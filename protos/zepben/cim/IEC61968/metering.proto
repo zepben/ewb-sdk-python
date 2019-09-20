@@ -1,0 +1,179 @@
+// Copyright 2019 Zeppelin Bend Pty Ltd
+// This file is part of cimbend.
+// 
+// cimbend is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// cimbend is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
+
+
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.zepben.protobuf.cim.iec61968";
+import "zepben/cim/IEC61970/phase/phase_code.proto";
+import "zepben/cim/IEC61970/unit/unit_symbol.proto";
+import "zepben/cim/IEC61970/domain.proto";
+import "google/protobuf/timestamp.proto";
+
+package zepben.cim.iec61968;
+
+message MeterReading {
+    // ID of meter
+    string mRID = 1;
+    string name = 2;
+    string serialNumber = 3;
+    // Corresponding equipment ID
+    string powerSystemResource = 4;
+    repeated Reading readings = 5;
+}
+
+message Reading {
+    google.protobuf.Timestamp timestamp = 1;
+    double value = 2;
+    ReadingType type = 3;
+}
+
+message ReadingType {
+    MeasurementKind kind = 1;
+    zepben.cim.iec61970.phase.PhaseCode phases = 2;
+    zepben.cim.iec61970.unit.UnitSymbol unitSymbol = 3;
+    zepben.cim.iec61970.domain.UnitMultiplier multiplier = 4;
+}
+
+enum MeasurementKind {
+    UNKNOWN = 0;
+    apparentPowerFactor = 1;
+    currency = 2;
+    current = 3;
+    currentAngle = 4;
+    currentImbalance = 5;
+    date = 6;
+    demand = 7;
+    distance = 8;
+    distortionVoltAmp = 9;
+    energization = 10;
+    energy = 11;
+    energizationLoadSide = 12;
+    fan = 13;
+    frequency = 14;
+    fund = 15;
+    ieee1366ASAI = 16;
+    ieee1366ASIDI = 17;
+    ieee1366ASIFI = 18;
+    ieee1366CAIDI = 19;
+    ieee1366CAIFI = 20;
+    ieee1366CEMIn = 21;
+    ieee1366CEMSMIn = 22;
+    ieee1366CTAIDI = 23;
+    ieee1366MAIFI = 24;
+    ieee1366MAIFIe = 25;
+    ieee1366SAIDI = 26;
+    ieee1366SAIFI = 27;
+    lineLoss = 28;
+    loss = 29;
+    negativeSequence = 30;
+    phasorPowerFactor = 31;
+    phasorReactivePower = 32;
+    positiveSequence = 33;
+    power = 34;
+    powerFactor = 35;
+    quantityPower = 36;
+    sag = 37;
+    swell = 38;
+    switchPosition = 39;
+    tapPosition = 40;
+    tariffRate = 41;
+    temperature = 42;
+    totalHarmonicDistortion = 43;
+    transformerLoss = 44;
+    unipedeVoltageDip10to15 = 45;
+    unipedeVoltageDip15to30 = 46;
+    unipedeVoltageDip30to60 = 47;
+    unipedeVoltageDip60to90 = 48;
+    unipedeVoltageDip90to100 = 49;
+    voltage = 50;
+    voltageAngle = 51;
+    voltageExcursion = 52;
+    voltageImbalance = 53;
+    volume = 54;
+    zeroFlowDuration = 55;
+    zeroSequence = 56;
+    distortionPowerFactor = 57;
+    frequencyExcursion = 58;
+    applicationContext = 59;
+    apTitle = 60;
+    assetNumber = 61;
+    bandwidth = 62;
+    batteryVoltage = 63;
+    broadcastAddress = 64;
+    deviceAddressType1 = 65;
+    deviceAddressType2 = 66;
+    deviceAddressType3 = 67;
+    deviceAddressType4 = 68;
+    deviceClass = 69;
+    electronicSerialNumber = 70;
+    endDeviceID = 71;
+    groupAddressType1 = 72;
+    groupAddressType2 = 73;
+    groupAddressType3 = 74;
+    groupAddressType4 = 75;
+    ipAddress = 76;
+    macAddress = 77;
+    mfgAssignedConfigurationID = 78;
+    mfgAssignedPhysicalSerialNumber = 79;
+    mfgAssignedProductNumber = 80;
+    mfgAssignedUniqueCommunicationAddress = 81;
+    multiCastAddress = 82;
+    oneWayAddress = 83;
+    signalStrength = 84;
+    twoWayAddress = 85;
+    signaltoNoiseRatio = 86;
+    alarm = 87;
+    batteryCarryover = 88;
+    dataOverflowAlarm = 89;
+    demandLimit = 90;
+    demandReset = 91;
+    diagnostic = 92;
+    emergencyLimit = 93;
+    encoderTamper = 94;
+    ieee1366MomentaryInterruption = 95;
+    ieee1366MomentaryInterruptionEvent = 96;
+    ieee1366SustainedInterruption = 97;
+    interruptionBehaviour = 98;
+    inversionTamper = 99;
+    loadInterrupt = 100;
+    loadShed = 101;
+    maintenance = 102;
+    physicalTamper = 103;
+    powerLossTamper = 104;
+    powerOutage = 105;
+    powerQuality = 106;
+    powerRestoration = 107;
+    programmed = 108;
+    pushbutton = 109;
+    relayActivation = 110;
+    relayCycle = 111;
+    removalTamper = 112;
+    reprogrammingTamper = 113;
+    reverseRotationTamper = 114;
+    switchArmed = 115;
+    switchDisabled = 116;
+    tamper = 117;
+    watchdogTimeout = 118;
+    billLastPeriod = 119;
+    billToDate = 120;
+    billCarryover = 121;
+    connectionFee = 122;
+    audibleVolume = 123;
+    volumetricFlow = 124;
+}
+
+

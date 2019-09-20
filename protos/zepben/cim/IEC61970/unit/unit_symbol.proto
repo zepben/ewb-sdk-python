@@ -1,0 +1,163 @@
+// Copyright 2019 Zeppelin Bend Pty Ltd
+// This file is part of cimbend.
+// 
+// cimbend is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// cimbend is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
+
+
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.zepben.protobuf.cim.iec61970";
+
+package zepben.cim.iec61970.unit;
+
+enum UnitSymbol {
+    UNKNOWN = 0;
+    m = 1;
+    kg = 2;
+    s = 3;
+    A = 4;
+    K = 5;
+    mol = 6;
+    cd = 7;
+    deg = 8;
+    rad = 9;
+    sr = 10;
+    Gy = 11;
+    Bq = 12;
+    degC = 13;
+    Sv = 14;
+    F = 15;
+    C = 16;
+    V = 19;
+    ohm = 20;
+    J = 21;
+    N = 22;
+    Hz = 23;
+    lx = 24;
+    lm = 25;
+    Wb = 26;
+    T = 27;
+    W = 28;
+    Pa = 29;
+    m2 = 30;
+    m3 = 31;
+    mPers = 32;
+    mPers2 = 33;
+    m3Pers = 34;
+    mPerm3 = 35;
+    kgm = 36;
+    kgPerm3 = 37;
+    WPermK = 38;
+    JPerK = 39;
+    ppm = 40;
+    rotPers = 41;
+    radPers = 42;
+    VA = 43;
+    VAr = 44;
+    cosPhi = 45;
+    Vs = 46;
+    V2 = 47;
+    As = 48;
+    A2 = 49;
+    A2s = 50;
+    VAh = 51;
+    Wh = 52;
+    VArh = 53;
+    VPerHz = 54;
+    HzPers = 55;
+    character = 56;
+    charPers = 57;
+    kgm2 = 58;
+    dB = 59;
+    WPers = 60;
+    lPers = 61;
+    dBm = 62;
+    h = 63;
+    min = 64;
+    Q = 65;
+    Qh = 66;
+    ohmm = 67;
+    APerm = 68;
+    V2h = 69;
+    A2h = 70;
+    Ah = 71;
+    count = 72;
+    ft3 = 73;
+    m3Perh = 74;
+    gal = 75;
+    Btu = 76;
+    l = 77;
+    lPerh = 78;
+    lPerl = 79;
+    gPerg = 80;
+    molPerm3 = 81;
+    molPermol = 82;
+    molPerkg = 83;
+    sPers = 84;
+    HzPerHz = 85;
+    VPerV = 86;
+    APerA = 87;
+    VPerVA = 88;
+    rev = 89;
+    kat = 90;
+    JPerkg = 91;
+    m3Uncompensated = 92;
+    m3Compensated = 93;
+    WPerW = 94;
+    therm = 95;
+    onePerm = 96;
+    m3Perkg = 97;
+    Pas = 98;
+    Nm = 99;
+    NPerm = 100;
+    radPers2 = 101;
+    WPerm2 = 102;
+    JPerkgK = 103;
+    JPerm3 = 104;
+    VPerm = 105;
+    CPerm3 = 106;
+    CPerm2 = 107;
+    FPerm = 108;
+    HPerm = 109;
+    JPermol = 110;
+    JPermolK = 111;
+    CPerkg = 112;
+    GyPers = 113;
+    WPersr = 114;
+    WPerm2sr = 115;
+    katPerm3 = 116;
+    d = 117;
+    anglemin = 118;
+    anglesec = 119;
+    ha = 120;
+    tonne = 121;
+    bar = 122;
+    mmHg = 123;
+    kn = 125;
+    Vh = 126;
+    Mx = 127;
+    G = 128;
+    Oe = 129;
+    WPerA = 130;
+    SPerm = 131;
+    onePerHz = 132;
+    VPerVAr = 133;
+    ohmPerm = 134;
+    kgPerJ = 135;
+    JPers = 136;
+    m2Pers = 137;
+    JPerm2 = 138;
+    KPers = 139;
+    PaPers = 140;
+}

@@ -1,0 +1,93 @@
+// Copyright 2019 Zeppelin Bend Pty Ltd
+// This file is part of cimbend.
+// 
+// cimbend is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// cimbend is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
+
+
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.zepben.pb";
+option java_outer_classname = "NetworkProto";
+import "zepben/cim/IEC61970/wires.proto";
+import "zepben/cim/IEC61970/diagram_layout.proto";
+import "zepben/cim/IEC61968/metering.proto";
+import "google/protobuf/any.proto";
+
+package zepben.pb;
+
+service NetworkData {
+    rpc recordEnergySource (zepben.cim.iec61970.EnergySource) returns (ESResponse);
+    rpc recordEnergyConsumer (zepben.cim.iec61970.EnergyConsumer) returns (ECResponse);
+    rpc recordPowerTransformer (zepben.cim.iec61970.PowerTransformer) returns (PTResponse);
+    rpc recordACLineSegment (zepben.cim.iec61970.ACLineSegment) returns (ACLSResponse);
+    rpc recordDiagramObjectPoint (zepben.cim.iec61970.DiagramObjectPoint) returns (zepben.cim.iec61970.Summary);
+    rpc recordBreaker (zepben.cim.iec61970.Breaker) returns (BreakerResponse);
+
+    /***** Getters *****/
+    rpc getEquipmentContainer(Identity) returns (stream Equipment);
+    rpc getWholeNetwork(Identity) returns (stream Equipment);
+
+    rpc getEnergySource (Identity) returns (zepben.cim.iec61970.EnergySource);
+    rpc getEnergyConsumer (Identity) returns (zepben.cim.iec61970.EnergyConsumer);
+    rpc getPowerTransformer (Identity) returns (zepben.cim.iec61970.PowerTransformer);
+    rpc getACLineSegment (Identity) returns (zepben.cim.iec61970.ACLineSegment);
+    // TEST FUNCTION, REMOVE LATER
+    rpc dumpEjson (zepben.cim.iec61970.Summary) returns (zepben.cim.iec61970.Summary);
+    rpc traceDirection (zepben.cim.iec61970.Summary) returns (zepben.cim.iec61970.Summary);
+}
+
+service MeterReadings {
+    rpc sendMeterReading (zepben.cim.iec61968.MeterReading) returns (MeterReadingResponse);
+    rpc sendReading (zepben.cim.iec61968.Reading) returns (zepben.cim.iec61970.Summary);
+    rpc getMeterReadings (Identity) returns (stream zepben.cim.iec61968.MeterReading);
+}
+
+message Equipment {
+    oneof equipment {
+        zepben.cim.iec61970.EnergySource es = 1;
+        zepben.cim.iec61970.EnergyConsumer ec = 2;
+        zepben.cim.iec61970.PowerTransformer pt = 3;
+        zepben.cim.iec61970.ACLineSegment acls = 4;
+        zepben.cim.iec61970.Breaker br = 5;
+        google.protobuf.Any other = 6;
+    }
+}
+
+message MeterReadingResponse {
+    string msg = 1;
+}
+
+message Identity {
+    string mRID = 1;
+}
+
+message ESResponse {
+    string msg = 1;
+}
+
+message ECResponse {
+    string msg = 1;
+}
+
+message ACLSResponse {
+    string msg = 1;
+}
+
+message PTResponse {
+    string msg = 1;
+}
+
+message BreakerResponse {
+    string msg = 1;
+}

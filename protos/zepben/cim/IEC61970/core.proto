@@ -1,0 +1,43 @@
+// Copyright 2019 Zeppelin Bend Pty Ltd
+// This file is part of cimbend.
+// 
+// cimbend is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// cimbend is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
+
+
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.zepben.protobuf.cim.iec61970";
+import "zepben/cim/IEC61970/phase/phase_code.proto";
+import "zepben/cim/IEC61970/diagram_layout.proto";
+import "google/protobuf/field_mask.proto";
+package zepben.cim.iec61970;
+
+/*
+* The concept of a ConnectivityNode is encapsulated in the Terminal as we don't store anything else related to the node.
+* A terminal has exactly one link to a conductingEquipment, and exactly one link to a terminal.
+* However, many terminals can be connected to a single connectivityNode, and a conductingEquipment can have many
+* terminals associated with it.
+*/
+message Terminal {
+    string mRID = 1;
+    string name = 2;
+    zepben.cim.iec61970.phase.PhaseCode phases = 3;
+    string connectivityNode = 4;
+    int32 sequenceNumber = 5;
+    bool connected = 6;
+    zepben.cim.iec61970.DiagramObjectPoint diagramPoints = 7;
+    google.protobuf.FieldMask mask = 15;
+    string description = 16;
+}
+
