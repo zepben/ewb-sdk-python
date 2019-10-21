@@ -17,25 +17,26 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.IEC61970.wires_pb2 import EnergySource as PBEnergySource
+from zepben.cim.iec61970 import EnergySource as PBEnergySource
 from zepben.model.equipment import ConductingEquipment
-from zepben.model.diagram_layout import DiagramObjectPoints
-from zepben.model.common import PositionPoints
-from typing import Set, Iterable
+from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
+from zepben.model.diagram_layout import DiagramObject
+from zepben.model.common import Location
+from typing import List
 
 
 class EnergySource(ConductingEquipment):
-    def __init__(self, mrid: str, active_power: float = 0.0, r: float = 0.0, x: float = 0.0, nom_volts: float = 0.0,
+    def __init__(self, mrid: str, active_power: float = 0.0, r: float = 0.0, x: float = 0.0, base_voltage: BaseVoltage = BV_UNKNOWN,
                  reactive_power: float = 0.0, voltage_angle: float = 0.0, voltage_magnitude: float = 0.0,
-                 in_service: bool = True, name: str = "", description: str = "", terminals: Set = None,
-                 diag_point: DiagramObjectPoints = None, pos_points: Iterable[PositionPoints] = None):
+                 in_service: bool = True, name: str = "", terminals: List = None,
+                 diag_objs: List[DiagramObject] = None, location: Location = None):
         self.active_power = active_power
         self.r = r
         self.x = x
         self.reactive_power = reactive_power
         self.voltage_angle = voltage_angle
         self.voltage_magnitude = voltage_magnitude
-        super().__init__(mrid, in_service, nom_volts, name, description, terminals, diag_point, pos_points)
+        super().__init__(mrid, in_service, base_voltage, name, terminals, diag_objs, location)
 
     def __str__(self):
         return f"{super().__str__()} active_power: {self.active_power}, r: {self.r}, x: {self.x}, reactive_power: {self.reactive_power}, voltage_angle: {self.voltage_angle}, voltage_mag: {self.voltage_magnitude}"

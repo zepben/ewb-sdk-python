@@ -17,10 +17,12 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.IEC61970.diagram_layout_pb2 import DiagramObjectPoint as PBDiagramObjectPoint
+from zepben.cim.iec61970 import DiagramObjectPoint as PBDiagramObjectPoint, DiagramObject as PBDiagramObject, DiagramStyle, OrientationKind, DiagramObjectStyle
+from zepben.model.identified_object import IdentifiedObject
+from typing import List
 
 
-class DiagramObjectPoints(object):
+class DiagramObjectPoint(object):
     def __init__(self, x, y):
         self.x_position = x
         self.y_position = y
@@ -33,3 +35,77 @@ class DiagramObjectPoints(object):
 
     def to_pb(self):
         return PBDiagramObjectPoint(xPosition=self.x_position, yPosition=self.y_position)
+
+    @staticmethod
+    def from_pb(diag_obj_point):
+        return DiagramObjectPoint(diag_obj_point.xPosition, diag_obj_point.yPosition)
+
+
+class DiagramObject(IdentifiedObject):
+    def __init__(self, mrid: str, points: List[DiagramObjectPoint] = None, name: str = None, diagram=None,
+                 object_style: DiagramObjectStyle = DiagramObjectStyle.NONE, rotation: float = 0.0):
+        self._diagram = diagram
+        self.diagram_object_points = points if points is not None else []
+        self.diagram_object_style = object_style
+        self.rotation = rotation
+        super().__init__(mrid, name)
+
+    @property
+    def diagram(self):
+        return self._diagram
+
+    @diagram.setter
+    def diagram(self, diagram):
+        self._diagram = diagram
+
+    def add_point(self, diag_obj_point):
+        self.diagram_object_points.append(diag_obj_point)
+
+    def to_pb(self):
+        args = self._pb_args()
+        args["diagramMRID"] = self.diagram.mrid
+        # TODO: Support diagramObjects on a DiagramObject?
+        del args["diagramObjects"]
+        return PBDiagramObject(**args)
+
+    @staticmethod
+    def from_pb(diag_obj):
+        """
+        Transform a protobuf DiagramObject to a cimbend DiagramObject
+        :param diag_obj:
+        :return:
+        """
+        diagram = Diagram(diag_obj.diagramMRID)
+        cim_diag_obj = DiagramObject(mrid=diag_obj.mRID, name=diag_obj.name, object_style=diag_obj.diagramObjectStyle,
+                                     rotation=diag_obj.rotation, diagram=diagram)
+        for point in diag_obj.diagramObjectPoints:
+            cim_diag_obj.add_point(DiagramObjectPoint.from_pb(point))
+        return cim_diag_obj
+
+    @staticmethod
+    def from_pbs(diagram_objects):
+        """
+        Transform a list of diagram objects into a list of cimbend DiagramObject's
+        :param diagram_objects:
+        :return:
+        """
+        objs = []
+        for diag_obj in diagram_objects:
+            objs.append(DiagramObject.from_pb(diag_obj))
+        return objs
+
+
+class Diagram(IdentifiedObject):
+    def __init__(self, mrid: str = "", name: str = None, diagram_style: DiagramStyle = DiagramStyle.SCHEMATIC,
+                 orientation: OrientationKind = OrientationKind.POSITIVE):
+        self.diagram_style = diagram_style
+        self.orientation_kind = orientation
+        self.objects = []  # Diagram objects belonging to this diagram
+        super().__init__(mrid, name)
+
+    def add_diagram_object(self, diagram_object: DiagramObject):
+        """
+        TODO:
+        :return:
+        """
+        self.diagram_objects.append(diagram_object)

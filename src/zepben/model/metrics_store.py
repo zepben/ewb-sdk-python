@@ -17,13 +17,14 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.model.meter_reading import Meter
+from zepben.model.metering import MeterReading
 
 
 class MetricsStore(object):
     """
-    We store buckets of time (5 minute intervals), which map to meters with sets of readings
-    If a meter doesn't report for a bucket, it will not have any meter present
+    We store buckets of time (5 minute intervals), which map to meters which map to Reading types (see metering.py)
+    to ordered lists of readings of that type.
+    If a meter doesn't report for a bucket, that meter did not report any metrics for that time period
     """
     def __init__(self, bucket_duration: int = 5000):
         self.store = dict()
@@ -37,27 +38,29 @@ class MetricsStore(object):
         """
         return timestamp - (timestamp % self.bucket_duration)
 
-    @property
-    def meters(self):
-        """
-        Returns a list of all meters in no particular order.
-        You should avoid this and instead prefer to operate on a bucket at a time
-        """
-        meters = []
-        for bucket in self.store.values():
-            meters.extend(bucket.values())
-        return meters
-
     def __iter__(self):
+        # TODO: this is a bit broken and doesn't make sense.... iter should return self, and next should do iteration
         for bucket_time in self.buckets:
-            for meter in self.store[bucket_time].values():
-                yield meter
+            for meter, typ in self.store[bucket_time].items():
+                for readings in typ.values():
+                    mr = MeterReading(meter=meter, readings=readings)
+                    yield mr
 
     def __next__(self):
         for r in self.ascending_iteration():
             yield r
 
         raise StopIteration()
+
+    def get_readings(self, reading_type):
+        """
+        At the moment we simply iterate over each bucket, meter, and reading type, and return
+        MeterReadings with a single type of reading
+        """
+        for bucket_time in self.buckets:
+            for meter, typ in self.store[bucket_time].items():
+                mr = MeterReading(meter=meter, readings=typ[reading_type])
+                yield mr
 
     @property
     def buckets(self):
@@ -80,11 +83,24 @@ class MetricsStore(object):
             for meter in self.store[bucket_time].values():
                 yield meter
 
-    def store_meter_reading(self, mrid, name, psr_id, timestamp, value, kind, phase, unit):
-        bucket_time = self._get_bucket(timestamp)
-        bucket = self.store.get(bucket_time, {})
-        self._bucket_times.add(bucket_time)
-        meter = bucket.get(mrid, Meter(mrid, name, psr_id))
-        meter.add_reading(timestamp, value, kind, phase, unit)
-        bucket[mrid] = meter
-        self.store[bucket_time] = bucket
+    def store_meter_reading(self, meter_reading):
+        """
+        Stores a given meter reading. If the meter already has readings in the bucket it will append
+        the readings to the existing meter, based on the type of the reading.
+
+        Note that a MeterReadings mRID is not used as part of this function. For the purposes of storing readings,
+        only the associated meter mRID is considered.
+        :param meter_reading:
+        :return:
+        """
+        # TODO: This should store Readings, not MeterReadings
+        for reading in meter_reading.readings:
+            bucket_time = self._get_bucket(reading.timestamp)
+            bucket = self.store.get(bucket_time, {})
+            self._bucket_times.add(bucket_time)
+            reading_types = bucket.get(meter_reading.meter, {})
+            readings = reading_types.get(type(reading), [])
+            readings.append(reading)
+            reading_types[type(reading)] = readings
+            bucket[meter_reading.meter] = reading_types
+            self.store[bucket_time] = bucket

@@ -18,31 +18,42 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.model.equipment import ConductingEquipment
-from zepben.model.diagram_layout import DiagramObjectPoints
-from zepben.model.common import PositionPoints
-from zepben.cim.IEC61970.wires_pb2 import Breaker as PBBreaker
-from typing import Set
+from zepben.model.diagram_layout import DiagramObject
+from zepben.model.common import Location
+from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
+from zepben.cim.iec61970 import Breaker as PBBreaker
+from typing import List
 
 
 class Switch(ConductingEquipment):
-    def __init__(self, mrid: str, open_: bool, nom_volts: float = 0.0, in_service: bool = True, name: str = "",
-                 desc: str = "", terminals: Set = None, diag_point: DiagramObjectPoints = None, pos_points: PositionPoints = None):
+    def __init__(self, mrid: str, open_: List[bool], base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
+                 terminals: List = None, diag_objs: List[DiagramObject] = None, location: Location = None):
+        """Unganged switches are supported as a list of booleans, each bool corresponding to a single phase"""
         self.open = open_
-        super().__init__(mrid=mrid, in_service=in_service, nom_volts=nom_volts, name=name, description=desc,
-                         terminals=terminals, diag_point=diag_point, pos_points=pos_points)
+        super().__init__(mrid=mrid, in_service=in_service, base_voltage=base_voltage, name=name,
+                         terminals=terminals, diag_objs=diag_objs, location=location)
+
+    def __len__(self):
+        return len(self.open)
 
     def connected(self):
         return not self.is_open()
 
     def is_open(self):
-        return not self.in_service or self.open
+        """Switch is open only if it's not in service OR at least one phase is open"""
+        if not self.in_service:
+            return not self.in_service
+        for o in self.open:
+            if o:
+                return o
+        return False
 
 
 class Breaker(Switch):
-    def __init__(self, mrid: str, open_: bool, nom_volts: float = 0.0, in_service: bool = True, name: str = "",
-                 desc: str = "", terminals: Set = None, diag_point: DiagramObjectPoints = None, pos_points: PositionPoints = None):
-        super().__init__(mrid=mrid, open_=open_, in_service=in_service, nom_volts=nom_volts, name=name, desc=desc,
-                         terminals=terminals, diag_point=diag_point, pos_points=pos_points)
+    def __init__(self, mrid: str, open_: bool, base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
+                 terminals: List = None, diag_objs: List[DiagramObject] = None, location: Location = None):
+        super().__init__(mrid=mrid, open_=open_, in_service=in_service, base_voltage=base_voltage, name=name,
+                         terminals=terminals, diag_objs=diag_objs, location=location)
 
     def to_pb(self):
         args = self._pb_args()

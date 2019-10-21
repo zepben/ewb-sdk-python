@@ -18,36 +18,40 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.model.identified_object import IdentifiedObject
-from zepben.model.diagram_layout import DiagramObjectPoints
-from zepben.model.common import PositionPoints
-from typing import Set, List
+from zepben.model.diagram_layout import DiagramObject
+from zepben.model.common import Location
+from zepben.model.base_voltage import BaseVoltage
+from typing import List
 
 
-class NoEquipmentException(Exception):
-    pass
+
 
 
 class ConductingEquipment(IdentifiedObject):
-    def __init__(self, mrid: str, in_service: bool, nom_volts: float, name: str, description: str, terminals: Set,
-                 diag_point: DiagramObjectPoints, pos_points: List[PositionPoints]):
+    def __init__(self, mrid: str, in_service: bool, base_voltage: BaseVoltage, name: str, terminals: List,
+                 diag_objs: List[DiagramObject], location: Location):
         self.in_service = in_service
-        self.pos_points = pos_points if pos_points is not None else []
-        self.nominal_voltage = nom_volts
+        self.location = location
+        self.base_voltage = base_voltage
         if terminals is None:
-            self.terminals = set()
+            self.terminals = list()
         else:
             self.terminals = terminals
 
         # We set a reference for each terminal back to its equipment to make iteration over a network easier
         for term in self.terminals:
             term.equipment = self
-        super().__init__(mrid, name, diag_point, description)
+        super().__init__(mrid, name, diag_objs)
 
     def __str__(self):
-        return f"{super().__str__()} in_serv: {self.in_service}, lnglat: {self.pos_points} terms: {self.terminals}"
+        return f"{super().__str__()} in_serv: {self.in_service}, lnglat: {self.location} terms: {self.terminals}"
 
     def __repr__(self):
-        return f"{super().__repr__()} in_serv: {self.in_service}, lnglat: {self.pos_points} terms: {self.terminals}"
+        return f"{super().__repr__()} in_serv: {self.in_service}, lnglat: {self.location} terms: {self.terminals}"
+
+    @property
+    def nominal_voltage(self):
+        return self.base_voltage.nominal_voltage
 
     def connected(self):
         return self.in_service
@@ -55,17 +59,28 @@ class ConductingEquipment(IdentifiedObject):
     def add_terminal(self, terminal):
         self.terminals.add(terminal)
 
-    def get_diag_point(self):
-        return self.diagram_points
+    def get_diag_objs(self):
+        return self.diagram_objects
 
     def pos_point(self, sequence_number):
-        for point in self.pos_points:
-            if point.sequence_number == sequence_number:
-                return point
-        return None
+        try:
+            return self.location.position_points[sequence_number]
+        except IndexError:
+            return None
 
     def has_points(self):
-        return len(self.pos_points) > 0
+        return len(self.location.position_points) > 0
+
+    def terminal_sequence_number(self, terminal):
+        """
+        Sequence number for terminals is stored as the index of the terminal in `self.terminals`
+        :param terminal: The terminal to retrieve the sequence number for
+        :return:
+        """
+        for i, term in enumerate(self.terminals):
+            if term is terminal:
+                return i
+        raise NoEquipmentException("Terminal does not exist in this equipment")
 
     def get_terminal_for_node(self, node):
         for t in self.terminals:
@@ -74,10 +89,10 @@ class ConductingEquipment(IdentifiedObject):
         raise NoEquipmentException(f"Equipment {self.mrid} is not connected to node {node.mrid}")
 
     def get_terminal(self, seq_num):
-        for term in self.terminals:
-            if term.sequence_number == seq_num:
-                return term
-        raise NoEquipmentException(f"Equipment {self.mrid} does not have a terminal {seq_num}")
+        try:
+            return self.terminals[seq_num]
+        except KeyError | IndexError:
+            raise NoEquipmentException(f"Equipment {self.mrid} does not have a terminal {seq_num}")
 
     def get_nominal_voltage(self, terminal=None):
         """
@@ -92,3 +107,9 @@ class ConductingEquipment(IdentifiedObject):
     def get_cons(self):
         return [term.connectivity_node for term in self.terminals]
 
+    def _pb_args(self, exclude=None):
+        args = super()._pb_args()
+        if self.base_voltage is not None:
+            args['baseVoltageMRID'] = self.base_voltage.mrid
+            del args['baseVoltage']
+        return args

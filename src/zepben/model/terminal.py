@@ -17,11 +17,12 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.IEC61970.core_pb2 import Terminal as PBTerminal
-from zepben.cim.IEC61970.phase.phase_code_pb2 import PhaseCode
+from zepben.cim.iec61970 import Terminal as PBTerminal
+from zepben.cim.iec61970 import PhaseCode
 from zepben.model.identified_object import IdentifiedObject
-from zepben.model.diagram_layout import DiagramObjectPoints
-from zepben.model.equipment import NoEquipmentException
+from zepben.model.diagram_layout import DiagramObject
+from zepben.model.exceptions import NoEquipmentException
+from typing import List
 
 
 class Terminal(IdentifiedObject):
@@ -32,8 +33,9 @@ class Terminal(IdentifiedObject):
     Note: If you are extending this class you must ensure you always safely access the linked equipment (i.e, check it is
     not None)
     """
-    def __init__(self, mrid: str, phases: PhaseCode, connectivity_node, seq_number: int, name: str = "", description: str = "",
-                 diag_point: DiagramObjectPoints = None, equipment=None, switch=None, upstream: bool = True, connected: bool = True):
+
+    def __init__(self, mrid: str, phases: PhaseCode, connectivity_node, name: str = "",
+                 diag_objs: List[DiagramObject] = None, equipment=None, upstream: bool = True, connected: bool = True):
         """
 
         :param mrid:
@@ -41,7 +43,7 @@ class Terminal(IdentifiedObject):
         :param connectivity_node: The ConnectivityNode that this terminal is attached to.
         :param name:
         :param description:
-        :param diag_point:
+        :param diag_objs:
         :param seq_number: The sequence number for this terminal. Used for mapping terminals to components/properties of
             the equipment.
         :param connected: Whether this terminal is connected (potentially energised)
@@ -52,11 +54,10 @@ class Terminal(IdentifiedObject):
         """
         self.phases = phases
         self.connected = connected
-        self.sequence_number = seq_number
         self.__connectivity_node = connectivity_node
         self.__equipment = equipment
         self.__upstream = upstream
-        super().__init__(mrid, name, diag_point, description)
+        super().__init__(mrid, name, diag_objs)
 
     @property
     def connectivity_node(self):
@@ -84,11 +85,14 @@ class Terminal(IdentifiedObject):
     def upstream(self, upstream):
         self.__upstream = upstream
 
-    def get_diag_point(self):
-        return self.equipment.get_diag_point()
+    def get_diag_objs(self):
+        return self.equipment.get_diag_objs()
 
     def get_pos_point(self):
-        return self.equipment.pos_point(self.sequence_number)
+        return self.equipment.pos_point(self.get_sequence_number())
+
+    def get_sequence_number(self):
+        return self.equipment.terminal_sequence_number(self)
 
     def get_switch(self):
         """
@@ -102,7 +106,7 @@ class Terminal(IdentifiedObject):
 
     def to_pb(self):
         args = self._pb_args()
-        args['connectivityNode'] = self.connectivity_node.mrid
+        args['connectivityNodeMRID'] = self.connectivity_node.mrid
         return PBTerminal(**args)
 
     def __str__(self):

@@ -124,5 +124,3 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# protobuf generated code - should always be created at build time
-**/*pb2*.py

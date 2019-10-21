@@ -17,9 +17,13 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.model.diagram_layout import DiagramObjectPoints
 from zepben.model.util import snake2camelback, iter_but_not_str
-from abc import abstractmethod
+from abc import abstractmethod, abstractstaticmethod
+from typing import List
+import inspect
+
+# Global state for ignored attributes - used when building protobuf args. Any keys in here will not be included
+_ignored_attribute_cache = set()
 
 
 class IdentifiedObject(object):
@@ -31,18 +35,26 @@ class IdentifiedObject(object):
     as a property in the class using @property and @<property>.setter. Failure to do this will result in the conversion
     to a protobuf type failing. Long Live PEP8
     """
-    def __init__(self, mrid: str, name: str = None, diagram_points: DiagramObjectPoints = None, description: str = None):
+    def __init__(self, mrid: str, name: str = None, diagram_objects: List = None):
         # It's really horrible to use the snake form of mRID, so we define a property + setter for it below as "mrid".
         self._m_r_i_d = mrid
         self.name = name
-        self.description = description
-        self.diagram_points = diagram_points
+        self.__diagram_objects_by_diagram = dict()
+        if diagram_objects is not None:
+            for obj in diagram_objects:
+                self.add_diagram_object(obj)
 
     def __str__(self):
-        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} point: {self.diagram_points}"
+        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} point: {self.diagram_objects}"
 
     def __repr__(self):
-        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} {self.diagram_points}"
+        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} {self.diagram_objects}"
+
+    def add_diagram_object(self, diagram_object):
+        if diagram_object.diagram is not None:
+            diagram_objects = self.diagram_objects_by_diagram.get(diagram_object.diagram.mrid, [])
+            diagram_objects.append(diagram_object)
+            self.diagram_objects_by_diagram[diagram_object.diagram.mrid] = diagram_objects
 
     @property
     def mrid(self):
@@ -52,9 +64,52 @@ class IdentifiedObject(object):
     def mrid(self, mrid):
         self._m_r_i_d = mrid
 
+    @property
+    def diagram_objects(self, diagram_mrid=""):
+        """Get the objects for a diagram. If diagram_mrid is None will use default diagram"""
+        return self.diagram_objects_by_diagram[diagram_mrid]
+
+    @property
+    def diagram_objects_by_diagram(self):
+        return self.__diagram_objects_by_diagram
+
     @abstractmethod
     def to_pb(self):
         raise NotImplementedError("Conversion to protobuf is not supported.")
+
+    @staticmethod
+    @abstractmethod
+    def from_pb(*args, **kwargs):
+        raise NotImplementedError("Conversion from protobuf is not supported.")
+
+    def get_all_diagram_object_points(self):
+        points = []
+        for diag_obj in self.diagram_objects_by_diagram.values():
+            points.extend(diag_obj.diagram_object_points)
+        return points
+
+    def _is_from_bases(self, k):
+        """Check if a certain key is an attribute from a base class."""
+        for c in inspect.getmro(self.__class__):
+            if k.startswith(f'_{c.__name__}'):
+                return True
+        return False
+
+    def _should_ignore_key(self, k, v, exclude):
+        if k in _ignored_attribute_cache:
+            return True
+        # No point adding any attributes that don't have a value
+        if v is None:
+            return True
+        if exclude:
+            if k in exclude:
+                return True
+        # attributes starting with _<classname> are properties and should always be excluded
+        if self._is_from_bases(k) or k.startswith('__'):
+            _ignored_attribute_cache.add(k)
+            return True
+
+        return False
 
     def _pb_args(self, exclude=None):
         """
@@ -68,16 +123,14 @@ class IdentifiedObject(object):
         ConductingEquipment._pb_args()
         """
         exclude = {} if exclude is None else exclude
-        pb_dict = {}
+        pb_dict = {"diagramObjects": []}
+        for diagram_id, diag_objs in self.diagram_objects_by_diagram.items():
+            pb_dict["diagramObjects"].extend([obj.to_pb() for obj in diag_objs])
+
         for k, v in self.__dict__.items():
-            # No point adding any attributes that don't have a value
-            if v is None:
+            if self._should_ignore_key(k, v, exclude):
                 continue
-            if k in exclude:
-                continue
-            # attributes starting with _<classname> are properties and should always be excluded
-            if k.startswith(f'_{self.__class__.__name__}'):
-                continue
+
             # Remove any leading underscores and convert to camelback casing
             key = snake2camelback(k.lstrip('_'))
             try:
@@ -94,11 +147,10 @@ class IdentifiedObject(object):
                 else:
                     # Strings + every other scalar
                     pb_dict[key] = v
-
+            except NotImplementedError:
+                continue
         return pb_dict
 
     def has_xy(self):
-        return self.diagram_points is not None
+        return self.diagram_objects is not None
 
-    def set_diagram_points(self, diagram_points):
-        self.diagram_points = diagram_points

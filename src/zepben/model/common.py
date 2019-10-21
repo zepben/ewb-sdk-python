@@ -17,21 +17,52 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.IEC61970.common_pb2 import PositionPoint as PBPositionPoint
+from zepben.cim.iec61968 import PositionPoint as PBPositionPoint
+from zepben.cim.iec61968 import Location as PBLocation
+from zepben.model.identified_object import IdentifiedObject
+from typing import List
 
 
-class PositionPoints(object):
-    def __init__(self, latitude, longitude, sequence_number):
-        # TODO: change long/lat to reflect CIM names
-        self.long = longitude
-        self.lat = latitude
-        self.sequence_number = sequence_number
+class PositionPoint(object):
+    def __init__(self, latitude, longitude):
+        self.x_position = longitude
+        self.y_position = latitude
 
     def __str__(self):
-        return f"{self.long}:{self.lat}"
+        return f"{self.x_position}:{self.y_position}"
 
     def __repr__(self):
-        return f"{self.long}:{self.lat}"
+        return f"{self.x_position}:{self.y_position}"
 
     def to_pb(self):
-        return PBPositionPoint(xPosition=self.long, yPosition=self.lat, sequenceNumber=self.sequence_number)
+        return PBPositionPoint(xPosition=self.x_position, yPosition=self.y_position)
+
+    @staticmethod
+    def from_pb(pos_point):
+        return PositionPoint(pos_point.xPosition, pos_point.yPosition)
+
+
+class Location(IdentifiedObject):
+    # TODO: TOMORROW - ADD DIAGRAM OBJECT + points with some kind of sensible default
+    def __init__(self, street_address=None, position_points: List[PositionPoint] = None, diag_obj = None):
+        self.main_address = street_address
+        self.position_points = position_points
+        # We currently have no use for the fields in IdentifiedObject for a Location
+        super().__init__("")
+
+    def to_pb(self):
+        args = self._pb_args()
+        return PBLocation(**args)
+
+    @staticmethod
+    def from_pb(location):
+        """
+        Transform a Protobuf Location to a cimbend Location
+        :param location: Protobuf Location
+        :return: A location
+        """
+        pos_points = []
+        for point in location.positionPoints:
+            pos_points.append(PositionPoint.from_pb(point))
+
+        return Location(position_points=pos_points)

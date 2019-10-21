@@ -18,19 +18,19 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.model.identified_object import IdentifiedObject
-from zepben.model.diagram_layout import DiagramObjectPoints
+from zepben.model.diagram_layout import DiagramObject
 from zepben.model.terminal import Terminal
-from typing import Set
+from typing import Set, List
 
 
 class ConnectivityNode(IdentifiedObject):
-    def __init__(self, mrid: str, terminals: Set[Terminal] = None, name: str = None, description: str = None,
-                 diag_point: DiagramObjectPoints = None):
+    def __init__(self, mrid: str, terminals: Set[Terminal] = None, name: str = None,
+                 diag_objs: List[DiagramObject] = None):
         if terminals is None:
             self.terminals = set()
         else:
             self.terminals = terminals
-        super().__init__(mrid, name, diagram_points=diag_point, description=description)
+        super().__init__(mrid, name, diagram_objects=diag_objs)
 
     def __iter__(self):
         return iter(self.terminals)

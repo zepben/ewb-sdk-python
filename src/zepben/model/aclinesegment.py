@@ -18,24 +18,23 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.model.equipment import ConductingEquipment
-from zepben.model.diagram_layout import DiagramObjectPoints
-from zepben.model.common import PositionPoints
-from zepben.cim.IEC61970.wires_pb2 import ACLineSegment as PBACLineSegment
-from typing import Set
+from zepben.model.diagram_layout import DiagramObject
+from zepben.model.common import Location
+from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
+from zepben.model.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.model.asset_info import WireInfo
+from zepben.cim.iec61970 import AcLineSegment as PBAcLineSegment
+from typing import List
 
 
 class ACLineSegment(ConductingEquipment):
-    def __init__(self, mrid: str, r: float = 0.0, x: float = 0.0, r0: float = 0.0, x0: float = 0.0, length: float = 0.0,
-                 rated_current: float = 0.0, nom_volts: float = 0.0, in_service: bool = True, name: str = "", description: str = "",
-                 terminals: Set = None, diag_point: DiagramObjectPoints = None, pos_points: PositionPoints = None):
-
-        self.r = r
-        self.x = x
-        self.r0 = r0
-        self.x0 = x0
+    def __init__(self, mrid: str, plsi: PerLengthSequenceImpedance = None, length: float = 0.0,
+                 wire_info: WireInfo = None, base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
+                 terminals: List = None, diag_objs: List[DiagramObject] = None, location: Location = None):
+        self.per_length_sequence_impedance = plsi
         self.length = length
-        self.rated_current = rated_current
-        super().__init__(mrid, in_service, nom_volts, name, description, terminals, diag_point, pos_points)
+        self.wire_info = wire_info
+        super().__init__(mrid, in_service, base_voltage, name, terminals, diag_objs, location)
 
     def __str__(self):
         return f"{super().__str__()} r: {self.r}, x: {self.x}"
@@ -43,6 +42,42 @@ class ACLineSegment(ConductingEquipment):
     def __repr__(self):
         return f"{super().__repr__()} r: {self.r}, x: {self.x}"
 
+    @property
+    def rated_current(self):
+        return self.wire_info.rated_current
+
+    @property
+    def r(self):
+        return self.per_length_sequence_impedance.r
+
+    @property
+    def x(self):
+        return self.per_length_sequence_impedance.x
+
+    @property
+    def r0(self):
+        return self.per_length_sequence_impedance.r0
+
+    @property
+    def x0(self):
+        return self.per_length_sequence_impedance.x0
+
+    @property
+    def bch(self):
+        return self.per_length_sequence_impedance.bch
+
+    @property
+    def b0ch(self):
+        return self.per_length_sequence_impedance.b0ch
+
+    def _pb_args(self, exclude=None):
+        args = super()._pb_args()
+        args['perLengthSequenceImpedanceMRID'] = self.per_length_sequence_impedance.mrid
+        args['assetInfoMRID'] = self.wire_info.mrid
+        del args['perLengthSequenceImpedance']
+        del args['wireInfo']
+        return args
+
     def to_pb(self):
         args = self._pb_args()
-        return PBACLineSegment(**args)
+        return PBAcLineSegment(**args)
