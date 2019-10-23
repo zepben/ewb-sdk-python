@@ -333,6 +333,7 @@ class EquipmentContainer(object):
                                pb_acls.x0,
                                pb_acls.length,
                                pb_acls.nominalVoltage,
+                               pb_acls.ratedCurrent,
                                pb_acls.inService,
                                terms,
                                pb_acls.diagramPoints.xPosition,
@@ -340,11 +341,11 @@ class EquipmentContainer(object):
                                pos_points)
 
     def add_aclinesegment(self, mrid: str, name: str, r: float, x: float, r0: float, x0: float, length: float,
-                          nominal_voltage: float,
+                          nominal_voltage: float, rated_current: float,
                           in_service: bool, terminals: set, x_pos: float = None, y_pos: float = None,
                           pos_points: List[PositionPoints] = None):
         diag_points = DiagramObjectPoints(x_pos, y_pos) if x_pos is not None and y_pos is not None else None
-        self.resources[mrid] = ACLineSegment(mrid, r, x, r0, x0, length, nom_volts=nominal_voltage, name=name,
+        self.resources[mrid] = ACLineSegment(mrid, r, x, r0, x0, length, rated_current, nom_volts=nominal_voltage, name=name,
                                              in_service=in_service, terminals=terminals, diag_point=diag_points,
                                              pos_points=pos_points)
         self._add_terms_to_map(terminals, self.resources[mrid])
