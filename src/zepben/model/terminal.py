@@ -33,7 +33,7 @@ class Terminal(IdentifiedObject):
     not None)
     """
     def __init__(self, mrid: str, phases: PhaseCode, connectivity_node, seq_number: int, name: str = "", description: str = "",
-                 diag_point: DiagramObjectPoints = None, equipment=None, upstream: bool = True, connected: bool = True):
+                 diag_point: DiagramObjectPoints = None, equipment=None, switch=None, upstream: bool = True, connected: bool = True):
         """
 
         :param mrid:
@@ -96,6 +96,9 @@ class Terminal(IdentifiedObject):
         :return: Switch if present in this terminals ConnectivityNode, else None
         """
         return self.connectivity_node.get_switch()
+
+    def get_nominal_voltage(self):
+        return self.equipment.get_nominal_voltage(self)
 
     def to_pb(self):
         args = self._pb_args()

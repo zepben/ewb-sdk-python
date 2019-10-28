@@ -114,6 +114,20 @@ class PowerTransformer(ConductingEquipment):
         else:
             raise InvalidTransformerError(f"Transformer {self.mrid} does not have end {end_number}")
 
+    def get_nominal_voltage(self, terminal=None):
+        """
+        Return nominal voltage, ideally corresponding to a specific terminal.
+        :param terminal:
+        :return: Nominal voltage of the PowerTransformerEnd corresponding to the terminal,
+                 or potentially None if no terminal is specified
+        """
+        if terminal is None:
+            return self.nominal_voltage
+
+        for term in self.terminals:
+            if term is terminal:
+                return self.get_end(terminal.sequence_number).rated_u
+
     @property
     def endCount(self):
         return len(self.ends)

@@ -73,6 +73,22 @@ class ConductingEquipment(IdentifiedObject):
                 return t
         raise NoEquipmentException(f"Equipment {self.mrid} is not connected to node {node.mrid}")
 
+    def get_terminal(self, seq_num):
+        for term in self.terminals:
+            if term.sequence_number == seq_num:
+                return term
+        raise NoEquipmentException(f"Equipment {self.mrid} does not have a terminal {seq_num}")
+
+    def get_nominal_voltage(self, terminal=None):
+        """
+        Get the nominal voltage for this piece of equipment.
+        In cases where this equipment has multiple nominal voltages (i.e, transformers),
+        this method should be overridden so providing a terminal will provide the voltage corresponding to that terminal
+
+        :param terminal: Terminal to fetch voltage for
+        """
+        return self.nominal_voltage
+
     def get_cons(self):
         return [term.connectivity_node for term in self.terminals]
 
