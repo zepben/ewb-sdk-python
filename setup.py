@@ -57,6 +57,9 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob.glob('src/*.py')],
+    setup_requires=[
+        "grpcio-tools",
+    ],
     install_requires=[
         "grpcio",
         "grpcio-tools",
