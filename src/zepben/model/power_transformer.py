@@ -92,7 +92,7 @@ class PowerTransformer(ConductingEquipment):
                  location: Location = None):
         """
         :param mrid:
-        :param vector_group:  TODO: change to vector?
+        :param vector_group:
         :param in_service:
         """
         self.vector_group = vector_group

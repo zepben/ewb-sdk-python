@@ -58,6 +58,7 @@ class Location(IdentifiedObject):
     def from_pb(location):
         """
         Transform a Protobuf Location to a cimbend Location
+        TODO: Test this doesn't error on empty positionPoints
         :param location: Protobuf Location
         :return: A location
         """
