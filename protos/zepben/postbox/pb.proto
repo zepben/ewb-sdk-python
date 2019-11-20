@@ -31,44 +31,43 @@ import "zepben/cim/iec61968/metering/MeterReading.proto";
 import "zepben/cim/iec61968/metering/UsagePoint.proto";
 import "zepben/cim/iec61968/assetinfo/AssetInfo.proto";
 import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
 
 package zepben.pb;
 
 service NetworkData {
-    rpc recordEnergySource (zepben.cim.iec61970.base.wires.EnergySource) returns (ESResponse);
-    rpc recordEnergyConsumer (zepben.cim.iec61970.base.wires.EnergyConsumer) returns (ECResponse);
-    rpc recordPowerTransformer (zepben.cim.iec61970.base.wires.PowerTransformer) returns (PTResponse);
-    rpc recordAcLineSegment (zepben.cim.iec61970.base.wires.AcLineSegment) returns (ACLSResponse);
-    rpc recordDiagramObjectPoint (zepben.cim.iec61970.base.diagramlayout.DiagramObject) returns (Summary);
-    rpc recordBreaker (zepben.cim.iec61970.base.wires.Breaker) returns (BreakerResponse);
+    rpc createEnergySource(zepben.cim.iec61970.base.wires.EnergySource) returns (ESResponse);
+    rpc createEnergyConsumer(zepben.cim.iec61970.base.wires.EnergyConsumer) returns (ECResponse);
+    rpc createPowerTransformer(zepben.cim.iec61970.base.wires.PowerTransformer) returns (PTResponse);
+    rpc createAcLineSegment(zepben.cim.iec61970.base.wires.AcLineSegment) returns (ACLSResponse);
+    rpc createDiagramObject(zepben.cim.iec61970.base.diagramlayout.DiagramObject) returns (DOResponse);
+    rpc createBreaker(zepben.cim.iec61970.base.wires.Breaker) returns (BreakerResponse);
     rpc createPerLengthSequenceImpedance(zepben.cim.iec61970.base.wires.PerLengthSequenceImpedance) returns (PLSIResponse);
     rpc createBaseVoltage(zepben.cim.iec61970.base.core.BaseVoltage) returns (BVResponse);
     rpc createAssetInfo(AssetInfoRequest) returns (AIResponse);
     rpc createUsagePoint(UsagePointRequest) returns (UPResponse);
     rpc createMeter(MeterRequest) returns (MeterResponse);
     /***** Getters *****/
-    rpc getEquipmentContainer(Identity) returns (stream Equipment);
-    rpc getWholeNetwork(Identity) returns (stream Equipment);
+    rpc getEquipmentContainer(google.protobuf.Empty) returns (stream Equipment);
+    rpc getWholeNetwork(google.protobuf.Empty) returns (stream Equipment);
 
     rpc getEnergySource (Identity) returns (zepben.cim.iec61970.base.wires.EnergySource);
     rpc getEnergyConsumer (Identity) returns (zepben.cim.iec61970.base.wires.EnergyConsumer);
     rpc getPowerTransformer (Identity) returns (zepben.cim.iec61970.base.wires.PowerTransformer);
     rpc getAcLineSegment (Identity) returns (zepben.cim.iec61970.base.wires.AcLineSegment);
     // TEST FUNCTION, REMOVE LATER
-    rpc dumpEjson (Summary) returns (Summary);
-    rpc traceDirection (Summary) returns (Summary);
+    // rpc dumpEjson (Summary) returns (Summary);
+    // rpc traceDirection (Summary) returns (Summary);
 }
 
 service MeterReadings {
     rpc createVoltageReading(MeterReadingRequest) returns (MRResponse);
     rpc createRealPowerReading(MeterReadingRequest) returns (MRResponse);
     rpc createReactivePowerReading(MeterReadingRequest) returns (MRResponse);
-    rpc sendMeterReading (zepben.cim.iec61968.metering.Meter) returns (MeterResponse);
     // TODO: This will need to be much smarter and allow some form of bucketing readings.
-    rpc getMeterReadings (Identity) returns (stream zepben.cim.iec61968.metering.Meter);
-    rpc getVoltageReadings(Identity) returns (stream zepben.cim.iec61968.metering.MeterReading);
-    rpc getRealPowerReadings(Identity) returns (stream zepben.cim.iec61968.metering.MeterReading);
-    rpc getReactivePowerReadings(Identity) returns (stream zepben.cim.iec61968.metering.MeterReading);
+    rpc getVoltageReadings(google.protobuf.Empty) returns (stream zepben.cim.iec61968.metering.MeterReading);
+    rpc getRealPowerReadings(google.protobuf.Empty) returns (stream zepben.cim.iec61968.metering.MeterReading);
+    rpc getReactivePowerReadings(google.protobuf.Empty) returns (stream zepben.cim.iec61968.metering.MeterReading);
 }
 
 message Equipment {
@@ -95,6 +94,10 @@ message Summary {
 message MeterRequest {
     int64 message_id = 1;
     zepben.cim.iec61968.metering.Meter meter = 2;
+}
+
+message DOResponse {
+    string msg = 1;
 }
 
 message MeterReadingRequest {

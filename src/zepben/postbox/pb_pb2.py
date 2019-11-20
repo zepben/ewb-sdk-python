@@ -45,6 +45,7 @@ from zepben.cim.iec61968.metering import MeterReading_pb2 as zepben_dot_cim_dot_
 from zepben.cim.iec61968.metering import UsagePoint_pb2 as zepben_dot_cim_dot_iec61968_dot_metering_dot_UsagePoint__pb2
 from zepben.cim.iec61968.assetinfo import AssetInfo_pb2 as zepben_dot_cim_dot_iec61968_dot_assetinfo_dot_AssetInfo__pb2
 from google.protobuf import any_pb2 as google_dot_protobuf_dot_any__pb2
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -52,9 +53,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='zepben.pb',
   syntax='proto3',
   serialized_options=_b('\n\033com.zepben.protobuf.postboxP\001'),
-  serialized_pb=_b('\n\x17zepben/postbox/pb.proto\x12\tzepben.pb\x1a/zepben/cim/iec61970/base/core/BaseVoltage.proto\x1a\x31zepben/cim/iec61970/base/wires/EnergySource.proto\x1a\x32zepben/cim/iec61970/base/wires/AcLineSegment.proto\x1a\x33zepben/cim/iec61970/base/wires/EnergyConsumer.proto\x1a\x35zepben/cim/iec61970/base/wires/PowerTransformer.proto\x1a,zepben/cim/iec61970/base/wires/Breaker.proto\x1a?zepben/cim/iec61970/base/wires/PerLengthSequenceImpedance.proto\x1a:zepben/cim/iec61970/base/diagramlayout/DiagramObject.proto\x1a(zepben/cim/iec61968/metering/Meter.proto\x1a/zepben/cim/iec61968/metering/MeterReading.proto\x1a-zepben/cim/iec61968/metering/UsagePoint.proto\x1a-zepben/cim/iec61968/assetinfo/AssetInfo.proto\x1a\x19google/protobuf/any.proto\"\x96\x05\n\tEquipment\x12:\n\x02\x65s\x18\x01 \x01(\x0b\x32,.zepben.cim.iec61970.base.wires.EnergySourceH\x00\x12<\n\x02\x65\x63\x18\x02 \x01(\x0b\x32..zepben.cim.iec61970.base.wires.EnergyConsumerH\x00\x12>\n\x02pt\x18\x03 \x01(\x0b\x32\x30.zepben.cim.iec61970.base.wires.PowerTransformerH\x00\x12=\n\x04\x61\x63ls\x18\x04 \x01(\x0b\x32-.zepben.cim.iec61970.base.wires.AcLineSegmentH\x00\x12\x35\n\x02\x62r\x18\x05 \x01(\x0b\x32\'.zepben.cim.iec61970.base.wires.BreakerH\x00\x12\x38\n\x02\x62v\x18\x06 \x01(\x0b\x32*.zepben.cim.iec61970.base.core.BaseVoltageH\x00\x12H\n\x02si\x18\x07 \x01(\x0b\x32:.zepben.cim.iec61970.base.wires.PerLengthSequenceImpedanceH\x00\x12\x36\n\x02\x61i\x18\x08 \x01(\x0b\x32(.zepben.cim.iec61968.assetinfo.AssetInfoH\x00\x12\x31\n\x02mt\x18\t \x01(\x0b\x32#.zepben.cim.iec61968.metering.MeterH\x00\x12\x36\n\x02up\x18\n \x01(\x0b\x32(.zepben.cim.iec61968.metering.UsagePointH\x00\x12%\n\x05other\x18\x10 \x01(\x0b\x32\x14.google.protobuf.AnyH\x00\x42\x0b\n\tequipment\"\x16\n\x07Summary\x12\x0b\n\x03msg\x18\x01 \x01(\t\"V\n\x0cMeterRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x03\x12\x32\n\x05meter\x18\x02 \x01(\x0b\x32#.zepben.cim.iec61968.metering.Meter\"k\n\x13MeterReadingRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x03\x12@\n\x0cmeterReading\x18\x02 \x01(\x0b\x32*.zepben.cim.iec61968.metering.MeterReading\"e\n\x11UsagePointRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x03\x12<\n\nusagePoint\x18\x02 \x01(\x0b\x32(.zepben.cim.iec61968.metering.UsagePoint\"\x19\n\nUPResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"[\n\nMRResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\x12@\n\x0cmeterReading\x18\x02 \x01(\x0b\x32*.zepben.cim.iec61968.metering.MeterReading\"c\n\x10\x41ssetInfoRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x03\x12;\n\tassetInfo\x18\x02 \x01(\x0b\x32(.zepben.cim.iec61968.assetinfo.AssetInfo\"\x19\n\nAIResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x19\n\nBVResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x1b\n\x0cPLSIResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x1c\n\rMeterResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x18\n\x08Identity\x12\x0c\n\x04mRID\x18\x01 \x01(\t\"\x19\n\nESResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x19\n\nECResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x1b\n\x0c\x41\x43LSResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x19\n\nPTResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x1e\n\x0f\x42reakerResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t2\xc4\x0c\n\x0bNetworkData\x12Y\n\x12recordEnergySource\x12,.zepben.cim.iec61970.base.wires.EnergySource\x1a\x15.zepben.pb.ESResponse\x12]\n\x14recordEnergyConsumer\x12..zepben.cim.iec61970.base.wires.EnergyConsumer\x1a\x15.zepben.pb.ECResponse\x12\x61\n\x16recordPowerTransformer\x12\x30.zepben.cim.iec61970.base.wires.PowerTransformer\x1a\x15.zepben.pb.PTResponse\x12]\n\x13recordAcLineSegment\x12-.zepben.cim.iec61970.base.wires.AcLineSegment\x1a\x17.zepben.pb.ACLSResponse\x12\x65\n\x18recordDiagramObjectPoint\x12\x35.zepben.cim.iec61970.base.diagramlayout.DiagramObject\x1a\x12.zepben.pb.Summary\x12T\n\rrecordBreaker\x12\'.zepben.cim.iec61970.base.wires.Breaker\x1a\x1a.zepben.pb.BreakerResponse\x12w\n createPerLengthSequenceImpedance\x12:.zepben.cim.iec61970.base.wires.PerLengthSequenceImpedance\x1a\x17.zepben.pb.PLSIResponse\x12V\n\x11\x63reateBaseVoltage\x12*.zepben.cim.iec61970.base.core.BaseVoltage\x1a\x15.zepben.pb.BVResponse\x12\x45\n\x0f\x63reateAssetInfo\x12\x1b.zepben.pb.AssetInfoRequest\x1a\x15.zepben.pb.AIResponse\x12G\n\x10\x63reateUsagePoint\x12\x1c.zepben.pb.UsagePointRequest\x1a\x15.zepben.pb.UPResponse\x12@\n\x0b\x63reateMeter\x12\x17.zepben.pb.MeterRequest\x1a\x18.zepben.pb.MeterResponse\x12\x44\n\x15getEquipmentContainer\x12\x13.zepben.pb.Identity\x1a\x14.zepben.pb.Equipment0\x01\x12>\n\x0fgetWholeNetwork\x12\x13.zepben.pb.Identity\x1a\x14.zepben.pb.Equipment0\x01\x12T\n\x0fgetEnergySource\x12\x13.zepben.pb.Identity\x1a,.zepben.cim.iec61970.base.wires.EnergySource\x12X\n\x11getEnergyConsumer\x12\x13.zepben.pb.Identity\x1a..zepben.cim.iec61970.base.wires.EnergyConsumer\x12\\\n\x13getPowerTransformer\x12\x13.zepben.pb.Identity\x1a\x30.zepben.cim.iec61970.base.wires.PowerTransformer\x12V\n\x10getAcLineSegment\x12\x13.zepben.pb.Identity\x1a-.zepben.cim.iec61970.base.wires.AcLineSegment\x12\x33\n\tdumpEjson\x12\x12.zepben.pb.Summary\x1a\x12.zepben.pb.Summary\x12\x38\n\x0etraceDirection\x12\x12.zepben.pb.Summary\x1a\x12.zepben.pb.Summary2\xba\x05\n\rMeterReadings\x12M\n\x14\x63reateVoltageReading\x12\x1e.zepben.pb.MeterReadingRequest\x1a\x15.zepben.pb.MRResponse\x12O\n\x16\x63reateRealPowerReading\x12\x1e.zepben.pb.MeterReadingRequest\x1a\x15.zepben.pb.MRResponse\x12S\n\x1a\x63reateReactivePowerReading\x12\x1e.zepben.pb.MeterReadingRequest\x1a\x15.zepben.pb.MRResponse\x12Q\n\x10sendMeterReading\x12#.zepben.cim.iec61968.metering.Meter\x1a\x18.zepben.pb.MeterResponse\x12N\n\x10getMeterReadings\x12\x13.zepben.pb.Identity\x1a#.zepben.cim.iec61968.metering.Meter0\x01\x12W\n\x12getVoltageReadings\x12\x13.zepben.pb.Identity\x1a*.zepben.cim.iec61968.metering.MeterReading0\x01\x12Y\n\x14getRealPowerReadings\x12\x13.zepben.pb.Identity\x1a*.zepben.cim.iec61968.metering.MeterReading0\x01\x12]\n\x18getReactivePowerReadings\x12\x13.zepben.pb.Identity\x1a*.zepben.cim.iec61968.metering.MeterReading0\x01\x42\x1f\n\x1b\x63om.zepben.protobuf.postboxP\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x17zepben/postbox/pb.proto\x12\tzepben.pb\x1a/zepben/cim/iec61970/base/core/BaseVoltage.proto\x1a\x31zepben/cim/iec61970/base/wires/EnergySource.proto\x1a\x32zepben/cim/iec61970/base/wires/AcLineSegment.proto\x1a\x33zepben/cim/iec61970/base/wires/EnergyConsumer.proto\x1a\x35zepben/cim/iec61970/base/wires/PowerTransformer.proto\x1a,zepben/cim/iec61970/base/wires/Breaker.proto\x1a?zepben/cim/iec61970/base/wires/PerLengthSequenceImpedance.proto\x1a:zepben/cim/iec61970/base/diagramlayout/DiagramObject.proto\x1a(zepben/cim/iec61968/metering/Meter.proto\x1a/zepben/cim/iec61968/metering/MeterReading.proto\x1a-zepben/cim/iec61968/metering/UsagePoint.proto\x1a-zepben/cim/iec61968/assetinfo/AssetInfo.proto\x1a\x19google/protobuf/any.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x96\x05\n\tEquipment\x12:\n\x02\x65s\x18\x01 \x01(\x0b\x32,.zepben.cim.iec61970.base.wires.EnergySourceH\x00\x12<\n\x02\x65\x63\x18\x02 \x01(\x0b\x32..zepben.cim.iec61970.base.wires.EnergyConsumerH\x00\x12>\n\x02pt\x18\x03 \x01(\x0b\x32\x30.zepben.cim.iec61970.base.wires.PowerTransformerH\x00\x12=\n\x04\x61\x63ls\x18\x04 \x01(\x0b\x32-.zepben.cim.iec61970.base.wires.AcLineSegmentH\x00\x12\x35\n\x02\x62r\x18\x05 \x01(\x0b\x32\'.zepben.cim.iec61970.base.wires.BreakerH\x00\x12\x38\n\x02\x62v\x18\x06 \x01(\x0b\x32*.zepben.cim.iec61970.base.core.BaseVoltageH\x00\x12H\n\x02si\x18\x07 \x01(\x0b\x32:.zepben.cim.iec61970.base.wires.PerLengthSequenceImpedanceH\x00\x12\x36\n\x02\x61i\x18\x08 \x01(\x0b\x32(.zepben.cim.iec61968.assetinfo.AssetInfoH\x00\x12\x31\n\x02mt\x18\t \x01(\x0b\x32#.zepben.cim.iec61968.metering.MeterH\x00\x12\x36\n\x02up\x18\n \x01(\x0b\x32(.zepben.cim.iec61968.metering.UsagePointH\x00\x12%\n\x05other\x18\x10 \x01(\x0b\x32\x14.google.protobuf.AnyH\x00\x42\x0b\n\tequipment\"\x16\n\x07Summary\x12\x0b\n\x03msg\x18\x01 \x01(\t\"V\n\x0cMeterRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x03\x12\x32\n\x05meter\x18\x02 \x01(\x0b\x32#.zepben.cim.iec61968.metering.Meter\"\x19\n\nDOResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"k\n\x13MeterReadingRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x03\x12@\n\x0cmeterReading\x18\x02 \x01(\x0b\x32*.zepben.cim.iec61968.metering.MeterReading\"e\n\x11UsagePointRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x03\x12<\n\nusagePoint\x18\x02 \x01(\x0b\x32(.zepben.cim.iec61968.metering.UsagePoint\"\x19\n\nUPResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"[\n\nMRResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\x12@\n\x0cmeterReading\x18\x02 \x01(\x0b\x32*.zepben.cim.iec61968.metering.MeterReading\"c\n\x10\x41ssetInfoRequest\x12\x12\n\nmessage_id\x18\x01 \x01(\x03\x12;\n\tassetInfo\x18\x02 \x01(\x0b\x32(.zepben.cim.iec61968.assetinfo.AssetInfo\"\x19\n\nAIResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x19\n\nBVResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x1b\n\x0cPLSIResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x1c\n\rMeterResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x18\n\x08Identity\x12\x0c\n\x04mRID\x18\x01 \x01(\t\"\x19\n\nESResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x19\n\nECResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x1b\n\x0c\x41\x43LSResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x19\n\nPTResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\x1e\n\x0f\x42reakerResponse\x12\x0b\n\x03msg\x18\x01 \x01(\t2\xd9\x0b\n\x0bNetworkData\x12Y\n\x12\x63reateEnergySource\x12,.zepben.cim.iec61970.base.wires.EnergySource\x1a\x15.zepben.pb.ESResponse\x12]\n\x14\x63reateEnergyConsumer\x12..zepben.cim.iec61970.base.wires.EnergyConsumer\x1a\x15.zepben.pb.ECResponse\x12\x61\n\x16\x63reatePowerTransformer\x12\x30.zepben.cim.iec61970.base.wires.PowerTransformer\x1a\x15.zepben.pb.PTResponse\x12]\n\x13\x63reateAcLineSegment\x12-.zepben.cim.iec61970.base.wires.AcLineSegment\x1a\x17.zepben.pb.ACLSResponse\x12\x63\n\x13\x63reateDiagramObject\x12\x35.zepben.cim.iec61970.base.diagramlayout.DiagramObject\x1a\x15.zepben.pb.DOResponse\x12T\n\rcreateBreaker\x12\'.zepben.cim.iec61970.base.wires.Breaker\x1a\x1a.zepben.pb.BreakerResponse\x12w\n createPerLengthSequenceImpedance\x12:.zepben.cim.iec61970.base.wires.PerLengthSequenceImpedance\x1a\x17.zepben.pb.PLSIResponse\x12V\n\x11\x63reateBaseVoltage\x12*.zepben.cim.iec61970.base.core.BaseVoltage\x1a\x15.zepben.pb.BVResponse\x12\x45\n\x0f\x63reateAssetInfo\x12\x1b.zepben.pb.AssetInfoRequest\x1a\x15.zepben.pb.AIResponse\x12G\n\x10\x63reateUsagePoint\x12\x1c.zepben.pb.UsagePointRequest\x1a\x15.zepben.pb.UPResponse\x12@\n\x0b\x63reateMeter\x12\x17.zepben.pb.MeterRequest\x1a\x18.zepben.pb.MeterResponse\x12G\n\x15getEquipmentContainer\x12\x16.google.protobuf.Empty\x1a\x14.zepben.pb.Equipment0\x01\x12\x41\n\x0fgetWholeNetwork\x12\x16.google.protobuf.Empty\x1a\x14.zepben.pb.Equipment0\x01\x12T\n\x0fgetEnergySource\x12\x13.zepben.pb.Identity\x1a,.zepben.cim.iec61970.base.wires.EnergySource\x12X\n\x11getEnergyConsumer\x12\x13.zepben.pb.Identity\x1a..zepben.cim.iec61970.base.wires.EnergyConsumer\x12\\\n\x13getPowerTransformer\x12\x13.zepben.pb.Identity\x1a\x30.zepben.cim.iec61970.base.wires.PowerTransformer\x12V\n\x10getAcLineSegment\x12\x13.zepben.pb.Identity\x1a-.zepben.cim.iec61970.base.wires.AcLineSegment2\xa0\x04\n\rMeterReadings\x12M\n\x14\x63reateVoltageReading\x12\x1e.zepben.pb.MeterReadingRequest\x1a\x15.zepben.pb.MRResponse\x12O\n\x16\x63reateRealPowerReading\x12\x1e.zepben.pb.MeterReadingRequest\x1a\x15.zepben.pb.MRResponse\x12S\n\x1a\x63reateReactivePowerReading\x12\x1e.zepben.pb.MeterReadingRequest\x1a\x15.zepben.pb.MRResponse\x12Z\n\x12getVoltageReadings\x12\x16.google.protobuf.Empty\x1a*.zepben.cim.iec61968.metering.MeterReading0\x01\x12\\\n\x14getRealPowerReadings\x12\x16.google.protobuf.Empty\x1a*.zepben.cim.iec61968.metering.MeterReading0\x01\x12`\n\x18getReactivePowerReadings\x12\x16.google.protobuf.Empty\x1a*.zepben.cim.iec61968.metering.MeterReading0\x01\x42\x1f\n\x1b\x63om.zepben.protobuf.postboxP\x01\x62\x06proto3')
   ,
-  dependencies=[zepben_dot_cim_dot_iec61970_dot_base_dot_core_dot_BaseVoltage__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_EnergySource__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_AcLineSegment__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_EnergyConsumer__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_PowerTransformer__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_Breaker__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_PerLengthSequenceImpedance__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_diagramlayout_dot_DiagramObject__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61968_dot_metering_dot_Meter__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61968_dot_metering_dot_MeterReading__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61968_dot_metering_dot_UsagePoint__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61968_dot_assetinfo_dot_AssetInfo__pb2.DESCRIPTOR,google_dot_protobuf_dot_any__pb2.DESCRIPTOR,])
+  dependencies=[zepben_dot_cim_dot_iec61970_dot_base_dot_core_dot_BaseVoltage__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_EnergySource__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_AcLineSegment__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_EnergyConsumer__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_PowerTransformer__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_Breaker__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_PerLengthSequenceImpedance__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61970_dot_base_dot_diagramlayout_dot_DiagramObject__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61968_dot_metering_dot_Meter__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61968_dot_metering_dot_MeterReading__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61968_dot_metering_dot_UsagePoint__pb2.DESCRIPTOR,zepben_dot_cim_dot_iec61968_dot_assetinfo_dot_AssetInfo__pb2.DESCRIPTOR,google_dot_protobuf_dot_any__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,])
 
 
 
@@ -158,8 +159,8 @@ _EQUIPMENT = _descriptor.Descriptor(
       name='equipment', full_name='zepben.pb.Equipment.equipment',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=682,
-  serialized_end=1344,
+  serialized_start=711,
+  serialized_end=1373,
 )
 
 
@@ -189,8 +190,8 @@ _SUMMARY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1346,
-  serialized_end=1368,
+  serialized_start=1375,
+  serialized_end=1397,
 )
 
 
@@ -227,8 +228,39 @@ _METERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1370,
-  serialized_end=1456,
+  serialized_start=1399,
+  serialized_end=1485,
+)
+
+
+_DORESPONSE = _descriptor.Descriptor(
+  name='DOResponse',
+  full_name='zepben.pb.DOResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='msg', full_name='zepben.pb.DOResponse.msg', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1487,
+  serialized_end=1512,
 )
 
 
@@ -265,8 +297,8 @@ _METERREADINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1458,
-  serialized_end=1565,
+  serialized_start=1514,
+  serialized_end=1621,
 )
 
 
@@ -303,8 +335,8 @@ _USAGEPOINTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1567,
-  serialized_end=1668,
+  serialized_start=1623,
+  serialized_end=1724,
 )
 
 
@@ -334,8 +366,8 @@ _UPRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1670,
-  serialized_end=1695,
+  serialized_start=1726,
+  serialized_end=1751,
 )
 
 
@@ -372,8 +404,8 @@ _MRRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1697,
-  serialized_end=1788,
+  serialized_start=1753,
+  serialized_end=1844,
 )
 
 
@@ -410,8 +442,8 @@ _ASSETINFOREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1790,
-  serialized_end=1889,
+  serialized_start=1846,
+  serialized_end=1945,
 )
 
 
@@ -441,8 +473,8 @@ _AIRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1891,
-  serialized_end=1916,
+  serialized_start=1947,
+  serialized_end=1972,
 )
 
 
@@ -472,8 +504,8 @@ _BVRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1918,
-  serialized_end=1943,
+  serialized_start=1974,
+  serialized_end=1999,
 )
 
 
@@ -503,8 +535,8 @@ _PLSIRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1945,
-  serialized_end=1972,
+  serialized_start=2001,
+  serialized_end=2028,
 )
 
 
@@ -534,8 +566,8 @@ _METERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1974,
-  serialized_end=2002,
+  serialized_start=2030,
+  serialized_end=2058,
 )
 
 
@@ -565,8 +597,8 @@ _IDENTITY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2004,
-  serialized_end=2028,
+  serialized_start=2060,
+  serialized_end=2084,
 )
 
 
@@ -596,8 +628,8 @@ _ESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2030,
-  serialized_end=2055,
+  serialized_start=2086,
+  serialized_end=2111,
 )
 
 
@@ -627,8 +659,8 @@ _ECRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2057,
-  serialized_end=2082,
+  serialized_start=2113,
+  serialized_end=2138,
 )
 
 
@@ -658,8 +690,8 @@ _ACLSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2084,
-  serialized_end=2111,
+  serialized_start=2140,
+  serialized_end=2167,
 )
 
 
@@ -689,8 +721,8 @@ _PTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2113,
-  serialized_end=2138,
+  serialized_start=2169,
+  serialized_end=2194,
 )
 
 
@@ -720,8 +752,8 @@ _BREAKERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2140,
-  serialized_end=2170,
+  serialized_start=2196,
+  serialized_end=2226,
 )
 
 _EQUIPMENT.fields_by_name['es'].message_type = zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_EnergySource__pb2._ENERGYSOURCE
@@ -776,6 +808,7 @@ _ASSETINFOREQUEST.fields_by_name['assetInfo'].message_type = zepben_dot_cim_dot_
 DESCRIPTOR.message_types_by_name['Equipment'] = _EQUIPMENT
 DESCRIPTOR.message_types_by_name['Summary'] = _SUMMARY
 DESCRIPTOR.message_types_by_name['MeterRequest'] = _METERREQUEST
+DESCRIPTOR.message_types_by_name['DOResponse'] = _DORESPONSE
 DESCRIPTOR.message_types_by_name['MeterReadingRequest'] = _METERREADINGREQUEST
 DESCRIPTOR.message_types_by_name['UsagePointRequest'] = _USAGEPOINTREQUEST
 DESCRIPTOR.message_types_by_name['UPResponse'] = _UPRESPONSE
@@ -813,6 +846,13 @@ MeterRequest = _reflection.GeneratedProtocolMessageType('MeterRequest', (_messag
   # @@protoc_insertion_point(class_scope:zepben.pb.MeterRequest)
   })
 _sym_db.RegisterMessage(MeterRequest)
+
+DOResponse = _reflection.GeneratedProtocolMessageType('DOResponse', (_message.Message,), {
+  'DESCRIPTOR' : _DORESPONSE,
+  '__module__' : 'zepben.postbox.pb_pb2'
+  # @@protoc_insertion_point(class_scope:zepben.pb.DOResponse)
+  })
+_sym_db.RegisterMessage(DOResponse)
 
 MeterReadingRequest = _reflection.GeneratedProtocolMessageType('MeterReadingRequest', (_message.Message,), {
   'DESCRIPTOR' : _METERREADINGREQUEST,
@@ -928,12 +968,12 @@ _NETWORKDATA = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=2173,
-  serialized_end=3777,
+  serialized_start=2229,
+  serialized_end=3726,
   methods=[
   _descriptor.MethodDescriptor(
-    name='recordEnergySource',
-    full_name='zepben.pb.NetworkData.recordEnergySource',
+    name='createEnergySource',
+    full_name='zepben.pb.NetworkData.createEnergySource',
     index=0,
     containing_service=None,
     input_type=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_EnergySource__pb2._ENERGYSOURCE,
@@ -941,8 +981,8 @@ _NETWORKDATA = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='recordEnergyConsumer',
-    full_name='zepben.pb.NetworkData.recordEnergyConsumer',
+    name='createEnergyConsumer',
+    full_name='zepben.pb.NetworkData.createEnergyConsumer',
     index=1,
     containing_service=None,
     input_type=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_EnergyConsumer__pb2._ENERGYCONSUMER,
@@ -950,8 +990,8 @@ _NETWORKDATA = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='recordPowerTransformer',
-    full_name='zepben.pb.NetworkData.recordPowerTransformer',
+    name='createPowerTransformer',
+    full_name='zepben.pb.NetworkData.createPowerTransformer',
     index=2,
     containing_service=None,
     input_type=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_PowerTransformer__pb2._POWERTRANSFORMER,
@@ -959,8 +999,8 @@ _NETWORKDATA = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='recordAcLineSegment',
-    full_name='zepben.pb.NetworkData.recordAcLineSegment',
+    name='createAcLineSegment',
+    full_name='zepben.pb.NetworkData.createAcLineSegment',
     index=3,
     containing_service=None,
     input_type=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_AcLineSegment__pb2._ACLINESEGMENT,
@@ -968,17 +1008,17 @@ _NETWORKDATA = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='recordDiagramObjectPoint',
-    full_name='zepben.pb.NetworkData.recordDiagramObjectPoint',
+    name='createDiagramObject',
+    full_name='zepben.pb.NetworkData.createDiagramObject',
     index=4,
     containing_service=None,
     input_type=zepben_dot_cim_dot_iec61970_dot_base_dot_diagramlayout_dot_DiagramObject__pb2._DIAGRAMOBJECT,
-    output_type=_SUMMARY,
+    output_type=_DORESPONSE,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='recordBreaker',
-    full_name='zepben.pb.NetworkData.recordBreaker',
+    name='createBreaker',
+    full_name='zepben.pb.NetworkData.createBreaker',
     index=5,
     containing_service=None,
     input_type=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_Breaker__pb2._BREAKER,
@@ -1035,7 +1075,7 @@ _NETWORKDATA = _descriptor.ServiceDescriptor(
     full_name='zepben.pb.NetworkData.getEquipmentContainer',
     index=11,
     containing_service=None,
-    input_type=_IDENTITY,
+    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
     output_type=_EQUIPMENT,
     serialized_options=None,
   ),
@@ -1044,7 +1084,7 @@ _NETWORKDATA = _descriptor.ServiceDescriptor(
     full_name='zepben.pb.NetworkData.getWholeNetwork',
     index=12,
     containing_service=None,
-    input_type=_IDENTITY,
+    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
     output_type=_EQUIPMENT,
     serialized_options=None,
   ),
@@ -1084,24 +1124,6 @@ _NETWORKDATA = _descriptor.ServiceDescriptor(
     output_type=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_AcLineSegment__pb2._ACLINESEGMENT,
     serialized_options=None,
   ),
-  _descriptor.MethodDescriptor(
-    name='dumpEjson',
-    full_name='zepben.pb.NetworkData.dumpEjson',
-    index=17,
-    containing_service=None,
-    input_type=_SUMMARY,
-    output_type=_SUMMARY,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='traceDirection',
-    full_name='zepben.pb.NetworkData.traceDirection',
-    index=18,
-    containing_service=None,
-    input_type=_SUMMARY,
-    output_type=_SUMMARY,
-    serialized_options=None,
-  ),
 ])
 _sym_db.RegisterServiceDescriptor(_NETWORKDATA)
 
@@ -1114,8 +1136,8 @@ _METERREADINGS = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   serialized_options=None,
-  serialized_start=3780,
-  serialized_end=4478,
+  serialized_start=3729,
+  serialized_end=4273,
   methods=[
   _descriptor.MethodDescriptor(
     name='createVoltageReading',
@@ -1145,47 +1167,29 @@ _METERREADINGS = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='sendMeterReading',
-    full_name='zepben.pb.MeterReadings.sendMeterReading',
-    index=3,
-    containing_service=None,
-    input_type=zepben_dot_cim_dot_iec61968_dot_metering_dot_Meter__pb2._METER,
-    output_type=_METERRESPONSE,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='getMeterReadings',
-    full_name='zepben.pb.MeterReadings.getMeterReadings',
-    index=4,
-    containing_service=None,
-    input_type=_IDENTITY,
-    output_type=zepben_dot_cim_dot_iec61968_dot_metering_dot_Meter__pb2._METER,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
     name='getVoltageReadings',
     full_name='zepben.pb.MeterReadings.getVoltageReadings',
-    index=5,
+    index=3,
     containing_service=None,
-    input_type=_IDENTITY,
+    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
     output_type=zepben_dot_cim_dot_iec61968_dot_metering_dot_MeterReading__pb2._METERREADING,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
     name='getRealPowerReadings',
     full_name='zepben.pb.MeterReadings.getRealPowerReadings',
-    index=6,
+    index=4,
     containing_service=None,
-    input_type=_IDENTITY,
+    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
     output_type=zepben_dot_cim_dot_iec61968_dot_metering_dot_MeterReading__pb2._METERREADING,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
     name='getReactivePowerReadings',
     full_name='zepben.pb.MeterReadings.getReactivePowerReadings',
-    index=7,
+    index=5,
     containing_service=None,
-    input_type=_IDENTITY,
+    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
     output_type=zepben_dot_cim_dot_iec61968_dot_metering_dot_MeterReading__pb2._METERREADING,
     serialized_options=None,
   ),
