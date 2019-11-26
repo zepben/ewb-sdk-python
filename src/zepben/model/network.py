@@ -20,20 +20,19 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 import logging
 import pickle
 from zepben.model.exceptions import *
-from zepben.model import DiagramObject, Location, Terminal, RatioTapChanger, BaseVoltage
+from zepben.model import Terminal, BaseVoltage
 from zepben.model.asset_info import CableInfo, OverheadWireInfo, TransformerEndInfo
 from zepben.model.connectivity_node import ConnectivityNode
-from zepben.model.energy_consumer import EnergyConsumer, EnergyConsumerPhase
+from zepben.model.energy_consumer import EnergyConsumer
 from zepben.model.energy_source import EnergySource
 from zepben.model.aclinesegment import ACLineSegment
-from zepben.model.power_transformer import PowerTransformer, PowerTransformerEnd
-from zepben.model.asset_info import WireInfo
+from zepben.model.power_transformer import PowerTransformer
 from zepben.model.switch import Breaker
 from zepben.model.per_length_sequence_impedance import PerLengthSequenceImpedance
 from zepben.model.metrics_store import MetricsStore
 from zepben.model.metering import UsagePoint, Meter
 from zepben.model.customer import Customer
-from zepben.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup
+from zepben.model.decorators import create_registrar
 from typing import List
 from pprint import pformat
 from pathlib import Path
@@ -42,12 +41,22 @@ logger = logging.getLogger(__name__)
 TRACED_NETWORK_FILE = str(Path.home().joinpath(Path("traced.json")))
 
 
+
+
+
+
+
 class EquipmentContainer(object):
     """
     A full representation of the power network.
     Contains a map of equipment (string ID's -> Equipment/Nodes/etc)
-    And a reverse map of equipment to terminals
+    **All** `IdentifiedObject's` submitted to this EquipmentContainer **MUST** have unique mRID's!
     """
+
+    # A decorator simply used for registering EquipmentContainer getter functions.
+    # If you create a new equipment map in __init__, you should create a corresponding getter function and
+    # decorate it with @getter
+    getter = create_registrar()
 
     def __init__(self, metrics_store: MetricsStore, name: str = "default"):
         """
@@ -58,18 +67,20 @@ class EquipmentContainer(object):
         :param metrics_store: Storage for meter measurement data associated with this network.
         """
         self.name = name
-        self.resources = {}
-        self.energy_sources = {}
-        self.base_voltages = {}
-        self.seq_impedances = {}
+        # TODO: merge these into gets... stop using resources
         self.asset_infos = {}
-        self.usage_points = {}
+        self.base_voltages = {}
+        self.breakers = {}
+        self.connectivity_nodes = {}
         self.customers = {}
+        self.energy_sources = {}
+        self.energy_consumers = {}
+        self.lines = {}
         self.meters = {}
+        self.seq_impedances = {}
+        self.transformers = {}
+        self.usage_points = {}
         self.metrics_store = metrics_store
-
-    def print_network(self):
-        logger.info(f"Resources:\n{pformat(self.resources)}")
 
     def __iter__(self):
         """
@@ -87,62 +98,163 @@ class EquipmentContainer(object):
 
     def __getitem__(self, item):
         """
-        TODO: This requires everything to have unique ID's! Need to enforce/document this
+        Gets an mRID from the EquipmentContainer, checking all mappings.
         It is preferred to use the get_* methods if you know what type you are retrieving.
         :param item:
         :return:
-        :raises: NoEquipmentException when item isn't in the EquipmentContainer. This should be caught
-                 and re-thrown with more detail.
+        :raises: KeyError when `item` isn't in the EquipmentContainer.
         """
-        if item in self.resources:
-            return self.resources[item]
-        if item in self.asset_infos:
-            return self.asset_infos[item]
-        if item in self.seq_impedances:
-            return self.seq_impedances[item]
-        if item in self.base_voltages:
-            return self.base_voltages[item]
-        if item in self.usage_points:
-            return self.usage_points[item]
-        if item in self.meters:
-            return self.meters[item]
-        raise KeyError(f"{item}")
+        for m in EquipmentContainer.getter.all.values():
+            try:
+                return m(self, item)
+            except MissingReferenceException:
+                continue
+        else:
+            raise KeyError(f"{item}")
 
+    def keys(self):
+        """
+        This is probably a terrible idea. Should make this unnecessary. Do not use
+        :return:
+        """
+        k = set(self.meters.keys()).union(self.base_voltages.keys(), self.connectivity_nodes.keys(),
+                                          self.energy_consumers.keys(), self.energy_sources.keys(),
+                                          self.transformers.keys(), self.breakers.keys(), self.lines.keys(),
+                                          self.customers.keys(), self.usage_points.keys(), self.seq_impedances.keys(),
+                                          self.asset_infos.keys())
+        return k
+
+    @getter
+    def get_connectivity_node(self, cn_mrid):
+        try:
+            return self.connectivity_nodes[cn_mrid]
+        except KeyError:
+            raise NoConnectivityNodeException(f"{cn_mrid}")
+
+    @getter
+    def get_breaker(self, br_mrid):
+        try:
+            return self.breakers[br_mrid]
+        except KeyError:
+            raise NoBreakerException(f"{br_mrid}")
+
+    @getter
+    def get_aclinesegment(self, acls_mrid):
+        try:
+            return self.lines[acls_mrid]
+        except KeyError:
+            raise NoACLineSegmentException(f"{acls_mrid}")
+
+    @getter
+    def get_transformer(self, tf_mrid):
+        try:
+            return self.transformers[tf_mrid]
+        except KeyError:
+            raise NoTransformerException(f"{tf_mrid}")
+
+    @getter
+    def get_energysource(self, es_mrid):
+        try:
+            return self.energy_sources[es_mrid]
+        except KeyError:
+            raise NoEnergySourceException(f"{es_mrid}")
+
+    @getter
+    def get_energyconsumer(self, ec_mrid):
+        try:
+            return self.energy_consumers[ec_mrid]
+        except KeyError:
+            raise NoEnergyConsumerException(f"{ec_mrid}")
+
+    @getter
     def get_meter(self, meter_mrid):
         try:
             return self.meters[meter_mrid]
         except KeyError:
             raise NoMeterException(f"{meter_mrid}")
 
+    @getter
     def get_base_voltage(self, bv_mrid):
         try:
             return self.base_voltages[bv_mrid]
         except KeyError:
             raise NoBaseVoltageException(f"{bv_mrid}")
 
+    @getter
     def get_asset_info(self, ai_mrid):
         try:
             return self.asset_infos[ai_mrid]
         except KeyError:
             raise NoAssetInfoException(f"{ai_mrid}")
 
+    @getter
     def get_plsi(self, plsi_mrid):
         try:
             return self.seq_impedances[plsi_mrid]
         except KeyError:
             raise NoPerLengthSeqImpException(f"{plsi_mrid}")
 
+    @getter
     def get_usage_point(self, up_mrid):
         try:
             return self.usage_points[up_mrid]
         except KeyError:
             raise NoUsagePointException(f"{up_mrid}")
 
+    @getter
     def get_customer(self, cust_mrid):
         try:
             return self.customers[cust_mrid]
         except KeyError:
             raise NoCustomerException(f"{cust_mrid}")
+
+    def iter_connectivitynodes(self):
+        for node in self.connectivity_nodes.values():
+            yield node
+
+    def iter_lines(self):
+        for line in self.lines.values():
+            yield line
+
+    def iter_transformers(self):
+        for trafo in self.transformers.values():
+            yield trafo
+
+    def iter_breakers(self):
+        for breaker in self.breakers.values():
+            yield breaker
+
+    def iter_meters(self):
+        for meter in self.meters.values():
+            yield meter
+
+    def iter_assetinfos(self):
+        for ai in self.asset_infos.values():
+            yield ai
+
+    def iter_perlengthseqimpedances(self):
+        for si in self.seq_impedances.values():
+            yield si
+
+    def iter_usagepoints(self):
+        for up in self.usage_points.values():
+            yield up
+
+    def iter_customers(self):
+        for c in self.customers.values():
+            yield c
+
+    def iter_energysources(self):
+        for es in self.energy_sources.values():
+            yield es
+
+    def iter_energyconsumers(self):
+        for ec in self.energy_consumers.values():
+            yield ec
+
+    def iter_basevoltages(self):
+        for bv in self.base_voltages.values():
+            yield bv
 
     def depth_first_trace_and_apply(self, term_fn=None):
         """
@@ -209,50 +321,57 @@ class EquipmentContainer(object):
                         # Don't trace over a terminal twice to stop us from reversing direction
                         traced.add(term.mrid)
 
-    def _create_common_pb_fields(self, pb):
-        """
-        Creates common features of ConductingEquipment. No exceptions should be thrown from this function. It
-        is more appropriate to return None/Empty if something fails.
-        :param pb:
-        :return:
-        """
-        terms = self.create_connectivity_nodes(pb.terminals)
-        location = Location.from_pb(pb.location)
-        diag_objs = DiagramObject.from_pbs(pb.diagramObjects)
-        return terms, location, diag_objs
-
     def create_connectivity_nodes(self, pb_terminals):
         """
         Extract and create ConnectivityNode's from a set of protobuf Terminals.
         Order of the terminals is preserved and indicates their sequenceNumber
-        :param pb_terminals: A list of protobuf Terminal's.
+        :param pb_terminals: A list of protobuf :class:`zepben.cim.iec61970.core.Terminal`'s
         :return: A set of CIM terminals.
         """
         terms = []
         for terminal in pb_terminals:
-            conn_node = self.add_connectivity_node(terminal.connectivityNodeMRID)
+            conn_node = self.add_connectivitynode(terminal.connectivityNodeMRID)
             term = Terminal(terminal.mRID, terminal.phases, conn_node, terminal.name, connected=terminal.connected)
             conn_node.add_terminal(term)
             terms.append(term)
         return terms
 
-    def add_connectivity_node(self, mrid):
-        if mrid not in self.resources:
+    def add_connectivitynode(self, mrid):
+        """
+        Add a connectivity node to the network.
+        :param mrid: mRID of the ConnectivityNode
+        :return: A new ConnectivityNode with `mrid` if it doesn't already exist, otherwise the existing
+                 ConnectivityNode represented by `mrid`
+        """
+        if mrid not in self.connectivity_nodes:
             node = ConnectivityNode(mrid)
-            self.resources[mrid] = node
+            self.connectivity_nodes[mrid] = node
             return node
         else:
-            return self.resources[mrid]
+            return self.connectivity_nodes[mrid]
 
     def add_pb_base_voltage(self, pb_bv):
+        """
+        Add a Protobuf BaseVoltage
+        :param pb_bv: :class:`zepben.cim.iec61970.base.core.BaseVoltage`
+        """
         bv = BaseVoltage.from_pb(pb_bv)
         self.base_voltages[bv.mrid] = bv
 
     def add_pb_per_length_sequence_impedance(self, pb_plsi):
+        """
+        Add a Protobuf PerLengthSequenceImpedance
+        :param pb_plsi: :class:`zepben.cim.iec61970.base.wires.PerLengthSequenceImpedance`
+        """
         plsi = PerLengthSequenceImpedance.from_pb(pb_plsi)
         self.seq_impedances[plsi.mrid] = plsi
 
     def add_pb_asset_info(self, pb_ai):
+        """
+        Add a Protobuf AssetInfo
+        :param pb_ai: :class:`zepben.cim.iec61968.assetinfo.AssetInfo`
+        :raises: NoEquipmentException if no field in the oneof was set.
+        """
         if pb_ai.HasField("cableInfo"):
             cable_info = CableInfo.from_pb(pb_ai.cableInfo)
             self.asset_infos[cable_info.mrid] = cable_info
@@ -266,150 +385,76 @@ class EquipmentContainer(object):
             raise NoEquipmentException("assetInfo was empty")
 
     def add_pb_usage_point(self, pb_up):
+        """
+        Add a Protobuf UsagePoint
+        :param pb_up: :class:`zepben.cim.iec61968.metering.UsagePoint`
+        """
         up = UsagePoint.from_pb(pb_up, self)
         self.usage_points[up.mrid] = up
 
     def add_pb_customer(self, pb_c):
+        """
+        Add a Protobuf Customer
+        :param pb_c: :class:`zepben.cim.iec61968.customers.Customer`
+        """
         customer = Customer.from_pb(pb_c)
         self.customers[customer.mrid] = customer
 
     def add_pb_meter(self, pb_m):
-        meter = Meter.from_pb(pb_m, self)
-        self.meters[meter.mrid] = meter
+        """
+        Add a Protobuf Meter
+        :param pb_m: :class:`zepben.cim.iec61968.metering.Meter`
+        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
+                 network See :func:`Meter.from_pb`
+        """
+        self.meters[pb_m.mRID] = Meter.from_pb(pb_m, self)
 
     def add_pb_energy_source(self, pb_es):
         """
-        Helper function to add an energy source to the network that has come through as a protobuf message
-        :param pb_es:
-        :return:
+        Add an energy source to the network that has come through as a protobuf message
+        :param pb_es: :class:`zepben.cim.iec61970.base.wires.EnergySource`
+        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
+                 network. See :func:`EnergySource.from_pb`
         """
-        terms, location, diag_objs = self._create_common_pb_fields(pb_es)
-        base_voltage = self.get_base_voltage(pb_es.baseVoltageMRID)
-
-        self.add_energy_source(pb_es.mRID,
-                               pb_es.name,
-                               pb_es.activePower,
-                               pb_es.r,
-                               pb_es.x,
-                               base_voltage,
-                               pb_es.reactivePower,
-                               pb_es.voltageAngle,
-                               pb_es.voltageMagnitude,
-                               pb_es.inService,
-                               terms,
-                               diag_objs,
-                               location)
-
-    def add_energy_source(self, mrid, name: str, active_power: float, r: float, x: float, base_volt: BaseVoltage,
-                          reactive_power: float, voltage_angle: float, voltage_magnitude: float,
-                          in_service: bool, terminals: List, diag_objs: List[DiagramObject] = None,
-                          location: Location = None):
-        self.resources[mrid] = EnergySource(mrid, active_power, r, x, base_volt, reactive_power, voltage_angle,
-                                            voltage_magnitude, name=name,
-                                            in_service=in_service, terminals=terminals, diag_objs=diag_objs,
-                                            location=location)
-        self.energy_sources[mrid] = self.resources[mrid]
+        self.energy_sources[pb_es.mRID] = EnergySource.from_pb(pb_es, self)
 
     def add_pb_energy_consumer(self, pb_ec):
-        base_voltage = self.get_base_voltage(pb_ec.baseVoltageMRID)
-        terms, location, diag_objs = self._create_common_pb_fields(pb_ec)
-        ecp = [EnergyConsumerPhase(con_phase.pfixed, con_phase.qfixed, con_phase.phase) for con_phase in pb_ec.energyConsumerPhases]
-
-        self.add_energy_consumer(pb_ec.mRID,
-                                 pb_ec.name,
-                                 pb_ec.p,
-                                 pb_ec.q,
-                                 base_voltage,
-                                 pb_ec.phaseConnection,
-                                 pb_ec.inService,
-                                 terms,
-                                 ecp,
-                                 diag_objs,
-                                 location)
-
-    def add_energy_consumer(self, mrid, name: str, p: float, q: float, base_volt: BaseVoltage, phase_shunt_con_kind,
-                            in_service: bool,
-                            terminals: List, phases: List[EnergyConsumerPhase], diag_objs: List[DiagramObject] = None,
-                            location: Location = None):
-        self.resources[mrid] = EnergyConsumer(mrid, p, q, phs_shunt_conn_kind=phase_shunt_con_kind,
-                                              base_voltage=base_volt, ecp=phases,
-                                              name=name, in_service=in_service, terminals=terminals,
-                                              diag_objs=diag_objs,
-                                              location=location)
+        """
+        Add a Protobuf EnergyConsumer
+        :param pb_ec: :class:`zepben.cim.iec61970.base.wires.EnergyConsumer`
+        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
+                 network. See :func:`EnergyConsumer.from_pb`
+        """
+        self.energy_consumers[pb_ec.mRID] = EnergyConsumer.from_pb(pb_ec, self)
 
     def add_pb_transformer(self, pb_tf):
-        terms, location, diag_objs = self._create_common_pb_fields(pb_tf)
-        ends = []
-        for end in pb_tf.powerTransformerEnds:
-            tap_changer = RatioTapChanger(end.ratioTapChanger.highStep, end.ratioTapChanger.lowStep, end.ratioTapChanger.step,
-                                          end.ratioTapChanger.stepVoltageIncrement)
-            ends.append(PowerTransformerEnd(end.ratedS, end.ratedU, end.r, end.x, end.r0, end.x0, end.connectionKind,
-                                            tap_changer=tap_changer))
-
-        self.add_transformer(pb_tf.mRID,
-                             pb_tf.name,
-                             pb_tf.vectorGroup,
-                             pb_tf.inService,
-                             terms,
-                             ends,
-                             diag_objs,
-                             location)
-
-    def add_transformer(self, mrid: str, name: str, vector_group: VectorGroup, in_service: bool, terminals: List,
-                        transformer_ends: List[PowerTransformerEnd], diag_objs: List[DiagramObject] = None,
-                        location: Location = None):
-        self.resources[mrid] = PowerTransformer(mrid, vector_group, name=name, in_service=in_service, terminals=terminals,
-                                                ends=transformer_ends, diag_objs=diag_objs, location=location)
+        """
+        Add a Protobuf PowerTransformer
+        :param pb_tf: :class:`zepben.cim.iec61970.base.wires.PowerTransformer`
+        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
+                 network. See :func:`PowerTransformer.from_pb`
+        """
+        self.transformers[pb_tf.mRID] = PowerTransformer.from_pb(pb_tf, self)
 
     def add_pb_aclinesegment(self, pb_acls):
         """
         Add a Protobuf AcLineSegment
-        :param pb_acls:
-        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the network.
+        :param pb_acls: :class:`zepben.cim.iec61970.base.wires.AcLineSegment`
+        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
+                 network. See :func:`ACLineSegment.from_pb`
         """
-        terms, location, diag_objs = self._create_common_pb_fields(pb_acls)
-        plsi = self.get_plsi(pb_acls.perLengthSequenceImpedanceMRID)
-        base_voltage = self.get_base_voltage(pb_acls.baseVoltageMRID)
-        wire_info = self.get_asset_info(pb_acls.assetInfoMRID)
-
-        self.add_aclinesegment(pb_acls.mRID,
-                               pb_acls.name,
-                               plsi,
-                               pb_acls.length,
-                               base_voltage,
-                               wire_info,
-                               pb_acls.inService,
-                               terms,
-                               diag_objs,
-                               location)
-
-    def add_aclinesegment(self, mrid: str, name: str, plsi: PerLengthSequenceImpedance, length: float,
-                          base_volt: BaseVoltage, wire_info: WireInfo,
-                          in_service: bool, terminals: List, diag_objs: List[DiagramObject] = None,
-                          location: Location = None):
-        self.resources[mrid] = ACLineSegment(mrid, plsi, length, wire_info, base_voltage=base_volt, name=name,
-                                             in_service=in_service, terminals=terminals, diag_objs=diag_objs,
-                                             location=location)
+        self.lines[pb_acls.mRID] = ACLineSegment.from_pb(pb_acls, self)
 
     def add_pb_breaker(self, pb_br):
-        terms, location, diag_objs = self._create_common_pb_fields(pb_br)
-        base_voltage = self.get_base_voltage(pb_br.baseVoltageMRID)
+        """
+        Add a Protobuf Breaker
+        :param pb_br: :class:`zepben.cim.iec61970.base.wires.Breaker`
+        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
+                 network. See :func:`Breaker.from_pb`
+        """
+        self.breakers[pb_br.mRID] = Breaker.from_pb(pb_br, self)
 
-        self.add_breaker(pb_br.mRID,
-                         pb_br.name,
-                         pb_br.open,
-                         base_voltage,
-                         pb_br.inService,
-                         terms,
-                         diag_objs,
-                         location)
-
-    def add_breaker(self, mrid: str, name: str, open_: bool, base_volt: BaseVoltage, in_service: bool, terminals: List,
-                    diag_objs: List[DiagramObject] = None, location: Location = None):
-        self.resources[mrid] = Breaker(mrid, open_, base_voltage=base_volt, name=name, in_service=in_service,
-                                       terminals=terminals, diag_objs=diag_objs, location=location)
-
-    def dumpTracing(self):
+    def _dumpTracing(self):
         with open(TRACED_NETWORK_FILE, "w") as f:
             for e in self.depth_first_trace_and_apply():
                 assert len(e.terminals) < 3

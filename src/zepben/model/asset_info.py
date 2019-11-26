@@ -23,6 +23,11 @@ class CableInfo(WireInfo):
 
     @staticmethod
     def from_pb(pb_ci):
+        """
+        Convert a Protobuf CableInfo
+        :param pb_ci: :class:`zepben.cim.iec61968.assetinfo.CableInfo`
+        :return: A CableInfo
+        """
         return CableInfo(mrid=pb_ci.mRID, rated_current=CurrentFlow.from_pb(pb_ci.ratedCurrent), material=pb_ci.material, name=pb_ci.name)
 
     def to_pb(self):
@@ -36,6 +41,11 @@ class OverheadWireInfo(WireInfo):
 
     @staticmethod
     def from_pb(pb_ci):
+        """
+        Convert a Protobuf OverheadWireInfo
+        :param pb_ci: :class:`zepben.cim.iec61968.assetinfo.OverheadWireInfo`
+        :return: A CableInfo
+        """
         return OverheadWireInfo(mrid=pb_ci.mRID, rated_current=CurrentFlow.from_pb(pb_ci.ratedCurrent), material=pb_ci.material, name=pb_ci.name)
 
     def to_pb(self):
@@ -56,9 +66,17 @@ class CurrentFlow(object):
 
 
 class TransformerEndInfo(AssetInfo):
+    """
+    TODO: Implement
+    """
     def __init__(self, mrid, name: str = None):
         super().__init__(mrid, name)
 
     @staticmethod
     def from_pb(pb_te):
+        """
+        Convert a Protobuf TransformerEndInfo. Currently Unused.
+        :param pb_ci: :class:`zepben.cim.iec61968.assetinfo.TransformerEndInfo`
+        :return: A TransformerEndInfo
+        """
         raise NotImplementedError()

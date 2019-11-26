@@ -20,6 +20,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 from zepben.model.equipment import ConductingEquipment
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
+from zepben.model.terminal import Terminal
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
 from zepben.cim.iec61970 import Breaker as PBBreaker
 from typing import List
@@ -50,7 +51,7 @@ class Switch(ConductingEquipment):
 
 
 class Breaker(Switch):
-    def __init__(self, mrid: str, open_: bool, base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
+    def __init__(self, mrid: str, open_: List[bool], base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
                  terminals: List = None, diag_objs: List[DiagramObject] = None, location: Location = None):
         super().__init__(mrid=mrid, open_=open_, in_service=in_service, base_voltage=base_voltage, name=name,
                          terminals=terminals, diag_objs=diag_objs, location=location)
@@ -58,3 +59,25 @@ class Breaker(Switch):
     def to_pb(self):
         args = self._pb_args()
         return PBBreaker(**args)
+
+    @staticmethod
+    def from_pb(pb_br, network, **kwargs):
+        """
+        Convert a protobuf Breaker to a :class:`zepben.model.Breaker`
+        :param pb_br: :class:`zepben.cim.iec61970.base.wires.Breaker`
+        :param network: EquipmentContainer to extract BaseVoltage
+        :raises: NoBaseVoltageException when pb_br.baseVoltageMRID isn't found in network
+        :return: A :class:`zepben.model.Breaker`
+        """
+        terms = Terminal.from_pbs(pb_br.terminals, network)
+        location = Location.from_pb(pb_br.location)
+        diag_objs = DiagramObject.from_pbs(pb_br.diagramObjects)
+        base_voltage = network.get_base_voltage(pb_br.baseVoltageMRID)
+        return Breaker(pb_br.mRID,
+                       open_=pb_br.open,
+                       base_voltage=base_voltage,
+                       in_service=pb_br.inService,
+                       name=pb_br.name,
+                       terminals=terms,
+                       diag_objs=diag_objs,
+                       location=location)

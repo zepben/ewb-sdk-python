@@ -15,22 +15,45 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
-
-
+from zepben.model.terminal import Terminal
 from zepben.model.equipment import ConductingEquipment
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
 from zepben.model.per_length_sequence_impedance import PerLengthSequenceImpedance
 from zepben.model.asset_info import WireInfo
+from zepben.model.exceptions import NoPerLengthSeqImpException, NoBaseVoltageException, NoAssetInfoException
 from zepben.cim.iec61970 import AcLineSegment as PBAcLineSegment
 from typing import List
 
 
 class ACLineSegment(ConductingEquipment):
+    """
+    Attributes:
+        per_length_sequence_impedance : A :class:`zepben.model.PerLengthSequenceImpedance` that describes this ACLineSegment
+        length : Segment length for calculating line section capabilities.
+        wire_info : An instance of a subclass of :class:`zepben.model.WireInfo` that describes this ACLineSegment.
+                    Can be OverheadWireInfo or CableInfo (underground cable)
+    """
+
     def __init__(self, mrid: str, plsi: PerLengthSequenceImpedance = None, length: float = 0.0,
                  wire_info: WireInfo = None, base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
                  terminals: List = None, diag_objs: List[DiagramObject] = None, location: Location = None):
+        """
+        Create an ACLineSegment
+        :param mrid: mRID for this object
+        :param plsi: A :class:`zepben.model.PerLengthSequenceImpedance` that describes this ACLineSegment.
+        :param length: Segment length for calculating line section capabilities.
+        :param wire_info: An instance of a subclass of :class:`zepben.model.WireInfo` that describes this ACLineSegment.
+                          Can be OverheadWireInfo or CableInfo (underground cable)
+        :param base_voltage: A :class:`zepben.model.BaseVoltage`.
+        :param in_service: If True, the equipment is in service.
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param terminals: An ordered list of :class:`zepben.model.Terminal`'s. The order is important and the index of
+                          each Terminal should reflect each Terminal's `sequenceNumber`.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        :param location: A :class:zepben.model.Location` for this line.
+        """
         self.per_length_sequence_impedance = plsi
         self.length = length
         self.wire_info = wire_info
@@ -81,3 +104,33 @@ class ACLineSegment(ConductingEquipment):
     def to_pb(self):
         args = self._pb_args()
         return PBAcLineSegment(**args)
+
+    @staticmethod
+    def from_pb(pb_acls, network):
+        """
+        Convert a protobuf AcLineSegment to a :class:`zepben.model.ACLineSegment`
+        :param pb_acls: :class:`zepben.cim.iec61970.base.wires.AcLineSegment`
+        :param network: EquipmentContainer to extract BaseVoltage, PerLengthSequenceImpedance,
+                        and WireInfo (assetInfoMRID)
+        :raises: NoBaseVoltageException when pb_acls.baseVoltageMRID isn't found in network
+        :raises: NoPerLengthSequenceImpedance when pb_acls.perLengthSequenceImpedanceMRID isn't found in the network.
+        :raises: NoAssetInfoException when pb_acls.assetInfoMRID isn't found in the network
+        :return: A :class:`zepben.model.ACLineSegment`
+        """
+        terms = Terminal.from_pbs(pb_acls.terminals, network)
+        location = Location.from_pb(pb_acls.location)
+        diag_objs = DiagramObject.from_pbs(pb_acls.diagramObjects)
+        base_voltage = network.get_base_voltage(pb_acls.baseVoltageMRID) if pb_acls.baseVoltageMRID else None
+        plsi = network.get_plsi(pb_acls.perLengthSequenceImpedanceMRID) if pb_acls.perLengthSequenceImpedanceMRID else None
+        wire_info = network.get_asset_info(pb_acls.assetInfoMRID)
+
+        return ACLineSegment(mrid=pb_acls.mRID,
+                             name=pb_acls.name,
+                             plsi=plsi,
+                             length=pb_acls.length,
+                             base_voltage=base_voltage,
+                             wire_info=wire_info,
+                             in_service=pb_acls.inService,
+                             terminals=terms,
+                             diag_objs=diag_objs,
+                             location=location)

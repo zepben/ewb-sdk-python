@@ -18,6 +18,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.cim.iec61970 import PhaseShuntConnectionKind, SinglePhaseKind, EnergyConsumer as PBEnergyConsumer, EnergyConsumerPhase as PBEnergyConsumerPhase
+from zepben.model.terminal import Terminal
 from zepben.model.equipment import ConductingEquipment
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
 from zepben.model.diagram_layout import DiagramObject
@@ -36,6 +37,10 @@ class EnergyConsumerPhase(IdentifiedObject):
 
     def to_pb(self):
         return PBEnergyConsumerPhase(**self._pb_args())
+
+    @staticmethod
+    def from_pb(pb_ecp, **kwargs):
+        return EnergyConsumerPhase(pfixed=pb_ecp.pfixed, qfixed=pb_ecp.qfixed, phase=pb_ecp.phase)
 
 
 class EnergyConsumer(ConductingEquipment):
@@ -57,3 +62,30 @@ class EnergyConsumer(ConductingEquipment):
     def to_pb(self):
         args = self._pb_args()
         return PBEnergyConsumer(**args)
+
+    @staticmethod
+    def from_pb(pb_ec, network, **kwargs):
+        """
+        Convert a protobuf EnergyConsumer to a :class:`zepben.model.EnergyConsumer`
+        :param pb_ec: :class:`zepben.cim.iec61970.base.wires.EnergyConsumer`
+        :param network: EquipmentContainer to extract pb_ec.baseVoltageMRID
+        :raises: NoBaseVoltageException when pb_ec.baseVoltageMRID isn't found in network
+        :return: A :class:`zepben.model.EnergyConsumer`
+        """
+        terms = Terminal.from_pbs(pb_ec.terminals, network)
+        location = Location.from_pb(pb_ec.location)
+        diag_objs = DiagramObject.from_pbs(pb_ec.diagramObjects)
+        base_voltage = network.get_base_voltage(pb_ec.baseVoltageMRID)
+        ecp = EnergyConsumerPhase.from_pbs(pb_ec.energyConsumerPhases)
+
+        return EnergyConsumer(mrid=pb_ec.mRID,
+                              p=pb_ec.p,
+                              q=pb_ec.q,
+                              name=pb_ec.name,
+                              base_voltage=base_voltage,
+                              phs_shunt_conn_kind=pb_ec.phaseConnection,
+                              in_service=pb_ec.inService,
+                              terminals=terms,
+                              ecp=ecp,
+                              diag_objs=diag_objs,
+                              location=location)

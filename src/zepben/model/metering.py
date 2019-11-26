@@ -16,7 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-
+import logging
 from typing import Iterable
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.common import Location
@@ -27,6 +27,8 @@ from zepben.cim.iec61968 import Reading as PBReading, MeterReading as PBMeterRea
 from google.protobuf.timestamp_pb2 import Timestamp
 from typing import List, Union
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 
 class ReadingType(Enum):
@@ -58,7 +60,6 @@ class Reading(object):
             return RealPowerReading(pb_r.timestamp.seconds, pb_r.value)
         else:
             raise ReadingException(f"Reading type {reading_type} is not supported. Supported types are {[x for x in ReadingType.__members__]}")
-
 
 
 class VoltageReading(Reading):
@@ -134,14 +135,24 @@ class UsagePoint(IdentifiedObject):
 
     @staticmethod
     def from_pb(pb_up, network, **kwargs):
-        try:
-            equipment = [network[e] for e in pb_up.equipmentMRIDs]
-        except KeyError as k:
-            raise NoEquipmentException(f"{k} in equipmentMRIDs for message {pb_up.mRID} was not found.")
+        """
+        Convert a :class:`zepben.cim.iec61968.metering.UsagePoint` to a UsagePoint. We accept a UsagePoint with no
+        equipmentMRIDs set.
+        :param pb_up: The protobuf UsagePoint
+        :param network: An EquipmentContainer to query for equipment related to this UsagePoint
+        :return: A UsagePoint
+        """
+        equipment = []
+        for e in pb_up.equipmentMRIDs:
+            try:
+                equipment.append(network[e])
+            except KeyError as k:
+                logger.debug(f"Network was missing equipment {e} for UsagePoint {pb_up.mRID}")
+                continue
 
         return UsagePoint(mrid=pb_up.mRID, name=pb_up.name, equipment=equipment,
                           location=Location.from_pb(pb_up.usagePointLocation),
-                          diagram_objects=pb_up.diagramObjects)
+                          diagram_objects=DiagramObject.from_pbs(pb_up.diagramObjects))
 
 
 class Meter(EndDevice):
@@ -163,24 +174,29 @@ class Meter(EndDevice):
         return PBMeter(mRID=self.mrid, name=self.name, usagePointMRIDs=usage_points)
 
     @staticmethod
-    def from_pb(pb_m, network, **kwargs):
+    def from_pb(pb_m, network):
         """
         Create a meter from a protobuf Meter
         A meter requires all specified usagePointMRIDs to already exist in the network.
         Customer, serviceLocation, and diagramObjects are optional.
         :param pb_m: A protobuf Meter
         :param network: EquipmentContainer to be used for fetching UsagePoint's and Customer's
-        :param kwargs:
         :raises: NoUsagePointException if no UsagePoint has been added to the network.
         :return: a Meter
         """
         usage_points = [network.get_usage_point(p) for p in pb_m.usagePointMRIDs]
 
-        try:
-            customer = network.get_customer(pb_m.customerMRID)
-        except NoCustomerException:
+        if pb_m.customerMRID:
+            try:
+                customer = network.get_customer(pb_m.customerMRID)
+            except NoCustomerException:
+                logger.debug(f"Network was missing customer {pb_m.customerMRID} for meter {pb_m.mRID}")
+                customer = None
+        else:
             customer = None
-        return Meter(pb_m.mRID, usage_points, pb_m.name, customer, pb_m.serviceLocation, pb_m.diagramObjects)
+
+        return Meter(mrid=pb_m.mRID, usage_points=usage_points, name=pb_m.name, customer=customer,
+                     location=pb_m.serviceLocation, diag_objs=pb_m.diagramObjects)
 
 
 class MeterReading(IdentifiedObject):

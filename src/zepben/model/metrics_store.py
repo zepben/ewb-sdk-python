@@ -58,8 +58,9 @@ class MetricsStore(object):
         MeterReadings with a single type of reading
         """
         for bucket_time in self.buckets:
-            for meter, typ in self.store[bucket_time].items():
-                mr = MeterReading(meter=meter, readings=typ[reading_type])
+            for meter, types in self.store[bucket_time].items():
+                # TODO: add try/except keyerror for reading_type
+                mr = MeterReading(meter=meter, readings=types[reading_type])
                 yield mr
 
     @property
@@ -83,24 +84,24 @@ class MetricsStore(object):
             for meter in self.store[bucket_time].values():
                 yield meter
 
-    def store_meter_reading(self, meter_reading):
+    def store_meter_reading(self, meter_reading, reading_type):
         """
         Stores a given meter reading. If the meter already has readings in the bucket it will append
         the readings to the existing meter, based on the type of the reading.
+
 
         Note that a MeterReadings mRID is not used as part of this function. For the purposes of storing readings,
         only the associated meter mRID is considered.
         :param meter_reading:
         :return:
         """
-        # TODO: This should store Readings, not MeterReadings
         for reading in meter_reading.readings:
             bucket_time = self._get_bucket(reading.timestamp)
             bucket = self.store.get(bucket_time, {})
             self._bucket_times.add(bucket_time)
-            reading_types = bucket.get(meter_reading.meter, {})
-            readings = reading_types.get(type(reading), [])
+            reading_types = bucket.get(meter_reading.meter_mrid, {})
+            readings = reading_types.get(reading_type, [])
             readings.append(reading)
-            reading_types[type(reading)] = readings
-            bucket[meter_reading.meter] = reading_types
+            reading_types[reading_type] = readings
+            bucket[meter_reading.meter_mrid] = reading_types
             self.store[bucket_time] = bucket

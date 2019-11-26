@@ -82,18 +82,6 @@ class DiagramObject(IdentifiedObject):
             cim_diag_obj.add_point(DiagramObjectPoint.from_pb(point))
         return cim_diag_obj
 
-    @staticmethod
-    def from_pbs(diagram_objects):
-        """
-        Transform a list of diagram objects into a list of cimbend DiagramObject's
-        :param diagram_objects:
-        :return:
-        """
-        objs = []
-        for diag_obj in diagram_objects:
-            objs.append(DiagramObject.from_pb(diag_obj))
-        return objs
-
 
 class Diagram(IdentifiedObject):
     def __init__(self, mrid: str = "", name: str = None, diagram_style: DiagramStyle = DiagramStyle.SCHEMATIC,

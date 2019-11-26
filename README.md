@@ -1,9 +1,12 @@
-# Zepben cimbend #
+# Zepben cimbend (WIP) #
 This library provides Zepben's CIM profile as a python module for simplified interaction with Zepben services. You can find an overview and diagrams of Zepben's profile [here](https://zepben.bitbucket.io/docs/cim/zepben/).
 
 All classes exposed in `zepben.model` can be converted into protobuf messages and sent to/received from Zepben's gRPC services.
 
-# Usage #
+Note this project is still a work in progress and should be considered unstable, however the framework of `zepben.model` should mostly stay the same.
+
+More extensive documentation can be found in the [docs](docs/README.md)
+# Basic Usage #
 ## Sending ##
 The most basic usage is to import a class from the model, populate it, and then convert it to a protobuf message with the `to_pb()` function and call the desired service with the result.
 

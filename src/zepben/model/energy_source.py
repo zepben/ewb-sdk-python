@@ -18,6 +18,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.cim.iec61970 import EnergySource as PBEnergySource
+from zepben.model.terminal import Terminal
 from zepben.model.equipment import ConductingEquipment
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
 from zepben.model.diagram_layout import DiagramObject
@@ -47,3 +48,32 @@ class EnergySource(ConductingEquipment):
     def to_pb(self):
         args = self._pb_args()
         return PBEnergySource(**args)
+
+    @staticmethod
+    def from_pb(pb_es, network):
+        """
+        Convert a protobuf EnergySource to a :class:`zepben.model.EnergySource`
+        :param pb_es: :class:`zepben.cim.iec61970.base.wires.EnergySource`
+        :param network: EquipmentContainer to extract BaseVoltage
+        :raises: NoBaseVoltageException when BaseVoltage isn't found in network
+        :return: A :class:`zepben.model.EnergySource`
+        """
+        terms = Terminal.from_pbs(pb_es.terminals, network)
+        location = Location.from_pb(pb_es.location)
+        diag_objs = DiagramObject.from_pbs(pb_es.diagramObjects)
+        base_voltage = network.get_base_voltage(pb_es.baseVoltageMRID)
+        return EnergySource(mrid=pb_es.mRID,
+                            name=pb_es.name,
+                            active_power=pb_es.activePower,
+                            r=pb_es.r,
+                            x=pb_es.x,
+                            base_voltage=base_voltage,
+                            reactive_power=pb_es.reactivePower,
+                            voltage_angle=pb_es.voltageAngle,
+                            voltage_magnitude=pb_es.voltageMagnitude,
+                            in_service=pb_es.inService,
+                            terminals=terms,
+                            diag_objs=diag_objs,
+                            location=location)
+
+

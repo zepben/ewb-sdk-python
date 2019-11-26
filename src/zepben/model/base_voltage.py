@@ -4,18 +4,22 @@ from zepben.cim.iec61970.base.domain.Voltage_pb2 import Voltage as PBVoltage
 
 
 class BaseVoltage(IdentifiedObject):
-    def __init__(self, mrid: str, nom_volt: int, name: str = None):
+    def __init__(self, mrid: str, nom_volt: int, name: str = ""):
         """
         TODO: nom_volt must always be int32 - need to put in bounds test
-        :param mrid:
-        :param nom_volt:
-        :param name:
+        :param mrid: mRID of this BaseVoltage
+        :param nom_volt: The nominal voltage in Volts.
+        :param name: Name of this BaseVoltage
         """
         self.nominal_voltage = nom_volt
         super().__init__(mrid, name)
 
     @staticmethod
-    def from_pb(bv_pb):
+    def from_pb(bv_pb: PBBaseVoltage):
+        """
+        :param bv_pb: A :class:`zepben.cim.iec61970.core.BaseVoltage`
+        :return: A BaseVoltage
+        """
         bv = BaseVoltage(bv_pb.mRID, bv_pb.nominalVoltage.value, bv_pb.name)
         return bv
 
@@ -28,4 +32,5 @@ class BaseVoltage(IdentifiedObject):
         args = self._pb_args()
         return PBBaseVoltage(**args)
 
-UNKNOWN = BaseVoltage("", 0.0)
+
+UNKNOWN = BaseVoltage("", 0)

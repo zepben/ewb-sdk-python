@@ -15,8 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
-
-
+from zepben.model.exceptions import NoEquipmentException
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
@@ -24,10 +23,15 @@ from zepben.model.base_voltage import BaseVoltage
 from typing import List
 
 
-
-
-
 class ConductingEquipment(IdentifiedObject):
+    """
+    Attributes:
+        - in_service : If True, the equipment is in service.
+        - location : A :class:zepben.model.Location` for this line.
+        - base_voltage : A :class:`zepben.model.BaseVoltage`.
+        - terminals : Conducting equipment have terminals that may be connected to other conducting equipment terminals
+                      via connectivity nodes or topological nodes.
+    """
     def __init__(self, mrid: str, in_service: bool, base_voltage: BaseVoltage, name: str, terminals: List,
                  diag_objs: List[DiagramObject], location: Location):
         self.in_service = in_service

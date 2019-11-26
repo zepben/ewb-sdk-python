@@ -20,13 +20,15 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 from zepben.cim.iec61968 import PositionPoint as PBPositionPoint
 from zepben.cim.iec61968 import Location as PBLocation
 from zepben.model.identified_object import IdentifiedObject
+from zepben.model.diagram_layout import DiagramObject
 from typing import List
 
 
-class PositionPoint(object):
+class PositionPoint(IdentifiedObject):
     def __init__(self, latitude, longitude):
         self.x_position = longitude
         self.y_position = latitude
+        super().__init__()
 
     def __str__(self):
         return f"{self.x_position}:{self.y_position}"
@@ -55,15 +57,14 @@ class Location(IdentifiedObject):
         return PBLocation(**args)
 
     @staticmethod
-    def from_pb(location):
+    def from_pb(pb_l):
         """
         Transform a Protobuf Location to a cimbend Location
         TODO: Test this doesn't error on empty positionPoints
-        :param location: Protobuf Location
+        TODO: Create StreetAddress type
+        :param pb_l: Protobuf Location
         :return: A location
         """
-        pos_points = []
-        for point in location.positionPoints:
-            pos_points.append(PositionPoint.from_pb(point))
-
-        return Location(position_points=pos_points)
+        return Location(street_address=pb_l.mainAddress,
+                        position_points=PositionPoint.from_pbs(pb_l.positionPoints),
+                        diag_obj=DiagramObject.from_pbs(pb_l.diagramObjects))

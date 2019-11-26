@@ -15,12 +15,12 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
-
-
+from zepben.model.terminal import Terminal
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.equipment import ConductingEquipment
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
+from zepben.model.exceptions import NoTerminalException
 from zepben.cim.iec61970 import PowerTransformer as PBPowerTransformer, PowerTransformerEnd as PBPowerTransformerEnd, \
     RatioTapChanger as PBRatioTabChanger, WindingConnection
 from zepben.cim.iec61970 import VectorGroup
@@ -43,6 +43,16 @@ class RatioTapChanger(IdentifiedObject):
     def to_pb(self):
         args = self._pb_args()
         return PBRatioTabChanger(**args)
+
+    @staticmethod
+    def from_pb(pb_rtc):
+        """
+        Convert a :class:`zepben.cim.iec61970.base.wires.RatioTapChanger`
+        :param pb_rtc: :class:`zepben.cim.iec61970.base.wires.RatioTapChanger`
+        :return: :class:`RatioTapChanger`
+        """
+        return RatioTapChanger(high_step=pb_rtc.highStep, low_step=pb_rtc.lowStep, step=pb_rtc.step,
+                               step_voltage_increment=pb_rtc.stepVoltageIncrement)
 
 
 class PowerTransformerEnd(IdentifiedObject):
@@ -84,6 +94,17 @@ class PowerTransformerEnd(IdentifiedObject):
         args = self._pb_args()
         return PBPowerTransformerEnd(**args)
 
+    @staticmethod
+    def from_pb(pb_tfe):
+        """
+        Convert a :class:`zepben.cim.iec61970.base.wires.PowerTransformerEnd`
+        :param pb_rtc: :class:`zepben.cim.iec61970.base.wires.PowerTransformerEnd`
+        :return: :class:`PowerTransformerEnd`
+        """
+        tap_changer = RatioTapChanger.from_pb(pb_tfe.ratioTapChanger)
+        return PowerTransformerEnd(rated_s=pb_tfe.ratedS, rated_u=pb_tfe.ratedU, r=pb_tfe.r, x=pb_tfe.x, r0=pb_tfe.r0,
+                                   x0=pb_tfe.x0, winding=pb_tfe.connectionKind, tap_changer=tap_changer)
+
 
 class PowerTransformer(ConductingEquipment):
 
@@ -119,7 +140,7 @@ class PowerTransformer(ConductingEquipment):
             for i, term in enumerate(self.terminals):
                 if term is terminal:
                     return self.get_end(i).rated_u
-        raise NoSuchEquipmentException(f"PowerTransformer {self.mrid} had no terminal {terminal.mrid}")
+        raise NoTerminalException(f"PowerTransformer {self.mrid} had no terminal {terminal.mrid}")
 
     @property
     def end_count(self):
@@ -134,3 +155,24 @@ class PowerTransformer(ConductingEquipment):
     def to_pb(self):
         args = self._pb_args()
         return PBPowerTransformer(**args)
+
+    @staticmethod
+    def from_pb(pb_tf, network):
+        """
+        Convert a protobuf PowerTransformer to a :class:`zepben.model.PowerTransformer`
+        :param pb_tf: :class:`zepben.cim.iec61970.base.wires.PowerTransformer`
+        :param network: EquipmentContainer associated with this transformer.
+        :return: A :class:`zepben.model.PowerTransformer`
+        """
+        terms = Terminal.from_pbs(pb_tf.terminals, network)
+        location = Location.from_pb(pb_tf.location)
+        diag_objs = DiagramObject.from_pbs(pb_tf.diagramObjects)
+        ends = PowerTransformerEnd.from_pbs(pb_tf.powerTransformerEnds)
+        return PowerTransformer(mrid=pb_tf.mRID,
+                                name=pb_tf.name,
+                                vector_group=pb_tf.vectorGroup,
+                                in_service=pb_tf.inService,
+                                terminals=terms,
+                                ends=ends,
+                                diag_objs=diag_objs,
+                                location=location)

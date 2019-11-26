@@ -17,11 +17,16 @@ class PerLengthSequenceImpedance(IdentifiedObject):
 
     @staticmethod
     def from_pb(pb_plsi):
+        """
+        Convert a Protobuf PerLengthSequenceImpedance
+        :param pb_plsi: :class:`zepben.cim.iec61970.base.wires.PerLengthSequenceImpedance`
+        :return: PerLengthSequenceImpedance
+        """
         diag_objects = []
         for do in pb_plsi.diagramObjects:
             diag_objects.append(DiagramObject.from_pb(do))
-        return PerLengthSequenceImpedance(pb_plsi.mRID, pb_plsi.r, pb_plsi.x, pb_plsi.r0, pb_plsi.x0, pb_plsi.bch,
-                                          pb_plsi.b0ch, pb_plsi.name, diag_objects)
+        return PerLengthSequenceImpedance(mrid=pb_plsi.mRID, r=pb_plsi.r, x=pb_plsi.x, r0=pb_plsi.r0, x0=pb_plsi.x0,
+                                          bch=pb_plsi.bch, b0ch=pb_plsi.b0ch, name=pb_plsi.name, diag_objects=diag_objects)
 
     def to_pb(self):
         args = self._pb_args()

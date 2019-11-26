@@ -35,7 +35,7 @@ class IdentifiedObject(object):
     as a property in the class using @property and @<property>.setter. Failure to do this will result in the conversion
     to a protobuf type failing. Long Live PEP8
     """
-    def __init__(self, mrid: str, name: str = None, diagram_objects: List = None):
+    def __init__(self, mrid: str = "", name: str = "", diagram_objects: List = None):
         # It's really horrible to use the snake form of mRID, so we define a property + setter for it below as "mrid".
         self._m_r_i_d = mrid
         self.name = name
@@ -75,12 +75,30 @@ class IdentifiedObject(object):
 
     @abstractmethod
     def to_pb(self):
+        """
+        This method should be defined for any :mod:`zepben.model` type that can be converted to a
+        :mod:`zepben.cim` protobuf message.
+        :return: The corresponding protobuf message
+        """
         raise NotImplementedError("Conversion to protobuf is not supported.")
 
     @staticmethod
     @abstractmethod
     def from_pb(*args, **kwargs):
+        """
+        This method should be defined for all types that can be transformed from a Protobuf message.
+        :param args: First arg should always be the protobuf message to convert
+        :param kwargs: All other args are implementation dependent, anything you need to build your
+                       type should be passed in as another parameter. Typical example is network: EquipmentContainer,
+                       used for fetching references from an associated network.
+        :return: The corresponding type from :mod:`zepben.model`
+        """
         raise NotImplementedError("Conversion from protobuf is not supported.")
+
+    @classmethod
+    @abstractmethod
+    def from_pbs(cls, pb, *args, **kwargs):
+        return [cls.from_pb(x, *args, **kwargs) for x in pb]
 
     def get_all_diagram_object_points(self):
         points = []

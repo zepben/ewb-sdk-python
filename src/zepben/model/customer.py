@@ -12,4 +12,9 @@ class Customer(IdentifiedObject):
 
     @staticmethod
     def from_pb(pb_c):
-        return Customer(pb_c.mRID, pb_c.name, DiagramObject.from_pbs(pb_c.diagramObjects))
+        """
+        Convert a :class:`zepben.cim.iec61968.customers.Customer` to a Customer.
+        :param pb_c: :class:`zepben.cim.iec61968.customers.Customer`
+        :return: Customer
+        """
+        return Customer(mrid=pb_c.mRID, name=pb_c.name, diagram_objects=DiagramObject.from_pbs(pb_c.diagramObjects))

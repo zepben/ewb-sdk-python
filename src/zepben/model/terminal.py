@@ -21,7 +21,7 @@ from zepben.cim.iec61970 import Terminal as PBTerminal
 from zepben.cim.iec61970 import PhaseCode
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.diagram_layout import DiagramObject
-from zepben.model.exceptions import NoEquipmentException
+from zepben.model.exceptions import NoEquipmentException, NoConnectivityNodeException
 from typing import List
 
 
@@ -32,25 +32,35 @@ class Terminal(IdentifiedObject):
 
     Note: If you are extending this class you must ensure you always safely access the linked equipment (i.e, check it is
     not None)
+
+    Attributes:
+        - equipment : A reference back to the equipment this Terminal belongs to. This reference will typically
+                      be added in :class:`zepben.model.ConductingEquipment::__init__()`.
+        - phases : A :class:`zepben.cim.iec61970.PhaseCode` representing the normal network phasing condition of this
+                   Terminal.
+        - connected : The connected status is related to a bus-branch model and the topological node to terminal relation.
+                      True implies the terminal is connected to the related topological node and false implies it is not.
+                      In a bus-branch model, the connected status is used to tell if equipment is disconnected without having to change
+                      the connectivity described by the topological node to terminal relation. A valid case is that conducting
+                      equipment can be connected in one end and open in the other. In particular for an AC line segment,
+                      where the reactive line charging can be significant, this is a relevant case.
     """
 
     def __init__(self, mrid: str, phases: PhaseCode, connectivity_node, name: str = "",
                  diag_objs: List[DiagramObject] = None, equipment=None, upstream: bool = True, connected: bool = True):
         """
 
-        :param mrid:
-        :param phases:
+        :param mrid: Master resource identifier for this Terminal.
+        :param phases: A :class:`zepben.cim.iec61970.PhaseCode` representing the normal network phasing condition of this
+                       Terminal.
         :param connectivity_node: The ConnectivityNode that this terminal is attached to.
-        :param name:
-        :param description:
-        :param diag_objs:
-        :param seq_number: The sequence number for this terminal. Used for mapping terminals to components/properties of
-            the equipment.
-        :param connected: Whether this terminal is connected (potentially energised)
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        :param connected: Whether this terminal is connected (potentially energised). See description in class definition.
         :param equipment: A reference to the equipment that owns this terminal. This can be set after instantiation as
                           to resolve chicken-and-egg issues between terminals and equipment (as both have references).
-        :param upstream: True if this terminal is "closest" to its primary EnergySource. I.e, it is the first terminal
-                         on a piece of equipment to receive power (specifically from the primary EnergySource).
+        :param upstream: (experimental) True if this terminal is "closest" to its primary EnergySource. I.e, it is the
+                        first terminal on a piece of equipment to receive power (specifically from the primary EnergySource).
         """
         self.phases = phases
         self.connected = connected
@@ -108,6 +118,23 @@ class Terminal(IdentifiedObject):
         args = self._pb_args()
         args['connectivityNodeMRID'] = self.connectivity_node.mrid
         return PBTerminal(**args)
+
+    @staticmethod
+    def from_pb(pb_t, network):
+        """
+        Every terminal requires a connectivityNodeMRID to be specified.
+        :param pb_t: A protobuf Terminal to convert to Terminal
+        :param network: The EquipmentContainer that the terminal belongs to. Associated ConnectivityNode's will be
+                        added to this network.
+        :return: A zepben.model.Terminal
+        :raises: NoConnectivityNodeException when connectivityNodeMRID is not set.
+        """
+        if not pb_t.connectivityNodeMRID:
+            raise NoConnectivityNodeException(f"Terminal {pb_t.mRID} has no connectivity node declared.")
+        conn_node = network.add_connectivitynode(pb_t.connectivityNodeMRID)
+        term = Terminal(mrid=pb_t.mRID, phases=pb_t.phases, connectivity_node=conn_node, name=pb_t.name, connected=pb_t.connected)
+        conn_node.add_terminal(term)
+        return term
 
     def __str__(self):
         return f"{super().__repr__()}, phase: {self.phases}, connectivityNode: {self.connectivity_node.mrid} upstream: {self.upstream}"
