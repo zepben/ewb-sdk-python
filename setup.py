@@ -22,33 +22,6 @@ import pkg_resources
 from os.path import basename
 from os.path import splitext
 from setuptools import setup, find_packages
-from setuptools.command.build_py import build_py as build_py_orig
-
-
-class BuildWithProto(build_py_orig):
-
-    def run(self):
-        self.build_proto()
-
-    def build_proto(self):
-        """This will build the pb2 files at pip install time"""
-        import grpc_tools.protoc
-        proto_include = pkg_resources.resource_filename('grpc_tools', '_proto')
-        files = glob.glob("protos/**/*.proto", recursive=True)
-        print(f"Compiling protos: {', '.join(files)}")
-
-        result = grpc_tools.protoc.main([
-            'grpc_tools.protoc',
-            '-Iprotos',
-            f'-I{proto_include}',
-            '--python_out=src/',
-            '--grpc_python_out=src/',
-            *files
-        ])
-
-        if result:
-            raise Exception(f'protoc failed with {result}')
-
 
 test_deps = ["pytest"]
 setup(
@@ -67,8 +40,5 @@ setup(
     ],
     extras_require={
         "test": test_deps,
-    },
-    cmdclass={
-        'build_ext': BuildWithProto
     }
 )
