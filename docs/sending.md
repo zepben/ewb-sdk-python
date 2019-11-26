@@ -9,6 +9,7 @@ Other than the above described dependency checks, `from_pb()` will not perform a
 
 Example: Network doesn't contain dependency and it's required. Include "empty" example (i.e no MRID was provided)
 
+    
 Example: Unset message fields receiving default values with `from_pb()`
 
 Example: Sending an AssetInfo 
