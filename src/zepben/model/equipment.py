@@ -15,27 +15,97 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
+from zepben.model.asset_info import AssetInfo
 from zepben.model.exceptions import NoEquipmentException
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
 from zepben.model.base_voltage import BaseVoltage
 from typing import List
+from abc import ABCMeta
 
 
-class ConductingEquipment(IdentifiedObject):
+class PowerSystemResource(IdentifiedObject, metaclass=ABCMeta):
     """
+    Abstract class, should only be used through subclasses.
+    A power system resource can be an item of equipment such as a switch, an equipment container containing many individual
+    items of equipment such as a substation, or an organisational entity such as sub-control area. Power system resources
+    can have measurements associated.
+
+    Attributes:
+        - location : A :class:`zepben.model.Location` for this resource.
+        - asset_info : A subclass of :class:`zepben.model.AssetInfo` providing information about the asset associated
+                       with this PowerSystemResource.
+    """
+    def __init__(self, mrid: str, name: str = "", asset_info: AssetInfo = None, diag_objs: List[DiagramObject] = None,
+                 location: Location = None):
+        """
+        Create a PowerSystemResource
+        :param mrid: mRID for this object
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        :param location: :class:`zepben.model.Location` of this resource.
+        :param asset_info: A subclass of :class:`zepben.model.AssetInfo` providing information about the asset associated
+                           with this PowerSystemResource.
+        """
+        self.location = location
+        self.asset_info = asset_info
+        super().__init__(mrid=mrid, name=name, diagram_objects=diag_objs)
+
+
+class Equipment(PowerSystemResource, metaclass=ABCMeta):
+    """
+    Abstract class, should only be used through subclasses.
+    Any part of a power system that is a physical device, electronic or mechanical.
     Attributes:
         - in_service : If True, the equipment is in service.
-        - location : A :class:zepben.model.Location` for this line.
+        - normally_in_service : If True, the equipment is _normally_ in service.
+    """
+    def __init__(self, mrid: str, in_service: bool, normally_in_service: bool, name: str = "",
+                 asset_info: AssetInfo = None, diag_objs: List[DiagramObject] = None, location: Location = None):
+        """
+        :param mrid: mRID for this object
+        :param in_service: If True, the equipment is in service.
+        :param normally_in_service: If True, the equipment is _normally_ in service.
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param asset_info: A subclass of :class:`zepben.model.AssetInfo` providing information about the asset associated
+                           with this PowerSystemResource.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        :param location: :class:`zepben.model.Location` of this resource.
+        """
+        self.in_service = in_service
+        self.normally_in_service = normally_in_service
+        super().__init__(mrid=mrid, name=name, asset_info=asset_info, diag_objs=diag_objs, location=location)
+
+
+class ConductingEquipment(Equipment, metaclass=ABCMeta):
+    """
+    Abstract class, should only be used through subclasses.
+    The parts of the AC power system that are designed to carry current or that are conductively connected through
+    terminals.
+
+    Attributes:
         - base_voltage : A :class:`zepben.model.BaseVoltage`.
         - terminals : Conducting equipment have terminals that may be connected to other conducting equipment terminals
                       via connectivity nodes or topological nodes.
     """
-    def __init__(self, mrid: str, in_service: bool, base_voltage: BaseVoltage, name: str, terminals: List,
-                 diag_objs: List[DiagramObject], location: Location):
-        self.in_service = in_service
-        self.location = location
+    def __init__(self, mrid: str, base_voltage: BaseVoltage, terminals: List, in_service: bool = True,
+                 normally_in_service: bool = True, name: str = "", diag_objs: List[DiagramObject] = None,
+                 location: Location = None, asset_info: AssetInfo = None):
+        """
+        Create a ConductingEquipment
+        :param mrid: mRID for this object
+        :param in_service: If True, the equipment is in service.
+        :param base_voltage: A :class:`zepben.model.BaseVoltage`.
+        :param normally_in_service: If True, the equipment is _normally_ in service.
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param terminals: An ordered list of :class:`zepben.model.Terminal`'s. The order is important and the index of
+                          each Terminal should reflect each Terminal's `sequenceNumber`.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        :param location: :class:`zepben.model.Location` of this resource.
+        :param asset_info: A subclass of :class:`zepben.model.AssetInfo` providing information about the asset associated
+                           with this PowerSystemResource.
+        """
         self.base_voltage = base_voltage
         if terminals is None:
             self.terminals = list()
@@ -45,7 +115,8 @@ class ConductingEquipment(IdentifiedObject):
         # We set a reference for each terminal back to its equipment to make iteration over a network easier
         for term in self.terminals:
             term.equipment = self
-        super().__init__(mrid, name, diag_objs)
+        super().__init__(mrid=mrid, in_service=in_service, normally_in_service=normally_in_service, name=name,
+                         asset_info=asset_info, diag_objs=diag_objs, location=location)
 
     def __str__(self):
         return f"{super().__str__()} in_serv: {self.in_service}, lnglat: {self.location} terms: {self.terminals}"
@@ -61,7 +132,7 @@ class ConductingEquipment(IdentifiedObject):
         return self.in_service
 
     def add_terminal(self, terminal):
-        self.terminals.add(terminal)
+        self.terminals.append(terminal)
 
     def get_diag_objs(self):
         return self.diagram_objects
@@ -95,7 +166,7 @@ class ConductingEquipment(IdentifiedObject):
     def get_terminal(self, seq_num):
         try:
             return self.terminals[seq_num]
-        except KeyError | IndexError:
+        except (KeyError, IndexError):
             raise NoEquipmentException(f"Equipment {self.mrid} does not have a terminal {seq_num}")
 
     def get_nominal_voltage(self, terminal=None):

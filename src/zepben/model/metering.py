@@ -87,31 +87,48 @@ class EndDevice(IdentifiedObject):
     or communications systems (e.g., water, gas, electricity).
 
     Some devices may use an optical port that conforms to the ANSI C12.18 standard for communications.
+
+    Attributes:
+        customer : The :class:`zepben.model.Customer` associated with this EndDevice.
+        service_location : The :class:`zepben.model.Location` of this EndDevice
     """
-    def __init__(self, mrid: str = None, name: str = None, customer: Customer = None, location: Location = None,
-                 diagram_objects: List[DiagramObject] = None):
+    def __init__(self, mrid: str = "", name: str = "", customer: Customer = None, location: Location = None,
+                 diag_objs: List[DiagramObject] = None):
+        """
+        Create an EndDevice
+        :param mrid: mRID for this object
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param customer: The :class:`zepben.model.Customer` associated with this EndDevice.
+        :param location: The :class:`zepben.model.Location` of this EndDevice
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        """
         self.customer = customer
         self.service_location = location
-        super().__init__(mrid, name, diagram_objects)
+        super().__init__(mrid, name, diag_objs)
 
 
 class UsagePoint(IdentifiedObject):
     """
     Logical or physical point in the network to which readings or events may be attributed.
     Used at the place where a physical or virtual meter may be located; however, it is not required that a meter be present.
+
+    Attributes:
+        usage_point_location : The :class:`zepben.model.Location` of this UsagePoint
+        end_devices : The :class:`EndDevice`'s (Meter's) associated with this UsagePoint.
+        equipment : The :class:`zepben.model.Equipment` associated with this UsagePoint.
     """
-    def __init__(self, mrid: str = None, name: str = None, equipment=None, location=None, end_devices=None,
-                 diagram_objects: List[DiagramObject] = None):
+    def __init__(self, mrid: str, name: str = "", equipment=None, location=None, end_devices=None,
+                 diag_objs: List[DiagramObject] = None):
         """
         A UsagePoint must have at least one piece of equipment present.
-        :param mrid:
-        :param name:
-        :param equipment:
-        :param location:
-        :param end_devices:
-        :param diagram_objects:
+        :param mrid: mRID for this object
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param equipment: The :class:`zepben.model.Equipment` associated with this UsagePoint.
+        :param location: :class:`zepben.model.Location` of this resource.
+        :param end_devices: The :class:`EndDevice`'s (Meter's) associated with this UsagePoint.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
         """
-        super().__init__(mrid, name, diagram_objects)
+        super().__init__(mrid, name, diag_objs)
         self.__equipment = equipment if equipment is not None else []
         self.usage_point_location = location
         self.__end_devices = end_devices if end_devices is not None else []
@@ -152,17 +169,26 @@ class UsagePoint(IdentifiedObject):
 
         return UsagePoint(mrid=pb_up.mRID, name=pb_up.name, equipment=equipment,
                           location=Location.from_pb(pb_up.usagePointLocation),
-                          diagram_objects=DiagramObject.from_pbs(pb_up.diagramObjects))
+                          diag_objs=DiagramObject.from_pbs(pb_up.diagramObjects))
 
 
 class Meter(EndDevice):
-    def __init__(self, mrid: str, usage_points: List[UsagePoint], name: str = None, customer: Customer = None,
+    """
+    Physical asset that performs the metering role of the usage point.
+    Used for measuring consumption and detection of events.
+
+    Attributes:
+        usage_points: The :class:`UsagePoints` this Meter is associated with.
+    """
+    def __init__(self, mrid: str, usage_points: List[UsagePoint], name: str = "", customer: Customer = None,
                  location: Location = None, diag_objs: List[DiagramObject] = None):
         """
         Every UsagePoint associated with this Meter will have a back-reference to the meter added via
         `UsagePoint.add_end_device`
-        :param mrid: Meter ID
-        :param name: Name of meter
+        :param mrid: mRID for this object
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param location: :class:`zepben.model.Location` of this resource.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
         """
         super().__init__(mrid, name, customer, location, diag_objs)
         self.usage_points = usage_points
@@ -205,8 +231,19 @@ class MeterReading(IdentifiedObject):
 
     Do not use a MeterReading if you are not tying the readings to a Meter. You should instead be using a list of
     Reading's, if all you need is the Reading data.
+
+    Attributes:
+        meter : The :class:`Meter` associated with this MeterReading, OR a string of the Meter's MRID.
+        readings : A list of (subclass) :class:`Reading`'s acquired from the associated meter.
     """
-    def __init__(self, meter: Union[str, Meter], mrid: str = None, name: str = None, readings: List[Reading] = None):
+    def __init__(self, meter: Union[str, Meter], mrid: str = "", name: str = "", readings: List[Reading] = None):
+        """
+        Create a MeterReading
+        :param meter: The :class:`Meter` associated with this MeterReading, OR a string of the Meter's MRID.
+        :param mrid: mRID for this object. Optional and not typically used.
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param readings: A list of :class:`Reading`'s acquired from the associated meter.
+        """
         super().__init__(mrid, name)
         self.meter = meter
         self._readings = readings

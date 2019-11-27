@@ -25,9 +25,26 @@ from typing import List
 
 
 class PositionPoint(IdentifiedObject):
-    def __init__(self, latitude, longitude):
+    """
+    Set of spatial coordinates that determine a point, defined in WGS84 (latitudes and longitudes).
+
+    Use a single position point instance to desribe a point-oriented location.
+    Use a sequence of position points to describe a line-oriented object (physical location of non-point oriented
+    objects like cables or lines), or area of an object (like a substation or a geographical zone - in this case,
+    have first and last position point with the same values).
+
+    Attributes:
+        x_position : X axis position - longitude
+        y_position : Y axis position - latitude
+    """
+    def __init__(self, latitude: float, longitude: float):
+        """
+        :param latitude: The latitude of the point
+        :param longitude: The longitude of the point
+        """
         self.x_position = longitude
         self.y_position = latitude
+        # mrid, name, diagramObjects are currently unused.
         super().__init__()
 
     def __str__(self):
@@ -45,12 +62,30 @@ class PositionPoint(IdentifiedObject):
 
 
 class Location(IdentifiedObject):
-    # TODO: TOMORROW - ADD DIAGRAM OBJECT + points with some kind of sensible default
-    def __init__(self, street_address=None, position_points: List[PositionPoint] = None, diag_obj = None):
+    """
+    The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment
+    in time. It can be defined with one or more :class:`PositionPoint`'s.
+
+    Attributes:
+        main_address : Main address of the location.
+        position_points : List of :class:`PositionPoint`. The ordering of the list is important, and refers to the
+                          `sequenceNumber` of each PositionPoint.
+
+    """
+    def __init__(self, street_address=None, position_points: List[PositionPoint] = None, mrid: str = "",
+                 name: str = "", diag_objs: List[DiagramObject] = None):
+        """
+
+        :param street_address: Main address of the location.
+        :param position_points: List of :class:`PositionPoint`. The ordering of the list is important, and refers to the
+                                `sequenceNumber` of each PositionPoint.
+        :param mrid: mRID of Location, typically unused.
+        :param name: Name of Location
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        """
         self.main_address = street_address
         self.position_points = position_points
-        # We currently have no use for the fields in IdentifiedObject for a Location
-        super().__init__("")
+        super().__init__(mrid=mrid, name=name, diagram_objects=diag_objs)
 
     def to_pb(self):
         args = self._pb_args()
@@ -67,4 +102,5 @@ class Location(IdentifiedObject):
         """
         return Location(street_address=pb_l.mainAddress,
                         position_points=PositionPoint.from_pbs(pb_l.positionPoints),
-                        diag_obj=DiagramObject.from_pbs(pb_l.diagramObjects))
+                        diag_objs=DiagramObject.from_pbs(pb_l.diagramObjects))
+

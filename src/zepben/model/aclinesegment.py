@@ -52,12 +52,13 @@ class ACLineSegment(ConductingEquipment):
         :param terminals: An ordered list of :class:`zepben.model.Terminal`'s. The order is important and the index of
                           each Terminal should reflect each Terminal's `sequenceNumber`.
         :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
-        :param location: A :class:zepben.model.Location` for this line.
+        :param location: :class:`zepben.model.Location` of this resource.
         """
         self.per_length_sequence_impedance = plsi
         self.length = length
         self.wire_info = wire_info
-        super().__init__(mrid, in_service, base_voltage, name, terminals, diag_objs, location)
+        super().__init__(mrid=mrid, in_service=in_service, base_voltage=base_voltage, name=name, terminals=terminals,
+                         diag_objs=diag_objs, location=location)
 
     def __str__(self):
         return f"{super().__str__()} r: {self.r}, x: {self.x}"

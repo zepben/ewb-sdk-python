@@ -24,15 +24,36 @@ from zepben.model.terminal import Terminal
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
 from zepben.cim.iec61970 import Breaker as PBBreaker
 from typing import List
+from abc import ABCMeta
 
 
-class Switch(ConductingEquipment):
+class Switch(ConductingEquipment, metaclass=ABCMeta):
+    """
+    A generic device designed to close, or open, or both, one or more electric circuits.
+    All switches are two terminal devices including grounding switches.
+
+    Unganged switches are supported as a list of booleans, each bool corresponding to a single phase
+    Attributes:
+         open : True if the switch is considered open and not allowing current to flow.
+                Can be a list of booleans to represent an unganged switch.
+    """
     def __init__(self, mrid: str, open_: List[bool], base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
                  terminals: List = None, diag_objs: List[DiagramObject] = None, location: Location = None):
-        """Unganged switches are supported as a list of booleans, each bool corresponding to a single phase"""
-        self.open = open_
+        """
+        Create a Switch. This is an abstract class and typically should not be used directly.
+        :param mrid: mRID for this object
+        :param open_: True if the switch is open
+        :param base_voltage: A :class:`zepben.model.BaseVoltage`.
+        :param in_service: If True, the equipment is in service.
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param terminals: An ordered list of :class:`zepben.model.Terminal`'s. The order is important and the index of
+                          each Terminal should reflect each Terminal's `sequenceNumber`.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        :param location: :class:`zepben.model.Location` of this resource.
+        """
         super().__init__(mrid=mrid, in_service=in_service, base_voltage=base_voltage, name=name,
                          terminals=terminals, diag_objs=diag_objs, location=location)
+        self.open = open_
 
     def __len__(self):
         return len(self.open)
@@ -51,8 +72,28 @@ class Switch(ConductingEquipment):
 
 
 class Breaker(Switch):
+    """
+    A mechanical switching device capable of making, carrying, and breaking currents under normal circuit conditions
+    and also making, carrying for a specified time, and breaking currents under specified abnormal circuit conditions
+    e.g. those of short circuit.
+
+    Attributes:
+        Same as :class:`Switch`
+    """
     def __init__(self, mrid: str, open_: List[bool], base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
                  terminals: List = None, diag_objs: List[DiagramObject] = None, location: Location = None):
+        """
+        Create a Breaker
+        :param mrid: mRID for this object
+        :param open_: True if the switch is open
+        :param base_voltage: A :class:`zepben.model.BaseVoltage`.
+        :param in_service: If True, the equipment is in service.
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param terminals: An ordered list of :class:`zepben.model.Terminal`'s. The order is important and the index of
+                          each Terminal should reflect each Terminal's `sequenceNumber`.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        :param location: :class:`zepben.model.Location` of this resource.
+        """
         super().__init__(mrid=mrid, open_=open_, in_service=in_service, base_voltage=base_voltage, name=name,
                          terminals=terminals, diag_objs=diag_objs, location=location)
 

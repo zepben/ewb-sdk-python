@@ -18,6 +18,7 @@ class NoAssetInfoException(MissingReferenceException):
 class NoTerminalException(MissingReferenceException):
     pass
 
+
 class NoPerLengthSeqImpException(MissingReferenceException):
     pass
 

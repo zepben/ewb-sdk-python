@@ -49,7 +49,7 @@ class Terminal(IdentifiedObject):
     def __init__(self, mrid: str, phases: PhaseCode, connectivity_node, name: str = "",
                  diag_objs: List[DiagramObject] = None, equipment=None, upstream: bool = True, connected: bool = True):
         """
-
+        Create a Terminal
         :param mrid: Master resource identifier for this Terminal.
         :param phases: A :class:`zepben.cim.iec61970.PhaseCode` representing the normal network phasing condition of this
                        Terminal.

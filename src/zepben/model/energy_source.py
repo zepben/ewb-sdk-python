@@ -27,17 +27,49 @@ from typing import List
 
 
 class EnergySource(ConductingEquipment):
+    """
+    A generic equivalent for an energy supplier on a transmission or distribution voltage level.
+
+    Attributes:
+        active_power : High voltage source active injection. Load sign convention is used, i.e. positive sign means flow
+                       out from a node. Starting value for steady state solutions
+        r : Positive sequence Thevenin resistance.
+        x : Positive sequence Thevenin reactance.
+        reactive_power : High voltage source reactive injection. Load sign convention is used, i.e. positive sign means
+                         flow out from a node. Starting value for steady state solutions.
+        voltage_angle : Phase angle of a-phase open circuit.
+        voltage_magnitude : Phase-to-phase open circuit voltage magnitude.
+    """
     def __init__(self, mrid: str, active_power: float = 0.0, r: float = 0.0, x: float = 0.0, base_voltage: BaseVoltage = BV_UNKNOWN,
                  reactive_power: float = 0.0, voltage_angle: float = 0.0, voltage_magnitude: float = 0.0,
                  in_service: bool = True, name: str = "", terminals: List = None,
                  diag_objs: List[DiagramObject] = None, location: Location = None):
+        """
+        Create an EnergySource
+        :param mrid: mRID for this object
+        :param active_power: High voltage source active injection. Load sign convention is used, i.e. positive sign
+                             means flow out from a node. Starting value for steady state solutions
+        :param r: Positive sequence Thevenin resistance.
+        :param x: Positive sequence Thevenin reactance.
+        :param base_voltage: A :class:`zepben.model.BaseVoltage`.
+        :param reactive_power: High voltage source reactive injection. Load sign convention is used, i.e. positive sign
+                               means flow out from a node. Starting value for steady state solutions.
+        :param voltage_angle: Phase angle of a-phase open circuit.
+        :param voltage_magnitude: Phase-to-phase open circuit voltage magnitude.
+        :param in_service: If True, the equipment is in service.
+        :param name: Any free human readable and possibly non unique text naming the object.
+        :param terminals: An ordered list of :class:`zepben.model.Terminal`'s. The order is important and the index of
+                          each Terminal should reflect each Terminal's `sequenceNumber`.
+        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
+        :param location: :class:`zepben.model.Location` of this resource.
+        """
         self.active_power = active_power
         self.r = r
         self.x = x
         self.reactive_power = reactive_power
         self.voltage_angle = voltage_angle
         self.voltage_magnitude = voltage_magnitude
-        super().__init__(mrid, in_service, base_voltage, name, terminals, diag_objs, location)
+        super().__init__(mrid=mrid, in_service=in_service, base_voltage=base_voltage, name=name, terminals=terminals, diag_objs=diag_objs, location=location)
 
     def __str__(self):
         return f"{super().__str__()} active_power: {self.active_power}, r: {self.r}, x: {self.x}, reactive_power: {self.reactive_power}, voltage_angle: {self.voltage_angle}, voltage_mag: {self.voltage_magnitude}"

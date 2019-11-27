@@ -42,7 +42,7 @@ class DiagramObjectPoint(object):
 
 
 class DiagramObject(IdentifiedObject):
-    def __init__(self, mrid: str, points: List[DiagramObjectPoint] = None, name: str = None, diagram=None,
+    def __init__(self, mrid: str, points: List[DiagramObjectPoint] = None, name: str = "", diagram=None,
                  object_style: DiagramObjectStyle = DiagramObjectStyle.NONE, rotation: float = 0.0):
         self._diagram = diagram
         self.diagram_object_points = points if points is not None else []
@@ -84,7 +84,7 @@ class DiagramObject(IdentifiedObject):
 
 
 class Diagram(IdentifiedObject):
-    def __init__(self, mrid: str = "", name: str = None, diagram_style: DiagramStyle = DiagramStyle.SCHEMATIC,
+    def __init__(self, mrid: str = "", name: str = "", diagram_style: DiagramStyle = DiagramStyle.SCHEMATIC,
                  orientation: OrientationKind = OrientationKind.POSITIVE):
         self.diagram_style = diagram_style
         self.orientation_kind = orientation
@@ -97,3 +97,9 @@ class Diagram(IdentifiedObject):
         :return:
         """
         self.diagram_objects.append(diagram_object)
+
+    def from_pb(pb_d):
+        raise NotImplementedError()
+
+    def to_pb(self):
+        raise NotImplementedError()

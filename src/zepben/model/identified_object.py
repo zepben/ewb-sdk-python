@@ -18,7 +18,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.model.util import snake2camelback, iter_but_not_str
-from abc import abstractmethod, abstractstaticmethod
+from abc import abstractmethod, ABCMeta
 from typing import List
 import inspect
 
@@ -26,16 +26,33 @@ import inspect
 _ignored_attribute_cache = set()
 
 
-class IdentifiedObject(object):
+class IdentifiedObject(object, metaclass=ABCMeta):
     """
-    All names of attributes *must* directly reflect CIM properties if they have a direct relation, however must be in
-    snake case to keep the model PEP compliant.
+    Root class to provide common identification for all classes needing identification and naming attributes.
+    Everything should extend this class, however it's not mandated that every subclass must use all the fields
+    defined here.
+
+    All names of attributes of classes extending this class *must* directly reflect CIM properties if they have a direct
+    relation, however must be in snake case to keep the model PEP compliant.
     If you need to add extra attributes to a class that *ARE NOT* in the corresponding protobuf type the name
-    must start with at least 2 underscores, for example __upstream in terminal, and you should define this attribute
-    as a property in the class using @property and @<property>.setter. Failure to do this will result in the conversion
-    to a protobuf type failing. Long Live PEP8
+    must start with at least 2 underscores, for example __upstream in :class:`zepben.model.Terminal`, and you should
+    define this attribute as a property in the class using @property and @<property>.setter.
+    Failure to do this will result in the conversion to a protobuf type failing. Long Live PEP8
+
+    Attributes:
+        mrid : Master resource identifier issued by a model authority. The mRID is unique within an exchange context.
+               Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID.
+               The use of UUID is strongly recommended.
+        name : The name is any free human readable and possibly non unique text naming the object.
+        diagram_objects : The :class:`zepben.model.DiagramObject`'s related to this object.
     """
     def __init__(self, mrid: str = "", name: str = "", diagram_objects: List = None):
+        """
+
+        :param mrid: The Master Resource Identifier for this object.
+        :param name: Any free human readable text naming this object.
+        :param diagram_objects: The :class:`zepben.model.DiagramObject`'s related to this object.
+        """
         # It's really horrible to use the snake form of mRID, so we define a property + setter for it below as "mrid".
         self._m_r_i_d = mrid
         self.name = name
@@ -96,7 +113,6 @@ class IdentifiedObject(object):
         raise NotImplementedError("Conversion from protobuf is not supported.")
 
     @classmethod
-    @abstractmethod
     def from_pbs(cls, pb, *args, **kwargs):
         return [cls.from_pb(x, *args, **kwargs) for x in pb]
 

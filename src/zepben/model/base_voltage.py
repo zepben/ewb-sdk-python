@@ -4,6 +4,12 @@ from zepben.cim.iec61970.base.domain.Voltage_pb2 import Voltage as PBVoltage
 
 
 class BaseVoltage(IdentifiedObject):
+    """
+    Defines a system base voltage which is referenced.
+
+    Attributes:
+        nominal_voltage: The power system resource's base voltage.
+    """
     def __init__(self, mrid: str, nom_volt: int, name: str = ""):
         """
         TODO: nom_volt must always be int32 - need to put in bounds test
@@ -33,4 +39,5 @@ class BaseVoltage(IdentifiedObject):
         return PBBaseVoltage(**args)
 
 
+# Default BaseVoltage used when unknown.
 UNKNOWN = BaseVoltage("", 0)

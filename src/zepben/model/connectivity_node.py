@@ -24,7 +24,7 @@ from typing import Set, List
 
 
 class ConnectivityNode(IdentifiedObject):
-    def __init__(self, mrid: str, terminals: Set[Terminal] = None, name: str = None,
+    def __init__(self, mrid: str, terminals: Set[Terminal] = None, name: str = "",
                  diag_objs: List[DiagramObject] = None):
         if terminals is None:
             self.terminals = set()
@@ -65,4 +65,10 @@ class ConnectivityNode(IdentifiedObject):
     def __repr__(self):
         return f"{super().__repr__()} terminals: {self.terminals}"
 
+    @staticmethod
+    def from_pb(pb_cn):
+        raise NotImplementedError()
+
+    def to_pb(self):
+        raise NotImplementedError()
 
