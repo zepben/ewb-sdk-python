@@ -26,7 +26,7 @@ from setuptools import setup, find_packages
 test_deps = ["pytest", "pytest-asyncio"]
 setup(
     name="cimbend",
-    version="0.1",
+    version="0.2.0",
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob.glob('src/*.py')],
