@@ -23,7 +23,7 @@ from os.path import basename
 from os.path import splitext
 from setuptools import setup, find_packages
 
-test_deps = ["pytest"]
+test_deps = ["pytest", "pytest-asyncio"]
 setup(
     name="cimbend",
     version="0.1",

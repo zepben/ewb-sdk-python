@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.iec61968 import PositionPoint as PBPositionPoint
+from zepben.cim.iec61968 import PositionPoint as PBPositionPoint, TownDetail as PBTownDetail, StreetAddress as PBStreetAddress
 from zepben.cim.iec61968 import Location as PBLocation
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.diagram_layout import DiagramObject
@@ -53,12 +53,55 @@ class PositionPoint(IdentifiedObject):
     def __repr__(self):
         return f"{self.x_position}:{self.y_position}"
 
+    @property
+    def longitude(self):
+        return self.x_position
+
+    @longitude.setter
+    def longitude(self, lon):
+        self.x_position = lon
+
+    @property
+    def latitude(self):
+        return self.y_position
+
+    @latitude.setter
+    def latitude(self, lat):
+        self.y_position = lat
+
     def to_pb(self):
         return PBPositionPoint(xPosition=self.x_position, yPosition=self.y_position)
 
     @staticmethod
     def from_pb(pos_point):
         return PositionPoint(pos_point.xPosition, pos_point.yPosition)
+
+
+class TownDetail(object):
+    def __init__(self, name: str, state_or_province: str):
+        self.name = name
+        self.state_or_province = state_or_province
+
+    def to_pb(self):
+        return PBTownDetail(name=self.name, stateOrProvince=self.state_or_province)
+
+    @staticmethod
+    def from_pb(pb_td):
+        return TownDetail(name=pb_td.name, state_or_province=pb_td.stateOrProvince)
+
+
+class StreetAddress(object):
+    def __init__(self, postal_code: str, town_detail: TownDetail):
+        super().__init__()
+        self.postal_code = postal_code
+        self.town_detail = town_detail
+
+    def to_pb(self):
+        return PBStreetAddress(postalCode=self.postal_code, townDetail=self.town_detail.to_pb())
+
+    @staticmethod
+    def from_pb(pb_sa):
+        return StreetAddress(pb_sa.postalCode, TownDetail.from_pb(pb_sa.townDetail))
 
 
 class Location(IdentifiedObject):
@@ -100,7 +143,7 @@ class Location(IdentifiedObject):
         :param pb_l: Protobuf Location
         :return: A location
         """
-        return Location(street_address=pb_l.mainAddress,
+        return Location(street_address=StreetAddress.from_pb(pb_l.mainAddress),
                         position_points=PositionPoint.from_pbs(pb_l.positionPoints),
                         diag_objs=DiagramObject.from_pbs(pb_l.diagramObjects))
 

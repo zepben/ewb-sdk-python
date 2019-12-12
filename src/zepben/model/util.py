@@ -19,6 +19,13 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 import re
 from collections.abc import Iterable
+from typing import Set, List
+from zepben.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind
+
+phs_to_cores = { SinglePhaseKind.A: 0,
+                 SinglePhaseKind.B: 1,
+                 SinglePhaseKind.C: 2,
+                 SinglePhaseKind.N: 3}
 
 
 def snake2camelback(name):
@@ -27,3 +34,12 @@ def snake2camelback(name):
 
 def iter_but_not_str(obj):
     return isinstance(obj, Iterable) and not isinstance(obj, (str, bytes, bytearray, dict))
+
+
+def get_equipment_connections(cond_equip, exclude: Set = None) -> List:
+    """ Utility function wrapping :meth:`zepben.model.ConductingEquipment.get_connections` """
+    return cond_equip.get_connections(exclude=exclude)
+
+
+def phs_kind_to_idx(phase: SinglePhaseKind):
+    return phs_to_cores[phase]

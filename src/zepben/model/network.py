@@ -20,7 +20,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 import logging
 import pickle
 from zepben.model.exceptions import *
-from zepben.model import Terminal, BaseVoltage
+from zepben.model.terminal import Terminal
+from zepben.model.base_voltage import BaseVoltage
 from zepben.model.asset_info import CableInfo, OverheadWireInfo, TransformerEndInfo
 from zepben.model.connectivity_node import ConnectivityNode
 from zepben.model.energy_consumer import EnergyConsumer
@@ -34,16 +35,10 @@ from zepben.model.metering import UsagePoint, Meter
 from zepben.model.customer import Customer
 from zepben.model.decorators import create_registrar
 from typing import List
-from pprint import pformat
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 TRACED_NETWORK_FILE = str(Path.home().joinpath(Path("traced.json")))
-
-
-
-
-
 
 
 class EquipmentContainer(object):
@@ -123,6 +118,13 @@ class EquipmentContainer(object):
                                           self.customers.keys(), self.usage_points.keys(), self.seq_impedances.keys(),
                                           self.asset_infos.keys())
         return k
+
+    def get_primary_sources(self):
+        """
+        Get the primary source for this network. All directions are applied relative to this EnergySource
+        :return: The primary EnergySource
+        """
+        return [source for source in self.energy_sources.values() if source.has_phases()]
 
     @getter
     def get_connectivity_node(self, cn_mrid):
@@ -295,7 +297,7 @@ class EquipmentContainer(object):
             # All sources have no upstream terminals
             upstream = False
             for t in source.terminals:
-                t.upstream = upstream
+                t.direction = upstream
                 traced.add(t.mrid)
             equips_to_trace.append(source)
             while equips_to_trace:
@@ -308,7 +310,7 @@ class EquipmentContainer(object):
                 # and set upstream on each terminal.
                 for terminal in equip.terminals:
                     conn_node = terminal.connectivity_node
-                    terminal.upstream = upstream
+                    terminal.direction = upstream
                     upstream = not upstream
                     for term in conn_node:
                         if term.mrid in traced:
@@ -316,7 +318,7 @@ class EquipmentContainer(object):
                         if term != terminal:
                             if not term.equipment.connected():
                                 continue
-                            term.upstream = upstream
+                            term.direction = upstream
                             equips_to_trace.append(term.equipment)
                         # Don't trace over a terminal twice to stop us from reversing direction
                         traced.add(term.mrid)
@@ -461,7 +463,7 @@ class EquipmentContainer(object):
                 upstream_count = 0
                 f.write(str(e) + "\n")
                 for term in e.terminals:
-                    if term.upstream:
+                    if term.direction:
                         upstream_count += 1
                     f.write("\t" + str(term) + "\n")
                 try:
@@ -475,11 +477,4 @@ class EquipmentContainer(object):
                     for term in e.terminals:
                         logger.error(str(term))
                 f.write("\n\n")
-
-    def pickle(self, path=None):
-        if path is not None:
-            with open(path, 'w') as f:
-                pickle.dump(self, f)
-        else:
-            return pickle.dumps(self)
 

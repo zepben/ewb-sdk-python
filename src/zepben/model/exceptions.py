@@ -63,5 +63,12 @@ class NoEnergyConsumerException(MissingReferenceException):
     pass
 
 
+class AlreadyExistsException(Exception):
+    pass
+
 class ReadingException(Exception):
+    pass
+
+
+class PhaseException(Exception):
     pass

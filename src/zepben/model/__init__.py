@@ -36,5 +36,3 @@ from zepben.model.per_length_sequence_impedance import PerLengthSequenceImpedanc
 from zepben.model.asset_info import AssetInfo, OverheadWireInfo, CableInfo, TransformerEndInfo, WireInfo
 
 
-
-

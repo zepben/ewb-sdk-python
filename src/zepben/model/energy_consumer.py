@@ -19,15 +19,14 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 from zepben.cim.iec61970 import PhaseShuntConnectionKind, SinglePhaseKind, EnergyConsumer as PBEnergyConsumer, EnergyConsumerPhase as PBEnergyConsumerPhase
 from zepben.model.terminal import Terminal
-from zepben.model.equipment import ConductingEquipment
+from zepben.model.equipment import ConductingEquipment, PowerSystemResource
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
-from zepben.model.identified_object import IdentifiedObject
 from typing import List
 
 
-class EnergyConsumerPhase(IdentifiedObject):
+class EnergyConsumerPhase(PowerSystemResource):
     """
     A single phase of an energy consumer.
 
@@ -60,7 +59,7 @@ class EnergyConsumerPhase(IdentifiedObject):
         self.pfixed = pfixed
         self.qfixed = qfixed
         self.phase = phase
-        super().__init__(mrid, name, diag_objs)
+        super().__init__(mrid=mrid, name=name, diag_objs=diag_objs)
 
     def to_pb(self):
         return PBEnergyConsumerPhase(**self._pb_args())

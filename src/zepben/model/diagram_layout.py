@@ -96,7 +96,7 @@ class Diagram(IdentifiedObject):
         TODO:
         :return:
         """
-        self.diagram_objects.append(diagram_object)
+        self.objects.append(diagram_object)
 
     def from_pb(pb_d):
         raise NotImplementedError()

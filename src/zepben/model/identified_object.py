@@ -81,7 +81,6 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     def mrid(self, mrid):
         self._m_r_i_d = mrid
 
-    @property
     def diagram_objects(self, diagram_mrid=""):
         """Get the objects for a diagram. If diagram_mrid is None will use default diagram"""
         return self.diagram_objects_by_diagram[diagram_mrid]

@@ -130,6 +130,8 @@ class UsagePoint(IdentifiedObject):
         """
         super().__init__(mrid, name, diag_objs)
         self.__equipment = equipment if equipment is not None else []
+        for equip in self.equipment:
+            equip.add_usage_point(self)
         self.usage_point_location = location
         self.__end_devices = end_devices if end_devices is not None else []
 
@@ -143,6 +145,14 @@ class UsagePoint(IdentifiedObject):
 
     def add_end_device(self, end_device):
         self.end_devices.append(end_device)
+
+    def is_metered(self):
+        """
+        Check whether this `UsagePoint` is metered. A `UsagePoint` is metered if it's associated with at
+        least one  :class:`zepben.model.EndDevice`.
+        :return: True if this UsagePoint has an EndDevice, False otherwise.
+        """
+        return len(self.end_devices) > 0
 
     def to_pb(self):
         args = self._pb_args()
@@ -222,7 +232,7 @@ class Meter(EndDevice):
             customer = None
 
         return Meter(mrid=pb_m.mRID, usage_points=usage_points, name=pb_m.name, customer=customer,
-                     location=pb_m.serviceLocation, diag_objs=pb_m.diagramObjects)
+                     location=Location.from_pb(pb_m.serviceLocation), diag_objs=DiagramObject.from_pbs(pb_m.diagramObjects))
 
 
 class MeterReading(IdentifiedObject):

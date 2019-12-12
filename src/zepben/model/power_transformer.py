@@ -81,7 +81,7 @@ class RatioTapChanger(TapChanger):
         :param low_step: Lowest possible tap step position, retard from neutral
         :param step: Tap changer position. Starting step for a steady state solution. Non integer values are allowed to
                      support continuous tap variables. Must be >= low_step and <= high_step.
-        :param step_voltage_increment: Tap step increment, in per cent of neutral voltage, per step position.
+        :param step_voltage_increment: Tap step increment, in percent of neutral voltage, per step position.
         :param mrid: mRID for this object. Optional and not typically used.
         :param name: Any free human readable and possibly non unique text naming the object.
         :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
@@ -144,7 +144,7 @@ class PowerTransformerEnd(IdentifiedObject):
         :param r: Resistance (star-model) of the transformer end. The attribute shall be equal or greater than zero
                   for non-equivalent transformers.
         :param x: Positive sequence series reactance (star-model) of the transformer end.
-        :param r0: Zero sequence series resistance (star-model) of the tr
+        :param r0: Zero sequence series resistance (star-model) of the transformer end.
         :param x0: Zero sequence series reactance of the transformer end.
         :param winding: Kind of :class:`zepben.cim.iec61970.base.wires.WindingConnection` for this end.
         :param tap_changer: :class:`RatioTapChanger` attached to this end.

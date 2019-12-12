@@ -23,6 +23,14 @@ from zepben.model.identified_object import IdentifiedObject
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.exceptions import NoEquipmentException, NoConnectivityNodeException
 from typing import List
+from enum import Enum
+
+
+class Direction(Enum):
+    NONE = 0
+    IN = 1
+    OUT = 2
+    BOTH = 3
 
 
 class Terminal(IdentifiedObject):
@@ -47,26 +55,27 @@ class Terminal(IdentifiedObject):
     """
 
     def __init__(self, mrid: str, phases: PhaseCode, connectivity_node, name: str = "",
-                 diag_objs: List[DiagramObject] = None, equipment=None, upstream: bool = True, connected: bool = True):
+                 diag_objs: List[DiagramObject] = None, equipment=None, direction: Direction = Direction.NONE,
+                 connected: bool = True):
         """
         Create a Terminal
         :param mrid: Master resource identifier for this Terminal.
         :param phases: A :class:`zepben.cim.iec61970.PhaseCode` representing the normal network phasing condition of this
                        Terminal.
-        :param connectivity_node: The ConnectivityNode that this terminal is attached to.
+        :param connectivity_node: The :class:`zepben.model.ConnectivityNode` that this terminal is attached to.
         :param name: Any free human readable and possibly non unique text naming the object.
         :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
         :param connected: Whether this terminal is connected (potentially energised). See description in class definition.
         :param equipment: A reference to the equipment that owns this terminal. This can be set after instantiation as
                           to resolve chicken-and-egg issues between terminals and equipment (as both have references).
-        :param upstream: (experimental) True if this terminal is "closest" to its primary EnergySource. I.e, it is the
+        :param direction: (experimental) True if this terminal is "closest" to its primary EnergySource. I.e, it is the
                         first terminal on a piece of equipment to receive power (specifically from the primary EnergySource).
         """
         self.phases = phases
         self.connected = connected
         self.__connectivity_node = connectivity_node
         self.__equipment = equipment
-        self.__upstream = upstream
+        self.__direction = direction
         super().__init__(mrid, name, diag_objs)
 
     @property
@@ -88,15 +97,12 @@ class Terminal(IdentifiedObject):
         self.__equipment = equip
 
     @property
-    def upstream(self):
-        return self.__upstream
+    def direction(self):
+        return self.__direction
 
-    @upstream.setter
-    def upstream(self, upstream):
-        self.__upstream = upstream
-
-    def get_diag_objs(self):
-        return self.equipment.get_diag_objs()
+    @direction.setter
+    def direction(self, direction):
+        self.__direction = direction
 
     def get_pos_point(self):
         return self.equipment.pos_point(self.get_sequence_number())
@@ -132,9 +138,15 @@ class Terminal(IdentifiedObject):
         if not pb_t.connectivityNodeMRID:
             raise NoConnectivityNodeException(f"Terminal {pb_t.mRID} has no connectivity node declared.")
         conn_node = network.add_connectivitynode(pb_t.connectivityNodeMRID)
-        term = Terminal(mrid=pb_t.mRID, phases=pb_t.phases, connectivity_node=conn_node, name=pb_t.name, connected=pb_t.connected)
+        term = Terminal(mrid=pb_t.mRID,
+                        phases=pb_t.phases,
+                        connectivity_node=conn_node,
+                        name=pb_t.name,
+                        connected=pb_t.connected,
+                        diag_objs=DiagramObject.from_pbs(pb_t.diagramObjects))
         conn_node.add_terminal(term)
         return term
 
     def __str__(self):
-        return f"{super().__repr__()}, phase: {self.phases}, connectivityNode: {self.connectivity_node.mrid} upstream: {self.upstream}"
+        return f"{super().__repr__()}, phase: {self.phases}, connectivityNode: {self.connectivity_node.mrid} direction: {self.direction}"
+

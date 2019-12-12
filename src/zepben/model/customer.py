@@ -1,5 +1,5 @@
 from zepben.model.identified_object import IdentifiedObject
-from zepben.model import DiagramObject
+from zepben.model.diagram_layout import DiagramObject
 from zepben.cim.iec61968.customers.Customer_pb2 import Customer as PBCustomer
 
 
