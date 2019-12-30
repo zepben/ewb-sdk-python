@@ -1,24 +1,43 @@
+"""
+Copyright 2019 Zeppelin Bend Pty Ltd
+This file is part of cimbend.
+
+cimbend is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+cimbend is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+
 import pytest
-from queue import Queue
-from zepben.model.tracing import Traversal, SearchType, Tracker, BranchRecursiveTraversal
+from zepben.model.tracing import Traversal, SearchType, Tracker, BranchRecursiveTraversal, FifoQueue
 from typing import List
 
 
-async def validate_run(t: Traversal, visit_order: List[int], expected_order: List[int], can_stop_on_start=True):
+async def validate_run(t: Traversal, visit_order: List[int], expected_order: List[int], can_stop_on_start=True, check_visited=True):
     # clean slate each run
     t.reset()
     visit_order.clear()
     await t.trace(can_stop_on_start)
     for i, x in enumerate(expected_order):
         assert visit_order[i] == x
-        assert t.tracker.has_visited(x)
+        if check_visited:
+            assert t.tracker.has_visited(x)
 
 
-async def _validate_can_stop(t: Traversal, visit_order: List[int], expected_order: List[int], stop_count = None):
-    await validate_run(t, visit_order=visit_order, expected_order=expected_order, can_stop_on_start=False)
+async def _validate_can_stop(t: Traversal, visit_order: List[int], expected_order: List[int], stop_count=None, check_visited=True):
+    await validate_run(t, visit_order=visit_order, expected_order=expected_order, can_stop_on_start=False, check_visited=check_visited)
     if stop_count is not None:
         assert stop_count == len(visit_order)
-    await validate_run(t, visit_order=visit_order, expected_order=[expected_order[0]], can_stop_on_start=True)
+    await validate_run(t, visit_order=visit_order, expected_order=[expected_order[0]], can_stop_on_start=True, check_visited=check_visited)
     if stop_count is not None:
         assert stop_count == len(visit_order) - 1
 
@@ -99,27 +118,30 @@ class TestTracing(object):
             assert x in stopping_on
 
 
+def queue_next_br(item, traversal, exclude=None):
+    if item == 0:
+        branch = traversal.create_branch()
+        branch.start_item = 1
+        traversal.branch_queue.put(branch)
+        branch = traversal.create_branch()
+        branch.start_item = 3
+        traversal.branch_queue.put(branch)
+    elif item == 1 or item == 3:
+        if traversal.tracker.has_visited(2):
+            traversal.process_queue.put(0)
+        else:
+            traversal.process_queue.put(2)
+    elif item == 2:
+        if traversal.tracker.has_visited(1):
+            traversal.process_queue.put(3)
+        elif traversal.tracker.has_visited(3):
+            traversal.process_queue.put(1)
+
+
 class TestBranchRecursiveTraversal(object):
 
-    def queue_next(self, item, traversal, exclude=None):
-        ret = []
-        if item == 0:
-            branch = traversal.create_branch()
-            branch.start_item = 3
-            traversal.branch_queue.put(branch)
-        elif item == 1 or item == 3:
-            if traversal.tracker.has_visited(2):
-                ret.append(0)
-            else:
-                ret.append(2)
-        elif item == 2:
-            if traversal.tracker.has_visited(1):
-                ret.append(3)
-            elif traversal.tracker.has_visited(3):
-                ret.append(1)
-        return ret
-
-    def test_simple(self):
+    @pytest.mark.asyncio
+    async def test_simple(self):
         visited = list()
 
         async def action(i, s):
@@ -130,12 +152,13 @@ class TestBranchRecursiveTraversal(object):
             self.stop_count += 1
             return False
 
-        t = BranchRecursiveTraversal(start_item=0, queue_next=self.queue_next, search_type=SearchType.DEPTH,
-                                     branch_queue=Queue(), step_actions=[action], stop_conditions=[cond])
-        validate_run(t, visited, [0, 1, 2, 3, 3, 2, 1])
+        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, search_type=SearchType.DEPTH,
+                                     branch_queue=FifoQueue(), step_actions=[action], stop_conditions=[cond])
+        await validate_run(t, visited, [0, 1, 2, 3, 3, 2, 1], check_visited=False)
         assert self.stop_count == len(visited)
 
-    def test_stop_first_asset(self):
+    @pytest.mark.asyncio
+    async def test_stop_first_asset(self):
         visited = list()
 
         async def action(i, s):
@@ -149,8 +172,8 @@ class TestBranchRecursiveTraversal(object):
         async def cond2(i):
             return i == 0
 
-        t = BranchRecursiveTraversal(start_item=0, queue_next=self.queue_next, search_type=SearchType.DEPTH,
-                                     branch_queue=Queue(), step_actions=[action], stop_conditions=[cond1, cond2])
-        _validate_can_stop(t, visited, [0, 1, 2, 3, 3, 2, 1])
+        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, search_type=SearchType.DEPTH,
+                                     branch_queue=FifoQueue(), step_actions=[action], stop_conditions=[cond1, cond2])
+        await _validate_can_stop(t, visited, [0, 1, 2, 3, 3, 2, 1], check_visited=False)
 
 

@@ -18,11 +18,16 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 import logging
-import pickle
+import inspect
+from uuid import uuid4
+
+from zepben.model.common import Location
+from zepben.model.diagram_layout import DiagramObject
+from zepben.model.equipment import PowerSystemResource
 from zepben.model.exceptions import *
 from zepben.model.terminal import Terminal
 from zepben.model.base_voltage import BaseVoltage
-from zepben.model.asset_info import CableInfo, OverheadWireInfo, TransformerEndInfo
+from zepben.model.asset_info import CableInfo, OverheadWireInfo, TransformerEndInfo, AssetInfo
 from zepben.model.connectivity_node import ConnectivityNode
 from zepben.model.energy_consumer import EnergyConsumer
 from zepben.model.energy_source import EnergySource
@@ -33,49 +38,123 @@ from zepben.model.per_length_sequence_impedance import PerLengthSequenceImpedanc
 from zepben.model.metrics_store import MetricsStore
 from zepben.model.metering import UsagePoint, Meter
 from zepben.model.customer import Customer
-from zepben.model.decorators import create_registrar
-from typing import List
+from zepben.model.decorators import create_registrar, map_type
+from zepben.cim.iec61970 import EnergySource as PBEnergySource, EnergyConsumer as PBEnergyConsumer, Breaker as PBBreaker, \
+    PowerTransformer as PBPowerTransformer, AcLineSegment as PBAcLineSegment, BaseVoltage as PBBaseVoltage, \
+    PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
+from zepben.cim.iec61968 import AssetInfo as PBAssetInfo, Customer as PBCustomer, Meter as PBMeter, UsagePoint as PBUsagePoint
 from pathlib import Path
+from typing import List
 
 logger = logging.getLogger(__name__)
 TRACED_NETWORK_FILE = str(Path.home().joinpath(Path("traced.json")))
 
+# A decorator simply used for registering EquipmentContainer getter functions.
+# If you create a new equipment map in __init__, you should create a corresponding getter function and
+# decorate it with @getter
+getter = create_registrar()
 
-class EquipmentContainer(object):
+# A decorator used to specify which types are stored in each map. For every map there should be a
+# corresponding `@property` declaration that is decorated with `type_map(class)`, where `class` indicates
+# the type stored in that map. Utilised in the `add` method.
+type_map = map_type()
+
+
+class ConnectivityNodeContainer(PowerSystemResource):
+    """
+    This class is currently unused in our CIM profile, but may be extended in the future
+    """
+    def __init__(self, mrid: str, name: str = "", diag_objs: List[DiagramObject] = None, location: Location = None):
+        super().__init__(mrid=mrid, name=name, diag_objs=diag_objs, location=location)
+
+
+class EquipmentContainer(ConnectivityNodeContainer):
     """
     A full representation of the power network.
     Contains a map of equipment (string ID's -> Equipment/Nodes/etc)
     **All** `IdentifiedObject's` submitted to this EquipmentContainer **MUST** have unique mRID's!
     """
-
-    # A decorator simply used for registering EquipmentContainer getter functions.
-    # If you create a new equipment map in __init__, you should create a corresponding getter function and
-    # decorate it with @getter
-    getter = create_registrar()
-
-    def __init__(self, metrics_store: MetricsStore, name: str = "default"):
+    def __init__(self, metrics_store: MetricsStore = None, name: str = "default", mrid=None,
+                 diag_objs: List[DiagramObject] = None, location: Location = None):
         """
         Represents a whole network. At the moment there's a single index on equipment ID's -> all types of equipment,
         as well as an index on energy source ID's -> energy sources.
-        TODO: Split resources into a dictionary for each type and provide type based getter methods for each
-              type - as well as a getter for when type is unknown.
         :param metrics_store: Storage for meter measurement data associated with this network.
         """
-        self.name = name
-        # TODO: merge these into gets... stop using resources
-        self.asset_infos = {}
-        self.base_voltages = {}
-        self.breakers = {}
-        self.connectivity_nodes = {}
-        self.customers = {}
-        self.energy_sources = {}
-        self.energy_consumers = {}
-        self.lines = {}
-        self.meters = {}
-        self.seq_impedances = {}
-        self.transformers = {}
-        self.usage_points = {}
+        super().__init__(mrid=mrid if mrid is not None else uuid4(), name=name, diag_objs=diag_objs, location=location)
+        self._asset_infos = {}
+        self._base_voltages = {}
+        self._breakers = {}
+        self._connectivity_nodes = {}
+        self._customers = {}
+        self._energy_sources = {}
+        self._energy_consumers = {}
+        self._lines = {}
+        self._meters = {}
+        self._seq_impedances = {}
+        self._transformers = {}
+        self._usage_points = {}
         self.metrics_store = metrics_store
+
+    @type_map(EnergySource, PBEnergySource)
+    @property
+    def energy_sources(self):
+        return self._energy_sources
+
+    @type_map(EnergyConsumer, PBEnergyConsumer)
+    @property
+    def energy_consumers(self):
+        return self._energy_consumers
+
+    @type_map(AssetInfo, PBAssetInfo)
+    @property
+    def asset_infos(self):
+        return self._asset_infos
+
+    @type_map(BaseVoltage, PBBaseVoltage)
+    @property
+    def base_voltages(self):
+        return self._base_voltages
+
+    @type_map(Breaker, PBBreaker)
+    @property
+    def breakers(self):
+        return self._breakers
+
+    @type_map(ConnectivityNode)
+    @property
+    def connectivity_nodes(self):
+        return self._connectivity_nodes
+
+    @type_map(Customer, PBCustomer)
+    @property
+    def customers(self):
+        return self._customers
+
+    @type_map(ACLineSegment, PBAcLineSegment)
+    @property
+    def lines(self):
+        return self._lines
+
+    @type_map(Meter, PBMeter)
+    @property
+    def meters(self):
+        return self._meters
+
+    @type_map(PerLengthSequenceImpedance, PBPerLengthSequenceImpedance)
+    @property
+    def seq_impedances(self):
+        return self._seq_impedances
+
+    @type_map(PowerTransformer, PBPowerTransformer)
+    @property
+    def transformers(self):
+        return self._transformers
+
+    @type_map(UsagePoint, PBUsagePoint)
+    @property
+    def usage_points(self):
+        return self._usage_points
 
     def __iter__(self):
         """
@@ -99,7 +178,7 @@ class EquipmentContainer(object):
         :return:
         :raises: KeyError when `item` isn't in the EquipmentContainer.
         """
-        for m in EquipmentContainer.getter.all.values():
+        for m in getter.all.values():
             try:
                 return m(self, item)
             except MissingReferenceException:
@@ -133,12 +212,6 @@ class EquipmentContainer(object):
         except KeyError:
             raise NoConnectivityNodeException(f"{cn_mrid}")
 
-    @getter
-    def get_breaker(self, br_mrid):
-        try:
-            return self.breakers[br_mrid]
-        except KeyError:
-            raise NoBreakerException(f"{br_mrid}")
 
     @getter
     def get_aclinesegment(self, acls_mrid):
@@ -146,6 +219,20 @@ class EquipmentContainer(object):
             return self.lines[acls_mrid]
         except KeyError:
             raise NoACLineSegmentException(f"{acls_mrid}")
+
+    @getter
+    def get_energyconsumer(self, ec_mrid):
+        try:
+            return self.energy_consumers[ec_mrid]
+        except KeyError:
+            raise NoEnergyConsumerException(f"{ec_mrid}")
+
+    @getter
+    def get_breaker(self, br_mrid):
+        try:
+            return self.breakers[br_mrid]
+        except KeyError:
+            raise NoBreakerException(f"{br_mrid}")
 
     @getter
     def get_transformer(self, tf_mrid):
@@ -160,13 +247,6 @@ class EquipmentContainer(object):
             return self.energy_sources[es_mrid]
         except KeyError:
             raise NoEnergySourceException(f"{es_mrid}")
-
-    @getter
-    def get_energyconsumer(self, ec_mrid):
-        try:
-            return self.energy_consumers[ec_mrid]
-        except KeyError:
-            raise NoEnergyConsumerException(f"{ec_mrid}")
 
     @getter
     def get_meter(self, meter_mrid):
@@ -258,87 +338,7 @@ class EquipmentContainer(object):
         for bv in self.base_voltages.values():
             yield bv
 
-    def depth_first_trace_and_apply(self, term_fn=None):
-        """
-        term_fn will be applied to each terminal prior to being returned
-        """
-        equips_to_trace = []
-        traced = set()
-        for source in self.energy_sources.values():
-            # All sources have no upstream terminals
-            yield source
-            for t in source.terminals:
-                traced.add(t.mrid)
-            equips_to_trace.append(source)
-            while equips_to_trace:
-                try:
-                    equip = equips_to_trace.pop()
-                except IndexError:  # No more equipment
-                    break
-                # Explore all connectivity nodes for this equipments terminals,
-                # and set upstream on each terminal.
-                for terminal in equip.terminals:
-                    conn_node = terminal.connectivity_node
-                    for term in conn_node:
-                        if term.mrid in traced:
-                            continue
-                        if term != terminal:
-                            if not term.equipment.connected():
-                                continue
-                            equips_to_trace.append(term.equipment)
-                            yield term.equipment
-                        # Don't trace over a terminal twice to stop us from reversing direction
-                        traced.add(term.mrid)
-
-    def trace_and_set_directions(self):
-        equips_to_trace = []
-        traced = set()
-        for source in self.energy_sources.values():
-            # All sources have no upstream terminals
-            upstream = False
-            for t in source.terminals:
-                t.direction = upstream
-                traced.add(t.mrid)
-            equips_to_trace.append(source)
-            while equips_to_trace:
-                upstream = not upstream
-                try:
-                    equip = equips_to_trace.pop()
-                except IndexError:  # No more equipment
-                    break
-                # Explore all connectivity nodes for this equipments terminals,
-                # and set upstream on each terminal.
-                for terminal in equip.terminals:
-                    conn_node = terminal.connectivity_node
-                    terminal.direction = upstream
-                    upstream = not upstream
-                    for term in conn_node:
-                        if term.mrid in traced:
-                            continue
-                        if term != terminal:
-                            if not term.equipment.connected():
-                                continue
-                            term.direction = upstream
-                            equips_to_trace.append(term.equipment)
-                        # Don't trace over a terminal twice to stop us from reversing direction
-                        traced.add(term.mrid)
-
-    def create_connectivity_nodes(self, pb_terminals):
-        """
-        Extract and create ConnectivityNode's from a set of protobuf Terminals.
-        Order of the terminals is preserved and indicates their sequenceNumber
-        :param pb_terminals: A list of protobuf :class:`zepben.cim.iec61970.core.Terminal`'s
-        :return: A set of CIM terminals.
-        """
-        terms = []
-        for terminal in pb_terminals:
-            conn_node = self.add_connectivitynode(terminal.connectivityNodeMRID)
-            term = Terminal(terminal.mRID, terminal.phases, conn_node, terminal.name, connected=terminal.connected)
-            conn_node.add_terminal(term)
-            terms.append(term)
-        return terms
-
-    def add_connectivitynode(self, mrid):
+    def add_connectivitynode(self, mrid: str):
         """
         Add a connectivity node to the network.
         :param mrid: mRID of the ConnectivityNode
@@ -346,115 +346,48 @@ class EquipmentContainer(object):
                  ConnectivityNode represented by `mrid`
         """
         if mrid not in self.connectivity_nodes:
-            node = ConnectivityNode(mrid)
-            self.connectivity_nodes[mrid] = node
-            return node
+            self.connectivity_nodes[mrid] = ConnectivityNode(mrid)
+            return self.connectivity_nodes[mrid]
         else:
             return self.connectivity_nodes[mrid]
 
-    def add_pb_base_voltage(self, pb_bv):
+    def add(self, obj):
         """
-        Add a Protobuf BaseVoltage
-        :param pb_bv: :class:`zepben.cim.iec61970.base.core.BaseVoltage`
+        Adds object to its corresponding map in the network. Utilises the type_map decorator to identify the
+        corresponding map. Supports protobuf types, which must also be specified with the type_map decorator.
+        :param obj: The object to add. Must extend IdentifiedObject and have a corresponding map field in the network.
+        :raises: :class:`zepben.model.exceptions.NetworkException` if there is no corresponding type_map for the
+                 provided type.
+                 A subclass of :class:`zepben.model.exceptions.MissingReferenceException` if any dependencies are not
+                 already in the network. See the types corresponding `from_pb` for specifics.
         """
-        bv = BaseVoltage.from_pb(pb_bv)
-        self.base_voltages[bv.mrid] = bv
+        try:
+            # General case, obj is a CIM class with a mapping or a protobuf class.
+            map_ = type_map.all[type(obj)].fget(self)
+            cls = type_map.pb_to_cim[type(obj)]
+        except (AttributeError, KeyError):
+            # Case where obj is a subclass of a class that has a mapping (e.g obj = CableInfo, map is asset_infos)
+            for clazz in inspect.getmro(type(obj)):
+                try:
+                    map_ = type_map.all[clazz].fget(self)
+                    break
+                except KeyError:
+                    pass
+            else:
+                raise NetworkException((f"Type {type(obj)} did not have a corresponding map in the network and thus could"
+                                        f"not be added. You've either passed a non-CIM type or forgot to decorate the"
+                                        f"maps property with the correct types."))
 
-    def add_pb_per_length_sequence_impedance(self, pb_plsi):
-        """
-        Add a Protobuf PerLengthSequenceImpedance
-        :param pb_plsi: :class:`zepben.cim.iec61970.base.wires.PerLengthSequenceImpedance`
-        """
-        plsi = PerLengthSequenceImpedance.from_pb(pb_plsi)
-        self.seq_impedances[plsi.mrid] = plsi
+        try:
+            # If mrid exists we assume we have a CIM class and add it to its map.
+            map_[obj.mrid] = obj
 
-    def add_pb_asset_info(self, pb_ai):
-        """
-        Add a Protobuf AssetInfo
-        :param pb_ai: :class:`zepben.cim.iec61968.assetinfo.AssetInfo`
-        :raises: NoEquipmentException if no field in the oneof was set.
-        """
-        if pb_ai.HasField("cableInfo"):
-            cable_info = CableInfo.from_pb(pb_ai.cableInfo)
-            self.asset_infos[cable_info.mrid] = cable_info
-        elif pb_ai.HasField("overheadWireInfo"):
-            overhead_wire_info = OverheadWireInfo.from_pb(pb_ai.overheadWireInfo)
-            self.asset_infos[overhead_wire_info.mrid] = overhead_wire_info
-        elif pb_ai.HasField("transformerEndInfo"):
-            transformer_end_info = TransformerEndInfo.from_pb(pb_ai.transformerEndInfo)
-            self.asset_infos[transformer_end_info.mrid] = transformer_end_info
-        else:
-            raise NoEquipmentException("assetInfo was empty")
-
-    def add_pb_usage_point(self, pb_up):
-        """
-        Add a Protobuf UsagePoint
-        :param pb_up: :class:`zepben.cim.iec61968.metering.UsagePoint`
-        """
-        up = UsagePoint.from_pb(pb_up, self)
-        self.usage_points[up.mrid] = up
-
-    def add_pb_customer(self, pb_c):
-        """
-        Add a Protobuf Customer
-        :param pb_c: :class:`zepben.cim.iec61968.customers.Customer`
-        """
-        customer = Customer.from_pb(pb_c)
-        self.customers[customer.mrid] = customer
-
-    def add_pb_meter(self, pb_m):
-        """
-        Add a Protobuf Meter
-        :param pb_m: :class:`zepben.cim.iec61968.metering.Meter`
-        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
-                 network See :func:`Meter.from_pb`
-        """
-        self.meters[pb_m.mRID] = Meter.from_pb(pb_m, self)
-
-    def add_pb_energy_source(self, pb_es):
-        """
-        Add an energy source to the network that has come through as a protobuf message
-        :param pb_es: :class:`zepben.cim.iec61970.base.wires.EnergySource`
-        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
-                 network. See :func:`EnergySource.from_pb`
-        """
-        self.energy_sources[pb_es.mRID] = EnergySource.from_pb(pb_es, self)
-
-    def add_pb_energy_consumer(self, pb_ec):
-        """
-        Add a Protobuf EnergyConsumer
-        :param pb_ec: :class:`zepben.cim.iec61970.base.wires.EnergyConsumer`
-        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
-                 network. See :func:`EnergyConsumer.from_pb`
-        """
-        self.energy_consumers[pb_ec.mRID] = EnergyConsumer.from_pb(pb_ec, self)
-
-    def add_pb_transformer(self, pb_tf):
-        """
-        Add a Protobuf PowerTransformer
-        :param pb_tf: :class:`zepben.cim.iec61970.base.wires.PowerTransformer`
-        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
-                 network. See :func:`PowerTransformer.from_pb`
-        """
-        self.transformers[pb_tf.mRID] = PowerTransformer.from_pb(pb_tf, self)
-
-    def add_pb_aclinesegment(self, pb_acls):
-        """
-        Add a Protobuf AcLineSegment
-        :param pb_acls: :class:`zepben.cim.iec61970.base.wires.AcLineSegment`
-        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
-                 network. See :func:`ACLineSegment.from_pb`
-        """
-        self.lines[pb_acls.mRID] = ACLineSegment.from_pb(pb_acls, self)
-
-    def add_pb_breaker(self, pb_br):
-        """
-        Add a Protobuf Breaker
-        :param pb_br: :class:`zepben.cim.iec61970.base.wires.Breaker`
-        :raises: a subclass of MissingReferenceException if any reference fields in the message are not already in the
-                 network. See :func:`Breaker.from_pb`
-        """
-        self.breakers[pb_br.mRID] = Breaker.from_pb(pb_br, self)
+        except AttributeError:
+            # Otherwise it's a protobuf class.
+            # Need to pass in keyword args - at the moment the only possibility is the network.
+            # This will throw any exception the corresponding `from_pb` throws
+            o = cls.from_pb(obj, network=self)
+            map_[o.mrid] = o
 
     def _dumpTracing(self):
         with open(TRACED_NETWORK_FILE, "w") as f:
@@ -478,3 +411,10 @@ class EquipmentContainer(object):
                         logger.error(str(term))
                 f.write("\n\n")
 
+    # TODO: implement?
+    @staticmethod
+    def from_pb(pb_gr):
+        raise NotImplementedError()
+
+    def to_pb(self):
+        raise NotImplementedError()

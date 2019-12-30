@@ -24,7 +24,7 @@ from zepben.model.exceptions import PhaseException
 from zepben.model.common import Location
 from zepben.model.terminal import Terminal
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
-from zepben.model.util import phs_to_cores
+from zepben.model.util import phs_to_cores, cores_to_phs
 from zepben.cim.iec61970 import Breaker as PBBreaker
 from typing import List
 import copy
@@ -41,15 +41,16 @@ class Switch(ConductingEquipment, metaclass=ABCMeta):
          open : True if the switch is considered open and not allowing current to flow.
                 Can be a list of booleans to represent an unganged switch.
     """
-    def __init__(self, mrid: str, open_: List[bool], normal_open: List[bool] = None,
+    def __init__(self, mrid: str, open_: List[bool] = None, normal_open: List[bool] = None,
                  base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
                  terminals: List = None, diag_objs: List[DiagramObject] = None, location: Location = None):
         """
         Create a Switch. This is an abstract class and typically should not be used directly.
         :param mrid: mRID for this object
-        :param open_: True if the switch is open
-        :param normal_open: True if the switch is normally open (nominal state of switch). Will default to the same
-                            as open_ if not set - i.e, we assume all switches are in their normal state.
+        :param open_: True for each core on the switch if it is open, False otherwise. Defaults to [False] * self.num_cores
+        :param normal_open: True for each core on the the switch if it is normally open (nominal state of switch).
+                            Will default to the same as open_ if not set - i.e, we assume all switches are in their
+                            normal state.
         :param base_voltage: A :class:`zepben.model.BaseVoltage`.
         :param in_service: If True, the equipment is in service.
         :param name: Any free human readable and possibly non unique text naming the object.
@@ -62,40 +63,40 @@ class Switch(ConductingEquipment, metaclass=ABCMeta):
                          terminals=terminals, diag_objs=diag_objs, location=location)
         # TODO: verify that switch is correctly associated with terminal phases, and open/normal_open reflects
         #       each phase.
-        self.open = open_
-        self.normal_open = normal_open if normal_open is not None else copy.deepcopy(open_)
+        self.open = open_ if open_ is not None else [False] * self.num_cores
+        self.normal_open = normal_open if normal_open is not None else copy.deepcopy(self.open)
 
     def __len__(self):
         return len(self.open)
 
-    def normally_open(self, phase: SinglePhaseKind = None):
+    def normally_open(self, core: int = None):
         """Switch is normally open only if it isn't normally in service OR at least one phase is open"""
         if not self.normally_in_service:
             return False
 
-        if phase is None:
+        if core is None:
             for core in self.normal_open:
                 if not core:
                     return False
         try:
-            return self.normal_open[phs_to_cores[phase]]
+            return self.normal_open[core]
         except (IndexError, KeyError):
-            raise PhaseException(f"Switch {self.mrid} is not connected to phase {SinglePhaseKind.Name(phase)}")
+            raise PhaseException(f"Switch {self.mrid} is not connected to phase {SinglePhaseKind.Name(core)}")
 
-    def is_open(self, phase: SinglePhaseKind = None):
+    def is_open(self, core: int = None):
         """Switch is open only if it's not in service OR at least one phase is open"""
         if not self.in_service:
             return False
 
-        if phase is None:
+        if core is None:
             for core in self.open:
                 if not core:
                     return False
         else:
             try:
-                return self.open[phs_to_cores[phase]]
+                return self.open[core]
             except (IndexError, KeyError):
-                raise PhaseException(f"Switch {self.mrid} is not connected to phase {SinglePhaseKind.Name(phase)}")
+                raise PhaseException(f"Switch {self.mrid} is not connected to phase {SinglePhaseKind.Name(core)}")
 
 
 class Breaker(Switch):
@@ -107,12 +108,16 @@ class Breaker(Switch):
     Attributes:
         Same as :class:`Switch`
     """
-    def __init__(self, mrid: str, open_: List[bool], base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "",
-                 terminals: List = None, diag_objs: List[DiagramObject] = None, location: Location = None):
+    def __init__(self, mrid: str, open_: List[bool] = None, normal_open: List[bool] = None,
+                 base_voltage: BaseVoltage = BV_UNKNOWN, in_service: bool = True, name: str = "", terminals: List = None,
+                 diag_objs: List[DiagramObject] = None, location: Location = None):
         """
         Create a Breaker
         :param mrid: mRID for this object
-        :param open_: True if the switch is open
+        :param open_: True for each core on the switch if it is open
+        :param normal_open: True for each core on the the switch if it is normally open (nominal state of switch).
+                            Will default to the same as open_ if not set - i.e, we assume all switches are in their
+                            normal state.
         :param base_voltage: A :class:`zepben.model.BaseVoltage`.
         :param in_service: If True, the equipment is in service.
         :param name: Any free human readable and possibly non unique text naming the object.
@@ -121,8 +126,8 @@ class Breaker(Switch):
         :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
         :param location: :class:`zepben.model.Location` of this resource.
         """
-        super().__init__(mrid=mrid, open_=open_, in_service=in_service, base_voltage=base_voltage, name=name,
-                         terminals=terminals, diag_objs=diag_objs, location=location)
+        super().__init__(mrid=mrid, open_=open_, normal_open=normal_open, in_service=in_service,
+                         base_voltage=base_voltage, name=name, terminals=terminals, diag_objs=diag_objs, location=location)
 
     def is_substation_breaker(self):
         return not len(self.substation) == 0
@@ -143,7 +148,7 @@ class Breaker(Switch):
         terms = Terminal.from_pbs(pb_br.terminals, network)
         location = Location.from_pb(pb_br.location)
         diag_objs = DiagramObject.from_pbs(pb_br.diagramObjects)
-        base_voltage = network.get_base_voltage(pb_br.baseVoltageMRID)
+        base_voltage = network.get_base_voltage(pb_br.baseVoltageMRID) if pb_br.baseVoltageMRID else []
         return Breaker(pb_br.mRID,
                        open_=pb_br.open,
                        base_voltage=base_voltage,

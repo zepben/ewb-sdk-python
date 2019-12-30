@@ -16,6 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from zepben.model.asset_info import AssetInfo
+from zepben.model.cores import from_phases, SUPPORTED_CORES
 from zepben.model.exceptions import NoEquipmentException, NoUsagePointException, AlreadyExistsException
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.diagram_layout import DiagramObject
@@ -24,8 +25,8 @@ from zepben.model.base_voltage import BaseVoltage
 from zepben.model.metering import UsagePoint
 from enum import Enum
 from typing import List, Set, Dict, TypeVar
-from abc import ABCMeta
 EquipmentContainer = TypeVar('EquipmentContainer')
+__all__ = ['EquipmentContainerType', 'Equipment', 'ConductingEquipment', 'PowerSystemResource']
 
 
 class EquipmentContainerType(Enum):
@@ -71,6 +72,9 @@ class Equipment(PowerSystemResource):
     Attributes:
         - in_service : If True, the equipment is in service.
         - normally_in_service : If True, the equipment is _normally_ in service.
+        - usage_points : List of all usage points associated with this equipment
+        - equipment_containers : Mapping of equipment container types to equipment container ID's this equipment
+                                 is associated with.
     """
     def __init__(self, mrid: str, in_service: bool, normally_in_service: bool, name: str = "",
                  asset_info: AssetInfo = None, diag_objs: List[DiagramObject] = None, location: Location = None,
@@ -133,6 +137,11 @@ class Equipment(PowerSystemResource):
         else:
             self.__usage_points.append(usage_point)
 
+    def link_equipment_container(self, type_: EquipmentContainerType, container: EquipmentContainer):
+        types = self.__equipment_containers.get(type_, {})
+        types[container.mrid] = container
+        self.__equipment_containers[type_] = types
+
     def equipment_containers_of_type(self, typ: EquipmentContainerType):
         return self.__equipment_containers.get(typ, [])
 
@@ -154,7 +163,8 @@ class ConductingEquipment(Equipment):
     """
     def __init__(self, mrid: str, base_voltage: BaseVoltage, terminals: List, in_service: bool = True,
                  normally_in_service: bool = True, name: str = "", diag_objs: List[DiagramObject] = None,
-                 location: Location = None, asset_info: AssetInfo = None, usage_points: List[UsagePoint] = None):
+                 location: Location = None, asset_info: AssetInfo = None, usage_points: List[UsagePoint] = None,
+                 num_cores: int = 0):
         """
         Create a ConductingEquipment
         :param mrid: mRID for this object
@@ -174,7 +184,10 @@ class ConductingEquipment(Equipment):
             self.terminals = list()
         else:
             self.terminals = terminals
-
+        try:
+            self.__num_cores = from_phases(self.terminals[0].phases.phase)
+        except IndexError:
+            self.__num_cores = SUPPORTED_CORES  # Default to max cores when unknown.
         # We set a reference for each terminal back to its equipment to make iteration over a network easier
         for term in self.terminals:
             term.equipment = self
@@ -185,15 +198,20 @@ class ConductingEquipment(Equipment):
         return f"{super().__str__()} in_serv: {self.in_service}, lnglat: {self.location} terms: {self.terminals}"
 
     def __repr__(self):
-        return f"{super().__repr__()} in_serv: {self.in_service}, lnglat: {self.location} terms: {self.terminals}"
+        return f"{super().__repr__()} in_serv: {self.in_service}, lnglat: {self.location}"
 
     def __lt__(self, other):
         """
         TODO: this will be used for priority. Implement this based on phasing (more phases = higher priority = less than)
+              Need to check if heap queue sorts ascending or descending.
         :param other:
         :return:
         """
-        return True
+        return self.num_cores < other.num_cores
+
+    @property
+    def num_cores(self):
+        return self.__num_cores
 
     @property
     def nominal_voltage(self):
@@ -247,7 +265,7 @@ class ConductingEquipment(Equipment):
         """
         return self.nominal_voltage
 
-    def get_connections(self, exclude: Set = None):
+    def get_connected_equipment(self, exclude: Set = None):
         """
         Get all :class:`ConductingEquipment` connected to this piece of equipment. An `Equipment` is connected if it has
         a `Terminal` associated with a `ConnectivityNode` that this `ConductingEquipment` is also associated with.
@@ -273,7 +291,5 @@ class ConductingEquipment(Equipment):
             args['baseVoltageMRID'] = self.base_voltage.mrid
             del args['baseVoltage']
         return args
-
-
 
 

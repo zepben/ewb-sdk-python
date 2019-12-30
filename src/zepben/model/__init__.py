@@ -18,8 +18,9 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.model.connectivity_node import ConnectivityNode
-from zepben.model.energy_source import EnergySource
+from zepben.model.energy_source import *
 from zepben.model.energy_consumer import EnergyConsumer
+from zepben.model.direction import *
 from zepben.model.power_transformer import PowerTransformerEnd, PowerTransformer, RatioTapChanger, InvalidTransformerError
 from zepben.model.aclinesegment import ACLineSegment
 from zepben.model.switch import Breaker, Switch
@@ -34,5 +35,10 @@ from zepben.model.metering import Meter, UsagePoint, MeterReading, VoltageReadin
 from zepben.model.customer import Customer
 from zepben.model.per_length_sequence_impedance import PerLengthSequenceImpedance
 from zepben.model.asset_info import AssetInfo, OverheadWireInfo, CableInfo, TransformerEndInfo, WireInfo
+from zepben.model.equipment import *
+from zepben.model.identified_object import IdentifiedObject
+from zepben.model.substation import *
+from zepben.model.containers import *
+
 
 

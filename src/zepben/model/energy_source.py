@@ -24,6 +24,7 @@ from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
 from typing import List
+__all__ = ["EnergySource", "EnergySourcePhase"]
 
 
 class EnergySourcePhase(PowerSystemResource):
@@ -54,7 +55,7 @@ class EnergySourcePhase(PowerSystemResource):
         return PBEnergySourcePhase(**self._pb_args())
 
     @staticmethod
-    def from_pb(pb_esp):
+    def from_pb(pb_esp, **kwargs):
         return EnergySourcePhase(phase=pb_esp.phase, mrid=pb_esp.mRID, name=pb_esp.name,
                                  diag_objs=DiagramObject.from_pbs(pb_esp.diagramObjects))
 
@@ -129,7 +130,7 @@ class EnergySource(ConductingEquipment):
         return PBEnergySource(**args)
 
     @staticmethod
-    def from_pb(pb_es, network):
+    def from_pb(pb_es, network, **kwargs):
         """
         Convert a protobuf EnergySource to a :class:`zepben.model.EnergySource`
         :param pb_es: :class:`zepben.cim.iec61970.base.wires.EnergySource`
@@ -141,7 +142,7 @@ class EnergySource(ConductingEquipment):
         location = Location.from_pb(pb_es.location)
         es_phases = EnergySourcePhase.from_pbs(pb_es.energySourcePhases)
         diag_objs = DiagramObject.from_pbs(pb_es.diagramObjects)
-        base_voltage = network.get_base_voltage(pb_es.baseVoltageMRID)
+        base_voltage = network.get_base_voltage(pb_es.baseVoltageMRID) if pb_es.baseVoltageMRID else None
         return EnergySource(mrid=pb_es.mRID,
                             name=pb_es.name,
                             active_power=pb_es.activePower,

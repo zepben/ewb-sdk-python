@@ -62,10 +62,10 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                 self.add_diagram_object(obj)
 
     def __str__(self):
-        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} point: {self.diagram_objects}"
+        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} point: {self.diagram_objects()}"
 
     def __repr__(self):
-        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} {self.diagram_objects}"
+        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} {self.diagram_objects()}"
 
     def add_diagram_object(self, diagram_object):
         if diagram_object.diagram is not None:
@@ -83,7 +83,10 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
     def diagram_objects(self, diagram_mrid=""):
         """Get the objects for a diagram. If diagram_mrid is None will use default diagram"""
-        return self.diagram_objects_by_diagram[diagram_mrid]
+        try:
+            return self.diagram_objects_by_diagram[diagram_mrid]
+        except KeyError:
+            return None
 
     @property
     def diagram_objects_by_diagram(self):
@@ -154,6 +157,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         another CIM type, or is a collection of a CIM type, to_pb() should be called for each and the result returned
         as the key to the dictionary. As an example, see self.diagram_points below or terminals in
         ConductingEquipment._pb_args()
+        # TODO: use __slots__
         """
         exclude = {} if exclude is None else exclude
         pb_dict = {"diagramObjects": []}

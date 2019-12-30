@@ -1,5 +1,24 @@
+"""
+Copyright 2019 Zeppelin Bend Pty Ltd
+This file is part of cimbend.
+
+cimbend is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+cimbend is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+
 from zepben.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind
-from zepben.model.terminal import Direction
+from zepben.model.direction import Direction
 from abc import ABC, abstractmethod
 
 
@@ -68,17 +87,17 @@ class NormalPhases(PhaseStatus):
         return self.terminal.phases.phase_normal(self.core_num)
 
     def direction(self):
-        return self.terminal.phases.normal_direction(self.core_num)
+        return self.terminal.phases.direction_normal(self.core_num)
 
     def set(self, phase_kind: SinglePhaseKind, dir: Direction):
-        return self.terminal.phases.set_normal(phase_kind, dir, self.core_num)
+        return self.terminal.phases.set_normal(phase_kind, self.core_num, dir)
 
     def add(self, phase_kind: SinglePhaseKind, dir: Direction):
-        return self.terminal.phases.add_normal(phase_kind, dir, self.core_num)
+        return self.terminal.phases.add_normal(phase_kind, self.core_num, dir)
 
     def remove(self, phase_kind: SinglePhaseKind, dir: Direction = None):
         if dir is not None:
-            return self.terminal.phases.remove_normal(phase_kind, dir, self.core_num)
+            return self.terminal.phases.remove_normal(phase_kind, self.core_num, dir)
         else:
             return self.terminal.phases.remove_normal(phase_kind, self.core_num)
 
@@ -93,17 +112,17 @@ class CurrentPhases(PhaseStatus):
         return self.terminal.phases.phase_current(self.core_num)
 
     def direction(self):
-        return self.terminal.phases.current_direction(self.core_num)
+        return self.terminal.phases.direction_current(self.core_num)
 
     def set(self, phase_kind: SinglePhaseKind, dir: Direction):
-        return self.terminal.phases.set_current(phase_kind, dir, self.core_num)
+        return self.terminal.phases.set_current(phase_kind, self.core_num, dir)
 
     def add(self, phase_kind: SinglePhaseKind, dir: Direction):
-        return self.terminal.phases.add_current(phase_kind, dir, self.core_num)
+        return self.terminal.phases.add_current(phase_kind, self.core_num, dir)
 
     def remove(self, phase_kind: SinglePhaseKind, dir: Direction = None):
         if dir is not None:
-            return self.terminal.phases.remove_current(phase_kind, dir, self.core_num)
+            return self.terminal.phases.remove_current(phase_kind, self.core_num, dir)
         else:
             return self.terminal.phases.remove_current(phase_kind, self.core_num)
 

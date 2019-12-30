@@ -136,7 +136,7 @@ class EnergyConsumer(ConductingEquipment):
         terms = Terminal.from_pbs(pb_ec.terminals, network)
         location = Location.from_pb(pb_ec.location)
         diag_objs = DiagramObject.from_pbs(pb_ec.diagramObjects)
-        base_voltage = network.get_base_voltage(pb_ec.baseVoltageMRID)
+        base_voltage = network.get_base_voltage(pb_ec.baseVoltageMRID) if pb_ec.baseVoltageMRID else None
         ecp = EnergyConsumerPhase.from_pbs(pb_ec.energyConsumerPhases)
 
         return EnergyConsumer(mrid=pb_ec.mRID,

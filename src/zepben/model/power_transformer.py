@@ -94,7 +94,7 @@ class RatioTapChanger(TapChanger):
         return PBRatioTabChanger(**args)
 
     @staticmethod
-    def from_pb(pb_rtc):
+    def from_pb(pb_rtc, **kwargs):
         """
         Convert a :class:`zepben.cim.iec61970.base.wires.RatioTapChanger`
         :param pb_rtc: :class:`zepben.cim.iec61970.base.wires.RatioTapChanger`
@@ -174,7 +174,7 @@ class PowerTransformerEnd(IdentifiedObject):
         return PBPowerTransformerEnd(**args)
 
     @staticmethod
-    def from_pb(pb_tfe):
+    def from_pb(pb_tfe, **kwargs):
         """
         Convert a :class:`zepben.cim.iec61970.base.wires.PowerTransformerEnd`
         :param pb_rtc: :class:`zepben.cim.iec61970.base.wires.PowerTransformerEnd`
@@ -203,7 +203,7 @@ class PowerTransformer(ConductingEquipment):
                                  The ordering of the list is important, and reflects which
                                  :class:`zepben.model.Terminal` each end is associated with.
     """
-    def __init__(self, mrid: str, ends: List[PowerTransformerEnd], vector_group: VectorGroup = VectorGroup.UNKNOWN,
+    def __init__(self, mrid: str, ends: List[PowerTransformerEnd] = None, vector_group: VectorGroup = VectorGroup.UNKNOWN,
                  in_service: bool = True, name: str = "", terminals: List = None, diag_objs: List[DiagramObject] = None,
                  location: Location = None):
         """
@@ -260,7 +260,7 @@ class PowerTransformer(ConductingEquipment):
         return PBPowerTransformer(**args)
 
     @staticmethod
-    def from_pb(pb_tf, network):
+    def from_pb(pb_tf, network, **kwargs):
         """
         Convert a protobuf PowerTransformer to a :class:`zepben.model.PowerTransformer`
         :param pb_tf: :class:`zepben.cim.iec61970.base.wires.PowerTransformer`

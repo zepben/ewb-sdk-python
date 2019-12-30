@@ -73,7 +73,7 @@ class PositionPoint(IdentifiedObject):
         return PBPositionPoint(xPosition=self.x_position, yPosition=self.y_position)
 
     @staticmethod
-    def from_pb(pos_point):
+    def from_pb(pos_point, **kwargs):
         return PositionPoint(pos_point.xPosition, pos_point.yPosition)
 
 
@@ -86,7 +86,7 @@ class TownDetail(object):
         return PBTownDetail(name=self.name, stateOrProvince=self.state_or_province)
 
     @staticmethod
-    def from_pb(pb_td):
+    def from_pb(pb_td, **kwargs):
         return TownDetail(name=pb_td.name, state_or_province=pb_td.stateOrProvince)
 
 
@@ -100,7 +100,7 @@ class StreetAddress(object):
         return PBStreetAddress(postalCode=self.postal_code, townDetail=self.town_detail.to_pb())
 
     @staticmethod
-    def from_pb(pb_sa):
+    def from_pb(pb_sa, **kwargs):
         return StreetAddress(pb_sa.postalCode, TownDetail.from_pb(pb_sa.townDetail))
 
 
@@ -135,7 +135,7 @@ class Location(IdentifiedObject):
         return PBLocation(**args)
 
     @staticmethod
-    def from_pb(pb_l):
+    def from_pb(pb_l, **kwargs):
         """
         Transform a Protobuf Location to a cimbend Location
         TODO: Test this doesn't error on empty positionPoints

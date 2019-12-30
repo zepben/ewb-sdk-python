@@ -51,7 +51,7 @@ class Reading(object):
         return PBReading(timestamp=ts, value=self.value)
 
     @staticmethod
-    def from_pb(pb_r, reading_type):
+    def from_pb(pb_r, reading_type, **kwargs):
         if reading_type == ReadingType.VOLTAGE:
             return VoltageReading(pb_r.timestamp.seconds, pb_r.value)
         elif reading_type == ReadingType.REACTIVE_POWER:
@@ -173,7 +173,7 @@ class UsagePoint(IdentifiedObject):
         for e in pb_up.equipmentMRIDs:
             try:
                 equipment.append(network[e])
-            except KeyError as k:
+            except KeyError:
                 logger.debug(f"Network was missing equipment {e} for UsagePoint {pb_up.mRID}")
                 continue
 
@@ -201,7 +201,7 @@ class Meter(EndDevice):
         :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
         """
         super().__init__(mrid, name, customer, location, diag_objs)
-        self.usage_points = usage_points
+        self.usage_points = usage_points if usage_points is not None else []
         for point in self.usage_points:
             point.add_end_device(self)
 
@@ -210,17 +210,20 @@ class Meter(EndDevice):
         return PBMeter(mRID=self.mrid, name=self.name, usagePointMRIDs=usage_points)
 
     @staticmethod
-    def from_pb(pb_m, network):
+    def from_pb(pb_m, network, **kwargs):
         """
         Create a meter from a protobuf Meter
         A meter requires all specified usagePointMRIDs to already exist in the network.
         Customer, serviceLocation, and diagramObjects are optional.
         :param pb_m: A protobuf Meter
         :param network: EquipmentContainer to be used for fetching UsagePoint's and Customer's
-        :raises: NoUsagePointException if no UsagePoint has been added to the network.
+        :raises: NoUsagePointException if the specified `UsagePoint`'s have not been added to the network.
         :return: a Meter
         """
-        usage_points = [network.get_usage_point(p) for p in pb_m.usagePointMRIDs]
+        if pb_m.usagePointMRIDs:
+            usage_points = [network.get_usage_point(p) for p in pb_m.usagePointMRIDs]
+        else:
+            usage_points = None
 
         if pb_m.customerMRID:
             try:

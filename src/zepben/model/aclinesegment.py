@@ -107,7 +107,7 @@ class ACLineSegment(ConductingEquipment):
         return PBAcLineSegment(**args)
 
     @staticmethod
-    def from_pb(pb_acls, network):
+    def from_pb(pb_acls, network, **kwargs):
         """
         Convert a protobuf AcLineSegment to a :class:`zepben.model.ACLineSegment`
         :param pb_acls: :class:`zepben.cim.iec61970.base.wires.AcLineSegment`
@@ -123,7 +123,7 @@ class ACLineSegment(ConductingEquipment):
         diag_objs = DiagramObject.from_pbs(pb_acls.diagramObjects)
         base_voltage = network.get_base_voltage(pb_acls.baseVoltageMRID) if pb_acls.baseVoltageMRID else None
         plsi = network.get_plsi(pb_acls.perLengthSequenceImpedanceMRID) if pb_acls.perLengthSequenceImpedanceMRID else None
-        wire_info = network.get_asset_info(pb_acls.assetInfoMRID)
+        wire_info = network.get_asset_info(pb_acls.assetInfoMRID) if pb_acls.assetInfoMRID else None
 
         return ACLineSegment(mrid=pb_acls.mRID,
                              name=pb_acls.name,

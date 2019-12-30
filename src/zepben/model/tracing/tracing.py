@@ -1,8 +1,27 @@
+"""
+Copyright 2019 Zeppelin Bend Pty Ltd
+This file is part of cimbend.
+
+cimbend is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+cimbend is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+
 from abc import ABC, abstractmethod
-from zepben.model.tracing.queue import Queue, LifoQueue, PriorityQueue
+from zepben.model.tracing.queue import FifoQueue, LifoQueue, PriorityQueue
 from zepben.model.tracing.exceptions import TracingException
 from zepben.model.tracing.tracker import Tracker
-from typing import List, Callable, Awaitable, TypeVar, Generic, Set
+from typing import List, Callable, Awaitable, TypeVar, Generic, Set, Iterable
 from enum import Enum
 
 T = TypeVar('T')
@@ -18,7 +37,7 @@ def create_queue(search_type):
     if search_type == SearchType.DEPTH:
         return LifoQueue()
     elif search_type == SearchType.BREADTH:
-        return Queue()
+        return FifoQueue()
     elif search_type == SearchType.PRIORITY:
         return PriorityQueue()
 
@@ -166,7 +185,7 @@ class Traversal(BaseTraversal):
     visiting under different conditions etc.
     """
     def __init__(self,
-                 queue_next: Callable[[T, Set[T]], List[T]],
+                 queue_next: Callable[[T, Set[T]], Iterable[T]],
                  start_item: T,
                  search_type: SearchType = SearchType.DEPTH,
                  tracker: Tracker = None,
@@ -196,6 +215,12 @@ class Traversal(BaseTraversal):
         :param can_stop_on_start_item: Whether the trace can stop on the start_item. Actions will still be applied to
                                        the start_item.
         """
+        if self.start_item is None:
+            try:
+                self.start_item = self.process_queue.get()
+            except IndexError:
+                raise TracingException("Starting item wasn't specified and the process queue is empty. Cannot start the trace.")
+
         self.tracker.visit(self.start_item)
         # If we can't stop on the start item we don't run any stop conditions. if this causes a problem for you,
         # work around it by running the stop conditions for the start item prior to running the trace.

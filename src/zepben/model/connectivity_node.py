@@ -66,7 +66,7 @@ class ConnectivityNode(IdentifiedObject):
         return f"{super().__repr__()} terminals: {self.terminals}"
 
     @staticmethod
-    def from_pb(pb_cn):
+    def from_pb(pb_cn, **kwargs):
         raise NotImplementedError()
 
     def to_pb(self):

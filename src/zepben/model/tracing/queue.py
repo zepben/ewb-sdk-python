@@ -1,3 +1,22 @@
+"""
+Copyright 2019 Zeppelin Bend Pty Ltd
+This file is part of cimbend.
+
+cimbend is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+cimbend is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+
 from collections import deque
 from abc import abstractmethod, ABC
 from typing import TypeVar, Generic
@@ -19,6 +38,10 @@ class Queue(Generic[T], ABC):
 
     @abstractmethod
     def get(self):
+        """
+        Pop an item off the queue.
+        :raises: `IndexError` if the queue is empty.
+        """
         raise NotImplementedError()
 
     @abstractmethod
@@ -48,6 +71,10 @@ class FifoQueue(Queue[T]):
         self.queue.append(item)
 
     def get(self):
+        """
+        Pop an item off the queue.
+        :raises: `IndexError` if the queue is empty.
+        """
         return self.queue.popleft()
 
     def empty(self):
@@ -74,6 +101,10 @@ class LifoQueue(Queue[T]):
         self.queue.append(item)
 
     def get(self):
+        """
+        Pop an item off the queue.
+        :raises: `IndexError` if the queue is empty.
+        """
         return self.queue.pop()
 
     def empty(self):
@@ -117,6 +148,7 @@ class PriorityQueue(Queue[T]):
         """
         Get the next item in the queue, removing it from the queue.
         :return: The next item in the queue by priority.
+        :raises: `IndexError` if the queue is empty
         """
         return heappop(self.queue)
 

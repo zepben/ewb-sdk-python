@@ -17,18 +17,23 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.model.metering import MeterReading, ReactivePowerReading, RealPowerReading, VoltageReading
-from zepben.model.metrics_store import MetricsStore
+from zepben.model.network import EquipmentContainer
+from zepben.model.containers import UNKNOWN_SUBGEO, SubGeographicalRegion
+__all__ = ["Substation", "UNKNOWN_SUBSTATION"]
 
 
-class TestMetricsStore(object):
+class Substation(EquipmentContainer):
+    def __init__(self, mrid, subgeo: SubGeographicalRegion = None, name: str = ""):
+        super().__init__(mrid=mrid, name=name)
+        self.sub_geographical_region = subgeo
+        self.normal_energized_feeders = dict()
 
-    def test_iteration(self):
-        store = MetricsStore()
-        r1 = RealPowerReading(1, 1.0)
-        r2 = ReactivePowerReading(2, 1.0)
-        r3 = VoltageReading(3, 1.0)
-        mr = MeterReading(meter="10", readings=[r1, r2, r3])
-        store.store_meter_reading(mr)
+    @staticmethod
+    def from_pb(pb_gr):
+        raise NotImplementedError()
+
+    def to_pb(self):
+        raise NotImplementedError()
 
 
+UNKNOWN_SUBSTATION = Substation("dc20ec4d-cbf0-474d-886b-42c21ec92ff4", subgeo=UNKNOWN_SUBGEO, name="unknown")

@@ -17,18 +17,26 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.model.metering import MeterReading, ReactivePowerReading, RealPowerReading, VoltageReading
-from zepben.model.metrics_store import MetricsStore
+from zepben.model.tracing.util import normally_open, currently_open
 
 
-class TestMetricsStore(object):
+class TestUtils(object):
+    def test_normally_open(self, conducting_equipment, switch):
+        # Test with core = None
+        normally_open(conducting_equipment)
 
-    def test_iteration(self):
-        store = MetricsStore()
-        r1 = RealPowerReading(1, 1.0)
-        r2 = ReactivePowerReading(2, 1.0)
-        r3 = VoltageReading(3, 1.0)
-        mr = MeterReading(meter="10", readings=[r1, r2, r3])
-        store.store_meter_reading(mr)
+        # Test with cond equip, legit core
+
+        # test with cond equip, incorrect core
+
+        # Test with switch, core = None
+        normally_open(switch)
+
+        # Test with switch, legit core
+
+        # test with switch, incorrect core
+
+        # Test non-equipment raises error
+
 
 

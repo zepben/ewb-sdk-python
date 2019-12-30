@@ -22,10 +22,15 @@ from collections.abc import Iterable
 from typing import Set, List
 from zepben.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind
 
-phs_to_cores = { SinglePhaseKind.A: 0,
-                 SinglePhaseKind.B: 1,
-                 SinglePhaseKind.C: 2,
-                 SinglePhaseKind.N: 3}
+phs_to_cores = {SinglePhaseKind.A: 0,
+                SinglePhaseKind.B: 1,
+                SinglePhaseKind.C: 2,
+                SinglePhaseKind.N: 3}
+
+cores_to_phs = {0: SinglePhaseKind.A,
+                1: SinglePhaseKind.B,
+                2: SinglePhaseKind.C,
+                3: SinglePhaseKind.N}
 
 
 def snake2camelback(name):
@@ -38,7 +43,7 @@ def iter_but_not_str(obj):
 
 def get_equipment_connections(cond_equip, exclude: Set = None) -> List:
     """ Utility function wrapping :meth:`zepben.model.ConductingEquipment.get_connections` """
-    return cond_equip.get_connections(exclude=exclude)
+    return cond_equip.get_connected_equipment(exclude=exclude)
 
 
 def phs_kind_to_idx(phase: SinglePhaseKind):

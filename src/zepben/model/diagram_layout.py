@@ -37,8 +37,8 @@ class DiagramObjectPoint(object):
         return PBDiagramObjectPoint(xPosition=self.x_position, yPosition=self.y_position)
 
     @staticmethod
-    def from_pb(diag_obj_point):
-        return DiagramObjectPoint(diag_obj_point.xPosition, diag_obj_point.yPosition)
+    def from_pb(pb_dop, **kwargs):
+        return DiagramObjectPoint(pb_dop.xPosition, pb_dop.yPosition)
 
 
 class DiagramObject(IdentifiedObject):
@@ -69,16 +69,16 @@ class DiagramObject(IdentifiedObject):
         return PBDiagramObject(**args)
 
     @staticmethod
-    def from_pb(diag_obj):
+    def from_pb(pb_do, **kwargs):
         """
         Transform a protobuf DiagramObject to a cimbend DiagramObject
-        :param diag_obj:
+        :param pb_do:
         :return:
         """
-        diagram = Diagram(diag_obj.diagramMRID)
-        cim_diag_obj = DiagramObject(mrid=diag_obj.mRID, name=diag_obj.name, object_style=diag_obj.diagramObjectStyle,
-                                     rotation=diag_obj.rotation, diagram=diagram)
-        for point in diag_obj.diagramObjectPoints:
+        diagram = Diagram(pb_do.diagramMRID)
+        cim_diag_obj = DiagramObject(mrid=pb_do.mRID, name=pb_do.name, object_style=pb_do.diagramObjectStyle,
+                                     rotation=pb_do.rotation, diagram=diagram)
+        for point in pb_do.diagramObjectPoints:
             cim_diag_obj.add_point(DiagramObjectPoint.from_pb(point))
         return cim_diag_obj
 
@@ -98,7 +98,7 @@ class Diagram(IdentifiedObject):
         """
         self.objects.append(diagram_object)
 
-    def from_pb(pb_d):
+    def from_pb(pb_d, **kwargs):
         raise NotImplementedError()
 
     def to_pb(self):
