@@ -17,7 +17,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.iec61970 import EnergySource as PBEnergySource, EnergySourcePhase as PBEnergySourcePhase, SinglePhaseKind
+from zepben.cim.iec61970 import EnergySource as PBEnergySource, EnergySourcePhase as PBEnergySourcePhase
+from zepben.model.phases import SinglePhaseKind
 from zepben.model.terminal import Terminal
 from zepben.model.equipment import ConductingEquipment, PowerSystemResource
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
@@ -32,7 +33,7 @@ class EnergySourcePhase(PowerSystemResource):
     A single phase of an energy source.
 
     Attributes:
-        phase : A :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind`
+        phase : A :class:`zepben.model.phases.SinglePhaseKind`
                 Phase of this energy source component. If the energy source is wye connected, the connection is from
                 the indicated phase to the central ground or neutral point. If the energy source is delta connected,
                 the phase indicates an energy source connected from the indicated phase to the next logical
@@ -43,7 +44,7 @@ class EnergySourcePhase(PowerSystemResource):
         Create an EnergySourcePhase. Represents a single phase of an EnergySource. Typically, you are only required
         to create EnergySourcePhases if they are unbalanced, or if it's a single phase EnergySource.
 
-        :param phase: A :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind`
+        :param phase: A :class:`zepben.model.phases.SinglePhaseKind`
         :param mrid: mRID for this object (optional)
         :param name: Any free human readable and possibly non unique text naming the object.
         :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
@@ -56,7 +57,7 @@ class EnergySourcePhase(PowerSystemResource):
 
     @staticmethod
     def from_pb(pb_esp, **kwargs):
-        return EnergySourcePhase(phase=pb_esp.phase, mrid=pb_esp.mRID, name=pb_esp.name,
+        return EnergySourcePhase(phase=SinglePhaseKind.from_pb(pb_esp.phase), mrid=pb_esp.mRID, name=pb_esp.name,
                                  diag_objs=DiagramObject.from_pbs(pb_esp.diagramObjects))
 
 
@@ -111,12 +112,6 @@ class EnergySource(ConductingEquipment):
         self.voltage_magnitude = voltage_magnitude
         self.energy_source_phases = esp if esp is not None else []
         super().__init__(mrid=mrid, in_service=in_service, base_voltage=base_voltage, name=name, terminals=terminals, diag_objs=diag_objs, location=location)
-
-    def __str__(self):
-        return f"{super().__str__()} active_power: {self.active_power}, r: {self.r}, x: {self.x}, reactive_power: {self.reactive_power}, voltage_angle: {self.voltage_angle}, voltage_mag: {self.voltage_magnitude}"
-
-    def __repr__(self):
-        return f"{super().__repr__()} active_power: {self.active_power}, r: {self.r}, x: {self.x}, reactive_power: {self.reactive_power}, voltage_angle: {self.voltage_angle}, voltage_mag: {self.voltage_magnitude}"
 
     def has_phases(self):
         """

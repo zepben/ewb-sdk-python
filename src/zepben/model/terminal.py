@@ -18,16 +18,15 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.cim.iec61970 import Terminal as PBTerminal
-from zepben.model.cores import from_count, from_phases
+from zepben.model.cores import from_count
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.diagram_layout import DiagramObject
-from zepben.model.phases import Phases
+from zepben.model.phases import Phases, cores_from_phases
 from zepben.model.wiring import IMPLICIT_WIRING, Wiring
 from zepben.model.exceptions import NoEquipmentException, NoConnectivityNodeException, WiringException
 from zepben.model.tracing.phase_status import current_phases as ps_current_phases, normal_phases as ps_normal_phases
 from typing import List, Set
 from weakref import ref
-from zepben.model.direction import Direction
 from zepben.model.tracing.connectivity import ConnectivityResult
 
 
@@ -42,7 +41,7 @@ class Terminal(IdentifiedObject):
     Attributes:
         - equipment : A reference back to the equipment this Terminal belongs to. This reference will typically
                       be added in :class:`zepben.model.ConductingEquipment::__init__()`.
-        - phases : A :class:`zepben.cim.iec61970.PhaseCode` representing the normal network phasing condition of this
+        - phases : A :class:`zepben.model.phases.PhaseCode` representing the normal network phasing condition of this
                    Terminal.
         - connected : The connected status is related to a bus-branch model and the topological node to terminal relation.
                       True implies the terminal is connected to the related topological node and false implies it is not.
@@ -53,14 +52,13 @@ class Terminal(IdentifiedObject):
     """
 
     def __init__(self, mrid: str, connectivity_node, phases: Phases = None, name: str = "",
-                 diag_objs: List[DiagramObject] = None, equipment=None, direction: Direction = Direction.NONE,
-                 connected: bool = True):
+                 diag_objs: List[DiagramObject] = None, equipment=None, connected: bool = True):
         """
         Create a Terminal.
         The provided connectivity_node will always be referenced weakly to ensure that a single Terminal reference
         can't indirectly keep an entire network alive via the ConnectivityNode.
         :param mrid: Master resource identifier for this Terminal.
-        :param phases: A :class:`zepben.cim.iec61970.PhaseCode` representing the normal network phasing condition of this
+        :param phases: A :class:`zepben.model.phases.PhaseCode` representing the normal network phasing condition of this
                        Terminal.
         :param connectivity_node: The :class:`zepben.model.ConnectivityNode` that this terminal is attached to.
         :param name: Any free human readable and possibly non unique text naming the object.
@@ -68,14 +66,11 @@ class Terminal(IdentifiedObject):
         :param connected: Whether this terminal is connected (potentially energised). See description in class definition.
         :param equipment: A reference to the equipment that owns this terminal. This can be set after instantiation as
                           to resolve chicken-and-egg issues between terminals and equipment (as both have references).
-        :param direction: (experimental) True if this terminal is "closest" to its primary EnergySource. I.e, it is the
-                        first terminal on a piece of equipment to receive power (specifically from the primary EnergySource).
         """
         self.phases = phases if phases is not None else Phases()
         self.connected = connected
         self.__connectivity_node = ref(connectivity_node)
         self.__equipment = equipment
-        self.__direction = direction
         self.__ext_int_wiring = [-1 for _ in range(self.num_cores)]
         self.__int_ext_wiring = [-1 for _ in range(self.num_cores)]
         super().__init__(mrid, name, diag_objs)
@@ -99,19 +94,11 @@ class Terminal(IdentifiedObject):
         self.__equipment = equip
 
     @property
-    def direction(self):
-        return self.__direction
-
-    @direction.setter
-    def direction(self, direction):
-        self.__direction = direction
-
-    @property
     def num_cores(self):
         try:
             return self.equipment.num_cores
         except (AttributeError, NoEquipmentException):  # Equipment may not be set yet, but num_cores should always be the same.
-            return from_phases(self.phases.phase)
+            return cores_from_phases(self.phases.phase)
 
     def __lt__(self, other):
         """
@@ -120,7 +107,7 @@ class Terminal(IdentifiedObject):
         :param other:
         :return:
         """
-        return self.num_cores < other.num_cores
+        return self.num_cores > other.num_cores
 
     def normal_phases(self, core):
         return ps_normal_phases(self, core)
@@ -240,5 +227,5 @@ class Terminal(IdentifiedObject):
         return term
 
     def __str__(self):
-        return f"{super().__repr__()}, phase: {self.phases}, connectivityNode: {self.connectivity_node.mrid} direction: {self.direction}"
+        return f"{super().__str__()}, {self.phases}, cn: {self.connectivity_node.mrid}, conn: {self.connected}"
 

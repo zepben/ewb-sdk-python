@@ -20,7 +20,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 import re
 from collections.abc import Iterable
 from typing import Set, List
-from zepben.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind
+from zepben.model.phases import SinglePhaseKind
 
 phs_to_cores = {SinglePhaseKind.A: 0,
                 SinglePhaseKind.B: 1,

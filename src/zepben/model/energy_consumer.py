@@ -17,7 +17,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.iec61970 import PhaseShuntConnectionKind, SinglePhaseKind, EnergyConsumer as PBEnergyConsumer, EnergyConsumerPhase as PBEnergyConsumerPhase
+from zepben.cim.iec61970 import PhaseShuntConnectionKind, EnergyConsumer as PBEnergyConsumer, EnergyConsumerPhase as PBEnergyConsumerPhase
+from zepben.model.phases import SinglePhaseKind
 from zepben.model.terminal import Terminal
 from zepben.model.equipment import ConductingEquipment, PowerSystemResource
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
@@ -35,7 +36,7 @@ class EnergyConsumerPhase(PowerSystemResource):
                  i.e. positive sign means flow out from a node.
         qfixed : Reactive power of the load that is a fixed quantity. Load sign convention is used,
                  i.e. positive sign means flow out from a node.
-        phase : A :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind`
+        phase : A :class:`zepben.model.phases.SinglePhaseKind`
                 Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from
                 the indicated phase to the central ground or neutral point. If the energy consumer is delta connected,
                 the phase indicates an energy consumer connected from the indicated phase to the next logical
@@ -51,7 +52,7 @@ class EnergyConsumerPhase(PowerSystemResource):
                        i.e. positive sign means flow out from a node.
         :param qfixed: Reactive power of the load that is a fixed quantity. Load sign convention is used,
                        i.e. positive sign means flow out from a node.
-        :param phase: A :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind`
+        :param phase: A :class:`zepben.model.phases.SinglePhaseKind`
         :param mrid: mRID for this object (optional)
         :param name: Any free human readable and possibly non unique text naming the object.
         :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
@@ -66,7 +67,7 @@ class EnergyConsumerPhase(PowerSystemResource):
 
     @staticmethod
     def from_pb(pb_ecp, **kwargs):
-        return EnergyConsumerPhase(pfixed=pb_ecp.pfixed, qfixed=pb_ecp.qfixed, phase=pb_ecp.phase)
+        return EnergyConsumerPhase(pfixed=pb_ecp.pfixed, qfixed=pb_ecp.qfixed, phase=SinglePhaseKind.from_pb(pb_ecp.phase))
 
 
 class EnergyConsumer(ConductingEquipment):
@@ -113,12 +114,6 @@ class EnergyConsumer(ConductingEquipment):
         self.phaseConnection = phs_shunt_conn_kind
         self.energy_consumer_phases = ecp if ecp is not None else []
         super().__init__(mrid=mrid, in_service=in_service, base_voltage=base_voltage, name=name, terminals=terminals, diag_objs=diag_objs, location=location)
-
-    def __str__(self):
-        return f"{super().__str__()} p: {self.p}, q: {self.q}"
-
-    def __repr__(self):
-        return f"{super().__repr__()} p: {self.p}, q: {self.q}"
 
     def to_pb(self):
         args = self._pb_args()

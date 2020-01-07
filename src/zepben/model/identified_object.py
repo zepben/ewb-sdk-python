@@ -46,6 +46,9 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         name : The name is any free human readable and possibly non unique text naming the object.
         diagram_objects : The :class:`zepben.model.DiagramObject`'s related to this object.
     """
+    # TODO: requires rework of _pb_args
+    #__slots__ = "_m_r_i_d", "name", "__diagram_objects_by_diagram"
+
     def __init__(self, mrid: str = "", name: str = "", diagram_objects: List = None):
         """
 
@@ -54,7 +57,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         :param diagram_objects: The :class:`zepben.model.DiagramObject`'s related to this object.
         """
         # It's really horrible to use the snake form of mRID, so we define a property + setter for it below as "mrid".
-        self._m_r_i_d = mrid
+        self.mrid = mrid
         self.name = name
         self.__diagram_objects_by_diagram = dict()
         if diagram_objects is not None:
@@ -62,10 +65,10 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                 self.add_diagram_object(obj)
 
     def __str__(self):
-        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} point: {self.diagram_objects()}"
+        return f"{{{'|'.join(a for a in (self.mrid, self.name) if a)}}}"
 
     def __repr__(self):
-        return f"mrid: {self.mrid}, name: {self.name.strip() if self.name else 'UNKNOWN'} {self.diagram_objects()}"
+        return f"mrid={self.mrid}, name='{self.name}', __diagram_objects_by_diagram={self.__diagram_objects_by_diagram}"
 
     def add_diagram_object(self, diagram_object):
         if diagram_object.diagram is not None:
@@ -186,6 +189,30 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                     pb_dict[key] = v
             except NotImplementedError:
                 continue
+
+#        for k, v in zip(self.__slots__, map(self.__getattribute__, self.__slots__)):
+#            if self._should_ignore_key(k, v, exclude):
+#                continue
+#
+#            # Remove any leading underscores and convert to camelback casing
+#            key = snake2camelback(k.lstrip('_'))
+#            try:
+#                pb_dict[key] = v.to_pb()
+#            except AttributeError:
+#                # Any sequence must stay a sequence, except for strings, bytes, and bytearrays.
+#                if iter_but_not_str(v):
+#                    try:
+#                        # Handle repeated sub-message
+#                        pb_dict[key] = [x.to_pb() for x in v]
+#                    except AttributeError:
+#                        # Handle repeated scalar
+#                        pb_dict[key] = v
+#                else:
+#                    # Strings + every other scalar
+#                    pb_dict[key] = v
+#            except NotImplementedError:
+#                continue
+
         return pb_dict
 
     def has_xy(self):

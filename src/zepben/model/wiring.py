@@ -20,6 +20,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 from copy import deepcopy
 from zepben.model.exceptions import WiringException
 from zepben.model.cores import validate_core, SUPPORTED_CORES
+from zepben.model.phases import SinglePhaseKind
 
 
 class Wiring(object):
@@ -67,7 +68,7 @@ class Wiring(object):
         :return: A list of `self.num_cores` int's between [0, :data:`zepben.model.cores.SUPPORTED_CORES`] representing
                 the wiring between cores from the `ConnectivityNode` to the `Terminal`
         """
-        cn_to_term = [-1 for _ in range(self.num_cores)]
+        cn_to_term = [-1 for _ in range(self.max_connectivity_node_wires + 1)]
         for i in range(len(self.term_to_cn)):
             if self.term_to_cn[i] == -1:
                 raise WiringException(f"Wiring {i} was unspecified. All wirings need to be specified.")

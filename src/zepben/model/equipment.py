@@ -16,7 +16,8 @@ You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from zepben.model.asset_info import AssetInfo
-from zepben.model.cores import from_phases, SUPPORTED_CORES
+from zepben.model.cores import SUPPORTED_CORES
+from zepben.model.phases import cores_from_phases
 from zepben.model.exceptions import NoEquipmentException, NoUsagePointException, AlreadyExistsException
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.diagram_layout import DiagramObject
@@ -163,8 +164,7 @@ class ConductingEquipment(Equipment):
     """
     def __init__(self, mrid: str, base_voltage: BaseVoltage, terminals: List, in_service: bool = True,
                  normally_in_service: bool = True, name: str = "", diag_objs: List[DiagramObject] = None,
-                 location: Location = None, asset_info: AssetInfo = None, usage_points: List[UsagePoint] = None,
-                 num_cores: int = 0):
+                 location: Location = None, asset_info: AssetInfo = None, usage_points: List[UsagePoint] = None):
         """
         Create a ConductingEquipment
         :param mrid: mRID for this object
@@ -185,7 +185,7 @@ class ConductingEquipment(Equipment):
         else:
             self.terminals = terminals
         try:
-            self.__num_cores = from_phases(self.terminals[0].phases.phase)
+            self.__num_cores = cores_from_phases(self.terminals[0].phases.phase)
         except IndexError:
             self.__num_cores = SUPPORTED_CORES  # Default to max cores when unknown.
         # We set a reference for each terminal back to its equipment to make iteration over a network easier
@@ -195,10 +195,12 @@ class ConductingEquipment(Equipment):
                          asset_info=asset_info, diag_objs=diag_objs, location=location, usage_points=usage_points)
 
     def __str__(self):
-        return f"{super().__str__()} in_serv: {self.in_service}, lnglat: {self.location} terms: {self.terminals}"
+        return f"{super().__str__()} {self.base_voltage} in_serv: {self.in_service}, norm_in_serv: {self.normally_in_service} terms: {self.terminals}"
 
     def __repr__(self):
-        return f"{super().__repr__()} in_serv: {self.in_service}, lnglat: {self.location}"
+        return (f"{super().__repr__()}, num_cores={self.num_cores} in_service={self.in_service}, "
+                f"normally_in_service={self.normally_in_service}, location={self.location}"
+                )
 
     def __lt__(self, other):
         """

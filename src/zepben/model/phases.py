@@ -19,13 +19,95 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 from collections import defaultdict
+from enum import Enum
+
+from zepben.model.cores import SUPPORTED_CORES
 from zepben.model.exceptions import CoreException, PhaseException
 from zepben.model.direction import Direction
-from zepben.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind
-from zepben.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode
-from typing import Sequence
+from zepben.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind as PBSinglePhaseKind
+from zepben.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode as PBPhaseCode
 
 CORE_MASKS = [0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000]
+DIR_MASK = 0b11
+
+
+class SinglePhaseKind(Enum):
+    NONE = 0
+    A = 1
+    B = 2
+    C = 3
+    N = 4
+    INVALID = 5
+
+    @property
+    def short_name(self):
+        return str(self)[16:]
+
+    def to_pb(self):
+        return PBSinglePhaseKind.Value(self.name)
+
+    @staticmethod
+    def from_pb(pb_spk, **kwargs):
+        return SinglePhaseKind[PBSinglePhaseKind.Name(pb_spk)]
+
+
+def cores_from_phases(phases: PhaseCode):
+    """
+    Convert a phase into its corresponding number of Cores
+    TODO: handle all phases
+    :param phases: A :class:`zepben.model.phases.PhaseCode` to convert
+    :return: Number of cores
+    """
+    if phases in (PhaseCode.ABC, PhaseCode.ABN, PhaseCode.ACN, PhaseCode.BCN):
+        return 3
+    elif phases in (PhaseCode.AB, PhaseCode.AC, PhaseCode.BC, PhaseCode.AN, PhaseCode.BN, PhaseCode.CN):
+        return 2
+    elif phases in (PhaseCode.A, PhaseCode.B, PhaseCode.C, PhaseCode.N):
+        return 1
+    elif phases == PhaseCode.ABCN:
+        return 4
+    else:
+        return 4
+
+
+class PhaseCode(Enum):
+    NONE = (SinglePhaseKind.NONE,)
+    A = (SinglePhaseKind.A,)
+    B = (SinglePhaseKind.B,)
+    C = (SinglePhaseKind.C,)
+    N = (SinglePhaseKind.N,)
+    AB = (SinglePhaseKind.A, SinglePhaseKind.B)
+    AC = (SinglePhaseKind.A, SinglePhaseKind.C)
+    AN = (SinglePhaseKind.A, SinglePhaseKind.N)
+    BC = (SinglePhaseKind.B, SinglePhaseKind.C)
+    BN = (SinglePhaseKind.B, SinglePhaseKind.N)
+    CN = (SinglePhaseKind.C, SinglePhaseKind.N)
+    ABC = (SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C)
+    ABN = (SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.N)
+    ACN = (SinglePhaseKind.A, SinglePhaseKind.C, SinglePhaseKind.N)
+    BCN = (SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N)
+    ABCN = (SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N)
+    X = (SinglePhaseKind.NONE,)
+    XN = (SinglePhaseKind.NONE, SinglePhaseKind.N)
+    XY = (SinglePhaseKind.NONE, SinglePhaseKind.NONE)
+    XYN = (SinglePhaseKind.NONE, SinglePhaseKind.NONE, SinglePhaseKind.N)
+
+    @property
+    def short_name(self):
+        return str(self)[10:]
+
+    @property
+    def single_phases(self):
+        return self.value
+
+    def to_pb(self):
+        return PBPhaseCode.Value(self.name)
+
+    @staticmethod
+    def from_pb(pb_pc, **kwargs):
+        return PhaseCode[PBPhaseCode.Name(pb_pc)]
+
+
 PHASE_DIR_MAP = defaultdict(lambda: SinglePhaseKind.NONE)
 PHASE_DIR_MAP[0b01] = SinglePhaseKind.A
 PHASE_DIR_MAP[0b10] = SinglePhaseKind.A
@@ -39,27 +121,6 @@ PHASE_DIR_MAP[0b110000] = SinglePhaseKind.C
 PHASE_DIR_MAP[0b01000000] = SinglePhaseKind.N
 PHASE_DIR_MAP[0b10000000] = SinglePhaseKind.N
 PHASE_DIR_MAP[0b11000000] = SinglePhaseKind.N
-PC_TO_SPK = defaultdict(lambda: SinglePhaseKind)
-PC_TO_SPK[PhaseCode.ABCN] = [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N]
-PC_TO_SPK[PhaseCode.ABC] = [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C]
-PC_TO_SPK[PhaseCode.ABN] = [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.N]
-PC_TO_SPK[PhaseCode.ACN] = [SinglePhaseKind.A, SinglePhaseKind.C, SinglePhaseKind.N]
-PC_TO_SPK[PhaseCode.BCN] = [SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N]
-PC_TO_SPK[PhaseCode.AB] = [SinglePhaseKind.A, SinglePhaseKind.B]
-PC_TO_SPK[PhaseCode.AC] = [SinglePhaseKind.A, SinglePhaseKind.C]
-PC_TO_SPK[PhaseCode.AN] = [SinglePhaseKind.A, SinglePhaseKind.N]
-PC_TO_SPK[PhaseCode.BC] = [SinglePhaseKind.B, SinglePhaseKind.C]
-PC_TO_SPK[PhaseCode.BN] = [SinglePhaseKind.B, SinglePhaseKind.N]
-PC_TO_SPK[PhaseCode.CN] = [SinglePhaseKind.C, SinglePhaseKind.N]
-PC_TO_SPK[PhaseCode.A] = [SinglePhaseKind.A]
-PC_TO_SPK[PhaseCode.B] = [SinglePhaseKind.B]
-PC_TO_SPK[PhaseCode.C] = [SinglePhaseKind.C]
-PC_TO_SPK[PhaseCode.N] = [SinglePhaseKind.N]
-DIR_MASK = 0b11
-
-
-def get_single_phases(pc: PhaseCode) -> Sequence[SinglePhaseKind]:
-    return PC_TO_SPK[pc]
 
 
 def validate_core(core_num):
@@ -81,7 +142,7 @@ def _direction(status: int, core_num: int):
 
 
 def _pos_shift(phase: SinglePhaseKind, core_num: int):
-    return (core_num * 8) + (2 * max(phase - 1, 0))
+    return (core_num * 8) + (2 * max(phase.value - 1, 0))
 
 
 class Phases(object):
@@ -89,6 +150,16 @@ class Phases(object):
         self.phase = phase
         self.normal_status = 0
         self.current_status = 0
+
+    def __str__(self):
+        s = []
+        for core in range(SUPPORTED_CORES):
+            pn = self.phase_normal(core)
+            pc = self.phase_current(core)
+            dn = self.direction_normal(core)
+            dc = self.direction_current(core)
+            s = s.append(f"core {core}: n: {pn.short_name}|{dn.short_name} c: {pc.short_name}|{dc.short_name}")
+        return ", ".join(s)
 
     def phase_normal(self, core_num):
         """
@@ -129,6 +200,7 @@ class Phases(object):
         :param phase: The :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind` to add.
         :param core_num: The core number this phase should be applied to
         :param direction: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
+        :return: True if phase status was changed, False otherwise.
         :raises: :class:`zepben.model.exceptions.PhaseException` if phases cross,
                  :class:`zepben.model.exceptions.CoreException` if `core_num` is invalid.
         """
@@ -149,6 +221,7 @@ class Phases(object):
         :param phase: The :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind` to add.
         :param core_num: The core number this phase should be applied to
         :param direction: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
+        :return: True if phase status was changed, False otherwise.
         :raises: :class:`zepben.model.exceptions.PhaseException` if phases cross
         """
         validate_core(core_num)
@@ -167,6 +240,7 @@ class Phases(object):
         :param phase: The :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind` to add.
         :param core_num: The core number this phase should be applied to
         :param direction: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
+        :return: True if phase status was changed, False otherwise.
         """
         validate_core(core_num)
         if phase == SinglePhaseKind.NONE or direction == Direction.NONE:
@@ -184,6 +258,7 @@ class Phases(object):
         :param phase: The :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind` to add.
         :param core_num: The core number this phase should be applied to
         :param direction: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
+        :return: True if phase status was changed, False otherwise.
         """
         validate_core(core_num)
         if phase == SinglePhaseKind.NONE or direction == Direction.NONE:
@@ -201,6 +276,7 @@ class Phases(object):
         :param phase: The :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind` to add.
         :param core_num: The core number this phase should be applied to
         :param direction: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
+        :return: True if phase status was changed, False otherwise.
         """
         validate_core(core_num)
         if phase != self.phase_normal(core_num):
@@ -219,6 +295,7 @@ class Phases(object):
         :param phase: The :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind` to add.
         :param core_num: The core number this phase should be applied to
         :param direction: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
+        :return: True if phase status was changed, False otherwise.
         """
         validate_core(core_num)
         if phase != self.phase_current(core_num):
@@ -233,10 +310,10 @@ class Phases(object):
             return True
 
     def to_pb(self):
-        return self.phase
+        return self.phase.to_pb()
 
     @staticmethod
-    def from_pb(pb_pc: PhaseCode, **kwargs):
+    def from_pb(pb_pc: PBPhaseCode, **kwargs):
         """
         Convert a phase code into a :class:`zepben.model.phases.Phases`.
         Will initialise the `Phases` with the normal phase as indicated by the passed in `PhaseCode`.
@@ -244,6 +321,6 @@ class Phases(object):
         :return: a :class:`zepben.model.phases.Phases` with the normal phases set for the corresponding `PhaseCode`,
                  but no current phases or `Direction`'s.
         """
-        return Phases(pb_pc)
+        return Phases(PhaseCode.from_pb(pb_pc))
 
 

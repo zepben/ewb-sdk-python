@@ -37,3 +37,6 @@ class Direction(Enum):
         else:
             return self is other
 
+    @property
+    def short_name(self):
+        return str(self)[10:]

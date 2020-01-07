@@ -18,30 +18,28 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from __future__ import annotations
-__all__ = ["FeederProcessingStatus", "SetPhases", "FeederCbTerminalCoresByStatus", "DelayedFeederTrace",
-           "set_phases_and_queue_next", "set_current_phases_and_queue_next", "set_normal_phases_and_queue_next"]
+
 import copy
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
+from zepben.model.direction import Direction
+from zepben.model.equipment import Equipment
 from zepben.model.exceptions import CoreException, PhaseException
+from zepben.model.tracing.exceptions import TracingException
 from zepben.model.tracing.phase_status import normal_phases, current_phases
 from zepben.model.tracing.util import queue_next_terminal
-from zepben.model.equipment import Equipment
-from zepben.model.direction import Direction
 from zepben.model.tracing.queue import PriorityQueue
 from zepben.model.tracing.tracing import SearchType, Traversal
 from zepben.model.tracing.phase_status import PhaseStatus
 from zepben.model.tracing.branch_recursive_tracing import BranchRecursiveTraversal
 from zepben.model.tracing.util import normally_open, currently_open
-from typing import Set, Callable, List, TYPE_CHECKING
+from typing import Set, Callable, List
 
+__all__ = ["FeederProcessingStatus", "SetPhases", "FeederCbTerminalCoresByStatus", "DelayedFeederTrace",
+           "set_phases_and_queue_next", "set_current_phases_and_queue_next", "set_normal_phases_and_queue_next"]
 
-if TYPE_CHECKING:
-    from zepben.model.terminal import Terminal
-
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("phasing.py")
 
 
 class FeederProcessingStatus(Enum):
@@ -54,7 +52,7 @@ class FeederProcessingStatus(Enum):
 class FeederCbTerminalCoresByStatus:
     #__slots__ = ("terminal", "in_cores", "none_cores", "cores_to_flow")
     terminal: Terminal
-    in_cores: 'Set[int]' = field(default_factory=set)
+    in_cores: Set[int] = field(default_factory=set)
     none_cores: Set[int] = field(default_factory=set)
     cores_to_flow: Set[int] = field(default_factory=set)
 
@@ -77,6 +75,8 @@ class SetPhases(object):
 
     async def run(self, network):
         terminals = await _apply_phases_from_feeder_cbs(network)
+        if not terminals:
+            raise TracingException("No feeder circuit breakers were found, tracing cannot be performed.")
         await self.run_complete(terminals, network.breakers.values())
 
     async def run_complete(self, terminals: list, breakers: List[Breaker]):
@@ -102,7 +102,7 @@ async def find_es_breaker_terminal(es):
     TODO: check how ES are normally connected to feeder CB's.
     """
     out_terminals = set()
-    stopping = False
+
     async def stop_on_sub_breaker(term, exc=None):
         if out_terminals:  # stop as soon as we find a substation breaker.
             return True
@@ -127,16 +127,22 @@ async def _apply_phases_from_feeder_cbs(network):
     :param network: :class:`zepben.model.network.EquipmentContainer` to apply phasing on.
     """
     start_terms = []
+    # TODO: check if below assumption is correct
+    # We find the substation breaker from the networks energy sources as we assume that the ES will be wired below
+    # the breaker, and thus we can determine which terminal of the breaker to flow out from and apply phases.
     for es in network.energy_sources.values():
         esp = es.energy_source_phases
         if esp:
             if len(esp) != es.num_cores:
-                logger.warning(f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_cores}. Number of phases should match number of cores.")
+                # TODO: java network model doesn't throw here, but would throw in the below for loop if num_cores > len(esp). why does java silently handle less cores?
+                logger.error(f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_cores}. Number of phases should match number of cores. Phasing cannot be applied")
+                raise TracingException(f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_cores}. Number of phases should match number of cores. Phasing cannot be applied")
             breaker_terms = await find_es_breaker_terminal(es)
             for terminal in breaker_terms:
                 for i in range(terminal.num_cores):
                     terminal.normal_phases(i).add(esp[i].phase, Direction.OUT)
                     terminal.current_phases(i).add(esp[i].phase, Direction.OUT)
+                logger.debug(f"Set {terminal.equipment.mrid} as Feeder Circuit Breaker with phases {terminal.phases.phase}")
             start_terms.extend(breaker_terms)
     return start_terms
 
@@ -217,9 +223,19 @@ def _flow_out_to_connected_terminals_and_queue(traversal: BranchRecursiveTravers
         for oi in cr.core_paths:
             out_core = oi.from_core
             in_core = oi.to_core
-
-            has_added = phase_selector(in_term, in_core).add(phase_selector(out_terminal, out_core).phase(), Direction.IN)
-
+            out_phase = phase_selector(out_terminal, out_core).phase()
+            in_phase = phase_selector(in_term, in_core)
+            try:
+                if in_phase.add(out_phase, Direction.IN):
+                    has_added = True
+                    if in_phase.direction() == Direction.BOTH:
+                        logger.debug(f"Applied {Direction.BOTH} to phase {out_phase} on core {in_core} for {in_term.mrid}")
+                    else:
+                        logger.debug(f"Applied {Direction.IN} to phase {out_phase} on core {in_core} for {in_term.mrid}")
+            except (PhaseException, CoreException) as ex:
+                raise PhaseException((f"Attempted to apply more than one phase to [{in_term.equipment.mrid}|"
+                                      f"{in_term.equipment.name}] on core {in_core}."
+                                      f" Current phase was {out_phase} and applied was {in_phase.phase()}."), ex)
         if has_added and not traversal.has_visited(in_term):
             if len(connectivity_results) > 1 or len(out_terminal.equipment.terminals) > 2:
                 branch = traversal.create_branch()
@@ -249,14 +265,20 @@ def _flow_through_equipment(traversal: BranchRecursiveTraversal, in_terminal: Te
     has_changes = False
     traversal.tracker.visit(out_terminal)
     for core in cores_to_flow:
+        out_phase_status = phase_selector(out_terminal, core)
         try:
-            out_phase_status = phase_selector(out_terminal, core)
             in_phase = phase_selector(in_terminal, core).phase()
-            has_changes = out_phase_status.add(in_phase, Direction.OUT) or has_changes
+            applied = out_phase_status.add(in_phase, Direction.OUT)
+            has_changes = applied or has_changes
+            if applied:
+                if out_phase_status.direction() == Direction.BOTH:
+                    logger.debug(f"Applied {Direction.BOTH} to phase {in_phase} on core {core} for {out_terminal.mrid}")
+                else:
+                    logger.debug(f"Applied {Direction.OUT} to phase {in_phase} on core {core} for {out_terminal.mrid}")
         except (PhaseException, CoreException) as ex:
-            raise PhaseException((f"Attempted to apply more than one phase to [{out_terminal.equipment.name}"
-                                  f"{out_terminal.equipment.mrid}] on core {core}." 
-                                  f"Detected phases {out_phase_status.phase()} and {in_phase}"), ex)
+            raise PhaseException((f"Attempted to apply more than one phase to {out_terminal.equipment.mrid} "
+                                  f"[{out_terminal.mrid}] on core {core}." 
+                                  f" Current phase was {out_phase_status.phase()} and applied was {in_phase}."), ex)
     return has_changes
 
 

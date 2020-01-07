@@ -39,6 +39,9 @@ class BaseVoltage(IdentifiedObject):
         self.nominal_voltage = nom_volt
         super().__init__(mrid, name)
 
+    def __str__(self):
+        return f"Nominal Voltage: {self.nominal_voltage}V"
+
     @staticmethod
     def from_pb(bv_pb: PBBaseVoltage, **kwargs):
         """

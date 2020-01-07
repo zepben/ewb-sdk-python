@@ -63,7 +63,7 @@ class ConnectivityNode(IdentifiedObject):
         return f"{super().__str__()} terminals: {self.terminals}"
 
     def __repr__(self):
-        return f"{super().__repr__()} terminals: {self.terminals}"
+        return f"{super().__repr__()}(terminals={self.terminals})"
 
     @staticmethod
     def from_pb(pb_cn, **kwargs):

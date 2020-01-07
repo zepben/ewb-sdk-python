@@ -249,12 +249,6 @@ class PowerTransformer(ConductingEquipment):
     def end_count(self):
         return len(self.power_transformer_ends)
 
-    def __str__(self):
-        return f"{super().__str__()} vector_group: {self.vector_group}"
-
-    def __repr__(self):
-        return f"{super().__repr__()} vector_group: {self.vector_group}"
-
     def to_pb(self):
         args = self._pb_args()
         return PBPowerTransformer(**args)

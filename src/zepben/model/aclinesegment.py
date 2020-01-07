@@ -60,12 +60,6 @@ class ACLineSegment(ConductingEquipment):
         super().__init__(mrid=mrid, in_service=in_service, base_voltage=base_voltage, name=name, terminals=terminals,
                          diag_objs=diag_objs, location=location)
 
-    def __str__(self):
-        return f"{super().__str__()} r: {self.r}, x: {self.x}"
-
-    def __repr__(self):
-        return f"{super().__repr__()} r: {self.r}, x: {self.x}"
-
     @property
     def rated_current(self):
         return self.wire_info.rated_current

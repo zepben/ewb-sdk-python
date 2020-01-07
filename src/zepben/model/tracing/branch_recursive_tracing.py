@@ -64,6 +64,7 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
     def __lt__(self, other):
         """
         This Traversal is Less than `other` if the starting item is less than other's starting item.
+        This is used to dictate which branch is next to traverse in the branch_queue.
         :param other:
         :return:
         """

@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind
+from zepben.model.phases import SinglePhaseKind
 from zepben.model.direction import Direction
 from abc import ABC, abstractmethod
 

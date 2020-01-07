@@ -25,10 +25,10 @@ from zepben.model.common import Location
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.equipment import PowerSystemResource
 from zepben.model.exceptions import *
-from zepben.model.terminal import Terminal
 from zepben.model.base_voltage import BaseVoltage
-from zepben.model.asset_info import CableInfo, OverheadWireInfo, TransformerEndInfo, AssetInfo
+from zepben.model.asset_info import AssetInfo
 from zepben.model.connectivity_node import ConnectivityNode
+from zepben.model.connectors import Junction
 from zepben.model.energy_consumer import EnergyConsumer
 from zepben.model.energy_source import EnergySource
 from zepben.model.aclinesegment import ACLineSegment
@@ -41,7 +41,7 @@ from zepben.model.customer import Customer
 from zepben.model.decorators import create_registrar, map_type
 from zepben.cim.iec61970 import EnergySource as PBEnergySource, EnergyConsumer as PBEnergyConsumer, Breaker as PBBreaker, \
     PowerTransformer as PBPowerTransformer, AcLineSegment as PBAcLineSegment, BaseVoltage as PBBaseVoltage, \
-    PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
+    PerLengthSequenceImpedance as PBPerLengthSequenceImpedance, Junction as PBJunction
 from zepben.cim.iec61968 import AssetInfo as PBAssetInfo, Customer as PBCustomer, Meter as PBMeter, UsagePoint as PBUsagePoint
 from pathlib import Path
 from typing import List
@@ -89,6 +89,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         self._customers = {}
         self._energy_sources = {}
         self._energy_consumers = {}
+        self._junctions = {}
         self._lines = {}
         self._meters = {}
         self._seq_impedances = {}
@@ -156,6 +157,11 @@ class EquipmentContainer(ConnectivityNodeContainer):
     def usage_points(self):
         return self._usage_points
 
+    @type_map(Junction, PBJunction)
+    @property
+    def junctions(self):
+        return self._junctions
+
     def __iter__(self):
         """
         This performs a depth-first iteration of the network, stopping
@@ -212,13 +218,19 @@ class EquipmentContainer(ConnectivityNodeContainer):
         except KeyError:
             raise NoConnectivityNodeException(f"{cn_mrid}")
 
-
     @getter
     def get_aclinesegment(self, acls_mrid):
         try:
             return self.lines[acls_mrid]
         except KeyError:
             raise NoACLineSegmentException(f"{acls_mrid}")
+
+    @getter
+    def get_junction(self, j_mrid):
+        try:
+            return self.junctions[j_mrid]
+        except KeyError:
+            raise NoJunctionException(f"{j_mrid}")
 
     @getter
     def get_energyconsumer(self, ec_mrid):

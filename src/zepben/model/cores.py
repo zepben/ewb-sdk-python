@@ -18,7 +18,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.model.exceptions import CoreException
-from zepben.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode
+__all__ = ["SUPPORTED_CORES", "validate_core", "from_count", "CorePath"]
 SUPPORTED_CORES = 4
 
 
@@ -32,24 +32,6 @@ def from_count(num_cores: int):
     validate_core(num_cores)
     return range(0, num_cores)
 
-
-def from_phases(phases: PhaseCode):
-    """
-    Convert a phase into its corresponding number of Cores
-    TODO: handle all phases
-    :param phases: A :class:`zepben.cim.iec61970.base.core.PhaseCode` to convert
-    :return: Number of cores
-    """
-    if phases == PhaseCode.ABC:
-        return 3
-    elif phases in (PhaseCode.AB, PhaseCode.AC, PhaseCode.BC):
-        return 2
-    elif phases in (PhaseCode.A, PhaseCode.B, PhaseCode.C):
-        return 1
-    elif phases == PhaseCode.ABCN:
-        return 4
-    else:
-        return 4
 
 
 class CorePath(object):

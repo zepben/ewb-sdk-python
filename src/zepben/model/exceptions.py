@@ -74,6 +74,10 @@ class NoTransformerException(MissingReferenceException):
     pass
 
 
+class NoJunctionException(MissingReferenceException):
+    pass
+
+
 class NoEnergySourceException(MissingReferenceException):
     pass
 

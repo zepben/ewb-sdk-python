@@ -18,8 +18,10 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from zepben.model.connectivity_node import ConnectivityNode
+from zepben.model.cores import *
 from zepben.model.energy_source import *
 from zepben.model.energy_consumer import EnergyConsumer
+from zepben.model.connectors import *
 from zepben.model.direction import *
 from zepben.model.power_transformer import PowerTransformerEnd, PowerTransformer, RatioTapChanger, InvalidTransformerError
 from zepben.model.aclinesegment import ACLineSegment

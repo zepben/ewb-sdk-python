@@ -17,14 +17,12 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind
 from zepben.model.equipment import ConductingEquipment
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.exceptions import PhaseException
 from zepben.model.common import Location
 from zepben.model.terminal import Terminal
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
-from zepben.model.util import phs_to_cores, cores_to_phs
 from zepben.cim.iec61970 import Breaker as PBBreaker
 from typing import List
 import copy
@@ -81,7 +79,7 @@ class Switch(ConductingEquipment, metaclass=ABCMeta):
         try:
             return self.normal_open[core]
         except (IndexError, KeyError):
-            raise PhaseException(f"Switch {self.mrid} is not connected to phase {SinglePhaseKind.Name(core)}")
+            raise PhaseException(f"Switch {self.mrid} is not connected to phase {core}")
 
     def is_open(self, core: int = None):
         """Switch is open only if it's not in service OR at least one phase is open"""
@@ -96,7 +94,7 @@ class Switch(ConductingEquipment, metaclass=ABCMeta):
             try:
                 return self.open[core]
             except (IndexError, KeyError):
-                raise PhaseException(f"Switch {self.mrid} is not connected to phase {SinglePhaseKind.Name(core)}")
+                raise PhaseException(f"Switch {self.mrid} is not connected to phase {core}")
 
 
 class Breaker(Switch):
