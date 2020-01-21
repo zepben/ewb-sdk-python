@@ -20,16 +20,27 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 import grpc_tools.protoc
 import pkg_resources
 import glob
+import sys
+
+if len(sys.argv) > 1:
+    include = {arg for arg in sys.argv[1:]}
+else:
+    include = None
+
 
 proto_include = pkg_resources.resource_filename('grpc_tools', '_proto')
 files = glob.glob("protos/**/*.proto", recursive=True)
-print(f"Compiling protos: {', '.join(files)}")
+if include is not None:
+    files_filtered = {f for f in files if f in include}
+else:
+    files_filtered = files
 
+print(f"Compiling protos: {', '.join(files_filtered)}")
 result = grpc_tools.protoc.main([
     'grpc_tools.protoc',
     '-Iprotos',
     f'-I{proto_include}',
     '--python_out=src/',
     '--grpc_python_out=src/',
-    *files
+    *files_filtered
 ])
