@@ -28,6 +28,7 @@ from zepben.cim.iec61970.base.wires import AcLineSegment_pb2 as zepben_dot_cim_d
 from zepben.cim.iec61970.base.wires import Breaker_pb2 as zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_Breaker__pb2
 from zepben.cim.iec61970.base.wires import EnergyConsumer_pb2 as zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_EnergyConsumer__pb2
 from zepben.cim.iec61970.base.wires import EnergySource_pb2 as zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_EnergySource__pb2
+from zepben.cim.iec61970.base.wires import Junction_pb2 as zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_Junction__pb2
 from zepben.cim.iec61970.base.wires import PerLengthSequenceImpedance_pb2 as zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_PerLengthSequenceImpedance__pb2
 from zepben.cim.iec61970.base.wires import PowerTransformer_pb2 as zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_PowerTransformer__pb2
 from zepben.postbox import pb_pb2 as zepben_dot_postbox_dot_pb__pb2
@@ -73,6 +74,11 @@ class NetworkDataStub(object):
         request_serializer=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_Breaker__pb2.Breaker.SerializeToString,
         response_deserializer=zepben_dot_postbox_dot_pb__pb2.BreakerResponse.FromString,
         )
+    self.createJunction = channel.unary_unary(
+        '/zepben.pb.NetworkData/createJunction',
+        request_serializer=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_Junction__pb2.Junction.SerializeToString,
+        response_deserializer=zepben_dot_postbox_dot_pb__pb2.JCResponse.FromString,
+        )
     self.createPerLengthSequenceImpedance = channel.unary_unary(
         '/zepben.pb.NetworkData/createPerLengthSequenceImpedance',
         request_serializer=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_PerLengthSequenceImpedance__pb2.PerLengthSequenceImpedance.SerializeToString,
@@ -98,6 +104,11 @@ class NetworkDataStub(object):
         request_serializer=zepben_dot_postbox_dot_pb__pb2.MeterRequest.SerializeToString,
         response_deserializer=zepben_dot_postbox_dot_pb__pb2.MeterResponse.FromString,
         )
+    self.createCustomer = channel.unary_unary(
+        '/zepben.pb.NetworkData/createCustomer',
+        request_serializer=zepben_dot_postbox_dot_pb__pb2.CustomerRequest.SerializeToString,
+        response_deserializer=zepben_dot_postbox_dot_pb__pb2.CUResponse.FromString,
+        )
     self.getEquipmentContainer = channel.unary_stream(
         '/zepben.pb.NetworkData/getEquipmentContainer',
         request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
@@ -105,7 +116,7 @@ class NetworkDataStub(object):
         )
     self.getWholeNetwork = channel.unary_stream(
         '/zepben.pb.NetworkData/getWholeNetwork',
-        request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+        request_serializer=zepben_dot_postbox_dot_pb__pb2.Identity.SerializeToString,
         response_deserializer=zepben_dot_postbox_dot_pb__pb2.Equipment.FromString,
         )
     self.getEnergySource = channel.unary_unary(
@@ -176,6 +187,13 @@ class NetworkDataServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def createJunction(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def createPerLengthSequenceImpedance(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -205,6 +223,13 @@ class NetworkDataServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def createMeter(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def createCustomer(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -288,6 +313,11 @@ def add_NetworkDataServicer_to_server(servicer, server):
           request_deserializer=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_Breaker__pb2.Breaker.FromString,
           response_serializer=zepben_dot_postbox_dot_pb__pb2.BreakerResponse.SerializeToString,
       ),
+      'createJunction': grpc.unary_unary_rpc_method_handler(
+          servicer.createJunction,
+          request_deserializer=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_Junction__pb2.Junction.FromString,
+          response_serializer=zepben_dot_postbox_dot_pb__pb2.JCResponse.SerializeToString,
+      ),
       'createPerLengthSequenceImpedance': grpc.unary_unary_rpc_method_handler(
           servicer.createPerLengthSequenceImpedance,
           request_deserializer=zepben_dot_cim_dot_iec61970_dot_base_dot_wires_dot_PerLengthSequenceImpedance__pb2.PerLengthSequenceImpedance.FromString,
@@ -313,6 +343,11 @@ def add_NetworkDataServicer_to_server(servicer, server):
           request_deserializer=zepben_dot_postbox_dot_pb__pb2.MeterRequest.FromString,
           response_serializer=zepben_dot_postbox_dot_pb__pb2.MeterResponse.SerializeToString,
       ),
+      'createCustomer': grpc.unary_unary_rpc_method_handler(
+          servicer.createCustomer,
+          request_deserializer=zepben_dot_postbox_dot_pb__pb2.CustomerRequest.FromString,
+          response_serializer=zepben_dot_postbox_dot_pb__pb2.CUResponse.SerializeToString,
+      ),
       'getEquipmentContainer': grpc.unary_stream_rpc_method_handler(
           servicer.getEquipmentContainer,
           request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
@@ -320,7 +355,7 @@ def add_NetworkDataServicer_to_server(servicer, server):
       ),
       'getWholeNetwork': grpc.unary_stream_rpc_method_handler(
           servicer.getWholeNetwork,
-          request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+          request_deserializer=zepben_dot_postbox_dot_pb__pb2.Identity.FromString,
           response_serializer=zepben_dot_postbox_dot_pb__pb2.Equipment.SerializeToString,
       ),
       'getEnergySource': grpc.unary_unary_rpc_method_handler(

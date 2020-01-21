@@ -18,18 +18,21 @@
 syntax = "proto3";
 option java_multiple_files = true;
 option java_package = "com.zepben.protobuf.postbox";
+option csharp_namespace = "Zepben.Protobuf.Postbox";
 import "zepben/cim/iec61970/base/core/BaseVoltage.proto";
 import "zepben/cim/iec61970/base/wires/EnergySource.proto";
 import "zepben/cim/iec61970/base/wires/AcLineSegment.proto";
 import "zepben/cim/iec61970/base/wires/EnergyConsumer.proto";
 import "zepben/cim/iec61970/base/wires/PowerTransformer.proto";
 import "zepben/cim/iec61970/base/wires/Breaker.proto";
+import "zepben/cim/iec61970/base/wires/Junction.proto";
 import "zepben/cim/iec61970/base/wires/PerLengthSequenceImpedance.proto";
 import "zepben/cim/iec61970/base/diagramlayout/DiagramObject.proto";
 import "zepben/cim/iec61968/metering/Meter.proto";
 import "zepben/cim/iec61968/metering/MeterReading.proto";
 import "zepben/cim/iec61968/metering/UsagePoint.proto";
 import "zepben/cim/iec61968/assetinfo/AssetInfo.proto";
+import "zepben/cim/iec61968/customers/Customer.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 
@@ -42,14 +45,16 @@ service NetworkData {
     rpc createAcLineSegment(zepben.cim.iec61970.base.wires.AcLineSegment) returns (ACLSResponse);
     rpc createDiagramObject(zepben.cim.iec61970.base.diagramlayout.DiagramObject) returns (DOResponse);
     rpc createBreaker(zepben.cim.iec61970.base.wires.Breaker) returns (BreakerResponse);
+    rpc createJunction(zepben.cim.iec61970.base.wires.Junction) returns (JCResponse);
     rpc createPerLengthSequenceImpedance(zepben.cim.iec61970.base.wires.PerLengthSequenceImpedance) returns (PLSIResponse);
     rpc createBaseVoltage(zepben.cim.iec61970.base.core.BaseVoltage) returns (BVResponse);
     rpc createAssetInfo(AssetInfoRequest) returns (AIResponse);
     rpc createUsagePoint(UsagePointRequest) returns (UPResponse);
     rpc createMeter(MeterRequest) returns (MeterResponse);
+    rpc createCustomer(CustomerRequest) returns (CUResponse);
     /***** Getters *****/
     rpc getEquipmentContainer(google.protobuf.Empty) returns (stream Equipment);
-    rpc getWholeNetwork(google.protobuf.Empty) returns (stream Equipment);
+    rpc getWholeNetwork(Identity) returns (stream Equipment);
 
     rpc getEnergySource (Identity) returns (zepben.cim.iec61970.base.wires.EnergySource);
     rpc getEnergyConsumer (Identity) returns (zepben.cim.iec61970.base.wires.EnergyConsumer);
@@ -82,6 +87,8 @@ message Equipment {
         zepben.cim.iec61968.assetinfo.AssetInfo ai = 8;
         zepben.cim.iec61968.metering.Meter mt = 9;
         zepben.cim.iec61968.metering.UsagePoint up = 10;
+        zepben.cim.iec61970.base.wires.Junction jc = 11;
+        zepben.cim.iec61968.customers.Customer cu = 12;
 
         google.protobuf.Any other = 16;
     }
@@ -95,6 +102,12 @@ message MeterRequest {
     int64 message_id = 1;
     zepben.cim.iec61968.metering.Meter meter = 2;
 }
+
+message CustomerRequest {
+    int64 message_id = 1;
+    zepben.cim.iec61968.customers.Customer customer = 2;
+}
+
 
 message DOResponse {
     string msg = 1;
@@ -124,7 +137,15 @@ message AssetInfoRequest {
     zepben.cim.iec61968.assetinfo.AssetInfo assetInfo = 2;
 }
 
+message CUResponse {
+    string msg = 1;
+}
+
 message AIResponse {
+    string msg = 1;
+}
+
+message JCResponse {
     string msg = 1;
 }
 
