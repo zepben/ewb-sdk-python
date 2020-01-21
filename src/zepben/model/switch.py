@@ -146,7 +146,7 @@ class Breaker(Switch):
         terms = Terminal.from_pbs(pb_br.terminals, network)
         location = Location.from_pb(pb_br.location)
         diag_objs = DiagramObject.from_pbs(pb_br.diagramObjects)
-        base_voltage = network.get_base_voltage(pb_br.baseVoltageMRID) if pb_br.baseVoltageMRID else []
+        base_voltage = network.get_base_voltage(pb_br.baseVoltageMRID) if pb_br.baseVoltageMRID else None
         return Breaker(pb_br.mRID,
                        open_=pb_br.open,
                        base_voltage=base_voltage,

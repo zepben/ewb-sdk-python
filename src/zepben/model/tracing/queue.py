@@ -129,8 +129,6 @@ class LifoQueue(Queue[T]):
 class PriorityQueue(Queue[T]):
 
     def __init__(self):
-        """
-        """
         super().__init__([])
 
     def __len__(self):

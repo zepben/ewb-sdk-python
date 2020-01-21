@@ -204,12 +204,11 @@ class ConductingEquipment(Equipment):
 
     def __lt__(self, other):
         """
-        TODO: this will be used for priority. Implement this based on phasing (more phases = higher priority = less than)
-              Need to check if heap queue sorts ascending or descending.
-        :param other:
-        :return:
+        This definition should only be used for sorting within a :class:`zepben.model.tracing.queue.PriorityQueue`
+        :param other: Another Terminal to compare against
+        :return: True if self has more cores than other, False otherwise.
         """
-        return self.num_cores < other.num_cores
+        return self.num_cores > other.num_cores
 
     @property
     def num_cores(self):
@@ -289,7 +288,7 @@ class ConductingEquipment(Equipment):
 
     def _pb_args(self, exclude=None):
         args = super()._pb_args()
-        if self.base_voltage is not None:
+        if self.base_voltage:
             args['baseVoltageMRID'] = self.base_voltage.mrid
             del args['baseVoltage']
         return args

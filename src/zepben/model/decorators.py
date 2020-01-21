@@ -15,7 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
-
+from collections import OrderedDict
 
 
 def create_registrar():
@@ -29,22 +29,34 @@ def create_registrar():
 
 
 def map_type():
-    # Maps types to the decorated function
-    type_map = {}
+    # Maps types to the decorated function. The ordering here is important, as we use this ordering when we
+    # serialise or deserialise from an EquipmentContainer.
+    type_map = OrderedDict()
     # Maps protobuf types to CIM types
-    pb_to_cim = {}
+    pb_to_cim = OrderedDict()
+    # Maps protobuf types to the name of a gRPC streaming function.
+    # For example, a Protobuf BaseVoltage maps to createBaseVoltage.
+    # This is used when streaming an EquipmentContainer.
+    grpc_func_map = dict()
 
-    def wrap(typ, pb_typ=None):
+    def wrap(typ, pb_typ=None, stream_func_name=None):
         def mapper(func):
+            if pb_typ is None and stream_func_name is not None:
+                raise Exception(f"A protobuf type must be provided for {typ} because stream_func_name is set. We can only stream types with protobuf mappings.")
             if typ in type_map:
                 raise Exception(f"Type {typ} already has an associated map - ensure {typ} corresponds to only one map")
             if pb_typ in type_map:
                 raise Exception(f"Protobuf Type {pb_typ} already has an associated map - ensure {typ} corresponds to only one map")
             type_map[typ] = func
-            type_map[pb_typ] = func
-            pb_to_cim[pb_typ] = typ
+            if pb_typ is not None:
+                type_map[pb_typ] = func
+                pb_to_cim[pb_typ] = typ
+                if stream_func_name is not None:
+                    grpc_func_map[pb_typ] = stream_func_name
+
             return func
         return mapper
     wrap.all = type_map
     wrap.pb_to_cim = pb_to_cim
+    wrap.grpc = grpc_func_map
     return wrap

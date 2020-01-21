@@ -33,7 +33,6 @@ def from_count(num_cores: int):
     return range(0, num_cores)
 
 
-
 class CorePath(object):
     def __init__(self, from_core: int, to_core: int):
         self.from_core = validate_core(from_core)
@@ -48,6 +47,9 @@ class CorePath(object):
         if self is other:
             return False
         return self.from_core != other.from_core or self.to_core != other.to_core
+
+    def __hash__(self):
+        return hash((self.from_core, self.to_core))
 
     def __lt__(self, other):
         if self.from_core < other.from_core and self.to_core < other.to_core:

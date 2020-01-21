@@ -21,9 +21,10 @@ from zepben.model.tracing.tracing import BaseTraversal, Traversal, SearchType
 from zepben.model.tracing.branch_recursive_tracing import BranchRecursiveTraversal
 from zepben.model.tracing.tracker import Tracker
 from zepben.model.tracing.exceptions import *
-from zepben.model.tracing.connectivity import ConnectivityResult
+from zepben.model.tracing.connectivity import *
 from zepben.model.tracing.queue import PriorityQueue, LifoQueue, FifoQueue, Queue
 from zepben.model.tracing.phasing import SetPhases
+from zepben.model.tracing.find import *
 from zepben.model.tracing.util import *
 
 

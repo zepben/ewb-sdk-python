@@ -17,14 +17,22 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
+from __future__ import annotations
 import logging
 from zepben.model.equipment import Equipment
+from zepben.model.tracing.connectivity import ConductingEquipmentToCores
+from zepben.model.direction import Direction
 from zepben.model.tracing.tracing import Traversal, SearchType
+from zepben.model.tracing.phase_status import normal_phases, current_phases
+from typing import Callable
+
+__all__ = ["normally_open", "currently_open", "queue_next_equipment", "queue_next_terminal", "normal_downstream_trace",
+           "current_downstream_trace", "get_cores_with_direction", "phase_log"]
 phase_logger = logging.getLogger("phase_logger")
 tracing_logger = logging.getLogger("queue_next")
 
 
-def normally_open(equip: Equipment, core=None):
+def normally_open(equip: Equipment, core: int = None):
     """
     Test if a given core on an equipment is normally open.
     :param equip: The equipment to test
@@ -45,7 +53,7 @@ def normally_open(equip: Equipment, core=None):
         return not equip.normally_in_service
 
 
-def currently_open(equip: Equipment, core=None):
+def currently_open(equip: Equipment, core: int = None):
     """
     Test if a given core on an equipment is open.
     :param equip: The equipment to test
@@ -96,6 +104,73 @@ def queue_next_terminal(item, exclude=None):
     to_terms = [cr.to_terminal for cr in crs]
     tracing_logger.debug(f"Queuing terminals: [{', '.join(t.mrid for t in to_terms)}] from {item.mrid}")
     return to_terms
+
+
+def normal_downstream_trace(search_type: SearchType = SearchType.PRIORITY, **kwargs):
+    """
+    Create a downstream trace over nominal phases.
+    :param search_type: Search type to perform for this traversal. Defaults to priority traversal based on number of
+                        cores.
+    :param kwargs: Args to be passed to :class:`zepben.model.tracing.tracing.Traversal`
+    :return: A :class:`zepben.model.tracing.tracing.Traversal`
+    """
+    return Traversal(queue_next=_create_downstream_queue_next(normally_open, normal_phases), search_type=search_type,
+                     **kwargs)
+
+
+def current_downstream_trace(search_type: SearchType = SearchType.PRIORITY, **kwargs):
+    """
+    Create a downstream trace over current phases
+    :param search_type: Search type to perform for this traversal. Defaults to priority traversal based on number of
+                        cores.
+    :param kwargs: Args to be passed to :class:`zepben.model.tracing.tracing.Traversal`
+    :return: A :class:`zepben.model.tracing.tracing.Traversal`
+    """
+    return Traversal(queue_next=_create_downstream_queue_next(currently_open, current_phases), search_type=search_type,
+                     **kwargs)
+
+
+def _create_downstream_queue_next(open_test: Callable[[Equipment, int], bool], active_phases: Callable[[Terminal, int], PhaseStatus]):
+    """
+    Creates a queue_next function from the given open test and phase selector for use with tracing
+    :param open_test: Function that takes a ConductingEquipment and a core (int) and returns whether the core on the
+                      equipment is open (True) or closed (False).
+    :param active_phases: A :class:`zepben.model.tracing.phase_status.PhaseStatus`
+    :return: A queue_next function for use with :class:`zepben.model.tracing.tracing.BaseTraversal` classes
+    """
+    def qn(cetc, visited):
+        connected_terms = []
+        if not cetc:
+            return connected_terms
+        for term in cetc.equipment.terminals:
+            out_cores = get_cores_with_direction(open_test, active_phases, term, cetc.cores, Direction.OUT)
+            if out_cores:
+                crs = term.get_connectivity(out_cores)
+                for cr in crs:
+                    if cr.to_equip in visited:
+                        continue
+                    connected_terms.append(ConductingEquipmentToCores(cr.to_equip, cr.to_cores, cr.from_equip))
+        return connected_terms
+    return qn
+
+
+def get_cores_with_direction(open_test, active_phases, terminal, filter_cores, direction):
+    """
+    Gets the closed cores from terminal in a specified :class:`zepben.model.direction.Direction`
+    :param open_test: Function that takes a ConductingEquipment and a core (int) and returns whether the core on the
+                      equipment is open (True) or closed (False).
+    :param active_phases: A :class:`zepben.model.tracing.phase_status.PhaseStatus`
+    :param terminal: :class:`zepben.model.terminal.Terminal` to retrieve cores for
+    :param filter_cores: The cores for `terminal` to test. May be a subset of `terminal`'s available cores.
+    :param direction: The direction to check against.
+    :return: Set of cores that are closed in the specified `Direction`.
+    """
+    return_cores = set()
+    for core in filter_cores:
+        if not open_test(terminal.equipment, core):
+            if active_phases(terminal, core).direction().has(direction):
+                return_cores.add(core)
+    return return_cores
 
 
 async def phase_log(cond_equip):

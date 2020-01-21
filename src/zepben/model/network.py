@@ -43,21 +43,12 @@ from zepben.cim.iec61970 import EnergySource as PBEnergySource, EnergyConsumer a
     PowerTransformer as PBPowerTransformer, AcLineSegment as PBAcLineSegment, BaseVoltage as PBBaseVoltage, \
     PerLengthSequenceImpedance as PBPerLengthSequenceImpedance, Junction as PBJunction
 from zepben.cim.iec61968 import AssetInfo as PBAssetInfo, Customer as PBCustomer, Meter as PBMeter, UsagePoint as PBUsagePoint
+from zepben.model.tracing.phasing import SetPhases
 from pathlib import Path
 from typing import List
 
 logger = logging.getLogger(__name__)
 TRACED_NETWORK_FILE = str(Path.home().joinpath(Path("traced.json")))
-
-# A decorator simply used for registering EquipmentContainer getter functions.
-# If you create a new equipment map in __init__, you should create a corresponding getter function and
-# decorate it with @getter
-getter = create_registrar()
-
-# A decorator used to specify which types are stored in each map. For every map there should be a
-# corresponding `@property` declaration that is decorated with `type_map(class)`, where `class` indicates
-# the type stored in that map. Utilised in the `add` method.
-type_map = map_type()
 
 
 class ConnectivityNodeContainer(PowerSystemResource):
@@ -74,6 +65,19 @@ class EquipmentContainer(ConnectivityNodeContainer):
     Contains a map of equipment (string ID's -> Equipment/Nodes/etc)
     **All** `IdentifiedObject's` submitted to this EquipmentContainer **MUST** have unique mRID's!
     """
+
+    # A decorator simply used for registering EquipmentContainer getter functions.
+    # If you create a new equipment map in __init__, you should create a corresponding getter function and
+    # decorate it with @getter
+    getter = create_registrar()
+
+    # A decorator used to specify which types are stored in each map. For every map there should be a
+    # corresponding `@property` declaration that is decorated with `type_map(class, [pb_class, gRPC_create_func])`,
+    # where `class` indicates the CIM type stored in that map, `pb_class` optionally indicates `class`'s corresponding
+    # Protobuf class, and `gRPC_create_func` indicates `pb_class`'s corresponding gRPC function for streaming.
+    # Utilised in the `add` method, but also in the streaming library.
+    type_map = map_type()
+
     def __init__(self, metrics_store: MetricsStore = None, name: str = "default", mrid=None,
                  diag_objs: List[DiagramObject] = None, location: Location = None):
         """
@@ -97,27 +101,27 @@ class EquipmentContainer(ConnectivityNodeContainer):
         self._usage_points = {}
         self.metrics_store = metrics_store
 
-    @type_map(EnergySource, PBEnergySource)
-    @property
-    def energy_sources(self):
-        return self._energy_sources
-
-    @type_map(EnergyConsumer, PBEnergyConsumer)
-    @property
-    def energy_consumers(self):
-        return self._energy_consumers
-
-    @type_map(AssetInfo, PBAssetInfo)
-    @property
-    def asset_infos(self):
-        return self._asset_infos
-
-    @type_map(BaseVoltage, PBBaseVoltage)
+    @type_map(BaseVoltage, PBBaseVoltage, 'createBaseVoltage')
     @property
     def base_voltages(self):
         return self._base_voltages
 
-    @type_map(Breaker, PBBreaker)
+    @type_map(AssetInfo, PBAssetInfo, 'createAssetInfo')
+    @property
+    def asset_infos(self):
+        return self._asset_infos
+
+    @type_map(EnergySource, PBEnergySource, 'createEnergySource')
+    @property
+    def energy_sources(self):
+        return self._energy_sources
+
+    @type_map(EnergyConsumer, PBEnergyConsumer, 'createEnergyConsumer')
+    @property
+    def energy_consumers(self):
+        return self._energy_consumers
+
+    @type_map(Breaker, PBBreaker, 'createBreaker')
     @property
     def breakers(self):
         return self._breakers
@@ -127,40 +131,40 @@ class EquipmentContainer(ConnectivityNodeContainer):
     def connectivity_nodes(self):
         return self._connectivity_nodes
 
-    @type_map(Customer, PBCustomer)
+    @type_map(Customer, PBCustomer, 'createCustomer')
     @property
     def customers(self):
         return self._customers
 
-    @type_map(ACLineSegment, PBAcLineSegment)
-    @property
-    def lines(self):
-        return self._lines
-
-    @type_map(Meter, PBMeter)
-    @property
-    def meters(self):
-        return self._meters
-
-    @type_map(PerLengthSequenceImpedance, PBPerLengthSequenceImpedance)
+    @type_map(PerLengthSequenceImpedance, PBPerLengthSequenceImpedance, 'createPerLengthSequenceImpedance')
     @property
     def seq_impedances(self):
         return self._seq_impedances
 
-    @type_map(PowerTransformer, PBPowerTransformer)
+    @type_map(ACLineSegment, PBAcLineSegment, 'createAcLineSegment')
+    @property
+    def lines(self):
+        return self._lines
+
+    @type_map(Junction, PBJunction, 'createJunction')
+    @property
+    def junctions(self):
+        return self._junctions
+
+    @type_map(Meter, PBMeter, 'createMeter')
+    @property
+    def meters(self):
+        return self._meters
+
+    @type_map(PowerTransformer, PBPowerTransformer, 'createPowerTransformer')
     @property
     def transformers(self):
         return self._transformers
 
-    @type_map(UsagePoint, PBUsagePoint)
+    @type_map(UsagePoint, PBUsagePoint, 'createUsagePoint')
     @property
     def usage_points(self):
         return self._usage_points
-
-    @type_map(Junction, PBJunction)
-    @property
-    def junctions(self):
-        return self._junctions
 
     def __iter__(self):
         """
@@ -171,10 +175,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         return self
 
     def __next__(self):
-        for e in self.depth_first_trace_and_apply():
-            yield e
-
-        raise StopIteration()
+        raise NotImplementedError()
 
     def __getitem__(self, item):
         """
@@ -184,7 +185,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         :return:
         :raises: KeyError when `item` isn't in the EquipmentContainer.
         """
-        for m in getter.all.values():
+        for m in self.getter.all.values():
             try:
                 return m(self, item)
             except MissingReferenceException:
@@ -375,13 +376,13 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         try:
             # General case, obj is a CIM class with a mapping or a protobuf class.
-            map_ = type_map.all[type(obj)].fget(self)
-            cls = type_map.pb_to_cim[type(obj)]
+            map_ = self.type_map.all[type(obj)].fget(self)
+            cls = self.type_map.pb_to_cim[type(obj)]
         except (AttributeError, KeyError):
             # Case where obj is a subclass of a class that has a mapping (e.g obj = CableInfo, map is asset_infos)
             for clazz in inspect.getmro(type(obj)):
                 try:
-                    map_ = type_map.all[clazz].fget(self)
+                    map_ = self.type_map.all[clazz].fget(self)
                     break
                 except KeyError:
                     pass
@@ -400,6 +401,10 @@ class EquipmentContainer(ConnectivityNodeContainer):
             # This will throw any exception the corresponding `from_pb` throws
             o = cls.from_pb(obj, network=self)
             map_[o.mrid] = o
+
+    async def set_phases(self):
+        set_phases = SetPhases()
+        await set_phases.run(self)
 
     def _dumpTracing(self):
         with open(TRACED_NETWORK_FILE, "w") as f:

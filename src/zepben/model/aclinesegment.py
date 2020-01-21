@@ -90,10 +90,13 @@ class ACLineSegment(ConductingEquipment):
 
     def _pb_args(self, exclude=None):
         args = super()._pb_args()
-        args['perLengthSequenceImpedanceMRID'] = self.per_length_sequence_impedance.mrid
-        args['assetInfoMRID'] = self.wire_info.mrid
-        del args['perLengthSequenceImpedance']
-        del args['wireInfo']
+        if self.per_length_sequence_impedance:
+            args['perLengthSequenceImpedanceMRID'] = self.per_length_sequence_impedance.mrid
+            del args['perLengthSequenceImpedance']
+        if self.asset_info:
+            args['assetInfoMRID'] = self.wire_info.mrid
+        if 'wireInfo' in args:
+            del args['wireInfo']
         return args
 
     def to_pb(self):

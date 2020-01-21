@@ -137,7 +137,7 @@ class BaseTraversal(Generic[T], ABC):
         """
         raise NotImplementedError()
 
-    async def trace(self, can_stop_on_start_item: bool = True):
+    async def trace(self, start_item: T = None, can_stop_on_start_item: bool = True):
         """
         Perform a trace across the network from `start_item`, applying actions to each piece of equipment encountered
         until all branches of the network are exhausted, or a stop condition succeeds and we cannot continue any further.
@@ -154,6 +154,7 @@ class BaseTraversal(Generic[T], ABC):
 
         self._running = True
         self._has_run = True
+        self.start_item = start_item if start_item is not None else self.start_item
         await self._run_trace(can_stop_on_start_item)
         self._running = False
 
@@ -186,7 +187,7 @@ class Traversal(BaseTraversal):
     """
     def __init__(self,
                  queue_next: Callable[[T, Set[T]], Iterable[T]],
-                 start_item: T,
+                 start_item: T = None,
                  search_type: SearchType = SearchType.DEPTH,
                  tracker: Tracker = None,
                  stop_conditions: List[Callable[[T], Awaitable[bool]]] = None,

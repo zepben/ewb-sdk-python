@@ -36,6 +36,7 @@ setup(
     install_requires=[
         "grpcio",
         "grpcio-tools",
+        "python-jose-cryptodome",
         "protobuf"
     ],
     extras_require={

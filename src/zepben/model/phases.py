@@ -158,7 +158,7 @@ class Phases(object):
             pc = self.phase_current(core)
             dn = self.direction_normal(core)
             dc = self.direction_current(core)
-            s = s.append(f"core {core}: n: {pn.short_name}|{dn.short_name} c: {pc.short_name}|{dc.short_name}")
+            s.append(f"core {core}: n: {pn.short_name}|{dn.short_name} c: {pc.short_name}|{dc.short_name}")
         return ", ".join(s)
 
     def phase_normal(self, core_num):

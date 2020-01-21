@@ -21,10 +21,12 @@ from zepben.model.util import snake2camelback, iter_but_not_str
 from abc import abstractmethod, ABCMeta
 from typing import List
 import inspect
+import logging
 
 # Global state for ignored attributes - used when building protobuf args. Any keys in here will not be included
 _ignored_attribute_cache = set()
 
+logger = logging.getLogger(__name__)
 
 class IdentifiedObject(object, metaclass=ABCMeta):
     """
@@ -152,7 +154,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
     def _pb_args(self, exclude=None):
         """
-        Protobuf CIM objects are in camelback form, but we want to keep the CIM model PEP compliant;
+        Protobuf CIM objects are in camelcase, but we want to keep the CIM model PEP compliant;
         to convert between a CIM object and a PB object, we should simply be able to convert the attributes between
         snake case and camelback and use the corresponding PB constructor to build the protobuf form.
         :param exclude: List of properties to exclude from the resulting dictionary
@@ -180,8 +182,13 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                 if iter_but_not_str(v):
                     try:
                         # Handle repeated sub-message
-                        pb_dict[key] = [x.to_pb() for x in v]
-                    except AttributeError:
+                        pb_dict[key] = []
+                        for x in v:
+                            pb_dict[key].append(x.to_pb())
+                    except AttributeError as ae:
+                        if x:
+                            if hasattr(x, 'to_pb'):
+                                logger.warning(f"Converting repeated field '{key}' caused: ", exc_info=ae)
                         # Handle repeated scalar
                         pb_dict[key] = v
                 else:

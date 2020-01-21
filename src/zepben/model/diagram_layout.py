@@ -63,7 +63,8 @@ class DiagramObject(IdentifiedObject):
 
     def to_pb(self):
         args = self._pb_args()
-        args["diagramMRID"] = self.diagram.mrid
+        if self.diagram:
+            args["diagramMRID"] = self.diagram.mrid
         # TODO: Support diagramObjects on a DiagramObject?
         del args["diagramObjects"]
         return PBDiagramObject(**args)
