@@ -17,3 +17,10 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
+
+class AuthException(Exception):
+    pass
+
+
+class StreamingException(Exception):
+    pass
