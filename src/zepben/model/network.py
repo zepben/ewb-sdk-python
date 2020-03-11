@@ -399,7 +399,11 @@ class EquipmentContainer(ConnectivityNodeContainer):
             # Otherwise it's a protobuf class.
             # Need to pass in keyword args - at the moment the only possibility is the network.
             # This will throw any exception the corresponding `from_pb` throws
-            o = cls.from_pb(obj, network=self)
+            try:
+                o = cls.from_pb(obj, network=self)
+            except MissingReferenceException as mre:
+                mre.referrer = obj  # To add referrer details to error message.
+                raise mre
             map_[o.mrid] = o
 
     async def set_phases(self):

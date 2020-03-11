@@ -26,7 +26,7 @@ async def validate_run(t: Traversal, visit_order: List[int], expected_order: Lis
     # clean slate each run
     t.reset()
     visit_order.clear()
-    await t.trace(can_stop_on_start)
+    await t.trace(can_stop_on_start_item=can_stop_on_start)
     for i, x in enumerate(expected_order):
         assert visit_order[i] == x
         if check_visited:

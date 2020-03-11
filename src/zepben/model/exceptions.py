@@ -18,76 +18,84 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 class MissingReferenceException(Exception):
-    def __init__(self, info: str = None, **kwargs):
-        if info is None:
-            self.info = f"{self} was not found in the network. It must be created prior to dependencies."
-        else:
-            self.info = info
+    TYPE = 'UNKNOWN'
+
+    def __init__(self, referenced_mrid: str, referrer=None, **kwargs):
+        self.referenced_mrid = referenced_mrid
+        self.referrer = referrer
+
         super().__init__(kwargs)
+
+    @property
+    def info(self):
+        if self.referrer is not None:
+            if hasattr(self.referrer, 'DESCRIPTOR'):
+                self.referrer_type = self.referrer.DESCRIPTOR.name
+                self.referrer_mrid = self.referrer.mRID
+            else:
+                self.referrer_type = type(self.referrer).__name__
+                self.referrer_mrid = self.referrer.mrid
+        return f"{self.TYPE} {self.referenced_mrid} was not found in the network. It must be created before {self.referrer_type}[{self.referrer_mrid}] can reference it."
 
 
 class NoBaseVoltageException(MissingReferenceException):
-    pass
+    TYPE = 'BaseVoltage'
 
 
 class NoAssetInfoException(MissingReferenceException):
-    pass
+    TYPE = 'AssetInfo'
 
 
 class NoTerminalException(MissingReferenceException):
-    pass
+    TYPE = 'Terminal'
 
 
 class NoPerLengthSeqImpException(MissingReferenceException):
-    pass
+    TYPE = 'PerLengthSequenceImpedance'
 
 
 class NoConnectivityNodeException(MissingReferenceException):
-    pass
+    TYPE = 'ConnectivityNode'
 
 
 class NoUsagePointException(MissingReferenceException):
-    pass
+    TYPE = 'UsagePoint'
 
 
 class NoCustomerException(MissingReferenceException):
-    pass
+    TYPE = 'Customer'
 
 
 class NoEquipmentException(MissingReferenceException):
-    pass
+    TYPE = 'Equipment'
 
 
 class NoMeterException(MissingReferenceException):
-    pass
+    TYPE = 'Meter'
 
 
 class NoBreakerException(MissingReferenceException):
-    pass
+    TYPE = 'Breaker'
 
 
 class NoACLineSegmentException(MissingReferenceException):
-    pass
+    TYPE = 'AcLineSegment'
 
 
 class NoTransformerException(MissingReferenceException):
-    pass
+    TYPE = 'PowerTransformer'
 
 
 class NoJunctionException(MissingReferenceException):
-    pass
+    TYPE = 'Junction'
 
 
 class NoEnergySourceException(MissingReferenceException):
-    pass
+    TYPE = 'EnergySource'
 
 
 class NoEnergyConsumerException(MissingReferenceException):
-    pass
-
-
-class NoAssetInfoException(MissingReferenceException):
-    pass
+    TYPE = 'EnergyConsumer'
 
 
 class NetworkException(Exception):

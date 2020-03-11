@@ -16,10 +16,10 @@ You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-
 from __future__ import annotations
 from collections import defaultdict
 from enum import Enum
+import itertools
 
 from zepben.model.cores import SUPPORTED_CORES
 from zepben.model.exceptions import CoreException, PhaseException
@@ -125,7 +125,8 @@ PHASE_DIR_MAP[0b11000000] = SinglePhaseKind.N
 
 def validate_core(core_num):
     if core_num > 3 or core_num < 0:
-        raise CoreException(f"INTERNAL ERROR: Core index {core_num} is invalid. There are only 4 possible core indexes {0,1,2,3}.")
+        raise CoreException(
+            f"INTERNAL ERROR: Core index {core_num} is invalid. There are only 4 possible core indexes {0, 1, 2, 3}.")
 
 
 def _phase(status: int, core_num: int):
@@ -235,7 +236,7 @@ class Phases(object):
         self.current_status |= direction.value << _pos_shift(phase, core_num)
         return True
 
-    def set_normal(self, phase: SinglePhaseKind, core_num: int, direction: Direction ):
+    def set_normal(self, phase: SinglePhaseKind, core_num: int, direction: Direction):
         """
         :param phase: The :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind` to add.
         :param core_num: The core number this phase should be applied to
@@ -250,7 +251,8 @@ class Phases(object):
         if self.phase_normal(core_num) == phase and self.direction_normal(core_num) == direction:
             return False
 
-        self.normal_status = (self.normal_status & CORE_MASKS[core_num]) | (direction.value << _pos_shift(phase, core_num))
+        self.normal_status = (self.normal_status & CORE_MASKS[core_num]) | (
+                    direction.value << _pos_shift(phase, core_num))
         return True
 
     def set_current(self, phase: SinglePhaseKind, direction: Direction, core_num: int):
@@ -268,7 +270,8 @@ class Phases(object):
         if self.phase_current(core_num) == phase and self.direction_current(core_num) == direction:
             return False
 
-        self.current_status = (self.current_status & CORE_MASKS[core_num]) | (direction.value << _pos_shift(phase, core_num))
+        self.current_status = (self.current_status & CORE_MASKS[core_num]) | (
+                    direction.value << _pos_shift(phase, core_num))
         return True
 
     def remove_normal(self, phase: SinglePhaseKind, core_num: int, direction: Direction = None):
@@ -290,7 +293,7 @@ class Phases(object):
             self.normal_status &= ~CORE_MASKS[core_num]
             return True
 
-    def remove_current(self, phase: SinglePhaseKind, core_num: int,  direction: Direction = None):
+    def remove_current(self, phase: SinglePhaseKind, core_num: int, direction: Direction = None):
         """
         :param phase: The :class:`zepben.cim.iec61970.base.wires.SinglePhaseKind` to add.
         :param core_num: The core number this phase should be applied to
@@ -322,5 +325,3 @@ class Phases(object):
                  but no current phases or `Direction`'s.
         """
         return Phases(PhaseCode.from_pb(pb_pc))
-
-
