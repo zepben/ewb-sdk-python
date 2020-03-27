@@ -24,7 +24,7 @@ from zepben.model.terminal import Terminal
 from zepben.model.base_voltage import UNKNOWN as BV_UNKNOWN
 from zepben.model.common import Location
 from zepben.model.diagram_layout import DiagramObject
-from zepben.model.equipment import ConductingEquipment
+from zepben.model.conducting_equipment import ConductingEquipment
 from typing import List
 __all__ = ["Connector", "Junction"]
 
@@ -56,7 +56,7 @@ class Junction(Connector):
         """
         Convert a protobuf Junction to a :class:`zepben.model.connectors.Junction`
         :param pb_j: :class:`zepben.cim.iec61970.base.wires.Junction`
-        :param network: EquipmentContainer to extract `pb_j.baseVoltageMRID`
+        :param network: Network to extract `pb_j.baseVoltageMRID`
         :raises: NoBaseVoltageException when pb_j.baseVoltageMRID isn't found in network
         :return: A :class:`zepben.model.connectors.Junction`
         """

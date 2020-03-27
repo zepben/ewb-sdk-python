@@ -1,7 +1,7 @@
 # Sending data using cimbend #
 The `to_pb()` and `from_pb(*args, **kwargs)` functions for each class in the model allow simplified conversion between model objects and their equivalent protobuf objects.
 
-`from_pb()` will often require you to pass in some extra arguments to gather dependencies. The most frequent of these is `network: EquipmentContainer`, so relevant dependencies can be fetched from the network. In some cases dependencies are hard, and `from_pb()` will propagate some form of `MissingReferenceException` if the network does not contain the required dependency. See the relevant documentation in `from_pb()` for these cases. 
+`from_pb()` will often require you to pass in some extra arguments to gather dependencies. The most frequent of these is `network: Network`, so relevant dependencies can be fetched from the network. In some cases dependencies are hard, and `from_pb()` will propagate some form of `MissingReferenceException` if the network does not contain the required dependency. See the relevant documentation in `from_pb()` for these cases. 
 
 Where a Protobuf message contains a `oneof` field, as per Protobuf rules only the field that has been explicitly set will be utilised. See AssetInfo example below.
 

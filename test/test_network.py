@@ -25,7 +25,7 @@ from zepben.cim.iec61968 import CableInfo as PBCableInfo, OverheadWireInfo as PB
 from zepben.model import EnergySource, BaseVoltage, EnergyConsumer, ACLineSegment, PowerTransformer, Breaker, \
     PerLengthSequenceImpedance, Terminal, VoltageReading
 from zepben.model import CableInfo, OverheadWireInfo, Customer, UsagePoint, Meter, MeterReading
-from zepben.model import EquipmentContainer, MetricsStore, ReadingType
+from zepben.model import Network, MetricsStore, ReadingType
 
 """
 TODO:
@@ -37,7 +37,7 @@ class TestEquipmentContainer(object):
     def test_add_pb(self):
         """Test addition to the network works for all PB types."""
         ms = MetricsStore()
-        network = EquipmentContainer(ms)
+        network = Network(ms)
         bv1 = PBBaseVoltage(mRID="bv1", nominalVoltage=PBVoltage(value=22000))
         network.add(bv1)
         bv2 = PBBaseVoltage(mRID="bv2", nominalVoltage=PBVoltage(value=415))
@@ -99,7 +99,7 @@ class TestEquipmentContainer(object):
     def test_add(self):
         """Test addition to the network works for all CIM types."""
         ms = MetricsStore()
-        network = EquipmentContainer(ms)
+        network = Network(ms)
         bv1 = BaseVoltage(mrid="bv1", nom_volt=22000)
         network.add(bv1)
         bv2 = BaseVoltage(mrid="bv2", nom_volt=415)

@@ -21,7 +21,7 @@ import uuid
 from dataclasses import dataclass
 from pytest import fixture
 from zepben.cim.iec61970 import WindingConnection, VectorGroup
-from zepben.model.network import EquipmentContainer
+from zepben.model.network import Network
 from zepben.model.metrics_store import MetricsStore
 from zepben.model import EnergySource, EnergyConsumer, Terminal, ConnectivityNode, IdentifiedObject, ACLineSegment, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Breaker, EquipmentContainerType, \
@@ -85,7 +85,7 @@ class AddResult:
 class NetworkBuilder(object):
     def __init__(self):
         self.metrics_store = MetricsStore()
-        self.network = EquipmentContainer(self.metrics_store)
+        self.network = Network(self.metrics_store)
 
     def create_feeder_start(self, name="default", es_args=None, cb_args=None, acls_args=None):
         if cb_args is None:
@@ -192,7 +192,7 @@ class NetworkBuilder(object):
         terms = self.gen_terminals(2, connectivity_node, mrid=mrid, phases=phases, wiring_supplier=wiring_supplier)
         br = Breaker(mrid=mrid, terminals=terms, **kwargs)
         if substation is not None:
-            br.link_equipment_container(EquipmentContainerType.SUBSTATION, substation)
+            br.link_equipment_container(substation)
 
         self.network.add(br)
         return AddResult(br, terms[0].connectivity_node)

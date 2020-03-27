@@ -17,48 +17,16 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.iec61970 import EnergySource as PBEnergySource, EnergySourcePhase as PBEnergySourcePhase
-from zepben.model.phases import SinglePhaseKind
+from zepben.cim.iec61970 import EnergySource as PBEnergySource
+from zepben.model.energy_source_phase import EnergySourcePhase
 from zepben.model.terminal import Terminal
-from zepben.model.equipment import ConductingEquipment, PowerSystemResource
+from zepben.model.conducting_equipment import ConductingEquipment
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
 from typing import List
-__all__ = ["EnergySource", "EnergySourcePhase"]
+__all__ = ["EnergySource"]
 
-
-class EnergySourcePhase(PowerSystemResource):
-    """
-    A single phase of an energy source.
-
-    Attributes:
-        phase : A :class:`zepben.model.phases.SinglePhaseKind`
-                Phase of this energy source component. If the energy source is wye connected, the connection is from
-                the indicated phase to the central ground or neutral point. If the energy source is delta connected,
-                the phase indicates an energy source connected from the indicated phase to the next logical
-                non-neutral phase.
-    """
-    def __init__(self, phase: SinglePhaseKind, mrid: str = "", name: str = "", diag_objs: List[DiagramObject] = None):
-        """
-        Create an EnergySourcePhase. Represents a single phase of an EnergySource. Typically, you are only required
-        to create EnergySourcePhases if they are unbalanced, or if it's a single phase EnergySource.
-
-        :param phase: A :class:`zepben.model.phases.SinglePhaseKind`
-        :param mrid: mRID for this object (optional)
-        :param name: Any free human readable and possibly non unique text naming the object.
-        :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
-        """
-        self.phase = phase
-        super().__init__(mrid=mrid, name=name, diag_objs=diag_objs)
-
-    def to_pb(self):
-        return PBEnergySourcePhase(**self._pb_args())
-
-    @staticmethod
-    def from_pb(pb_esp, **kwargs):
-        return EnergySourcePhase(phase=SinglePhaseKind.from_pb(pb_esp.phase), mrid=pb_esp.mRID, name=pb_esp.name,
-                                 diag_objs=DiagramObject.from_pbs(pb_esp.diagramObjects))
 
 
 class EnergySource(ConductingEquipment):
@@ -79,8 +47,8 @@ class EnergySource(ConductingEquipment):
                     source point for calculating `Direction`'s.
     """
     def __init__(self, mrid: str, active_power: float = 0.0, r: float = 0.0, x: float = 0.0, base_voltage: BaseVoltage = BV_UNKNOWN,
-                 reactive_power: float = 0.0, voltage_angle: float = 0.0, voltage_magnitude: float = 0.0,
-                 in_service: bool = True, name: str = "", terminals: List = None, esp: List[EnergySourcePhase] = None,
+                 reactive_power: float = 0.0, voltage_angle: float = 0.0, voltage_magnitude: int = 0.0,
+                 in_service: bool = True, name: str = "", terminals: List[Terminal] = None, esp: List[EnergySourcePhase] = None,
                  diag_objs: List[DiagramObject] = None, location: Location = None):
         """
         Create an EnergySource
@@ -129,7 +97,7 @@ class EnergySource(ConductingEquipment):
         """
         Convert a protobuf EnergySource to a :class:`zepben.model.EnergySource`
         :param pb_es: :class:`zepben.cim.iec61970.base.wires.EnergySource`
-        :param network: EquipmentContainer to extract BaseVoltage
+        :param network: Network to extract BaseVoltage
         :raises: NoBaseVoltageException when BaseVoltage isn't found in network
         :return: A :class:`zepben.model.EnergySource`
         """

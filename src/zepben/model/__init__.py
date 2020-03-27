@@ -20,7 +20,9 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 from zepben.model.connectivity_node import ConnectivityNode
 from zepben.model.cores import *
 from zepben.model.energy_source import *
-from zepben.model.energy_consumer import EnergyConsumer
+from zepben.model.energy_source_phase import *
+from zepben.model.energy_consumer import *
+from zepben.model.equipment_container import *
 from zepben.model.connectors import *
 from zepben.model.direction import *
 from zepben.model.power_transformer import PowerTransformerEnd, PowerTransformer, RatioTapChanger, InvalidTransformerError
@@ -31,7 +33,7 @@ from zepben.model.base_voltage import BaseVoltage
 from zepben.model.diagram_layout import DiagramObject, DiagramObjectPoint
 from zepben.model.metrics_store import MetricsStore
 from zepben.model.terminal import Terminal
-from zepben.model.network import EquipmentContainer
+from zepben.model.network import Network
 from zepben.model.exceptions import *
 from zepben.model.metering import Meter, UsagePoint, MeterReading, VoltageReading, RealPowerReading, ReactivePowerReading, ReadingType
 from zepben.model.customer import Customer
@@ -41,6 +43,7 @@ from zepben.model.equipment import *
 from zepben.model.identified_object import IdentifiedObject
 from zepben.model.substation import *
 from zepben.model.containers import *
-
-
+from zepben.model.winding_connection import *
+from zepben.model.vector_group import *
+from zepben.model.phase_shunt_connection_kind import *
 

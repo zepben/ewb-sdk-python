@@ -15,8 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
-
-
+from __future__ import annotations
 from zepben.cim.iec61970 import Terminal as PBTerminal
 from zepben.model.cores import from_count
 from zepben.model.identified_object import IdentifiedObject
@@ -51,7 +50,7 @@ class Terminal(IdentifiedObject):
                       where the reactive line charging can be significant, this is a relevant case.
     """
 
-    def __init__(self, mrid: str, connectivity_node, phases: Phases = None, name: str = "",
+    def __init__(self, mrid: str, connectivity_node: ConnectivityNode, phases: Phases = None, name: str = "",
                  diag_objs: List[DiagramObject] = None, equipment=None, connected: bool = True):
         """
         Create a Terminal.
@@ -69,6 +68,7 @@ class Terminal(IdentifiedObject):
         """
         self.phases = phases if phases is not None else Phases()
         self.connected = connected
+        connectivity_node.add_terminal(self)
         self.__connectivity_node = ref(connectivity_node)
         self.__equipment = equipment
         self.__ext_int_wiring = [-1 for _ in range(self.num_cores)]
@@ -175,12 +175,15 @@ class Terminal(IdentifiedObject):
                     results.append(cr)
         return results
 
-    def connect(self, wiring: Wiring):
+    def connect(self, wiring: Wiring = None):
         """
         Connect this terminal's wiring to its `ConnectivityNode`
         :param wiring: The wiring to use to connect
         :raises: :class:`zepben.model.exceptions.WiringException` if `wiring` is incompatible with the `ConnectivityNode`
         """
+        if wiring is None:
+            wiring = IMPLICIT_WIRING[self.num_cores]     
+            
         if wiring.num_cores != self.num_cores:
             raise WiringException(f"Wiring had {wiring.num_cores} and terminal had {self.num_cores}. They must have the same number of cores")
         # max_cores = -1
@@ -206,7 +209,7 @@ class Terminal(IdentifiedObject):
         """
         Every terminal requires a connectivityNodeMRID to be specified.
         :param pb_t: A protobuf Terminal to convert to Terminal
-        :param network: The EquipmentContainer that the terminal belongs to. Associated ConnectivityNode's will be
+        :param network: The Network that the terminal belongs to. Associated ConnectivityNode's will be
                         added to this network.
         :param wiring: Wiring for this Terminal. TODO: does this need to be part of Terminal.proto?
         :return: A zepben.model.Terminal
@@ -221,7 +224,7 @@ class Terminal(IdentifiedObject):
                         name=pb_t.name,
                         connected=pb_t.connected,
                         diag_objs=DiagramObject.from_pbs(pb_t.diagramObjects))
-        term.connect(IMPLICIT_WIRING[term.num_cores])
+        term.connect()
         conn_node.add_terminal(term)
         return term
 

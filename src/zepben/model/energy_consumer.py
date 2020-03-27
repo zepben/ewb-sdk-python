@@ -20,11 +20,13 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 from zepben.cim.iec61970 import PhaseShuntConnectionKind, EnergyConsumer as PBEnergyConsumer, EnergyConsumerPhase as PBEnergyConsumerPhase
 from zepben.model.phases import SinglePhaseKind
 from zepben.model.terminal import Terminal
-from zepben.model.equipment import ConductingEquipment, PowerSystemResource
+from zepben.model.conducting_equipment import ConductingEquipment
+from zepben.model.power_system_resource import PowerSystemResource
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
 from typing import List
+__all__ = ["EnergyConsumer", "EnergyConsumerPhase"]
 
 
 class EnergyConsumerPhase(PowerSystemResource):
@@ -42,7 +44,7 @@ class EnergyConsumerPhase(PowerSystemResource):
                 the phase indicates an energy consumer connected from the indicated phase to the next logical
                 non-neutral phase.
     """
-    def __init__(self, pfixed: float, qfixed: float, phase: SinglePhaseKind, mrid: str = "", name: str = "",
+    def __init__(self, pfixed: float = 0.0, qfixed: float = 0.0, phase: SinglePhaseKind = None, mrid: str = "", name: str = "",
                  diag_objs: List[DiagramObject] = None):
         """
         Create an EnergyConsumerPhase. Represents a single phase of an EnergyConsumer. Typically, you are only required
@@ -124,7 +126,7 @@ class EnergyConsumer(ConductingEquipment):
         """
         Convert a protobuf EnergyConsumer to a :class:`zepben.model.EnergyConsumer`
         :param pb_ec: :class:`zepben.cim.iec61970.base.wires.EnergyConsumer`
-        :param network: EquipmentContainer to extract pb_ec.baseVoltageMRID
+        :param network: Network to extract pb_ec.baseVoltageMRID
         :raises: NoBaseVoltageException when pb_ec.baseVoltageMRID isn't found in network
         :return: A :class:`zepben.model.EnergyConsumer`
         """

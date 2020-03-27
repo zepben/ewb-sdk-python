@@ -19,7 +19,6 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 import logging
-from zepben.model.equipment import Equipment
 from zepben.model.tracing.connectivity import ConductingEquipmentToCores
 from zepben.model.direction import Direction
 from zepben.model.tracing.tracing import Traversal, SearchType
@@ -94,7 +93,8 @@ def queue_next_terminal(item, exclude=None):
         # also return connections for EnergyConsumer's, but upstream will be covered by the exclude parameter and thus
         # should yield an empty list.
         to_terms = [cr.to_terminal for cr in item.get_connectivity(exclude=exclude)]
-        tracing_logger.debug(f"Queuing {to_terms[0].mrid} from single terminal equipment {item.mrid}")
+        if len(to_terms) > 0:
+            tracing_logger.debug(f"Queuing {to_terms[0].mrid} from single terminal equipment {item.mrid}")
         return to_terms
 
     crs = []

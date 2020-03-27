@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.model.equipment import ConductingEquipment
+from zepben.model.conducting_equipment import ConductingEquipment
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.exceptions import PhaseException
 from zepben.model.common import Location
@@ -128,7 +128,7 @@ class Breaker(Switch):
                          base_voltage=base_voltage, name=name, terminals=terminals, diag_objs=diag_objs, location=location)
 
     def is_substation_breaker(self):
-        return not len(self.substation) == 0
+        return len(self.substations) > 0
 
     def to_pb(self):
         args = self._pb_args()
@@ -139,7 +139,7 @@ class Breaker(Switch):
         """
         Convert a protobuf Breaker to a :class:`zepben.model.Breaker`
         :param pb_br: :class:`zepben.cim.iec61970.base.wires.Breaker`
-        :param network: EquipmentContainer to extract BaseVoltage
+        :param network: Network to extract BaseVoltage
         :raises: NoBaseVoltageException when pb_br.baseVoltageMRID isn't found in network
         :return: A :class:`zepben.model.Breaker`
         """

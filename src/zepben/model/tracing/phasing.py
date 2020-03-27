@@ -24,7 +24,6 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from zepben.model.direction import Direction
-from zepben.model.equipment import Equipment
 from zepben.model.exceptions import CoreException, PhaseException
 from zepben.model.tracing.exceptions import TracingException
 from zepben.model.tracing.phase_status import normal_phases, current_phases
@@ -124,7 +123,7 @@ async def _apply_phases_from_feeder_cbs(network):
     """
     Apply phase and direction on all Feeder Circuit Breakers. Will make all phases on the outgoing Terminal of a
     `Breaker` that is part of a substation have a `Direction` of `OUT`.
-    :param network: :class:`zepben.model.network.EquipmentContainer` to apply phasing on.
+    :param network: :class:`zepben.model.network.Network` to apply phasing on.
     """
     start_terms = []
     # TODO: check if below assumption is correct

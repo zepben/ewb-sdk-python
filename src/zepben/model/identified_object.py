@@ -114,7 +114,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         This method should be defined for all types that can be transformed from a Protobuf message.
         :param args: First arg should always be the protobuf message to convert
         :param kwargs: All other args are implementation dependent, anything you need to build your
-                       type should be passed in as another parameter. Typical example is network: EquipmentContainer,
+                       type should be passed in as another parameter. Typical example is network: Network,
                        used for fetching references from an associated network.
         :return: The corresponding type from :mod:`zepben.model`
         """

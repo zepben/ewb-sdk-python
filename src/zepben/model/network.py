@@ -23,7 +23,6 @@ from uuid import uuid4
 
 from zepben.model.common import Location
 from zepben.model.diagram_layout import DiagramObject
-from zepben.model.equipment import PowerSystemResource
 from zepben.model.exceptions import *
 from zepben.model.base_voltage import BaseVoltage
 from zepben.model.asset_info import AssetInfo
@@ -38,10 +37,11 @@ from zepben.model.per_length_sequence_impedance import PerLengthSequenceImpedanc
 from zepben.model.metrics_store import MetricsStore
 from zepben.model.metering import UsagePoint, Meter
 from zepben.model.customer import Customer
+from zepben.model.substation import Substation
 from zepben.model.decorators import create_registrar, map_type
 from zepben.cim.iec61970 import EnergySource as PBEnergySource, EnergyConsumer as PBEnergyConsumer, Breaker as PBBreaker, \
     PowerTransformer as PBPowerTransformer, AcLineSegment as PBAcLineSegment, BaseVoltage as PBBaseVoltage, \
-    PerLengthSequenceImpedance as PBPerLengthSequenceImpedance, Junction as PBJunction
+    PerLengthSequenceImpedance as PBPerLengthSequenceImpedance, Junction as PBJunction, Substation as PBSubstation
 from zepben.cim.iec61968 import AssetInfo as PBAssetInfo, Customer as PBCustomer, Meter as PBMeter, UsagePoint as PBUsagePoint
 from zepben.model.tracing.phasing import SetPhases
 from pathlib import Path
@@ -51,22 +51,14 @@ logger = logging.getLogger(__name__)
 TRACED_NETWORK_FILE = str(Path.home().joinpath(Path("traced.json")))
 
 
-class ConnectivityNodeContainer(PowerSystemResource):
-    """
-    This class is currently unused in our CIM profile, but may be extended in the future
-    """
-    def __init__(self, mrid: str, name: str = "", diag_objs: List[DiagramObject] = None, location: Location = None):
-        super().__init__(mrid=mrid, name=name, diag_objs=diag_objs, location=location)
-
-
-class EquipmentContainer(ConnectivityNodeContainer):
+class Network:
     """
     A full representation of the power network.
     Contains a map of equipment (string ID's -> Equipment/Nodes/etc)
-    **All** `IdentifiedObject's` submitted to this EquipmentContainer **MUST** have unique mRID's!
+    **All** `IdentifiedObject's` submitted to this Network **MUST** have unique mRID's!
     """
 
-    # A decorator simply used for registering EquipmentContainer getter functions.
+    # A decorator simply used for registering Network getter functions.
     # If you create a new equipment map in __init__, you should create a corresponding getter function and
     # decorate it with @getter
     getter = create_registrar()
@@ -78,14 +70,13 @@ class EquipmentContainer(ConnectivityNodeContainer):
     # Utilised in the `add` method, but also in the streaming library.
     type_map = map_type()
 
-    def __init__(self, metrics_store: MetricsStore = None, name: str = "default", mrid=None,
-                 diag_objs: List[DiagramObject] = None, location: Location = None):
+    def __init__(self, metrics_store: MetricsStore = None, name: str = "default", mrid=None):
         """
         Represents a whole network. At the moment there's a single index on equipment ID's -> all types of equipment,
         as well as an index on energy source ID's -> energy sources.
         :param metrics_store: Storage for meter measurement data associated with this network.
         """
-        super().__init__(mrid=mrid if mrid is not None else uuid4(), name=name, diag_objs=diag_objs, location=location)
+        self.mrid = mrid
         self._asset_infos = {}
         self._base_voltages = {}
         self._breakers = {}
@@ -99,6 +90,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         self._seq_impedances = {}
         self._transformers = {}
         self._usage_points = {}
+        self._substations = {}
         self.metrics_store = metrics_store
 
     @type_map(BaseVoltage, PBBaseVoltage, 'createBaseVoltage')
@@ -110,6 +102,11 @@ class EquipmentContainer(ConnectivityNodeContainer):
     @property
     def asset_infos(self):
         return self._asset_infos
+
+    @type_map(Substation, PBSubstation, 'createSubstation')
+    @property
+    def substations(self):
+        return self._substations
 
     @type_map(EnergySource, PBEnergySource, 'createEnergySource')
     @property
@@ -179,11 +176,11 @@ class EquipmentContainer(ConnectivityNodeContainer):
 
     def __getitem__(self, item):
         """
-        Gets an mRID from the EquipmentContainer, checking all mappings.
+        Gets an mRID from the Network, checking all mappings.
         It is preferred to use the get_* methods if you know what type you are retrieving.
         :param item:
         :return:
-        :raises: KeyError when `item` isn't in the EquipmentContainer.
+        :raises: KeyError when `item` isn't in the Network.
         """
         for m in self.getter.all.values():
             try:

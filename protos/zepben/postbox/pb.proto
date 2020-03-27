@@ -28,6 +28,7 @@ import "zepben/cim/iec61970/base/wires/Breaker.proto";
 import "zepben/cim/iec61970/base/wires/Junction.proto";
 import "zepben/cim/iec61970/base/wires/PerLengthSequenceImpedance.proto";
 import "zepben/cim/iec61970/base/diagramlayout/DiagramObject.proto";
+import "zepben/cim/iec61970/base/core/Substation.proto";
 import "zepben/cim/iec61968/metering/Meter.proto";
 import "zepben/cim/iec61968/metering/MeterReading.proto";
 import "zepben/cim/iec61968/metering/UsagePoint.proto";
@@ -52,6 +53,7 @@ service NetworkData {
     rpc createUsagePoint(UsagePointRequest) returns (UPResponse);
     rpc createMeter(MeterRequest) returns (MeterResponse);
     rpc createCustomer(CustomerRequest) returns (CUResponse);
+    rpc createSubstation(SubstationRequest) returns (SubstationResponse);
     /***** Getters *****/
     rpc getEquipmentContainer(google.protobuf.Empty) returns (stream Equipment);
     rpc getWholeNetwork(Identity) returns (stream Equipment);
@@ -108,6 +110,10 @@ message CustomerRequest {
     zepben.cim.iec61968.customers.Customer customer = 2;
 }
 
+message SubstationRequest {
+    int64 message_id = 1;
+    zepben.cim.iec61970.base.core.Substation substation = 2;
+}
 
 message DOResponse {
     string msg = 1;
@@ -135,6 +141,10 @@ message MRResponse {
 message AssetInfoRequest {
     int64 message_id = 1;
     zepben.cim.iec61968.assetinfo.AssetInfo assetInfo = 2;
+}
+
+message SubstationResponse {
+    string msg = 1;
 }
 
 message CUResponse {

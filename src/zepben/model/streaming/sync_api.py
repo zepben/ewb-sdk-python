@@ -31,7 +31,7 @@ class SyncWorkbenchConnection(WorkbenchConnection):
         """
         Retrieve an entire network from the connection.
         :param mrid: ID of the network to retrieve (not supported yet) TODO
-        :return: An :class:`zepben.model.network.EquipmentContainer` populated with the network.
+        :return: An :class:`zepben.model.network.Network` populated with the network.
         """
         ec = get_event_loop().run_until_complete(super().get_whole_network(self.network.getWholeNetwork, Identity(mRID=mrid)))
         return ec
@@ -40,7 +40,7 @@ class SyncWorkbenchConnection(WorkbenchConnection):
         """
         Send a feeder to the connected server. A feeder must start with a feeder circuit :class:`zepben.model.switch.Breaker`.
 
-        :param ec: The EquipmentContainer containing all equipment in the feeder.
+        :param ec: The Network containing all equipment in the feeder.
         :return: A :class:`zepben.model.streaming.streaming.FeederStreamResult
         :raises: A derivative of :class:`zepben.model.exceptions.MissingReferenceException` if a incorrect reference
                  between types is made.

@@ -30,13 +30,13 @@ def create_registrar():
 
 def map_type():
     # Maps types to the decorated function. The ordering here is important, as we use this ordering when we
-    # serialise or deserialise from an EquipmentContainer.
+    # serialise or deserialise from an Network.
     type_map = OrderedDict()
     # Maps protobuf types to CIM types
     pb_to_cim = OrderedDict()
     # Maps protobuf types to the name of a gRPC streaming function.
     # For example, a Protobuf BaseVoltage maps to createBaseVoltage.
-    # This is used when streaming an EquipmentContainer.
+    # This is used when streaming an Network.
     grpc_func_map = dict()
 
     def wrap(typ, pb_typ=None, stream_func_name=None):

@@ -17,12 +17,13 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from zepben.model.terminal import Terminal
 from zepben.model.identified_object import IdentifiedObject
-from zepben.model.equipment import ConductingEquipment, PowerSystemResource
+from zepben.model.conducting_equipment import ConductingEquipment
+from zepben.model.power_system_resource import PowerSystemResource
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
 from zepben.model.exceptions import NoTerminalException
 from zepben.cim.iec61970 import PowerTransformer as PBPowerTransformer, PowerTransformerEnd as PBPowerTransformerEnd, \
-    RatioTapChanger as PBRatioTabChanger, WindingConnection
+    RatioTapChanger as PBRatioTapChanger, WindingConnection
 from zepben.cim.iec61970 import VectorGroup
 from typing import List
 
@@ -73,7 +74,7 @@ class RatioTapChanger(TapChanger):
     Attributes:
         step_voltage_increment : Tap step increment, in per cent of neutral voltage, per step position.
     """
-    def __init__(self, high_step: float = 0.0, low_step: float = 0.0, step: float = 0.0, step_voltage_increment: float = 0.0,
+    def __init__(self, high_step: int = 0, low_step: int = 0, step: float = 0.0, step_voltage_increment: float = 0.0,
                  mrid: str = "", name: str = "", diag_objs: List[DiagramObject] = None):
         """
         Create a RatioTapChanger
@@ -82,6 +83,7 @@ class RatioTapChanger(TapChanger):
         :param step: Tap changer position. Starting step for a steady state solution. Non integer values are allowed to
                      support continuous tap variables. Must be >= low_step and <= high_step.
         :param step_voltage_increment: Tap step increment, in percent of neutral voltage, per step position.
+                                       Must be between 0 and 1.
         :param mrid: mRID for this object. Optional and not typically used.
         :param name: Any free human readable and possibly non unique text naming the object.
         :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
@@ -91,7 +93,7 @@ class RatioTapChanger(TapChanger):
 
     def to_pb(self):
         args = self._pb_args()
-        return PBRatioTabChanger(**args)
+        return PBRatioTapChanger(**args)
 
     @staticmethod
     def from_pb(pb_rtc, **kwargs):
@@ -130,7 +132,7 @@ class PowerTransformerEnd(IdentifiedObject):
         connection_kind : Kind of :class:`zepben.cim.iec61970.base.wires.WindingConnection` for this end.
         ratio_tap_changer : :class:`RatioTapChanger` attached to this end.
     """
-    def __init__(self, rated_s: float = None, rated_u: float = None, r: float = None, x: float = None, r0: float = None,
+    def __init__(self, rated_s: int = None, rated_u: int = None, r: float = None, x: float = None, r0: float = None,
                  x0: float = None, winding: WindingConnection = None, tap_changer: RatioTapChanger = None,
                  mrid: str = "", name: str = "", diag_objs: List[DiagramObject] = None):
         """
@@ -258,7 +260,7 @@ class PowerTransformer(ConductingEquipment):
         """
         Convert a protobuf PowerTransformer to a :class:`zepben.model.PowerTransformer`
         :param pb_tf: :class:`zepben.cim.iec61970.base.wires.PowerTransformer`
-        :param network: EquipmentContainer associated with this transformer.
+        :param network: Network associated with this transformer.
         :return: A :class:`zepben.model.PowerTransformer`
         """
         terms = Terminal.from_pbs(pb_tf.terminals, network)

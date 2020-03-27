@@ -16,7 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from zepben.model.terminal import Terminal
-from zepben.model.equipment import ConductingEquipment
+from zepben.model.conducting_equipment import ConductingEquipment
 from zepben.model.diagram_layout import DiagramObject
 from zepben.model.common import Location
 from zepben.model.base_voltage import BaseVoltage, UNKNOWN as BV_UNKNOWN
@@ -108,7 +108,7 @@ class ACLineSegment(ConductingEquipment):
         """
         Convert a protobuf AcLineSegment to a :class:`zepben.model.ACLineSegment`
         :param pb_acls: :class:`zepben.cim.iec61970.base.wires.AcLineSegment`
-        :param network: EquipmentContainer to extract BaseVoltage, PerLengthSequenceImpedance,
+        :param network: Network to extract BaseVoltage, PerLengthSequenceImpedance,
                         and WireInfo (assetInfoMRID)
         :raises: NoBaseVoltageException when pb_acls.baseVoltageMRID isn't found in network
         :raises: NoPerLengthSequenceImpedance when pb_acls.perLengthSequenceImpedanceMRID isn't found in the network.

@@ -1,5 +1,5 @@
 # Streaming #
-Sending and receiving of data can be achieved through the streaming module, which provides connection facilities and streaming of `EquipmentContainer`s. This module is the preferred way of sending data between systems utilising the CIM model.
+Sending and receiving of data can be achieved through the streaming module, which provides connection facilities and streaming of `Network`s. This module is the preferred way of sending data between systems utilising the CIM model.
 
 The connection module provides both an asyncio and synchronous interface. The synchronous interface will work **ONLY** if you are **NOT** using asyncio.
 

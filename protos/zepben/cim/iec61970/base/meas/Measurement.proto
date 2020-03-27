@@ -30,7 +30,7 @@ import "zepben/cim/iec61970/base/diagramlayout/DiagramObject.proto";
  * Breaker may contain a switch status measurement.
  * <p>
  * The PSR - Measurement association is intended to capture this use of Measurement and is included in the naming
- * hierarchy based on EquipmentContainer. The naming hierarchy typically has Measurements as leafs,
+ * hierarchy based on Network. The naming hierarchy typically has Measurements as leafs,
  * e.g. Substation-VoltageLevel-Bay-Switch-Measurement.
  * <p>
  * Some Measurements represent quantities related to a particular sensor location in the network, e.g. a voltage transformer

@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.model.network import EquipmentContainer
+from zepben.model.equipment_container import EquipmentContainer
 from zepben.model.containers import UNKNOWN_SUBGEO, SubGeographicalRegion
 __all__ = ["Substation", "UNKNOWN_SUBSTATION"]
 

@@ -115,7 +115,7 @@ class Location(IdentifiedObject):
                           `sequenceNumber` of each PositionPoint.
 
     """
-    def __init__(self, street_address=None, position_points: List[PositionPoint] = None, mrid: str = "",
+    def __init__(self, street_address: StreetAddress = None, position_points: List[PositionPoint] = None, mrid: str = "",
                  name: str = "", diag_objs: List[DiagramObject] = None):
         """
 
@@ -127,7 +127,7 @@ class Location(IdentifiedObject):
         :param diag_objs: An ordered list of :class:`zepben.model.DiagramObject`'s.
         """
         self.main_address = street_address
-        self.position_points = position_points
+        self.position_points = position_points if position_points is not None else []
         super().__init__(mrid=mrid, name=name, diagram_objects=diag_objs)
 
     def to_pb(self):

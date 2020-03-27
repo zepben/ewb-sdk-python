@@ -166,7 +166,7 @@ class UsagePoint(IdentifiedObject):
         Convert a :class:`zepben.cim.iec61968.metering.UsagePoint` to a UsagePoint. We accept a UsagePoint with no
         equipmentMRIDs set.
         :param pb_up: The protobuf UsagePoint
-        :param network: An EquipmentContainer to query for equipment related to this UsagePoint
+        :param network: An Network to query for equipment related to this UsagePoint
         :return: A UsagePoint
         """
         equipment = []
@@ -216,7 +216,7 @@ class Meter(EndDevice):
         A meter requires all specified usagePointMRIDs to already exist in the network.
         Customer, serviceLocation, and diagramObjects are optional.
         :param pb_m: A protobuf Meter
-        :param network: EquipmentContainer to be used for fetching UsagePoint's and Customer's
+        :param network: Network to be used for fetching UsagePoint's and Customer's
         :raises: NoUsagePointException if the specified `UsagePoint`'s have not been added to the network.
         :return: a Meter
         """
