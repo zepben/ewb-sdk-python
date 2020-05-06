@@ -17,15 +17,15 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cim.iec61970 import EnergySource as PBEnergySource, BaseVoltage as PBBaseVoltage, Voltage as PBVoltage, \
+from zepben.protobuf.cim.iec61970 import EnergySource as PBEnergySource, BaseVoltage as PBBaseVoltage, Voltage as PBVoltage, \
     EnergyConsumer as PBEnergyConsumer, AcLineSegment as PBACLineSegment, PowerTransformer as PBPowerTransformer, \
     Breaker as PBBreaker, PerLengthSequenceImpedance as PBPLSI, Terminal as PBTerminal
-from zepben.cim.iec61968 import CableInfo as PBCableInfo, OverheadWireInfo as PBOverheadWireInfo, Customer as PBCustomer, \
+from zepben.protobuf.cim.iec61968 import CableInfo as PBCableInfo, OverheadWireInfo as PBOverheadWireInfo, Customer as PBCustomer, \
     UsagePoint as PBUsagePoint, Meter as PBMeter, AssetInfo as PBAssetInfo, MeterReading as PBMeterReading
-from zepben.model import EnergySource, BaseVoltage, EnergyConsumer, ACLineSegment, PowerTransformer, Breaker, \
+from zepben.cimbend import EnergySource, BaseVoltage, EnergyConsumer, AcLineSegment, PowerTransformer, Breaker, \
     PerLengthSequenceImpedance, Terminal, VoltageReading
-from zepben.model import CableInfo, OverheadWireInfo, Customer, UsagePoint, Meter, MeterReading
-from zepben.model import Network, MetricsStore, ReadingType
+from zepben.cimbend import CableInfo, OverheadWireInfo, Customer, UsagePoint, Meter, MeterReading
+from zepben.cimbend import NetworkService, MetricsStore, ReadingType
 
 """
 TODO:
@@ -37,7 +37,7 @@ class TestEquipmentContainer(object):
     def test_add_pb(self):
         """Test addition to the network works for all PB types."""
         ms = MetricsStore()
-        network = Network(ms)
+        network = NetworkService(ms)
         bv1 = PBBaseVoltage(mRID="bv1", nominalVoltage=PBVoltage(value=22000))
         network.add(bv1)
         bv2 = PBBaseVoltage(mRID="bv2", nominalVoltage=PBVoltage(value=415))
@@ -99,7 +99,7 @@ class TestEquipmentContainer(object):
     def test_add(self):
         """Test addition to the network works for all CIM types."""
         ms = MetricsStore()
-        network = Network(ms)
+        network = NetworkService(ms)
         bv1 = BaseVoltage(mrid="bv1", nom_volt=22000)
         network.add(bv1)
         bv2 = BaseVoltage(mrid="bv2", nom_volt=415)
@@ -114,7 +114,7 @@ class TestEquipmentContainer(object):
         network.add(plsi)
         ci = CableInfo(mrid="7")
         network.add(ci)
-        acls = ACLineSegment(mrid="3", base_voltage=bv1, plsi=plsi, wire_info=ci)
+        acls = AcLineSegment(mrid="3", base_voltage=bv1, plsi=plsi, wire_info=ci)
         network.add(acls)
         pt = PowerTransformer(mrid="4")
         network.add(pt)

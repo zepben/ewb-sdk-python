@@ -18,9 +18,9 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 import pytest
-from zepben.model.tracing import SetPhases, phase_log
-from zepben.model import Direction
-from zepben.model.phases import SinglePhaseKind
+from zepben.cimbend.tracing import SetPhases, phase_log
+from zepben.cimbend import Direction
+from zepben.cimbend.phases import SinglePhaseKind
 from test.util import get_terminal, check_phases
 
 A = SinglePhaseKind.A

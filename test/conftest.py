@@ -20,14 +20,13 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 import uuid
 from dataclasses import dataclass
 from pytest import fixture
-from zepben.cim.iec61970 import WindingConnection, VectorGroup
-from zepben.model.network import Network
-from zepben.model.metrics_store import MetricsStore
-from zepben.model import EnergySource, EnergyConsumer, Terminal, ConnectivityNode, IdentifiedObject, ACLineSegment, \
-    PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Breaker, EquipmentContainerType, \
-    UNKNOWN_SUBSTATION, EnergySourcePhase, Junction
-from zepben.model.phases import Phases, PhaseCode
-from zepben.model.wiring import IMPLICIT_WIRING, Wiring
+from zepben.protobuf.cim.iec61970 import WindingConnection, VectorGroup
+from zepben.cimbend.network.network import NetworkService
+from zepben.cimbend.measurement.metrics_store import MetricsStore
+from zepben.cimbend import EnergySource, EnergyConsumer, Terminal, ConnectivityNode, IdentifiedObject, AcLineSegment, \
+    PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Breaker, UNKNOWN_SUBSTATION, EnergySourcePhase, Junction
+from zepben.cimbend.phases import TracedPhases, PhaseCode
+from zepben.cimbend.wiring import IMPLICIT_WIRING, Wiring
 from typing import Union, List, Callable
 
 
@@ -85,7 +84,7 @@ class AddResult:
 class NetworkBuilder(object):
     def __init__(self):
         self.metrics_store = MetricsStore()
-        self.network = Network(self.metrics_store)
+        self.network = NetworkService(self.metrics_store)
 
     def create_feeder_start(self, name="default", es_args=None, cb_args=None, acls_args=None):
         if cb_args is None:
@@ -137,7 +136,7 @@ class NetworkBuilder(object):
             plsi = self.add_plsi()
         mrid = _get_mrid(mrid)
         terms = self.gen_terminals(num_terms, conn_nodes=connectivity_nodes, mrid=mrid, phases=phases, wiring_supplier=wiring_supplier)
-        acls = ACLineSegment(mrid, terminals=terms, plsi=plsi, **kwargs)
+        acls = AcLineSegment(mrid, terminals=terms, plsi=plsi, **kwargs)
         self.network.add(acls)
         return AddResult(acls, _get_result_nodes(terms))
 
@@ -192,7 +191,7 @@ class NetworkBuilder(object):
         terms = self.gen_terminals(2, connectivity_node, mrid=mrid, phases=phases, wiring_supplier=wiring_supplier)
         br = Breaker(mrid=mrid, terminals=terms, **kwargs)
         if substation is not None:
-            br.link_equipment_container(substation)
+            br.add_container(substation)
 
         self.network.add(br)
         return AddResult(br, terms[0].connectivity_node)
@@ -236,17 +235,17 @@ class NetworkBuilder(object):
                 # and then create new ConnectivityNodes for the rest
                 for i, node in enumerate(conn_nodes):
                     wiring = wiring_supplier(node)
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=Phases(phases), connectivity_node=node, name=f"Terminal {i}", wiring=wiring, **kwargs))
+                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=TracedPhases(phases), connectivity_node=node, name=f"Terminal {i}", wiring=wiring, **kwargs))
 
                 for j in range(start=i+1, stop=count):
                     conn_node = self.network.add_connectivitynode(uuid.uuid4())
                     wiring = wiring_supplier(conn_node)
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=Phases(phases), connectivity_node=conn_node, name=f"Terminal {j}", wiring=wiring, **kwargs))
+                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=TracedPhases(phases), connectivity_node=conn_node, name=f"Terminal {j}", wiring=wiring, **kwargs))
             elif count == len(conn_nodes):
                 # We have same number of connectivity nodes as we need terminals, map terminals to ConnectivityNode's in order
                 for i, node in enumerate(conn_nodes):
                     wiring = wiring_supplier(node)
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=Phases(phases), connectivity_node=node, name=f"Terminal {i}", wiring=wiring, **kwargs))
+                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=TracedPhases(phases), connectivity_node=node, name=f"Terminal {i}", wiring=wiring, **kwargs))
             else:
                 raise Exception("Count must either be greater than or equal to the number of connectivity nodes created")
             return terms
@@ -257,11 +256,11 @@ class NetworkBuilder(object):
                     # These conditions require creating new connectivity nodes.
                     conn_node = self.network.add_connectivitynode(uuid.uuid4())
                     wiring = wiring_supplier(conn_node)
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=Phases(phases), connectivity_node=conn_node, name=f"Terminal {i}", wiring=wiring, **kwargs))
+                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=TracedPhases(phases), connectivity_node=conn_node, name=f"Terminal {i}", wiring=wiring, **kwargs))
                 elif i == 0 and conn_nodes is not None:
                     wiring = wiring_supplier(conn_nodes)
                     # this requires connecting the terminal to an existing ConnectivityNode
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=Phases(phases), connectivity_node=conn_nodes, name=f"Terminal {i}", wiring=wiring, **kwargs))
+                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=TracedPhases(phases), connectivity_node=conn_nodes, name=f"Terminal {i}", wiring=wiring, **kwargs))
             return terms
 
 
@@ -319,7 +318,7 @@ def network2():
     node11 = ar_b2.node[0]
     node18 = ar_b2.node[1]
     ar_b2 = nb.add_acls(node11, mrid="acls7", phases=PhaseCode.AB)
-    ar_b2 = nb.add_cb(ar_b2.node, mrid="br0", open_=[True, True], phases=PhaseCode.AB)  # TODO: Phases?
+    ar_b2 = nb.add_cb(ar_b2.node, mrid="br0", open_=[True, True], phases=PhaseCode.AB)  # TODO: TracedPhases?
     ar_b2 = nb.add_acls(ar_b2.node, mrid="acls8", phases=PhaseCode.AB)
     ar_b2 = nb.add_junction(ar_b2.node, mrid="junc5", phases=PhaseCode.AB)
 

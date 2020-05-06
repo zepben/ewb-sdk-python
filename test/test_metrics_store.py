@@ -17,8 +17,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.model.metering import MeterReading, ReactivePowerReading, RealPowerReading, VoltageReading
-from zepben.model.metrics_store import MetricsStore
+from zepben.cimbend.cim.iec61968.metering import MeterReading, ReactivePowerReading, RealPowerReading, VoltageReading
+from zepben.cimbend.measurement.metrics_store import MetricsStore
 
 
 class TestMetricsStore(object):

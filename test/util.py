@@ -18,8 +18,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from __future__ import annotations
-from zepben.model import Terminal, Direction
-from zepben.cim.iec61970 import SinglePhaseKind
+from zepben.cimbend import Terminal, Direction
+from zepben.protobuf.cim.iec61970 import SinglePhaseKind
 from typing import List
 
 

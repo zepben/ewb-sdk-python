@@ -17,27 +17,21 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-import glob
-import pkg_resources
-from os.path import basename
-from os.path import splitext
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 test_deps = ["pytest", "pytest-asyncio"]
 setup(
-    name="cimbend",
+    name="zepben.cimbend",
     version="0.2.0",
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
-    py_modules=[splitext(basename(path))[0] for path in glob.glob('src/*.py')],
-    setup_requires=[
-        "grpcio-tools",
-    ],
+    package_dir={"": "src"},
+    packages=find_namespace_packages(where="src"),
     install_requires=[
-        "grpcio",
-        "grpcio-tools",
+        "protobuf",
+        "zepben.protobuf.cim",
+        "zepben.protobuf.np",
+        "zepben.protobuf.cp",
+        "zepben.protobuf.dp",
         "python-jose-cryptodome",
-        "protobuf"
     ],
     extras_require={
         "test": test_deps,

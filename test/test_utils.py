@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.model.tracing.util import normally_open, currently_open
+from zepben.cimbend.tracing.util import normally_open, currently_open
 
 
 class TestUtils(object):

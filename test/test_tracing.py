@@ -18,7 +18,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 import pytest
-from zepben.model.tracing import Traversal, SearchType, Tracker, BranchRecursiveTraversal, FifoQueue
+from zepben.cimbend.tracing import Traversal, SearchType, Tracker, BranchRecursiveTraversal, FifoQueue
 from typing import List
 
 
