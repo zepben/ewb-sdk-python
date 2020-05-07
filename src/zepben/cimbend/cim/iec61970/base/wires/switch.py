@@ -18,6 +18,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import List
 
 from zepben.cimbend.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.cimbend.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -35,7 +36,7 @@ class Switch(ConductingEquipment):
       measurement values if the switch is operating un-ganged. These values will cache the latest values from the measurement
       value for each phase of the switch.
 
-    Attributes:
+    Attributes -
 
         _open : The attribute tells if the switch is considered open when used as input to topology processing.
         _normal_open : The attribute is used in cases when no Measurement for the status value is present. If the Switch
@@ -45,7 +46,12 @@ class Switch(ConductingEquipment):
     _open: int = field(init=False, default=0)
     _normal_open: int = field(init=False, default=0)
 
-    def __post_init__(self):
+    def __post_init__(self, usagepoints: List[UsagePoint],
+                      equipmentcontainers: List[EquipmentContainer],
+                      operationalrestrictions: List[OperationalRestriction],
+                      currentfeeders: List[Feeder],
+                      terminals_: List[Terminal]):
+        super().__post_init__(usagepoints, equipmentcontainers, operationalrestrictions, currentfeeders, terminals_)
         self.set_open(False)
         self.set_normally_open(False)
 
@@ -102,7 +108,7 @@ class Switch(ConductingEquipment):
             return current_state != 0
 
         res = None
-        for term in self.terminals:
+        for _, term in self.terminals:
             if res is None and term.phases.single_phases.contains(phase):
                 res = current_state & phase.bit_mask() != 0
 
@@ -116,7 +122,7 @@ class Switch(ConductingEquipment):
             return 0b1111 if is_open else 0
 
         new_state = None
-        for term in self.terminals:
+        for _, term in self.terminals:
             if new_state is None and term.phases.single_phases.contains(phase):
                 new_state = current_state | phase.bit_mask if is_open else current_state & ~phase.bit_mask
 
@@ -140,7 +146,7 @@ class Breaker(ProtectedSwitch):
     and also making, carrying for a specified time, and breaking currents under specified abnormal circuit conditions
     e.g. those of short circuit.
 
-    Attributes:
+    Attributes -
         Same as :class:`Switch`
     """
 

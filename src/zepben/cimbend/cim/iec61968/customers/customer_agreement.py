@@ -18,8 +18,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Set, Generator
+from dataclasses import dataclass, InitVar, field
+from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61968.common.document import Agreement
 from zepben.cimbend.util import nlen, require, contains_mrid, get_by_mrid, ngen
@@ -38,7 +38,13 @@ class CustomerAgreement(Agreement):
         _pricingStructures : PricingStructures associated with this CustomerAgreement
     """
     customer: Optional[Customer] = None
-    _pricing_structures: Optional[Set[PricingStructure]] = None
+    pricingstructures: InitVar[List[PricingStructure]] = field(default=list())
+    _pricing_structures: Optional[List[PricingStructure]] = field(init=False, default=None)
+
+    def __post_init__(self, pricingstructures: List[PricingStructure]):
+        super().__post_init__()
+        for ps in pricingstructures:
+            self.add_pricing_structure(ps)
 
     @property
     def num_pricing_structures(self):
@@ -74,8 +80,8 @@ class CustomerAgreement(Agreement):
         """
         require(not contains_mrid(self._pricing_structures, ps.mrid), lambda: f"A PricingStructure with mRID {ps.mrid} "
                                                                               f"already exists in {str(self)}.")
-        self._pricing_structures = set() if self._pricing_structures is None else self._pricing_structures
-        self._pricing_structures.add(ps)
+        self._pricing_structures = list() if self._pricing_structures is None else self._pricing_structures
+        self._pricing_structures.append(ps)
         return self
 
     def remove_pricing_structure(self, ps: PricingStructure) -> CustomerAgreement:

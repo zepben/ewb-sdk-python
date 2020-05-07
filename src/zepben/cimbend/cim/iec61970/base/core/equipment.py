@@ -17,8 +17,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Set, Optional, Generator, List
+from dataclasses import dataclass, field, InitVar, MISSING
+from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.equipment_container import Feeder, Site
 from zepben.cimbend.cim.iec61970.base.core.power_system_resource import PowerSystemResource
@@ -33,7 +33,7 @@ class Equipment(PowerSystemResource):
     """
     Abstract class, should only be used through subclasses.
     Any part of a power system that is a physical device, electronic or mechanical.
-    Attributes:
+    Attributes -
         - in_service : If True, the equipment is in service.
         - normally_in_service : If True, the equipment is _normally_ in service.
         - usage_points : List of all usage points associated with this equipment
@@ -43,10 +43,29 @@ class Equipment(PowerSystemResource):
 
     in_service: bool = True
     normally_in_service: bool = True
-    _usage_points: Optional[Set[UsagePoint]] = None
-    _equipment_containers: Optional[Set[EquipmentContainer]] = None
-    _operational_restrictions: Optional[Set[OperationalRestriction]] = None
-    _current_feeders: Optional[Set[Feeder]] = None
+    usagepoints: InitVar[List[UsagePoint]] = field(default=list())
+    _usage_points: Optional[List[UsagePoint]] = field(init=False, default=None)
+    equipmentcontainers: InitVar[List[EquipmentContainer]] = field(default=list())
+    _equipment_containers: Optional[List[EquipmentContainer]] = field(init=False, default=None)
+    operationalrestrictions: InitVar[List[OperationalRestriction]] = field(default=list())
+    _operational_restrictions: Optional[List[OperationalRestriction]] = field(init=False, default=None)
+    currentfeeders: InitVar[List[Feeder]] = field(default=list())
+    _current_feeders: Optional[List[Feeder]] = field(init=False, default=None)
+
+    def __post_init__(self, usagepoints: List[UsagePoint],
+                      equipmentcontainers: List[EquipmentContainer],
+                      operationalrestrictions: List[OperationalRestriction],
+                      currentfeeders: List[Feeder]):
+        super().__post_init__()
+        for up in usagepoints:
+            self.add_usage_point(up)
+        for container in equipmentcontainers:
+            self.add_container(container)
+        if operationalrestrictions:
+            for restriction in operationalrestrictions:
+                self.add_restriction(restriction)
+        for cf in currentfeeders:
+            self.add_current_feeder(cf)
 
     @property
     def position_points(self):
@@ -156,8 +175,8 @@ class Equipment(PowerSystemResource):
         """
         require(not contains_mrid(self._equipment_containers, ec.mrid),
                 lambda: f"An EquipmentContainer with mRID {ec.mrid} already exists in {str(self)}.")
-        self._equipment_containers = set() if self._equipment_containers is None else self._equipment_containers
-        self._equipment_containers.add(ec)
+        self._equipment_containers = list() if self._equipment_containers is None else self._equipment_containers
+        self._equipment_containers.append(ec)
         return self
 
     def remove_containers(self, ec: EquipmentContainer) -> Equipment:
@@ -211,8 +230,8 @@ class Equipment(PowerSystemResource):
         """
         require(not contains_mrid(self._current_feeders, feeder.mrid),
                 lambda: f"A current Feeder with mRID {feeder.mrid} already exists in {str(self)}.")
-        self._current_feeders = set() if self._current_feeders is None else self._current_feeders
-        self._current_feeders.add(feeder)
+        self._current_feeders = list() if self._current_feeders is None else self._current_feeders
+        self._current_feeders.append(feeder)
         return self
 
     def remove_current_feeder(self, feeder: Feeder) -> Equipment:
@@ -266,8 +285,8 @@ class Equipment(PowerSystemResource):
         """
         require(not contains_mrid(self._usage_points, up.mrid),
                 lambda: f"A UsagePoint with mRID {up.mrid} already exists in {str(self)}.")
-        self._usage_points = set() if self._usage_points is None else self._usage_points
-        self._usage_points.add(up)
+        self._usage_points = list() if self._usage_points is None else self._usage_points
+        self._usage_points.append(up)
         return self
 
     def remove_usage_point(self, up: UsagePoint) -> Equipment:
@@ -322,8 +341,8 @@ class Equipment(PowerSystemResource):
         """
         require(not contains_mrid(self._operational_restrictions, op.mrid),
                 lambda: f"An OperationalRestriction with mRID {op.mrid} already exists in {str(self)}.")
-        self._operational_restrictions = set() if self._operational_restrictions is None else self._operational_restrictions
-        self._operational_restrictions.add(op)
+        self._operational_restrictions = list() if self._operational_restrictions is None else self._operational_restrictions
+        self._operational_restrictions.append(op)
         return self
 
     def remove_restriction(self, op: OperationalRestriction) -> Equipment:

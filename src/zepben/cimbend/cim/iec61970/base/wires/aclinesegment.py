@@ -61,7 +61,7 @@ class AcLineSegment(Conductor):
     However, boundary lines  may have slightly different BaseVoltage.nominalVoltages and  variation is allowed.
     Larger voltage difference in general requires use of an equivalent branch.
 
-    Attributes:
+    Attributes -
         per_length_sequence_impedance : A :class:`zepben.cimbend.PerLengthSequenceImpedance` describing this ACLineSegment
     """
     per_length_sequence_impedance: Optional[PerLengthSequenceImpedance] = None
@@ -93,15 +93,4 @@ class AcLineSegment(Conductor):
     @property
     def b0ch(self):
         return self.per_length_sequence_impedance.b0ch
-
-    def _pb_args(self, exclude=None):
-        args = super()._pb_args()
-        if self.per_length_sequence_impedance:
-            args['perLengthSequenceImpedanceMRID'] = self.per_length_sequence_impedance.mrid
-            del args['perLengthSequenceImpedance']
-        if self.asset_info:
-            args['assetInfoMRID'] = self.wire_info.mrid
-        if 'wireInfo' in args:
-            del args['wireInfo']
-        return args
 

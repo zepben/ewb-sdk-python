@@ -18,8 +18,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Set, Generator
+from dataclasses import dataclass, InitVar, field
+from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.util import get_by_mrid, nlen, require, contains_mrid, ngen
@@ -35,11 +35,17 @@ class Asset(IdentifiedObject):
     subclasses, defined mainly in the Wires model (refer to IEC61970-301 and model package IEC61970::Wires). Asset
     description places emphasis on the physical characteristics of the equipment fulfilling that role.
 
-    Attributes:
+    Attributes -
         _organisation_roles: The :class:`asset_organisation_role.AssetOrganisationRole`s for this ``Asset``
     """
 
-    _organisation_roles: Optional[Set[AssetOrganisationRole]] = None
+    organisationroles: InitVar[List[AssetOrganisationRole]] = field(default=list())
+    _organisation_roles: Optional[List[AssetOrganisationRole]] = field(init=False, default=None)
+
+    def __post_init__(self, organisationroles: List[AssetOrganisationRole]):
+        super().__post_init__()
+        for role in organisationroles:
+            self.add_organisation_role(role)
 
     @property
     def num_organisation_roles(self) -> int:
@@ -76,8 +82,8 @@ class Asset(IdentifiedObject):
         """
         require(not contains_mrid(self._organisation_roles, role.mrid),
                 lambda: f"An organisation role with mRID {role.mrid} already exists in {str(self)}.")
-        self._organisation_roles = set() if self._organisation_roles is None else self._organisation_roles
-        self._organisation_roles.add(role)
+        self._organisation_roles = list() if self._organisation_roles is None else self._organisation_roles
+        self._organisation_roles.append(role)
         return self
 
     def remove_organisation_role(self, role: AssetOrganisationRole) -> Asset:

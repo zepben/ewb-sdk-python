@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar, field
 from typing import List, Optional, Generator, Tuple
 
 from zepben.cimbend.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -35,7 +35,7 @@ class TapChanger(PowerSystemResource):
     """
     Mechanism for changing transformer winding tap positions.
 
-    Attributes:
+    Attributes -
         control_enabled : Specifies the regulation status of the equipment.  True is regulating, false is not regulating.
         _high_step : Highest possible tap step position, advance from neutral. The attribute shall be greater than lowStep.
         _low_step : Lowest possible tap step position, retard from neutral
@@ -53,14 +53,25 @@ class TapChanger(PowerSystemResource):
                      and equal or less than highStep.
     """
     control_enabled: bool = True
-    _high_step: int = 1
-    _low_step: int = 0
-    _neutral_step: int = 0
+    highstep: InitVar[int] = 1
+    _high_step: int = field(default=1, init=False)
+    lowstep: InitVar[int] = 0
+    _low_step: int = field(default=0, init=False)
+    neutralstep: InitVar[int] = 0
+    _neutral_step: int = field(default=0, init=False)
     neutral_u: int = 0
-    _normal_step: int = 0
-    _step: float = 0.0
+    normalstep: InitVar[int] = 0
+    _normal_step: int = field(default=0, init=False)
+    step_: InitVar[float] = 0.0
+    _step: float = field(default=0.0, init=False)
 
-    def __post_init__(self):
+    def __post_init__(self, highstep: int, lowstep: int, neutralstep: int, normalstep: int, step_: float):
+        super().__post_init__()
+        self._high_step = highstep
+        self._low_step = lowstep
+        self._neutral_step = neutralstep
+        self._normal_step = normalstep
+        self._step = step_
         self._validate_steps()
 
     @property
@@ -121,13 +132,15 @@ class TapChanger(PowerSystemResource):
                 lambda: f"New value would invalidate current neutral_step of {self.neutral_step}")
 
     def _validate_steps(self):
-        require(self.high_step > self.low_step, lambda: f"High step [{self.high_step}] must be greater than low step [{self.low_step}]")
+        require(self.high_step > self.low_step,
+                lambda: f"High step [{self.high_step}] must be greater than low step [{self.low_step}]")
         require(self.low_step <= self.neutral_step <= self.high_step,
                 lambda: f"Neutral step [{self.neutral_step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
         require(self._low_step <= self.normal_step <= self._high_step,
                 lambda: f"Normal step [{self.normal_step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
         require(self._low_step <= self.step <= self._high_step,
                 lambda: f"Step [{self.step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+
 
 @dataclass
 class RatioTapChanger(TapChanger):
@@ -179,7 +192,7 @@ class PowerTransformerEnd(TransformerEnd):
     3) for a PowerTransformer with more than three Terminals the PowerTransformerEnd impedance values cannot be used.
     Instead use the TransformerMeshImpedance or split the transformer into multiple PowerTransformers.
 
-    Attributes:
+    Attributes -
         power_transformer : The power transformer of this power transformer end.
         rated_s : Normal apparent power rating.
                   The attribute shall be a positive value. For a two-winding transformer the values for the high and
@@ -238,14 +251,25 @@ class PowerTransformer(ConductingEquipment):
     The inherited association ConductingEquipment.BaseVoltage should not be used.
     The association from TransformerEnd to BaseVoltage should be used instead.
 
-    Attributes:
+    Attributes -
         vector_group : :class:`zepben.protobuf.cim.iec61970.base.wires.VectorGroup` of the transformer for protective relaying.
         power_transformer_ends : A list of the :class:`PowerTransformerEnd` for each winding in this Transformer.
                                  The ordering of the list is important, and reflects which
                                  :class:`zepben.cimbend.Terminal` each end is associated with.
     """
     vector_group: VectorGroup = VectorGroup.UNKNOWN
-    _power_transformer_ends: Optional[List[PowerTransformerEnd]] = None
+    powertransformerends: InitVar[List[PowerTransformerEnd]] = field(default=list())
+    _power_transformer_ends: Optional[List[PowerTransformerEnd]] = field(init=False, default=None)
+
+    def __post_init__(self, usagepoints: Optional[List[UsagePoint]],
+                      equipmentcontainers: Optional[List[EquipmentContainer]],
+                      operationalrestrictions: Optional[List[OperationalRestriction]],
+                      currentfeeders: Optional[List[Feeder]],
+                      terminals_: List[Terminal],
+                      powertransformerends: List[PowerTransformerEnd]):
+        super().__post_init__(usagepoints, equipmentcontainers, operationalrestrictions, currentfeeders, terminals_)
+        for end in powertransformerends:
+            self.add_end(end)
 
     @property
     def num_ends(self):
@@ -342,4 +366,3 @@ class PowerTransformer(ConductingEquipment):
             return self.nominal_voltage
         else:
             return self.get_end_by_num(self.terminal_sequence_number(terminal))
-

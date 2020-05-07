@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar, field
 from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.power_system_resource import PowerSystemResource
@@ -35,7 +35,7 @@ class EnergyConsumerPhase(PowerSystemResource):
     """
     A single phase of an energy consumer.
 
-    Attributes:
+    Attributes -
         energy_consumer : The :class:`zepben.cimbend.iec61970.base.wires.EnergyConsumer` to which this phase belongs.
         phase : Phase of this energy consumer component. If the energy consumer is wye connected, the connection is
                 from the indicated phase to the central ground or neutral point.  If the energy consumer is delta
@@ -71,7 +71,7 @@ class EnergyConsumer(EnergyConnection):
     Generic user of energy - a point of consumption on the power system phases. May also represent a pro-sumer with
     negative p/q values.
 
-    Attributes:
+    Attributes -
         p : Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node.
             For voltage dependent loads the value is at rated voltage.
             Starting value for a steady state solution.
@@ -89,7 +89,8 @@ class EnergyConsumer(EnergyConnection):
                   flow out from a node.
     """
 
-    _energy_consumer_phases: Optional[List[EnergyConsumerPhase]] = None
+    energyconsumerphases: InitVar[List[EnergyConsumerPhase]] = field(default=list())
+    _energy_consumer_phases: Optional[List[EnergyConsumerPhase]] = field(init=False, default=None)
     grounded: bool = False
     phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.D
     p: float = 0.0
@@ -98,9 +99,16 @@ class EnergyConsumer(EnergyConnection):
     q_fixed: float = 0.0
     customer_count: int = 0
 
-    def __post_init__(self):
-        for phase in self._energy_consumer_phases:
+    def __post_init__(self, usagepoints: Optional[List[UsagePoint]],
+                      equipmentcontainers: Optional[List[EquipmentContainer]],
+                      operationalrestrictions: Optional[List[OperationalRestriction]],
+                      currentfeeders: Optional[List[Feeder]],
+                      terminals_: List[Terminal],
+                      energyconsumerphases: List[EnergyConsumerPhase]):
+        super().__post_init__(usagepoints, equipmentcontainers, operationalrestrictions, currentfeeders, terminals_)
+        for phase in energyconsumerphases:
             phase.energy_consumer = self
+            self.add_phase(phase)
 
     @property
     def has_phases(self):
@@ -140,8 +148,8 @@ class EnergyConsumer(EnergyConnection):
         require(not contains_mrid(self._energy_consumer_phases, phase.mrid),
                 lambda: f"An EnergyConsumerPhase with mRID {phase.mrid} already exists in {str(self)}")
 
-        self._energy_consumer_phases = set() if self._energy_consumer_phases is None else self._energy_consumer_phases
-        self._energy_consumer_phases.add(phase)
+        self._energy_consumer_phases = list() if self._energy_consumer_phases is None else self._energy_consumer_phases
+        self._energy_consumer_phases.append(phase)
         return self
 
     def remove_phases(self, phase: EnergyConsumerPhase) -> EnergyConsumer:

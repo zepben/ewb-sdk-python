@@ -21,9 +21,9 @@ from dataclasses import dataclass, field, InitVar
 from typing import Set, Optional
 from weakref import ref, ReferenceType
 
-from zepben.cimbend.cores import from_count
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.cimbend.cores import from_count
 from zepben.cimbend.phases import TracedPhases, cores_from_phases
 from zepben.cimbend.tracing.connectivity import ConnectivityResult
 from zepben.cimbend.tracing.phase_status import current_phases as ps_current_phases, normal_phases as ps_normal_phases
@@ -51,7 +51,7 @@ class Terminal(AcDcTerminal):
     Note: If you are extending this class you must ensure you always safely access the linked equipment (i.e, check it is
     not None)
 
-    Attributes:
+    Attributes -
         - conducting_equipment : A reference back to the equipment this Terminal belongs to. Conducting equipment have
                                 terminals that may be connected to other conducting equipment terminals via connectivity
                                 nodes or topological nodes.
@@ -68,11 +68,12 @@ class Terminal(AcDcTerminal):
     conducting_equipment: Optional[ConductingEquipment] = None
     phases: PhaseCode = PhaseCode.ABC
     traced_phases: TracedPhases = field(default_factory=TracedPhases)
-    _connectivity_node: InitVar[ConnectivityNode] = NO_CONNECTIVITY_NODE
+    connectivity_node_: InitVar[ConnectivityNode] = NO_CONNECTIVITY_NODE
     _cn: ReferenceType = field(init=False)
 
-    def __post_init__(self, _connectivity_node):
-        self.connectivity_node = _connectivity_node
+    def __post_init__(self, connectivity_node_):
+        super().__post_init__()
+        self.connectivity_node = connectivity_node_
 
     @property
     def connectivity_node(self):

@@ -17,8 +17,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Set, Generator
+from dataclasses import dataclass, field, InitVar
+from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.cimbend.cim.iec61970.base.core.regions import SubGeographicalRegion
@@ -30,7 +30,13 @@ __all__ = ["Substation"]
 @dataclass
 class Substation(EquipmentContainer):
     sub_geographical_region: Optional[SubGeographicalRegion] = None
-    _normal_energized_feeders: Optional[Set[Feeder]] = None
+    normalenergizedfeeders: InitVar[List[Feeder]] = field(default=list())
+    _normal_energized_feeders: Optional[List[Feeder]] = field(init=False, default=None)
+
+    def __post_init__(self, equipment_: List[Equipment], normalenergizedfeeders: List[Feeder]):
+        super().__post_init__(equipment_)
+        for feeder in normalenergizedfeeders:
+            self.add_feeder(feeder)
 
     @property
     def num_feeders(self):
@@ -66,8 +72,8 @@ class Substation(EquipmentContainer):
         """
         require(not contains_mrid(self._normal_energized_feeders, feeder.mrid),
                 lambda: f"A Feeder with mRID {feeder.mrid} already exists in {str(self)}.")
-        self._normal_energized_feeders = set() if self._normal_energized_feeders is None else self._normal_energized_feeders
-        self._normal_energized_feeders.add(feeder)
+        self._normal_energized_feeders = list() if self._normal_energized_feeders is None else self._normal_energized_feeders
+        self._normal_energized_feeders.append(feeder)
         return self
 
     def remove_feeder(self, feeder: Feeder) -> Substation:

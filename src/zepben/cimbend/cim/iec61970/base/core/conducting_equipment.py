@@ -19,12 +19,12 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from typing import List, Set, Optional, Generator, Tuple
 
-from zepben.cimbend.exceptions import NoEquipmentException
 from zepben.cimbend.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.cimbend.cim.iec61970.base.core.equipment import Equipment
+from zepben.cimbend.exceptions import NoEquipmentException
 
 __all__ = ['ConductingEquipment']
 
@@ -42,18 +42,25 @@ class ConductingEquipment(Equipment):
     :class:`zepben.cimbend.ConnectivityNode`'s. Each `Terminal` is associated with _exactly one_ `ConnectivityNode`,
     and through that `ConnectivityNode` can be linked with many other `Terminals` and thus `ConductingEquipment`.
 
-    Attributes:
+    Attributes -
         - base_voltage : A :class:`zepben.cimbend.BaseVoltage`.
         - terminals : Conducting equipment have terminals that may be connected to other conducting equipment terminals
                       via connectivity nodes or topological nodes. The sequenceNumber of each ``Terminal`` is the index
                       of the Terminal in the list.
     """
     base_voltage: Optional[BaseVoltage] = None
-    _terminals: List[Terminal] = field(default_factory=list)
+    terminals_: InitVar[List[Terminal]] = field(default=list())
+    _terminals: List[Terminal] = field(default_factory=list, init=False)
 
-    def __post_init__(self):
-        for term in self._terminals:
+    def __post_init__(self, usagepoints: List[UsagePoint],
+                      equipmentcontainers: List[EquipmentContainer],
+                      operationalrestrictions: List[OperationalRestriction],
+                      currentfeeders: List[Feeder],
+                      terminals_: List[Terminal]):
+        super().__post_init__(usagepoints, equipmentcontainers, operationalrestrictions, currentfeeders)
+        for term in terminals_:
             term.conducting_equipment = self
+            self.add_terminal(term)
 
     @property
     def nominal_voltage(self):
@@ -223,9 +230,3 @@ class ConductingEquipment(Equipment):
                     connected_equip.append(term.conducting_equipment)
         return connected_equip
 
-    def _pb_args(self, exclude=None):
-        args = super()._pb_args()
-        if self.base_voltage:
-            args['baseVoltageMRID'] = self.base_voltage.mrid
-            del args['baseVoltage']
-        return args

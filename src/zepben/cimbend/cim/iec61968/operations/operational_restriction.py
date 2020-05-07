@@ -16,11 +16,10 @@ You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Set, Generator
+from dataclasses import dataclass, field, InitVar
+from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61968.common.document import Document
 from zepben.cimbend.util import require, contains_mrid, get_by_mrid, nlen, ngen
@@ -40,12 +39,13 @@ class OperationalRestriction(Document):
      They then apply operational restrictions in the operational systems to warn operators of potential problems.
      After appropriate inspection and maintenance, the operational restrictions may be removed.
     """
-    _equipment: Optional[Set[Equipment]] = None
+    equipment_: InitVar[List[Equipment]] = field(default=list())
+    _equipment: Optional[List[Equipment]] = field(init=False, default=None)
 
-    def __post_init__(self):
-        if self._equipment is not None:
-            for equip in self._equipment:
-                equip.add_operational_restriction(self)
+    def __post_init__(self, equipment_: List[Equipment]):
+        super().__post_init__()
+        for eq in equipment_:
+            self.add_equipment(eq)
 
     @property
     def num_equipment(self):
@@ -81,8 +81,8 @@ class OperationalRestriction(Document):
         """
         require(not contains_mrid(self._equipment, equipment.mrid), lambda: f"An Equipment with mRID {equipment.mrid}"
                                                                             f" already exists in {str(self)}.")
-        self._equipment = set() if self._equipment is None else self._equipment
-        self._equipment.add(equipment)
+        self._equipment = list() if self._equipment is None else self._equipment
+        self._equipment.append(equipment)
         return self
 
     def remove_equipment(self, equipment: Equipment) -> OperationalRestriction:

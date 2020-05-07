@@ -46,12 +46,13 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     define this attribute as a property in the class using @property and @<property>.setter.
     Failure to do this will result in the conversion to a protobuf type failing. Long Live PEP8
 
-    Attributes:
+    Attributes -
         mrid : Master resource identifier issued by a model authority. The mRID is unique within an exchange context.
                Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID.
                The use of UUID is strongly recommended.
         name : The name is any free human readable and possibly non unique text naming the object.
-        diagram_objects : The :class:`zepben.cimbend.DiagramObject`'s related to this object.
+        num_diagram_objects : The number of diagram objects associated with this object. Used to tell clients whether
+                              they can fetch diagram objects from a related DiagramService
     """
     # TODO: requires rework of _pb_args
     # __slots__ = "_m_r_i_d", "name", "__diagram_objects_by_diagram"

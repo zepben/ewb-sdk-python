@@ -57,7 +57,7 @@ def get_equipment_connections(cond_equip, exclude: Set = None) -> List:
 #     return phs_to_cores[phase]
 
 
-def get_by_mrid(collection: Iterable[IdentifiedObject], mrid: str) -> IdentifiedObject:
+def get_by_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -> IdentifiedObject:
     """
     Get an :class:`zepben.cimbend.iec61970.base.core.identified_object.IdentifiedObject` from `collection` based on
     its mRID.
@@ -66,13 +66,15 @@ def get_by_mrid(collection: Iterable[IdentifiedObject], mrid: str) -> Identified
     :return: The `IdentifiedObject`
     :raises: KeyError if ``mrid`` was not found in the collection.
     """
+    if not collection:
+        raise KeyError(mrid)
     for io in collection:
         if io.mrid == mrid:
             return io
     raise KeyError(mrid)
 
 
-def contains_mrid(collection: Iterable[IdentifiedObject], mrid: str) -> bool:
+def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -> bool:
     """
     Check if a collection of :class:`zepben.cimbend.iec61970.base.core.identified_object.IdentifiedObject` contains an
     object with a specified mRID.
@@ -80,6 +82,8 @@ def contains_mrid(collection: Iterable[IdentifiedObject], mrid: str) -> bool:
     :param mrid: The mRID to look up.
     :return: True if an `IdentifiedObject` is found in the collection with the specified mRID, False otherwise.
     """
+    if not collection:
+        return False
     try:
         if get_by_mrid(collection, mrid):
             return True

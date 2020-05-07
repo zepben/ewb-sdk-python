@@ -17,11 +17,11 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Dict, Set, Generator
+from dataclasses import dataclass, field, InitVar
+from typing import Optional, Dict, Set, Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
-from zepben.cimbend.util import nlen, ngen
+from zepben.cimbend.util import nlen, ngen, contains_mrid
 
 __all__ = ['EquipmentContainer', 'Feeder', 'Site']
 
@@ -35,12 +35,13 @@ class EquipmentContainer(ConnectivityNodeContainer):
         _equipment : The :class:`equipment.Equipment` contained in this ``EquipmentContainer``
     """
 
-    _equipment: Optional[Dict[str, Equipment]] = None
+    equipment_: InitVar[List[Equipment]] = field(default=list())
+    _equipment: Optional[Dict[str, Equipment]] = field(init=False, default=None)
 
-    def __post_init__(self):
-        if self._equipment is not None:
-            for equip in self._equipment.values():
-                equip.add_container(self)
+    def __post_init__(self, equipment_: List[Equipment]):
+        super().__post_init__()
+        for eq in equipment_:
+            self.add_equipment(eq)
 
     @property
     def num_equipment(self):
@@ -99,25 +100,29 @@ class EquipmentContainer(ConnectivityNodeContainer):
         self._equipment = None
         return self
 
-    def current_feeders(self) -> Set[Feeder]:
+    def current_feeders(self) -> Generator[Feeder, None, None]:
         """
         Convenience function to find all of the current feeders of the equipment associated with this equipment container.
         :return: the current feeders for all associated feeders
         """
-        feeder = set()
+        seen = set()
         for equip in self._equipment.values():
-            feeder = feeder.union(equip.current_feeders)
-        return feeder
+            for f in equip.current_feeders:
+                if f not in seen:
+                    seen.add(f.mrid)
+                    yield f
 
-    def normal_feeders(self) -> Set[Feeder]:
+    def normal_feeders(self) -> Generator[Feeder, None, None]:
         """
         Convenience function to find all of the normal feeders of the equipment associated with this equipment container.
         :return: the normal feeders for all associated feeders
         """
-        feeder = set()
+        seen = set()
         for equip in self._equipment.values():
-            feeder = feeder.union(equip.normal_feeders)
-        return feeder
+            for f in equip.normal_feeders:
+                if f not in seen:
+                    seen.add(f.mrid)
+                    yield f
 
 
 @dataclass
@@ -133,7 +138,13 @@ class Feeder(EquipmentContainer):
     """
     normal_head_terminal: Optional[Terminal] = None
     normal_energizing_substation: Optional[Substation] = None
-    _current_equipment: Optional[Dict[str, Equipment]] = None
+    currentequipment: InitVar[List[Equipment]] = field(default=list())
+    _current_equipment: Optional[Dict[str, Equipment]] = field(init=False, default=None)
+
+    def __post_init__(self, equipment_: List[Equipment], currentequipment: List[Equipment]):
+        super().__post_init__(equipment_)
+        for eq in currentequipment:
+            self.add_current_equipment(eq)
 
     @property
     def num_current_equipment(self):
@@ -157,7 +168,6 @@ class Feeder(EquipmentContainer):
         """
         Perform the specified action against each :class:`equipment.Equipment` associated with this ``Feeder``.
 
-        :param action: The action to perform on each :class:`equipment.Equipment`
         :return: A reference to this ``Feeder`` to allow fluent use.
         """
         return ngen(self._current_equipment)

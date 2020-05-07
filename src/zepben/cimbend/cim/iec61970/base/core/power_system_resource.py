@@ -35,7 +35,7 @@ class PowerSystemResource(IdentifiedObject):
     items of equipment such as a substation, or an organisational entity such as sub-control area. Power system resources
     can have measurements associated.
 
-    Attributes:
+    Attributes -
         - location : A :class:`zepben.cimbend.Location` for this resource.
         - asset_info : A subclass of :class:`zepben.cimbend.AssetInfo` providing information about the asset associated
                        with this PowerSystemResource.

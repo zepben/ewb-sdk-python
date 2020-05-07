@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar, field
 from typing import List, Optional, Generator, Tuple
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -36,7 +36,7 @@ class PositionPoint(object):
     objects like cables or lines), or area of an object (like a substation or a geographical zone - in this case,
     have first and last position point with the same values).
 
-    Attributes:
+    Attributes -
         x_position : X axis position - longitude
         y_position : Y axis position - latitude
     """
@@ -106,14 +106,20 @@ class Location(IdentifiedObject):
     The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment
     in time. It can be defined with one or more :class:`PositionPoint`'s.
 
-    Attributes:
+    Attributes -
         main_address : Main address of the location.
         _position_points : List of :class:`PositionPoint`. The ordering of the list is important, and refers to the
                           `sequenceNumber` of each PositionPoint.
 
     """
     main_address: Optional[StreetAddress] = None
-    _position_points: Optional[List[PositionPoint]] = None
+    positionpoints: InitVar[List[PositionPoint]] = field(default=list())
+    _position_points: Optional[List[PositionPoint]] = field(init=False, default=None)
+
+    def __post_init__(self, positionpoints: List[PositionPoint]):
+        super().__post_init__()
+        for point in positionpoints:
+            self.add_point(point)
 
     @property
     def num_points(self):

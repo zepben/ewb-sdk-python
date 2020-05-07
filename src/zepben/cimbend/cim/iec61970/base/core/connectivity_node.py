@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from typing import Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -34,7 +34,13 @@ class ConnectivityNode(IdentifiedObject):
     Attributes -
         _terminals : The :class:`terminal.Terminal`s attached to this ``ConnectivityNode``
     """
-    _terminals: List[Terminal] = field(default_factory=list)
+    terminals_: InitVar[List[Terminal]] = field(default=list())
+    _terminals: List[Terminal] = field(init=False, default_factory=list)
+
+    def __post_init__(self, terminals_: List[Terminal]):
+        super().__post_init__()
+        for term in terminals_:
+            self.add_terminal(term)
 
     def __iter__(self):
         return iter(self._terminals)

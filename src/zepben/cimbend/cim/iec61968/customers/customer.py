@@ -18,8 +18,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Set, Generator
+from dataclasses import dataclass, InitVar, field
+from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.cimbend.cim.iec61968.customers.customer_kind import CustomerKind
@@ -38,8 +38,14 @@ class Customer(OrganisationRole):
         numEndDevices : The number of end devices associated with this customer
     """
     kind: CustomerKind = CustomerKind.UNKNOWN
-    _customer_agreements: Optional[Set[CustomerAgreement]] = None
+    customeragreements: InitVar[List[CustomerAgreement]] = field(default=list())
+    _customer_agreements: Optional[List[CustomerAgreement]] = field(init=False, default=None)
     num_end_devices: int = 0
+
+    def __post_init__(self, customeragreements: List[CustomerAgreement]):
+        super().__post_init__()
+        for agreement in customeragreements:
+            self.add_agreement(agreement)
 
     @property
     def num_agreements(self) -> int:
@@ -73,8 +79,8 @@ class Customer(OrganisationRole):
         """
         require(not contains_mrid(self._customer_agreements, customer_agreement.mrid),
                 lambda: f"A CustomerAgreement with mRID {customer_agreement.mrid} already exists in {str(self)}.")
-        self._customer_agreements = set() if self._customer_agreements is None else self._customer_agreements
-        self._customer_agreements.add(customer_agreement)
+        self._customer_agreements = list() if self._customer_agreements is None else self._customer_agreements
+        self._customer_agreements.append(customer_agreement)
         return self
 
     def remove_agreement(self, customer_agreement: CustomerAgreement) -> Customer:

@@ -32,7 +32,7 @@ class EnergySourcePhase(PowerSystemResource):
     """
     A single phase of an energy source.
 
-    Attributes:
+    Attributes -
         energy_source : The :class:`zepben.cimbend.iec61970.wires.EnergySource` with this ``EnergySourcePhase``
         phase : A :class:`zepben.cimbend.SinglePhaseKind`
                 Phase of this energy source component. If the energy source is wye connected, the connection is from

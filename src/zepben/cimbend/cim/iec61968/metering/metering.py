@@ -19,9 +19,9 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field, InitVar
 from enum import Enum
-from typing import Iterable, Optional, Set, Generator
+from typing import Iterable, Optional, Generator
 from typing import List
 
 from zepben.cimbend.cim.iec61968.assets.asset import AssetContainer
@@ -78,7 +78,7 @@ class EndDevice(AssetContainer):
 
     Some devices may use an optical port that conforms to the ANSI C12.18 standard for communications.
 
-    Attributes:
+    Attributes -
         customer_mrid : The :class:`zepben.cimbend.Customer` associated with this EndDevice.
         service_location : The :class:`zepben.cimbend.Location` of this EndDevice
         _usage_points : The :class:`zepben.cimbend.iec61968.metering.metering.UsagePoint`s associated with this
@@ -87,7 +87,13 @@ class EndDevice(AssetContainer):
 
     customer_mrid: Optional[str] = None
     service_location: Optional[Location] = None
-    _usage_points: Optional[Set[UsagePoint]] = None
+    usagepoints: InitVar[List[UsagePoint]] = field(default=list())
+    _usage_points: Optional[List[UsagePoint]] = field(init=False, default=None)
+
+    def __post_init__(self, organisationroles: List[AssetOrganisationRole], usagepoints: [List[UsagePoint]]):
+        super().__post_init__(organisationroles)
+        for up in usagepoints:
+            self.add_usage_point(up)
 
     @property
     def num_usage_points(self):
@@ -123,8 +129,8 @@ class EndDevice(AssetContainer):
         """
         require(not contains_mrid(self._usage_points, up.mrid),
                 lambda: f"A UsagePoint with mRID {up.mrid} already exists in {str(self)}.")
-        self._usage_points = set() if self._usage_points is None else self._usage_points
-        self._usage_points.add(up)
+        self._usage_points = list() if self._usage_points is None else self._usage_points
+        self._usage_points.append(up)
         return self
 
     def remove_usage_point(self, up: UsagePoint) -> EndDevice:
@@ -158,20 +164,25 @@ class UsagePoint(IdentifiedObject):
     Logical or physical point in the network to which readings or events may be attributed.
     Used at the place where a physical or virtual meter may be located; however, it is not required that a meter be present.
 
-    Attributes:
+    Attributes -
         usage_point_location : The :class:`zepben.cimbend.iec61968.common.location.Location` of this UsagePoint
         _end_devices : The :class:`EndDevice`'s (Meter's) associated with this UsagePoint.
         _equipment : The :class:`zepben.model.Equipment` associated with this UsagePoint.
     """
 
     usage_point_location: Optional[Location] = None
-    _equipment: Optional[Set[Equipment]] = None
-    _end_devices: Optional[Set[EndDevice]] = None
+    equipment_: InitVar[List[Equipment]] = field(default=list())
+    _equipment: Optional[List[Equipment]] = field(init=False, default=None)
+    enddevices: InitVar[List[EndDevice]] = field(default=list())
+    _end_devices: Optional[List[EndDevice]] = field(init=False, default=None)
 
-    def __post_init__(self):
-        if self._equipment is not None:
-            for equip in self._equipment:
-                equip.add_usage_point(self)
+    def __post_init__(self, equipment_: List[Equipment], enddevices: List[EndDevice]):
+        super().__post_init__()
+        for eq in equipment_:
+            self.add_equipment(eq)
+        for ed in enddevices:
+            self.add_end_device(ed)
+        map(self.add_end_device, enddevices)
 
     @property
     def num_equipment(self):
@@ -222,8 +233,8 @@ class UsagePoint(IdentifiedObject):
         """
         require(not contains_mrid(self._equipment, equipment.mrid), lambda: f"An Equipment with mRID {equipment.mrid}"
                                                                             f" already exists in {str(self)}.")
-        self._equipment = set() if self._equipment is None else self._equipment
-        self._equipment.add(equipment)
+        self._equipment = list() if self._equipment is None else self._equipment
+        self._equipment.append(equipment)
         return self
 
     def remove_equipment(self, equipment: Equipment) -> UsagePoint:
@@ -269,8 +280,8 @@ class UsagePoint(IdentifiedObject):
         """
         require(not contains_mrid(self._end_devices, end_device.mrid), lambda: f"An existing pricing structure already "
                                                                                f"exists with mRID {end_device.mrid}.")
-        self._end_devices = set() if self._end_devices is None else self._end_devices
-        self._end_devices.add(end_device)
+        self._end_devices = list() if self._end_devices is None else self._end_devices
+        self._end_devices.append(end_device)
         return self
 
     def remove_end_device(self, end_device: EndDevice) -> UsagePoint:
@@ -330,18 +341,22 @@ class MeterReading(IdentifiedObject):
     Do not use a MeterReading if you are not tying the readings to a Meter. You should instead be using a list of
     Reading's, if all you need is the Reading data.
 
-    Attributes:
+    Attributes -
         meter : The :class:`Meter` associated with this MeterReading, OR a string of the Meter's MRID.
         readings : A list of (subclass) :class:`Reading`'s acquired from the associated meter.
     """
-    _readings: Optional[List[Reading]] = None
+    readings_: InitVar[List[Reading]] = field(default=list())
+    _readings: Optional[List[Reading]] = field(init=False, default=None)
     meter: Optional[Meter] = None
     __is_sorted: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self, readings_: List[Reading]):
         """
         Create a MeterReading
         """
+        super().__post_init__()
+        for reading in readings_:
+            self.add_reading(reading)
         self._sort_readings()
         self.__is_sorted = False
 

@@ -33,7 +33,7 @@ class WireInfo(AssetInfo):
     Wire data that can be specified per line segment phase, or for the line segment as a whole in case its phases all
     have the same wire characteristics
 
-    Attributes:
+    Attributes -
         rated_current : Current carrying capacity of the wire under stated thermal conditions.
         material : :class:`zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind` - Conductor material.
     """

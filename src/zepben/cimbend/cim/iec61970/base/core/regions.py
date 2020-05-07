@@ -17,8 +17,8 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Set, Generator
+from dataclasses import dataclass, InitVar, field
+from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.util import nlen, get_by_mrid, contains_mrid, require, ngen
@@ -31,7 +31,13 @@ class GeographicalRegion(IdentifiedObject):
     """
     A geographical region of a power system network phases.
     """
-    _sub_geographical_regions: Optional[Set[SubGeographicalRegion]] = None
+    subgeographicalregions: InitVar[List[SubGeographicalRegion]] = field(default=list())
+    _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = field(init=False, default=None)
+
+    def __post_init__(self, subgeographicalregions: List[SubGeographicalRegion]):
+        super().__post_init__()
+        for sgr in subgeographicalregions:
+            self.add_sub_geographical_region(sgr)
 
     @property
     def num_sub_geographical_regions(self) -> int:
@@ -64,8 +70,8 @@ class GeographicalRegion(IdentifiedObject):
         """
         require(not contains_mrid(self._sub_geographical_regions, sub_geographical_region.mrid),
                 lambda: f"A SubGeographicalRegion with mRID {sub_geographical_region.mrid} already exists in {str(self)}.")
-        self._sub_geographical_regions = set() if self._sub_geographical_regions is None else self._sub_geographical_regions
-        self._sub_geographical_regions.add(sub_geographical_region)
+        self._sub_geographical_regions = list() if self._sub_geographical_regions is None else self._sub_geographical_regions
+        self._sub_geographical_regions.append(sub_geographical_region)
         return self
 
     def remove_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> GeographicalRegion:
@@ -95,7 +101,13 @@ class GeographicalRegion(IdentifiedObject):
 @dataclass
 class SubGeographicalRegion(IdentifiedObject):
     geographical_region: Optional[GeographicalRegion] = None
-    _substations: Optional[Set[Substation]] = None
+    substations_: InitVar[List[Substation]] = field(default=list())
+    _substations: Optional[List[Substation]] = field(init=False, default=None)
+
+    def __post_init__(self, substations_: List[Substation]):
+        super().__post_init__()
+        for sub in substations_:
+            self.add_substation(sub)
 
     @property
     def num_substations(self) -> int:
@@ -128,8 +140,8 @@ class SubGeographicalRegion(IdentifiedObject):
         """
         require(not contains_mrid(self._substations, substation.mrid),
                 lambda: f"A Substation with mRID {substation.mrid} already exists in {str(self)}.")
-        self._substations = set() if self._substations is None else self._substations
-        self._substations.add(substation)
+        self._substations = list() if self._substations is None else self._substations
+        self._substations.append(substation)
         return self
 
     def remove_substation(self, substation: Substation) -> SubGeographicalRegion:

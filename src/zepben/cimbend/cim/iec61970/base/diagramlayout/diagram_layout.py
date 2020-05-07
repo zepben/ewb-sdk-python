@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar, field
 from typing import List, Optional, Dict, Generator, Tuple
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -67,7 +67,13 @@ class DiagramObject(IdentifiedObject):
     identified_object_mrid: Optional[str] = None
     style: DiagramObjectStyle = DiagramObjectStyle.NONE
     rotation: float = 0.0
-    _diagram_object_points: Optional[List[DiagramObjectPoint]] = None
+    diagramobjectpoints: InitVar[List[DiagramObjectPoint]] = field(default=list())
+    _diagram_object_points: Optional[List[DiagramObjectPoint]] = field(init=False, default=None)
+
+    def __post_init__(self, diagramobjectpoints: List[DiagramObjectPoint]):
+        super().__post_init__()
+        for point in diagramobjectpoints:
+            self.add_point(point)
 
     @property
     def num_points(self):
@@ -165,7 +171,13 @@ class Diagram(IdentifiedObject):
 
     diagram_style: DiagramStyle = DiagramStyle.SCHEMATIC
     orientation_kind: OrientationKind = OrientationKind.POSITIVE
-    _diagram_objects: Optional[Dict[str, DiagramObject]] = None
+    diagramobjects: InitVar[List[DiagramObject]] = field(default=list())
+    _diagram_objects: Optional[Dict[str, DiagramObject]] = field(init=False, default=None)
+
+    def __post_init__(self, diagramobjects: List[DiagramObject]):
+        super().__post_init__()
+        for obj in diagramobjects:
+            self.add_object(obj)
 
     @property
     def num_objects(self):

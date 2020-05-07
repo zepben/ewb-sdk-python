@@ -35,7 +35,7 @@ class AuxiliaryEquipment(Equipment):
     equipment performing the primary function.
 
     ``AuxiliaryEquipment`` is attached to primary equipment via an association with :class:`zepben.cimbend.iec61970.base.core.Terminal`.
-    Attributes:
+    Attributes -
         terminal : The ``Terminal`` at the equipment where the ``AuxiliaryEquipment`` is attached.
     """
     terminal: Optional[Terminal] = None

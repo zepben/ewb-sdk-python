@@ -40,7 +40,7 @@ class PerLengthSequenceImpedance(PerLengthImpedance):
 
     Typically, one PerLengthSequenceImpedance is used for many ACLineSegments.
 
-    Attributes:
+    Attributes -
         r : Positive sequence series resistance, per unit of length.
         x : Positive sequence series reactance, per unit of length.
         r0 : Zero sequence series resistance, per unit of length.

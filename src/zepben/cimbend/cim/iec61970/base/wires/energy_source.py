@@ -17,7 +17,7 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field, InitVar
 from typing import List, Optional, Generator
 
 from zepben.cimbend.cim.iec61970.base.wires.energy_connection import EnergyConnection
@@ -32,7 +32,7 @@ class EnergySource(EnergyConnection):
     """
     A generic equivalent for an energy supplier on a transmission or distribution voltage level.
 
-    Attributes:
+    Attributes -
         active_power : High voltage source active injection. Load sign convention is used, i.e. positive sign means flow
                        out from a node. Starting value for steady state solutions
         r : Positive sequence Thevenin resistance.
@@ -46,7 +46,8 @@ class EnergySource(EnergyConnection):
                     source point for calculating `Direction`'s.
     """
 
-    _energy_source_phases: Optional[List[EnergySourcePhase]] = None
+    energysourcephases: InitVar[List[EnergySourcePhase]] = field(default=list())
+    _energy_source_phases: Optional[List[EnergySourcePhase]] = field(init=False, default=None)
     active_power: float = 0.0
     r: float = 0.0
     x: float = 0.0
@@ -60,9 +61,16 @@ class EnergySource(EnergyConnection):
     x0: float = 0.0
     xn: float = 0.0
 
-    def __post_init__(self):
-        for phase in self._energy_source_phases:
-            phase.energy_source = self
+    def __post_init__(self, usagepoints: Optional[List[UsagePoint]],
+                      equipmentcontainers: Optional[List[EquipmentContainer]],
+                      operationalrestrictions: Optional[List[OperationalRestriction]],
+                      currentfeeders: Optional[List[Feeder]],
+                      terminals_: List[Terminal],
+                      energysourcephases: List[EnergySourcePhase]):
+        super().__post_init__(usagepoints, equipmentcontainers, operationalrestrictions, currentfeeders, terminals_)
+        for phase in energysourcephases:
+            phase.energy_consumer = self
+            self.add_phase(phase)
 
     @property
     def has_phases(self):
@@ -102,8 +110,8 @@ class EnergySource(EnergyConnection):
         require(not contains_mrid(self._energy_source_phases, phase.mrid),
                 lambda: f"An EnergySourcePhase with mRID {phase.mrid} already exists in {str(self)}")
 
-        self._energy_source_phases = set() if self._energy_source_phases is None else self._energy_source_phases
-        self._energy_source_phases.add(phase)
+        self._energy_source_phases = list() if self._energy_source_phases is None else self._energy_source_phases
+        self._energy_source_phases.append(phase)
         return self
 
     def remove_phases(self, phase: EnergySourcePhase) -> EnergySource:
@@ -128,4 +136,3 @@ class EnergySource(EnergyConnection):
         """
         self._energy_source_phases = None
         return self
-

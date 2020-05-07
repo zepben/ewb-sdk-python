@@ -27,7 +27,7 @@ __all__ = ["ConnectivityResult", "ConductingEquipmentToCores"]
 class ConnectivityResult(object):
     """
     The connectivity between two connected terminals
-    Attributes:
+    Attributes -
         from_terminal : Originating :class:`zepben.cimbend.Terminal`
         to_terminal : Destination :class:`zepben.cimbend.Terminal`
     """
