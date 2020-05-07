@@ -68,12 +68,12 @@ class Terminal(AcDcTerminal):
     conducting_equipment: Optional[ConductingEquipment] = None
     phases: PhaseCode = PhaseCode.ABC
     traced_phases: TracedPhases = field(default_factory=TracedPhases)
-    connectivity_node_: InitVar[ConnectivityNode] = NO_CONNECTIVITY_NODE
+    connectivitynode: InitVar[ConnectivityNode] = NO_CONNECTIVITY_NODE
     _cn: ReferenceType = field(init=False)
 
-    def __post_init__(self, connectivity_node_):
+    def __post_init__(self, connectivitynode):
         super().__post_init__()
-        self.connectivity_node = connectivity_node_
+        self.connectivity_node = connectivitynode
 
     @property
     def connectivity_node(self):
