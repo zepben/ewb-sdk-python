@@ -315,13 +315,15 @@ class PowerTransformer(ConductingEquipment):
         self.insert_end(end)
         return self
 
-    def insert_end(self, end: PowerTransformerEnd, end_number: int = num_ends) -> PowerTransformer:
+    def insert_end(self, end: PowerTransformerEnd, end_number: int = None) -> PowerTransformer:
         """
         :param end: the :class:`PowerTransformerEnd` to associate with this ``PowerTransformer``.
         :param end_number: The ``sequenceNumber`` for ``end``. You should aim to always insert
         ``PowerTransformerEnd``s in order.
         :return: A reference to this ``PowerTransformer`` to allow fluent use.
         """
+        if end_number is None:
+            end_number = self.num_terminals
         require(not contains_mrid(self._power_transformer_ends, end.mrid),
                 lambda: f"A PowerTransformerEnd with mRID {end.mrid} already exists in {str(self)}.")
         require(0 <= end_number <= self.num_ends,
