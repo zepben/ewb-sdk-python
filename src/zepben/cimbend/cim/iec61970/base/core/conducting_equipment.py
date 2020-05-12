@@ -154,9 +154,6 @@ class ConductingEquipment(Equipment):
         self._terminals.clear()
         return self
 
-    def __str__(self):
-        return f"{super().__str__()} {self.base_voltage} in_serv: {self.in_service}, norm_in_serv: {self.normally_in_service} terms: {self._terminals}"
-
     def __repr__(self):
         return (f"{super().__repr__()}, num_cores={self.num_cores} in_service={self.in_service}, "
                 f"normally_in_service={self.normally_in_service}, location={self.location}"

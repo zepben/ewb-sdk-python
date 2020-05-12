@@ -151,5 +151,3 @@ class Terminal(AcDcTerminal):
     def disconnect(self):
         self.connectivity_node = NO_CONNECTIVITY_NODE
 
-    def __str__(self):
-        return f"{super().__str__()}, {self.phases}, cn: {self.connectivity_node.mrid}, conn: {self.connected}"

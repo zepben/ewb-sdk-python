@@ -32,9 +32,3 @@ class BaseVoltage(IdentifiedObject):
     """
     nominal_voltage: int = 0
 
-    def __str__(self):
-        return f"Nominal Voltage: {self.nominal_voltage}V"
-
-    def _pb_args(self, exclude=None):
-        return super()._pb_args()
-

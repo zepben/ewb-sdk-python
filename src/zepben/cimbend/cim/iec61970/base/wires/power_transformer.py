@@ -323,7 +323,7 @@ class PowerTransformer(ConductingEquipment):
         :return: A reference to this ``PowerTransformer`` to allow fluent use.
         """
         if end_number is None:
-            end_number = self.num_terminals
+            end_number = self.num_ends
         require(not contains_mrid(self._power_transformer_ends, end.mrid),
                 lambda: f"A PowerTransformerEnd with mRID {end.mrid} already exists in {str(self)}.")
         require(0 <= end_number <= self.num_ends,

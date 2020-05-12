@@ -43,10 +43,7 @@ class DiagramObjectPoint(object):
     y_position: float = 0.0
 
     def __str__(self):
-        return f"xPos: {self.x_position}, yPos: {self.y_position}"
-
-    def __repr__(self):
-        return f"xPos: {self.x_position}, yPos: {self.y_position}"
+        return f"x:{self.x_position}|y:{self.y_position}"
 
 
 @dataclass

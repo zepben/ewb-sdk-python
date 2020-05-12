@@ -114,8 +114,3 @@ class ConnectivityNode(IdentifiedObject):
                 pass
         return None
 
-    def __str__(self):
-        return f"{super().__str__()} terminals: {self._terminals}"
-
-    def __repr__(self):
-        return f"{super().__repr__()}(terminals={self._terminals})"

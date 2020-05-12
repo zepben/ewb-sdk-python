@@ -68,9 +68,6 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     def __str__(self):
         return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), self.name) if a)}}}"
 
-    def __repr__(self):
-        return f"mrid='{self.mrid}', name='{self.name}', num_diagram_objects={self.num_diagram_objects}"
-
     @property
     def has_diagram_objects(self):
         return self.num_diagram_objects > 0

@@ -52,9 +52,6 @@ class PositionPoint(object):
     def __str__(self):
         return f"{self.x_position}:{self.y_position}"
 
-    def __repr__(self):
-        return f"{self.x_position}:{self.y_position}"
-
     @property
     def longitude(self):
         return self.x_position
@@ -95,7 +92,6 @@ class StreetAddress(object):
         postal_code : Postal code for the address.
         town_detail : TownDetail
     """
-
     postal_code: str = ""
     town_detail: Optional[TownDetail] = None
 
