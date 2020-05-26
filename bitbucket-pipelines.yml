@@ -1,0 +1,141 @@
+####################################################PIPELINE MENU####################################################
+# branch - master & pull requests:
+# * Runs build and tests.
+# * Deploys SNAPSHOT version to Zepben Nexus PyPi repo.
+#
+# Tags:
+# * Builds source code and upload to Zepben Nexus PyPi repo.
+#
+# release-then-incr-patch, release-then-incr-minor & release-then-incr-major:
+# * Only works on master and LTS/* branches.
+# * Remove SNAPSHOT from version and runs build and tests.
+# * Date stamp release date in Changelog.
+# * Tags the commit.
+# * Updates the version and add entry into Changelog depending on the selected semantic version.
+# * Tries to rebase master on top of the changes.
+# * release-then-incr-minor & release-then-incr-major only works for master branch or commits under master branch.
+# * Would not run pipeline when commit is part of the revisions in any tag.
+#
+# LTS:
+# * Specify major or major.minor version.
+# * Creates LTS/X.X.X branch, on the latest specified version.
+#
+# Images used: https://bitbucket.org/zepben/vm-container-images/
+#####################################################################################################################
+image: zepben/pipeline-python:0.1.0
+
+options:
+  max-time: 30
+
+definitions:
+  basic-image: &basic-image
+    image: zepben/pipeline-basic:1.1.0
+
+  steps:
+    - step: &run-tests-step
+        name: Build and Test
+        caches:
+          - pip
+        script:
+          - cd test
+          - pytest
+    - step: &deploy
+        name: Create and Upload SNAPSHOT release
+        caches:
+          - pip
+        script:
+          - release-lib --snapshot setup.py
+    - step: &update-snapshot-version
+        name: Update project version to next snapshot
+        script:
+          - update-version --snapshot setup.py
+    - step: &release-finalize-version
+        name: Build, test and finalize release version
+        caches:
+          - pip
+        script:
+          - finalize-version setup.py
+    - step: &release-rebase-master
+        <<: *basic-image
+        name: Rebase master
+        script:
+          - rebase
+    - step: &release-init
+        <<: *basic-image
+        name: Init
+    - step: &release-update-next-version
+        name: Update project version to next snapshot
+        caches:
+          - pip
+
+  release-update-version-script: &release-update-version-script
+                                 update-version setup.py
+pipelines:
+  branches:
+    master: 
+      - step: *run-tests-step
+      - step: *deploy
+      - step: *update-snapshot-version
+    LTS/*:
+      - step: *run-tests-step
+      - step: *deploy
+      - step: *update-snapshot-version
+  pull-requests:
+    '**': 
+      - step: *run-tests-step
+  tags:
+    '*.*.*':
+      - step: 
+          name: Create and Upload release to Nexus PyPi Repo
+          caches:
+            - pip
+          script:
+            - release-lib setup.py
+  custom:
+    release-then-incr-patch:
+      - step:
+          <<: *release-init
+          script:
+            - export VERSION_TYPE=patch
+            - release-init
+      - step: *release-finalize-version
+      - step:
+          <<: *release-update-next-version
+          script:
+            - export VERSION_TYPE=patch
+            - *release-update-version-script
+      - step: *release-rebase-master
+    release-then-incr-minor:
+      - step:
+          <<: *release-init
+          script:
+            - export VERSION_TYPE=minor
+            - release-init
+      - step: *release-finalize-version
+      - step:
+          <<: *release-update-next-version
+          script:
+            - export VERSION_TYPE=minor
+            - *release-update-version-script
+      - step: *release-rebase-master
+    release-then-incr-major:
+      - step:
+          <<: *release-init
+          script:
+            - export VERSION_TYPE=major
+            - release-init
+      - step: *release-finalize-version
+      - step:
+          <<: *release-update-next-version
+          script:
+            - export VERSION_TYPE=major
+            - *release-update-version-script
+      - step: *release-rebase-master
+    LTS:
+      - variables:
+          - name: version
+      - step:
+          <<: *basic-image
+          name: Create LTS support branch
+          script:
+            - create-lts $version
