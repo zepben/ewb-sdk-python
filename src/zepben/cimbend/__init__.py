@@ -28,3 +28,4 @@ from zepben.cimbend.diagram import *
 from zepben.cimbend.customer import *
 from zepben.cimbend.measurement import *
 from zepben.cimbend.common import *
+from zepben.cimbend.exceptions import *
