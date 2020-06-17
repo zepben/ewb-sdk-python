@@ -206,7 +206,7 @@ def get_towndetail(cim: TownDetail) -> PBTownDetail:
 
 
 def get_streetaddress(cim: StreetAddress) -> PBStreetAddress:
-    return PBStreetAddress(postalCode=cim.postal_code, townDetail=get_or_none(get_towndetail(cim.town_detail)))
+    return PBStreetAddress(postalCode=cim.postal_code, townDetail=get_or_none(get_towndetail, cim.town_detail))
 
 
 def get_location(cim: Location) -> PBLocation:
@@ -265,7 +265,8 @@ def get_acdcterminal(cim: AcDcTerminal) -> PBAcDcTerminal:
 
 
 def get_basevoltage(cim: BaseVoltage) -> PBBaseVoltage:
-    return PBBaseVoltage(io=get_identifiedobject(cim))
+    return PBBaseVoltage(io=get_identifiedobject(cim),
+                         nominalVoltage=cim.nominal_voltage)
 
 
 def get_conductingequipment(cim: ConductingEquipment) -> PBConductingEquipment:

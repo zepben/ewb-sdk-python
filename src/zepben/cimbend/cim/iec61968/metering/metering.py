@@ -182,7 +182,6 @@ class UsagePoint(IdentifiedObject):
             self.add_equipment(eq)
         for ed in enddevices:
             self.add_end_device(ed)
-        map(self.add_end_device, enddevices)
 
     @property
     def num_equipment(self):
