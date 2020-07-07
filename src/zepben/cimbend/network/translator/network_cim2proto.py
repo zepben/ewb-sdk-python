@@ -15,7 +15,45 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
-
+from zepben.cimbend.cim.iec61968.assetinfo.wire_info import CableInfo, OverheadWireInfo, WireInfo
+from zepben.cimbend.cim.iec61968.assets.asset import Asset, AssetContainer
+from zepben.cimbend.cim.iec61968.assets.asset_info import AssetInfo
+from zepben.cimbend.cim.iec61968.assets.asset_organisation_role import AssetOwner, AssetOrganisationRole
+from zepben.cimbend.cim.iec61968.assets.pole import Pole
+from zepben.cimbend.cim.iec61968.assets.streetlight import Streetlight
+from zepben.cimbend.cim.iec61968.assets.structure import Structure
+from zepben.cimbend.cim.iec61968.common.location import StreetAddress, TownDetail, PositionPoint, Location
+from zepben.cimbend.cim.iec61968.metering import EndDevice, UsagePoint, Meter
+from zepben.cimbend.cim.iec61968.operations.operational_restriction import OperationalRestriction
+from zepben.cimbend.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment, FaultIndicator
+from zepben.cimbend.cim.iec61970.base.core import BaseVoltage
+from zepben.cimbend.cim.iec61970.base.core import ConductingEquipment
+from zepben.cimbend.cim.iec61970.base.core import PowerSystemResource
+from zepben.cimbend.cim.iec61970.base.core import Substation
+from zepben.cimbend.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.cimbend.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
+from zepben.cimbend.cim.iec61970.base.core.equipment import Equipment
+from zepben.cimbend.cim.iec61970.base.core.equipment_container import EquipmentContainer, Feeder, Site
+from zepben.cimbend.cim.iec61970.base.core.regions import GeographicalRegion, SubGeographicalRegion
+from zepben.cimbend.cim.iec61970.base.core.terminal import Terminal, AcDcTerminal
+from zepben.cimbend.cim.iec61970.base.wires import Conductor, AcLineSegment
+from zepben.cimbend.cim.iec61970.base.wires import EnergyConnection, RegulatingCondEq
+from zepben.cimbend.cim.iec61970.base.wires import EnergyConsumer, EnergyConsumerPhase
+from zepben.cimbend.cim.iec61970.base.wires import EnergySource
+from zepben.cimbend.cim.iec61970.base.wires import EnergySourcePhase
+from zepben.cimbend.cim.iec61970.base.wires import Junction, Connector
+from zepben.cimbend.cim.iec61970.base.wires import LinearShuntCompensator, ShuntCompensator
+from zepben.cimbend.cim.iec61970.base.wires import PerLengthSequenceImpedance, PerLengthLineParameter, \
+    PerLengthImpedance
+from zepben.cimbend.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, \
+    RatioTapChanger, \
+    TapChanger, TransformerEnd
+from zepben.cimbend.cim.iec61970.base.wires.switch import Breaker, Disconnector, Fuse, Jumper, ProtectedSwitch, \
+    Recloser, \
+    Switch
+from zepben.cimbend.common import mrid_or_empty
+from zepben.cimbend.common.base_cim2proto import *
+from zepben.cimbend.phases import TracedPhases
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
@@ -26,6 +64,10 @@ from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import \
     AssetOrganisationRole as PBAssetOrganisationRole
 from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner as PBAssetOwner
 from zepben.protobuf.cim.iec61968.assets.Asset_pb2 import Asset as PBAsset
+from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole as  PBPole
+from zepben.protobuf.cim.iec61968.assets.StreetlightLampKind_pb2 import StreetlightLampKind as PBStreetlightLampKind
+from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight as PBStreetlight
+from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure as PBStructure
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location as PBLocation
 from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint as PBPositionPoint
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
@@ -92,44 +134,10 @@ from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup 
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection as PBWindingConnection
 from zepben.protobuf.network.model.TracedPhases_pb2 import TracedPhases as PBTracedPhases
 
-from zepben.cimbend import ConnectivityNode
-from zepben.cimbend.common import mrid_or_empty
-from zepben.cimbend.common.base_cim2proto import *
-from zepben.cimbend.common.decorators import map_type
-from zepben.cimbend.cim.iec61968.assetinfo.wire_info import CableInfo, OverheadWireInfo, WireInfo
-from zepben.cimbend.cim.iec61968.assets.asset import Asset, AssetContainer
-from zepben.cimbend.cim.iec61968.assets.asset_info import AssetInfo
-from zepben.cimbend.cim.iec61968.assets.asset_organisation_role import AssetOwner, AssetOrganisationRole
-from zepben.cimbend.cim.iec61968.common.location import StreetAddress, TownDetail, PositionPoint, Location
-from zepben.cimbend.cim.iec61968.metering import EndDevice, UsagePoint, Meter
-from zepben.cimbend.cim.iec61968.operations.operational_restriction import OperationalRestriction
-from zepben.cimbend.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment, FaultIndicator
-from zepben.cimbend.cim.iec61970.base.core import BaseVoltage
-from zepben.cimbend.cim.iec61970.base.core import ConductingEquipment
-from zepben.cimbend.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
-from zepben.cimbend.cim.iec61970.base.core.equipment import Equipment
-from zepben.cimbend.cim.iec61970.base.core.equipment_container import EquipmentContainer, Feeder, Site
-from zepben.cimbend.cim.iec61970.base.core import PowerSystemResource
-from zepben.cimbend.cim.iec61970.base.core.regions import GeographicalRegion, SubGeographicalRegion
-from zepben.cimbend.cim.iec61970.base.core import Substation
-from zepben.cimbend.cim.iec61970.base.core.terminal import Terminal, AcDcTerminal
-from zepben.cimbend.cim.iec61970.base.wires import Conductor, AcLineSegment
-from zepben.cimbend.cim.iec61970.base.wires import Junction, Connector
-from zepben.cimbend.cim.iec61970.base.wires import EnergyConnection, RegulatingCondEq
-from zepben.cimbend.cim.iec61970.base.wires import EnergyConsumer, EnergyConsumerPhase
-from zepben.cimbend.cim.iec61970.base.wires import EnergySource
-from zepben.cimbend.cim.iec61970.base.wires import EnergySourcePhase
-from zepben.cimbend.cim.iec61970.base.wires import PerLengthSequenceImpedance, PerLengthLineParameter, \
-    PerLengthImpedance
-from zepben.cimbend.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, \
-    TapChanger, TransformerEnd
-from zepben.cimbend.cim.iec61970.base.wires import LinearShuntCompensator, ShuntCompensator
-from zepben.cimbend.cim.iec61970.base.wires.switch import Breaker, Disconnector, Fuse, Jumper, ProtectedSwitch, Recloser, \
-    Switch
-from zepben.cimbend.phases import TracedPhases
-
-__all__ = ["CimTranslationException", "get_cableinfo", "get_overheadwireinfo", "get_wireinfo", "get_asset", "get_assetcontainer", "get_assetinfo",
-           "get_assetorganisationrole", "get_assetowner", "get_positionpoint", "get_towndetail", "get_streetaddress",
+__all__ = ["CimTranslationException", "get_cableinfo", "get_overheadwireinfo", "get_wireinfo", "get_asset",
+           "get_assetcontainer", "get_assetinfo",
+           "get_assetorganisationrole", "get_assetowner", "get_pole", "get_streetlight", "get_structure",
+           "get_positionpoint", "get_towndetail", "get_streetaddress",
            "get_location", "get_enddevice", "get_meter", "get_usagepoint", "get_operationalrestriction",
            "get_auxiliaryequipment", "get_faultindicator", "get_acdcterminal", "get_basevoltage",
            "get_conductingequipment", "get_connectivitynode", "get_connectivitynodecontainer", "get_equipment",
@@ -190,6 +198,21 @@ def get_assetorganisationrole(cim: AssetOrganisationRole) -> PBAssetOrganisation
     pb = PBAssetOrganisationRole()
     getattr(pb, "or").CopyFrom(get_organisationrole(cim))
     return pb
+
+
+def get_pole(cim: Pole) -> PBPole:
+    return PBPole(st=get_structure(cim), streetlightMRIDs=[str(io.mrid) for io in cim.streetlights])
+
+
+def get_streetlight(cim: Streetlight) -> PBStreetlight:
+    return PBStreetlight(at=get_asset(cim),
+                         poleMRID=str(cim.pole.mrid),
+                         lightRating=cim.light_rating,
+                         lampKind=PBStreetlightLampKind.Value(cim.lamp_kind.short_name))
+
+
+def get_structure(cim: Structure) -> PBStructure:
+    return PBStructure(ac=get_assetcontainer(cim))
 
 
 def get_assetowner(cim: AssetOwner) -> PBAssetOwner:
@@ -606,6 +629,9 @@ AssetContainer.to_pb = lambda self: get_assetcontainer(self)
 AssetInfo.to_pb = lambda self: get_assetinfo(self)
 AssetOrganisationRole.to_pb = lambda self: get_assetorganisationrole(self)
 AssetOwner.to_pb = lambda self: get_assetowner(self)
+Pole.to_pb = lambda self: get_pole(self)
+Streetlight.to_pb = lambda self: get_streetlight(self)
+Structure.to_pb = lambda self: get_structure(self)
 PositionPoint.to_pb = lambda self: get_positionpoint(self)
 TownDetail.to_pb = lambda self: get_towndetail(self)
 StreetAddress.to_pb = lambda self: get_streetaddress(self)

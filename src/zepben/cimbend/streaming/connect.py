@@ -33,9 +33,9 @@ _AUTH_HEADER_KEY = 'authorization'
 
 class AuthTokenPlugin(grpc.AuthMetadataPlugin):
 
-    def __init__(self, host, port, client_id, client_secret):
+    def __init__(self, host, conf_address, client_id, client_secret):
         self.host = host
-        self.port = port
+        self.conf_address = conf_address
         self.client_id = client_id
         self.client_secret = client_secret
         self.token = ""
@@ -48,15 +48,15 @@ class AuthTokenPlugin(grpc.AuthMetadataPlugin):
         callback(((_AUTH_HEADER_KEY, self.token),), None)
 
     def _refresh_token(self):
-        parts = get_token(self.host, self.port, self.client_id, self.client_secret)
+        parts = get_token(self.host, self.conf_address, self.client_id, self.client_secret)
         self.token = f"{parts['token_type']} {parts['access_token']}"
         self.token_expiry = jwt.get_unverified_claims(parts['access_token'])['exp']
 
 
-def get_token(addr, port, client_id, client_secret):
+def get_token(addr, conf_address, client_id, client_secret):
     # Get the configuration TODO: this probably needs to be OAuth2 compliant or something
     with requests.session() as session:
-        with session.get(f"http://{addr}:{port}/auth") as resp:
+        with session.get(conf_address) as resp:
             result = json.loads(resp.text)
             domain = result["dom"]
             aud = result["aud"]
@@ -67,23 +67,24 @@ def get_token(addr, port, client_id, client_secret):
     return token
 
 
-def _conn(host: str = "localhost", rpc_port: int = 50051, conf_port: int = 80, client_id: str = None,
+def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "http://localhost/auth", client_id: str = None,
           client_secret: str = None, pkey=None, cert=None, ca=None):
     """
     :param host: The host to connect to.
     :param rpc_port: The gRPC port for host.
-    :param conf_port: The configuration port for host.
+    :param conf_address: The complete address for the auth configuration endpoint.
     :param client_id: Your client id for your OAuth Auth provider.
     :param client_secret: Corresponding client secret.
     :param pkey: Private key for client authentication
     :param cert: Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
                  CA.
     :param ca: CA trust for the server.
+    :param secure_conf: Whether the server hosting configuration is secured (https)
     :return: A gRPC channel
     """
     # TODO: make this more robust so it can handle SSL without client verification
     if pkey and cert and client_id and client_secret:
-        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(host, conf_port, client_id, client_secret))
+        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(host, conf_address, client_id, client_secret))
         # Channel credential will be valid for the entire channel
         channel_credentials = grpc.ssl_channel_credentials(ca, pkey, cert)
         # Combining channel credentials and call credentials together
@@ -101,7 +102,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_port: int = 80, c
 @contextlib.contextmanager
 def connect(host: str = "localhost",
             rpc_port: int = 50051,
-            conf_port: int = 80,
+            conf_address: str = "http://localhost/auth",
             client_id: str = None,
             client_secret: str = None,
             pkey=None,
@@ -113,7 +114,7 @@ def connect(host: str = "localhost",
 
     :param host: The host to connect to.
     :param rpc_port: The gRPC port for host.
-    :param conf_port: The configuration port for host.
+    :param conf_address: The complete address for the auth configuration endpoint.
     :param client_id: Your client id for your OAuth Auth provider.
     :param client_secret: Corresponding client secret.
     :param pkey: Private key for client authentication
@@ -122,7 +123,7 @@ def connect(host: str = "localhost",
     :param ca: CA trust for the server.
     :return: A gRPC channel
     """
-    with _conn(host, rpc_port, conf_port, client_id, client_secret, pkey, cert, ca) as channel:
+    with _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca) as channel:
         conn = SyncWorkbenchConnection(channel)
         yield conn
 
@@ -130,7 +131,7 @@ def connect(host: str = "localhost",
 @contextlib.asynccontextmanager
 async def connect_async(host: str = "localhost",
                         rpc_port: int = 50051,
-                        conf_port: int = 80,
+                        conf_address: str = "http://localhost/auth",
                         client_id: str = None,
                         client_secret: str = None,
                         pkey=None,
@@ -142,7 +143,7 @@ async def connect_async(host: str = "localhost",
 
     :param host: The host to connect to.
     :param rpc_port: The gRPC port for host.
-    :param conf_port: The configuration port for host.
+    :param conf_address: The complete address for the auth configuration endpoint.
     :param client_id: Your client id for your OAuth Auth provider.
     :param client_secret: Corresponding client secret.
     :param pkey: Private key for client authentication
@@ -151,6 +152,6 @@ async def connect_async(host: str = "localhost",
     :param ca: CA trust for the server.
     :return: A gRPC channel
     """
-    with _conn(host, rpc_port, conf_port, client_id, client_secret, pkey, cert, ca) as channel:
+    with _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca) as channel:
         conn = WorkbenchConnection(channel)
         yield conn

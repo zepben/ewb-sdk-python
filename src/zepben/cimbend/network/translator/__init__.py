@@ -25,6 +25,9 @@ from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo
 from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import AssetOrganisationRole
 from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner
 from zepben.protobuf.cim.iec61968.assets.Asset_pb2 import Asset
+from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole
+from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight
+from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter
@@ -84,6 +87,9 @@ AssetContainer.mrid = lambda self: self.at.mrid()
 AssetInfo.mrid = lambda self: self.io.mRID
 AssetOrganisationRole.mrid = lambda self: getattr(self, "or").mrid()
 AssetOwner.mrid = lambda self: self.aor.mrid()
+Pole.mrid = lambda self: self.st.mrid()
+Streetlight.mrid = lambda self: self.at.mrid()
+Structure.mrid = lambda self: self.ac.mrid()
 Location.mrid = lambda self: self.io.mRID
 EndDevice.mrid = lambda self: self.ac.mrid()
 Meter.mrid = lambda self: self.ed.mrid()

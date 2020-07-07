@@ -104,6 +104,7 @@ class VectorGroup(Enum):
     DNYN11 = 79
     YNDN1 = 80
     YNDN11 = 81
+    TTN11 = 82
 
     @property
     def short_name(self):

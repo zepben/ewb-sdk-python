@@ -69,7 +69,7 @@ class EnergySource(EnergyConnection):
                       energysourcephases: List[EnergySourcePhase]):
         super().__post_init__(usagepoints, equipmentcontainers, operationalrestrictions, currentfeeders, terminals_)
         for phase in energysourcephases:
-            phase.energy_consumer = self
+            phase.energy_source = self
             self.add_phase(phase)
 
     @property

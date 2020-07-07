@@ -59,7 +59,6 @@ class ConductingEquipment(Equipment):
                       terminals_: List[Terminal]):
         super().__post_init__(usagepoints, equipmentcontainers, operationalrestrictions, currentfeeders)
         for term in terminals_:
-            term.conducting_equipment = self
             self.add_terminal(term)
 
     @property
@@ -124,7 +123,7 @@ class ConductingEquipment(Equipment):
         if sequence_number is None:
             sequence_number = self.num_terminals
         require(terminal.conducting_equipment is self,
-                lambda: f"Terminal {terminal} references another piece of conducting equipment ${terminal.conducting_equipment}, expected {self}.")
+                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {self}.")
         require(not contains_mrid(self._terminals, terminal.mrid),
                 lambda: f"A Terminal with mRID {terminal.mrid} already exists in {str(self)}.")
         require(0 <= sequence_number <= self.num_terminals,

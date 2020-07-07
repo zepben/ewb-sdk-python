@@ -15,11 +15,12 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
+from __future__ import annotations
 
-from zepben.cimbend.cim.iec61968.assets.asset import *
-from zepben.cimbend.cim.iec61968.assets.asset_info import *
-from zepben.cimbend.cim.iec61968.assets.asset_organisation_role import *
-from zepben.cimbend.cim.iec61968.assets.pole import *
-from zepben.cimbend.cim.iec61968.assets.streetlight import *
-from zepben.cimbend.cim.iec61968.assets.structure import *
+from zepben.cimbend.cim.iec61968.assets.asset import AssetContainer
 
+__all__ = ["Structure"]
+
+
+class Structure(AssetContainer):
+    pass

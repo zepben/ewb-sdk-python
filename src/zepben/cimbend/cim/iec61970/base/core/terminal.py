@@ -73,11 +73,15 @@ class Terminal(AcDcTerminal):
 
     def __post_init__(self, connectivitynode):
         super().__post_init__()
-        self.connectivity_node = connectivitynode
+        if connectivitynode is not NO_CONNECTIVITY_NODE:
+            self.connectivity_node = connectivitynode
 
     @property
     def connectivity_node(self):
-        return self._cn()
+        try:
+            return self._cn()
+        except AttributeError:
+            return None
 
     @connectivity_node.setter
     def connectivity_node(self, cn):
@@ -146,7 +150,7 @@ class Terminal(AcDcTerminal):
         return results
 
     def connect(self, connectivity_node: ConnectivityNode):
-        self.connectivity_node = ref(connectivity_node)
+        self.connectivity_node = connectivity_node
 
     def disconnect(self):
         self.connectivity_node = NO_CONNECTIVITY_NODE

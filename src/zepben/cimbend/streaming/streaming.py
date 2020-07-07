@@ -15,9 +15,9 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
-from zepben.cimbend import NetworkService, MetricsStore, CustomerService, DiagramService, ConnectivityNode
+from zepben.cimbend import NetworkService, MetricsStore, CustomerService, DiagramService, ConnectivityNode, Terminal, \
+    PowerTransformerEnd
 from zepben.cimbend.streaming.exceptions import StreamingException
-from zepben.cimbend.network.translator.network_cim2proto import *
 from zepben.protobuf.cp.cp_pb2_grpc import CustomerProducerStub
 from zepben.protobuf.cp.cp_requests_pb2 import CreateCustomerServiceRequest, CompleteCustomerServiceRequest
 from zepben.protobuf.dp.dp_pb2_grpc import DiagramProducerStub
@@ -25,6 +25,7 @@ from zepben.protobuf.dp.dp_requests_pb2 import CreateDiagramServiceRequest, Comp
 from zepben.protobuf.np.np_pb2_grpc import NetworkProducerStub
 from zepben.protobuf.np.np_requests_pb2 import CreateNetworkRequest, CompleteNetworkRequest
 from zepben.cimbend.streaming.network_rpc import rpc_map
+from zepben.cimbend.network.translator.network_cim2proto import *
 
 from dataclasses import dataclass
 
@@ -77,17 +78,21 @@ async def complete_network(stub: NetworkProducerStub):
 class NoSuchRPCException(Exception):
     pass
 
+
 class ProtoAttributeError(Exception):
     pass
 
+
 async def send_network(stub: NetworkProducerStub, network_service: NetworkService):
     """
-    Send a feeder to the connected server. A feeder must start with a feeder circuit :class:`zepben.cimbend.switch.Breaker`.
-
+    Send a feeder to the connected server.
+    Note that ConnectivityNodes are never sent with this method, a Terminal is sent containeing the ConnectivityNode mRID
+    which is the only necessary information to rebuild ConnectivityNodes.
     :param ns: The Network containing all equipment in the feeder.
     :return: A :class:`zepben.cimbend.streaming.streaming.FeederStreamResult
     """
-    for obj in network_service.objects(exc_types=[ConnectivityNode]):
+    # Terminals and PTE's are handled specifically below
+    for obj in network_service.objects(exc_types=[ConnectivityNode, Terminal, PowerTransformerEnd]):
         try:
             pb = obj.to_pb()
         except Exception as e:
@@ -101,6 +106,13 @@ async def send_network(stub: NetworkProducerStub, network_service: NetworkServic
         try:
             attrname = f"{obj.__class__.__name__[:1].lower()}{obj.__class__.__name__[1:]}"
             req = rpc_map[type(pb)][1]()
+            # Terminals are always sent with ConductingEquipment, so if we have a "terminals" field, add them here.
+            if hasattr(req, "terminals"):
+                for _, terminal in obj.terminals:
+                    req.terminals.append(terminal.to_pb())
+            if hasattr(req, "ends"):
+                for _, end in obj.ends:
+                    req.ends.append(end.to_pb())
             getattr(req, attrname).CopyFrom(pb)
         except AttributeError as e:
             raise ProtoAttributeError() from e

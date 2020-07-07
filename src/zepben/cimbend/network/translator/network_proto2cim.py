@@ -29,6 +29,10 @@ from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import \
     AssetOrganisationRole as PBAssetOrganisationRole
 from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner as PBAssetOwner
 from zepben.protobuf.cim.iec61968.assets.Asset_pb2 import Asset as PBAsset
+from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole as  PBPole
+from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight as PBStreetlight
+from zepben.protobuf.cim.iec61968.assets.StreetlightLampKind_pb2 import StreetlightLampKind as PBStreetlightLampKind
+from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure as PBStructure
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location as PBLocation
 from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint as PBPositionPoint
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
@@ -101,6 +105,9 @@ from zepben.cimbend.cim.iec61968.assetinfo import WireMaterialKind
 from zepben.cimbend.cim.iec61968.assets.asset import Asset, AssetContainer
 from zepben.cimbend.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.cimbend.cim.iec61968.assets.asset_organisation_role import AssetOwner, AssetOrganisationRole
+from zepben.cimbend.cim.iec61968.assets.pole import Pole
+from zepben.cimbend.cim.iec61968.assets.streetlight import Streetlight, StreetlightLampKind
+from zepben.cimbend.cim.iec61968.assets.structure import Structure
 from zepben.cimbend.cim.iec61968.common.location import StreetAddress, TownDetail, PositionPoint, Location
 from zepben.cimbend.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.cimbend.cim.iec61968.metering import EndDevice, UsagePoint, Meter
@@ -213,6 +220,24 @@ class NetworkProtoToCim(BaseProtoToCim):
         cim = AssetOwner(pb.mrid())
         self.set_asset_organisation_role(pb.aor, cim)
         self.service.add(cim)
+
+    def add_pole(self, pb: PBPole):
+        cim = Pole(pb.mrid())
+        for mrid in pb.streetlightMRIDs:
+            cim.add_streetlight(self._get(mrid, Streetlight, cim))
+        self.set_structure(pb.st, cim)
+        self.service.add(cim)
+
+    def add_streetlight(self, pb: PBStreetlight):
+        cim = Streetlight(pb.mrid())
+        cim.pole = self._get(pb.poleMRID, Pole, cim)
+        cim.light_rating = pb.lightRating
+        cim.lamp_kind = StreetlightLampKind[PBStreetlightLampKind.Name(pb.lampKind)]
+        self.set_asset(pb.at, cim)
+        self.service.add(cim)
+
+    def set_structure(self, pb: PBStructure, cim: Structure):
+        self.set_asset_container(pb.ac, cim)
 
     # IEC61968 COMMON #
     def add_location(self, pb: PBLocation):

@@ -18,6 +18,8 @@
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo
 from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner
+from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole
+from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter
@@ -54,6 +56,8 @@ rpc_map = {
     CableInfo: ('CreateCableInfo', CreateCableInfoRequest),
     OverheadWireInfo: ('CreateOverheadWireInfo', CreateOverheadWireInfoRequest),
     AssetOwner: ('CreateAssetOwner', CreateAssetOwnerRequest),
+    Pole: ('CreatePole', CreatePoleRequest),
+    Streetlight: ('CreateStreetlight', CreateStreetlightRequest),
     Location: ('CreateLocation', CreateLocationRequest),
     Organisation: ('CreateOrganisation', CreateOrganisationRequest),
     Meter: ('CreateMeter', CreateMeterRequest),
