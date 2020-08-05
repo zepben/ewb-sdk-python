@@ -9,7 +9,7 @@ options:
 
 definitions:
   zep-basic-image: &zep-basic-image
-    image: zepben/pipeline-basic:2.0.0
+    image: zepben/pipeline-basic:3.0.0
 
   steps:
     - step: &run-tests-step
@@ -25,9 +25,20 @@ definitions:
         caches:
           - pip
         script:
+          - python -m pip install pytest
+          - cd test
+          - pytest
+          - cd ..
           - python -m pip install twine
           - python setup.py sdist
           - twine upload --repository-url "$ZEPBEN_PYPI_REPO" -u "$ZEPBEN_PYPI_USERNAME" -p "$ZEPBEN_PYPI_PASSWORD" dist/*
+          - version="$(cat setup.py | grep "version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\(b[0-9]\+\)\?\"" | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+\(b[0-9]\+\)\?")"
+          - artifactId=$(cat setup.py | grep "name=\".*\"" | cut -d "=" -f2 | sed 's/^"\(.*\)".*/\1/')
+          - export artifact="${artifactId}-${version}"
+          - pipe: atlassian/slack-notify:0.3.6
+            variables:
+              WEBHOOK_URL: $SLACK_WEBHOOK
+              MESSAGE: "Python package $artifact is available."
     
     - step: &update-snapshot-version
         <<: *zep-basic-image
@@ -38,19 +49,17 @@ definitions:
 pipelines:
   branches:
     master: 
-      - step: *run-tests-step
       - step: *release-step
       - step: *update-snapshot-version
     LTS/*:
-      - step: *run-tests-step
+      - step: *release-step
+      - step: *update-snapshot-version
+    hotfix/*:
       - step: *release-step
       - step: *update-snapshot-version
   pull-requests:
     '**': 
       - step: *run-tests-step
-  tags:
-    '*.*.*':
-      - step: *release-step
           
   custom:
     create-release:
@@ -58,10 +67,57 @@ pipelines:
           name: Create release
           <<: *zep-basic-image
           script:
-            - release-checks
+            - py-release-checks setup.py
             - py-finalize-version setup.py
+            - version="$(cat setup.py | grep "version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\(b[0-9]\+\)\?\"" | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+\(b[0-9]\+\)\?")"
+            - echo $version >> version.txt
+            - artifactId=$(cat setup.py | grep "name=\".*\"" | cut -d "=" -f2 | sed 's/^"\(.*\)".*/\1/')
+            - echo $artifactId >> artifactid.txt
+          artifacts:
+            - version.txt
+            - artifactid.txt
+
+      - step:
+          name: Package and Upload artifact
+          caches:
+            - pip
+          script:
+            - apt update && apt install -y git
+            - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+            - git fetch --all
+            - git checkout release
+            - python -m pip install pytest
+            - cd test
+            - pytest
+            - cd ..
+            - python -m pip install twine
+            - python setup.py sdist
+            - twine upload --repository-url "$ZEPBEN_PYPI_REPO" -u "$ZEPBEN_PYPI_USERNAME" -p "$ZEPBEN_PYPI_PASSWORD" dist/*
+          after-script:
+            - if [ $BITBUCKET_EXIT_CODE -ne 0 ]; then
+            - git push origin -d release
+            - echo "There was an error in the deploy command above."
+            - else
+            - git remote set-url origin "https://${BB_AUTH_STRING}@bitbucket.org/$BITBUCKET_REPO_FULL_NAME"
+            - git checkout $BITBUCKET_BRANCH
+            - git merge release
+            - git push origin $BITBUCKET_BRANCH
+            - version=$(cat ./version.txt)
+            - artifactId=$(cat ./artifactid.txt)
+            - git tag "v$version"
+            - git push --tags
+            - export artifact="${artifactId}-${version}"
+            - pipe: atlassian/slack-notify:0.3.6
+              variables:
+                WEBHOOK_URL: $SLACK_WEBHOOK
+                MESSAGE: "Python package $artifact is available."
+            - fi
+
+      - step:
+          name: Update to next version
+          <<: *zep-basic-image
+          script:
             - py-update-version --release setup.py
-            - rebase
 
     create-LTS-branch:
       - step:
