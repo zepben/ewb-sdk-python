@@ -27,6 +27,7 @@ setup(
     packages=find_namespace_packages(where="src"),
     install_requires=[
         "protobuf",
+        "requests",
         "zepben.protobuf.cim",
         "zepben.protobuf.np",
         "zepben.protobuf.cp",

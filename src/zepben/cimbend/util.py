@@ -91,6 +91,22 @@ def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -
         return False
 
 
+def safe_remove(collection: Optional[List], obj: IdentifiedObject):
+    """
+    Remove an IdentifiedObject from a collection safely.
+    :raises: ValueError if ``obj`` is not in the collection.
+    :return: The collection if successfully removed or None if after removal the
+    collection was empty.
+    """
+    if collection is not None:
+        collection.remove(obj)
+        if not collection:
+            return None
+        return collection
+    else:
+        raise ValueError(obj)
+
+
 def nlen(sized: Optional[Sized]) -> int:
     """
     Get the len of a nullable sized type.

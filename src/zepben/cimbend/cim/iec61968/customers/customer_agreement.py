@@ -22,7 +22,7 @@ from dataclasses import dataclass, InitVar, field
 from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61968.common.document import Agreement
-from zepben.cimbend.util import nlen, require, contains_mrid, get_by_mrid, ngen
+from zepben.cimbend.util import nlen, get_by_mrid, ngen, safe_remove
 
 __all__ = ["CustomerAgreement"]
 
@@ -35,7 +35,8 @@ class CustomerAgreement(Agreement):
     during charge creation to determine the type of service.
 
     Attributes -
-        _pricingStructures : PricingStructures associated with this CustomerAgreement
+        customer : The ``Customer`` that has this ``CustomerAgreement``.
+        pricing_structures : ``PricingStructures`` associated with this CustomerAgreement
     """
     customer: Optional[Customer] = None
     pricingstructures: InitVar[List[PricingStructure]] = field(default=list())
@@ -75,11 +76,12 @@ class CustomerAgreement(Agreement):
     def add_pricing_structure(self, ps: PricingStructure) -> CustomerAgreement:
         """
         :param ps: the :class:`zepben.cimbend.iec61968.customers.pricing_structure.PricingStructure` to
-        associate with this ``CustomerAgreement``.
+        associate with this ``CustomerAgreement``. Will only add to this object if it is not already associated.
         :return: A reference to this ``CustomerAgreement`` to allow fluent use.
         """
-        require(not contains_mrid(self._pricing_structures, ps.mrid), lambda: f"A PricingStructure with mRID {ps.mrid} "
-                                                                              f"already exists in {str(self)}.")
+        if self._validate_reference(ps, self.get_pricing_structure, "A PricingStructure"):
+            return self
+
         self._pricing_structures = list() if self._pricing_structures is None else self._pricing_structures
         self._pricing_structures.append(ps)
         return self
@@ -88,16 +90,10 @@ class CustomerAgreement(Agreement):
         """
         :param ps: the :class:`zepben.cimbend.iec61968.customers.pricing_structure.PricingStructure` to
         disassociate with this ``CustomerAgreement``.
-        :raises: KeyError if ``role`` was not associated with this ``Asset``.
+        :raises: ValueError if ``ps`` was not associated with this ``CustomerAgreement``.
         :return: A reference to this ``CustomerAgreement`` to allow fluent use.
         """
-        if self._pricing_structures is not None:
-            self._pricing_structures.remove(ps)
-            if not self._pricing_structures:
-                self._pricing_structures = None
-        else:
-            raise KeyError(ps)
-
+        self._pricing_structures = safe_remove(self._pricing_structures, ps)
         return self
 
     def clear_pricing_structures(self) -> CustomerAgreement:

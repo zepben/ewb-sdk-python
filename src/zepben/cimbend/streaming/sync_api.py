@@ -18,6 +18,10 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from __future__ import annotations
+
+from typing import Union, List
+
+from zepben.cimbend.common import BaseService
 from zepben.cimbend.streaming.api import WorkbenchConnection
 from asyncio import get_event_loop
 __all__ = ["SyncWorkbenchConnection"]
@@ -36,16 +40,16 @@ class SyncWorkbenchConnection(WorkbenchConnection):
         ec = get_event_loop().run_until_complete(super().get_whole_network(self.network_stub.getWholeNetwork, Identity(mRID=mrid)))
         return ec
 
-    def send_feeder(self, ns: EquipmentContainer):
+    def send_services(self, services: Union[BaseService, List[BaseService]]):
         """
         Send a feeder to the connected server. A feeder must start with a feeder circuit :class:`zepben.cimbend.switch.Breaker`.
 
-        :param ns: The Network containing all equipment in the feeder.
+        :param services: The services to send. Must extend :class:`zepben.cimbend.BaseService`
         :return: A :class:`zepben.cimbend.streaming.streaming.FeederStreamResult
         :raises: A derivative of :class:`zepben.cimbend.exceptions.MissingReferenceException` if a incorrect reference
                  between types is made.
         """
-        return get_event_loop().run_until_complete(super().send_feeder(ns=ns))
+        return get_event_loop().run_until_complete(super().send(services=services))
 
 
 

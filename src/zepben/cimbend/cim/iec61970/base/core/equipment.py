@@ -34,11 +34,16 @@ class Equipment(PowerSystemResource):
     Abstract class, should only be used through subclasses.
     Any part of a power system that is a physical device, electronic or mechanical.
     Attributes -
-        - in_service : If True, the equipment is in service.
-        - normally_in_service : If True, the equipment is _normally_ in service.
-        - usage_points : List of all usage points associated with this equipment
-        - equipment_containers : Mapping of equipment container types to equipment container ID's this equipment
+        in_service : If True, the equipment is in service.
+        normally_in_service : If True, the equipment is _normally_ in service.
+        usage_points : List of all usage points associated with this equipment
+        equipment_containers : Mapping of equipment container types to equipment container ID's this equipment
                                  is associated with.
+        operational_restrictions : The :class:`zepben.cimbend.cim.iec61968.operations.operational_restriction.OperationalRestriction`s
+                                   associated with this ``Equipment``.
+        current_feeders : The current :class:`zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder`s associated
+                          with this ``Equipment``. Current feeders
+
     """
 
     in_service: bool = True
@@ -61,9 +66,8 @@ class Equipment(PowerSystemResource):
             self.add_usage_point(up)
         for container in equipmentcontainers:
             self.add_container(container)
-        if operationalrestrictions:
-            for restriction in operationalrestrictions:
-                self.add_restriction(restriction)
+        for restriction in operationalrestrictions:
+            self.add_restriction(restriction)
         for cf in currentfeeders:
             self.add_current_feeder(cf)
 

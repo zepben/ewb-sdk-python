@@ -23,7 +23,7 @@ from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.cimbend.cim.iec61968.customers.customer_kind import CustomerKind
-from zepben.cimbend.util import nlen, get_by_mrid, require, contains_mrid, ngen
+from zepben.cimbend.util import nlen, get_by_mrid, ngen, safe_remove
 
 __all__ = ["Customer"]
 
@@ -35,6 +35,7 @@ class Customer(OrganisationRole):
 
     Attributes -
         kind : Kind of customer
+        agreements : The ``CustomerAgreements`` this ``Customer`` has.
         numEndDevices : The number of end devices associated with this customer
     """
     kind: CustomerKind = CustomerKind.UNKNOWN
@@ -74,11 +75,13 @@ class Customer(OrganisationRole):
     def add_agreement(self, customer_agreement: CustomerAgreement) -> Customer:
         """
         Add a ``CustomerAgreement`` to this ``Customer``.
-        :param customer_agreement: the :class:`customer_agreement.CustomerAgreement` to associate with this ``Customer``.
+        :param customer_agreement: The :class:`customer_agreement.CustomerAgreement` to associate with this ``Customer``.
+                                   Will only add to this object if it is not already associated.
         :return: A reference to this ``Customer`` to allow fluent use.
         """
-        require(not contains_mrid(self._customer_agreements, customer_agreement.mrid),
-                lambda: f"A CustomerAgreement with mRID {customer_agreement.mrid} already exists in {str(self)}.")
+        if self._validate_reference(customer_agreement, self.get_agreement, "A CustomerAgreement"):
+            return self
+
         self._customer_agreements = list() if self._customer_agreements is None else self._customer_agreements
         self._customer_agreements.append(customer_agreement)
         return self
@@ -86,17 +89,13 @@ class Customer(OrganisationRole):
     def remove_agreement(self, customer_agreement: CustomerAgreement) -> Customer:
         """
         Disassociate a ``CustomerAgreement`` from this ``Customer``.
+
         :param customer_agreement: the :class:`customer_agreement.CustomerAgreement` to
         disassociate with this ``Customer``.
-        :raises: KeyError if ``customer_agreement`` was not associated with this ``Customer``.
+        :raises: ValueError if ``customer_agreement`` was not associated with this ``Customer``.
+        :return: A reference to this ``Customer`` to allow fluent use.
         """
-        if self._customer_agreements is not None:
-            self._customer_agreements.remove(customer_agreement)
-            if not self._customer_agreements:
-                self._customer_agreements = None
-        else:
-            raise KeyError(customer_agreement)
-
+        self._customer_agreements = safe_remove(self._customer_agreements, customer_agreement)
         return self
 
     def clear_agreements(self) -> Customer:

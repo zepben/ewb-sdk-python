@@ -37,6 +37,7 @@ class StreetlightLampKind(Enum):
     def short_name(self):
         return str(self)[20:]
 
+
 @dataclass
 class Streetlight(Asset):
     """

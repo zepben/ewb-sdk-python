@@ -21,8 +21,9 @@ from __future__ import annotations
 from dataclasses import dataclass, InitVar, field
 from typing import Optional, Generator, List
 
+from zepben.cimbend.cim.iec61968.common.location import Location
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.cimbend.util import get_by_mrid, nlen, require, contains_mrid, ngen
+from zepben.cimbend.util import get_by_mrid, nlen, ngen, safe_remove
 
 __all__ = ["Asset", "AssetContainer"]
 
@@ -39,6 +40,7 @@ class Asset(IdentifiedObject):
         _organisation_roles: The :class:`asset_organisation_role.AssetOrganisationRole`s for this ``Asset``
     """
 
+    location: Optional[Location] = None
     organisationroles: InitVar[List[AssetOrganisationRole]] = field(default=list())
     _organisation_roles: Optional[List[AssetOrganisationRole]] = field(init=False, default=None)
 
@@ -76,29 +78,27 @@ class Asset(IdentifiedObject):
 
     def add_organisation_role(self, role: AssetOrganisationRole) -> Asset:
         """
-        :param role: the :class:`zepben.cimbend.iec61968.assets.asset_organisation_role.AssetOrganisationRole` to
-        associate with this ``Asset``.
+        :param role: The :class:`zepben.cimbend.iec61968.assets.asset_organisation_role.AssetOrganisationRole` to
+        associate with this ``Asset``. Will only add to this object if it is not already associated.
         :return: A reference to this ``Asset`` to allow fluent use.
         """
-        require(not contains_mrid(self._organisation_roles, role.mrid),
-                lambda: f"An organisation role with mRID {role.mrid} already exists in {str(self)}.")
+        if self._validate_reference(role, self.get_organisation_role, "An AssetOrganisationRole"):
+            return self
+
         self._organisation_roles = list() if self._organisation_roles is None else self._organisation_roles
         self._organisation_roles.append(role)
         return self
 
     def remove_organisation_role(self, role: AssetOrganisationRole) -> Asset:
         """
+        Disassociate an ``AssetOrganisationRole`` from this ``Asset``.
+
         :param role: the :class:`zepben.cimbend.iec61968.assets.asset_organisation_role.AssetOrganisationRole` to
         disassociate with this ``Asset``.
-        :raises: KeyError if ``role`` was not associated with this ``Asset``.
+        :raises: ValueError if ``role`` was not associated with this ``Asset``.
+        :return: A reference to this ``Asset`` to allow fluent use.
         """
-        if self._organisation_roles is not None:
-            self._organisation_roles.remove(role)
-            if not self._organisation_roles:
-                self._organisation_roles = None
-        else:
-            raise KeyError(role)
-
+        self._organisation_roles = safe_remove(self._organisation_roles, role)
         return self
 
     def clear_organisation_roles(self) -> Asset:

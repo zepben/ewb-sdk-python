@@ -22,7 +22,7 @@ from dataclasses import dataclass, field, InitVar
 from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61968.common.document import Document
-from zepben.cimbend.util import require, contains_mrid, get_by_mrid, nlen, ngen
+from zepben.cimbend.util import require, contains_mrid, get_by_mrid, nlen, ngen, safe_remove
 
 __all__ = ["OperationalRestriction"]
 
@@ -38,6 +38,8 @@ class OperationalRestriction(Document):
      use their asset systems to identify all the installed devices of the same manufacturer's type.
      They then apply operational restrictions in the operational systems to warn operators of potential problems.
      After appropriate inspection and maintenance, the operational restrictions may be removed.
+     Attributes -
+        equipment : The :class:`zepben.cimbend.cim.iec61970.base.core.equipment.Equipment`` associated with this ``OperationalRestriction``
     """
     equipment_: InitVar[List[Equipment]] = field(default=list())
     _equipment: Optional[List[Equipment]] = field(init=False, default=None)
@@ -58,7 +60,7 @@ class OperationalRestriction(Document):
     @property
     def equipment(self) -> Generator[Equipment, None, None]:
         """
-        :return: Generator over the ``Equipment``s of this ``OperationalRestriction``.
+        :return: Generator over the ``Equipment`` of this ``OperationalRestriction``.
         """
         return ngen(self._equipment)
 
@@ -75,12 +77,14 @@ class OperationalRestriction(Document):
 
     def add_equipment(self, equipment: Equipment) -> OperationalRestriction:
         """
-        :param equipment: the :class:`zepben.cimbend.iec61970.base.core.equipment.Equipment` to
-        associate with this ``OperationalRestriction``.
+        Add an ``Equipment`` to this ``OperationalRestriction``
+
+        :param equipment: The :class:`zepben.cimbend.iec61970.base.core.equipment.Equipment` to
+        associate with this ``OperationalRestriction``. Will only add to this object if it is not already associated.
         :return: A reference to this ``OperationalRestriction`` to allow fluent use.
         """
-        require(not contains_mrid(self._equipment, equipment.mrid), lambda: f"An Equipment with mRID {equipment.mrid}"
-                                                                            f" already exists in {str(self)}.")
+        if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
+            return self
         self._equipment = list() if self._equipment is None else self._equipment
         self._equipment.append(equipment)
         return self
@@ -89,16 +93,10 @@ class OperationalRestriction(Document):
         """
         :param equipment: the :class:`zepben.cimbend.iec61970.base.core.equipment.Equipment` to
         disassociate with this ``OperationalRestriction``.
-        :raises: KeyError if ``equipment`` was not associated with this ``OperationalRestriction``.
+        :raises: ValueError if ``equipment`` was not associated with this ``OperationalRestriction``.
         :return: A reference to this ``OperationalRestriction`` to allow fluent use.
         """
-        if self._equipment is not None:
-            self._equipment.remove(equipment)
-            if not self._equipment:
-                self._equipment = None
-        else:
-            raise KeyError(equipment)
-
+        self._equipment = safe_remove(self._equipment, equipment)
         return self
 
     def clear_equipment(self) -> OperationalRestriction:

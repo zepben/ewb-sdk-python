@@ -22,7 +22,7 @@ from typing import Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.cim.iec61970.base.core.terminal import Terminal
-from zepben.cimbend.util import get_by_mrid, contains_mrid, require
+from zepben.cimbend.util import get_by_mrid
 
 __all__ = ["ConnectivityNode"]
 
@@ -32,7 +32,7 @@ class ConnectivityNode(IdentifiedObject):
     """
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.
     Attributes -
-        _terminals : The :class:`terminal.Terminal`s attached to this ``ConnectivityNode``
+        terminals : The :class:`terminal.Terminal`s attached to this ``ConnectivityNode``
     """
     terminals_: InitVar[List[Terminal]] = field(default=list())
     _terminals: List[Terminal] = field(init=False, default_factory=list)
@@ -74,16 +74,20 @@ class ConnectivityNode(IdentifiedObject):
     def add_terminal(self, terminal: Terminal) -> ConnectivityNode:
         """
         Add a :class:`terminal.Terminal` to this ``ConnectivityNode``
-        :param terminal: The ``Terminal`` to add
+
+        :param terminal: The ``Terminal`` to add. Will only add to this object if it is not already associated.
         :return: This ``ConnectivityNode`` for fluent use.
         """
-        require(not contains_mrid(self._terminals, terminal.mrid),
-                lambda: f"A Terminal with mRID {terminal.mrid} already exists in {str(self)}.")
+        if self._validate_reference(terminal, self.get_terminal_by_mrid, "A Terminal"):
+            return self
+
         self._terminals.append(terminal)
         return self
 
     def remove_terminal(self, terminal: Terminal) -> ConnectivityNode:
         """
+        Remove ``terminal`` from this ``ConnectivityNode``.
+
         :param terminal: the :class:`zepben.cimbend.iec61970.base.core.terminal.Terminal` to
         disassociate from this ``ConnectivityNode``.
         :raises: ValueError if ``terminal`` was not associated with this ``ConnectivityNode``.

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from typing import List, Union
 
+from zepben.cimbend.common import BaseService
 from zepben.cimbend.network import NetworkService
 from zepben.cimbend.customer import CustomerService
 from zepben.cimbend.diagram import DiagramService

@@ -22,7 +22,7 @@ from dataclasses import dataclass, InitVar, field
 from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61968.common.document import Document
-from zepben.cimbend.util import require, contains_mrid, get_by_mrid, nlen, ngen
+from zepben.cimbend.util import require, contains_mrid, get_by_mrid, nlen, ngen, safe_remove
 
 __all__ = ["PricingStructure"]
 
@@ -74,30 +74,28 @@ class PricingStructure(Document):
 
     def add_tariff(self, tariff: Tariff) -> PricingStructure:
         """
+        Add a Tariff to this PricingStructure.
+
         :param tariff: the :class:`zepben.cimbend.iec61968.customers.tariff.Tariff` to
-        associate with this ``PricingStructure``.
+        associate with this ``PricingStructure``. Will only add to this object if it is not already associated.
         :return: A reference to this ``PricingStructure`` to allow fluent use.
         """
-        require(not contains_mrid(self._tariffs, tariff.mrid), lambda: f"A PricingStructure with mRID {tariff.mrid} "
-                                                                       f"already exists in {str(self)}.")
+        if self._validate_reference(tariff, self.get_tariff, "A Tariff"):
+            return self
         self._tariffs = list() if self._tariffs is None else self._tariffs
         self._tariffs.append(tariff)
         return self
 
     def remove_tariff(self, tariff: Tariff) -> PricingStructure:
         """
+        Remove a tariff from this PricingStructure
+
         :param tariff: the :class:`zepben.cimbend.iec61968.customers.tariff.Tariff` to
         disassociate with this ``PricingStructure``.
-        :raises: KeyError if ``tariff`` was not associated with this ``PricingStructure``.
+        :raises: ValueError if ``tariff`` was not associated with this ``PricingStructure``.
         :return: A reference to this ``PricingStructure`` to allow fluent use.
         """
-        if self._tariffs is not None:
-            self._tariffs.remove(tariff)
-            if not self._tariffs:
-                self._tariffs = None
-        else:
-            raise KeyError(tariff)
-
+        self._tariffs = safe_remove(self._tariffs, tariff)
         return self
 
     def clear_tariffs(self) -> PricingStructure:

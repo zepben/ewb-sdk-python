@@ -21,7 +21,7 @@ from dataclasses import dataclass, InitVar, field
 from typing import List, Optional, Generator, Tuple
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.cimbend.util import require, nlen, ngen
+from zepben.cimbend.util import require, nlen, ngen, safe_remove
 
 __all__ = ["PositionPoint", "Location", "StreetAddress", "TownDetail"]
 
@@ -44,9 +44,9 @@ class PositionPoint(object):
     y_position: float = 0.0
 
     def __post_init__(self):
-        require(-90.0 <= self.y_position <= 90,
+        require(-90.0 <= self.y_position <= 90.0,
                 lambda: f"Latitude is out of range. Expected -90 to 90, got {self.y_position}.")
-        require(-180.0 <= self.x_position <= 180,
+        require(-180.0 <= self.x_position <= 180.0,
                 lambda: f"Longitude is out of range. Expected -180 to 180, got {self.x_position}.")
 
     def __str__(self):
@@ -90,7 +90,7 @@ class StreetAddress(object):
 
     Attributes -
         postal_code : Postal code for the address.
-        town_detail : TownDetail
+        town_detail : Optional ``TownDetail`` for this address.
     """
     postal_code: str = ""
     town_detail: Optional[TownDetail] = None
@@ -167,17 +167,11 @@ class Location(IdentifiedObject):
     def remove_point(self, point: PositionPoint) -> Location:
         """
         Remove a ``PositionPoint`` from this ``Location``
-        :param point:
+        :param point: The ``PositionPoint`` to remove.
         :raises: ValueError if ``point`` was not part of this ``Location``
-        :return: True if the point was removed, False otherwise.
+        :return: A reference to this ``Location`` to allow fluent use.
         """
-        if self._position_points is not None:
-            self._position_points.remove(point)
-            if not self._position_points:
-                self._position_points = None
-        else:
-            raise KeyError(point)
-
+        self._position_points = safe_remove(self._position_points, point)
         return self
 
     def clear_points(self) -> Location:

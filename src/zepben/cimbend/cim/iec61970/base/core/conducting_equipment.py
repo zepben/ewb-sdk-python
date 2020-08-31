@@ -119,11 +119,13 @@ class ConductingEquipment(Equipment):
         :param sequence_number: The ``sequenceNumber`` for ``terminal``. You should aim to always insert ``Terminal``s
         in order.
         :return: A reference to this ``ConductingEquipment`` to allow fluent use.
+        :raises: ``ValueError`` if ``terminal`` cannot be added to
         """
+        if self._validate_terminal(terminal):
+            return self
+
         if sequence_number is None:
             sequence_number = self.num_terminals
-        require(terminal.conducting_equipment is self,
-                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {self}.")
         require(not contains_mrid(self._terminals, terminal.mrid),
                 lambda: f"A Terminal with mRID {terminal.mrid} already exists in {str(self)}.")
         require(0 <= sequence_number <= self.num_terminals,
@@ -166,9 +168,21 @@ class ConductingEquipment(Equipment):
         """
         return self.num_cores > other.num_cores
 
-    @property
-    def num_cores(self):
-        return self.__num_cores
+    def _validate_terminal(self, terminal: Terminal) -> bool:
+        """
+        Validate a terminal against this ``ConductingEquipment``'s ``Terminal``s.
+        :param terminal: The ``Terminal`` to validate.
+        :return: True if ``terminal`` is already associated with this ``ConductingEquipment``,
+                 otherwise False.
+        :raises: ``ValueError`` if ``terminal``s ``conducting_equipment`` is not this ``ConductingEquipment``,
+                 or if this ``ConductingEquipment`` has a different ``Terminal`` with the same mRID.
+        """
+        if self._validate_reference(terminal, self.get_terminal_by_mrid, "A Terminal"):
+            return True
+
+        require(terminal.conducting_equipment is self,
+                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {self}.")
+        return False
 
     def is_metered(self):
         """

@@ -21,10 +21,9 @@ from dataclasses import dataclass, InitVar, field
 from typing import List, Optional, Generator
 
 from zepben.cimbend.cim.iec61968.assets.structure import Structure
+from zepben.cimbend.util import get_by_mrid, ngen, nlen, safe_remove
 
 __all__ = ["Pole"]
-
-from zepben.cimbend.util import require, contains_mrid, get_by_mrid, ngen, nlen
 
 
 @dataclass
@@ -65,11 +64,12 @@ class Pole(Structure):
     def add_streetlight(self, streetlight: Streetlight) -> Pole:
         """
         :param streetlight: the :class:`zepben.cimbend.iec61968.assets.streetlight.Streetlight` to
-        associate with this ``Pole``.
+        associate with this ``Pole``. Will only add to this object if it is not already associated.
         :return: A reference to this ``Pole`` to allow fluent use.
         """
-        require(not contains_mrid(self._streetlights, streetlight.mrid),
-                lambda: f"A Streetlight with mRID {streetlight.mrid} already exists in {str(self)}.")
+        if self._validate_reference(streetlight, self.get_streetlight, "A Streetlight"):
+            return self
+
         self._streetlights = list() if self._streetlights is None else self._streetlights
         self._streetlights.append(streetlight)
         return self
@@ -78,15 +78,10 @@ class Pole(Structure):
         """
         :param streetlight: the :class:`zepben.cimbend.iec61968.assets.streetlight.Streetlight` to
         disassociate from this ``Pole``.
-        :raises: KeyError if ``streetlight`` was not associated with this ``Pole``.
+        :raises: ValueError if ``streetlight`` was not associated with this ``Pole``.
+        :return: A reference to this ``Pole`` to allow fluent use.
         """
-        if self._streetlights is not None:
-            self._streetlights.remove(streetlight)
-            if not self._streetlights:
-                self._streetlights = None
-        else:
-            raise KeyError(streetlight)
-
+        self._streetlights = safe_remove(self._streetlights, streetlight)
         return self
 
     def clear_streetlights(self) -> Pole:

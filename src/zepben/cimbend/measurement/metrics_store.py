@@ -17,8 +17,6 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from zepben.cimbend.cim.iec61968.metering import MeterReading
-
 __all__ = ["MetricsStore"]
 
 
@@ -40,30 +38,12 @@ class MetricsStore(object):
         """
         return timestamp - (timestamp % self.bucket_duration)
 
-    def __iter__(self):
-        # TODO: this is a bit broken and doesn't make sense.... iter should return self, and next should do iteration
-        for bucket_time in self.buckets:
-            for meter, typ in self.store[bucket_time].items():
-                for readings in typ.values():
-                    mr = MeterReading(meter=meter, readings=readings)
-                    yield mr
 
     def __next__(self):
         for r in self.ascending_iteration():
             yield r
 
         raise StopIteration()
-
-    def get_readings(self, reading_type):
-        """
-        At the moment we simply iterate over each bucket, meter, and reading type, and return
-        MeterReadings with a single type of reading
-        """
-        for bucket_time in self.buckets:
-            for meter, types in self.store[bucket_time].items():
-                # TODO: add try/except keyerror for reading_type
-                mr = MeterReading(meter=meter, readings=types[reading_type])
-                yield mr
 
     @property
     def buckets(self):

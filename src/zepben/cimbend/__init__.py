@@ -29,3 +29,4 @@ from zepben.cimbend.customer import *
 from zepben.cimbend.measurement import *
 from zepben.cimbend.common import *
 from zepben.cimbend.exceptions import *
+from zepben.cimbend.common import resolver

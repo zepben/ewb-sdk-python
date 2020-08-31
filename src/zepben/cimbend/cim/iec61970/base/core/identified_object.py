@@ -21,15 +21,19 @@ import logging
 # from zepben.cimbend.util import snake2camelback, iter_but_not_str
 from abc import ABCMeta
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Callable, List, Optional
 from uuid import uuid4, UUID
 
 __all__ = ["IdentifiedObject"]
 
 # Global state for ignored attributes - used when building protobuf args. Any keys in here will not be included
+from zepben.cimbend.util import require
+
 _ignored_attribute_cache = set()
 
 logger = logging.getLogger(__name__)
+
+
 
 
 @dataclass
@@ -71,6 +75,22 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     @property
     def has_diagram_objects(self):
         return self.num_diagram_objects > 0
+
+    def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject], type_descr: str) -> bool:
+        """
+        Validate whether a given reference exists to ``other`` using the provided getter function.
+        :param other: The object to look up with the getter using its mRID.
+        :param getter: A function that takes an mRID and returns an object if it exists, and throws a ``KeyError`` if it couldn't be found.
+        :param type_descr: The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
+        :return: True if ``other`` was retrieved with ``getter`` and was equivalent, False otherwise.
+        :raises: ValueError if the object retrieved from ``getter`` is not ``other``.
+        """
+        try:
+            get_result = getter(other.mrid)
+            require(get_result is other, lambda: f"{type_descr} with mRID {other.mrid} already exists in {str(self)}")
+            return True
+        except KeyError:
+            return False
 
     # @classmethod
     # def from_pbs(cls, pb, *args, **kwargs):
