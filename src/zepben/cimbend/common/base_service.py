@@ -47,6 +47,10 @@ class BaseService(object, metaclass=ABCMeta):
                 return True
         return False
 
+    def unresolved_references(self):
+        for ur in self._unresolved_references:
+            yield ur
+
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
             generate_error: Callable[[str, str], str] = lambda mrid,
                                                                typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
