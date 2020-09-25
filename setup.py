@@ -28,11 +28,7 @@ setup(
     install_requires=[
         "protobuf",
         "requests",
-        "zepben.protobuf.cim",
-        "zepben.protobuf.np",
-        "zepben.protobuf.nc",
-        "zepben.protobuf.cp",
-        "zepben.protobuf.dp",
+        "zepben.protobuf",
         "python-jose-cryptodome",
     ],
     extras_require={

@@ -43,13 +43,4 @@ class PowerSystemResource(IdentifiedObject):
 
     location: Optional[Location] = None
     asset_info: Optional[AssetInfo] = None
-    num_controls: int = 0
-    num_measurements: int = 0
 
-    @property
-    def has_controls(self):
-        return self.num_controls > 0
-
-    @property
-    def has_measurements(self):
-        return self.num_measurements > 0

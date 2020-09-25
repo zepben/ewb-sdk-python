@@ -368,13 +368,13 @@ class ProtoAttributeError(Exception):
 async def send_network(stub: NetworkProducerStub, network_service: NetworkService):
     """
     Send a feeder to the connected server.
-    Note that ConnectivityNodes are never sent with this method, a Terminal is sent containeing the ConnectivityNode mRID
+    Note that ConnectivityNodes are never sent with this method, a Terminal is sent containing the ConnectivityNode mRID
     which is the only necessary information to rebuild ConnectivityNodes.
     :param ns: The Network containing all equipment in the feeder.
     :return: A :class:`zepben.cimbend.streaming.streaming.FeederStreamResult
     """
     # Terminals and PTE's are handled specifically below
-    for obj in network_service.objects(exc_types=[ConnectivityNode, Terminal, PowerTransformerEnd]):
+    for obj in network_service.objects():
         try:
             pb = obj.to_pb()
         except Exception as e:
@@ -388,13 +388,6 @@ async def send_network(stub: NetworkProducerStub, network_service: NetworkServic
         try:
             attrname = f"{obj.__class__.__name__[:1].lower()}{obj.__class__.__name__[1:]}"
             req = rpc_map[type(pb)][1]()
-            # Terminals are always sent with ConductingEquipment, so if we have a "terminals" field, add them here.
-            if hasattr(req, "terminals"):
-                for _, terminal in obj.terminals:
-                    req.terminals.append(terminal.to_pb())
-            if hasattr(req, "ends"):
-                for _, end in obj.ends:
-                    req.ends.append(end.to_pb())
             getattr(req, attrname).CopyFrom(pb)
         except AttributeError as e:
             raise ProtoAttributeError() from e

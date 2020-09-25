@@ -355,9 +355,7 @@ def get_powersystemresource(cim: PowerSystemResource) -> PBPowerSystemResource:
     """
     return PBPowerSystemResource(io=get_identifiedobject(cim),
                                  assetInfoMRID=mrid_or_empty(cim.asset_info),
-                                 locationMRID=mrid_or_empty(cim.location),
-                                 numControls=cim.num_controls,
-                                 numMeasurements=cim.num_measurements)
+                                 locationMRID=mrid_or_empty(cim.location))
 
 
 def get_site(cim: Site) -> PBSite:

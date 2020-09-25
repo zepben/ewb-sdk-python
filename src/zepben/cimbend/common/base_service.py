@@ -53,7 +53,7 @@ class BaseService(object, metaclass=ABCMeta):
 
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
             generate_error: Callable[[str, str], str] = lambda mrid,
-                                                               typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
+            typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
         """
         Get an object associated with this service.
 
@@ -152,7 +152,8 @@ class BaseService(object, metaclass=ABCMeta):
                 if from_.mrid in self._unresolved_references:
                     refs = self._unresolved_references[from_.mrid]
                     #
-                    self._unresolved_references[from_.mrid] = [ref for ref in refs if not ref.to_mrid == from_.mrid and not ref.resolver == reverse_resolver]
+                    self._unresolved_references[from_.mrid] = [ref for ref in refs if
+                                                               not ref.to_mrid == from_.mrid and not ref.resolver == reverse_resolver]
 
                     if not self._unresolved_references[from_.mrid]:
                         del self._unresolved_references[from_.mrid]
@@ -170,7 +171,9 @@ class BaseService(object, metaclass=ABCMeta):
         :param bound_resolver: The ``BoundReferenceResolver`` to retrieve unresolved references for.
         :return: Set of mRIDs that have unresolved references.
         """
-        return set(chain(*[[ref.to_mrid for ref in refs if ref.from_ref == bound_resolver.from_obj and ref.resolver == bound_resolver.resolver] for refs in self._unresolved_references.values()]))
+        return set(chain(*[[ref.to_mrid for ref in refs if
+                            ref.from_ref == bound_resolver.from_obj and ref.resolver == bound_resolver.resolver] for
+                           refs in self._unresolved_references.values()]))
 
     def remove(self, identified_object: IdentifiedObject) -> bool:
         """
@@ -182,7 +185,8 @@ class BaseService(object, metaclass=ABCMeta):
         del self._objectsByType[identified_object.__class__][identified_object.mrid]
         return True
 
-    def objects(self, obj_type: Optional[type] = None, exc_types: Optional[List[type]] = None) -> Generator[IdentifiedObject, None, None]:
+    def objects(self, obj_type: Optional[type] = None, exc_types: Optional[List[type]] = None) -> Generator[
+        IdentifiedObject, None, None]:
         """
         Generator for the objects in this service of type ``obj_type``.
         :param obj_type: The type of object to yield. If this is a base class it will yield all subclasses.
