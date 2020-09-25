@@ -38,8 +38,8 @@ from zepben.cimbend.cim.iec61968.customers import Tariff
 __all__ = ["set_agreement", "CustomerProtoToCim"]
 
 
-def set_agreement(pb: PBAgreement, cim: Agreement):
-    set_document(pb.doc, cim)
+def set_agreement(pb: PBAgreement, cim: Agreement, service: BaseService):
+    set_document(pb.doc, cim, service)
 
 
 @dataclass
@@ -57,19 +57,19 @@ class CustomerProtoToCim(BaseProtoToCim):
     def add_customeragreement(self, pb: PBCustomerAgreement):
         customer = self._get(pb.customerMRID, Customer, pb.name_and_mrid())
         cim = CustomerAgreement(customer, pb.mrid())
-        set_agreement(pb.agr, cim)
+        set_agreement(pb.agr, cim, self.service)
         for mrid in pb.pricingStructureMRIDs:
             cim.add_pricing_structure(self._get(mrid, PricingStructure, cim))
         self.service.add(cim)
 
     def add_pricingstructure(self, pb: PBPricingStructure):
         cim = PricingStructure(pb.mrid())
-        set_document(pb.doc, cim)
+        set_document(pb.doc, cim, self.service)
         for mrid in pb.tariffMRIDs:
             cim.add_tariff(self._get(mrid, Tariff, cim))
         self.service.add(cim)
 
     def add_tariff(self, pb: PBTariff):
         cim = Tariff(pb.mrid())
-        set_document(pb.doc, cim)
+        set_document(pb.doc, cim, self.service)
         self.service.add(cim)

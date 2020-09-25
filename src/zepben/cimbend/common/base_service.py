@@ -48,7 +48,7 @@ class BaseService(object, metaclass=ABCMeta):
         return False
 
     def unresolved_references(self):
-        for ur in self._unresolved_references:
+        for ur in self._unresolved_references.copy():
             yield ur
 
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
@@ -151,6 +151,7 @@ class BaseService(object, metaclass=ABCMeta):
                 # Clean up any reverse unresolved references now that the reference has been resolved
                 if from_.mrid in self._unresolved_references:
                     refs = self._unresolved_references[from_.mrid]
+                    #
                     self._unresolved_references[from_.mrid] = [ref for ref in refs if not ref.to_mrid == from_.mrid and not ref.resolver == reverse_resolver]
 
                     if not self._unresolved_references[from_.mrid]:
@@ -159,6 +160,7 @@ class BaseService(object, metaclass=ABCMeta):
         except KeyError:
             urefs = self._unresolved_references.get(to_mrid, list())
             urefs.append(UnresolvedReference(from_, to_mrid, resolver))
+            #
             self._unresolved_references[to_mrid] = urefs
             return False
 

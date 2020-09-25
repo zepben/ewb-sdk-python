@@ -66,3 +66,9 @@ When receiving data from a Zepben service, each class has a `from_pb()` function
         return ACLineSegment.from_pb(pb_acls)
         
 See the specific service you are utilising for more detailed documentation on receiving messages.
+
+# Testing #
+
+Install pytest: `pip install pytest`
+Run the tests: `python -m pytest`
+Run only one test file: `python -m pytest test/test_abc.py`

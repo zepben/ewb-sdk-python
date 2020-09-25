@@ -16,26 +16,14 @@ You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import zepben.cimbend.streaming.streaming as streaming
+import asyncio
+import grpc 
 
-from setuptools import setup, find_namespace_packages
+class TestStreaming(object):
 
-test_deps = ["pytest", "pytest-asyncio"]
-setup(
-    name="zepben.cimbend",
-    version="0.2.0b1",
-    package_dir={"": "src"},
-    packages=find_namespace_packages(where="src"),
-    install_requires=[
-        "protobuf",
-        "requests",
-        "zepben.protobuf.cim",
-        "zepben.protobuf.np",
-        "zepben.protobuf.nc",
-        "zepben.protobuf.cp",
-        "zepben.protobuf.dp",
-        "python-jose-cryptodome",
-    ],
-    extras_require={
-        "test": test_deps,
-    }
-)
+    def test_retrieve_network(self):
+        """Test retrieve_network"""
+        channel = grpc.insecure_channel('localhost:50051')
+        network = asyncio.run(streaming.retrieve_network(channel))
+        #print(network)

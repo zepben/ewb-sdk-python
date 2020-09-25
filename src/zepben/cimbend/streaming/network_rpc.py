@@ -52,6 +52,13 @@ from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTap
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser
 from zepben.protobuf.np.np_requests_pb2 import *
 
+# TODO: remove this!
+def CreatePoleRequest():
+    pass
+
+def CreateStreetlightRequest():
+    pass
+
 rpc_map = {
     CableInfo: ('CreateCableInfo', CreateCableInfoRequest),
     OverheadWireInfo: ('CreateOverheadWireInfo', CreateOverheadWireInfoRequest),

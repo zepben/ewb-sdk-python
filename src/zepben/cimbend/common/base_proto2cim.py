@@ -31,6 +31,7 @@ from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from typing import Any
+from zepben.cimbend.common import resolver
 
 __all__ = ["set_identifiedobject", "BaseProtoToCim", "set_document"]
 
@@ -47,21 +48,22 @@ __all__ = ["set_identifiedobject", "BaseProtoToCim", "set_document"]
 
 
 # IEC61970 CORE #
-def set_identifiedobject(pb: PBIdentifiedObject, cim: IdentifiedObject):
-    cim.mrid = pb.mrid
+def set_identifiedobject(pb: PBIdentifiedObject, cim: IdentifiedObject, service: BaseService):
+    cim.mrid = pb.mRID
     cim.name = pb.name
     cim.num_diagram_objects = pb.numDiagramObjects
+    service.add(cim)
 
 
 # IEC61968 COMMON #
-def set_document(pb: PBDocument, cim: Document):
-    set_identifiedobject(pb.io, cim)
+def set_document(pb: PBDocument, cim: Document, service: BaseService):
     cim.title = pb.title
     cim.created_date_time = pb.createdDateTime.ToDatetime()
     cim.author_name = pb.authorName
     cim.type = pb.type
     cim.status = pb.status
     cim.comment = pb.comment
+    set_identifiedobject(pb.io, cim, service)
 
 
 @dataclass
@@ -94,15 +96,6 @@ class BaseProtoToCim(object, metaclass=ABCMeta):
     #                 # non-repeated scalar
     #                 set_field(cim, pb, field)
 
-    def add_organisation(self, pb: PBOrganisation):
-        cim = Organisation()
-        set_identifiedobject(pb.io, cim)
-        return self.service.add(cim)
-
-    def set_organisation_role(self, pb: PBOrganisationRole, cim: OrganisationRole):
-        set_identifiedobject(pb.io, cim)
-        cim.organisation = self._ensure_get(pb.organisationMRID, Organisation, cim)
-
     def _gen_error(self, mrid: str, _type: str, referent: Any) -> str:
         """
 
@@ -120,3 +113,16 @@ class BaseProtoToCim(object, metaclass=ABCMeta):
     def _ensure_get(self, mrid: str, type_: type, referent):
         return self.service.ensure_get(mrid, type_, generate_error=lambda rid, t: self._gen_error(rid, t, referent))
 
+# Extensions
+
+def organisation_to_cim(pb: PBOrganisation, service: BaseService):
+    cim = Organisation()
+    set_identifiedobject(pb.io, cim, service)
+    return service.add(cim)
+
+def organisationrole_to_cim(pb: PBOrganisationRole, cim: OrganisationRole, service: BaseService):
+    cim.organisation = service.resolve_or_defer_reference(resolver.organisation(cim), pb.organisationMRID)
+    set_identifiedobject(pb.io, cim, service)
+
+PBOrganisation.to_cim = organisation_to_cim
+PBOrganisationRole.to_cim = organisationrole_to_cim

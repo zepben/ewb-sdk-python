@@ -227,7 +227,7 @@ def conducting_equipment(terminal: Terminal) -> BoundReferenceResolver:
     return BoundReferenceResolver(terminal, term_to_ce_resolver, cond_equip_to_terminal_resolver)
 
 
-def connectivity_rode(terminal: Terminal) -> BoundReferenceResolver:
+def connectivity_node(terminal: Terminal) -> BoundReferenceResolver:
     return BoundReferenceResolver(terminal, term_to_cn_resolver, conn_node_to_term_resolver)
 
 

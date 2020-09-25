@@ -103,7 +103,7 @@ ConductingEquipment.mrid = lambda self: self.eq.mrid()
 ConnectivityNode.mrid = lambda self: self.io.mRID
 ConnectivityNodeContainer.mrid = lambda self: self.psr.mrid()
 Equipment.mrid = lambda self: self.psr.mrid()
-EquipmentContainer.mrid = lambda self: self.crc.mrid()
+EquipmentContainer.mrid = lambda self: self.cnc.mrid()
 Feeder.mrid = lambda self: self.ec.mrid()
 GeographicalRegion.mrid = lambda self: self.io.mRID
 PowerSystemResource.mrid = lambda self: self.io.mRID
@@ -126,7 +126,7 @@ Jumper.mrid = lambda self: self.sw.mrid()
 Junction.mrid = lambda self: self.cn.mrid()
 LinearShuntCompensator.mrid = lambda self: self.sc.mrid()
 PerLengthImpedance.mrid = lambda self: self.lp.mrid()
-PerLengthLineParameter.mrid = lambda self: self.lo.mRID
+PerLengthLineParameter.mrid = lambda self: self.io.mRID
 PerLengthSequenceImpedance.mrid = lambda self: self.pli.mrid()
 PowerTransformer.mrid = lambda self: self.ce.mrid()
 PowerTransformerEnd.mrid = lambda self: self.te.mrid()
@@ -148,5 +148,98 @@ Feeder.name_and_mrid = lambda self: self.ec.name_and_mrid()
 EnergyConsumerPhase.name_and_mrid = lambda self: self.psr.name_and_mrid()
 EnergySourcePhase.name_and_mrid = lambda self: self.psr.name_and_mrid()
 PowerTransformerEnd.name_and_mrid = lambda self: self.te.name_and_mrid()
+AcDcTerminal.name_and_mrid = lambda self: self.io.name_and_mrid()
 TransformerEnd.name_and_mrid = lambda self: self.io.name_and_mrid()
 Terminal.name_and_mrid = lambda self: self.ad.name_and_mrid()
+
+# location_mrid
+PowerSystemResource.location_mrid = lambda self: getattr(self, "locationMRID", None)
+Equipment.location_mrid = lambda self: self.psr.location_mrid()
+AuxiliaryEquipment.location_mrid = lambda self: self.eq.location_mrid()
+FaultIndicator.location_mrid = lambda self: self.ae.location_mrid()
+ConductingEquipment.location_mrid = lambda self: self.eq.location_mrid()
+Conductor.location_mrid = lambda self: self.ce.location_mrid()
+Connector.location_mrid = lambda self: self.ce.location_mrid()
+EnergyConnection.location_mrid = lambda self: self.ce.location_mrid()
+PowerTransformer.location_mrid = lambda self: self.ce.location_mrid()
+Switch.location_mrid = lambda self: self.ce.location_mrid()
+AcLineSegment.location_mrid = lambda self: self.cd.location_mrid()
+Junction.location_mrid = lambda self: self.cn.location_mrid()
+EnergyConsumer.location_mrid = lambda self: self.ec.location_mrid()
+EnergySource.location_mrid = lambda self: self.ec.location_mrid()
+RegulatingCondEq.location_mrid = lambda self: self.ec.location_mrid()
+Disconnector.location_mrid = lambda self: self.sw.location_mrid()
+Fuse.location_mrid = lambda self: self.sw.location_mrid()
+Jumper.location_mrid = lambda self: self.sw.location_mrid()
+ProtectedSwitch.location_mrid = lambda self: self.sw.location_mrid()
+ShuntCompensator.location_mrid = lambda self: self.rce.location_mrid()
+Breaker.location_mrid = lambda self: self.sw.location_mrid()
+Recloser.location_mrid = lambda self: self.sw.location_mrid()
+LinearShuntCompensator.location_mrid = lambda self: self.sc.location_mrid()
+
+# service_location_mrid
+EndDevice.service_location_mrid = lambda self: getattr(self, "serviceLocationMRID", None)
+Meter.service_location_mrid = lambda self: self.ed.service_location_mrid()
+
+# usage_point_location_mrid
+UsagePoint.usage_point_location_mrid = lambda self: getattr(self, "usagePointLocationMRID", None)
+
+# terminal_mrid
+AuxiliaryEquipment.terminal_mrid = lambda self: getattr(self, "terminalMRID", None)
+FaultIndicator.terminal_mrid = lambda self: self.ae.terminal_mrid()
+
+# terminal_mrids
+ConductingEquipment.terminal_mrids = lambda self: getattr(self, "terminalMRIDs", [])
+Conductor.terminal_mrids = lambda self: self.ce.terminal_mrids()
+Connector.terminal_mrids = lambda self: self.ce.terminal_mrids()
+EnergyConnection.terminal_mrids = lambda self: self.ce.terminal_mrids()
+PowerTransformer.terminal_mrids = lambda self: self.ce.terminal_mrids()
+Switch.terminal_mrids = lambda self: self.ce.terminal_mrids()
+AcLineSegment.terminal_mrids = lambda self: self.cd.terminal_mrids()
+Junction.terminal_mrids = lambda self: self.cn.terminal_mrids()
+EnergyConsumer.terminal_mrids = lambda self: self.ec.terminal_mrids()
+EnergySource.terminal_mrids = lambda self: self.ec.terminal_mrids()
+RegulatingCondEq.terminal_mrids = lambda self: self.ec.terminal_mrids()
+Disconnector.terminal_mrids = lambda self: self.sw.terminal_mrids()
+Fuse.terminal_mrids = lambda self: self.sw.terminal_mrids()
+Jumper.terminal_mrids = lambda self: self.sw.terminal_mrids()
+ProtectedSwitch.terminal_mrids = lambda self: self.sw.terminal_mrids()
+ShuntCompensator.terminal_mrids = lambda self: self.rce.terminal_mrids()
+Breaker.terminal_mrids = lambda self: self.sw.terminal_mrids()
+Recloser.terminal_mrids = lambda self: self.sw.terminal_mrids()
+LinearShuntCompensator.terminal_mrids = lambda self: self.sc.terminal_mrids()
+
+# base_voltage_mrid
+ConductingEquipment.base_voltage_mrid = lambda self: getattr(self, "baseVoltageMRID", None)
+Conductor.base_voltage_mrid = lambda self: self.ce.base_voltage_mrid()
+Connector.base_voltage_mrid = lambda self: self.ce.base_voltage_mrid()
+EnergyConnection.base_voltage_mrid = lambda self: self.ce.base_voltage_mrid()
+PowerTransformer.base_voltage_mrid = lambda self: self.ce.base_voltage_mrid()
+Switch.base_voltage_mrid = lambda self: self.ce.base_voltage_mrid()
+AcLineSegment.base_voltage_mrid = lambda self: self.cd.base_voltage_mrid()
+Junction.base_voltage_mrid = lambda self: self.cn.base_voltage_mrid()
+EnergyConsumer.base_voltage_mrid = lambda self: self.ec.base_voltage_mrid()
+EnergySource.base_voltage_mrid = lambda self: self.ec.base_voltage_mrid()
+RegulatingCondEq.base_voltage_mrid = lambda self: self.ec.base_voltage_mrid()
+Disconnector.base_voltage_mrid = lambda self: self.sw.base_voltage_mrid()
+Fuse.base_voltage_mrid = lambda self: self.sw.base_voltage_mrid()
+Jumper.base_voltage_mrid = lambda self: self.sw.base_voltage_mrid()
+ProtectedSwitch.base_voltage_mrid = lambda self: self.sw.base_voltage_mrid()
+ShuntCompensator.base_voltage_mrid = lambda self: self.rce.base_voltage_mrid()
+Breaker.base_voltage_mrid = lambda self: self.sw.base_voltage_mrid()
+Recloser.base_voltage_mrid = lambda self: self.sw.base_voltage_mrid()
+LinearShuntCompensator.base_voltage_mrid = lambda self: self.sc.base_voltage_mrid()
+
+# normal_energizing_substation_mrid
+Feeder.normal_energizing_substation_mrid = lambda self: getattr(self, "normalEnergizingSubstationMRID", None)
+
+# per_length_sequence_impedance_mrid
+AcLineSegment.per_length_sequence_impedance_mrid = lambda self: getattr(self, "perLengthSequenceImpedanceMRID", None)
+
+# asset_info_mrid
+Conductor.asset_info_mrid = lambda self: getattr(self, "assetInfoMRID", None)
+AcLineSegment.asset_info_mrid = lambda self: self.cd.asset_info_mrid()
+
+# ratio_tap_changer_mrid
+TransformerEnd.ratio_tap_changer_mrid = lambda self: getattr(self, "ratioTapChangerMRID", None)
+PowerTransformerEnd.ratio_tap_changer_mrid = lambda self: self.te.ratio_tap_changer_mrid()
