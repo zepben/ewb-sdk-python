@@ -48,12 +48,11 @@ class BaseService(object, metaclass=ABCMeta):
         return False
 
     def unresolved_references(self):
-        for ur in self._unresolved_references.copy():
-            yield ur
+        for from_mrid, unresolved_refs in self._unresolved_references.copy().items():
+            yield from_mrid, unresolved_refs
 
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
-            generate_error: Callable[[str, str], str] = lambda mrid,
-            typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
+            generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
         """
         Get an object associated with this service.
 
@@ -67,21 +66,31 @@ class BaseService(object, metaclass=ABCMeta):
         :raises: KeyError if ``mrid`` was not found in the service with ``_type`` or if no objects of ``_type`` are
                  stored by the service and default was not set.
         """
-        if type_ is not None:
+        if not mrid:
+            raise KeyError("You must specify an mRID to get. Empty/None is invalid.")
+        # TODO MATCH KOTLIN VERSION
+        if type_:
             try:
                 return self._objectsByType[type_][mrid]
-            except KeyError as ke:
+            except KeyError:
+                for c, obj_map in self._objectsByType.items():
+                    if issubclass(type_, c):
+                        try:
+                            return obj_map[mrid]
+                        except KeyError:
+                            pass
                 if default is _GET_DEFAULT:
                     raise KeyError(generate_error(mrid, type_.__name__))
-                return default
+                else:
+                    return default
+        else:
+            for object_map in self._objectsByType.values():
+                if mrid in object_map:
+                    return object_map[mrid]
 
-        for object_map in self._objectsByType.values():
-            if mrid in object_map:
-                return object_map[mrid]
-
-        if default is _GET_DEFAULT:
-            raise KeyError(generate_error(mrid, ""))
-        return default
+            if default is _GET_DEFAULT:
+                raise KeyError(generate_error(mrid, ""))
+            return default
 
     def __getitem__(self, mrid):
         """

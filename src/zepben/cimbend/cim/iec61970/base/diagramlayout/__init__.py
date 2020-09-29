@@ -16,7 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from zepben.cimbend.cim.iec61970.base.diagramlayout import *
+from zepben.cimbend.cim.iec61970.base.diagramlayout.diagram_layout import *
 from zepben.cimbend.cim.iec61970.base.diagramlayout.diagram_object_style import *
 from zepben.cimbend.cim.iec61970.base.diagramlayout.diagram_style import *
 from zepben.cimbend.cim.iec61970.base.diagramlayout.orientation_kind import *

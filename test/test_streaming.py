@@ -20,6 +20,7 @@ import zepben.cimbend.streaming.streaming as streaming
 import asyncio
 import grpc 
 
+
 class TestStreaming(object):
 
     def test_retrieve_network(self):

@@ -33,7 +33,7 @@ from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedOb
 from typing import Any
 from zepben.cimbend.common import resolver
 
-__all__ = ["set_identifiedobject", "BaseProtoToCim", "set_document"]
+__all__ = ["set_identifiedobject", "BaseProtoToCim", "set_document", "organisation_to_cim", "organisationrole_to_cim"]
 
 
 #def set_field(cim, pb, field):
@@ -115,14 +115,16 @@ class BaseProtoToCim(object, metaclass=ABCMeta):
 
 # Extensions
 
+
 def organisation_to_cim(pb: PBOrganisation, service: BaseService):
     cim = Organisation()
     set_identifiedobject(pb.io, cim, service)
-    return service.add(cim)
+
 
 def organisationrole_to_cim(pb: PBOrganisationRole, cim: OrganisationRole, service: BaseService):
     cim.organisation = service.resolve_or_defer_reference(resolver.organisation(cim), pb.organisationMRID)
     set_identifiedobject(pb.io, cim, service)
+
 
 PBOrganisation.to_cim = organisation_to_cim
 PBOrganisationRole.to_cim = organisationrole_to_cim

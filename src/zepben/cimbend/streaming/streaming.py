@@ -31,15 +31,16 @@ from zepben.protobuf.nc.nc_data_pb2 import IdentifiedObjectGroup
 from zepben.cimbend.streaming.network_rpc import rpc_map
 from zepben.cimbend.network.translator.network_cim2proto import *
 from zepben.cimbend.network.translator.network_proto2cim import NetworkProtoToCim
+from collections import OrderedDict
 import random
 import math
 from zepben.cimbend.common import resolver
 from dataclasses import dataclass
 
-
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61968.assets.Asset_pb2 import Asset as PBAsset
-from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.AuxiliaryEquipment_pb2 import AuxiliaryEquipment as PBAuxiliaryEquipment
+from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.AuxiliaryEquipment_pb2 import \
+    AuxiliaryEquipment as PBAuxiliaryEquipment
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment as PBConductingEquipment
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor as PBConductor
 from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole as  PBPole
@@ -54,19 +55,48 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySourc
 from zepben.protobuf.cim.iec61970.base.wires.EnergySourcePhase_pb2 import EnergySourcePhase as PBEnergySourcePhase
 from zepben.protobuf.cim.iec61970.base.core.Feeder_pb2 import Feeder as PBFeeder
 from zepben.protobuf.cim.iec61970.base.core.GeographicalRegion_pb2 import GeographicalRegion as PBGeographicalRegion
-from zepben.protobuf.cim.iec61968.operations.OperationalRestriction_pb2 import OperationalRestriction as PBOperationalRestriction
+from zepben.protobuf.cim.iec61968.operations.OperationalRestriction_pb2 import \
+    OperationalRestriction as PBOperationalRestriction
 from zepben.protobuf.cim.iec61970.base.core.PowerSystemResource_pb2 import PowerSystemResource as PBPowerSystemResource
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer as PBPowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd as PBPowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger as PBRatioTapChanger
-from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion as PBSubGeographicalRegion
+from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import \
+    SubGeographicalRegion as PBSubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation as PBSubstation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint as PBUsagePoint
 
-
 __all__ = ["retrieve_network", "send_network", "send_customer", "send_diagram", "FeederStreamResult", "FeederSummary"]
+
+MRID_TYPE_MAP = OrderedDict()
+MRID_TYPE_MAP["locationMRID"] = "location"
+MRID_TYPE_MAP["serviceLocationMRID"] = "location"
+MRID_TYPE_MAP["usagePointLocationMRID"] = "location"
+MRID_TYPE_MAP["conductingEquipmentMRID"] = "conductingEquipment"
+MRID_TYPE_MAP["terminalMRID"] = "terminal"
+MRID_TYPE_MAP["terminalMRIDs"] = "terminal"
+MRID_TYPE_MAP["baseVoltageMRID"] = "baseVoltage"
+MRID_TYPE_MAP["normalEnergizingSubstationMRID"] = "substation"
+MRID_TYPE_MAP["perLengthSequenceImpedanceMRID"] = "perLengthSequenceImpedance"
+MRID_TYPE_MAP["assetInfoMRID"] = "assetInfo"
+MRID_TYPE_MAP["ratioTapChangerMRID"] = "ratioTapChanger"
+MRID_TYPE_MAP["connectivityNodeMRID"] = "connectivityNode"
+MRID_TYPE_MAP["organisationRoleMRIDs"] = "organisationRole"
+MRID_TYPE_MAP["streetlightMRIDs"] = "streetlight"
+MRID_TYPE_MAP["poleMRID"] = "pole"
+MRID_TYPE_MAP["usagePointMRIDs"] = "usagePoint"
+MRID_TYPE_MAP["equipmentMRIDs"] = "equipment"
+MRID_TYPE_MAP["equipmentContainerMRIDs"] = "equipmentContainer"
+MRID_TYPE_MAP["operationalRestrictionMRIDs"] = "operationalRestriction"
+MRID_TYPE_MAP["normalHeadTerminalMRID"] = "terminal"
+MRID_TYPE_MAP["energyConsumerPhasesMRIDs"] = "phase"
+MRID_TYPE_MAP["energyConsumerMRID"] = "energyConsumer"
+MRID_TYPE_MAP["energySourcePhasesMRIDs"] = "phase"
+MRID_TYPE_MAP["energySourceMRID"] = "energySource"
+MRID_TYPE_MAP["powerTransformerEndMRIDs"] = "powerTransformerEnd"
+MRID_TYPE_MAP["powerTransformerMRID"] = "powerTransformer"
 
 
 # TODO: Fill in all fields
@@ -83,6 +113,7 @@ class FeederStreamResult:
 
 
 MAX_INT: int = math.pow(2, 32) - 1
+
 
 def get_random_message_id() -> int:
     """
@@ -123,8 +154,7 @@ def safely_add(network: NetworkProtoToCim, pb) -> None:
     try:
         network.add_from_pb(pb)
     except Exception as e:
-        print(f"L126 {e}") # TODO: remove this!
-        #raise StreamingException((f"Failed to add [{pb}] to network. Are you using a cimbend ", "version compatible with the server? Underlying error was: {e}"))
+        raise StreamingException(f"Failed to add [{pb}] to network. Are you using a cimbend version compatible with the server? Underlying error was: {e}")
 
 
 async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str) -> IdentifiedObjectGroup:
@@ -142,7 +172,8 @@ async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str) -> I
     return identified_object_group
 
 
-async def retrieve_dependency(stub: NetworkConsumerStub, network: NetworkProtoToCim, dependency_type: str, dependency_mrid: str) -> None:
+async def retrieve_dependency(stub: NetworkConsumerStub, network: NetworkProtoToCim, dependency_type: str,
+                              dependency_mrid: str) -> None:
     """
     Add a per length sequence impedance to the network.
     :param stub: A network consumer stub.
@@ -163,7 +194,7 @@ async def retrieve_dependency(stub: NetworkConsumerStub, network: NetworkProtoTo
         else:
             print(f"Could not retrieve {dependency_type} {dependency_mrid}")
     except Exception as e:
-        pass #print(f"L135 | {dependency_mrid}")
+        pass  # print(f"L135 | {dependency_mrid}")
 
 
 async def add_equipment_dependencies(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment) -> None:
@@ -173,43 +204,15 @@ async def add_equipment_dependencies(stub: NetworkConsumerStub, network: Network
     :param network: The network to add the equipment to.
     :param equipment: The equipment that may have dependencies.
     """
-    mrid_to_type = {
-        "locationMRID": "location",
-        "serviceLocationMRID": "location",
-        "usagePointLocationMRID": "location",
-        "terminalMRID": "terminal",
-        "terminalMRIDs": "terminal",
-        "baseVoltageMRID": "baseVoltage",
-        "normalEnergizingSubstationMRID": "substation",
-        "perLengthSequenceImpedanceMRID": "perLengthSequenceImpedance",
-        "assetInfoMRID": "assetInfo",
-        "ratioTapChangerMRID": "ratioTapChanger",
-        "conductingEquipmentMRID": "conductingEquipment",
-        "connectivityNodeMRID": "connectivityNode",
-        "organisationRoleMRIDs": "organisationRole",
-        "streetlightMRIDs": "streetlight",
-        "poleMRID": "pole",
-        "usagePointMRIDs": "usagePoint",
-        "equipmentMRIDs": "equipment",
-        "equipmentContainerMRIDs": "equipmentContainer",
-        "operationalRestrictionMRIDs": "operationalRestriction",
-        "normalHeadTerminalMRID": "terminal",
-        "energyConsumerPhasesMRIDs": "phase",
-        "energyConsumerMRID": "energyConsumer",
-        "energySourcePhasesMRIDs": "phase",
-        "energySourceMRID": "energySource",
-        "powerTransformerEndMRIDs": "powerTransformerEnd",
-        "powerTransformerMRID": "powerTransformer"
-    }
 
-    for dep_mrid in mrid_to_type:
+    for dep_mrid in MRID_TYPE_MAP:
         mrid = getattr(equipment, dep_mrid, None)
         if mrid:
             if isinstance(mrid, list):
                 for _mrid in mrid:
-                    await retrieve_dependency(stub, network, mrid_to_type[dep_mrid], _mrid)
+                    await retrieve_dependency(stub, network, MRID_TYPE_MAP[dep_mrid], _mrid)
             else:
-                await retrieve_dependency(stub, network, mrid_to_type[dep_mrid], mrid)
+                await retrieve_dependency(stub, network, MRID_TYPE_MAP[dep_mrid], mrid)
 
 
 async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_io) -> None:
@@ -224,8 +227,6 @@ async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProto
         if equipment_type:
             # TODO: better check of equipment type (cf. oneof) ?
             equipment = getattr(equipment_io, equipment_type, None)
-            # TODO: handle dependencies afterwards?
-            await add_equipment_dependencies(stub, network, equipment)
             safely_add(network, equipment)
 
 
@@ -283,7 +284,8 @@ async def retrieve_substation(stub: NetworkConsumerStub, network: NetworkProtoTo
         print(f"Could not retrieve substation {substation_mrid}")
 
 
-async def retrieve_sub_geographical_region(stub: NetworkConsumerStub, network: NetworkProtoToCim, sub_geographical_region_mrid: str) -> None:
+async def retrieve_sub_geographical_region(stub: NetworkConsumerStub, network: NetworkProtoToCim,
+                                           sub_geographical_region_mrid: str) -> None:
     """
     Retrieve subgeographical region using its mRID, add it to the network and retrieve its substations.
     :param stub: A network consumer stub.
@@ -301,7 +303,8 @@ async def retrieve_sub_geographical_region(stub: NetworkConsumerStub, network: N
         print(f"Could not retrieve sub geographical region {sub_geographical_region_mrid}")
 
 
-async def retrieve_geographical_region(stub: NetworkConsumerStub, network: NetworkProtoToCim, geographical_region_mrid: str):
+async def retrieve_geographical_region(stub: NetworkConsumerStub, network: NetworkProtoToCim,
+                                       geographical_region_mrid: str):
     """
     Retrieve geographical region using its mRID, add it to the network and retrieve its subgeographical regions.
     :param stub: A network consumer stub.
@@ -325,7 +328,7 @@ async def retrieve_network(channel) -> NetworkService:
     :param channel: A gRPC channel to the gRPC server.
     :return: The retrieved `wepben.cimbend.NetworkService` object.
     """
-    network = NetworkProtoToCim(NetworkService())
+    proto2cim = NetworkProtoToCim(NetworkService())
     stub = NetworkConsumerStub(channel)
     message_id = get_random_message_id()
     request = GetNetworkHierarchyRequest(messageId=message_id)
@@ -333,20 +336,20 @@ async def retrieve_network(channel) -> NetworkService:
     for gr in getattr(response, "geographicalRegions", []):
         gr_mrid = getattr(gr, "mRID", None)
         if gr_mrid:
-            await retrieve_geographical_region(stub, network, gr_mrid)
+            await retrieve_geographical_region(stub, proto2cim, gr_mrid)
 
-    service = network.service
-    print(f"L341 {len(service._unresolved_references)}")
-    await empty_unresolved_refs(stub, network)
+    service = proto2cim.service
+    await empty_unresolved_refs(stub, proto2cim)
 
     return service
 
 
-async def empty_unresolved_refs(stub, network):
-    service = network.service
-    #while len(service._unresolved_references) > 0:
-    for ref in service.unresolved_references():
-        await retrieve_equipment(stub, network, ref)
+async def empty_unresolved_refs(stub, proto2cim):
+    service = proto2cim.service
+    # while len(service._unresolved_references) > 0:
+    for from_mrid, unresolved_refs in service.unresolved_references():
+        for ref in unresolved_refs:
+            await retrieve_equipment(stub, proto2cim, ref.to_mrid)
 
 
 async def create_network(stub: NetworkProducerStub):
@@ -383,7 +386,8 @@ async def send_network(stub: NetworkProducerStub, network_service: NetworkServic
         try:
             rpc = getattr(stub, rpc_map[type(pb)][0])
         except AttributeError as e:
-            raise NoSuchRPCException(f"RPC {rpc_map[type(pb)][0]} could not be found in {stub.__class__.__name__}") from e
+            raise NoSuchRPCException(
+                f"RPC {rpc_map[type(pb)][0]} could not be found in {stub.__class__.__name__}") from e
 
         try:
             attrname = f"{obj.__class__.__name__[:1].lower()}{obj.__class__.__name__[1:]}"

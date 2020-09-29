@@ -56,7 +56,7 @@ class ShuntCompensator(RegulatingCondEq):
     """
     grounded: bool = False
     nom_u: int = 0
-    phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.UNRECOGNIZED
+    phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.UNKNOWN
     sections: float = 0.0
 
 

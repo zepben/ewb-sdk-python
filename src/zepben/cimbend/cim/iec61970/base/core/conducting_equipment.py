@@ -180,12 +180,6 @@ class ConductingEquipment(Equipment):
         if self._validate_reference(terminal, self.get_terminal_by_mrid, "A Terminal"):
             return True
 
-        #if terminal.conducting_equipment is None:
-        #    terminal.conducting_equipment = self
-
-        #print(f"L186 {terminal.conducting_equipment.mrid()}")
-        #print(self.mrid())
-
         require(terminal.conducting_equipment is self,
                 lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {self}.")
         return False

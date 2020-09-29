@@ -28,19 +28,19 @@ from zepben.cimbend.cim.iec61970.base.wires.energy_source_phase import EnergySou
 from zepben.cimbend.cim.iec61970.base.wires.power_transformer import *
 from zepben.cimbend.common.reference_resolvers import *
 
-__all__ = ["per_length_sequence_impedance", "organisation_roles", "location", "terminal", "base_voltage", "terminals",
-           "asset_info", "streetlights", "pole", "terminals", "remote_control", "agreements", "customer",
+__all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
+           "asset_info", "streetlights", "pole", "cn_terminals", "remote_control", "agreements", "customer",
            "pricing_structures",
-           "diagram_objects", "diagram", "service_location", "usage_points", "containers", "current_feeders",
+           "diagram_objects", "diagram", "service_location", "ed_usage_points", "containers", "current_feeders",
            "operational_restrictions",
-           "usage_points", "equipment", "phases", "energy_consumer", "phases", "energy_source", "current_equipment",
+           "eq_usage_points", "ec_equipment", "ec_phases", "energy_consumer", "es_phases", "energy_source", "current_equipment",
            "normal_energizing_substation", "normal_head_terminal", "sub_geographical_regions", "remote_source",
-           "equipment", "organisation",
-           "location", "ends", "power_transformer", "tariffs", "transformer_end", "control", "measurement",
+           "or_equipment", "organisation",
+           "psr_location", "ends", "power_transformer", "tariffs", "transformer_end", "control", "measurement",
            "geographical_region", "substations",
-           "normal_energizing_feeders", "sub_geographical_region", "conducting_equipment", "connectivity_rode",
-           "base_voltage", "ratio_tap_changer",
-           "terminal", "end_devices", "equipment", "usage_point_location"]
+           "normal_energizing_feeders", "sub_geographical_region", "conducting_equipment", "connectivity_node",
+           "te_base_voltage", "ratio_tap_changer",
+           "te_terminal", "end_devices", "up_equipment", "usage_point_location"]
 
 
 def per_length_sequence_impedance(aclinesegment):
@@ -51,19 +51,19 @@ def organisation_roles(asset: Asset) -> BoundReferenceResolver:
     return BoundReferenceResolver(asset, asset_to_asset_org_role_resolver, None)
 
 
-def location(asset: Asset) -> BoundReferenceResolver:
+def at_location(asset: Asset) -> BoundReferenceResolver:
     return BoundReferenceResolver(asset, asset_to_location_resolver, None)
 
 
-def terminal(auxiliaryEquipment: AuxiliaryEquipment) -> BoundReferenceResolver:
+def ae_terminal(auxiliaryEquipment: AuxiliaryEquipment) -> BoundReferenceResolver:
     return BoundReferenceResolver(auxiliaryEquipment, aux_equip_to_term_resolver, None)
 
 
-def base_voltage(conducting_equipment: ConductingEquipment) -> BoundReferenceResolver:
+def ce_base_voltage(conducting_equipment: ConductingEquipment) -> BoundReferenceResolver:
     return BoundReferenceResolver(conducting_equipment, cond_equip_to_bv_resolver, None)
 
 
-def terminals(conducting_equipment: ConductingEquipment) -> BoundReferenceResolver:
+def ce_terminals(conducting_equipment: ConductingEquipment) -> BoundReferenceResolver:
     return BoundReferenceResolver(conducting_equipment, cond_equip_to_terminal_resolver, term_to_ce_resolver)
 
 
@@ -79,7 +79,7 @@ def pole(streetlight: Streetlight) -> BoundReferenceResolver:
     return BoundReferenceResolver(streetlight, streetlight_to_pole_resolver, pole_to_streetlight_resolver)
 
 
-def terminals(connectivity_node: ConnectivityNode) -> BoundReferenceResolver:
+def cn_terminals(connectivity_node: ConnectivityNode) -> BoundReferenceResolver:
     return BoundReferenceResolver(connectivity_node, conn_node_to_term_resolver, term_to_cn_resolver)
 
 
@@ -111,7 +111,7 @@ def service_location(end_device: EndDevice) -> BoundReferenceResolver:
     return BoundReferenceResolver(end_device, ed_to_loc_resolver, None)
 
 
-def usage_points(end_device: EndDevice) -> BoundReferenceResolver:
+def ed_usage_points(end_device: EndDevice) -> BoundReferenceResolver:
     return BoundReferenceResolver(end_device, ed_to_up_resolver, up_to_ed_resolver)
 
 
@@ -127,15 +127,15 @@ def operational_restrictions(equipment: Equipment) -> BoundReferenceResolver:
     return BoundReferenceResolver(equipment, eq_to_or_resolver, or_to_eq_resolver)
 
 
-def usage_points(equipment: Equipment) -> BoundReferenceResolver:
+def eq_usage_points(equipment: Equipment) -> BoundReferenceResolver:
     return BoundReferenceResolver(equipment, eq_to_up_resolver, up_to_eq_resolver)
 
 
-def equipment(equipment_container: EquipmentContainer) -> BoundReferenceResolver:
+def ec_equipment(equipment_container: EquipmentContainer) -> BoundReferenceResolver:
     return BoundReferenceResolver(equipment_container, ec_to_eq_resolver, eq_to_ec_resolver)
 
 
-def phases(energy_consumer: EnergyConsumer) -> BoundReferenceResolver:
+def ec_phases(energy_consumer: EnergyConsumer) -> BoundReferenceResolver:
     return BoundReferenceResolver(energy_consumer, ec_to_ecp_resolver, ecp_to_ec_resolver)
 
 
@@ -143,7 +143,7 @@ def energy_consumer(energy_consumer_phase: EnergyConsumerPhase) -> BoundReferenc
     return BoundReferenceResolver(energy_consumer_phase, ecp_to_ec_resolver, ec_to_ecp_resolver)
 
 
-def phases(energy_source: EnergySource) -> BoundReferenceResolver:
+def es_phases(energy_source: EnergySource) -> BoundReferenceResolver:
     return BoundReferenceResolver(energy_source, es_to_esp_resolver, esp_to_es_resolver)
 
 
@@ -171,7 +171,7 @@ def remote_source(measurement: Measurement) -> BoundReferenceResolver:
     return BoundReferenceResolver(measurement, meas_to_rs_resolver, rs_to_meas_resolver)
 
 
-def equipment(operational_restriction: OperationalRestriction) -> BoundReferenceResolver:
+def or_equipment(operational_restriction: OperationalRestriction) -> BoundReferenceResolver:
     return BoundReferenceResolver(operational_restriction, or_to_eq_resolver, eq_to_or_resolver)
 
 
@@ -179,7 +179,7 @@ def organisation(organisation_role: OrganisationRole) -> BoundReferenceResolver:
     return BoundReferenceResolver(organisation_role, orgr_to_org_resolver, None)
 
 
-def location(power_system_resource: PowerSystemResource) -> BoundReferenceResolver:
+def psr_location(power_system_resource: PowerSystemResource) -> BoundReferenceResolver:
     return BoundReferenceResolver(power_system_resource, psr_to_loc_resolver, None)
 
 
@@ -231,7 +231,7 @@ def connectivity_node(terminal: Terminal) -> BoundReferenceResolver:
     return BoundReferenceResolver(terminal, term_to_cn_resolver, conn_node_to_term_resolver)
 
 
-def base_voltage(transformer_end: TransformerEnd) -> BoundReferenceResolver:
+def te_base_voltage(transformer_end: TransformerEnd) -> BoundReferenceResolver:
     return BoundReferenceResolver(transformer_end, te_to_bv_resolver, None)
 
 
@@ -239,7 +239,7 @@ def ratio_tap_changer(transformer_end: TransformerEnd) -> BoundReferenceResolver
     return BoundReferenceResolver(transformer_end, te_to_rtc_resolver, rtc_to_te_resolver)
 
 
-def terminal(transformer_end: TransformerEnd) -> BoundReferenceResolver:
+def te_terminal(transformer_end: TransformerEnd) -> BoundReferenceResolver:
     return BoundReferenceResolver(transformer_end, te_to_term_resolver, None)
 
 
@@ -247,7 +247,7 @@ def end_devices(usage_point: UsagePoint) -> BoundReferenceResolver:
     return BoundReferenceResolver(usage_point, up_to_ed_resolver, ed_to_up_resolver)
 
 
-def equipment(usage_point: UsagePoint) -> BoundReferenceResolver:
+def up_equipment(usage_point: UsagePoint) -> BoundReferenceResolver:
     return BoundReferenceResolver(usage_point, up_to_eq_resolver, eq_to_up_resolver)
 
 

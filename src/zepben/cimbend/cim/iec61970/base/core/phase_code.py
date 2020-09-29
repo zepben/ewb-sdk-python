@@ -16,13 +16,18 @@ You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from enum import Enum
+from enum import Enum, unique
 
 from zepben.cimbend.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
-__all__ = ["PhaseCode"]
+__all__ = ["PhaseCode", "phasecode_by_id"]
 
 
+def phasecode_by_id(id: int):
+    return _phasecode_members[id]
+
+
+@unique
 class PhaseCode(Enum):
     NONE = (SinglePhaseKind.NONE,)
     A = (SinglePhaseKind.A,)
@@ -40,10 +45,12 @@ class PhaseCode(Enum):
     ACN = (SinglePhaseKind.A, SinglePhaseKind.C, SinglePhaseKind.N)
     BCN = (SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N)
     ABCN = (SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N)
-    X = (SinglePhaseKind.NONE,)
-    XN = (SinglePhaseKind.NONE, SinglePhaseKind.N)
-    XY = (SinglePhaseKind.NONE, SinglePhaseKind.NONE)
-    XYN = (SinglePhaseKind.NONE, SinglePhaseKind.NONE, SinglePhaseKind.N)
+    X = (SinglePhaseKind.X,)
+    XN = (SinglePhaseKind.X, SinglePhaseKind.N)
+    XY = (SinglePhaseKind.X, SinglePhaseKind.Y)
+    XYN = (SinglePhaseKind.X, SinglePhaseKind.Y, SinglePhaseKind.N)
+    Y = (SinglePhaseKind.Y,)
+    YN = (SinglePhaseKind.Y, SinglePhaseKind.N)
 
     @property
     def short_name(self):
@@ -51,7 +58,10 @@ class PhaseCode(Enum):
 
     @property
     def single_phases(self):
-        return self.value
+        return self.value[:1]
 
     def num_phases(self):
         return len(self.value)
+
+
+_phasecode_members = list(PhaseCode.__members__.values())

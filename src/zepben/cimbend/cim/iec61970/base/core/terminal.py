@@ -91,6 +91,9 @@ class Terminal(AcDcTerminal):
     def connected(self) -> bool:
         return self.connectivity_node
 
+    def __repr__(self):
+        return f"Terminal{self.mrid}"
+
     def __lt__(self, other):
         """
         TODO: fix
