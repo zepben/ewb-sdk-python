@@ -27,4 +27,4 @@ class TestStreaming(object):
         """Test retrieve_network"""
         channel = grpc.insecure_channel('localhost:50051')
         network = asyncio.run(streaming.retrieve_network(channel))
-        #print(network)
+        print(len(network._unresolved_references))

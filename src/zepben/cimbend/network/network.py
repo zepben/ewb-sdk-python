@@ -88,9 +88,6 @@ class NetworkService(BaseService):
     metrics_store: MetricsStore = None
     _auto_cn_index: int = field(init=False, default=0)
 
-    def __post_init__(self):
-        self._objectsByType[ConnectivityNode] = self._connectivity_nodes
-
     def replace(self, mrid: str, replacement: ConductingEquipment) -> ConductingEquipment:
         """
         Replace a ConductingEquipment by ``mrid`` in this network
