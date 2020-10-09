@@ -214,7 +214,7 @@ class BaseService(object, metaclass=ABCMeta):
                 for obj in self._objectsByType[obj_type].values():
                     yield obj
             except KeyError:
-                for _type, object_map in self._objectsByType:
+                for _type, object_map in self._objectsByType.items():
                     if issubclass(_type, obj_type):
                         for obj in object_map.values():
                             yield obj
