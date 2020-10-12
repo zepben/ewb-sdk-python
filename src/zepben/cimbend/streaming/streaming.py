@@ -98,7 +98,7 @@ def safely_add(network: NetworkProtoToCim, pb) -> None:
         raise StreamingException(f"Failed to add [{pb}] to network. Are you using a cimbend version compatible with the server? Underlying error was: {e}")
 
 
-async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str, debug: bool = False) -> IdentifiedObjectGroup:
+async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str) -> IdentifiedObjectGroup:
     """
     Send a request to the connected server to retrieve an identified object group given its mRID.
     :param stub: A network consumer stub.
@@ -113,7 +113,7 @@ async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str, debu
     return identified_object_group
 
 
-async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_io, debug: bool = False) -> None:
+async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_io) -> None:
     """
     Add an equipment to the network.
     :param stub: A network consumer stub.
@@ -125,37 +125,26 @@ async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProto
         if equipment_type:
             # TODO: better check of equipment type (cf. oneof) ?
             equipment = getattr(equipment_io, equipment_type, None)
-            if debug:
-                print(f"L157 {equipment_type} {equipment.mrid()}")
             safely_add(network, equipment)
-            if debug:
-                print(f"L160 Added!")
 
-BREAK_MRIDS = ['SSBLN/BX1162-p1', 'SSBLN/BX1162-p2', 'SSBLN/BX1162-p3', 'BLN16A']
-DEBUG_MRIDS = []
+DEBUG_MRIDS = ['BLN16A']
 
-async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_mrid: str, debug: bool = False) -> None:
+async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_mrid: str) -> None:
     """
     Retrieve equipment using its mRID and add it to the network.
     :param stub: A network consumer stub.
     :param network: The current network.
     :param equipment_mrid: The equipment mRID as a string.
     """
-    if equipment_mrid in BREAK_MRIDS:
-        print(f"L171 broke on {equipment_mrid}")
-        return None
-
-    if equipment_mrid in DEBUG_MRIDS:
-        debug = True
-
-    equipment_iog = await get_identified_object_group(stub, equipment_mrid, debug)
+    equipment_iog = await get_identified_object_group(stub, equipment_mrid)
 
     if equipment_iog:
-        await add_identified_object(stub, network, get_identified_object(equipment_iog), debug)
+        await add_identified_object(stub, network, get_identified_object(equipment_iog))
         for owned_io in getattr(equipment_iog, 'ownedIdentifiedObject', []):
-            await add_identified_object(stub, network, owned_io, debug)
+            await add_identified_object(stub, network, owned_io)
     else:
         print(f"Could not retrieve equipment {equipment_mrid}")
+
 
 
 async def retrieve_feeder(stub: NetworkConsumerStub, network: NetworkProtoToCim, feeder_mrid: str) -> None:
@@ -189,7 +178,7 @@ async def retrieve_substation(stub: NetworkConsumerStub, network: NetworkProtoTo
         if sub:
             safely_add(network, sub)
 
-        for nef_mrid in getattr(sub, "normalEnergizedFeederMRIDs", []):
+        for nef_mrid in set(getattr(sub, "normalEnergizedFeederMRIDs", [])):
             await retrieve_feeder(stub, network, nef_mrid)
         # add loopMRIDs circuitMRIDs normalEnergizedLoopMRIDs ?
     else:
@@ -260,7 +249,8 @@ async def empty_unresolved_refs(stub, proto2cim):
     while len(service._unresolved_references) > 4:
         for from_mrid, unresolved_refs in service.unresolved_references():
             for mrid in set(map(lambda x: x.to_mrid, unresolved_refs)):
-                await retrieve_equipment(stub, proto2cim, mrid, False)
+                if mrid not in DEBUG_MRIDS:
+                    await retrieve_equipment(stub, proto2cim, mrid)
 
 
 async def create_network(stub: NetworkProducerStub):

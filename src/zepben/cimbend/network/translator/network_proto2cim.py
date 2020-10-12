@@ -491,7 +491,11 @@ def energysource_to_cim(pb: PBEnergySource, network_service: NetworkService):
 
 
 def energysourcephase_to_cim(pb: PBEnergySourcePhase, network_service: NetworkService):
-    cim = EnergySourcePhase(mrid=pb.mrid(), phase=SinglePhaseKind(pb.phase))
+    try:
+        cim = EnergySourcePhase(mrid=pb.mrid(), phase=SinglePhaseKind(pb.phase))
+    except Exception as e:
+        cim = EnergySourcePhase(mrid=pb.mrid())
+
     network_service.resolve_or_defer_reference(resolver.energy_source(cim), pb.energySourceMRID)
     powersystemresource_to_cim(pb.psr, cim, network_service)
 
