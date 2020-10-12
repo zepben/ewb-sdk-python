@@ -126,7 +126,7 @@ from zepben.cimbend.cim.iec61970.base.wires.power_transformer import PowerTransf
     RatioTapChanger, \
     TapChanger, TransformerEnd
 from zepben.cimbend.cim.iec61970.base.wires import LinearShuntCompensator, ShuntCompensator
-from zepben.cimbend.cim.iec61970.base.wires import SinglePhaseKind
+from zepben.cimbend.cim.iec61970.base.wires.single_phase_kind import phasekind_by_id
 from zepben.cimbend.cim.iec61970.base.wires.switch import Breaker, Disconnector, Fuse, Jumper, ProtectedSwitch, \
     Recloser, \
     Switch
@@ -462,7 +462,7 @@ def energyconsumer_to_cim(pb: PBEnergyConsumer, network_service: NetworkService)
 
 
 def energyconsumerphase_to_cim(pb: PBEnergyConsumerPhase, network_service: NetworkService):
-    cim = EnergyConsumerPhase(mrid=pb.mrid(), phase=SinglePhaseKind(pb.phase))
+    cim = EnergyConsumerPhase(mrid=pb.mrid(), phase=phasekind_by_id(pb.phase))
     network_service.resolve_or_defer_reference(resolver.energy_consumer(cim), pb.energyConsumerMRID)
     cim.p = pb.p
     cim.p_fixed = pb.pFixed
@@ -491,11 +491,7 @@ def energysource_to_cim(pb: PBEnergySource, network_service: NetworkService):
 
 
 def energysourcephase_to_cim(pb: PBEnergySourcePhase, network_service: NetworkService):
-    try:
-        cim = EnergySourcePhase(mrid=pb.mrid(), phase=SinglePhaseKind(pb.phase))
-    except Exception as e:
-        cim = EnergySourcePhase(mrid=pb.mrid())
-
+    cim = EnergySourcePhase(mrid=pb.mrid(), phase=phasekind_by_id(pb.phase))
     network_service.resolve_or_defer_reference(resolver.energy_source(cim), pb.energySourceMRID)
     powersystemresource_to_cim(pb.psr, cim, network_service)
 

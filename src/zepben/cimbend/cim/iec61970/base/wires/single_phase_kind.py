@@ -18,7 +18,16 @@ along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 
 from enum import Enum
 
-__all__ = ["SinglePhaseKind"]
+__all__ = ["SinglePhaseKind", "phasekind_by_id"]
+
+
+def phasekind_by_id(id):
+    """
+    Get a SinglePhaseKind by its ID
+    :param id: ID of the SinglePhaseKind from 0 as per the order of definition
+    :return: The SinglePhaseKind
+    """
+    return _spk_members[id]
 
 
 class SinglePhaseKind(Enum):
@@ -42,3 +51,6 @@ class SinglePhaseKind(Enum):
     @property
     def short_name(self):
         return str(self)[16:]
+
+
+_spk_members = list(SinglePhaseKind.__members__.values())
