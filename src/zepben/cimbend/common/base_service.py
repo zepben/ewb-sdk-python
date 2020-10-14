@@ -51,6 +51,11 @@ class BaseService(object, metaclass=ABCMeta):
         for from_mrid, unresolved_refs in self._unresolved_references.copy().items():
             yield from_mrid, unresolved_refs
 
+    def unresolved_mrids(self):
+        for _, unresolved_refs in self._unresolved_references.copy().items():
+            for ref in unresolved_refs:
+                yield ref.to_mrid
+
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
             generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
         """
@@ -74,7 +79,7 @@ class BaseService(object, metaclass=ABCMeta):
                 return self._objectsByType[type_][mrid]
             except KeyError:
                 for c, obj_map in self._objectsByType.items():
-                    if issubclass(type_, c):
+                    if issubclass(c, type_):
                         try:
                             return obj_map[mrid]
                         except KeyError:

@@ -15,8 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
 """
-from zepben.cimbend import NetworkService, MetricsStore, CustomerService, DiagramService, ConnectivityNode, Terminal, \
-    PowerTransformerEnd
+from zepben.cimbend import NetworkService, CustomerService, DiagramService
 from zepben.cimbend.streaming.exceptions import StreamingException
 from zepben.protobuf.cp.cp_pb2_grpc import CustomerProducerStub
 from zepben.protobuf.cp.cp_requests_pb2 import CreateCustomerServiceRequest, CompleteCustomerServiceRequest
@@ -25,16 +24,13 @@ from zepben.protobuf.dp.dp_requests_pb2 import CreateDiagramServiceRequest, Comp
 from zepben.protobuf.np.np_pb2_grpc import NetworkProducerStub
 from zepben.protobuf.np.np_requests_pb2 import CreateNetworkRequest, CompleteNetworkRequest
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
-from zepben.protobuf.nc.nc_responses_pb2 import GetNetworkHierarchyResponse, GetIdentifiedObjectsResponse
 from zepben.protobuf.nc.nc_requests_pb2 import GetNetworkHierarchyRequest, GetIdentifiedObjectsRequest
 from zepben.protobuf.nc.nc_data_pb2 import IdentifiedObjectGroup
 from zepben.cimbend.streaming.network_rpc import rpc_map
 from zepben.cimbend.network.translator.network_cim2proto import *
 from zepben.cimbend.network.translator.network_proto2cim import NetworkProtoToCim
-from collections import OrderedDict
 import random
 import math
-from zepben.cimbend.common import resolver
 from dataclasses import dataclass
 
 __all__ = ["retrieve_network", "send_network", "send_customer", "send_diagram", "FeederStreamResult", "FeederSummary"]
@@ -127,7 +123,6 @@ async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProto
             equipment = getattr(equipment_io, equipment_type, None)
             safely_add(network, equipment)
 
-DEBUG_MRIDS = ['BLN16A']
 
 async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_mrid: str) -> None:
     """
@@ -246,11 +241,9 @@ async def retrieve_network(channel) -> NetworkService:
 
 async def empty_unresolved_refs(stub, proto2cim):
     service = proto2cim.service
-    while len(service._unresolved_references) > 4:
-        for from_mrid, unresolved_refs in service.unresolved_references():
-            for mrid in set(map(lambda x: x.to_mrid, unresolved_refs)):
-                if mrid not in DEBUG_MRIDS:
-                    await retrieve_equipment(stub, proto2cim, mrid)
+    for from_mrid, unresolved_refs in service.unresolved_references():
+        for mrid in set(map(lambda x: x.to_mrid, unresolved_refs)):
+            await retrieve_equipment(stub, proto2cim, mrid)
 
 
 async def create_network(stub: NetworkProducerStub):
