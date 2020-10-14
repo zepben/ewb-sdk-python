@@ -321,7 +321,7 @@ def conductingequipment_to_cim(pb: PBConductingEquipment, cim: ConductingEquipme
 def connectivitynode_to_cim(pb: PBConnectivityNode, network_service: NetworkService):
     cim = network_service.add_connectivitynode(pb.mrid())
     for mrid in pb.terminalMRIDs:
-        network_service.resolve_or_defer_references(resolver.cn_terminals(cim), mrid)
+        network_service.resolve_or_defer_reference(resolver.cn_terminals(cim), mrid)
     set_identifiedobject(pb.io, cim, network_service)
 
 
