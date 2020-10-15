@@ -141,7 +141,6 @@ async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkProtoToC
         print(f"Could not retrieve equipment {equipment_mrid}")
 
 
-
 async def retrieve_feeder(stub: NetworkConsumerStub, network: NetworkProtoToCim, feeder_mrid: str) -> None:
     """
     Retrieve feeder using its mRID, add it to the network and retrieve its equipments.
@@ -241,8 +240,8 @@ async def retrieve_network(channel) -> NetworkService:
 
 async def empty_unresolved_refs(stub, proto2cim):
     service = proto2cim.service
-    for from_mrid, unresolved_refs in service.unresolved_references():
-        for mrid in set(map(lambda x: x.to_mrid, unresolved_refs)):
+    while service.has_unresolved_references():
+        for mrid in service.unresolved_mrids():
             await retrieve_equipment(stub, proto2cim, mrid)
 
 

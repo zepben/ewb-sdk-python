@@ -47,14 +47,32 @@ class BaseService(object, metaclass=ABCMeta):
                 return True
         return False
 
+    def __str__(self):
+        return f"{type.__name__}{f' {self.name}' if self.name else ''}"
+
+    def has_unresolved_references(self):
+        """
+        :return: True if this service has unresolved references, False otherwise.
+        """
+        return len(self._unresolved_references) > 0
+
+    def num_unresolved_references(self):
+        """
+        Get the total number of unresolved references.
+        Note that this is not terribly cheap call, and should be used sparingly. To test if unresolved references exist,
+        use ``has_unresolved_references()`` instead.
+        :return: The number of references in the network that have not already been resolved.
+        """
+        return len({r.to_mrid for reflist in self._unresolved_references.values() for r in reflist})
+
     def unresolved_references(self):
         for from_mrid, unresolved_refs in self._unresolved_references.copy().items():
             yield from_mrid, unresolved_refs
 
     def unresolved_mrids(self):
-        for _, unresolved_refs in self._unresolved_references.copy().items():
-            for ref in unresolved_refs:
-                yield ref.to_mrid
+        refs = {r.to_mrid for reflist in self._unresolved_references.values() for r in reflist}
+        for ref in refs:
+            yield ref
 
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
             generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
@@ -73,7 +91,7 @@ class BaseService(object, metaclass=ABCMeta):
         """
         if not mrid:
             raise KeyError("You must specify an mRID to get. Empty/None is invalid.")
-        # TODO MATCH KOTLIN VERSION
+
         if type_:
             try:
                 return self._objectsByType[type_][mrid]

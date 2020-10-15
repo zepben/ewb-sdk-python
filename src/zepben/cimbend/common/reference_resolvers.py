@@ -58,21 +58,21 @@ __all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_t
            "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference"]
 
 
-@dataclass
+@dataclass(frozen=True)
 class ReferenceResolver(object):
     from_class: type
     to_class: type
     resolve: Callable[[IdentifiedObject, IdentifiedObject], None]
 
 
-@dataclass
+@dataclass(frozen=True)
 class BoundReferenceResolver(object):
     from_obj: IdentifiedObject
     resolver: ReferenceResolver
     reverse_resolver: Optional[ReferenceResolver]
 
 
-@dataclass
+@dataclass(frozen=True, eq=False)
 class UnresolvedReference(object):
     from_ref: IdentifiedObject
     to_mrid: str
