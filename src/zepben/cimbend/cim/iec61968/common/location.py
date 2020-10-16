@@ -1,23 +1,12 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 from __future__ import annotations
 
-from dataclasses import dataclass, InitVar, field
+from dataclassy import dataclass
 from typing import List, Optional, Generator, Tuple
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -26,7 +15,7 @@ from zepben.cimbend.util import require, nlen, ngen, safe_remove
 __all__ = ["PositionPoint", "Location", "StreetAddress", "TownDetail"]
 
 
-@dataclass
+@dataclass(slots=True, frozen=True)
 class PositionPoint(object):
     """
     Set of spatial coordinates that determine a point, defined in WGS84 (latitudes and longitudes).
@@ -35,15 +24,14 @@ class PositionPoint(object):
     Use a sequence of position points to describe a line-oriented object (physical location of non-point oriented
     objects like cables or lines), or area of an object (like a substation or a geographical zone - in this case,
     have first and last position point with the same values).
-
-    Attributes -
-        x_position : X axis position - longitude
-        y_position : Y axis position - latitude
     """
-    x_position: float = 0.0
-    y_position: float = 0.0
 
-    def __post_init__(self):
+    x_position: float
+    """X axis position - longitude"""
+    y_position: float
+    """Y axis position - latitude"""
+
+    def __init__(self):
         require(-90.0 <= self.y_position <= 90.0,
                 lambda: f"Latitude is out of range. Expected -90 to 90, got {self.y_position}.")
         require(-180.0 <= self.x_position <= 180.0,
@@ -69,76 +57,69 @@ class PositionPoint(object):
         self.y_position = lat
 
 
-@dataclass
+@dataclass(slots=True)
 class TownDetail(object):
     """
     Town details, in the context of address.
-
-    Attributes -
-        name : Town name.
-        stateOrProvince : Name of the state or province.
     """
 
     name: str = ""
+    """Town name."""
     state_or_province: str = ""
+    """Name of the state or province."""
 
 
-@dataclass
+@dataclass(slots=True)
 class StreetAddress(object):
     """
     General purpose street and postal address information.
-
-    Attributes -
-        postal_code : Postal code for the address.
-        town_detail : Optional ``TownDetail`` for this address.
     """
+
     postal_code: str = ""
+    """Postal code for the address."""
     town_detail: Optional[TownDetail] = None
+    """Optional `TownDetail` for this address."""
 
 
-@dataclass
 class Location(IdentifiedObject):
     """
-    The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment
-    in time. It can be defined with one or more :class:`PositionPoint`'s.
-
-    Attributes -
-        main_address : Main address of the location.
-        _position_points : List of :class:`PositionPoint`. The ordering of the list is important, and refers to the
-                          `sequenceNumber` of each PositionPoint.
-
+    The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment in time.
+    It can be defined with one or more `PositionPoint`'s.
     """
     main_address: Optional[StreetAddress] = None
-    positionpoints: InitVar[List[PositionPoint]] = field(default=list())
-    _position_points: Optional[List[PositionPoint]] = field(init=False, default=None)
+    """Main address of the location."""
 
-    def __post_init__(self, positionpoints: List[PositionPoint]):
-        super().__post_init__()
-        for point in positionpoints:
-            self.add_point(point)
+    _position_points: Optional[List[PositionPoint]] = None
 
-    @property
+    def __init__(self, position_points: List[PositionPoint] = None):
+        """
+        `position_points` A list of `PositionPoint`s to associate with this `Location`.
+        """
+        if position_points:
+            for point in position_points:
+                self.add_point(point)
+
     def num_points(self):
         """
-        :return: The number of :class:`PositionPoint`s in this ``Location``
+        Returns The number of `PositionPoint`s in this `Location`
         """
         return nlen(self._position_points)
 
     @property
     def points(self) -> Generator[Tuple[int, PositionPoint], None, None]:
         """
-        :return: Generator over the ``PositionPoint``s of this ``Location``.
+        Returns Generator over the `PositionPoint`s of this `Location`.
         """
         for i, point in enumerate(ngen(self._position_points)):
             yield i, point
 
     def get_point(self, sequence_number: int) -> Optional[PositionPoint]:
         """
-        Get the ``sequence_number`` ``PositionPoint`` for this ``DiagramObject``.
+        Get the `sequence_number` `PositionPoint` for this `DiagramObject`.
 
-        :param sequence_number: The sequence number of the ``PositionPoint`` to get.
-        :return: The :class:`PositionPoint` identified by ``sequence_number``
-        :raises: IndexError if this ``Location`` didn't contain ``sequence_number`` points.
+        `sequence_number` The sequence number of the `PositionPoint` to get.
+        Returns The `PositionPoint` identified by `sequence_number`
+        Raises IndexError if this `Location` didn't contain `sequence_number` points.
         """
         return self._position_points[sequence_number] if 0 < nlen(self._position_points) < sequence_number else None
 
@@ -147,16 +128,17 @@ class Location(IdentifiedObject):
 
     def add_point(self, point: PositionPoint, sequence_number: int = None) -> Location:
         """
-        Add a :class:`PositionPoint` to this ``Location``
-        :param point: The :class:`PositionPoint` to associate with this ``Location``.
-        :param sequence_number: The sequence number of the ``PositionPoint``.
-        :return: A reference to this ``Location`` to allow fluent use.
+        Associate a `PositionPoint` with this `Location`
+        `point` The `PositionPoint` to associate with this `Location`.
+        `sequence_number` The sequence number of the `PositionPoint`.
+        Returns A reference to this `Location` to allow fluent use.
+        Raises `ValueError` if `sequence_number` is set and not between 0 and `num_points()`
         """
         if sequence_number is None:
-            sequence_number = self.num_points
-        require(0 <= sequence_number <= self.num_points,
+            sequence_number = self.num_points()
+        require(0 <= sequence_number <= self.num_points(),
                 lambda: f"Unable to add PositionPoint to Location {str(self)}. Sequence number {sequence_number} is invalid. "
-                        f"Expected a value between 0 and {self.num_points}. Make sure you are adding the points in the correct order and there are no missing sequence numbers.")
+                        f"Expected a value between 0 and {self.num_points()}. Make sure you are adding the points in order and there are no gaps in the numbering.")
         self._position_points = [] if self._position_points is None else self._position_points
         self._position_points.insert(sequence_number, point)
         return self
@@ -166,10 +148,10 @@ class Location(IdentifiedObject):
 
     def remove_point(self, point: PositionPoint) -> Location:
         """
-        Remove a ``PositionPoint`` from this ``Location``
-        :param point: The ``PositionPoint`` to remove.
-        :raises: ValueError if ``point`` was not part of this ``Location``
-        :return: A reference to this ``Location`` to allow fluent use.
+        Remove a `PositionPoint` from this `Location`
+        `point` The `PositionPoint` to remove.
+        Raises `ValueError` if `point` was not part of this `Location`
+        Returns A reference to this `Location` to allow fluent use.
         """
         self._position_points = safe_remove(self._position_points, point)
         return self

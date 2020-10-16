@@ -1,3 +1,9 @@
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from zepben.cimbend.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.cimbend.cim.iec61968.assets.asset import Asset
 from zepben.cimbend.cim.iec61968.assets.pole import Pole
@@ -26,6 +32,7 @@ from zepben.cimbend.cim.iec61970.base.wires.energy_consumer import EnergyConsume
 from zepben.cimbend.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.cimbend.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
 from zepben.cimbend.cim.iec61970.base.wires.power_transformer import *
+from zepben.cimbend.cim.iec61970.infiec61970.feeder import Circuit, Loop
 from zepben.cimbend.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
@@ -223,6 +230,18 @@ def sub_geographical_region(substation: Substation) -> BoundReferenceResolver:
     return BoundReferenceResolver(substation, sub_to_sgr_resolver, sgr_to_sub_resolver)
 
 
+def circuits(substation: Substation) -> BoundReferenceResolver:
+    return BoundReferenceResolver(substation, sub_to_circuit_resolver, circuit_to_sub_resolver)
+
+
+def normal_energized_loops(substation: Substation) -> BoundReferenceResolver:
+    return BoundReferenceResolver(substation, sub_to_eloop_resolver, loop_to_esub_resolver)
+
+
+def loops(substation: Substation) -> BoundReferenceResolver:
+    return BoundReferenceResolver(substation, sub_to_loop_resolver, loop_to_sub_resolver)
+
+
 def conducting_equipment(terminal: Terminal) -> BoundReferenceResolver:
     return BoundReferenceResolver(terminal, term_to_ce_resolver, cond_equip_to_terminal_resolver)
 
@@ -253,3 +272,27 @@ def up_equipment(usage_point: UsagePoint) -> BoundReferenceResolver:
 
 def usage_point_location(usage_point: UsagePoint) -> BoundReferenceResolver:
     return BoundReferenceResolver(usage_point, up_to_loc_resolver, None)
+
+
+def loop(circuit: Circuit) -> BoundReferenceResolver:
+    return BoundReferenceResolver(circuit, circuit_to_loop_resolver, loop_to_circuit_resolver)
+
+
+def end_terminal(circuit: Circuit) -> BoundReferenceResolver:
+    return BoundReferenceResolver(circuit, circuit_to_term_resolver, None)
+
+
+def end_substation(circuit: Circuit) -> BoundReferenceResolver:
+    return BoundReferenceResolver(circuit, circuit_to_sub_resolver, sub_to_circuit_resolver)
+
+
+def loop_circuits(loop: Loop) -> BoundReferenceResolver:
+    return BoundReferenceResolver(loop, loop_to_circuit_resolver, circuit_to_loop_resolver)
+
+
+def loop_substations(loop: Loop) -> BoundReferenceResolver:
+    return BoundReferenceResolver(loop, loop_to_sub_resolver, sub_to_loop_resolver)
+
+
+def loop_energizing_substations(loop: Loop) -> BoundReferenceResolver:
+    return BoundReferenceResolver(loop, loop_to_esub_resolver, sub_to_eloop_resolver)

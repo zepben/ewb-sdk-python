@@ -1,23 +1,12 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
-
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 from collections import defaultdict
+from dataclassy import dataclass
 
 from zepben.cimbend.exceptions import PhaseException
 from zepben.cimbend.phases.direction import Direction
@@ -33,8 +22,8 @@ def cores_from_phases(phases: PhaseCode):
     """
     Convert a phase into its corresponding number of Cores
     TODO: handle all phases
-    :param phases: A :class:`zepben.cimbend.PhaseCode` to convert
-    :return: Number of cores
+    `phases` A `zepben.cimbend.PhaseCode` to convert
+    Returns Number of cores
     """
     if phases in (PhaseCode.ABC, PhaseCode.ABN, PhaseCode.ACN, PhaseCode.BCN):
         return 3
@@ -98,6 +87,7 @@ def remove(status: int, phs: SinglePhaseKind, dir_: Direction, nominal_phase: Si
     return status & ~(dir_.value << pos_shift(phs, nominal_phase))
 
 
+@dataclass(slots=True)
 class TracedPhases(object):
     """
     Class that holds the traced phase statuses for the current and normal state of the network.
@@ -114,9 +104,12 @@ class TracedPhases(object):
     Phase:           |    N    |    C    |    B    |    A    |
     Direction:       |OUT | IN |OUT | IN |OUT | IN |OUT | IN |
     """
-    def __init__(self):
-        self.normal_status = 0
-        self.current_status = 0
+    _normal_status: int = 0
+    _current_status: int = 0
+
+    def __init__(self, normal_status: int = 0, current_status: int = 0):
+        self._normal_status = normal_status
+        self._current_status = current_status
 
     def __str__(self):
         s = []
@@ -131,9 +124,9 @@ class TracedPhases(object):
     def phase_normal(self, nominal_phase: SinglePhaseKind):
         """
         Get the normal (nominal) phase for a core.
-        :param nominal_phase: The number of the core to check (between 0 - 4)
-        :return: :class:`zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` for the core
-        :raises: `CoreException` if core is invalid.
+        `nominal_phase` The number of the core to check (between 0 - 4)
+        Returns `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` for the core
+        Raises `CoreException` if core is invalid.
         """
         _valid_phase_check(nominal_phase)
         return phase(self.normal_status, nominal_phase)
@@ -141,8 +134,8 @@ class TracedPhases(object):
     def phase_current(self, nominal_phase: SinglePhaseKind):
         """
         Get the current (actual) phase for a core.
-        :param nominal_phase: The number of the core to check (between 0 - 4)
-        :return: :class:`zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` for the core
+        `nominal_phase` The number of the core to check (between 0 - 4)
+        Returns `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` for the core
         """
         _valid_phase_check(nominal_phase)
         return phase(self.current_status, nominal_phase)
@@ -150,8 +143,8 @@ class TracedPhases(object):
     def direction_normal(self, nominal_phase: SinglePhaseKind):
         """
         Get the normal (nominal) direction for a core.
-        :param nominal_phase: The number of the core to check (between 0 - 4)
-        :return: :class:`zepben.phases.direction.Direction` for the core
+        `nominal_phase` The number of the core to check (between 0 - 4)
+        Returns `zepben.phases.direction.Direction` for the core
         """
         _valid_phase_check(nominal_phase)
         return direction(self.normal_status, nominal_phase)
@@ -159,8 +152,8 @@ class TracedPhases(object):
     def direction_current(self, nominal_phase: SinglePhaseKind):
         """
         Get the current (actual) direction for a core.
-        :param nominal_phase: The number of the core to check (between 0 - 4)
-        :return: :class:`zepben.phases.direction.Direction` for the core
+        `nominal_phase` The number of the core to check (between 0 - 4)
+        Returns `zepben.phases.direction.Direction` for the core
         """
         _valid_phase_check(nominal_phase)
         return direction(self.current_status, nominal_phase)
@@ -168,12 +161,12 @@ class TracedPhases(object):
     def add_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction):
         """
         Add a normal phase
-        :param phs: The :class:`zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        :param nominal_phase: The core number this phase should be applied to
-        :param dir_: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
-        :return: True if phase status was changed, False otherwise.
-        :raises: :class:`zepben.phases.exceptions.PhaseException` if phases cross,
-                 :class:`zepben.phases.exceptions.CoreException` if `nominal_phase` is invalid.
+        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
+        `nominal_phase` The core number this phase should be applied to
+        `dir_` The direction of this phase relative to the location of the `zepben.cimbend.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
+        Returns True if phase status was changed, False otherwise.
+        Raises `zepben.phases.exceptions.PhaseException` if phases cross,
+                 `zepben.phases.exceptions.CoreException` if `nominal_phase` is invalid.
         """
         _valid_phase_check(nominal_phase)
         if phs == SinglePhaseKind.NONE or dir_ == Direction.NONE:
@@ -189,11 +182,11 @@ class TracedPhases(object):
     def add_current(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction):
         """
         Add a current phase
-        :param phs: The :class:`zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        :param nominal_phase: The core number this phase should be applied to
-        :param dir_: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
-        :return: True if phase status was changed, False otherwise.
-        :raises: :class:`zepben.phases.exceptions.PhaseException` if phases cross
+        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
+        `nominal_phase` The core number this phase should be applied to
+        `dir_` The direction of this phase relative to the location of the `zepben.cimbend.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
+        Returns True if phase status was changed, False otherwise.
+        Raises `zepben.phases.exceptions.PhaseException` if phases cross
         """
         _valid_phase_check(nominal_phase)
         if phs == SinglePhaseKind.NONE or dir_ == Direction.NONE:
@@ -208,10 +201,10 @@ class TracedPhases(object):
 
     def set_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction):
         """
-        :param phs: The :class:`zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        :param nominal_phase: The core number this phase should be applied to
-        :param dir_: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
-        :return: True if phase status was changed, False otherwise.
+        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
+        `nominal_phase` The core number this phase should be applied to
+        `dir_` The direction of this phase relative to the location of the `zepben.cimbend.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
+        Returns True if phase status was changed, False otherwise.
         """
         _valid_phase_check(nominal_phase)
         if phs == SinglePhaseKind.NONE or dir_ == Direction.NONE:
@@ -226,10 +219,10 @@ class TracedPhases(object):
 
     def set_current(self, phs: SinglePhaseKind, dir_: Direction, nominal_phase: SinglePhaseKind):
         """
-        :param phs: The :class:`zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        :param nominal_phase: The core number this phase should be applied to
-        :param dir_: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
-        :return: True if phase status was changed, False otherwise.
+        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
+        `nominal_phase` The core number this phase should be applied to
+        `dir_` The direction of this phase relative to the location of the `zepben.cimbend.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
+        Returns True if phase status was changed, False otherwise.
         """
         _valid_phase_check(nominal_phase)
         if phs == SinglePhaseKind.NONE or dir_ == Direction.NONE:
@@ -244,10 +237,10 @@ class TracedPhases(object):
 
     def remove_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction = None):
         """
-        :param phs: The :class:`zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        :param nominal_phase: The core number this phase should be applied to
-        :param dir_: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
-        :return: True if phase status was changed, False otherwise.
+        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
+        `nominal_phase` The core number this phase should be applied to
+        `dir_` The direction of this phase relative to the location of the `zepben.cimbend.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
+        Returns True if phase status was changed, False otherwise.
         """
         _valid_phase_check(nominal_phase)
         if phs != self.phase_normal(nominal_phase):
@@ -263,10 +256,10 @@ class TracedPhases(object):
 
     def remove_current(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction = None):
         """
-        :param phs: The :class:`zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        :param nominal_phase: The core number this phase should be applied to
-        :param dir_: The direction of this phase relative to the location of the `Terminal` to its feeder circuit breaker.
-        :return: True if phase status was changed, False otherwise.
+        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
+        `nominal_phase` The core number this phase should be applied to
+        `dir_` The direction of this phase relative to the location of the `zepben.cimbend.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
+        Returns True if phase status was changed, False otherwise.
         """
         _valid_phase_check(nominal_phase)
         if phs != self.phase_current(nominal_phase):
@@ -280,3 +273,5 @@ class TracedPhases(object):
             self.current_status = remove_all(self.current_status, nominal_phase)
             return True
 
+    def copy(self):
+        return TracedPhases()

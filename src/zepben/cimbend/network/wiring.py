@@ -1,20 +1,10 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from copy import deepcopy
 
@@ -26,7 +16,7 @@ __all__ = ["Wiring"]
 
 class Wiring(object):
     """
-    Represents the physical wiring of :class:`zepben.cimbend.Terminal`'s to :class:`zepben.cimbend.ConnectivityNode`'s
+    Represents the physical wiring of `zepben.cimbend.cim.iec61970.base.core.Terminal`'s to `zepben.cimbend.ConnectivityNode`'s
     """
 
     def __init__(self, num_cores: int):
@@ -38,9 +28,9 @@ class Wiring(object):
     def wire(self, terminal_wire: int, connectivity_node_wire: int):
         """
         Wire a terminal to a ConnectivityNode
-        :param terminal_wire: The terminal wire to connect to
-        :param connectivity_node_wire: The ConnectivityNode wire to connect to
-        :return:
+        `terminal_wire` The terminal wire to connect to
+        `connectivity_node_wire` The ConnectivityNode wire to connect to
+        Returns
         """
         if terminal_wire < 0 or terminal_wire > self.num_cores:
             raise WiringException(f"Invalid terminal wire specified, was {terminal_wire}")
@@ -56,8 +46,8 @@ class Wiring(object):
     def terminal_to_connectivity_node(self):
         """
         Create wiring from terminal to the ConnectivityNode
-        :return: A list of `self.num_cores` int's between [0, :data:`zepben.cimbend.cores.SUPPORTED_CORES`] representing
-                the wiring between cores from the `Terminal` to the `ConnectivityNode`
+        Returns A list of `self.num_cores` int's between [0, :data:`zepben.cimbend.cores.SUPPORTED_CORES`] representing
+                the wiring between cores from the `zepben.cimbend.iec61970.base.core.terminal.Terminal` to the `ConnectivityNode`
         """
         for i, v in enumerate(self.term_to_cn):
             if v == -1:
@@ -67,8 +57,8 @@ class Wiring(object):
     def connectivity_node_to_terminal(self):
         """
         Create wiring from terminal to the ConnectivityNode
-        :return: A list of `self.num_cores` int's between [0, :data:`zepben.cimbend.cores.SUPPORTED_CORES`] representing
-                the wiring between cores from the `ConnectivityNode` to the `Terminal`
+        Returns A list of `self.num_cores` int's between [0, :data:`zepben.cimbend.cores.SUPPORTED_CORES`] representing
+                the wiring between cores from the `ConnectivityNode` to the `zepben.cimbend.iec61970.base.core.terminal.Terminal`
         """
         cn_to_term = [-1 for _ in range(self.max_connectivity_node_wires + 1)]
         for i in range(len(self.term_to_cn)):

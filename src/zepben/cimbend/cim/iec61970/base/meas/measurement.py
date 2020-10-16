@@ -1,32 +1,20 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
-
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Optional
 
+from zepben.cimbend.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.cimbend.cim.iec61970.base.domain.unit_symbol import UnitSymbol
 
-__all__ = ["Measurement"]
+__all__ = ["Measurement", "Accumulator", "Analog", "Discrete"]
 
 
-@dataclass
 class Measurement(IdentifiedObject):
     """
     A Measurement represents any measured, calculated or non-measured non-calculated quantity. Any piece of equipment
@@ -49,11 +37,42 @@ class Measurement(IdentifiedObject):
 
     When the sensor location is needed both Measurement-PSR and Measurement-Terminal are used. The Measurement-Terminal
     association is never used alone.
-
-    Attributes -
-        power_system_resource_mrid : The MRID of the power system resource that contains the measurement.
-        remote_source : The :class:`scada.remote_source.RemoteSource` taking the ``Measurement``
     """
 
     power_system_resource_mrid: Optional[str] = None
+    """The MRID of the power system resource that contains the measurement."""
+
     remote_source: Optional[RemoteSource] = None
+    """The `zepben.cimbend.cim.iec61970.base.scada.remote_source.RemoteSource` taking the `Measurement`"""
+
+    terminal_mrid: Optional[str] = None
+    """A measurement may be associated with a terminal in the network."""
+
+    phases: PhaseCode = PhaseCode.ABC
+    """Indicates to which phases the measurement applies and avoids the need to use 'measurementType' to also encode phase information 
+    (which would explode the types). The phase information in Measurement, along with 'measurementType' and 'phases' uniquely defines a Measurement for a 
+    device, based on normal network phase. Their meaning will not change when the computed energizing phasing is changed due to jumpers or other reasons. 
+    If the attribute is missing three phases (ABC) shall be assumed."""
+
+    unitSymbol: UnitSymbol = UnitSymbol.NONE
+    """Specifies the type of measurement.  For example, this specifies if the measurement represents an indoor temperature, outdoor temperature, bus voltage, 
+    line flow, etc. When the measurementType is set to "Specialization", the type of Measurement is defined in more detail by the specialized class which 
+    inherits from Measurement."""
+
+
+class Accumulator(Measurement):
+    """Accumulator represents an accumulated (counted) Measurement, e.g. an energy value."""
+    pass
+
+
+class Analog(Measurement):
+    """Analog represents an analog Measurement."""
+
+    positive_flow_in: bool = False
+    """If true then this measurement is an active power, reactive power or current with the convention that a positive value measured at the 
+    Terminal means power is flowing into the related PowerSystemResource."""
+
+
+class Discrete(Measurement):
+    """Discrete represents a discrete Measurement, i.e. a Measurement representing discrete values, e.g. a Breaker position."""
+    pass

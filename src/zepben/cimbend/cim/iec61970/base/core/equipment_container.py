@@ -1,101 +1,92 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 from __future__ import annotations
 
-from dataclasses import dataclass, field, InitVar
-from typing import Optional, Dict, Set, Generator, List
+from typing import Optional, Dict, Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
-from zepben.cimbend.util import nlen, ngen, contains_mrid
+from zepben.cimbend.util import nlen, ngen
 
 __all__ = ['EquipmentContainer', 'Feeder', 'Site']
 
 
-@dataclass
 class EquipmentContainer(ConnectivityNodeContainer):
     """
     A modeling construct to provide a root class for containing equipment.
-
-    Attributes -
-        _equipment : The :class:`equipment.Equipment` contained in this ``EquipmentContainer``
     """
 
-    equipment_: InitVar[List[Equipment]] = field(default=list())
-    _equipment: Optional[Dict[str, Equipment]] = field(init=False, default=None)
+    _equipment: Optional[Dict[str, Equipment]] = None
+    """Map of Equipment in this EquipmentContainer by their mRID"""
 
-    def __post_init__(self, equipment_: List[Equipment]):
-        super().__post_init__()
-        for eq in equipment_:
-            self.add_equipment(eq)
+    def __init__(self, equipment: List[Equipment] = None):
+        if equipment:
+            for eq in equipment:
+                self.add_equipment(eq)
 
-    @property
     def num_equipment(self):
         """
-        :return: The number of :class:`equipment.Equipment`s associated with this ``EquipmentContainer``
+        Returns The number of `zepben.cimbend.iec61970.base.core.equipment.Equipment` associated with this `EquipmentContainer`
         """
         return nlen(self._equipment)
 
-    @property
     def equipment(self) -> Generator[Equipment, None, None]:
         """
-        :return: Generator over the ``Equipment``s of this ``EquipmentContainer``.
+        The `zepben.cimbend.iec61970.base.core.equipment.Equipment` contained in this `EquipmentContainer`
         """
-        return ngen(self._equipment)
+        return ngen(self._equipment.values())
 
     def get_equipment(self, mrid: str) -> Equipment:
         """
-        Get the ``Equipment`` for this ``EquipmentContainer`` identified by ``mrid``
+        Get the `zepben.cimbend.iec61970.base.core.equipment.Equipment` for this `EquipmentContainer` identified by `mrid`
 
-        :param mrid: the mRID of the required :class:`equipment.Equipment`
-        :return: The :class:`equipment.Equipment` with the specified ``mrid`` if it exists
-        :raises: KeyError if mrid wasn't present.
+        `mrid` the mRID of the required `zepben.cimbend.iec61970.base.core.equipment.Equipment`
+        Returns The `zepben.cimbend.iec61970.base.core.equipment.Equipment` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
         """
-        return self._equipment[mrid]
+        try:
+            return self._equipment[mrid]
+        except AttributeError:
+            raise KeyError(mrid)
 
-    def add_equipment(self, equipment: Equipment) -> Equipment:
+    def add_equipment(self, equipment: Equipment) -> EquipmentContainer:
         """
-        :param equipment: the :class:`equipment.Equipment` to associate with this ``EquipmentContainer``.
-        :return: The previous ``Equipment`` stored by ``equipment``s mrid, otherwise ``equipment`` is returned
-        if there was no previous value.
+        Associate `equipment` with this `EquipmentContainer`.
+
+        `equipment` The `zepben.cimbend.iec61970.base.core.equipment.Equipment` to associate with this `EquipmentContainer`.
+        Returns A reference to this `EquipmentContainer` to allow fluent use.
+        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `EquipmentContainer`.
         """
+        if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
+            return self
         self._equipment = dict() if self._equipment is None else self._equipment
-        return self._equipment.setdefault(equipment.mrid, equipment)
+        self._equipment[equipment.mrid] = equipment
+        return self
 
-    def remove_equipment(self, equipment: Equipment) -> Equipment:
+    def remove_equipment(self, equipment: Equipment) -> EquipmentContainer:
         """
-        :param equipment: the :class:`equipment.Equipment` to disassociate with this ``EquipmentContainer``.
-        :raises: KeyError if ``equipment`` was not associated with this ``EquipmentContainer``.
-        :return: The previous ``Equipment`` stored by ``equipment``s mrid if it existed.
+        Disassociate `equipment` from this `EquipmentContainer`
+
+        `equipment` The `zepben.cimbend.iec61970.base.core.equipment.Equipment` to disassociate with this `EquipmentContainer`.
+        Returns A reference to this `EquipmentContainer` to allow fluent use.
+        Raises `KeyError` if `equipment` was not associated with this `EquipmentContainer`.
         """
-        if self._equipment is not None:
-            previous = self._equipment[equipment.mrid]
+        if self._equipment:
             del self._equipment[equipment.mrid]
         else:
             raise KeyError(equipment)
 
         if not self._equipment:
             self._equipment = None
-        return previous
+        return self
 
     def clear_equipment(self) -> EquipmentContainer:
         """
         Clear all equipment.
-        :return: A reference to this ``EquipmentContainer`` to allow fluent use.
+        Returns A reference to this `EquipmentContainer` to allow fluent use.
         """
         self._equipment = None
         return self
@@ -103,7 +94,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
     def current_feeders(self) -> Generator[Feeder, None, None]:
         """
         Convenience function to find all of the current feeders of the equipment associated with this equipment container.
-        :return: the current feeders for all associated feeders
+        Returns the current feeders for all associated feeders
         """
         seen = set()
         for equip in self._equipment.values():
@@ -115,7 +106,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
     def normal_feeders(self) -> Generator[Feeder, None, None]:
         """
         Convenience function to find all of the normal feeders of the equipment associated with this equipment container.
-        :return: the normal feeders for all associated feeders
+        Returns the normal feeders for all associated feeders
         """
         seen = set()
         for equip in self._equipment.values():
@@ -125,92 +116,108 @@ class EquipmentContainer(ConnectivityNodeContainer):
                     yield f
 
 
-@dataclass
 class Feeder(EquipmentContainer):
     """
     A collection of equipment for organizational purposes, used for grouping distribution resources.
     The organization of a feeder does not necessarily reflect connectivity or current operation state.
-
-    Attributes -
-        normal_head_terminal : The normal head terminal or terminals of the feeder.
-        normal_energizing_substation : The substation that nominally energizes the feeder. Also used for naming purposes.
-        _current_equipment : The :class:`equipment.Equipment` of this ``Feeder``
     """
-    normal_head_terminal: Optional[Terminal] = None
-    normal_energizing_substation: Optional[Substation] = None
-    currentequipment: InitVar[List[Equipment]] = field(default=list())
-    _current_equipment: Optional[Dict[str, Equipment]] = field(init=False, default=None)
 
-    def __post_init__(self, equipment_: List[Equipment], currentequipment: List[Equipment]):
-        super().__post_init__(equipment_)
-        for eq in currentequipment:
-            self.add_current_equipment(eq)
+    _normal_head_terminal: Optional[Terminal] = None
+    """The normal head terminal or terminals of the feeder."""
+
+    normal_energizing_substation: Optional[Substation] = None
+    """The substation that nominally energizes the feeder. Also used for naming purposes."""
+
+    _current_equipment: Optional[Dict[str, Equipment]] = None
+
+    def __init__(self, normal_head_terminal: Terminal = None, equipment: List[Equipment] = None, current_equipment: List[Equipment] = None):
+        super().__init__(equipment)
+        self.normal_head_terminal = normal_head_terminal
+        if current_equipment:
+            for eq in current_equipment:
+                self.add_current_equipment(eq)
 
     @property
+    def normal_head_terminal(self):
+        """The normal head terminal or terminals of the feeder."""
+        return self._normal_head_terminal
+
+    @normal_head_terminal.setter
+    def normal_head_terminal(self, term):
+        if self._normal_head_terminal is None or self._normal_head_terminal is term:
+            self._normal_head_terminal = term
+        else:
+            raise ValueError(f"normal_head_terminal for {str(self)} has already been set to {self._normal_head_terminal}, cannot reset this field to {term}")
+
+    @property
+    def current_equipment(self) -> Generator[Equipment, None, None]:
+        """
+        Contained `zepben.cimbend.iec61970.base.core.equipment.Equipment` using the current state of the network.
+        """
+        return ngen(self._current_equipment)
+
     def num_current_equipment(self):
         """
-        :return: The number of :class:`equipment.Equipment`s associated with this ``Feeder``
+        Returns The number of `zepben.cimbend.iec61970.base.core.equipment.Equipment` associated with this `Feeder`
         """
         return nlen(self._current_equipment)
 
     def get_current_equipment(self, mrid: str) -> Equipment:
         """
-        Get the ``Equipment`` for this ``Feeder`` identified by ``mrid``
+        Get the `zepben.cimbend.iec61970.base.core.equipment.Equipment` for this `Feeder` identified by `mrid`
 
-        :param mrid: the mRID of the required :class:`equipment.Equipment`
-        :return: The :class:`equipment.Equipment` with the specified ``mrid`` if it exists
-        :raises: KeyError if mrid wasn't present.
+        `mrid` The mRID of the required `zepben.cimbend.iec61970.base.core.equipment.Equipment`
+        Returns The `zepben.cimbend.iec61970.base.core.equipment.Equipment` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
         """
-        return self._current_equipment[mrid]
+        try:
+            return self._current_equipment[mrid]
+        except AttributeError:
+            raise KeyError(mrid)
 
-    @property
-    def current_equipment(self) -> Generator[Equipment, None, None]:
+    def add_current_equipment(self, equipment: Equipment) -> Feeder:
         """
-        Perform the specified action against each :class:`equipment.Equipment` associated with this ``Feeder``.
+        Associate `equipment` with this `Feeder`.
 
-        :return: A reference to this ``Feeder`` to allow fluent use.
+        `equipment` the `zepben.cimbend.iec61970.base.core.equipment.Equipment` to associate with this `Feeder`.
+        Returns A reference to this `Feeder` to allow fluent use.
+        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `Feeder`.
         """
-        return ngen(self._current_equipment)
-
-    def add_current_equipment(self, equipment: Equipment) -> Equipment:
-        """
-        :param equipment: the :class:`equipment.Equipment` to associate with this ``Feeder``.
-        :return: The previous ``Equipment`` stored by ``equipment``s mrid, otherwise ``equipment`` is returned
-        if there was no previous value.
-        """
+        if self._validate_reference(equipment, self.get_current_equipment, "An Equipment"):
+            return self
         self._current_equipment = dict() if self._current_equipment is None else self._current_equipment
-        return self._current_equipment.setdefault(equipment.mrid, equipment)
+        self._equipment[equipment.mrid] = equipment
+        return self
 
-    def remove_current_equipment(self, equipment: Equipment) -> Equipment:
+    def remove_current_equipment(self, equipment: Equipment) -> Feeder:
         """
-        :param equipment: the :class:`equipment.Equipment` to disassociate with this ``Feeder``.
-        :raises: KeyError if ``equipment`` was not associated with this ``Feeder``.
-        :return: The previous ``Equipment`` stored by ``equipment``s mrid if it existed.
+        Disassociate `equipment` from this `Feeder`
+
+        `equipment` The `equipment.Equipment` to disassociate from this `Feeder`.
+        Returns A reference to this `Feeder` to allow fluent use.
+        Raises `KeyError` if `equipment` was not associated with this `Feeder`.
         """
-        if self._current_equipment is not None:
-            previous = self._current_equipment[equipment.mrid]
+        if self._current_equipment:
             del self._current_equipment[equipment.mrid]
         else:
             raise KeyError(equipment)
 
         if not self._current_equipment:
             self._current_equipment = None
-        return previous
+        return self
 
     def clear_current_equipment(self) -> Feeder:
         """
         Clear all equipment.
-        :return: A reference to this ``Feeder`` to allow fluent use.
+        Returns A reference to this `Feeder` to allow fluent use.
         """
         self._current_equipment = None
         return self
 
 
-@dataclass
 class Site(EquipmentContainer):
     """
     A collection of equipment for organizational purposes, used for grouping distribution resources located at a site.
-    Note this is not a CIM concept - however represents an ``EquipmentContainer`` in CIM. This is to avoid the use of
-    ``EquipmentContainer`` as a concrete class.
+    Note this is not a CIM concept - however represents an `EquipmentContainer` in CIM. This is to avoid the use of `EquipmentContainer` as a concrete class.
     """
     pass

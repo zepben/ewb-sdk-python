@@ -1,23 +1,11 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import List
 
 from zepben.cimbend.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -25,8 +13,25 @@ from zepben.cimbend.cim.iec61970.base.wires.single_phase_kind import SinglePhase
 
 __all__ = ["Switch", "Breaker", "Disconnector", "Jumper", "Fuse", "ProtectedSwitch", "Recloser"]
 
+from zepben.cimbend.util import require
 
-@dataclass
+
+def _calculate_open_state(current_state: int, is_open: bool, phase: SinglePhaseKind) -> int:
+    require(phase != SinglePhaseKind.NONE and phase != SinglePhaseKind.INVALID, lambda: f"Invalid phase {phase} specified")
+    if phase is None:
+        return 0b1111 if is_open else 0
+    else:
+        return current_state | phase.bit_mask if is_open else current_state & ~phase.bit_mask
+
+
+def _check_open(current_state: int, phase: SinglePhaseKind = None) -> bool:
+    require(phase != SinglePhaseKind.NONE and phase != SinglePhaseKind.INVALID, lambda: f"Invalid phase {phase} specified")
+    if phase is None:
+        return current_state != 0
+    else:
+        return (current_state & phase.bit_mask()) != 0
+
+
 class Switch(ConductingEquipment):
     """
     A generic device designed to close, or open, or both, one or more electric circuits.
@@ -38,31 +43,28 @@ class Switch(ConductingEquipment):
 
     Attributes -
 
-        _open : The attribute tells if the switch is considered open when used as input to topology processing.
+        _open :
         _normal_open : The attribute is used in cases when no Measurement for the status value is present. If the Switch
                        has a status measurement the Discrete.normalValue is expected to match with the Switch.normalOpen.
     """
 
-    _open: int = field(init=False, default=0)
-    _normal_open: int = field(init=False, default=0)
+    _open: int = 0
+    _normal_open: int = 0
 
-    def __post_init__(self, usagepoints: List[UsagePoint],
-                      equipmentcontainers: List[EquipmentContainer],
-                      operationalrestrictions: List[OperationalRestriction],
-                      currentfeeders: List[Feeder],
-                      terminals_: List[Terminal]):
-        super().__post_init__(usagepoints, equipmentcontainers, operationalrestrictions, currentfeeders, terminals_)
+    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
+                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None):
+        super().__init__(usage_points, equipment_containers, operational_restrictions, current_feeders, terminals)
         self.set_open(False)
         self.set_normally_open(False)
 
-    def normally_open(self, phase: SinglePhaseKind):
+    def is_normally_open(self, phase: SinglePhaseKind = None):
         """
-        Check if the switch is normally open on ``phase``.
+        Check if the switch is normally open on `phase`.
 
-        :param phase: The :class:`single_phase_kind.SinglePhaseKind` to check the normal status
-        :return: The status of the ``phase`` in its normal state
+        `phase` The `single_phase_kind.SinglePhaseKind` to check the normal status. A `phase` of `None` (default) checks if any phase is open.
+        Returns True if `phase` is open in its normal state, False if it is closed
         """
-        self._check_open(self._normal_open, phase)
+        return _check_open(self._normal_open, phase)
 
     def get_normal_state(self) -> int:
         """
@@ -70,66 +72,40 @@ class Switch(ConductingEquipment):
         """
         return self._normal_open
 
-    def is_open(self, phase: SinglePhaseKind):
+    def is_open(self, phase: SinglePhaseKind = None):
         """
-        Check if the switch is currently open on ``phase``.
+        Check if the switch is currently open on `phase`.
 
-        :param phase: The :class:`single_phase_kind.SinglePhaseKind` to check the current status
-        :return: The status of the ``phase`` in its current state
+        `phase` The `zepben.cimbend.cim.iec61970.base.wires.single_phase_kind.SinglePhaseKind` to check the current status. A `phase` of `None` (default) checks
+        if any phase is open.
+        Returns True if `phase` is open in its current state, False if it is closed
         """
-        self._check_open(self._open, phase)
+        return _check_open(self._open, phase)
 
     def get_state(self) -> int:
         """
+        The attribute tells if the switch is considered open when used as input to topology processing.
         Get the underlying open states. Stored as 4 bits, 1 per phase.
         """
         return self._open
 
     def set_normally_open(self, is_normally_open: bool, phase: SinglePhaseKind = SinglePhaseKind.NONE) -> Switch:
         """
-        :param is_normally_open: indicates if the phase(s) should be opened.
-        :param phase: the phase to set the normal status. If unset will default to all phases.
-        :return: This ``Switch`` to be used fluently.
+        `is_normally_open` indicates if the phase(s) should be opened.
+        `phase` the phase to set the normal status. If set to `SinglePhaseKind.NONE` will default to all phases (default).
+        Returns This `Switch` to be used fluently.
         """
-        self._normal_open = self._calculate_open_state(self._normal_open, is_normally_open, phase)
+        self._normal_open = _calculate_open_state(self._normal_open, is_normally_open, phase)
         return self
 
     def set_open(self, is_open: bool, phase: SinglePhaseKind = SinglePhaseKind.NONE) -> Switch:
         """
-        :param is_open: indicates if the phase(s) should be opened.
-        :param phase: the phase to set the current status. If unset will default to all phases.
-        :return: This ``Switch`` to be used fluently.
+        `is_open` indicates if the phase(s) should be opened.
+        `phase` the phase to set the current status. If set to `SinglePhaseKind.NONE` will default to all phases (default).
+        Returns This `Switch` to be used fluently.
         """
-        self._open = self._calculate_open_state(self._open, is_open, phase)
+        self._open = _calculate_open_state(self._open, is_open, phase)
         return self
-
-    def _check_open(self, current_state: int, phase: SinglePhaseKind) -> bool:
-        if phase == SinglePhaseKind.NONE or self.num_terminals == 0:
-            return current_state != 0
-
-        res = None
-        for _, term in self.terminals:
-            if res is None and term.phases.single_phases.contains(phase):
-                res = current_state & phase.bit_mask() != 0
-
-        if res is None:
-            raise ValueError(f"Invalid phase {phase} specified")
-
-        return res
-
-    def _calculate_open_state(self, current_state: int, is_open: bool, phase: SinglePhaseKind) -> int:
-        if phase == SinglePhaseKind.NONE or self.num_terminals == 0:
-            return 0b1111 if is_open else 0
-
-        new_state = None
-        for _, term in self.terminals:
-            if new_state is None and term.phases.single_phases.contains(phase):
-                new_state = current_state | phase.bit_mask if is_open else current_state & ~phase.bit_mask
-
-        if new_state is None:
-            raise ValueError(f"Invalid phase {phase} specified")
-
-        return new_state
 
 
 class ProtectedSwitch(Switch):
@@ -139,22 +115,18 @@ class ProtectedSwitch(Switch):
     pass
 
 
-@dataclass
 class Breaker(ProtectedSwitch):
     """
     A mechanical switching device capable of making, carrying, and breaking currents under normal circuit conditions
     and also making, carrying for a specified time, and breaking currents under specified abnormal circuit conditions
     e.g. those of short circuit.
-
-    Attributes -
-        Same as :class:`Switch`
     """
 
     def is_substation_breaker(self):
+        """Convenience function for detecting if this breaker is part of a substation. Returns true if this Breaker is associated with a Substation."""
         return self.num_substations > 0
 
 
-@dataclass
 class Disconnector(Switch):
     """
     A manually operated or motor operated mechanical switching device used for changing the connections in a circuit,
@@ -164,7 +136,6 @@ class Disconnector(Switch):
     pass
 
 
-@dataclass
 class Fuse(Switch):
     """
     An overcurrent protective device with a circuit opening fusible part that is heated and severed by the passage of
@@ -173,7 +144,6 @@ class Fuse(Switch):
     pass
 
 
-@dataclass
 class Jumper(Switch):
     """
     A short section of conductor with negligible impedance which can be manually removed and replaced if the circuit is de-energized.
@@ -182,7 +152,6 @@ class Jumper(Switch):
     pass
 
 
-@dataclass
 class Recloser(ProtectedSwitch):
     """
     Pole-mounted fault interrupter with built-in phase and ground relays, current transformer (CT), and supplemental controls.

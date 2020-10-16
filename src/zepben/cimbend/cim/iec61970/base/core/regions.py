@@ -1,168 +1,153 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 from __future__ import annotations
 
-from dataclasses import dataclass, InitVar, field
 from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.cimbend.util import nlen, get_by_mrid, contains_mrid, require, ngen
+from zepben.cimbend.util import nlen, get_by_mrid, ngen, safe_remove
 
 __all__ = ["GeographicalRegion", "SubGeographicalRegion"]
 
 
-@dataclass
 class GeographicalRegion(IdentifiedObject):
     """
     A geographical region of a power system network phases.
     """
-    subgeographicalregions: InitVar[List[SubGeographicalRegion]] = field(default=list())
-    _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = field(init=False, default=None)
+    _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = None
 
-    def __post_init__(self, subgeographicalregions: List[SubGeographicalRegion]):
-        super().__post_init__()
-        for sgr in subgeographicalregions:
-            self.add_sub_geographical_region(sgr)
+    def __init__(self, sub_geographical_regions: List[SubGeographicalRegion] = None):
+        if sub_geographical_regions:
+            for sgr in sub_geographical_regions:
+                self.add_sub_geographical_region(sgr)
 
-    @property
     def num_sub_geographical_regions(self) -> int:
         """
-        :return: The number of :class:`SubGeographicalRegion`s associated with this ``GeographicalRegion``
+        Returns The number of `SubGeographicalRegion`s associated with this `GeographicalRegion`
         """
         return nlen(self._sub_geographical_regions)
 
     @property
     def sub_geographical_regions(self) -> Generator[SubGeographicalRegion, None, None]:
         """
-        :return: Generator over the ``SubGeographicalRegion``s of this ``EquipmentContainer``.
+        The `SubGeographicalRegion`s of this `GeographicalRegion`.
         """
         return ngen(self._sub_geographical_regions)
 
     def get_sub_geographical_region(self, mrid: str) -> SubGeographicalRegion:
         """
-        Get the ``SubGeographicalRegion`` for this ``GeographicalRegion`` identified by ``mrid``
+        Get the `SubGeographicalRegion` for this `GeographicalRegion` identified by `mrid`
 
-        :param mrid: the mRID of the required :class:`SubGeographicalRegion`
-        :return: The :class:`SubGeographicalRegion` with the specified ``mrid`` if it exists
-        :raises: KeyError if mrid wasn't present.
+        `mrid` The mRID of the required `SubGeographicalRegion`
+        Returns The `SubGeographicalRegion` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._sub_geographical_regions, mrid)
 
     def add_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> GeographicalRegion:
         """
-        :param sub_geographical_region: the :class:`SubGeographicalRegion` to associate with this ``GeographicalRegion``.
-        :return: A reference to this ``GeographicalRegion`` to allow fluent use.
+        Associate a `SubGeographicalRegion` with this `GeographicalRegion`
+
+        `sub_geographical_region` The `SubGeographicalRegion` to associate with this `GeographicalRegion`.
+        Returns A reference to this `GeographicalRegion` to allow fluent use.
+        Raises `ValueError` if another `SubGeographicalRegion` with the same `mrid` already exists for this `GeographicalRegion`.
         """
-        require(not contains_mrid(self._sub_geographical_regions, sub_geographical_region.mrid),
-                lambda: f"A SubGeographicalRegion with mRID {sub_geographical_region.mrid} already exists in {str(self)}.")
+        if self._validate_reference(sub_geographical_region, self.get_sub_geographical_region, "A SubgeographicalRegion"):
+            return self
         self._sub_geographical_regions = list() if self._sub_geographical_regions is None else self._sub_geographical_regions
         self._sub_geographical_regions.append(sub_geographical_region)
         return self
 
     def remove_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> GeographicalRegion:
         """
-        :param sub_geographical_region: The :class:`SubGeographicalRegion` to disassociate from this ``GeographicalRegion``.
-        :raises: KeyError if ``sub_geographical_region`` was not associated with this ``GeographicalRegion``.
-        :return: A reference to this ``GeographicalRegion`` to allow fluent use.
+        Disassociate `sub_geographical_region` from this `GeographicalRegion`
+        `sub_geographical_region` The `SubGeographicalRegion` to disassociate from this `GeographicalRegion`.
+        Returns A reference to this `GeographicalRegion` to allow fluent use.
+        Raises `ValueError` if `sub_geographical_region` was not associated with this `GeographicalRegion`.
         """
-        if self._sub_geographical_regions is not None:
-            self._sub_geographical_regions.remove(sub_geographical_region)
-            if not self._sub_geographical_regions:
-                self._sub_geographical_regions = None
-        else:
-            raise KeyError(sub_geographical_region)
-
+        self._sub_geographical_regions = safe_remove(self._sub_geographical_regions, sub_geographical_region)
         return self
 
     def clear_sub_geographical_regions(self) -> GeographicalRegion:
         """
         Clear all SubGeographicalRegions.
-        :return: A reference to this ``GeographicalRegion`` to allow fluent use.
+        Returns A reference to this `GeographicalRegion` to allow fluent use.
         """
         self._sub_geographical_regions = None
         return self
 
 
-@dataclass
 class SubGeographicalRegion(IdentifiedObject):
+    """
+    A subset of a geographical region of a power system network model.
+    """
+
     geographical_region: Optional[GeographicalRegion] = None
-    substations_: InitVar[List[Substation]] = field(default=list())
-    _substations: Optional[List[Substation]] = field(init=False, default=None)
+    """The geographical region to which this sub-geographical region is within."""
 
-    def __post_init__(self, substations_: List[Substation]):
-        super().__post_init__()
-        for sub in substations_:
-            self.add_substation(sub)
+    _substations: Optional[List[Substation]] = None
 
-    @property
+    def __init__(self, substations: List[Substation] = None):
+        if substations:
+            for sub in substations:
+                self.add_substation(sub)
+
     def num_substations(self) -> int:
         """
-        :return: The number of :class:`substation.Substation`s associated with this ``SubGeographicalRegion``
+        Returns The number of `zepben.cimbend.iec61970.base.core.substation.Substation`s associated with this `SubGeographicalRegion`
         """
         return nlen(self._substations)
 
     @property
     def substations(self) -> Generator[Substation, None, None]:
         """
-        :return: Generator over the ``Substation``s of this ``EquipmentContainer``.
+        All substations belonging to this sub geographical region.
         """
         return ngen(self._substations)
 
     def get_substation(self, mrid: str) -> Substation:
         """
-        Get the ``Substation`` for this ``SubGeographicalRegion`` identified by ``mrid``
+        Get the `zepben.cimbend.iec61970.base.core.substation.Substation` for this `SubGeographicalRegion` identified by `mrid`
 
-        :param mrid: the mRID of the required :class:`Substation`
-        :return: The :class:`Substation` with the specified ``mrid`` if it exists
-        :raises: KeyError if mrid wasn't present.
+        `mrid` the mRID of the required `zepben.cimbend.iec61970.base.core.substation.Substation`
+        Returns The `zepben.cimbend.iec61970.base.core.substation.Substation` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._substations, mrid)
 
     def add_substation(self, substation: Substation) -> SubGeographicalRegion:
         """
-        :param substation: the :class:`substation.Substation` to associate with this ``SubGeographicalRegion``.
-        :return: A reference to this ``SubGeographicalRegion`` to allow fluent use.
+        Associate a `Substation` with this `GeographicalRegion`
+
+        `substation` the `zepben.cimbend.iec61970.base.core.substation.Substation` to associate with this `SubGeographicalRegion`.
+        Returns A reference to this `SubGeographicalRegion` to allow fluent use.
+        Raises `ValueError` if another `zepben.cimbend.iec61970.base.core.substation.Substation` with the same `mrid` already exists for this `GeographicalRegion`.
         """
-        require(not contains_mrid(self._substations, substation.mrid),
-                lambda: f"A Substation with mRID {substation.mrid} already exists in {str(self)}.")
+        if self._validate_reference(substation, self.get_substation, "A Substation"):
+            return self
         self._substations = list() if self._substations is None else self._substations
         self._substations.append(substation)
         return self
 
     def remove_substation(self, substation: Substation) -> SubGeographicalRegion:
         """
-        :param substation: The :class:`substation.Substation` to disassociate from this ``SubGeographicalRegion``.
-        :raises: KeyError if ``substation`` was not associated with this ``SubGeographicalRegion``.
-        :return: A reference to this ``SubGeographicalRegion`` to allow fluent use.
-        """
-        if self._substations is not None:
-            self._substations.remove(substation)
-            if not self._substations:
-                self._substations = None
-        else:
-            raise KeyError(substation)
+        Disassociate `substation` from this `GeographicalRegion`
 
+        `substation` The `zepben.cimbend.iec61970.base.core.substation.Substation` to disassociate from this `SubGeographicalRegion`.
+        Returns A reference to this `SubGeographicalRegion` to allow fluent use.
+        Raises `ValueError` if `substation` was not associated with this `SubGeographicalRegion`.
+        """
+        self._substations = safe_remove(self._substations, substation)
         return self
 
     def clear_substations(self) -> SubGeographicalRegion:
         """
-        Clear all ``Substations``.
-        :return: A reference to this ``SubGeographicalRegion`` to allow fluent use.
+        Clear all `Substations`.
+        Returns A reference to this `SubGeographicalRegion` to allow fluent use.
         """
         self._substations = None
         return self

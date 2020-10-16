@@ -1,73 +1,44 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+from zepben.cimbend.cim.iec61970.base.meas.value import *
+from zepben.protobuf.cim.iec61970.base.meas.MeasurementValue_pb2 import MeasurementValue as PBMeasurementValue
+from zepben.protobuf.cim.iec61970.base.meas.AccumulatorValue_pb2 import AccumulatorValue as PBAccumulatorValue
+from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue as PBAnalogValue
+from zepben.protobuf.cim.iec61970.base.meas.DiscreteValue_pb2 import DiscreteValue as PBDiscreteValue
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
-
-from dataclasses import dataclass
-
-from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control as PBControl
-from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPoint
-from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
-from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
-from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
-from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
-
-from zepben.cimbend.common.base_proto2cim import *
-from zepben.cimbend.cim.iec61970.base.meas.iopoint import IoPoint
-from zepben.cimbend.cim.iec61970 import Control
-from zepben.cimbend.cim.iec61970 import Measurement
-from zepben.cimbend.cim.iec61970.base.scada.remote_control import RemoteControl
-from zepben.cimbend.cim.iec61970 import RemotePoint
-from zepben.cimbend.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.cimbend.measurement.measurements import MeasurementService
 
-__all__ = ["MeasurementProtoToCim", "set_remotepoint", "set_iopoint"]
+__all__ = ["measurementvalue_to_cim", "analogvalue_to_cim", "accumulatorvalue_to_cim", "discretevalue_to_cim"]
 
 
-def set_iopoint(pb: PBIoPoint, cim: IoPoint):
-    set_identifiedobject(pb.io, cim)
+# IEC61970 MEAS
+def measurementvalue_to_cim(pb: PBMeasurementValue, cim: MeasurementValue):
+    cim.time_stamp = pb.timeStamp.ToDatetime()
 
 
-def set_remotepoint(pb: PBRemotePoint, cim: RemotePoint):
-    set_identifiedobject(pb.io, cim)
+def analogvalue_to_cim(pb: PBAnalogValue, service: MeasurementService):
+    cim = AnalogValue(analog_mrid=pb.analogMRID, value=pb.value)
+    measurementvalue_to_cim(pb.mv, cim)
+    service.add(cim)
 
 
-@dataclass
-class MeasurementProtoToCim(BaseProtoToCim):
-    service: MeasurementService
+def accumulatorvalue_to_cim(pb: PBAccumulatorValue, service: MeasurementService):
+    cim = AccumulatorValue(accumulator_mrid=pb.accumulatorMRID, value=pb.value)
+    measurementvalue_to_cim(pb.mv, cim)
+    service.add(cim)
 
-    def add_control(self, pb: PBControl):
-        cim = Control(pb.mrid())
-        set_iopoint(pb.ip, cim)
-        cim.remote_control = self._ensure_get(pb.remoteControlMRID, RemoteControl, cim)
-        self.service.add(cim)
 
-    def add_measurement(self, pb: PBMeasurement):
-        cim = Measurement(pb.mrid())
-        set_identifiedobject(pb.io, cim)
-        cim.remote_source = self._ensure_get(pb.remoteSourceMRID, RemoteSource, cim)
-        self.service.add(cim)
+def discretevalue_to_cim(pb: PBDiscreteValue, service: MeasurementService):
+    cim = DiscreteValue(discrete_mrid=pb.discreteMRID, value=pb.value)
+    measurementvalue_to_cim(pb.mv, cim)
+    service.add(cim)
 
-    def add_remotecontrol(self, pb: PBRemoteControl):
-        cim = RemoteControl(pb.mrid())
-        set_remotepoint(pb.rp, cim)
-        self.service.add(cim)
 
-    def add_remotesource(self, pb: PBRemoteSource):
-        cim = RemoteSource(pb.mrid())
-        set_remotepoint(pb.rp, cim)
-        self.service.add(cim)
+PBAccumulatorValue.to_cim = accumulatorvalue_to_cim
+PBAnalogValue.to_cim = analogvalue_to_cim
+PBDiscreteValue.to_cim = discretevalue_to_cim
+PBMeasurementValue.to_cim = measurementvalue_to_cim

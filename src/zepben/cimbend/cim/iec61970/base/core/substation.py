@@ -1,101 +1,273 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 from __future__ import annotations
 
-from dataclasses import dataclass, field, InitVar
 from typing import Optional, Generator, List
 
 from zepben.cimbend.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.cimbend.cim.iec61970.base.core.regions import SubGeographicalRegion
-from zepben.cimbend.util import nlen, get_by_mrid, contains_mrid, require, ngen
+from zepben.cimbend.util import nlen, get_by_mrid, contains_mrid, require, ngen, safe_remove
 
 __all__ = ["Substation"]
 
 
-@dataclass
 class Substation(EquipmentContainer):
-    sub_geographical_region: Optional[SubGeographicalRegion] = None
-    normalenergizedfeeders: InitVar[List[Feeder]] = field(default=list())
-    _normal_energized_feeders: Optional[List[Feeder]] = field(init=False, default=None)
+    """
+    A collection of equipment for purposes other than generation or utilization, through which electric energy in bulk
+    is passed for the purposes of switching or modifying its characteristics.
+    """
 
-    def __post_init__(self, equipment_: List[Equipment], normalenergizedfeeders: List[Feeder]):
-        super().__post_init__(equipment_)
-        for feeder in normalenergizedfeeders:
-            self.add_feeder(feeder)
+    sub_geographical_region: Optional[SubGeographicalRegion] = None
+    """The SubGeographicalRegion containing the substation."""
+
+    _normal_energized_feeders: Optional[List[Feeder]] = None
+
+    _loops: Optional[List[Loop]] = None
+
+    _energized_loops: Optional[List[Loop]] = None
+
+    _circuits: Optional[List[Circuit]] = None
+
+    def __init__(self, equipment: List[Equipment] = None, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None,
+                 energized_loops: List[Loop] = None, circuits: List[Circuit] = None):
+        super().__init__(equipment)
+        if normal_energized_feeders:
+            for feeder in normal_energized_feeders:
+                self.add_feeder(feeder)
+        if loops:
+            for loop in loops:
+                self.add_loop(loop)
+        if energised_loops:
+            for loop in energized_loops:
+                self.add_energized_loop(loop)
+        if circuits:
+            for circuit in circuits:
+                self.add_circuit(circuit)
 
     @property
-    def num_feeders(self):
+    def circuits(self) -> Generator[Circuit, None, None]:
         """
-        :return: The number of :class:`zepben.cimbend.iec61970.base.core.equipment_container.Feeder`s associated
-        with this ``Substation``
+        The `zepben.cimbend.cim.infiec61970.feeder.circuit.Circuit`s originating from this substation.
         """
-        return nlen(self._normal_energized_feeders)
+        return ngen(self._circuits)
+
+    @property
+    def loops(self) -> Generator[Loop, None, None]:
+        """
+        The `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` originating from this substation.
+        """
+        return ngen(self._loops)
+
+    @property
+    def energized_loops(self) -> Generator[Loop, None, None]:
+        """
+        The `zepben.cimbend.cim.infiec61970.feeder.loop.Loop`s originating from this substation that are energised.
+        """
+        return ngen(self._energized_loops)
 
     @property
     def feeders(self) -> Generator[Feeder, None, None]:
         """
-        :return: Generator over the normal ``Feeder``s of this ``Equipment``.
+        The normal energized feeders of the substation. Also used for naming purposes.
         """
         return ngen(self._normal_energized_feeders)
 
+    def num_feeders(self):
+        """
+        Returns The number of `zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder`s associated with this `Substation`
+        """
+        return nlen(self._normal_energized_feeders)
+
     def get_feeder(self, mrid: str) -> Substation:
         """
-        Get the ``Feeder`` for this ``Substation`` identified by ``mrid``
+        Get the `zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder` for this `Substation` identified by `mrid`
 
-        :param mrid: the mRID of the required :class:`zepben.cimbend.iec61970.base.core.equipment_container.Feeder`
-        :return: The :class:`zepben.cimbend.iec61970.base.core.equipment_container.Feeder` with the specified
-        ``mrid`` if it exists
-        :raises: KeyError if mrid wasn't present.
+        `mrid` The mRID of the required `zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder`
+        Returns The `zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._normal_energized_feeders, mrid)
 
     def add_feeder(self, feeder: Feeder) -> Substation:
         """
-        :param feeder: the :class:`zepben.cimbend.iec61970.base.core.equipment_container.Feeder` to
-        associate with this ``Substation``.
-        :return: A reference to this ``Substation`` to allow fluent use.
+        Associate a `zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder` with this `Substation`
+
+        `feeder` The `zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder` to associate with this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if another `Feeder` with the same `mrid` already exists for this `Substation`.
         """
-        require(not contains_mrid(self._normal_energized_feeders, feeder.mrid),
-                lambda: f"A Feeder with mRID {feeder.mrid} already exists in {str(self)}.")
+        if self._validate_reference(feeder, self.get_feeder, "A Feeder"):
+            return self
         self._normal_energized_feeders = list() if self._normal_energized_feeders is None else self._normal_energized_feeders
         self._normal_energized_feeders.append(feeder)
         return self
 
     def remove_feeder(self, feeder: Feeder) -> Substation:
         """
-        :param feeder: the :class:`zepben.cimbend.iec61970.base.core.equipment_container.Feeder` to
-        disassociate with this ``Substation``.
-        :raises: KeyError if ``feeder`` was not associated with this ``Substation``.
-        :return: A reference to this ``Substation`` to allow fluent use.
-        """
-        if self._normal_energized_feeders is not None:
-            self._normal_energized_feeders.remove(feeder)
-            if not self._normal_energized_feeders:
-                self._normal_energized_feeders = None
-        else:
-            raise KeyError(feeder)
+        Disassociate `feeder` from this `Substation`
 
+        `feeder` The `zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder` to disassociate from this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if `feeder` was not associated with this `Substation`.
+        """
+        self._normal_energized_feeders = safe_remove(self._normal_energized_feeders, feeder)
         return self
 
     def clear_feeders(self) -> Substation:
         """
-        Clear all current ``Feeder``s.
-        :return: A reference to this ``Substation`` to allow fluent use.
+        Clear all current `Feeder`s.
+        Returns A reference to this `Substation` to allow fluent use.
         """
         self._normal_energized_feeders = None
+        return self
+
+    def num_loops(self):
+        """
+        Returns The number of `zepben.cimbend.cim.infiec61970.feeder.loop.Loop`s associated with this `Substation`
+        """
+        return nlen(self._loops)
+
+    def get_loop(self, mrid: str) -> Substation:
+        """
+        Get the `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` for this `Substation` identified by `mrid`
+
+        `mrid` The mRID of the required `zepben.cimbend.cim.infiec61970.feeder.loop.Loop`
+        Returns The `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return get_by_mrid(self._loops, mrid)
+
+    def add_loop(self, loop: Loop) -> Substation:
+        """
+        Associate a `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` with this `Substation`
+
+        `loop` The `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` to associate with this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if another `Loop` with the same `mrid` already exists for this `Substation`.
+        """
+        if self._validate_reference(loop, self.get_loop, "A Loop"):
+            return self
+        self._loops = list() if self._loops is None else self._loops
+        self._loops.append(loop)
+        return self
+
+    def remove_loop(self, loop: Loop) -> Substation:
+        """
+        Disassociate `loop` from this `Substation`
+
+        `loop` The `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` to disassociate from this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if `loop` was not associated with this `Substation`.
+        """
+        self._loops = safe_remove(self._loops, loop)
+        return self
+
+    def clear_loops(self) -> Substation:
+        """
+        Clear all current `Loop`s.
+        Returns A reference to this `Substation` to allow fluent use.
+        """
+        self._loops = None
+        return self
+
+    def num_energized_loops(self):
+        """
+        Returns The number of `zepben.cimbend.cim.infiec61970.feeder.loop.Loop`s associated with this `Substation`
+        """
+        return nlen(self._energized_loops)
+
+    def get_energized_loop(self, mrid: str) -> Substation:
+        """
+        Get the `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` for this `Substation` identified by `mrid`
+
+        `mrid` The mRID of the required `zepben.cimbend.cim.infiec61970.feeder.loop.Loop`
+        Returns The `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return get_by_mrid(self._energized_loops, mrid)
+
+    def add_energized_loop(self, loop: Loop) -> Substation:
+        """
+        Associate a `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` with this `Substation`
+
+        `loop` The `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` to associate with this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if another `Loop` with the same `mrid` already exists for this `Substation`.
+        """
+        if self._validate_reference(loop, self.get_energized_loop, "A Loop"):
+            return self
+        self._energized_loops = list() if self._energized_loops is None else self._energized_loops
+        self._energized_loops.append(loop)
+        return self
+
+    def remove_energized_loop(self, loop: Loop) -> Substation:
+        """
+        Disassociate `loop` from this `Substation`
+
+        `loop` The `zepben.cimbend.cim.infiec61970.feeder.loop.Loop` to disassociate from this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if `loop` was not associated with this `Substation`.
+        """
+        self._energized_loops = safe_remove(self._energized_loops, loop)
+        return self
+
+    def clear_energized_loops(self) -> Substation:
+        """
+        Clear all current `Loop`s.
+        Returns A reference to this `Substation` to allow fluent use.
+        """
+        self._energized_loops = None
+        return self
+
+    def num_circuits(self):
+        """
+        Returns The number of `zepben.cimbend.cim.infiec61970.feeder.circuit.Circuit`s associated with this `Substation`
+        """
+        return nlen(self._circuits)
+
+    def get_circuit(self, mrid: str) -> Substation:
+        """
+        Get the `zepben.cimbend.cim.infiec61970.feeder.circuit.Circuit` for this `Substation` identified by `mrid`
+
+        `mrid` The mRID of the required `zepben.cimbend.cim.infiec61970.feeder.circuit.Circuit`
+        Returns The `zepben.cimbend.cim.infiec61970.feeder.circuit.Circuit` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return get_by_mrid(self._circuits, mrid)
+
+    def add_circuit(self, circuit: Circuit) -> Substation:
+        """
+        Associate a `zepben.cimbend.cim.infiec61970.feeder.circuit.Circuit` with this `Substation`
+
+        `circuit` The `zepben.cimbend.cim.infiec61970.feeder.circuit.Circuit` to associate with this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if another `Circuit` with the same `mrid` already exists for this `Substation`.
+        """
+        if self._validate_reference(circuit, self.get_circuit, "A Circuit"):
+            return self
+        self._circuits = list() if self._circuits is None else self._circuits
+        self._circuits.append(circuit)
+        return self
+
+    def remove_circuit(self, circuit: Circuit) -> Substation:
+        """
+        Disassociate `circuit` from this `Substation`
+
+        `circuit` The `zepben.cimbend.cim.infiec61970.feeder.circuit.Circuit` to disassociate from this `Substation`.
+        Returns A reference to this `Substation` to allow fluent use.
+        Raises `ValueError` if `circuit` was not associated with this `Substation`.
+        """
+        self._circuits = safe_remove(self._circuits, circuit)
+        return self
+
+    def clear_circuits(self) -> Substation:
+        """
+        Clear all current `Circuit`s.
+        Returns A reference to this `Substation` to allow fluent use.
+        """
+        self._circuits = None
         return self

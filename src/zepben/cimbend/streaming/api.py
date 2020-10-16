@@ -1,20 +1,10 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 
@@ -57,8 +47,8 @@ class WorkbenchConnection(object):
     # async def get_whole_network(self, mrid=""):
     #     """
     #     Retrieve an entire network from the connection.
-    #     :param mrid: ID of the network to retrieve (not supported yet) TODO
-    #     :return: An :class:`zepben.cimbend.network.Network` populated with the network.
+    #     `mrid` ID of the network to retrieve (not supported yet) TODO
+    #     Returns An `zepben.cimbend.network.Network` populated with the network.
     #     """
     #     ec = await retrieve_network(self.network_stub.getWholeNetwork, Identity(mRID=mrid))
     #     return ec
@@ -86,11 +76,11 @@ class WorkbenchConnection(object):
 
     # async def send_feeder(self, ns: NetworkService):
     #     """
-    #     Send a feeder to the connected server. A feeder must start with a feeder circuit :class:`zepben.cimbend.switch.Breaker`.
+    #     Send a feeder to the connected server. A feeder must start with a feeder circuit `zepben.cimbend.switch.Breaker`.
     #
-    #     :param ns: The Network containing all equipment in the feeder.
-    #     :return: A :class:`zepben.cimbend.streaming.streaming.FeederStreamResult
-    #     :raises: A derivative of :class:`zepben.cimbend.exceptions.MissingReferenceException` if a incorrect reference
+    #     `ns` The Network containing all equipment in the feeder.
+    #     Returns A `zepben.cimbend.streaming.streaming.FeederStreamResult`
+    #     Raises A derivative of `zepben.cimbend.exceptions.MissingReferenceException` if a incorrect reference
     #              between types is made.
     #     """
     #     # res = await send_network(self.network_stub, ns)

@@ -1,20 +1,10 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.cimbend.tracing.queue import Queue
 from zepben.cimbend.tracing.tracing import BaseTraversal, SearchType, create_queue
@@ -39,18 +29,18 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
                  step_actions: List[Callable[[T, bool], Awaitable[None]]] = None):
         """
 
-        :param queue_next: A callable for each item encountered during the trace, that should queue the next items
+        `queue_next` A callable for each item encountered during the trace, that should queue the next items
                            found on the given traversal's `process_queue`. The first argument will be the current item,
                            the second this traversal, and the third a set of already visited items that can be used as
                            an optimisation when queuing.
-        :param start_item: The starting point for this trace.
-        :param branch_queue:
-        :param search_type:
-        :param tracker:
-        :param parent: A parent :class:`zepben.cimbend.tracing.Traversal` of this traversal.
-        :param on_branch_start:
-        :param stop_conditions:
-        :param step_actions:
+        `start_item` The starting point for this trace.
+        `branch_queue`
+        `search_type`
+        `tracker`
+        `parent` A parent `zepben.cimbend.tracing.Traversal` of this traversal.
+        `on_branch_start`
+        `stop_conditions`
+        `step_actions`
         """
         super().__init__(start_item=start_item, stop_conditions=stop_conditions, step_actions=step_actions)
         self.queue_next = queue_next
@@ -64,8 +54,8 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
         """
         This Traversal is Less than `other` if the starting item is less than other's starting item.
         This is used to dictate which branch is next to traverse in the branch_queue.
-        :param other:
-        :return:
+        `other`
+        Returns
         """
         if self.start_item is not None and other.start_item is not None:
             return self.start_item < other.start_item
@@ -80,8 +70,8 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
         """
         Check whether item has been visited before. An item is visited if this traversal or any parent has
         visited it.
-        :param item: The item to check
-        :return: True if the item has been visited once.
+        `item` The item to check
+        Returns True if the item has been visited once.
         """
         parent = self.parent
         while parent is not None:
@@ -94,8 +84,8 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
     def visit(self, item: T):
         """
         Visit an item.
-        :param item: Item to visit
-        :return: True if we visit the item. False if this traversal or any parent has previously visited this item.
+        `item` Item to visit
+        Returns True if we visit the item. False if this traversal or any parent has previously visited this item.
         """
         parent = self.parent
         while parent is not None:
@@ -126,7 +116,7 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
         """
         Create a branch for this `Traversal`. Will take copies of queues, actions, conditions, and tracker, and
         pass this `Traversal` as the parent. The new Traversal will be :meth:`reset` prior to being returned.
-        :return: A new :class:`BranchRecursiveTraversal` the same as this, but with this Traversal as its parent
+        Returns A new `BranchRecursiveTraversal` the same as this, but with this Traversal as its parent
         """
         branch = BranchRecursiveTraversal(self.queue_next,
                                           branch_queue=copy.deepcopy(self.branch_queue),
@@ -144,7 +134,7 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
         Run's the trace. Stop conditions and step_actions are called with await, so you can utilise asyncio when
         performing a trace if your step actions or conditions are IO intensive. Stop conditions and
         step actions will always be called for each item in the order provided.
-        :param can_stop_on_start_item: Whether the trace can stop on the start_item. Actions will still be applied to
+        `can_stop_on_start_item` Whether the trace can stop on the start_item. Actions will still be applied to
                                        the start_item.
         """
         # Unroll first iteration of loop to handle can_stop_on_start_item = True

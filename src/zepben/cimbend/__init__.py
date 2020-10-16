@@ -1,28 +1,18 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
-
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.cimbend.cim.iec61970.base.core import *
 from zepben.cimbend.cim.iec61968 import *
+from zepben.cimbend.cim.iec61970.base.auxiliaryequipment import *
 from zepben.cimbend.cim.iec61970.base.diagramlayout import *
-from zepben.cimbend.cim.iec61970 import *
-from zepben.cimbend.cim.iec61970 import *
-from zepben.cimbend.cim.iec61970 import *
+from zepben.cimbend.cim.iec61970.base.domain import *
+from zepben.cimbend.cim.iec61970.base.meas import *
+from zepben.cimbend.cim.iec61970.base.scada import *
 from zepben.cimbend.cim.iec61970.base.wires import *
+from zepben.cimbend.cim.iec61970.infiec61970.feeder import *
 from zepben.cimbend.network import *
 from zepben.cimbend.diagram import *
 from zepben.cimbend.customer import *
@@ -30,3 +20,4 @@ from zepben.cimbend.measurement import *
 from zepben.cimbend.common import *
 from zepben.cimbend.exceptions import *
 from zepben.cimbend.common import resolver
+from zepben.cimbend.streaming import *

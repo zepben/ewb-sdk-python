@@ -1,21 +1,11 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 
@@ -47,7 +37,7 @@ class FeederProcessingStatus(Enum):
     NONE = 2
 
 
-@dataclass
+
 class FeederCbTerminalCoresByStatus:
     #__slots__ = ("terminal", "in_cores", "none_cores", "cores_to_flow")
     terminal: Terminal
@@ -56,7 +46,7 @@ class FeederCbTerminalCoresByStatus:
     cores_to_flow: Set[int] = field(default_factory=set)
 
 
-@dataclass
+
 class DelayedFeederTrace:
     __slots__ = ("out_terminal", "cores_to_flow")
     out_terminal: Terminal
@@ -95,8 +85,8 @@ async def find_es_breaker_terminal(es):
     From an EnergySource finds the closest connected Feeder CB (Breaker that is part of a substation).
     At the moment we assume that all EnergySource's with EnergySourcePhase's will be associated with at least a
     single feeder circuit breaker, and thus this function given an `EnergySource` will perform a trace that returns
-    the first `Terminal` encountered from that `EnergySource` that belongs to a `Breaker`. This `Terminal` should always
-    be the most downstream `Terminal` on the `Breaker`, and thus can then be used for setting `Direction` downstream and
+    the first `zepben.cimbend.iec61970.base.core.terminal.Terminal` encountered from that `EnergySource` that belongs to a `Breaker`. This `zepben.cimbend.iec61970.base.core.terminal.Terminal` should always
+    be the most downstream `zepben.cimbend.iec61970.base.core.terminal.Terminal` on the `Breaker`, and thus can then be used for setting `Direction` downstream and
     away from this `Breaker`.
     TODO: check how ES are normally connected to feeder CB's.
     """
@@ -123,7 +113,7 @@ async def _apply_phases_from_feeder_cbs(network):
     """
     Apply phase and direction on all Feeder Circuit Breakers. Will make all phases on the outgoing Terminal of a
     `Breaker` that is part of a substation have a `Direction` of `OUT`.
-    :param network: :class:`zepben.cimbend.network.Network` to apply phasing on.
+    `network` `zepben.cimbend.network.Network` to apply phasing on.
     """
     start_terms = []
     # TODO: check if below assumption is correct
@@ -208,12 +198,12 @@ def _flow_out_to_connected_terminals_and_queue(traversal: BranchRecursiveTravers
                                                cores_to_flow: Set[int], phase_selector: Callable[[Terminal, int], PhaseStatus]):
     """
 
-    :param traversal:
-    :param out_terminal:
-    :param cores_to_flow:
-    :param phase_selector:
-    :return:
-    :raises: PhaseException, CoreException if phasing couldn't be added.
+    `traversal`
+    `out_terminal`
+    `cores_to_flow`
+    `phase_selector`
+    Returns
+    Raises PhaseException, CoreException if phasing couldn't be added.
     """
     connectivity_results = out_terminal.get_connectivity(cores_to_flow)
     for cr in connectivity_results:

@@ -1,20 +1,10 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 from zepben.cimbend.exceptions import CoreException
@@ -28,15 +18,15 @@ class ConnectivityResult(object):
     """
     The connectivity between two connected terminals
     Attributes -
-        from_terminal : Originating :class:`zepben.cimbend.Terminal`
-        to_terminal : Destination :class:`zepben.cimbend.Terminal`
+        from_terminal : Originating `zepben.cimbend.cim.iec61970.base.core.Terminal`
+        to_terminal : Destination `zepben.cimbend.cim.iec61970.base.core.Terminal`
     """
 
     def __init__(self, from_terminal, to_terminal):
         """
         Create a ConnectivityResult.
-        :param from_terminal: The originating :class:`zepben.cimbend.Terminal`
-        :param to_terminal: The destination :class:`zepben.cimbend.Terminal`
+        `from_terminal` The originating `zepben.cimbend.cim.iec61970.base.core.Terminal`
+        `to_terminal` The destination `zepben.cimbend.cim.iec61970.base.core.Terminal`
         """
         self.from_terminal = from_terminal
         self.to_terminal = to_terminal
@@ -109,9 +99,9 @@ class ConductingEquipmentToCores(object):
     def __init__(self, equip: ConductingEquipment, cores: Set[int], previous: ConductingEquipment = None):
         """
 
-        :param equip: The current :class:`zepben.cimbend.ConductingEquipment`
-        :param cores: The cores which were traced
-        :param previous: The previous :class:`zepben.cimbend.ConductingEquipment`
+        `equip` The current `zepben.cimbend.ConductingEquipment`
+        `cores` The cores which were traced
+        `previous` The previous `zepben.cimbend.ConductingEquipment`
         """
         self.equipment = equip
         self.cores = frozenset(cores)
@@ -139,9 +129,9 @@ class ConductingEquipmentToCores(object):
 
     def __lt__(self, other):
         """
-        This definition should only be used for sorting within a :class:`zepben.cimbend.tracing.queue.PriorityQueue`
-        :param other: Another Terminal to compare against
-        :return: True if self has more cores than other, False otherwise.
+        This definition should only be used for sorting within a `zepben.cimbend.tracing.queue.PriorityQueue`
+        `other` Another Terminal to compare against
+        Returns True if self has more cores than other, False otherwise.
         """
         return self.num_cores > other.num_cores
 

@@ -1,21 +1,11 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 import logging
@@ -34,18 +24,18 @@ tracing_logger = logging.getLogger("queue_next")
 def normally_open(equip: Equipment, core: int = None):
     """
     Test if a given core on an equipment is normally open.
-    :param equip: The equipment to test
-    :param core: The core to test. If None tests all cores.
-    :return: True if the equipment is open (de-energised), False otherwise
+    `equip` The equipment to test
+    `core` The core to test. If None tests all cores.
+    Returns True if the equipment is open (de-energised), False otherwise
     """
     try:
         if core is None:
             ret = not equip.normally_in_service
             for core in range(0, equip.num_cores()):
-                ret &= equip.normally_open(core)
+                ret &= equip.is_normally_open(core)
             return ret
         else:
-            return equip.normally_open(core) or not equip.normally_in_service
+            return equip.is_normally_open(core) or not equip.normally_in_service
     except AttributeError:
         # This should only be reachable if equip is normally in service but didn't define normally_open, in which case
         # it's not normally open.
@@ -55,9 +45,9 @@ def normally_open(equip: Equipment, core: int = None):
 def currently_open(equip: Equipment, core: int = None):
     """
     Test if a given core on an equipment is open.
-    :param equip: The equipment to test
-    :param core: The core to test. If None tests all cores.
-    :return: True if the equipment is open (de-energised), False otherwise
+    `equip` The equipment to test
+    `core` The core to test. If None tests all cores.
+    Returns True if the equipment is open (de-energised), False otherwise
     """
     try:
         if core is None:
@@ -83,9 +73,9 @@ def queue_next_terminal(item, exclude=None):
     """
     Wrapper tracing queue function for queuing terminals via their connectivity
     TODO: CoreTrace: queue_next that allows specifying cores to trace
-    :param item:
-    :param exclude:
-    :return:
+    `item`
+    `exclude`
+    Returns
     """
     other_terms = item.get_other_terminals()
     if not other_terms:
@@ -109,10 +99,10 @@ def queue_next_terminal(item, exclude=None):
 def normal_downstream_trace(search_type: SearchType = SearchType.PRIORITY, **kwargs):
     """
     Create a downstream trace over nominal phases.
-    :param search_type: Search type to perform for this traversal. Defaults to priority traversal based on number of
+    `search_type` Search type to perform for this traversal. Defaults to priority traversal based on number of
                         cores.
-    :param kwargs: Args to be passed to :class:`zepben.cimbend.tracing.tracing.Traversal`
-    :return: A :class:`zepben.cimbend.tracing.tracing.Traversal`
+    `kwargs` Args to be passed to `zepben.cimbend.tracing.tracing.Traversal`
+    Returns A `zepben.cimbend.tracing.tracing.Traversal`
     """
     return Traversal(queue_next=_create_downstream_queue_next(normally_open, normal_phases), search_type=search_type,
                      **kwargs)
@@ -121,10 +111,10 @@ def normal_downstream_trace(search_type: SearchType = SearchType.PRIORITY, **kwa
 def current_downstream_trace(search_type: SearchType = SearchType.PRIORITY, **kwargs):
     """
     Create a downstream trace over current phases
-    :param search_type: Search type to perform for this traversal. Defaults to priority traversal based on number of
+    `search_type` Search type to perform for this traversal. Defaults to priority traversal based on number of
                         cores.
-    :param kwargs: Args to be passed to :class:`zepben.cimbend.tracing.tracing.Traversal`
-    :return: A :class:`zepben.cimbend.tracing.tracing.Traversal`
+    `kwargs` Args to be passed to `zepben.cimbend.tracing.tracing.Traversal`
+    Returns A `zepben.cimbend.tracing.tracing.Traversal`
     """
     return Traversal(queue_next=_create_downstream_queue_next(currently_open, current_phases), search_type=search_type,
                      **kwargs)
@@ -133,10 +123,10 @@ def current_downstream_trace(search_type: SearchType = SearchType.PRIORITY, **kw
 def _create_downstream_queue_next(open_test: Callable[[Equipment, int], bool], active_phases: Callable[[Terminal, int], PhaseStatus]):
     """
     Creates a queue_next function from the given open test and phase selector for use with tracing
-    :param open_test: Function that takes a ConductingEquipment and a core (int) and returns whether the core on the
+    `open_test` Function that takes a ConductingEquipment and a core (int) and returns whether the core on the
                       equipment is open (True) or closed (False).
-    :param active_phases: A :class:`zepben.cimbend.tracing.phase_status.PhaseStatus`
-    :return: A queue_next function for use with :class:`zepben.cimbend.tracing.tracing.BaseTraversal` classes
+    `active_phases` A `zepben.cimbend.tracing.phase_status.PhaseStatus`
+    Returns A queue_next function for use with `zepben.cimbend.tracing.tracing.BaseTraversal` classes
     """
     def qn(cetc, visited):
         connected_terms = []
@@ -156,14 +146,14 @@ def _create_downstream_queue_next(open_test: Callable[[Equipment, int], bool], a
 
 def get_cores_with_direction(open_test, active_phases, terminal, filter_cores, direction):
     """
-    Gets the closed cores from terminal in a specified :class:`zepben.cimbend.phases.direction.Direction`
-    :param open_test: Function that takes a ConductingEquipment and a core (int) and returns whether the core on the
+    Gets the closed cores from terminal in a specified `zepben.cimbend.phases.direction.Direction`
+    `open_test` Function that takes a ConductingEquipment and a core (int) and returns whether the core on the
                       equipment is open (True) or closed (False).
-    :param active_phases: A :class:`zepben.cimbend.phases.tracing.phase_status.PhaseStatus`
-    :param terminal: :class:`zepben.cimbend.phases.terminal.Terminal` to retrieve cores for
-    :param filter_cores: The cores for `terminal` to test. May be a subset of `terminal`'s available cores.
-    :param direction: The direction to check against.
-    :return: Set of cores that are closed in the specified `Direction`.
+    `active_phases` A `zepben.cimbend.phases.tracing.phase_status.PhaseStatus`
+    `terminal` `zepben.cimbend.phases.terminal.Terminal` to retrieve cores for
+    `filter_cores` The cores for `zepben.cimbend.iec61970.base.core.terminal.Terminal` to test. May be a subset of `zepben.cimbend.iec61970.base.core.terminal.Terminal`'s available cores.
+    `direction` The direction to check against.
+    Returns Set of cores that are closed in the specified `Direction`.
     """
     return_cores = set()
     for core in filter_cores:

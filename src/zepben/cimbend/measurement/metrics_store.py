@@ -1,24 +1,14 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 
 
 __all__ = ["MetricsStore"]
 
+
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 class MetricsStore(object):
     """
@@ -49,7 +39,7 @@ class MetricsStore(object):
     def buckets(self):
         """
         Time buckets in this metrics store.
-        :return: List of present time buckets in ascending order
+        Returns List of present time buckets in ascending order
         """
         # We lazy sort because we don't want to slow down write times. This will probably disappear in the long run
         # TODO: Revisit this after first stable version, potentially when a timeseries DB is implemented
@@ -60,7 +50,7 @@ class MetricsStore(object):
     def ascending_iteration(self):
         """
 
-        :return: Mapping of meter IDs to Meter's by bucket time in ascending order
+        Returns Mapping of meter IDs to Meter's by bucket time in ascending order
         """
         for bucket_time in self.buckets:
             for meter in self.store[bucket_time].values():
@@ -74,8 +64,8 @@ class MetricsStore(object):
 
         Note that a MeterReadings mRID is not used as part of this function. For the purposes of storing readings,
         only the associated meter mRID is considered.
-        :param meter_reading:
-        :return:
+        `meter_reading`
+        Returns
         """
         for reading in meter_reading.readings:
             bucket_time = self._get_bucket(reading.timestamp)

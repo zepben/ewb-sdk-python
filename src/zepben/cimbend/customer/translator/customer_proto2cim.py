@@ -1,24 +1,13 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+from __future__ import annotations
+import zepben.cimbend.common.resolver as resolver
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
-
-from dataclasses import dataclass
-
+from zepben.cimbend.common import BaseService
 from zepben.protobuf.cim.iec61968.common.Agreement_pb2 import Agreement as PBAgreement
 from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import CustomerAgreement as PBCustomerAgreement
 from zepben.protobuf.cim.iec61968.customers.CustomerKind_pb2 import CustomerKind as PBCustomerKind
@@ -26,50 +15,52 @@ from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer as PBCu
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure as PBPricingStructure
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
 
-from zepben.cimbend import Customer
-from zepben.cimbend.common.base_proto2cim import *
+from zepben.cimbend.cim.iec61968.customers.customer import Customer
 from zepben.cimbend.customer.customers import CustomerService
+from zepben.cimbend.common.translator.base_proto2cim import *
 from zepben.cimbend.cim.iec61968.common.document import Agreement
-from zepben.cimbend.cim.iec61968.customers import CustomerAgreement
-from zepben.cimbend.cim.iec61968.customers import CustomerKind
-from zepben.cimbend.cim.iec61968.customers import PricingStructure
-from zepben.cimbend.cim.iec61968.customers import Tariff
+from zepben.cimbend.cim.iec61968.customers import CustomerAgreement, CustomerKind, PricingStructure, Tariff
 
-__all__ = ["set_agreement", "CustomerProtoToCim"]
+__all__ = ["agreement_to_cim", "tariff_to_cim", "customer_to_cim", "customeragreement_to_cim", "pricingstructure_to_cim"]
 
 
-def set_agreement(pb: PBAgreement, cim: Agreement, service: BaseService):
-    set_document(pb.doc, cim, service)
+def agreement_to_cim(pb: PBAgreement, cim: Agreement, service: BaseService):
+    document_to_cim(pb.doc, cim, service)
 
 
-@dataclass
-class CustomerProtoToCim(BaseProtoToCim):
-    service: CustomerService
+def customer_to_cim(pb: PBCustomer, service: CustomerService):
+    cim = Customer(mrid=pb.mrid(), kind=CustomerKind[PBCustomerKind.Name(pb.kind)])
+    for mrid in pb.customerAgreementMRIDs:
+        service.resolve_or_defer_reference(resolver.agreements(cim), mrid)
+    organisationrole_to_cim(getattr(pb, 'or'), cim)
+    service.add(cim)
 
-    def add_customer(self, pb: PBCustomer):
-        cim = Customer(pb.mrid())
-        self.set_organisation_role(getattr(pb, 'or'), cim)
-        cim.kind = CustomerKind[PBCustomerKind.Name(pb.kind)]
-        for mrid in pb.customerAgreementMRIDs:
-            cim.add_agreement(self._get(mrid, CustomerAgreement, cim))
-        self.service.add(cim)
 
-    def add_customeragreement(self, pb: PBCustomerAgreement):
-        customer = self._get(pb.customerMRID, Customer, pb.name_and_mrid())
-        cim = CustomerAgreement(customer, pb.mrid())
-        set_agreement(pb.agr, cim, self.service)
-        for mrid in pb.pricingStructureMRIDs:
-            cim.add_pricing_structure(self._get(mrid, PricingStructure, cim))
-        self.service.add(cim)
+def customeragreement_to_cim(pb: PBCustomerAgreement, service: CustomerService):
+    cim = CustomerAgreement(mrid=pb.mrid())
+    service.resolve_or_defer_reference(resolver.customer(cim), pb.customerMRID)
+    for mrid in pb.pricingStructureMRIDs:
+        service.resolve_or_defer_reference(resolver.pricing_structures(cim), mrid)
+    agreement_to_cim(pb.agr, cim, service)
+    service.add(cim)
 
-    def add_pricingstructure(self, pb: PBPricingStructure):
-        cim = PricingStructure(pb.mrid())
-        set_document(pb.doc, cim, self.service)
-        for mrid in pb.tariffMRIDs:
-            cim.add_tariff(self._get(mrid, Tariff, cim))
-        self.service.add(cim)
 
-    def add_tariff(self, pb: PBTariff):
-        cim = Tariff(pb.mrid())
-        set_document(pb.doc, cim, self.service)
-        self.service.add(cim)
+def pricingstructure_to_cim(pb: PBPricingStructure, service: CustomerService):
+    cim = PricingStructure(mrid=pb.mrid())
+    for mrid in pb.tariffMRIDs:
+        service.resolve_or_defer_reference(resolver.tariffs(cim), mrid)
+    document_to_cim(pb.doc, cim, service)
+    service.add(cim)
+
+
+def tariff_to_cim(self, pb: PBTariff, service: CustomerService):
+    cim = Tariff(mrid=pb.mrid())
+    document_to_cim(pb.doc, cim, self.service)
+    service.add(cim)
+
+
+PBAgreement.to_cim = agreement_to_cim
+PBCustomer.to_cim = customer_to_cim
+PBCustomerAgreement.to_cim = customeragreement_to_cim
+PBPricingStructure.to_cim = pricingstructure_to_cim
+PBTariff.to_cim = PBTariff

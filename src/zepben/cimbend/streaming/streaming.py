@@ -1,20 +1,10 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 from zepben.cimbend import NetworkService, CustomerService, DiagramService
 from zepben.cimbend.streaming.exceptions import StreamingException
 from zepben.protobuf.cp.cp_pb2_grpc import CustomerProducerStub
@@ -37,13 +27,13 @@ __all__ = ["retrieve_network", "send_network", "send_customer", "send_diagram", 
 
 
 # TODO: Fill in all fields
-@dataclass
+
 class FeederSummary:
     acls_count: int
     node_count: int
 
 
-@dataclass
+
 class FeederStreamResult:
     success: bool
     summary: FeederSummary
@@ -55,7 +45,7 @@ MAX_INT: int = math.pow(2, 32) - 1
 def get_random_message_id() -> int:
     """
     Provide a random message_id for gRPC communication.
-    :return: A random message_id as an int.
+    Returns A random message_id as an int.
     """
     return random.randint(1, MAX_INT)
 
@@ -63,8 +53,8 @@ def get_random_message_id() -> int:
 def get_identified_object(iog: IdentifiedObjectGroup):
     """
     Unwrap an object group and return the enclosed identified object.
-    :param object_group: The object group retrieved.
-    :return: A :class:`zepben.protobuf.nc.nc_data_pb2.NetworkIdentifiedObject` containing the underlying identified object.
+    `object_group` The object group retrieved.
+    Returns A `zepben.protobuf.nc.nc_data_pb2.NetworkIdentifiedObject` containing the underlying identified object.
     """
     og = getattr(iog, "objectGroup", {})
     return getattr(og, "identifiedObject", {})
@@ -73,9 +63,9 @@ def get_identified_object(iog: IdentifiedObjectGroup):
 def get_expected_object(iog: IdentifiedObjectGroup, expected_type: str):
     """
     Try to unwrap received identified object group to expected identified object.
-    :param iog: The object group retrieved.
-    :param expected_type: The expected type of the underlying identified object.
-    :return: One of the possible :class:`zepben.protobuf.cim.*` objects in `zepben.protobuf.nc.nc_data_pb2.NetworkIdentifiedObject`
+    `iog` The object group retrieved.
+    `expected_type` The expected type of the underlying identified object.
+    Returns One of the possible `zepben.protobuf.cim.*` objects in `zepben.protobuf.nc.nc_data_pb2.NetworkIdentifiedObject`
     """
     identified_object = get_identified_object(iog)
     object_type = identified_object.WhichOneof("identifiedObject")
@@ -97,9 +87,9 @@ def safely_add(network: NetworkProtoToCim, pb) -> None:
 async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str) -> IdentifiedObjectGroup:
     """
     Send a request to the connected server to retrieve an identified object group given its mRID.
-    :param stub: A network consumer stub.
-    :param mrid: The mRID of the desired object.
-    :return: The :class:`zepben.protobuf.nc.nc_data_pb2.IdentifiedObjectGroup` object returned by the server.
+    `stub` A network consumer stub.
+    `mrid` The mRID of the desired object.
+    Returns The `zepben.protobuf.nc.nc_data_pb2.IdentifiedObjectGroup` object returned by the server.
     """
     message_id = get_random_message_id()
     request = GetIdentifiedObjectsRequest(messageId=message_id, mrids=[mrid])
@@ -112,9 +102,9 @@ async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str) -> I
 async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_io) -> None:
     """
     Add an equipment to the network.
-    :param stub: A network consumer stub.
-    :param network: The network to add the equipment to.
-    :param equipment_io: The equipment identified object returned by the server.
+    `stub` A network consumer stub.
+    `network` The network to add the equipment to.
+    `equipment_io` The equipment identified object returned by the server.
     """
     if equipment_io:
         equipment_type = equipment_io.WhichOneof("identifiedObject")
@@ -127,9 +117,9 @@ async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProto
 async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_mrid: str) -> None:
     """
     Retrieve equipment using its mRID and add it to the network.
-    :param stub: A network consumer stub.
-    :param network: The current network.
-    :param equipment_mrid: The equipment mRID as a string.
+    `stub` A network consumer stub.
+    `network` The current network.
+    `equipment_mrid` The equipment mRID as a string.
     """
     equipment_iog = await get_identified_object_group(stub, equipment_mrid)
 
@@ -144,9 +134,9 @@ async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkProtoToC
 async def retrieve_feeder(stub: NetworkConsumerStub, network: NetworkProtoToCim, feeder_mrid: str) -> None:
     """
     Retrieve feeder using its mRID, add it to the network and retrieve its equipments.
-    :param stub: A network consumer stub.
-    :param network: The current network.
-    :param equipment_mrid: The equipment mRID as a string.
+    `stub` A network consumer stub.
+    `network` The current network.
+    `equipment_mrid` The equipment mRID as a string.
     """
     feeder_iog = await get_identified_object_group(stub, feeder_mrid)
     if feeder_iog:
@@ -163,8 +153,8 @@ async def retrieve_feeder(stub: NetworkConsumerStub, network: NetworkProtoToCim,
 async def retrieve_substation(stub: NetworkConsumerStub, network: NetworkProtoToCim, substation_mrid: str) -> None:
     """
     Retrieve substation using its mRID, add it to the network and retrieve its feeders.
-    :param stub: A network consumer stub.
-    :param network: The current network.
+    `stub` A network consumer stub.
+    `network` The current network.
     """
     sub_iog = await get_identified_object_group(stub, substation_mrid)
     if sub_iog:
@@ -183,8 +173,8 @@ async def retrieve_sub_geographical_region(stub: NetworkConsumerStub, network: N
                                            sub_geographical_region_mrid: str) -> None:
     """
     Retrieve subgeographical region using its mRID, add it to the network and retrieve its substations.
-    :param stub: A network consumer stub.
-    :param network: The current network.
+    `stub` A network consumer stub.
+    `network` The current network.
     """
     sgr_iog = await get_identified_object_group(stub, sub_geographical_region_mrid)
     if sgr_iog:
@@ -202,8 +192,8 @@ async def retrieve_geographical_region(stub: NetworkConsumerStub, network: Netwo
                                        geographical_region_mrid: str):
     """
     Retrieve geographical region using its mRID, add it to the network and retrieve its subgeographical regions.
-    :param stub: A network consumer stub.
-    :param network: The current network.
+    `stub` A network consumer stub.
+    `network` The current network.
     """
     gr_iog = await get_identified_object_group(stub, geographical_region_mrid)
     if gr_iog:
@@ -220,8 +210,8 @@ async def retrieve_geographical_region(stub: NetworkConsumerStub, network: Netwo
 async def retrieve_network(channel) -> NetworkService:
     """
     Request network hierarchy and retrieve the network geographical regions.
-    :param channel: A gRPC channel to the gRPC server.
-    :return: The retrieved `wepben.cimbend.NetworkService` object.
+    `channel` A gRPC channel to the gRPC server.
+    Returns The retrieved `wepben.cimbend.NetworkService` object.
     """
     proto2cim = NetworkProtoToCim(NetworkService())
     stub = NetworkConsumerStub(channel)
@@ -266,8 +256,8 @@ async def send_network(stub: NetworkProducerStub, network_service: NetworkServic
     Send a feeder to the connected server.
     Note that ConnectivityNodes are never sent with this method, a Terminal is sent containing the ConnectivityNode mRID
     which is the only necessary information to rebuild ConnectivityNodes.
-    :param ns: The Network containing all equipment in the feeder.
-    :return: A :class:`zepben.cimbend.streaming.streaming.FeederStreamResult
+    `ns` The Network containing all equipment in the feeder.
+    Returns A `zepben.cimbend.streaming.streaming.FeederStreamResult`
     """
     # Terminals and PTE's are handled specifically below
     for obj in network_service.objects():

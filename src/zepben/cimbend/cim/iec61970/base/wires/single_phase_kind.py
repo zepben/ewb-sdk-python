@@ -1,48 +1,58 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
-
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from enum import Enum
 
 __all__ = ["SinglePhaseKind", "phasekind_by_id"]
 
 
-def phasekind_by_id(id):
+def phasekind_by_id(spk_id):
     """
     Get a SinglePhaseKind by its ID
-    :param id: ID of the SinglePhaseKind from 0 as per the order of definition
-    :return: The SinglePhaseKind
+
+    `spk_id` ID of the SinglePhaseKind from 0 as per the order of definition
+    Returns The SinglePhaseKind
     """
-    return _spk_members[id]
+    return _spk_members[spk_id]
 
 
 class SinglePhaseKind(Enum):
+    """Enumeration of single phase identifiers. Allows designation of single phases for both transmission and distribution equipment, circuits and loads."""
+
     NONE = (0, -1)
+    """No phase specified"""
+
     A = (1, 0)
+    """Phase A"""
+
     B = (2, 1)
+    """Phase B"""
+
     C = (3, 2)
+    """Phase C"""
+
     N = (4, 3)
+    """Neutral"""
+
     X = (5, 0)
+    """An unknown primary phase."""
+
     Y = (6, 1)
+    """An unknown primary phase."""
+
     INVALID = (7, -1)
+    """Invalid phase. Caused by trying to energise with multiple phases simultaneously."""
 
     @property
     def bit_mask(self):
         return 1 << self.mask_index if self.mask_index >= 0 else 0
+
+    @property
+    def value(self):
+        return self.value[0]
 
     @property
     def mask_index(self):

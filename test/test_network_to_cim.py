@@ -1,20 +1,4 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
@@ -97,7 +81,7 @@ from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup 
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection as PBWindingConnection
 from zepben.protobuf.network.model.TracedPhases_pb2 import TracedPhases as PBTracedPhases
 
-from zepben.cimbend.common.base_proto2cim import *
+from zepben.cimbend.common.translator.base_proto2cim import *
 from zepben.cimbend.cim.iec61968.assetinfo.wire_info import CableInfo, OverheadWireInfo, WireInfo
 from zepben.cimbend.cim.iec61968.assetinfo import WireMaterialKind
 from zepben.cimbend.cim.iec61968.assets.asset import Asset, AssetContainer
@@ -142,6 +126,7 @@ from zepben.cimbend.network.network import NetworkService
 from zepben.cimbend.phases import TracedPhases, direction, phase
 
 from zepben.cimbend.network.translator.network_proto2cim import NetworkProtoToCim
+
 
 class TestNetworkToCim(object):
     def test_add_pb(self):

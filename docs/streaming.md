@@ -5,7 +5,7 @@ The connection module provides both an asyncio and synchronous interface. The sy
 
 To connect to an HTTPS server with auth token and client auth:
 
-    from zepben.model.streaming import connect
+    from zepben.cimbend import connect
     
     ca = cert = key = None
     with open('path/to/key', 'rb') as f:

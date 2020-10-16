@@ -1,23 +1,11 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 from __future__ import annotations
 
-from dataclasses import dataclass, field, InitVar
 from typing import Set, Optional
 from weakref import ref, ReferenceType
 
@@ -30,9 +18,6 @@ from zepben.cimbend.tracing.phase_status import current_phases as ps_current_pha
 
 __all__ = ["AcDcTerminal", "Terminal"]
 
-# This is False to allow us to ref() it below. It's expected that users will always check existence via ``if x.connectivity_node:``
-NO_CONNECTIVITY_NODE = False
-
 
 class AcDcTerminal(IdentifiedObject):
     """
@@ -42,39 +27,49 @@ class AcDcTerminal(IdentifiedObject):
     pass
 
 
-@dataclass
 class Terminal(AcDcTerminal):
     """
-    A terminal is a connection point on a piece of ConductingEquipment. Terminals are connected at physical connection points called connectivity nodes.
-    All ConductingEquipment must have terminals and all terminals must have an associated piece of ConductingEquipment.
-
-    Note: If you are extending this class you must ensure you always safely access the linked equipment (i.e, check it is
-    not None)
-
-    Attributes -
-        - conducting_equipment : A reference back to the equipment this Terminal belongs to. Conducting equipment have
-                                terminals that may be connected to other conducting equipment terminals via connectivity
-                                nodes or topological nodes.
-                                Note: The Terminal will *not* be added to the ``conducting_equipment`` as part of construction.
-                                You must explicitly add the ``Terminal`` to its ``ConductingEquipment`` via ``add_terminal()``.
-        - phases : A :class:`zepben.cimbend.phases.PhaseCode` representing the normal network phasing condition of this
-                   Terminal.
-        - connectivity_node: The :class:`zepben.cimbend.iec61970.base.core.connectivity_node.ConnectivityNode` that this
-                             ``Terminal`` is connected to.
-        - traced_phases: The :class:`zepben.cimbend.phases.TracedPhases` representing the traced phases in both the
-                         normal and current network. If properly configured you would expect the normal state phases to
-                         match those in ``phases``
+    An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.
     """
-    conducting_equipment: Optional[ConductingEquipment] = None
-    phases: PhaseCode = PhaseCode.ABC
-    traced_phases: TracedPhases = field(default_factory=TracedPhases)
-    connectivitynode: InitVar[ConnectivityNode] = NO_CONNECTIVITY_NODE
-    _cn: ReferenceType = field(init=False)
 
-    def __post_init__(self, connectivitynode):
-        super().__post_init__()
-        if connectivitynode is not NO_CONNECTIVITY_NODE:
-            self.connectivity_node = connectivitynode
+    _conducting_equipment: Optional[ConductingEquipment] = None
+    """The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via 
+    connectivity nodes."""
+
+    phases: PhaseCode = PhaseCode.ABC
+    """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
+
+    sequence_number: int = 0
+    """The orientation of the terminal connections for a multiple terminal conducting equipment. The sequence numbering starts with 1 and additional 
+    terminals should follow in increasing order. The first terminal is the "starting point" for a two terminal branch."""
+
+    traced_phases: TracedPhases = TracedPhases()
+    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases 
+    to match those in `phases`"""
+
+    _cn: ReferenceType = None
+    """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
+    reference does not cause everything connected to it in the network to stay in memory."""
+
+    def __init__(self, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None):
+        self.conducting_equipment = conducting_equipment
+        if connectivity_node:
+            self.connectivity_node = connectivity_node
+
+    @property
+    def conducting_equipment(self):
+        """
+        The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
+        connectivity nodes.
+        """
+        return self._conducting_equipment
+
+    @conducting_equipment.setter
+    def conducting_equipment(self, ce):
+        if self._conducting_equipment is None or self._conducting_equipment is ce:
+            self._conducting_equipment = ce
+        else:
+            raise ValueError(f"conducting_equipment for {str(self)} has already been set to {self._conducting_equipment}, cannot reset this field to {ce}")
 
     @property
     def connectivity_node(self):
@@ -89,17 +84,23 @@ class Terminal(AcDcTerminal):
 
     @property
     def connected(self) -> bool:
-        return self.connectivity_node
+        if self.connectivity_node:
+            return True
+        return False
+
+    @property
+    def connectivity_node_id(self):
+        return self.connectivity_node.mrid if self.connectivity_node is not None else None
 
     def __repr__(self):
-        return f"Terminal{self.mrid}"
+        return f"Terminal{{{self.mrid}}}"
 
     def __lt__(self, other):
         """
         TODO: fix
-        This definition should only be used for sorting within a :class:`zepben.cimbend.tracing.queue.PriorityQueue`
-        :param other: Another Terminal to compare against
-        :return: True if self has more cores than other, False otherwise.
+        This definition should only be used for sorting within a `zepben.cimbend.tracing.queue.PriorityQueue`
+        `other` Another Terminal to compare against
+        Returns True if self has more cores than other, False otherwise.
         """
         return cores_from_phases(self.phases) > cores_from_phases(other.phases)
 
@@ -118,7 +119,7 @@ class Terminal(AcDcTerminal):
     def get_switch(self):
         """
         Get any associated switch for this Terminal
-        :return: Switch if present in this terminals ConnectivityNode, else None
+        Returns Switch if present in this terminals ConnectivityNode, else None
         """
         return self.connectivity_node.get_switch()
 
@@ -131,9 +132,9 @@ class Terminal(AcDcTerminal):
     def get_connectivity(self, cores: Set[int] = None, exclude=None):
         """
         Get the connectivity between this terminal and all other terminals in its `ConnectivityNode`.
-        :param cores: Core paths to trace between the terminals. Defaults to all cores.
-        :param exclude: `Terminal`'s to exclude from the result. Will be skipped if encountered.
-        :return: List of :class:`ConnectivityResult`'s for this terminal.
+        `cores` Core paths to trace between the terminals. Defaults to all cores.
+        `exclude` `zepben.cimbend.iec61970.base.core.terminal.Terminal`'s to exclude from the result. Will be skipped if encountered.
+        Returns List of `ConnectivityResult`'s for this terminal.
         """
         if exclude is None:
             exclude = set()
@@ -151,9 +152,6 @@ class Terminal(AcDcTerminal):
                     # Only return CR's that are physically wired together.
                     results.append(cr)
         return results
-
-    def connect(self, connectivity_node: ConnectivityNode):
-        self.connectivity_node = connectivity_node
 
     def disconnect(self):
         self.connectivity_node = NO_CONNECTIVITY_NODE

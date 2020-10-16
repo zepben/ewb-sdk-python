@@ -1,25 +1,11 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
-
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, InitVar
 from typing import List, Set, Optional, Generator, Tuple
 
 from zepben.cimbend.cim.iec61970.base.core.base_voltage import BaseVoltage
@@ -28,121 +14,105 @@ from zepben.cimbend.exceptions import NoEquipmentException
 
 __all__ = ['ConductingEquipment']
 
-from zepben.cimbend.util import get_by_mrid, require, contains_mrid
+from zepben.cimbend.util import get_by_mrid, require
 
 
-@dataclass
 class ConductingEquipment(Equipment):
     """
     Abstract class, should only be used through subclasses.
     The parts of the AC power system that are designed to carry current or that are conductively connected through
     terminals.
 
-    ConductingEquipment are connected by :class:`zepben.cimbend.Terminal`'s which are in turn associated with
-    :class:`zepben.cimbend.ConnectivityNode`'s. Each `Terminal` is associated with _exactly one_ `ConnectivityNode`,
-    and through that `ConnectivityNode` can be linked with many other `Terminals` and thus `ConductingEquipment`.
-
-    Attributes -
-        - base_voltage : A :class:`zepben.cimbend.BaseVoltage`.
-        - terminals : Conducting equipment have terminals that may be connected to other conducting equipment terminals
-                      via connectivity nodes or topological nodes. The sequenceNumber of each ``Terminal`` is the index
-                      of the Terminal in the list.
+    ConductingEquipment are connected by `zepben.cimbend.cim.iec61970.base.core.Terminal`'s which are in turn associated with
+    `zepben.cimbend.cim.iec61970.base.connectivity_node.ConnectivityNode`'s. Each `zepben.cimbend.iec61970.base.core.terminal.Terminal` is associated with
+    _exactly one_ `ConnectivityNode`, and through that `ConnectivityNode` can be linked with many other `Terminals` and `ConductingEquipment`.
     """
-    base_voltage: Optional[BaseVoltage] = None
-    terminals_: InitVar[List[Terminal]] = field(default=list())
-    _terminals: List[Terminal] = field(default_factory=list, init=False)
 
-    def __post_init__(self, usagepoints: List[UsagePoint],
-                      equipmentcontainers: List[EquipmentContainer],
-                      operationalrestrictions: List[OperationalRestriction],
-                      currentfeeders: List[Feeder],
-                      terminals_: List[Terminal]):
-        super().__post_init__(usagepoints, equipmentcontainers, operationalrestrictions, currentfeeders)
-        for term in terminals_:
-            self.add_terminal(term)
+    base_voltage: Optional[BaseVoltage] = None
+    """`zepben.cimbend.iec61970.base.core.base_voltage.BaseVoltage` of this `ConductingEquipment`. Use only when there is no voltage level container used and 
+    only one base voltage applies. For example, not used for transformers."""
+
+    _terminals: List[Terminal] = []
+
+    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
+                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None):
+        super().__init__(usage_points, equipment_containers, operational_restrictions, current_feeders)
+        if terminals:
+            for term in terminals:
+                self.add_terminal(term)
 
     @property
     def nominal_voltage(self):
         return self.base_voltage.nominal_voltage if self.base_voltage is not None else 0
 
     @property
+    def terminals(self) -> Generator[Terminal, None, None]:
+        """
+        `ConductingEquipment` have `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal`s that may be connected to other `ConductingEquipment`
+        `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal`s via `ConnectivityNode`s.
+        """
+        for term in self._terminals:
+            yield term
+
     def num_terminals(self):
         """
-        Get the number of :class:`zepben.cimbend.iec61970.base.core.terminal.Terminal`s for this ``ConductingEquipment``.
+        Get the number of `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal`s for this `ConductingEquipment`.
         """
         return len(self._terminals)
 
-    @property
-    def terminals(self) -> Generator[Tuple[int, Terminal], None, None]:
-        """
-        :return: Generator over the terminals of this ``ConductingEquipment``.
-        """
-        for i, term in enumerate(self._terminals):
-            yield i, term
-
     def get_terminal_by_mrid(self, mrid: str) -> Terminal:
         """
-        Get the ``Terminal`` for this ``ConductingEquipment`` identified by ``mrid``
+        Get the `zepben.cimbend.iec61970.base.core.terminal.Terminal` for this `ConductingEquipment` identified by `mrid`
 
-        :param mrid: the mRID of the required :class:`zepben.cimbend.iec61970.base.core.terminal.Terminal`
-        :return: The :class:`zepben.cimbend.iec61970.base.core.terminal.Terminal` with the specified ``mrid`` if it
-        exists
-        :raises: KeyError if mrid wasn't present.
+        `mrid` the mRID of the required `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal`
+        Returns The `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._terminals, mrid)
 
     def get_terminal_by_sn(self, sequence_number: int):
         """
-        Get a ``Terminal`` by its sequenceNumber.
-        :param sequence_number: The sequenceNumber of the `Terminal` in relation to this ``ConductingEquipment``.
-        :raises: IndexError if this ``ConductingEquipment`` does not have ``sequence_number`` ``Terminal``'s.
-        :return: The ``Terminal`` referred to by ``sequenceNumber``
-        """
-        return self._terminals[sequence_number]
+        Get the `zepben.cimbend.iec61970.base.core.terminal.Terminal` on this `ConductingEquipment` by its `sequence_number`.
 
-    def __getitem__(self, item):
+        `sequence_number` The `sequence_number` of the `zepben.cimbend.iec61970.base.core.terminal.Terminal` in relation to this `ConductingEquipment`.
+        Returns The `zepben.cimbend.iec61970.base.core.terminal.Terminal` on this `ConductingEquipment` with sequence number `sequence_number`
+        Raises IndexError if no `zepben.cimbend.iec61970.base.core.terminal.Terminal` was found with sequence_number `sequence_number`.
+        """
+        for term in self._terminals:
+            if term.sequence_number == sequence_number:
+                return term
+        raise IndexError(f"No Terminal with sequence_number {sequence_number} was found in ConductingEquipment {str(self)}")
+
+    def __getitem__(self, item: int):
         return self.get_terminal_by_sn(item)
 
     def add_terminal(self, terminal: Terminal) -> ConductingEquipment:
         """
-        :param terminal: the :class:`zepben.cimbend.iec61970.base.core.terminal.Terminal` to add to this
-        ``ConductingEquipment``, assigning it a sequence_number of ``num_terminals``.
-        :return: A reference to this ``ConductingEquipment`` to allow fluent use.
-        """
-        self.insert_terminal(terminal)
-        return self
+        Associate `terminal` with this `ConductingEquipment`. If `terminal.sequence_number` == 0, the terminal will be assigned a sequence_number of
+        `self.num_terminals() + 1`.
 
-    def insert_terminal(self, terminal: Terminal, sequence_number: int = None) -> ConductingEquipment:
+        `terminal` The `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal` to associate with this `ConductingEquipment`.
+        Returns A reference to this `ConductingEquipment` to allow fluent use.
+        Raises `ValueError` if another `zepben.cimbend.iec61970.base.core.terminal.Terminal` with the same `mrid` already exists for this `ConductingEquipment`.
         """
-        :param terminal: the :class:`zepben.cimbend.iec61970.base.core.terminal.Terminal` to
-        associate with this ``ConductingEquipment``.
-        :param sequence_number: The ``sequenceNumber`` for ``terminal``. You should aim to always insert ``Terminal``s
-        in order.
-        :return: A reference to this ``ConductingEquipment`` to allow fluent use.
-        :raises: ``ValueError`` if ``terminal`` cannot be added to
-        """
+        if terminal.sequence_number == 0:
+            terminal.sequence_number = self.num_terminals() + 1
+
         if self._validate_terminal(terminal):
             return self
 
-        if sequence_number is None:
-            sequence_number = self.num_terminals
-        require(not contains_mrid(self._terminals, terminal.mrid),
-                lambda: f"A Terminal with mRID {terminal.mrid} already exists in {str(self)}.")
-        require(0 <= sequence_number <= self.num_terminals,
-                lambda: f"Unable to add Terminal to ConductingEquipment {self}. Sequence number {sequence_number} is invalid. "
-                        f"Expected a value between 0 and {self.num_terminals}. Make sure you are adding the terminals in the correct order and there are no missing sequence numbers.")
-        self._terminals.insert(sequence_number, terminal)
-        return self
+        self._terminals.append(terminal)
+        self._terminals.sort(key=lambda t: t.sequence_number)
 
-    def __setitem__(self, key, value):
-        self.insert_terminal(value, key)
+        return self
 
     def remove_terminal(self, terminal: Terminal) -> ConductingEquipment:
         """
-        :param terminal: the :class:`zepben.cimbend.iec61970.base.core.terminal.Terminal` to
-        disassociate from this ``ConductingEquipment``.
-        :raises: ValueError if ``terminal`` was not associated with this ``ConductingEquipment``.
-        :return: A reference to this ``ConductingEquipment`` to allow fluent use.
+        Disassociate `terminal` from this `ConductingEquipment`
+
+        `terminal` the `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal` to disassociate from this `ConductingEquipment`.
+        Returns A reference to this `ConductingEquipment` to allow fluent use.
+        Raises `ValueError` if `terminal` was not associated with this `ConductingEquipment`.
         """
         self._terminals.remove(terminal)
         return self
@@ -150,7 +120,7 @@ class ConductingEquipment(Equipment):
     def clear_terminals(self) -> ConductingEquipment:
         """
         Clear all terminals.
-        :return: A reference to this ``ConductingEquipment`` to allow fluent use.
+        Returns A reference to this `ConductingEquipment` to allow fluent use.
         """
         self._terminals.clear()
         return self
@@ -162,47 +132,30 @@ class ConductingEquipment(Equipment):
 
     def __lt__(self, other):
         """
-        This definition should only be used for sorting within a :class:`zepben.cimbend.tracing.queue.PriorityQueue`
-        :param other: Another Terminal to compare against
-        :return: True if self has more cores than other, False otherwise.
+        This definition should only be used for sorting within a `zepben.cimbend.tracing.queue.PriorityQueue`
+        `other` Another Terminal to compare against
+        Returns True if self has more cores than other, False otherwise.
         """
         return self.num_cores > other.num_cores
 
     def _validate_terminal(self, terminal: Terminal) -> bool:
         """
-        Validate a terminal against this ``ConductingEquipment``'s ``Terminal``s.
-        :param terminal: The ``Terminal`` to validate.
-        :return: True if ``terminal`` is already associated with this ``ConductingEquipment``,
-                 otherwise False.
-        :raises: ``ValueError`` if ``terminal``s ``conducting_equipment`` is not this ``ConductingEquipment``,
-                 or if this ``ConductingEquipment`` has a different ``Terminal`` with the same mRID.
+        Validate a terminal against this `ConductingEquipment`'s `zepben.cimbend.iec61970.base.core.terminal.Terminal`s.
+
+        `terminal` The `zepben.cimbend.iec61970.base.core.terminal.Terminal` to validate.
+        Returns True if `zepben.cimbend.iec61970.base.core.terminal.Terminal`` is already associated with this `ConductingEquipment`, otherwise False.
+        Raises `ValueError` if `zepben.cimbend.iec61970.base.core.terminal.Terminal`s `conducting_equipment` is not this `ConductingEquipment`,
+        or if this `ConductingEquipment` has a different `zepben.cimbend.iec61970.base.core.terminal.Terminal` with the same mRID.
         """
         if self._validate_reference(terminal, self.get_terminal_by_mrid, "A Terminal"):
             return True
 
+        if self._validate_reference_by_sn(terminal.sequence_number, terminal, self.get_terminal_by_sn, "A Terminal"):
+            return True
+
         require(terminal.conducting_equipment is self,
-                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {self}.")
+                lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.")
         return False
-
-    def is_metered(self):
-        """
-        Check whether this piece of equipment is metered. A piece of equipment is metered if it's associated with at
-        least one :class:`zepben.cimbend.UsagePoint` that has an :class:`zepben.cimbend.EndDevice` attached to it.
-        :return: True if this equipment has at least one `EndDevice` on one `UsagePoint`, False otherwise.
-        """
-        for up in self.usage_points:
-            if up.is_metered():
-                return True
-        else:
-            return False
-
-    def terminal_sequence_number(self, terminal):
-        """
-        Sequence number for terminals is stored as the index of the terminal in `self.terminals`
-        :param terminal: The terminal to retrieve the sequence number for
-        :return:
-        """
-        return self.get_terminal_by_mrid(terminal.mrid)
 
     def get_terminal_for_node(self, node):
         for t in self._terminals:
@@ -210,23 +163,13 @@ class ConductingEquipment(Equipment):
                 return t
         raise NoEquipmentException(f"Equipment {self.mrid} is not connected to node {node.mrid}")
 
-    def get_nominal_voltage(self, terminal=None):
-        """
-        Get the nominal voltage for this piece of equipment.
-        In cases where this equipment has multiple nominal voltages (i.e, transformers),
-        this method should be overridden so providing a terminal will provide the voltage corresponding to that terminal
-
-        :param terminal: Terminal to fetch voltage for
-        """
-        return self.nominal_voltage
-
     def get_connected_equipment(self, exclude: Set = None):
         """
-        Get all :class:`ConductingEquipment` connected to this piece of equipment. An `Equipment` is connected if it has
-        a `Terminal` associated with a `ConnectivityNode` that this `ConductingEquipment` is also associated with.
+        Get all `ConductingEquipment` connected to this piece of equipment. An `Equipment` is connected if it has
+        a `zepben.cimbend.iec61970.base.core.terminal.Terminal` associated with a `ConnectivityNode` that this `ConductingEquipment` is also associated with.
 
-        :param exclude: Equipment to exclude from return.
-        :return: A list of `ConductingEquipment` that are connected to this.
+        `exclude` Equipment to exclude from return.
+        Returns A list of `ConductingEquipment` that are connected to this.
         """
         if exclude is None:
             exclude = []
@@ -239,4 +182,3 @@ class ConductingEquipment(Equipment):
                 if term != terminal:  # Don't include ourselves.
                     connected_equip.append(term.conducting_equipment)
         return connected_equip
-

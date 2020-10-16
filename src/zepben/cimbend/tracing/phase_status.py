@@ -1,21 +1,11 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.cimbend.cim.iec61970.base.wires import SinglePhaseKind
 from zepben.cimbend.phases.direction import Direction
@@ -37,14 +27,14 @@ class PhaseStatus(ABC):
     @abstractmethod
     def phase(self):
         """
-        :return: The phase added to this status
+        Returns The phase added to this status
         """
         raise NotImplementedError()
 
     @abstractmethod
     def direction(self):
         """
-        :return: The direction added to this status.
+        Returns The direction added to this status.
         """
         raise NotImplementedError()
 
@@ -53,8 +43,8 @@ class PhaseStatus(ABC):
         """
         Clears the phase and sets it to the specified phase and direction.
         If the passed in phase is NONE or the passed in direction is NONE, this should clear the phase status.
-        :param phase: The new phase to be set.
-        :param direction: The direction of the phase.
+        `phase` The new phase to be set.
+        `direction` The direction of the phase.
         """
         raise NotImplementedError()
 
@@ -62,9 +52,9 @@ class PhaseStatus(ABC):
     def add(self, phase: SinglePhaseKind, direction: Direction):
         """
         Adds a phase to the status with the given direction.
-        :param phase: The phase to be added.
-        :param direction: The direction of the phase.
-        :return: True if the phase or direction has been updated
+        `phase` The phase to be added.
+        `direction` The direction of the phase.
+        Returns True if the phase or direction has been updated
         """
         raise NotImplementedError()
 
@@ -72,9 +62,9 @@ class PhaseStatus(ABC):
     def remove(self, phase: SinglePhaseKind, direction: Direction = None):
         """
         Removes a phase from the status. If direction is supplied will remove phase matching the direction.
-        :param phase: The phase to be removed.
-        :param direction: The direction to match with the phase being removed.
-        :return: True if the phase or direction has been removed.
+        `phase` The phase to be removed.
+        `direction` The direction to match with the phase being removed.
+        Returns True if the phase or direction has been removed.
         """
         raise NotImplementedError()
 

@@ -1,23 +1,9 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
-
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
@@ -26,15 +12,34 @@ from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedOb
 __all__ = ["Document", "Agreement"]
 
 
-@dataclass
 class Document(IdentifiedObject):
+    """
+    Parent class for different groupings of information collected and managed as a part of a business process.
+    It will frequently contain references to other objects, such as assets, people and power system resources.
+    """
     title: str = ""
+    """Document title."""
+
     created_date_time: Optional[datetime] = None
+    """Date and time that this document was created."""
+
     author_name: str = ""
+    """Name of the author of this document."""
+
     type: str = ""
+    """Utility-specific classification of this document, according to its corporate standards, practices, 
+    and existing IT systems (e.g., for management of assets, maintenance, work, outage, customers, etc.)."""
+
     status: str = ""
+    """Status of subject matter (e.g., Agreement, Work) this document represents."""
+
     comment: str = ""
+    """Free text comment"""
 
 
 class Agreement(Document):
+    """
+    Formal agreement between two parties defining the terms and conditions for a set of services. The specifics of
+    the services are, in turn, defined via one or more service agreements.
+    """
     pass

@@ -1,60 +1,49 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
-
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from enum import Enum
 
 
 class WireMaterialKind(Enum):
-    # @property UNKNOWN
+
     UNKNOWN = 0
+    """UNKNOWN"""
 
-    # Aluminum-alloy conductor steel reinforced.
     aaac = 1
+    """Aluminum-alloy conductor steel reinforced."""
 
-    # Aluminum conductor steel reinforced.
     acsr = 2
+    """Aluminum conductor steel reinforced."""
 
-    # Aluminum conductor steel reinforced, aluminumized steel core
     acsrAz = 3
+    """Aluminum conductor steel reinforced, aluminumized steel core"""
 
-    # Aluminum wire.
     aluminum = 4
+    """Aluminum wire."""
 
-    # Aluminum-alloy wire.
     aluminumAlloy = 5
+    """Aluminum-alloy wire."""
 
-    # Aluminum-alloy-steel wire.
     aluminumAlloySteel = 6
+    """Aluminum-alloy-steel wire."""
 
-    # Aluminum-steel wire.
     aluminumSteel = 7
+    """Aluminum-steel wire."""
 
-    # Copper wire.
     copper = 8
+    """Copper wire."""
 
-    # Copper cadmium wire.
     copperCadmium = 9
+    """Copper cadmium wire."""
 
-    # Other wire material.
     other = 10
+    """Other wire material."""
 
-    # Steel wire.
     steel = 11
+    """Steel wire."""
 
     @property
     def short_name(self):

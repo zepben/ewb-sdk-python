@@ -1,32 +1,19 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
-
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 import logging
-from dataclasses import dataclass, field
+from dataclassy import dataclass
 from enum import Enum
-from typing import Dict
+from typing import Dict, List
 
+from zepben.cimbend import Measurement
 from zepben.cimbend.common.base_service import BaseService
-from zepben.cimbend.cim.iec61970.base.core import ConductingEquipment
 from zepben.cimbend.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.cimbend.cim.iec61970.base.wires import EnergySource
-from zepben.cimbend.measurement.metrics_store import MetricsStore
 from zepben.cimbend.tracing.phasing import SetPhases
 from pathlib import Path
 
@@ -43,9 +30,9 @@ class ProcessStatus(Enum):
 
 def connect(terminal: Terminal, connectivity_node: ConnectivityNode):
     """
-    Connect a ``Terminal`` to a ``ConnectivityNode``
-    :param terminal: The ``Terminal`` to connect.
-    :param connectivity_node: The ``ConnectivityNode`` to connect ``terminal`` to.
+    Connect a `zepben.cimbend.iec61970.base.core.terminal.Terminal`` to a `ConnectivityNode`
+    `terminal` The `zepben.cimbend.iec61970.base.core.terminal.Terminal` to connect.
+    `connectivity_node` The `ConnectivityNode` to connect ``zepben.cimbend.iec61970.base.core.terminal.Terminal` to.
     """
     terminal.connect(connectivity_node)
     connectivity_node.add_terminal(terminal)
@@ -53,9 +40,9 @@ def connect(terminal: Terminal, connectivity_node: ConnectivityNode):
 
 def _attempt_to_reuse_connection(terminal1: Terminal, terminal2: Terminal) -> ProcessStatus:
     """
-    Attempt to connect two ``Terminal``s.
-    :return: ``ProcessStatus`` reflecting whether the connection was reused. PROCESSED if a connection was
-    established, INVALID if it couldn't be, and SKIPPED if neither terminal had an existing ``ConnectivityNode``.
+    Attempt to connect two `zepben.cimbend.iec61970.base.core.terminal.Terminal`s.
+    Returns `ProcessStatus` reflecting whether the connection was reused. PROCESSED if a connection was
+    established, INVALID if it couldn't be, and SKIPPED if neither terminal had an existing `ConnectivityNode`.
     """
     cn1 = terminal1.connectivity_node
     cn2 = terminal2.connectivity_node
@@ -72,7 +59,7 @@ def _attempt_to_reuse_connection(terminal1: Terminal, terminal2: Terminal) -> Pr
     return ProcessStatus.SKIPPED
 
 
-@dataclass
+@dataclass(slots=True)
 class NetworkService(BaseService):
     """
     A full representation of the power network.
@@ -84,52 +71,46 @@ class NetworkService(BaseService):
     """
 
     name: str = "network"
-    _connectivity_nodes: Dict[str, ConnectivityNode] = field(init=False, default_factory=dict)
-    metrics_store: MetricsStore = None
-    _auto_cn_index: int = field(init=False, default=0)
+    _connectivity_nodes: Dict[str, ConnectivityNode] = dict()
+    _auto_cn_index: int = 0
+    _measurements: Dict[str, List[Measurement]] = []
 
-    def replace(self, mrid: str, replacement: ConductingEquipment) -> ConductingEquipment:
+    def get_measurements(self, mrid: str, t: type) -> List[Measurement]:
         """
-        Replace a ConductingEquipment by ``mrid`` in this network
-        :param mrid: The ``mrid`` of the ``ConductingEquipment`` to be replaced.
-        :param replacement: The replacement ``ConductingEquipment``. Must at least have the same number of ``Terminal``s
-                            and the same ``PhaseCode`` on each ``Terminal``.
-        :return: The original ``ConductingEquipment`` that was replaced.
-        :raises: ValueError if the replacement was incompatible with the existing ``ConductingEquipment``.
-        :raises: KeyError if ``mrid`` was not stored as a ``ConductingEquipment`` in this ``Network``.
+        Get all measurements of type `t` associated with the given `mrid`.
+                                                                                                              
+        The `mrid` should be either a `zepben.cimbend.iec61970.base.core.power_system_resource.PowerSystemResource` or a
+        `zepben.cimbend.iec61970.base.core.terminal.Terminal` MRID that is assigned to the corresponding fields on the measurements.
         """
-        original = self.get(mrid, ConductingEquipment)
-        connected_terms = []
-        for term in original.terminals:
-            if term.is_connected:
-                connected_terms.append(term)
+        return [meas for meas in self._measurements[mrid] if isinstance(meas, t)]
 
-        if len(connected_terms) > replacement.num_terminals:
-            raise ValueError(
-                f"Replacement terminal needed {len(connected_terms)} but only had {replacement.num_terminals}")
+    def add_measurement(self, measurement: Measurement) -> bool:
+        """
+        Add a `zepben.cimbend.cim.iec61970.base.meas.measurement.Measurement` to this `NetworkService`
 
-        for i, term in enumerate(connected_terms):
-            replacement_term = replacement[i]
-            cn = term.connectivity_node
-            if term.phases is not replacement_term.phases:
-                raise ValueError(
-                    f"Replacement terminal needed phase {term.phases.short_name} but had {replacement_term.phases.short_name}")
+        `measurement` The `Measurement` to add.
+        Returns `True` if `measurement` was added, `False` otherwise
+        """
+        return self._index_measurement(measurement) and self.add(measurement)
 
-            connect(replacement_term, cn)
-            self.disconnect(term)
+    def remove_measurement(self, measurement) -> bool:
+        """
+        Remove a `zepben.cimbend.cim.iec61970.base.meas.measurement.Measurement` from this `NetworkService`
 
-        self.remove(original)
-        self.add(replacement)
-        return original
+        `measurement` The `Measurement` to remove.
+        Returns `True` if `measurement` was removed, `False` otherwise
+        """
+        self._remove_measurement_index(measurement)
+        return self.remove(measurement)
 
     def connect_by_mrid(self, terminal: Terminal, connectivity_node_mrid: str) -> bool:
         """
-        Connect a ``Terminal`` to the ``ConnectivityNode`` with mRID ``connectivity_node_mrid``
-        :param terminal: The ``Terminal`` to connect.
-        :param connectivity_node_mrid: The mRID of the ``ConnectivityNode``. Will be created in the ``Network`` if it
+        Connect a `zepben.cimbend.iec61970.base.core.terminal.Terminal` to the `ConnectivityNode` with mRID `connectivity_node_mrid`
+        `terminal` The `zepben.cimbend.iec61970.base.core.terminal.Terminal` to connect.
+        `connectivity_node_mrid` The mRID of the `ConnectivityNode`. Will be created in the `Network` if it
         doesn't already exist.
-        :return: True if the connection was made or already existed, False if ``terminal`` was already connected to a
-        different ``ConnectivityNode``
+        Returns True if the connection was made or already existed, False if `zepben.cimbend.iec61970.base.core.terminal.Terminal` was already connected to a
+        different `ConnectivityNode`
         """
         if not connectivity_node_mrid:
             return False
@@ -143,8 +124,8 @@ class NetworkService(BaseService):
 
     def connect_terminals(self, terminal1: Terminal, terminal2: Terminal) -> bool:
         """
-        Connect two ``Terminal``s
-        :return: True if the ``Terminal``s could be connected, False otherwise.
+        Connect two `zepben.cimbend.iec61970.base.core.terminal.Terminal`s
+        Returns True if the `zepben.cimbend.iec61970.base.core.terminal.Terminal`s could be connected, False otherwise.
         """
         status = _attempt_to_reuse_connection(terminal1, terminal2)
         if status == ProcessStatus.PROCESSED:
@@ -167,9 +148,9 @@ class NetworkService(BaseService):
 
     def disconnect(self, terminal: Terminal):
         """
-        Disconnect a ``Terminal`` from its ``ConnectivityNode``. Will also remove the ``ConnectivityNode`` from this
-        ``Network`` if it no longer has any terminals.
-        :param terminal: The ``Terminal`` to disconnect.
+        Disconnect a `zepben.cimbend.iec61970.base.core.terminal.Terminal`` from its `ConnectivityNode`. Will also remove the `ConnectivityNode` from this
+        `Network` if it no longer has any terminals.
+        `terminal` The `zepben.cimbend.iec61970.base.core.terminal.Terminal` to disconnect.
         """
         cn = terminal.connectivity_node
         if cn is None:
@@ -181,10 +162,10 @@ class NetworkService(BaseService):
 
     def disconnect_by_mrid(self, connectivity_node_mrid: str):
         """
-        Disconnect a ``ConnectivityNode`` from this ``Network``. Will disconnect all ``Terminal``s from the
-        ``ConnectivityNode``
-        :param connectivity_node_mrid: The mRID of the ``ConnectivityNode`` to disconnect.
-        :raises: KeyError if there is no ``ConnectivityNode`` for ``connectivity_node_mrid``
+        Disconnect a `ConnectivityNode` from this `Network`. Will disconnect all ``zepben.cimbend.iec61970.base.core.terminal.Terminal`s from the
+        `ConnectivityNode`
+        `connectivity_node_mrid` The mRID of the `ConnectivityNode` to disconnect.
+        Raises `KeyError` if there is no `ConnectivityNode` for `connectivity_node_mrid`
         """
         cn = self._connectivity_nodes[connectivity_node_mrid]
         if cn is not None:
@@ -196,15 +177,15 @@ class NetworkService(BaseService):
     def get_primary_sources(self):
         """
         Get the primary source for this network. All directions are applied relative to this EnergySource
-        :return: The primary EnergySource
+        Returns The primary EnergySource
         """
         return [source for source in self._objectsByType[EnergySource].values() if source.has_phases()]
 
     def add_connectivitynode(self, mrid: str):
         """
         Add a connectivity node to the network.
-        :param mrid: mRID of the ConnectivityNode
-        :return: A new ConnectivityNode with `mrid` if it doesn't already exist, otherwise the existing
+        `mrid` mRID of the ConnectivityNode
+        Returns A new ConnectivityNode with `mrid` if it doesn't already exist, otherwise the existing
                  ConnectivityNode represented by `mrid`
         """
         if mrid not in self._connectivity_nodes:
@@ -217,24 +198,31 @@ class NetworkService(BaseService):
         set_phases = SetPhases()
         await set_phases.run(self)
 
-    def _dumpTracing(self):
-        with open(TRACED_NETWORK_FILE, "w") as f:
-            for e in self.depth_first_trace_and_apply():
-                assert len(e.terminals) < 3
-                upstream_count = 0
-                f.write(str(e) + "\n")
-                for term in e.terminals:
-                    if term.direction:
-                        upstream_count += 1
-                    f.write("\t" + str(term) + "\n")
-                try:
-                    if isinstance(e, EnergySource):
-                        assert upstream_count == 0, "energy source had more than 0 upstreams"
-                    else:
-                        assert upstream_count == 1, "Need at least 1 upstream terminal"
-                except AssertionError as a:
-                    logger.error(a)
-                    logger.error(str(e))
-                    for term in e._terminals:
-                        logger.error(str(term))
-                f.write("\n\n")
+    def _index_measurement(self, measurement: Measurement, mrid: str) -> bool:
+        if not mrid:
+            return False
+
+        if mrid in self._measurements:
+            for meas in self._measurements[mrid]:
+                if meas.mrid == measurement.mrid:
+                    return False
+            else:
+                self._measurements[mrid].append(measurement)
+                return True
+        else:
+            self._measurements[mrid] = [measurement]
+            return True
+
+    def _remove_measurement_index(self, measurement: Measurement):
+        try:
+            self._measurements[measurement.terminal_mrid].remove(measurement)
+        except KeyError:
+            pass
+        try:
+            self._measurements[measurement.power_system_resource_mrid].remove(measurement)
+        except KeyError:
+            pass
+
+
+
+

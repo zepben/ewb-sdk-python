@@ -1,21 +1,8 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
-
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo
@@ -49,6 +36,15 @@ from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator
+from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog
+from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control
+from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete
+from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint
+from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement
+from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl
+from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint
+from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor
@@ -62,6 +58,7 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySourc
 from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction
+from zepben.protobuf.cim.iec61970.base.wires.Line_pb2 import Line
 from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import LinearShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter
@@ -76,8 +73,11 @@ from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCo
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd
+from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop
+from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit
+
 from zepben.cimbend.network.translator.network_proto2cim import *
-__all__ = ["network_proto2cim.py"]
+__all__ = []
 
 CableInfo.mrid = lambda self: self.wi.mrid()
 OverheadWireInfo.mrid = lambda self: self.wi.mrid()
@@ -124,6 +124,7 @@ EnergySourcePhase.mrid = lambda self: self.psr.mrid()
 Fuse.mrid = lambda self: self.sw.mrid()
 Jumper.mrid = lambda self: self.sw.mrid()
 Junction.mrid = lambda self: self.cn.mrid()
+Line.mrid = lambda self: self.ec.mrid()
 LinearShuntCompensator.mrid = lambda self: self.sc.mrid()
 PerLengthImpedance.mrid = lambda self: self.lp.mrid()
 PerLengthLineParameter.mrid = lambda self: self.io.mRID
@@ -138,6 +139,18 @@ ShuntCompensator.mrid = lambda self: self.rce.mrid()
 Switch.mrid = lambda self: self.ce.mrid()
 TapChanger.mrid = lambda self: self.psr.mrid()
 TransformerEnd.mrid = lambda self: self.io.mRID
+Loop.mrid = lambda self: self.io.mRID
+Circuit.mrid = lambda self: self.l.mrid()
+Accumulator.mrid = lambda self: self.measurement.mrid()
+Analog.mrid = lambda self: self.measurement.mrid()
+Discrete.mrid = lambda self: self.measurement.mrid()
+Control.mrid = lambda self: self.ip.mrid()
+IoPoint.mrid = lambda self: self.io.mRID
+Measurement.mrid = lambda self: self.io.mRID
+RemoteControl.mrid = lambda self: self.rp.mrid()
+RemotePoint.mrid = lambda self: self.io.mRID
+RemoteSource.mrid = lambda self: self.rp.mrid()
+
 
 PowerSystemResource.name_and_mrid = lambda self: self.io.name_and_mrid()
 ConductingEquipment.name_and_mrid = lambda self: self.eq.name_and_mrid()

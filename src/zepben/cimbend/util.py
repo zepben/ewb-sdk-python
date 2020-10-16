@@ -1,24 +1,16 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
 from __future__ import annotations
 import re
+import os
 from collections.abc import Sized
 from typing import Set, List, Optional, Iterable, Callable, Any, TypeVar, Generator
+from uuid import UUID
 
 T = TypeVar('T')
 
@@ -59,12 +51,12 @@ def get_equipment_connections(cond_equip, exclude: Set = None) -> List:
 
 def get_by_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -> IdentifiedObject:
     """
-    Get an :class:`zepben.cimbend.iec61970.base.core.identified_object.IdentifiedObject` from `collection` based on
+    Get an `zepben.cimbend.cim.iec61970.base.core.identified_object.IdentifiedObject` from `collection` based on
     its mRID.
-    :param collection: The collection to operate on
-    :param mrid: The mRID of the `IdentifiedObject` to lookup in the collection
-    :return: The `IdentifiedObject`
-    :raises: KeyError if ``mrid`` was not found in the collection.
+    `collection` The collection to operate on
+    `mrid` The mRID of the `IdentifiedObject` to lookup in the collection
+    Returns The `IdentifiedObject`
+    Raises `KeyError` if `mrid` was not found in the collection.
     """
     if not collection:
         raise KeyError(mrid)
@@ -76,11 +68,11 @@ def get_by_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -> 
 
 def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -> bool:
     """
-    Check if a collection of :class:`zepben.cimbend.iec61970.base.core.identified_object.IdentifiedObject` contains an
+    Check if a collection of `zepben.cimbend.cim.iec61970.base.core.identified_object.IdentifiedObject` contains an
     object with a specified mRID.
-    :param collection: The collection to operate on
-    :param mrid: The mRID to look up.
-    :return: True if an `IdentifiedObject` is found in the collection with the specified mRID, False otherwise.
+    `collection` The collection to operate on
+    `mrid` The mRID to look up.
+    Returns True if an `IdentifiedObject` is found in the collection with the specified mRID, False otherwise.
     """
     if not collection:
         return False
@@ -94,9 +86,8 @@ def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -
 def safe_remove(collection: Optional[List], obj: IdentifiedObject):
     """
     Remove an IdentifiedObject from a collection safely.
-    :raises: ValueError if ``obj`` is not in the collection.
-    :return: The collection if successfully removed or None if after removal the
-    collection was empty.
+    Raises `ValueError` if `obj` is not in the collection.
+    Returns The collection if successfully removed or None if after removal the collection was empty.
     """
     if collection is not None:
         collection.remove(obj)
@@ -110,8 +101,8 @@ def safe_remove(collection: Optional[List], obj: IdentifiedObject):
 def nlen(sized: Optional[Sized]) -> int:
     """
     Get the len of a nullable sized type.
-    :param sized: The object to get length of
-    :return: 0 if `sized` is None, otherwise len(`sized`)
+    `sized` The object to get length of
+    Returns 0 if `sized` is None, otherwise len(`sized`)
     """
     return 0 if sized is None else len(sized)
 
@@ -125,15 +116,15 @@ def ngen(collection: Optional[Iterable[T]]) -> Generator[T, None, None]:
 def is_none_or_empty(sized: Optional[Sized]) -> bool:
     """
     Check if a given object is empty and return None if it is.
-    :param sized: Any type implementing `__len__`
-    :return: `sized` if len(sized) > 0, or None if sized is None or len(sized) == 0.
+    `sized` Any type implementing `__len__`
+    Returns `sized` if len(sized) > 0, or None if sized is None or len(sized) == 0.
     """
     return sized is None or not len(sized)
 
 
 def require(condition: bool, lazy_message: Callable[[], Any]):
     """
-    Raise a ``ValueError`` if condition is not met, with the result of calling ``lazy_message`` as the message,
+    Raise a `ValueError` if condition is not met, with the result of calling `lazy_message` as the message,
     if the result is false.
     """
     if not condition:
@@ -143,3 +134,14 @@ def require(condition: bool, lazy_message: Callable[[], Any]):
 def pb_or_none(cim: Optional[Any]):
     """ Convert to a protobuf type or return None if cim was None """
     return cim.to_pb() if cim is not None else None
+
+
+
+
+class CopyableUUID(UUID):
+    
+    def __init__(self):
+        super().__init__(bytes=os.urandom(16), version=4)
+
+    def copy(self):
+        return UUID(bytes=os.urandom(16), version=4)

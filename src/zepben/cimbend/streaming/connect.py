@@ -1,21 +1,11 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
 
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
+#  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import contextlib
 import grpc
@@ -70,17 +60,17 @@ def get_token(addr, conf_address, client_id, client_secret):
 def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "http://localhost/auth", client_id: str = None,
           client_secret: str = None, pkey=None, cert=None, ca=None):
     """
-    :param host: The host to connect to.
-    :param rpc_port: The gRPC port for host.
-    :param conf_address: The complete address for the auth configuration endpoint.
-    :param client_id: Your client id for your OAuth Auth provider.
-    :param client_secret: Corresponding client secret.
-    :param pkey: Private key for client authentication
-    :param cert: Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
+    `host` The host to connect to.
+    `rpc_port` The gRPC port for host.
+    `conf_address` The complete address for the auth configuration endpoint.
+    `client_id` Your client id for your OAuth Auth provider.
+    `client_secret` Corresponding client secret.
+    `pkey` Private key for client authentication
+    `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
                  CA.
-    :param ca: CA trust for the server.
-    :param secure_conf: Whether the server hosting configuration is secured (https)
-    :return: A gRPC channel
+    `ca` CA trust for the server.
+    `secure_conf` Whether the server hosting configuration is secured (https)
+    Returns A gRPC channel
     """
     # TODO: make this more robust so it can handle SSL without client verification
     if pkey and cert and client_id and client_secret:
@@ -112,16 +102,16 @@ def connect(host: str = "localhost",
     Usage:
         with connect(args) as channel:
 
-    :param host: The host to connect to.
-    :param rpc_port: The gRPC port for host.
-    :param conf_address: The complete address for the auth configuration endpoint.
-    :param client_id: Your client id for your OAuth Auth provider.
-    :param client_secret: Corresponding client secret.
-    :param pkey: Private key for client authentication
-    :param cert: Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
+    `host` The host to connect to.
+    `rpc_port` The gRPC port for host.
+    `conf_address` The complete address for the auth configuration endpoint.
+    `client_id` Your client id for your OAuth Auth provider.
+    `client_secret` Corresponding client secret.
+    `pkey` Private key for client authentication
+    `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
                  CA.
-    :param ca: CA trust for the server.
-    :return: A gRPC channel
+    `ca` CA trust for the server.
+    Returns A gRPC channel
     """
     with _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca) as channel:
         conn = SyncWorkbenchConnection(channel)
@@ -141,16 +131,16 @@ async def connect_async(host: str = "localhost",
     Usage:
         async with connect_async(args) as channel:
 
-    :param host: The host to connect to.
-    :param rpc_port: The gRPC port for host.
-    :param conf_address: The complete address for the auth configuration endpoint.
-    :param client_id: Your client id for your OAuth Auth provider.
-    :param client_secret: Corresponding client secret.
-    :param pkey: Private key for client authentication
-    :param cert: Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
+    `host` The host to connect to.
+    `rpc_port` The gRPC port for host.
+    `conf_address` The complete address for the auth configuration endpoint.
+    `client_id` Your client id for your OAuth Auth provider.
+    `client_secret` Corresponding client secret.
+    `pkey` Private key for client authentication
+    `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
                  CA.
-    :param ca: CA trust for the server.
-    :return: A gRPC channel
+    `ca` CA trust for the server.
+    Returns A gRPC channel
     """
     with _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca) as channel:
         conn = WorkbenchConnection(channel)

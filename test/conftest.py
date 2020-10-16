@@ -1,24 +1,5 @@
-"""
-Copyright 2019 Zeppelin Bend Pty Ltd
-This file is part of cimbend.
-
-cimbend is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-cimbend is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with cimbend.  If not, see <https://www.gnu.org/licenses/>.
-"""
-
-
 import uuid
-from dataclasses import dataclass
+from dataclassy import dataclass
 from pytest import fixture
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection
 from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup
@@ -92,11 +73,11 @@ class NetworkBuilder(object):
 
     def add_energysource(self, mrid: str = None, with_phases: PhaseCode = PhaseCode.NONE, wiring_supplier=None, **kwargs):
         """
-        :param with_phases: If a `PhaseCode` is specified, the EnergySource will be added with an `EnergySourcePhase` for
+        `with_phases` If a `PhaseCode` is specified, the EnergySource will be added with an `EnergySourcePhase` for
                             each phase specified.
-        :param esp: List of EnergySourcePhase to specify for this EnergySource, overrides with_phases.
-        :param kwargs: Args to pass to `EnergySource.__init__`
-        :return: AddResult(io=created EnergySource, node=created ConnectivityNode)
+        `esp` List of EnergySourcePhase to specify for this EnergySource, overrides with_phases.
+        `kwargs` Args to pass to `EnergySource.__init__`
+        Returns AddResult(io=created EnergySource, node=created ConnectivityNode)
         """
         mrid = _get_mrid(mrid)
         terms = self.gen_terminals(1, mrid=mrid, wiring_supplier=wiring_supplier)
@@ -173,11 +154,11 @@ class NetworkBuilder(object):
         For a feeder CB we return the passed in connectivity_node rather than the newly created one.
         This is so network builders can continue building downstream from the feeder CB, rather than receiving a node
         above the feeder.
-        :param connectivity_node:
-        :param mrid:
-        :param substation:
-        :param kwargs:
-        :return:
+        `connectivity_node`
+        `mrid`
+        `substation`
+        `kwargs`
+        Returns
         """
         mrid = _get_mrid(mrid)
         terms = self.gen_terminals(2, connectivity_node, mrid=mrid, phases=phases, wiring_supplier=wiring_supplier)
@@ -206,16 +187,16 @@ class NetworkBuilder(object):
         If you require differing phases between Terminals, you should call this function multiple times with different
         phases for each Terminal as required. This function is only built to handle all the simpler cases described here
         to simplify building test networks.
-        :param wiring_supplier: A callback for providing the wiring for a Terminal to a specific `ConnectivityNode`.
+        `wiring_supplier` A callback for providing the wiring for a Terminal to a specific `ConnectivityNode`.
                                 This callback will be passed the corresponding ConnectivityNode for the Terminal being
                                 generated, and expects a `Wiring` returned, or `None` if implicit wiring is desired.
-        :param mrid: If provided, will be used as the base for the terminal MRID, and tN will be appended for each terminal.
-        :param count: The number of terminals to generate
-        :param conn_nodes: The connectivity nodes to use for the terminals. If count > len(conn_nodes) or conn_nodes == None,
+        `mrid` If provided, will be used as the base for the terminal MRID, and tN will be appended for each terminal.
+        `count` The number of terminals to generate
+        `conn_nodes` The connectivity nodes to use for the terminals. If count > len(conn_nodes) or conn_nodes == None,
                            new `ConnectivityNode`s will be created for each extra Terminal.
-        :param phases: The phase to use for the terminals. All generated terminals will get the provided phase.
-        :param kwargs: Passed to `Terminal` constructor
-        :return: List of `Terminal`'s
+        `phases` The phase to use for the terminals. All generated terminals will get the provided phase.
+        `kwargs` Passed to `zepben.cimbend.iec61970.base.core.terminal.Terminal` constructor
+        Returns List of `zepben.cimbend.iec61970.base.core.terminal.Terminal`'s
         """
         if wiring_supplier is None:
             wiring_supplier = lambda cn: None
