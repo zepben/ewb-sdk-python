@@ -53,7 +53,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apk add tar curl bash gcc musl-dev libffi-dev openssl-dev
+          apk add tar curl bash gcc musl-dev libffi-dev openssl-dev git
 
       - name: Cache python deps
         uses: actions/cache@v2
