@@ -49,16 +49,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install dependencies
+        run: |
+          apk add tar curl bash gcc musl-dev libffi-dev openssl-dev git
+
       - name: Checkout release branch
         run: |
           git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
           git fetch --all
           git checkout release
         shell: bash
-
-      - name: Install dependencies
-        run: |
-          apk add tar curl bash gcc musl-dev libffi-dev openssl-dev git
 
       - name: Cache python deps
         uses: actions/cache@v2
