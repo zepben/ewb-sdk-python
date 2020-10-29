@@ -82,6 +82,7 @@ jobs:
       - name: Delete release branch if deploy failed and fail
         if: steps.build.outcome == 'failure'
         run: |
+          ls -a
           git push origin -d release
           echo "There was an error in the python build and publish commands above."
           exit 1
