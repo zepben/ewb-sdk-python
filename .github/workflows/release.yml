@@ -145,12 +145,11 @@ jobs:
       - name: Update to next minor version
         run: |
           source /scripts/common.sh
-          /scripts/update-version.sh --python setup.py
-          git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
-          git fetch --all
-          git checkout ${GITHUB_REF/refs\/heads\//}
-          git pull
-          git merge release
-          git push origin ${GITHUB_REF/refs\/heads\//}
-          git push origin -d release
+          FILE=docs/release.md
+          if [ -f "$FILE" ]; then
+            export ln=$(cat $FILE | grep -n "### v[0-9]\+.[0-9]\+.[0-9]\+" | head -1 | cut -d':' -f1)
+            /scripts/update-version.sh --python --release setup.py $FILE 'next_release_version=${version//-SNAPSHOT/} && sed -i "${ln}i \#\#\# v${version//-SNAPSHOT/}\n\n\#\#\#\#\# Breaking Changes\n\* None.\n\n\#\#\#\#\# New Features\n\* None.\n\n\#\#\#\#\# Enhancements\n\* None.\n\n\#\#\#\#\# Fixes\n\* None.\n\n\#\#\#\#\# Notes\n\* None.\n\n\-\-\-\n" $changelog && sed -i "5i \|\[${next_release_version}\]\(\#v${next_release_version//\./}\)\| \`TBD\` \|"'
+          else
+            /scripts/update-version.sh --python --release setup.py
+          fi
         shell: bash
