@@ -11,6 +11,5 @@ from zepben.cimbend.common.base_service import BaseService
 __all__ = ["MeasurementService"]
 
 
-@dataclass(slots=True)
 class MeasurementService(BaseService):
     name: str = "measurement"

@@ -13,7 +13,6 @@ from zepben.cimbend.common.base_service import BaseService
 __all__ = ["DiagramService"]
 
 
-@dataclass(slots=True)
 class DiagramService(BaseService):
     name: str = "diagram"
     _diagram_objects_by_diagram_mrid: Dict[str, Dict[str, DiagramObject]] = dict()

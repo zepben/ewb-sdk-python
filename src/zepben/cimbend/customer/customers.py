@@ -11,7 +11,6 @@ from zepben.cimbend.common.base_service import BaseService
 __all__ = ["CustomerService"]
 
 
-@dataclass(slots=True)
 class CustomerService(BaseService):
     """
     Used to store Customer related types.

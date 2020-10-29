@@ -59,7 +59,6 @@ def _attempt_to_reuse_connection(terminal1: Terminal, terminal2: Terminal) -> Pr
     return ProcessStatus.SKIPPED
 
 
-@dataclass(slots=True)
 class NetworkService(BaseService):
     """
     A full representation of the power network.
