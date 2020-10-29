@@ -38,13 +38,17 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    container: python:3.7-slim
+    container: python:3.7-alpine
     needs: release-checks
 
     steps:
       - uses: actions/checkout@v2
         with:
           ref: release
+
+      - name: Install dependencies
+        run: |
+          apk add tar curl bash gcc musl-dev libffi-dev openssl-dev
 
       - name: Cache python deps
         uses: actions/cache@v2
