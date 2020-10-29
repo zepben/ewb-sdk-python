@@ -47,11 +47,11 @@ jobs:
     needs: release-checks
 
     steps:
-      - uses: actions/checkout@v2
-
       - name: Install dependencies
         run: |
           apk add tar curl bash gcc musl-dev libffi-dev openssl-dev git
+
+      - uses: actions/checkout@v2
 
       - name: Checkout release branch
         run: |
