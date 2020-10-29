@@ -1,10 +1,6 @@
 name: Release and deploy to Pypi
 
 on:
-  push:
-    branches:
-      - main
-      - LTS/*
   workflow_dispatch:
 
 jobs:
