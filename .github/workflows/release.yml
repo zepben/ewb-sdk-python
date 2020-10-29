@@ -1,0 +1,144 @@
+name: Release and deploy to Pypi
+
+on:
+  push:
+    branches:
+      - main
+      - LTS/*
+  workflow_dispatch:
+
+jobs:
+  release-checks:
+    runs-on: ubuntu-latest
+    container: zepben/pipeline-basic
+    outputs:
+      version: ${{ steps.check.outputs.release-version }}
+    env:
+      SLACK_NOTIFICATION: YES
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Release checks and update version for release
+        id: check
+        run: |
+          source /scripts/common.sh
+          git checkout -b release
+          /scripts/release-checks.sh --python setup.py
+          /scripts/finalize-version.sh --python setup.py
+          version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
+          echo "::set-output name=release-version::$(echo $version)"
+        shell: bash
+
+      - name: Cache licence-check
+        uses: actions/cache@v2
+        with:
+          path: /lc
+          key: lcc
+
+      - name: Check licence
+        uses: zepben/licence-check-action@main
+        with:
+          LC_URL: ${{ secrets.LC_URL }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    container: python:3.7-slim
+    needs: release-checks
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: release
+
+      - name: Cache python deps
+        uses: actions/cache@v2
+        with:
+          path: /pipcache
+          key: pip
+
+      - name: Build and publish
+        id: build
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          mkdir -p /pipcache
+          pip install --cache-dir /pipcache twine
+          pip install --cache-dir /pipcache -r requirements.txt
+          # pytest
+          python setup.py sdist bdist_wheel
+          twine upload dist/*
+          artifact="zepben.cimbend-${VERSION}-py3-none-any.whl"
+          echo "::set-output name=artifact::$(echo $artifact)"
+          echo "::set-output name=artifact-path::$(echo dist/$artifact)"
+        shell: bash
+        continue-on-error: true
+
+      - name: Delete release branch if deploy failed and fail
+        if: steps.build.outcome == 'failure'
+        run: |
+          git push origin -d release
+          echo "There was an error in the python build and publish commands above."
+          exit 1
+        shell: bash
+
+      - name: Merge and Tag
+        id: merge
+        run: |
+          git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+          git fetch --all
+          git merge origin/release
+          git push origin ${GITHUB_REF/refs\/heads\//}
+          version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
+          git tag "v$version"
+          git push --tags
+          echo "::set-output name=tag::$(echo v$version)"
+        shell: bash
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.merge.outputs.tag }}
+          release_name: ${{ steps.merge.outputs.tag }}
+          body_path: docs/release.md
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.build.outputs.artifact-path }}
+          asset_name: ${{ steps.build.outputs.artifact }}
+          asset_content_type: application/octet-stream
+        continue-on-error: true
+
+  update-version:
+    needs: deploy
+    runs-on: ubuntu-latest
+    container: zepben/pipeline-basic
+    env:
+      SLACK_NOTIFICATION: YES
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: release
+
+      - name: Update to next minor version
+        run: |
+          source /scripts/common.sh
+          /scripts/update-version.sh --python setup.py
+          git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+          git fetch --all
+          git checkout ${GITHUB_REF/refs\/heads\//}
+          git pull
+          git merge release
+          git push origin ${GITHUB_REF/refs\/heads\//}
+          git push origin -d release
+        shell: bash
