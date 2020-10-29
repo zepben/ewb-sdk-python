@@ -1,0 +1,36 @@
+#### Release History
+
+| Version | Released |
+| --- | --- |
+|[0.6.0](#v060)| `TBD` |
+| [0.5.0](#v050) | `29 October 2020` |
+
+---
+
+NOTE: This library is not yet stable, and breaking changes should be expected until
+a 1.0.0 release.
+
+---
+
+### v0.6.0
+
+##### Breaking Changes
+* None.
+
+##### New Features
+* None.
+
+##### Enhancements
+* None.
+
+##### Fixes
+* None.
+
+##### Notes
+* None.
+
+---
+
+### v0.5.0
+
+Initial github release of the evolve protobuf and gRPC definitions.
