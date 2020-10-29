@@ -13,7 +13,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apk add tar curl
+          apk add tar curl bash
 
       - name: Cache licence-check
         uses: actions/cache@v2
