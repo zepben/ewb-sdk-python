@@ -18,9 +18,14 @@ jobs:
         id: check
         run: |
           source /scripts/common.sh
-          git checkout -b release
           /scripts/release-checks.sh --python setup.py
-          /scripts/finalize-version.sh --python setup.py
+          FILE=docs/release.md
+          if [ -f "$FILE" ]; then
+            export release_date=$(date +'%d %B %Y')
+            /scripts/finalize-version.sh --python setup.py $FILE 'sed -i -e "s/TBD/$release_date/g"'
+          else
+            /scripts/finalize-version.sh --python setup.py
+          fi
           version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
           echo "::set-output name=release-version::$(echo $version)"
         shell: bash
