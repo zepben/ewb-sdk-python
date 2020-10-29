@@ -71,6 +71,7 @@ jobs:
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          VERSION: ${{ needs.release-checks.outputs.version }}
         run: |
           mkdir -p /pipcache
           pip install --cache-dir /pipcache twine
@@ -94,15 +95,16 @@ jobs:
 
       - name: Merge and Tag
         id: merge
+        env:
+          VERSION: ${{ needs.release-checks.outputs.version }}
         run: |
           git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
           git fetch --all
           git merge origin/release
           git push origin ${GITHUB_REF/refs\/heads\//}
-          version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
-          git tag "v$version"
+          git tag "v$VERSION"
           git push --tags
-          echo "::set-output name=tag::$(echo v$version)"
+          echo "::set-output name=tag::$(echo v$VERSION)"
         shell: bash
 
       - name: Create Release
