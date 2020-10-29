@@ -139,8 +139,6 @@ jobs:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: release
 
       - name: Update to next minor version
         run: |
