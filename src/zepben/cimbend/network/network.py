@@ -74,6 +74,9 @@ class NetworkService(BaseService):
     _auto_cn_index: int = 0
     _measurements: Dict[str, List[Measurement]] = []
 
+    def __init__(self):
+        self._objectsByType[ConnectivityNode] = self._connectivity_nodes
+
     def get_measurements(self, mrid: str, t: type) -> List[Measurement]:
         """
         Get all measurements of type `t` associated with the given `mrid`.
@@ -188,7 +191,7 @@ class NetworkService(BaseService):
                  ConnectivityNode represented by `mrid`
         """
         if mrid not in self._connectivity_nodes:
-            self._connectivity_nodes[mrid] = ConnectivityNode(mrid)
+            self._connectivity_nodes[mrid] = ConnectivityNode(mrid=mrid)
             return self._connectivity_nodes[mrid]
         else:
             return self._connectivity_nodes[mrid]

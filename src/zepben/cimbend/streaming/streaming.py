@@ -21,7 +21,6 @@ from zepben.cimbend.network.translator.network_cim2proto import *
 from zepben.cimbend.network.translator.network_proto2cim import NetworkProtoToCim
 import random
 import math
-from dataclasses import dataclass
 
 __all__ = ["retrieve_network", "send_network", "send_customer", "send_diagram", "FeederStreamResult", "FeederSummary"]
 
