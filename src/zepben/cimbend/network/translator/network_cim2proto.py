@@ -593,7 +593,7 @@ def remotesource_to_pb(cim: RemoteSource) -> PBRemoteSource:
 
 # MODEL #
 def tracedphases_to_pb(cim: TracedPhases) -> PBTracedPhases:
-    return PBTracedPhases(normalStatus=cim.normal_status, currentStatus=cim.current_status)
+    return PBTracedPhases(normalStatus=cim._normal_status, currentStatus=cim._current_status)
 
 
 # Extension functions for each CIM type.

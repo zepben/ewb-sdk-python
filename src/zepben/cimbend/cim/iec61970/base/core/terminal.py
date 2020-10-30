@@ -75,7 +75,7 @@ class Terminal(AcDcTerminal):
     def connectivity_node(self):
         try:
             return self._cn()
-        except AttributeError:
+        except TypeError:
             return None
 
     @connectivity_node.setter
@@ -153,6 +153,9 @@ class Terminal(AcDcTerminal):
                     results.append(cr)
         return results
 
+    def connect(self, connectivity_node: ConnectivityNode):
+        self.connectivity_node = connectivity_node
+
     def disconnect(self):
-        self.connectivity_node = NO_CONNECTIVITY_NODE
+        self.connectivity_node = None
 

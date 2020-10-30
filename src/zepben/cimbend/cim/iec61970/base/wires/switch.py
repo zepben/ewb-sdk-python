@@ -40,22 +40,14 @@ class Switch(ConductingEquipment):
     NOTE: The normal and currently open properties are implemented as an integer rather than a boolean to allow for the caching of
       measurement values if the switch is operating un-ganged. These values will cache the latest values from the measurement
       value for each phase of the switch.
-
-    Attributes -
-
-        _open :
-        _normal_open : The attribute is used in cases when no Measurement for the status value is present. If the Switch
-                       has a status measurement the Discrete.normalValue is expected to match with the Switch.normalOpen.
     """
 
     _open: int = 0
-    _normal_open: int = 0
+    """Tells if the switch is considered open when used as input to topology processing."""
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None):
-        super().__init__(usage_points, equipment_containers, operational_restrictions, current_feeders, terminals)
-        self.set_open(False)
-        self.set_normally_open(False)
+    _normal_open: int = 0
+    """The attribute is used in cases when no Measurement for the status value is present. If the Switch has a status measurement the Discrete.normalValue 
+    is expected to match with the Switch.normalOpen."""
 
     def is_normally_open(self, phase: SinglePhaseKind = None):
         """

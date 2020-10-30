@@ -35,8 +35,7 @@ class TapChanger(PowerSystemResource):
     _normal_step: int = 0
     _step: float = 0.0
 
-    def __init__(self, high_step: int, low_step: int, neutral_step: int, normal_step: int, step: float):
-        super().__init__()
+    def __init__(self, high_step: int = 1, low_step: int = 0, neutral_step: int = 0, normal_step: int = 0, step: float = 0.0):
         self._high_step = high_step
         self._low_step = low_step
         self._neutral_step = neutral_step
@@ -323,9 +322,10 @@ class PowerTransformer(ConductingEquipment):
         Returns The `PowerTransformerEnd` referred to by `end_number`
         Raises IndexError if no `PowerTransformerEnd` was found with end_number `end_number`.
         """
-        for end in self._power_transformer_ends:
-            if end.end_number == end_number:
-                return end
+        if self._power_transformer_ends:
+            for end in self._power_transformer_ends:
+                if end.end_number == end_number:
+                    return end
         raise IndexError(f"No TransformerEnd with end_number {end_number} was found in PowerTransformer {str(self)}")
 
     def add_end(self, end: PowerTransformerEnd) -> PowerTransformer:
@@ -343,6 +343,7 @@ class PowerTransformer(ConductingEquipment):
         if self._validate_end(end):
             return self
 
+        self._power_transformer_ends = list() if self._power_transformer_ends is None else self._power_transformer_ends
         self._power_transformer_ends.append(end)
         self._power_transformer_ends.sort(key=lambda t: t.end_number)
         return self

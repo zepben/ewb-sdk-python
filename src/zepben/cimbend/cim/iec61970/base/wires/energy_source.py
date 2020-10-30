@@ -18,16 +18,6 @@ __all__ = ["EnergySource"]
 class EnergySource(EnergyConnection):
     """
     A generic equivalent for an energy supplier on a transmission or distribution voltage level.
-
-    Attributes -
-        active_power : 
-                       
-        r :
-        x :
-        reactive_power :
-
-        voltage_angle :
-        voltage_magnitude :
     """
 
     _energy_source_phases: Optional[List[EnergySourcePhase]] = None
@@ -60,8 +50,9 @@ class EnergySource(EnergyConnection):
     def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
                  operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None,
                  energy_source_phases: List[EnergySourcePhase] = None):
-        super().__init__(usage_points=usage_points, equipment_containers=equipment_containers, operational_restrictions=operational_restrictions,
-                         current_feeders=current_feeders, terminals=terminals)
+        super(EnergySource, self).__init__(usage_points=usage_points, equipment_containers=equipment_containers,
+                                           operational_restrictions=operational_restrictions,
+                                           current_feeders=current_feeders, terminals=terminals)
         if energy_source_phases:
             for phase in energy_source_phases:
                 self.add_phase(phase)

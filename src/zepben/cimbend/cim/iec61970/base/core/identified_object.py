@@ -56,7 +56,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
             get_result = getter(other.mrid)
             require(get_result is other, lambda: f"{type_descr} with mRID {other.mrid} already exists in {str(self)}")
             return True
-        except KeyError:
+        except (KeyError, AttributeError):
             return False
 
     def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject], type_descr: str) -> bool:

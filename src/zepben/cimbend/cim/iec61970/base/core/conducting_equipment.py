@@ -36,7 +36,7 @@ class ConductingEquipment(Equipment):
 
     def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
                  operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None):
-        super().__init__(usage_points, equipment_containers, operational_restrictions, current_feeders)
+        super(ConductingEquipment, self).__init__(usage_points, equipment_containers, operational_restrictions, current_feeders)
         if terminals:
             for term in terminals:
                 self.add_terminal(term)

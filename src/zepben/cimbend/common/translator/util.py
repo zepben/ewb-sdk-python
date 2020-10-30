@@ -10,4 +10,4 @@ __all__ = ["mrid_or_empty"]
 
 
 def mrid_or_empty(io: PBIdentifiedObject) -> str:
-    return io.mrid if io else ""
+    return str(io.mrid) if io else ""
