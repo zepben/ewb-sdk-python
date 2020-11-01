@@ -1,6 +1,3 @@
-
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
@@ -11,17 +8,17 @@ from __future__ import annotations
 
 import copy
 import logging
-from dataclasses import dataclass, field
+from dataclasses import field
 from enum import Enum
-from zepben.cimbend.phases.direction import Direction
+from zepben.cimbend.model.phasedirection import PhaseDirection
 from zepben.cimbend.exceptions import CoreException, PhaseException
 from zepben.cimbend.tracing.exceptions import TracingException
 from zepben.cimbend.tracing.phase_status import normal_phases, current_phases
 from zepben.cimbend.tracing.util import queue_next_terminal
 from zepben.cimbend.tracing.queue import PriorityQueue
-from zepben.cimbend.tracing.tracing import SearchType, Traversal
+from zepben.cimbend.traversals.tracing import SearchType, Traversal
 from zepben.cimbend.tracing.phase_status import PhaseStatus
-from zepben.cimbend.tracing.branch_recursive_tracing import BranchRecursiveTraversal
+from zepben.cimbend.traversals.branch_recursive_tracing import BranchRecursiveTraversal
 from zepben.cimbend.tracing.util import normally_open, currently_open
 from typing import Set, Callable, List
 
@@ -129,8 +126,8 @@ async def _apply_phases_from_feeder_cbs(network):
             breaker_terms = await find_es_breaker_terminal(es)
             for terminal in breaker_terms:
                 for i in range(terminal.num_cores):
-                    terminal.normal_phases(i).add(esp[i].phase, Direction.OUT)
-                    terminal.current_phases(i).add(esp[i].phase, Direction.OUT)
+                    terminal.normal_phases(i).add(esp[i].phase, PhaseDirection.OUT)
+                    terminal.current_phases(i).add(esp[i].phase, PhaseDirection.OUT)
                 logger.debug(f"Set {terminal.conducting_equipment.mrid} as Feeder Circuit Breaker with phases {terminal.phases.phase}")
             start_terms.extend(breaker_terms)
     return start_terms
@@ -181,7 +178,7 @@ async def run_set_phasing(start_terminals: List[Terminal],
 async def _run_terminal(start: Terminal, traversal: BranchRecursiveTraversal, phase_selector: Callable[[Terminal, int], PhaseStatus]):
     cores_to_flow = set()
     for core in range(start.num_cores):
-        if phase_selector(start, core).direction().has(Direction.OUT):
+        if phase_selector(start, core).direction().has(PhaseDirection.OUT):
             cores_to_flow.add(core)
     await _run_from_out_terminal(traversal, start, cores_to_flow, phase_selector)
 
@@ -215,12 +212,12 @@ def _flow_out_to_connected_terminals_and_queue(traversal: BranchRecursiveTravers
             out_phase = phase_selector(out_terminal, out_core).phase()
             in_phase = phase_selector(in_term, in_core)
             try:
-                if in_phase.add(out_phase, Direction.IN):
+                if in_phase.add(out_phase, PhaseDirection.IN):
                     has_added = True
-                    if in_phase.direction() == Direction.BOTH:
-                        logger.debug(f"Applied {Direction.BOTH} to phase {out_phase} on core {in_core} for {in_term.mrid}")
+                    if in_phase.direction() == PhaseDirection.BOTH:
+                        logger.debug(f"Applied {PhaseDirection.BOTH} to phase {out_phase} on core {in_core} for {in_term.mrid}")
                     else:
-                        logger.debug(f"Applied {Direction.IN} to phase {out_phase} on core {in_core} for {in_term.mrid}")
+                        logger.debug(f"Applied {PhaseDirection.IN} to phase {out_phase} on core {in_core} for {in_term.mrid}")
             except (PhaseException, CoreException) as ex:
                 raise PhaseException((f"Attempted to apply more than one phase to [{in_term.conducting_equipment.mrid}|"
                                       f"{in_term.conducting_equipment.name}] on core {in_core}."
@@ -244,7 +241,7 @@ def _get_cores_to_flow(terminal: Terminal, open_test: Callable[[Equipment, int],
 
     equip = terminal.conducting_equipment
     for core in range(equip.num_cores):
-        if not open_test(equip, core) and phase_selector(terminal, core).direction().has(Direction.IN):
+        if not open_test(equip, core) and phase_selector(terminal, core).direction().has(PhaseDirection.IN):
             cores.add(core)
     return cores
 
@@ -257,13 +254,13 @@ def _flow_through_equipment(traversal: BranchRecursiveTraversal, in_terminal: Te
         out_phase_status = phase_selector(out_terminal, core)
         try:
             in_phase = phase_selector(in_terminal, core).phase()
-            applied = out_phase_status.add(in_phase, Direction.OUT)
+            applied = out_phase_status.add(in_phase, PhaseDirection.OUT)
             has_changes = applied or has_changes
             if applied:
-                if out_phase_status.direction() == Direction.BOTH:
-                    logger.debug(f"Applied {Direction.BOTH} to phase {in_phase} on core {core} for {out_terminal.mrid}")
+                if out_phase_status.direction() == PhaseDirection.BOTH:
+                    logger.debug(f"Applied {PhaseDirection.BOTH} to phase {in_phase} on core {core} for {out_terminal.mrid}")
                 else:
-                    logger.debug(f"Applied {Direction.OUT} to phase {in_phase} on core {core} for {out_terminal.mrid}")
+                    logger.debug(f"Applied {PhaseDirection.OUT} to phase {in_phase} on core {core} for {out_terminal.mrid}")
         except (PhaseException, CoreException) as ex:
             raise PhaseException((f"Attempted to apply more than one phase to {out_terminal.conducting_equipment.mrid} "
                                   f"[{out_terminal.mrid}] on core {core}." 
@@ -280,13 +277,13 @@ def _get_feeder_cb_terminal_cores_by_status(feeder_cb: Breaker, open_test: Calla
 
         for core in range(terminal.num_cores):
             phase_status = phase_selector(terminal, core)
-            if phase_status.direction() == Direction.IN:
+            if phase_status.direction() == PhaseDirection.IN:
                 status.in_cores.add(core)
             if not open_test(feeder_cb, core):
                 status.cores_to_flow.add(core)
-            elif phase_status.direction() == Direction.BOTH:
+            elif phase_status.direction() == PhaseDirection.BOTH:
                 status.in_cores.add(core)
-            elif phase_status.direction() == Direction.NONE:
+            elif phase_status.direction() == PhaseDirection.NONE:
                 status.none_cores.add(core)
     return res
 

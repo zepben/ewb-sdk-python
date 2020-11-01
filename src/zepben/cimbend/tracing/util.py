@@ -1,6 +1,3 @@
-
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
@@ -10,8 +7,8 @@
 from __future__ import annotations
 import logging
 from zepben.cimbend.tracing.connectivity import ConductingEquipmentToCores
-from zepben.cimbend.phases.direction import Direction
-from zepben.cimbend.tracing.tracing import Traversal, SearchType
+from zepben.cimbend.model.phasedirection import PhaseDirection
+from zepben.cimbend.traversals.tracing import Traversal, SearchType
 from zepben.cimbend.tracing.phase_status import normal_phases, current_phases
 from typing import Callable
 
@@ -21,46 +18,34 @@ phase_logger = logging.getLogger("phase_logger")
 tracing_logger = logging.getLogger("queue_next")
 
 
-def normally_open(equip: Equipment, core: int = None):
+def normally_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] = None):
     """
     Test if a given core on an equipment is normally open.
     `equip` The equipment to test
-    `core` The core to test. If None tests all cores.
+    `phase` The Phase to test. If None tests all cores.
     Returns True if the equipment is open (de-energised), False otherwise
     """
     try:
-        if core is None:
-            ret = not equip.normally_in_service
-            for core in range(0, equip.num_cores()):
-                ret &= equip.is_normally_open(core)
-            return ret
-        else:
-            return equip.is_normally_open(core) or not equip.normally_in_service
+        return not equip.normally_in_service or equip.is_normally_open(phase)
     except AttributeError:
-        # This should only be reachable if equip is normally in service but didn't define normally_open, in which case
-        # it's not normally open.
         return not equip.normally_in_service
 
 
-def currently_open(equip: Equipment, core: int = None):
+def currently_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] = None):
     """
     Test if a given core on an equipment is open.
     `equip` The equipment to test
-    `core` The core to test. If None tests all cores.
+    `phase` The phase to test. If None tests all cores.
     Returns True if the equipment is open (de-energised), False otherwise
     """
     try:
-        if core is None:
-            ret = not equip.in_service
-            for core in range(0, equip.num_cores()):
-                ret &= equip.is_open(core)
-            return ret
-        else:
-            return not equip.in_service or equip.is_open(core)
+        return not equip.in_service or equip.is_open(phase)
     except AttributeError:
-        # This should only be reachable if equip is normally in service but didn't define normally_open, in which case
-        # it's not normally open.
         return not equip.in_service
+
+
+def ignore_open(ce: ConductingEquipment, phase: Optional[SinglePhaseKind] = None):
+    return False
 
 
 def queue_next_equipment(item, exclude=None):
@@ -133,7 +118,7 @@ def _create_downstream_queue_next(open_test: Callable[[Equipment, int], bool], a
         if not cetc:
             return connected_terms
         for term in cetc.conducting_equipment.terminals:
-            out_cores = get_cores_with_direction(open_test, active_phases, term, cetc.cores, Direction.OUT)
+            out_cores = get_cores_with_direction(open_test, active_phases, term, cetc.cores, PhaseDirection.OUT)
             if out_cores:
                 crs = term.get_connectivity(out_cores)
                 for cr in crs:

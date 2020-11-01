@@ -10,7 +10,6 @@ from typing import Generator, List
 
 from dataclassy import dataclass
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.cimbend.cim.iec61970.base.core.terminal import Terminal
 from zepben.cimbend.util import get_by_mrid
 
 __all__ = ["ConnectivityNode"]

@@ -6,11 +6,10 @@
 
 from __future__ import annotations
 import logging
-from dataclassy import dataclass
 from enum import Enum
 from typing import Dict, List
 
-from zepben.cimbend import Measurement
+from zepben.cimbend.cim.iec61970.base.meas.measurement import Measurement
 from zepben.cimbend.common.base_service import BaseService
 from zepben.cimbend.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.cimbend.cim.iec61970.base.wires import EnergySource
@@ -159,7 +158,7 @@ class NetworkService(BaseService):
             return
         cn.remove_terminal(terminal)
         terminal.disconnect()
-        if cn.num_terminals == 0:
+        if cn.num_terminals() == 0:
             del self._connectivity_nodes[cn.mrid]
 
     def disconnect_by_mrid(self, connectivity_node_mrid: str):

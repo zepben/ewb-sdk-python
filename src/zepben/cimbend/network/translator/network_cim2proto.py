@@ -30,7 +30,7 @@ from zepben.cimbend.cim.iec61970.base.meas import Control, IoPoint, Accumulator,
 from zepben.cimbend.cim.iec61970.infiec61970.feeder import Circuit, Loop
 from zepben.cimbend.common.translator.util import mrid_or_empty
 from zepben.cimbend.common.translator.base_cim2proto import *
-from zepben.cimbend.phases import TracedPhases
+from zepben.cimbend.model.phases import TracedPhases
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo

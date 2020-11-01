@@ -6,14 +6,12 @@
 
 from __future__ import annotations
 
-from typing import Set, Optional
+from typing import Optional
 from weakref import ref, ReferenceType
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.cimbend.cores import from_count
-from zepben.cimbend.phases import TracedPhases, cores_from_phases
-from zepben.cimbend.tracing.connectivity import ConnectivityResult
+from zepben.cimbend.model.phases import TracedPhases
 from zepben.cimbend.tracing.phase_status import current_phases as ps_current_phases, normal_phases as ps_normal_phases
 
 __all__ = ["AcDcTerminal", "Terminal"]
@@ -102,19 +100,14 @@ class Terminal(AcDcTerminal):
         `other` Another Terminal to compare against
         Returns True if self has more cores than other, False otherwise.
         """
-        return cores_from_phases(self.phases) > cores_from_phases(other.phases)
+        return 0
+        #return cores_from_phases(self.phases) > cores_from_phases(other.phases)
 
     def normal_phases(self, nominal_phase: SinglePhaseKind):
         return ps_normal_phases(self, nominal_phase)
 
     def current_phases(self, nominal_phase: SinglePhaseKind):
         return ps_current_phases(self, nominal_phase)
-
-    def get_pos_point(self):
-        return self.conducting_equipment.pos_point(self.get_sequence_number())
-
-    def get_sequence_number(self):
-        return self.conducting_equipment.terminal_sequence_number(self)
 
     def get_switch(self):
         """
@@ -124,34 +117,34 @@ class Terminal(AcDcTerminal):
         return self.connectivity_node.get_switch()
 
     def get_nominal_voltage(self):
-        return self.conducting_equipment.get_nominal_voltage(self)
+        return self.conducting_equipment.nominal_voltage
 
     def get_other_terminals(self):
         return [t for t in self.conducting_equipment.terminals if t is not self]
 
-    def get_connectivity(self, cores: Set[int] = None, exclude=None):
-        """
-        Get the connectivity between this terminal and all other terminals in its `ConnectivityNode`.
-        `cores` Core paths to trace between the terminals. Defaults to all cores.
-        `exclude` `zepben.cimbend.iec61970.base.core.terminal.Terminal`'s to exclude from the result. Will be skipped if encountered.
-        Returns List of `ConnectivityResult`'s for this terminal.
-        """
-        if exclude is None:
-            exclude = set()
-        if cores is None:
-            cores = from_count(self.num_cores)
-        results = []
-        for terminal in self.connectivity_node:
-            if self != terminal and terminal not in exclude:  # Don't include ourselves.
-                cr = ConnectivityResult(self, terminal)
-                for core in cores:
-                    connected_core = terminal.external_to_internal_wiring(self.internal_to_external_wiring(core))
-                    if connected_core != -1:
-                        cr.add_core_path(core, connected_core)
-                if cr.from_cores:
-                    # Only return CR's that are physically wired together.
-                    results.append(cr)
-        return results
+    # def get_connectivity(self, cores: Set[int] = None, exclude=None):
+    #     """
+    #     Get the connectivity between this terminal and all other terminals in its `ConnectivityNode`.
+    #     `cores` Core paths to trace between the terminals. Defaults to all cores.
+    #     `exclude` `zepben.cimbend.iec61970.base.core.terminal.Terminal`'s to exclude from the result. Will be skipped if encountered.
+    #     Returns List of `ConnectivityResult`'s for this terminal.
+    #     """
+    #     if exclude is None:
+    #         exclude = set()
+    #     if cores is None:
+    #         cores = from_count(self.num_cores)
+    #     results = []
+    #     for terminal in self.connectivity_node:
+    #         if self != terminal and terminal not in exclude:  # Don't include ourselves.
+    #             cr = ConnectivityResult(self, terminal)
+    #             for core in cores:
+    #                 connected_core = terminal.external_to_internal_wiring(self.internal_to_external_wiring(core))
+    #                 if connected_core != -1:
+    #                     cr.add_core_path(core, connected_core)
+    #             if cr.from_cores:
+    #                 # Only return CR's that are physically wired together.
+    #                 results.append(cr)
+    #     return results
 
     def connect(self, connectivity_node: ConnectivityNode):
         self.connectivity_node = connectivity_node

@@ -29,7 +29,7 @@ def _check_open(current_state: int, phase: SinglePhaseKind = None) -> bool:
     if phase is None:
         return current_state != 0
     else:
-        return (current_state & phase.bit_mask()) != 0
+        return (current_state & phase.bit_mask) != 0
 
 
 class Switch(ConductingEquipment):
@@ -116,7 +116,7 @@ class Breaker(ProtectedSwitch):
 
     def is_substation_breaker(self):
         """Convenience function for detecting if this breaker is part of a substation. Returns true if this Breaker is associated with a Substation."""
-        return self.num_substations > 0
+        return self.num_substations() > 0
 
 
 class Disconnector(Switch):
