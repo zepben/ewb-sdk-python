@@ -9,32 +9,12 @@ from collections import defaultdict
 from dataclassy import dataclass
 
 from zepben.cimbend.exceptions import PhaseException
-from zepben.cimbend.phases.direction import Direction
+from zepben.cimbend.model.phasedirection import PhaseDirection
 from zepben.cimbend.cim.iec61970.base.wires import SinglePhaseKind
-from zepben.cimbend.cim.iec61970.base.core.phase_code import PhaseCode
 
-__all__ = ["cores_from_phases", "phase", "direction", "pos_shift", "add", "setphs", "remove", "remove_all", "TracedPhases"]
+__all__ = ["phase", "direction", "pos_shift", "add", "setphs", "remove", "remove_all", "TracedPhases", "NominalPhasePath"]
 CORE_MASKS = [0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000]
 DIR_MASK = 0b11
-
-
-def cores_from_phases(phases: PhaseCode):
-    """
-    Convert a phase into its corresponding number of Cores
-    TODO: handle all phases
-    `phases` A `zepben.cimbend.PhaseCode` to convert
-    Returns Number of cores
-    """
-    if phases in (PhaseCode.ABC, PhaseCode.ABN, PhaseCode.ACN, PhaseCode.BCN):
-        return 3
-    elif phases in (PhaseCode.AB, PhaseCode.AC, PhaseCode.BC, PhaseCode.AN, PhaseCode.BN, PhaseCode.CN):
-        return 2
-    elif phases in (PhaseCode.A, PhaseCode.B, PhaseCode.C, PhaseCode.N):
-        return 1
-    elif phases == PhaseCode.ABCN:
-        return 4
-    else:
-        return 4
 
 
 PHASE_DIR_MAP = defaultdict(lambda: SinglePhaseKind.NONE)
@@ -64,27 +44,44 @@ def phase(status: int, nominal_phase: SinglePhaseKind):
 
 def direction(status: int, nominal_phase: SinglePhaseKind):
     dir_val = (status >> pos_shift(phase(status, nominal_phase), nominal_phase)) & DIR_MASK
-    return Direction(dir_val)
+    return PhaseDirection(dir_val)
 
 
 def pos_shift(phs: SinglePhaseKind, nominal_phase: SinglePhaseKind):
-    return (nominal_phase.mask_index * 8) + (2 * max(phs.value - 1, 0))
+    return (2 * max(phs.value - 1, 0)) + (nominal_phase.mask_index * 8)
 
 
-def setphs(status: int, phs: SinglePhaseKind, dir_: Direction, nominal_phase: SinglePhaseKind) -> int:
-    return (status & ~CORE_MASKS[nominal_phase.mask_index]) | (dir_.value << pos_shift(phs, nominal_phase))
+def setphs(status: int, phs: SinglePhaseKind, direction: PhaseDirection, nominal_phs: SinglePhaseKind) -> int:
+    return (status & ~CORE_MASKS[nominal_phs.mask_index]) | _shifted_value(direction, phs, nominal_phs)
 
 
-def add(status: int, phs: SinglePhaseKind, dir_: Direction, nominal_phase: SinglePhaseKind) -> int:
-    return status | dir_.value << pos_shift(phs, nominal_phase)
+def add(status: int, phs: SinglePhaseKind, direction: PhaseDirection, nominal_phs: SinglePhaseKind) -> int:
+    return status | _shifted_value(direction, phs, nominal_phs)
 
 
 def remove_all(status: int, nominal_phase: SinglePhaseKind) -> int:
     return status & ~CORE_MASKS[nominal_phase.mask_index]
 
 
-def remove(status: int, phs: SinglePhaseKind, dir_: Direction, nominal_phase: SinglePhaseKind) -> int:
-    return status & ~(dir_.value << pos_shift(phs, nominal_phase))
+def remove(status: int, phs: SinglePhaseKind, direction: PhaseDirection, nominal_phs: SinglePhaseKind) -> int:
+    return status & ~_shifted_value(direction, phs, nominal_phs)
+
+
+def _shifted_value(pd: PhaseDirection, spk: SinglePhaseKind, nom: SinglePhaseKind) -> int:
+    return pd.value << pos_shift(spk, nom)
+
+
+@dataclass(slots=True)
+class NominalPhasePath(object):
+    """
+    Defines how a nominal phase is wired through a connectivity node between two terminals
+    """
+
+    from_phase: SinglePhaseKind
+    """The nominal phase where the path comes from."""
+
+    to_phase: SinglePhaseKind
+    """The nominal phase where the path goes to."""
 
 
 @dataclass(slots=True)
@@ -129,7 +126,7 @@ class TracedPhases(object):
         Raises `CoreException` if core is invalid.
         """
         _valid_phase_check(nominal_phase)
-        return phase(self.normal_status, nominal_phase)
+        return phase(self._normal_status, nominal_phase)
 
     def phase_current(self, nominal_phase: SinglePhaseKind):
         """
@@ -138,7 +135,7 @@ class TracedPhases(object):
         Returns `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` for the core
         """
         _valid_phase_check(nominal_phase)
-        return phase(self.current_status, nominal_phase)
+        return phase(self._current_status, nominal_phase)
 
     def direction_normal(self, nominal_phase: SinglePhaseKind):
         """
@@ -147,7 +144,7 @@ class TracedPhases(object):
         Returns `zepben.phases.direction.Direction` for the core
         """
         _valid_phase_check(nominal_phase)
-        return direction(self.normal_status, nominal_phase)
+        return direction(self._normal_status, nominal_phase)
 
     def direction_current(self, nominal_phase: SinglePhaseKind):
         """
@@ -156,9 +153,9 @@ class TracedPhases(object):
         Returns `zepben.phases.direction.Direction` for the core
         """
         _valid_phase_check(nominal_phase)
-        return direction(self.current_status, nominal_phase)
+        return direction(self._current_status, nominal_phase)
 
-    def add_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction):
+    def add_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection):
         """
         Add a normal phase
         `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
@@ -169,17 +166,17 @@ class TracedPhases(object):
                  `zepben.phases.exceptions.CoreException` if `nominal_phase` is invalid.
         """
         _valid_phase_check(nominal_phase)
-        if phs == SinglePhaseKind.NONE or dir_ == Direction.NONE:
+        if phs == SinglePhaseKind.NONE or dir_ == PhaseDirection.NONE:
             return False
         if self.phase_normal(nominal_phase) != SinglePhaseKind.NONE and phs != self.phase_normal(nominal_phase):
             raise PhaseException("Crossing phases")
         if self.direction_normal(nominal_phase).has(dir_):
             return False
 
-        self.normal_status = add(self.normal_status, phs, dir_, nominal_phase)
+        self._normal_status = add(self._normal_status, phs, dir_, nominal_phase)
         return True
 
-    def add_current(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction):
+    def add_current(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection):
         """
         Add a current phase
         `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
@@ -189,17 +186,17 @@ class TracedPhases(object):
         Raises `zepben.phases.exceptions.PhaseException` if phases cross
         """
         _valid_phase_check(nominal_phase)
-        if phs == SinglePhaseKind.NONE or dir_ == Direction.NONE:
+        if phs == SinglePhaseKind.NONE or dir_ == PhaseDirection.NONE:
             return False
         if self.phase_current(nominal_phase) != SinglePhaseKind.NONE and phs != self.phase_current(nominal_phase):
             raise PhaseException("Crossing phases")
         if self.direction_current(nominal_phase).has(dir_):
             return False
 
-        self.current_status = add(self.current_status, phs, dir_, nominal_phase)
+        self._current_status = add(self._current_status, phs, dir_, nominal_phase)
         return True
 
-    def set_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction):
+    def set_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection):
         """
         `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
         `nominal_phase` The core number this phase should be applied to
@@ -207,17 +204,17 @@ class TracedPhases(object):
         Returns True if phase status was changed, False otherwise.
         """
         _valid_phase_check(nominal_phase)
-        if phs == SinglePhaseKind.NONE or dir_ == Direction.NONE:
+        if phs == SinglePhaseKind.NONE or dir_ == PhaseDirection.NONE:
             self.remove_normal(self.phase_normal(nominal_phase), nominal_phase)
             return True
 
         if self.phase_normal(nominal_phase) == phs and self.direction_normal(nominal_phase) == dir_:
             return False
 
-        self.normal_status = setphs(self.normal_status, phs, dir_, nominal_phase)
+        self._normal_status = setphs(self._normal_status, phs, dir_, nominal_phase)
         return True
 
-    def set_current(self, phs: SinglePhaseKind, dir_: Direction, nominal_phase: SinglePhaseKind):
+    def set_current(self, phs: SinglePhaseKind, dir_: PhaseDirection, nominal_phase: SinglePhaseKind):
         """
         `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
         `nominal_phase` The core number this phase should be applied to
@@ -225,17 +222,17 @@ class TracedPhases(object):
         Returns True if phase status was changed, False otherwise.
         """
         _valid_phase_check(nominal_phase)
-        if phs == SinglePhaseKind.NONE or dir_ == Direction.NONE:
+        if phs == SinglePhaseKind.NONE or dir_ == PhaseDirection.NONE:
             self.remove_current(self.phase_current(nominal_phase), nominal_phase)
             return True
 
         if self.phase_current(nominal_phase) == phs and self.direction_current(nominal_phase) == dir_:
             return False
 
-        self.current_status = setphs(self.current_status, phs, dir_, nominal_phase)
+        self._current_status = setphs(self._current_status, phs, dir_, nominal_phase)
         return True
 
-    def remove_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction = None):
+    def remove_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection = None):
         """
         `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
         `nominal_phase` The core number this phase should be applied to
@@ -249,12 +246,12 @@ class TracedPhases(object):
         if dir_ is not None:
             if not self.direction_normal(nominal_phase).has(dir_):
                 return False
-            self.normal_status = remove(self.normal_status, phs, dir_, nominal_phase)
+            self._normal_status = remove(self._normal_status, phs, dir_, nominal_phase)
         else:
-            self.normal_status = remove_all(self.normal_status, nominal_phase)
+            self._normal_status = remove_all(self._normal_status, nominal_phase)
             return True
 
-    def remove_current(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: Direction = None):
+    def remove_current(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection = None):
         """
         `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
         `nominal_phase` The core number this phase should be applied to
@@ -268,9 +265,9 @@ class TracedPhases(object):
         if dir_ is not None:
             if not self.direction_current(nominal_phase).has(dir_):
                 return False
-            self.current_status = remove(self.current_status, phs, dir_, nominal_phase)
+            self._current_status = remove(self._current_status, phs, dir_, nominal_phase)
         else:
-            self.current_status = remove_all(self.current_status, nominal_phase)
+            self._current_status = remove_all(self._current_status, nominal_phase)
             return True
 
     def copy(self):

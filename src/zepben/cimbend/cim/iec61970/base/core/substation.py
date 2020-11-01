@@ -41,7 +41,7 @@ class Substation(EquipmentContainer):
         if loops:
             for loop in loops:
                 self.add_loop(loop)
-        if energised_loops:
+        if energized_loops:
             for loop in energized_loops:
                 self.add_energized_loop(loop)
         if circuits:

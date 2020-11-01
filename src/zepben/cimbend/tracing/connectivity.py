@@ -1,5 +1,3 @@
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
@@ -7,85 +5,80 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
-from zepben.cimbend.exceptions import CoreException
-from zepben.cimbend.cores import CorePath
-from typing import Set
+
+from dataclassy import dataclass
+from operator import attrgetter
+from zepben.cimbend.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.cimbend.model.phases import NominalPhasePath
+from typing import List, Optional, Tuple
 
 __all__ = ["ConnectivityResult", "ConductingEquipmentToCores"]
 
 
+@dataclass(slots=True)
 class ConnectivityResult(object):
     """
-    The connectivity between two connected terminals
-    Attributes -
-        from_terminal : Originating `zepben.cimbend.cim.iec61970.base.core.Terminal`
-        to_terminal : Destination `zepben.cimbend.cim.iec61970.base.core.Terminal`
+    Stores the connectivity between two terminals, including the mapping between the nominal phases.
+    This class is intended to be used in an immutable way. You should avoid modifying it after it has been created.
     """
 
-    def __init__(self, from_terminal, to_terminal):
-        """
-        Create a ConnectivityResult.
-        `from_terminal` The originating `zepben.cimbend.cim.iec61970.base.core.Terminal`
-        `to_terminal` The destination `zepben.cimbend.cim.iec61970.base.core.Terminal`
-        """
-        self.from_terminal = from_terminal
-        self.to_terminal = to_terminal
-        self.from_cores = []
-        self.to_cores = []
-        self._core_paths = []
-        self._is_sorted = False
+    from_terminal: Terminal
+    """The terminal from which the connectivity was requested."""
 
-    def __eq__(self, other):
+    to_terminal: Terminal
+    """The terminal which is connected to the requested terminal."""
+
+    _nominal_phase_paths: Tuple[NominalPhasePath]
+    """The mapping of nominal phase paths between the from and to terminals."""
+
+    def __init__(self, nominal_phase_paths: List[NominalPhasePath]):
+        self._nominal_phase_paths = tuple(sorted(nominal_phase_paths, key=attrgetter('from_terminal', 'to_terminal')))
+
+    def __eq__(self, other: ConnectivityResult):
         if self is other:
             return True
-        return self.from_terminal == other.from_terminal \
-               and self.to_terminal == other.to_terminal \
-               and self.sorted_core_paths() == other.sorted_core_paths()
+        try:
+            return self.from_terminal is other.from_terminal and self.to_terminal is other.to_terminal and self._nominal_phase_paths != other._nominal_phase_paths
+        except:
+            return False
 
     def __ne__(self, other):
         if self is other:
             return False
-        return self.from_terminal != other.from_terminal \
-               or self.to_terminal != other.to_terminal \
-               or self.sorted_core_paths() != other.sorted_core_paths()
+        try:
+            return self.from_terminal is not other.from_terminal or self.to_terminal is not other.to_terminal or self._nominal_phase_paths != other._nominal_phase_paths
+        except:
+            return True
 
     def __str__(self):
-        return (f"ConnectivityResult(from_terminal={self.from_equip.mrid}-t{self.from_terminal.sequence_number()}"
-                f", to_terminal={self.to_equip.mrid}-t{self.to_terminal.sequence_number()}, "
-                f"core_paths={self.sorted_core_paths()})"
-                )
+        return (f"ConnectivityResult(from_terminal={self.from_equip.mrid}-t{self.from_terminal.sequence_number}"
+                f", to_terminal={self.to_equip.mrid}-t{self.to_terminal.sequence_number}, core_paths={self._nominal_phase_paths})")
+
+    def __hash__(self):
+        res = self.from_terminal.mrid.__hash__()
+        res = 31 * res + self.to_terminal.mrid.__hash__()
+        res = 31 * res + self._nominal_phase_paths.__hash__()
+        return res
 
     @property
-    def from_equip(self):
+    def from_equip(self) -> Optional[ConductingEquipment]:
+        """The conducting equipment that owns the `from_terminal."""
         return self.from_terminal.conducting_equipment
 
     @property
-    def to_equip(self):
+    def to_equip(self) -> Optional[ConductingEquipment]:
+        """The conducting equipment that owns the `to_terminal`."""
         return self.to_terminal.conducting_equipment
 
     @property
-    def core_paths(self):
-        if not self._core_paths:
-            self._populate_core_paths()
-        return self._core_paths
+    def from_nominal_phases(self) -> List[SinglePhaseKind]:
+        """The nominal phases that are connected in the `from_terminal`."""
+        return [npp.from_phase for npp in self.nominal_phase_paths]
 
-    def add_core_path(self, from_core: int, to_core: int):
-        if self._core_paths:
-            raise CoreException("You cannot add cores after the result has been used")
-
-        self.from_cores.append(from_core)
-        self.to_cores.append(to_core)
-        return self
-
-    def sorted_core_paths(self):
-        if not self._is_sorted:
-            self.core_paths.sort()
-            self._is_sorted = True
-        return self.core_paths
-
-    def _populate_core_paths(self):
-        for fc, tc in zip(self.from_cores, self.to_cores):
-            self._core_paths.append(CorePath(fc, tc))
+    @property
+    def from_nominal_phases(self) -> List[SinglePhaseKind]:
+        """The nominal phases that are connected in the `to_terminal`."""
+        return [npp.to_phase for npp in self.nominal_phase_paths]
 
 
 class ConductingEquipmentToCores(object):

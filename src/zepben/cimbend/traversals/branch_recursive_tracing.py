@@ -1,14 +1,14 @@
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from dataclassy import dataclass
+
 from zepben.cimbend.tracing.queue import Queue
-from zepben.cimbend.tracing.tracing import BaseTraversal, SearchType, create_queue
-from zepben.cimbend.tracing.tracker import Tracker
+from zepben.cimbend.traversals.tracing import BaseTraversal, SearchType, create_queue
+from zepben.cimbend.traversals.tracker import Tracker
 from typing import Callable, Set, List, Awaitable, TypeVar
 import copy
 
@@ -16,39 +16,21 @@ __all__ = ["BranchRecursiveTraversal"]
 T = TypeVar('T')
 
 
+@dataclass(slots=True)
 class BranchRecursiveTraversal(BaseTraversal[T]):
-    def __init__(self,
-                 queue_next: Callable[[T, BaseTraversal[T], Set[T]], None],
-                 branch_queue: Queue,
-                 start_item: T = None,
-                 search_type: SearchType = SearchType.DEPTH,
-                 tracker: Tracker = Tracker(),
-                 parent: BaseTraversal = None,
-                 on_branch_start: Callable[[T], None] = None,
-                 stop_conditions: List[Callable[[T], Awaitable[bool]]] = None,
-                 step_actions: List[Callable[[T, bool], Awaitable[None]]] = None):
-        """
 
-        `queue_next` A callable for each item encountered during the trace, that should queue the next items
-                           found on the given traversal's `process_queue`. The first argument will be the current item,
-                           the second this traversal, and the third a set of already visited items that can be used as
-                           an optimisation when queuing.
-        `start_item` The starting point for this trace.
-        `branch_queue`
-        `search_type`
-        `tracker`
-        `parent` A parent `zepben.cimbend.tracing.Traversal` of this traversal.
-        `on_branch_start`
-        `stop_conditions`
-        `step_actions`
-        """
-        super().__init__(start_item=start_item, stop_conditions=stop_conditions, step_actions=step_actions)
-        self.queue_next = queue_next
-        self.parent = parent
-        self.branch_queue = branch_queue
-        self.on_branch_start = on_branch_start
-        self.tracker = tracker
-        self.process_queue = create_queue(search_type)
+    queue_next: Callable[[T, BaseTraversal[T], Set[T]], None]
+    """A callable for each item encountered during the trace, that should queue the next items found on the given traversal's `process_queue`. 
+    The first argument will be the current item, the second this traversal, and the third a set of already visited items that can be used as an optional 
+    optimisation to skip queuing."""
+
+    branch_queue: Queue
+
+    process_queue: Queue
+
+    tracker: Tracker = Tracker()
+    parent: BaseTraversal = None
+    on_branch_start: Callable[[T], None] = None
 
     def __lt__(self, other):
         """
@@ -107,7 +89,7 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
                 await t.trace()
 
     def reset(self):
-        self._reset_run_flags()
+        self._reset_run_flag()
         self.process_queue.queue.clear()
         self.branch_queue.queue.clear()
         self.tracker.clear()

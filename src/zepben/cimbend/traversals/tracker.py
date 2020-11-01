@@ -1,7 +1,8 @@
-
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -11,13 +12,19 @@ from abc import abstractmethod, ABC
 
 __all__ = ["BaseTracker", "Tracker"]
 
+from typing import Set
 
-class BaseTracker(ABC):
+from dataclassy import dataclass
+
+
+@dataclass(slots=True)
+class BaseTracker(object):
     """
     An interface used by `zepben.cimbend.tracing.Traversal`'s to 'track' items that have been visited.
 
     A `Traversal` will utilise `has_visited`, `visit`, and `clear`.
     """
+
     @abstractmethod
     def has_visited(self, item):
         """
@@ -46,10 +53,9 @@ class BaseTracker(ABC):
 
 class Tracker(BaseTracker):
     """
-    An interface used by `zepben.cimbend.tracing.Traversal`'s to 'track' items that have been visited.
+    An interface used by `zepben.cimbend.traversals.tracing.Traversal`'s to 'track' items that have been visited.
     """
-    def __init__(self):
-        self.visited = set()
+    visited: Set = set()
 
     def has_visited(self, item):
         """
@@ -76,3 +82,6 @@ class Tracker(BaseTracker):
         Clear the tracker, removing all visited items.
         """
         self.visited.clear()
+
+    def copy(self):
+        return Tracker(visited=self.visited.copy())

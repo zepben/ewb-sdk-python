@@ -1,6 +1,3 @@
-
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.cimbend.cim.iec61970.base.wires import SinglePhaseKind
-from zepben.cimbend.phases.direction import Direction
+from zepben.cimbend.model.phasedirection import PhaseDirection
 from abc import ABC, abstractmethod
 
 __all__ = ["normal_phases", "current_phases", "PhaseStatus", "NormalPhases", "CurrentPhases"]
@@ -39,7 +36,7 @@ class PhaseStatus(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def set(self, phase: SinglePhaseKind, direction: Direction):
+    def set(self, phase: SinglePhaseKind, direction: PhaseDirection):
         """
         Clears the phase and sets it to the specified phase and direction.
         If the passed in phase is NONE or the passed in direction is NONE, this should clear the phase status.
@@ -49,7 +46,7 @@ class PhaseStatus(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def add(self, phase: SinglePhaseKind, direction: Direction):
+    def add(self, phase: SinglePhaseKind, direction: PhaseDirection):
         """
         Adds a phase to the status with the given direction.
         `phase` The phase to be added.
@@ -59,7 +56,7 @@ class PhaseStatus(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def remove(self, phase: SinglePhaseKind, direction: Direction = None):
+    def remove(self, phase: SinglePhaseKind, direction: PhaseDirection = None):
         """
         Removes a phase from the status. If direction is supplied will remove phase matching the direction.
         `phase` The phase to be removed.
@@ -71,50 +68,50 @@ class PhaseStatus(ABC):
 
 class NormalPhases(PhaseStatus):
 
-    def __init__(self, terminal, core_num):
+    def __init__(self, terminal, nominal_phase):
         self.terminal = terminal
-        self.core_num = core_num
+        self.nominal_phase = nominal_phase
 
     def phase(self):
-        return self.terminal.phases.phase_normal(self.core_num)
+        return self.terminal.traced_phases.phase_normal(self.nominal_phase)
 
     def direction(self):
-        return self.terminal.phases.direction_normal(self.core_num)
+        return self.terminal.traced_phases.direction_normal(self.nominal_phase)
 
-    def set(self, phase_kind: SinglePhaseKind, dir: Direction):
-        return self.terminal.phases.set_normal(phase_kind, self.core_num, dir)
+    def set(self, phase_kind: SinglePhaseKind, dir: PhaseDirection):
+        return self.terminal.traced_phases.set_normal(phase_kind, self.nominal_phase, dir)
 
-    def add(self, phase_kind: SinglePhaseKind, dir: Direction):
-        return self.terminal.phases.add_normal(phase_kind, self.core_num, dir)
+    def add(self, phase_kind: SinglePhaseKind, dir: PhaseDirection):
+        return self.terminal.traced_phases.add_normal(phase_kind, self.nominal_phase, dir)
 
-    def remove(self, phase_kind: SinglePhaseKind, dir: Direction = None):
+    def remove(self, phase_kind: SinglePhaseKind, dir: PhaseDirection = None):
         if dir is not None:
-            return self.terminal.phases.remove_normal(phase_kind, self.core_num, dir)
+            return self.terminal.traced_phases.remove_normal(phase_kind, self.nominal_phase, dir)
         else:
-            return self.terminal.phases.remove_normal(phase_kind, self.core_num)
+            return self.terminal.traced_phases.remove_normal(phase_kind, self.nominal_phase)
 
 
 class CurrentPhases(PhaseStatus):
 
-    def __init__(self, terminal, core_num):
+    def __init__(self, terminal, nominal_phase):
         self.terminal = terminal
-        self.core_num = core_num
+        self.nominal_phase = nominal_phase
 
     def phase(self):
-        return self.terminal.phases.phase_current(self.core_num)
+        return self.terminal.traced_phases.phase_current(self.nominal_phase)
 
     def direction(self):
-        return self.terminal.phases.direction_current(self.core_num)
+        return self.terminal.traced_phases.direction_current(self.nominal_phase)
 
-    def set(self, phase_kind: SinglePhaseKind, dir: Direction):
-        return self.terminal.phases.set_current(phase_kind, self.core_num, dir)
+    def set(self, phase_kind: SinglePhaseKind, dir: PhaseDirection):
+        return self.terminal.traced_phases.set_current(phase_kind, self.nominal_phase, dir)
 
-    def add(self, phase_kind: SinglePhaseKind, dir: Direction):
-        return self.terminal.phases.add_current(phase_kind, self.core_num, dir)
+    def add(self, phase_kind: SinglePhaseKind, dir: PhaseDirection):
+        return self.terminal.traced_phases.add_current(phase_kind, self.nominal_phase, dir)
 
-    def remove(self, phase_kind: SinglePhaseKind, dir: Direction = None):
+    def remove(self, phase_kind: SinglePhaseKind, dir: PhaseDirection = None):
         if dir is not None:
-            return self.terminal.phases.remove_current(phase_kind, self.core_num, dir)
+            return self.terminal.traced_phases.remove_current(phase_kind, self.nominal_phase, dir)
         else:
-            return self.terminal.phases.remove_current(phase_kind, self.core_num)
+            return self.terminal.traced_phases.remove_current(phase_kind, self.nominal_phase)
 

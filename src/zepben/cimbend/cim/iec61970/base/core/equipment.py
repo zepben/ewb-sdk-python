@@ -99,43 +99,43 @@ class Equipment(PowerSystemResource):
         """
         return ngen(self._operational_restrictions)
 
-    def num_equipment_containers(self):
+    def num_equipment_containers(self) -> int:
         """
         Returns The number of `zepben.cimbend.cim.iec61970.base.core.equipment_container.EquipmentContainer`s associated with this `Equipment`
         """
         return nlen(self._equipment_containers)
 
-    def num_substations(self):
+    def num_substations(self) -> int:
         """
         Returns The number of `zepben.cimbend.cim.iec61970.base.core.substation.Substation`s associated with this `Equipment`
         """
         return len(self._equipment_containers_of_type(Substation))
 
-    def num_sites(self):
+    def num_sites(self) -> int:
         """
         Returns The number of `zepben.cimbend.cim.iec61970.base.core.equipment_container.Site`s associated with this `Equipment`
         """
         return len(self._equipment_containers_of_type(Site))
 
-    def num_normal_feeders(self):
+    def num_normal_feeders(self) -> int:
         """
         Returns The number of normal `zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder`s associated with this `Equipment`
         """
         return len(self._equipment_containers_of_type(Feeder))
 
-    def num_usage_points(self):
+    def num_usage_points(self) -> int:
         """
         Returns The number of `zepben.cimbend.cim.iec61968.metering.metering.UsagePoint`s associated with this `Equipment`
         """
         return nlen(self._usage_points)
 
-    def num_current_feeders(self):
+    def num_current_feeders(self) -> int:
         """
         Returns The number of `zepben.cimbend.cim.iec61970.base.core.equipment_container.Feeder`s associated with this `Equipment`
         """
         return nlen(self._current_feeders)
 
-    def num_restrictions(self):
+    def num_restrictions(self) -> int:
         """
         Returns The number of `zepben.cimbend.cim.iec61968.operations.operational_restriction.OperationalRestriction`s associated with this `Equipment`
         """

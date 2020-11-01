@@ -1,16 +1,17 @@
-
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
-#
+# 
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from __future__ import annotations
 from abc import ABC, abstractmethod
-from zepben.cimbend.tracing.queue import FifoQueue, LifoQueue, PriorityQueue
+
+from dataclassy import dataclass
+
+from zepben.cimbend.tracing.queue import FifoQueue, LifoQueue, PriorityQueue, Queue
 from zepben.cimbend.tracing.exceptions import TracingException
-from zepben.cimbend.tracing.tracker import Tracker
+from zepben.cimbend.traversals.tracker import Tracker
 from typing import List, Callable, Awaitable, TypeVar, Generic, Set, Iterable
 from enum import Enum
 
@@ -33,8 +34,10 @@ def create_queue(search_type):
         return PriorityQueue()
 
 
-class BaseTraversal(Generic[T], ABC):
+@dataclass(slots=True)
+class BaseTraversal(Generic[T]):
     """
+    A basic traversal implementation that can be used to traverse any type of item.
     This class is asyncio compatible. Stop condition and step action callbacks are called with await.
 
     A stop condition is a callback function that must return a boolean indicating whether the Tracer should stop
@@ -44,35 +47,47 @@ class BaseTraversal(Generic[T], ABC):
     Stop conditions will be called prior to applying any callbacks, but the stop will only occur after all actions
     have been applied.
 
-    Step actions are functions to be called on each item visited in the trace. These are called after the stop
-    conditions are evaluated, and each action is passed the current `zepben.cimbend.tracing.ConnectivityResult` as well as
-    the `stopping` state (True if the trace is stopping after the current `ConnectivityResult, False otherwise).
-    Thus, the signature of each step action must be:
+    Step actions are functions to be called on each item visited in the trace. These are called after the stop conditions are evaluated, and each action is
+    passed the current `zepben.cimbend.network.tracing.connectivity.ConnectivityResult` as well as the `stopping` state (True if the trace is stopping after
+    the current `ConnectivityResult, False otherwise). Thus, the signature of each step action must be:
     :func: action(cr: `zepben.cimbend.tracing.ConnectivityResult`, is_stopping: bool) -> None
     """
-    def __init__(self,
-                 start_item: T,
-                 stop_conditions: List[Callable[[T], Awaitable[bool]]] = None,
-                 step_actions: List[Callable[[T, bool], Awaitable[None]]] = None):
-        """
+    start_item: T
+    """The starting item for this `BaseTraversal`"""
 
-        `start_item` The starting point for this trace.
+    _stop_conditions: List[Callable[[T], Awaitable[bool]]] = []
+    """A list of callback functions, to be called in order with the current item."""
+
+    _step_actions: List[Callable[[T, bool], Awaitable[None]]] = []
+    """A list of callback functions, to be called on each item."""
+
+    _has_run: bool = False
+    """Whether this traversal has run """
+
+    _running: bool = False
+    """Whether this traversal is currently running"""
+
+    def __init__(self, stop_conditions: List[Callable[[T], Awaitable[bool]]] = None, step_actions: List[Callable[[T, bool], Awaitable[None]]] = None):
+        """
         `stop_conditions` A list of callback functions, to be called in order with the current item.
         `step_actions` A list of callback functions, to be called on each item.
         """
-        self.stop_conditions = stop_conditions if stop_conditions is not None else []
-        self.step_actions = step_actions if step_actions else []
-        self._start_item = start_item
-        self._has_run = False
-        self._running = False
+        if stop_conditions:
+            for cond in stop_conditions:
+                self.add_stop_condition(cond)
+        if step_actions:
+            for action in step_actions:
+                self.add_step_action(action)
 
     @property
-    def start_item(self):
-        return self._start_item
+    def stop_conditions(self):
+        for cond in self._stop_conditions:
+            yield cond
 
-    @start_item.setter
-    def start_item(self, item):
-        self._start_item = item
+    @property
+    def step_actions(self):
+        for action in self._step_actions:
+            yield action
 
     async def matches_stop_condition(self, item: T):
         """
@@ -90,21 +105,41 @@ class BaseTraversal(Generic[T], ABC):
         return stop
 
     def add_stop_condition(self, cond: Callable[[T], Awaitable[bool]]):
-        self.stop_conditions.append(cond)
+        """
+        Add a callback to check whether the current item in the traversal is a stop point.
+        If any of the registered stop conditions return true, the traversal will not call the callback to queue more items.
+        Note that a match on a stop condition doesn't necessarily stop the traversal, it just stops traversal of the current branch.
+                                                                                                                      
+        `cond` A function that if returns true will cause the traversal to stop traversing the branch.
+        Returns this traversal instance.
+        """
+        self._stop_conditions.append(cond)
 
-    def add_step_action(self, action: Callable[[T, bool], Awaitable[None]]):
-        self.step_actions.append(action)
+    def add_step_action(self, action: Callable[[T, bool], Awaitable[None]]) -> BaseTraversal[T]:
+        """
+        Add a callback which is called for every item in the traversal (including the starting item).
+                                                                                                             
+        `action` Action to be called on each item in the traversal, passing if the trace will stop on this step.
+        Returns this traversal instance.
+        """
+        self._step_actions.append(action)
+        return self
+
+    def copy_stop_conditions(self, other: BaseTraversal[T]):
+        """Copy the stop conditions from `other` to this `BaseTraversal`."""
+        self._stop_conditions.extend(other.stop_conditions)
+
+    def copy_step_actions(self, other: BaseTraversal[T]):
+        """Copy the step actions from `other` to this `BaseTraversal`."""
+        self._step_actions.extend(other.step_actions)
 
     def clear_stop_conditions(self):
-        self.stop_conditions.clear()
+        """Clear all stop conditions."""
+        self._stop_conditions.clear()
 
-    def remove_stop_condition(self, stop_cnd):
-        """
-        Remove a previously added stop condition. Will remove the first instance of stop_cnd.
-        `stop_cnd` The stop condition callback
-        Raises `ValueError` if stop condition wasn't present
-        """
-        self.stop_conditions.remove(stop_cnd)
+    def clear_step_actions(self):
+        """Clear all step actions"""
+        self._step_actions.clear()
 
     async def apply_step_actions(self, item: T, is_stopping: bool):
         """
@@ -113,10 +148,10 @@ class BaseTraversal(Generic[T], ABC):
         `item` The item to pass to the step actions.
         `is_stopping` Indicates if the trace will stop on this step.
         """
-        for action in self.step_actions:
+        for action in self._step_actions:
             await action(item, is_stopping)
 
-    def _reset_run_flags(self):
+    def _reset_run_flag(self):
         if self._running:
             raise TracingException("Can't reset when Traversal is currently executing.")
         self._has_run = False
@@ -172,32 +207,18 @@ class Traversal(BaseTraversal):
     will use a FIFO `Queue` breadth-first search. More complex searches can be achieved with `Priority`, which
     will use a PriorityQueue under the hood.
 
-    The traversal also requires a `zepben.cimbend.tracing.tracker.Tracker` to be supplied. This gives flexibility
+    The traversal also requires a `zepben.cimbend.traversals.tracker.Tracker` to be supplied. This gives flexibility
     to track items in unique ways, more than just "has this item been visited" e.g. visiting more than once,
     visiting under different conditions etc.
     """
-    def __init__(self,
-                 queue_next: Callable[[T, Set[T]], Iterable[T]],
-                 start_item: T = None,
-                 search_type: SearchType = SearchType.DEPTH,
-                 tracker: Tracker = None,
-                 stop_conditions: List[Callable[[T], Awaitable[bool]]] = None,
-                 step_actions: List[Callable[[T, bool], Awaitable[None]]] = None):
-        """
-        `queue_next` A function that will return a list of `T` to add to the queue. The function must take the
-                           item to queue and optionally a set of already visited items.
-        `start_item` The starting point for this trace.
-        `search_type` Dictates the type of search to be performed on the network graph. Breadth-first, Depth-first,
-                            and Priority based searches are possible.
-        `tracker` A `zepben.cimbend.tracing.Tracker` for tracking which items have been seen. If not provided
-                        a `Tracker` will be created for this trace.
-        `stop_conditions` A list of callback functions, to be called in order with the current item.
-        `step_actions` A list of callback functions, to be called on each item.
-        """
-        super().__init__(start_item=start_item, stop_conditions=stop_conditions, step_actions=step_actions)
-        self.queue_next = queue_next
-        self.tracker = tracker if tracker is not None else Tracker()
-        self.process_queue = create_queue(search_type)
+    queue_next: Callable[[T, Set[T]], Iterable[T]]
+    """A function that will return a list of `T` to add to the queue. The function must take the item to queue and optionally a set of already visited items."""
+
+    process_queue: Queue
+    """Dictates the type of search to be performed on the network graph. Breadth-first, Depth-first, and Priority based searches are possible."""
+
+    tracker: Tracker = Tracker()
+    """A `zepben.cimbend.traversals.tracker.Tracker` for tracking which items have been seen. If not provided a `Tracker` will be created for this trace."""
 
     async def _run_trace(self, can_stop_on_start_item: bool = True):
         """
@@ -215,7 +236,7 @@ class Traversal(BaseTraversal):
 
         self.tracker.visit(self.start_item)
         # If we can't stop on the start item we don't run any stop conditions. if this causes a problem for you,
-        # work around it by running the stop conditions for the start item prior to running the trace.
+        # you should run the stop conditions for the start item prior to running the traversal.
         stopping = can_stop_on_start_item and await self.matches_stop_condition(self.start_item)
         await self.apply_step_actions(self.start_item, stopping)
         if not stopping:
@@ -225,7 +246,6 @@ class Traversal(BaseTraversal):
         while not self.process_queue.empty():
             current = self.process_queue.get()
             if self.tracker.visit(current):
-                # this won't call matches_stop_condition if can_stop == False :/
                 stopping = await self.matches_stop_condition(current)
                 await self.apply_step_actions(current, stopping)
                 if not stopping:
@@ -233,7 +253,7 @@ class Traversal(BaseTraversal):
                         self.process_queue.put(x)
 
     def reset(self):
-        self._reset_run_flags()
+        self._reset_run_flag()
         self.process_queue.queue.clear()
         self.tracker.clear()
 

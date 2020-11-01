@@ -14,6 +14,7 @@ from zepben.cimbend.cim.iec61970.base.scada import *
 from zepben.cimbend.cim.iec61970.base.wires import *
 from zepben.cimbend.cim.iec61970.infiec61970.feeder import *
 from zepben.cimbend.network import *
+from zepben.cimbend.model import *
 from zepben.cimbend.diagram import *
 from zepben.cimbend.customer import *
 from zepben.cimbend.measurement import *
