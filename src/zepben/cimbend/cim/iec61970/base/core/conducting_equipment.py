@@ -95,11 +95,11 @@ class ConductingEquipment(Equipment):
         Returns A reference to this `ConductingEquipment` to allow fluent use.
         Raises `ValueError` if another `zepben.cimbend.iec61970.base.core.terminal.Terminal` with the same `mrid` already exists for this `ConductingEquipment`.
         """
-        if terminal.sequence_number == 0:
-            terminal.sequence_number = self.num_terminals() + 1
-
         if self._validate_terminal(terminal):
             return self
+
+        if terminal.sequence_number == 0:
+            terminal.sequence_number = self.num_terminals() + 1
 
         self._terminals.append(terminal)
         self._terminals.sort(key=lambda t: t.sequence_number)

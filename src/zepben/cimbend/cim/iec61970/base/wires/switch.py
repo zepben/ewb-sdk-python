@@ -16,7 +16,7 @@ __all__ = ["Switch", "Breaker", "Disconnector", "Jumper", "Fuse", "ProtectedSwit
 from zepben.cimbend.util import require
 
 
-def _calculate_open_state(current_state: int, is_open: bool, phase: SinglePhaseKind) -> int:
+def _calculate_open_state(current_state: int, is_open: bool, phase: SinglePhaseKind = None) -> int:
     require(phase != SinglePhaseKind.NONE and phase != SinglePhaseKind.INVALID, lambda: f"Invalid phase {phase} specified")
     if phase is None:
         return 0b1111 if is_open else 0
@@ -81,19 +81,19 @@ class Switch(ConductingEquipment):
         """
         return self._open
 
-    def set_normally_open(self, is_normally_open: bool, phase: SinglePhaseKind = SinglePhaseKind.NONE) -> Switch:
+    def set_normally_open(self, is_normally_open: bool, phase: SinglePhaseKind = None) -> Switch:
         """
         `is_normally_open` indicates if the phase(s) should be opened.
-        `phase` the phase to set the normal status. If set to `SinglePhaseKind.NONE` will default to all phases (default).
+        `phase` the phase to set the normal status. If set to None will default to all phases.
         Returns This `Switch` to be used fluently.
         """
         self._normal_open = _calculate_open_state(self._normal_open, is_normally_open, phase)
         return self
 
-    def set_open(self, is_open: bool, phase: SinglePhaseKind = SinglePhaseKind.NONE) -> Switch:
+    def set_open(self, is_open: bool, phase: SinglePhaseKind = None) -> Switch:
         """
         `is_open` indicates if the phase(s) should be opened.
-        `phase` the phase to set the current status. If set to `SinglePhaseKind.NONE` will default to all phases (default).
+        `phase` the phase to set the current status. If set to None will default to all phases.
         Returns This `Switch` to be used fluently.
         """
         self._open = _calculate_open_state(self._open, is_open, phase)

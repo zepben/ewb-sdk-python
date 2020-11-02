@@ -47,6 +47,8 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns The `zepben.cimbend.iec61970.base.core.equipment.Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
+        if not self._equipment:
+            raise KeyError(mrid)
         try:
             return self._equipment[mrid]
         except AttributeError:

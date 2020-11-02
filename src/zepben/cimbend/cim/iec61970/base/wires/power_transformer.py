@@ -337,11 +337,11 @@ class PowerTransformer(ConductingEquipment):
         Returns A reference to this `PowerTransformer` to allow fluent use.
         Raises `ValueError` if another `PowerTransformerEnd` with the same `mrid` already exists for this `PowerTransformer`.
         """
-        if end.end_number == 0:
-            end.end_number = self.num_ends() + 1
-
         if self._validate_end(end):
             return self
+
+        if end.end_number == 0:
+            end.end_number = self.num_ends() + 1
 
         self._power_transformer_ends = list() if self._power_transformer_ends is None else self._power_transformer_ends
         self._power_transformer_ends.append(end)
@@ -377,7 +377,7 @@ class PowerTransformer(ConductingEquipment):
         if self._validate_reference(end, self.get_end_by_mrid, "A PowerTransformerEnd"):
             return True
 
-        if self._validate_reference_by_sn(end.end_number, end, self.get_end_by_num, "A PowerTransformerEnd"):
+        if self._validate_reference_by_sn(end.end_number, end, self.get_end_by_num, "A PowerTransformerEnd", "end_number"):
             return True
 
         require(end.power_transformer is self,

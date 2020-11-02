@@ -410,8 +410,8 @@ def substation_to_cim(pb: PBSubstation, network_service: NetworkService):
 def terminal_to_cim(pb: PBTerminal, network_service: NetworkService):
     cim = Terminal(mrid=pb.mrid(), phases=phasecode_by_id(pb.phases), sequence_number=pb.sequenceNumber)
     network_service.resolve_or_defer_reference(resolver.conducting_equipment(cim), pb.conductingEquipmentMRID)
-    cim.traced_phases.normal_status = pb.tracedPhases.normalStatus
-    cim.traced_phases.current_status = pb.tracedPhases.currentStatus
+    cim.traced_phases._normal_status = pb.tracedPhases.normalStatus
+    cim.traced_phases._current_status = pb.tracedPhases.currentStatus
     network_service.resolve_or_defer_reference(resolver.connectivity_node(cim), pb.connectivityNodeMRID)
     acdcterminal_to_cim(pb.ad, cim, network_service)
     network_service.add(cim)

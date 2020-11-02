@@ -59,7 +59,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         except (KeyError, AttributeError):
             return False
 
-    def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject], type_descr: str) -> bool:
+    def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject], type_descr: str, field_name: str = "sequence_number") -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function called with `field`.
 
@@ -71,7 +71,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         """
         try:
             get_result = getter(field)
-            require(get_result is other, lambda: f"{type_descr} with {field} already exists in {str(self)}")
+            require(get_result is other, lambda: f"{type_descr} with {field_name} {field} already exists in {str(self)}")
             return True
         except IndexError:
             return False
