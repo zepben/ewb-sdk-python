@@ -104,11 +104,11 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
         Returns A new `BranchRecursiveTraversal` the same as this, but with this Traversal as its parent
         """
         branch = BranchRecursiveTraversal(queue_next=self.queue_next,
-                                          branch_queue=copy.copy(self.branch_queue),
-                                          tracker=copy.copy(self.tracker),
+                                          branch_queue=self.branch_queue.copy(),
+                                          tracker=self.tracker.copy(),
                                           parent=self,
                                           on_branch_start=self.on_branch_start,
-                                          process_queue=copy.copy(self.process_queue),
+                                          process_queue=self.process_queue.copy(),
                                           step_actions=list(self.step_actions),
                                           stop_conditions=list(self.stop_conditions))
         branch.reset()

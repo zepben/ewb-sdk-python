@@ -3,7 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+import copy
 from collections import deque
 from abc import abstractmethod, ABC
 from typing import TypeVar, Generic
@@ -53,6 +53,11 @@ class Queue(Generic[T], ABC):
         """Clear the queue."""
         raise NotImplementedError()
 
+    @abstractmethod
+    def copy(self):
+        """Create a copy of this Queue"""
+        raise NotImplementedError()
+
 
 class FifoQueue(Queue[T]):
     def put(self, item):
@@ -83,6 +88,9 @@ class FifoQueue(Queue[T]):
         """Clear the queue."""
         self.queue.clear()
 
+    def copy(self):
+        return FifoQueue(self.queue.copy())
+
 
 class LifoQueue(Queue[T]):
     def put(self, item):
@@ -112,6 +120,9 @@ class LifoQueue(Queue[T]):
     def clear(self):
         """Clear the queue."""
         self.queue.clear()
+
+    def copy(self):
+        return LifoQueue(self.queue.copy())
 
 
 class PriorityQueue(Queue[T]):
@@ -153,3 +164,6 @@ class PriorityQueue(Queue[T]):
     def clear(self):
         """Clear the queue."""
         self.queue.clear()
+
+    def copy(self):
+        return PriorityQueue(self.queue.copy())
