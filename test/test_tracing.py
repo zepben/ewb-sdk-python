@@ -5,8 +5,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import pytest
-from zepben.cimbend.tracing import Traversal, SearchType, Tracker, BranchRecursiveTraversal, FifoQueue
-from typing import List
+from zepben.cimbend.traversals.tracing import Traversal
+from zepben.cimbend.traversals.branch_recursive_tracing import BranchRecursiveTraversal
+from zepben.cimbend.traversals.queue import FifoQueue, LifoQueue
+from typing import List, Optional, Set
 
 
 async def validate_run(t: Traversal, visit_order: List[int], expected_order: List[int], can_stop_on_start=True, check_visited=True):
@@ -46,7 +48,7 @@ class TestTracing(object):
         async def action(i, s):
             visit_order.append(i)
 
-        t = Traversal(queue_next, 1, SearchType.BREADTH, Tracker(), [cond], [action])
+        t = Traversal(queue_next=queue_next, start_item=1, process_queue=FifoQueue(), stop_conditions=[cond], step_actions=[action])
 
         await validate_run(t, can_stop_on_start=True, visit_order=visit_order, expected_order=expected_order)
 
@@ -61,7 +63,7 @@ class TestTracing(object):
         async def action(i, s):
             visit_order.append(i)
 
-        t = Traversal(queue_next, 1, SearchType.DEPTH, Tracker(), [cond], [action])
+        t = Traversal(queue_next=queue_next, start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
 
         await validate_run(t, can_stop_on_start=True, visit_order=visit_order, expected_order=expected_order)
 
@@ -78,9 +80,9 @@ class TestTracing(object):
         async def action(i, s):
             visit_order.append(i)
 
-        t = Traversal(queue_next, 1, SearchType.BREADTH, Tracker(), [cond1, cond2], [action])
+        t = Traversal(queue_next=queue_next, start_item=1, process_queue=FifoQueue(), stop_conditions=[cond1, cond2], step_actions=[action])
         await _validate_can_stop(t, visit_order=visit_order, expected_order=[1, 2, 3])
-        t = Traversal(queue_next, 1, SearchType.DEPTH, Tracker(), [cond1, cond2], [action])
+        t = Traversal(queue_next=queue_next, start_item=1, process_queue=LifoQueue(), stop_conditions=[cond1, cond2], step_actions=[action])
         await _validate_can_stop(t, visit_order=visit_order, expected_order=[1, 3, 2])
 
     @pytest.mark.asyncio
@@ -96,7 +98,7 @@ class TestTracing(object):
             if s:
                 stopping_on.add(i)
 
-        t = Traversal(lambda i, exc: [i + 1, i + 2], 1, SearchType.DEPTH, Tracker(), [cond], [action])
+        t = Traversal(queue_next=lambda i, exc: [i + 1, i + 2], start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
 
         await t.trace(can_stop_on_start_item=True)
         for x in range(1, 4):
@@ -105,7 +107,7 @@ class TestTracing(object):
             assert x in stopping_on
 
 
-def queue_next_br(item, traversal, exclude=None):
+def queue_next_br(item: int, traversal: BranchRecursiveTraversal, exclude: Optional[Set[int]] = None):
     if item == 0:
         branch = traversal.create_branch()
         branch.start_item = 1
@@ -133,14 +135,15 @@ class TestBranchRecursiveTraversal(object):
 
         async def action(i, s):
             visited.append(i)
+
         self.stop_count = 0
 
         async def cond(i):
             self.stop_count += 1
             return False
 
-        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, search_type=SearchType.DEPTH,
-                                     branch_queue=FifoQueue(), step_actions=[action], stop_conditions=[cond])
+        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, process_queue=LifoQueue(), branch_queue=FifoQueue(), step_actions=[action],
+                                     stop_conditions=[cond])
         await validate_run(t, visited, [0, 1, 2, 3, 3, 2, 1], check_visited=False)
         assert self.stop_count == len(visited)
 
@@ -150,6 +153,7 @@ class TestBranchRecursiveTraversal(object):
 
         async def action(i, s):
             visited.append(i)
+
         self.stop_count = 0
 
         async def cond1(i):
@@ -159,8 +163,6 @@ class TestBranchRecursiveTraversal(object):
         async def cond2(i):
             return i == 0
 
-        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, search_type=SearchType.DEPTH,
-                                     branch_queue=FifoQueue(), step_actions=[action], stop_conditions=[cond1, cond2])
+        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, process_queue=LifoQueue(), branch_queue=FifoQueue(), step_actions=[action],
+                                     stop_conditions=[cond1, cond2])
         await _validate_can_stop(t, visited, [0, 1, 2, 3, 3, 2, 1], check_visited=False)
-
-

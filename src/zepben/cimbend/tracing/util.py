@@ -6,14 +6,15 @@
 
 from __future__ import annotations
 import logging
-from zepben.cimbend.tracing.connectivity import ConductingEquipmentToCores
+from zepben.cimbend.tracing.phase_step import PhaseStep
 from zepben.cimbend.model.phasedirection import PhaseDirection
-from zepben.cimbend.traversals.tracing import Traversal, SearchType
+from zepben.cimbend.traversals.tracing import Traversal
+from zepben.cimbend.traversals.queue import PriorityQueue, LifoQueue
 from zepben.cimbend.tracing.phase_status import normal_phases, current_phases
 from typing import Callable
 
-__all__ = ["normally_open", "currently_open", "queue_next_equipment", "queue_next_terminal", "normal_downstream_trace",
-           "current_downstream_trace", "get_cores_with_direction", "phase_log"]
+__all__ = ["normally_open", "currently_open", "ignore_open", "queue_next_equipment", "queue_next_terminal", "normal_downstream_trace",
+           "current_downstream_trace", "phase_log"]
 phase_logger = logging.getLogger("phase_logger")
 tracing_logger = logging.getLogger("queue_next")
 
@@ -57,7 +58,7 @@ def queue_next_equipment(item, exclude=None):
 def queue_next_terminal(item, exclude=None):
     """
     Wrapper tracing queue function for queuing terminals via their connectivity
-    TODO: CoreTrace: queue_next that allows specifying cores to trace
+
     `item`
     `exclude`
     Returns
@@ -81,71 +82,79 @@ def queue_next_terminal(item, exclude=None):
     return to_terms
 
 
-def normal_downstream_trace(search_type: SearchType = SearchType.PRIORITY, **kwargs):
+def normal_downstream_trace(queue: Queue = None, **kwargs):
     """
     Create a downstream trace over nominal phases.
-    `search_type` Search type to perform for this traversal. Defaults to priority traversal based on number of
-                        cores.
+
+    `queue` Queue to use for this trace. Defaults to a `zepben.cimbend.traversals.queue.PriorityQueue`
     `kwargs` Args to be passed to `zepben.cimbend.tracing.tracing.Traversal`
-    Returns A `zepben.cimbend.tracing.tracing.Traversal`
+    Returns A `zepben.cimbend.traversals.tracing.Traversal`
     """
-    return Traversal(queue_next=_create_downstream_queue_next(normally_open, normal_phases), search_type=search_type,
-                     **kwargs)
+    if queue is None:
+        queue = PriorityQueue()
+    return Traversal(queue_next=_create_downstream_queue_next(normally_open, normal_phases), process_queue=queue, **kwargs)
 
 
-def current_downstream_trace(search_type: SearchType = SearchType.PRIORITY, **kwargs):
+def current_downstream_trace(queue: Queue = None, **kwargs):
     """
     Create a downstream trace over current phases
-    `search_type` Search type to perform for this traversal. Defaults to priority traversal based on number of
-                        cores.
+    `queue` Queue to use for this trace. Defaults to a `zepben.cimbend.traversals.queue.PriorityQueue`
     `kwargs` Args to be passed to `zepben.cimbend.tracing.tracing.Traversal`
-    Returns A `zepben.cimbend.tracing.tracing.Traversal`
+    Returns A `zepben.cimbend.traversals.tracing.Traversal`
     """
-    return Traversal(queue_next=_create_downstream_queue_next(currently_open, current_phases), search_type=search_type,
-                     **kwargs)
+    return Traversal(queue_next=_create_downstream_queue_next(currently_open, current_phases), process_queue=queue, **kwargs)
 
 
-def _create_downstream_queue_next(open_test: Callable[[Equipment, int], bool], active_phases: Callable[[Terminal, int], PhaseStatus]):
+def _create_downstream_queue_next(open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool],
+                                  active_phases: Callable[[Terminal, SinglePhaseKind], PhaseStatus]):
     """
-    Creates a queue_next function from the given open test and phase selector for use with tracing
-    `open_test` Function that takes a ConductingEquipment and a core (int) and returns whether the core on the
-                      equipment is open (True) or closed (False).
+    Creates a queue_next function from the given open test and phase selector for use with traversals.
+    `open_test` Function that takes a ConductingEquipment and a phase and returns whether the phase on the equipment is open (True) or closed (False).
     `active_phases` A `zepben.cimbend.tracing.phase_status.PhaseStatus`
     Returns A queue_next function for use with `zepben.cimbend.tracing.tracing.BaseTraversal` classes
     """
-    def qn(cetc, visited):
+
+    def qn(phase_step, visited):
         connected_terms = []
-        if not cetc:
+        if not phase_step:
             return connected_terms
-        for term in cetc.conducting_equipment.terminals:
-            out_cores = get_cores_with_direction(open_test, active_phases, term, cetc.cores, PhaseDirection.OUT)
-            if out_cores:
-                crs = term.get_connectivity(out_cores)
+        out_phases = set()
+        for term in phase_step.conducting_equipment.terminals:
+            _get_phases_with_direction(open_test, active_phases, term, phase_step.phases, PhaseDirection.OUT, out_phases)
+
+            if out_phases:
+                crs = get_connectivity(term, out_phases)
                 for cr in crs:
-                    if cr.to_equip in visited:
-                        continue
-                    connected_terms.append(ConductingEquipmentToCores(cr.to_equip, cr.to_cores, cr.from_equip))
+                    if cr.to_equip is not None:
+                        if cr.to_equip in visited:
+                            continue
+                        connected_terms.append(PhaseStep(cr.to_equip, out_phases, cr.from_equip))
         return connected_terms
     return qn
 
 
-def get_cores_with_direction(open_test, active_phases, terminal, filter_cores, direction):
+def _get_phases_with_direction(open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool],
+                               active_phases: Callable[[Terminal, SinglePhaseKind], PhaseStatus],
+                               terminal: Terminal,
+                               candidate_phases: Set[SinglePhaseKind],
+                               direction: PhaseDirection,
+                               matched_phases: Set[SinglePhaseKind]):
     """
-    Gets the closed cores from terminal in a specified `zepben.cimbend.phases.direction.Direction`
-    `open_test` Function that takes a ConductingEquipment and a core (int) and returns whether the core on the
-                      equipment is open (True) or closed (False).
-    `active_phases` A `zepben.cimbend.phases.tracing.phase_status.PhaseStatus`
-    `terminal` `zepben.cimbend.phases.terminal.Terminal` to retrieve cores for
-    `filter_cores` The cores for `zepben.cimbend.iec61970.base.core.terminal.Terminal` to test. May be a subset of `zepben.cimbend.iec61970.base.core.terminal.Terminal`'s available cores.
-    `direction` The direction to check against.
-    Returns Set of cores that are closed in the specified `Direction`.
+    Adds the closed phases from `terminal` in a specified `zepben.cimbend.model.phasedirection.PhaseDirection` to `matched_phases`.
+
+    `open_test` Function that takes a ConductingEquipment and a phase and returns whether the phase on the equipment is open (True) or closed (False).
+    `active_phases` A `zepben.cimbend.tracing.phase_status.PhaseStatus`
+    `terminal` `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal` to retrieve phases for
+    `filter_cores` The phases of `terminal` to test.
+    `direction` The `zepben.cimbend.model.phasedirection.PhaseDirection` to check against.
+    `matched_phases` The set of matched phases to add to.
     """
-    return_cores = set()
-    for core in filter_cores:
-        if not open_test(terminal.conducting_equipment, core):
-            if active_phases(terminal, core).direction().has(direction):
-                return_cores.add(core)
-    return return_cores
+    if terminal.conducting_equipment is None:
+        raise TraceException(f"Terminal {terminal} did not have an associated ConductingEquipment, cannot get phases.")
+    for phase in candidate_phases:
+        if phase in terminal.phases.single_phases and not open_test(terminal.conducting_equipment, phase):
+            if active_phases(terminal, phase).direction().has(direction):
+                matched_phases.add(phase)
 
 
 async def phase_log(cond_equip):
@@ -163,17 +172,17 @@ async def _phase_log_trace(cond_equip):
 
     async def log(e, exc):
         equip_msgs = []
-        for i, term in enumerate(e.terminals):
-            e_msg = f"{e.mrid}-T{i}:"
-            for n in range(term.num_cores):
-                ps_n = term.normal_phases(i)
+        for term in e.terminals:
+            e_msg = f"{e.mrid}-T{term.sequence_number}:"
+            for n in term.phases.single_phases:
+                ps_n = normal_phases(term, n)
                 phase_n_msg = f"n: {ps_n.phase().short_name}:{ps_n.direction().short_name}"
-                ps_c = term.current_phases(i)
+                ps_c = current_phases(term, n)
                 phase_c_msg = f"c: {ps_c.phase().short_name}:{ps_c.direction().short_name}"
                 e_msg = f"{e_msg} {{core {n}: {phase_n_msg} {phase_c_msg}}}"
             equip_msgs.append(e_msg)
         log_msg.append(equip_msgs)
 
-    trace = Traversal(queue_next=queue_next_equipment, start_item=cond_equip, search_type=SearchType.DEPTH, step_actions=[log])
+    trace = Traversal(queue_next=queue_next_equipment, start_item=cond_equip, process_queue=LifoQueue(), step_actions=[log])
     await trace.trace()
     return "\n".join([", ".join(x) for x in log_msg])

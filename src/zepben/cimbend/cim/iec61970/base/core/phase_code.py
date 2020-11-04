@@ -102,6 +102,7 @@ class PhaseCode(Enum):
     def single_phases(self):
         return self.value[:1]
 
+    @property
     def num_phases(self):
         return len(self.value)
 

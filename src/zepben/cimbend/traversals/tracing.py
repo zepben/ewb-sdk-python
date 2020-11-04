@@ -5,12 +5,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from dataclassy import dataclass
 
-from zepben.cimbend.tracing.queue import FifoQueue, LifoQueue, PriorityQueue, Queue
-from zepben.cimbend.tracing.exceptions import TracingException
+from zepben.cimbend.traversals.queue import FifoQueue, LifoQueue, PriorityQueue, Queue
+from zepben.cimbend.exceptions import TracingException
 from zepben.cimbend.traversals.tracker import Tracker
 from typing import List, Callable, Awaitable, TypeVar, Generic, Set, Iterable
 from enum import Enum
@@ -52,7 +52,7 @@ class BaseTraversal(Generic[T]):
     the current `ConnectivityResult, False otherwise). Thus, the signature of each step action must be:
     :func: action(cr: `zepben.cimbend.tracing.ConnectivityResult`, is_stopping: bool) -> None
     """
-    start_item: T
+    start_item: T = None
     """The starting item for this `BaseTraversal`"""
 
     _stop_conditions: List[Callable[[T], Awaitable[bool]]] = []

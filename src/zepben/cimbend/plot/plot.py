@@ -1,6 +1,3 @@
-
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,7 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from collections import namedtuple
-from zepben.cimbend.tracing import Traversal, queue_next_equipment, SearchType
+from zepben.cimbend.traversals.tracing import Traversal
+from zepben.cimbend.tracing.util import queue_next_equipment
+from zepben.cimbend.traversals.queue import LifoQueue
 
 __all__ = ["extract_latlongs"]
 
@@ -29,7 +28,7 @@ async def extract_latlongs(network):
             latlongs.append(LatLong(lat=point.latitude, long=point.longitude))
 
     start_item = network.get_primary_sources()[0]
-    trace = Traversal(queue_next=queue_next_equipment, start_item=start_item, search_type=SearchType.DEPTH, step_actions=[save_points])
+    trace = Traversal(queue_next=queue_next_equipment, start_item=start_item, process_queue=LifoQueue(), step_actions=[save_points])
     await trace.trace()
     return latlongs
 

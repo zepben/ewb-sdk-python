@@ -10,7 +10,6 @@ from typing import List, Set, Optional, Generator, Tuple
 
 from zepben.cimbend.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.cimbend.cim.iec61970.base.core.equipment import Equipment
-from zepben.cimbend.exceptions import NoEquipmentException
 
 __all__ = ['ConductingEquipment']
 
@@ -156,12 +155,6 @@ class ConductingEquipment(Equipment):
         require(terminal.conducting_equipment is self,
                 lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.")
         return False
-
-    def get_terminal_for_node(self, node):
-        for t in self._terminals:
-            if t.connectivity_node.mrid == node.mrid:
-                return t
-        raise NoEquipmentException(f"Equipment {self.mrid} is not connected to node {node.mrid}")
 
     def get_connected_equipment(self, exclude: Set = None):
         """

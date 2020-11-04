@@ -9,10 +9,75 @@ from __future__ import annotations
 from dataclassy import dataclass
 from operator import attrgetter
 from zepben.cimbend.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.cimbend.cim.iec61970.base.core.terminal import Terminal
 from zepben.cimbend.model.phases import NominalPhasePath
 from typing import List, Optional, Tuple
 
-__all__ = ["ConnectivityResult", "ConductingEquipmentToCores"]
+__all__ = ["ConnectivityResult", "get_connectivity", "terminal_compare"]
+
+
+def terminal_compare(terminal: Terminal, other: Terminal):
+    """
+    This definition should only be used for sorting within a `zepben.cimbend.traversals.queue.PriorityQueue`
+    `terminal` The terminal to compare
+    `other` The terminal to compare against
+    Returns True if `terminal` has more phases than `other`, False otherwise.
+    """
+    return terminal.phases.num_phases > other.phases.num_phases
+
+
+Terminal.__lt__ = terminal_compare
+
+
+def get_connectivity(terminal: Terminal, phases: Set[SinglePhaseKind] = None, exclude=None):
+    """
+    Get the connectivity between this terminal and all other terminals in its `ConnectivityNode`.
+    `cores` Core paths to trace between the terminals. Defaults to all cores.
+    `exclude` `zepben.cimbend.iec61970.base.core.terminal.Terminal`'s to exclude from the result. Will be skipped if encountered.
+    Returns List of `ConnectivityResult`'s for this terminal.
+    """
+    if exclude is None:
+        exclude = set()
+    if phases is None:
+        phases = terminal.phases.single_phases
+    trace_phases = phases.intersection(terminal.phases.single_phases)
+    cn = terminal.connectivity_node if terminal.connectivity_node else []
+    results = []
+    for term in cn:
+        if terminal is not term and term not in exclude:  # Don't include ourselves, or those specifically excluded.
+            cr = _terminal_connectivity(terminal, term, trace_phases)
+            if cr.nominal_phase_paths:
+                results.append(cr)
+    return results
+
+
+def _terminal_connectivity(terminal: Terminal, connected_terminal: Terminal, phases: Set[SinglePhaseKind]) -> ConnectivityResult:
+    nominal_phase_paths = [NominalPhasePath(phase, phase) for phase in phases if phase in connected_terminal.phases.single_phases]
+
+    if not nominal_phase_paths:
+        xy_phases = {phase for phase in phases if phase == SinglePhaseKind.X or phase == SinglePhaseKind.Y}
+        connected_xy_phases = {phase for phase in connected_terminal.phases.single_phases if phase == SinglePhaseKind.X or phase == SinglePhaseKind.Y}
+
+        _process_xy_phases(terminal, connected_terminal, phases, xy_phases, connected_xy_phases, nominal_phase_paths)
+
+    return ConnectivityResult(from_terminal=terminal, to_terminal=connected_terminal, nominal_phase_paths=nominal_phase_paths)
+
+
+def _process_xy_phases(terminal: Terminal, connected_terminal: Terminal, phases: Set[SinglePhaseKind], xy_phases: Set[SinglePhaseKind],
+                       connectied_xy_phases: Set[SinglePhaseKind], nominal_phase_paths: List[NominalPhasePath]):
+    if (not xy_phases and not connectied_xy_phases) or (xy_phases and connectied_xy_phases):
+        return
+    for phase in xy_phases:
+        i = terminal.phases.single_phases.index(phase)
+        if i < len(connected_terminal.phases.single_phases):
+            nominal_phase_paths.append(NominalPhasePath(from_phase=phase, to_phase=connected_terminal.phases.single_phases[i]))
+
+    for phase in connectied_xy_phases:
+        i = connected_terminal.phases.single_phases.index(phase)
+        if i < len(terminal.phases.single_phases):
+            terminal_phase = terminal.phases.single_phases[i]
+            if terminal_phase in phases:
+                nominal_phase_paths.append(NominalPhasePath(from_phase=terminal_phase, to_phase=phase))
 
 
 @dataclass(slots=True)
@@ -28,17 +93,17 @@ class ConnectivityResult(object):
     to_terminal: Terminal
     """The terminal which is connected to the requested terminal."""
 
-    _nominal_phase_paths: Tuple[NominalPhasePath]
+    nominal_phase_paths: Tuple[NominalPhasePath]
     """The mapping of nominal phase paths between the from and to terminals."""
 
     def __init__(self, nominal_phase_paths: List[NominalPhasePath]):
-        self._nominal_phase_paths = tuple(sorted(nominal_phase_paths, key=attrgetter('from_terminal', 'to_terminal')))
+        self.nominal_phase_paths = tuple(sorted(nominal_phase_paths, key=attrgetter('from_terminal', 'to_terminal')))
 
     def __eq__(self, other: ConnectivityResult):
         if self is other:
             return True
         try:
-            return self.from_terminal is other.from_terminal and self.to_terminal is other.to_terminal and self._nominal_phase_paths != other._nominal_phase_paths
+            return self.from_terminal is other.from_terminal and self.to_terminal is other.to_terminal and self.nominal_phase_paths != other.nominal_phase_paths
         except:
             return False
 
@@ -46,18 +111,18 @@ class ConnectivityResult(object):
         if self is other:
             return False
         try:
-            return self.from_terminal is not other.from_terminal or self.to_terminal is not other.to_terminal or self._nominal_phase_paths != other._nominal_phase_paths
+            return self.from_terminal is not other.from_terminal or self.to_terminal is not other.to_terminal or self.nominal_phase_paths != other.nominal_phase_paths
         except:
             return True
 
     def __str__(self):
         return (f"ConnectivityResult(from_terminal={self.from_equip.mrid}-t{self.from_terminal.sequence_number}"
-                f", to_terminal={self.to_equip.mrid}-t{self.to_terminal.sequence_number}, core_paths={self._nominal_phase_paths})")
+                f", to_terminal={self.to_equip.mrid}-t{self.to_terminal.sequence_number}, core_paths={self.nominal_phase_paths})")
 
     def __hash__(self):
         res = self.from_terminal.mrid.__hash__()
         res = 31 * res + self.to_terminal.mrid.__hash__()
-        res = 31 * res + self._nominal_phase_paths.__hash__()
+        res = 31 * res + self.nominal_phase_paths.__hash__()
         return res
 
     @property
@@ -76,57 +141,8 @@ class ConnectivityResult(object):
         return [npp.from_phase for npp in self.nominal_phase_paths]
 
     @property
-    def from_nominal_phases(self) -> List[SinglePhaseKind]:
+    def to_nominal_phases(self) -> List[SinglePhaseKind]:
         """The nominal phases that are connected in the `to_terminal`."""
         return [npp.to_phase for npp in self.nominal_phase_paths]
 
 
-class ConductingEquipmentToCores(object):
-    """
-    Class that records which cores were traced to get to a given conducting equipment during a trace.
-    Allows a trace to continue only on the cores used to get to the current step in the trace.
-
-    This class is immutable.
-    """
-
-    def __init__(self, equip: ConductingEquipment, cores: Set[int], previous: ConductingEquipment = None):
-        """
-
-        `equip` The current `zepben.cimbend.ConductingEquipment`
-        `cores` The cores which were traced
-        `previous` The previous `zepben.cimbend.ConductingEquipment`
-        """
-        self.equipment = equip
-        self.cores = frozenset(cores)
-        self.previous = previous
-
-    @property
-    def num_cores(self):
-        return len(self.cores)
-
-    def __eq__(self, other):
-        if self is other:
-            return True
-        if self.equipment == other.conducting_equipment and self.cores == other.cores:
-            return True
-        else:
-            return False
-
-    def __ne__(self, other):
-        if self is other:
-            return False
-        if self.equipment != other.conducting_equipment or self.cores != other.cores:
-            return True
-        else:
-            return False
-
-    def __lt__(self, other):
-        """
-        This definition should only be used for sorting within a `zepben.cimbend.tracing.queue.PriorityQueue`
-        `other` Another Terminal to compare against
-        Returns True if self has more cores than other, False otherwise.
-        """
-        return self.num_cores > other.num_cores
-
-    def __hash__(self):
-        return hash((self.equipment, self.cores))

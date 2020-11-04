@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from __future__ import annotations
 
 from zepben.cimbend.cim.iec61970.base.wires import SinglePhaseKind
 from zepben.cimbend.model.phasedirection import PhaseDirection
@@ -11,12 +12,12 @@ from abc import ABC, abstractmethod
 __all__ = ["normal_phases", "current_phases", "PhaseStatus", "NormalPhases", "CurrentPhases"]
 
 
-def normal_phases(terminal, core_num):
-    return NormalPhases(terminal, core_num)
+def normal_phases(terminal: Terminal, phase: SinglePhaseKind):
+    return NormalPhases(terminal, phase)
 
 
-def current_phases(terminal, core_num):
-    return CurrentPhases(terminal, core_num)
+def current_phases(terminal: Terminal, phase: SinglePhaseKind):
+    return CurrentPhases(terminal, phase)
 
 
 class PhaseStatus(ABC):
@@ -68,7 +69,7 @@ class PhaseStatus(ABC):
 
 class NormalPhases(PhaseStatus):
 
-    def __init__(self, terminal, nominal_phase):
+    def __init__(self, terminal: Terminal, nominal_phase: SinglePhaseKind):
         self.terminal = terminal
         self.nominal_phase = nominal_phase
 
@@ -93,7 +94,7 @@ class NormalPhases(PhaseStatus):
 
 class CurrentPhases(PhaseStatus):
 
-    def __init__(self, terminal, nominal_phase):
+    def __init__(self, terminal: Terminal, nominal_phase: SinglePhaseKind):
         self.terminal = terminal
         self.nominal_phase = nominal_phase
 
