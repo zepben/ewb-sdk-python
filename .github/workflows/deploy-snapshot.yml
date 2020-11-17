@@ -48,17 +48,17 @@ jobs:
           twine upload dist/*
         shell: bash
 
-    update-snapshot-version:
-      needs: deploy
-      runs-on: ubuntu-latest
-      container: zepben/pipeline-basic:5.1.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
-      steps:
-        - uses: actions/checkout@v2
-        - name: Update snapshot version
-          run: |
-            git pull origin $GITHUB_REF
-            source /scripts/common.sh
-            /scripts/update-version.sh --python --snapshot setup.py
-          shell: bash
+  update-snapshot-version:
+    needs: deploy
+    runs-on: ubuntu-latest
+    container: zepben/pipeline-basic:5.1.0
+    env:
+      GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update snapshot version
+        run: |
+          git pull origin $GITHUB_REF
+          source /scripts/common.sh
+          /scripts/update-version.sh --python --snapshot setup.py
+        shell: bash
