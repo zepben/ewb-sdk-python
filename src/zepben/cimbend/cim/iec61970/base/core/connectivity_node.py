@@ -24,7 +24,6 @@ class ConnectivityNode(IdentifiedObject):
     _terminals: List[Terminal] = []
 
     def __init__(self, terminals: List[Terminal] = None):
-        super().__init__()
         if terminals:
             for term in terminals:
                 self.add_terminal(term)

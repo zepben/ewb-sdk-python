@@ -133,7 +133,7 @@ class Feeder(EquipmentContainer):
     _current_equipment: Optional[Dict[str, Equipment]] = None
 
     def __init__(self, normal_head_terminal: Terminal = None, equipment: List[Equipment] = None, current_equipment: List[Equipment] = None):
-        super().__init__(equipment)
+        super(Feeder, self).__init__(equipment)
         self.normal_head_terminal = normal_head_terminal
         if current_equipment:
             for eq in current_equipment:

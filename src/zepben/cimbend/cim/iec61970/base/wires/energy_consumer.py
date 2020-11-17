@@ -92,7 +92,7 @@ class EnergyConsumer(EnergyConnection):
     def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
                  operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None,
                  energy_consumer_phases: List[EnergyConsumerPhase] = None):
-        super().__init__(usage_points=usage_points, equipment_containers=equipment_containers, operational_restrictions=operational_restrictions,
+        super(EnergyConsumer, self).__init__(usage_points=usage_points, equipment_containers=equipment_containers, operational_restrictions=operational_restrictions,
                          current_feeders=current_feeders, terminals=terminals)
         if energy_consumer_phases:
             for phase in energy_consumer_phases:

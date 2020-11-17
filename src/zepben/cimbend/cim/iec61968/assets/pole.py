@@ -23,7 +23,7 @@ class Pole(Structure):
     _streetlights: Optional[List[Streetlight]] = None
 
     def __init__(self, organisation_roles: List[AssetOrganisationRole] = None, streetlights: List[Streetlight] = None):
-        super().__init__(organisation_roles=organisation_roles)
+        super(Pole, self).__init__(organisation_roles=organisation_roles)
         if streetlights:
             for light in streetlights:
                 self.add_streetlight(light)

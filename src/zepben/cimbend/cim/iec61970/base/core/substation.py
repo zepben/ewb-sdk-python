@@ -34,7 +34,7 @@ class Substation(EquipmentContainer):
 
     def __init__(self, equipment: List[Equipment] = None, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None,
                  energized_loops: List[Loop] = None, circuits: List[Circuit] = None):
-        super().__init__(equipment)
+        super(Substation, self).__init__(equipment)
         if normal_energized_feeders:
             for feeder in normal_energized_feeders:
                 self.add_feeder(feeder)

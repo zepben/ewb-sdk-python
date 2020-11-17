@@ -125,7 +125,7 @@ class ConductingEquipment(Equipment):
         return self
 
     def __repr__(self):
-        return (f"{super().__repr__()}, num_cores={self.num_cores} in_service={self.in_service}, "
+        return (f"{super(ConductingEquipment, self).__repr__()}, num_cores={self.num_cores} in_service={self.in_service}, "
                 f"normally_in_service={self.normally_in_service}, location={self.location}"
                 )
 

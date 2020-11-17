@@ -44,7 +44,7 @@ class EndDevice(AssetContainer):
     _usage_points: Optional[List[UsagePoint]] = None
 
     def __init__(self, organisation_roles: List[AssetOrganisationRole] = None, usage_points: List[UsagePoint] = None):
-        super().__init__(organisation_roles=organisation_roles)
+        super(EndDevice, self).__init__(organisation_roles=organisation_roles)
         if usage_points:
             for up in usage_points:
                 self.add_usage_point(up)

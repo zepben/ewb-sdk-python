@@ -20,7 +20,7 @@ class Circuit(Line):
     _end_substations: Optional[List[Substation]] = None
 
     def __init__(self, equipment: List[Equipment] = None, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None):
-        super().__init__(equipment)
+        super(Circuit, self).__init__(equipment)
         if end_terminals:
             for term in end_terminals:
                 self.add_end_terminal(term)
