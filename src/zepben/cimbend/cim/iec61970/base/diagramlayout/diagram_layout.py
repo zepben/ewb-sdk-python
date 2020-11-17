@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+from dataclassy import dataclass
+
 from typing import List, Optional, Dict, Generator, Tuple
 
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -17,6 +19,7 @@ from zepben.cimbend.util import nlen, require, contains_mrid, ngen, safe_remove
 __all__ = ["DiagramObjectPoint", "Diagram", "DiagramObject"]
 
 
+@dataclass(slots=True)
 class DiagramObjectPoint(object):
     """
     A point in a given space defined by 3 coordinates and associated to a diagram object.  The coordinates may be positive

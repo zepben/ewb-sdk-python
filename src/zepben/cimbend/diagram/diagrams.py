@@ -17,7 +17,7 @@ class DiagramService(BaseService):
     name: str = "diagram"
     _diagram_objects_by_diagram_mrid: Dict[str, Dict[str, DiagramObject]] = dict()
     _diagram_objects_by_identified_object_mrid: Dict[str, Dict[str, DiagramObject]] = dict()
-    _diagram_object_indexes: List[Dict[str, Dict[str, DiagramObject]]] = dict()
+    _diagram_object_indexes: List[Dict[str, Dict[str, DiagramObject]]] = list()
 
     def __init__(self):
         self._diagram_object_indexes.append(self._diagram_objects_by_identified_object_mrid)
@@ -63,7 +63,7 @@ class DiagramService(BaseService):
         `diagram_object` The `DiagramObject` to disassociate with this service.
         Returns True if the `DiagramObject` was removed successfully.
         """
-        return super().remove(diagram_object) and self._remove_index(diagram_object)
+        return super(DiagramService, self).remove(diagram_object) and self._remove_index(diagram_object)
 
     def _add_index(self, diagram_object: DiagramObject) -> bool:
         """
