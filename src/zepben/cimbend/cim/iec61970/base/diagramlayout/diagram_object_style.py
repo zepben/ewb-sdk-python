@@ -109,4 +109,4 @@ class DiagramObjectStyle(Enum):
 
     @property
     def short_name(self):
-        return str(self)[18:]
+        return str(self)[19:]

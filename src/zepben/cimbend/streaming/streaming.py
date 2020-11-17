@@ -1,4 +1,3 @@
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
@@ -16,7 +15,7 @@ from zepben.protobuf.np.np_requests_pb2 import CreateNetworkRequest, CompleteNet
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.nc.nc_requests_pb2 import GetNetworkHierarchyRequest, GetIdentifiedObjectsRequest
 from zepben.protobuf.nc.nc_data_pb2 import IdentifiedObjectGroup
-from zepben.cimbend.streaming.network_rpc import rpc_map
+from zepben.cimbend.streaming.network_rpc import diagram_rpc_map, network_rpc_map, customer_rpc_map
 from zepben.cimbend.network.translator.network_cim2proto import *
 from zepben.cimbend.network.translator.network_proto2cim import NetworkProtoToCim
 import random
@@ -30,7 +29,6 @@ __all__ = ["retrieve_network", "send_network", "send_customer", "send_diagram", 
 class FeederSummary:
     acls_count: int
     node_count: int
-
 
 
 class FeederStreamResult:
@@ -250,16 +248,8 @@ class ProtoAttributeError(Exception):
     pass
 
 
-async def send_network(stub: NetworkProducerStub, network_service: NetworkService):
-    """
-    Send a feeder to the connected server.
-    Note that ConnectivityNodes are never sent with this method, a Terminal is sent containing the ConnectivityNode mRID
-    which is the only necessary information to rebuild ConnectivityNodes.
-    `ns` The Network containing all equipment in the feeder.
-    Returns A `zepben.cimbend.streaming.streaming.FeederStreamResult`
-    """
-    # Terminals and PTE's are handled specifically below
-    for obj in network_service.objects():
+async def _send(stub, service, rpc_map):
+    for obj in service.objects():
         try:
             pb = obj.to_pb()
         except Exception as e:
@@ -268,8 +258,7 @@ async def send_network(stub: NetworkProducerStub, network_service: NetworkServic
         try:
             rpc = getattr(stub, rpc_map[type(pb)][0])
         except AttributeError as e:
-            raise NoSuchRPCException(
-                f"RPC {rpc_map[type(pb)][0]} could not be found in {stub.__class__.__name__}") from e
+            raise NoSuchRPCException(f"RPC {rpc_map[type(pb)][0]} could not be found in {stub.__class__.__name__}") from e
 
         try:
             attrname = f"{obj.__class__.__name__[:1].lower()}{obj.__class__.__name__[1:]}"
@@ -281,6 +270,14 @@ async def send_network(stub: NetworkProducerStub, network_service: NetworkServic
         rpc(req)
 
 
+async def send_network(stub: NetworkProducerStub, network_service: NetworkService):
+    """
+    Send a network to the connected server.
+    `network_service` The Network containing all equipment in the feeder.
+    """
+    return await _send(stub, network_service, network_rpc_map)
+
+
 async def create_diagram(stub: DiagramProducerStub):
     stub.CreateDiagramService(CreateDiagramServiceRequest())
 
@@ -290,7 +287,7 @@ async def complete_diagram(stub: DiagramProducerStub):
 
 
 async def send_diagram(stub: DiagramProducerStub, diagram_service: DiagramService):
-    pass
+    return await _send(stub, diagram_service, diagram_rpc_map)
 
 
 async def create_customer(stub: CustomerProducerStub):
@@ -302,4 +299,4 @@ async def complete_customer(stub: CustomerProducerStub):
 
 
 async def send_customer(stub: CustomerProducerStub, customer_service: CustomerService):
-    pass
+    return await _send(stub, customer_service, customer_rpc_map)

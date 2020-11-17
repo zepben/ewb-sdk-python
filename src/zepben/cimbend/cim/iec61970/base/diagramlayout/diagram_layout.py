@@ -184,7 +184,7 @@ class Diagram(IdentifiedObject):
         """
         The diagram objects belonging to this diagram.
         """
-        return ngen(self._diagram_objects)
+        return ngen(self._diagram_objects.values())
 
     def get_object(self, mrid: str) -> DiagramObject:
         """

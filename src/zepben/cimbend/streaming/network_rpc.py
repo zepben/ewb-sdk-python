@@ -40,16 +40,19 @@ from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTr
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser
+from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram
+from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject
+from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer
+from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import CustomerAgreement
+from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure
+from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff
+from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation
+from zepben.protobuf.dp.dp_requests_pb2 import *
+from zepben.protobuf.cp.cp_requests_pb2 import *
+from zepben.protobuf.cp.cp_requests_pb2 import CreateOrganisationRequest as CreateCustomerOrganisationRequest
 from zepben.protobuf.np.np_requests_pb2 import *
 
-# TODO: remove this!
-def CreatePoleRequest():
-    pass
-
-def CreateStreetlightRequest():
-    pass
-
-rpc_map = {
+network_rpc_map = {
     CableInfo: ('CreateCableInfo', CreateCableInfoRequest),
     OverheadWireInfo: ('CreateOverheadWireInfo', CreateOverheadWireInfoRequest),
     AssetOwner: ('CreateAssetOwner', CreateAssetOwnerRequest),
@@ -87,3 +90,15 @@ rpc_map = {
     Recloser: ('CreateRecloser', CreateRecloserRequest),
 }
 
+diagram_rpc_map = {
+    Diagram: ('CreateDiagram', CreateDiagramRequest),
+    DiagramObject: ('CreateDiagramObject', CreateDiagramObjectRequest),
+}
+
+customer_rpc_map = {
+    Customer: ('CreateCustomer', CreateCustomerRequest),
+    CustomerAgreement: ('CreateCustomerAgreement', CreateCustomerAgreementRequest),
+    PricingStructure: ('CreatePricingStructure', CreatePricingStructureRequest),
+    Tariff: ('CreateTariff', CreateTariffRequest),
+    Organisation: ('CreateOrganisation', CreateCustomerOrganisationRequest),
+}
