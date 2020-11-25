@@ -143,9 +143,8 @@ async def _apply_phases_from_feeder_cbs(network):
         esp = es.energy_source_phases
         if esp:
             if len(esp) != es.num_cores:
-                # TODO: java network phases doesn't throw here, but would throw in the below for loop if num_cores > len(esp). why does java silently handle less cores?
-                logger.error(
-                    f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_cores}. Number of phases should match number of cores. Phasing cannot be applied")
+                # TODO: java network phases doesn't throw here, but would throw in the below for loop if num_phases > len(esp). why does java silently handle less cores?
+                logger.error(f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_phases}. Number of phases should match number of cores. Phasing cannot be applied")
                 raise TracingException(
                     f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_cores}. Number of phases should match number of cores. Phasing cannot be applied")
             breaker_terms = await find_es_breaker_terminal(es)

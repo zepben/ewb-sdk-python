@@ -40,8 +40,13 @@ class ConductingEquipment(Equipment):
             for term in terminals:
                 self.add_terminal(term)
 
-    @property
-    def nominal_voltage(self):
+    def nominal_voltage(self, terminal: Terminal = None):
+        """
+        Get the nominal voltage of this `ConductingEquipment`. `terminal` is not used here, but this method can be overridden in child classes
+        (e.g PowerTransformer).
+        :param terminal: The `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal` to get the voltage at.
+        :return: The nominal voltage in volts of this `ConductingEquipment` at `terminal`
+        """
         return self.base_voltage.nominal_voltage if self.base_voltage is not None else 0
 
     @property
@@ -125,17 +130,9 @@ class ConductingEquipment(Equipment):
         return self
 
     def __repr__(self):
-        return (f"{super(ConductingEquipment, self).__repr__()}, num_cores={self.num_cores} in_service={self.in_service}, "
+        return (f"{super(ConductingEquipment, self).__repr__()}, in_service={self.in_service}, "
                 f"normally_in_service={self.normally_in_service}, location={self.location}"
                 )
-
-    def __lt__(self, other):
-        """
-        This definition should only be used for sorting within a `zepben.cimbend.tracing.queue.PriorityQueue`
-        `other` Another Terminal to compare against
-        Returns True if self has more cores than other, False otherwise.
-        """
-        return self.num_cores > other.num_cores
 
     def _validate_terminal(self, terminal: Terminal) -> bool:
         """

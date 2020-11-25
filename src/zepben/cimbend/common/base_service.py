@@ -123,16 +123,15 @@ class BaseService(object, metaclass=ABCMeta):
         """
         return self.get(mrid)
 
-    def ensure_get(self, mrid: Optional[str], type_: type,
-                   generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]"):
-        return None if not mrid else self.get(mrid, type_, generate_error=generate_error)
-
     def add(self, identified_object: IdentifiedObject) -> bool:
         """
         Associate an object with this service.
         `identified_object` The object to associate with this service.
         Returns True if the object is associated with this service, False otherwise.
         """
+        if not identified_object.mrid:
+            return False
+
         objs = self._objectsByType.get(identified_object.__class__, dict())
         if identified_object.mrid in objs:
             return False
@@ -181,9 +180,7 @@ class BaseService(object, metaclass=ABCMeta):
                 # Clean up any reverse unresolved references now that the reference has been resolved
                 if from_.mrid in self._unresolved_references:
                     refs = self._unresolved_references[from_.mrid]
-                    #
-                    self._unresolved_references[from_.mrid] = [ref for ref in refs if
-                                                               not ref.to_mrid == from_.mrid and not ref.resolver == reverse_resolver]
+                    self._unresolved_references[from_.mrid] = [ref for ref in refs if not ref.to_mrid == from_.mrid or not ref.resolver == reverse_resolver]
 
                     if not self._unresolved_references[from_.mrid]:
                         del self._unresolved_references[from_.mrid]
@@ -191,7 +188,6 @@ class BaseService(object, metaclass=ABCMeta):
         except KeyError:
             urefs = self._unresolved_references.get(to_mrid, list())
             urefs.append(UnresolvedReference(from_ref=from_, to_mrid=to_mrid, resolver=resolver))
-            #
             self._unresolved_references[to_mrid] = urefs
             return False
 

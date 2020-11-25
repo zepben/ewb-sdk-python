@@ -1,5 +1,3 @@
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
@@ -8,7 +6,9 @@
 
 from __future__ import annotations
 
-from typing import List, Union
+from typing import List, Union, Callable
+
+from dataclassy import dataclass
 
 from zepben.cimbend.common import BaseService
 from zepben.cimbend.network import NetworkService
@@ -32,6 +32,9 @@ DiagramProducerStub.complete = complete_diagram
 CustomerProducerStub.send = send_customer
 CustomerProducerStub.create = create_customer
 CustomerProducerStub.complete = complete_customer
+
+
+
 
 
 class WorkbenchConnection(object):
@@ -85,6 +88,9 @@ class WorkbenchConnection(object):
     #     """
     #     # res = await send_network(self.network_stub, ns)
     #     return res
+
+    async def get_network_hierarchy():
+        response = self.stub.getNetworkHierarchy(request)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.channel.close()

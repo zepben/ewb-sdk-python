@@ -158,11 +158,6 @@ def wireinfo_to_pb(cim: WireInfo) -> PBWireInfo:
 
 # IEC61968 ASSETS #
 def asset_to_pb(cim: Asset) -> PBAsset:
-    """
-    OrganisationRoles are sent with Asset
-    `cim`
-    Returns
-    """
     return PBAsset(io=identifiedobject_to_pb(cim),
                    locationMRID=cim.location.mrid if cim.location else None,
                    organisationRoleMRIDs=[str(io.mrid) for io in cim.organisation_roles])

@@ -4,6 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import ABCMeta
+from typing import Optional
 
 from dataclassy import dataclass
 from zepben.cimbend.common.base_service import BaseService
@@ -39,10 +40,10 @@ def document_to_cim(pb: PBDocument, cim: Document, service: BaseService):
     identifiedobject_to_cim(pb.io, cim, service)
 
 
-def organisation_to_cim(pb: PBOrganisation, service: BaseService):
+def organisation_to_cim(pb: PBOrganisation, service: BaseService) -> Optional[Organisation]:
     cim = Organisation()
     identifiedobject_to_cim(pb.io, cim, service)
-    service.add(cim)
+    return cim if service.add(cim) else None
 
 
 def organisationrole_to_cim(pb: PBOrganisationRole, cim: OrganisationRole, service: BaseService):

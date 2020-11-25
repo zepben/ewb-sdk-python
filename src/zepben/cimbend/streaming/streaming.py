@@ -3,8 +3,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from __future__ import annotations
 
-from zepben.cimbend import NetworkService, CustomerService, DiagramService
+from zepben.cimbend import NetworkService, CustomerService, DiagramService, BaseService
 from zepben.cimbend.streaming.exceptions import StreamingException
 from zepben.protobuf.cp.cp_pb2_grpc import CustomerProducerStub
 from zepben.protobuf.cp.cp_requests_pb2 import CreateCustomerServiceRequest, CompleteCustomerServiceRequest
@@ -36,7 +37,7 @@ class FeederStreamResult:
     summary: FeederSummary
 
 
-MAX_INT: int = math.pow(2, 32) - 1
+MAX_INT: int = int(math.pow(2, 32) - 1)
 
 
 def get_random_message_id() -> int:
@@ -74,7 +75,7 @@ def get_expected_object(iog: IdentifiedObjectGroup, expected_type: str):
     return getattr(identified_object, expected_type, None)
 
 
-def safely_add(network: NetworkProtoToCim, pb) -> None:
+def safely_add(network: NetworkService, pb) -> None:
     try:
         network.add_from_pb(pb)
     except Exception as e:
@@ -96,7 +97,7 @@ async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str) -> I
     return identified_object_group
 
 
-async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_io) -> None:
+async def add_identified_object(stub: NetworkConsumerStub, network: NetworkService, equipment_io) -> None:
     """
     Add an equipment to the network.
     `stub` A network consumer stub.
@@ -111,7 +112,7 @@ async def add_identified_object(stub: NetworkConsumerStub, network: NetworkProto
             safely_add(network, equipment)
 
 
-async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkProtoToCim, equipment_mrid: str) -> None:
+async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkService, equipment_mrid: str) -> None:
     """
     Retrieve equipment using its mRID and add it to the network.
     `stub` A network consumer stub.
@@ -122,13 +123,16 @@ async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkProtoToC
 
     if equipment_iog:
         await add_identified_object(stub, network, get_identified_object(equipment_iog))
-        for owned_io in getattr(equipment_iog, 'ownedIdentifiedObject', []):
+
+        for owned_io in equipment_iog.objectGroup.ownedIdentifiedObject:
+            if owned_io.WhichOneof("identifiedObject") == "powerTransformerEnd":
+                print("STAPH")
             await add_identified_object(stub, network, owned_io)
     else:
         print(f"Could not retrieve equipment {equipment_mrid}")
 
 
-async def retrieve_feeder(stub: NetworkConsumerStub, network: NetworkProtoToCim, feeder_mrid: str) -> None:
+async def retrieve_feeder(stub: NetworkConsumerStub, network: NetworkService, feeder_mrid: str) -> None:
     """
     Retrieve feeder using its mRID, add it to the network and retrieve its equipments.
     `stub` A network consumer stub.
@@ -147,7 +151,7 @@ async def retrieve_feeder(stub: NetworkConsumerStub, network: NetworkProtoToCim,
         print(f"Could not retrieve feeder {feeder_mrid}")
 
 
-async def retrieve_substation(stub: NetworkConsumerStub, network: NetworkProtoToCim, substation_mrid: str) -> None:
+async def retrieve_substation(stub: NetworkConsumerStub, network: NetworkService, substation_mrid: str) -> None:
     """
     Retrieve substation using its mRID, add it to the network and retrieve its feeders.
     `stub` A network consumer stub.
@@ -166,8 +170,7 @@ async def retrieve_substation(stub: NetworkConsumerStub, network: NetworkProtoTo
         print(f"Could not retrieve substation {substation_mrid}")
 
 
-async def retrieve_sub_geographical_region(stub: NetworkConsumerStub, network: NetworkProtoToCim,
-                                           sub_geographical_region_mrid: str) -> None:
+async def retrieve_sub_geographical_region(stub: NetworkConsumerStub, network: NetworkService, sub_geographical_region_mrid: str) -> None:
     """
     Retrieve subgeographical region using its mRID, add it to the network and retrieve its substations.
     `stub` A network consumer stub.
@@ -185,8 +188,7 @@ async def retrieve_sub_geographical_region(stub: NetworkConsumerStub, network: N
         print(f"Could not retrieve sub geographical region {sub_geographical_region_mrid}")
 
 
-async def retrieve_geographical_region(stub: NetworkConsumerStub, network: NetworkProtoToCim,
-                                       geographical_region_mrid: str):
+async def retrieve_geographical_region(stub: NetworkConsumerStub, network: NetworkService, geographical_region_mrid: str):
     """
     Retrieve geographical region using its mRID, add it to the network and retrieve its subgeographical regions.
     `stub` A network consumer stub.
@@ -210,7 +212,7 @@ async def retrieve_network(channel) -> NetworkService:
     `channel` A gRPC channel to the gRPC server.
     Returns The retrieved `wepben.cimbend.NetworkService` object.
     """
-    proto2cim = NetworkProtoToCim(NetworkService())
+    service = NetworkService()
     stub = NetworkConsumerStub(channel)
     message_id = get_random_message_id()
     request = GetNetworkHierarchyRequest(messageId=message_id)
@@ -218,18 +220,18 @@ async def retrieve_network(channel) -> NetworkService:
     for gr in getattr(response, "geographicalRegions", []):
         gr_mrid = getattr(gr, "mRID", None)
         if gr_mrid:
-            await retrieve_geographical_region(stub, proto2cim, gr_mrid)
+            await retrieve_geographical_region(stub, service, gr_mrid)
 
-    await empty_unresolved_refs(stub, proto2cim)
+    await empty_unresolved_refs(stub, service)
 
-    return proto2cim.service
+    return service
 
 
-async def empty_unresolved_refs(stub, proto2cim):
-    service = proto2cim.service
+async def empty_unresolved_refs(stub, service: NetworkService):
+    service = service
     while service.has_unresolved_references():
         for mrid in service.unresolved_mrids():
-            await retrieve_equipment(stub, proto2cim, mrid)
+            await retrieve_equipment(stub, service, mrid)
 
 
 async def create_network(stub: NetworkProducerStub):

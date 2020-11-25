@@ -3,7 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+import os
 import uuid
 from dataclassy import dataclass
 from pytest import fixture
@@ -15,6 +15,12 @@ from zepben.cimbend import EnergySource, EnergyConsumer, Terminal, ConnectivityN
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Breaker, EnergySourcePhase, Junction
 from zepben.cimbend import PhaseCode
 from typing import Union, List, Callable
+from hypothesis import settings, Verbosity
+
+settings.register_profile("ci", max_examples=1000)
+settings.register_profile("dev", max_examples=10)
+settings.register_profile("debug", max_examples=10, verbosity=Verbosity.verbose)
+settings.load_profile(os.getenv(u'HYPOTHESIS_PROFILE', 'dev'))
 
 
 def _get_mrid(mrid=None):
@@ -62,8 +68,7 @@ class AddResult:
 
 class NetworkBuilder(object):
     def __init__(self):
-        self.metrics_store = MetricsStore()
-        self.network = NetworkService(self.metrics_store)
+        self.network = NetworkService()
 
     def create_feeder_start(self, name="default", es_args=None, cb_args=None, acls_args=None):
         if cb_args is None:
@@ -312,3 +317,10 @@ def network2():
     ar_b3 = nb.add_junction(ar_b3.node, mrid="junc7", num_terms=1, phases=PhaseCode.B)
 
     return nb.network
+
+
+
+
+@fixture()
+def network_service():
+    return NetworkService()

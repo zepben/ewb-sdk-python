@@ -242,6 +242,10 @@ class PowerTransformerEnd(TransformerEnd):
         else:
             raise ValueError(f"power_transformer for {str(self)} has already been set to {self._power_transformer}, cannot reset this field to {pt}")
 
+    @property
+    def nominal_voltage(self):
+        return self.base_voltage.nominal_voltage if self.base_voltage else self.rated_u
+
 
 class PowerTransformer(ConductingEquipment):
     """
@@ -303,6 +307,15 @@ class PowerTransformer(ConductingEquipment):
     def ends(self) -> Generator[PowerTransformerEnd, None, None]:
         """The `PowerTransformerEnd`s for this `PowerTransformer`."""
         return ngen(self._power_transformer_ends)
+
+    def nominal_voltage(self, terminal: Terminal = None):
+        if terminal is None:
+            return 0
+        for end in self.ends:
+            if end.terminal is terminal:
+                return end.nominal_voltage
+        else:
+            return 0
 
     def get_end_by_mrid(self, mrid: str) -> PowerTransformerEnd:
         """

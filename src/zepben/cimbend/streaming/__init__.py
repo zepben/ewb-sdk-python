@@ -9,3 +9,4 @@ from zepben.cimbend.streaming.connect import *
 from zepben.cimbend.streaming.exceptions import *
 from zepben.cimbend.streaming.streaming import *
 from zepben.cimbend.streaming.sync_api import *
+from zepben.cimbend.streaming.consumer import *
