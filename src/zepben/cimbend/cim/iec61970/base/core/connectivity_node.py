@@ -89,8 +89,7 @@ class ConnectivityNode(IdentifiedObject):
         return self
 
     def is_switched(self):
-        if self.get_switch() is not None:
-            return True
+        return self.get_switch() is not None
 
     def get_switch(self):
         for term in self._terminals:
