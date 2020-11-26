@@ -6,7 +6,7 @@
 
 from enum import Enum
 
-__all__ = ["SinglePhaseKind", "phasekind_by_id"]
+__all__ = ["SinglePhaseKind", "phasekind_by_id", "SINGLE_PHASE_KIND_VALUES"]
 
 
 def phasekind_by_id(spk_id):
@@ -16,7 +16,7 @@ def phasekind_by_id(spk_id):
     `spk_id` ID of the SinglePhaseKind from 0 as per the order of definition
     Returns The SinglePhaseKind
     """
-    return _spk_members[spk_id]
+    return SINGLE_PHASE_KIND_VALUES[spk_id]
 
 
 class SinglePhaseKind(Enum):
@@ -63,4 +63,4 @@ class SinglePhaseKind(Enum):
         return str(self)[16:]
 
 
-_spk_members = list(SinglePhaseKind.__members__.values())
+SINGLE_PHASE_KIND_VALUES = list(SinglePhaseKind.__members__.values())

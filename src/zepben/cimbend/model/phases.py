@@ -10,7 +10,7 @@ from dataclassy import dataclass
 
 from zepben.cimbend.exceptions import PhaseException
 from zepben.cimbend.model.phasedirection import PhaseDirection
-from zepben.cimbend.cim.iec61970.base.wires import SinglePhaseKind
+from zepben.cimbend.cim.iec61970.base.wires import SinglePhaseKind, SINGLE_PHASE_KIND_VALUES
 
 __all__ = ["phase", "direction", "pos_shift", "add", "setphs", "remove", "remove_all", "TracedPhases", "NominalPhasePath"]
 CORE_MASKS = [0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000]
@@ -33,8 +33,8 @@ PHASE_DIR_MAP[0b11000000] = SinglePhaseKind.N
 
 
 def _valid_phase_check(nominal_phase):
-    if nominal_phase not in SinglePhaseKind[1:6]:
-        raise ValueError(f"INTERNAL ERROR: Phase {nominal_phase} is invalid. Must be one of {SinglePhaseKind[1:6]}.")
+    if nominal_phase not in SINGLE_PHASE_KIND_VALUES[1:7]:
+        raise ValueError(f"INTERNAL ERROR: Phase {nominal_phase} is invalid. Must be one of {SINGLE_PHASE_KIND_VALUES[1:7]}.")
 
 
 def phase(status: int, nominal_phase: SinglePhaseKind):
