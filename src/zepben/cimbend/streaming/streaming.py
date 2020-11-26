@@ -5,6 +5,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
+from typing import AsyncGenerator
+
 from zepben.cimbend import NetworkService, CustomerService, DiagramService, BaseService
 from zepben.cimbend.streaming.exceptions import StreamingException
 from zepben.protobuf.cp.cp_pb2_grpc import CustomerProducerStub
@@ -82,7 +84,7 @@ def safely_add(network: NetworkService, pb) -> None:
         raise StreamingException(f"Failed to add [{pb}] to network. Are you using a cimbend version compatible with the server? Underlying error was: {e}")
 
 
-async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str) -> IdentifiedObjectGroup:
+async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str) -> AsyncGenerator[IdentifiedObjectGroup, None]:
     """
     Send a request to the connected server to retrieve an identified object group given its mRID.
     `stub` A network consumer stub.
@@ -93,8 +95,13 @@ async def get_identified_object_group(stub: NetworkConsumerStub, mrid: str) -> I
     request = GetIdentifiedObjectsRequest(messageId=message_id, mrids=[mrid])
     response = stub.getIdentifiedObjects(request)
     for obj in response:
-        identified_object_group = obj
-    return identified_object_group
+        yield obj
+
+
+async def get_single_object(stub: NetworkConsumerStub, mrid: str) -> IdentifiedObjectGroup:
+    async for obj in get_identified_object_group(stub, mrid):
+        return obj
+    return None
 
 
 async def add_identified_object(stub: NetworkConsumerStub, network: NetworkService, equipment_io) -> None:
@@ -119,17 +126,15 @@ async def retrieve_equipment(stub: NetworkConsumerStub, network: NetworkService,
     `network` The current network.
     `equipment_mrid` The equipment mRID as a string.
     """
-    equipment_iog = await get_identified_object_group(stub, equipment_mrid)
+    async for equipment_iog in get_identified_object_group(stub, equipment_mrid):
 
-    if equipment_iog:
-        await add_identified_object(stub, network, get_identified_object(equipment_iog))
+        if equipment_iog:
+            await add_identified_object(stub, network, get_identified_object(equipment_iog))
 
-        for owned_io in equipment_iog.objectGroup.ownedIdentifiedObject:
-            if owned_io.WhichOneof("identifiedObject") == "powerTransformerEnd":
-                print("STAPH")
-            await add_identified_object(stub, network, owned_io)
-    else:
-        print(f"Could not retrieve equipment {equipment_mrid}")
+            for owned_io in equipment_iog.objectGroup.ownedIdentifiedObject:
+                await add_identified_object(stub, network, owned_io)
+        else:
+            print(f"Could not retrieve equipment {equipment_mrid}")
 
 
 async def retrieve_feeder(stub: NetworkConsumerStub, network: NetworkService, feeder_mrid: str) -> None:
@@ -139,7 +144,7 @@ async def retrieve_feeder(stub: NetworkConsumerStub, network: NetworkService, fe
     `network` The current network.
     `equipment_mrid` The equipment mRID as a string.
     """
-    feeder_iog = await get_identified_object_group(stub, feeder_mrid)
+    feeder_iog = await get_single_object(stub, feeder_mrid)
     if feeder_iog:
         feeder = get_expected_object(feeder_iog, "feeder")
         if feeder:
@@ -157,7 +162,7 @@ async def retrieve_substation(stub: NetworkConsumerStub, network: NetworkService
     `stub` A network consumer stub.
     `network` The current network.
     """
-    sub_iog = await get_identified_object_group(stub, substation_mrid)
+    sub_iog = await get_single_object(stub, substation_mrid)
     if sub_iog:
         sub = get_expected_object(sub_iog, "substation")
         if sub:
@@ -176,7 +181,7 @@ async def retrieve_sub_geographical_region(stub: NetworkConsumerStub, network: N
     `stub` A network consumer stub.
     `network` The current network.
     """
-    sgr_iog = await get_identified_object_group(stub, sub_geographical_region_mrid)
+    sgr_iog = await get_single_object(stub, sub_geographical_region_mrid)
     if sgr_iog:
         sgr = get_expected_object(sgr_iog, "subGeographicalRegion")
         if sgr:
@@ -194,7 +199,7 @@ async def retrieve_geographical_region(stub: NetworkConsumerStub, network: Netwo
     `stub` A network consumer stub.
     `network` The current network.
     """
-    gr_iog = await get_identified_object_group(stub, geographical_region_mrid)
+    gr_iog = await get_single_object(stub, geographical_region_mrid)
     if gr_iog:
         gr = get_expected_object(gr_iog, "geographicalRegion")
         if gr:
