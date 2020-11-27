@@ -33,6 +33,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         return nlen(self._equipment)
 
+    @property
     def equipment(self) -> Generator[Equipment, None, None]:
         """
         The `zepben.cimbend.iec61970.base.core.equipment.Equipment` contained in this `EquipmentContainer`
