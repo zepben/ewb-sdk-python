@@ -38,7 +38,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         The `zepben.cimbend.iec61970.base.core.equipment.Equipment` contained in this `EquipmentContainer`
         """
-        return ngen(self._equipment.values())
+        return ngen(self._equipment.values() if self._equipment is not None else None)
 
     def get_equipment(self, mrid: str) -> Equipment:
         """
