@@ -308,14 +308,14 @@ class PowerTransformer(ConductingEquipment):
         """The `PowerTransformerEnd`s for this `PowerTransformer`."""
         return ngen(self._power_transformer_ends)
 
-    def nominal_voltage(self, terminal: Terminal = None):
+    def get_base_voltage(self, terminal: Terminal = None):
         if terminal is None:
-            return 0
+            return self.base_voltage
         for end in self.ends:
             if end.terminal is terminal:
-                return end.nominal_voltage
+                return end.base_voltage
         else:
-            return 0
+            return None
 
     def get_end_by_mrid(self, mrid: str) -> PowerTransformerEnd:
         """

@@ -40,14 +40,15 @@ class ConductingEquipment(Equipment):
             for term in terminals:
                 self.add_terminal(term)
 
-    def nominal_voltage(self, terminal: Terminal = None):
+    def get_base_voltage(self, terminal: Terminal = None):
         """
-        Get the nominal voltage of this `ConductingEquipment`. `terminal` is not used here, but this method can be overridden in child classes
-        (e.g PowerTransformer).
+        Get the `zepben.cimbend.iec61970.base.core.base_voltage.BaseVoltage` of this `ConductingEquipment`.
+        Note `terminal` is not used here, but this method can be overridden in child classes (e.g PowerTransformer).
+
         :param terminal: The `zepben.cimbend.cim.iec61970.base.core.terminal.Terminal` to get the voltage at.
-        :return: The nominal voltage in volts of this `ConductingEquipment` at `terminal`
+        :return: The BaseVoltage of this `ConductingEquipment` at `terminal`
         """
-        return self.base_voltage.nominal_voltage if self.base_voltage is not None else 0
+        return self.base_voltage
 
     @property
     def terminals(self) -> Generator[Terminal, None, None]:

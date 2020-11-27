@@ -14,4 +14,4 @@ class TestPowerTransformer(object):
         t1 = Terminal(conducting_equipment=pt)
         pte = PowerTransformerEnd(power_transformer=pt, base_voltage=bv11k, terminal=t1)
         pt.add_end(pte)
-        assert pt.nominal_voltage(t1) == pte.nominal_voltage == t1.nominal_voltage
+        assert pt.get_base_voltage(t1) is pte.base_voltage is t1.base_voltage

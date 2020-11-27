@@ -99,12 +99,9 @@ class Terminal(AcDcTerminal):
         """
         return self.connectivity_node.get_switch()
 
-    def get_nominal_voltage(self):
-        return self.conducting_equipment.nominal_voltage
-
     @property
-    def nominal_voltage(self):
-        return self.conducting_equipment.nominal_voltage(self)
+    def base_voltage(self):
+        return self.conducting_equipment.get_base_voltage(self)
 
     def get_other_terminals(self):
         return [t for t in self.conducting_equipment.terminals if t is not self]
