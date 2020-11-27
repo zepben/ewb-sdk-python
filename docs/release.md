@@ -2,6 +2,7 @@
 
 | Version | Released |
 | --- | --- |
+|[0.16.0](#v0160)| `TBD` |
 |[0.15.0](#v0150)| `27 November 2020` |
 |[0.14.0](#v0140)| `27 November 2020` |
 |[0.13.0](#v0130)| `17 November 2020` |
@@ -18,6 +19,25 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+### v0.16.0
+
+##### Breaking Changes
+* None.
+
+##### New Features
+* None.
+
+##### Enhancements
+* None.
+
+##### Fixes
+* None.
+
+##### Notes
+* None.
 
 ---
 
