@@ -4,6 +4,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
+
+from zepben.cimbend._dataclass import DataClassMetaZ
 from zepben.cimbend.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.cimbend.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
@@ -13,7 +15,7 @@ from dataclassy import dataclass
 __all__ = ["PhaseStep"]
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, meta=DataClassMetaZ)
 class PhaseStep(object):
     """
     Class that records which phases were traced to get to a given conducting equipment during a trace.

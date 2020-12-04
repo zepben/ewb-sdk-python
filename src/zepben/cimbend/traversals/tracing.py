@@ -9,6 +9,7 @@ from abc import abstractmethod
 
 from dataclassy import dataclass
 
+from zepben.cimbend._dataclass import DataClassMetaZ
 from zepben.cimbend.traversals.queue import FifoQueue, LifoQueue, PriorityQueue, Queue
 from zepben.cimbend.exceptions import TracingException
 from zepben.cimbend.traversals.tracker import Tracker
@@ -34,7 +35,7 @@ def create_queue(search_type):
         return PriorityQueue()
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, meta=DataClassMetaZ)
 class BaseTraversal(Generic[T]):
     """
     A basic traversal implementation that can be used to traverse any type of item.

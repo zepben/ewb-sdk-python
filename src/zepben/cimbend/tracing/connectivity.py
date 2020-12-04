@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclassy import dataclass
 from operator import attrgetter
+from zepben.cimbend._dataclass import DataClassMetaZ
 from zepben.cimbend.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.cimbend.cim.iec61970.base.core.terminal import Terminal
 from zepben.cimbend.model.phases import NominalPhasePath
@@ -80,7 +81,7 @@ def _process_xy_phases(terminal: Terminal, connected_terminal: Terminal, phases:
                 nominal_phase_paths.append(NominalPhasePath(from_phase=terminal_phase, to_phase=phase))
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, meta=DataClassMetaZ)
 class ConnectivityResult(object):
     """
     Stores the connectivity between two terminals, including the mapping between the nominal phases.

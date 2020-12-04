@@ -12,6 +12,8 @@ from collections.abc import Sized
 from typing import Set, List, Optional, Iterable, Callable, Any, TypeVar, Generator
 from uuid import UUID
 
+from dataclassy.dataclass import DataClassMeta
+
 T = TypeVar('T')
 
 # phs_to_cores = {SinglePhaseKind.A: 0,
@@ -145,3 +147,5 @@ class CopyableUUID(UUID):
 
     def copy(self):
         return UUID(bytes=os.urandom(16), version=4)
+
+

@@ -11,6 +11,7 @@ import logging
 from dataclassy import dataclass
 from enum import Enum
 
+from zepben.cimbend._dataclass import DataClassMetaZ
 from zepben.cimbend.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.cimbend.cim.iec61970.base.wires.switch import Breaker
 from zepben.cimbend.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -39,7 +40,7 @@ class FeederProcessingStatus(Enum):
     NONE = 2
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, meta=DataClassMetaZ)
 class FeederCbTerminalPhasesByStatus:
     terminal: Terminal
     in_phases: Set[SinglePhaseKind] = set()
@@ -47,7 +48,7 @@ class FeederCbTerminalPhasesByStatus:
     phases_to_flow: Set[SinglePhaseKind] = set()
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, meta=DataClassMetaZ)
 class DelayedFeederTrace:
     out_terminal: Terminal
     phases_to_flow: Set[SinglePhaseKind]
