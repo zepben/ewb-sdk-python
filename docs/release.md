@@ -44,10 +44,19 @@ a 1.0.0 release.
 ### v0.15.0
 
 ##### Breaking Changes
-* None.
-
+* connect() and connect_async() now return a gRPC `Channel` rather than a [Sync]WorkbenchConnection which is now deprecated.
+Instead you should use this `Channel` to create a subclass of the `CimConsumerClient` or `CimProducerClient`. (see new features).
+    
 ##### New Features
-* None.
+* Consumer and Producer gRPC streaming APIs have been enhanced. All gRPC based streaming should be done through the following classes:
+    - `NetworkConsumerClient`
+    - `NetworkProducerClient`
+    - `DiagramConsumerClient`
+    - `DiagramProducerClient`
+    - `CustomerConsumerClient`
+    - `CustomerProducerClient`
+All consumers implement `get_identified_object()` and `get_identified_objects()`
+NetworkConsumerClient also has `get_network_hierarchy()`, `get_feeder()`, `retrieve_network()`. See their pydoc for more info.
 
 ##### Enhancements
 * None.
