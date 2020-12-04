@@ -9,6 +9,8 @@ from dataclassy import dataclass
 from pytest import fixture
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection
 from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup
+
+from zepben.cimbend._dataclass import DataClassMetaZ
 from zepben.cimbend.network.network import NetworkService
 from zepben.cimbend.measurement.metrics_store import MetricsStore
 from zepben.cimbend import EnergySource, EnergyConsumer, Terminal, ConnectivityNode, IdentifiedObject, AcLineSegment, \
@@ -60,7 +62,7 @@ def gen_tap_changer(**kwargs):
     return RatioTapChanger(**kwargs)
 
 
-@dataclass
+@dataclass(meta=DataClassMetaZ)
 class AddResult:
     io: IdentifiedObject
     node: Union[ConnectivityNode, List[ConnectivityNode]] = None

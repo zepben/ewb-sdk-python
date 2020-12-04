@@ -1,0 +1,52 @@
+---
+id: sdk-persistence
+title: Persisting Models
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+## Local database
+
+The SDK provides the ability to save your model to a local SQLite database. This may be handy for situations such as saving a 
+model in a specific state / configuration or it may be quicker to persist the model to a local database and reload than
+it is rebuilding your model from a source data system every time you want to build it.
+
+```python
+fun saveToDb(dbFile: String, networkService: NetworkService, diagramService: DiagramService, customerService: CustomerService) {
+    // All service are saved to the given dbFile file
+    DatabaseWriter(dbFile).save(listOf(networkService, diagramService, customerService))
+}
+
+fun readFromDb(dbFile: String, networkService: NetworkService, diagramService: DiagramService, customerService: CustomerService) {
+    // All the services will be loaded with their respective objects from dbFile
+    DatabaseReader(dbFile).load(networkService, diagramService, customerService)
+}
+```
+
+## Evolve data service
+
+:::warning
+The API for persisting data to a remote server is currently in alpha and very likely to experience breaking changes 
+in the future. Please provide any feedback about this API to [Zepben](www.zepben.com).
+:::
+
+The SDK provides a client to send models to a remote data server via [gRPC](https://grpc.io/). The service and proto 
+definitions for this API can be found [here](https://github.com/zepben/evolve-grpc). An implementation of the server for 
+the services is provided with the Evolve platform data services.
+
+Here is an example of how to connect to and send a model to the evolve data server:
+
+```python
+val channel = GrpcChannelFactory.create(ConnectionConfig(host, port))
+
+val networkService = NetworkService()
+val customerService = CustomerService()
+val diagramService = DiagramService()
+populateNetworkObjects(networkService)
+
+NetworkProducerClient(channel).send(networkService)
+CustomerProducerClient(channel).send(customerService)
+DiagramProducerClient(channel).send(diagramService)
+```
+
