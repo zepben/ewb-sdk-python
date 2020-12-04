@@ -10,3 +10,6 @@ from zepben.cimbend.streaming.exceptions import *
 from zepben.cimbend.streaming.streaming import *
 from zepben.cimbend.streaming.sync_api import *
 from zepben.cimbend.streaming.consumer import *
+from zepben.cimbend.streaming.customer_consumer import *
+from zepben.cimbend.streaming.network_consumer import *
+from zepben.cimbend.streaming.diagram_consumer import *

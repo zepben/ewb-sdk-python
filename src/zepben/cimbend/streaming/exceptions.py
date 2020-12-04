@@ -13,3 +13,7 @@ class AuthException(Exception):
 
 class StreamingException(Exception):
     pass
+
+
+class UnsupportedOperationException(Exception):
+    pass
