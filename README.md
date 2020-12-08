@@ -1,32 +1,41 @@
-# Zepben cimbend (WIP) #
-This library provides Zepben's CIM profile as a python module for simplified interaction with Zepben services. You can find an overview and diagrams of Zepben's profile [here](https://zepben.bitbucket.io/cim/evolve/).
+# Zepben Evolve Python SDK #
+The Python Evolve SDK contains everything necessary to communicate with a [Zepben EWB Server](https://github.com/zepben/energy-workbench-server). See the [architecture](docs/architecture.md) documentation for more details.
 
-All classes exposed in `zepben.cimbend.cim` can be converted into protobuf messages and sent to/received from Zepben's gRPC services.
+ote this project is still a work in progress and unstable, and breaking changes may occur prior to 1.0.0. 
 
-Note this project is still a work in progress and unstable, and breaking changes may occur prior to 1.0.0. 
+# Requirements #
 
-More extensive documentation can be found in the [docs](docs/README.md)
+- Python 3.7 or later
+- pycryptodome, which requires a C/C++ compiler to be installed.
+On Linux, python headers (typically `python-dev`) is also necessary to build pycryptodome.
 
-# Basic Usage #
+##### On Windows systems: 
 
-TODO
+Download and run [Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019)
 
-## Installation ##
-Requirements:
+When in the installer, select and install:
+- C++ build tools
+- Windows 10 SDK
+- The latest version of MSVC v142 x64/x86 build tools.
 
-1. Python 3.7+
+After this you should be able to `pip install zepben.cimbend` without issues.
 
-Install straight from Pypi:
+# Installation #
 
     pip install zepben.cimbend
     
-## Developing ##
+    
+# Building #
+
+    python setup.py bdist_wheel
+    
+# Developing ##
 
 This library depends on protobuf and gRPC for messaging. To set up for developing against this library, clone it first:
 
     git clone https://github.com/zepben/evolve-sdk-python.git
 
-Install as an editable install. Its recommended to install in a [Python virtualenv](https://virtualenv.pypa.io/en/stable/)
+Install as an editable install. It's recommended to install in a [Python virtualenv](https://virtualenv.pypa.io/en/stable/)
 
     cd evolve-sdk-python
     pip install -e .[test]
