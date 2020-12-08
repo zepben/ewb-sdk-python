@@ -40,6 +40,7 @@ jobs:
         uses: zepben/licence-check-action@main
         with:
           LC_URL: ${{ secrets.LC_URL }}
+          PATH: src
 
   deploy:
     runs-on: ubuntu-latest
