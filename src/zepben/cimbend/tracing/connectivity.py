@@ -8,13 +8,13 @@ from __future__ import annotations
 
 from dataclassy import dataclass
 from operator import attrgetter
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 from zepben.cimbend.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.cimbend.cim.iec61970.base.core.terminal import Terminal
 from zepben.cimbend.model.phases import NominalPhasePath
 from typing import List, Optional, Tuple
 
-__all__ = ["ConnectivityResult", "get_connectivity", "terminal_compare"]
+__all__ = ["ConnectivityResult", "get_connectivity", "terminal_compare", "get_connected_equipment"]
 
 
 def terminal_compare(terminal: Terminal, other: Terminal):
@@ -52,6 +52,33 @@ def get_connectivity(terminal: Terminal, phases: Set[SinglePhaseKind] = None, ex
     return results
 
 
+Terminal.connected_terminals = get_connectivity
+
+
+def get_connected_equipment(cond_equip, exclude: Set = None):
+    """
+    Get all `ConductingEquipment` connected to this piece of equipment. An `Equipment` is connected if it has
+    a `zepben.cimbend.iec61970.base.core.terminal.Terminal` associated with a `ConnectivityNode` that this `ConductingEquipment` is also associated with.
+
+    `exclude` Equipment to exclude from return.
+    Returns A list of `ConductingEquipment` that are connected to this.
+    """
+    if exclude is None:
+        exclude = []
+    connected_equip = []
+    for terminal in cond_equip._terminals:
+        conn_node = terminal.connectivity_node
+        for term in conn_node:
+            if term.conducting_equipment in exclude:
+                continue
+            if term != terminal:  # Don't include ourselves.
+                connected_equip.append(term.conducting_equipment)
+    return connected_equip
+
+
+ConductingEquipment.connected_equipment = get_connected_equipment
+
+
 def _terminal_connectivity(terminal: Terminal, connected_terminal: Terminal, phases: Set[SinglePhaseKind]) -> ConnectivityResult:
     nominal_phase_paths = [NominalPhasePath(phase, phase) for phase in phases if phase in connected_terminal.phases.single_phases]
 
@@ -81,7 +108,7 @@ def _process_xy_phases(terminal: Terminal, connected_terminal: Terminal, phases:
                 nominal_phase_paths.append(NominalPhasePath(from_phase=terminal_phase, to_phase=phase))
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class ConnectivityResult(object):
     """
     Stores the connectivity between two terminals, including the mapping between the nominal phases.

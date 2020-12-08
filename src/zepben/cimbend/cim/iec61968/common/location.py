@@ -9,14 +9,14 @@ from __future__ import annotations
 from dataclassy import dataclass
 from typing import List, Optional, Generator, Tuple
 
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.util import require, nlen, ngen, safe_remove
 
 __all__ = ["PositionPoint", "Location", "StreetAddress", "TownDetail"]
 
 
-@dataclass(slots=True, frozen=True, meta=DataClassMetaZ)
+@dataclass(slots=True, frozen=True)
 class PositionPoint(object):
     """
     Set of spatial coordinates that determine a point, defined in WGS84 (latitudes and longitudes).
@@ -50,7 +50,7 @@ class PositionPoint(object):
         return self.y_position
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class TownDetail(object):
     """
     Town details, in the context of address.
@@ -62,7 +62,7 @@ class TownDetail(object):
     """Name of the state or province."""
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class StreetAddress(object):
     """
     General purpose street and postal address information.

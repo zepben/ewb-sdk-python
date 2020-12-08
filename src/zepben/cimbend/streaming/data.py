@@ -8,10 +8,10 @@ from typing import Optional, Dict
 
 from dataclassy import dataclass
 
-from zepben.cimbend._dataclass import DataClassMetaZ
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+
+@dataclass(slots=True)
 class NetworkHierarchy(object):
     """Container for simplified network hierarchy objects"""
     geographical_regions: Dict[str, NetworkHierarchyGeographicalRegion]
@@ -20,7 +20,7 @@ class NetworkHierarchy(object):
     feeders: Dict[str, NetworkHierarchyFeeder]
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class NetworkHierarchyIdentifiedObject(object):
     """A simplified representation of an identified object for requesting the network hierarchy."""
     mrid: str

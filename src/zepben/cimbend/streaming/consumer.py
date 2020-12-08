@@ -10,7 +10,7 @@ from typing import Iterable, Dict, Optional, Set, Tuple
 
 from dataclassy import dataclass
 
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 from zepben.cimbend.streaming.exceptions import UnsupportedOperationException
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 
@@ -19,7 +19,7 @@ from zepben.cimbend.streaming.grpc import GrpcClient, GrpcResult
 __all__ = ["CimConsumerClient", "MultiObjectResult", "extract_identified_object"]
 
 
-@dataclass(meta=DataClassMetaZ)
+@dataclass()
 class MultiObjectResult(object):
     value: Dict[str, IdentifiedObject]
     failed: Set[str]

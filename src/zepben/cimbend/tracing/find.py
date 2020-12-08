@@ -7,9 +7,9 @@
 from __future__ import annotations
 from dataclassy import dataclass
 
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 from zepben.cimbend.tracing.phase_step import PhaseStep
-from zepben.cimbend.tracing.util import normal_downstream_trace, current_downstream_trace
+from zepben.cimbend.tracing.traces import normal_downstream_trace, current_downstream_trace
 from typing import Callable, List, Optional, Dict
 from enum import Enum
 
@@ -22,7 +22,7 @@ class Status(Enum):
     MISMATCHED_FROM_TO = 3
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class Result(object):
     status: Status = Status.SUCCESS
     equipment: Optional[Dict[str, ConductingEquipment]] = {}

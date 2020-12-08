@@ -11,7 +11,7 @@ from dataclassy import dataclass
 from typing import Dict, Generator, Callable, Optional, List, Set, Union, Iterable, Sized
 from itertools import chain
 
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 from zepben.cimbend.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
 
 __all__ = ["BaseService"]
@@ -19,7 +19,7 @@ __all__ = ["BaseService"]
 _GET_DEFAULT = (1,)
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class BaseService(object, metaclass=ABCMeta):
     name: str
     _objectsByType: Dict[type, Dict[str, IdentifiedObject]] = OrderedDict()
@@ -136,6 +136,7 @@ class BaseService(object, metaclass=ABCMeta):
         """
         if not identified_object.mrid:
             return False
+        # TODO: Only allow supported types
 
         objs = self._objectsByType.get(identified_object.__class__, dict())
         if identified_object.mrid in objs:

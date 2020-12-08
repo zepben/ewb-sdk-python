@@ -10,12 +10,12 @@ from typing import Optional, TypeVar, Generic, Callable, List, Union
 
 from dataclassy import dataclass
 
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 
 T = TypeVar("T")
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class GrpcResult(Generic[T]):
     result: Optional[Union[T, Exception]]
     was_error_handled: bool = False
@@ -65,7 +65,7 @@ class GrpcResult(Generic[T]):
         return self
 
 
-@dataclass(init=False, slots=True, meta=DataClassMetaZ)
+@dataclass(init=False, slots=True)
 class GrpcClient(object):
     error_handlers: List[Callable[[Exception], bool]] = []
 

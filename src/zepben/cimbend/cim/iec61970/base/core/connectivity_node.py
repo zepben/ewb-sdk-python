@@ -9,14 +9,14 @@ from __future__ import annotations
 from typing import Generator, List
 
 from dataclassy import dataclass
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.util import get_by_mrid
 
 __all__ = ["ConnectivityNode"]
 
 
-@dataclass(slots=False, meta=DataClassMetaZ)
+@dataclass(slots=False)
 class ConnectivityNode(IdentifiedObject):
     """
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.

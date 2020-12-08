@@ -11,10 +11,10 @@ from dataclassy import dataclass
 
 __all__ = ["MeasurementValue", "AccumulatorValue", "AnalogValue", "DiscreteValue"]
 
-from zepben.cimbend._dataclass import DataClassMetaZ
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+
+@dataclass(slots=True)
 class MeasurementValue(object):
     """
     The current state for a measurement. A state value is an instance of a measurement from a specific source.

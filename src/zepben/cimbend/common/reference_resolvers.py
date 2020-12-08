@@ -7,7 +7,7 @@
 from dataclassy import dataclass
 from typing import Callable, Optional
 
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 from zepben.cimbend.cim.iec61968.common.organisation import Organisation
 from zepben.cimbend.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.cimbend.cim.iec61968.assetinfo.wire_info import WireInfo
@@ -61,7 +61,7 @@ __all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_t
 from zepben.cimbend.cim.iec61970.infiec61970.feeder import Circuit, Loop
 
 
-@dataclass(frozen=True, eq=False, slots=True, meta=DataClassMetaZ)
+@dataclass(frozen=True, eq=False, slots=True)
 class ReferenceResolver(object):
     from_class: type
     to_class: type
@@ -74,7 +74,7 @@ class ReferenceResolver(object):
         return self.from_class is not other.from_class or self.to_class is not other.to_class or self.resolve is not other.resolve
 
 
-@dataclass(frozen=True, eq=False, slots=True, meta=DataClassMetaZ)
+@dataclass(frozen=True, eq=False, slots=True)
 class BoundReferenceResolver(object):
     from_obj: IdentifiedObject
     resolver: ReferenceResolver
@@ -87,7 +87,7 @@ class BoundReferenceResolver(object):
         return self.from_obj is not other.from_obj or self.resolver is not other.resolver
 
 
-@dataclass(frozen=True, eq=False, slots=True, meta=DataClassMetaZ)
+@dataclass(frozen=True, eq=False, slots=True)
 class UnresolvedReference(object):
     from_ref: IdentifiedObject
     to_mrid: str

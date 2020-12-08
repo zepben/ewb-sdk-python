@@ -12,10 +12,10 @@ from typing import Set
 
 from dataclassy import dataclass
 
-from zepben.cimbend._dataclass import DataClassMetaZ
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+
+@dataclass(slots=True)
 class BaseTracker(object):
     """
     An interface used by `zepben.cimbend.tracing.Traversal`'s to 'track' items that have been visited.

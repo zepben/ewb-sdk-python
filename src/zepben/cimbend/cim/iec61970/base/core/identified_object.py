@@ -12,7 +12,7 @@ from dataclassy import dataclass
 from typing import Union, Callable, Any
 from uuid import UUID
 
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 from zepben.cimbend.util import require, CopyableUUID
 
 __all__ = ["IdentifiedObject"]
@@ -20,7 +20,7 @@ __all__ = ["IdentifiedObject"]
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class IdentifiedObject(object, metaclass=ABCMeta):
     """
     Root class to provide common identification for all classes needing identification and naming attributes.

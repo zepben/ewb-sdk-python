@@ -10,7 +10,4 @@ from zepben.cimbend.tracing.util import *
 from zepben.cimbend.tracing.phasing import *
 from zepben.cimbend.tracing.connectivity import *
 from zepben.cimbend.tracing.phase_step import *
-
-
-
-
+from zepben.cimbend.tracing.traces import *

@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclassy import dataclass
 
-from zepben.cimbend._dataclass import DataClassMetaZ
+
 from zepben.cimbend.exceptions import PhaseException
 from zepben.cimbend.model.phasedirection import PhaseDirection
 from zepben.cimbend.cim.iec61970.base.wires import SinglePhaseKind, SINGLE_PHASE_KIND_VALUES
@@ -72,7 +72,7 @@ def _shifted_value(pd: PhaseDirection, spk: SinglePhaseKind, nom: SinglePhaseKin
     return pd.value << pos_shift(spk, nom)
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class NominalPhasePath(object):
     """
     Defines how a nominal phase is wired through a connectivity node between two terminals
@@ -85,7 +85,7 @@ class NominalPhasePath(object):
     """The nominal phase where the path goes to."""
 
 
-@dataclass(slots=True, meta=DataClassMetaZ)
+@dataclass(slots=True)
 class TracedPhases(object):
     """
     Class that holds the traced phase statuses for the current and normal state of the network.

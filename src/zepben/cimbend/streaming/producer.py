@@ -189,3 +189,15 @@ class SyncCustomerProducerClient(CimProducerClient):
 
     def send(self, service: CustomerService = None):
         return get_event_loop().run_until_complete(super().send(service))
+
+
+class SyncNetworkProducerClient(CimProducerClient):
+
+    def send(self, service: NetworkService = None):
+        return get_event_loop().run_until_complete(super().send(service))
+
+
+class SyncDiagramProducerClient(CimProducerClient):
+
+    def send(self, service: DiagramService = None):
+        return get_event_loop().run_until_complete(super().send(service))
