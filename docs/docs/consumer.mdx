@@ -25,12 +25,16 @@ run any analytics you may wish to perform across the whole model.
 
 ```python
 from zepben.cimbend.streaming import connect, connect_async
+
 # Synchronous
-with connect(host="localhost", rpc_port=50051) as conn:
-    # ... do stuff with conn ...
+with connect(host="localhost", rpc_port=50051) as channel:
+    client = SyncNetworkConsumerClient(channel)
+    result = client.get_feeder("xxx")
+
 # Asyncio
-with connect_async(host="localhost", rpc_port=50051) as conn:
-    # ... do stuff with conn ...
+async with connect_async(host="localhost", rpc_port=50051) as channel:
+    client = NetworkConsumerClient(channel)
+    result = await client.get_feeder("xxx")
 ```
 
 ## Network Hierarchy
@@ -40,29 +44,27 @@ to easily identify and request smaller chunks of the network so you can focus on
 of how to request the network hierarchy and print it out as a tree to the console.
 
 ```python
+from zepben.cimbend.streaming import NetworkConsumerClient
 
-fun printNetworkHierarchy(client: NetworkConsumerClient) {
-    val hierarchy: NetworkHierarchy = client.getNetworkHierarchy().result ?: return
-    hierarchy.geographicalRegions.values.forEach { region ->
-        println("- ${region.name} [${region.mRID}]")
-        region.subGeographicalRegions.values.forEach { subRegion ->
-            println("  |- ${subRegion.name} [${subRegion.mRID}]")
-            subRegion.substations.values.forEach { substation ->
-                println("    |- ${substation.name} [${substation.mRID}]")
-                substation.feeders.values.forEach { feeder ->
-                    println("      |- ${feeder.name} [${feeder.mRID}]")
-                }
-            }
-        }
-    }
-}
+def print_network_hierarchy(client: NetworkConsumerClient):
+    hierarchy = client.get_network_hierarchy().result
+    if not hierarchy:
+        return
+    for region in hierarchy.geographical_regions:
+        print(f"- {region.name} [{region.mrid}]")
+        for sub_region in region.sub_geographical_regions:
+            print(f"  |- {sub_region.name} [{sub_region.mrid}]")
+            for substation in sub_region.substations:
+                print(f"    |- {sub_region.name} [{sub_region.mrid}]")
+                for feeder in substation.feeders:
+                    print(f"      |- {feeder.name} [{feeder.mrid}]")
 ```
 
 Each item from the hierarchy result contains an identified object MRID and it's name. This simplified data structure
 enables you to do things like easily build a suitable UI component allowing a user to select a portion of the network
 they wish to use, without needing to pull back large amount of full object data.
 
-## Requesting Identififed Objects
+## Requesting Identified Objects
 
 Identified objects can be requested to build a model client side. When identified objects are loaded, any referenced
 objects that have not been previously requested need to be requested explicitly. The exception to this is terminals
@@ -72,13 +74,14 @@ To find the MRIDs of any references that need to be requested you can use the [d
 functions on the service provided when requesting identified objects.
 
 ```python
-fun getWithBaseVoltage(service: NetworkService, client: NetworkConsumerClient, mrid: String) {
-    val equipment = client.getIdentifiedObject(service, mrid).result
-    if (equipment == null || equipment !is ConductingEquipment) {
-        return
-    }
+from zepben.cimbend import NetworkService, NetworkConsumerClient, resolver
 
-    service.getUnresolvedReferenceMrids(Resolvers.baseVoltage(equipment)).firstOrNull()
-        ?.let { client.getIdentifiedObject(service, it) }
-}
+async def get_with_base_voltage(service: NetworkService, client: NetworkConsumerClient, mrid: String):
+    equipment = await client.get_identified_object(service, mrid).result
+    if not equipment:
+        return
+
+    mrids = service.get_unresolved_reference_mrids(resolver.ce_base_voltage(equipment))
+    if mrids:
+        await client.get_identified_object(service, mrids[0])
 ```

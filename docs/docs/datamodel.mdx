@@ -15,16 +15,16 @@ build your own solutions from scratch that will be compatible with other things 
 The Evolve platform is composed around a domain model based on the 'Common Information Model' (CIM). The CIM is a very
 large standard that covers a huge amount of use cases. To make things more digestible, Evolve publishes its own CIM
 profile. CIM profiles are subsets of the whole CIM standard that dictates which parts of the model are in use. Evolve
-publishes its model at <https://zepben.bitbucket.io/cim/evolve/>.
+publishes its model at <https:#zepben.bitbucket.io/cim/evolve/>.
 
 If the Evolve profile doesn't contain a part of CIM that you require for your use case, you can request or propose a
-change to the model following the instructions at: <https://github.com/zepben/evolve-data-model>
+change to the model following the instructions at: <https:#github.com/zepben/evolve-data-model>
 
 ## Getting Started With The Model
 
 :::tip
 All things that have an ID in the CIM model inherit from
-[IdentifiedObject](https://zepben.bitbucket.io/cim/cim100/iec61970/base/core/identifiedobject/). This provides common
+[IdentifiedObject](https:#zepben.bitbucket.io/cim/cim100/iec61970/base/core/identifiedobject/). This provides common
 attributes such as MRID (master resource identifier), name, description, etc.
 :::
 
@@ -32,30 +32,32 @@ Let's get started with the data model by building the following contrived electr
 
 ![](./assets/contrived-circuit.png)
 
-Here we simply have an AC energy source ([EnergySource](https://zepben.bitbucket.io/cim/evolve/iec61970/base/wires/energysource/))
-connected to a conductor ([ACLineSegment](https://zepben.bitbucket.io/cim/evolve/iec61970/base/wires/aclinesegment/))
-connected to a circuit breaker ([Breaker](https://zepben.bitbucket.io/cim/evolve/iec61970/base/wires/breaker/)).
+Here we simply have an AC energy source ([EnergySource](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/wires/energysource/))
+connected to a conductor ([ACLineSegment](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/wires/aclinesegment/))
+connected to a circuit breaker ([Breaker](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/wires/breaker/)).
 In CIM all these things are a subtype of 
-[ConductingEquipment](https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/conductingequipment/).
+[ConductingEquipment](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/conductingequipment/).
 
 Let's see how we create them:
 
 ```python
-// Create the energy source. Providing no ID will generate a UUID.
-val source = EnergySource()
+from zepben.cimbend import EnergySource, AcLineSegment, Breaker
 
-// Create the conductor providing a specific ID.
-val acLine = AcLineSegment("aclineseg1")
+# Create the energy source. Providing no ID will generate a UUID.
+source = EnergySource()
 
-// Create a circuit breaker.
-// A UUID will be generated but we can give it a descriptive name.
-val breaker = Breaker().apply { name = "my circuit breaker" }
+# Create the conductor providing a specific ID.
+acls = AcLineSegment("aclineseg1")
+
+# Create a circuit breaker.
+# A UUID will be generated but we can give it a descriptive name.
+breaker = Breaker(name="my circuit breaker")
 ```
 
 ## Creating Connectivity
 
-In CIM, all conducting equipment can have any number of [Terminals](https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/terminal/), 
-and terminals connect to other terminals using a [ConnectivityNode](https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/connectivitynode/). 
+In CIM, all conducting equipment can have any number of [Terminals](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/terminal/),
+and terminals connect to other terminals using a [ConnectivityNode](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/connectivitynode/).
 If we redraw the above diagram with all the required items from CIM it would look like:
 
 ![](./assets/contrived-circuit-cim.png)
@@ -65,48 +67,50 @@ Where the back dots represent the terminals and the black diamonds represent con
 Now, lets redo the above code sample this time also creating connectivity between the objects.
 
 ```python
-// Create the energy source
-val source = EnergySource()
+from zepben.cimbend import EnergySource, AcLineSegment, Terminal, Breaker, ConnectivityNode
 
-// Create the terminal for the energy source and associate it with the source
-val sourceT1 = Terminal().apply { conductingEquipment = source }
-source.addTerminal(sourceT1)
+# Create the energy source
+source = EnergySource()
 
-// Create the conductor
-val acLine = AcLineSegment()
+# Create the terminal for the energy source and associate it with the source
+source_t1 = Terminal(conducting_equipment=source)
+source.add_terminal(source_t1)
 
-// Create a terminal for each end of the conductor
-// and associate them with the conductor
-val acLineT1 = Terminal().apply { conductingEquipment = acLine }
-val acLineT2 = Terminal().apply { conductingEquipment = acLine }
-acLine.addTerminal(acLineT1)
-acLine.addTerminal(acLineT2)
+# Create the conductor
+acls = AcLineSegment()
 
-// Create a circuit breaker
-val breaker = Breaker()
+# Create a terminal for each end of the conductor
+# and associate them with the conductor
+acls_t1 = Terminal(conducting_equipment=acls)
+acls_t2 = Terminal(conducting_equipment=acls)
+acls.add_terminal(acls_t1)
+acls.add_terminal(acls_t2)
 
-// Create a terminal for the breaker
-val breakerT1 = Terminal().apply { conductingEquipment = breaker }
+# Create a circuit breaker
+breaker = Breaker()
 
-// Now create a connectivity node to connect the source terminal
-// to the conductor's first terminal
-val cn1 = ConnectivityNode()
+# Create a terminal for the breaker
+breaker_t1 = Terminal(conducting_equipment=breaker)
 
-// Now associate the connectivity nodes to the terminals
-cn1.addTerminal(sourceT1)
-sourceT1.connectivityNode = cn1
-cn1.addTerminal(acLineT1)
-acLineT1.connectivityNode = cn1
+# Now create a connectivity node to connect the source terminal
+# to the conductor's first terminal
+cn1 = ConnectivityNode()
 
-// Now create a connectivity node to connect the source terminal
-// to the conductor's first terminal
-val cn2 = ConnectivityNode()
+# Now associate the connectivity nodes to the terminals
+cn1.add_terminal(source_t1)
+source_t1.connectivity_node = cn1
+cn1.add_terminal(acls_t1)
+acls_t1.connectivity_node = cn1
 
-// Now associate the connectivity nodes to the terminals
-cn2.addTerminal(acLineT2)
-acLineT2.connectivityNode = cn2
-cn2.addTerminal(breakerT1)
-breakerT1.connectivityNode = cn2
+# Now create a connectivity node to connect the source terminal
+# to the conductor's first terminal
+cn2 = ConnectivityNode()
+
+# Now associate the connectivity nodes to the terminals
+cn2.add_terminal(acls_t2)
+acls_t2.connectivity_node = cn2
+cn2.add_terminal(breaker_t1)
+breaker_t1.connectivity_node = cn2
 ```
 
 ## Normal and Current states
@@ -118,18 +122,20 @@ to tell if the network is currently in the normal state or not. This can be impo
 analytics you may be running when using the model.
 
 ```python
-// Example of setting normal and current switch states
-val switch = Breaker()
-switch.setNormallyOpen(true)
-switch.setOpen(false)
+from zepben.cimbend import Breaker
+
+# Example of setting normal and current switch states
+switch = Breaker()
+switch.set_normally_open(True)
+switch.set_open(False)
 ```
 
 ## Phases 
 
-Phases in CIM are set on a [Terminal](https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/terminal/). The `phases`
+Phases in CIM are set on a [Terminal](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/terminal/). The `phases`
 property on the terminal should be considered the terminal's 'nominal' phases. The vast mojority of the time, this will
 be the actual active phases at that terminal. However, due to the dynamic nature of the network, it's possible that when
-tracing connecitvity that the active phase at the terminal is different. The phase can be tracked using the `tracedPhases`
+tracing connecitvity that the active phase at the terminal is different. The phase can be tracked using the `traced_phases`
 property on the terminal. 
 
 :::tip
@@ -137,8 +143,9 @@ There are a number of helpful functions for tracing phases based on connectivity
 :::
 
 ```python
-// Example of setting nominal phases on a terminal
-Terminal terminal = Terminal().apply { phases = PhaseCode.ABC };
+from zepben.cimbend import Terminal, PhaseCode
+# Example of setting nominal phases on a terminal
+Terminal terminal = Terminal(phases=PhaseCode.ABC)
 ```
 
 ## Grouping equipment
@@ -146,20 +153,20 @@ Terminal terminal = Terminal().apply { phases = PhaseCode.ABC };
 In electricity distribution networks, a model is typically made up of groups of equipment that represent different
 sections of the network. For example things like: feeder, zone (substation), transmission line etc. The terminology 
 differs within the industry, however CIM provides types of 
-[EquipmentContainer](https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/equipmentcontainer/) to allow you to
+[EquipmentContainer](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/equipmentcontainer/) to allow you to
 group equipment into the above types of categories. Refer to the Evolve profile CIM profile for all supported equipment 
 container types in the model, however the most common ones are:
 
-- [Line](https://zepben.bitbucket.io/cim/evolve/iec61970/base/wires/line/)
-- [Substation](https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/substation/)
-- [Feeder](https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/feeder/)
+- [Line](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/wires/line/)
+- [Substation](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/substation/)
+- [Feeder](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/feeder/)
 
 ### Network Hierarchy
 
 When creating a `Substation` you will see that it can belong to a 
-[SubGeographicalRegion](https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/subgeographicalregion/) and a 
+[SubGeographicalRegion](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/subgeographicalregion/) and a
 `SubGeogrpahicalRegion` can belong to a 
-[GeographicalRegion](https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/geographicalregion/). 
+[GeographicalRegion](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/geographicalregion/).
 
 When using various parts of the Evolve platform, it will refer to the concept of a network hierarchy. This is the 
 mechanism used to chunk up the network and provides an overview of what makes up the model. The network hierarchy looks
@@ -177,7 +184,7 @@ populated as there are assumptions built around the network being structured in 
 
 A feeder is generally a chain of equipment from a nominated starting point in a `Substation` to all open points when 
 tracing along the equipment. The starting point can be defined by setting a 
-[Feeder's]((https://zepben.bitbucket.io/cim/evolve/iec61970/base/core/feeder/)) `normalHeadTerminal`. This means if you
+[Feeder's]((https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/feeder/)) `normal_head_terminal`. This means if you
 have a correctly connected model, setting the feeder equipment container on any equipment can be calculated dynamically. 
 This has the benefit of making sure that an equipment's feeder is always correct (because it has been set by checking
 connectivity). A function to do this is provided as part of the [tracing](sdk/tracing.mdx#useful-traces) package. 
@@ -188,25 +195,23 @@ The following example shows how you can build a network hierarchy and assign equ
 containers.
 
 ```python
-val region = GeographicalRegion()
-val subRegion = SubGeographicalRegion().apply {
-    geographicalRegion = region
-    region.addSubGeographicalRegion(this)
-}
+from zepben.cimbend import GeographicalRegion, SubGeographicalRegion, PowerTransformer, Feeder, Breaker
 
-val substation = Substation().apply { subGeographicalRegion = subRegion }
+region = GeographicalRegion()
+sub_region = SubGeographicalRegion(geographical_region=region)
+region.add_sub_geographical_region(sub_region)
 
-val subTx = PowerTransformer().apply {
-    addContainer(substation)
-    substation.addEquipment(this)
-}
+substation = Substation(sub_geographical_region=sub_region)
 
-val feeder = Feeder().apply { normalEnergizingSubstation = substation }
+sub_tx = PowerTransformer()
+sub_tx.add_container(substation)
+substation.add_equipment(sub_tx)
 
-val feederCb = Breaker().apply {
-    addContainer(feeder)
-    feeder.addEquipment(this)
-}
+feeder = Feeder(normal_energizing_substation=substation)
+
+feeder_cb = Breaker()
+feeder_cb.add_container(feeder)
+feeder.add_equipment(this)
 ```
 
 ---
