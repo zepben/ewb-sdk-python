@@ -82,6 +82,8 @@ class NetworkService(BaseService):
                                                                                                               
         The `mrid` should be either a `zepben.cimbend.iec61970.base.core.power_system_resource.PowerSystemResource` or a
         `zepben.cimbend.iec61970.base.core.terminal.Terminal` MRID that is assigned to the corresponding fields on the measurements.
+        Returns all `Measurement`s indexed by `mrid` in this service.
+        Raises `KeyError` if `mrid` isn't present in this service.
         """
         return [meas for meas in self._measurements[mrid] if isinstance(meas, t)]
 

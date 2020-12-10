@@ -11,6 +11,7 @@ import logging
 from dataclassy import dataclass
 from enum import Enum
 
+
 from zepben.cimbend.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.cimbend.cim.iec61970.base.wires.switch import Breaker
 from zepben.cimbend.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -19,7 +20,7 @@ from zepben.cimbend.exceptions import PhaseException
 from zepben.cimbend.tracing.connectivity import get_connectivity
 from zepben.cimbend.exceptions import TracingException
 from zepben.cimbend.tracing.phase_status import normal_phases, current_phases
-from zepben.cimbend.tracing.util import queue_next_terminal
+from zepben.cimbend.tracing.traces import queue_next_terminal
 from zepben.cimbend.traversals.queue import PriorityQueue
 from zepben.cimbend.traversals.tracing import Traversal
 from zepben.cimbend.tracing.phase_status import PhaseStatus

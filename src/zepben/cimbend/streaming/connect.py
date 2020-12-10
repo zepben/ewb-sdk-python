@@ -1,6 +1,3 @@
-
-
-
 #  Copyright 2020 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
@@ -14,8 +11,6 @@ import json
 from jose import jwt
 from datetime import datetime
 from zepben.cimbend.streaming.exceptions import AuthException
-from zepben.cimbend.streaming.api import WorkbenchConnection
-from zepben.cimbend.streaming.sync_api import SyncWorkbenchConnection
 
 __all__ = ["connect", "connect_async"]
 _AUTH_HEADER_KEY = 'authorization'
@@ -113,9 +108,7 @@ def connect(host: str = "localhost",
     `ca` CA trust for the server.
     Returns A gRPC channel
     """
-    with _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca) as channel:
-        conn = SyncWorkbenchConnection(channel)
-        yield conn
+    yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca)
 
 
 @contextlib.asynccontextmanager
@@ -142,6 +135,4 @@ async def connect_async(host: str = "localhost",
     `ca` CA trust for the server.
     Returns A gRPC channel
     """
-    with _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca) as channel:
-        conn = WorkbenchConnection(channel)
-        yield conn
+    yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca)

@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclassy import dataclass
 
+
 from zepben.cimbend.exceptions import PhaseException
 from zepben.cimbend.model.phasedirection import PhaseDirection
 from zepben.cimbend.cim.iec61970.base.wires import SinglePhaseKind, SINGLE_PHASE_KIND_VALUES

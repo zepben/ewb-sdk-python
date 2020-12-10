@@ -8,8 +8,10 @@ from __future__ import annotations
 from abc import ABCMeta
 from collections import OrderedDict
 from dataclassy import dataclass
-from typing import Dict, Generator, Callable, Optional, List, Set
+from typing import Dict, Generator, Callable, Optional, List, Set, Union, Iterable, Sized
 from itertools import chain
+
+
 from zepben.cimbend.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
 
 __all__ = ["BaseService"]
@@ -68,9 +70,12 @@ class BaseService(object, metaclass=ABCMeta):
             yield from_mrid, unresolved_refs
 
     def unresolved_mrids(self):
-        refs = {r.to_mrid for reflist in self._unresolved_references.values() for r in reflist}
-        for ref in refs:
-            yield ref
+        seen = set()
+        for refs in self._unresolved_references.copy().values():
+            for ref in refs:
+                if ref.to_mrid not in seen:
+                    seen.add(ref.to_mrid)
+                    yield ref.to_mrid
 
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
             generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
@@ -131,6 +136,7 @@ class BaseService(object, metaclass=ABCMeta):
         """
         if not identified_object.mrid:
             return False
+        # TODO: Only allow supported types
 
         objs = self._objectsByType.get(identified_object.__class__, dict())
         if identified_object.mrid in objs:
@@ -191,14 +197,25 @@ class BaseService(object, metaclass=ABCMeta):
             self._unresolved_references[to_mrid] = urefs
             return False
 
-    def get_unresolved_reference_mrids(self, bound_resolver: BoundReferenceResolver) -> Set[str]:
+    def get_unresolved_reference_mrids(self, bound_resolvers: Union[BoundReferenceResolver, Sized[BoundReferenceResolver]]) -> Generator[str, None, None]:
         """
         Gets a set of MRIDs that are referenced by the from_obj held by `bound_resolver` that are unresolved.
         `bound_resolver` The `BoundReferenceResolver` to retrieve unresolved references for.
         Returns Set of mRIDs that have unresolved references.
         """
-        return set(chain(*[[ref.to_mrid for ref in refs if ref.from_ref == bound_resolver.from_obj and ref.resolver == bound_resolver.resolver] for
-                           refs in self._unresolved_references.values()]))
+        seen = set()
+        try:
+            len(bound_resolvers)
+            resolvers = bound_resolvers
+        except TypeError:
+            resolvers = [bound_resolvers]
+
+        for refs in self._unresolved_references.values():
+            for ref in refs:
+                for resolver in resolvers:
+                    if ref.from_ref is resolver.from_obj and ref.to_mrid not in seen and ref.resolver == resolver.resolver:
+                        seen.add(ref.to_mrid)
+                        yield ref.to_mrid
 
     def remove(self, identified_object: IdentifiedObject) -> bool:
         """

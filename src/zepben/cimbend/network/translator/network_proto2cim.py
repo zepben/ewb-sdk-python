@@ -469,7 +469,7 @@ PBMeasurement.to_cim = measurement_to_cim
 def remotecontrol_to_cim(pb: PBRemoteControl, network_service: NetworkService) -> Optional[RemoteControl]:
     cim = RemoteControl(mrid=pb.mrid())
     network_service.resolve_or_defer_reference(resolver.control(cim), pb.controlMRID)
-    remotepoint_to_cim(pb.rp, cim)
+    remotepoint_to_cim(pb.rp, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
@@ -480,7 +480,7 @@ def remotepoint_to_cim(pb: PBRemotePoint, cim: RemotePoint, service: NetworkServ
 def remotesource_to_cim(pb: PBRemoteSource, network_service: NetworkService) -> Optional[RemoteSource]:
     cim = RemoteSource(mrid=pb.mrid())
     network_service.resolve_or_defer_reference(resolver.measurement(cim), pb.measurementMRID)
-    remotepoint_to_cim(pb.rp, cim)
+    remotepoint_to_cim(pb.rp, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
@@ -652,11 +652,11 @@ def switch_to_cim(pb: PBSwitch, cim: Switch, network_service: NetworkService):
 
 def tapchanger_to_cim(pb: PBTapChanger, cim: TapChanger, network_service: NetworkService):
     cim.high_step = pb.highStep
-    cim.low_step = pb.lowStep
     cim.step = pb.step
     cim.neutral_step = pb.neutralStep
-    cim.neutral_u = pb.neutralU
     cim.normal_step = pb.normalStep
+    cim.low_step = pb.lowStep
+    cim.neutral_u = pb.neutralU
     cim.control_enabled = pb.controlEnabled
     powersystemresource_to_cim(pb.psr, cim, network_service)
 

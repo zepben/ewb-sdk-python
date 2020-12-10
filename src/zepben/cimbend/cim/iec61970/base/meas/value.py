@@ -12,6 +12,8 @@ from dataclassy import dataclass
 __all__ = ["MeasurementValue", "AccumulatorValue", "AnalogValue", "DiscreteValue"]
 
 
+
+
 @dataclass(slots=True)
 class MeasurementValue(object):
     """

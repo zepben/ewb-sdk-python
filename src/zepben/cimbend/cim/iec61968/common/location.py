@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclassy import dataclass
 from typing import List, Optional, Generator, Tuple
 
+
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.util import require, nlen, ngen, safe_remove
 
@@ -44,17 +45,9 @@ class PositionPoint(object):
     def longitude(self):
         return self.x_position
 
-    @longitude.setter
-    def longitude(self, lon):
-        self.x_position = lon
-
     @property
     def latitude(self):
         return self.y_position
-
-    @latitude.setter
-    def latitude(self, lat):
-        self.y_position = lat
 
 
 @dataclass(slots=True)

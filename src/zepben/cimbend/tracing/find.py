@@ -6,8 +6,10 @@
 
 from __future__ import annotations
 from dataclassy import dataclass
+
+
 from zepben.cimbend.tracing.phase_step import PhaseStep
-from zepben.cimbend.tracing.util import normal_downstream_trace, current_downstream_trace
+from zepben.cimbend.tracing.traces import normal_downstream_trace, current_downstream_trace
 from typing import Callable, List, Optional, Dict
 from enum import Enum
 

@@ -10,6 +10,7 @@ from dataclassy import dataclass
 
 from typing import List, Optional, Dict, Generator, Tuple
 
+
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.cim.iec61970.base.diagramlayout.diagram_object_style import DiagramObjectStyle
 from zepben.cimbend.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle

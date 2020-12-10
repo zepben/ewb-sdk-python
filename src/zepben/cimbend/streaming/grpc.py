@@ -10,6 +10,8 @@ from typing import Optional, TypeVar, Generic, Callable, List, Union
 
 from dataclassy import dataclass
 
+
+
 T = TypeVar("T")
 
 
@@ -33,32 +35,37 @@ class GrpcResult(Generic[T]):
         return self
 
     def on_error(self, handler: Callable[[Exception, bool], GrpcResult[T]]) -> GrpcResult[T]:
+        """Calls `handler` with the `thrown` exception and `self.was_error_handled` if `self.was_failure`."""
         if self.was_failure and self.was_error_handled:
             return handler(self.result, self.was_error_handled)
         return self
 
     def on_handled_error(self, handler: Callable[[Exception], None]) -> GrpcResult[T]:
+        """Calls `handler` with the `thrown` exception if `self.was_failure` only if `self.was_error_handled`."""
         if self.was_failure and self.was_error_handled:
             handler(self.result)
         return self
 
     def on_unhandled_error(self, handler: Callable[[Exception], None]) -> GrpcResult[T]:
+        """Calls `handler` with the `thrown` exception if `self.was_failure` only if not `self.was_error_handled`."""
         if self.was_failure and not self.was_error_handled:
             handler(self.result)
         return self
 
     def throw_on_error(self) -> GrpcResult[T]:
+        """Throws `self.result` if `self.was_failure`"""
         if self.was_failure:
             raise self.result
         return self
 
     def throw_on_unhandled_error(self) -> GrpcResult[T]:
+        """Throws `self.result` only if `self.was_failure` and not `self.was_error_handled`"""
         if self.was_failure and not self.was_error_handled:
             raise self.result
         return self
 
 
-@dataclass(slots=True)
+@dataclass(init=False, slots=True)
 class GrpcClient(object):
     error_handlers: List[Callable[[Exception], bool]] = []
 

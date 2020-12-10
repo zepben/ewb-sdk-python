@@ -154,22 +154,3 @@ class ConductingEquipment(Equipment):
                 lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.")
         return False
 
-    def get_connected_equipment(self, exclude: Set = None):
-        """
-        Get all `ConductingEquipment` connected to this piece of equipment. An `Equipment` is connected if it has
-        a `zepben.cimbend.iec61970.base.core.terminal.Terminal` associated with a `ConnectivityNode` that this `ConductingEquipment` is also associated with.
-
-        `exclude` Equipment to exclude from return.
-        Returns A list of `ConductingEquipment` that are connected to this.
-        """
-        if exclude is None:
-            exclude = []
-        connected_equip = []
-        for terminal in self._terminals:
-            conn_node = terminal.connectivity_node
-            for term in conn_node:
-                if term.conducting_equipment in exclude:
-                    continue
-                if term != terminal:  # Don't include ourselves.
-                    connected_equip.append(term.conducting_equipment)
-        return connected_equip

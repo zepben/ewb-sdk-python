@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Generator, List
 
 from dataclassy import dataclass
+
 from zepben.cimbend.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.cimbend.util import get_by_mrid
 

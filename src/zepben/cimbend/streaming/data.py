@@ -9,6 +9,8 @@ from typing import Optional, Dict
 from dataclassy import dataclass
 
 
+
+
 @dataclass(slots=True)
 class NetworkHierarchy(object):
     """Container for simplified network hierarchy objects"""

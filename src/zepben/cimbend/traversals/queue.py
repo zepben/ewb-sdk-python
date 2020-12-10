@@ -9,8 +9,16 @@ from abc import abstractmethod, ABC
 from typing import TypeVar, Generic
 from heapq import heappush, heappop
 
-__all__ = ["Queue", "FifoQueue", "LifoQueue", "PriorityQueue"]
+__all__ = ["Queue", "FifoQueue", "LifoQueue", "PriorityQueue", "depth_first", "breadth_first"]
 T = TypeVar('T')
+
+
+def depth_first():
+    return LifoQueue()
+
+
+def breadth_first():
+    return FifoQueue()
 
 
 class Queue(Generic[T], ABC):

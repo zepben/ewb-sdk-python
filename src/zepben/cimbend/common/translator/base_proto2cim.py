@@ -7,6 +7,8 @@ from abc import ABCMeta
 from typing import Optional
 
 from dataclassy import dataclass
+
+
 from zepben.cimbend.common.base_service import BaseService
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument

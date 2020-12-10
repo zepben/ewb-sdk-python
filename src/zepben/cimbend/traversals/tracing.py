@@ -9,6 +9,7 @@ from abc import abstractmethod
 
 from dataclassy import dataclass
 
+
 from zepben.cimbend.traversals.queue import FifoQueue, LifoQueue, PriorityQueue, Queue
 from zepben.cimbend.exceptions import TracingException
 from zepben.cimbend.traversals.tracker import Tracker
@@ -55,10 +56,10 @@ class BaseTraversal(Generic[T]):
     start_item: T = None
     """The starting item for this `BaseTraversal`"""
 
-    _stop_conditions: List[Callable[[T], Awaitable[bool]]] = []
+    stop_conditions: List[Callable[[T], Awaitable[bool]]] = []
     """A list of callback functions, to be called in order with the current item."""
 
-    _step_actions: List[Callable[[T, bool], Awaitable[None]]] = []
+    step_actions: List[Callable[[T, bool], Awaitable[None]]] = []
     """A list of callback functions, to be called on each item."""
 
     _has_run: bool = False
@@ -66,28 +67,6 @@ class BaseTraversal(Generic[T]):
 
     _running: bool = False
     """Whether this traversal is currently running"""
-
-    def __init__(self, stop_conditions: List[Callable[[T], Awaitable[bool]]] = None, step_actions: List[Callable[[T, bool], Awaitable[None]]] = None):
-        """
-        `stop_conditions` A list of callback functions, to be called in order with the current item.
-        `step_actions` A list of callback functions, to be called on each item.
-        """
-        if stop_conditions:
-            for cond in stop_conditions:
-                self.add_stop_condition(cond)
-        if step_actions:
-            for action in step_actions:
-                self.add_step_action(action)
-
-    @property
-    def stop_conditions(self):
-        for cond in self._stop_conditions:
-            yield cond
-
-    @property
-    def step_actions(self):
-        for action in self._step_actions:
-            yield action
 
     async def matches_stop_condition(self, item: T):
         """
@@ -113,7 +92,7 @@ class BaseTraversal(Generic[T]):
         `cond` A function that if returns true will cause the traversal to stop traversing the branch.
         Returns this traversal instance.
         """
-        self._stop_conditions.append(cond)
+        self.stop_conditions.append(cond)
 
     def add_step_action(self, action: Callable[[T, bool], Awaitable[None]]) -> BaseTraversal[T]:
         """
@@ -122,24 +101,24 @@ class BaseTraversal(Generic[T]):
         `action` Action to be called on each item in the traversal, passing if the trace will stop on this step.
         Returns this traversal instance.
         """
-        self._step_actions.append(action)
+        self.step_actions.append(action)
         return self
 
     def copy_stop_conditions(self, other: BaseTraversal[T]):
         """Copy the stop conditions from `other` to this `BaseTraversal`."""
-        self._stop_conditions.extend(other.stop_conditions)
+        self.stop_conditions.extend(other.stop_conditions)
 
     def copy_step_actions(self, other: BaseTraversal[T]):
         """Copy the step actions from `other` to this `BaseTraversal`."""
-        self._step_actions.extend(other.step_actions)
+        self.step_actions.extend(other.step_actions)
 
     def clear_stop_conditions(self):
         """Clear all stop conditions."""
-        self._stop_conditions.clear()
+        self.stop_conditions.clear()
 
     def clear_step_actions(self):
         """Clear all step actions"""
-        self._step_actions.clear()
+        self.step_actions.clear()
 
     async def apply_step_actions(self, item: T, is_stopping: bool):
         """
@@ -148,7 +127,7 @@ class BaseTraversal(Generic[T]):
         `item` The item to pass to the step actions.
         `is_stopping` Indicates if the trace will stop on this step.
         """
-        for action in self._step_actions:
+        for action in self.step_actions:
             await action(item, is_stopping)
 
     def _reset_run_flag(self):

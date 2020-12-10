@@ -11,6 +11,8 @@ from abc import ABCMeta
 from dataclassy import dataclass
 from typing import Union, Callable, Any
 from uuid import UUID
+
+
 from zepben.cimbend.util import require, CopyableUUID
 
 __all__ = ["IdentifiedObject"]
