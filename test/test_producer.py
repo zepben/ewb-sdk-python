@@ -6,22 +6,21 @@
 from unittest.mock import MagicMock
 
 import pytest
-from zepben.cimbend import CableInfo, NetworkService
-from zepben.cimbend.streaming.producer import NetworkProducerClient, ProducerClient
+from zepben.evolve import CableInfo, NetworkService
+from zepben.evolve.streaming.put.producer import NetworkProducerClient, ProducerClient, SyncNetworkProducerClient
 from zepben.protobuf.np.np_pb2_grpc import NetworkProducerStub
 
 
 class TestProducer(object):
 
-    @pytest.mark.asyncio
-    async def test_send(self):
+    def test_send(self):
         stub: NetworkProducerStub = MagicMock(["CreateNetwork", "CompleteNetwork", "CreateCableInfo"])
-        producer_client: NetworkProducerClient = NetworkProducerClient(stub=stub)
+        producer_client: SyncNetworkProducerClient = SyncNetworkProducerClient(stub=stub)
         service: NetworkService = NetworkService()
 
         cable_info = CableInfo("id1")
         service.add(cable_info)
-        await producer_client.send(service)
+        producer_client.send(service)
         stub.CreateNetwork.assert_called_once()
         stub.CreateCableInfo.assert_called_once()
         stub.CompleteNetwork.assert_called_once()

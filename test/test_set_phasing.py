@@ -5,9 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import pytest
-from zepben.cimbend.tracing import SetPhases, phase_log
-from zepben.cimbend import Direction
-from zepben.cimbend.phases import SinglePhaseKind
+from zepben.evolve import SetPhases, phase_log, PhaseDirection, SinglePhaseKind
 from test.util import get_terminal, check_phases
 
 A = SinglePhaseKind.A
@@ -16,10 +14,10 @@ C = SinglePhaseKind.C
 N = SinglePhaseKind.N
 SPK_NONE = SinglePhaseKind.NONE
 
-OUT = Direction.OUT
-IN = Direction.IN
-BOTH = Direction.BOTH
-NONE = Direction.NONE
+OUT = PhaseDirection.OUT
+IN = PhaseDirection.IN
+BOTH = PhaseDirection.BOTH
+NONE = PhaseDirection.NONE
 
 
 class TestSetPhase(object):

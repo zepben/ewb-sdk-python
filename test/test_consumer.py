@@ -4,15 +4,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
-from hypothesis import given, settings, Phase, example
+from hypothesis import given, settings, Phase
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject, IdentifiedObjectGroup
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse
-from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
-from unittest.mock import MagicMock, patch, Mock
-import zepben.cimbend.network.translator
+from unittest.mock import MagicMock
 
-from pb_creators import control, cableinfo, networkidentifiedobjects, aclinesegment
-from zepben.cimbend import NetworkConsumerClient, NetworkService
+from test.pb_creators import networkidentifiedobjects, aclinesegment
+from zepben.evolve import NetworkConsumerClient, NetworkService
 
 
 class TestConsumer(object):

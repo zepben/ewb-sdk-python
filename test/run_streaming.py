@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.cimbend import connect, NetworkConsumerClient, NetworkService
+from zepben.evolve import connect, NetworkService
 
-from zepben.cimbend.streaming.network_consumer import SyncNetworkConsumerClient
+from zepben.evolve.streaming.get.network_consumer import SyncNetworkConsumerClient
 import cProfile
 
 

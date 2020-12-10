@@ -80,7 +80,7 @@ jobs:
           # pytest
           python setup.py sdist bdist_wheel
           twine upload dist/*
-          artifact="zepben.cimbend-${VERSION}-py3-none-any.whl"
+          artifact="zepben.evolve-${VERSION}-py3-none-any.whl"
           echo "::set-output name=artifact::$(echo $artifact)"
           echo "::set-output name=artifact-path::$(echo dist/$artifact)"
         shell: bash

@@ -33,7 +33,7 @@ and thus `add` will only work for these types. Note that in some cases where obj
 will be present, which should be utilised to allow efficient querying of the types they support. (e.g add_diagram_object in DiagramService)
 
 ```python
-from zepben.cimbend import NetworkService, Breaker, Junction, IdentifiedObject
+from zepben.evolve import NetworkService, Breaker, Junction, IdentifiedObject
 service = NetworkService()
 
 breaker = Breaker()
@@ -49,7 +49,7 @@ service.add(diagram)  # throws exception.
 There are a few ways we provide to get objects back out of a service. The most obvious one is by MRID:
 
 ```python
-from zepben.cimbend import NetworkService, Breaker
+from zepben.evolve import NetworkService, Breaker
 
 service = NetworkService()
 service.add(Breaker("breaker1"))
@@ -66,7 +66,7 @@ in the CIM class hierarchy. Due to the internal data structures used by the serv
 efficient than looping over all objects in the service and checking if they are of the required type.
 
 ```python
-from zepben.cimbend import NetworkService, Breaker, Junction, ConductingEquipment
+from zepben.evolve import NetworkService, Breaker, Junction, ConductingEquipment
 
 service = NetworkService()
 
@@ -99,7 +99,7 @@ You can then get all measurements associated with a power system resource or a t
 the service:
 
 ```python
-from zepben.cimbend import NetworkService, Analog, Accumulator, Measurement
+from zepben.evolve import NetworkService, Analog, Accumulator, Measurement
 
 service = NetworkService()
 
@@ -137,7 +137,7 @@ identified object. Specifically:
 - If the MRID is any other identified object, the diagram objects for that identified objects are returned.
 
 ```python
-from zepben.cimbend import DiagramService, Diagram, DiagramObject
+from zepben.evolve import DiagramService, Diagram, DiagramObject
 
 service = DiagramService()
 
@@ -182,7 +182,7 @@ function. This function will:
 Unresolved references can also be queried back out of the service. Let's see all with a simple example:
 
 ```python
-from zepben.cimbend import NetworkService, Feeder, Breaker, resolver
+from zepben.evolve import NetworkService, Feeder, Breaker, resolver
 
 service = NetworkService()
 

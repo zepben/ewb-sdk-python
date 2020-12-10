@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 .idea/
+docs/.docusaurus
+docs/node_modules
 
 # C extensions
 *.so
