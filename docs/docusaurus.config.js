@@ -4,7 +4,7 @@ const versions = require("./versions.json");
 module.exports = {
   title: "Evolve SDK (Python)",
   tagline: "",
-  url: "https://zepben.github.io/evolve/sdk-jvm/",
+  url: "https://zepben.github.io/evolve/docs/python-sdk",
   baseUrl: "/evolve/docs/python-sdk/",
   onBrokenLinks: "warn",
   favicon: "img/favicon.ico",
@@ -63,9 +63,9 @@ module.exports = {
       anonymizeIP: false,
     },
     algolia: {
-      apiKey: "bd9b85d42d37ebf66b352f07513f4d6a",
-      indexName: "python-sdk-docs",
-      appId: "IU0L20J0JX"
+      apiKey: "b5ec32dcc5109c1a14d773fd21604bce",
+      indexName: "evolve-docs",
+      appId: "3K6D3DR52K"
     },
   },
   presets: [

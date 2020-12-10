@@ -23,7 +23,7 @@ you can read more about it [here](#why-multiple-services).
 
 ## Common Service functionality
 
-Because services work with [identified objects](https:#zepben.bitbucket.io/cim/cim100/iec61970/base/core/identifiedobject/)
+Because services work with [identified objects](http://zepben.bitbucket.io/cim/cim100/iec61970/base/core/identifiedobject/)
 they can provide some common level of functionality. This functionality can be found in the base class `BaseService`.
 
 ### Adding and Removing Objects
@@ -88,12 +88,12 @@ for obj in service.objects(Breaker):  # generator over all objects in service of
 ## Network Service
 
 The network service works with objects related to the physical asset model. That means all
-[PowerSystemResource](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/core/powersystemresource/) types, but also
-data related types such as [AssetInfo](https:#zepben.bitbucket.io/cim/evolve/iec61968/assets/assetinfo/) and
-[Location](https:#zepben.bitbucket.io/cim/evolve/iec61968/common/location/).
+[PowerSystemResource](http://zepben.bitbucket.io/cim/evolve/iec61970/base/core/powersystemresource/) types, but also
+data related types such as [AssetInfo](http://zepben.bitbucket.io/cim/evolve/iec61968/assets/assetinfo/) and
+[Location](http://zepben.bitbucket.io/cim/evolve/iec61968/common/location/).
 
 The network service also generates an index between power system resources and terminals and their corresponding
-measurements. When you add a [Measurement](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/meas/measurement/)
+measurements. When you add a [Measurement](http://zepben.bitbucket.io/cim/evolve/iec61970/base/meas/measurement/)
 to the service, it indexes it against the `power_system_resource_mrid` or the `terminal_mrid` associated with the measurement.
 You can then get all measurements associated with a power system resource or a terminal via its MRID via the lookup on
 the service:
@@ -129,10 +129,10 @@ network. At this point in time it provides no further specialised functionality.
 ## Diagram Service
 
 The diagram service work with objects related to diagrams associated with identified objects.
-It also provides a lookup to be able to get the [DiagramObjects](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagramobject/) associated with any
+It also provides a lookup to be able to get the [DiagramObjects](http://zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagramobject/) associated with any
 identified object. Specifically:
 - If the MRID is a diagram object, a list with just the diagram object is returned.
-- If the MRID is a [Diagram](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagram/) all diagram
+- If the MRID is a [Diagram](http://zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagram/) all diagram
   objects belonging to that diagram are returned.
 - If the MRID is any other identified object, the diagram objects for that identified objects are returned.
 
@@ -220,10 +220,10 @@ data model into separate concerns, at what we feel are sensible boundary points.
 
 * The network service deals with models of the physical electricity network.
 * The customer service deals with customers and their agreements with electricity providers
-(e.g their [Tariff](https:#zepben.bitbucket.io/cim/evolve/iec61968/customers/tariff/)).
+(e.g their [Tariff](http://zepben.bitbucket.io/cim/evolve/iec61968/customers/tariff/)).
 * The diagram service deals with things related to representing networks as diagrams
-(see [Diagram](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagram/) and
- [DiagramObject](https:#zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagramobject/)).
+(see [Diagram](http://zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagram/) and
+ [DiagramObject](http://zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagramobject/)).
 * Once the platform supports measurement values, these values will be retrieved via a separate service rather than
   directly from measurement objects.
 
