@@ -9,14 +9,16 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
+from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable
 
+from zepben.evolve import DiagramService, IdentifiedObject
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult, extract_identified_object
 from zepben.evolve.streaming.grpc import GrpcResult
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
 from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest
 
-__all__ = ["DiagramConsumerClient"]
+__all__ = ["DiagramConsumerClient", "SyncDiagramConsumerClient"]
 
 
 class DiagramConsumerClient(CimConsumerClient):
@@ -102,3 +104,38 @@ class DiagramConsumerClient(CimConsumerClient):
                     yield extracted, mrid
                 else:
                     yield None, mrid
+
+
+class SyncDiagramConsumerClient(DiagramConsumerClient):
+
+    def get_identified_object(self, service: DiagramService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+        """
+        Retrieve the object with the given `mrid` and store the result in the `service`.
+
+        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered against this client.
+
+        Returns a `GrpcResult` with a result of one of the following:
+             - The object if found
+             - None if an object could not be found or it was found but not added to `service` (see `zepben.evolve.common.base_service.BaseService.add`).
+             - An `Exception` if an error occurred while retrieving or processing the object, in which case, `GrpcResult.was_successful` will return false.
+        """
+        return get_event_loop().run_until_complete(super().get_identified_objects(service, mrid))
+
+    def get_identified_objects(self, service: DiagramService, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        """
+        Retrieve the objects with the given `mrids` and store the results in the `service`.
+
+        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered against this client.
+
+        WARNING: This operation is not atomic upon `service`, and thus if processing fails partway through `mrids`, any previously successful mRID will have been
+        added to the service, and thus you may have an incomplete `BaseService`. Also note that adding to the `service` may not occur for an object if another
+        object with the same mRID is already present in `service`. `MultiObjectResult.failed` can be used to check for mRIDs that were retrieved but not
+        added to `service`.
+
+        Returns a `GrpcResult` with a result of one of the following:
+        - A `MultiObjectResult` containing a map of the retrieved objects keyed by mRID. If an item is not found it will be excluded from the map.
+          If an item couldn't be added to `service` its mRID will be present in `MultiObjectResult.failed` (see `zepben.evolve.common.base_service.BaseService.add`).
+        - An `Exception` if an error occurred while retrieving or processing the objects, in which case, `GrpcResult.was_successful` will return false.
+          Note the warning above in this case.
+        """
+        return get_event_loop().run_until_complete(super().get_identified_objects(service, mrids))

@@ -23,7 +23,7 @@ from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 import zepben.evolve.services.common.resolver as resolver
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest
 
-__all__ = ["NetworkConsumerClient"]
+__all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
 
 
 MAX_64_BIT_INTEGER = 9223372036854775807
@@ -272,25 +272,18 @@ class NetworkConsumerClient(CimConsumerClient):
 
 class SyncNetworkConsumerClient(NetworkConsumerClient):
 
-    def get_network_hierarchy(self):
+    def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
         """
-        Retrieve the network hierarchy
-        Returns a simplified version of the network hierarchy that can be used to make further in-depth requests.
-        """
-        return get_event_loop().run_until_complete(super().get_network_hierarchy())
+        Retrieve the object with the given `mrid` and store the result in the `service`.
 
-    def get_feeder(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
-        """
-        Retrieve the feeder network for the specified `mrid` and store the results in the `service`.
+        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered against this client.
 
-        This is a convenience method that will fetch the feeder object, all of the equipment referenced by the feeder (normal state),
-        the terminals of all elements, the connectivity between terminals, the locations of all elements, the ends of all transformers
-        and the wire info for all conductors.
-
-        Returns a GrpcResult of a `MultiObjectResult`, containing a map keyed by mRID of all the objects retrieved as part of retrieving the `Feeder` and the
-        'Feeder' itself. If an item couldn't be added to `service`, its mRID will be present in `MultiObjectResult.failed`.
+        Returns a `GrpcResult` with a result of one of the following:
+             - The object if found
+             - None if an object could not be found or it was found but not added to `service` (see `zepben.evolve.common.base_service.BaseService.add`).
+             - An `Exception` if an error occurred while retrieving or processing the object, in which case, `GrpcResult.was_successful` will return false.
         """
-        return get_event_loop().run_until_complete(super().get_feeder(service, mrid))
+        return get_event_loop().run_until_complete(super().get_identified_objects(service, mrid))
 
     def get_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         """
@@ -311,18 +304,25 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         """
         return get_event_loop().run_until_complete(super().get_identified_objects(service, mrids))
 
-    def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    def get_network_hierarchy(self):
         """
-        Retrieve the object with the given `mrid` and store the result in the `service`.
-
-        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered against this client.
-
-        Returns a `GrpcResult` with a result of one of the following:
-             - The object if found
-             - None if an object could not be found or it was found but not added to `service` (see `zepben.evolve.common.base_service.BaseService.add`).
-             - An `Exception` if an error occurred while retrieving or processing the object, in which case, `GrpcResult.was_successful` will return false.
+        Retrieve the network hierarchy
+        Returns a simplified version of the network hierarchy that can be used to make further in-depth requests.
         """
-        return get_event_loop().run_until_complete(super().get_identified_objects(service, mrid))
+        return get_event_loop().run_until_complete(super().get_network_hierarchy())
+
+    def get_feeder(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
+        """
+        Retrieve the feeder network for the specified `mrid` and store the results in the `service`.
+
+        This is a convenience method that will fetch the feeder object, all of the equipment referenced by the feeder (normal state),
+        the terminals of all elements, the connectivity between terminals, the locations of all elements, the ends of all transformers
+        and the wire info for all conductors.
+
+        Returns a GrpcResult of a `MultiObjectResult`, containing a map keyed by mRID of all the objects retrieved as part of retrieving the `Feeder` and the
+        'Feeder' itself. If an item couldn't be added to `service`, its mRID will be present in `MultiObjectResult.failed`.
+        """
+        return get_event_loop().run_until_complete(super().get_feeder(service, mrid))
 
     def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         return get_event_loop().run_until_complete(super().retrieve_network())
