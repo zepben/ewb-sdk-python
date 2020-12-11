@@ -11,11 +11,10 @@ from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import Windin
 from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup
 
 
-from zepben.cimbend.network.network import NetworkService
-from zepben.cimbend.measurement.metrics_store import MetricsStore
-from zepben.cimbend import EnergySource, EnergyConsumer, Terminal, ConnectivityNode, IdentifiedObject, AcLineSegment, \
+from zepben.evolve.services.network.network import NetworkService
+from zepben.evolve import EnergySource, EnergyConsumer, Terminal, ConnectivityNode, IdentifiedObject, AcLineSegment, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Breaker, EnergySourcePhase, Junction
-from zepben.cimbend import PhaseCode
+from zepben.evolve import PhaseCode
 from typing import Union, List, Callable
 from hypothesis import settings, Verbosity
 
@@ -93,7 +92,7 @@ class NetworkBuilder(object):
         Returns AddResult(io=created EnergySource, node=created ConnectivityNode)
         """
         mrid = _get_mrid(mrid)
-        terms = self.gen_terminals(1, mrid=mrid, wiring_supplier=wiring_supplier)
+        terms = self.gen_terminals(1, mrid=mrid)
         try:
             esp = kwargs["esp"]
             del kwargs["esp"]  # Remove reference to stop duplicate key when creating EnergySource
@@ -103,7 +102,7 @@ class NetworkBuilder(object):
                 for spk in with_phases.single_phases:
                     esp.append(EnergySourcePhase(spk))
 
-        es = EnergySource(mrid, terminals=terms, esp=esp, **kwargs)
+        es = EnergySource(mrid, terminals=terms, energy_source_phases=[esp], **kwargs)
         self.network.add(es)
         return AddResult(es, terms[0].connectivity_node)
 
@@ -208,8 +207,8 @@ class NetworkBuilder(object):
         `conn_nodes` The connectivity nodes to use for the terminals. If count > len(conn_nodes) or conn_nodes == None,
                            new `ConnectivityNode`s will be created for each extra Terminal.
         `phases` The phase to use for the terminals. All generated terminals will get the provided phase.
-        `kwargs` Passed to `zepben.cimbend.iec61970.base.core.terminal.Terminal` constructor
-        Returns List of `zepben.cimbend.iec61970.base.core.terminal.Terminal`'s
+        `kwargs` Passed to `zepben.evolve.iec61970.base.core.terminal.Terminal` constructor
+        Returns List of `zepben.evolve.iec61970.base.core.terminal.Terminal`'s
         """
         if wiring_supplier is None:
             wiring_supplier = lambda cn: None

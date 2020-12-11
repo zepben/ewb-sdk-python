@@ -7,7 +7,7 @@
 from __future__ import annotations
 from typing import List
 
-from zepben.cimbend.tracing import current_phases, normal_phases
+from zepben.evolve import current_phases, normal_phases
 
 
 def get_terminal(network, mrid, term_num):

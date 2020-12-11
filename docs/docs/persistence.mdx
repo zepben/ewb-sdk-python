@@ -20,7 +20,7 @@ the services is provided with the Evolve platform data services.
 Here is an example of how to connect to and send a model to the evolve data server:
 
 ```python
-from zepben.cimbend.streaming import connect_async, connect, ProducerClient
+from zepben.evolve.streaming import connect_async, connect, ProducerClient
 
 async with connect_async(host="localhost", rpc_port=50051) as channel:
     client = ProducerClient(channel)
@@ -56,7 +56,7 @@ These classes expose a similar API to `ProducerClient`, however accepting a sing
 For example:
 
 ```python
-from zepben.cimbend.streaming import connect_async, NetworkProducerClient, CustomerProducerClient, DiagramProducerClient
+from zepben.evolve.streaming import connect_async, NetworkProducerClient, CustomerProducerClient, DiagramProducerClient
 
 async with connect_async(host="localhost", rpc_port=50051) as channel:
     network_client = NetworkProducerClient(channel)

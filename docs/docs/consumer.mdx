@@ -24,17 +24,21 @@ run any analytics you may wish to perform across the whole model.
 ## Connecting to a server
 
 ```python
-from zepben.cimbend.streaming import connect, connect_async
+from zepben.evolve.streaming import connect, connect_async, NetworkService
 
 # Synchronous
 with connect(host="localhost", rpc_port=50051) as channel:
+    service = NetworkService()
     client = SyncNetworkConsumerClient(channel)
-    result = client.get_feeder("xxx")
+    result = client.get_feeder(service, "xxx")
+    # do stuff with service
 
 # Asyncio
 async with connect_async(host="localhost", rpc_port=50051) as channel:
+    service = NetworkService()
     client = NetworkConsumerClient(channel)
-    result = await client.get_feeder("xxx")
+    result = await client.get_feeder(service, "xxx")
+    # do stuff with service
 ```
 
 ## Network Hierarchy
@@ -44,7 +48,7 @@ to easily identify and request smaller chunks of the network so you can focus on
 of how to request the network hierarchy and print it out as a tree to the console.
 
 ```python
-from zepben.cimbend.streaming import NetworkConsumerClient
+from zepben.evolve.streaming import NetworkConsumerClient
 
 def print_network_hierarchy(client: NetworkConsumerClient):
     hierarchy = client.get_network_hierarchy().result
@@ -74,7 +78,7 @@ To find the MRIDs of any references that need to be requested you can use the [d
 functions on the service provided when requesting identified objects.
 
 ```python
-from zepben.cimbend import NetworkService, NetworkConsumerClient, resolver
+from zepben.evolve import NetworkService, NetworkConsumerClient, resolver
 
 async def get_with_base_voltage(service: NetworkService, client: NetworkConsumerClient, mrid: String):
     equipment = await client.get_identified_object(service, mrid).result

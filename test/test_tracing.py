@@ -5,9 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import pytest
-from zepben.cimbend.traversals.tracing import Traversal
-from zepben.cimbend.traversals.branch_recursive_tracing import BranchRecursiveTraversal
-from zepben.cimbend.traversals.queue import FifoQueue, LifoQueue
+from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
+from zepben.evolve.services.network.tracing.traversals import BranchRecursiveTraversal
+from zepben.evolve.services.network.tracing.traversals.queue import FifoQueue, LifoQueue
 from typing import List, Optional, Set
 
 

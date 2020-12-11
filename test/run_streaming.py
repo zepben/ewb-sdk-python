@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.cimbend import connect, NetworkConsumerClient, NetworkService
+from zepben.evolve import connect, NetworkService
 
-from zepben.cimbend.streaming.network_consumer import SyncNetworkConsumerClient
+from zepben.evolve.streaming.get.network_consumer import SyncNetworkConsumerClient
 import cProfile
 
 
@@ -14,7 +14,7 @@ def run_retrieve():
     with connect() as channel:
         client = SyncNetworkConsumerClient(channel=channel)
         result = client.retrieve_network()
-        network = result.result
+        network = result.result.network_service
         print(len(network._unresolved_references))
         print(len([obj for obj in network.objects()]))
 

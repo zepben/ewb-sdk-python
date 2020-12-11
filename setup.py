@@ -11,8 +11,8 @@ with open("README.md", "r") as fh:
 
 test_deps = ["pytest", "pytest-asyncio", "hypothesis<6"]
 setup(
-    name="zepben.cimbend",
-    version="0.16.0b2",
+    name="zepben.evolve",
+    version="0.16.0b3",
     description="Python SDK for interacting with the Evolve platform",
     long_description=long_description,
     long_description_content_type="text/markdown",

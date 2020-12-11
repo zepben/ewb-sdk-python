@@ -27,8 +27,8 @@ Obviously we provide a function to let you to find out. Let's see it in code:
 TODO: Take example from datamodel page and code then explain in context of that
 
 ```python
-from zepben.cimbend import Junction
-from zepben.cimbend.tracing import ConnectivityResult, connected_equipment
+from zepben.evolve import Junction
+from zepben.evolve.tracing import ConnectivityResult, connected_equipment
 
 switch: Breaker = network.get("aSwitch")
 connectivity: List<ConnectivityResult> = switch.connected_equipment(PhaseCode.ABCN)
@@ -44,8 +44,8 @@ Sometimes you want to be a bit more specific about your connectivity, such as wh
 equipment. You can do this by using specific terminals:
 
 ```python
-from zepben.cimbend import Breaker
-from zepben.cimbend.tracing import ConnectivityResult, connected_terminals
+from zepben.evolve import Breaker
+from zepben.evolve.tracing import ConnectivityResult, connected_terminals
 
 switch: Breaker = network.get("aSwitch")
 connectivity: List<ConnectivityResult> = switch.connected_terminals(PhaseCode.ABCN)
@@ -80,8 +80,8 @@ identify the nearest circuit breakers to a piece of equipment, capturing all equ
 that with the following:
 
 ```python
-from zepben.cimbend import NetworkService, AcLineSegment, Breaker, ConductingEquipment
-from zepben.cimbend.tracing import connected_equipment_trace
+from zepben.evolve import NetworkService, AcLineSegment, Breaker, ConductingEquipment
+from zepben.evolve.tracing import connected_equipment_trace
 network = NetworkService()
 
 # Populate network service with your network
@@ -116,7 +116,7 @@ provide an easy way to instantiate them.
 
 #### Set phases trace
 
-`traces.set_phases()` returns a `zepben.cimbend.tracing.phasing.SetPhases` instance. This provides a way to dynamically set phases at runtime based
+`traces.set_phases()` returns a `zepben.evolve.tracing.phasing.SetPhases` instance. This provides a way to dynamically set phases at runtime based
 on a network's energy sources and the nominal phase connectivity within the network.
 
 #### Phase traces 

@@ -19,7 +19,7 @@ jobs:
         run: |
           source /scripts/common.sh
           /scripts/release-checks.sh --python setup.py
-          FILE=docs/release.md
+          FILE=RELEASE.md
           if [ -f "$FILE" ]; then
             export release_date=$(date +'%d %B %Y')
             /scripts/finalize-version.sh --python setup.py $FILE 'sed -i -e "s/TBD/$release_date/g"'
@@ -80,7 +80,7 @@ jobs:
           # pytest
           python setup.py sdist bdist_wheel
           twine upload dist/*
-          artifact="zepben.cimbend-${VERSION}-py3-none-any.whl"
+          artifact="zepben.evolve-${VERSION}-py3-none-any.whl"
           echo "::set-output name=artifact::$(echo $artifact)"
           echo "::set-output name=artifact-path::$(echo dist/$artifact)"
         shell: bash
@@ -116,7 +116,7 @@ jobs:
         with:
           tag_name: ${{ steps.merge.outputs.tag }}
           release_name: ${{ steps.merge.outputs.tag }}
-          body_path: docs/release.md
+          body_path: RELEASE.md
           draft: false
           prerelease: false
 
@@ -144,7 +144,7 @@ jobs:
       - name: Update to next minor version
         run: |
           source /scripts/common.sh
-          FILE=docs/release.md
+          FILE=RELEASE.md
           if [ -f "$FILE" ]; then
             export ln=$(cat $FILE | grep -n "### v[0-9]\+.[0-9]\+.[0-9]\+" | head -1 | cut -d':' -f1)
             /scripts/update-version.sh --python --release setup.py $FILE 'next_release_version=${version//-SNAPSHOT/} && sed -i "${ln}i \#\#\# v${version//-SNAPSHOT/}\n\n\#\#\#\#\# Breaking Changes\n\* None.\n\n\#\#\#\#\# New Features\n\* None.\n\n\#\#\#\#\# Enhancements\n\* None.\n\n\#\#\#\#\# Fixes\n\* None.\n\n\#\#\#\#\# Notes\n\* None.\n\n\-\-\-\n" $changelog && sed -i "5i \|\[${next_release_version}\]\(\#v${next_release_version//\./}\)\| \`TBD\` \|"'

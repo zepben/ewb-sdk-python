@@ -18,11 +18,11 @@ When in the installer, select and install:
 - Windows 10 SDK
 - The latest version of MSVC v142 x64/x86 build tools.
 
-After this you should be able to `pip install zepben.cimbend` without issues.
+After this you should be able to `pip install zepben.evolve` without issues.
 
 # Installation #
 
-    pip install zepben.cimbend
+    pip install zepben.evolve
     
     
 # Building #

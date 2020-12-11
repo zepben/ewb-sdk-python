@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
 
-from zepben.cimbend import PositionPoint, TownDetail
+from zepben.evolve import PositionPoint, TownDetail
 
 
 def test_create_positionpoints():
