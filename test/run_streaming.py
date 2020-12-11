@@ -14,7 +14,7 @@ def run_retrieve():
     with connect() as channel:
         client = SyncNetworkConsumerClient(channel=channel)
         result = client.retrieve_network()
-        network = result.result
+        network = result.result.network_service
         print(len(network._unresolved_references))
         print(len([obj for obj in network.objects()]))
 

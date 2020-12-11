@@ -24,17 +24,21 @@ run any analytics you may wish to perform across the whole model.
 ## Connecting to a server
 
 ```python
-from zepben.evolve.streaming import connect, connect_async
+from zepben.evolve.streaming import connect, connect_async, NetworkService
 
 # Synchronous
 with connect(host="localhost", rpc_port=50051) as channel:
+    service = NetworkService()
     client = SyncNetworkConsumerClient(channel)
-    result = client.get_feeder("xxx")
+    result = client.get_feeder(service, "xxx")
+    # do stuff with service
 
 # Asyncio
 async with connect_async(host="localhost", rpc_port=50051) as channel:
+    service = NetworkService()
     client = NetworkConsumerClient(channel)
-    result = await client.get_feeder("xxx")
+    result = await client.get_feeder(service, "xxx")
+    # do stuff with service
 ```
 
 ## Network Hierarchy

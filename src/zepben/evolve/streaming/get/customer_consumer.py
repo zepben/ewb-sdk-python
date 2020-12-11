@@ -9,7 +9,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import Optional, Iterable, AsyncGenerator
+from typing import Optional, Iterable, AsyncGenerator, List, Callable
 
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult, extract_identified_object
 from zepben.evolve.streaming.grpc import GrpcResult
@@ -22,7 +22,8 @@ __all__ = ["CustomerConsumerClient"]
 class CustomerConsumerClient(CimConsumerClient):
     _stub: CustomerConsumerStub = None
 
-    def __init__(self, channel=None, stub: CustomerConsumerStub = None):
+    def __init__(self, channel=None, stub: CustomerConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
+        super().__init__(error_handlers=error_handlers)
         if channel is None and stub is None:
             raise ValueError("Must provide either a channel or a stub")
         if stub is not None:

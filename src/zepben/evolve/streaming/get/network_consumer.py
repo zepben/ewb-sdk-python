@@ -10,7 +10,9 @@
 from __future__ import annotations
 
 from asyncio import get_event_loop
-from typing import Iterable, Dict, Optional, AsyncGenerator, Union
+from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set
+
+from dataclassy import dataclass
 
 from zepben.evolve import NetworkService, Feeder, Conductor
 from zepben.evolve.streaming.get.consumer import MultiObjectResult, extract_identified_object, CimConsumerClient
@@ -22,6 +24,15 @@ import zepben.evolve.services.common.resolver as resolver
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest
 
 __all__ = ["NetworkConsumerClient"]
+
+
+MAX_64_BIT_INTEGER = 9223372036854775807
+
+
+@dataclass(slots=True)
+class NetworkResult(object):
+    network_service: Optional[NetworkService]
+    failed: Optional[Set[str]]
 
 
 def _lookup(mrids: Iterable[str], lookup: Dict[str, NetworkHierarchyIdentifiedObject]):
@@ -45,7 +56,8 @@ def _finalise_links(geographical_regions: Dict[str, NetworkHierarchyGeographical
 class NetworkConsumerClient(CimConsumerClient):
     _stub: NetworkConsumerStub = None
 
-    def __init__(self, channel=None, stub: NetworkConsumerStub = None):
+    def __init__(self, channel=None, stub: NetworkConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
+        super().__init__(error_handlers=error_handlers)
         if channel is None and stub is None:
             raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
@@ -106,7 +118,7 @@ class NetworkConsumerClient(CimConsumerClient):
         """
         return await self._get_feeder(service, mrid)
 
-    async def retrieve_network(self) -> GrpcResult[Union[NetworkService, Exception]]:
+    async def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         """
         Retrieve the entire network.
         Returns a GrpcResult containing the complete `zepben.evolve.network.network.NetworkService` from the server.
@@ -172,7 +184,7 @@ class NetworkConsumerClient(CimConsumerClient):
         objects.result.value[feeder.mrid] = feeder  # Add feeder to result
         return GrpcResult(result=MultiObjectResult(objects.result.value, objects.result.failed.union(equipment_objects.result.failed)))
 
-    async def _retrieve_network(self) -> GrpcResult[Union[NetworkService, Exception]]:
+    async def _retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         service = NetworkService()
         result = await self._get_network_hierarchy()
         if result.was_failure:
@@ -199,11 +211,26 @@ class NetworkConsumerClient(CimConsumerClient):
             if feeder_result.was_failure:
                 return feeder_result
 
+        last_num_unresolved = MAX_64_BIT_INTEGER
         while service.has_unresolved_references():
-            for mrid in service.unresolved_mrids():
-                await self._get_identified_object(service, mrid)
+            current_ids = set()
+            if last_num_unresolved == service.num_unresolved_references():
+                # we only want to break out if we've been trying to resolve the same set of references as we did in the last iteration.
+                # so if we didn't resolve anything in the last iteration (i.e, the number of unresolved refs didn't change) we keep a
+                # record of those mRIDs and break out of the loop if they don't change after another fetch.
+                current_ids.update(service.unresolved_mrids())
 
-        return GrpcResult(service)
+            while last_num_unresolved != service.num_unresolved_references():
+
+                last_num_unresolved = service.num_unresolved_references()
+                for mrid in service.unresolved_mrids():
+                    await self._get_identified_object(service, mrid)
+
+            if current_ids:
+                if current_ids == set(service.unresolved_mrids()):
+                    return GrpcResult(NetworkResult(service, current_ids))
+
+        return GrpcResult(NetworkResult(service))
 
     async def _process_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
         to_fetch = set()
@@ -297,5 +324,5 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         """
         return get_event_loop().run_until_complete(super().get_identified_objects(service, mrid))
 
-    def retrieve_network(self) -> GrpcResult[Union[NetworkService, Exception]]:
+    def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         return get_event_loop().run_until_complete(super().retrieve_network())
