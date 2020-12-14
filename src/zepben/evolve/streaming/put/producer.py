@@ -17,7 +17,7 @@ from zepben.evolve import NetworkService, BaseService, DiagramService, CustomerS
 from zepben.evolve.services.network.translator.network_cim2proto import CimTranslationException
 from zepben.evolve.streaming.exceptions import UnsupportedOperationException
 from zepben.evolve.streaming.grpc import GrpcClient, GrpcResult
-from zepben.evolve.streaming.put.network_rpc import network_rpc_map
+from zepben.evolve.streaming.put.network_rpc import network_rpc_map, diagram_rpc_map, customer_rpc_map
 from zepben.protobuf.cp.cp_pb2_grpc import CustomerProducerStub
 from zepben.protobuf.cp.cp_requests_pb2 import CreateCustomerServiceRequest, CompleteCustomerServiceRequest
 from zepben.protobuf.dp.dp_pb2_grpc import DiagramProducerStub
@@ -117,7 +117,7 @@ class DiagramProducerClient(CimProducerClient):
         """
         await self.try_rpc(lambda: self._stub.CreateDiagramService(CreateDiagramServiceRequest()))
 
-        await _send(self._stub, service, network_rpc_map)
+        await _send(self._stub, service, diagram_rpc_map)
 
         await self.try_rpc(lambda: self._stub.CompleteDiagramService(CompleteDiagramServiceRequest()))
 
@@ -143,7 +143,7 @@ class CustomerProducerClient(CimProducerClient):
         """
         await self.try_rpc(lambda: self._stub.CreateCustomerService(CreateCustomerServiceRequest()))
 
-        await _send(self._stub, service, network_rpc_map)
+        await _send(self._stub, service, customer_rpc_map)
 
         await self.try_rpc(lambda: self._stub.CompleteCustomerService(CompleteCustomerServiceRequest()))
 
