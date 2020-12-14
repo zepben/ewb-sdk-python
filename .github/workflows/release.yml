@@ -136,6 +136,9 @@ jobs:
     runs-on: ubuntu-latest
     container: zepben/pipeline-basic:5.0.0
     env:
+      ZEPBEN_PYPI_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      ZEPBEN_PYPI_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      ZEPBEN_PYPI_REPO: ${{ secrets.ZEPBEN_PYPI_REPO }}
       SLACK_NOTIFICATION: YES
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     steps:
