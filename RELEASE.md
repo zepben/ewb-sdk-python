@@ -1,10 +1,4 @@
-#### Release History
-
-|Version | Date |
-|--- | :--- |
-|[0.18.0](#v0180)| `14 December 2020` |
-
-### v0.18.0
+### v0.19.0
 
 ##### Breaking Changes
 * None.
@@ -16,7 +10,7 @@
 * None.
 
 ##### Fixes
-* CimProducerClient and subclasses now works as expected - error_handlers are now able to be passed in.
+* None.
 
 ##### Notes
 * None.
