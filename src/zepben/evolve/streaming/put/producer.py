@@ -74,13 +74,13 @@ class NetworkProducerClient(CimProducerClient):
     _stub: NetworkProducerStub = None
 
     def __init__(self, channel=None, stub: NetworkProducerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
-        super().__init__()
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
+        super().__init__(error_handlers=error_handlers)
         if stub is not None:
             self._stub = stub
-        else:
+        elif channel is not None:
             self._stub = NetworkProducerStub(channel)
+        else:
+            raise ValueError("Must provide either a channel or a stub")
 
     async def send(self, service: NetworkService = None):
         """
@@ -99,13 +99,14 @@ class NetworkProducerClient(CimProducerClient):
 class DiagramProducerClient(CimProducerClient):
     _stub: DiagramProducerStub = None
 
-    def __init__(self, channel=None, stub: DiagramProducerStub = None):
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
+    def __init__(self, channel=None, stub: DiagramProducerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
+        super().__init__(error_handlers=error_handlers)
         if stub is not None:
             self._stub = stub
-        else:
+        elif channel is not None:
             self._stub = DiagramProducerStub(channel)
+        else:
+            raise ValueError("Must provide either a channel or a stub")
 
     async def send(self, service: DiagramService = None):
         """
@@ -124,13 +125,14 @@ class DiagramProducerClient(CimProducerClient):
 class CustomerProducerClient(CimProducerClient):
     _stub: CustomerProducerStub = None
 
-    def __init__(self, channel=None, stub: CustomerProducerStub = None):
-        if channel is None and stub is None:
-            raise ValueError("Must provide either a channel or a stub")
+    def __init__(self, channel=None, stub: CustomerProducerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
+        super().__init__(error_handlers=error_handlers)
         if stub is not None:
             self._stub = stub
-        else:
+        elif channel is not None:
             self._stub = CustomerProducerStub(channel)
+        else:
+            raise ValueError("Must provide either a channel or a stub")
 
     async def send(self, service: CustomerService = None):
         """
@@ -150,16 +152,20 @@ class ProducerClient(CimProducerClient):
     _channel: Channel = None
     _clients: Dict[Type[BaseService], CimProducerClient] = None
 
-    def __init__(self, channel: Channel, clients: Dict[Type[BaseService], CimProducerClient] = None):
-        self._channel = channel
+    def __init__(self, channel: Channel = None, clients: Dict[Type[BaseService], CimProducerClient] = None, error_handlers: List[Callable[[Exception], bool]] = None):
+        super().__init__(error_handlers=error_handlers)
+
         if clients is not None:
             self._clients = clients.copy()
-        else:
+        elif channel is not None:
+            self._channel = channel
             self._clients = {
                 NetworkService: NetworkProducerClient(self._channel),
                 DiagramService: DiagramProducerClient(self._channel),
                 CustomerService: CustomerProducerClient(self._channel)
             }
+        else:
+            raise ValueError("You must provide either a channel or clients")
 
     async def send(self, services: Union[List[BaseService], BaseService] = None):
         """
