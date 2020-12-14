@@ -24,7 +24,7 @@ run any analytics you may wish to perform across the whole model.
 ## Connecting to a server
 
 ```python
-from zepben.evolve.streaming import connect, connect_async, NetworkService
+from zepben.evolve import connect, connect_async, NetworkService, SyncNetworkConsumerClient, NetworkConsumerClient
 
 # Synchronous
 with connect(host="localhost", rpc_port=50051) as channel:
@@ -48,7 +48,7 @@ to easily identify and request smaller chunks of the network so you can focus on
 of how to request the network hierarchy and print it out as a tree to the console.
 
 ```python
-from zepben.evolve.streaming import NetworkConsumerClient
+from zepben.evolve import NetworkConsumerClient
 
 def print_network_hierarchy(client: NetworkConsumerClient):
     hierarchy = client.get_network_hierarchy().result
