@@ -8,6 +8,7 @@ from zepben.protobuf.cim.iec61970.base.meas.AccumulatorValue_pb2 import Accumula
 from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue as PBAnalogValue
 from zepben.protobuf.cim.iec61970.base.meas.DiscreteValue_pb2 import DiscreteValue as PBDiscreteValue
 from zepben.evolve.model import AnalogValue, AccumulatorValue, DiscreteValue, MeasurementValue
+from google.protobuf.timestamp_pb2 import Timestamp
 
 __all__ = ["analogvalue_to_pb", "accumulatorvalue_to_pb", "discretevalue_to_pb", "measurementvalue_to_pb"]
 
@@ -25,7 +26,9 @@ def discretevalue_to_pb(cim: DiscreteValue) -> PBDiscreteValue:
 
 
 def measurementvalue_to_pb(cim: MeasurementValue) -> PBMeasurementValue:
-    return PBMeasurementValue(timeStamp=cim.time_stamp.timestamp())
+    ts = Timestamp()
+    ts.FromDatetime(cim.time_stamp)
+    return PBMeasurementValue(timeStamp=ts)
 
 
 AnalogValue.to_pb = analogvalue_to_pb
