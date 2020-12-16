@@ -7,8 +7,6 @@ jobs:
   release-checks:
     runs-on: ubuntu-latest
     container: zepben/pipeline-basic
-    outputs:
-      version: ${{ steps.check.outputs.release-version }}
     env:
       SLACK_NOTIFICATION: YES
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -17,17 +15,8 @@ jobs:
       - name: Release checks and update version for release
         id: check
         run: |
-          source /scripts/common.sh
           /scripts/release-checks.sh --python setup.py
-          FILE=RELEASE.md
-          if [ -f "$FILE" ]; then
-            export release_date=$(date +'%d %B %Y')
-            /scripts/finalize-version.sh --python setup.py $FILE 'sed -i -e "s/TBD/$release_date/g"'
-          else
-            /scripts/finalize-version.sh --python setup.py
-          fi
-          version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
-          echo "::set-output name=release-version::$(echo $version)"
+          /scripts/finalize-version.sh --python setup.py
         shell: bash
 
       - name: Cache licence-check
@@ -46,7 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     container: python:3.7-alpine
     needs: release-checks
-
+    outputs:
+      artifact: ${{ steps.build.outputs.artifact }}
+      version: ${{ steps.build.outputs.version }}
     steps:
       - name: Install dependencies
         run: |
@@ -72,7 +63,6 @@ jobs:
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-          VERSION: ${{ needs.release-checks.outputs.version }}
         run: |
           mkdir -p /pipcache
           pip install --cache-dir /pipcache twine
@@ -80,11 +70,19 @@ jobs:
           # pytest
           python setup.py sdist bdist_wheel
           twine upload dist/*
-          artifact="zepben.evolve-${VERSION}-py3-none-any.whl"
+          version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
+          artifact="zepben.evolve-${version}-py3-none-any.whl"
+          echo "::set-output name=version::$(echo $version)"
           echo "::set-output name=artifact::$(echo $artifact)"
           echo "::set-output name=artifact-path::$(echo dist/$artifact)"
         shell: bash
         continue-on-error: true
+
+      - uses: actions/upload-artifact@master
+        if: steps.build.outcome == 'success'
+        with:
+          name: ${{ steps.build.outputs.artifact }}
+          path: ${{ steps.build.outputs.artifact-path }}
 
       - name: Delete release branch if deploy failed and fail
         if: steps.build.outcome == 'failure'
@@ -94,10 +92,58 @@ jobs:
           exit 1
         shell: bash
 
+  build-docs:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: docs
+    container: node:12-alpine
+    steps:
+      - name: Install Git
+        run: |
+          apk add git
+
+      - uses: actions/checkout@v2
+
+      - name: Cache nodejs deps
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: npm
+
+      - name: Build docusaurus
+        id: build
+        uses: zepben/docusaurus-action@main
+        with:
+          VERSION: ${{ needs.deploy.outputs.version }}
+          NPM_REPO: ${{ secrets.NPM_REPO }}
+          NPM_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - uses: actions/upload-artifact@master
+        if: steps.build.outcome == 'success'
+        with:
+          name: docs
+          path: docs/build/
+
+      - name: Fail build
+        if: steps.build.outcome == 'failure'
+        run: | 
+          git push origin -d release
+          echo "There was an error in the docusaurus build above."
+          exit 1
+        shell: sh
+
+  create-release:
+    needs: [deploy, build-docs]
+    runs-on: ubuntu-latest
+    container: zepben/pipeline-basic:5.0.0
+    steps:
+      - uses: actions/checkout@v2
       - name: Merge and Tag
         id: merge
         env:
-          VERSION: ${{ needs.release-checks.outputs.version }}
+          VERSION: ${{ needs.deploy.outputs.version }}
         run: |
           git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
           git fetch --all
@@ -108,7 +154,16 @@ jobs:
           echo "::set-output name=tag::$(echo v$VERSION)"
         shell: bash
 
+      - name: Fail
+        if: steps.merge.outcome == 'failure'
+        run: | 
+          git push origin -d release
+          echo "There was an error in merging the branch. release branch was deleted."
+          exit 1
+        shell: bash
+
       - name: Create Release
+        if: steps.merge.outcome == 'success'
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -116,9 +171,15 @@ jobs:
         with:
           tag_name: ${{ steps.merge.outputs.tag }}
           release_name: ${{ steps.merge.outputs.tag }}
-          body_path: RELEASE.md
+          body_path: changelog.md
           draft: false
           prerelease: false
+
+      - name: Download binary
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.deploy.outputs.artifact }}
+          path: built-artifacts
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -126,10 +187,39 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.build.outputs.artifact-path }}
-          asset_name: ${{ steps.build.outputs.artifact }}
+          asset_path: built-artifacts/${{ needs.deploy.outputs.artifact }}
+          asset_name: ${{ needs.deploy.outputs.artifact }}
           asset_content_type: application/octet-stream
-        continue-on-error: true
+
+      - name: Download docs
+        uses: actions/download-artifact@v2
+        with:
+          name: docs
+          path: docs-site
+
+      - name: Zip documentation
+        run: |
+          cd docs-site
+          zip -r docs-site.zip .
+        shell: bash
+
+      - name: Upload docs
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: docs-site/docs-site.zip
+          asset_name: docs-site.zip
+          asset_content_type: application/zip
+
+      - name: Deploy documentation
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+          repository: ${{ secrets.DOCS_REPO }}
+          event-type: ${{ secrets.DOCS_REPO_EVOLVE_WORKFLOW }}
+          client-payload: '{"product_key": "python-sdk", "download_url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.merge.outputs.tag }}/docs-site.zip"}'
 
   update-version:
     needs: deploy
@@ -146,7 +236,5 @@ jobs:
 
       - name: Update to next minor version
         run: |
-          export FILE=RELEASE.md
-          export ln=$(cat $FILE | grep -n "### v[0-9]\+.[0-9]\+.[0-9]\+" | head -1 | cut -d':' -f1)
-          /scripts/update-version.sh --python --release setup.py $FILE 'next_release_version=${version//-SNAPSHOT/} && sed -i "${ln}i \#\#\# v${version//-SNAPSHOT/}\n\n\#\#\#\#\# Breaking Changes\n\* None.\n\n\#\#\#\#\# New Features\n\* None.\n\n\#\#\#\#\# Enhancements\n\* None.\n\n\#\#\#\#\# Fixes\n\* None.\n\n\#\#\#\#\# Notes\n\* None.\n\n\-\-\-\n" $changelog && sed -i "5i \|\[${next_release_version}\]\(\#v${next_release_version//\./}\)\| \`TBD\` \|"'
+          /scripts/update-version.sh --python --release setup.py changelog.md
         shell: bash
