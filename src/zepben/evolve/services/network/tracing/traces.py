@@ -10,8 +10,8 @@ from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import Cond
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model import SinglePhaseKind
 from zepben.evolve.model.phasedirection import PhaseDirection
-from zepben.evolve.services.network.tracing.phase_step import PhaseStep
-from zepben.evolve.services.network.tracing.phase_status import PhaseStatus, current_phases, normal_phases
+from zepben.evolve.services.network.tracing.phases.phase_step import PhaseStep
+from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus, current_phases, normal_phases
 from zepben.evolve.services.network.tracing.connectivity import get_connected_equipment, get_connectivity
 from zepben.evolve.services.network.tracing.util import currently_open, normally_open
 from zepben.evolve.services.network.tracing.traversals import Traversal, depth_first, Queue, PriorityQueue

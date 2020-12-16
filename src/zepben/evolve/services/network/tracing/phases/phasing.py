@@ -3,6 +3,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 
@@ -19,11 +23,11 @@ from zepben.evolve.model.phasedirection import PhaseDirection
 from zepben.evolve.exceptions import PhaseException
 from zepben.evolve.services.network.tracing.connectivity import get_connectivity
 from zepben.evolve.exceptions import TracingException
-from zepben.evolve.services.network.tracing.phase_status import normal_phases, current_phases
-from zepben.evolve.services.network.tracing import queue_next_terminal
+from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
+from zepben.evolve.services.network.tracing.traces import queue_next_terminal
 from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
 from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
-from zepben.evolve.services.network.tracing.phase_status import PhaseStatus
+from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus
 from zepben.evolve.services.network.tracing.traversals import BranchRecursiveTraversal
 from zepben.evolve.services.network.tracing.util import normally_open, currently_open
 from typing import Set, Callable, List, Iterable, Optional

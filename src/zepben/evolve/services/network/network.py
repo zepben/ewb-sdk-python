@@ -13,7 +13,7 @@ from zepben.evolve.model import Measurement
 from zepben.evolve.services.common import BaseService
 from zepben.evolve.model import ConnectivityNode
 from zepben.evolve.model import EnergySource
-from zepben.evolve.services.network.tracing import SetPhases
+from zepben.evolve.services.network.tracing.phases.phasing import SetPhases
 from pathlib import Path
 
 __all__ = ["connect", "NetworkService"]

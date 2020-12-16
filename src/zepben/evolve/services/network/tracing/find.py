@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclassy import dataclass
 
 
-from zepben.evolve.services.network.tracing.phase_step import PhaseStep
+from zepben.evolve.services.network.tracing.phases.phase_step import PhaseStep
 from zepben.evolve.services.network.tracing.traces import normal_downstream_trace, current_downstream_trace
 from typing import Callable, List, Optional, Dict
 from enum import Enum
