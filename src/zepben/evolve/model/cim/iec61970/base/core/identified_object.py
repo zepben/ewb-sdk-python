@@ -42,7 +42,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     """a free human readable text describing or naming the object. It may be non unique and may not correlate to a naming hierarchy."""
 
     def __str__(self):
-        return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), self.name) if a)}}}"
+        return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), str(self.name)) if a)}}}"
 
     def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject], type_descr: str) -> bool:
         """

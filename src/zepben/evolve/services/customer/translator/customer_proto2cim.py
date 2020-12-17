@@ -14,11 +14,13 @@ from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer as PBCu
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure as PBPricingStructure
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
 
-from zepben.evolve.model import Customer
 from zepben.evolve.services.customer.customers import CustomerService
 from zepben.evolve.services.common import *
-from zepben.evolve.model import Agreement
-from zepben.evolve.model import CustomerAgreement, CustomerKind, PricingStructure, Tariff
+from zepben.evolve.model.cim.iec61968.customers.customer import Customer
+from zepben.evolve.model.cim.iec61968.common.document import Agreement
+from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
+from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure
+from zepben.evolve.model.cim.iec61968.customers.tariff import Tariff
 
 __all__ = ["agreement_to_cim", "tariff_to_cim", "customer_to_cim", "customeragreement_to_cim", "pricingstructure_to_cim"]
 

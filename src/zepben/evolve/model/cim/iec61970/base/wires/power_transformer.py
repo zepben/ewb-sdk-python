@@ -288,6 +288,12 @@ class PowerTransformer(ConductingEquipment):
 
     _power_transformer_ends: Optional[List[PowerTransformerEnd]] = None
 
+    transformer_utilisation: float = 0.0
+    """
+    The fraction of the transformer’s normal capacity (nameplate rating) that is in use. It may be expressed as the
+    result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
+    """
+
     def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
                  operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None,
                  power_transformer_ends: List[PowerTransformerEnd] = None):

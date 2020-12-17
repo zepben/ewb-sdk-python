@@ -478,7 +478,8 @@ class UnitSymbol(Enum):
     def short_name(self):
         return str(self)[11:]
 
-    def __str__(self):
+    @property
+    def name(self):
         return self.value[1]
 
     def id(self):

@@ -6,7 +6,7 @@
 
 from zepben.evolve.services.network.tracing.traversals.queue import Queue
 from zepben.evolve.services.network.tracing.traversals.tracing import BaseTraversal
-from zepben.evolve.services.network.tracing.traversals import Tracker
+from zepben.evolve.services.network.tracing.traversals.tracker import Tracker
 from typing import Callable, Set, TypeVar, Optional
 
 __all__ = ["BranchRecursiveTraversal"]

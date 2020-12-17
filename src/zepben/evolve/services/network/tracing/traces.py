@@ -8,13 +8,14 @@ from typing import Optional, Callable, Set, Iterable, TypeVar
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.model import SinglePhaseKind
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.model.phasedirection import PhaseDirection
 from zepben.evolve.services.network.tracing.phases.phase_step import PhaseStep
 from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus, current_phases, normal_phases
 from zepben.evolve.services.network.tracing.connectivity import get_connected_equipment, get_connectivity
 from zepben.evolve.services.network.tracing.util import currently_open, normally_open
-from zepben.evolve.services.network.tracing.traversals import Traversal, depth_first, Queue, PriorityQueue
+from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
+from zepben.evolve.services.network.tracing.traversals.queue import depth_first, Queue, PriorityQueue
 
 __all__ = ["queue_next_terminal", "normal_downstream_trace", "create_basic_depth_trace", "connected_equipment_trace", "current_downstream_trace"]
 

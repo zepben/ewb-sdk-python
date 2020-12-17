@@ -12,7 +12,7 @@ from dataclassy import dataclass
 
 from zepben.evolve.services.network.tracing.traversals.queue import FifoQueue, LifoQueue, PriorityQueue, Queue
 from zepben.evolve.exceptions import TracingException
-from zepben.evolve.services.network.tracing.traversals import Tracker
+from zepben.evolve.services.network.tracing.traversals.tracker import Tracker
 from typing import List, Callable, Awaitable, TypeVar, Generic, Set, Iterable
 from enum import Enum
 

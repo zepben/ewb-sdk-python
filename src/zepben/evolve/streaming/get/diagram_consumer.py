@@ -14,7 +14,7 @@ from typing import Optional, Iterable, AsyncGenerator, List, Callable
 
 from zepben.evolve import DiagramService, IdentifiedObject
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult, extract_identified_object
-from zepben.evolve.streaming.grpc import GrpcResult
+from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
 from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest
 

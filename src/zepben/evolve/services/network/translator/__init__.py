@@ -76,8 +76,6 @@ from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import Transform
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit
 
-from zepben.evolve.services.network.translator.network_proto2cim import *
-from zepben.evolve.services.network.translator.network_cim2proto import *
 __all__ = []
 
 CableInfo.mrid = lambda self: self.wi.mrid()

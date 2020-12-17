@@ -4,10 +4,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve.model import OrganisationRole, Asset, Pole, Streetlight, Customer, CustomerAgreement, PricingStructure, EndDevice, UsagePoint, \
-    OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, Terminal, Diagram, DiagramObject, Measurement, Control, \
-    RemoteSource, RemoteControl, Conductor, EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Circuit, Loop, Feeder, EquipmentContainer, \
-    Substation, GeographicalRegion, SubGeographicalRegion, PowerSystemResource, PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd
+from __future__ import annotations
+
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",

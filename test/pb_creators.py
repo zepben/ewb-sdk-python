@@ -421,7 +421,7 @@ def vectorgroup():
 
 def powertransformer():
     return builds(PBPowerTransformer, ce=conductingequipment(), powerTransformerEndMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-                  vectorGroup=vectorgroup())
+                  vectorGroup=vectorgroup(), transformerUtilisation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
 
 
 def windingconnectionkind():
