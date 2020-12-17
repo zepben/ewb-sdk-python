@@ -13,11 +13,15 @@ from asyncio import get_event_loop
 from typing import TypeVar, Union, List, Dict, Type, Callable
 
 from grpc import Channel
-from zepben.evolve import NetworkService, BaseService, DiagramService, CustomerService
+from zepben.protobuf.mp.mp_pb2_grpc import MeasurementProducerStub
+from zepben.protobuf.mp.mp_requests_pb2 import CreateAnalogValuesRequest, CreateDiscreteValuesRequest, CreateAccumulatorValuesRequest
+
+from zepben.evolve import NetworkService, BaseService, DiagramService, CustomerService, MeasurementService, MeasurementValue, AnalogValue, AccumulatorValue, \
+    DiscreteValue
 from zepben.evolve.services.network.translator.network_cim2proto import CimTranslationException
 from zepben.evolve.streaming.exceptions import UnsupportedOperationException
-from zepben.evolve.streaming.grpc import GrpcClient, GrpcResult
-from zepben.evolve.streaming.put.network_rpc import network_rpc_map, diagram_rpc_map, customer_rpc_map
+from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
+from zepben.evolve.streaming.put.network_rpc import network_rpc_map, diagram_rpc_map, customer_rpc_map, measurement_rpc_map
 from zepben.protobuf.cp.cp_pb2_grpc import CustomerProducerStub
 from zepben.protobuf.cp.cp_requests_pb2 import CreateCustomerServiceRequest, CompleteCustomerServiceRequest
 from zepben.protobuf.dp.dp_pb2_grpc import DiagramProducerStub
@@ -25,8 +29,9 @@ from zepben.protobuf.dp.dp_requests_pb2 import CompleteDiagramServiceRequest, Cr
 from zepben.protobuf.np.np_pb2_grpc import NetworkProducerStub
 from zepben.protobuf.np.np_requests_pb2 import CreateNetworkRequest, CompleteNetworkRequest
 
-__all__ = ["CimProducerClient", "CustomerProducerClient", "NetworkProducerClient", "DiagramProducerClient", "ProducerClient", "SyncProducerClient",
-           "SyncCustomerProducerClient", "SyncNetworkProducerClient", "SyncDiagramProducerClient"]
+__all__ = ["CimProducerClient", "CustomerProducerClient", "NetworkProducerClient", "DiagramProducerClient", "MeasurementProducerClient", "ProducerClient",
+           "SyncProducerClient", "SyncCustomerProducerClient", "SyncNetworkProducerClient", "SyncDiagramProducerClient", "SyncMeasurementProducerClient"]
+
 T = TypeVar("T", bound=BaseService)
 
 
@@ -148,6 +153,40 @@ class CustomerProducerClient(CimProducerClient):
         await self.try_rpc(lambda: self._stub.CompleteCustomerService(CompleteCustomerServiceRequest()))
 
 
+class MeasurementProducerClient(CimProducerClient):
+    _stub: MeasurementProducerStub = None
+
+    def __init__(self, channel=None, stub: MeasurementProducerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
+        super().__init__(error_handlers=error_handlers)
+        if stub is not None:
+            self._stub = stub
+        elif channel is not None:
+            self._stub = MeasurementProducerStub(channel)
+        else:
+            raise ValueError("Must provide either a channel or a stub")
+
+    async def send(self, service: MeasurementService = None):
+        """
+        Sends objects within the given `service` to the producer server.
+
+        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered. If none of the registered error handlers
+        return true to indicate the error has been handled, the exception will be rethrown.
+        """
+        await _send(self._stub, service, measurement_rpc_map)
+
+    async def send_analogs(self, analogs: List[AnalogValue]):
+        request = CreateAnalogValuesRequest(analogValues=[av.to_pb() for av in analogs])
+        self._stub.CreateAnalogValues(request)
+
+    async def send_accumulators(self, accumulators: List[AccumulatorValue]):
+        request = CreateAccumulatorValuesRequest(analogValues=[av.to_pb() for av in accumulators])
+        self._stub.CreateAccumulatorValues(request)
+
+    async def send_discretes(self, discretes: List[DiscreteValue]):
+        request = CreateDiscreteValuesRequest(analogValues=[dv.to_pb() for dv in discretes])
+        self._stub.CreateDiscreteValues(request)
+
+
 class ProducerClient(CimProducerClient):
     _channel: Channel = None
     _clients: Dict[Type[BaseService], CimProducerClient] = None
@@ -211,3 +250,18 @@ class SyncDiagramProducerClient(DiagramProducerClient):
 
     def send(self, service: DiagramService = None):
         return get_event_loop().run_until_complete(super().send(service))
+
+
+class SyncMeasurementProducerClient(MeasurementProducerClient):
+
+    def send(self, service: MeasurementService = None):
+        return get_event_loop().run_until_complete(super().send(service))
+
+    async def send_analogs(self, analogs: List[AnalogValue]):
+        return get_event_loop().run_until_complete(super().send_analogs(analogs))
+
+    async def send_accumulators(self, accumulators: List[AccumulatorValue]):
+        return get_event_loop().run_until_complete(super().send_accumulators(accumulators))
+
+    async def send_discretes(self, discretes: List[DiscreteValue]):
+        return get_event_loop().run_until_complete(super().send_discretes(discretes))

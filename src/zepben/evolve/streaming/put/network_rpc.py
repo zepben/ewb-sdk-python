@@ -23,6 +23,12 @@ from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from zepben.protobuf.cim.iec61970.base.meas.AccumulatorValue_pb2 import AccumulatorValue
+from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator
+from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue
+from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog
+from zepben.protobuf.cim.iec61970.base.meas.DiscreteValue_pb2 import DiscreteValue
+from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector
@@ -49,7 +55,9 @@ from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation
 from zepben.protobuf.dp.dp_requests_pb2 import *
 from zepben.protobuf.cp.cp_requests_pb2 import *
 from zepben.protobuf.cp.cp_requests_pb2 import CreateOrganisationRequest as CreateCustomerOrganisationRequest
+from zepben.protobuf.mp.mp_requests_pb2 import CreateAnalogValueRequest, CreateAccumulatorValueRequest, CreateDiscreteValueRequest
 from zepben.protobuf.np.np_requests_pb2 import *
+
 
 network_rpc_map = {
     CableInfo: ('CreateCableInfo', CreateCableInfoRequest),
@@ -71,6 +79,9 @@ network_rpc_map = {
     SubGeographicalRegion: ('CreateSubGeographicalRegion', CreateSubGeographicalRegionRequest),
     Substation: ('CreateSubstation', CreateSubstationRequest),
     Terminal: ('CreateTerminal', CreateTerminalRequest),
+    Accumulator: ('CreateAccumulator', CreateAccumulatorRequest),
+    Analog: ('CreateAnalog', CreateAnalogRequest),
+    Discrete: ('CreateDiscrete', CreateDiscreteRequest),
     AcLineSegment: ('CreateAcLineSegment', CreateAcLineSegmentRequest),
     EnergyConsumer: ('CreateEnergyConsumer', CreateEnergyConsumerRequest),
     Disconnector: ('CreateDisconnector', CreateDisconnectorRequest),
@@ -100,4 +111,10 @@ customer_rpc_map = {
     PricingStructure: ('CreatePricingStructure', CreatePricingStructureRequest),
     Tariff: ('CreateTariff', CreateTariffRequest),
     Organisation: ('CreateOrganisation', CreateCustomerOrganisationRequest),
+}
+
+measurement_rpc_map = {
+    AnalogValue: ('CreateAnalogValue', CreateAnalogValueRequest),
+    AccumulatorValue: ('CreateAccumulatorValue', CreateAccumulatorValueRequest),
+    DiscreteValue: ('CreateDiscreteValue', CreateDiscreteValueRequest),
 }
