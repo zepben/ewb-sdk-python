@@ -89,7 +89,7 @@ from zepben.evolve.services.common.translator.base_cim2proto import *
 from zepben.evolve.services.common.translator.base_proto2cim import *
 from zepben.evolve.services.common.base_service import *
 from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, ReferenceResolver, UnresolvedReference
-import zepben.evolve.services.common.resolver
+import zepben.evolve.services.common.resolver as resolver
 
 
 from zepben.evolve.services.diagram.translator.diagram_proto2cim import *

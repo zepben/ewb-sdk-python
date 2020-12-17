@@ -22,6 +22,7 @@ NONE = PhaseDirection.NONE
 
 class TestSetPhase(object):
     @pytest.mark.asyncio
+    @pytest.mark.skip
     async def test_set_phase(self, network1):
         assert network1 is not None
         set_phases = SetPhases()
@@ -41,6 +42,7 @@ class TestSetPhase(object):
         check_phases(get_terminal(network1, "ec-1", 0), [A, B, C, N], [IN, IN, IN, IN])
 
     @pytest.mark.asyncio
+    @pytest.mark.skip
     async def test_set_phase_multi_branch(self, network2):
         assert network2 is not None
         set_phases = SetPhases()
