@@ -18,7 +18,7 @@ from dataclassy import dataclass
 from zepben.evolve.streaming.exceptions import UnsupportedOperationException
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 
-from zepben.evolve.streaming.grpc import GrpcClient, GrpcResult
+from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
 
 __all__ = ["CimConsumerClient", "MultiObjectResult", "extract_identified_object"]
 

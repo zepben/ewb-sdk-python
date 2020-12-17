@@ -14,8 +14,8 @@ from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import Identifi
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
 
 from zepben.evolve.model.cim.iec61968.common.document import Document
-from zepben.evolve.model import Organisation
-from zepben.evolve.model import OrganisationRole
+from zepben.evolve.model.cim.iec61968.common.organisation import Organisation
+from zepben.evolve.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject

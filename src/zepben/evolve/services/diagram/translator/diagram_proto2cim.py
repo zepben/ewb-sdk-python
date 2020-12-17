@@ -14,10 +14,10 @@ from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import Di
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectPoint_pb2 import DiagramObjectPoint as PBDiagramObjectPoint
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectStyle_pb2 import DiagramObjectStyle as PBDiagramObjectStyle
 
-from zepben.evolve.model import Diagram, DiagramObject, DiagramObjectPoint
-from zepben.evolve.model import DiagramObjectStyle
-from zepben.evolve.model import DiagramStyle
-from zepben.evolve.model import OrientationKind
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject, DiagramObjectPoint
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_style import DiagramObjectStyle
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
 
 __all__ = ["diagramobjectpoint_to_cim", "diagram_to_cim", "diagramobject_to_cim"]
 

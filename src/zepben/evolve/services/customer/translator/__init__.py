@@ -8,8 +8,6 @@ from zepben.protobuf.cim.iec61968.common.Agreement_pb2 import Agreement
 from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import CustomerAgreement
 from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure
-from zepben.evolve.services.customer.translator.customer_cim2proto import *
-from zepben.evolve.services.customer.translator.customer_proto2cim import *
 
 __all__ = []
 

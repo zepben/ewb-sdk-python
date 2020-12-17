@@ -14,9 +14,10 @@ def run_retrieve():
     with connect() as channel:
         client = SyncNetworkConsumerClient(channel=channel)
         result = client.retrieve_network()
+        result.throw_on_error()
         network = result.result.network_service
         print(len(network._unresolved_references))
-        print(len([obj for obj in network.objects()]))
+        print(network.len_of())
 
 
 def run_feeder():
@@ -26,7 +27,7 @@ def run_feeder():
         result = client.get_feeder(service, "PBH3A")
         network = result.result
         print(len(service._unresolved_references))
-        print(len([obj for obj in service.objects()]))
+        print(service.len_of())
 
 
 if __name__ == "__main__":

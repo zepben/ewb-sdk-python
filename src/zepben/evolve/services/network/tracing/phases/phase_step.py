@@ -7,7 +7,7 @@ from __future__ import annotations
 
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model import SinglePhaseKind
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 from typing import FrozenSet, Optional
 from dataclassy import dataclass

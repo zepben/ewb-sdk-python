@@ -18,7 +18,7 @@ from zepben.evolve import NetworkService, Feeder, Conductor
 from zepben.evolve.streaming.get.consumer import MultiObjectResult, extract_identified_object, CimConsumerClient
 from zepben.evolve.streaming.get.hierarchy.data import NetworkHierarchyIdentifiedObject, NetworkHierarchyGeographicalRegion, NetworkHierarchySubGeographicalRegion, \
     NetworkHierarchySubstation, NetworkHierarchy, NetworkHierarchyFeeder
-from zepben.evolve.streaming.grpc import GrpcResult
+from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 import zepben.evolve.services.common.resolver as resolver
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest
@@ -213,24 +213,26 @@ class NetworkConsumerClient(CimConsumerClient):
 
         last_num_unresolved = MAX_64_BIT_INTEGER
         while service.has_unresolved_references():
-            current_ids = set()
-            if last_num_unresolved == service.num_unresolved_references():
                 # we only want to break out if we've been trying to resolve the same set of references as we did in the last iteration.
                 # so if we didn't resolve anything in the last iteration (i.e, the number of unresolved refs didn't change) we keep a
                 # record of those mRIDs and break out of the loop if they don't change after another fetch.
-                current_ids.update(service.unresolved_mrids())
 
-            while last_num_unresolved != service.num_unresolved_references():
+            failed = set()
+            for mrid in service.unresolved_mrids():
+                result = (await self._get_identified_object(service, mrid)).throw_on_error()
+                if result.was_failure or result.result is None:
+                    failed.add(mrid)
 
-                last_num_unresolved = service.num_unresolved_references()
-                for mrid in service.unresolved_mrids():
-                    await self._get_identified_object(service, mrid)
 
-            if current_ids:
-                if current_ids == set(service.unresolved_mrids()):
-                    return GrpcResult(NetworkResult(service, current_ids))
+            if failed:
+                if failed == set(service.unresolved_mrids()):
+                    return GrpcResult(NetworkResult(service, failed))
 
         return GrpcResult(NetworkResult(service))
+
+    async def _process_unresolved(self, service):
+        for mrid in service.unresolved_mrids():
+            await self._get_identified_object(service, mrid)
 
     async def _process_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
         to_fetch = set()

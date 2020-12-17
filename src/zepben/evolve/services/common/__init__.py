@@ -8,10 +8,6 @@ from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocum
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
-from zepben.evolve.services.common.base_service import *
-from zepben.evolve.services.common.translator import *
-from zepben.evolve.services.common.reference_resolvers import *
-import zepben.evolve.services.common.resolver
 
 
 PBOrganisationRole.mrid = lambda self: self.io.mRID

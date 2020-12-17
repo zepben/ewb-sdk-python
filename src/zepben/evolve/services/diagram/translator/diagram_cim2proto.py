@@ -12,7 +12,7 @@ from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectPoint_pb2 impo
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectStyle_pb2 import DiagramObjectStyle as PBDiagramObjectStyle
 
 from zepben.evolve.services.common.translator.util import mrid_or_empty
-from zepben.evolve.model import Diagram, DiagramObject, DiagramObjectPoint
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject, DiagramObjectPoint
 from zepben.evolve.services.common.translator.base_cim2proto import identifiedobject_to_pb
 
 __all__ = ["diagram_to_pb", "diagramobject_to_pb", "diagramobjectpoint_to_pb"]

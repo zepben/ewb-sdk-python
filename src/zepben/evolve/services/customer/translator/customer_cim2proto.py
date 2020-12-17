@@ -12,10 +12,12 @@ from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingS
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
 
 from zepben.evolve.services.common.translator.util import mrid_or_empty
-from zepben.evolve.model import Customer
 from zepben.evolve.services.common.translator.base_cim2proto import document_to_pb, organisation_to_pb
-from zepben.evolve.model import Agreement
-from zepben.evolve.model import CustomerAgreement, PricingStructure, Tariff
+from zepben.evolve.model.cim.iec61968.customers.customer import Customer
+from zepben.evolve.model.cim.iec61968.common.document import Agreement
+from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
+from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure
+from zepben.evolve.model.cim.iec61968.customers.tariff import Tariff
 
 __all__ = ["agreement_to_pb", "customer_to_pb", "customeragreement_to_pb", "pricingstructure_to_pb", "tariff_to_pb"]
 

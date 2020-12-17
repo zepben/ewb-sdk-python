@@ -8,38 +8,44 @@ from dataclassy import dataclass
 from typing import Callable, Optional
 
 
-from zepben.evolve.model import Organisation
-from zepben.evolve.model import OrganisationRole
-from zepben.evolve.model import WireInfo
-from zepben.evolve.model import Asset
-from zepben.evolve.model import Pole
-from zepben.evolve.model import Streetlight
-from zepben.evolve.model import AssetOrganisationRole
-from zepben.evolve.model import Location
-from zepben.evolve.model import Customer
-from zepben.evolve.model import CustomerAgreement
-from zepben.evolve.model import PricingStructure
-from zepben.evolve.model import Tariff
-from zepben.evolve.model import EndDevice, UsagePoint
-from zepben.evolve.model import OperationalRestriction
-from zepben.evolve.model import AuxiliaryEquipment
-from zepben.evolve.model import BaseVoltage
-from zepben.evolve.model import ConductingEquipment
-from zepben.evolve.model import ConnectivityNode
-from zepben.evolve.model import IdentifiedObject
-from zepben.evolve.model import Equipment
-from zepben.evolve.model import Terminal
-from zepben.evolve.model import Diagram, DiagramObject
-from zepben.evolve.model import Measurement
-from zepben.evolve.model import Control
-from zepben.evolve.model import RemoteSource
-from zepben.evolve.model import RemoteControl
-from zepben.evolve.model import AcLineSegment, Conductor
-from zepben.evolve.model import EnergyConsumer, EnergyConsumerPhase
-from zepben.evolve.model import EnergySource
-from zepben.evolve.model import EnergySourcePhase
-from zepben.evolve.model import PerLengthSequenceImpedance, Feeder, EquipmentContainer, Substation, GeographicalRegion, SubGeographicalRegion, \
-    PowerSystemResource, PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd
+from zepben.evolve.model.cim.iec61968.common.organisation import Organisation
+from zepben.evolve.model.cim.iec61968.common.organisation_role import OrganisationRole
+from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
+from zepben.evolve.model.cim.iec61968.assets.asset import Asset
+from zepben.evolve.model.cim.iec61968.assets.pole import Pole
+from zepben.evolve.model.cim.iec61968.assets.streetlight import Streetlight
+from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole
+from zepben.evolve.model.cim.iec61968.common.location import Location
+from zepben.evolve.model.cim.iec61968.customers.customer import Customer
+from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
+from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure
+from zepben.evolve.model.cim.iec61968.customers.tariff import Tariff
+from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
+from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, UsagePoint
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
+from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
+from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, EquipmentContainer
+from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
+from zepben.evolve.model.cim.iec61970.base.core.regions import GeographicalRegion, SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject
+from zepben.evolve.model.cim.iec61970.base.meas.measurement import Measurement
+from zepben.evolve.model.cim.iec61970.base.meas.control import Control
+from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
+from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
+from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
+from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
 
 __all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_to_location_resolver", "pole_to_streetlight_resolver",
            "streetlight_to_pole_resolver", "aux_equip_to_term_resolver", "cond_equip_to_bv_resolver", "cond_equip_to_terminal_resolver",
@@ -54,7 +60,6 @@ __all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_t
            "up_to_ed_resolver", "up_to_eq_resolver", "up_to_loc_resolver", "circuit_to_loop_resolver", "circuit_to_sub_resolver", "circuit_to_term_resolver",
            "loop_to_circuit_resolver", "loop_to_esub_resolver", "loop_to_sub_resolver", "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference"]
 
-from zepben.evolve.model import Circuit, Loop
 
 
 @dataclass(frozen=True, eq=False, slots=True)

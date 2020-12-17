@@ -8,9 +8,9 @@ from zepben.protobuf.cim.iec61970.base.meas.MeasurementValue_pb2 import Measurem
 from zepben.protobuf.cim.iec61970.base.meas.AccumulatorValue_pb2 import AccumulatorValue as PBAccumulatorValue
 from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue as PBAnalogValue
 from zepben.protobuf.cim.iec61970.base.meas.DiscreteValue_pb2 import DiscreteValue as PBDiscreteValue
-from zepben.evolve.model import AnalogValue, AccumulatorValue, DiscreteValue, MeasurementValue
+from zepben.evolve.model.cim.iec61970.base.meas.value import AnalogValue, AccumulatorValue, DiscreteValue, MeasurementValue
 
-from zepben.evolve.services.measurement import MeasurementService
+from zepben.evolve.services.measurement.measurements import MeasurementService
 
 __all__ = ["measurementvalue_to_cim", "analogvalue_to_cim", "accumulatorvalue_to_cim", "discretevalue_to_cim"]
 

@@ -9,11 +9,11 @@ import logging
 from enum import Enum
 from typing import Dict, List
 
-from zepben.evolve.model import Measurement
-from zepben.evolve.services.common import BaseService
-from zepben.evolve.model import ConnectivityNode
-from zepben.evolve.model import EnergySource
-from zepben.evolve.services.network.tracing import SetPhases
+from zepben.evolve.model.cim.iec61970.base.meas.measurement import Measurement
+from zepben.evolve.services.common.base_service import BaseService
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
+from zepben.evolve.services.network.tracing.phases.phasing import SetPhases
 from pathlib import Path
 
 __all__ = ["connect", "NetworkService"]

@@ -6,8 +6,8 @@
 
 from typing import Dict, List
 
-from zepben.evolve.model import DiagramObject
-from zepben.evolve.services.common import BaseService
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import DiagramObject
+from zepben.evolve.services.common.base_service import BaseService
 
 __all__ = ["DiagramService"]
 

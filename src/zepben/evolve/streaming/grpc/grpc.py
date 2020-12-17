@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 from typing import Optional, TypeVar, Generic, Callable, List, Union
+from grpc import RpcError
 
 from dataclassy import dataclass
 

@@ -6,7 +6,7 @@
 from __future__ import annotations
 from typing import Optional, Generator, List
 
-from zepben.evolve.model import Line
+from zepben.evolve.model.cim.iec61970.base.wires.line import Line
 from zepben.evolve.util import ngen, get_by_mrid, safe_remove, nlen
 
 __all__ = ["Circuit"]

@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
 from zepben.evolve.services.network.tracing.traversals.queue import LifoQueue
-from zepben.evolve.services.network.tracing.phase_status import normal_phases, current_phases
+from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
 
 __all__ = ["normally_open", "currently_open", "ignore_open", "phase_log"]
 phase_logger = logging.getLogger("phase_logger")
