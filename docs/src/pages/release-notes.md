@@ -2,6 +2,7 @@
 
 | Version | Released |
 | --- | --- |
+|[0.21.0](#v0210)| `17 December 2020` |
 |[0.20.0](#v0200)| `14 December 2020` |
 |[0.19.0](#v0190)| `14 December 2020` |
 |[0.18.0](#v0180)| `14 December 2020` |
@@ -23,6 +24,26 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+### v0.21.0
+
+##### Breaking Changes
+* Re-ordered the internal modules. If you were previously importing from something other than the top-level module (zepben.evolve), 
+  it's likely these imports will no longer work. You should change all your imports to only import from zepben.evolve.
+
+##### New Features
+* Added MeasurementProducerClient for streaming measurements. Currently experimental and API will definitely change.
+
+##### Enhancements
+* None.
+
+##### Fixes
+* None.
+
+##### Notes
+* None.
 
 ---
 
