@@ -65,7 +65,7 @@ class NetworkConsumerClient(CimConsumerClient):
         else:
             self._stub = NetworkConsumerStub(channel)
 
-    async def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    async def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[NetworkHierarchyIdentifiedObject]]:
         """
         Retrieve the object with the given `mrid` and store the result in the `service`.
 
@@ -125,7 +125,7 @@ class NetworkConsumerClient(CimConsumerClient):
         """
         return await self._retrieve_network()
 
-    async def _get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    async def _get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[NetworkHierarchyIdentifiedObject]]:
         async def y():
             async for io, _ in self._process_identified_objects(service, [mrid]):
                 return io
@@ -191,38 +191,36 @@ class NetworkConsumerClient(CimConsumerClient):
             return result
 
         hierarchy: NetworkHierarchy = result.result
-        for mrid, gr in hierarchy.geographical_regions.items():
+        for mrid in hierarchy.geographical_regions.keys():
             gr_result = await self._get_identified_object(service, mrid)
             if gr_result.was_failure:
                 return gr_result
 
-        for mrid, sgr in hierarchy.sub_geographical_regions.items():
+        for mrid in hierarchy.sub_geographical_regions.keys():
             sgr_result = await self._get_identified_object(service, mrid)
             if sgr_result.was_failure:
                 return sgr_result
 
-        for mrid, substation in hierarchy.substations.items():
+        for mrid in hierarchy.substations.keys():
             substation_result = await self._get_identified_object(service, mrid)
             if substation_result.was_failure:
                 return substation_result
 
-        for mrid, feeder in hierarchy.feeders.items():
+        for mrid in hierarchy.feeders.keys():
             feeder_result = await self._get_identified_object(service, mrid)
             if feeder_result.was_failure:
                 return feeder_result
 
-        last_num_unresolved = MAX_64_BIT_INTEGER
+        failed = set()
         while service.has_unresolved_references():
                 # we only want to break out if we've been trying to resolve the same set of references as we did in the last iteration.
                 # so if we didn't resolve anything in the last iteration (i.e, the number of unresolved refs didn't change) we keep a
                 # record of those mRIDs and break out of the loop if they don't change after another fetch.
 
-            failed = set()
             for mrid in service.unresolved_mrids():
                 result = (await self._get_identified_object(service, mrid)).throw_on_error()
                 if result.was_failure or result.result is None:
                     failed.add(mrid)
-
 
             if failed:
                 if failed == set(service.unresolved_mrids()):
@@ -234,7 +232,7 @@ class NetworkConsumerClient(CimConsumerClient):
         for mrid in service.unresolved_mrids():
             await self._get_identified_object(service, mrid)
 
-    async def _process_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
+    async def _process_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> AsyncGenerator[NetworkHierarchyIdentifiedObject, None]:
         to_fetch = set()
         existing = set()
         for mrid in mrids:
@@ -274,7 +272,7 @@ class NetworkConsumerClient(CimConsumerClient):
 
 class SyncNetworkConsumerClient(NetworkConsumerClient):
 
-    def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[NetworkHierarchyIdentifiedObject]]:
         """
         Retrieve the object with the given `mrid` and store the result in the `service`.
 
