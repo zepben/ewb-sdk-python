@@ -228,7 +228,7 @@ class NetworkConsumerClient(CimConsumerClient):
                 if failed == set(service.unresolved_mrids()):
                     return GrpcResult(NetworkResult(service, failed))
 
-        return GrpcResult(NetworkResult(service))
+        return GrpcResult(NetworkResult(service, failed))
 
     async def _process_unresolved(self, service):
         for mrid in service.unresolved_mrids():
