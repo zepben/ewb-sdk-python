@@ -24,7 +24,6 @@ jobs:
       - name: Check licence
         uses: zepben/licence-check-action@main
         with:
-          LC_URL: ${{ secrets.LC_URL }}
           PATH: src
 
       - name: Cache python deps
