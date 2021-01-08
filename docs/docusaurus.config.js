@@ -1,5 +1,12 @@
-const path = require("path");
-const versions = require("./versions.json");
+/*
+ * Copyright 2021 Zeppelin Bend Pty Ltd
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+const zepbenDocusaurusPreset = require("@zepben/docusaurus-preset");
 
 module.exports = {
   title: "Evolve SDK (Python)",
@@ -11,6 +18,7 @@ module.exports = {
   organizationName: "zepben",
   projectName: "evolve-sdk-python",
   themeConfig: {
+    ...zepbenDocusaurusPreset.defaultThemeConfig,
     colorMode: {
       defaultMode: "light",
       disableSwitch: false,
@@ -57,16 +65,7 @@ module.exports = {
       style: "dark",
       links: [],
       copyright: `Copyright © ${new Date().getFullYear()} Zeppelin Bend Pty. Ltd.`,
-    },
-    googleAnalytics: {
-      trackingID: "UA-81287323-1",
-      anonymizeIP: false,
-    },
-    algolia: {
-      apiKey: "b5ec32dcc5109c1a14d773fd21604bce",
-      indexName: "evolve-docs",
-      appId: "3K6D3DR52K"
-    },
+    }
   },
   presets: [
     [
