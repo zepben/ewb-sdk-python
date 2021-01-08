@@ -6,6 +6,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-module.exports = {
-  presets: [require.resolve("@docusaurus/core/lib/babel/preset")],
-};
+import SearchBar from "@zepben/docusaurus-components/components/SearchBar";
+
+export default SearchBar;

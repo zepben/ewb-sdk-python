@@ -10,7 +10,7 @@ import TabItem from '@theme/TabItem';
 The tracing module is in an experimental state and bugs will be present.
 :::
 
-Once you have a connected network model you can start following the connectivity to do some interesting analysis, from
+Once you have a connected network model you can start following the connectivity to do some interesting analyses, from
 simple tasks such as adding up cable lengths along a line to advanced functions like a full load flow analysis.
 
 The Evolve SDK provides an API to make following connectivity (what we will call tracing) less cumbersome and more
@@ -21,7 +21,7 @@ package is a great place to get an overview of the kind of tools we provide as p
 
 ## Basic Connectivity 
 
-So, let's start at the absolute basic use case. "What is directly connected to this piece of equipment".
+So, let's start at the absolute basic use case. "What is directly connected to this piece of equipment?".
 Obviously we provide a function to let you to find out. Let's see it in code:
 
 TODO: Take example from datamodel page and code then explain in context of that
@@ -40,8 +40,8 @@ for cr in connectivity:
 
 ```
 
-Sometimes you want to be a bit more specific about your connectivity, such as what is connected only to one side of the
-equipment. You can do this by using specific terminals:
+Sometimes you want to be a bit more specific about your connectivity, such as "what is connected only to one side of the
+equipment?". You can do this by using specific terminals:
 
 ```python
 from zepben.evolve import Breaker
@@ -73,7 +73,7 @@ of objects. See the code docs for more details.
 There are a number of traces which we have identified as being frequently required. So, the SDK provides a number of 
 preconfigured BasicTraversal creators for these common use cases. These can be found in the tracing [package](#).
 
-To get started, lets take a looks at the `tracing.connected_equipment_trace()`. This returns a `BasicTraversal` that is
+To get started, lets take a look at the `tracing.connected_equipment_trace()`. This returns a `BasicTraversal` that is
 preconfigured to continuously step to equipment that is connected in any way. Under the covers it uses the
 `Tracing.connected_equipment` function we looked at above to continuously step to connected objects. Now, say we wanted to
 identify the nearest circuit breakers to a piece of equipment, capturing all equipment between those breakers. We can do

@@ -18,12 +18,12 @@ following services
 * DiagramService
 
 Each of these services manage a specific subset of identified objects. This subset will hopefully be somewhat obvious
-based on the name of each service. If you would like to know why there a multiple services for different objects types
+based on the name of each service. If you would like to know why there a multiple services for different object types
 you can read more about it [here](#why-multiple-services).
 
 ## Common Service functionality
 
-Because services work with [identified objects](http://zepben.bitbucket.io/cim/cim100/iec61970/base/core/identifiedobject/)
+Because services work with [identified objects](https://zepben.github.io/evolve/docs/cim/cim100/TC57CIM/IEC61970/Base/Core/IdentifiedObject)
 they can provide some common level of functionality. This functionality can be found in the base class `BaseService`.
 
 ### Adding and Removing Objects
@@ -46,7 +46,7 @@ service.add(diagram)  # throws exception.
 
 ### Object Retrieval
 
-There are a few ways we provide to get objects back out of a service. The most obvious one is by MRID:
+There are a few ways we provide to get objects back out of a service. The most obvious one is by mRID:
 
 ```python
 from zepben.evolve import NetworkService, Breaker
@@ -88,14 +88,14 @@ for obj in service.objects(Breaker):  # generator over all objects in service of
 ## Network Service
 
 The network service works with objects related to the physical asset model. That means all
-[PowerSystemResource](http://zepben.bitbucket.io/cim/evolve/iec61970/base/core/powersystemresource/) types, but also
-data related types such as [AssetInfo](http://zepben.bitbucket.io/cim/evolve/iec61968/assets/assetinfo/) and
-[Location](http://zepben.bitbucket.io/cim/evolve/iec61968/common/location/).
+[PowerSystemResource](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/PowerSystemResource) types, but also
+data related types such as [AssetInfo](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Assets/AssetInfo) and
+[Location](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Common/Location).
 
 The network service also generates an index between power system resources and terminals and their corresponding
-measurements. When you add a [Measurement](http://zepben.bitbucket.io/cim/evolve/iec61970/base/meas/measurement/)
+measurements. When you add a [Measurement](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Meas/Measurement)
 to the service, it indexes it against the `power_system_resource_mrid` or the `terminal_mrid` associated with the measurement.
-You can then get all measurements associated with a power system resource or a terminal via its MRID via the lookup on
+You can then get all measurements associated with a power system resource or a terminal via its mRID via the lookup on
 the service:
 
 ```python
@@ -123,18 +123,18 @@ as the association is set before adding to the service it is unlikely to be a pr
 
 ## Customer Service
 
-The customer service work with objects related to customers and their agreements they may have with actors in the
+The customer service works with objects related to customers and their agreements they may have with actors in the
 network. At this point in time it provides no further specialised functionality.
 
 ## Diagram Service
 
-The diagram service work with objects related to diagrams associated with identified objects.
-It also provides a lookup to be able to get the [DiagramObjects](http://zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagramobject/) associated with any
+The diagram service works with objects related to diagrams associated with identified objects.
+It also provides a lookup to be able to get the [DiagramObjects](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/DiagramLayout/DiagramObject) associated with any
 identified object. Specifically:
-- If the MRID is a diagram object, a list with just the diagram object is returned.
-- If the MRID is a [Diagram](http://zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagram/) all diagram
+- If the mRID is a diagram object, a list with just the diagram object is returned.
+- If the mRID is a [Diagram](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/DiagramLayout/Diagram) all diagram
   objects belonging to that diagram are returned.
-- If the MRID is any other identified object, the diagram objects for that identified objects are returned.
+- If the mRID is any other identified object, the diagram objects for that identified object are returned.
 
 ```python
 from zepben.evolve import DiagramService, Diagram, DiagramObject
@@ -173,13 +173,13 @@ representing, so as long as it is set before adding it to the service it is unli
 
 When creating an object to include in the model, you will often not have all referenced objects constructed, not have
 all the information to construct a reference immediately, or not have a reference handy to use. However, you will 
-generally have the MRID of any referenced objects. To deal with this, the services provide a `resolve_or_defer_reference`
+generally have the mRID of any referenced objects. To deal with this, the services provide a `resolve_or_defer_reference`
 function. This function will:
-- Resolve a reference immediately (in both direcitons is applicable) if the reference MRID object is already added to the service. 
-- If the reference MRID is not added to the service, the request to resolve the reference is chached. When an object 
-  with the referenced MRID is eventually added to the service, the reference is resolved at this time. 
+- Resolve a reference immediately (in both direcitons if applicable) if the reference mRID object is already added to the service. 
+- If the reference mRID is not added to the service, the request to resolve the reference is cached. When an object 
+  with the referenced mRID is eventually added to the service, the reference is resolved at this time. 
 
-Unresolved references can also be queried back out of the service. Let's see all with a simple example:
+Unresolved references can also be queried back out of the service. Let's see it all with a simple example:
 
 ```python
 from zepben.evolve import NetworkService, Feeder, Breaker, resolver
@@ -204,7 +204,7 @@ print(feeder.equipment.contains(junction)) # false
 # We can query the unresolved reference MRIDs back out of the service
 print(service.get_unresolved_reference_mrids(resolver.ec_equipment(feeder))) # [junction]
 
-# When the object with the deferred MRID is added, the reference gets resolved
+# When the object with the deferred mRID is added, the reference gets resolved
 service.add(junction)
 print(feeder.equipment.contains(junction)) # true
 ```
@@ -220,10 +220,10 @@ data model into separate concerns, at what we feel are sensible boundary points.
 
 * The network service deals with models of the physical electricity network.
 * The customer service deals with customers and their agreements with electricity providers
-(e.g their [Tariff](http://zepben.bitbucket.io/cim/evolve/iec61968/customers/tariff/)).
+(e.g their [Tariff](https://zepben.github.io/evolve/docs/cim/evolve/IEC61968/Customers/Tariff)).
 * The diagram service deals with things related to representing networks as diagrams
-(see [Diagram](http://zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagram/) and
- [DiagramObject](http://zepben.bitbucket.io/cim/evolve/iec61970/base/diagramlayout/diagramobject/)).
+(see [Diagram](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/DiagramLayout/Diagram) and
+ [DiagramObject](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/DiagramLayout/DiagramObject)).
 * Once the platform supports measurement values, these values will be retrieved via a separate service rather than
   directly from measurement objects.
 
