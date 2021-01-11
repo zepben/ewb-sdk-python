@@ -5,15 +5,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  licence-check:
+  check-licence-and-test:
     runs-on: ubuntu-latest
-    container: python:3.7-alpine
+    container: python:3.7
     steps:
       - uses: actions/checkout@v2
 
       - name: Install dependencies
         run: |
-          apk add tar curl bash g++
           pip install tox
 
       - name: Cache licence-check
@@ -27,7 +26,7 @@ jobs:
         with:
           PATH: src
 
-      - name: Build and publish
+      - name: Build and test
         run: |
           tox
         shell: bash
