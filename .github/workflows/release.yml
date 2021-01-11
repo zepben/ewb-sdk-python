@@ -33,7 +33,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    container: python:3.7-alpine
+    container: python:3.7
     needs: release-checks
     outputs:
       artifact: ${{ steps.build.outputs.artifact }}
@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          apk add tar curl bash gcc musl-dev libffi-dev openssl-dev git
+          pip install tox twine
 
       - uses: actions/checkout@v2
 
@@ -52,23 +52,13 @@ jobs:
           git checkout release
         shell: bash
 
-      - name: Cache python deps
-        uses: actions/cache@v2
-        with:
-          path: /pipcache
-          key: pip
-
       - name: Build and publish
         id: build
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          mkdir -p /pipcache
-          pip install --cache-dir /pipcache twine
-          pip install --cache-dir /pipcache -r requirements.txt
-          # pytest
-          python setup.py sdist bdist_wheel
+          tox
           twine upload dist/*
           version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
           artifact="zepben.evolve-${version}-py3-none-any.whl"

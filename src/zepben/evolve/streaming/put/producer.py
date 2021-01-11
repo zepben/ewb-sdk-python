@@ -57,7 +57,10 @@ async def _send(stub, service, rpc_map):
         except AttributeError as e:
             raise AttributeError(f"Protobuf attribute {attrname} could not be found - is evolve-grpc in sync?") from e
 
-        rpc(req)
+        try:
+            rpc(req)
+        except Exception as e:
+            raise Exception(f"Failed to call {rpc_map[type(pb)][0]} with {str(obj)}.") from e
 
 
 class CimProducerClient(GrpcClient):

@@ -1,3 +1,5 @@
+[![Coverage](https://coveralls.io/repos/github/zepben/evolve-sdk-python/badge.svg)](https://coveralls.io/github/zepben/evolve-sdk-python)
+
 # Zepben Evolve Python SDK #
 The Python Evolve SDK contains everything necessary to communicate with a [Zepben EWB Server](https://github.com/zepben/energy-workbench-server). See the [architecture](docs/architecture.md) documentation for more details.
 

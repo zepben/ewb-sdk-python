@@ -9,7 +9,7 @@ from setuptools import setup, find_namespace_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-test_deps = ["pytest", "pytest-asyncio", "hypothesis<6"]
+test_deps = ["pytest", "pytest-cov", "pytest-asyncio", "hypothesis<6"]
 setup(
     name="zepben.evolve",
     version="0.22.0b4",
@@ -24,6 +24,9 @@ setup(
         "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Operating System :: OS Independent"
     ],
     package_dir={"": "src"},
@@ -32,7 +35,7 @@ setup(
     install_requires=[
         "protobuf",
         "requests",
-        "zepben.protobuf==0.9.0",
+        "zepben.protobuf>=0.9.0",
         "python-jose-cryptodome",
         "dataclassy"
     ],

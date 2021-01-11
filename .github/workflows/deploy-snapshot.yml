@@ -10,14 +10,14 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    container: python:3.7-alpine
+    container: python:3.7
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Install dependencies
         run: |
-          apk add tar curl bash gcc musl-dev libffi-dev openssl-dev
+          pip install tox twine
 
       - name: Cache licence-check
         uses: actions/cache@v2
@@ -31,21 +31,12 @@ jobs:
           LC_URL: ${{ secrets.LC_URL }}
           PATH: src
 
-      - name: Cache python deps
-        uses: actions/cache@v2
-        with:
-          path: /pipcache
-          key: pip
-
       - name: Build and publish
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          mkdir -p /pipcache
-          pip install --cache-dir /pipcache twine
-          pip install --cache-dir /pipcache -r requirements.txt
-          python setup.py sdist bdist_wheel
+          tox
           twine upload dist/*
         shell: bash
 

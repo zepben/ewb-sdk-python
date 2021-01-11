@@ -209,9 +209,9 @@ class NetworkConsumerClient(CimConsumerClient):
 
         failed = set()
         while service.has_unresolved_references():
-                # we only want to break out if we've been trying to resolve the same set of references as we did in the last iteration.
-                # so if we didn't resolve anything in the last iteration (i.e, the number of unresolved refs didn't change) we keep a
-                # record of those mRIDs and break out of the loop if they don't change after another fetch.
+            # we only want to break out if we've been trying to resolve the same set of references as we did in the last iteration.
+            # so if we didn't resolve anything in the last iteration (i.e, the number of unresolved refs didn't change) we keep a
+            # record of those mRIDs and break out of the loop if they don't change after another fetch.
 
             failed = set()
             for mrid in service.unresolved_mrids():
@@ -242,17 +242,9 @@ class NetworkConsumerClient(CimConsumerClient):
         responses = self._stub.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=to_fetch))
         for response in responses:
             og = response.objectGroup
-            io, mrid = extract_identified_object(service, og.identifiedObject)
-            if io:
-                yield io, mrid
-            else:
-                yield None, mrid
+            yield extract_identified_object(service, og.identifiedObject)
             for owned_obj in og.ownedIdentifiedObject:
-                extracted, mrid = extract_identified_object(service, owned_obj)
-                if extracted:
-                    yield extracted, mrid
-                else:
-                    yield None, mrid
+                yield extract_identified_object(service, owned_obj)
 
     async def _handle_network_hierarchy(self):
         response = self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest())
