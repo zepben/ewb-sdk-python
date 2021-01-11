@@ -3,10 +3,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-#
-#  This Source Code Form is subject to the terms of the Mozilla Public
-#  License, v. 2.0. If a copy of the MPL was not distributed with this
-#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
 from asyncio import get_event_loop
@@ -32,7 +28,7 @@ MAX_64_BIT_INTEGER = 9223372036854775807
 @dataclass(slots=True)
 class NetworkResult(object):
     network_service: Optional[NetworkService]
-    failed: Optional[Set[str]]
+    failed: Set[str] = set()
 
 
 def _lookup(mrids: Iterable[str], lookup: Dict[str, NetworkHierarchyIdentifiedObject]):
@@ -65,7 +61,7 @@ class NetworkConsumerClient(CimConsumerClient):
         else:
             self._stub = NetworkConsumerStub(channel)
 
-    async def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[NetworkHierarchyIdentifiedObject]]:
+    async def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
         """
         Retrieve the object with the given `mrid` and store the result in the `service`.
 
@@ -125,7 +121,7 @@ class NetworkConsumerClient(CimConsumerClient):
         """
         return await self._retrieve_network()
 
-    async def _get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[NetworkHierarchyIdentifiedObject]]:
+    async def _get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
         async def y():
             async for io, _ in self._process_identified_objects(service, [mrid]):
                 return io
@@ -217,6 +213,7 @@ class NetworkConsumerClient(CimConsumerClient):
                 # so if we didn't resolve anything in the last iteration (i.e, the number of unresolved refs didn't change) we keep a
                 # record of those mRIDs and break out of the loop if they don't change after another fetch.
 
+            failed = set()
             for mrid in service.unresolved_mrids():
                 result = (await self._get_identified_object(service, mrid)).throw_on_error()
                 if result.was_failure or result.result is None:
@@ -232,7 +229,7 @@ class NetworkConsumerClient(CimConsumerClient):
         for mrid in service.unresolved_mrids():
             await self._get_identified_object(service, mrid)
 
-    async def _process_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> AsyncGenerator[NetworkHierarchyIdentifiedObject, None]:
+    async def _process_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
         to_fetch = set()
         existing = set()
         for mrid in mrids:
@@ -272,7 +269,7 @@ class NetworkConsumerClient(CimConsumerClient):
 
 class SyncNetworkConsumerClient(NetworkConsumerClient):
 
-    def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[NetworkHierarchyIdentifiedObject]]:
+    def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
         """
         Retrieve the object with the given `mrid` and store the result in the `service`.
 
