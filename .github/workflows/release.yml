@@ -33,7 +33,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    container: python:3.7-alpine
+    container: python:3.7
     needs: release-checks
     outputs:
       artifact: ${{ steps.build.outputs.artifact }}
@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          apk add tar curl bash gcc musl-dev libffi-dev openssl-dev git
+          pip install tox twine
 
       - uses: actions/checkout@v2
 
@@ -58,8 +58,6 @@ jobs:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          mkdir -p /pipcache
-          pip install twine
           tox
           twine upload dist/*
           version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
