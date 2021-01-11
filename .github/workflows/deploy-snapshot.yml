@@ -42,10 +42,8 @@ jobs:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          mkdir -p /pipcache
-          pip install --cache-dir /pipcache twine
-          pip install --cache-dir /pipcache -r requirements.txt
-          python setup.py sdist bdist_wheel
+          pip install twine
+          tox
           twine upload dist/*
         shell: bash
 

@@ -11,7 +11,7 @@ import cProfile
 
 
 def run_retrieve():
-    with connect() as channel:
+    with connect(rpc_port=50052) as channel:
         client = SyncNetworkConsumerClient(channel=channel)
         result = client.retrieve_network()
         result.throw_on_error()
@@ -21,7 +21,7 @@ def run_retrieve():
 
 
 def run_feeder():
-    with connect() as channel:
+    with connect(rpc_port=50052) as channel:
         service = NetworkService()
         client = SyncNetworkConsumerClient(channel=channel)
         result = client.get_feeder(service, "PBH3A")
@@ -32,4 +32,4 @@ def run_feeder():
 
 if __name__ == "__main__":
     cProfile.run("run_retrieve()")
-    cProfile.run("run_feeder()")
+    # cProfile.run("run_feeder()")
