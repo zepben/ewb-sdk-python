@@ -1,3 +1,4 @@
+![Build Status](https://img.shields.io/github/workflow/status/zepben/evolve-sdk-python/Deploy%20snapshot%20to%20Pypi)
 [![Coverage](https://coveralls.io/repos/github/zepben/evolve-sdk-python/badge.svg)](https://coveralls.io/github/zepben/evolve-sdk-python)
 
 # Zepben Evolve Python SDK #
