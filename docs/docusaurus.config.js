@@ -7,6 +7,7 @@
  */
 
 const zepbenDocusaurusPreset = require("@zepben/docusaurus-preset");
+const versions = require("./versions.json");
 
 module.exports = {
   title: "Evolve SDK (Python)",
@@ -65,7 +66,14 @@ module.exports = {
       style: "dark",
       links: [],
       copyright: `Copyright © ${new Date().getFullYear()} Zeppelin Bend Pty. Ltd.`,
-    }
+    },
+    algolia: {
+      ...zepbenDocusaurusPreset.defaultThemeConfig.algolia,
+      searchParameters: {
+        facetFilters: ["project:python-sdk"]
+      }
+    },
+    metadatas: [{name: 'docsearch:project', content: 'python-sdk'}],
   },
   presets: [
     [
@@ -74,7 +82,10 @@ module.exports = {
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl: "https://github.com/zepben",
+          versions: versions.reduce((acc, curr) => {
+            acc[curr] = {label: curr, path: curr};
+            return acc;
+          }, {})
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
