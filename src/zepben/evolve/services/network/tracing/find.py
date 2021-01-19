@@ -25,7 +25,7 @@ class Status(Enum):
 @dataclass(slots=True)
 class Result(object):
     status: Status = Status.SUCCESS
-    equipment: Optional[Dict[str, ConductingEquipment]] = {}
+    equipment: Optional[Dict[str, ConductingEquipment]] = dict()
 
 
 async def _trace(traversal_supplier: Callable[[...], Traversal], from_: ConductingEquipment, to: Optional[ConductingEquipment]):

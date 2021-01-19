@@ -24,7 +24,7 @@ from zepben.evolve.exceptions import PhaseException
 from zepben.evolve.services.network.tracing.connectivity import get_connectivity
 from zepben.evolve.exceptions import TracingException
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
-from zepben.evolve.services.network.tracing.traces import queue_next_terminal
+from zepben.evolve.services.network.tracing.queuing_functions import queue_next_terminal
 from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
 from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
 from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus
@@ -258,8 +258,8 @@ def _flow_out_to_connected_terminals_and_queue(traversal: BranchRecursiveTravers
         in_term = cr.to_terminal
         has_added = False
         for oi in cr.nominal_phase_paths:
-            out_core = oi.from_core
-            in_core = oi.to_core
+            out_core = oi.from_phase
+            in_core = oi.to_phase
             out_phase = phase_selector(out_terminal, out_core).phase()
             in_phase = phase_selector(in_term, in_core)
             try:
