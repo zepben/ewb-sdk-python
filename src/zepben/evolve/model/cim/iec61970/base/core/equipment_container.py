@@ -157,7 +157,7 @@ class Feeder(EquipmentContainer):
         """
         Contained `zepben.evolve.iec61970.base.core.equipment.Equipment` using the current state of the network.
         """
-        return ngen(self._current_equipment)
+        return ngen(self._current_equipment.values() if self._current_equipment is not None else None)
 
     def num_current_equipment(self):
         """
@@ -173,6 +173,8 @@ class Feeder(EquipmentContainer):
         Returns The `zepben.evolve.iec61970.base.core.equipment.Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
+        if not self._current_equipment:
+            raise KeyError(mrid)
         try:
             return self._current_equipment[mrid]
         except AttributeError:
@@ -189,7 +191,7 @@ class Feeder(EquipmentContainer):
         if self._validate_reference(equipment, self.get_current_equipment, "An Equipment"):
             return self
         self._current_equipment = dict() if self._current_equipment is None else self._current_equipment
-        self._equipment[equipment.mrid] = equipment
+        self._current_equipment[equipment.mrid] = equipment
         return self
 
     def remove_current_equipment(self, equipment: Equipment) -> Feeder:
