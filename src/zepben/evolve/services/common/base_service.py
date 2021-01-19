@@ -225,7 +225,7 @@ class BaseService(object, metaclass=ABCMeta):
         del self._objectsByType[identified_object.__class__][identified_object.mrid]
         return True
 
-    def objects(self, obj_type: Optional[type] = None, exc_types: Optional[List[type]] = None) -> Generator[ IdentifiedObject, None, None]:
+    def objects(self, obj_type: Optional[type] = None, exc_types: Optional[List[type]] = None) -> Generator[IdentifiedObject, None, None]:
         """
         Generator for the objects in this service of type `obj_type`.
         `obj_type` The type of object to yield. If this is a base class it will yield all subclasses.
