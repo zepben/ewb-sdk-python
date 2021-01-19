@@ -1,10 +1,10 @@
 ### v0.22.0
 
 ##### Breaking Changes
-* None.
+* ConnectivityResult __init__ signature has slight changes to simplify use.
 
 ##### New Features
-* None.
+* AssignToFeeders and AssociatedTerminalTrace are now available for use.
 
 ##### Enhancements
 * None.
