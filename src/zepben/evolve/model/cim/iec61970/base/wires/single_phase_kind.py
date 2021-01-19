@@ -51,7 +51,7 @@ class SinglePhaseKind(Enum):
         return 1 << self.mask_index if self.mask_index >= 0 else 0
 
     @property
-    def value(self):
+    def id(self):
         return self.value[0]
 
     @property
@@ -61,6 +61,9 @@ class SinglePhaseKind(Enum):
     @property
     def short_name(self):
         return str(self)[16:]
+
+    def __lt__(self, other):
+        return self.id < other.id
 
 
 SINGLE_PHASE_KIND_VALUES = list(SinglePhaseKind.__members__.values())
