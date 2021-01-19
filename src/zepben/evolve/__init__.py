@@ -17,6 +17,7 @@ from zepben.evolve.model.cim.iec61968.assets.asset_info import *
 from zepben.evolve.model.cim.iec61968.assets.streetlight import *
 from zepben.evolve.model.cim.iec61968.operations.operational_restriction import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
 from zepben.evolve.model.cim.iec61968.metering.metering import *
 from zepben.evolve.model.cim.iec61968.common.organisation import *

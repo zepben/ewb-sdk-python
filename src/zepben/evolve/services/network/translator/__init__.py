@@ -7,6 +7,7 @@
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo
+from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo
 from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import AssetOrganisationRole
@@ -80,6 +81,7 @@ __all__ = []
 
 CableInfo.mrid = lambda self: self.wi.mrid()
 OverheadWireInfo.mrid = lambda self: self.wi.mrid()
+PowerTransformerInfo.mrid = lambda self: self.ai.mrid()
 WireInfo.mrid = lambda self: self.ai.mrid()
 Asset.mrid = lambda self: self.io.mRID
 AssetContainer.mrid = lambda self: self.at.mrid()
@@ -163,6 +165,7 @@ PowerTransformerEnd.name_and_mrid = lambda self: self.te.name_and_mrid()
 AcDcTerminal.name_and_mrid = lambda self: self.io.name_and_mrid()
 TransformerEnd.name_and_mrid = lambda self: self.io.name_and_mrid()
 Terminal.name_and_mrid = lambda self: self.ad.name_and_mrid()
+PowerTransformerInfo.name_and_mrid = lambda self: self.ce.eq.psr.io.name_and_mrid()
 
 # location_mrid
 PowerSystemResource.location_mrid = lambda self: getattr(self, "locationMRID", None)
@@ -251,6 +254,7 @@ AcLineSegment.per_length_sequence_impedance_mrid = lambda self: getattr(self, "p
 # asset_info_mrid
 Conductor.asset_info_mrid = lambda self: getattr(self, "assetInfoMRID", None)
 AcLineSegment.asset_info_mrid = lambda self: self.cd.asset_info_mrid()
+PowerTransformer.asset_info_mrid = lambda self: self.ce.eq.psr.assetInfoMRID
 
 # ratio_tap_changer_mrid
 TransformerEnd.ratio_tap_changer_mrid = lambda self: getattr(self, "ratioTapChangerMRID", None)

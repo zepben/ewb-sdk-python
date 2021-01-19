@@ -3,7 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.evolve import PowerTransformer, BaseVoltage, Terminal, PowerTransformerEnd
+from zepben.evolve import PowerTransformer, BaseVoltage, Terminal, PowerTransformerEnd, PowerTransformerInfo
 
 
 class TestPowerTransformer(object):
@@ -15,3 +15,9 @@ class TestPowerTransformer(object):
         pte = PowerTransformerEnd(power_transformer=pt, base_voltage=bv11k, terminal=t1)
         pt.add_end(pte)
         assert pt.get_base_voltage(t1) is pte.base_voltage is t1.base_voltage
+
+    def test_powertransformer_asset_info(self):
+        pti = PowerTransformerInfo(mrid="pti", name="pti")
+        pt = PowerTransformer("pt")
+        pt.asset_info = pti
+        assert pt.asset_info is pti

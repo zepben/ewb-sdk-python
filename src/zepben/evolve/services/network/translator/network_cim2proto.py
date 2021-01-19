@@ -14,6 +14,7 @@ from zepben.evolve.model.cim.iec61968.assets.asset_info import *
 from zepben.evolve.model.cim.iec61968.assets.streetlight import *
 from zepben.evolve.model.cim.iec61968.operations.operational_restriction import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
 from zepben.evolve.model.cim.iec61968.metering.metering import *
 from zepben.evolve.model.cim.iec61968.common.location import *
 from zepben.evolve.model.cim.iec61970.base.meas.control import *
@@ -51,6 +52,7 @@ from zepben.evolve.model.phases import *
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
+from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer as PBAssetContainer
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo as PBAssetInfo
@@ -132,7 +134,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBL
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.network.model.TracedPhases_pb2 import TracedPhases as PBTracedPhases
 
-__all__ = ["CimTranslationException", "cableinfo_to_pb", "overheadwireinfo_to_pb", "wireinfo_to_pb", "asset_to_pb",
+__all__ = ["CimTranslationException", "cableinfo_to_pb", "overheadwireinfo_to_pb", "wireinfo_to_pb", "power_transformer_info_to_pb", "asset_to_pb",
            "assetcontainer_to_pb", "assetinfo_to_pb",
            "assetorganisationrole_to_pb", "assetowner_to_pb", "pole_to_pb", "streetlight_to_pb", "structure_to_pb",
            "positionpoint_to_pb", "towndetail_to_pb", "streetaddress_to_pb",
@@ -171,6 +173,10 @@ def wireinfo_to_pb(cim: WireInfo) -> PBWireInfo:
     return PBWireInfo(ai=assetinfo_to_pb(cim),
                       ratedCurrent=cim.rated_current,
                       material=PBWireMaterialKind.Value(cim.material.short_name))
+
+
+def power_transformer_info_to_pb(cim: PowerTransformerInfo) -> PBPowerTransformerInfo:
+    return PBPowerTransformerInfo(ai=assetinfo_to_pb(cim))
 
 
 # IEC61968 ASSETS #
@@ -613,6 +619,7 @@ def tracedphases_to_pb(cim: TracedPhases) -> PBTracedPhases:
 CableInfo.to_pb = lambda self: cableinfo_to_pb(self)
 OverheadWireInfo.to_pb = lambda self: overheadwireinfo_to_pb(self)
 WireInfo.to_pb = lambda self: wireinfo_to_pb(self)
+PowerTransformerInfo.to_pb = lambda self: power_transformer_info_to_pb(self)
 Asset.to_pb = lambda self: asset_to_pb(self)
 AssetContainer.to_pb = lambda self: assetcontainer_to_pb(self)
 AssetInfo.to_pb = lambda self: assetinfo_to_pb(self)

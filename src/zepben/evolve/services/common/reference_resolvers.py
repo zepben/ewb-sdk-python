@@ -4,40 +4,41 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from dataclassy import dataclass
 from typing import Callable, Optional
 
+from dataclassy import dataclass
 
-from zepben.evolve.model.cim.iec61968.common.organisation import Organisation
-from zepben.evolve.model.cim.iec61968.common.organisation_role import OrganisationRole
+from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
 from zepben.evolve.model.cim.iec61968.assets.asset import Asset
+from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole
 from zepben.evolve.model.cim.iec61968.assets.pole import Pole
 from zepben.evolve.model.cim.iec61968.assets.streetlight import Streetlight
-from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole
 from zepben.evolve.model.cim.iec61968.common.location import Location
+from zepben.evolve.model.cim.iec61968.common.organisation import Organisation
+from zepben.evolve.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.evolve.model.cim.iec61968.customers.customer import Customer
 from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure
 from zepben.evolve.model.cim.iec61968.customers.tariff import Tariff
-from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
 from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, UsagePoint
+from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
-from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
-from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, EquipmentContainer
-from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
+from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.regions import GeographicalRegion, SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject
-from zepben.evolve.model.cim.iec61970.base.meas.measurement import Measurement
 from zepben.evolve.model.cim.iec61970.base.meas.control import Control
-from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
+from zepben.evolve.model.cim.iec61970.base.meas.measurement import Measurement
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
+from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
@@ -52,14 +53,14 @@ __all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_t
            "conductor_to_wire_info_resolver", "conn_node_to_term_resolver", "control_to_remote_control_resolver", "cust_to_custagr_resolver",
            "custagr_to_cust_resolver", "custagr_to_ps_resolver", "diag_to_diagobj_resolver", "diagobj_to_diag_resolver", "ed_to_up_resolver",
            "ed_to_loc_resolver", "ec_to_ecp_resolver", "ecp_to_ec_resolver", "es_to_esp_resolver", "esp_to_es_resolver", "eq_to_curfeeder_resolver",
-           "eq_to_ec_resolver", "eq_to_or_resolver", "eq_to_up_resolver", "ec_to_eq_resolver", "curfeeder_to_eq_resolver", "feeder_to_nes_resolver",
-           "feeder_to_nht_resolver", "gr_to_sgr_resolver", "meas_to_rs_resolver", "or_to_eq_resolver", "orgr_to_org_resolver", "psr_to_loc_resolver",
-           "pt_to_pte_resolver", "pte_to_pt_resolver", "ps_to_tariff_resolver", "rtc_to_te_resolver", "rc_to_cont_resolver", "rs_to_meas_resolver",
-           "sgr_to_gr_resolver", "sgr_to_sub_resolver", "sub_to_feeder_resolver", "sub_to_sgr_resolver", "sub_to_circuit_resolver", "sub_to_eloop_resolver",
-           "sub_to_loop_resolver", "term_to_ce_resolver", "term_to_cn_resolver", "te_to_term_resolver", "te_to_bv_resolver", "te_to_rtc_resolver",
-           "up_to_ed_resolver", "up_to_eq_resolver", "up_to_loc_resolver", "circuit_to_loop_resolver", "circuit_to_sub_resolver", "circuit_to_term_resolver",
-           "loop_to_circuit_resolver", "loop_to_esub_resolver", "loop_to_sub_resolver", "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference"]
-
+           "powertransformer_to_power_transformer_info_resolver", "eq_to_ec_resolver", "eq_to_or_resolver", "eq_to_up_resolver", "ec_to_eq_resolver",
+           "curfeeder_to_eq_resolver", "feeder_to_nes_resolver", "feeder_to_nht_resolver", "gr_to_sgr_resolver", "meas_to_rs_resolver", "or_to_eq_resolver",
+           "orgr_to_org_resolver", "psr_to_loc_resolver", "pt_to_pte_resolver", "pte_to_pt_resolver", "ps_to_tariff_resolver", "rtc_to_te_resolver",
+           "rc_to_cont_resolver", "rs_to_meas_resolver", "sgr_to_gr_resolver", "sgr_to_sub_resolver", "sub_to_feeder_resolver", "sub_to_sgr_resolver",
+           "sub_to_circuit_resolver", "sub_to_eloop_resolver", "sub_to_loop_resolver", "term_to_ce_resolver", "term_to_cn_resolver", "te_to_term_resolver",
+           "te_to_bv_resolver", "te_to_rtc_resolver", "up_to_ed_resolver", "up_to_eq_resolver", "up_to_loc_resolver", "circuit_to_loop_resolver",
+           "circuit_to_sub_resolver", "circuit_to_term_resolver", "loop_to_circuit_resolver", "loop_to_esub_resolver", "loop_to_sub_resolver",
+           "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference"]
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -124,6 +125,8 @@ cond_equip_to_bv_resolver = ReferenceResolver(ConductingEquipment, BaseVoltage, 
 cond_equip_to_terminal_resolver = ReferenceResolver(ConductingEquipment, Terminal, _resolve_ce_term)
 
 conductor_to_wire_info_resolver = ReferenceResolver(Conductor, WireInfo, lambda t, r: setattr(t, 'asset_info', r))
+
+powertransformer_to_power_transformer_info_resolver = ReferenceResolver(PowerTransformer, PowerTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 
 conn_node_to_term_resolver = ReferenceResolver(ConnectivityNode, Terminal, lambda t, r: t.add_terminal(r))
 
@@ -206,5 +209,3 @@ circuit_to_sub_resolver = ReferenceResolver(Circuit, Substation, lambda t, r: t.
 loop_to_circuit_resolver = ReferenceResolver(Loop, Circuit, lambda t, r: t.add_circuit(r))
 loop_to_sub_resolver = ReferenceResolver(Loop, Substation, lambda t, r: t.add_substation(r))
 loop_to_esub_resolver = ReferenceResolver(Loop, Substation, lambda t, r: t.add_energizing_substation(r))
-
-

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Generator
 
+from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
@@ -294,11 +295,23 @@ class PowerTransformer(ConductingEquipment):
     result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
     """
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None,
+    asset_info: Optional[PowerTransformerInfo] = None
+    """
+    Override the [AssetInfo] as [PowerTransformerInfo].
+    """
+
+    def __init__(self,
+                 usage_points: List[UsagePoint] = None,
+                 equipment_containers: List[EquipmentContainer] = None,
+                 operational_restrictions: List[OperationalRestriction] = None,
+                 current_feeders: List[Feeder] = None,
+                 terminals: List[Terminal] = None,
                  power_transformer_ends: List[PowerTransformerEnd] = None):
-        super(PowerTransformer, self).__init__(usage_points=usage_points, equipment_containers=equipment_containers, operational_restrictions=operational_restrictions,
-                         current_feeders=current_feeders, terminals=terminals)
+        super(PowerTransformer, self).__init__(usage_points=usage_points,
+                                               equipment_containers=equipment_containers,
+                                               operational_restrictions=operational_restrictions,
+                                               current_feeders=current_feeders,
+                                               terminals=terminals)
         if power_transformer_ends:
             for end in power_transformer_ends:
                 self.add_end(end)
