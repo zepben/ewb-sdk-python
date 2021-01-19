@@ -3,23 +3,24 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import logging
 from typing import Optional, Callable, Set, Iterable, TypeVar
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.model.phasedirection import PhaseDirection
+from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
 from zepben.evolve.services.network.tracing.phases.phase_step import PhaseStep
 from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus, current_phases, normal_phases
-from zepben.evolve.services.network.tracing.connectivity import get_connected_equipment, get_connectivity
+from zepben.evolve.services.network.tracing.connectivity import get_connectivity
+from zepben.evolve.services.network.tracing.queuing_functions import conducting_equipment_queue_next
 from zepben.evolve.services.network.tracing.util import currently_open, normally_open
 from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
 from zepben.evolve.services.network.tracing.traversals.queue import depth_first, Queue, PriorityQueue
 
-__all__ = ["queue_next_terminal", "normal_downstream_trace", "create_basic_depth_trace", "connected_equipment_trace", "current_downstream_trace"]
+__all__ = ["normal_downstream_trace", "create_basic_depth_trace", "connected_equipment_trace", "current_downstream_trace",
+           "assign_equipment_containers_to_feeders"]
 
-tracing_logger = logging.getLogger("queue_next")
 
 T = TypeVar("T")
 
@@ -30,21 +31,6 @@ def connected_equipment_trace():
 
 def create_basic_depth_trace(queue_next: Callable[[T, Set[T]], Iterable[T]]):
     return Traversal(queue_next, depth_first())
-
-
-def conducting_equipment_queue_next(conducting_equipment: Optional[ConductingEquipment], exclude: Optional[Set] = None) -> Iterable[ConductingEquipment]:
-    """
-    Get the next `ConductingEquipment` to queue next as determined by `conducting_equipment`s connectivity.
-    `conducting_equipment` the `ConductingEquipment` to fetch connected equipment for.
-    `exclude` Any `ConductingEquipment` that should be excluded from the result.
-    Returns a list of `ConductingEquipment` that should be queued next.
-    """
-    if exclude is None:
-        exclude = []
-
-    if conducting_equipment:
-        crs = get_connected_equipment(conducting_equipment, exclude)
-        return [cr.to_equip for cr in crs if cr.to_equip and cr.to_equip not in exclude]
 
 
 def current_downstream_trace(queue: Queue = None, **kwargs):
@@ -84,33 +70,6 @@ def _create_downstream_queue_next(open_test: Callable[[ConductingEquipment, Opti
     return qn
 
 
-def queue_next_terminal(item, exclude: Optional[Set] = None):
-    """
-    Wrapper tracing queue function for fetching the terminals that should be queued based on their connectivity
-
-    `item` The Terminal to fetch connected `zepben.evolve.iec61970.base.core.terminal.Terminal`s for.
-    `exclude` set of `Terminal`s to be excluded from queuing.
-    Returns a list of `zepben.evolve.iec61970.base.core.terminal.Terminal`s to be queued
-    """
-    other_terms = item.get_other_terminals()
-    if not other_terms:
-        # If there are no other terminals we get connectivity for this one and return that. Note that this will
-        # also return connections for EnergyConsumer's, but upstream will be covered by the exclude parameter and thus
-        # should yield an empty list.
-        to_terms = [cr.to_terminal for cr in item.get_connectivity(exclude=exclude)]
-        if len(to_terms) > 0:
-            tracing_logger.debug(f"Queuing {to_terms[0].mrid} from single terminal equipment {item.mrid}")
-        return to_terms
-
-    crs = []
-    for term in other_terms:
-        crs.extend(term.get_connectivity(exclude=exclude))
-
-    to_terms = [cr.to_terminal for cr in crs]
-    tracing_logger.debug(f"Queuing terminals: [{', '.join(t.mrid for t in to_terms)}] from {item.mrid}")
-    return to_terms
-
-
 def normal_downstream_trace(queue: Queue = None, **kwargs):
     """
     Create a downstream trace over nominal phases.
@@ -146,6 +105,12 @@ def _get_phases_with_direction(open_test: Callable[[ConductingEquipment, Optiona
         if phase in terminal.phases.single_phases and not open_test(terminal.conducting_equipment, phase):
             if active_phases(terminal, phase).direction().has(direction):
                 matched_phases.add(phase)
+
+
+def assign_equipment_containers_to_feeders():
+    """Returns an instance of `zepben.evolve.services.network.tracing.feeder.assign_to_feeders.AssignToFeeders convenience class for assigning equipment
+    containers to feeders on a network."""
+    return AssignToFeeders()
 
 
 class TraceException(Exception):
