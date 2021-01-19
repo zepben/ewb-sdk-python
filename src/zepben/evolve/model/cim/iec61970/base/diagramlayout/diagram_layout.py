@@ -194,7 +194,12 @@ class Diagram(IdentifiedObject):
         Returns The `DiagramObject` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return self._diagram_objects[mrid]
+        if not self._diagram_objects:
+            raise KeyError(mrid)
+        try:
+            return self._diagram_objects[mrid]
+        except AttributeError:
+            raise KeyError(mrid)
 
     def add_object(self, diagram_object: DiagramObject) -> DiagramObject:
         """
