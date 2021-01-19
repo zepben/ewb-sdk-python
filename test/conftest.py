@@ -17,6 +17,7 @@ from zepben.evolve import EnergySource, EnergyConsumer, Terminal, ConnectivityNo
 from zepben.evolve import PhaseCode
 from typing import Union, List, Callable
 from hypothesis import settings, Verbosity
+from .network_fixtures import *
 
 settings.register_profile("ci", max_examples=1000)
 settings.register_profile("dev", max_examples=10)
