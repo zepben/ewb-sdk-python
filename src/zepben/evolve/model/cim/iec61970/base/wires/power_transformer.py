@@ -73,7 +73,8 @@ class TapChanger(PowerSystemResource):
 
     @neutral_step.setter
     def neutral_step(self, val):
-        require(self._low_step <= val <= self._high_step, lambda: f"Neutral step {val} must be between high step {self._high_step} and low step {self._low_step}")
+        require(self._low_step <= val <= self._high_step,
+                lambda: f"Neutral step {val} must be between high step {self._high_step} and low step {self._low_step}")
         self._neutral_step = val
 
     @property
@@ -86,7 +87,8 @@ class TapChanger(PowerSystemResource):
 
     @normal_step.setter
     def normal_step(self, val):
-        require(self._low_step <= val <= self._high_step, lambda: f"Normal step {val} must be between high step {self._high_step} and low step {self._low_step}")
+        require(self._low_step <= val <= self._high_step,
+                lambda: f"Normal step {val} must be between high step {self._high_step} and low step {self._low_step}")
         self._normal_step = val
 
     @property
@@ -295,10 +297,10 @@ class PowerTransformer(ConductingEquipment):
     result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
     """
 
-    asset_info: Optional[PowerTransformerInfo] = None
-    """
-    Override the [AssetInfo] as [PowerTransformerInfo].
-    """
+    @property
+    def power_transformer_info(self) -> PowerTransformerInfo:
+        """The `zepben.evolve.cim.iec61968.assetinfo.power_transformer_info.PowerTransformerInfo` for this `PowerTransformer`"""
+        return self.asset_info
 
     def __init__(self,
                  usage_points: List[UsagePoint] = None,

@@ -50,8 +50,8 @@ def ce_terminals(conducting_equipment: ConductingEquipment) -> BoundReferenceRes
 def asset_info(conductor: Conductor) -> BoundReferenceResolver:
     return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)
 
-def power_transformer_info(powerTransformer: PowerTransformer) -> BoundReferenceResolver:
-    return BoundReferenceResolver(powerTransformer, powertransformer_to_power_transformer_info_resolver, None)
+def power_transformer_info(power_transformer: PowerTransformer) -> BoundReferenceResolver:
+    return BoundReferenceResolver(power_transformer, powertransformer_to_power_transformer_info_resolver, None)
 
 
 def streetlights(pole: Pole) -> BoundReferenceResolver:
