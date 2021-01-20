@@ -297,11 +297,6 @@ class PowerTransformer(ConductingEquipment):
     result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
     """
 
-    @property
-    def power_transformer_info(self) -> PowerTransformerInfo:
-        """The `zepben.evolve.cim.iec61968.assetinfo.power_transformer_info.PowerTransformerInfo` for this `PowerTransformer`"""
-        return self.asset_info
-
     def __init__(self,
                  usage_points: List[UsagePoint] = None,
                  equipment_containers: List[EquipmentContainer] = None,
@@ -328,6 +323,11 @@ class PowerTransformer(ConductingEquipment):
     def ends(self) -> Generator[PowerTransformerEnd, None, None]:
         """The `PowerTransformerEnd`s for this `PowerTransformer`."""
         return ngen(self._power_transformer_ends)
+
+    @property
+    def power_transformer_info(self) -> PowerTransformerInfo:
+        """The `zepben.evolve.cim.iec61968.assetinfo.power_transformer_info.PowerTransformerInfo` for this `PowerTransformer`"""
+        return self.asset_info
 
     def get_base_voltage(self, terminal: Terminal = None):
         if terminal is None:
