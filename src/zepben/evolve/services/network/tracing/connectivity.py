@@ -12,7 +12,7 @@ from operator import attrgetter
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.phases import NominalPhasePath
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Set
 
 __all__ = ["ConnectivityResult", "get_connectivity", "terminal_compare", "get_connected_equipment"]
 
@@ -30,7 +30,7 @@ def terminal_compare(terminal: Terminal, other: Terminal):
 Terminal.__lt__ = terminal_compare
 
 
-def get_connectivity(terminal: Terminal, phases: Set[SinglePhaseKind] = None, exclude=None):
+def get_connectivity(terminal: Terminal, phases: Set[SinglePhaseKind] = None, exclude=None) -> List[ConnectivityResult]:
     """
     Get the connectivity between this terminal and all other terminals in its `ConnectivityNode`.
     `cores` Core paths to trace between the terminals. Defaults to all cores.
@@ -108,7 +108,7 @@ def _process_xy_phases(terminal: Terminal, connected_terminal: Terminal, phases:
                 nominal_phase_paths.append(NominalPhasePath(from_phase=terminal_phase, to_phase=phase))
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, init=False)
 class ConnectivityResult(object):
     """
     Stores the connectivity between two terminals, including the mapping between the nominal phases.
@@ -124,8 +124,10 @@ class ConnectivityResult(object):
     nominal_phase_paths: Tuple[NominalPhasePath]
     """The mapping of nominal phase paths between the from and to terminals."""
 
-    def __init__(self, nominal_phase_paths: List[NominalPhasePath]):
-        self.nominal_phase_paths = tuple(sorted(nominal_phase_paths, key=attrgetter('from_terminal', 'to_terminal')))
+    def __init__(self, from_terminal: Terminal, to_terminal: Terminal, nominal_phase_paths: List[NominalPhasePath]):
+        self.nominal_phase_paths = tuple(sorted(nominal_phase_paths, key=attrgetter('from_phase', 'to_phase')))
+        self.from_terminal = from_terminal
+        self.to_terminal = to_terminal
 
     def __eq__(self, other: ConnectivityResult):
         if self is other:

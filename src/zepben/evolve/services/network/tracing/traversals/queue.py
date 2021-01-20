@@ -6,7 +6,7 @@
 import copy
 from collections import deque
 from abc import abstractmethod, ABC
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Iterable
 from heapq import heappush, heappop
 
 __all__ = ["Queue", "FifoQueue", "LifoQueue", "PriorityQueue", "depth_first", "breadth_first"]
@@ -30,6 +30,10 @@ class Queue(Generic[T], ABC):
 
     @abstractmethod
     def put(self, item):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def extend(self, items: Iterable):
         raise NotImplementedError()
 
     @abstractmethod
@@ -68,8 +72,13 @@ class Queue(Generic[T], ABC):
 
 
 class FifoQueue(Queue[T]):
+    """Used for Breadth-first Traversal's"""
+
     def put(self, item):
         self.queue.append(item)
+
+    def extend(self, items: Iterable):
+        self.queue.extend(items)
 
     def get(self):
         """
@@ -101,8 +110,13 @@ class FifoQueue(Queue[T]):
 
 
 class LifoQueue(Queue[T]):
+    """Used for Depth-first Traversal's"""
+
     def put(self, item):
         self.queue.append(item)
+
+    def extend(self, items: Iterable):
+        self.queue.extend(items)
 
     def get(self):
         """
@@ -134,6 +148,7 @@ class LifoQueue(Queue[T]):
 
 
 class PriorityQueue(Queue[T]):
+    """Used for custom `Traversal`s"""
 
     def __init__(self):
         super().__init__([])
@@ -148,6 +163,10 @@ class PriorityQueue(Queue[T]):
         Returns True if put was successful, False otherwise.
         """
         heappush(self.queue, item)
+
+    def extend(self, items: Iterable):
+        for item in items:
+            heappush(self.queue, item)
 
     def get(self):
         """

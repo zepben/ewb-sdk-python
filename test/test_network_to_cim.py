@@ -62,7 +62,6 @@ class TestNetworkToCim(object):
         ce1 = PBConductingEquipment(eq=eq, baseVoltageMRID="bv1", terminalMRIDs=["t"])
         ec = PBEnergyConnection(ce=ce1)
         es = PBEnergySource(ec=ec)
-        # AttributeError: 'EnergySource' object has no attribute 'conducting_equipment'
         network.add_from_pb(es)
 
         # PerLengthSequenceImpedance
@@ -70,9 +69,7 @@ class TestNetworkToCim(object):
         lp = PBPerLengthLineParameter(io=io_lp)
         pli = PBPerLengthImpedance(lp=lp)
         plsi = PBPerLengthSequenceImpedance(pli=pli)
-        # PerLengthLineParameter.mrid = lambda self: self.lo.mRID
-        # E   AttributeError: lo
-        #network.add_from_pb(plsi)
+        network.add_from_pb(plsi)
 
         # CableInfo
         io_ci = PBIdentifiedObject(mRID="7", name="ci")
@@ -85,9 +82,7 @@ class TestNetworkToCim(object):
         ce2 = PBConductingEquipment(baseVoltageMRID="bv1")
         cd = PBConductor(ce=ce2)
         acls = PBAcLineSegment(cd=cd, perLengthSequenceImpedanceMRID="plsi1")
-        # PerLengthLineParameter.mrid = lambda self: self.lo.mRID
-        # E   AttributeError: lo
-        # network.add_from_pb(acls)
+        network.add_from_pb(acls)
 
         # PowerTransformer
         ce3 = PBConductingEquipment(baseVoltageMRID="bv2")

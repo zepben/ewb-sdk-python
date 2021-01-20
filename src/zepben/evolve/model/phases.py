@@ -53,7 +53,7 @@ def direction(status: int, nominal_phase: SinglePhaseKind):
 
 
 def pos_shift(phs: SinglePhaseKind, nominal_phase: SinglePhaseKind):
-    return (2 * max(phs.value - 1, 0)) + (nominal_phase.mask_index * 8)
+    return (2 * max(phs.id - 1, 0)) + (nominal_phase.mask_index * 8)
 
 
 def setphs(status: int, phs: SinglePhaseKind, direction: PhaseDirection, nominal_phs: SinglePhaseKind) -> int:

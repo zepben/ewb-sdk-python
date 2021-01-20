@@ -55,4 +55,10 @@ class TestConsumer(object):
         assert result.result is None
 
 
+    @pytest.mark.asyncio
+    async def test_get_network_hierarchy(self, feeder_network):
+        pass
 
+    @pytest.mark.asyncio
+    async def test_retrieve_network(self):
+        pass

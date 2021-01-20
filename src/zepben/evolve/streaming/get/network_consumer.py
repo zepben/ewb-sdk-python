@@ -182,9 +182,7 @@ class NetworkConsumerClient(CimConsumerClient):
 
     async def _retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         service = NetworkService()
-        result = await self._get_network_hierarchy()
-        if result.was_failure:
-            return result
+        result = (await self._get_network_hierarchy()).throw_on_error()
 
         hierarchy: NetworkHierarchy = result.result
         for mrid in hierarchy.geographical_regions.keys():
