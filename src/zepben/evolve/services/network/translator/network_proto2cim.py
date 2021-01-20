@@ -6,72 +6,10 @@
 from __future__ import annotations
 
 from typing import Optional
-from zepben.evolve.model.cim.iec61968.customers.pricing_structure import *
-from zepben.evolve.model.cim.iec61968.customers.customer_agreement import *
-from zepben.evolve.model.cim.iec61968.customers.customer_kind import *
-from zepben.evolve.model.cim.iec61968.customers.customer import *
-from zepben.evolve.model.cim.iec61968.customers.tariff import *
-from zepben.evolve.model.cim.iec61968.assets.structure import *
-from zepben.evolve.model.cim.iec61968.assets.asset import *
-from zepben.evolve.model.cim.iec61968.assets.pole import *
-from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import *
-from zepben.evolve.model.cim.iec61968.assets.asset_info import *
-from zepben.evolve.model.cim.iec61968.assets.streetlight import *
-from zepben.evolve.model.cim.iec61968.operations.operational_restriction import *
-from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
-from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
-from zepben.evolve.model.cim.iec61968.metering.metering import *
-from zepben.evolve.model.cim.iec61968.common.organisation import *
-from zepben.evolve.model.cim.iec61968.common.document import *
-from zepben.evolve.model.cim.iec61968.common.organisation_role import *
-from zepben.evolve.model.cim.iec61968.common.location import *
-from zepben.evolve.model.cim.iec61970.base.meas.control import *
-from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
-from zepben.evolve.model.cim.iec61970.base.meas.value import *
-from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import *
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import *
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import *
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_style import *
-from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
-from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
-from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
-from zepben.evolve.model.cim.iec61970.base.domain.unit_symbol import *
-from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *
-from zepben.evolve.model.cim.iec61970.base.wires.line import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import *
-from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
-from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
-from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
-from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
-from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
-from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import *
-from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
-from zepben.evolve.model.cim.iec61970.base.wires.switch import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
-from zepben.evolve.model.cim.iec61970.base.core.substation import *
-from zepben.evolve.model.cim.iec61970.base.core.terminal import *
-from zepben.evolve.model.cim.iec61970.base.core.equipment import *
-from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import *
-from zepben.evolve.model.cim.iec61970.base.core.identified_object import *
-from zepben.evolve.model.cim.iec61970.base.core.base_voltage import *
-from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import *
-from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import *
-from zepben.evolve.model.cim.iec61970.base.core.regions import *
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import *
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import *
-from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import *
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
-from zepben.evolve.model.phasedirection import *
-from zepben.evolve.model.phases import *
 
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
+from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer as PBAssetContainer
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo as PBAssetInfo
@@ -105,6 +43,15 @@ from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site as PBSite
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion as PBSubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation as PBSubstation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
+from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator as PBAccumulator
+from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog as PBAnalog
+from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control as PBControl
+from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete as PBDiscrete
+from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPoint
+from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
+from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
+from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
+from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor as PBConductor
@@ -133,23 +80,62 @@ from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCo
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger as PBTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
-from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control as PBControl
-from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPoint
-from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
-from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator as PBAccumulator
-from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog as PBAnalog
-from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete as PBDiscrete
-from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
-from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
-from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 
-from zepben.evolve.services.common.translator.base_proto2cim import BaseProtoToCim
-from zepben.evolve.services.network.network import NetworkService
-
-from zepben.evolve.services.common.translator.base_proto2cim import identifiedobject_to_cim, organisationrole_to_cim, document_to_cim
 import zepben.evolve.services.common.resolver as resolver
+from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
+from zepben.evolve.model.cim.iec61968.assets.asset import *
+from zepben.evolve.model.cim.iec61968.assets.asset_info import *
+from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import *
+from zepben.evolve.model.cim.iec61968.assets.pole import *
+from zepben.evolve.model.cim.iec61968.assets.streetlight import *
+from zepben.evolve.model.cim.iec61968.assets.structure import *
+from zepben.evolve.model.cim.iec61968.common.location import *
+from zepben.evolve.model.cim.iec61968.metering.metering import *
+from zepben.evolve.model.cim.iec61968.operations.operational_restriction import *
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *
+from zepben.evolve.model.cim.iec61970.base.core.base_voltage import *
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import *
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import *
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import *
+from zepben.evolve.model.cim.iec61970.base.core.equipment import *
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import *
+from zepben.evolve.model.cim.iec61970.base.core.identified_object import *
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import *
+from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import *
+from zepben.evolve.model.cim.iec61970.base.core.regions import *
+from zepben.evolve.model.cim.iec61970.base.core.substation import *
+from zepben.evolve.model.cim.iec61970.base.core.terminal import *
+from zepben.evolve.model.cim.iec61970.base.domain.unit_symbol import *
+from zepben.evolve.model.cim.iec61970.base.meas.control import *
+from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
+from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
+from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
+from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
+from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
+from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
+from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
+from zepben.evolve.model.cim.iec61970.base.wires.line import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
+from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import *
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
+from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
+from zepben.evolve.model.cim.iec61970.base.wires.switch import *
+from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
+from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
+from zepben.evolve.services.common.translator.base_proto2cim import BaseProtoToCim
+from zepben.evolve.services.common.translator.base_proto2cim import identifiedobject_to_cim, organisationrole_to_cim, document_to_cim
+from zepben.evolve.services.network.network import NetworkService
 
 __all__ = ["cableinfo_to_cim", "overheadwireinfo_to_cim", "wireinfo_to_cim", "asset_to_cim", "assetcontainer_to_cim", "assetinfo_to_cim",
            "assetorganisationrole_to_cim", "assetowner_to_cim", "pole_to_cim", "streetlight_to_cim", "structure_to_cim", "location_to_cim",
@@ -162,9 +148,9 @@ __all__ = ["cableinfo_to_cim", "overheadwireinfo_to_cim", "wireinfo_to_cim", "as
            "connector_to_cim", "disconnector_to_cim", "energyconnection_to_cim", "energyconsumer_to_cim", "energyconsumerphase_to_cim", "energysource_to_cim",
            "energysourcephase_to_cim", "fuse_to_cim", "jumper_to_cim", "junction_to_cim", "line_to_cim", "linearshuntcompensator_to_cim",
            "perlengthlineparameter_to_cim", "perlengthimpedance_to_cim", "perlengthsequenceimpedance_to_cim", "powertransformer_to_cim",
-           "powertransformerend_to_cim", "protectedswitch_to_cim", "ratiotapchanger_to_cim", "recloser_to_cim", "regulatingcondeq_to_cim",
-           "shuntcompensator_to_cim", "switch_to_cim", "tapchanger_to_cim", "transformerend_to_cim", "PBPerLengthImpedance", "circuit_to_cim", "loop_to_cim",
-           "_add_from_pb", "NetworkProtoToCim"]
+           "powertransformerend_to_cim", "power_transformer_info_to_cim", "protectedswitch_to_cim", "ratiotapchanger_to_cim", "recloser_to_cim",
+           "regulatingcondeq_to_cim", "shuntcompensator_to_cim", "switch_to_cim", "tapchanger_to_cim", "transformerend_to_cim", "PBPerLengthImpedance",
+           "circuit_to_cim", "loop_to_cim", "_add_from_pb", "NetworkProtoToCim"]
 
 
 ### IEC61968 ASSET INFO
@@ -186,9 +172,16 @@ def wireinfo_to_cim(pb: PBWireInfo, cim: WireInfo, network_service: NetworkServi
     assetinfo_to_cim(pb.ai, cim, network_service)
 
 
+def power_transformer_info_to_cim(pb: PBPowerTransformerInfo, network_service: NetworkService):
+    cim = PowerTransformerInfo(mrid=pb.mrid())
+    assetinfo_to_cim(pb.ai, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 PBCableInfo.to_cim = cableinfo_to_cim
 PBOverheadWireInfo.to_cim = overheadwireinfo_to_cim
 PBWireInfo.to_cim = wireinfo_to_cim
+PBPowerTransformerInfo.to_cim = power_transformer_info_to_cim
 
 
 ### IEC61968 ASSETS
@@ -650,6 +643,7 @@ def powertransformer_to_cim(pb: PBPowerTransformer, network_service: NetworkServ
     cim = PowerTransformer(mrid=pb.mrid(), vector_group=VectorGroup(pb.vectorGroup), transformer_utilisation=pb.transformerUtilisation)
     for mrid in pb.powerTransformerEndMRIDs:
         network_service.resolve_or_defer_reference(resolver.ends(cim), mrid)
+    network_service.resolve_or_defer_reference(resolver.power_transformer_info(cim), pb.asset_info_mrid())
     conductingequipment_to_cim(pb.ce, cim, network_service)
     return cim if network_service.add(cim) else None
 

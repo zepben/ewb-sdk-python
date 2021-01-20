@@ -11,6 +11,7 @@ from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import Organisatio
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
+from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer as PBAssetContainer
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo as PBAssetInfo
@@ -147,6 +148,9 @@ def wireinfo():
 
 def overheadwireinfo():
     return builds(PBOverheadWireInfo, wi=wireinfo())
+
+def powertransformerinfo():
+    return builds(PBPowerTransformerInfo, ai=assetinfo())
 
 
 # IEC61968 ASSETS #
@@ -555,6 +559,7 @@ def networkidentifiedobjects(draw):
     nios = [
         draw(builds(NetworkIdentifiedObject, cableInfo=cableinfo())),
         draw(builds(NetworkIdentifiedObject, overheadWireInfo=overheadwireinfo())),
+        draw(builds(NetworkIdentifiedObject, powerTransformerInfo=powertransformerinfo())),
         draw(builds(NetworkIdentifiedObject, assetOwner=assetowner())),
         draw(builds(NetworkIdentifiedObject, organisation=organisation())),
         draw(builds(NetworkIdentifiedObject, location=location())),

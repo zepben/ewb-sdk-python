@@ -10,7 +10,7 @@ from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
            "asset_info", "streetlights", "pole", "cn_terminals", "remote_control", "agreements", "customer",
-           "pricing_structures",
+           "pricing_structures","power_transformer_info",
            "diagram_objects", "diagram", "service_location", "ed_usage_points", "containers", "current_feeders",
            "operational_restrictions",
            "eq_usage_points", "ec_equipment", "ec_phases", "energy_consumer", "es_phases", "energy_source", "current_equipment",
@@ -49,6 +49,9 @@ def ce_terminals(conducting_equipment: ConductingEquipment) -> BoundReferenceRes
 
 def asset_info(conductor: Conductor) -> BoundReferenceResolver:
     return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)
+
+def power_transformer_info(power_transformer: PowerTransformer) -> BoundReferenceResolver:
+    return BoundReferenceResolver(power_transformer, powertransformer_to_power_transformer_info_resolver, None)
 
 
 def streetlights(pole: Pole) -> BoundReferenceResolver:

@@ -37,7 +37,7 @@ a 1.0.0 release.
 * Added MeasurementProducerClient for streaming measurements. Currently experimental and API will definitely change.
 
 ##### Enhancements
-* None.
+* Added PowerTransformerInfo class to be used as asset_info for PowerTransformers.
 
 ##### Fixes
 * None.

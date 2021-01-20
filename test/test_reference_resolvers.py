@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import NetworkService, PerLengthSequenceImpedance, AcLineSegment, Pole, Streetlight
+from zepben.evolve import NetworkService, PerLengthSequenceImpedance, AcLineSegment, Pole, Streetlight, PowerTransformerInfo, PowerTransformer
 from zepben.evolve import resolver
 
 
@@ -27,6 +27,28 @@ def test_resolves_acls_plsi():
     acls_fetched = ns.get(acls.mrid)
     assert acls_fetched.per_length_sequence_impedance == plsi
 
+def test_resolves_pt_pti():
+    ns = NetworkService()
+    pti = PowerTransformerInfo()
+    pt = PowerTransformer()
+    pt.asset_info = pti
+
+    br = resolver.power_transformer_info(pt)
+    ns.resolve_or_defer_reference(br, pti.mrid)
+
+    assert pti.mrid in ns.get_unresolved_reference_mrids(br)
+
+    ns.add(pt)
+    pt_fetched = ns.get(pt.mrid)
+    assert pt_fetched.asset_info == pti
+
+    ns = NetworkService()
+    ns.add(pti)
+    ns.resolve_or_defer_reference(resolver.power_transformer_info(pt), pti.mrid)
+    assert len(list(ns.get_unresolved_reference_mrids(br))) == 0
+    ns.add(pt)
+    pt_fetched = ns.get(pt.mrid)
+    assert pt_fetched.asset_info == pti
 
 def test_resolves_pole_streetlight():
     ns = NetworkService()

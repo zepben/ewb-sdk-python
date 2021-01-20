@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Generator
 
+from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
@@ -72,7 +73,8 @@ class TapChanger(PowerSystemResource):
 
     @neutral_step.setter
     def neutral_step(self, val):
-        require(self._low_step <= val <= self._high_step, lambda: f"Neutral step {val} must be between high step {self._high_step} and low step {self._low_step}")
+        require(self._low_step <= val <= self._high_step,
+                lambda: f"Neutral step {val} must be between high step {self._high_step} and low step {self._low_step}")
         self._neutral_step = val
 
     @property
@@ -85,7 +87,8 @@ class TapChanger(PowerSystemResource):
 
     @normal_step.setter
     def normal_step(self, val):
-        require(self._low_step <= val <= self._high_step, lambda: f"Normal step {val} must be between high step {self._high_step} and low step {self._low_step}")
+        require(self._low_step <= val <= self._high_step,
+                lambda: f"Normal step {val} must be between high step {self._high_step} and low step {self._low_step}")
         self._normal_step = val
 
     @property
@@ -294,11 +297,18 @@ class PowerTransformer(ConductingEquipment):
     result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
     """
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None,
+    def __init__(self,
+                 usage_points: List[UsagePoint] = None,
+                 equipment_containers: List[EquipmentContainer] = None,
+                 operational_restrictions: List[OperationalRestriction] = None,
+                 current_feeders: List[Feeder] = None,
+                 terminals: List[Terminal] = None,
                  power_transformer_ends: List[PowerTransformerEnd] = None):
-        super(PowerTransformer, self).__init__(usage_points=usage_points, equipment_containers=equipment_containers, operational_restrictions=operational_restrictions,
-                         current_feeders=current_feeders, terminals=terminals)
+        super(PowerTransformer, self).__init__(usage_points=usage_points,
+                                               equipment_containers=equipment_containers,
+                                               operational_restrictions=operational_restrictions,
+                                               current_feeders=current_feeders,
+                                               terminals=terminals)
         if power_transformer_ends:
             for end in power_transformer_ends:
                 self.add_end(end)
@@ -313,6 +323,11 @@ class PowerTransformer(ConductingEquipment):
     def ends(self) -> Generator[PowerTransformerEnd, None, None]:
         """The `PowerTransformerEnd`s for this `PowerTransformer`."""
         return ngen(self._power_transformer_ends)
+
+    @property
+    def power_transformer_info(self) -> PowerTransformerInfo:
+        """The `zepben.evolve.cim.iec61968.assetinfo.power_transformer_info.PowerTransformerInfo` for this `PowerTransformer`"""
+        return self.asset_info
 
     def get_base_voltage(self, terminal: Terminal = None):
         if terminal is None:

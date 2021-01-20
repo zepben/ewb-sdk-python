@@ -6,6 +6,7 @@
 
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo
+from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner
 from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole
 from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight
@@ -96,6 +97,7 @@ network_rpc_map = {
     PerLengthSequenceImpedance: ('CreatePerLengthSequenceImpedance', CreatePerLengthSequenceImpedanceRequest),
     PowerTransformer: ('CreatePowerTransformer', CreatePowerTransformerRequest),
     PowerTransformerEnd: ('CreatePowerTransformerEnd', CreatePowerTransformerEndRequest),
+    PowerTransformerInfo: ('CreatePowerTransformerInfo', CreatePowerTransformerInfoRequest),
     RatioTapChanger: ('CreateRatioTapChanger', CreateRatioTapChangerRequest),
     Recloser: ('CreateRecloser', CreateRecloserRequest),
 }

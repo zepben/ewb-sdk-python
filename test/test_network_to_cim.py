@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
+from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo as PBAssetInfo
@@ -17,6 +17,8 @@ from zepben.protobuf.cim.iec61970.base.core.AcDcTerminal_pb2 import AcDcTerminal
 from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage as PBBaseVoltage
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment as PBConductingEquipment
 from zepben.protobuf.cim.iec61970.base.core.Equipment_pb2 import Equipment as PBEquipment
+from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
+from zepben.protobuf.cim.iec61970.base.core.PowerSystemResource_pb2 import PowerSystemResource as PBPowerSystemResource
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
@@ -33,14 +35,13 @@ from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import Protecte
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
 
 from zepben.evolve.services.network.network import NetworkService
-
 from zepben.evolve.services.network.translator.network_proto2cim import NetworkProtoToCim
 
 
 class TestNetworkToCim(object):
     def test_add_pb(self):
         """Test addition to the network works for CableInfo PB type."""
-       
+
         # Create network
         network = NetworkProtoToCim(NetworkService())
 
@@ -84,9 +85,17 @@ class TestNetworkToCim(object):
         acls = PBAcLineSegment(cd=cd, perLengthSequenceImpedanceMRID="plsi1")
         network.add_from_pb(acls)
 
+        # PowerTransformerInfo
+        io_pti1 = PBIdentifiedObject(mRID="pti1", name="pti1")
+        ai_pti1 = PBAssetInfo(io=io_pti1)
+        pti1 = PBPowerTransformerInfo(ai=ai_pti1)
+        network.add_from_pb(pti1)
+
         # PowerTransformer
-        ce3 = PBConductingEquipment(baseVoltageMRID="bv2")
-        pt = PBPowerTransformer(ce=ce3)
+        psr1_pt = PBPowerSystemResource(assetInfoMRID=pti1.ai.io.mRID)
+        eq_pt = PBEquipment(psr=psr1_pt)
+        ce3_pt = PBConductingEquipment(eq=eq_pt, baseVoltageMRID="bv2")
+        pt = PBPowerTransformer(ce=ce3_pt)
         network.add_from_pb(pt)
 
         # Breaker
