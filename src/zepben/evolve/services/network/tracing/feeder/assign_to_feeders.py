@@ -15,6 +15,8 @@ from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_trace import new_normal_trace, new_current_trace, get_associated_terminals
 from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
 
+__all__ = ["AssignToFeeders"]
+
 
 def configure_stop_conditions(traversal: Traversal, feeder_start_points: Set[ConductingEquipment]):
     traversal.clear_stop_conditions()
@@ -32,13 +34,15 @@ async def reached_substation_transformer(t: Terminal) -> bool:
     return isinstance(t.conducting_equipment, PowerTransformer) and t.conducting_equipment.num_substations()
 
 
-@dataclass
+@dataclass(slots=True)
 class AssignToFeeders(object):
-    normal_traversal: Traversal = new_normal_trace()
-    current_traversal: Traversal = new_current_trace()
+    normal_traversal: Traversal = None
+    current_traversal: Traversal = None
     active_feeder: Feeder = None
 
-    def __init__(self):
+    def __init__(self, normal_traversal: Traversal = None, current_traversal: Traversal = None):
+        self.normal_traversal = normal_traversal if normal_traversal is not None else new_normal_trace()
+        self.current_traversal = current_traversal if current_traversal is not None else new_current_trace()
         self.normal_traversal.add_step_action(self.process_normal)
         self.current_traversal.add_step_action(self.process_current)
 

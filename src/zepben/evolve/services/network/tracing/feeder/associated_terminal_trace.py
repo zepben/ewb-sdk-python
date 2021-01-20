@@ -66,6 +66,6 @@ def queue_next_terminal_if_closed(open_test: Callable[[ConductingEquipment, Opti
                             if terminal is not term:
                                 assoc_terminals.extend(get_associated_terminals(term, visited))
                         return assoc_terminals
-                # Return nothing only if all phases are open.
-                return []
+        # Return nothing only if all phases are open.
+        return []
     return qn
