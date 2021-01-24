@@ -7,11 +7,16 @@
  */
 
 module.exports = {
-  someSidebar: [
-    "sdk-data-model", 
-    "sdk-services", 
-    "sdk-tracing", 
-    "sdk-persistence", 
-    "sdk-consumer"
-  ]
+    someSidebar: [
+        {
+            type: "category",
+            items: ["venv-setup", "intellij-setup"],
+            label: "Setup Guide"
+        },
+        "sdk-data-model",
+        "sdk-services",
+        "sdk-tracing",
+        "sdk-persistence",
+        "sdk-consumer"
+    ]
 };
