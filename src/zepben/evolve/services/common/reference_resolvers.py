@@ -4,9 +4,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import Callable, Optional
+from __future__ import annotations
 
 from dataclassy import dataclass
+from typing import Callable, Optional
 
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
@@ -62,7 +63,6 @@ __all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_t
            "circuit_to_sub_resolver", "circuit_to_term_resolver", "loop_to_circuit_resolver", "loop_to_esub_resolver", "loop_to_sub_resolver",
            "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference"]
 
-
 @dataclass(frozen=True, eq=False, slots=True)
 class ReferenceResolver(object):
     from_class: type
@@ -72,8 +72,11 @@ class ReferenceResolver(object):
     def __eq__(self, other):
         return self.from_class is other.from_class and self.to_class is other.to_class and self.resolve is other.resolve
 
-    def __neq__(self, other):
+    def __ne__(self, other):
         return self.from_class is not other.from_class or self.to_class is not other.to_class or self.resolve is not other.resolve
+
+    def __hash__(self):
+        return hash((type(self), self.from_class, self.to_class, self.resolve))
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -83,17 +86,45 @@ class BoundReferenceResolver(object):
     reverse_resolver: Optional[ReferenceResolver]
 
     def __eq__(self, other):
-        return self.from_obj is other.from_obj and self.resolver is other.resolver
+        """ We only do a reference check for `from_obj` to avoid expensive equality checks on `IdentifiedObjects`. """
+        if self.reverse_resolver is None and other.reverse_resolver is None:
+            return self.from_obj is other.from_obj and self.resolver == other.resolver
+        elif self.reverse_resolver is not None and other.reverse_resolver is not None:
+            return self.from_obj is other.from_obj and self.resolver == other.resolver and self.reverse_resolver == other.reverse_resolver
+        elif self.reverse_resolver is None:
+            return False
+        else:
+            return False
 
-    def __neq__(self, other):
-        return self.from_obj is not other.from_obj or self.resolver is not other.resolver
+    def __ne__(self, other):
+        if self.reverse_resolver is None and other.reverse_resolver is None:
+            return self.from_obj is not other.from_obj or self.resolver != other.resolver
+        elif self.reverse_resolver is not None and other.reverse_resolver is not None:
+            return self.from_obj is not other.from_obj or self.resolver != other.resolver or self.reverse_resolver != other.reverse_resolver
+        elif self.reverse_resolver is None:
+            return True
+        else:
+            return True
+
+    def __hash__(self):
+        return hash((type(self), self.from_obj, self.resolver, self.reverse_resolver))
 
 
+# @dataclass(frozen=True, eq=False, slots=True)
 @dataclass(frozen=True, eq=False, slots=True)
 class UnresolvedReference(object):
-    from_ref: IdentifiedObject
+    from_mrid: str
     to_mrid: str
     resolver: ReferenceResolver
+
+    def __eq__(self, other: UnresolvedReference):
+        return self.from_mrid == other.from_mrid and self.to_mrid == other.to_mrid and self.resolver == other.resolver
+
+    def __ne__(self, other: UnresolvedReference):
+        return self.from_mrid != other.from_mrid or self.to_mrid != other.to_mrid or self.resolver != other.resolver
+
+    def __hash__(self):
+        return hash((type(self), self.from_mrid, self.to_mrid, self.resolver))
 
 
 def _resolve_ce_term(ce, t):
