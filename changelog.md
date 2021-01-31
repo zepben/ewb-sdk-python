@@ -5,6 +5,7 @@
 
 ##### New Features
 * AssignToFeeders and AssociatedTerminalTrace are now available for use.
+* PowerTransformerInfo class added. A PowerTransformer may have a PowerTransformerInfo as its asset_info.
 
 ##### Enhancements
 * None.
