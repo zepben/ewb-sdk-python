@@ -70,7 +70,7 @@ class BaseService(object, metaclass=ABCMeta):
         """
         Returns True if this service has unresolved references, False otherwise.
         """
-        return len(self._unresolved_references_to) > 0
+        return self.num_unresolved_references() > 0
 
     def len_of(self, t: type = None) -> int:
         """
@@ -95,7 +95,7 @@ class BaseService(object, metaclass=ABCMeta):
                 yield ur
 
     def unresolved_mrids(self) -> KeysView[str]:
-        return self._unresolved_references_from.copy().keys()
+        return self._unresolved_references_from.keys() | self._unresolved_references_to.keys()
 
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
             generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
