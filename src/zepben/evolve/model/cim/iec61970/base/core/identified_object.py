@@ -31,7 +31,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     relation, however must be in snake case to keep the phases PEP compliant.
     """
 
-    mrid: Union[str, UUID] = CopyableUUID()
+    mrid: Union[str] = CopyableUUID()
     """Master resource identifier issued by a model authority. The mRID is unique within an exchange context. 
     Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID. The use of UUID is strongly recommended."""
 
@@ -40,6 +40,9 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
     description: str = ""
     """a free human readable text describing or naming the object. It may be non unique and may not correlate to a naming hierarchy."""
+
+    def __init__(self):
+        self.mrid = str(self.mrid)
 
     def __str__(self):
         return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), str(self.name)) if a)}}}"
