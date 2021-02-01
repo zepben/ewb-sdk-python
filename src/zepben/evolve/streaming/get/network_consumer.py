@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from asyncio import get_event_loop
-from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set
+from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Generator
 
 from dataclassy import dataclass
 
@@ -130,16 +130,23 @@ class NetworkConsumerClient(CimConsumerClient):
 
         return await self.try_rpc(y)
 
-    async def _get_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+    async def _get_identified_objects(self, service: NetworkService, mrids: Iterable[str], result: MultiObjectResult = None) -> GrpcResult[MultiObjectResult]:
+        """
+        `service` The service to add any results to.
+        `mrids` The mRIDs to fetch from the server.
+        `result` an existing `MultiObjectResult` to populate. A new result will be created if not provided.
+        Returns a GrpcResult with a MultiObjectResult containing everything that was added to `service`.
+        """
+        if result is None:
+            result = MultiObjectResult()
+
         async def y():
-            results = dict()
-            failed = set()
             async for io, mrid in self._process_identified_objects(service, mrids):
                 if io:
-                    results[io.mrid] = io
+                    result.value[io.mrid] = io
                 else:
-                    failed.add(mrid)
-            return MultiObjectResult(results, failed)
+                    result.failed.add(mrid)
+            return result
 
         return await self.try_rpc(y)
 
@@ -147,38 +154,46 @@ class NetworkConsumerClient(CimConsumerClient):
         return await self.try_rpc(self._handle_network_hierarchy)
 
     async def _get_feeder(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
-        feeder_response = await self._get_identified_object(service, mrid)
-        if feeder_response.was_failure:
-            return feeder_response
+        feeder_response = (await self._get_identified_object(service, mrid)).throw_on_error()
         feeder: Feeder = feeder_response.result
 
         if not feeder:
             return GrpcResult(result=None)
 
-        equipment_objects = await self._get_identified_objects(service, service.get_unresolved_reference_mrids(resolver.ec_equipment(feeder)))
-        if equipment_objects.was_failure:
-            return equipment_objects
+        if not isinstance(feeder, Feeder):
+            return GrpcResult(result=ValueError(f"Requested mrid {mrid} was not a Feeder, was {type(feeder)}"))
 
-        resolvers = list()
-        resolvers.append(resolver.normal_energizing_substation(feeder))
-        for equip in feeder.equipment:
-            try:
-                for terminal in equip.terminals:
-                    resolvers.append(resolver.connectivity_node(terminal))
-                if isinstance(equip, Conductor):
-                    resolvers.append(resolver.per_length_sequence_impedance(equip))
-                    resolvers.append(resolver.asset_info(equip))
-            except AttributeError:
-                pass  # Not ConductingEquipment.
-            resolvers.append(resolver.psr_location(equip))
+        mor = MultiObjectResult()
+        res = await self._get_objects(service, service.get_unresolved_reference_mrids_by_resolver(resolver.ec_equipment(feeder)))
+        mor.value.update(res.value)
+        # We need to resolve all the unresolved references for each piece of equipment, but then we need to
+        # also do the same for the resolutions, and so on so forth until the entire tree of references originating from the Feeder has been resolved,
+        # however we don't know how long this tree is until we've resolved everything. So we start by resolving all the equipment, then we iteratively
+        # descend the tree by checking for unresolved references for the objects we just resolved in the previous iteration.
+        to_resolve = self._get_unresolved_mrids(service, res.value.keys())
+        while True:
+            res = await self._get_objects(service, to_resolve)
+            if not res.value:
+                break
+            mor.value.update(res.value)
+            to_resolve = self._get_unresolved_mrids(service, res.value.keys())
 
-        mrids = service.get_unresolved_reference_mrids(resolvers)
-        objects = await self._get_identified_objects(service, mrids)
-        if objects.was_failure:
-            return objects
-        objects.result.value.update(equipment_objects.result.value)  # Combine with previous results
-        objects.result.value[feeder.mrid] = feeder  # Add feeder to result
-        return GrpcResult(result=MultiObjectResult(objects.result.value, objects.result.failed.union(equipment_objects.result.failed)))
+        # Get the rest of the unresolved references for the feeder (e.g substation)
+        await self._get_objects(service, service.get_unresolved_reference_mrids_from(feeder.mrid), mor)
+        mor.value[feeder.mrid] = feeder
+
+        return GrpcResult(result=mor)
+
+    async def _get_objects(self, service: NetworkService, mrids: Iterable[str], result: MultiObjectResult = None) -> MultiObjectResult:
+        if not mrids:
+            return MultiObjectResult() if result is None else result
+        objects = (await self._get_identified_objects(service, mrids, result)).throw_on_error()
+        return objects.result
+
+    def _get_unresolved_mrids(self, service: NetworkService, mrids: Iterable[str]) -> Generator[str, None, None]:
+        for m in mrids:
+            for i in service.get_unresolved_reference_mrids_from(m):
+                yield i
 
     async def _retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         service = NetworkService()
@@ -210,7 +225,6 @@ class NetworkConsumerClient(CimConsumerClient):
             # we only want to break out if we've been trying to resolve the same set of references as we did in the last iteration.
             # so if we didn't resolve anything in the last iteration (i.e, the number of unresolved refs didn't change) we keep a
             # record of those mRIDs and break out of the loop if they don't change after another fetch.
-
             failed = set()
             for mrid in service.unresolved_mrids():
                 result = (await self._get_identified_object(service, mrid)).throw_on_error()
