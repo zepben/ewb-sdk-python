@@ -25,8 +25,8 @@ __all__ = ["CimConsumerClient", "MultiObjectResult", "extract_identified_object"
 
 @dataclass()
 class MultiObjectResult(object):
-    value: Dict[str, IdentifiedObject]
-    failed: Set[str]
+    value: Dict[str, IdentifiedObject] = dict()
+    failed: Set[str] = set()
 
 
 class CimConsumerClient(GrpcClient):
