@@ -191,51 +191,48 @@ class NetworkConsumerClient(CimConsumerClient):
         return objects.result
 
     def _get_unresolved_mrids(self, service: NetworkService, mrids: Iterable[str]) -> Generator[str, None, None]:
+        seen = set()
         for m in mrids:
             for i in service.get_unresolved_reference_mrids_from(m):
+                if i in seen:
+                    continue
                 yield i
+                seen.add(i)
 
     async def _retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         service = NetworkService()
         result = (await self._get_network_hierarchy()).throw_on_error()
 
         hierarchy: NetworkHierarchy = result.result
+        mor = MultiObjectResult()
         for mrid in hierarchy.geographical_regions.keys():
-            gr_result = await self._get_identified_object(service, mrid)
-            if gr_result.was_failure:
-                return gr_result
+            gr_result = (await self._get_identified_object(service, mrid)).throw_on_error()
+            if gr_result.result is None:
+                mor.failed.add(mrid)
 
         for mrid in hierarchy.sub_geographical_regions.keys():
-            sgr_result = await self._get_identified_object(service, mrid)
-            if sgr_result.was_failure:
-                return sgr_result
+            sgr_result = (await self._get_identified_object(service, mrid)).throw_on_error()
+            if sgr_result.result is None:
+                mor.failed.add(mrid)
 
         for mrid in hierarchy.substations.keys():
-            substation_result = await self._get_identified_object(service, mrid)
-            if substation_result.was_failure:
-                return substation_result
+            substation_result = (await self._get_identified_object(service, mrid)).throw_on_error()
+            if substation_result.result is None:
+                mor.failed.add(mrid)
 
         for mrid in hierarchy.feeders.keys():
-            feeder_result = await self._get_identified_object(service, mrid)
-            if feeder_result.was_failure:
-                return feeder_result
+            feeder_result = (await self._get_feeder(service, mrid)).throw_on_error()
+            mor.failed.update(feeder_result.result.failed)
 
-        failed = set()
-        while service.has_unresolved_references():
-            # we only want to break out if we've been trying to resolve the same set of references as we did in the last iteration.
-            # so if we didn't resolve anything in the last iteration (i.e, the number of unresolved refs didn't change) we keep a
-            # record of those mRIDs and break out of the loop if they don't change after another fetch.
-            failed = set()
-            for mrid in service.unresolved_mrids():
-                result = (await self._get_identified_object(service, mrid)).throw_on_error()
-                if result.was_failure or result.result is None:
-                    failed.add(mrid)
+        # Possible that some previously failed resolutions were successful some other way, so check all the failures against the service
+        for f in mor.failed:
+            try:
+                service.get(f)
+                mor.failed.remove(f)
+            except:
+                pass
 
-            if failed:
-                if failed == set(service.unresolved_mrids()):
-                    return GrpcResult(NetworkResult(service, failed))
-
-        return GrpcResult(NetworkResult(service, failed))
+        return GrpcResult(NetworkResult(service, mor.failed))
 
     async def _process_unresolved(self, service):
         for mrid in service.unresolved_mrids():
