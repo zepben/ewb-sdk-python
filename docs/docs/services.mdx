@@ -186,10 +186,10 @@ from zepben.evolve import NetworkService, Feeder, Breaker, resolver
 
 service = NetworkService()
 
-feeder = Feeder()
+feeder = Feeder("f")
 service.add(feeder)
 
-switch = Breaker()
+switch = Breaker("b1")
 service.add(switch)
 
 # As the switch is already added to the service, this will be resolved immediately.
@@ -197,12 +197,24 @@ service.resolve_or_defer_reference(resolver.ec_equipment(feeder), switch.mrid)
 print(feeder.equipment.contains(switch)) # true
 
 # Now if we try and resolve something not added it will be deferred
-junction = Junction()
+junction = Junction("j1")
 service.resolve_or_defer_reference(resolver.ec_equipment(feeder), junction.mrid)
 print(feeder.equipment.contains(junction)) # false
 
-# We can query the unresolved reference MRIDs back out of the service
-print(service.get_unresolved_reference_mrids(resolver.ec_equipment(feeder))) # [junction]
+# We can query the unresolved reference MRIDs back out of the service using a specific resolver
+print(service.get_unresolved_reference_mrids_by_resolver(resolver.ec_equipment(feeder))) # ["j1"]
+# Or using the mrid of the destination object
+print(service.get_unresolved_reference_mrids_to(feeder.mrid)) # ["j1"]
+# Or using the mrid of the source object
+print(service.get_unresolved_reference_mrids_from(junction.mrid)) # ["f"]
+
+# Or simply loop over all the unresolved references
+for ur in service.unresolved_references():
+    print(f"From: {ur.resolver.from_class} {ur.from_mrid}, To: {ur.resolver.to_class} {ur.to_mrid}")
+
+# Or only their mRIDs (useful for using with a consumer client)
+for mrid in service.unresolved_mrids():
+    print(mrid)
 
 # When the object with the deferred mRID is added, the reference gets resolved
 service.add(junction)

@@ -85,7 +85,15 @@ async def get_with_base_voltage(service: NetworkService, client: NetworkConsumer
     if not equipment:
         return
 
-    mrids = service.get_unresolved_reference_mrids(resolver.ce_base_voltage(equipment))
-    if mrids:
-        await client.get_identified_object(service, mrids[0])
+    # Get all unresolved references
+    for mrid in service.unresolved_mrids():
+        await client.get_identified_object(service, mrid)
+
+    # Or get only unresolved references for `equipment` only:
+    for mrid in service.get_unresolved_reference_mrids_from(equipment):
+        await client.get_identified_object(service, mrid)
+
+    # Or get only unresolved reference mRIDs pointing to `equipment`:
+    for mrid in service.get_unresolved_reference_mrids_to(equipment):
+        await client.get_identified_object(service, mrid)
 ```
