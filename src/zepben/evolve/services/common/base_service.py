@@ -8,11 +8,13 @@ from __future__ import annotations
 from abc import ABCMeta
 from collections import OrderedDict
 from dataclassy import dataclass
-from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set, KeysView
+from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set, KeysView, Type
 
-from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
+from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference, Relationship
 
 __all__ = ["BaseService"]
+
 
 _GET_DEFAULT = (1,)
 
@@ -90,11 +92,19 @@ class BaseService(object, metaclass=ABCMeta):
         return sum([len(r) for r in self._unresolved_references_to.copy().values()])
 
     def unresolved_references(self) -> Generator[UnresolvedReference, None, None]:
+        """
+        Returns a generator over all the `UnresolvedReferences` that are known to this service. This should typically be avoided when resolving references in
+        favour of `get_unresolved_reference_mrids_by_resolver()`, `get_unresolved_reference_mrids_from()`, and `get_unresolved_reference_mrids_to()`
+        """
         for unresolved_refs in self._unresolved_references_to.copy().values():
             for ur in unresolved_refs:
                 yield ur
 
     def unresolved_mrids(self) -> KeysView[str]:
+        """
+        Returns all mRIDs that are currently unresolved. This should typically be avoided when resolving references in favour of
+        `get_unresolved_reference_mrids_by_resolver()`, `get_unresolved_reference_mrids_from()`, and `get_unresolved_reference_mrids_to()`
+        """
         return self._unresolved_references_from.keys() | self._unresolved_references_to.keys()
 
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
@@ -251,24 +261,34 @@ class BaseService(object, metaclass=ABCMeta):
                     seen.add(ref.to_mrid)
                     yield ref.to_mrid
 
-    def get_unresolved_reference_mrids_from(self, mrid: str) -> Generator[str, None, None]:
+    def get_unresolved_reference_mrids_from(self, mrid: str, exclude_types: Set[Relationship] = None) -> Generator[str, None, None]:
         """
         Get the mRIDs that are unresolved that `mrid` has to other objects.
         `mrid` The mRID to get unresolved references for.
         Returns a generator over the mRIDs that need to be resolved for `mrid`.
         """
+        if not exclude_types:
+            exclude_types = set()
+
         if mrid in self._unresolved_references_from:
             for ref in self._unresolved_references_from[str(mrid)]:
+                if ref.relationship in exclude_types:
+                    continue
                 yield ref.to_mrid
 
-    def get_unresolved_reference_mrids_to(self, mrid: str) -> Generator[str, None, None]:
+    def get_unresolved_reference_mrids_to(self, mrid: str, exclude_types: Set[Relationship] = None) -> Generator[str, None, None]:
         """
         Get the mRIDs that are unresolved that other objects have to `mrid`.
         `mrid` The mRID to fetch unresolved references for that are pointing to it.
         Returns a generator over the mRIDs that need to be resolved for `mrid`.
         """
+        if not exclude_types:
+            exclude_types = set()
+
         if mrid in self._unresolved_references_to:
             for ref in self._unresolved_references_to[str(mrid)]:
+                if ref.relationship in exclude_types:
+                    continue
                 yield ref.from_mrid
 
     def remove(self, identified_object: IdentifiedObject) -> bool:

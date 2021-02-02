@@ -35,7 +35,7 @@ setup(
     install_requires=[
         "protobuf",
         "requests",
-        "zepben.protobuf>=0.11.0b2",
+        "zepben.protobuf>=0.11.0",
         "python-jose-cryptodome",
         "dataclassy"
     ],

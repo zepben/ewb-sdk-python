@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from dataclassy import dataclass
-from typing import Callable, Optional
+from typing import Callable, Optional, Type
 
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
@@ -61,7 +61,7 @@ __all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_t
            "sub_to_circuit_resolver", "sub_to_eloop_resolver", "sub_to_loop_resolver", "term_to_ce_resolver", "term_to_cn_resolver", "te_to_term_resolver",
            "te_to_bv_resolver", "te_to_rtc_resolver", "up_to_ed_resolver", "up_to_eq_resolver", "up_to_loc_resolver", "circuit_to_loop_resolver",
            "circuit_to_sub_resolver", "circuit_to_term_resolver", "loop_to_circuit_resolver", "loop_to_esub_resolver", "loop_to_sub_resolver",
-           "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference"]
+           "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference", "Relationship"]
 
 @dataclass(frozen=True, eq=False, slots=True)
 class ReferenceResolver(object):
@@ -125,6 +125,16 @@ class UnresolvedReference(object):
 
     def __hash__(self):
         return hash((type(self), self.from_mrid, self.to_mrid, self.resolver))
+
+    @property
+    def relationship(self) -> Relationship:
+        return Relationship(self.resolver.from_class, self.resolver.to_class)
+
+
+@dataclass(frozen=True, slots=True)
+class Relationship(object):
+    from_class: Type
+    to_class: Type
 
 
 def _resolve_ce_term(ce, t):
