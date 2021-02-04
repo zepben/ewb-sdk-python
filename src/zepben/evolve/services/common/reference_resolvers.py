@@ -110,21 +110,20 @@ class BoundReferenceResolver(object):
         return hash((type(self), self.from_obj, self.resolver, self.reverse_resolver))
 
 
-# @dataclass(frozen=True, eq=False, slots=True)
 @dataclass(frozen=True, eq=False, slots=True)
 class UnresolvedReference(object):
-    from_mrid: str
+    from_ref: IdentifiedObject
     to_mrid: str
     resolver: ReferenceResolver
 
     def __eq__(self, other: UnresolvedReference):
-        return self.from_mrid == other.from_mrid and self.to_mrid == other.to_mrid and self.resolver == other.resolver
+        return self.from_ref.mrid == other.from_ref.mrid and self.to_mrid == other.to_mrid and self.resolver == other.resolver
 
     def __ne__(self, other: UnresolvedReference):
-        return self.from_mrid != other.from_mrid or self.to_mrid != other.to_mrid or self.resolver != other.resolver
+        return self.from_ref.mrid != other.from_ref.mrid or self.to_mrid != other.to_mrid or self.resolver != other.resolver
 
     def __hash__(self):
-        return hash((type(self), self.from_mrid, self.to_mrid, self.resolver))
+        return hash((type(self), self.from_ref.mrid, self.to_mrid, self.resolver))
 
     @property
     def relationship(self) -> Relationship:

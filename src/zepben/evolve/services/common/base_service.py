@@ -164,7 +164,7 @@ class BaseService(object, metaclass=ABCMeta):
         `identified_object` The object to associate with this service.
         Returns True if the object is associated with this service, False otherwise.
         """
-        mrid = str(identified_object.mrid)
+        mrid = identified_object.mrid
         if not mrid:
             return False
         # TODO: Only allow supported types
@@ -181,10 +181,10 @@ class BaseService(object, metaclass=ABCMeta):
         unresolved_refs = self._unresolved_references_to.get(mrid, None)
         if unresolved_refs:
             for ref in unresolved_refs:
-                ref.resolver.resolve(self.get(ref.from_mrid, ref.resolver.from_class), identified_object)
-                self._unresolved_references_from[ref.from_mrid].remove(ref)
-                if not self._unresolved_references_from[ref.from_mrid]:
-                    del self._unresolved_references_from[ref.from_mrid]
+                ref.resolver.resolve(ref.from_ref, identified_object)
+                self._unresolved_references_from[ref.from_ref.mrid].remove(ref)
+                if not self._unresolved_references_from[ref.from_ref.mrid]:
+                    del self._unresolved_references_from[ref.from_ref.mrid]
             del self._unresolved_references_to[mrid]
 
         objs[mrid] = identified_object
@@ -207,7 +207,7 @@ class BaseService(object, metaclass=ABCMeta):
         """
         if not to_mrid:
             return True
-        to_mrid = str(to_mrid)
+        to_mrid = to_mrid
         from_ = bound_resolver.from_obj
         resolver = bound_resolver.resolver
         reverse_resolver = bound_resolver.reverse_resolver
@@ -220,11 +220,11 @@ class BaseService(object, metaclass=ABCMeta):
 
                 # Clean up any reverse resolvers now that the reference has been resolved
                 if from_.mrid in self._unresolved_references_to:
-                    to_remove = UnresolvedReference(from_mrid=to.mrid, to_mrid=from_.mrid, resolver=reverse_resolver)
+                    to_remove = UnresolvedReference(from_ref=to, to_mrid=from_.mrid, resolver=reverse_resolver)
                     self._unresolved_references_to[from_.mrid].remove(to_remove)
-                    self._unresolved_references_from[to_remove.from_mrid].remove(to_remove)
-                    if not self._unresolved_references_from[to_remove.from_mrid]:
-                        del self._unresolved_references_from[to_remove.from_mrid]
+                    self._unresolved_references_from[to_remove.from_ref.mrid].remove(to_remove)
+                    if not self._unresolved_references_from[to_remove.from_ref.mrid]:
+                        del self._unresolved_references_from[to_remove.from_ref.mrid]
                     if not self._unresolved_references_to[from_.mrid]:
                         del self._unresolved_references_to[from_.mrid]
 
@@ -232,7 +232,7 @@ class BaseService(object, metaclass=ABCMeta):
         except KeyError:
             # to_mrid didn't exist in the service, populate the reference caches for resolution when it is added.
             urefs = self._unresolved_references_to.get(to_mrid, set())
-            uref = UnresolvedReference(from_mrid=from_.mrid, to_mrid=to_mrid, resolver=resolver)
+            uref = UnresolvedReference(from_ref=from_, to_mrid=to_mrid, resolver=resolver)
             urefs.add(uref)
             self._unresolved_references_to[to_mrid] = urefs
             rev_urefs = self._unresolved_references_from.get(from_.mrid, set())
@@ -261,35 +261,25 @@ class BaseService(object, metaclass=ABCMeta):
                     seen.add(ref.to_mrid)
                     yield ref.to_mrid
 
-    def get_unresolved_reference_mrids_from(self, mrid: str, exclude_types: Set[Relationship] = None) -> Generator[str, None, None]:
+    def get_unresolved_references_from(self, mrid: str) -> Generator[UnresolvedReference, None, None]:
         """
         Get the mRIDs that are unresolved that `mrid` has to other objects.
         `mrid` The mRID to get unresolved references for.
         Returns a generator over the mRIDs that need to be resolved for `mrid`.
         """
-        if not exclude_types:
-            exclude_types = set()
-
         if mrid in self._unresolved_references_from:
-            for ref in self._unresolved_references_from[str(mrid)]:
-                if ref.relationship in exclude_types:
-                    continue
-                yield ref.to_mrid
+            for ref in self._unresolved_references_from[mrid]:
+                yield ref
 
-    def get_unresolved_reference_mrids_to(self, mrid: str, exclude_types: Set[Relationship] = None) -> Generator[str, None, None]:
+    def get_unresolved_references_to(self, mrid: str, exclude_types: Set[Relationship] = None) -> Generator[UnresolvedReference, None, None]:
         """
         Get the mRIDs that are unresolved that other objects have to `mrid`.
         `mrid` The mRID to fetch unresolved references for that are pointing to it.
         Returns a generator over the mRIDs that need to be resolved for `mrid`.
         """
-        if not exclude_types:
-            exclude_types = set()
-
         if mrid in self._unresolved_references_to:
-            for ref in self._unresolved_references_to[str(mrid)]:
-                if ref.relationship in exclude_types:
-                    continue
-                yield ref.from_mrid
+            for ref in self._unresolved_references_to[mrid]:
+                yield ref
 
     def remove(self, identified_object: IdentifiedObject) -> bool:
         """
@@ -298,7 +288,7 @@ class BaseService(object, metaclass=ABCMeta):
         `identified_object` THe object to disassociate from the service.
         Raises `KeyError` if `identified_object` or its type was not present in the service.
         """
-        del self._objectsByType[identified_object.__class__][str(identified_object.mrid)]
+        del self._objectsByType[identified_object.__class__][identified_object.mrid]
         return True
 
     def objects(self, obj_type: Optional[type] = None, exc_types: Optional[List[type]] = None) -> Generator[IdentifiedObject, None, None]:
