@@ -125,16 +125,6 @@ class UnresolvedReference(object):
     def __hash__(self):
         return hash((type(self), self.from_ref.mrid, self.to_mrid, self.resolver))
 
-    @property
-    def relationship(self) -> Relationship:
-        return Relationship(self.resolver.from_class, self.resolver.to_class)
-
-
-@dataclass(frozen=True, slots=True)
-class Relationship(object):
-    from_class: Type
-    to_class: Type
-
 
 def _resolve_ce_term(ce, t):
     t.conducting_equipment = ce
