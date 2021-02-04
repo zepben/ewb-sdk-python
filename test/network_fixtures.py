@@ -232,6 +232,10 @@ def add_location(network: NetworkService, psr: PowerSystemResource, *coords: flo
 
 @fixture()
 async def feeder_network():
+    """
+                c1       c2
+    source-fcb------fsp------tx
+    """
     network_service = NetworkService()
 
     source = create_source_for_connecting(network_service, "source", 1, PhaseCode.AB)

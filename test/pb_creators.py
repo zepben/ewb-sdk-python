@@ -231,7 +231,7 @@ def usagepoint():
 
 # IEC61968 OPERATIONS #
 def operationalrestriction():
-    return builds(PBOperationalRestriction, doc=document(), equipmentMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2))
+    return builds(PBOperationalRestriction, doc=document())
 
 
 # IEC61970 AUXILIARY EQUIPMENT #
@@ -258,7 +258,7 @@ def conductingequipment():
 
 
 def connectivitynode():
-    return builds(PBConnectivityNode, io=identifiedobject(), terminalMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=5))
+    return builds(PBConnectivityNode, io=identifiedobject())
 
 
 def connectivitynodecontainer():
@@ -274,13 +274,12 @@ def equipment():
 
 
 def equipmentcontainer():
-    return builds(PBEquipmentContainer, cnc=connectivitynodecontainer(), equipmentMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=10))
+    return builds(PBEquipmentContainer, cnc=connectivitynodecontainer())
 
 
 def feeder():
     return builds(PBFeeder, ec=equipmentcontainer(), normalHeadTerminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-                  normalEnergizingSubstationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-                  currentEquipmentMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2))
+                  normalEnergizingSubstationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
 
 
 def geographicalregion():

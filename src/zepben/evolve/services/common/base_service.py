@@ -100,13 +100,6 @@ class BaseService(object, metaclass=ABCMeta):
             for ur in unresolved_refs:
                 yield ur
 
-    def unresolved_mrids(self) -> KeysView[str]:
-        """
-        Returns all mRIDs that are currently unresolved. This should typically be avoided when resolving references in favour of
-        `get_unresolved_reference_mrids_by_resolver()`, `get_unresolved_reference_mrids_from()`, and `get_unresolved_reference_mrids_to()`
-        """
-        return self._unresolved_references_from.keys() | self._unresolved_references_to.keys()
-
     def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
             generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
         """

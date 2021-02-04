@@ -259,8 +259,7 @@ def usagepoint_to_pb(cim: UsagePoint) -> PBUsagePoint:
 
 # IEC61968 OPERATIONS #
 def operationalrestriction_to_pb(cim: OperationalRestriction) -> PBOperationalRestriction:
-    return PBOperationalRestriction(doc=document_to_pb(cim),
-                                    equipmentMRIDs=[str(io.mrid) for io in cim.equipment])
+    return PBOperationalRestriction(doc=document_to_pb(cim))
 
 
 # IEC61970 AUXILIARY EQUIPMENT #
@@ -290,7 +289,7 @@ def conductingequipment_to_pb(cim: ConductingEquipment) -> PBConductingEquipment
 
 
 def connectivitynode_to_pb(cim: ConnectivityNode) -> PBConnectivityNode:
-    return PBConnectivityNode(io=identifiedobject_to_pb(cim), terminalMRIDs=[str(io.mrid) for io in cim.terminals])
+    return PBConnectivityNode(io=identifiedobject_to_pb(cim))
 
 
 def connectivitynodecontainer_to_pb(cim: ConnectivityNodeContainer) -> PBConnectivityNodeContainer:
@@ -309,15 +308,13 @@ def equipment_to_pb(cim: Equipment) -> PBEquipment:
 
 
 def equipmentcontainer_to_pb(cim: EquipmentContainer) -> PBEquipmentContainer:
-    return PBEquipmentContainer(cnc=connectivitynodecontainer_to_pb(cim),
-                                equipmentMRIDs=[str(io.mrid) for io in cim.equipment])
+    return PBEquipmentContainer(cnc=connectivitynodecontainer_to_pb(cim))
 
 
 def feeder_to_pb(cim: Feeder) -> PBFeeder:
     return PBFeeder(ec=equipmentcontainer_to_pb(cim),
                     normalHeadTerminalMRID=mrid_or_empty(cim.normal_head_terminal),
-                    normalEnergizingSubstationMRID=mrid_or_empty(cim.normal_energizing_substation),
-                    currentEquipmentMRIDs=[str(io.mrid) for io in cim.current_equipment])
+                    normalEnergizingSubstationMRID=mrid_or_empty(cim.normal_energizing_substation))
 
 
 def geographicalregion_to_pb(cim: GeographicalRegion) -> PBGeographicalRegion:

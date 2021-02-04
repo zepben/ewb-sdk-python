@@ -14,7 +14,6 @@ from typing import Iterable, Dict, Optional, Set, Tuple
 
 from dataclassy import dataclass
 
-
 from zepben.evolve.streaming.exceptions import UnsupportedOperationException
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 
@@ -80,5 +79,3 @@ def extract_identified_object(service: NetworkService, nio: NetworkIdentifiedObj
         return service.add_from_pb(pbio), pbio.mrid()
     else:
         raise UnsupportedOperationException(f"Received a NetworkIdentifiedObject where no field was set")
-
-

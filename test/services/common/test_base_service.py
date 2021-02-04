@@ -21,7 +21,7 @@ def test_unresolved_bidirectional_references(service: BaseService):
     assert service.add(term)
     assert service.resolve_or_defer_reference(resolver.conducting_equipment(term), "j1") is False
 
-    assert list(service.unresolved_references())[0] == UnresolvedReference(term.mrid, "j1", resolver.conducting_equipment(term).resolver)
+    assert list(service.unresolved_references())[0] == UnresolvedReference(term, "j1", resolver.conducting_equipment(term).resolver)
     assert "j1" in service.get_unresolved_reference_mrids_by_resolver(resolver.conducting_equipment(term))
 
     j1 = Junction("j1")
@@ -40,7 +40,7 @@ def test_unresolved_unidirectional_references(service: BaseService):
     j1 = Junction("j1")
     assert service.add(j1)
     assert service.resolve_or_defer_reference(resolver.ce_base_voltage(j1), "bv1") is False
-    assert list(service.unresolved_references())[0] == UnresolvedReference(j1.mrid, "bv1", resolver.ce_base_voltage(j1).resolver)
+    assert list(service.unresolved_references())[0] == UnresolvedReference(j1, "bv1", resolver.ce_base_voltage(j1).resolver)
     assert "bv1" in service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(j1))
 
     bv1 = BaseVoltage("bv1")
@@ -77,17 +77,17 @@ def test_unresolved_references(service: BaseService):
     assert service.add(acls1)
     assert service.add(acls2)
     assert service.num_unresolved_references() == 6
-    refs_for_acls1 = list(service.get_unresolved_reference_mrids_from("acls1"))
+    refs_for_acls1 = [x.to_mrid for x in service.get_unresolved_references_from("acls1")]
     for expected in (plsi1.mrid, t1.mrid, t2.mrid, ci1.mrid):
         assert expected in refs_for_acls1
 
     refs = list(service.get_unresolved_reference_mrids_by_resolver(resolver.per_length_sequence_impedance(acls1)))
     assert plsi1.mrid in refs
 
-    check_unresolved_reference(t1.mrid, acls1.mrid, service.get_unresolved_reference_mrids_to)
-    check_unresolved_reference(t2.mrid, acls1.mrid, service.get_unresolved_reference_mrids_to)
-    check_unresolved_reference(plsi1.mrid, acls1.mrid, service.get_unresolved_reference_mrids_to)
-    check_unresolved_reference(ci1.mrid, acls1.mrid, service.get_unresolved_reference_mrids_to)
+    check_unresolved_reference(t1.mrid, acls1.mrid, service.get_unresolved_references_to)
+    check_unresolved_reference(t2.mrid, acls1.mrid, service.get_unresolved_references_to)
+    check_unresolved_reference(plsi1.mrid, acls1.mrid, service.get_unresolved_references_to)
+    check_unresolved_reference(ci1.mrid, acls1.mrid, service.get_unresolved_references_to)
 
     add_and_check(service, f, [acls1, acls2], "equipment_containers")
     assert service.num_unresolved_references() == 4
@@ -106,9 +106,9 @@ def add_and_check(service: BaseService, to_add, to_check: Union[IdentifiedObject
     if isinstance(to_check, IdentifiedObject):
         to_check = [to_check]
     for io in to_check:
-        refs = list(service.get_unresolved_reference_mrids_from(io.mrid))
+        refs = [x.from_ref.mrid for x in service.get_unresolved_references_from(io.mrid)]
         assert to_add.mrid not in refs
-        assert to_add.mrid not in service.get_unresolved_reference_mrids_to(to_add.mrid)
+        assert to_add.mrid not in service.get_unresolved_references_to(to_add.mrid)
         attr = getattr(io, to_check_reference)
         if isinstance(attr, IdentifiedObject):
             assert attr is to_add
@@ -117,5 +117,16 @@ def add_and_check(service: BaseService, to_add, to_check: Union[IdentifiedObject
 
 
 def check_unresolved_reference(to_check, expected_from, getter):
-    refs = list(getter(to_check))
+    refs = [x.from_ref.mrid for x in getter(to_check)]
     assert expected_from in refs
+
+
+def test_resolve_thingo(service):
+    acls1 = AcLineSegment("acls1")
+    t1 = Terminal("t1")
+    service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t1")
+    service.resolve_or_defer_reference(resolver.conducting_equipment(t1), "acls1")
+
+    service.add(acls1)
+    service.add(t1)
+
