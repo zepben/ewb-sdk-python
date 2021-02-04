@@ -150,7 +150,7 @@ __all__ = ["cableinfo_to_cim", "overheadwireinfo_to_cim", "wireinfo_to_cim", "as
            "perlengthlineparameter_to_cim", "perlengthimpedance_to_cim", "perlengthsequenceimpedance_to_cim", "powertransformer_to_cim",
            "powertransformerend_to_cim", "power_transformer_info_to_cim", "protectedswitch_to_cim", "ratiotapchanger_to_cim", "recloser_to_cim",
            "regulatingcondeq_to_cim", "shuntcompensator_to_cim", "switch_to_cim", "tapchanger_to_cim", "transformerend_to_cim", "PBPerLengthImpedance",
-           "circuit_to_cim", "loop_to_cim", "_add_from_pb", "NetworkProtoToCim"]
+           "circuit_to_cim", "loop_to_cim", "_add_from_pb"]
 
 
 ### IEC61968 ASSET INFO
@@ -302,8 +302,6 @@ PBUsagePoint.to_cim = usagepoint_to_cim
 ### IEC61968 OPERATIONS
 def operationalrestriction_to_cim(pb: PBOperationalRestriction, network_service: NetworkService) -> Optional[OperationalRestriction]:
     cim = OperationalRestriction(mrid=pb.mrid())
-    for mrid in pb.equipmentMRIDs:
-        network_service.resolve_or_defer_reference(resolver.or_equipment(cim), mrid)
     document_to_cim(pb.doc, cim, network_service)
     return cim if network_service.add(cim) else None
 
@@ -348,8 +346,6 @@ def conductingequipment_to_cim(pb: PBConductingEquipment, cim: ConductingEquipme
 
 def connectivitynode_to_cim(pb: PBConnectivityNode, network_service: NetworkService) -> Optional[ConnectivityNode]:
     cim = ConnectivityNode(mrid=pb.mrid())
-    for mrid in pb.terminalMRIDs:
-        network_service.resolve_or_defer_reference(resolver.cn_terminals(cim), mrid)
     identifiedobject_to_cim(pb.io, cim, network_service)
     return cim if network_service.add(cim) else None
 
@@ -374,8 +370,6 @@ def equipment_to_cim(pb: PBEquipment, cim: Equipment, network_service: NetworkSe
 
 
 def equipmentcontainer_to_cim(pb: PBEquipmentContainer, cim: EquipmentContainer, network_service: NetworkService):
-    for mrid in pb.equipmentMRIDs:
-        network_service.resolve_or_defer_reference(resolver.ec_equipment(cim), mrid)
     connectivitynodecontainer_to_cim(pb.cnc, cim, network_service)
 
 
@@ -383,8 +377,6 @@ def feeder_to_cim(pb: PBFeeder, network_service: NetworkService) -> Optional[Fee
     cim = Feeder(mrid=pb.mrid())
     network_service.resolve_or_defer_reference(resolver.normal_head_terminal(cim), pb.normalHeadTerminalMRID)
     network_service.resolve_or_defer_reference(resolver.normal_energizing_substation(cim), pb.normalEnergizingSubstationMRID)
-    for mrid in pb.currentEquipmentMRIDs:
-        network_service.resolve_or_defer_reference(resolver.current_equipment(cim), mrid)
     equipmentcontainer_to_cim(pb.ec, cim, network_service)
     return cim if network_service.add(cim) else None
 
@@ -774,17 +766,8 @@ def _add_from_pb(network_service: NetworkService, pb) -> Optional[IdentifiedObje
     """Must only be called by objects for which .to_cim() takes themselves and the network service."""
     try:
         return pb.to_cim(network_service)
-    except AttributeError:
-        raise TypeError(f"Type {pb.__class__.__name__} is not supported by NetworkService")
+    except AttributeError as e:
+        raise TypeError(f"Type {pb.__class__.__name__} is not supported by NetworkService. (Error was: {e})")
 
 
 NetworkService.add_from_pb = _add_from_pb
-
-
-# Convenience class for adding to the service
-class NetworkProtoToCim(BaseProtoToCim):
-    service: NetworkService
-
-    def add_from_pb(self, pb) -> Optional[IdentifiedObject]:
-        """Must only be called by objects for which .to_cim() takes themselves and the network."""
-        return pb.to_cim(self.service)

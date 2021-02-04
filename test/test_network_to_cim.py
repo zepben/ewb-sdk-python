@@ -35,7 +35,7 @@ from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import Protecte
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
 
 from zepben.evolve.services.network.network import NetworkService
-from zepben.evolve.services.network.translator.network_proto2cim import NetworkProtoToCim
+import zepben.evolve.services.network.translator.network_proto2cim
 
 
 class TestNetworkToCim(object):
@@ -43,7 +43,7 @@ class TestNetworkToCim(object):
         """Test addition to the network works for CableInfo PB type."""
 
         # Create network
-        network = NetworkProtoToCim(NetworkService())
+        network = NetworkService()
 
         # BaseVoltage1
         io_bv1 = PBIdentifiedObject(mRID="bv1", name="bv1")
@@ -125,4 +125,4 @@ class TestNetworkToCim(object):
         me = PBMeter(ed=ed)
         network.add_from_pb(me)
 
-        print(network.service)
+        print(network)

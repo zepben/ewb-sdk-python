@@ -9,21 +9,21 @@ from zepben.evolve.services.common.reference_resolvers import term_to_ce_resolve
 
 def test_unresolved_reference_equality():
     t1 = Terminal("t1")
-    ur1 = UnresolvedReference(from_mrid=t1.mrid, to_mrid="j1", resolver=resolver.conducting_equipment(t1))
-    ur2 = UnresolvedReference(from_mrid=t1.mrid, to_mrid="j1", resolver=resolver.conducting_equipment(t1))
+    ur1 = UnresolvedReference(from_ref=t1, to_mrid="j1", resolver=resolver.conducting_equipment(t1))
+    ur2 = UnresolvedReference(from_ref=t1, to_mrid="j1", resolver=resolver.conducting_equipment(t1))
     assert ur1 == ur2
     assert not ur1 != ur2
 
     t2 = Terminal("t2")
-    ur3 = UnresolvedReference(from_mrid=t2.mrid, to_mrid="j1", resolver=resolver.conducting_equipment(t1))
+    ur3 = UnresolvedReference(from_ref=t2, to_mrid="j1", resolver=resolver.conducting_equipment(t1))
     assert ur1 != ur3
     assert not ur1 == ur3
 
-    ur4 = UnresolvedReference(from_mrid=t1.mrid, to_mrid="j1", resolver=resolver.conducting_equipment(t2))
+    ur4 = UnresolvedReference(from_ref=t1, to_mrid="j1", resolver=resolver.conducting_equipment(t2))
     assert ur1 != ur4
     assert ur3 != ur4
 
-    ur5 = UnresolvedReference(from_mrid=t1.mrid, to_mrid="j2", resolver=resolver.conducting_equipment(t1))
+    ur5 = UnresolvedReference(from_ref=t1, to_mrid="j2", resolver=resolver.conducting_equipment(t1))
     assert ur1 != ur5
 
 
