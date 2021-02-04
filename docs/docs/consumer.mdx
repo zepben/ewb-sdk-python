@@ -70,11 +70,16 @@ they wish to use, without needing to pull back large amounts of full object data
 
 ## Requesting Identified Objects
 
-Identified objects can be requested to build a model client side. When identified objects are loaded, any referenced
-objects that have not been previously requested need to be requested explicitly. The exception to this is terminals
-are always sent with their conducting equipment and transformer ends are always sent with transformers.
+:::warning
+The *ConsumerClient APIs will take care of this for you, and you typically only need these functions if you're
+developing the consumer client APIs themselves. Make sure what you want to achieve isn't already covered by the
+API before delving into this code.
+:::
 
-To find the mRIDs of any references that need to be requested you can use the [deferred reference](services.mdx#deferred-references)
+Identified objects can be requested to build a model client side. When identified objects are loaded, any referenced
+objects that have not been previously requested need to be requested explicitly.
+
+To find the references that need to be requested you can use the [deferred reference](services.mdx#deferred-references)
 functions on the service provided when requesting identified objects.
 
 ```python
@@ -85,15 +90,24 @@ async def get_with_base_voltage(service: NetworkService, client: NetworkConsumer
     if not equipment:
         return
 
-    # Get all unresolved references
-    for mrid in service.unresolved_mrids():
-        await client.get_identified_object(service, mrid)
+    # Get all base voltage relationships
+    mrids = service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(equipment))
+    if mrids:
+        await client.get_identified_object(service, mrids[0])
+```
 
-    # Or get only unresolved references for `equipment` only:
-    for mrid in service.get_unresolved_reference_mrids_from(equipment):
-        await client.get_identified_object(service, mrid)
+You can also query the services UnresolvedReferences in the following ways:
 
-    # Or get only unresolved reference mRIDs pointing to `equipment`:
-    for mrid in service.get_unresolved_reference_mrids_to(equipment):
-        await client.get_identified_object(service, mrid)
+```python
+# To get unresolved references pointing from `equipment` to other objects:
+for ref in service.get_unresolved_references_from(equipment.mrid):
+    await client.get_identified_object(service, ref.to_mrid)
+
+# To get unresolved references pointing to `equipment`:
+for ref in service.get_unresolved_references_to(equipment.mrid):
+    await client.get_identified_object(service, ref.mrid)
+
+# Get all unresolved references. Note this will iterate over every unresolved reference and is likely undesirable. You should prefer to use the above two methods.
+for ref in service.unresolved_references():
+    await client.get_identified_object(service, ref.to_mrid)
 ```
