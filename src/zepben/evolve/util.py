@@ -122,6 +122,6 @@ class CopyableUUID(UUID):
         super().__init__(bytes=os.urandom(16), version=4)
 
     def copy(self):
-        return UUID(bytes=os.urandom(16), version=4)
+        return str(UUID(bytes=os.urandom(16), version=4))
 
 
