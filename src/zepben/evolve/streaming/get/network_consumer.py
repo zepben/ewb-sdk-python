@@ -182,23 +182,22 @@ class NetworkConsumerClient(CimConsumerClient):
             return GrpcResult(result=ValueError(f"Requested mrid {mrid} was not a Feeder, was {type(feeder)}"))
 
         mor = MultiObjectResult()
+        mor.value[feeder.mrid] = feeder
         res = (await self._handle_multi_object_rpc(service, feeder.mrid, self._process_equipment_container)).throw_on_error()
         mor.value.update(res.result.value)
+        result_with_feeder = set(res.result.value.keys())
+        result_with_feeder.add(feeder.mrid)
         # We need to resolve all the unresolved references for each piece of equipment, but then we need to
         # also do the same for the resolutions, and so on so forth until the entire tree of references originating from the Feeder has been resolved,
         # however we don't know how long this tree is until we've resolved everything. So we start by resolving all the equipment, then we iteratively
         # descend the tree by checking for unresolved references for the objects we just resolved in the previous iteration.
-        to_resolve = _get_unresolved_mrids(service, res.result.value.keys())
+        to_resolve = _get_unresolved_mrids(service, result_with_feeder)
         while True:
             res = await self._get_objects(service, to_resolve)
             if not res.value:
                 break
             mor.value.update(res.value)
             to_resolve = _get_unresolved_mrids(service, res.value.keys())
-
-        # Get the rest of the unresolved references for the feeder (e.g substation)
-        await self._get_objects(service, [x.to_mrid for x in service.get_unresolved_references_from(feeder.mrid)], mor)
-        mor.value[feeder.mrid] = feeder
 
         return GrpcResult(result=mor)
 
