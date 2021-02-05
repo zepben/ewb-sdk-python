@@ -8,10 +8,10 @@ from __future__ import annotations
 from abc import ABCMeta
 from collections import OrderedDict
 from dataclassy import dataclass
-from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set, KeysView, Type
+from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference, Relationship
+from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
 
 __all__ = ["BaseService"]
 
@@ -82,7 +82,17 @@ class BaseService(object, metaclass=ABCMeta):
         if t is None:
             return sum([len(vals) for vals in self._objectsByType.values()])
         else:
-            return len(self._objectsByType[t].values())
+            try:
+                return len(self._objectsByType[t].values())
+            except KeyError:
+                count = 0
+                for c, obj_map in self._objectsByType.items():
+                    if issubclass(c, t):
+                        try:
+                            count += len(self._objectsByType[c].values())
+                        except KeyError:
+                            pass
+                return count
 
     def num_unresolved_references(self):
         """
