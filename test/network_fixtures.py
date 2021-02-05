@@ -10,12 +10,13 @@ from pytest import fixture
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, WindingConnection, BaseVoltage, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo
+    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
            "create_geographical_region", "create_subgeographical_region", "create_asset_owner", "create_meter", "create_power_transformer_end",
-           "basic_network_hierarchy", "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network"]
+           "basic_network_hierarchy", "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
+           "feeder_with_current", "operational_restriction_with_equipment"]
 
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
 from zepben.evolve.util import CopyableUUID
@@ -34,7 +35,7 @@ def create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms
 
 def create_junction_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABCN) -> Junction:
     if not mrid:
-        mrid = CopyableUUID()
+        mrid = str(CopyableUUID())
 
     junction = Junction(mrid, name="test junction")
     create_terminals(network, junction, num_terms, phases)
@@ -44,7 +45,7 @@ def create_junction_for_connecting(network: NetworkService, mrid: str = "", num_
 
 def create_source_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABCN) -> EnergySource:
     if not mrid:
-        mrid = CopyableUUID()
+        mrid = str(CopyableUUID())
 
     source = EnergySource(mrid)
     for phase in phases.single_phases:
@@ -58,15 +59,19 @@ def create_source_for_connecting(network: NetworkService, mrid: str = "", num_te
     return source
 
 
-def create_switch_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABC, *phase_states: bool) -> Breaker:
+def create_switch_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABC,
+                                 normal_phase_states: List[bool] = None, current_phase_states: List[bool] = None) -> Breaker:
     if not mrid:
-        mrid = CopyableUUID()
+        mrid = str(CopyableUUID())
 
     cb = Breaker(mrid, name="test breaker")
     create_terminals(network, cb, num_terms, phases)
 
-    for i, state in enumerate(phase_states):
+    normal_phase_states = [False] * phases.num_phases if normal_phase_states is None else normal_phase_states
+    current_phase_states = [False] * phases.num_phases if current_phase_states is None else current_phase_states
+    for i, state in enumerate(normal_phase_states):
         cb.set_normally_open(state, phases.single_phases[i])
+    for i, state in enumerate(current_phase_states):
         cb.set_open(state, phases.single_phases[i])
 
     network.add(cb)
@@ -97,7 +102,7 @@ def create_asset_owner(network: NetworkService, company: str, customer_service: 
 
 def create_meter(network: NetworkService, id: str = "") -> Meter:
     if not id:
-        id = CopyableUUID()
+        id = str(CopyableUUID())
 
     meter = Meter(id, name=f"companyMeterId{id}")
     meter.add_organisation_role(create_asset_owner(network, f"company{id}"))
@@ -112,7 +117,7 @@ def create_power_transformer_for_connecting(network: NetworkService, mrid: str =
                can be passed to the `PowerTransformerEnd` constructor. Keep in mind CIM recommends the HV end is first in the list.
     """
     if not mrid:
-        mrid = CopyableUUID()
+        mrid = str(CopyableUUID())
 
     pt = PowerTransformer(mrid, name="test powertransformer")
     terminals = create_terminals(network, pt, num_terms, phases)
@@ -138,7 +143,7 @@ def create_acls_for_connecting(network: NetworkService, mrid: str = "", phases: 
                                plsi_mrid: str = "perLengthSequenceImepedance",
                                wi_mrid: str = "wireInfo") -> AcLineSegment:
     if not mrid:
-        mrid = CopyableUUID()
+        mrid = str(CopyableUUID())
 
     try:
         plsi = network.get(plsi_mrid, PerLengthSequenceImpedance)
@@ -160,7 +165,7 @@ def create_acls_for_connecting(network: NetworkService, mrid: str = "", phases: 
 
 def create_energy_consumer_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABCN) -> EnergyConsumer:
     if not mrid:
-        mrid = CopyableUUID()
+        mrid = str(CopyableUUID())
 
     ec = EnergyConsumer(mrid, name=f"{mrid}-name")
     create_terminals(network, ec, num_terms, phases)
@@ -170,7 +175,7 @@ def create_energy_consumer_for_connecting(network: NetworkService, mrid: str = "
 
 def create_geographical_region(network: NetworkService, mrid: str = "", name: str = "") -> GeographicalRegion:
     if not mrid:
-        mrid = CopyableUUID()
+        mrid = str(CopyableUUID())
 
     gr = GeographicalRegion(mrid, name=name)
     network.add(gr)
@@ -179,7 +184,7 @@ def create_geographical_region(network: NetworkService, mrid: str = "", name: st
 
 def create_subgeographical_region(network: NetworkService, mrid: str = "", name: str = "", gr: GeographicalRegion = None) -> SubGeographicalRegion:
     if not mrid:
-        mrid = CopyableUUID()
+        mrid = str(CopyableUUID())
 
     sgr = SubGeographicalRegion(mrid, name=name)
     if gr is not None:
@@ -192,7 +197,7 @@ def create_subgeographical_region(network: NetworkService, mrid: str = "", name:
 
 def create_substation(network: NetworkService, mrid: str = "", name: str = "", sgr: SubGeographicalRegion = None) -> Substation:
     if not mrid:
-        mrid = CopyableUUID()
+        mrid = str(CopyableUUID())
 
     sub = Substation(mrid, name=name, sub_geographical_region=sgr)
     if sgr is not None:
@@ -202,10 +207,13 @@ def create_substation(network: NetworkService, mrid: str = "", name: str = "", s
     return sub
 
 
-def create_feeder(network: NetworkService, mrid: str = "", name: str = "", sub: Substation = None, head_terminal: Terminal = None, *equipment_mrids: str) -> Feeder:
+def create_feeder(network: NetworkService, mrid: str = "", name: str = "", sub: Substation = None, head_terminal: Terminal = None,
+                  *equipment_mrids: str) -> Feeder:
     """
     `equipment_mrids` Equipment to fetch from the network and add to this feeder.
     """
+    if not mrid:
+        mrid = str(CopyableUUID())
     feeder = Feeder(mrid, name=name, normal_head_terminal=head_terminal, normal_energizing_substation=sub)
     sub.add_feeder(feeder)
     network.add(feeder)
@@ -218,6 +226,20 @@ def create_feeder(network: NetworkService, mrid: str = "", name: str = "", sub: 
     return feeder
 
 
+def create_operational_restriction(network: NetworkService, mrid: str = "", name: str = "", *equipment_mrids: str, **document_kwargs):
+    if not mrid:
+        mrid = str(CopyableUUID())
+    restriction = OperationalRestriction(mrid, name, **document_kwargs)
+    network.add(restriction)
+
+    for mrid in equipment_mrids:
+        eq = network.get(mrid, Equipment)
+        restriction.add_equipment(eq)
+        eq.add_restriction(restriction)
+
+    return restriction
+
+
 def add_location(network: NetworkService, psr: PowerSystemResource, *coords: float):
     """
     `coords` XY/longlats to use for the PositionPoint for this location. Must be an even number of coords.
@@ -225,7 +247,7 @@ def add_location(network: NetworkService, psr: PowerSystemResource, *coords: flo
     """
     loc = Location()
     for i in range(0, len(coords), 2):
-        loc.add_point(PositionPoint(coords[i], coords[i+1]))
+        loc.add_point(PositionPoint(coords[i], coords[i + 1]))
     psr.location = loc
     network.add(loc)
 
@@ -268,6 +290,54 @@ async def feeder_network():
 
 
 @fixture()
+async def feeder_with_current():
+    """
+                c1       c2      c3       c4
+    source-fcb------fsp------tx------sw--------tx2
+                                   (open)
+    """
+    network_service = NetworkService()
+
+    source = create_source_for_connecting(network_service, "source", 1, PhaseCode.AB)
+    fcb = create_switch_for_connecting(network_service, "fcb", 2, PhaseCode.AB)
+    fsp = create_junction_for_connecting(network_service, "fsp", 2, PhaseCode.AB)
+    tx = create_power_transformer_for_connecting(network_service, "tx", 2, PhaseCode.AB, end_args=[{"rated_u": 22000}, {"rated_u": 415}])
+    sw = create_switch_for_connecting(network_service, "sw", 2, PhaseCode.AB, current_phase_states=[True, True])
+    tx2 = create_power_transformer_for_connecting(network_service, "tx2", 2, PhaseCode.AB, end_args=[{"rated_u": 415}, {"rated_u": 22000}])
+
+    c1 = create_acls_for_connecting(network_service, "c1", PhaseCode.AB)
+    c2 = create_acls_for_connecting(network_service, "c2", PhaseCode.AB)
+    c3 = create_acls_for_connecting(network_service, "c3", PhaseCode.AB)
+    c4 = create_acls_for_connecting(network_service, "c4", PhaseCode.AB)
+
+    sub = create_substation(network_service, "f", "f")
+    create_feeder(network_service, "f001", "f001", sub, fsp.get_terminal_by_sn(2))
+
+    add_location(network_service, source, 1.0, 1.0)
+    add_location(network_service, fcb, 1.0, 1.0)
+    add_location(network_service, fsp, 5.0, 1.0)
+    add_location(network_service, tx, 10.0, 2.0)
+    add_location(network_service, c1, 1.0, 1.0, 5.0, 1.0)
+    add_location(network_service, c2, 5.0, 1.0, 10.0, 2.0)
+    add_location(network_service, c2, 10.0, 1.0, 15.0, 3.0)
+    add_location(network_service, c2, 15.0, 1.0, 20.0, 4.0)
+
+    network_service.connect_terminals(source.get_terminal_by_sn(1), fcb.get_terminal_by_sn(1))
+    network_service.connect_terminals(fcb.get_terminal_by_sn(2), c1.get_terminal_by_sn(1))
+    network_service.connect_terminals(c1.get_terminal_by_sn(2), fsp.get_terminal_by_sn(1))
+    network_service.connect_terminals(fsp.get_terminal_by_sn(2), c2.get_terminal_by_sn(1))
+    network_service.connect_terminals(c2.get_terminal_by_sn(2), tx.get_terminal_by_sn(1))
+    network_service.connect_terminals(tx.get_terminal_by_sn(2), c3.get_terminal_by_sn(1))
+    network_service.connect_terminals(c3.get_terminal_by_sn(2), sw.get_terminal_by_sn(1))
+    network_service.connect_terminals(sw.get_terminal_by_sn(2), c4.get_terminal_by_sn(1))
+    network_service.connect_terminals(c4.get_terminal_by_sn(2), tx2.get_terminal_by_sn(1))
+
+    await SetPhases().run(network_service)
+    await AssignToFeeders().run(network_service)
+    return network_service
+
+
+@fixture()
 def feeder_start_point_between_conductors_network():
     network_service = NetworkService()
 
@@ -285,6 +355,27 @@ def feeder_start_point_between_conductors_network():
 
 
 @fixture()
+def operational_restriction_with_equipment():
+    network_service = NetworkService()
+    source = create_source_for_connecting(network_service, "source", 1, PhaseCode.AB)
+    fcb = create_switch_for_connecting(network_service, "fcb", 2, PhaseCode.AB)
+    fsp = create_junction_for_connecting(network_service, "fsp", 2, PhaseCode.AB)
+    c1 = create_acls_for_connecting(network_service, "c1", PhaseCode.AB)
+    c2 = create_acls_for_connecting(network_service, "c2", PhaseCode.AB)
+    tx = create_power_transformer_for_connecting(network_service, "tx", 2, PhaseCode.AB, end_args=[{"rated_u": 22000}, {"rated_u": 415}])
+    create_operational_restriction(network_service, "or1", "test_or1", "fsp", "c2", "tx", title="test title")
+
+    network_service.connect_terminals(source.get_terminal_by_sn(1), fcb.get_terminal_by_sn(1))
+    network_service.connect_terminals(fcb.get_terminal_by_sn(2), c1.get_terminal_by_sn(1))
+    network_service.connect_terminals(c1.get_terminal_by_sn(2), fsp.get_terminal_by_sn(1))
+    network_service.connect_terminals(c1.get_terminal_by_sn(2), fsp.get_terminal_by_sn(1))
+    network_service.connect_terminals(fsp.get_terminal_by_sn(2), c2.get_terminal_by_sn(1))
+    network_service.connect_terminals(c2.get_terminal_by_sn(2), tx.get_terminal_by_sn(1))
+
+    return network_service
+
+
+@fixture()
 def feeder_start_point_to_open_point_network(request):
     normally_open = request.param[0]
     currently_open = request.param[1]
@@ -298,6 +389,7 @@ def feeder_start_point_to_open_point_network(request):
     op.set_normally_open(normally_open)
     op.set_open(currently_open)
 
+
     network_service.connect_terminals(c1.get_terminal_by_sn(1), fsp.get_terminal_by_sn(1))
     network_service.connect_terminals(c1.get_terminal_by_sn(2), op.get_terminal_by_sn(1))
     network_service.connect_terminals(c2.get_terminal_by_sn(1), op.get_terminal_by_sn(2))
@@ -310,4 +402,4 @@ def feeder_start_point_to_open_point_network(request):
 def basic_network_hierarchy():
     service = NetworkService()
     feeder = Feeder(name="basic-feeder")
-    create_switch_for_connecting(service, "test_breaker", 2, PhaseCode.ABCN, True, True, True, True)
+    create_switch_for_connecting(service, "test_breaker", 2, PhaseCode.ABCN, normal_phase_states=[True] * 4, current_phase_states=[True] * 4)
