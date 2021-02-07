@@ -105,7 +105,7 @@ for ref in service.get_unresolved_references_from(equipment.mrid):
 
 # To get unresolved references pointing to `equipment`:
 for ref in service.get_unresolved_references_to(equipment.mrid):
-    await client.get_identified_object(service, ref.mrid)
+    await client.get_identified_object(service, ref.from_ref.mrid)
 
 # Get all unresolved references. Note this will iterate over every unresolved reference and is likely undesirable. You should prefer to use the above two methods.
 for ref in service.unresolved_references():
