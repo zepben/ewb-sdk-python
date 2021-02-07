@@ -26,29 +26,29 @@ class BaseService(object, metaclass=ABCMeta):
     _unresolved_references_to: Dict[str, Set[UnresolvedReference]] = OrderedDict()
     """
     A dictionary of references between mRID's that as yet have not been resolved - typically when transferring services between systems.
-    THe key is the to_mrid of the `UnresolvedReference`s, and the value is a list of `UnresolvedReference`s for that specific object.
+    The key is the to_mrid of the `UnresolvedReference`s, and the value is a list of `UnresolvedReference`s for that specific object.
     For example, if an AcLineSegment with mRID 'acls1' is present in the service, but the service is missing its `location` with mRID 'location-l1' 
     and `perLengthSequenceImpedance` with mRID 'plsi-1', the following key value pairs would be present:
     {
         "plsi-1": [
-          UnresolvedReference(from_mrid='acls1', to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...))
+          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...))
         ],
         "location-l1": [
-          UnresolvedReference(from_mrid='acls1', to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...))
+          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...))
         ]
     }
     
-    `resolve` in `ReferenceResolver` will be the `Callable` used to populate the relationship between the `IdentifiedObject`s after they are both added to the
-    service.
+    `resolve` in `ReferenceResolver` will be the function used to populate the relationship between the `IdentifiedObject`s either when 
+    `resolveOrDeferReference() is called if the other side of the reference exists in the service, or otherwise when the second object is added to the service.
     """
 
     _unresolved_references_from: Dict[str, Set[UnresolvedReference]] = OrderedDict()
     """ 
-    An index of the unresolved references by their from_mrid used for lookups only. For the above example this will be a dictionary of the form:
+    An index of the unresolved references by their `from_ref.mrid`. For the above example this will be a dictionary of the form:
     {
         "acls1": [
-          UnresolvedReference(from_mrid='acls1', to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...)),
-          UnresolvedReference(from_mrid='acls1', to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...))
+          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...)),
+          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...))
         ]
     }
     """

@@ -204,9 +204,9 @@ print(feeder.equipment.contains(junction)) # false
 # We can query the unresolved reference MRIDs back out of the service using a specific resolver
 print(service.get_unresolved_reference_mrids_by_resolver(resolver.ec_equipment(feeder))) # ["j1"]
 # Or using the mrid of the destination object
-print(service.get_unresolved_references_to(feeder.mrid)) # ["j1"]
+print(service.get_unresolved_references_to(feeder.mrid)) # [junction]
 # Or using the mrid of the source object
-print(service.get_unresolved_references_from(junction.mrid)) # ["f"]
+print(service.get_unresolved_references_from(junction.mrid)) # [feeder]
 
 # When the object with the deferred mRID is added, the reference gets resolved
 service.add(junction)
