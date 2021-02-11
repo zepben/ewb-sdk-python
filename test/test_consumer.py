@@ -9,10 +9,10 @@ import pytest
 from hypothesis import given, settings, Phase
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainerRequest, GetCurrentEquipmentForFeederRequest, \
-    GetEquipmentForRestrictionRequest
+    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainerResponse, GetCurrentEquipmentForFeederResponse, \
-    GetEquipmentForRestrictionResponse
-from unittest.mock import MagicMock
+    GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse
+from unittest.mock import MagicMock, call
 
 from test.pb_creators import networkidentifiedobjects, aclinesegment
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, ConductingEquipment, AcLineSegment, Breaker, EnergySource, \
@@ -87,6 +87,8 @@ async def test_get_feeder(feeder_network):
         **{"getIdentifiedObjects.side_effect": create_feeder_response, "getEquipmentForContainer.side_effect": create_container_equipment_func(feeder_network)})
     client = NetworkConsumerClient(stub=stub)
     objects = await client.get_feeder(ns, feeder_mrid)
+    stub.assert_has_calls([call.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=["f001"]))])
+    assert stub.getIdentifiedObjects.call_count == 3
     assert len(objects.result.value) == ns.len_of() == 21
     assert objects.was_successful
     assert feeder_mrid in objects.result.value
@@ -134,6 +136,23 @@ async def test_get_equipment_for_operational_restriction(operational_restriction
     objects = await client.get_equipment_for_restriction(ns, or_mrid)
     assert len(objects.result.value) == ns.len_of(Equipment) == 3
     assert_contains_mrids(ns, "fsp", "c2", "tx")
+
+@pytest.mark.asyncio
+async def test_get_terminals_for_connectivitynode(single_connectivitynode_network):
+    ns = NetworkService()
+    cn_mrid = "cn1"
+
+    def create_cn_response(request: GetTerminalsForNodeRequest, *args, **kwargs):
+        cn1 = single_connectivitynode_network.get(request.mrid, ConnectivityNode)
+        for terminal in cn1.terminals:
+            yield GetTerminalsForNodeResponse(terminal=terminal.to_pb())
+
+    stub = MagicMock(**{"getTerminalsForNode.side_effect": create_cn_response})
+    client = NetworkConsumerClient(stub=stub)
+    objects = await client.get_terminals_for_connectivitynode(ns, cn_mrid)
+    assert len(objects.result.value) == ns.len_of(Terminal) == 3
+    for term in single_connectivitynode_network.get(cn_mrid).terminals:
+        assert ns.get(term.mrid)
 
 
 def assert_contains_mrids(service: BaseService, *mrids):
