@@ -7,7 +7,7 @@ from typing import List, Union
 
 from pytest import fixture
 from zepben.evolve import BaseService, Terminal, resolver, UnresolvedReference, Junction, BaseVoltage, Location, AcLineSegment, CableInfo, \
-    PerLengthSequenceImpedance, IdentifiedObject, ConnectivityNode, Feeder
+    PerLengthSequenceImpedance, IdentifiedObject, ConnectivityNode, Feeder, OperationalRestriction, NetworkService
 
 
 @fixture
@@ -99,6 +99,19 @@ def test_unresolved_references(service: BaseService):
     assert service.num_unresolved_references() == 1
     add_and_check(service, t2, acls1, "terminals")
     assert service.num_unresolved_references() == 0
+
+
+def test_add_resolves_reverse_relationship():
+    or1 = OperationalRestriction("or1")
+    eq1 = AcLineSegment("eq1", operational_restrictions=[or1])
+    or1.add_equipment(eq1)
+
+    ns = NetworkService("test")
+    ns.add_from_pb(eq1.to_pb())
+    ns.add_from_pb(or1.to_pb())
+
+    assert ns.get("eq1") in ns.get("or1").equipment
+    assert ns.get("or1") in ns.get("eq1").operational_restrictions
 
 
 def add_and_check(service: BaseService, to_add, to_check: Union[IdentifiedObject, List[IdentifiedObject]], to_check_reference):

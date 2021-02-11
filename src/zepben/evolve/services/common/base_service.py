@@ -31,10 +31,10 @@ class BaseService(object, metaclass=ABCMeta):
     and `perLengthSequenceImpedance` with mRID 'plsi-1', the following key value pairs would be present:
     {
         "plsi-1": [
-          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...))
+          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
         ],
         "location-l1": [
-          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...))
+          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...)
         ]
     }
     
@@ -47,8 +47,8 @@ class BaseService(object, metaclass=ABCMeta):
     An index of the unresolved references by their `from_ref.mrid`. For the above example this will be a dictionary of the form:
     {
         "acls1": [
-          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...)),
-          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...))
+          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...),
+          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
         ]
     }
     """
@@ -66,13 +66,17 @@ class BaseService(object, metaclass=ABCMeta):
         return False
 
     def __str__(self):
-        return f"{type.__name__}{f' {self.name}' if self.name else ''}"
+        return f"{self.__class__.__name__}{f' {self.name}' if self.name else ''}"
 
-    def has_unresolved_references(self):
+    def has_unresolved_references(self, mrid: str = None) -> bool:
         """
-        Returns True if this service has unresolved references, False otherwise.
+        Check if there are `UnresolvedReference`s in the service
+                                                                                                                                 
+        `mrid` The mRID to check for `UnresolvedReference`s. If None, will check if any unresolved references exist in the service.
+                                                                                                                                 
+        Returns True if at least one reference exists.
         """
-        return self.num_unresolved_references() > 0
+        return len(self._unresolved_references_to) > 0 if mrid is None else mrid in self._unresolved_references_to
 
     def len_of(self, t: type = None) -> int:
         """
@@ -94,12 +98,18 @@ class BaseService(object, metaclass=ABCMeta):
                             pass
                 return count
 
-    def num_unresolved_references(self):
+    def num_unresolved_references(self, mrid: str = None):
         """
-        Get the total number of unresolved references.
-        Returns The number of references in the network that have not already been resolved.
+        Get the total number of unresolved references in this service.
+        `mRID` The mRID to check the number of [UnresolvedReference]s for. If None, will default to number of all unresolved references in the service.
+        Returns The number of `UnresolvedReference`s.
         """
-        return sum([len(r) for r in self._unresolved_references_to.copy().values()])
+        if mrid is None:
+            return sum([len(r) for r in self._unresolved_references_to.copy().values()])
+        elif mrid in self._unresolved_references_to:
+            return len(self._unresolved_references_to[mrid])
+        else:
+            return 0
 
     def unresolved_references(self) -> Generator[UnresolvedReference, None, None]:
         """
@@ -127,7 +137,7 @@ class BaseService(object, metaclass=ABCMeta):
         """
         if not mrid:
             raise KeyError("You must specify an mRID to get. Empty/None is invalid.")
-        mrid = str(mrid)
+
         if type_:
             try:
                 return self._objectsByType[type_][mrid]
@@ -185,6 +195,8 @@ class BaseService(object, metaclass=ABCMeta):
         if unresolved_refs:
             for ref in unresolved_refs:
                 ref.resolver.resolve(ref.from_ref, identified_object)
+                if ref.reverse_resolver:
+                    ref.reverse_resolver.resolve(identified_object, ref.from_ref)
                 self._unresolved_references_from[ref.from_ref.mrid].remove(ref)
                 if not self._unresolved_references_from[ref.from_ref.mrid]:
                     del self._unresolved_references_from[ref.from_ref.mrid]
@@ -235,7 +247,7 @@ class BaseService(object, metaclass=ABCMeta):
         except KeyError:
             # to_mrid didn't exist in the service, populate the reference caches for resolution when it is added.
             urefs = self._unresolved_references_to.get(to_mrid, set())
-            uref = UnresolvedReference(from_ref=from_, to_mrid=to_mrid, resolver=resolver)
+            uref = UnresolvedReference(from_ref=from_, to_mrid=to_mrid, resolver=resolver, reverse_resolver=reverse_resolver)
             urefs.add(uref)
             self._unresolved_references_to[to_mrid] = urefs
             rev_urefs = self._unresolved_references_from.get(from_.mrid, set())
@@ -266,19 +278,19 @@ class BaseService(object, metaclass=ABCMeta):
 
     def get_unresolved_references_from(self, mrid: str) -> Generator[UnresolvedReference, None, None]:
         """
-        Get the mRIDs that are unresolved that `mrid` has to other objects.
+        Get the `UnresolvedReference`s that `mrid` has to other objects.
         `mrid` The mRID to get unresolved references for.
-        Returns a generator over the mRIDs that need to be resolved for `mrid`.
+        Returns a generator over the `UnresolvedReference`s that need to be resolved for `mrid`.
         """
         if mrid in self._unresolved_references_from:
             for ref in self._unresolved_references_from[mrid]:
                 yield ref
 
-    def get_unresolved_references_to(self, mrid: str, exclude_types: Set[Relationship] = None) -> Generator[UnresolvedReference, None, None]:
+    def get_unresolved_references_to(self, mrid: str) -> Generator[UnresolvedReference, None, None]:
         """
-        Get the mRIDs that are unresolved that other objects have to `mrid`.
+        Get the UnresolvedReferences that other objects have to `mrid`.
         `mrid` The mRID to fetch unresolved references for that are pointing to it.
-        Returns a generator over the mRIDs that need to be resolved for `mrid`.
+        Returns a generator over the `UnresolvedReference`s that need to be resolved for `mrid`.
         """
         if mrid in self._unresolved_references_to:
             for ref in self._unresolved_references_to[mrid]:
