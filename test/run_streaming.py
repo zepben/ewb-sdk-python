@@ -15,9 +15,9 @@ def run_retrieve():
         client = SyncNetworkConsumerClient(channel=channel)
         result = client.retrieve_network()
         result.throw_on_error()
-        network = result.result.network_service
-        print(len(network._unresolved_references))
-        print(network.len_of())
+        service = result.result.network_service
+        print(f"Num unresolved: {service.num_unresolved_references()}")
+        print(f"Num objects: {service.len_of()}")
 
 
 def run_feeder():
@@ -26,10 +26,14 @@ def run_feeder():
         client = SyncNetworkConsumerClient(channel=channel)
         result = client.get_feeder(service, "PBH3A")
         network = result.result
-        print(len(service._unresolved_references))
-        print(service.len_of())
+        print(f"Num unresolved: {service.num_unresolved_references()}")
+        print(f"Num objects: {service.len_of()}")
 
 
 if __name__ == "__main__":
-    cProfile.run("run_retrieve()")
+    print("running get feeder")
     # cProfile.run("run_feeder()")
+    run_feeder()
+    print("running retrieve network")
+    # cProfile.run("run_retrieve()")
+    run_retrieve()

@@ -10,7 +10,7 @@ from pytest import fixture
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, WindingConnection, BaseVoltage, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases
+    SetPhases, OverheadWireInfo
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
@@ -148,8 +148,8 @@ def create_acls_for_connecting(network: NetworkService, mrid: str = "", phases: 
 
     try:
         wi = network.get(wi_mrid, WireInfo)
-    except:
-        wi = WireInfo(wi_mrid)
+    except KeyError:
+        wi = OverheadWireInfo(wi_mrid)
         network.add(wi)
 
     acls = AcLineSegment(mrid, name=f"{mrid} name", per_length_sequence_impedance=plsi, asset_info=wi, length=length)
