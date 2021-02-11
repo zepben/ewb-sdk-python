@@ -143,9 +143,8 @@ class NetworkConsumerClient(CimConsumerClient):
         """
         Retrieve the feeder network for the specified `mrid` and store the results in the `service`.
 
-        This is a convenience method that will fetch the feeder object, all of the equipment referenced by the feeder (normal state),
-        the terminals of all elements, the connectivity between terminals, the locations of all elements, the ends of all transformers
-        and the wire info for all conductors.
+        This is a convenience method that will fetch the feeder object and all of the equipment referenced by the feeder (normal state), along with
+        all references. This should entail a complete connectivity model for the feeder, however not the connectivity between multiple feeders.
 
         Returns a GrpcResult of a `MultiObjectResult`, containing a map keyed by mRID of all the objects retrieved as part of retrieving the `Feeder` and the
         'Feeder' itself. If an item couldn't be added to `service`, its mRID will be present in `MultiObjectResult.failed`.
@@ -185,13 +184,11 @@ class NetworkConsumerClient(CimConsumerClient):
         mor.value[feeder.mrid] = feeder
         res = (await self._handle_multi_object_rpc(service, feeder.mrid, self._process_equipment_container)).throw_on_error()
         mor.value.update(res.result.value)
-        result_with_feeder = set(res.result.value.keys())
-        result_with_feeder.add(feeder.mrid)
         # We need to resolve all the unresolved references for each piece of equipment, but then we need to
         # also do the same for the resolutions, and so on so forth until the entire tree of references originating from the Feeder has been resolved,
         # however we don't know how long this tree is until we've resolved everything. So we start by resolving all the equipment, then we iteratively
         # descend the tree by checking for unresolved references for the objects we just resolved in the previous iteration.
-        to_resolve = _get_unresolved_mrids(service, result_with_feeder)
+        to_resolve = _get_unresolved_mrids(service, mor.value.keys())
         while True:
             res = await self._get_objects(service, to_resolve)
             if not res.value:
@@ -201,10 +198,10 @@ class NetworkConsumerClient(CimConsumerClient):
 
         return GrpcResult(result=mor)
 
-    async def _get_objects(self, service: NetworkService, mrids: Iterable[str], result: MultiObjectResult = None) -> MultiObjectResult:
+    async def _get_objects(self, service: NetworkService, mrids: Iterable[str]) -> MultiObjectResult:
         if not mrids:
-            return MultiObjectResult() if result is None else result
-        objects = (await self._handle_multi_object_rpc(service, mrids, self._process_identified_objects, result)).throw_on_error()
+            return MultiObjectResult()
+        objects = (await self._handle_multi_object_rpc(service, mrids, self._process_identified_objects)).throw_on_error()
         return objects.result
 
     async def _retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
@@ -263,6 +260,9 @@ class NetworkConsumerClient(CimConsumerClient):
             yield service.add_from_pb(response.terminal), response.terminal.mrid()
 
     async def _process_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
+        if not mrids:
+            return
+
         to_fetch = set()
         existing = set()
         for mrid in mrids:
@@ -272,9 +272,12 @@ class NetworkConsumerClient(CimConsumerClient):
             except KeyError:
                 to_fetch.add(mrid)
 
-        responses = self._stub.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=to_fetch))
-        for response in responses:
-            yield extract_identified_object(service, response.identifiedObject)
+        if to_fetch:
+            responses = self._stub.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=to_fetch))
+            for response in responses:
+                yield extract_identified_object(service, response.identifiedObject)
+        for io in existing:
+            yield io
 
     async def _handle_network_hierarchy(self):
         response = self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest())
@@ -288,8 +291,8 @@ class NetworkConsumerClient(CimConsumerClient):
         _finalise_links(geographical_regions, sub_geographical_regions, substations)
         return NetworkHierarchy(geographical_regions, sub_geographical_regions, substations, feeders)
 
-    async def _handle_multi_object_rpc(self, service: NetworkService, mrid: Union[str, Iterable[str]], func: Callable[[NetworkService, Union[str, Iterable[str]]], AsyncGenerator[IdentifiedObject, None]],
-                                       result: MultiObjectResult = None) -> GrpcResult[MultiObjectResult]:
+    async def _handle_multi_object_rpc(self, service: NetworkService, mrid: Union[str, Iterable[str]],
+                                       func: Callable[[NetworkService, Union[str, Iterable[str]]], AsyncGenerator[IdentifiedObject, None]]) -> GrpcResult[MultiObjectResult]:
         """
         `service` The service to add any results to.
         `mrid` The mRID of the `EquipmentContainer` to fetch `Equipment` for from the server.
@@ -297,8 +300,7 @@ class NetworkConsumerClient(CimConsumerClient):
         Returns a GrpcResult with a MultiObjectResult containing everything that was added to `service`, and potentially a list of failed mRIDs that couldn't
         be added.
         """
-        if result is None:
-            result = MultiObjectResult()
+        result = MultiObjectResult()
 
         async def y():
             async for io, _mrid in func(service, mrid):

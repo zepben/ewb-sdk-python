@@ -10,13 +10,14 @@ from pytest import fixture
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, WindingConnection, BaseVoltage, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment
+    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
            "create_geographical_region", "create_subgeographical_region", "create_asset_owner", "create_meter", "create_power_transformer_end",
            "basic_network_hierarchy", "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
-           "feeder_with_current", "operational_restriction_with_equipment"]
+           "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals", "single_connectivitynode_network",
+           "create_terminal"]
 
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
 from zepben.evolve.util import CopyableUUID
@@ -31,6 +32,25 @@ def create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms
         terms.append(term)
 
     return terms
+
+
+def create_terminal(network: NetworkService, ce: Optional[ConductingEquipment], phases: PhaseCode = PhaseCode.ABCN, sequence_number: int = 1) -> Terminal:
+    terminal = ce.get_terminal_by_sn(sequence_number) if ce else None
+
+    if terminal is None:
+        terminal = Terminal(conducting_equipment=ce, phases=phases, sequence_number=sequence_number)
+        if ce:
+            ce.add_terminal(terminal)
+        network.add(terminal)
+    return terminal
+
+
+def create_connectivitynode_with_terminals(ns: NetworkService, mrid: str, *terminal_phases: PhaseCode):
+    cn = ConnectivityNode(mrid)
+    ns.add(cn)
+    for i, phase in enumerate(terminal_phases, start=1):
+        t = create_terminal(ns, None, phase, i)
+        ns.connect_by_mrid(t, mrid)
 
 
 def create_junction_for_connecting(network: NetworkService, mrid: str = "", num_terms: int = 0, phases: PhaseCode = PhaseCode.ABCN) -> Junction:
@@ -67,12 +87,14 @@ def create_switch_for_connecting(network: NetworkService, mrid: str = "", num_te
     cb = Breaker(mrid, name="test breaker")
     create_terminals(network, cb, num_terms, phases)
 
-    normal_phase_states = [False] * phases.num_phases if normal_phase_states is None else normal_phase_states
-    current_phase_states = [False] * phases.num_phases if current_phase_states is None else current_phase_states
-    for i, state in enumerate(normal_phase_states):
-        cb.set_normally_open(state, phases.single_phases[i])
-    for i, state in enumerate(current_phase_states):
-        cb.set_open(state, phases.single_phases[i])
+    cb.set_open(False)
+    cb.set_normally_open(False)
+    if normal_phase_states:
+        for i, state in enumerate(normal_phase_states):
+            cb.set_normally_open(state, phases.single_phases[i])
+    if current_phase_states:
+        for i, state in enumerate(current_phase_states):
+            cb.set_open(state, phases.single_phases[i])
 
     network.add(cb)
     return cb
@@ -317,10 +339,12 @@ async def feeder_with_current():
     add_location(network_service, fcb, 1.0, 1.0)
     add_location(network_service, fsp, 5.0, 1.0)
     add_location(network_service, tx, 10.0, 2.0)
+    add_location(network_service, sw, 15.0, 3.0)
+    add_location(network_service, tx2, 20.0, 4.0)
     add_location(network_service, c1, 1.0, 1.0, 5.0, 1.0)
     add_location(network_service, c2, 5.0, 1.0, 10.0, 2.0)
-    add_location(network_service, c2, 10.0, 1.0, 15.0, 3.0)
-    add_location(network_service, c2, 15.0, 1.0, 20.0, 4.0)
+    add_location(network_service, c3, 10.0, 1.0, 15.0, 3.0)
+    add_location(network_service, c4, 15.0, 1.0, 20.0, 4.0)
 
     network_service.connect_terminals(source.get_terminal_by_sn(1), fcb.get_terminal_by_sn(1))
     network_service.connect_terminals(fcb.get_terminal_by_sn(2), c1.get_terminal_by_sn(1))
@@ -372,6 +396,13 @@ def operational_restriction_with_equipment():
     network_service.connect_terminals(fsp.get_terminal_by_sn(2), c2.get_terminal_by_sn(1))
     network_service.connect_terminals(c2.get_terminal_by_sn(2), tx.get_terminal_by_sn(1))
 
+    return network_service
+
+
+@fixture()
+def single_connectivitynode_network():
+    network_service = NetworkService()
+    create_connectivitynode_with_terminals(network_service, "cn1", PhaseCode.A, PhaseCode.B, PhaseCode.C)
     return network_service
 
 
