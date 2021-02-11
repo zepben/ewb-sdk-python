@@ -115,8 +115,10 @@ class UnresolvedReference(object):
     from_ref: IdentifiedObject
     to_mrid: str
     resolver: ReferenceResolver
+    reverse_resolver: Optional[ReferenceResolver] = None
 
     def __eq__(self, other: UnresolvedReference):
+        # we don't check reverse resolver for equality, as it doesn't make sense to have a reverse resolver that is not the reverse of resolver
         return self.from_ref.mrid == other.from_ref.mrid and self.to_mrid == other.to_mrid and self.resolver == other.resolver
 
     def __ne__(self, other: UnresolvedReference):
