@@ -3,7 +3,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo
@@ -11,7 +10,6 @@ from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner
 from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole
 from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location
-from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint
 from zepben.protobuf.cim.iec61968.operations.OperationalRestriction_pb2 import OperationalRestriction
@@ -32,6 +30,7 @@ from zepben.protobuf.cim.iec61970.base.meas.DiscreteValue_pb2 import DiscreteVal
 from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker
+from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConsumer_pb2 import EnergyConsumer
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConsumerPhase_pb2 import EnergyConsumerPhase
@@ -53,10 +52,10 @@ from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import Custome
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation
-from zepben.protobuf.dp.dp_requests_pb2 import *
-from zepben.protobuf.cp.cp_requests_pb2 import *
 from zepben.protobuf.cp.cp_requests_pb2 import CreateOrganisationRequest as CreateCustomerOrganisationRequest
 from zepben.protobuf.mp.mp_requests_pb2 import CreateAnalogValueRequest, CreateAccumulatorValueRequest, CreateDiscreteValueRequest
+from zepben.protobuf.dp.dp_requests_pb2 import *
+from zepben.protobuf.cp.cp_requests_pb2 import *
 from zepben.protobuf.np.np_requests_pb2 import *
 
 
@@ -93,6 +92,7 @@ network_rpc_map = {
     Fuse: ('CreateFuse', CreateFuseRequest),
     Jumper: ('CreateJumper', CreateJumperRequest),
     Junction: ('CreateJunction', CreateJunctionRequest),
+    BusbarSection: ('CreateBusbarSection', CreateBusbarSectionRequest),
     LinearShuntCompensator: ('CreateLinearShuntCompensator', CreateLinearShuntCompensatorRequest),
     PerLengthSequenceImpedance: ('CreatePerLengthSequenceImpedance', CreatePerLengthSequenceImpedanceRequest),
     PowerTransformer: ('CreatePowerTransformer', CreatePowerTransformerRequest),

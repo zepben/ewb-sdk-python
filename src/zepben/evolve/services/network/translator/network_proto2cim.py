@@ -65,6 +65,7 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySourc
 from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse as PBFuse
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper as PBJumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction as PBJunction
+from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Line_pb2 import Line as PBLine
 from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import LinearShuntCompensator as PBLinearShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance as PBPerLengthImpedance
@@ -605,6 +606,12 @@ def junction_to_cim(pb: PBJunction, network_service: NetworkService) -> Optional
     return cim if network_service.add(cim) else None
 
 
+def busbarsection_to_cim(pb: PBBusbarSection, network_service: NetworkService) -> Optional[BusbarSection]:
+    cim = BusbarSection(mrid=pb.mrid())
+    connector_to_cim(pb.cn, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 def line_to_cim(pb: PBLine, cim: Line, network_service: NetworkService):
     equipmentcontainer_to_cim(pb.ec, cim, network_service)
 
@@ -718,6 +725,7 @@ PBEnergySourcePhase.to_cim = energysourcephase_to_cim
 PBFuse.to_cim = fuse_to_cim
 PBJumper.to_cim = jumper_to_cim
 PBJunction.to_cim = junction_to_cim
+PBBusbarSection.to_cim = busbarsection_to_cim
 PBLine.to_cim = line_to_cim
 PBLinearShuntCompensator.to_cim = linearshuntcompensator_to_cim
 PBPerLengthSequenceImpedance.to_cim = perlengthsequenceimpedance_to_cim

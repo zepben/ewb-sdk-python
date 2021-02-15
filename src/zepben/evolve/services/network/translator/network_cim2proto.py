@@ -111,6 +111,7 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySourc
 from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse as PBFuse
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper as PBJumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction as PBJunction
+from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Line_pb2 import Line as PBLine
 from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import LinearShuntCompensator as PBLinearShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance as PBPerLengthImpedance
@@ -438,6 +439,10 @@ def junction_to_pb(cim: Junction) -> PBJunction:
     return PBJunction(cn=connector_to_pb(cim))
 
 
+def busbarsection_to_pb(cim: BusbarSection) -> PBBusbarSection:
+    return PBBusbarSection(cn=connector_to_pb(cim))
+
+
 def line_to_pb(cim: Line) -> PBLine:
     return PBLine(ec=equipmentcontainer_to_pb(cim))
 
@@ -664,6 +669,7 @@ EnergySourcePhase.to_pb = lambda self: energysourcephase_to_pb(self)
 Fuse.to_pb = lambda self: fuse_to_pb(self)
 Jumper.to_pb = lambda self: jumper_to_pb(self)
 Junction.to_pb = lambda self: junction_to_pb(self)
+BusbarSection.to_pb = busbarsection_to_pb
 Line.to_pb = line_to_pb
 LinearShuntCompensator.to_pb = lambda self: linearshuntcompensator_to_pb(self)
 PerLengthSequenceImpedance.to_pb = lambda self: perlengthsequenceimpedance_to_pb(self)
