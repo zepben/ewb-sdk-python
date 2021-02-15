@@ -118,3 +118,5 @@ from zepben.evolve.streaming.grpc.connect import *
 from zepben.evolve.streaming.put.producer import *
 
 from zepben.evolve.util import *
+
+import zepben.evolve.examples.networks.network_creator
