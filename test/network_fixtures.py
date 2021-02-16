@@ -17,7 +17,7 @@ __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_
            "create_geographical_region", "create_subgeographical_region", "create_asset_owner", "create_meter", "create_power_transformer_end",
            "basic_network_hierarchy", "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
            "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals", "single_connectivitynode_network",
-           "create_terminal"]
+           "create_terminal", "network_service"]
 
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
 from zepben.evolve.util import CopyableUUID
@@ -434,3 +434,9 @@ def basic_network_hierarchy():
     service = NetworkService()
     feeder = Feeder(name="basic-feeder")
     create_switch_for_connecting(service, "test_breaker", 2, PhaseCode.ABCN, normal_phase_states=[True] * 4, current_phase_states=[True] * 4)
+
+
+@fixture()
+def network_service():
+    # An empty network.
+    yield NetworkService()

@@ -48,6 +48,7 @@ from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker
+from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor
 from zepben.protobuf.cim.iec61970.base.wires.Connector_pb2 import Connector
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector
@@ -125,6 +126,7 @@ EnergySourcePhase.mrid = lambda self: self.psr.mrid()
 Fuse.mrid = lambda self: self.sw.mrid()
 Jumper.mrid = lambda self: self.sw.mrid()
 Junction.mrid = lambda self: self.cn.mrid()
+BusbarSection.mrid = lambda self: self.cn.mrid()
 Line.mrid = lambda self: self.ec.mrid()
 LinearShuntCompensator.mrid = lambda self: self.sc.mrid()
 PerLengthImpedance.mrid = lambda self: self.lp.mrid()

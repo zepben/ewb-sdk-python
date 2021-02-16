@@ -70,6 +70,7 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySourc
 from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse as PBFuse
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper as PBJumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction as PBJunction
+from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Line_pb2 import Line as PBLine
 from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import LinearShuntCompensator as PBLinearShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance as PBPerLengthImpedance
@@ -392,6 +393,10 @@ def junction():
     return builds(PBJunction, cn=connector())
 
 
+def busbarsection():
+    return builds(PBBusbarSection, cn=connector())
+
+
 def line():
     return builds(PBLine, ec=equipmentcontainer())
 
@@ -584,6 +589,7 @@ def networkidentifiedobjects(draw):
         draw(builds(NetworkIdentifiedObject, fuse=fuse())),
         draw(builds(NetworkIdentifiedObject, jumper=jumper())),
         draw(builds(NetworkIdentifiedObject, junction=junction())),
+        draw(builds(NetworkIdentifiedObject, busbarSection=busbarsection())),
         draw(builds(NetworkIdentifiedObject, linearShuntCompensator=linearshuntcompensator())),
         draw(builds(NetworkIdentifiedObject, perLengthSequenceImpedance=perlengthsequenceimpedance())),
         draw(builds(NetworkIdentifiedObject, powerTransformer=powertransformer())),
