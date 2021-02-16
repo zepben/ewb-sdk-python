@@ -1,5 +1,5 @@
 from zepben.evolve import NetworkService, Junction, Terminal, PhaseCode, ConductingEquipment, EnergySource, \
-    PowerTransformer, BaseVoltage, AcLineSegment
+    PowerTransformer, BaseVoltage, AcLineSegment, EnergyConsumer
 from zepben.evolve.util import CopyableUUID
 
 
@@ -17,9 +17,17 @@ def create_power_transformer(network_service: NetworkService, bus1: Junction, bu
     return pt
 
 
+def create_energy_consumer(network_service: NetworkService, bus: Junction, **kwargs) -> EnergyConsumer:
+    ec = EnergyConsumer()
+    _create_single_terminal_conducting_equipment(network_service=network_service, ce=ec)
+    # TODO: Connect to bus
+    return ec
+
+
 def create_energy_source(network_service: NetworkService, bus: Junction, **kwargs) -> EnergySource:
     es = EnergySource()
     _create_single_terminal_conducting_equipment(network_service=network_service, ce=es)
+    # TODO: Connect to bus
     return es
 
 
@@ -60,3 +68,4 @@ NetworkService.create_bus = create_bus
 NetworkService.create_energy_source = create_energy_source
 NetworkService.create_power_transformer = create_power_transformer
 NetworkService.create_ac_line_segment = create_ac_line_segment
+NetworkService.create_energy_consumer = create_energy_consumer
