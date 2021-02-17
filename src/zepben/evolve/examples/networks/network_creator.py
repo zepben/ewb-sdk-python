@@ -6,19 +6,19 @@ from zepben.evolve.util import CopyableUUID
 def create_ac_line_segment(network_service: NetworkService, bus1: Junction, bus2: Junction,
                            **kwargs) -> AcLineSegment:
     acls = AcLineSegment()
-    _create_two_terminal_conducting_equipment(network_service=network_service, ce=acls, bus1=bus1, bus2=bus2, **kwargs)
+    _create_two_terminal_conducting_equipment(network_service=network_service, ce=acls, **kwargs)
+    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=acls, bus1=bus1, bus2=bus2)
     return acls
 
 
 def create_two_winding_power_transformer(network_service: NetworkService, bus1: Junction, bus2: Junction,
                                          pt_info: PowerTransformerInfo, **kwargs) -> PowerTransformer:
     power_transformer = PowerTransformer()
-    _create_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer,
-                                              bus1=bus1, bus2=bus2, **kwargs)
+    _create_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer, **kwargs)
     _connect_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer,
-                                               bus1=bus1, bus2=bus2)
+                                             bus1=bus1, bus2=bus2)
     # TODO: power_transformer = PowerTransformer(power_transformer_info = PowerTransformerInfo())
-    # TODO: How to associated PowerTrandformerEndInfo to a PowerTranformerInfo
+    # TODO: How to associated PowerTransformerEndInfo to a PowerTransformerInfo
     for i in range(1, 2):
         end = PowerTransformerEnd(power_transformer=power_transformer)
         power_transformer.add_end(end)
@@ -28,14 +28,15 @@ def create_two_winding_power_transformer(network_service: NetworkService, bus1: 
 
 def create_energy_consumer(net: NetworkService, bus: Junction, **kwargs) -> EnergyConsumer:
     ec = EnergyConsumer()
-    _create_single_terminal_conducting_equipment(network_service=net, ce=ec)
+    _create_single_terminal_conducting_equipment(network_service=net, ce=ec, **kwargs)
     _connect_single_terminal_conducting_equipment(network_service=net, ce=ec, bus=bus)
     return ec
 
 
 def create_energy_source(net: NetworkService, bus: Junction, **kwargs) -> EnergySource:
     es = EnergySource()
-    _create_single_terminal_conducting_equipment(network_service=net, ce=es, bus=bus)
+    _create_single_terminal_conducting_equipment(network_service=net, ce=es, bus=bus, **kwargs)
+    _connect_single_terminal_conducting_equipment(network_service=net, ce=es, bus=bus)
     return es
 
 
@@ -58,17 +59,20 @@ def _create_two_terminal_conducting_equipment(network_service: NetworkService,
     _create_terminals(ce=ce, num_terms=2, network=network_service, **kwargs)
 
 
-def _connect_two_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, bus1: Junction,
-                                               bus2: Junction):
-    network_service.connect_terminals(ce.get_terminal_by_sn(1), bus1.get_terminal_by_sn(1))
-    network_service.connect_terminals(ce.get_terminal_by_sn(2), bus2.get_terminal_by_sn(1))
+def _connect_two_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment,
+                                               bus1: Junction, bus2: Junction):
+    network_service.connect_terminals(bus1.get_terminal_by_sn(1), ce.get_terminal_by_sn(1))
+    network_service.connect_terminals(bus2.get_terminal_by_sn(1), ce.get_terminal_by_sn(2))
+
+
+
 
 
 def _create_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, **kwargs):
     if 'mrid' not in kwargs:
         ce.mrid = str(CopyableUUID())
     network_service.add(ce)
-    _create_terminals(ce=ce, network=network_service, **kwargs)
+    _create_terminals(ce=ce, network=network_service)
 
 
 def _connect_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment,

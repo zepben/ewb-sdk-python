@@ -18,8 +18,8 @@ class TestSimpleBusBranch(unittest.TestCase):
         assert len(junctions) == 3, f'len(junctions) should be 3, len(junctions) is: {len(junctions)}'
         assert len(power_transformers) == 1, f'len(power_transformers) should be 1, len(power_transformers) is: {len(power_transformers)}'
         assert len(feeder) == 1, f'len(feeder) should be 2, len(feeder) is: {len(feeder)}'
-        assert len(terminals) == 7, f'len(terminals) should be 7, len(terminals) is: {len(terminals)}'
-        assert len(connectivity_nodes) == 3, f'len(connectivity_nodes) should be 3, len(connectivity_nodes) is: {len(connectivity_nodes)}'
+        assert len(terminals) == 9, f'len(terminals) should be 9, len(terminals) is: {len(terminals)}'
+        assert len(connectivity_nodes) == 6, f'len(connectivity_nodes) should be 6, len(connectivity_nodes) is: {len(connectivity_nodes)}'
 
 
 

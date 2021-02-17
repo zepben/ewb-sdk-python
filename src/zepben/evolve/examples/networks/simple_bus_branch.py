@@ -41,6 +41,12 @@ class SimpleBusBranch:
                                                                   pt_info=PowerTransformerInfo())
         # TODO: Associate the PowerTransformerInfo() to th PowerTransformer instance
         # TODO: Add ptInfo= self.network_service.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")
+        # Create location for the Line
+        line_location = Location().add_point(point1).add_point(point2)
+        self.network_service.add(line_location)
+        # Create Line
+        self.network_service.create_ac_line_segment(bus1=b1, bus2=b2, name="Line", location=line_location,
+                                                    length=100.0, base_voltage=bv_lv)
 
 
 SimpleBusBranch()
