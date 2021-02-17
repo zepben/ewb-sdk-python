@@ -1,5 +1,5 @@
 from zepben.evolve import NetworkService, Junction, BaseVoltage, Terminal, EnergySource, \
-    PowerTransformer, AcLineSegment, EnergyConsumer
+    PowerTransformer, AcLineSegment, EnergyConsumer, PowerTransformerInfo
 import unittest
 
 
@@ -11,6 +11,7 @@ class TestNetworkCreator(unittest.TestCase):
         self.bv = BaseVoltage()
         self.bus1 = self.net.create_bus(BaseVoltage())
         self.bus2 = self.net.create_bus(BaseVoltage())
+        self.pt_info = PowerTransformerInfo()
 
     def test_create_bus(self):
         bus = self.net.create_bus(base_voltage=self.bv)
@@ -37,8 +38,8 @@ class TestNetworkCreator(unittest.TestCase):
         assert isinstance(ec, EnergyConsumer)
         assert t.conducting_equipment is ec, "t.conducting_equipment should be 'ec'"
 
-    def test_create_power_transformer(self):
-        pt = self.net.create_power_transformer(bus1=self.bus1, bus2=self.bus2)
+    def test_create_two_winding_power_transformer(self):
+        pt = self.net.create_two_winding_power_transformer(bus1=self.bus1, bus2=self.bus2, pt_info = self.pt_info)
         t: Terminal = pt.get_terminal_by_sn(1)
         assert pt.num_terminals() == 2
         assert isinstance(t, Terminal)

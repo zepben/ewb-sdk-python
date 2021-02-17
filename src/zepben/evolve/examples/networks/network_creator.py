@@ -1,5 +1,5 @@
 from zepben.evolve import NetworkService, Junction, Terminal, PhaseCode, ConductingEquipment, EnergySource, \
-    PowerTransformer, BaseVoltage, AcLineSegment, EnergyConsumer
+    PowerTransformer, BaseVoltage, AcLineSegment, EnergyConsumer, PowerTransformerInfo, PowerTransformerEnd
 from zepben.evolve.util import CopyableUUID
 
 
@@ -10,11 +10,18 @@ def create_ac_line_segment(network_service: NetworkService, bus1: Junction, bus2
     return acls
 
 
-def create_power_transformer(network_service: NetworkService, bus1: Junction, bus2: Junction,
-                             **kwargs) -> PowerTransformer:
-    pt = PowerTransformer()
-    _create_two_terminal_conducting_equipment(network_service=network_service, ce=pt, bus1=bus1, bus2=bus2, **kwargs)
-    return pt
+def create_two_winding_power_transformer(network_service: NetworkService, bus1: Junction, bus2: Junction,
+                                         pt_info: PowerTransformerInfo, **kwargs) -> PowerTransformer:
+    power_transformer = PowerTransformer()
+    _create_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer,
+                                              bus1=bus1, bus2=bus2, **kwargs)
+    # TODO: power_transformer = PowerTransformer(power_transformer_info = PowerTransformerInfo())
+    # TODO: Add _connectBuses(bus1, bus2)
+    for i in range(1, 2):
+        end = PowerTransformerEnd(power_transformer=power_transformer)
+        power_transformer.add_end(end)
+        end.terminal = power_transformer.get_terminal_by_sn(i)
+    return power_transformer
 
 
 def create_energy_consumer(network_service: NetworkService, bus: Junction, **kwargs) -> EnergyConsumer:
@@ -64,8 +71,10 @@ def _create_terminals(network: NetworkService, ce: ConductingEquipment,
         terminal.conducting_equipment = ce
 
 
+# TODO: How to associated PowerTrandformerEndInfo to a PowerTranformerInfo
+
 NetworkService.create_bus = create_bus
 NetworkService.create_energy_source = create_energy_source
-NetworkService.create_power_transformer = create_power_transformer
+NetworkService.create_two_winding_power_transformer = create_two_winding_power_transformer
 NetworkService.create_ac_line_segment = create_ac_line_segment
 NetworkService.create_energy_consumer = create_energy_consumer

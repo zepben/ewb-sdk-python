@@ -1,5 +1,5 @@
 from zepben.evolve import NetworkService, DiagramService, Diagram, \
-    DiagramStyle, BaseVoltage, PositionPoint, Location, Feeder, EnergySource
+    DiagramStyle, BaseVoltage, PositionPoint, Location, Feeder, EnergySource, PowerTransformerInfo
 
 
 class SimpleBusBranch:
@@ -37,7 +37,9 @@ class SimpleBusBranch:
         # Create EnergyConsumer
         self.network_service.create_energy_consumer(bus=b3, p=100000., q=50000., name="Load", location=loc2)
         # Create Transformer
-        self.network_service.create_power_transformer(bus1=b1, bus2=b2, name="Trafo", location=loc1)
+        self.network_service.create_two_winding_power_transformer(bus1=b1, bus2=b2, name="Trafo", location=loc1,
+                                                                  pt_info=PowerTransformerInfo())
+        # TODO: Associate the PowerTransformerInfo() to th PowerTransformer instance
         # TODO: Add ptInfo= self.network_service.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")
 
 
