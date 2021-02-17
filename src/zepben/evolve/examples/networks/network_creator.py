@@ -15,8 +15,10 @@ def create_two_winding_power_transformer(network_service: NetworkService, bus1: 
     power_transformer = PowerTransformer()
     _create_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer,
                                               bus1=bus1, bus2=bus2, **kwargs)
+    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer,
+                                               bus1=bus1, bus2=bus2)
     # TODO: power_transformer = PowerTransformer(power_transformer_info = PowerTransformerInfo())
-    # TODO: Add _connectBuses(bus1, bus2)
+    # TODO: How to associated PowerTrandformerEndInfo to a PowerTranformerInfo
     for i in range(1, 2):
         end = PowerTransformerEnd(power_transformer=power_transformer)
         power_transformer.add_end(end)
@@ -24,42 +26,54 @@ def create_two_winding_power_transformer(network_service: NetworkService, bus1: 
     return power_transformer
 
 
-def create_energy_consumer(network_service: NetworkService, bus: Junction, **kwargs) -> EnergyConsumer:
+def create_energy_consumer(net: NetworkService, bus: Junction, **kwargs) -> EnergyConsumer:
     ec = EnergyConsumer()
-    _create_single_terminal_conducting_equipment(network_service=network_service, ce=ec)
-    # TODO: Connect to bus
+    _create_single_terminal_conducting_equipment(network_service=net, ce=ec)
+    _connect_single_terminal_conducting_equipment(network_service=net, ce=ec, bus=bus)
     return ec
 
 
-def create_energy_source(network_service: NetworkService, bus: Junction, **kwargs) -> EnergySource:
+def create_energy_source(net: NetworkService, bus: Junction, **kwargs) -> EnergySource:
     es = EnergySource()
-    _create_single_terminal_conducting_equipment(network_service=network_service, ce=es)
-    # TODO: Connect to bus
+    _create_single_terminal_conducting_equipment(network_service=net, ce=es, bus=bus)
     return es
 
 
 def create_bus(network_service: NetworkService, base_voltage: BaseVoltage, **kwargs) -> Junction:
     bus = Junction(base_voltage=base_voltage)
-    _create_single_terminal_conducting_equipment(network_service=network_service, ce=bus, **kwargs)
+    if 'mrid' not in kwargs:
+        bus.mrid = str(CopyableUUID())
+    network_service.add(bus)
+    _create_terminals(ce=bus, network=network_service, **kwargs)
     # TODO: Figure out how to add Voltage to Buses - Looks like we need to add topologicalNode to support the
     #  relationship to BaseVoltage. Meanwhile using Junction.
     return bus
 
 
 def _create_two_terminal_conducting_equipment(network_service: NetworkService,
-                                              ce: ConductingEquipment, bus1: Junction, bus2: Junction, **kwargs):
+                                              ce: ConductingEquipment, **kwargs):
     if 'mrid' not in kwargs:
         ce.mrid = str(CopyableUUID())
     network_service.add(ce)
     _create_terminals(ce=ce, num_terms=2, network=network_service, **kwargs)
 
 
-def _create_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment,
-                                                 bus: Junction = None, **kwargs):
+def _connect_two_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, bus1: Junction,
+                                               bus2: Junction):
+    network_service.connect_terminals(ce.get_terminal_by_sn(1), bus1.get_terminal_by_sn(1))
+    network_service.connect_terminals(ce.get_terminal_by_sn(2), bus2.get_terminal_by_sn(1))
+
+
+def _create_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, **kwargs):
     if 'mrid' not in kwargs:
         ce.mrid = str(CopyableUUID())
     network_service.add(ce)
     _create_terminals(ce=ce, network=network_service, **kwargs)
+
+
+def _connect_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment,
+                                                  bus: Junction):
+    network_service.connect_terminals(ce.get_terminal_by_sn(1), bus.get_terminal_by_sn(1))
 
 
 def _create_terminals(network: NetworkService, ce: ConductingEquipment,
@@ -70,8 +84,6 @@ def _create_terminals(network: NetworkService, ce: ConductingEquipment,
         network.add(terminal)
         terminal.conducting_equipment = ce
 
-
-# TODO: How to associated PowerTrandformerEndInfo to a PowerTranformerInfo
 
 NetworkService.create_bus = create_bus
 NetworkService.create_energy_source = create_energy_source
