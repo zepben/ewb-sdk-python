@@ -46,7 +46,7 @@ class SimpleBusBranch:
         self.network_service.add(line_location)
         # Create Line
         self.network_service.create_ac_line_segment(bus1=b1, bus2=b2, name="Line", location=line_location,
-                                                    length=100.0, base_voltage=bv_lv)
+                                                    length=100., base_voltage=bv_lv)
 
 
 SimpleBusBranch()
