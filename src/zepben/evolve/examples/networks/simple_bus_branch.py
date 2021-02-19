@@ -2,7 +2,8 @@ from collections import defaultdict
 
 from zepben.evolve import NetworkService, DiagramService, Diagram, \
     DiagramStyle, BaseVoltage, PositionPoint, Location, Feeder, EnergySource, PowerTransformerInfo, DiagramObject, \
-    AcLineSegment, DiagramObjectStyle, IdentifiedObject, ConductingEquipment, Junction, EnergyConsumer, PowerTransformer
+    AcLineSegment, DiagramObjectStyle, IdentifiedObject, ConductingEquipment, Junction, EnergyConsumer, \
+    PowerTransformer, DiagramObjectPoint
 
 
 class SimpleBusBranch:
@@ -42,15 +43,15 @@ class SimpleBusBranch:
         self.network_service.create_energy_consumer(bus=b3, p=100000., q=50000., name="Load", location=loc2)
         # Create Transformer
         self.network_service.create_two_winding_power_transformer(bus1=b1, bus2=b2, name="Trafo", location=loc1,
-                                                                  pt_info=PowerTransformerInfo())
+                                                                  asset_info=PowerTransformerInfo())
         # TODO: Associate the PowerTransformerInfo() to th PowerTransformer instance
         # TODO: Add ptInfo= self.network_service.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")
         # Create location for the Line
         line_location = Location().add_point(point1).add_point(point2)
         self.network_service.add(line_location)
         # Create Line
-        self.network_service.create_ac_line_segment(bus1=b1, bus2=b2, name="Line", location=line_location,
-                                                    length=100., base_voltage=bv_lv)
+        self.network_service.create_ac_line_segment(bus1=b1, bus2=b2, name="Line",
+                                                    length=100., base_voltage=bv_lv, location=line_location)
 
     def _add_diagram(self):
         self.diagram_service.add(self.diagram)
@@ -64,35 +65,42 @@ class SimpleBusBranch:
             diagram_object_mapping = defaultdict(
                 lambda: DiagramObject(identified_object_mrid=ce.mrid, style=DiagramObjectStyle.JUNCTION,
                                       diagram=self.diagram))
-            diagram_object_mapping[Junction] = DiagramObject(identified_object_mrid=ce.mrid,
-                                                             style=DiagramObjectStyle.JUNCTION,
-                                                             diagram=self.diagram)
-            diagram_object_mapping[EnergySource] = DiagramObject(identified_object_mrid=ce.mrid,
-                                                                 style=DiagramObjectStyle.ENERGY_SOURCE,
-                                                                 diagram=self.diagram)
-            diagram_object_mapping[EnergyConsumer] = DiagramObject(identified_object_mrid=ce.mrid,
-                                                                   style=DiagramObjectStyle.USAGE_POINT,
-                                                                   diagram=self.diagram)
-            diagram_object_mapping[PowerTransformer] = DiagramObject(identified_object_mrid=ce.mrid,
-                                                                     style=DiagramObjectStyle.DIST_TRANSFORMER,
-                                                                     diagram=self.diagram)
-            # diagram_object_mapping[AcLineSegment] = self._add_diagram_objects_to_ac_line_segment(ce)
-            diagram_object: DiagramObject = diagram_object_mapping[type(ce)]
+            if type(ce) == Junction:
+                diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
+                                               style=DiagramObjectStyle.JUNCTION,
+                                               diagram=self.diagram)
+            elif type(ce) == EnergySource:
+                diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
+                                               style=DiagramObjectStyle.ENERGY_SOURCE,
+                                               diagram=self.diagram)
+            elif type(ce) == EnergyConsumer:
+                diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
+                                               style=DiagramObjectStyle.USAGE_POINT,
+                                               diagram=self.diagram)
+            elif type(ce) == PowerTransformer:
+                diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
+                                               style=DiagramObjectStyle.DIST_TRANSFORMER,
+                                               diagram=self.diagram)
+
+            elif type(ce) == AcLineSegment:
+                diagram_object = self._add_diagram_objects_to_ac_line_segment(ce)
+            else:
+                diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
+                                               style=DiagramObjectStyle.JUNCTION,
+                                               diagram=self.diagram)
             self.diagram.add_object(diagram_object)
             self.diagram_service.add(diagram_object)
 
     def _add_diagram_objects_to_ac_line_segment(self, ac_line_segment: AcLineSegment):
         # Create DiagramObject for AcLineSegments
-        # diagram_object = DiagramObject(mrid = ac_line_segment.mrid + "-do",
-        # = acLineSegment.mRID; style = DiagramObjectStyle.CONDUCTOR_LV; diagram = diagram}
         diagram_object = DiagramObject()
         diagram_object.mrid = ac_line_segment.mrid + "-do"
         diagram_object.style = DiagramObjectStyle.CONDUCTOR_LV
-        # diagram_object.diagram =
-        # point1 = ac_line_segment.location.get_point(0)
-        # point2 = ac_line_segment.location.get_point(1)
-        # diagram_object.addPoint(DiagramObjectPoint(xPosition = point1.xPosition, yPosition = point1.yPosition))
-        # diagramObject.addPoint(DiagramObjectPoint(xPosition = point2.xPosition, yPosition = point2.yPosition))
+        diagram_object.diagram = self.diagram
+        for position_point in ac_line_segment.location.points:
+            diagram_point = DiagramObjectPoint(x_position=position_point.x_position,
+                                               y_position=position_point.y_position)
+            diagram_object.add_point(diagram_point)
         return diagram_object
 
 
