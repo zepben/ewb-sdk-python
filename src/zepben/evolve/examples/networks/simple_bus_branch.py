@@ -102,6 +102,3 @@ class SimpleBusBranch:
                                                y_position=position_point.y_position)
             diagram_object.add_point(diagram_point)
         return diagram_object
-
-
-SimpleBusBranch()
