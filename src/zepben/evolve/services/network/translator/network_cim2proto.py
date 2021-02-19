@@ -224,7 +224,7 @@ def structure_to_pb(cim: Structure) -> PBStructure:
 def location_to_pb(cim: Location) -> PBLocation:
     return PBLocation(io=identifiedobject_to_pb(cim),
                       mainAddress=get_or_none(streetaddress_to_pb, cim.main_address),
-                      positionPoints=[positionpoint_to_pb(point) for _, point in cim.points])
+                      positionPoints=[positionpoint_to_pb(point) for point in cim.points])
 
 
 def positionpoint_to_pb(cim: PositionPoint) -> PBPositionPoint:
