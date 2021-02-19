@@ -93,7 +93,7 @@ class SimpleBusBranch:
 
     def _add_diagram_objects_to_ac_line_segment(self, ac_line_segment: AcLineSegment):
         # Create DiagramObject for AcLineSegments
-        diagram_object = DiagramObject()
+        diagram_object = DiagramObject(diagram=self.diagram)
         diagram_object.mrid = ac_line_segment.mrid + "-do"
         diagram_object.style = DiagramObjectStyle.CONDUCTOR_LV
         diagram_object.diagram = self.diagram
