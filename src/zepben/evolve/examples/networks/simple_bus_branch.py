@@ -13,10 +13,10 @@ class SimpleBusBranch:
         self.network_service: NetworkService = NetworkService()
         self.diagram_service: DiagramService = DiagramService()
         self.diagram: Diagram = Diagram(diagram_style=DiagramStyle.GEOGRAPHIC)
-        self.create_network()
-        self._add_diagram()
+        self._create_network_service()
+        self._create_diagram_service()
 
-    def create_network(self):
+    def _create_network_service(self):
         # Create BaseVoltages
         bv_hv: BaseVoltage = BaseVoltage(mrid="20kV", nominal_voltage=20000, name="20kV")
         bv_lv: BaseVoltage = BaseVoltage(mrid="415V", nominal_voltage=3000, name="415V")
@@ -53,7 +53,7 @@ class SimpleBusBranch:
         self.network_service.create_ac_line_segment(bus1=b1, bus2=b2, name="Line",
                                                     length=100., base_voltage=bv_lv, location=line_location)
 
-    def _add_diagram(self):
+    def _create_diagram_service(self):
         self.diagram_service.add(self.diagram)
         self._add_diagram_objects()
         # TODO: In ?voltages geo view the acls does not appear.
