@@ -201,7 +201,7 @@ class Diagram(IdentifiedObject):
         except AttributeError:
             raise KeyError(mrid)
 
-    def add_object(self, diagram_object: DiagramObject) -> DiagramObject:
+    def add_object(self, diagram_object: DiagramObject) -> Diagram:
         """
         Associate a `DiagramObject` with this `Diagram`.
 
@@ -213,10 +213,14 @@ class Diagram(IdentifiedObject):
         """
         require(diagram_object.diagram is self, lambda: f"{str(diagram_object)} references another Diagram "
                                                         f"{str(diagram_object.diagram)}, expected {str(self)}.")
-        require(not contains_mrid(self._diagram_objects, diagram_object.mrid),
-                lambda: f"A DiagramObject with mRID ${diagram_object.mrid} already exists in {str(self)}.")
+
+        if self._validate_reference(diagram_object, self.get_object, "A DiagramObject"):
+            return self
+
         self._diagram_objects = dict() if self._diagram_objects is None else self._diagram_objects
-        return self._diagram_objects.setdefault(diagram_object.mrid, diagram_object)
+        self._diagram_objects[diagram_object.mrid] = diagram_object
+
+        return self
 
     def remove_object(self, diagram_object: DiagramObject) -> Diagram:
         """
@@ -227,7 +231,7 @@ class Diagram(IdentifiedObject):
         Raises `KeyError` if `diagram_object` was not associated with this `Diagram`.
         """
         if self._diagram_objects:
-            del self._equipment[diagram_object.mrid]
+            del self._diagram_objects[diagram_object.mrid]
         else:
             raise KeyError(diagram_object)
 

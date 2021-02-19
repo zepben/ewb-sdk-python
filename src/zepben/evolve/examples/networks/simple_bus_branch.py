@@ -1,5 +1,8 @@
+from collections import defaultdict
+
 from zepben.evolve import NetworkService, DiagramService, Diagram, \
-    DiagramStyle, BaseVoltage, PositionPoint, Location, Feeder, EnergySource, PowerTransformerInfo
+    DiagramStyle, BaseVoltage, PositionPoint, Location, Feeder, EnergySource, PowerTransformerInfo, DiagramObject, \
+    AcLineSegment, DiagramObjectStyle, IdentifiedObject, ConductingEquipment, Junction, EnergyConsumer, PowerTransformer
 
 
 class SimpleBusBranch:
@@ -10,6 +13,7 @@ class SimpleBusBranch:
         self.diagram_service: DiagramService = DiagramService()
         self.diagram: Diagram = Diagram(diagram_style=DiagramStyle.GEOGRAPHIC)
         self.create_network()
+        self._add_diagram()
 
     def create_network(self):
         # Create BaseVoltages
@@ -47,6 +51,49 @@ class SimpleBusBranch:
         # Create Line
         self.network_service.create_ac_line_segment(bus1=b1, bus2=b2, name="Line", location=line_location,
                                                     length=100., base_voltage=bv_lv)
+
+    def _add_diagram(self):
+        self.diagram_service.add(self.diagram)
+        self._add_diagram_objects()
+        # TODO: In ?voltages geo view the acls does not appear.
+
+    def _add_diagram_objects(self):
+        # Add DiagramObject for ConductingEquipments
+        ce_list = self.network_service.objects(ConductingEquipment)
+        for ce in ce_list:
+            diagram_object_mapping = defaultdict(
+                lambda: DiagramObject(identified_object_mrid=ce.mrid, style=DiagramObjectStyle.JUNCTION,
+                                      diagram=self.diagram))
+            diagram_object_mapping[Junction] = DiagramObject(identified_object_mrid=ce.mrid,
+                                                             style=DiagramObjectStyle.JUNCTION,
+                                                             diagram=self.diagram)
+            diagram_object_mapping[EnergySource] = DiagramObject(identified_object_mrid=ce.mrid,
+                                                                 style=DiagramObjectStyle.ENERGY_SOURCE,
+                                                                 diagram=self.diagram)
+            diagram_object_mapping[EnergyConsumer] = DiagramObject(identified_object_mrid=ce.mrid,
+                                                                   style=DiagramObjectStyle.USAGE_POINT,
+                                                                   diagram=self.diagram)
+            diagram_object_mapping[PowerTransformer] = DiagramObject(identified_object_mrid=ce.mrid,
+                                                                     style=DiagramObjectStyle.DIST_TRANSFORMER,
+                                                                     diagram=self.diagram)
+            # diagram_object_mapping[AcLineSegment] = self._add_diagram_objects_to_ac_line_segment(ce)
+            diagram_object: DiagramObject = diagram_object_mapping[type(ce)]
+            self.diagram.add_object(diagram_object)
+            self.diagram_service.add(diagram_object)
+
+    def _add_diagram_objects_to_ac_line_segment(self, ac_line_segment: AcLineSegment):
+        # Create DiagramObject for AcLineSegments
+        # diagram_object = DiagramObject(mrid = ac_line_segment.mrid + "-do",
+        # = acLineSegment.mRID; style = DiagramObjectStyle.CONDUCTOR_LV; diagram = diagram}
+        diagram_object = DiagramObject()
+        diagram_object.mrid = ac_line_segment.mrid + "-do"
+        diagram_object.style = DiagramObjectStyle.CONDUCTOR_LV
+        # diagram_object.diagram =
+        # point1 = ac_line_segment.location.get_point(0)
+        # point2 = ac_line_segment.location.get_point(1)
+        # diagram_object.addPoint(DiagramObjectPoint(xPosition = point1.xPosition, yPosition = point1.yPosition))
+        # diagramObject.addPoint(DiagramObjectPoint(xPosition = point2.xPosition, yPosition = point2.yPosition))
+        return diagram_object
 
 
 SimpleBusBranch()
