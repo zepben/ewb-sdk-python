@@ -22,6 +22,9 @@ from zepben.evolve.util import CopyableUUID
 __all__ = ["create_ac_line_segment", "create_two_winding_power_transformer", "create_energy_consumer", "create_energy_source", "create_bus"]
 
 
+# !! WARNING !! #
+# THIS CODE IS IN ACTIVE DEVELOPMENT, UNSTABLE, AND LIKELY TO HAVE ISSUES. FOR EXPERIMENTATION ONLY.
+
 def create_ac_line_segment(network_service: NetworkService, bus1: Junction, bus2: Junction,
                            **kwargs) -> AcLineSegment:
     acls = AcLineSegment(**kwargs)
