@@ -11,8 +11,10 @@ from zepben.evolve import NetworkService, DiagramService, Diagram, \
     AcLineSegment, DiagramObjectStyle, ConductingEquipment, Junction, EnergyConsumer, \
     PowerTransformer, DiagramObjectPoint
 
+__all__ = ["SimpleBusBranch"]
 
-class SimpleBusBranch:
+
+class SimpleBusBranch(object):
 
     def __init__(self):
         # Create empty network

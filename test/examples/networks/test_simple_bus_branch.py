@@ -1,5 +1,6 @@
 import unittest
-from zepben.evolve import SimpleBusBranch, BaseVoltage, EnergySource, Junction, Terminal, Feeder, PowerTransformer, \
+from zepben.evolve.examples import SimpleBusBranch
+from zepben.evolve import BaseVoltage, EnergySource, Junction, Terminal, Feeder, PowerTransformer, \
     ConnectivityNode, DiagramObject
 
 
