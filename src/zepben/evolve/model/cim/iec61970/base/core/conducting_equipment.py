@@ -38,6 +38,8 @@ class ConductingEquipment(Equipment):
         super(ConductingEquipment, self).__init__(usage_points, equipment_containers, operational_restrictions, current_feeders)
         if terminals:
             for term in terminals:
+                if term.conducting_equipment is None:
+                    term.conducting_equipment = self
                 self.add_terminal(term)
 
     def get_base_voltage(self, terminal: Terminal = None):
