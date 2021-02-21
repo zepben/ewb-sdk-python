@@ -32,7 +32,7 @@ async def test_retrieve_supported_types(networkidentifiedobjects):
         stub = MagicMock(**{"getIdentifiedObjects.return_value": [response]})
         client = NetworkConsumerClient(stub=stub)
         pbio = getattr(nio, nio.WhichOneof("identifiedObject"), None)
-        result = await client.get_identified_objects(network_service, [pbio.mrid()])
+        result = (await client.get_identified_objects(network_service, [pbio.mrid()])).throw_on_error()
         assert result.was_successful
         if pbio.mrid():
             assert result.result.value[pbio.mrid()] is not None, f"type: {nio.WhichOneof('identifiedObject')} mrid: {pbio.mrid()}"

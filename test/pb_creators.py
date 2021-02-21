@@ -57,6 +57,11 @@ from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement a
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryStateKind_pb2 import BatteryStateKind as PBBatteryStateKind
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit as PBPhotoVoltaicUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsUnit_pb2 import PowerElectronicsUnit as PBPowerElectronicsUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor as PBConductor
@@ -77,6 +82,8 @@ from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLe
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter as PBPerLengthLineParameter
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PhaseShuntConnectionKind_pb2 import PhaseShuntConnectionKind as PBPhaseShuntConnectionKind
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection as PBPowerElectronicsConnection
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase as PBPowerElectronicsConnectionPhase
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd as PBPowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer as PBPowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import ProtectedSwitch as PBProtectedSwitch
@@ -319,6 +326,30 @@ def terminal():
                   tracedPhases=tracedphases(), phases=phasecode(), sequenceNumber=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER))
 
 
+# IEC61970 WIRES.GENERATION.PRODUCTION #
+def batterystatekind():
+    return sampled_from(PBBatteryStateKind.values())
+
+
+def batteryunit():
+    return builds(PBBatteryUnit, peu=powerelectronicsunit(), batteryState=batterystatekind(), ratedE=floats(min_value=0.0, max_value=FLOAT_MAX),
+                  storedE=floats(min_value=0.0, max_value=FLOAT_MAX))
+
+
+def photovoltaicunit():
+    return builds(PBPhotoVoltaicUnit, peu=powerelectronicsunit())
+
+
+def powerelectronicsunit():
+    return builds(PBPowerElectronicsUnit, eq=equipment(), powerElectronicsConnectionMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+                  maxP=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+                  minP=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER))
+
+
+def powerelectronicswindunit():
+    return builds(PBPowerElectronicsWindUnit, peu=powerelectronicsunit())
+
+
 # IEC61970 WIRES #
 def aclinesegment():
     return builds(PBAcLineSegment, cd=conductor(), perLengthSequenceImpedanceMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
@@ -425,6 +456,20 @@ def perlengthsequenceimpedance():
 
 def vectorgroup():
     return sampled_from(PBVectorGroup.values())
+
+
+def powerelectronicsconnection():
+    return builds(PBPowerElectronicsConnection, rce=regulatingcondeq(), powerElectronicsUnitMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+                  powerElectronicsConnectionPhaseMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
+                  maxIFault=integers(min_value=0, max_value=MAX_32_BIT_INTEGER), maxQ=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+                  minQ=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+                  q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), ratedS=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+                  ratedU=integers(min_value=0, max_value=MAX_32_BIT_INTEGER))
+
+
+def powerelectronicsconnectionphase():
+    return builds(PBPowerElectronicsConnectionPhase, psr=powersystemresource(), powerElectronicsConnectionMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+                  phase=singlephasekind(), p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
 
 
 def powertransformer():
@@ -579,6 +624,9 @@ def networkidentifiedobjects(draw):
         draw(builds(NetworkIdentifiedObject, subGeographicalRegion=subgeographicalregion())),
         draw(builds(NetworkIdentifiedObject, substation=substation())),
         draw(builds(NetworkIdentifiedObject, terminal=terminal())),
+        draw(builds(NetworkIdentifiedObject, batteryUnit=batteryunit())),
+        draw(builds(NetworkIdentifiedObject, photoVoltaicUnit=photovoltaicunit())),
+        draw(builds(NetworkIdentifiedObject, powerElectronicsWindUnit=powerelectronicswindunit())),
         draw(builds(NetworkIdentifiedObject, acLineSegment=aclinesegment())),
         draw(builds(NetworkIdentifiedObject, breaker=breaker())),
         draw(builds(NetworkIdentifiedObject, disconnector=disconnector())),
@@ -592,6 +640,8 @@ def networkidentifiedobjects(draw):
         draw(builds(NetworkIdentifiedObject, busbarSection=busbarsection())),
         draw(builds(NetworkIdentifiedObject, linearShuntCompensator=linearshuntcompensator())),
         draw(builds(NetworkIdentifiedObject, perLengthSequenceImpedance=perlengthsequenceimpedance())),
+        draw(builds(NetworkIdentifiedObject, powerElectronicsConnection=powerelectronicsconnection())),
+        draw(builds(NetworkIdentifiedObject, powerElectronicsConnectionPhase=powerelectronicsconnectionphase())),
         draw(builds(NetworkIdentifiedObject, powerTransformer=powertransformer())),
         draw(builds(NetworkIdentifiedObject, powerTransformerEnd=powertransformerend())),
         draw(builds(NetworkIdentifiedObject, ratioTapChanger=ratiotapchanger())),
@@ -606,5 +656,6 @@ def networkidentifiedobjects(draw):
         draw(builds(NetworkIdentifiedObject, control=control())),
         draw(builds(NetworkIdentifiedObject, remoteControl=remotecontrol())),
         draw(builds(NetworkIdentifiedObject, remoteSource=remotesource())),
+
     ]
     return nios
