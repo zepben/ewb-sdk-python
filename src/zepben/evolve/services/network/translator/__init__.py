@@ -65,6 +65,8 @@ from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import L
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import ProtectedSwitch
@@ -75,6 +77,10 @@ from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCo
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsUnit_pb2 import PowerElectronicsUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit
 
@@ -113,6 +119,10 @@ Site.mrid = lambda self: self.ec.mrid()
 SubGeographicalRegion.mrid = lambda self: self.io.mRID
 Substation.mrid = lambda self: self.ec.mrid()
 Terminal.mrid = lambda self: self.ad.mrid()
+PowerElectronicsUnit.mrid = lambda self: self.eq.mrid()
+BatteryUnit.mrid = lambda self: self.peu.mrid()
+PhotoVoltaicUnit.mrid = lambda self: self.peu.mrid()
+PowerElectronicsWindUnit.mrid = lambda self: self.peu.mrid()
 AcLineSegment.mrid = lambda self: self.cd.mrid()
 Breaker.mrid = lambda self: self.sw.mrid()
 Conductor.mrid = lambda self: self.ce.mrid()
@@ -133,6 +143,8 @@ PerLengthImpedance.mrid = lambda self: self.lp.mrid()
 PerLengthLineParameter.mrid = lambda self: self.io.mRID
 PerLengthSequenceImpedance.mrid = lambda self: self.pli.mrid()
 PowerTransformer.mrid = lambda self: self.ce.mrid()
+PowerElectronicsConnection.mrid = lambda self: self.rce.mrid()
+PowerElectronicsConnectionPhase.mrid = lambda self: self.psr.mrid()
 PowerTransformerEnd.mrid = lambda self: self.te.mrid()
 ProtectedSwitch.mrid = lambda self: self.sw.mrid()
 RatioTapChanger.mrid = lambda self: self.tc.mrid()
