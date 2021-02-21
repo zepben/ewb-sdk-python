@@ -5,8 +5,9 @@
 
 ##### New Features
 * Added CIM class BusbarSection.
-* Example Simple bus branch network added in `TODO`.
-* Helper factory methods for types some extending ConductingEquipment in `zepben.evolve.examples.networks.network_creator`
+* Example Simple bus branch network added in `zepben.evolve.examples.simple_bus_branch`.
+* Helper factory methods for AcLineSegment, Junction (Bus), PowerTransformer, EnergySource, and EnergyConsumer added to `NetworkService` and available
+through `zepben.evolve.services.network.network_extensions`.
 
 ##### Enhancements
 * [tests] cim_creators.py created with similar hypothesis derived functionality to pb_creators, and can be used to quickly build fake data for testing.
