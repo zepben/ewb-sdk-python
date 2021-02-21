@@ -8,9 +8,18 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import NetworkService, Junction, Terminal, PhaseCode, ConductingEquipment, EnergySource, \
-    PowerTransformer, BaseVoltage, AcLineSegment, EnergyConsumer, PowerTransformerInfo, PowerTransformerEnd
+from zepben.evolve.services.network.network import NetworkService
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.wires.connectors import Junction
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
 from zepben.evolve.util import CopyableUUID
+
+__all__ = ["create_ac_line_segment", "create_two_winding_power_transformer", "create_energy_consumer", "create_energy_source", "create_bus"]
 
 
 def create_ac_line_segment(network_service: NetworkService, bus1: Junction, bus2: Junction,
@@ -25,8 +34,7 @@ def create_two_winding_power_transformer(network_service: NetworkService, bus1: 
                                          **kwargs) -> PowerTransformer:
     power_transformer = PowerTransformer(**kwargs)
     _create_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer, **kwargs)
-    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer,
-                                               bus1=bus1, bus2=bus2)
+    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer, bus1=bus1, bus2=bus2)
     # TODO: How to associated PowerTransformerEndInfo to a PowerTransformerInfo
     for i in range(1, 2):
         end = PowerTransformerEnd(power_transformer=power_transformer)
@@ -60,16 +68,14 @@ def create_bus(network_service: NetworkService, **kwargs) -> Junction:
     return bus
 
 
-def _create_two_terminal_conducting_equipment(network_service: NetworkService,
-                                              ce: ConductingEquipment, **kwargs):
+def _create_two_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, **kwargs):
     if 'mrid' not in kwargs:
         ce.mrid = str(CopyableUUID())
     network_service.add(ce)
     _create_terminals(ce=ce, num_terms=2, network=network_service)
 
 
-def _connect_two_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment,
-                                               bus1: Junction, bus2: Junction):
+def _connect_two_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, bus1: Junction, bus2: Junction):
     network_service.connect_terminals(bus1.get_terminal_by_sn(1), ce.get_terminal_by_sn(1))
     network_service.connect_terminals(bus2.get_terminal_by_sn(1), ce.get_terminal_by_sn(2))
 
@@ -81,13 +87,11 @@ def _create_single_terminal_conducting_equipment(network_service: NetworkService
     _create_terminals(ce=ce, network=network_service)
 
 
-def _connect_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment,
-                                                  bus: Junction):
+def _connect_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, bus: Junction):
     network_service.connect_terminals(ce.get_terminal_by_sn(1), bus.get_terminal_by_sn(1))
 
 
-def _create_terminals(network: NetworkService, ce: ConductingEquipment,
-                      num_terms: int = 1, phases: PhaseCode = PhaseCode.ABC):
+def _create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms: int = 1, phases: PhaseCode = PhaseCode.ABC):
     for i in range(1, num_terms + 1):
         terminal: Terminal = Terminal(mrid=f"{ce.mrid}_t{i}", conducting_equipment=ce, phases=phases, sequence_number=i)
         ce.add_terminal(terminal)

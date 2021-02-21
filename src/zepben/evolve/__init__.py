@@ -119,5 +119,4 @@ from zepben.evolve.streaming.put.producer import *
 
 from zepben.evolve.util import *
 
-import zepben.evolve.examples.networks.network_creator
-from zepben.evolve.examples.networks.simple_bus_branch import *
+from zepben.evolve.services.network.network_extensions import *
