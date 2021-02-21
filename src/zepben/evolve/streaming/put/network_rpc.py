@@ -41,6 +41,8 @@ from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction
 from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import LinearShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
@@ -52,6 +54,9 @@ from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import Custome
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit
 from zepben.protobuf.cp.cp_requests_pb2 import CreateOrganisationRequest as CreateCustomerOrganisationRequest
 from zepben.protobuf.mp.mp_requests_pb2 import CreateAnalogValueRequest, CreateAccumulatorValueRequest, CreateDiscreteValueRequest
 from zepben.protobuf.dp.dp_requests_pb2 import *
@@ -82,6 +87,9 @@ network_rpc_map = {
     Accumulator: ('CreateAccumulator', CreateAccumulatorRequest),
     Analog: ('CreateAnalog', CreateAnalogRequest),
     Discrete: ('CreateDiscrete', CreateDiscreteRequest),
+    BatteryUnit: ('CreateBatteryUnit', CreateBatteryUnitRequest),
+    PhotoVoltaicUnit: ('CreatePhotoVoltaicUnit', CreatePhotoVoltaicRequest),
+    PowerElectronicsWindUnit: ('CreatePowerElectronicsWindUnit', CreatePowerElectronicsWindUnitRequest),
     AcLineSegment: ('CreateAcLineSegment', CreateAcLineSegmentRequest),
     EnergyConsumer: ('CreateEnergyConsumer', CreateEnergyConsumerRequest),
     Disconnector: ('CreateDisconnector', CreateDisconnectorRequest),
@@ -95,6 +103,8 @@ network_rpc_map = {
     BusbarSection: ('CreateBusbarSection', CreateBusbarSectionRequest),
     LinearShuntCompensator: ('CreateLinearShuntCompensator', CreateLinearShuntCompensatorRequest),
     PerLengthSequenceImpedance: ('CreatePerLengthSequenceImpedance', CreatePerLengthSequenceImpedanceRequest),
+    PowerElectronicsConnection: ('CreatePowerElectronicsConnection', CreatePowerElectronicsConnectionRequest),
+    PowerElectronicsConnectionPhase: ('CreatePowerElectronicsConnectionPhase', CreatePowerElectronicsConnectionPhaseRequest),
     PowerTransformer: ('CreatePowerTransformer', CreatePowerTransformerRequest),
     PowerTransformerEnd: ('CreatePowerTransformerEnd', CreatePowerTransformerEndRequest),
     PowerTransformerInfo: ('CreatePowerTransformerInfo', CreatePowerTransformerInfoRequest),
