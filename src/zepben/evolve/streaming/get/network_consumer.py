@@ -171,11 +171,11 @@ class NetworkConsumerClient(CimConsumerClient):
         return await self.try_rpc(self._handle_network_hierarchy)
 
     async def _get_feeder(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
-        feeder_response = (await self._get_identified_object(service, mrid)).throw_on_error()
+        feeder_response = await self._get_identified_object(service, mrid)
         feeder: Feeder = feeder_response.result
 
         if not feeder:
-            return GrpcResult(result=None)
+            return GrpcResult(result=ValueError(f"Requested Feeder with mRID {mrid} could not be found."))
 
         if not isinstance(feeder, Feeder):
             return GrpcResult(result=ValueError(f"Requested mrid {mrid} was not a Feeder, was {type(feeder)}"))
@@ -226,8 +226,9 @@ class NetworkConsumerClient(CimConsumerClient):
                 mor.failed.add(mrid)
 
         for mrid in hierarchy.feeders.keys():
-            feeder_result = (await self._get_feeder(service, mrid)).throw_on_error()
-            mor.failed.update(feeder_result.result.failed)
+            feeder_result = await self._get_feeder(service, mrid)
+            if feeder_result.was_successful:
+                mor.failed.update(feeder_result.result.failed)
 
         # Possible that some previously failed resolutions were successful some other way, so check all the failures against the service
         for f in mor.failed:
