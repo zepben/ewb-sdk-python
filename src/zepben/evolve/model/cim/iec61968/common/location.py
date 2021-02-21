@@ -103,8 +103,8 @@ class Location(IdentifiedObject):
         """
         Returns Generator over the `PositionPoint`s of this `Location`.
         """
-        for i, point in enumerate(ngen(self._position_points)):
-            yield i, point
+        for point in ngen(self._position_points):
+            yield point
 
     def get_point(self, sequence_number: int) -> Optional[PositionPoint]:
         """
