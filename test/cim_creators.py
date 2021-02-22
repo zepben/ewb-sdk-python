@@ -134,7 +134,7 @@ def streetlight():
 
 # IEC61968 COMMON #
 def location():
-    return builds(Location, **identifiedobject(), main_address=builds(StreetAddress), position_points=lists(builds(PositionPoint), max_size=4))
+    return builds(Location, **identifiedobject(), main_address=builds(StreetAddress), position_points=lists(positionpoint(), max_size=4))
 
 
 def positionpoint():
