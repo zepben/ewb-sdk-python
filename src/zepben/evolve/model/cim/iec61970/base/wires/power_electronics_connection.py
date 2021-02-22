@@ -107,7 +107,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
         """Return the number of `PowerElectronicsUnit`s associated with this `PowerElectronicsConnection`"""
         return nlen(self._power_electronics_units)
 
-    def get_unit(self, mrid: str) -> PowerElectronicsConnection:
+    def get_unit(self, mrid: str) -> PowerElectronicsUnit:
         """
         Get the `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` for this `PowerElectronicsConnection` identified by `mrid`
 
@@ -131,7 +131,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
         self._power_electronics_units.append(unit)
         return self
 
-    def remove_units(self, unit: PowerElectronicsUnit) -> PowerElectronicsConnection:
+    def remove_unit(self, unit: PowerElectronicsUnit) -> PowerElectronicsConnection:
         """
         Disassociate `unit` from this `PowerElectronicsConnection`
 
@@ -161,7 +161,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
         """Return the number of `PowerElectronicsConnectionPhase`s associated with this `PowerElectronicsConnection`"""
         return nlen(self._power_electronics_connection_phases)
 
-    def get_phase(self, mrid: str) -> PowerElectronicsConnection:
+    def get_phase(self, mrid: str) -> PowerElectronicsConnectionPhase:
         """
         Get the `PowerElectronicsConnectionPhase` for this `PowerElectronicsConnection` identified by `mrid`
 
