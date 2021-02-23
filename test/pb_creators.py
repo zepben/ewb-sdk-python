@@ -64,6 +64,7 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
+from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch as PBLoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor as PBConductor
 from zepben.protobuf.cim.iec61970.base.wires.Connector_pb2 import Connector as PBConnector
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector as PBDisconnector
@@ -357,6 +358,10 @@ def aclinesegment():
 
 def breaker():
     return builds(PBBreaker, sw=protectedswitch())
+
+
+def loadbreakswitch():
+    return builds(PBLoadBreakSwitch, ps=protectedswitch())
 
 
 def conductor():
@@ -656,6 +661,6 @@ def networkidentifiedobjects(draw):
         draw(builds(NetworkIdentifiedObject, control=control())),
         draw(builds(NetworkIdentifiedObject, remoteControl=remotecontrol())),
         draw(builds(NetworkIdentifiedObject, remoteSource=remotesource())),
-
+        draw(builds(NetworkIdentifiedObject, loadBreakSwitch=loadbreakswitch())),
     ]
     return nios
