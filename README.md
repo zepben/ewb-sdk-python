@@ -51,31 +51,31 @@ Run the tests:
 
 1. Update `setup.py` to import the correct version of `zepben.protobuf`.
 1. Model updating:
-   1. Add new classes to the [model package](https://github.com/zepben/evolve-sdk-python/tree/main/src/zepben/evolve/model). 
+   1. Add new classes to the [model package](src/zepben/evolve/model/). 
    1. Descriptions copied from [Evolve CIM Profile documentation](https://zepben.github.io/evolve/docs/cim/evolve) and added as doc comments to new changes (on class, property etc)
-1. Update [translator package](https://github.com/zepben/evolve-sdk-python/tree/main/src/zepben/evolve/services/network/translator):
-   1. Update [```__init__.py```](https://github.com/zepben/evolve-sdk-python/blob/main/src/zepben/evolve/services/network/translator/__init__.py):
+1. Update [translator package](src/zepben/evolve/services/network/translator):
+   1. Update [```__init__.py```](src/zepben/evolve/services/network/translator/__init__.py):
       * ```from zepben.protobuf...<new_class_name>_pb2 import <new_class_name>```
       * ```<new_class_name>.mrid = lambda self: self...mrid()```
-   1. Update [network_cim2proto.py](https://github.com/zepben/evolve-sdk-python/blob/main/src/zepben/evolve/services/network/translator/network_cim2proto.py):
+   1. Update [network_cim2proto.py](src/zepben/evolve/services/network/translator/network_cim2proto.py):
       * ```import <new_class_name> as PB<new_class_name>```
       * Add ```def <new_class_name>_to_pb```  
       * Add ```"<new_class_name>_to_pb"``` to ```__all__```
       * Add ```<new_class_name>.to_pb = <new_class_name>_to_pb```
-   1. Update  [network_proto2cim.py](https://github.com/zepben/evolve-sdk-python/blob/main/src/zepben/evolve/services/network/translator/network_proto2cim.py)
+   1. Update  [network_proto2cim.py](src/zepben/evolve/services/network/translator/network_proto2cim.py)
       * ```import <new_class_name> as PB<new_class_name>```
       * Add ```def <new_class_name>_to_pb```  
       * Add ```"<new_class_name>_to_cim"``` to ```__all__```
       * Add ```<new_class_name>_to_cim = <new_class_name>_to_cim```                
-1. Update [network_rpc.py](https://github.com/zepben/evolve-sdk-python/blob/main/src/zepben/evolve/streaming/put/network_rpc.py)
+1. Update [network_rpc.py](src/zepben/evolve/streaming/put/network_rpc.py)
    * Add ```from zepben.protobuf...<new_class_name>_pb2 import <new_class_name>```
    * Add ```<new_class_name>: ('Create<new_class_name>', Create<new_class_name>),```
-1. Add reference resolver(s) to resolvers in [common package](https://github.com/zepben/evolve-sdk-python/tree/main/src/zepben/evolve/services/common)  (if new associations).
+1. Add reference resolver(s) to resolvers in [common package](src/zepben/evolve/services/common)  (if new associations).
 1. Testing:
    * Add the required creators to:
      - [```pb_creators.py```]()
-     - [```cim_creators.py```](https://github.com/zepben/evolve-sdk-python/blob/main/test/cim_creators.py)
-   * Update [```constructor_validation.py```](https://github.com/zepben/evolve-sdk-python/blob/main/test/cim/constructor_validation.py) 
-   * Add test for each new class to  [test/cim/...](https://github.com/zepben/evolve-sdk-python/tree/main/test/cim) package.
+     - [```cim_creators.py```](test/cim_creators.py)
+   * Update [```constructor_validation.py```](test/cim/constructor_validation.py) 
+   * Add test for each new class to  [test/cim/...](test/cim) package.
    * Verify that al the test are passing. 
-1. Update release notes in [```changelog.md```](https://github.com/zepben/evolve-sdk-python/blob/main/changelog.md).
+1. Update release notes in [```changelog.md```](changelog.md).
