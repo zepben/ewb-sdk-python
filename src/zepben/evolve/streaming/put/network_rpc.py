@@ -40,6 +40,7 @@ from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction
 from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import LinearShuntCompensator
+from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection
@@ -102,6 +103,7 @@ network_rpc_map = {
     Junction: ('CreateJunction', CreateJunctionRequest),
     BusbarSection: ('CreateBusbarSection', CreateBusbarSectionRequest),
     LinearShuntCompensator: ('CreateLinearShuntCompensator', CreateLinearShuntCompensatorRequest),
+    LoadBreakSwitch: ('CreateLoadBreakSwitch', CreateLoadBreakSwitchRequest),
     PerLengthSequenceImpedance: ('CreatePerLengthSequenceImpedance', CreatePerLengthSequenceImpedanceRequest),
     PowerElectronicsConnection: ('CreatePowerElectronicsConnection', CreatePowerElectronicsConnectionRequest),
     PowerElectronicsConnectionPhase: ('CreatePowerElectronicsConnectionPhase', CreatePowerElectronicsConnectionPhaseRequest),
