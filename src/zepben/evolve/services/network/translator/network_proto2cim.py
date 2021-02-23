@@ -72,6 +72,7 @@ from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction as PBJ
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Line_pb2 import Line as PBLine
 from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import LinearShuntCompensator as PBLinearShuntCompensator
+from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch as PBLoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance as PBPerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter as PBPerLengthLineParameter
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
@@ -158,7 +159,8 @@ __all__ = ["cableinfo_to_cim", "overheadwireinfo_to_cim", "wireinfo_to_cim", "as
            "powerelectronicswindunit_to_cim", "aclinesegment_to_cim", "breaker_to_cim", "conductor_to_cim",
            "connector_to_cim", "disconnector_to_cim", "energyconnection_to_cim", "energyconsumer_to_cim", "energyconsumerphase_to_cim", "energysource_to_cim",
            "energysourcephase_to_cim", "fuse_to_cim", "jumper_to_cim", "junction_to_cim", "line_to_cim", "linearshuntcompensator_to_cim",
-           "perlengthlineparameter_to_cim", "perlengthimpedance_to_cim", "perlengthsequenceimpedance_to_cim", "powerelectronicsconnection_to_cim",
+           "loadbreakswitch_to_cim", "perlengthlineparameter_to_cim", "perlengthimpedance_to_cim",
+           "perlengthsequenceimpedance_to_cim", "powerelectronicsconnection_to_cim",
            "powerelectronicsconnectionphase_to_cim", "powertransformer_to_cim",
            "powertransformerend_to_cim", "power_transformer_info_to_cim", "protectedswitch_to_cim", "ratiotapchanger_to_cim", "recloser_to_cim",
            "regulatingcondeq_to_cim", "shuntcompensator_to_cim", "switch_to_cim", "tapchanger_to_cim", "transformerend_to_cim", "PBPerLengthImpedance",
@@ -662,6 +664,12 @@ def linearshuntcompensator_to_cim(pb: PBLinearShuntCompensator, network_service:
     return cim if network_service.add(cim) else None
 
 
+def loadbreakswitch_to_cim(pb: PBLoadBreakSwitch, network_service: NetworkService) -> Optional[LoadBreakSwitch]:
+    cim = LoadBreakSwitch(mrid=pb.mrid())
+    protectedswitch_to_cim(pb.ps, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 def perlengthlineparameter_to_cim(pb: PBPerLengthLineParameter, cim: PerLengthLineParameter,
                                   network_service: NetworkService):
     identifiedobject_to_cim(pb.io, cim, network_service)
@@ -788,6 +796,7 @@ PBJunction.to_cim = junction_to_cim
 PBBusbarSection.to_cim = busbarsection_to_cim
 PBLine.to_cim = line_to_cim
 PBLinearShuntCompensator.to_cim = linearshuntcompensator_to_cim
+PBLoadBreakSwitch.to_cim = loadbreakswitch_to_cim
 PBPerLengthSequenceImpedance.to_cim = perlengthsequenceimpedance_to_cim
 PBPerLengthLineParameter.to_cim = perlengthlineparameter_to_cim
 PBPerLengthImpedance = perlengthimpedance_to_cim
