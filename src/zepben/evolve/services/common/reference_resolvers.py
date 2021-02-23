@@ -44,7 +44,9 @@ from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegm
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
+from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import PowerElectronicsUnit
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnectionPhase, PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
@@ -62,6 +64,7 @@ __all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_t
            "te_to_bv_resolver", "te_to_rtc_resolver", "up_to_ed_resolver", "up_to_eq_resolver", "up_to_loc_resolver", "circuit_to_loop_resolver",
            "circuit_to_sub_resolver", "circuit_to_term_resolver", "loop_to_circuit_resolver", "loop_to_esub_resolver", "loop_to_sub_resolver",
            "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference"]
+
 
 @dataclass(frozen=True, eq=False, slots=True)
 class ReferenceResolver(object):
@@ -241,3 +244,9 @@ circuit_to_sub_resolver = ReferenceResolver(Circuit, Substation, lambda t, r: t.
 loop_to_circuit_resolver = ReferenceResolver(Loop, Circuit, lambda t, r: t.add_circuit(r))
 loop_to_sub_resolver = ReferenceResolver(Loop, Substation, lambda t, r: t.add_substation(r))
 loop_to_esub_resolver = ReferenceResolver(Loop, Substation, lambda t, r: t.add_energizing_substation(r))
+
+pec_to_pecphase_resolver = ReferenceResolver(PowerElectronicsConnection, PowerElectronicsConnectionPhase, lambda t, r: t.add_phase(r))
+pecphase_to_pec_resolver = ReferenceResolver(PowerElectronicsConnectionPhase, PowerElectronicsConnection, lambda t, r: setattr(t, 'power_electronics_connection', r))
+
+pec_to_peu_resolver = ReferenceResolver(PowerElectronicsConnection, PowerElectronicsUnit, lambda t, r: t.add_unit(r))
+peu_to_pec_resolver = ReferenceResolver(PowerElectronicsUnit, PowerElectronicsConnection, lambda t, r: setattr(t, 'power_electronics_connection', r))

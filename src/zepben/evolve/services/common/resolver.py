@@ -22,6 +22,8 @@ __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location",
            "te_base_voltage", "ratio_tap_changer",
            "te_terminal", "end_devices", "up_equipment", "usage_point_location"]
 
+from zepben.evolve.services.common.reference_resolvers import peu_to_pec_resolver, pec_to_peu_resolver, pecphase_to_pec_resolver, pec_to_pecphase_resolver
+
 
 def per_length_sequence_impedance(aclinesegment):
     return BoundReferenceResolver(aclinesegment, acls_to_plsi_resolver, None)
@@ -272,3 +274,19 @@ def loop_substations(loop: Loop) -> BoundReferenceResolver:
 
 def loop_energizing_substations(loop: Loop) -> BoundReferenceResolver:
     return BoundReferenceResolver(loop, loop_to_esub_resolver, sub_to_eloop_resolver)
+
+
+def unit_power_electronics_connection(pec: PowerElectronicsUnit) -> BoundReferenceResolver:
+    return BoundReferenceResolver(pec, peu_to_pec_resolver, pec_to_peu_resolver)
+
+
+def phase_power_electronics_connection(pec: PowerElectronicsConnectionPhase) -> BoundReferenceResolver:
+    return BoundReferenceResolver(pec, pecphase_to_pec_resolver, pec_to_pecphase_resolver)
+
+
+def power_electronics_unit(pec: PowerElectronicsConnection) -> BoundReferenceResolver:
+    return BoundReferenceResolver(pec, pec_to_peu_resolver,peu_to_pec_resolver)
+
+
+def power_electronics_connection_phase(pec: PowerElectronicsConnectionPhase) -> BoundReferenceResolver:
+    return BoundReferenceResolver(pec, pec_to_pecphase_resolver, pecphase_to_pec_resolver)

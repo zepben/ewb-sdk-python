@@ -7,6 +7,10 @@ from __future__ import annotations
 
 from typing import Optional
 
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit as PBPhotoVoltaicUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsUnit_pb2 import PowerElectronicsUnit as PBPowerElectronicsUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
@@ -71,6 +75,8 @@ from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import L
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance as PBPerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter as PBPerLengthLineParameter
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection as PBPowerElectronicsConnection
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase as PBPowerElectronicsConnectionPhase
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd as PBPowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer as PBPowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import ProtectedSwitch as PBProtectedSwitch
@@ -117,6 +123,8 @@ from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
+from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
+from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_state_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
@@ -126,6 +134,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
 from zepben.evolve.model.cim.iec61970.base.wires.line import *
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
 from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import *
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
@@ -145,10 +154,12 @@ __all__ = ["cableinfo_to_cim", "overheadwireinfo_to_cim", "wireinfo_to_cim", "as
            "conductingequipment_to_cim", "connectivitynode_to_cim", "connectivitynodecontainer_to_cim", "equipment_to_cim", "equipmentcontainer_to_cim",
            "feeder_to_cim", "geographicalregion_to_cim", "powersystemresource_to_cim", "site_to_cim", "subgeographicalregion_to_cim", "substation_to_cim",
            "terminal_to_cim", "accumulator_to_cim", "analog_to_cim", "control_to_cim", "discrete_to_cim", "iopoint_to_cim", "measurement_to_cim",
-           "remotecontrol_to_cim", "remotepoint_to_cim", "remotesource_to_cim", "aclinesegment_to_cim", "breaker_to_cim", "conductor_to_cim",
+           "remotecontrol_to_cim", "remotepoint_to_cim", "remotesource_to_cim", "powerelectronicsunit_to_cim", "batteryunit_to_cim", "photovoltaicunit_to_cim",
+           "powerelectronicswindunit_to_cim", "aclinesegment_to_cim", "breaker_to_cim", "conductor_to_cim",
            "connector_to_cim", "disconnector_to_cim", "energyconnection_to_cim", "energyconsumer_to_cim", "energyconsumerphase_to_cim", "energysource_to_cim",
            "energysourcephase_to_cim", "fuse_to_cim", "jumper_to_cim", "junction_to_cim", "line_to_cim", "linearshuntcompensator_to_cim",
-           "perlengthlineparameter_to_cim", "perlengthimpedance_to_cim", "perlengthsequenceimpedance_to_cim", "powertransformer_to_cim",
+           "perlengthlineparameter_to_cim", "perlengthimpedance_to_cim", "perlengthsequenceimpedance_to_cim", "powerelectronicsconnection_to_cim",
+           "powerelectronicsconnectionphase_to_cim", "powertransformer_to_cim",
            "powertransformerend_to_cim", "power_transformer_info_to_cim", "protectedswitch_to_cim", "ratiotapchanger_to_cim", "recloser_to_cim",
            "regulatingcondeq_to_cim", "shuntcompensator_to_cim", "switch_to_cim", "tapchanger_to_cim", "transformerend_to_cim", "PBPerLengthImpedance",
            "circuit_to_cim", "loop_to_cim", "_add_from_pb"]
@@ -523,6 +534,34 @@ PBRemoteSource.to_cim = remotesource_to_cim
 
 
 ### IEC61970 WIRES
+def powerelectronicsunit_to_cim(pb: PBPowerElectronicsUnit, cim: PowerElectronicsUnit, network_service: NetworkService):
+    network_service.resolve_or_defer_reference(resolver.unit_power_electronics_connection(cim), pb.powerElectronicsConnectionMRID)
+    cim.max_p = pb.maxP
+    cim.min_p = pb.minP
+    equipment_to_cim(pb.eq, cim, network_service)
+
+
+def batteryunit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> Optional[BatteryUnit]:
+    cim = BatteryUnit(mrid=pb.mrid())
+    cim.battery_state = BatteryStateKind(pb.batteryState)
+    cim.rated_e = pb.ratedE
+    cim.stored_e = pb.storedE
+    powerelectronicsunit_to_cim(pb.peu, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
+def photovoltaicunit_to_cim(pb: PBPhotoVoltaicUnit, network_service: NetworkService) -> Optional[PhotoVoltaicUnit]:
+    cim = PhotoVoltaicUnit(mrid=pb.mrid())
+    powerelectronicsunit_to_cim(pb.peu, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
+def powerelectronicswindunit_to_cim(pb: PBPowerElectronicsWindUnit, network_service: NetworkService) -> Optional[PowerElectronicsWindUnit]:
+    cim = PowerElectronicsWindUnit(mrid=pb.mrid())
+    powerelectronicsunit_to_cim(pb.peu, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 def aclinesegment_to_cim(pb: PBAcLineSegment, network_service: NetworkService) -> Optional[AcLineSegment]:
     cim = AcLineSegment(mrid=pb.mrid())
     network_service.resolve_or_defer_reference(resolver.per_length_sequence_impedance(cim), pb.perLengthSequenceImpedanceMRID)
@@ -638,6 +677,23 @@ def perlengthsequenceimpedance_to_cim(pb: PBPerLengthSequenceImpedance, network_
     return cim if network_service.add(cim) else None
 
 
+def powerelectronicsconnection_to_cim(pb: PBPowerElectronicsConnection, network_service: NetworkService) -> Optional[PowerElectronicsConnection]:
+    cim = PowerElectronicsConnection(mrid=pb.mrid(), max_i_fault=pb.maxIFault, p=pb.p, q=pb.q, max_q=pb.maxQ, min_q=pb.minQ, rated_s=pb.ratedS, rated_u=pb.ratedU)
+    for mrid in pb.powerElectronicsUnitMRIDs:
+        network_service.resolve_or_defer_reference(resolver.power_electronics_unit(cim), mrid)
+    for mrid in pb.powerElectronicsConnectionPhaseMRIDs:
+        network_service.resolve_or_defer_reference(resolver.power_electronics_connection_phase(cim), mrid)
+    regulatingcondeq_to_cim(pb.rce, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
+def powerelectronicsconnectionphase_to_cim(pb: PBPowerElectronicsConnection, network_service: NetworkService) -> Optional[PowerElectronicsConnectionPhase]:
+    cim = PowerElectronicsConnectionPhase(mrid=pb.mrid(), p=pb.p, q=pb.q, phase=phasekind_by_id(pb.phase))
+    network_service.resolve_or_defer_reference(resolver.phase_power_electronics_connection(cim), pb.powerElectronicsConnectionMRID)
+    powersystemresource_to_cim(pb.psr, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 def powertransformer_to_cim(pb: PBPowerTransformer, network_service: NetworkService) -> Optional[PowerTransformer]:
     cim = PowerTransformer(mrid=pb.mrid(), vector_group=VectorGroup(pb.vectorGroup), transformer_utilisation=pb.transformerUtilisation)
     for mrid in pb.powerTransformerEndMRIDs:
@@ -712,6 +768,10 @@ def transformerend_to_cim(pb: PBTransformerEnd, cim: TransformerEnd, network_ser
     identifiedobject_to_cim(pb.io, cim, network_service)
 
 
+PBPowerElectronicsUnit.to_cim = powerelectronicsunit_to_cim
+PBBatteryUnit.to_cim = batteryunit_to_cim
+PBPhotoVoltaicUnit.to_cim = photovoltaicunit_to_cim
+PBPowerElectronicsWindUnit.to_cim = powerelectronicswindunit_to_cim
 PBAcLineSegment.to_cim = aclinesegment_to_cim
 PBBreaker.to_cim = breaker_to_cim
 PBConductor.to_cim = conductor_to_cim
@@ -731,6 +791,8 @@ PBLinearShuntCompensator.to_cim = linearshuntcompensator_to_cim
 PBPerLengthSequenceImpedance.to_cim = perlengthsequenceimpedance_to_cim
 PBPerLengthLineParameter.to_cim = perlengthlineparameter_to_cim
 PBPerLengthImpedance = perlengthimpedance_to_cim
+PBPowerElectronicsConnection.to_cim = powerelectronicsconnection_to_cim
+PBPowerElectronicsConnectionPhase.to_cim = powerelectronicsconnectionphase_to_cim
 PBPowerTransformer.to_cim = powertransformer_to_cim
 PBPowerTransformerEnd.to_cim = powertransformerend_to_cim
 PBProtectedSwitch.to_cim = protectedswitch_to_cim

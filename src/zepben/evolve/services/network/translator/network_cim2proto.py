@@ -3,7 +3,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
 from zepben.evolve.services.common.translator.base_cim2proto import identifiedobject_to_pb, organisationrole_to_pb, document_to_pb
 from zepben.evolve.services.common.translator.util import mrid_or_empty
 from zepben.evolve.model.cim.iec61968.assets.structure import *
@@ -24,11 +23,13 @@ from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *
+from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
 from zepben.evolve.model.cim.iec61970.base.wires.line import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import *
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
@@ -98,6 +99,11 @@ from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement a
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryStateKind_pb2 import BatteryStateKind as PBBatteryStateKind
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit as PBPhotoVoltaicUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsUnit_pb2 import PowerElectronicsUnit as PBPowerElectronicsUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor as PBConductor
@@ -118,6 +124,8 @@ from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLe
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter as PBPerLengthLineParameter
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PhaseShuntConnectionKind_pb2 import PhaseShuntConnectionKind as PBPhaseShuntConnectionKind
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection as PBPowerElectronicsConnection
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase as PBPowerElectronicsConnectionPhase
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd as PBPowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer as PBPowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import ProtectedSwitch as PBProtectedSwitch
@@ -144,11 +152,12 @@ __all__ = ["CimTranslationException", "cableinfo_to_pb", "overheadwireinfo_to_pb
            "conductingequipment_to_pb", "connectivitynode_to_pb", "connectivitynodecontainer_to_pb", "equipment_to_pb",
            "equipmentcontainer_to_pb", "feeder_to_pb", "geographicalregion_to_pb", "powersystemresource_to_pb", "site_to_pb",
            "subgeographicalregion_to_pb", "substation_to_pb", "terminal_to_pb", "perlengthlineparameter_to_pb",
-           "perlengthimpedance_to_pb", "aclinesegment_to_pb", "breaker_to_pb", "conductor_to_pb", "connector_to_pb",
+           "perlengthimpedance_to_pb", "powerelectronicsunit_to_pb", "batteryunit_to_pb", "photovoltaicunit_to_pb", "powerelectronicswindunit_to_pb",
+           "aclinesegment_to_pb", "breaker_to_pb", "conductor_to_pb", "connector_to_pb",
            "disconnector_to_pb", "energyconnection_to_pb", "energyconsumer_to_pb", "energyconsumerphase_to_pb",
            "energysource_to_pb", "energysourcephase_to_pb", "fuse_to_pb", "jumper_to_pb", "junction_to_pb",
-           "linearshuntcompensator_to_pb", "perlengthsequenceimpedance_to_pb", "powertransformer_to_pb",
-           "powertransformerend_to_pb", "protectedswitch_to_pb", "ratiotapchanger_to_pb", "recloser_to_pb",
+           "linearshuntcompensator_to_pb", "perlengthsequenceimpedance_to_pb", "powerelectronicsconnection_to_pb", "powerelectronicsconnectionphase_to_pb",
+           "powertransformer_to_pb", "powertransformerend_to_pb", "protectedswitch_to_pb", "ratiotapchanger_to_pb", "recloser_to_pb",
            "regulatingcondeq_to_pb", "shuntcompensator_to_pb", "switch_to_pb", "tapchanger_to_pb", "transformerend_to_pb",
            "tracedphases_to_pb"]
 
@@ -358,6 +367,28 @@ def terminal_to_pb(cim: Terminal) -> PBTerminal:
 
 
 # IEC61970 WIRES #
+def powerelectronicsunit_to_pb(cim: PowerElectronicsUnit) -> PBPowerElectronicsUnit:
+    return PBPowerElectronicsUnit(eq=equipment_to_pb(cim),
+                                  maxP=cim.max_p,
+                                  minP=cim.min_p,
+                                  powerElectronicsConnectionMRID=mrid_or_empty(cim.power_electronics_connection))
+
+
+def batteryunit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
+    return PBBatteryUnit(peu=powerelectronicsunit_to_pb(cim),
+                         ratedE=cim.rated_e,
+                         storedE=cim.stored_e,
+                         batteryState=PBBatteryStateKind.Value(cim.battery_state.short_name))
+
+
+def photovoltaicunit_to_pb(cim: PhotoVoltaicUnit) -> PBPhotoVoltaicUnit:
+    return PBPhotoVoltaicUnit(peu=powerelectronicsunit_to_pb(cim))
+
+
+def powerelectronicswindunit_to_pb(cim: PowerElectronicsWindUnit) -> PBPowerElectronicsWindUnit:
+    return PBPowerElectronicsWindUnit(peu=powerelectronicsunit_to_pb(cim))
+
+
 def aclinesegment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
     return PBAcLineSegment(cd=conductor_to_pb(cim), perLengthSequenceImpedanceMRID=mrid_or_empty(cim.per_length_sequence_impedance))
 
@@ -473,6 +504,27 @@ def perlengthsequenceimpedance_to_pb(cim: PerLengthSequenceImpedance) -> PBPerLe
                                         gch=cim.gch,
                                         b0ch=cim.b0ch,
                                         g0ch=cim.g0ch)
+
+
+def powerelectronicsconnection_to_pb(cim: PowerElectronicsConnection) -> PBPowerElectronicsConnection:
+    return PBPowerElectronicsConnection(rce=regulatingcondeq_to_pb(cim),
+                                        powerElectronicsUnitMRIDs=[str(io.mrid) for io in cim.units],
+                                        powerElectronicsConnectionPhaseMRIDs=[str(io.mrid) for io in cim.phases],
+                                        maxIFault = cim.max_i_fault,
+                                        maxQ=cim.max_q,
+                                        minQ=cim.min_q,
+                                        p=cim.p,
+                                        q=cim.q,
+                                        ratedS=cim.rated_s,
+                                        ratedU=cim.rated_u)
+
+
+def powerelectronicsconnectionphase_to_pb(cim: PowerElectronicsConnectionPhase) -> PBPowerElectronicsConnectionPhase:
+    return PBPowerElectronicsConnectionPhase(psr=powersystemresource_to_pb(cim),
+                                             powerElectronicsConnectionMRID=mrid_or_empty(cim.power_electronics_connection),
+                                             p=cim.p,
+                                             q=cim.q,
+                                             phase=PBSinglePhaseKind.Value(cim.phase.short_name))
 
 
 def powertransformer_to_pb(cim: PowerTransformer) -> PBPowerTransformer:
@@ -656,6 +708,10 @@ Substation.to_pb = lambda self: substation_to_pb(self)
 Terminal.to_pb = lambda self: terminal_to_pb(self)
 PerLengthLineParameter.to_pb = lambda self: perlengthlineparameter_to_pb(self)
 PerLengthImpedance.to_pb = lambda self: perlengthimpedance_to_pb(self)
+PowerElectronicsUnit.to_pb = powerelectronicsunit_to_pb
+BatteryUnit.to_pb = batteryunit_to_pb
+PhotoVoltaicUnit.to_pb = photovoltaicunit_to_pb
+PowerElectronicsWindUnit.to_pb = powerelectronicswindunit_to_pb
 AcLineSegment.to_pb = lambda self: aclinesegment_to_pb(self)
 Breaker.to_pb = lambda self: breaker_to_pb(self)
 Conductor.to_pb = lambda self: conductor_to_pb(self)
@@ -673,6 +729,8 @@ BusbarSection.to_pb = busbarsection_to_pb
 Line.to_pb = line_to_pb
 LinearShuntCompensator.to_pb = lambda self: linearshuntcompensator_to_pb(self)
 PerLengthSequenceImpedance.to_pb = lambda self: perlengthsequenceimpedance_to_pb(self)
+PowerElectronicsConnection.to_pb = powerelectronicsconnection_to_pb
+PowerElectronicsConnectionPhase.to_pb = powerelectronicsconnectionphase_to_pb
 PowerTransformer.to_pb = lambda self: powertransformer_to_pb(self)
 PowerTransformerEnd.to_pb = lambda self: powertransformerend_to_pb(self)
 ProtectedSwitch.to_pb = lambda self: protectedswitch_to_pb(self)
