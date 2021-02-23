@@ -70,6 +70,7 @@ from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 impo
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import ProtectedSwitch
+from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq
@@ -139,6 +140,7 @@ Junction.mrid = lambda self: self.cn.mrid()
 BusbarSection.mrid = lambda self: self.cn.mrid()
 Line.mrid = lambda self: self.ec.mrid()
 LinearShuntCompensator.mrid = lambda self: self.sc.mrid()
+LoadBreakSwitch.mrid = lambda self: self.ps.mrid()
 PerLengthImpedance.mrid = lambda self: self.lp.mrid()
 PerLengthLineParameter.mrid = lambda self: self.io.mRID
 PerLengthSequenceImpedance.mrid = lambda self: self.pli.mrid()
