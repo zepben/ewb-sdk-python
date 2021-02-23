@@ -64,6 +64,16 @@ peu_kwargs = {**equip_kwargs, "power_electronics_connection": builds(PowerElectr
 peu_args = (*equip_args, PowerElectronicsConnection("test_pec"), -100, 200)
 
 
+sw_kwargs = {**ce_kwargs}
+
+sw_args = ce_args
+
+
+ps_kwargs = {**sw_kwargs}
+
+ps_args = sw_args
+
+
 def verify_identifed_object_constructor(clazz, mrid, name, description, **kwargs):
     io: IdentifiedObject = clazz()
     assert io.mrid
@@ -140,6 +150,14 @@ def verify_connector_constructor(clazz, **kwargs):
     verify_conducting_equipment_constructor(clazz, **kwargs)
 
 
+def verify_switch_constructor(clazz, **kwargs):
+    verify_conducting_equipment_constructor(clazz, **kwargs)
+
+
+def verify_protected_switch_constructor(clazz, **kwargs):
+    verify_switch_constructor(clazz, **kwargs)
+
+
 def verify_power_electronics_unit_constructor(clazz, power_electronics_connection, max_p, min_p, **kwargs):
     peu = clazz(power_electronics_connection=power_electronics_connection, max_p=max_p, min_p=min_p)
     assert peu.power_electronics_connection == power_electronics_connection
@@ -192,3 +210,11 @@ def verify_peu_args(peu):
     assert peu.max_p == -100
     assert peu.min_p == 200
     verify_equip_args(peu)
+
+
+def verify_sw_args(sw):
+    verify_ce_args(sw)
+
+
+def verify_ps_args(ps):
+    verify_sw_args(ps)
