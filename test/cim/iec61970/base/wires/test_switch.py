@@ -7,12 +7,11 @@
 from hypothesis import given
 
 
-from cim.constructor_validation import ps_kwargs, ps_args, verify_connector_constructor, \
-    verify_protected_switch_constructor, verify_ps_args
+from test.cim.constructor_validation import ps_kwargs, ps_args, verify_protected_switch_constructor, \
+    verify_ps_args
 from zepben.evolve import LoadBreakSwitch
 
 lbs_kwargs = ps_kwargs
-
 lbs_args = ps_args
 
 
