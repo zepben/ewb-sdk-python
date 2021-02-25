@@ -27,7 +27,7 @@ _GET_DEFAULT = (1,)
 @dataclass(slots=True)
 class BaseService(object, metaclass=ABCMeta):
     name: str
-    _objectsByType: Dict[type, Dict[str, IdentifiedObject]] = OrderedDict()
+    _objects_by_type: Dict[type, Dict[str, IdentifiedObject]] = OrderedDict()
     _name_types: Dict[str, NameType] = dict()
     _unresolved_references_to: Dict[str, Set[UnresolvedReference]] = OrderedDict()
     """
@@ -74,7 +74,7 @@ class BaseService(object, metaclass=ABCMeta):
         `mrid` The mRID to search for.
         Returns True if there is an object associated with the specified `mrid`, False otherwise.
         """
-        for type_map in self._objectsByType.values():
+        for type_map in self._objects_by_type.values():
             if mrid in type_map:
                 return True
         return False
@@ -98,16 +98,16 @@ class BaseService(object, metaclass=ABCMeta):
         `t` The type of object to get the len of. If None (default), will get the len of all objects in the service.
         """
         if t is None:
-            return sum([len(vals) for vals in self._objectsByType.values()])
+            return sum([len(vals) for vals in self._objects_by_type.values()])
         else:
             try:
-                return len(self._objectsByType[t].values())
+                return len(self._objects_by_type[t].values())
             except KeyError:
                 count = 0
-                for c, obj_map in self._objectsByType.items():
+                for c, obj_map in self._objects_by_type.items():
                     if issubclass(c, t):
                         try:
-                            count += len(self._objectsByType[c].values())
+                            count += len(self._objects_by_type[c].values())
                         except KeyError:
                             pass
                 return count
@@ -154,13 +154,13 @@ class BaseService(object, metaclass=ABCMeta):
 
         # This can be written much simpler than below but we want to avoid throwing any exceptions in this high frequency function
         if type_ != IdentifiedObject:
-            objs = self._objectsByType.get(type_)
+            objs = self._objects_by_type.get(type_)
             if objs:
                 obj = objs.get(mrid)
                 if obj:
                     return obj
 
-        for c, objs in self._objectsByType.items():
+        for c, objs in self._objects_by_type.items():
             obj = objs.get(mrid)
             if obj:
                 if isinstance(obj, type_):
@@ -194,12 +194,12 @@ class BaseService(object, metaclass=ABCMeta):
             return False
         # TODO: Only allow supported types
 
-        objs = self._objectsByType.get(identified_object.__class__, dict())
+        objs = self._objects_by_type.get(identified_object.__class__, dict())
         if mrid in objs:
             return objs[mrid] is identified_object
 
         # Check other types and make sure this mRID is unique
-        for obj_map in self._objectsByType.values():
+        for obj_map in self._objects_by_type.values():
             if mrid in obj_map:
                 return False
 
@@ -215,7 +215,7 @@ class BaseService(object, metaclass=ABCMeta):
             del self._unresolved_references_to[mrid]
 
         objs[mrid] = identified_object
-        self._objectsByType[identified_object.__class__] = objs
+        self._objects_by_type[identified_object.__class__] = objs
         return True
 
     def resolve_or_defer_reference(self, bound_resolver: BoundReferenceResolver, to_mrid: str) -> bool:
@@ -319,7 +319,7 @@ class BaseService(object, metaclass=ABCMeta):
         `identified_object` THe object to disassociate from the service.
         Raises `KeyError` if `identified_object` or its type was not present in the service.
         """
-        del self._objectsByType[identified_object.__class__][identified_object.mrid]
+        del self._objects_by_type[identified_object.__class__][identified_object.mrid]
         return True
 
     def objects(self, obj_type: Optional[Type[T]] = None, exc_types: Optional[List[type]] = None) -> Generator[T, None, None]:
@@ -329,7 +329,7 @@ class BaseService(object, metaclass=ABCMeta):
         Returns Generator over
         """
         if obj_type is None:
-            for typ, obj_map in self._objectsByType.items():
+            for typ, obj_map in self._objects_by_type.items():
                 if exc_types:
                     if typ in exc_types:
                         continue
@@ -338,10 +338,10 @@ class BaseService(object, metaclass=ABCMeta):
             return
         else:
             try:
-                for obj in self._objectsByType[obj_type].values():
+                for obj in self._objects_by_type[obj_type].values():
                     yield obj
             except KeyError:
-                for _type, object_map in self._objectsByType.items():
+                for _type, object_map in self._objects_by_type.items():
                     if issubclass(_type, obj_type):
                         for obj in object_map.values():
                             yield obj

@@ -13,7 +13,7 @@ from zepben.evolve import PowerSystemResource, Location, PowerTransformerInfo
 power_system_resource_kwargs = {
     **identified_object_kwargs,
     "location": builds(Location),
-    "asset_info": sampled_wire_info()
+    "asset_info": sampled_wire_info(True)
 }
 
 power_system_resource_args = [*identified_object_args, Location(), PowerTransformerInfo()]

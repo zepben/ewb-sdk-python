@@ -34,7 +34,7 @@ class DiagramService(BaseService):
         `mrid` The mRID to look up in the service.
         Returns A list of `DiagramObject`'s associated with `mrid`.
         """
-        obj = self.get(mrid, DiagramObject)
+        obj = self.get(mrid, DiagramObject, None)
         if obj is not None:
             return [obj]
 

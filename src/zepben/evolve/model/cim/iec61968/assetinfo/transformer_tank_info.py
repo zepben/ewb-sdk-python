@@ -5,7 +5,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import PowerTransformerInfo
 
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
@@ -16,6 +19,9 @@ __all__ = ["TransformerTankInfo"]
 
 class TransformerTankInfo(AssetInfo):
     """Set of transformer tank data, from an equipment library."""
+
+    power_transformer_info: Optional[PowerTransformerInfo] = None
+    """Power transformer data that this tank description is part of."""
 
     _transformer_end_infos: Optional[List[TransformerEndInfo]] = None
     """Data for all the ends described by this transformer tank data."""
