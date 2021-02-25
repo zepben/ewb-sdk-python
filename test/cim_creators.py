@@ -489,7 +489,7 @@ def shuntcompensator():
 
 
 def switch():
-    return {**conductingequipment(), "_normal_open": booleans(), "_open": booleans()}
+    return {**conductingequipment(), "_normal_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER), "_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)}
 
 
 MIN_TC_INT = 0
