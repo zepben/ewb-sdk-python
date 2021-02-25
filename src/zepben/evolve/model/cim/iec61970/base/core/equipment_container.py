@@ -140,12 +140,12 @@ class Feeder(EquipmentContainer):
                 self.add_current_equipment(eq)
 
     @property
-    def normal_head_terminal(self):
+    def normal_head_terminal(self) -> Optional[Terminal]:
         """The normal head terminal or terminals of the feeder."""
         return self._normal_head_terminal
 
     @normal_head_terminal.setter
-    def normal_head_terminal(self, term):
+    def normal_head_terminal(self, term: Optional[Terminal]):
         if self._normal_head_terminal is None or self._normal_head_terminal is term:
             self._normal_head_terminal = term
         else:

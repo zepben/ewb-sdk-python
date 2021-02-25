@@ -45,12 +45,13 @@ class BaseServiceComparator:
         self._compare_by_type: Dict[Type, Callable[[Any, T, T], ObjectDifference]] = {}
         _find_comparisons_for_type(type(self))
 
-    def compare_services(self, source: BaseService, target: BaseService) -> ServiceDifferences:
+    def compare_services(self, source: BaseService, target: BaseService, compare_name_types: bool = True) -> ServiceDifferences:
         """
         Run the compare with the specified optional checks
 
         :param source: The service to use as the source
         :param target: The service to use as the target
+        :param compare_name_types: Optional parameter to suppress comparing name types
 
         :return: The differences detected between the source and the target
         """
@@ -79,20 +80,21 @@ class BaseServiceComparator:
             if t.mrid not in source:
                 differences.add_to_missing_from_source(t.mrid)
 
-        for s in source.name_types:
-            try:
-                t = target.get_name_type(s.name)
-                difference = self._compare_name_type(s, t)
-                if difference.differences:
-                    differences.add_modifications(s.name, difference)
-            except KeyError:
-                differences.add_to_missing_from_target(s.name)
+        if compare_name_types:
+            for s in source.name_types:
+                try:
+                    t = target.get_name_type(s.name)
+                    difference = self._compare_name_type(s, t)
+                    if difference.differences:
+                        differences.add_modifications(s.name, difference)
+                except KeyError:
+                    differences.add_to_missing_from_target(s.name)
 
-        for t in target.name_types:
-            try:
-                source.get_name_type(t.name)
-            except KeyError:
-                differences.add_to_missing_from_source(t.name)
+            for t in target.name_types:
+                try:
+                    source.get_name_type(t.name)
+                except KeyError:
+                    differences.add_to_missing_from_source(t.name)
 
         return differences
 
