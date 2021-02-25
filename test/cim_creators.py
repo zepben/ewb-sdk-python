@@ -328,6 +328,10 @@ def breaker():
     return builds(Breaker, **protectedswitch())
 
 
+def loadbreakswitch():
+    return builds(LoadBreakSwitch, **protectedswitch())
+
+
 def conductor():
     return {**conductingequipment(), "length": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)}
 
@@ -485,7 +489,7 @@ def shuntcompensator():
 
 
 def switch():
-    return {**conductingequipment(), "normal_open": booleans(), "open": booleans()}
+    return {**conductingequipment(), "_normal_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER), "_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)}
 
 
 MIN_TC_INT = 0

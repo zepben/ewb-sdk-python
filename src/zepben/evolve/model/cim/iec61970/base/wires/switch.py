@@ -9,13 +9,14 @@ from __future__ import annotations
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
-__all__ = ["Switch", "Breaker", "Disconnector", "Jumper", "Fuse", "ProtectedSwitch", "Recloser"]
+__all__ = ["Switch", "Breaker", "Disconnector", "Jumper", "Fuse", "ProtectedSwitch", "Recloser", "LoadBreakSwitch"]
 
 from zepben.evolve.util import require
 
 
 def _calculate_open_state(current_state: int, is_open: bool, phase: SinglePhaseKind = None) -> int:
-    require(phase != SinglePhaseKind.NONE and phase != SinglePhaseKind.INVALID, lambda: f"Invalid phase {phase} specified")
+    require(phase != SinglePhaseKind.NONE and phase != SinglePhaseKind.INVALID,
+            lambda: f"Invalid phase {phase} specified")
     if phase is None:
         return 0b1111 if is_open else 0
     else:
@@ -23,7 +24,8 @@ def _calculate_open_state(current_state: int, is_open: bool, phase: SinglePhaseK
 
 
 def _check_open(current_state: int, phase: SinglePhaseKind = None) -> bool:
-    require(phase != SinglePhaseKind.NONE and phase != SinglePhaseKind.INVALID, lambda: f"Invalid phase {phase} specified")
+    require(phase != SinglePhaseKind.NONE and phase != SinglePhaseKind.INVALID,
+            lambda: f"Invalid phase {phase} specified")
     if phase is None:
         return current_state != 0
     else:
@@ -146,4 +148,10 @@ class Recloser(ProtectedSwitch):
     """
     Pole-mounted fault interrupter with built-in phase and ground relays, current transformer (CT), and supplemental controls.
     """
+    pass
+
+
+class LoadBreakSwitch(ProtectedSwitch):
+    """A mechanical switching device capable of making, carrying, and breaking currents under normal operating
+    conditions. """
     pass
