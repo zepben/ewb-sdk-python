@@ -40,11 +40,11 @@ class SimpleBusBranch(object):
         b2 = self.network_service.create_bus(base_voltage=bv_lv, name="Bus 2", location=loc1)
         b3 = self.network_service.create_bus(base_voltage=bv_lv, name="Bus 3", location=loc2)
         # Create connectivity_nodes
-        cn1 = ConnectivityNode(name="cn_1")
-        cn2 = ConnectivityNode(name="cn_2")
-        cn3 = ConnectivityNode(name="cn_3")
+        cn1 = ConnectivityNode(name="cn1")
+        cn2 = ConnectivityNode(name="cn2")
+        cn3 = ConnectivityNode(name="cn3")
         # Create EnergySource
-        energy_source: EnergySource = self.network_service.create_energy_source(bus=b1,
+        energy_source: EnergySource = self.network_service.create_energy_source(cn=cn1,
                                                                                 voltage_magnitude=1.02 * bv_hv.nominal_voltage,
                                                                                 name="Grid Connection", location=loc1)
         # TODO: Replace  createEnergySource with creation of EquivalentInjection
@@ -52,9 +52,9 @@ class SimpleBusBranch(object):
         fdr = Feeder(normal_head_terminal=energy_source.get_terminal_by_sn(1))
         self.network_service.add(fdr)
         # Create EnergyConsumer
-        self.network_service.create_energy_consumer(bus=b3, p=100000., q=50000., name="Load", location=loc2)
+        self.network_service.create_energy_consumer(cn=cn3, p=100000., q=50000., name="Load", location=loc2)
         # Create Transformer
-        self.network_service.create_two_winding_power_transformer(bus1=b1, bus2=b2, name="Trafo", location=loc1,
+        self.network_service.create_two_winding_power_transformer(cn1=cn1, cn2=cn2, name="Trafo", location=loc1,
                                                                   asset_info=PowerTransformerInfo())
         # TODO: Associate the PowerTransformerInfo() to th PowerTransformer instance
         # TODO: Add ptInfo= self.network_service.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")
@@ -62,7 +62,7 @@ class SimpleBusBranch(object):
         line_location = Location().add_point(point1).add_point(point2)
         self.network_service.add(line_location)
         # Create Line
-        self.network_service.create_ac_line_segment(bus1=b1, bus2=b2, name="Line",
+        self.network_service.create_ac_line_segment(cn1=cn1, cn2=cn2, name="Line",
                                                     length=100., base_voltage=bv_lv, location=line_location)
 
     def _create_diagram_service(self):

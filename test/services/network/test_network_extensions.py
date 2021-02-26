@@ -3,9 +3,9 @@ from collections import namedtuple
 from pytest import fixture
 
 from zepben.evolve import NetworkService, Junction, BaseVoltage, Terminal, EnergySource, \
-    PowerTransformer, AcLineSegment, EnergyConsumer, PowerTransformerInfo, PositionPoint, Location
+    PowerTransformer, AcLineSegment, EnergyConsumer, PowerTransformerInfo, PositionPoint, Location, ConnectivityNode
 
-TestNetworkCreator = namedtuple("TestNetworkCreator", ["net", "bv", "bus1", "bus2", "pt_info", "loc1", "loc2", "loc3"])
+TestNetworkCreator = namedtuple("TestNetworkCreator", ["net", "bv", "cn1", "cn2", "pt_info", "loc1", "loc2", "loc3"])
 
 
 @fixture()
@@ -14,13 +14,15 @@ def tnc():
     bv = BaseVoltage()
     bus1 = net.create_bus(base_voltage=bv)
     bus2 = net.create_bus(base_voltage=bv)
+    cn1 = ConnectivityNode()
+    cn2 = ConnectivityNode()
     pt_info = PowerTransformerInfo()
     point1 = PositionPoint(x_position=149.12791965570293, y_position=-35.277592101000934)
     point2 = PositionPoint(x_position=149.12779472660375, y_position=-35.278183862759285)
     loc1 = Location().add_point(point1)
     loc2 = Location().add_point(point2)
     loc3 = Location().add_point(point2).add_point(point2)
-    yield TestNetworkCreator(net=net, bv=bv, bus1=bus1, bus2=bus2, pt_info=pt_info, loc1=loc1, loc2=loc2, loc3=loc3)
+    yield TestNetworkCreator(net=net, bv=bv, cn1=cn1, cn2=cn2, pt_info=pt_info, loc1=loc1, loc2=loc2, loc3=loc3)
 
 
 def test_create_bus(tnc):
@@ -37,7 +39,7 @@ def test_create_bus(tnc):
 
 
 def test_create_energy_source(tnc):
-    tnc.net.create_energy_source(bus=tnc.bus1)
+    tnc.net.create_energy_source(cn=tnc.cn1)
     objects = tnc.net.objects(EnergySource)
     for source in objects:
         t: Terminal = source.get_terminal_by_sn(1)
@@ -48,7 +50,7 @@ def test_create_energy_source(tnc):
 
 
 def test_create_energy_consumer(tnc):
-    tnc.net.create_energy_consumer(bus=tnc.bus1, location=tnc.loc1)
+    tnc.net.create_energy_consumer(cn=tnc.cn1, location=tnc.loc1)
     objects = tnc.net.objects(EnergyConsumer)
     for ce in objects:
         consumer: EnergyConsumer = ce
@@ -61,7 +63,7 @@ def test_create_energy_consumer(tnc):
 
 
 def test_create_two_winding_power_transformer(tnc):
-    tnc.net.create_two_winding_power_transformer(bus1=tnc.bus1, bus2=tnc.bus2, asset_info=tnc.pt_info,
+    tnc.net.create_two_winding_power_transformer(cn1=tnc.cn1, cn2=tnc.cn2, asset_info=tnc.pt_info,
                                                  location=tnc.loc1)
     objects = tnc.net.objects(PowerTransformer)
     for ce in objects:
@@ -75,7 +77,7 @@ def test_create_two_winding_power_transformer(tnc):
 
 
 def test_create_ac_line_segment(tnc):
-    tnc.net.create_ac_line_segment(bus1=tnc.bus1, bus2=tnc.bus2, location=tnc.loc3)
+    tnc.net.create_ac_line_segment(cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
     objects = tnc.net.objects(AcLineSegment)
     for ce in objects:
         line_segment: AcLineSegment = ce

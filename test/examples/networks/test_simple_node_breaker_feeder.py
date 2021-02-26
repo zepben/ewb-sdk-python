@@ -4,10 +4,10 @@ from zepben.evolve import BaseVoltage, EnergySource, Junction, Terminal, Feeder,
     ConnectivityNode, DiagramObject
 
 
-class TestSimpleBusBranch(unittest.TestCase):
+class TestSimpleNodeBreaker(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(TestSimpleBusBranch, self).__init__(*args, **kwargs)
+        super(TestSimpleNodeBreaker, self).__init__(*args, **kwargs)
         self.network_service = SimpleBusBranch().network_service
         self.diagram_service = SimpleBusBranch().diagram_service
 
@@ -27,7 +27,7 @@ class TestSimpleBusBranch(unittest.TestCase):
         assert len(feeders) == 1, f'len(feeder) should be 2, len(feeder) is: {len(feeder)}'
         assert len(terminals) == 9, f'len(terminals) should be 9, len(terminals) is: {len(terminals)}'
         assert len(
-            connectivity_nodes) == 6, f'len(connectivity_nodes) should be 6, len(connectivity_nodes) is: {len(connectivity_nodes)}'
+            connectivity_nodes) == 3, f'len(connectivity_nodes) should be 3, len(connectivity_nodes) is: {len(connectivity_nodes)}'
 
     def test_create_diagram_service(self):
         assert self.diagram_service
