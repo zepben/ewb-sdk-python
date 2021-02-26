@@ -9,7 +9,7 @@ from collections import defaultdict
 from zepben.evolve import NetworkService, DiagramService, Diagram, \
     DiagramStyle, BaseVoltage, PositionPoint, Location, Feeder, EnergySource, PowerTransformerInfo, DiagramObject, \
     AcLineSegment, DiagramObjectStyle, ConductingEquipment, Junction, EnergyConsumer, \
-    PowerTransformer, DiagramObjectPoint
+    PowerTransformer, DiagramObjectPoint, ConnectivityNode
 
 __all__ = ["SimpleBusBranch"]
 
@@ -39,6 +39,10 @@ class SimpleBusBranch(object):
         b1 = self.network_service.create_bus(base_voltage=bv_hv, name="Bus 1", location=loc1)
         b2 = self.network_service.create_bus(base_voltage=bv_lv, name="Bus 2", location=loc1)
         b3 = self.network_service.create_bus(base_voltage=bv_lv, name="Bus 3", location=loc2)
+        # Create connectivity_nodes
+        cn1 = ConnectivityNode(name="cn_1")
+        cn2 = ConnectivityNode(name="cn_2")
+        cn3 = ConnectivityNode(name="cn_3")
         # Create EnergySource
         energy_source: EnergySource = self.network_service.create_energy_source(bus=b1,
                                                                                 voltage_magnitude=1.02 * bv_hv.nominal_voltage,
