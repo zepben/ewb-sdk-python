@@ -333,8 +333,8 @@ def batterystatekind():
 
 
 def batteryunit():
-    return builds(PBBatteryUnit, peu=powerelectronicsunit(), batteryState=batterystatekind(), ratedE=floats(min_value=0.0, max_value=FLOAT_MAX),
-                  storedE=floats(min_value=0.0, max_value=FLOAT_MAX))
+    return builds(PBBatteryUnit, peu=powerelectronicsunit(), batteryState=batterystatekind(), ratedE=integers(min_value=0, max_value=MAX_64_BIT_INTEGER),
+                  storedE=integers(min_value=0, max_value=MAX_64_BIT_INTEGER))
 
 
 def photovoltaicunit():
