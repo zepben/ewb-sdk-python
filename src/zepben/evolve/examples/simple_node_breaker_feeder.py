@@ -39,6 +39,7 @@ class SimpleNodeBreakerFeeder(object):
         cn1 = ConnectivityNode(name="cn1")
         cn2 = ConnectivityNode(name="cn2")
         cn3 = ConnectivityNode(name="cn3")
+        cn4 = ConnectivityNode(name="cn4")
         # Create EnergySource
         energy_source: EnergySource = self.network_service.create_energy_source(cn=cn1, base_voltage=bv_hv,
                                                                                 voltage_magnitude=1.02 * bv_hv.nominal_voltage,
@@ -47,26 +48,25 @@ class SimpleNodeBreakerFeeder(object):
         # Create Feeder
         fdr = Feeder(normal_head_terminal=energy_source.get_terminal_by_sn(1))
         self.network_service.add(fdr)
-        # Create EnergyConsumer
-        self.network_service.create_energy_consumer(cn=cn3, p=100000., q=50000., name="Load",
-                                                    location=loc2,
-                                                    base_voltage=bv_lv)
         # Create Transformer
         self.network_service.create_two_winding_power_transformer(cn1=cn1, cn2=cn2, name="Trafo", location=loc1,
                                                                   asset_info=PowerTransformerInfo())
         # TODO: Associate the PowerTransformerInfo() to th PowerTransformer instance
         # TODO: Add ptInfo= self.network_service.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")
         # Create Breaker
-        breaker = self.network_service.create_breaker(base_voltage=bv_lv)
+        breaker = self.network_service.create_breaker(cn1=cn2, cn2=cn3, base_voltage=bv_lv)
         breaker.set_open(False)
         # Create location for the Line
         line_location = Location().add_point(point1).add_point(point2)
         self.network_service.add(line_location)
         # Create Line
-        self.network_service.create_ac_line_segment(cn1=cn1, cn2=cn2, name="Line",
+        self.network_service.create_ac_line_segment(cn1=cn3, cn2=cn4, name="Line",
                                                     length=100., base_voltage=bv_lv,
                                                     location=line_location)
-
+        # Create EnergyConsumer
+        self.network_service.create_energy_consumer(cn=cn3, p=100000., q=50000., name="Load",
+                                                    location=loc2,
+                                                    base_voltage=bv_lv)
     def _create_diagram_service(self):
         self.diagram_service.add(self.diagram)
         self._add_diagram_objects()
