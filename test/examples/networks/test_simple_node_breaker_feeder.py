@@ -24,12 +24,12 @@ class TestSimpleNodeBreaker(unittest.TestCase):
         assert len(junctions) == 0, f'len(junctions) should be 0, len(junctions) is: {len(junctions)}'
         assert len(
             power_transformers) == 1, f'len(power_transformers) should be 1, len(power_transformers) is: {len(power_transformers)}'
-        assert len(feeders) == 1, f'len(feeder) should be 2, len(feeder) is: {len(feeder)}'
-        assert len(terminals) == 6, f'len(terminals) should be 6, len(terminals) is: {len(terminals)}'
+        assert len(feeders) == 1, f'len(feeder) should be 2, len(feeder) is: {len(feeders)}'
+        assert len(terminals) == 8, f'len(terminals) should be 8, len(terminals) is: {len(terminals)}'
         assert len(
-            connectivity_nodes) == 3, f'len(connectivity_nodes) should be 3, len(connectivity_nodes) is: {len(connectivity_nodes)}'
+            connectivity_nodes) == 4, f'len(connectivity_nodes) should be 4, len(connectivity_nodes) is: {len(connectivity_nodes)}'
 
     def test_create_diagram_service(self):
         assert self.diagram_service
         diagram_objects = list(self.diagram_service.objects(DiagramObject))
-        assert len(diagram_objects) == 4, f'len(diagram_objects) should be 4, len(cdiagram_objects) is: {len(diagram_objects)}'
+        assert len(diagram_objects) == 5, f'len(diagram_objects) should be 5, len(cdiagram_objects) is: {len(diagram_objects)}'
