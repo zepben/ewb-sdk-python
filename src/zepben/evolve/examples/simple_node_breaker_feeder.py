@@ -11,10 +11,10 @@ from zepben.evolve import NetworkService, DiagramService, Diagram, \
     AcLineSegment, DiagramObjectStyle, ConductingEquipment, Junction, EnergyConsumer, \
     PowerTransformer, DiagramObjectPoint, ConnectivityNode, Breaker
 
-__all__ = ["SimpleBusBranch"]
+__all__ = ["SimpleNodeBreakerFeeder"]
 
 
-class SimpleBusBranch(object):
+class SimpleNodeBreakerFeeder(object):
 
     def __init__(self):
         # Create empty network
