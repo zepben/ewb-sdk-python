@@ -63,10 +63,10 @@ def create_energy_source(net: NetworkService, cn: ConnectivityNode, **kwargs) ->
     return es
 
 
-def create_breaker(net: NetworkService, cn: ConnectivityNode, **kwargs) -> Breaker:
+def create_breaker(network_service: NetworkService, cn1: ConnectivityNode, cn2: ConnectivityNode, **kwargs) -> Breaker:
     ce = Breaker(**kwargs)
-    _create_single_terminal_conducting_equipment(network_service=net, ce=ce, cn=cn, **kwargs)
-    _connect_single_terminal_conducting_equipment(network_service=net, ce=ce, cn=cn)
+    _create_two_terminal_conducting_equipment(network_service=network_service, ce=ce, **kwargs)
+    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=ce, cn1=cn1, cn2=cn2)
     return ce
 
 
