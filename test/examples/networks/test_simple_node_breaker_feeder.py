@@ -21,15 +21,15 @@ class TestSimpleNodeBreaker(unittest.TestCase):
         feeders = list(self.network_service.objects(Feeder))
         assert len(voltages) == 2, f'len(voltages) should be 2, len(voltages) is: {len(voltages)}'
         assert len(sources) == 1, f'len(sources) should be 1, len(sources) is: {len(sources)}'
-        assert len(junctions) == 3, f'len(junctions) should be 3, len(junctions) is: {len(junctions)}'
+        assert len(junctions) == 0, f'len(junctions) should be 0, len(junctions) is: {len(junctions)}'
         assert len(
             power_transformers) == 1, f'len(power_transformers) should be 1, len(power_transformers) is: {len(power_transformers)}'
         assert len(feeders) == 1, f'len(feeder) should be 2, len(feeder) is: {len(feeder)}'
-        assert len(terminals) == 9, f'len(terminals) should be 9, len(terminals) is: {len(terminals)}'
+        assert len(terminals) == 6, f'len(terminals) should be 6, len(terminals) is: {len(terminals)}'
         assert len(
             connectivity_nodes) == 3, f'len(connectivity_nodes) should be 3, len(connectivity_nodes) is: {len(connectivity_nodes)}'
 
     def test_create_diagram_service(self):
         assert self.diagram_service
         diagram_objects = list(self.diagram_service.objects(DiagramObject))
-        assert len(diagram_objects) == 7, f'len(connectivity_nodes) should be 6, len(connectivity_nodes) is: {len(diagram_objects)}'
+        assert len(diagram_objects) == 4, f'len(diagram_objects) should be 4, len(cdiagram_objects) is: {len(diagram_objects)}'
