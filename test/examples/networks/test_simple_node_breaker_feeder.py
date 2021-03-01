@@ -1,5 +1,5 @@
 import unittest
-from zepben.evolve.examples import SimpleBusBranch
+from zepben.evolve.examples import *
 from zepben.evolve import BaseVoltage, EnergySource, Junction, Terminal, Feeder, PowerTransformer, \
     ConnectivityNode, DiagramObject
 
@@ -8,8 +8,8 @@ class TestSimpleNodeBreaker(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestSimpleNodeBreaker, self).__init__(*args, **kwargs)
-        self.network_service = SimpleBusBranch().network_service
-        self.diagram_service = SimpleBusBranch().diagram_service
+        self.network_service = SimpleNodeBreakerFeeder().network_service
+        self.diagram_service = SimpleNodeBreakerFeeder().diagram_service
 
     def test_self_create_network(self):
         voltages = list(self.network_service.objects(BaseVoltage))
