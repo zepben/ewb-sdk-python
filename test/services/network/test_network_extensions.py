@@ -3,7 +3,8 @@ from collections import namedtuple
 from pytest import fixture
 
 from zepben.evolve import NetworkService, Junction, BaseVoltage, Terminal, EnergySource, \
-    PowerTransformer, AcLineSegment, EnergyConsumer, PowerTransformerInfo, PositionPoint, Location, ConnectivityNode
+    PowerTransformer, AcLineSegment, EnergyConsumer, PowerTransformerInfo, PositionPoint, Location, \
+    ConnectivityNode, Breaker
 
 TestNetworkCreator = namedtuple("TestNetworkCreator", ["net", "bv", "cn1", "cn2", "pt_info", "loc1", "loc2", "loc3"])
 
@@ -87,3 +88,19 @@ def test_create_ac_line_segment(tnc):
         assert isinstance(line_segment, AcLineSegment)
         assert t.conducting_equipment is line_segment, "t.conducting_equipment should be 'line_segment'"
         assert line_segment.location == tnc.loc3
+
+
+def test_create_breaker(tnc):
+    tnc.net.create_breaker(cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
+    objects = tnc.net.objects(Breaker)
+    for ce in objects:
+        breaker: Breaker = ce
+        assert isinstance(breaker, Breaker)
+        assert breaker.num_terminals() == 2
+        t1: Terminal = breaker.get_terminal_by_sn(1)
+        t2: Terminal = breaker.get_terminal_by_sn(2)
+        assert isinstance(t1, Terminal)
+        assert isinstance(t2, Terminal)
+        assert t1.conducting_equipment is breaker, "t.conducting_equipment should be 'line_segment'"
+        assert t1.conducting_equipment is breaker, "t.conducting_equipment should be 'line_segment'"
+        assert breaker.location == tnc.loc3
