@@ -17,10 +17,12 @@ from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySour
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
+from zepben.evolve.model.cim.iec61970.base.wires.switch import Breaker
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.evolve.util import CopyableUUID
 
-__all__ = ["create_ac_line_segment", "create_two_winding_power_transformer", "create_energy_consumer", "create_energy_source", "create_bus"]
+__all__ = ["create_ac_line_segment", "create_two_winding_power_transformer", "create_energy_consumer",
+           "create_energy_source", "create_bus"]
 
 
 # !! WARNING !! #
@@ -61,6 +63,13 @@ def create_energy_source(net: NetworkService, cn: ConnectivityNode, **kwargs) ->
     return es
 
 
+def create_breaker(net: NetworkService, cn: ConnectivityNode, **kwargs) -> Breaker:
+    ce = Breaker(**kwargs)
+    _create_single_terminal_conducting_equipment(network_service=net, ce=ce, cn=cn, **kwargs)
+    _connect_single_terminal_conducting_equipment(network_service=net, ce=ce, cn=cn)
+    return ce
+
+
 def create_bus(network_service: NetworkService, **kwargs) -> Junction:
     bus = Junction(**kwargs)
     if 'mrid' not in kwargs:
@@ -97,7 +106,8 @@ def _connect_single_terminal_conducting_equipment(network_service: NetworkServic
     network_service.connect_by_mrid(ce.get_terminal_by_sn(1), cn.mrid)
 
 
-def _create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms: int = 1, phases: PhaseCode = PhaseCode.ABC):
+def _create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms: int = 1,
+                      phases: PhaseCode = PhaseCode.ABC):
     for i in range(1, num_terms + 1):
         terminal: Terminal = Terminal(mrid=f"{ce.mrid}_t{i}", conducting_equipment=ce, phases=phases, sequence_number=i)
         ce.add_terminal(terminal)
