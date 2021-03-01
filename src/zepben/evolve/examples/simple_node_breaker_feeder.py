@@ -57,7 +57,7 @@ class SimpleBusBranch(object):
         # TODO: Associate the PowerTransformerInfo() to th PowerTransformer instance
         # TODO: Add ptInfo= self.network_service.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")
         # Create Breaker
-        breaker = Breaker(base_voltage=bv_lv)
+        breaker = self.network_service.create_breaker(base_voltage=bv_lv)
         breaker.set_open(False)
         # Create location for the Line
         line_location = Location().add_point(point1).add_point(point2)

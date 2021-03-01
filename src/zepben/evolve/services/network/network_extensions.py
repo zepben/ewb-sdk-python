@@ -22,7 +22,7 @@ from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import Connect
 from zepben.evolve.util import CopyableUUID
 
 __all__ = ["create_ac_line_segment", "create_two_winding_power_transformer", "create_energy_consumer",
-           "create_energy_source", "create_bus"]
+           "create_energy_source", "create_bus", "create_breaker"]
 
 
 # !! WARNING !! #
@@ -120,3 +120,4 @@ NetworkService.create_energy_source = create_energy_source
 NetworkService.create_two_winding_power_transformer = create_two_winding_power_transformer
 NetworkService.create_ac_line_segment = create_ac_line_segment
 NetworkService.create_energy_consumer = create_energy_consumer
+NetworkService.create_breaker = create_breaker
