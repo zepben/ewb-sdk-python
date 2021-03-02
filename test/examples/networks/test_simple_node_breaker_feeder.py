@@ -1,7 +1,7 @@
 import unittest
 from zepben.evolve.examples import *
 from zepben.evolve import BaseVoltage, EnergySource, Junction, Terminal, Feeder, PowerTransformer, \
-    ConnectivityNode, DiagramObject
+    ConnectivityNode, DiagramObject, Breaker
 
 
 class TestSimpleNodeBreaker(unittest.TestCase):
@@ -16,6 +16,7 @@ class TestSimpleNodeBreaker(unittest.TestCase):
         sources = list(self.network_service.objects(EnergySource))
         junctions = list(self.network_service.objects(Junction))
         terminals = list(self.network_service.objects(Terminal))
+        breakers = list(self.network_service.objects(Breaker))
         power_transformers = list(self.network_service.objects(PowerTransformer))
         connectivity_nodes = list(self.network_service.objects(ConnectivityNode))
         feeders = list(self.network_service.objects(Feeder))
@@ -28,8 +29,26 @@ class TestSimpleNodeBreaker(unittest.TestCase):
         assert len(terminals) == 8, f'len(terminals) should be 8, len(terminals) is: {len(terminals)}'
         assert len(
             connectivity_nodes) == 4, f'len(connectivity_nodes) should be 4, len(connectivity_nodes) is: {len(connectivity_nodes)}'
+        assert len(breakers) == 1, f'len(breakers) should be 2, len(breakers) is: {len(breakers)}'
 
     def test_create_diagram_service(self):
         assert self.diagram_service
         diagram_objects = list(self.diagram_service.objects(DiagramObject))
-        assert len(diagram_objects) == 5, f'len(diagram_objects) should be 5, len(cdiagram_objects) is: {len(diagram_objects)}'
+        assert len(
+            diagram_objects) == 5, f'len(diagram_objects) should be 5, len(cdiagram_objects) is: {len(diagram_objects)}'
+
+    def test_breaker_is_open(self):
+        net = SimpleNodeBreakerFeeder(breaker_is_open=True)
+        breakers = list(net.network_service.objects(Breaker))
+        assert len(breakers) == 1
+        breaker: Breaker = breakers[0]
+        assert isinstance(breaker, Breaker)
+        assert breaker.is_open() is True
+        net2 = SimpleNodeBreakerFeeder(breaker_is_open=False)
+        breakers2 = list(net2.network_service.objects(Breaker))
+        assert len(breakers2) == 1
+        breaker2 = breakers2[0]
+        assert isinstance(breaker2, Breaker)
+        assert breaker2.is_open() is False
+
+
