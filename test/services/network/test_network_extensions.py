@@ -23,6 +23,7 @@ def tnc():
     loc3 = Location().add_point(point2).add_point(point2)
     yield TestNetworkCreator(net=net, bv=bv, cn1=cn1, cn2=cn2, pt_info=pt_info, loc1=loc1, loc2=loc2, loc3=loc3)
 
+
 def test_create_energy_source(tnc):
     tnc.net.create_energy_source(cn=tnc.cn1)
     objects = tnc.net.objects(EnergySource)
