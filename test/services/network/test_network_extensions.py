@@ -91,16 +91,15 @@ def test_create_ac_line_segment(tnc):
 
 
 def test_create_breaker(tnc):
-    tnc.net.create_breaker(cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
-    objects = tnc.net.objects(Breaker)
-    for ce in objects:
-        breaker: Breaker = ce
-        assert isinstance(breaker, Breaker)
-        assert breaker.num_terminals() == 2
-        t1: Terminal = breaker.get_terminal_by_sn(1)
-        t2: Terminal = breaker.get_terminal_by_sn(2)
-        assert isinstance(t1, Terminal)
-        assert isinstance(t2, Terminal)
-        assert t1.conducting_equipment is breaker, "t.conducting_equipment should be 'line_segment'"
-        assert t1.conducting_equipment is breaker, "t.conducting_equipment should be 'line_segment'"
-        assert breaker.location == tnc.loc3
+    b1 = tnc.net.create_breaker(cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
+    b2 = tnc.net.get(b1.mrid)
+    assert b1 is b2
+    assert isinstance(b1, Breaker)
+    assert b1.num_terminals() == 2
+    t1: Terminal = b1.get_terminal_by_sn(1)
+    t2: Terminal = b1.get_terminal_by_sn(2)
+    assert isinstance(t1, Terminal)
+    assert isinstance(t2, Terminal)
+    assert t1.conducting_equipment is b1, "t.conducting_equipment should be 'line_segment'"
+    assert t1.conducting_equipment is b1, "t.conducting_equipment should be 'line_segment'"
+    assert b1.location == tnc.loc3
