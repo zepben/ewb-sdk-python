@@ -28,6 +28,8 @@ def test_junction_constructor_args():
     jnc = Junction(*jnc_args)
     verify_cn_args(jnc)
 
+#TESTING
+
 
 
 
