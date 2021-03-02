@@ -9,15 +9,15 @@ from collections import defaultdict
 from zepben.evolve import NetworkService, DiagramService, Diagram, \
     DiagramStyle, BaseVoltage, PositionPoint, Location, Feeder, EnergySource, PowerTransformerInfo, DiagramObject, \
     AcLineSegment, DiagramObjectStyle, ConductingEquipment, Junction, EnergyConsumer, \
-    PowerTransformer, DiagramObjectPoint, ConnectivityNode, Breaker
+    PowerTransformer, DiagramObjectPoint, ConnectivityNode
 
 __all__ = ["SimpleNodeBreakerFeeder"]
 
 
-class SimpleNodeBreakerFeeder(object):
+class SimpleNodeBreakerFeeder:
 
-    def __init__(self):
-        # Create empty network
+    def __init__(self, breaker_is_open=False):
+        self.breaker_is_open = breaker_is_open
         self.network_service: NetworkService = NetworkService()
         self.diagram_service: DiagramService = DiagramService()
         self.diagram: Diagram = Diagram(diagram_style=DiagramStyle.GEOGRAPHIC)
@@ -55,7 +55,7 @@ class SimpleNodeBreakerFeeder(object):
         # TODO: Add ptInfo= self.network_service.getAvailablePowerTransformerInfo("0.4 MVA 20/0.4 kV")
         # Create Breaker
         breaker = self.network_service.create_breaker(cn1=cn2, cn2=cn3, base_voltage=bv_lv)
-        breaker.set_open(False)
+        breaker.set_open(self.breaker_is_open)
         # Create location for the Line
         line_location = Location().add_point(point1).add_point(point2)
         self.network_service.add(line_location)
@@ -67,6 +67,7 @@ class SimpleNodeBreakerFeeder(object):
         self.network_service.create_energy_consumer(cn=cn3, p=100000., q=50000., name="Load",
                                                     location=loc2,
                                                     base_voltage=bv_lv)
+
     def _create_diagram_service(self):
         self.diagram_service.add(self.diagram)
         self._add_diagram_objects()
