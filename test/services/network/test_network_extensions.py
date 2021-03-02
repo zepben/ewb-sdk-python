@@ -13,8 +13,6 @@ TestNetworkCreator = namedtuple("TestNetworkCreator", ["net", "bv", "cn1", "cn2"
 def tnc():
     net = NetworkService()
     bv = BaseVoltage()
-    bus1 = net.create_bus(base_voltage=bv)
-    bus2 = net.create_bus(base_voltage=bv)
     cn1 = ConnectivityNode()
     cn2 = ConnectivityNode()
     pt_info = PowerTransformerInfo()
@@ -24,20 +22,6 @@ def tnc():
     loc2 = Location().add_point(point2)
     loc3 = Location().add_point(point2).add_point(point2)
     yield TestNetworkCreator(net=net, bv=bv, cn1=cn1, cn2=cn2, pt_info=pt_info, loc1=loc1, loc2=loc2, loc3=loc3)
-
-
-def test_create_bus(tnc):
-    tnc.net.create_bus(base_voltage=tnc.bv)
-    objects = tnc.net.objects(Junction)
-    for ce in objects:
-        bus: Junction = ce
-        assert isinstance(bus, Junction)
-        assert bus.num_terminals() == 1, "num_terminals should be 1"
-        t: Terminal = bus.get_terminal_by_sn(1)
-        assert t is not None
-        assert bus.get_base_voltage() is tnc.bv, f'bus.get_base_voltage() is not {tnc.bv}. Instead is {bus.get_base_voltage()}'
-        assert t.conducting_equipment is bus, "t.conducting_equipment should be 'bus'"
-
 
 def test_create_energy_source(tnc):
     tnc.net.create_energy_source(cn=tnc.cn1)
