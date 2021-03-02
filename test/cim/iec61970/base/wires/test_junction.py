@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/
+
 from hypothesis import given
 
 from test.cim.constructor_validation import verify_connector_constructor, cn_kwargs, cn_args, verify_cn_args
@@ -28,7 +29,7 @@ def test_junction_constructor_args():
     jnc = Junction(*jnc_args)
     verify_cn_args(jnc)
 
-#TESTING
+#git commit test
 
 
 
