@@ -17,27 +17,30 @@ from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySour
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
+from zepben.evolve.model.cim.iec61970.base.wires.switch import Breaker
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.evolve.util import CopyableUUID
 
-__all__ = ["create_ac_line_segment", "create_two_winding_power_transformer", "create_energy_consumer", "create_energy_source", "create_bus"]
+__all__ = ["create_ac_line_segment", "create_two_winding_power_transformer", "create_energy_consumer",
+           "create_energy_source", "create_bus", "create_breaker"]
 
 
 # !! WARNING !! #
 # THIS CODE IS IN ACTIVE DEVELOPMENT, UNSTABLE, AND LIKELY TO HAVE ISSUES. FOR EXPERIMENTATION ONLY.
 
-def create_ac_line_segment(network_service: NetworkService, bus1: Junction, bus2: Junction,
+def create_ac_line_segment(network_service: NetworkService, cn1: ConnectivityNode, cn2: ConnectivityNode,
                            **kwargs) -> AcLineSegment:
     acls = AcLineSegment(**kwargs)
     _create_two_terminal_conducting_equipment(network_service=network_service, ce=acls)
-    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=acls, bus1=bus1, bus2=bus2)
+    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=acls, cn1=cn1, cn2=cn2)
     return acls
 
 
-def create_two_winding_power_transformer(network_service: NetworkService, bus1: Junction, bus2: Junction,
+def create_two_winding_power_transformer(network_service: NetworkService, cn1: ConnectivityNode, cn2: ConnectivityNode,
                                          **kwargs) -> PowerTransformer:
     power_transformer = PowerTransformer(**kwargs)
     _create_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer, **kwargs)
-    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer, bus1=bus1, bus2=bus2)
+    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=power_transformer, cn1=cn1, cn2=cn2)
     # TODO: How to associated PowerTransformerEndInfo to a PowerTransformerInfo
     for i in range(1, 2):
         end = PowerTransformerEnd(power_transformer=power_transformer)
@@ -46,18 +49,25 @@ def create_two_winding_power_transformer(network_service: NetworkService, bus1: 
     return power_transformer
 
 
-def create_energy_consumer(net: NetworkService, bus: Junction, **kwargs) -> EnergyConsumer:
+def create_energy_consumer(net: NetworkService, cn: ConnectivityNode, **kwargs) -> EnergyConsumer:
     ec = EnergyConsumer(**kwargs)
     _create_single_terminal_conducting_equipment(network_service=net, ce=ec, **kwargs)
-    _connect_single_terminal_conducting_equipment(network_service=net, ce=ec, bus=bus)
+    _connect_single_terminal_conducting_equipment(network_service=net, ce=ec, cn=cn)
     return ec
 
 
-def create_energy_source(net: NetworkService, bus: Junction, **kwargs) -> EnergySource:
+def create_energy_source(net: NetworkService, cn: ConnectivityNode, **kwargs) -> EnergySource:
     es = EnergySource(**kwargs)
-    _create_single_terminal_conducting_equipment(network_service=net, ce=es, bus=bus, **kwargs)
-    _connect_single_terminal_conducting_equipment(network_service=net, ce=es, bus=bus)
+    _create_single_terminal_conducting_equipment(network_service=net, ce=es, cn=cn, **kwargs)
+    _connect_single_terminal_conducting_equipment(network_service=net, ce=es, cn=cn)
     return es
+
+
+def create_breaker(network_service: NetworkService, cn1: ConnectivityNode, cn2: ConnectivityNode, **kwargs) -> Breaker:
+    ce = Breaker(**kwargs)
+    _create_two_terminal_conducting_equipment(network_service=network_service, ce=ce, **kwargs)
+    _connect_two_terminal_conducting_equipment(network_service=network_service, ce=ce, cn1=cn1, cn2=cn2)
+    return ce
 
 
 def create_bus(network_service: NetworkService, **kwargs) -> Junction:
@@ -78,9 +88,10 @@ def _create_two_terminal_conducting_equipment(network_service: NetworkService, c
     _create_terminals(ce=ce, num_terms=2, network=network_service)
 
 
-def _connect_two_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, bus1: Junction, bus2: Junction):
-    network_service.connect_terminals(bus1.get_terminal_by_sn(1), ce.get_terminal_by_sn(1))
-    network_service.connect_terminals(bus2.get_terminal_by_sn(1), ce.get_terminal_by_sn(2))
+def _connect_two_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment,
+                                               cn1: ConnectivityNode, cn2: ConnectivityNode):
+    network_service.connect_by_mrid(ce.get_terminal_by_sn(1), cn1.mrid)
+    network_service.connect_by_mrid(ce.get_terminal_by_sn(2), cn2.mrid)
 
 
 def _create_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, **kwargs):
@@ -90,11 +101,13 @@ def _create_single_terminal_conducting_equipment(network_service: NetworkService
     _create_terminals(ce=ce, network=network_service)
 
 
-def _connect_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment, bus: Junction):
-    network_service.connect_terminals(ce.get_terminal_by_sn(1), bus.get_terminal_by_sn(1))
+def _connect_single_terminal_conducting_equipment(network_service: NetworkService, ce: ConductingEquipment,
+                                                  cn: ConnectivityNode):
+    network_service.connect_by_mrid(ce.get_terminal_by_sn(1), cn.mrid)
 
 
-def _create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms: int = 1, phases: PhaseCode = PhaseCode.ABC):
+def _create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms: int = 1,
+                      phases: PhaseCode = PhaseCode.ABC):
     for i in range(1, num_terms + 1):
         terminal: Terminal = Terminal(mrid=f"{ce.mrid}_t{i}", conducting_equipment=ce, phases=phases, sequence_number=i)
         ce.add_terminal(terminal)
@@ -107,3 +120,4 @@ NetworkService.create_energy_source = create_energy_source
 NetworkService.create_two_winding_power_transformer = create_two_winding_power_transformer
 NetworkService.create_ac_line_segment = create_ac_line_segment
 NetworkService.create_energy_consumer = create_energy_consumer
+NetworkService.create_breaker = create_breaker
