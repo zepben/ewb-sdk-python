@@ -25,27 +25,26 @@ def tnc():
 
 
 def test_create_energy_source(tnc):
-    tnc.net.create_energy_source(cn=tnc.cn1)
-    objects = tnc.net.objects(EnergySource)
-    for source in objects:
-        t: Terminal = source.get_terminal_by_sn(1)
-        assert source.num_terminals() == 1
-        assert isinstance(t, Terminal)
-        assert isinstance(source, EnergySource)
-        assert t.conducting_equipment is source, "t.conducting_equipment should be 'source'"
+    ce1 = tnc.net.create_energy_source(cn=tnc.cn1)
+    ce2 = tnc.net.get(ce1.mrid)
+    assert ce1 is ce2
+    assert isinstance(ce1, EnergySource)
+    t: Terminal = ce1.get_terminal_by_sn(1)
+    assert ce1.num_terminals() == 1
+    assert isinstance(t, Terminal)
+    assert t.conducting_equipment is ce1, "t.conducting_equipment should be 'source'"
 
 
 def test_create_energy_consumer(tnc):
-    tnc.net.create_energy_consumer(cn=tnc.cn1, location=tnc.loc1)
-    objects = tnc.net.objects(EnergyConsumer)
-    for ce in objects:
-        consumer: EnergyConsumer = ce
-        t: Terminal = consumer.get_terminal_by_sn(1)
-        assert consumer.num_terminals() == 1
-        assert isinstance(t, Terminal)
-        assert isinstance(consumer, EnergyConsumer)
-        assert t.conducting_equipment is consumer, "t.conducting_equipment should be 'ec'"
-        assert consumer.location == tnc.loc1
+    ce1 = tnc.net.create_energy_consumer(cn=tnc.cn1, location=tnc.loc1)
+    ce2 = tnc.net.get(ce1.mrid)
+    assert ce1 is ce2
+    assert ce2.num_terminals() == 1
+    t: Terminal = ce2.get_terminal_by_sn(1)
+    assert isinstance(t, Terminal)
+    assert isinstance(ce2, EnergyConsumer)
+    assert t.conducting_equipment is ce2, "t.conducting_equipment should be 'ce1'"
+    assert ce2.location == tnc.loc1
 
 
 def test_create_two_winding_power_transformer(tnc):
@@ -63,16 +62,15 @@ def test_create_two_winding_power_transformer(tnc):
 
 
 def test_create_ac_line_segment(tnc):
-    tnc.net.create_ac_line_segment(cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
-    objects = tnc.net.objects(AcLineSegment)
-    for ce in objects:
-        line_segment: AcLineSegment = ce
-        t: Terminal = line_segment.get_terminal_by_sn(1)
-        assert line_segment.num_terminals() == 2
-        assert isinstance(t, Terminal)
-        assert isinstance(line_segment, AcLineSegment)
-        assert t.conducting_equipment is line_segment, "t.conducting_equipment should be 'line_segment'"
-        assert line_segment.location == tnc.loc3
+    ce1 = tnc.net.create_ac_line_segment(cn1=tnc.cn1, cn2=tnc.cn2, location=tnc.loc3)
+    ce2 = tnc.net.get(ce1.mrid)
+    assert ce1 is ce2
+    t: Terminal = ce1.get_terminal_by_sn(1)
+    assert ce1.num_terminals() == 2
+    assert isinstance(t, Terminal)
+    assert isinstance(ce1, AcLineSegment)
+    assert t.conducting_equipment is ce1, "t.conducting_equipment should be 'line_segment'"
+    assert ce1.location == tnc.loc3
 
 
 def test_create_breaker(tnc):
