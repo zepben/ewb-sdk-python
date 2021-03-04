@@ -51,6 +51,7 @@ class DiagramObject(IdentifiedObject):
 
     style: DiagramObjectStyle = DiagramObjectStyle.NONE
     """A diagram object has a style associated that provides a reference for the style used in the originating system."""
+
     rotation: float = 0.0
     """Sets the angle of rotation of the diagram object.  Zero degrees is pointing to the top of the diagram. Rotation is clockwise."""
 

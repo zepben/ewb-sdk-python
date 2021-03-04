@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 import inspect
-from abc import ABCMeta, abstractmethod, ABC
-from typing import List, Optional, Type, TypeVar, Dict
+from abc import abstractmethod
+from typing import List, Optional, Type, TypeVar
 
 from dataclassy import dataclass
 
@@ -19,24 +19,23 @@ Any = TypeVar("Any")
 
 @dataclass(slots=True)
 class SqliteTable(object):
+    """
+    Represents a table in an Sqlite Database. This class should be extended and initialised to build the DDL for a Table.
+    Methods that need to be overridden are those marked @abstractmethod.
+    Methods that can be optionally overridden are unique_index_columns() and non_unique_index_columns().
+    Columns must be assigned in __init__ and column_index must be incremented for each Column created.
+    See existing implementations such as TableVersion for examples.
+    """
 
-    _column_index: int = 0
+    column_index: int = 0
+    """Used to specify index of the column in the table during initialisation. Always increment BEFORE creating a Column. Indices start from 1."""
+
     _column_set: Optional[List[Column]] = None
     _create_table_sql: Optional[str] = None
     _prepared_insert_sql: Optional[str] = None
     _prepared_update_sql: Optional[str] = None
     _create_indexes_sql: Optional[List[str]] = None
     _select_sql: Optional[str] = None
-
-    @property
-    @abstractmethod
-    def table_class(self) -> Type[T]:
-        pass
-
-    @property
-    @abstractmethod
-    def table_class_instance(self) -> T:
-        pass
 
     @abstractmethod
     def name(self) -> str:
@@ -48,50 +47,79 @@ class SqliteTable(object):
     def non_unique_index_columns(self) -> List[List[Column]]:
         return []
 
-    @property
     def column_set(self) -> List[Column]:
-        return self._column_set if self._column_set else self._create_column_set(self.table_class, self.table_class_instance)
+        return self._column_set if self._column_set else self._build_column_set(self.__class__, self)
 
-    @property
     def create_table_sql(self):
-        return self._create_table_sql if self._create_table_sql else self._create_create_table_sql()
+        return self._create_table_sql if self._create_table_sql else self._build_create_table_sql()
 
-    @property
     def select_sql(self):
-        return self._select_sql if self._select_sql else self._create_select_sql()
+        return self._select_sql if self._select_sql else self._build_select_sql()
 
-    @property
     def prepared_insert_sql(self):
-        return self._prepared_insert_sql if self._prepared_insert_sql else self._create_prepared_insert_sql()
+        return self._prepared_insert_sql if self._prepared_insert_sql else self._build_prepared_insert_sql()
 
-    @property
     def prepared_update_sql(self):
-        return self._prepared_update_sql if self._prepared_update_sql else self._create_prepared_update_sql()
+        return self._prepared_update_sql if self._prepared_update_sql else self._build_prepared_update_sql()
 
-    def _create_column_set(self, clazz: Type[Any], instance: Any) -> Dict[Column, None]:
-        cols = dict()
-        repeated_field = False
+    def create_indexes_sql(self):
+        return self._create_indexes_sql if self._create_indexes_sql else self._build_indexes_sql()
 
-        if clazz.__base__:
-            cols.update(self._create_column_set(clazz.__base__, instance))
+    def _build_column_set(self, clazz: Type[Any], instance: Any) -> List[Column]:
+        """
+        Builds the list of columns for use in DDL statements for this table.
 
-        attributes = inspect.getmembers(SqliteTable, lambda x: not inspect.isdatadescriptor(x) and not inspect.isroutine(x))
+        :param clazz: The class of this table.
+        :param instance:
+        :return:
+        """
+        cols = list()
+
+        attributes = inspect.getmembers(clazz, lambda x: not inspect.isroutine(x))
         declared_fields = [a for a in attributes if not a[0].startswith('_')]
-        for field in declared_fields:
-            pass
+        for field, _ in declared_fields:
+            try:
+                x = getattr(instance, field)
+                if isinstance(x, Column):
+                    for c in cols:
+                        if x.query_index == c.query_index:
+                            raise ValueError(f"Field {field} in SQL Table class {clazz.__name__} is using an index that has already been used. Did you forget to increment column_index?")
+                    cols.append(x)
+            except Exception as e:
+                raise ValueError(f"Unable to retrieve field {field}. It will be missing from the database. Error was: {str(e)}")
 
-    def _create_create_table_sql(self):
-        pass
+        self._column_set = sorted(cols, key=lambda c: c.query_index)
+        return self._column_set
 
-    def _create_select_sql(self):
-        pass
+    def _build_create_table_sql(self) -> str:
+        self._create_table_sql = f"CREATE TABLE {self.name()} ({', '.join([str(c) for c in self.column_set()])})"
+        return self._create_table_sql
 
-    def _create_prepared_insert_sql(self):
-        pass
+    def _build_select_sql(self) -> str:
+        self._select_sql = f"SELECT ({', '.join([c.name for c in self.column_set()])}) FROM {self.name()}"
+        return self._select_sql
 
-    def _create_prepared_update_sql(self):
-        pass
+    def _build_prepared_insert_sql(self) -> str:
+        self._prepared_insert_sql = f"INSERT INTO {self.name()} ({', '.join([c.name for c in self.column_set()])}) VALUES ({', '.join(['?' for _ in self.column_set()])})"
+        return self._prepared_insert_sql
 
+    def _build_prepared_update_sql(self) -> str:
+        self._prepared_update_sql = f"UPDATE {self.name()} SET {', '.join([f'{c.name} = ?' for c in self.column_set()])}"
+        return self._prepared_update_sql
+
+    def _build_indexes_sql(self) -> List[str]:
+        statements = []
+        for index_col in self.unique_index_columns():
+            statements.append(self._build_index_sql(index_col, True))
+        for index_col in self.non_unique_index_columns():
+            statements.append(self._build_index_sql(index_col, False))
+        self._create_indexes_sql = statements
+        return self._create_indexes_sql
+
+    def _build_index_sql(self, index_col: List[Column], is_unique: bool):
+        id_string = f"{self.name()}_{'_'.join(map(lambda c: c.name, index_col))}"
+        col_string = ', '.join(map(lambda c: c.name, index_col))
+        return f"CREATE {'UNIQUE ' if is_unique else ''}INDEX {id_string} ON {self.name()} {col_string}"
 
 
 T = TypeVar("T", bound=SqliteTable)
