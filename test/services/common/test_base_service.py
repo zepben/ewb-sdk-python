@@ -7,7 +7,16 @@ from typing import List, Union
 
 from pytest import fixture
 from zepben.evolve import BaseService, Terminal, resolver, UnresolvedReference, Junction, BaseVoltage, Location, AcLineSegment, CableInfo, \
-    PerLengthSequenceImpedance, IdentifiedObject, ConnectivityNode, Feeder, OperationalRestriction, NetworkService
+PerLengthSequenceImpedance, IdentifiedObject, ConnectivityNode, Feeder, OperationalRestriction, NetworkService, IdentifiedObject, \
+BaseService, PowerTransformerInfo, CableInfo, OverheadWireInfo, Streetlight, Pole, Meter, Location, Organisation, AssetOwner, \
+Customer, CustomerAgreement, Tariff, PricingStructure, OperationalRestriction, UsagePoint, Junction, BusbarSection, EnergySource, PowerElectronicsConnection, \
+LinearShuntCompensator, EnergyConsumer, EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, Breaker, Recloser, \
+LoadBreakSwitch, Disconnector, Fuse, Jumper, RegulatingCondEq, BatteryUnit, PowerElectronicsWindUnit, PhotoVoltaicUnit, \
+FaultIndicator, Feeder, Site, Substation, Circuit, Substation, PowerElectronicsConnectionPhase, EnergySourcePhase, \
+RatioTapChanger, EnergyConsumerPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, EnergyConsumerPhase, \
+EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete, \
+Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo, \
+AssetContainer, OrganisationRole, Document, Agreement
 
 
 @fixture
@@ -142,4 +151,32 @@ def test_resolve_thingo(service):
 
     service.add(acls1)
     service.add(t1)
+
+
+types = [PowerTransformerInfo, CableInfo, OverheadWireInfo, Streetlight,
+Pole, Meter, Location, Organisation, AssetOwner, Customer, CustomerAgreement, Tariff, PricingStructure,
+OperationalRestriction, UsagePoint, Terminal, Junction, BusbarSection, EnergySource, PowerElectronicsConnection,
+LinearShuntCompensator, EnergyConsumer, EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, Breaker, Recloser,
+LoadBreakSwitch, Disconnector, Fuse, Jumper, RegulatingCondEq, BatteryUnit, PowerElectronicsWindUnit, PhotoVoltaicUnit,
+FaultIndicator, Feeder, Site, Substation, Circuit, Substation, PowerElectronicsConnectionPhase, EnergySourcePhase,
+RatioTapChanger, EnergyConsumerPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, EnergyConsumerPhase,
+EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete,
+Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo,
+AssetContainer, OrganisationRole, Document, Agreement]
+
+def create_objects_test(service, type_):
+
+    object = type_()
+    io = IdentifiedObject()
+    service.add(object)
+    service.add(io)
+    for obj in service.objects(type_):
+        assert obj is object
+        assert obj is not io
+
+
+def test_objects():
+    for part in types:
+        create_objects_test(BaseService(""), part)
+
 
