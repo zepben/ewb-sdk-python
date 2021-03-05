@@ -9,6 +9,7 @@
 * Helper factory methods for AcLineSegment, Junction (Bus), PowerTransformer, EnergySource, and EnergyConsumer added to `NetworkService` and available
 through `zepben.evolve.services.network.network_extensions`.
 * Added CIM Class LoadBreakSwitch
+* Added utility function to generate bus-branch models from a NetworkService.
 
 ##### Enhancements
 * [tests] cim_creators.py created with similar hypothesis derived functionality to pb_creators, and can be used to quickly build fake data for testing.
