@@ -32,7 +32,7 @@ class ErrorInfo:
     Error information for an identified object that failed a validation test when trying to generate a bus-branch model.
     """
 
-    def __init__(error_type: ErrorType, io: IdentifiedObject):
+    def __init__(self, error_type: ErrorType, io: IdentifiedObject):
         self.error_type = error_type
         self.io = io
 
