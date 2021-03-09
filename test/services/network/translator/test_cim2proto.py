@@ -4,7 +4,6 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from zepben.evolve import NetworkService
 '''Core'''
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode
@@ -91,8 +90,25 @@ def test_analog(ana):
     assert pb.mrid() == ana.mrid
     assert isinstance(pb, Analog)
 
-'''Wires'''
+@given(dis=discrete())
+def test_discrete(dis):
+    pb = dis.to_pb()
+    assert pb.mrid() == dis.mrid
+    assert isinstance(pb, Discrete)
 
+@given(acc=accumulator())
+def test_discrete(acc):
+    pb = acc.to_pb()
+    assert pb.mrid() == acc.mrid
+    assert isinstance(pb, Accumulator)
+
+#@given(disv=discretevalue())
+#def test_discrete(disv):
+    #pb = disv.to_pb()
+    #assert pb.mrid() == disv.mrid()
+    #assert isinstance(pb, DiscreteValue)
+
+'''Wires'''
 @given(dis=disconnector())
 def test_disconnector_to_pb(dis):
     pb = dis.to_pb()
