@@ -1,4 +1,4 @@
-#  Copyright 2020 Zeppelin Bend Pty Ltd
+#  Copyright 2021 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -8,10 +8,21 @@ from enum import Enum
 from functools import reduce
 from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Optional
 
-from zepben.evolve import NetworkService, ConnectivityNode, Terminal, Switch, AcLineSegment, ConductingEquipment, \
-    PowerTransformer, \
-    EnergySource, EnergyConsumer, IdentifiedObject, ShuntCompensator, Junction, BusbarSection, Jumper, \
-    PerLengthSequenceImpedance, WireInfo
+from dataclassy import dataclass
+from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
+from zepben.evolve.model.cim.iec61970.base.wires.connectors import Junction, BusbarSection
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
+from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
+from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import ShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch, Jumper
+from zepben.evolve.services.network.network import NetworkService
 
 __all__ = ["create_bus_branch_model", "CreationResult", "ErrorInfo", "ErrorType"]
 
@@ -27,24 +38,24 @@ class ErrorType(Enum):
     missing_required_data = "missing_required_data"
 
 
+@dataclass(slots=True)
 class ErrorInfo:
     """
     Error information for an identified object that failed a validation test when trying to generate a bus-branch model.
     """
 
-    def __init__(self, error_type: ErrorType, io: IdentifiedObject):
-        self.error_type = error_type
-        self.io = io
+    error_type: ErrorType
+    io: IdentifiedObject
 
 
+@dataclass(slots=True)
 class CreationResult:
     """
     Represents the results of creating a bus-branch model from a network service (node-breaker-model)
     """
 
-    def __init__(self, bus_branch_model: Optional[BBN] = None, errors: Dict[ErrorType, Set[ErrorInfo]] = defaultdict(set)):
-        self.bus_branch_model = bus_branch_model,
-        self.errors = errors
+    bus_branch_model: Optional[BBN] = None
+    errors: Dict[ErrorType, Set[ErrorInfo]] = defaultdict(set)
 
     @property
     def succeed(self) -> bool:

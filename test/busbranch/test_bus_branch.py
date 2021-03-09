@@ -7,8 +7,8 @@ from typing import Set, Union, FrozenSet, Tuple
 
 import pytest
 from zepben.evolve import ConnectivityNode, Junction, Disconnector, BusbarSection, Switch, Terminal, NetworkService, AcLineSegment, PerLengthSequenceImpedance, \
-    WireInfo, PowerTransformer, EnergySource, EnergyConsumer, ConductingEquipment
-from zepben.evolve.model.busbranch.bus_branch import _group_negligible_impedance_terminals, _group_common_ac_line_segment_terminals, create_bus_branch_model
+    WireInfo, PowerTransformer, EnergySource, EnergyConsumer, ConductingEquipment, create_bus_branch_model
+from zepben.evolve.model.busbranch.bus_branch import _group_negligible_impedance_terminals, _group_common_ac_line_segment_terminals
 
 
 def test_create_bus_branch_model_callbacks(simple_node_breaker_network):

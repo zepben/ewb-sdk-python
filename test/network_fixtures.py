@@ -6,9 +6,8 @@
 from typing import Dict, List, Optional
 
 from pytest import fixture
-
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
-    UsagePoint, Terminal, PowerTransformerEnd, WindingConnection, BaseVoltage, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
+    UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
     SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode
 
@@ -35,7 +34,11 @@ def create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms
 
 
 def create_terminal(network: NetworkService, ce: Optional[ConductingEquipment], phases: PhaseCode = PhaseCode.ABCN, sequence_number: int = 1) -> Terminal:
-    terminal = ce.get_terminal_by_sn(sequence_number) if ce else None
+    terminal = None
+    try:
+        terminal = ce.get_terminal_by_sn(sequence_number) if ce is not None else None
+    except IndexError:
+        pass
 
     if terminal is None:
         terminal = Terminal(conducting_equipment=ce, phases=phases, sequence_number=sequence_number)
@@ -419,7 +422,6 @@ def feeder_start_point_to_open_point_network(request):
 
     op.set_normally_open(normally_open)
     op.set_open(currently_open)
-
 
     network_service.connect_terminals(c1.get_terminal_by_sn(1), fsp.get_terminal_by_sn(1))
     network_service.connect_terminals(c1.get_terminal_by_sn(2), op.get_terminal_by_sn(1))

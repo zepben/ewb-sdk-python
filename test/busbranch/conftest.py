@@ -1,9 +1,17 @@
+#  Copyright 2021 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from typing import List
 
 from pytest import fixture
-from zepben.evolve import PhaseCode, NetworkService, Terminal, ConductingEquipment, AcLineSegment, PerLengthSequenceImpedance, \
+from zepben.evolve import NetworkService, AcLineSegment, PerLengthSequenceImpedance, \
     PowerTransformer, PowerTransformerEnd, Breaker, BaseVoltage, OverheadWireInfo, PowerTransformerInfo, EnergyConsumer, EnergySource
 from zepben.evolve.services.network.network import connect
+
+from test.network_fixtures import create_terminal, create_terminals
 
 
 @fixture()
@@ -33,16 +41,13 @@ def simple_node_breaker_network() -> NetworkService:
     es = EnergySource(mrid="grid_connection", name="Grid Connection", voltage_magnitude=1.02 * bv_hv.nominal_voltage)
     es.base_voltage = bv_hv
     network.add(es)
-    es_t = _create_terminal(es)
-    network.add(es_t)
+    es_t = create_terminal(network, es)
 
     # Transformer
     tx = PowerTransformer(mrid="transformer", name="Transformer")
     tx.asset_info = pt_info
-    tx_terminals = _create_terminals(tx, [PhaseCode.ABC, PhaseCode.ABN])
-    for t in tx_terminals:
-        network.add(t)
     network.add(tx)
+    tx_terminals = create_terminals(network, tx, 2)
 
     ends = _create_transformer_ends(tx, [20000, 400])
     for end in ends:
@@ -54,10 +59,8 @@ def simple_node_breaker_network() -> NetworkService:
     line = AcLineSegment(mrid="line", name="Line", length=100.0, per_length_sequence_impedance=plsi)
     line.asset_info = wire_info
     line.base_voltage = bv_lv
-    line_terminals = _create_terminals(line)
-    for t in line_terminals:
-        network.add(t)
     network.add(line)
+    line_terminals = create_terminals(network, line, 2)
 
     network.connect_terminals(tx_terminals[1], line_terminals[0])
 
@@ -65,8 +68,7 @@ def simple_node_breaker_network() -> NetworkService:
     ec = EnergyConsumer(mrid="load", name="Load", p=100000., q=50000.)
     ec.base_voltage = bv_lv
     network.add(ec)
-    ec_t = _create_terminal(ec)
-    network.add(ec_t)
+    ec_t = create_terminal(network, ec)
 
     network.connect_terminals(line_terminals[1], ec_t)
 
@@ -96,77 +98,62 @@ def multi_branch_common_lines_network() -> NetworkService:
 
     # AcLineSegment0
     a0 = AcLineSegment(mrid="a0", length=0.0, per_length_sequence_impedance=plsi)
-    a0_t = _create_terminal(a0)
-    network.add(a0_t)
     network.add(a0)
+    a0_t = create_terminal(network, a0)
 
     # AcLineSegment1
     a1 = AcLineSegment(mrid="a1", length=1.0, per_length_sequence_impedance=plsi)
-    a1_ts = _create_terminals(a1)
-    for t in a1_ts:
-        network.add(t)
     network.add(a1)
+    a1_ts = create_terminals(network, a1, 2)
 
     network.connect_terminals(a0_t, a1_ts[0])
 
     # AcLineSegment2
     a2 = AcLineSegment(mrid="a2", length=2.0, per_length_sequence_impedance=plsi)
-    a2_ts = _create_terminals(a2)
-    for t in a2_ts:
-        network.add(t)
     network.add(a2)
+    a2_ts = create_terminals(network, a2, 2)
 
     network.connect_terminals(a1_ts[1], a2_ts[0])
 
     # AcLineSegment3
     a3 = AcLineSegment(mrid="a3", length=3.0, per_length_sequence_impedance=plsi)
-    a3_ts = _create_terminals(a3)
-    for t in a3_ts:
-        network.add(t)
     network.add(a3)
+    a3_ts = create_terminals(network, a3, 2)
 
     network.connect_terminals(a2_ts[1], a3_ts[0])
 
     # AcLineSegment4
     a4 = AcLineSegment(mrid="a4", length=4.0, per_length_sequence_impedance=plsi)
-    a4_ts = _create_terminals(a4)
-    for t in a4_ts:
-        network.add(t)
     network.add(a4)
+    a4_ts = create_terminals(network, a4, 2)
 
     network.connect_terminals(a3_ts[1], a4_ts[0])
 
     # AcLineSegment5
     a5 = AcLineSegment(mrid="a5", length=5.0, per_length_sequence_impedance=plsi)
-    a5_ts = _create_terminals(a5)
-    for t in a5_ts:
-        network.add(t)
     network.add(a5)
+    a5_ts = create_terminals(network, a5, 2)
 
     network.connect_terminals(a4_ts[1], a5_ts[0])
 
     # AcLineSegment6
     a6 = AcLineSegment(mrid="a6", length=6.0, per_length_sequence_impedance=plsi)
-    a6_ts = _create_terminals(a6)
-    for t in a6_ts:
-        network.add(t)
     network.add(a6)
+    a6_ts = create_terminals(network, a6, 2)
 
     connect(a6_ts[0], a2_ts[1].connectivity_node)
 
     # AcLineSegment7
     a7 = AcLineSegment(mrid="a7", length=7.0, per_length_sequence_impedance=plsi)
-    a7_t = _create_terminal(a7)
-    network.add(a7_t)
     network.add(a7)
+    a7_t = create_terminal(network, a7)
 
     network.connect_terminals(a6_ts[1], a7_t)
 
     # AcLineSegment8
     a8 = AcLineSegment(mrid="a8", length=8.0, per_length_sequence_impedance=plsi)
-    a8_t = _create_terminal(a8)
-    network.add(a8_t)
     network.add(a8)
+    a8_t = create_terminal(network, a8)
 
     connect(a8_t, a3_ts[1].connectivity_node)
 
@@ -194,25 +181,20 @@ def single_branch_common_lines_network(request) -> NetworkService:
 
     # AcLineSegment1
     acls1 = AcLineSegment(mrid="acls1", length=1.0, per_length_sequence_impedance=plsi1)
-    acls1_t = _create_terminal(acls1)
-    network.add(acls1_t)
     network.add(acls1)
+    acls1_t = create_terminal(network, acls1)
 
     # AcLineSegment2
     acls2 = AcLineSegment(mrid="acls2", length=2.0, per_length_sequence_impedance=plsi1)
-    acls2_terminals = _create_terminals(acls2)
-    for t in acls2_terminals:
-        network.add(t)
     network.add(acls2)
+    acls2_terminals = create_terminals(network, acls2, 2)
 
     network.connect_terminals(acls1_t, acls2_terminals[0])
 
     # AcLineSegment3
     acls3 = AcLineSegment(mrid="acls3", length=3.0, per_length_sequence_impedance=plsi1)
-    acls3_terminals = _create_terminals(acls3)
-    for t in acls3_terminals:
-        network.add(t)
     network.add(acls3)
+    acls3_terminals = create_terminals(network, acls3, 2)
 
     network.connect_terminals(acls2_terminals[1], acls3_terminals[0])
 
@@ -220,26 +202,21 @@ def single_branch_common_lines_network(request) -> NetworkService:
     sw = Breaker(mrid="sw")
     sw.set_open(sw_is_open)
     sw.set_normally_open(sw_is_open)
-    sw_terminals = _create_terminals(sw)
-    for t in sw_terminals:
-        network.add(t)
     network.add(sw)
+    sw_terminals = create_terminals(network, sw, 2)
     network.connect_terminals(acls3_terminals[1], sw_terminals[0])
 
     # AcLineSegment4
     acls4 = AcLineSegment(mrid="acls4", length=4.0, per_length_sequence_impedance=plsi2)
-    acls4_terminals = _create_terminals(acls4)
-    for t in acls4_terminals:
-        network.add(t)
     network.add(acls4)
+    acls4_terminals = create_terminals(network, acls4, 2)
 
     network.connect_terminals(sw_terminals[1], acls4_terminals[0])
 
     # AcLineSegment5
     acls5 = AcLineSegment(mrid="acls5", length=5.0, per_length_sequence_impedance=plsi3)
-    acls5_t = _create_terminal(acls5)
-    network.add(acls5_t)
     network.add(acls5)
+    acls5_t = create_terminal(network, acls5)
 
     network.connect_terminals(acls4_terminals[1], acls5_t)
 
@@ -269,94 +246,59 @@ def negligible_impedance_equipment_basic_network(request) -> NetworkService:
 
     # AcLineSegment0
     a0 = AcLineSegment(mrid="a0", length=0.0, per_length_sequence_impedance=plsi)
-    a0_t = _create_terminal(a0)
-    network.add(a0_t)
     network.add(a0)
+    a0_t = create_terminal(network, a0)
 
     # NegligibleImpedanceEquipment1
     nie1 = nie_constructor("nie1")
-    nie1_ts = _create_terminals(nie1)
     network.add(nie1)
-    for t in nie1_ts:
-        network.add(t)
+    nie1_ts = create_terminals(network, nie1, 2)
 
     network.connect_terminals(a0_t, nie1_ts[0])
 
     # AcLineSegment1
     a1 = AcLineSegment(mrid="a1", length=1.0, per_length_sequence_impedance=plsi)
-    a1_ts = _create_terminals(a1)
-    for t in a1_ts:
-        network.add(t)
     network.add(a1)
+    a1_ts = create_terminals(network, a1, 2)
 
     network.connect_terminals(nie1_ts[1], a1_ts[0])
 
     # AcLineSegment2
     a2 = AcLineSegment(mrid="a2", length=2.0, per_length_sequence_impedance=plsi)
-    a2_ts = _create_terminals(a2)
-    for t in a2_ts:
-        network.add(t)
     network.add(a2)
+    a2_ts = create_terminals(network, a2, 2)
 
     network.connect_terminals(a1_ts[1], a2_ts[0])
 
     # NegligibleImpedanceEquipment2
     nie2 = nie_constructor("nie2")
-    nie2_ts = _create_terminals(nie2, [PhaseCode.ABC, PhaseCode.ABC, PhaseCode.ABC])
     network.add(nie2)
-    for t in nie2_ts:
-        network.add(t)
+    nie2_ts = create_terminals(network, nie2, 3)
 
     network.connect_terminals(a2_ts[1], nie2_ts[0])
 
     # AcLineSegment3
     a3 = AcLineSegment(mrid="a3", length=3.0, per_length_sequence_impedance=plsi)
-    a3_ts = _create_terminals(a3)
-    for t in a3_ts:
-        network.add(t)
     network.add(a3)
+    a3_ts = create_terminals(network, a3, 2)
 
     network.connect_terminals(nie2_ts[1], a3_ts[0])
 
     # AcLineSegment4
     a4 = AcLineSegment(mrid="a4", length=4.0, per_length_sequence_impedance=plsi)
-    a4_ts = _create_terminals(a4)
-    for t in a4_ts:
-        network.add(t)
     network.add(a4)
+    a4_ts = create_terminals(network, a4, 2)
 
     network.connect_terminals(nie2_ts[2], a4_ts[0])
 
     # AcLineSegment5
     a5 = AcLineSegment(mrid="a5", length=5.0, per_length_sequence_impedance=plsi)
-    a5_t = _create_terminal(a5)
     network.add(a5)
-    network.add(a5_t)
+    a5_t = create_terminal(network, a5)
 
     network.connect_terminals(a4_ts[1], a5_t)
 
     return network
-
-
-def _create_terminal(ce: ConductingEquipment, phases: PhaseCode = PhaseCode.ABC) -> Terminal:
-    return _create_terminals(ce, [phases])[0]
-
-
-def _create_terminals(ce: ConductingEquipment, phases_per_term: List[PhaseCode] = None) -> List[Terminal]:
-    if phases_per_term is None:
-        phases_per_term = [PhaseCode.ABC, PhaseCode.ABC]
-
-    terminals: List[Terminal] = []
-    for i in range(0, len(phases_per_term)):
-        terminal = Terminal(
-            mrid=f"{ce.mrid}_t{i + 1}",
-            conducting_equipment=ce,
-            phases=phases_per_term[i],
-            sequence_number=i + 1
-        )
-        ce.add_terminal(terminal)
-        terminals.append(terminal)
-    return terminals
 
 
 def _create_per_length_sequence_impedance(i: float) -> PerLengthSequenceImpedance:
