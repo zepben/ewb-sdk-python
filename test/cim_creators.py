@@ -281,8 +281,8 @@ def substation():
     return builds(Substation, **equipmentcontainer(), sub_geographical_region=builds(SubGeographicalRegion, **identifiedobject()),
                   normal_energized_feeders=lists(builds(Feeder, **identifiedobject()), max_size=2),
                   loops=lists(builds(Loop, **identifiedobject()), max_size=2),
-                  normal_energized_loops=lists(builds(Loop, **identifiedobject()), max_size=2),
-                  cicuits=lists(builds(Circuit, **identifiedobject()), max_size=2))
+                  energized_loops=lists(builds(Loop, **identifiedobject()), max_size=2),
+                  circuits=lists(builds(Circuit, **identifiedobject()), max_size=2))
 
 
 def phasecode():
@@ -542,6 +542,18 @@ def analog():
 
 def discrete():
     return builds(Discrete, **measurement())
+
+
+def discretevalue():
+    return builds(DiscreteValue, **measurement())
+
+
+def analogvalue():
+    return builds(AnalogValue, **measurement())
+
+
+def accumulatorvalue():
+    return builds(AccumulatorValue, **measurement())
 
 
 def unitsymbol():

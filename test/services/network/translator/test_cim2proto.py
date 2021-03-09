@@ -4,6 +4,22 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from zepben.evolve import NetworkService
+'''Core'''
+from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode
+from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage
+from zepben.protobuf.cim.iec61970.base.core.Feeder_pb2 import Feeder
+from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation
+from zepben.protobuf.cim.iec61970.base.core.GeographicalRegion_pb2 import GeographicalRegion
+'''Meas'''
+from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog
+from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete
+from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator
+from zepben.protobuf.cim.iec61970.base.meas.DiscreteValue_pb2 import DiscreteValue
+from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue
+from zepben.protobuf.cim.iec61970.base.meas.AccumulatorValue_pb2 import AccumulatorValue
+'''Wires'''
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction
@@ -20,14 +36,62 @@ from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTap
 
 
 from test.cim_creators import busbarsection, loadbreakswitch, energysource, energyconsumer, junction, aclinesegment, \
-disconnector, fuse, jumper, breaker, linearshuntcompensator, ratiotapchanger
+disconnector, fuse, jumper, breaker, linearshuntcompensator, ratiotapchanger, terminal, connectivitynode, basevoltage, \
+feeder, substation, geographicalregion, analog, discrete, accumulator, discretevalue, analogvalue, accumulatorvalue \
 
+
+'''Core'''
+@given(te=terminal())
+def test_terminal_to_pb(te):
+    pb = te.to_pb()
+    assert pb.mrid() == te.mrid
+    assert isinstance(pb, Terminal)
+
+@given(cnn=connectivitynode())
+def test_connectivitynode_to_pb(cnn):
+    pb = cnn.to_pb()
+    assert pb.mrid() == cnn.mrid
+    assert isinstance(pb, ConnectivityNode)
+
+@given(bv=basevoltage())
+def test_connectivitynode_to_pb(bv):
+    pb = bv.to_pb()
+    assert pb.mrid() == bv.mrid
+    assert isinstance(pb, BaseVoltage)
+    assert pb.nominalVoltage == bv.nominal_voltage
+
+@given(fe=feeder())
+def test_connectivitynode_to_pb(fe):
+    pb = fe.to_pb()
+    assert pb.mrid() == fe.mrid
+    assert isinstance(pb, Feeder)
+
+@given(sub=substation())
+def test_substation_to_pb(sub):
+    pb = sub.to_pb()
+    assert pb.mrid() == sub.mrid
+    assert isinstance(pb, Substation)
 
 @given(bbs=busbarsection())
 def test_busbar_to_pb(bbs):
     pb = bbs.to_pb()
     assert pb.mrid() == bbs.mrid
     assert isinstance(pb, BusbarSection)
+
+@given(ger=geographicalregion())
+def test_geographicalregion(ger):
+    pb = ger.to_pb()
+    assert pb.mrid() == ger.mrid
+    assert isinstance(pb, GeographicalRegion)
+
+'''Meas'''
+@given(ana=analog())
+def test_analog(ana):
+    pb = ana.to_pb()
+    assert pb.mrid() == ana.mrid
+    assert isinstance(pb, Analog)
+
+'''Wires'''
 
 @given(dis=disconnector())
 def test_disconnector_to_pb(dis):
@@ -114,16 +178,13 @@ def test_energyconsumer_to_pb(enc):
     pb = enc.to_pb()
     assert pb.mrid() == enc.mrid
     assert isinstance(pb, EnergyConsumer)
-
-def verify_energyconsumer_parameters():
-    pb = enc.to_pb(NetworkService())
     assert pb.p == enc.p
     assert pb.q == enc.q
-    assert pb.p_fixed == enc.p_fixed
-    assert pb.q_fixed == enc.q_fixed
+    assert pb.pFixed == enc.p_fixed
+    assert pb.qFixed == enc.q_fixed
 
 #@given(lsc=linearshuntcompensator())
 #def test_linearshuntcompensator_to_pb(lsc):
     #pb = lsc.to_pb()
     #assert pb.mrid() == lsc.mrid
-    #assert isinstance(pb, LinearShuntCompensator)'''
+    #assert isinstance(pb, LinearShuntCompensator)

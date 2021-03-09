@@ -52,13 +52,10 @@ def test_energyconsumer_to_cim(enc):
     cim = enc.to_cim(NetworkService())
     assert cim.mrid == enc.mrid()
     assert isinstance(cim, EnergyConsumer)
-
-def verify_energyconsumer_parameters():
-    cim = enc.to_cim(NetworkService())
     assert cim.p == enc.p
     assert cim.q == enc.q
-    assert cim.p_fixed == enc.p_fixed
-    assert cim.q_fixed == enc.q_fixed
+    assert cim.p_fixed == enc.pFixed
+    assert cim.q_fixed == enc.qFixed
 
 @given(dis=disconnector())
 def test_disconnector_to_cim(dis):
@@ -91,7 +88,7 @@ def test_loadbreakswitch_to_cim(lbs):
     assert isinstance(cim, LoadBreakSwitch)
 
 @given(pwt=powertransformer())
-def test_disconnector_to_cim(pwt):
+def test_powertransformer_to_cim(pwt):
     cim = pwt.to_cim(NetworkService())
     assert cim.mrid == pwt.mrid()
     assert isinstance(cim, PowerTransformer)
@@ -102,9 +99,12 @@ def test_disconnector_to_cim(pwt):
     #cim = rtc.to_cim(NetworkService())
     #assert cim.mrid == rtc.mrid()
     #assert isinstance(cim, RatioTapChanger)
+    #assert cim.step_voltage_increment == rtc.stepVoltageIncrement
 
-#@given(lsc=LinearShuntCompensator())
+#@given(lsc=linearshuntcompensator())
 #def test_linearshuntcompensator_to_cim(lsc):
     #cim = lsc.to_cim(NetworkService())
     #assert cim.mrid == lsc.mrid()
-    #assert isinstance(cim, LinearShuntCompensator)'''
+    #assert isinstance(cim, LinearShuntCompensator)
+    #assert cim.b0_per_section == lsc.b0PerSection
+
