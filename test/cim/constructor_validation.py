@@ -3,13 +3,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
+
 from hypothesis.strategies import uuids, text, lists, booleans, builds, sampled_from, integers
 
-from test.cim_creators import ALPHANUM, TEXT_MAX_SIZE, location, sampled_asset_info, sampled_equipment, document, sampled_equipment_container, \
-    equipmentcontainer, identifiedobject, acdcterminal, basevoltage, powersystemresource, MAX_32_BIT_INTEGER, MIN_32_BIT_INTEGER
-from zepben.evolve import IdentifiedObject, PowerSystemResource, Location, CableInfo, Equipment, UsagePoint, OperationalRestriction, Feeder, Site, \
-    ConductingEquipment, BaseVoltage, Terminal, RegulatingCondEq, PowerElectronicsConnection, PowerElectronicsUnit, PhaseCode, Substation
+from test.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_asset_info, sampled_equipment_container, \
+    identifiedobject, MAX_32_BIT_INTEGER, MIN_32_BIT_INTEGER
+from zepben.evolve import IdentifiedObject, PowerSystemResource, Location, CableInfo, Equipment, UsagePoint, \
+    OperationalRestriction, Feeder, Site, \
+    ConductingEquipment, BaseVoltage, Terminal, RegulatingCondEq, PowerElectronicsConnection, PowerElectronicsUnit, \
+    PhaseCode, Substation
 
 # NOTE:
 # verify...constructor calls are used for verifying the constructor for a superclass works as intended at least with no args or with a set of args.
@@ -17,61 +19,62 @@ from zepben.evolve import IdentifiedObject, PowerSystemResource, Location, Cable
 # there is a lot of overlap here, but calling both maximises the constructor combinations we check and should catch any breaking changes to
 # constructors.
 
-io_kwargs = {"mrid": uuids(version=4).map(lambda x: str(x)), "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-             "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)}
+io_kwargs = {
+    "mrid": uuids(version=4).map(lambda x: str(x)),
+    "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+    "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+}
 
 io_args = ("test_mrid", "test_name", "test_description")
-
 
 psr_kwargs = {**io_kwargs, "location": builds(Location, **identifiedobject()), "asset_info": sampled_asset_info()}
 
 psr_args = (*io_args, Location("test_location"), CableInfo("test_assetinfo"))
 
-
-equip_kwargs = {**psr_kwargs, "in_service": booleans(), "normally_in_service": booleans(),
-                "usage_points": lists(builds(UsagePoint, **identifiedobject()), max_size=1),
-                "equipment_containers": lists(sampled_equipment_container(), max_size=1),
-                "operational_restrictions": lists(builds(OperationalRestriction, **identifiedobject()), max_size=1),
-                "current_feeders": lists(builds(Feeder, **identifiedobject()), max_size=1)}
+equip_kwargs = {
+    **psr_kwargs, "in_service": booleans(), "normally_in_service": booleans(),
+    "usage_points": lists(builds(UsagePoint, **identifiedobject()), max_size=1),
+    "equipment_containers": lists(sampled_equipment_container(), max_size=1),
+    "operational_restrictions": lists(builds(OperationalRestriction, **identifiedobject()), max_size=1),
+    "current_feeders": lists(builds(Feeder, **identifiedobject()), max_size=1)
+}
 
 equip_args = (*psr_args, False, False, [UsagePoint("test_up")], [Site("test_site")], [OperationalRestriction("test_or")], [Feeder("test_feeder")])
 
-
-ce_kwargs = {**equip_kwargs,
-             "base_voltage": builds(BaseVoltage, **identifiedobject()),
-             "terminals":
-                 lists(builds(Terminal, phases=sampled_from(PhaseCode), sequence_number=integers(min_value=1, max_value=100)), max_size=1)
-             }
+ce_kwargs = {
+    **equip_kwargs,
+    "base_voltage": builds(BaseVoltage, **identifiedobject()),
+    "terminals": lists(builds(Terminal, phases=sampled_from(PhaseCode), sequence_number=integers(min_value=1, max_value=100)), max_size=1)
+}
 
 ce_args = (*equip_args, BaseVoltage("test_bv"), [Terminal("test_terminal")])
-
 
 rce_kwargs = {**ce_kwargs, "control_enabled": booleans()}
 
 rce_args = (*ce_args, False)
 
-
 cn_kwargs = {**ce_kwargs}
 
 cn_args = ce_args
 
-
-peu_kwargs = {**equip_kwargs, "power_electronics_connection": builds(PowerElectronicsConnection),
-              "max_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-              "min_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-              }
+peu_kwargs = {
+    **equip_kwargs,
+    "power_electronics_connection": builds(PowerElectronicsConnection),
+    "max_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+    "min_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+}
 
 peu_args = (*equip_args, PowerElectronicsConnection("test_pec"), -100, 200)
-
 
 sw_kwargs = {**ce_kwargs}
 
 sw_args = ce_args
 
-
 ps_kwargs = {**sw_kwargs}
-
 ps_args = sw_args
+
+ai_kwargs = {**io_kwargs}
+ai_args = io_args
 
 
 def verify_identifed_object_constructor(clazz, mrid, name, description, **kwargs):
@@ -166,6 +169,10 @@ def verify_power_electronics_unit_constructor(clazz, power_electronics_connectio
     verify_equipment_constructor(clazz=PowerElectronicsUnit, **kwargs)
 
 
+def verify_asset_info_constructor(clazz, **kwargs):
+    verify_identifed_object_constructor(clazz, **kwargs)
+
+
 def verify_io_args(io):
     assert io.mrid
     assert io.name == "test_name"
@@ -218,3 +225,7 @@ def verify_sw_args(sw):
 
 def verify_ps_args(ps):
     verify_sw_args(ps)
+
+
+def verify_ai_args(ai):
+    verify_io_args(ai)

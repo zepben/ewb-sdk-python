@@ -6,9 +6,11 @@
 
 from __future__ import annotations
 
-from dataclassy import dataclass
 from typing import Callable, Optional
 
+from dataclassy import dataclass
+
+from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
 from zepben.evolve.model.cim.iec61968.assets.asset import Asset
@@ -63,7 +65,11 @@ __all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_t
            "sub_to_circuit_resolver", "sub_to_eloop_resolver", "sub_to_loop_resolver", "term_to_ce_resolver", "term_to_cn_resolver", "te_to_term_resolver",
            "te_to_bv_resolver", "te_to_rtc_resolver", "up_to_ed_resolver", "up_to_eq_resolver", "up_to_loc_resolver", "circuit_to_loop_resolver",
            "circuit_to_sub_resolver", "circuit_to_term_resolver", "loop_to_circuit_resolver", "loop_to_esub_resolver", "loop_to_sub_resolver",
-           "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference"]
+           "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference", "tei_to_tti_resolver", "tti_to_tei_resolver",
+           "tei_to_tsi_resolver", "tsi_to_tei_resolver",
+           "te_to_tsi_resolver", "pti_to_tti_resolver", "peu_to_pec_resolver",
+           "pec_to_peu_resolver",
+           "pecphase_to_pec_resolver", "pec_to_pecphase_resolver"]
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -162,6 +168,18 @@ cond_equip_to_terminal_resolver = ReferenceResolver(ConductingEquipment, Termina
 conductor_to_wire_info_resolver = ReferenceResolver(Conductor, WireInfo, lambda t, r: setattr(t, 'asset_info', r))
 
 powertransformer_to_power_transformer_info_resolver = ReferenceResolver(PowerTransformer, PowerTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
+
+tei_to_tti_resolver = ReferenceResolver(TransformerEndInfo, TransformerTankInfo, lambda t, r: setattr(t, 'transformer_end_info', r))
+
+tti_to_tei_resolver = ReferenceResolver(TransformerTankInfo, TransformerEndInfo, lambda t, r: t.add_transformer_end_info(r))
+
+tei_to_tsi_resolver = ReferenceResolver(TransformerEndInfo, TransformerStarImpedance, lambda t, r: setattr(t, 'transformer_star_impedance', r))
+
+tsi_to_tei_resolver = ReferenceResolver(TransformerStarImpedance, TransformerEndInfo, lambda t, r: setattr(t, 'transformer_end_info', r))
+
+te_to_tsi_resolver = ReferenceResolver(TransformerEnd, TransformerStarImpedance, lambda t, r: setattr(t, 'star_impedance', r))
+
+pti_to_tti_resolver = ReferenceResolver(PowerTransformerInfo, TransformerTankInfo, lambda t, r: t.add_transformer_tank_info(r))
 
 conn_node_to_term_resolver = ReferenceResolver(ConnectivityNode, Terminal, lambda t, r: t.add_terminal(r))
 

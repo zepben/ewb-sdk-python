@@ -4,6 +4,9 @@
 * `Location.points` no longer provides an enumerated generator over PositionPoints.
 
 ##### New Features
+* Added CIM class TransformerTankInfo.
+* Added CIM class TransformerStarImpedance.
+* Added CIM class TransformerEndInfo.
 * Added CIM class BusbarSection.
 * Example Simple bus branch network added in `zepben.evolve.examples.simple_bus_branch`.
 * Helper factory methods for AcLineSegment, Junction (Bus), PowerTransformer, EnergySource, and EnergyConsumer added to `NetworkService` and available

@@ -3,7 +3,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import List
+
+from unittest.mock import MagicMock, call
 
 import pytest
 from hypothesis import given, settings, Phase
@@ -12,12 +13,11 @@ from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetE
     GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainerResponse, GetCurrentEquipmentForFeederResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse
-from unittest.mock import MagicMock, call
 
 from test.pb_creators import networkidentifiedobjects, aclinesegment
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, ConductingEquipment, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
-    Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction
+    Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance
 
 
 # TODO: Test behaviour of "failures" with get_feeder/get_identified_objects
@@ -116,7 +116,8 @@ async def test_get_equipment_for_container(feeder_network):
 async def test_get_current_equipment_for_feeder(feeder_with_current):
     ns = NetworkService()
     feeder_mrid = "f001"
-    stub = MagicMock(**{"getEquipmentForContainer.side_effect": create_container_equipment_func(feeder_with_current), "getCurrentEquipmentForFeeder.side_effect": create_container_current_equipment_func(feeder_with_current)})
+    stub = MagicMock(**{"getEquipmentForContainer.side_effect": create_container_equipment_func(feeder_with_current),
+                        "getCurrentEquipmentForFeeder.side_effect": create_container_current_equipment_func(feeder_with_current)})
     client = NetworkConsumerClient(stub=stub)
     objects = await client.get_equipment_for_container(ns, feeder_mrid)
     assert len(objects.result.value) == ns.len_of(Equipment) == 7
@@ -136,6 +137,7 @@ async def test_get_equipment_for_operational_restriction(operational_restriction
     objects = await client.get_equipment_for_restriction(ns, or_mrid)
     assert len(objects.result.value) == ns.len_of(Equipment) == 3
     assert_contains_mrids(ns, "fsp", "c2", "tx")
+
 
 @pytest.mark.asyncio
 async def test_get_terminals_for_connectivitynode(single_connectivitynode_network):
@@ -167,6 +169,8 @@ def response_of(object: IdentifiedObject, response_type):
 def to_networkidentifiedobject(obj) -> NetworkIdentifiedObject:
     if isinstance(obj, CableInfo):
         nio = NetworkIdentifiedObject(cableInfo=obj.to_pb())
+    if isinstance(obj, TransformerStarImpedance):
+        nio = NetworkIdentifiedObject(transformerStarImpedance=obj.to_pb())
     elif isinstance(obj, ConductingEquipment):
         if isinstance(obj, AcLineSegment):
             nio = NetworkIdentifiedObject(acLineSegment=obj.to_pb())
