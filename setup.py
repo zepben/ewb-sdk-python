@@ -33,10 +33,10 @@ setup(
     packages=find_namespace_packages(where="src"),
     python_requires='>=3.7',
     install_requires=[
-        "protobuf",
-        "requests",
-        "zepben.protobuf>=0.12.0b6",
-        "python-jose-cryptodome",
+        "protobuf==3.14.0",
+        "requests<2.26.0,>=2.25.0",
+        "zepben.protobuf>=0.12.0b6,<=0.13.0",
+        "python-jose-cryptodome>=1.3.2,<1.4.0",
         "dataclassy==0.6.2",
         "grpcio==1.36.0"
     ],
