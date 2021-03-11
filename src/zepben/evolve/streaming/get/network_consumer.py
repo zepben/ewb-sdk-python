@@ -276,7 +276,7 @@ class NetworkConsumerClient(CimConsumerClient):
         if to_fetch:
             responses = self._stub.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=to_fetch))
             for response in responses:
-                yield extract_identified_object(service, response.identifiedObject)
+                yield extract_identified_object(service, response.identifiedObject, check_presence=False)  # Already checked presence above
         for io in existing:
             yield io
 

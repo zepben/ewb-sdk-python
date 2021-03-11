@@ -21,6 +21,8 @@ from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
 
 __all__ = ["CimConsumerClient", "MultiObjectResult", "extract_identified_object"]
 
+from zepben.evolve.streaming.put.network_rpc import nio_type_to_cim
+
 
 @dataclass()
 class MultiObjectResult(object):
@@ -65,17 +67,24 @@ class CimConsumerClient(GrpcClient):
         raise NotImplementedError()
 
 
-def extract_identified_object(service: NetworkService, nio: NetworkIdentifiedObject) -> Tuple[Optional[IdentifiedObject], str]:
+def extract_identified_object(service: NetworkService, nio: NetworkIdentifiedObject, check_presence: bool = True) -> Tuple[Optional[IdentifiedObject], str]:
     """
-    Add an equipment to the network.
-    `stub` A network consumer stub.
-    `network` The network to add the equipment to.
-    `equipment_io` The equipment identified object returned by the server.
+    Add a NetworkIdentifiedObject to the network. Will convert from protobuf to CIM type.
+    `network` The network to add the identified object to.
+    `nio` The NetworkIdentifiedObject returned by the server.
+    `check_presence` Whether to check if `nio` already exists in the service and skip if it does.
     Raises `UnsupportedOperationException` if `nio` was invalid/unset.
     """
     io_type = nio.WhichOneof("identifiedObject")
     if io_type:
         pbio = getattr(nio, io_type)
+        if check_presence:
+            obj = service.get(pbio.mrid(), nio_type_to_cim[io_type], default=None)
+            if obj is not None:
+                return obj, obj.mrid
+
         return service.add_from_pb(pbio), pbio.mrid()
     else:
         raise UnsupportedOperationException(f"Received a NetworkIdentifiedObject where no field was set")
+
+
