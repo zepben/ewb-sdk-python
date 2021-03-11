@@ -4,13 +4,72 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from zepben.evolve import NetworkService, BusbarSection, Junction, EnergySource, EnergyConsumer, AcLineSegment, Disconnector, \
+from zepben.evolve import NetworkService, Terminal, ConnectivityNode, BaseVoltage, Feeder, Substation, GeographicalRegion, \
+Analog, Discrete, Accumulator, BusbarSection, Junction, EnergySource, EnergyConsumer, AcLineSegment, Disconnector, \
 Fuse, Jumper, Breaker, LoadBreakSwitch, PowerTransformer, LinearShuntCompensator, RatioTapChanger
 
-from test.pb_creators import busbarsection, junction, energysource, energyconsumer, aclinesegment, disconnector, fuse, \
-jumper, breaker, loadbreakswitch, powertransformer, linearshuntcompensator, ratiotapchanger
+from test.pb_creators import terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, \
+discrete, accumulator, busbarsection, junction, energysource, energyconsumer, \
+aclinesegment, disconnector, fuse, jumper, breaker, loadbreakswitch, powertransformer, linearshuntcompensator, ratiotapchanger \
 
 
+'''Core'''
+@given(te=terminal())
+def test_terminal_to_cim(te):
+    cim = te.to_cim(NetworkService())
+    assert cim.mrid == te.mrid()
+    assert isinstance(cim, Terminal)
+
+@given(cnn=connectivitynode())
+def test_connectivitynode_to_cim(cnn):
+    cim = cnn.to_cim(NetworkService())
+    assert cim.mrid == cnn.mrid()
+    assert isinstance(cim, ConnectivityNode)
+
+@given(bv=basevoltage())
+def test_basevoltage_to_cim(bv):
+    cim = bv.to_cim(NetworkService())
+    assert cim.mrid == bv.mrid()
+    assert isinstance(cim, BaseVoltage)
+
+@given(fe=feeder())
+def test_feeder_to_cim(fe):
+    cim = fe.to_cim(NetworkService())
+    assert cim.mrid == fe.mrid()
+    assert isinstance(cim, Feeder)
+
+@given(sub=substation())
+def test_substation_to_cim(sub):
+    cim = sub.to_cim(NetworkService())
+    assert cim.mrid == sub.mrid()
+    assert isinstance(cim, Substation)
+
+@given(ger=geographicalregion())
+def test_geographicalregion_to_cim(ger):
+    cim = ger.to_cim(NetworkService())
+    assert cim.mrid == ger.mrid()
+    assert isinstance(cim, GeographicalRegion)
+
+'''Meas'''
+@given(ana=analog())
+def test_analog_to_cim(ana):
+    cim = ana.to_cim(NetworkService())
+    assert cim.mrid == ana.mrid()
+    assert isinstance(cim, Analog)
+
+@given(dis=discrete())
+def test_discrete_to_cim(dis):
+    cim = dis.to_cim(NetworkService())
+    assert cim.mrid == dis.mrid()
+    assert isinstance(cim, Discrete)
+
+@given(acc=accumulator())
+def test_accumulator_to_cim(acc):
+    cim = acc.to_cim(NetworkService())
+    assert cim.mrid == acc.mrid()
+    assert isinstance(cim, Accumulator)
+
+'''Wires'''
 @given(bbs=busbarsection())
 def test_busbar_to_cim(bbs):
     cim = bbs.to_cim(NetworkService())

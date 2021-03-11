@@ -38,6 +38,15 @@ from test.cim_creators import busbarsection, loadbreakswitch, energysource, ener
 disconnector, fuse, jumper, breaker, linearshuntcompensator, ratiotapchanger, terminal, connectivitynode, basevoltage, \
 feeder, substation, geographicalregion, analog, discrete, accumulator, discretevalue, analogvalue, accumulatorvalue \
 
+#typea = [junction]
+#typeb = [Junction]
+
+#def test_type_to_pb(type_):
+    #object = type_()
+    #for part in typea:
+    #pb = part.to_pb()
+    #assert pb.mrid() == part.mrid
+    #assert isinstance(pb, typeb.index(typea))
 
 '''Core'''
 @given(te=terminal())
@@ -57,7 +66,6 @@ def test_connectivitynode_to_pb(bv):
     pb = bv.to_pb()
     assert pb.mrid() == bv.mrid
     assert isinstance(pb, BaseVoltage)
-    assert pb.nominalVoltage == bv.nominal_voltage
 
 @given(fe=feeder())
 def test_connectivitynode_to_pb(fe):
@@ -71,44 +79,38 @@ def test_substation_to_pb(sub):
     assert pb.mrid() == sub.mrid
     assert isinstance(pb, Substation)
 
-@given(bbs=busbarsection())
-def test_busbar_to_pb(bbs):
-    pb = bbs.to_pb()
-    assert pb.mrid() == bbs.mrid
-    assert isinstance(pb, BusbarSection)
-
 @given(ger=geographicalregion())
-def test_geographicalregion(ger):
+def test_geographicalregion_to_pb(ger):
     pb = ger.to_pb()
     assert pb.mrid() == ger.mrid
     assert isinstance(pb, GeographicalRegion)
 
 '''Meas'''
 @given(ana=analog())
-def test_analog(ana):
+def test_analog_to_pb(ana):
     pb = ana.to_pb()
     assert pb.mrid() == ana.mrid
     assert isinstance(pb, Analog)
 
 @given(dis=discrete())
-def test_discrete(dis):
+def test_discrete_to_pb(dis):
     pb = dis.to_pb()
     assert pb.mrid() == dis.mrid
     assert isinstance(pb, Discrete)
 
 @given(acc=accumulator())
-def test_discrete(acc):
+def test_accumulator_to_pb(acc):
     pb = acc.to_pb()
     assert pb.mrid() == acc.mrid
     assert isinstance(pb, Accumulator)
 
-#@given(disv=discretevalue())
-#def test_discrete(disv):
-    #pb = disv.to_pb()
-    #assert pb.mrid() == disv.mrid()
-    #assert isinstance(pb, DiscreteValue)
-
 '''Wires'''
+@given(bbs=busbarsection())
+def test_busbarsection_to_pb(bbs):
+    pb = bbs.to_pb()
+    assert pb.mrid() == bbs.mrid
+    assert isinstance(pb, BusbarSection)
+
 @given(dis=disconnector())
 def test_disconnector_to_pb(dis):
     pb = dis.to_pb()

@@ -561,8 +561,8 @@ def unitsymbol():
 
 
 def measurement():
-    return {**identifiedobject(), "remote_source": builds(RemoteSource, **identifiedobject()), "power_system_resource": sampled_equipment(),
-            "terminal": builds(Terminal, **identifiedobject()), "phases": phasecode(), "unitSymbol": unitsymbol()}
+    return {**identifiedobject(), "remote_source": builds(RemoteSource, **identifiedobject()), "power_system_resource_mrid": uuids(version=4).map(lambda x: str(x)),
+            "terminal_mrid": uuids(version=4).map(lambda x: str(x)), "phases": phasecode(), "unitSymbol": unitsymbol()}
 
 
 # IEC61970 SCADA #
@@ -576,7 +576,6 @@ def remotepoint():
 
 def remotesource():
     return builds(RemoteSource, **remotepoint(), measurement=sampled_measurement())
-
 
 # MODEL #
 def tracedphases():
