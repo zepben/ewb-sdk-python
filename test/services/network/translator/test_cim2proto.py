@@ -4,6 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+
+from zepben.evolve import phasecode_by_id, WindingConnection, PhaseShuntConnectionKind
+
 '''Core'''
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode
@@ -15,9 +18,9 @@ from zepben.protobuf.cim.iec61970.base.core.GeographicalRegion_pb2 import Geogra
 from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog
 from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete
 from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator
-from zepben.protobuf.cim.iec61970.base.meas.DiscreteValue_pb2 import DiscreteValue
-from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue
-from zepben.protobuf.cim.iec61970.base.meas.AccumulatorValue_pb2 import AccumulatorValue
+'''SCADA'''
+from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource
+from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl
 '''Wires'''
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch
@@ -30,30 +33,26 @@ from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker
 from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import LinearShuntCompensator
+from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer
+from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
 
 
 
 from test.cim_creators import busbarsection, loadbreakswitch, energysource, energyconsumer, junction, aclinesegment, \
-disconnector, fuse, jumper, breaker, linearshuntcompensator, ratiotapchanger, terminal, connectivitynode, basevoltage, \
-feeder, substation, geographicalregion, analog, discrete, accumulator, discretevalue, analogvalue, accumulatorvalue \
+disconnector, fuse, jumper, breaker, linearshuntcompensator, powertransformer, powertransformerend, ratiotapchanger, \
+terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, discrete, accumulator, analogvalue, \
+remotesource, remotecontrol
 
-#typea = [junction]
-#typeb = [Junction]
-
-#def test_type_to_pb(type_):
-    #object = type_()
-    #for part in typea:
-    #pb = part.to_pb()
-    #assert pb.mrid() == part.mrid
-    #assert isinstance(pb, typeb.index(typea))
 
 '''Core'''
+
 @given(te=terminal())
 def test_terminal_to_pb(te):
     pb = te.to_pb()
     assert pb.mrid() == te.mrid
     assert isinstance(pb, Terminal)
+    assert phasecode_by_id(pb.phases) == te.phases
 
 @given(cnn=connectivitynode())
 def test_connectivitynode_to_pb(cnn):
@@ -62,10 +61,11 @@ def test_connectivitynode_to_pb(cnn):
     assert isinstance(pb, ConnectivityNode)
 
 @given(bv=basevoltage())
-def test_connectivitynode_to_pb(bv):
+def test_basevoltage_to_pb(bv):
     pb = bv.to_pb()
     assert pb.mrid() == bv.mrid
     assert isinstance(pb, BaseVoltage)
+    assert pb.nominalVoltage == bv.nominal_voltage
 
 @given(fe=feeder())
 def test_connectivitynode_to_pb(fe):
@@ -86,11 +86,13 @@ def test_geographicalregion_to_pb(ger):
     assert isinstance(pb, GeographicalRegion)
 
 '''Meas'''
+
 @given(ana=analog())
 def test_analog_to_pb(ana):
     pb = ana.to_pb()
     assert pb.mrid() == ana.mrid
     assert isinstance(pb, Analog)
+    assert pb.positiveFlowIn == ana.positive_flow_in
 
 @given(dis=discrete())
 def test_discrete_to_pb(dis):
@@ -104,7 +106,22 @@ def test_accumulator_to_pb(acc):
     assert pb.mrid() == acc.mrid
     assert isinstance(pb, Accumulator)
 
+'''SCADA'''
+
+#@given(rs=remotesource())
+#def test_remotesource_to_pb(rs):
+    #pb = rs.to_pb()
+    #assert pb.mrid() == rs.mrid
+    #assert isinstance(pb, RemoteSource)
+
+@given(rc=remotecontrol())
+def test_remotecontrol_to_pb(rc):
+    pb = rc.to_pb()
+    assert pb.mrid() == rc.mrid
+    assert isinstance(pb, RemoteControl)
+
 '''Wires'''
+
 @given(bbs=busbarsection())
 def test_busbarsection_to_pb(bbs):
     pb = bbs.to_pb()
@@ -142,10 +159,8 @@ def test_loadbreakswitch_to_pb(lbs):
     verify_protected_switch(lbs, pb)
     assert isinstance(pb, LoadBreakSwitch)
 
-
 def verify_protected_switch(cim, pb):
     verify_switch(cim, pb)
-
 
 def verify_switch(cim, pb):
     # Protobuf switch open/normalOpen are currently bools, so we can only perform a naive check of if all phases are closed
@@ -190,19 +205,57 @@ def test_energysource_to_pb(ens):
     assert pb.x0 == ens.x0
     assert pb.xn == ens.xn
 
+#@given(pwt=powertransformer())
+#def test_powertransformer_to_pb(pwt):
+    #pb = pwt.to_pb()
+    #assert pb.mrid() == pwt.mrid
+    #assert isinstance(pb, PowerTransformer)
 
 @given(enc=energyconsumer())
 def test_energyconsumer_to_pb(enc):
     pb = enc.to_pb()
     assert pb.mrid() == enc.mrid
     assert isinstance(pb, EnergyConsumer)
+    assert pb.customerCount == enc.customer_count
+    assert pb.grounded == enc.grounded
+    assert PhaseShuntConnectionKind(pb.phaseConnection) == enc.phase_connection
     assert pb.p == enc.p
     assert pb.q == enc.q
     assert pb.pFixed == enc.p_fixed
     assert pb.qFixed == enc.q_fixed
 
-#@given(lsc=linearshuntcompensator())
-#def test_linearshuntcompensator_to_pb(lsc):
-    #pb = lsc.to_pb()
-    #assert pb.mrid() == lsc.mrid
-    #assert isinstance(pb, LinearShuntCompensator)
+@given(lsc=linearshuntcompensator())
+def test_linearshuntcompensator_to_pb(lsc):
+    pb = lsc.to_pb()
+    assert pb.mrid() == lsc.mrid
+    assert isinstance(pb, LinearShuntCompensator)
+    assert pb.b0PerSection == lsc.b0_per_section
+    assert pb.bPerSection == lsc.b_per_section
+    #assert pb.g0PerSection == lsc.b0_per_section
+    #assert pb.gPerSection == lsc.g_per_section
+
+@given(pte=powertransformerend())
+def test_powertransformerend_to_pb(pte):
+    pb = pte.to_pb()
+    assert pb.mrid() == pte.mrid
+    assert isinstance(pb, PowerTransformerEnd)
+    assert pb.b == pte.b
+    assert pb.b0 == pte.b0
+    assert WindingConnection(pb.connectionKind) == pte.connection_kind
+    assert pb.g == pte.g
+    assert pb.g0 == pte.g0
+    assert pb.phaseAngleClock == pte.phase_angle_clock
+    assert pb.r == pte.r
+    assert pb.r0 == pte.r0
+    assert pb.ratedS == pte.rated_s
+    assert pb.ratedU == pte.rated_u
+    assert pb.x == pte.x
+    assert pb.x0 == pte.x0
+
+#@given(rtc=ratiotapchanger())
+#def test_ratiotapchanger_to_pb(rtc):
+    #pb = rtc.to_pb()
+    #assert pb.mrid() == rtc.mrid
+    #assert isinstance(pb, RatioTapChanger)
+    #assert pb.stepVoltageIncrement == rtc.step_voltage_increment
+

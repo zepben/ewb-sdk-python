@@ -463,7 +463,6 @@ PBSubGeographicalRegion.to_cim = subgeographicalregion_to_cim
 PBSubstation.to_cim = substation_to_cim
 PBTerminal.to_cim = terminal_to_cim
 
-
 ### IEC61970 MEAS ###
 def accumulator_to_cim(pb: PBAccumulator, network_service: NetworkService) -> Optional[Accumulator]:
     cim = Accumulator(mrid=pb.mrid())

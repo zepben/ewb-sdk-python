@@ -579,7 +579,7 @@ def shuntcompensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
                               sections=cim.sections,
                               grounded=cim.grounded,
                               nomU=cim.nom_u,
-                              phaseConnection=PBPhaseShuntConnectionKind.Value(cim.phase_connection))
+                              phaseConnection=PBPhaseShuntConnectionKind.Enum.Value(cim.phase_connection.short_name))
 
 
 def switch_to_pb(cim: Switch) -> PBSwitch:
