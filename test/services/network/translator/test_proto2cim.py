@@ -7,11 +7,12 @@ from hypothesis import given
 from zepben.evolve import NetworkService, WindingConnection, phasecode_by_id, PhaseShuntConnectionKind, IdentifiedObject, Terminal, ConnectivityNode, \
 BaseVoltage, Feeder, Substation, GeographicalRegion, Analog, Discrete, Accumulator, RemoteControl, BusbarSection, Junction, \
 EnergySource, EnergyConsumer, AcLineSegment, Disconnector, Fuse, Jumper, Breaker, LoadBreakSwitch, PowerTransformer, \
-PowerTransformerEnd, LinearShuntCompensator, RatioTapChanger
+PowerTransformerEnd, LinearShuntCompensator, RatioTapChanger, RemoteSource
 
 from test.pb_creators import terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, \
 discrete, accumulator, remotecontrol, busbarsection, junction, energysource, energyconsumer, aclinesegment, disconnector, \
-fuse, jumper, breaker, loadbreakswitch, powertransformer, powertransformerend, linearshuntcompensator, ratiotapchanger
+fuse, jumper, breaker, loadbreakswitch, powertransformer, powertransformerend, linearshuntcompensator, ratiotapchanger, \
+remotesource
 
 
 '''Core'''
@@ -76,11 +77,11 @@ def test_accumulator_to_cim(acc):
 
 '''SCADA'''
 
-#@given(rs=remotesource())
-#def test_remotesource_to_cim(rs):
-    #cim = rs.to_cim(NetworkService())
-    #assert cim.mrid == rs.mrid()
-    #assert isinstance(cim, RemoteSource)
+@given(rs=remotesource())
+def test_remotesource_to_cim(rs):
+    cim = rs.to_cim(NetworkService())
+    assert cim.mrid == rs.mrid()
+    assert isinstance(cim, RemoteSource)
 
 @given(rc=remotecontrol())
 def test_remotecontrol_to_cim(rc):
@@ -95,7 +96,7 @@ def test_busbarsection_to_cim(bbs):
     cim = bbs.to_cim(NetworkService())
     assert cim.mrid == bbs.mrid()
     assert isinstance(cim, BusbarSection)
-    #assert cim.ipMax == bbs.ipMax
+    #assert cim.ip_max == bbs.ipMax
 
 @given(dis=disconnector())
 def test_disconnector_to_cim(dis):
@@ -183,8 +184,8 @@ def test_linearshuntcompensator_to_cim(lsc):
     assert isinstance(cim, LinearShuntCompensator)
     assert cim.b0_per_section == lsc.b0PerSection
     assert cim.b_per_section == lsc.bPerSection
-    #assert cim.g0_per_section == lsc.g0PerSection
-    #assert cim.g_per_section == lsc.gPerSection
+    assert cim.g0_per_section == lsc.g0PerSection
+    assert cim.g_per_section == lsc.gPerSection
 
 @given(pte=powertransformerend())
 def test_powertransformerend_to_cim(pte):
@@ -204,12 +205,12 @@ def test_powertransformerend_to_cim(pte):
     assert cim.x == pte.x
     assert cim.x0 == pte.x0
 
-#@given(rtc=ratiotapchanger())
-#def test_ratiotapchanger_to_cim(rtc):
-    #cim = rtc.to_cim(NetworkService())
-    #assert cim.mrid == rtc.mrid()
-    #assert isinstance(cim, RatioTapChanger)
-    #assert cim.step_voltage_increment == rtc.stepVoltageIncrement
+@given(rtc=ratiotapchanger())
+def test_ratiotapchanger_to_cim(rtc):
+    cim = rtc.to_cim(NetworkService())
+    assert cim.mrid == rtc.mrid()
+    assert isinstance(cim, RatioTapChanger)
+    assert cim.step_voltage_increment == rtc.stepVoltageIncrement
 
 
 

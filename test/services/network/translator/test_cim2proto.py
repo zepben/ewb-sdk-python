@@ -4,8 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from hypothesis.strategies import builds
 
-from zepben.evolve import phasecode_by_id, WindingConnection, PhaseShuntConnectionKind
+from zepben.evolve import phasecode_by_id, WindingConnection, PhaseShuntConnectionKind, RegulatingCondEq
 
 '''Core'''
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
@@ -40,10 +41,10 @@ from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTap
 
 
 from test.cim_creators import busbarsection, loadbreakswitch, energysource, energyconsumer, junction, aclinesegment, \
-disconnector, fuse, jumper, breaker, linearshuntcompensator, powertransformer, powertransformerend, ratiotapchanger, \
-terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, discrete, accumulator, analogvalue, \
-remotesource, remotecontrol
-
+    disconnector, fuse, jumper, breaker, linearshuntcompensator, powertransformer, powertransformerend, ratiotapchanger, \
+    terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, discrete, accumulator, \
+    analogvalue, \
+    remotesource, remotecontrol, regulatingcondeq
 
 '''Core'''
 
@@ -108,11 +109,11 @@ def test_accumulator_to_pb(acc):
 
 '''SCADA'''
 
-#@given(rs=remotesource())
-#def test_remotesource_to_pb(rs):
-    #pb = rs.to_pb()
-    #assert pb.mrid() == rs.mrid
-    #assert isinstance(pb, RemoteSource)
+@given(rs=remotesource())
+def test_remotesource_to_pb(rs):
+    pb = rs.to_pb()
+    assert pb.mrid() == rs.mrid
+    assert isinstance(pb, RemoteSource)
 
 @given(rc=remotecontrol())
 def test_remotecontrol_to_pb(rc):
@@ -122,11 +123,35 @@ def test_remotecontrol_to_pb(rc):
 
 '''Wires'''
 
+def verify_powersystemsresource(cim, pb):
+    pass
+    # Top of inheritance hierarchy
+
+def verify_equipment(cim, pb):
+    assert pb.inService == cim.in_service
+    assert pb.normallyInService == cim.normally_in_service
+    verify_powersystemsresource(cim, pb.psr)
+
+def verify_conductingequipment(cim, pb):
+    verify_equipment(cim, pb.eq)
+
+def verify_connector(cim, pb):
+    verify_conductingequipment(cim, pb.ce)
+
 @given(bbs=busbarsection())
 def test_busbarsection_to_pb(bbs):
     pb = bbs.to_pb()
     assert pb.mrid() == bbs.mrid
     assert isinstance(pb, BusbarSection)
+    #assert pb.ipMax == bbs.ip_max
+    verify_connector(bbs, pb.cn)
+
+@given(jnc=junction())
+def test_junction_to_pb(jnc):
+    pb = jnc.to_pb()
+    assert pb.mrid() == jnc.mrid
+    assert isinstance(pb, Junction)
+    verify_connector(jnc, pb.cn)
 
 @given(dis=disconnector())
 def test_disconnector_to_pb(dis):
@@ -175,64 +200,15 @@ def verify_switch(cim, pb):
     if cim.is_normally_open():
         assert pb.ps.sw.normalOpen
 
-@given(jnc=junction())
-def test_junction_to_pb(jnc):
-    pb = jnc.to_pb()
-    assert pb.mrid() == jnc.mrid
-    assert isinstance(pb, Junction)
+def verify_energyconnection(cim, pb):
+    verify_conductingequipment(cim, pb.ce)
 
-@given(acl=aclinesegment())
-def test_aclinesegment_to_pb(acl):
-    pb = acl.to_pb()
-    assert pb.mrid() == acl.mrid
-    assert isinstance(pb, AcLineSegment)
-
-@given(ens=energysource())
-def test_energysource_to_pb(ens):
-    pb = ens.to_pb()
-    assert pb.mrid() == ens.mrid
-    assert isinstance(pb, EnergySource)
-    assert pb.activePower == ens.active_power
-    assert pb.r == ens.r
-    assert pb.x == ens.x
-    assert pb.reactivePower == ens.reactive_power
-    assert pb.voltageAngle == ens.voltage_angle
-    assert pb.voltageMagnitude == ens.voltage_magnitude
-    assert pb.pMax == ens.p_max
-    assert pb.pMin == ens.p_min
-    assert pb.r0 == ens.r0
-    assert pb.rn == ens.rn
-    assert pb.x0 == ens.x0
-    assert pb.xn == ens.xn
-
-#@given(pwt=powertransformer())
-#def test_powertransformer_to_pb(pwt):
-    #pb = pwt.to_pb()
-    #assert pb.mrid() == pwt.mrid
-    #assert isinstance(pb, PowerTransformer)
-
-@given(enc=energyconsumer())
-def test_energyconsumer_to_pb(enc):
-    pb = enc.to_pb()
-    assert pb.mrid() == enc.mrid
-    assert isinstance(pb, EnergyConsumer)
-    assert pb.customerCount == enc.customer_count
-    assert pb.grounded == enc.grounded
-    assert PhaseShuntConnectionKind(pb.phaseConnection) == enc.phase_connection
-    assert pb.p == enc.p
-    assert pb.q == enc.q
-    assert pb.pFixed == enc.p_fixed
-    assert pb.qFixed == enc.q_fixed
-
-@given(lsc=linearshuntcompensator())
-def test_linearshuntcompensator_to_pb(lsc):
-    pb = lsc.to_pb()
-    assert pb.mrid() == lsc.mrid
-    assert isinstance(pb, LinearShuntCompensator)
-    assert pb.b0PerSection == lsc.b0_per_section
-    assert pb.bPerSection == lsc.b_per_section
-    #assert pb.g0PerSection == lsc.b0_per_section
-    #assert pb.gPerSection == lsc.g_per_section
+@given(pwt=powertransformer())
+def test_powertransformer_to_pb(pwt):
+    pb = pwt.to_pb()
+    assert pb.mrid() == pwt.mrid
+    assert isinstance(pb, PowerTransformer)
+    verify_conductingequipment(pwt, pb.ce)
 
 @given(pte=powertransformerend())
 def test_powertransformerend_to_pb(pte):
@@ -252,10 +228,86 @@ def test_powertransformerend_to_pb(pte):
     assert pb.x == pte.x
     assert pb.x0 == pte.x0
 
-#@given(rtc=ratiotapchanger())
-#def test_ratiotapchanger_to_pb(rtc):
-    #pb = rtc.to_pb()
-    #assert pb.mrid() == rtc.mrid
-    #assert isinstance(pb, RatioTapChanger)
-    #assert pb.stepVoltageIncrement == rtc.step_voltage_increment
+@given(ens=energysource())
+def test_energysource_to_pb(ens):
+    pb = ens.to_pb()
+    assert pb.mrid() == ens.mrid
+    assert isinstance(pb, EnergySource)
+    assert pb.activePower == ens.active_power
+    assert pb.r == ens.r
+    assert pb.x == ens.x
+    assert pb.reactivePower == ens.reactive_power
+    assert pb.voltageAngle == ens.voltage_angle
+    assert pb.voltageMagnitude == ens.voltage_magnitude
+    assert pb.pMax == ens.p_max
+    assert pb.pMin == ens.p_min
+    assert pb.r0 == ens.r0
+    assert pb.rn == ens.rn
+    assert pb.x0 == ens.x0
+    assert pb.xn == ens.xn
+    verify_energyconnection(ens, pb.ec)
 
+@given(enc=energyconsumer())
+def test_energyconsumer_to_pb(enc):
+    pb = enc.to_pb()
+    assert pb.mrid() == enc.mrid
+    assert isinstance(pb, EnergyConsumer)
+    assert pb.customerCount == enc.customer_count
+    assert pb.grounded == enc.grounded
+    assert PhaseShuntConnectionKind(pb.phaseConnection) == enc.phase_connection
+    assert pb.p == enc.p
+    assert pb.q == enc.q
+    assert pb.pFixed == enc.p_fixed
+    assert pb.qFixed == enc.q_fixed
+    verify_energyconnection(enc, pb.ec)
+
+def verify_regulatingcondeq(cim, pb):
+    assert pb.controlEnabled == cim.control_enabled
+    verify_energyconnection(cim, pb.ec)
+
+def verify_shuntcompensator(cim, pb):
+    assert pb.grounded == cim.grounded
+    assert pb.nomU == cim.nom_u
+    assert PhaseShuntConnectionKind(pb.phaseConnection) == cim.phase_connection
+    assert pb.sections == cim.sections
+    verify_regulatingcondeq(cim, pb.rce)
+
+def verify_conductor(cim, pb):
+    assert pb.length == cim.length
+    verify_conductingequipment(cim, pb.ce)
+
+@given(acl=aclinesegment())
+def test_aclinesegment_to_pb(acl):
+    pb = acl.to_pb()
+    assert pb.mrid() == acl.mrid
+    assert isinstance(pb, AcLineSegment)
+    verify_conductor(acl, pb.cd)
+
+@given(lsc=linearshuntcompensator())
+def test_linearshuntcompensator_to_pb(lsc):
+    pb = lsc.to_pb()
+    assert pb.mrid() == lsc.mrid
+    assert isinstance(pb, LinearShuntCompensator)
+    assert pb.b0PerSection == lsc.b0_per_section
+    assert pb.bPerSection == lsc.b_per_section
+    assert pb.g0PerSection == lsc.g0_per_section
+    assert pb.gPerSection == lsc.g_per_section
+    verify_shuntcompensator(lsc, pb.sc)
+
+def verify_tapchanger(cim, pb):
+    assert pb.controlEnabled == cim.control_enabled
+    assert pb.highStep == cim.high_step
+    assert pb.lowStep == cim.low_step
+    assert pb.neutralStep == cim.neutral_step
+    assert pb.neutralU == cim.neutral_u
+    assert pb.normalStep == cim.normal_step
+    assert pb.step == cim.step
+    verify_powersystemsresource(cim, pb.psr)
+
+@given(rtc=ratiotapchanger())
+def test_ratiotapchanger_to_pb(rtc):
+    pb = rtc.to_pb()
+    assert pb.mrid() == rtc.mrid
+    assert isinstance(pb, RatioTapChanger)
+    assert pb.stepVoltageIncrement == rtc.step_voltage_increment
+    verify_tapchanger(rtc, pb.tc)

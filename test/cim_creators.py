@@ -448,7 +448,7 @@ def powerelectronicsconnectionphase():
 
 def powertransformer():
     return builds(PowerTransformer, **conductingequipment(), power_transformer_ends=lists(builds(PowerTransformerEnd, **identifiedobject()), max_size=2),
-                  vectorGroup=vectorgroup(), transformer_utilisation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+                  vector_group=vectorgroup(), transformer_utilisation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
 
 
 def windingconnectionkind():
@@ -498,7 +498,7 @@ MAX_TC_INT = 3
 
 def tapchanger():
     return {**powersystemresource(), "high_step": integers(min_value=10, max_value=15),
-            "low_step": integers(min_value=0, max_value=2), "step": floats(min_value=1.0, max_value=10.0),
+            "low_step": integers(min_value=0, max_value=2), "step": floats(min_value=2.0, max_value=10.0),
             "neutral_step": integers(min_value=2, max_value=10), "neutral_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
             "normal_step": integers(min_value=2, max_value=10), "control_enabled": booleans()}
 
@@ -585,7 +585,7 @@ def tracedphases():
 
 def sampled_measurement():
     return choice([
-        builds(Accumulator()),
-        builds(Analog()),
-        builds(Discrete()),
+        builds(Accumulator),
+        builds(Analog),
+        builds(Discrete),
     ])

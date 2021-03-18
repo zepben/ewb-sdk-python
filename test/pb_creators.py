@@ -529,7 +529,7 @@ MAX_TC_INT = 3
 
 def tapchanger():
     return builds(PBTapChanger, psr=powersystemresource(), highStep=integers(min_value=10, max_value=15),
-                  lowStep=integers(min_value=0, max_value=2), step=floats(min_value=1.0, max_value=10.0),
+                  lowStep=integers(min_value=0, max_value=2), step=floats(min_value=2.0, max_value=10.0),
                   neutralStep=integers(min_value=2, max_value=10), neutralU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
                   normalStep=integers(min_value=2, max_value=10), controlEnabled=booleans())
 
