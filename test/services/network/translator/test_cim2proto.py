@@ -19,6 +19,7 @@ from zepben.protobuf.cim.iec61970.base.core.GeographicalRegion_pb2 import Geogra
 from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog
 from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete
 from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator
+from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue
 '''SCADA'''
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl
@@ -38,15 +39,16 @@ from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTr
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
 
-
-
 from test.cim_creators import busbarsection, loadbreakswitch, energysource, energyconsumer, junction, aclinesegment, \
     disconnector, fuse, jumper, breaker, linearshuntcompensator, powertransformer, powertransformerend, ratiotapchanger, \
     terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, discrete, accumulator, \
-    analogvalue, \
-    remotesource, remotecontrol, regulatingcondeq
+    analogvalue, remotesource, remotecontrol, regulatingcondeq
 
 '''Core'''
+
+def verify_ACDCTerminal(cim, pb):
+    pass
+    ## Top of inheritance hierarchy
 
 @given(te=terminal())
 def test_terminal_to_pb(te):
@@ -54,6 +56,7 @@ def test_terminal_to_pb(te):
     assert pb.mrid() == te.mrid
     assert isinstance(pb, Terminal)
     assert phasecode_by_id(pb.phases) == te.phases
+    verify_ACDCTerminal(te, pb)
 
 @given(cnn=connectivitynode())
 def test_connectivitynode_to_pb(cnn):
@@ -67,6 +70,7 @@ def test_basevoltage_to_pb(bv):
     assert pb.mrid() == bv.mrid
     assert isinstance(pb, BaseVoltage)
     assert pb.nominalVoltage == bv.nominal_voltage
+    verify_ACDCTerminal(bv, pb)
 
 @given(fe=feeder())
 def test_connectivitynode_to_pb(fe):
@@ -123,20 +127,20 @@ def test_remotecontrol_to_pb(rc):
 
 '''Wires'''
 
-def verify_powersystemsresource(cim, pb):
+def verify_powersystemsresource_to_pb(cim, pb):
     pass
-    # Top of inheritance hierarchy
+    ## Top of inheritance hierarchy
 
-def verify_equipment(cim, pb):
+def verify_equipment_to_pb(cim, pb):
     assert pb.inService == cim.in_service
     assert pb.normallyInService == cim.normally_in_service
-    verify_powersystemsresource(cim, pb.psr)
+    verify_powersystemsresource_to_pb(cim, pb.psr)
 
-def verify_conductingequipment(cim, pb):
-    verify_equipment(cim, pb.eq)
+def verify_conductingequipment_to_pb(cim, pb):
+    verify_equipment_to_pb(cim, pb.eq)
 
-def verify_connector(cim, pb):
-    verify_conductingequipment(cim, pb.ce)
+def verify_connector_to_pb(cim, pb):
+    verify_conductingequipment_to_pb(cim, pb.ce)
 
 @given(bbs=busbarsection())
 def test_busbarsection_to_pb(bbs):
@@ -144,14 +148,14 @@ def test_busbarsection_to_pb(bbs):
     assert pb.mrid() == bbs.mrid
     assert isinstance(pb, BusbarSection)
     #assert pb.ipMax == bbs.ip_max
-    verify_connector(bbs, pb.cn)
+    verify_connector_to_pb(bbs, pb.cn)
 
 @given(jnc=junction())
 def test_junction_to_pb(jnc):
     pb = jnc.to_pb()
     assert pb.mrid() == jnc.mrid
     assert isinstance(pb, Junction)
-    verify_connector(jnc, pb.cn)
+    verify_connector_to_pb(jnc, pb.cn)
 
 @given(dis=disconnector())
 def test_disconnector_to_pb(dis):
@@ -200,15 +204,15 @@ def verify_switch(cim, pb):
     if cim.is_normally_open():
         assert pb.ps.sw.normalOpen
 
-def verify_energyconnection(cim, pb):
-    verify_conductingequipment(cim, pb.ce)
+def verify_energyconnection_to_pb(cim, pb):
+    verify_conductingequipment_to_pb(cim, pb.ce)
 
 @given(pwt=powertransformer())
 def test_powertransformer_to_pb(pwt):
     pb = pwt.to_pb()
     assert pb.mrid() == pwt.mrid
     assert isinstance(pb, PowerTransformer)
-    verify_conductingequipment(pwt, pb.ce)
+    verify_conductingequipment_to_pb(pwt, pb.ce)
 
 @given(pte=powertransformerend())
 def test_powertransformerend_to_pb(pte):
@@ -245,7 +249,7 @@ def test_energysource_to_pb(ens):
     assert pb.rn == ens.rn
     assert pb.x0 == ens.x0
     assert pb.xn == ens.xn
-    verify_energyconnection(ens, pb.ec)
+    verify_energyconnection_to_pb(ens, pb.ec)
 
 @given(enc=energyconsumer())
 def test_energyconsumer_to_pb(enc):
@@ -259,29 +263,29 @@ def test_energyconsumer_to_pb(enc):
     assert pb.q == enc.q
     assert pb.pFixed == enc.p_fixed
     assert pb.qFixed == enc.q_fixed
-    verify_energyconnection(enc, pb.ec)
+    verify_energyconnection_to_pb(enc, pb.ec)
 
-def verify_regulatingcondeq(cim, pb):
+def verify_regulatingcondeq_to_pb(cim, pb):
     assert pb.controlEnabled == cim.control_enabled
-    verify_energyconnection(cim, pb.ec)
+    verify_energyconnection_to_pb(cim, pb.ec)
 
-def verify_shuntcompensator(cim, pb):
+def verify_shuntcompensator_to_pb(cim, pb):
     assert pb.grounded == cim.grounded
     assert pb.nomU == cim.nom_u
     assert PhaseShuntConnectionKind(pb.phaseConnection) == cim.phase_connection
     assert pb.sections == cim.sections
-    verify_regulatingcondeq(cim, pb.rce)
+    verify_regulatingcondeq_to_pb(cim, pb.rce)
 
-def verify_conductor(cim, pb):
+def verify_conductor_to_pb(cim, pb):
     assert pb.length == cim.length
-    verify_conductingequipment(cim, pb.ce)
+    verify_conductingequipment_to_pb(cim, pb.ce)
 
 @given(acl=aclinesegment())
 def test_aclinesegment_to_pb(acl):
     pb = acl.to_pb()
     assert pb.mrid() == acl.mrid
     assert isinstance(pb, AcLineSegment)
-    verify_conductor(acl, pb.cd)
+    verify_conductor_to_pb(acl, pb.cd)
 
 @given(lsc=linearshuntcompensator())
 def test_linearshuntcompensator_to_pb(lsc):
@@ -292,9 +296,9 @@ def test_linearshuntcompensator_to_pb(lsc):
     assert pb.bPerSection == lsc.b_per_section
     assert pb.g0PerSection == lsc.g0_per_section
     assert pb.gPerSection == lsc.g_per_section
-    verify_shuntcompensator(lsc, pb.sc)
+    verify_shuntcompensator_to_pb(lsc, pb.sc)
 
-def verify_tapchanger(cim, pb):
+def verify_tapchanger_to_pb(cim, pb):
     assert pb.controlEnabled == cim.control_enabled
     assert pb.highStep == cim.high_step
     assert pb.lowStep == cim.low_step
@@ -302,7 +306,7 @@ def verify_tapchanger(cim, pb):
     assert pb.neutralU == cim.neutral_u
     assert pb.normalStep == cim.normal_step
     assert pb.step == cim.step
-    verify_powersystemsresource(cim, pb.psr)
+    verify_powersystemsresource_to_pb(cim, pb.psr)
 
 @given(rtc=ratiotapchanger())
 def test_ratiotapchanger_to_pb(rtc):
@@ -310,4 +314,4 @@ def test_ratiotapchanger_to_pb(rtc):
     assert pb.mrid() == rtc.mrid
     assert isinstance(pb, RatioTapChanger)
     assert pb.stepVoltageIncrement == rtc.step_voltage_increment
-    verify_tapchanger(rtc, pb.tc)
+    verify_tapchanger_to_pb(rtc, pb.tc)

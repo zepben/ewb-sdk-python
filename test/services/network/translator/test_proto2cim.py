@@ -14,8 +14,10 @@ discrete, accumulator, remotecontrol, busbarsection, junction, energysource, ene
 fuse, jumper, breaker, loadbreakswitch, powertransformer, powertransformerend, linearshuntcompensator, ratiotapchanger, \
 remotesource
 
-
 '''Core'''
+def verify_ACDCTerminal(pb, cim):
+    pass
+    ## Top of inheritance hierarchy
 
 @given(te=terminal())
 def test_terminal_to_cim(te):
@@ -23,12 +25,14 @@ def test_terminal_to_cim(te):
     assert cim.mrid == te.mrid()
     assert isinstance(cim, Terminal)
     assert cim.phases == phasecode_by_id(te.phases)
+    verify_ACDCTerminal(te, cim)
 
 @given(cnn=connectivitynode())
 def test_connectivitynode_to_cim(cnn):
     cim = cnn.to_cim(NetworkService())
     assert cim.mrid == cnn.mrid()
     assert isinstance(cim, ConnectivityNode)
+    verify_ACDCTerminal(cnn, cim)
 
 @given(bv=basevoltage())
 def test_basevoltage_to_cim(bv):
@@ -36,6 +40,7 @@ def test_basevoltage_to_cim(bv):
     assert cim.mrid == bv.mrid()
     assert isinstance(cim, BaseVoltage)
     assert cim.nominal_voltage == bv.nominalVoltage
+    verify_ACDCTerminal(bv, cim)
 
 @given(fe=feeder())
 def test_feeder_to_cim(fe):
@@ -91,12 +96,36 @@ def test_remotecontrol_to_cim(rc):
 
 '''Wires'''
 
+def verify_powersystemsresource_to_cim(pb, cim):
+    pass
+    ## Top of inheritance hierarchy
+
+def verify_equipment_to_cim(pb, cim):
+    assert cim.in_service == pb.inService
+    assert cim.normally_in_service == pb.normallyInService
+    verify_powersystemsresource_to_cim(pb.psr, cim)
+
+def verify_conductingequipment_to_cim(pb, cim):
+    verify_equipment_to_cim(pb.eq, cim)
+
+def verify_connector_to_cim(pb, cim):
+    verify_conductingequipment_to_cim(pb.ce, cim)
+
 @given(bbs=busbarsection())
 def test_busbarsection_to_cim(bbs):
     cim = bbs.to_cim(NetworkService())
     assert cim.mrid == bbs.mrid()
     assert isinstance(cim, BusbarSection)
     #assert cim.ip_max == bbs.ipMax
+    verify_connector_to_cim(bbs.cn, cim)
+
+def verify_switch_to_cim(pb, cim):
+    assert cim._normal_open == pb.normalOpen
+    assert cim._open == pb.open
+    verify_conductingequipment_to_cim(pb.ce, cim)
+
+def verify_protectedswitch_to_cim(pb, cim):
+    verify_switch_to_cim(pb.sw, cim)
 
 @given(dis=disconnector())
 def test_disconnector_to_cim(dis):
@@ -121,6 +150,8 @@ def test_breaker_to_cim(brk):
     cim = brk.to_cim(NetworkService())
     assert cim.mrid == brk.mrid()
     assert isinstance(cim, Breaker)
+    #verify_protectedswitch_to_cim(brk, cim)
+    ## Error with normalOpen (not recognized as attribute)
 
 @given(lbs=loadbreakswitch())
 def test_loadbreakswitch_to_cim(lbs):
@@ -157,6 +188,7 @@ def test_energysource_to_cim(ens):
     assert cim.rn == ens.rn
     assert cim.x0 == ens.x0
     assert cim.xn == ens.xn
+    verify_energyconnection_to_cim(ens.ec, cim)
 
 @given(enc=energyconsumer())
 def test_energyconsumer_to_cim(enc):
@@ -170,6 +202,7 @@ def test_energyconsumer_to_cim(enc):
     assert cim.q == enc.q
     assert cim.p_fixed == enc.pFixed
     assert cim.q_fixed == enc.qFixed
+    verify_energyconnection_to_cim(enc.ec, cim)
 
 @given(pwt=powertransformer())
 def test_powertransformer_to_cim(pwt):
@@ -186,6 +219,21 @@ def test_linearshuntcompensator_to_cim(lsc):
     assert cim.b_per_section == lsc.bPerSection
     assert cim.g0_per_section == lsc.g0PerSection
     assert cim.g_per_section == lsc.gPerSection
+    verify_shuntcompensator_to_cim(lsc.sc, cim)
+
+def verify_energyconnection_to_cim(pb, cim):
+    verify_conductingequipment_to_cim(pb.ce, cim)
+
+def verify_regulatingcondeq_to_cim(pb, cim):
+    assert cim.control_enabled == pb.controlEnabled
+    verify_energyconnection_to_cim(pb.ec, cim)
+
+def verify_shuntcompensator_to_cim(pb, cim):
+    assert cim.grounded == pb.grounded
+    assert cim.nom_u == pb.nomU
+    assert cim.phase_connection == PhaseShuntConnectionKind(pb.phaseConnection)
+    assert cim.sections == pb.sections
+    verify_regulatingcondeq_to_cim(pb.rce, cim)
 
 @given(pte=powertransformerend())
 def test_powertransformerend_to_cim(pte):
@@ -205,12 +253,22 @@ def test_powertransformerend_to_cim(pte):
     assert cim.x == pte.x
     assert cim.x0 == pte.x0
 
+def verify_tapchanger_to_cim(pb, cim):
+    assert cim.control_enabled == pb.controlEnabled
+    assert cim.high_step == pb.highStep
+    assert cim.low_step == pb.lowStep
+    assert cim.neutral_step == pb.neutralStep
+    assert cim.neutral_u == pb.neutralU
+    assert cim.normal_step == pb.normalStep
+    assert cim.step == pb.step
+    verify_powersystemsresource_to_cim(pb.psr, cim)
+
 @given(rtc=ratiotapchanger())
 def test_ratiotapchanger_to_cim(rtc):
     cim = rtc.to_cim(NetworkService())
     assert cim.mrid == rtc.mrid()
     assert isinstance(cim, RatioTapChanger)
     assert cim.step_voltage_increment == rtc.stepVoltageIncrement
-
+    verify_tapchanger_to_cim(rtc.tc, cim)
 
 
