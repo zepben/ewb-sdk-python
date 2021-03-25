@@ -8,6 +8,7 @@ from hypothesis.strategies import builds
 
 from zepben.evolve import phasecode_by_id, WindingConnection, PhaseShuntConnectionKind, RegulatingCondEq
 
+# IEC61970
 '''Core'''
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode
@@ -39,16 +40,58 @@ from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTr
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
 
+#IEC61968
+from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter
+from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole
+
+# IEC61970
 from test.cim_creators import busbarsection, loadbreakswitch, energysource, energyconsumer, junction, aclinesegment, \
     disconnector, fuse, jumper, breaker, linearshuntcompensator, powertransformer, powertransformerend, ratiotapchanger, \
     terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, discrete, accumulator, \
     analogvalue, remotesource, remotecontrol, regulatingcondeq
 
+#IEC61968
+from test.cim_creators import meter, pole
+
 '''Core'''
 
-def verify_ACDCTerminal(cim, pb):
-    pass
-    ## Top of inheritance hierarchy
+def verify_identifiedobject_to_pb(cim, pb):
+    ## Top of inheritance hierarchy -- NOT ALL ATTRIBUTES FULFILLED BY ALL OBJECTS
+    assert pb.mrid() == cim.mrid
+    try:
+        assert pb.name == cim.name
+    except AttributeError:
+        pass
+    try:
+        assert pb.description == cim.description
+    except AttributeError:
+        pass
+
+def verify_ACDCTerminal_to_pb(cim, pb):
+    verify_identifiedobject_to_pb(cim, pb)
+
+def verify_asset_to_pb(cim, pb):
+    verify_identifiedobject_to_pb(cim, pb)
+
+def verify_assetcontainer_to_pb(cim, pb):
+    verify_asset_to_pb(cim, pb)
+
+def verify_enddevice_to_pb(cim, pb):
+    verify_assetcontainer_to_pb(cim, pb)
+
+#@given(me=meter())
+#def test_meter_to_pb(me):
+    #pb = me.to_pb()
+    #assert pb.mrid() == me.mrid
+    #assert isinstance(pb, Meter)
+    #verify_enddevice_to_pb(me, pb)
+
+@given(po=pole())
+def test_pole_to_pb(po):
+    pb = po.to_pb()
+    assert pb.mrid() == po.mrid
+    assert isinstance(pb, Pole)
+    assert pb.classification == po.classification
 
 @given(te=terminal())
 def test_terminal_to_pb(te):
@@ -56,13 +99,14 @@ def test_terminal_to_pb(te):
     assert pb.mrid() == te.mrid
     assert isinstance(pb, Terminal)
     assert phasecode_by_id(pb.phases) == te.phases
-    verify_ACDCTerminal(te, pb)
+    verify_ACDCTerminal_to_pb(te, pb.ad)
 
 @given(cnn=connectivitynode())
 def test_connectivitynode_to_pb(cnn):
     pb = cnn.to_pb()
     assert pb.mrid() == cnn.mrid
     assert isinstance(pb, ConnectivityNode)
+    verify_identifiedobject_to_pb(cnn, pb)
 
 @given(bv=basevoltage())
 def test_basevoltage_to_pb(bv):
@@ -70,7 +114,6 @@ def test_basevoltage_to_pb(bv):
     assert pb.mrid() == bv.mrid
     assert isinstance(pb, BaseVoltage)
     assert pb.nominalVoltage == bv.nominal_voltage
-    verify_ACDCTerminal(bv, pb)
 
 @given(fe=feeder())
 def test_connectivitynode_to_pb(fe):
@@ -128,8 +171,7 @@ def test_remotecontrol_to_pb(rc):
 '''Wires'''
 
 def verify_powersystemsresource_to_pb(cim, pb):
-    pass
-    ## Top of inheritance hierarchy
+    verify_identifiedobject_to_pb(cim, pb)
 
 def verify_equipment_to_pb(cim, pb):
     assert pb.inService == cim.in_service

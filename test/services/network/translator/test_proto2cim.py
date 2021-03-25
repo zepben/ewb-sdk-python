@@ -7,17 +7,52 @@ from hypothesis import given
 from zepben.evolve import NetworkService, WindingConnection, phasecode_by_id, PhaseShuntConnectionKind, IdentifiedObject, Terminal, ConnectivityNode, \
 BaseVoltage, Feeder, Substation, GeographicalRegion, Analog, Discrete, Accumulator, RemoteControl, BusbarSection, Junction, \
 EnergySource, EnergyConsumer, AcLineSegment, Disconnector, Fuse, Jumper, Breaker, LoadBreakSwitch, PowerTransformer, \
-PowerTransformerEnd, LinearShuntCompensator, RatioTapChanger, RemoteSource
+PowerTransformerEnd, LinearShuntCompensator, RatioTapChanger, RemoteSource, Meter, Pole
 
 from test.pb_creators import terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, \
 discrete, accumulator, remotecontrol, busbarsection, junction, energysource, energyconsumer, aclinesegment, disconnector, \
 fuse, jumper, breaker, loadbreakswitch, powertransformer, powertransformerend, linearshuntcompensator, ratiotapchanger, \
-remotesource
+remotesource, meter, pole
 
 '''Core'''
-def verify_ACDCTerminal(pb, cim):
-    pass
-    ## Top of inheritance hierarchy
+
+def verify_identifiedobject_to_cim(pb, cim):
+    ## Top of inheritance hierarchy -- NOT ALL ATTRIBUTES FULFILLED BY ALL OBJECTS
+    assert cim.mrid == pb.mrid()
+    try:
+        assert cim.name == pb.name
+    except AttributeError:
+        pass
+    try:
+        assert cim.description == pb.description
+    except AttributeError:
+        pass
+
+def verify_ACDCTerminal_to_cim(pb, cim):
+    verify_identifiedobject_to_cim(pb, cim)
+
+def verify_asset_to_cim(pb, cim):
+    verify_identifiedobject_to_cim(pb, cim)
+
+def verify_assetcontainer_to_cim(pb, cim):
+    verify_asset_to_cim(pb, cim)
+
+def verify_enddevice_to_cim(pb, cim):
+    verify_assetcontainer_to_cim(pb, cim)
+
+#@given(me=meter())
+#def test_meter_to_cim(me):
+    #cim = me.to_cim(NetworkService())
+    #assert cim.mrid == me.mrid()
+    #assert isinstance(cim, Meter)
+    #verify_enddevice_to_cim(me.ed, cim)
+
+@given(po=pole())
+def test_pole_to_cim(po):
+    cim = po.to_cim(NetworkService())
+    assert cim.mrid == po.mrid()
+    assert isinstance(cim, Pole)
+    assert cim.classification == po.classification
 
 @given(te=terminal())
 def test_terminal_to_cim(te):
@@ -25,14 +60,14 @@ def test_terminal_to_cim(te):
     assert cim.mrid == te.mrid()
     assert isinstance(cim, Terminal)
     assert cim.phases == phasecode_by_id(te.phases)
-    verify_ACDCTerminal(te, cim)
+    verify_ACDCTerminal_to_cim(te, cim)
 
 @given(cnn=connectivitynode())
 def test_connectivitynode_to_cim(cnn):
     cim = cnn.to_cim(NetworkService())
     assert cim.mrid == cnn.mrid()
     assert isinstance(cim, ConnectivityNode)
-    verify_ACDCTerminal(cnn, cim)
+    verify_identifiedobject_to_cim(cnn, cim)
 
 @given(bv=basevoltage())
 def test_basevoltage_to_cim(bv):
@@ -40,7 +75,13 @@ def test_basevoltage_to_cim(bv):
     assert cim.mrid == bv.mrid()
     assert isinstance(cim, BaseVoltage)
     assert cim.nominal_voltage == bv.nominalVoltage
-    verify_ACDCTerminal(bv, cim)
+    verify_identifiedobject_to_cim(bv, cim)
+
+def verify_connectivitynodecontainer_to_cim(pb, cim):
+    verify_powersystemsresource_to_cim(pb.psr, cim)
+
+def verify_equipmentcontainer_to_cim(pb, cim):
+    verify_connectivitynodecontainer_to_cim(pb, cim)
 
 @given(fe=feeder())
 def test_feeder_to_cim(fe):
@@ -59,6 +100,7 @@ def test_geographicalregion_to_cim(ger):
     cim = ger.to_cim(NetworkService())
     assert cim.mrid == ger.mrid()
     assert isinstance(cim, GeographicalRegion)
+    verify_identifiedobject_to_cim(ger, cim)
 
 '''Meas'''
 
@@ -97,8 +139,7 @@ def test_remotecontrol_to_cim(rc):
 '''Wires'''
 
 def verify_powersystemsresource_to_cim(pb, cim):
-    pass
-    ## Top of inheritance hierarchy
+    verify_identifiedobject_to_cim(pb, cim)
 
 def verify_equipment_to_cim(pb, cim):
     assert cim.in_service == pb.inService
@@ -107,6 +148,10 @@ def verify_equipment_to_cim(pb, cim):
 
 def verify_conductingequipment_to_cim(pb, cim):
     verify_equipment_to_cim(pb.eq, cim)
+
+def verify_conductor_to_cim(pb, cim):
+    assert cim.length == pb.length
+    verify_conductingequipment_to_cim(pb.ce, cim)
 
 def verify_connector_to_cim(pb, cim):
     verify_conductingequipment_to_cim(pb.ce, cim)
@@ -150,7 +195,7 @@ def test_breaker_to_cim(brk):
     cim = brk.to_cim(NetworkService())
     assert cim.mrid == brk.mrid()
     assert isinstance(cim, Breaker)
-    #verify_protectedswitch_to_cim(brk, cim)
+    #verify_protectedswitch_to_cim(brk.sw, cim)
     ## Error with normalOpen (not recognized as attribute)
 
 @given(lbs=loadbreakswitch())
@@ -164,12 +209,14 @@ def test_junction_to_cim(jnc):
     cim = jnc.to_cim(NetworkService())
     assert cim.mrid == jnc.mrid()
     assert isinstance(cim, Junction)
+    verify_connector_to_cim(jnc.cn, cim)
 
 @given(acl=aclinesegment())
 def test_aclinesegment_to_cim(acl):
     cim = acl.to_cim(NetworkService())
     assert cim.mrid == acl.mrid()
     assert isinstance(cim, AcLineSegment)
+    verify_conductor_to_cim(acl.cd, cim)
 
 @given(ens=energysource())
 def test_energysource_to_cim(ens):
