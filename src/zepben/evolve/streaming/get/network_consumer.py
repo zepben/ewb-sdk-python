@@ -174,6 +174,9 @@ class NetworkConsumerClient(CimConsumerClient):
         feeder_response = await self._get_identified_object(service, mrid)
         feeder: Feeder = feeder_response.result
 
+        if feeder_response.was_failure:
+            return feeder_response
+
         if not feeder:
             return GrpcResult(result=ValueError(f"Requested Feeder with mRID {mrid} could not be found."))
 
