@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
-from typing import Type
+from typing import List
 
 from pytest import raises
 
@@ -27,16 +27,14 @@ class TestTable(SqliteTable):
         self.column_index += 1
         self.test_column_2 = Column(self.column_index, "test_column_2", "TEXT", Nullable.NULL)
 
-    @property
-    def table_class(self) -> Type[TestTable]:
-        return self.__class__
+    def unique_index_columns(self) -> List[List[Column]]:
+        return [[self.test_column]]
 
-    @property
-    def table_class_instance(self) -> TestTable:
-        return self
+    def non_unique_index_columns(self) -> List[List[Column]]:
+        return [[self.test_column_2]]
 
     def name(self) -> str:
-        return "test table"
+        return "test_table"
 
 
 class TestTable2(SqliteTable):
@@ -49,16 +47,8 @@ class TestTable2(SqliteTable):
         self.test_column = Column(self.column_index, "test_column", "TEXT", Nullable.NOT_NULL)
         self.test_column_2 = Column(self.column_index, "test_column_2", "TEXT", Nullable.NULL)
 
-    @property
-    def table_class(self) -> Type[TestTable2]:
-        return self.__class__
-
-    @property
-    def table_class_instance(self) -> TestTable2:
-        return self
-
     def name(self) -> str:
-        return "test table"
+        return "test_table"
 
 
 def test_create_column_set():
@@ -68,7 +58,6 @@ def test_create_column_set():
     assert cs[1] == x.test_column_2
     assert x._ignored_column not in cs
     assert x._ignored_field not in cs
-    assert x.table_class not in cs
     assert x.name not in cs
 
 
@@ -93,19 +82,22 @@ class TestTable3(SqliteTable):
     def test_prop(self):
         raise Exception("test")
 
-    @property
-    def table_class(self) -> Type[TestTable3]:
-        return self.__class__
-
-    @property
-    def table_class_instance(self) -> TestTable3:
-        return self
-
     def name(self) -> str:
-        return "test table"
+        return "test_table"
 
 
 def test_create_column_set_raises_on_exception():
     x = TestTable3()
     with raises(ValueError, match="Unable to retrieve field test_prop. It will be missing from the database. Error was: test"):
         cs = x.column_set()
+
+
+def test_ddl():
+    x = TestTable()
+    assert x.create_table_sql() == "CREATE TABLE test_table (test_column TEXT NOT NULL, test_column_2 TEXT NULL)"
+    assert x.select_sql() == "SELECT (test_column, test_column_2) FROM test_table"
+    assert x.prepared_insert_sql() == "INSERT INTO test_table (test_column, test_column_2) VALUES (?, ?)"
+    assert x.prepared_update_sql() == "UPDATE test_table SET test_column = ?, test_column_2 = ?"
+    assert x.create_indexes_sql() == [f"CREATE UNIQUE INDEX test_table_test_column ON test_table test_column",
+                                      f"CREATE INDEX test_table_test_column_2 ON test_table test_column_2"]
+
