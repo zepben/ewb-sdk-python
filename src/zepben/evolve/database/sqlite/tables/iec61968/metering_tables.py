@@ -5,7 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import TableAssetContainers
-from zepben.evolve.database.sqlite.tables.iec61970.core_tables import TableIdentifiedObjects
+from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects
+
+__all__ = ["TableEndDevices", "TableMeters", "TableUsagePoints"]
 
 
 class TableEndDevices(TableAssetContainers):

@@ -7,14 +7,13 @@ from __future__ import annotations
 
 import inspect
 from abc import abstractmethod
-from typing import List, Optional, Type, TypeVar
+from typing import List, Optional, Type, TypeVar, Any
 
 from dataclassy import dataclass
 
 from zepben.evolve import Column
 
-
-Any = TypeVar("Any")
+__all__ = ["SqliteTable"]
 
 
 @dataclass(slots=True)

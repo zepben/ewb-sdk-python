@@ -3,33 +3,38 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from typing import List
 
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
+__all__ = ["TablePowerSystemResources", "TableSites", "TableNames", "TableTerminals", "TableFeeders", "TableIdentifiedObjects", "TableSubstations",
+           "TableAcDcTerminals", "TableEquipmentContainers", "TableEquipment", "TableConnectivityNodeContainers", "TableConductingEquipment",
+           "TableBaseVoltages", "TableConnectivityNodes", "TableSubGeographicalRegions", "TableNameTypes", "TableEquipment"]
+
 
 class TableIdentifiedObjects(SqliteTable):
     mrid: Column = None
-    name: Column = None
+    name_: Column = None
     description: Column = None
     num_diagram_objects: Column = None
 
     def __init__(self):
         self.column_index += 1
-        self.version = Column(self.column_index, "mrid", "TEXT", Nullable.NOT_NULL)
+        self.mrid = Column(self.column_index, "mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
-        self.version = Column(self.column_index, "name", "TEXT", Nullable.NOT_NULL)
+        self.name_ = Column(self.column_index, "name", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
-        self.version = Column(self.column_index, "description", "TEXT", Nullable.NOT_NULL)
+        self.description = Column(self.column_index, "description", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
-        self.version = Column(self.column_index, "num_diagram_objects", "TEXT", Nullable.NOT_NULL)
+        self.num_diagram_objects = Column(self.column_index, "num_diagram_objects", "INTEGER", Nullable.NOT_NULL)
 
     def unique_index_columns(self) -> List[List[Column]]:
         return [[self.mrid]]
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        return [[self.name]]
+        return [[self.name_]]
 
 
 class TableAcDcTerminals(TableIdentifiedObjects):
@@ -53,7 +58,7 @@ class TablePowerSystemResources(TableIdentifiedObjects):
     num_controls: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TablePowerSystemResources, self).__init__()
         self.column_index += 1
         self.location_mrid = Column(self.column_index, "location_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1

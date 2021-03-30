@@ -6,8 +6,10 @@
 from typing import List
 
 from zepben.evolve.database.sqlite.tables.column import Nullable, Column
-from zepben.evolve.database.sqlite.tables.iec61970.core_tables import TableIdentifiedObjects
-from zepben.evolve.database.sqlite.tables.iec61970.base.wires import TableLines
+from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.container_tables import TableLines
+
+__all__ = ["TableCircuits", "TableLoops"]
 
 
 class TableCircuits(TableLines):

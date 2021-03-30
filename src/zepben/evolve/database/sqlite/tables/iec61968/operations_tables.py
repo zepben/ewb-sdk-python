@@ -5,6 +5,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.evolve.database.sqlite.tables.iec61968.common_tables import TableDocuments
 
+__all__ = ["TableOperationalRestrictions"]
+
 
 class TableOperationalRestrictions(TableDocuments):
 

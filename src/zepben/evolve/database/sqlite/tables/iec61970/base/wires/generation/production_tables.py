@@ -6,7 +6,9 @@
 from typing import List
 
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
-from zepben.evolve.database.sqlite.tables.iec61970.core_tables import TableEquipment
+from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableEquipment
+
+__all__ = ["TablePowerElectronicsUnit", "TablePowerElectronicsWindUnit", "TablePhotoVoltaicUnit", "TablePowerElectronicsWindUnit"]
 
 
 class TablePowerElectronicsUnit(TableEquipment):

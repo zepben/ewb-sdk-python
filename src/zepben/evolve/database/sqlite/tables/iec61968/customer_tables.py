@@ -8,6 +8,7 @@ from typing import List
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61968.common_tables import TableAgreements, TableOrganisationRoles, TableDocuments
 
+__all__ = ["TableCustomerAgreements", "TableCustomers", "TablePricingStructures", "TableTariffs"]
 
 class TableCustomerAgreements(TableAgreements):
     customer_mrid: Column = None

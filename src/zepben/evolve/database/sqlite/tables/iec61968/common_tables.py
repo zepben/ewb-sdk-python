@@ -3,13 +3,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from abc import ABC
 from enum import Enum
 from typing import List
 
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
-from zepben.evolve.database.sqlite.tables.iec61970.core_tables import TableIdentifiedObjects
+from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects
 from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
+
+__all__ = ["TableDocuments", "TableAgreements", "TableLocations", "TableTownDetails", "TableStreetAddresses", "TableLocationStreetAddresses",
+           "TableLocationStreetAddressField", "TableOrganisationRoles", "TablePositionPoints"]
 
 
 class TableDocuments(TableIdentifiedObjects):
@@ -46,7 +48,7 @@ class TableLocations(TableIdentifiedObjects):
         return "locations"
 
 
-class TableTownDetails(SqliteTable, ABC):
+class TableTownDetails(SqliteTable):
     town_name: Column = None
     state_or_province: Column = None
 
@@ -58,7 +60,7 @@ class TableTownDetails(SqliteTable, ABC):
         self.state_or_province = Column(self.column_index, "state_or_province", "TEXT", Nullable.NULL)
 
 
-class TableStreetAddresses(TableTownDetails, ABC):
+class TableStreetAddresses(TableTownDetails):
     postal_code: Column = None
 
     def __init__(self):
