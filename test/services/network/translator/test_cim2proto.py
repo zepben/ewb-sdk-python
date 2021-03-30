@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds
 
-from zepben.evolve import phasecode_by_id, WindingConnection, PhaseShuntConnectionKind, RegulatingCondEq
+from zepben.evolve import phasecode_by_id, WindingConnection, PhaseShuntConnectionKind, BatteryStateKind, unit_symbol_from_id, VectorGroup
 
 # IEC61970
 '''Core'''
@@ -20,11 +20,10 @@ from zepben.protobuf.cim.iec61970.base.core.GeographicalRegion_pb2 import Geogra
 from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog
 from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete
 from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator
-from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue
 '''SCADA'''
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl
-'''Wires'''
+'''Wires - Generation - Production'''
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction
@@ -39,19 +38,14 @@ from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import L
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
-
-#IEC61968
-from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter
-from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole
+from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit
 
 # IEC61970
 from test.cim_creators import busbarsection, loadbreakswitch, energysource, energyconsumer, junction, aclinesegment, \
-    disconnector, fuse, jumper, breaker, linearshuntcompensator, powertransformer, powertransformerend, ratiotapchanger, \
-    terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, discrete, accumulator, \
-    analogvalue, remotesource, remotecontrol, regulatingcondeq
-
-#IEC61968
-from test.cim_creators import meter, pole
+disconnector, fuse, jumper, breaker, linearshuntcompensator, powertransformer, powertransformerend, ratiotapchanger, \
+terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, discrete, accumulator, \
+analogvalue, remotesource, remotecontrol, perlengthimpedance, perlengthsequenceimpedance, batteryunit
 
 '''Core'''
 
@@ -70,6 +64,9 @@ def verify_identifiedobject_to_pb(cim, pb):
 def verify_ACDCTerminal_to_pb(cim, pb):
     verify_identifiedobject_to_pb(cim, pb)
 
+def verify_assetinfo_to_pb(cim, pb):
+    verify_identifiedobject_to_pb(cim, pb)
+
 def verify_asset_to_pb(cim, pb):
     verify_identifiedobject_to_pb(cim, pb)
 
@@ -78,20 +75,6 @@ def verify_assetcontainer_to_pb(cim, pb):
 
 def verify_enddevice_to_pb(cim, pb):
     verify_assetcontainer_to_pb(cim, pb)
-
-#@given(me=meter())
-#def test_meter_to_pb(me):
-    #pb = me.to_pb()
-    #assert pb.mrid() == me.mrid
-    #assert isinstance(pb, Meter)
-    #verify_enddevice_to_pb(me, pb)
-
-@given(po=pole())
-def test_pole_to_pb(po):
-    pb = po.to_pb()
-    assert pb.mrid() == po.mrid
-    assert isinstance(pb, Pole)
-    assert pb.classification == po.classification
 
 @given(te=terminal())
 def test_terminal_to_pb(te):
@@ -114,26 +97,34 @@ def test_basevoltage_to_pb(bv):
     assert pb.mrid() == bv.mrid
     assert isinstance(pb, BaseVoltage)
     assert pb.nominalVoltage == bv.nominal_voltage
+    verify_identifiedobject_to_pb(bv, pb)
 
 @given(fe=feeder())
-def test_connectivitynode_to_pb(fe):
+def test_feeder_to_pb(fe):
     pb = fe.to_pb()
     assert pb.mrid() == fe.mrid
     assert isinstance(pb, Feeder)
+    verify_equipmentcontainer_to_pb(fe, pb.ec)
 
 @given(sub=substation())
 def test_substation_to_pb(sub):
     pb = sub.to_pb()
     assert pb.mrid() == sub.mrid
     assert isinstance(pb, Substation)
+    verify_equipmentcontainer_to_pb(sub, pb.ec)
 
 @given(ger=geographicalregion())
 def test_geographicalregion_to_pb(ger):
     pb = ger.to_pb()
     assert pb.mrid() == ger.mrid
     assert isinstance(pb, GeographicalRegion)
+    verify_identifiedobject_to_pb(ger, pb)
 
 '''Meas'''
+
+def verify_measurement_to_pb(cim, pb):
+    assert phasecode_by_id(pb.phases) == cim.phases
+    assert unit_symbol_from_id(pb.unitSymbol) == cim.unitSymbol
 
 @given(ana=analog())
 def test_analog_to_pb(ana):
@@ -141,34 +132,42 @@ def test_analog_to_pb(ana):
     assert pb.mrid() == ana.mrid
     assert isinstance(pb, Analog)
     assert pb.positiveFlowIn == ana.positive_flow_in
+    verify_measurement_to_pb(ana, pb.measurement)
 
 @given(dis=discrete())
 def test_discrete_to_pb(dis):
     pb = dis.to_pb()
     assert pb.mrid() == dis.mrid
     assert isinstance(pb, Discrete)
+    verify_measurement_to_pb(dis, pb.measurement)
 
 @given(acc=accumulator())
 def test_accumulator_to_pb(acc):
     pb = acc.to_pb()
     assert pb.mrid() == acc.mrid
     assert isinstance(pb, Accumulator)
+    verify_measurement_to_pb(acc, pb.measurement)
 
 '''SCADA'''
+
+def verify_remotepoint_to_pb(cim, pb):
+    verify_identifiedobject_to_pb(cim, pb)
 
 @given(rs=remotesource())
 def test_remotesource_to_pb(rs):
     pb = rs.to_pb()
     assert pb.mrid() == rs.mrid
     assert isinstance(pb, RemoteSource)
+    verify_remotepoint_to_pb(rs, pb.rp)
 
 @given(rc=remotecontrol())
 def test_remotecontrol_to_pb(rc):
     pb = rc.to_pb()
     assert pb.mrid() == rc.mrid
     assert isinstance(pb, RemoteControl)
+    verify_remotepoint_to_pb(rc, pb.rp)
 
-'''Wires'''
+'''Wires - Generation - Production'''
 
 def verify_powersystemsresource_to_pb(cim, pb):
     verify_identifiedobject_to_pb(cim, pb)
@@ -184,6 +183,12 @@ def verify_conductingequipment_to_pb(cim, pb):
 def verify_connector_to_pb(cim, pb):
     verify_conductingequipment_to_pb(cim, pb.ce)
 
+def verify_connectivitynodecontainer_to_pb(cim, pb):
+    verify_powersystemsresource_to_pb(cim, pb.psr)
+
+def verify_equipmentcontainer_to_pb(cim, pb):
+    verify_connectivitynodecontainer_to_pb(cim, pb.cnc)
+
 @given(bbs=busbarsection())
 def test_busbarsection_to_pb(bbs):
     pb = bbs.to_pb()
@@ -191,6 +196,27 @@ def test_busbarsection_to_pb(bbs):
     assert isinstance(pb, BusbarSection)
     #assert pb.ipMax == bbs.ip_max
     verify_connector_to_pb(bbs, pb.cn)
+
+def verify_perlengthlineparameter_to_pb(cim, pb):
+    verify_identifiedobject_to_pb(cim, pb)
+
+def verify_perlengthimpedance_to_pb(cim, pb):
+    verify_perlengthlineparameter_to_pb(cim, pb)
+
+@given(plsi=perlengthsequenceimpedance())
+def test_perlengthsequenceimpedance_to_pb(plsi):
+    pb = plsi.to_pb()
+    assert isinstance(pb, PerLengthSequenceImpedance)
+    assert pb.mrid() == plsi.mrid
+    assert pb.b0ch == plsi.b0ch
+    assert pb.bch == plsi.bch
+    assert pb.g0ch == plsi.g0ch
+    assert pb.gch == plsi.gch
+    assert pb.r == plsi.r
+    assert pb.r0 == plsi.r0
+    assert pb.x == plsi.x
+    assert pb.x0 == plsi.x0
+    verify_perlengthimpedance_to_pb(plsi, pb.pli)
 
 @given(jnc=junction())
 def test_junction_to_pb(jnc):
@@ -204,33 +230,38 @@ def test_disconnector_to_pb(dis):
     pb = dis.to_pb()
     assert pb.mrid() == dis.mrid
     assert isinstance(pb, Disconnector)
+    #verify_switch(dis, pb.sw)
+    ##.sw assigned to switch and protectedswitch
 
 @given(fus=fuse())
 def test_fuse_to_pb(fus):
     pb = fus.to_pb()
     assert pb.mrid() == fus.mrid
     assert isinstance(pb, Fuse)
+    #verify_switch(fus, pb.sw)
 
 @given(jum=jumper())
 def test_jumper_to_pb(jum):
     pb = jum.to_pb()
     assert pb.mrid() == jum.mrid
     assert isinstance(pb, Jumper)
+    #verify_switch(jum, pb.sw)
 
 @given(brk=breaker())
 def test_breaker_to_pb(brk):
     pb = brk.to_pb()
     assert pb.mrid() == brk.mrid
     assert isinstance(pb, Breaker)
+    #verify_protectedswitch(brk, pb.ps)
 
 @given(lbs=loadbreakswitch())
 def test_loadbreakswitch_to_pb(lbs):
     pb = lbs.to_pb()
     assert pb.mrid() == lbs.mrid
-    verify_protected_switch(lbs, pb)
     assert isinstance(pb, LoadBreakSwitch)
+    #verify_protectedswitch(lbs, pb.ps)
 
-def verify_protected_switch(cim, pb):
+def verify_protectedswitch(cim, pb):
     verify_switch(cim, pb)
 
 def verify_switch(cim, pb):
@@ -249,11 +280,20 @@ def verify_switch(cim, pb):
 def verify_energyconnection_to_pb(cim, pb):
     verify_conductingequipment_to_pb(cim, pb.ce)
 
+def verify_transformerend_to_pb(cim, pb):
+    assert pb.endNumber == cim.end_number
+    assert pb.grounded == cim.grounded
+    assert pb.rGround == cim.r_ground
+    assert pb.xGround == cim.x_ground
+    verify_identifiedobject_to_pb(cim, pb)
+
 @given(pwt=powertransformer())
 def test_powertransformer_to_pb(pwt):
     pb = pwt.to_pb()
     assert pb.mrid() == pwt.mrid
     assert isinstance(pb, PowerTransformer)
+    assert VectorGroup(pb.vectorGroup) == pwt.vector_group
+    assert pb.transformerUtilisation == pwt.transformer_utilisation
     verify_conductingequipment_to_pb(pwt, pb.ce)
 
 @given(pte=powertransformerend())
@@ -273,6 +313,7 @@ def test_powertransformerend_to_pb(pte):
     assert pb.ratedU == pte.rated_u
     assert pb.x == pte.x
     assert pb.x0 == pte.x0
+    verify_transformerend_to_pb(pte, pb.te)
 
 @given(ens=energysource())
 def test_energysource_to_pb(ens):
@@ -357,3 +398,18 @@ def test_ratiotapchanger_to_pb(rtc):
     assert isinstance(pb, RatioTapChanger)
     assert pb.stepVoltageIncrement == rtc.step_voltage_increment
     verify_tapchanger_to_pb(rtc, pb.tc)
+
+def verify_powerelectronicsunit_to_pb(cim, pb):
+    assert pb.maxP == cim.max_p
+    assert pb.minP == cim.min_p
+    verify_equipment_to_pb(cim, pb.eq)
+
+#@given(bu=batteryunit())
+#def test_batteryunit_to_pb(bu):
+    #pb = bu.to_pb()
+    #assert pb.mrid() == bu.mrid
+    #assert isinstance(pb, BatteryUnit)
+    #assert BatteryStateKind(pb.batteryState) == bu.battery_state
+    #assert pb.ratedE == bu.rated_e
+    #assert pb.storedE == bu.stored_e
+    #verify_powerelectronicsunit_to_pb(bu, pb.peu)

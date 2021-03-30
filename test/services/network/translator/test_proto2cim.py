@@ -4,15 +4,16 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from zepben.evolve import NetworkService, WindingConnection, phasecode_by_id, PhaseShuntConnectionKind, IdentifiedObject, Terminal, ConnectivityNode, \
+from zepben.evolve import NetworkService, WindingConnection, VectorGroup, phasecode_by_id, unit_symbol_from_id, PhaseShuntConnectionKind, IdentifiedObject, Terminal, ConnectivityNode, \
 BaseVoltage, Feeder, Substation, GeographicalRegion, Analog, Discrete, Accumulator, RemoteControl, BusbarSection, Junction, \
 EnergySource, EnergyConsumer, AcLineSegment, Disconnector, Fuse, Jumper, Breaker, LoadBreakSwitch, PowerTransformer, \
-PowerTransformerEnd, LinearShuntCompensator, RatioTapChanger, RemoteSource, Meter, Pole
+PowerTransformerEnd, LinearShuntCompensator, RatioTapChanger, RemoteSource, PerLengthSequenceImpedance, BatteryUnit, \
+BatteryStateKind, UnitSymbol
 
 from test.pb_creators import terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, \
 discrete, accumulator, remotecontrol, busbarsection, junction, energysource, energyconsumer, aclinesegment, disconnector, \
 fuse, jumper, breaker, loadbreakswitch, powertransformer, powertransformerend, linearshuntcompensator, ratiotapchanger, \
-remotesource, meter, pole
+remotesource, perlengthsequenceimpedance, batteryunit
 
 '''Core'''
 
@@ -31,28 +32,17 @@ def verify_identifiedobject_to_cim(pb, cim):
 def verify_ACDCTerminal_to_cim(pb, cim):
     verify_identifiedobject_to_cim(pb, cim)
 
-def verify_asset_to_cim(pb, cim):
+def verify_assetinfo_to_cim(pb, cim):
     verify_identifiedobject_to_cim(pb, cim)
+
+def verify_asset_to_cim(pb, cim):
+    verify_assetinfo_to_cim(pb, cim)
 
 def verify_assetcontainer_to_cim(pb, cim):
     verify_asset_to_cim(pb, cim)
 
 def verify_enddevice_to_cim(pb, cim):
     verify_assetcontainer_to_cim(pb, cim)
-
-#@given(me=meter())
-#def test_meter_to_cim(me):
-    #cim = me.to_cim(NetworkService())
-    #assert cim.mrid == me.mrid()
-    #assert isinstance(cim, Meter)
-    #verify_enddevice_to_cim(me.ed, cim)
-
-@given(po=pole())
-def test_pole_to_cim(po):
-    cim = po.to_cim(NetworkService())
-    assert cim.mrid == po.mrid()
-    assert isinstance(cim, Pole)
-    assert cim.classification == po.classification
 
 @given(te=terminal())
 def test_terminal_to_cim(te):
@@ -78,7 +68,7 @@ def test_basevoltage_to_cim(bv):
     verify_identifiedobject_to_cim(bv, cim)
 
 def verify_connectivitynodecontainer_to_cim(pb, cim):
-    verify_powersystemsresource_to_cim(pb.psr, cim)
+    verify_powersystemsresource_to_cim(pb, cim)
 
 def verify_equipmentcontainer_to_cim(pb, cim):
     verify_connectivitynodecontainer_to_cim(pb, cim)
@@ -88,12 +78,14 @@ def test_feeder_to_cim(fe):
     cim = fe.to_cim(NetworkService())
     assert cim.mrid == fe.mrid()
     assert isinstance(cim, Feeder)
+    verify_equipmentcontainer_to_cim(fe, cim)
 
 @given(sub=substation())
 def test_substation_to_cim(sub):
     cim = sub.to_cim(NetworkService())
     assert cim.mrid == sub.mrid()
     assert isinstance(cim, Substation)
+    verify_equipmentcontainer_to_cim(sub, cim)
 
 @given(ger=geographicalregion())
 def test_geographicalregion_to_cim(ger):
@@ -104,37 +96,50 @@ def test_geographicalregion_to_cim(ger):
 
 '''Meas'''
 
+def verify_measurement_to_cim(pb, cim):
+    assert cim.phases == phasecode_by_id(pb.phases)
+    assert cim.unitSymbol == unit_symbol_from_id(pb.unitSymbol)
+
 @given(ana=analog())
 def test_analog_to_cim(ana):
     cim = ana.to_cim(NetworkService())
     assert cim.mrid == ana.mrid()
     assert isinstance(cim, Analog)
+    assert cim.positive_flow_in == ana.positiveFlowIn
+    verify_measurement_to_cim(ana.measurement, cim)
 
 @given(dis=discrete())
 def test_discrete_to_cim(dis):
     cim = dis.to_cim(NetworkService())
     assert cim.mrid == dis.mrid()
     assert isinstance(cim, Discrete)
+    verify_measurement_to_cim(dis.measurement, cim)
 
 @given(acc=accumulator())
 def test_accumulator_to_cim(acc):
     cim = acc.to_cim(NetworkService())
     assert cim.mrid == acc.mrid()
     assert isinstance(cim, Accumulator)
+    verify_measurement_to_cim(acc.measurement, cim)
 
 '''SCADA'''
+
+def verify_remotepoint_to_cim(pb, cim):
+    verify_identifiedobject_to_cim(pb, cim)
 
 @given(rs=remotesource())
 def test_remotesource_to_cim(rs):
     cim = rs.to_cim(NetworkService())
     assert cim.mrid == rs.mrid()
     assert isinstance(cim, RemoteSource)
+    verify_remotepoint_to_cim(rs.rp, cim)
 
 @given(rc=remotecontrol())
 def test_remotecontrol_to_cim(rc):
     cim = rc.to_cim(NetworkService())
     assert cim.mrid == rc.mrid()
     assert isinstance(cim, RemoteControl)
+    verify_remotepoint_to_cim(rc.rp, cim)
 
 '''Wires'''
 
@@ -164,6 +169,27 @@ def test_busbarsection_to_cim(bbs):
     #assert cim.ip_max == bbs.ipMax
     verify_connector_to_cim(bbs.cn, cim)
 
+def verify_perlengthlineparameter_to_pb(pb, cim):
+    verify_identifiedobject_to_cim(pb, cim)
+
+def verify_perlengthimpedance_to_pb(pb, cim):
+    verify_perlengthlineparameter_to_pb(pb, cim)
+
+@given(plsi=perlengthsequenceimpedance())
+def test_perlengthsequenceimpedance_to_cim(plsi):
+    cim = plsi.to_cim(NetworkService())
+    assert cim.mrid == plsi.mrid()
+    assert isinstance(cim, PerLengthSequenceImpedance)
+    assert cim.b0ch == plsi.b0ch
+    assert cim.bch == plsi.bch
+    assert cim.g0ch == plsi.g0ch
+    assert cim.gch == plsi.gch
+    assert cim.r == plsi.r
+    assert cim.r0 == plsi.r0
+    assert cim.x == plsi.x
+    assert cim.x0 == plsi.x0
+    verify_perlengthimpedance_to_pb(plsi.pli, cim)
+
 def verify_switch_to_cim(pb, cim):
     assert cim._normal_open == pb.normalOpen
     assert cim._open == pb.open
@@ -177,6 +203,8 @@ def test_disconnector_to_cim(dis):
     cim = dis.to_cim(NetworkService())
     assert cim.mrid == dis.mrid()
     assert isinstance(cim, Disconnector)
+    #verify_switch_to_cim(dis.sw, cim)
+    ##.sw assigned to switch and protectedswitch
 
 @given(fus=fuse())
 def test_fuse_to_cim(fus):
@@ -195,14 +223,15 @@ def test_breaker_to_cim(brk):
     cim = brk.to_cim(NetworkService())
     assert cim.mrid == brk.mrid()
     assert isinstance(cim, Breaker)
-    #verify_protectedswitch_to_cim(brk.sw, cim)
-    ## Error with normalOpen (not recognized as attribute)
+    #verify_protectedswitch_to_cim(brk.ps, cim)
+    ##breaker assigned to switch drectly (not protectedswitch)
 
 @given(lbs=loadbreakswitch())
 def test_loadbreakswitch_to_cim(lbs):
     cim = lbs.to_cim(NetworkService())
     assert cim.mrid == lbs.mrid()
     assert isinstance(cim, LoadBreakSwitch)
+    #verify_protectedswitch_to_cim(lbs.ps, cim)
 
 @given(jnc=junction())
 def test_junction_to_cim(jnc):
@@ -251,12 +280,6 @@ def test_energyconsumer_to_cim(enc):
     assert cim.q_fixed == enc.qFixed
     verify_energyconnection_to_cim(enc.ec, cim)
 
-@given(pwt=powertransformer())
-def test_powertransformer_to_cim(pwt):
-    cim = pwt.to_cim(NetworkService())
-    assert cim.mrid == pwt.mrid()
-    assert isinstance(cim, PowerTransformer)
-
 @given(lsc=linearshuntcompensator())
 def test_linearshuntcompensator_to_cim(lsc):
     cim = lsc.to_cim(NetworkService())
@@ -282,6 +305,22 @@ def verify_shuntcompensator_to_cim(pb, cim):
     assert cim.sections == pb.sections
     verify_regulatingcondeq_to_cim(pb.rce, cim)
 
+def verify_transformerend_to_cim(pb, cim):
+    assert cim.end_number == pb.endNumber
+    assert cim.grounded == pb.grounded
+    assert cim.r_ground == pb.rGround
+    assert cim.x_ground == pb.xGround
+    verify_identifiedobject_to_cim(pb, cim)
+
+@given(pwt=powertransformer())
+def test_powertransformer_to_cim(pwt):
+    cim = pwt.to_cim(NetworkService())
+    assert cim.mrid == pwt.mrid()
+    assert isinstance(cim, PowerTransformer)
+    assert cim.vector_group == VectorGroup(pwt.vectorGroup)
+    assert cim.transformer_utilisation == pwt.transformerUtilisation
+    verify_conductingequipment_to_cim(pwt.ce, cim)
+
 @given(pte=powertransformerend())
 def test_powertransformerend_to_cim(pte):
     cim = pte.to_cim(NetworkService())
@@ -299,6 +338,7 @@ def test_powertransformerend_to_cim(pte):
     assert cim.rated_u == pte.ratedU
     assert cim.x == pte.x
     assert cim.x0 == pte.x0
+    verify_transformerend_to_cim(pte.te, cim)
 
 def verify_tapchanger_to_cim(pb, cim):
     assert cim.control_enabled == pb.controlEnabled
@@ -318,4 +358,19 @@ def test_ratiotapchanger_to_cim(rtc):
     assert cim.step_voltage_increment == rtc.stepVoltageIncrement
     verify_tapchanger_to_cim(rtc.tc, cim)
 
+'''Generation'''
 
+def verify_powerelectronicsunit_to_cim(pb, cim):
+    assert cim.max_p == pb. maxP
+    assert cim.min_p == pb.minP
+    verify_equipment_to_cim(pb.eq, cim)
+
+@given(bu=batteryunit())
+def test_batteryunit_to_cim(bu):
+    cim = bu.to_cim(NetworkService())
+    assert cim.mrid == bu.mrid()
+    assert isinstance(cim, BatteryUnit)
+    assert cim.battery_state == BatteryStateKind(bu.batteryState)
+    assert cim.rated_e == bu.ratedE
+    assert cim.stored_e == bu.storedE
+    verify_powerelectronicsunit_to_cim(bu.peu, cim)
