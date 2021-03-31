@@ -15,7 +15,7 @@ class TableConductors(TableConductingEquipment):
     wire_info_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableConductors, self).__init__()
         self.column_index += 1
         self.length = Column(self.column_index, "length", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -26,7 +26,7 @@ class TableAcLineSegments(TableConductors):
     per_length_sequence_impedance_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableAcLineSegments, self).__init__()
         self.column_index += 1
         self.per_length_sequence_impedance_mrid = Column(self.column_index, "per_length_sequence_impedance_mrid", "TEXT", Nullable.NULL)
 

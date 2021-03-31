@@ -8,7 +8,8 @@ from typing import List
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import TableAssetInfo
 
-__all__ = ["TablePowerTransformerInfo", "TableTransformerEndInfo", "TableTransformerTankInfo", "TableWireInfo", "TableCableInfo", "TableAssetInfo"]
+__all__ = ["TablePowerTransformerInfo", "TableTransformerEndInfo", "TableTransformerTankInfo", "TableWireInfo", "TableCableInfo", "TableAssetInfo",
+           "TableOverheadWireInfo"]
 
 
 class TablePowerTransformerInfo(TableAssetInfo):
@@ -30,7 +31,7 @@ class TableTransformerEndInfo(TableAssetInfo):
     transformer_tank_info_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableTransformerEndInfo, self).__init__()
         self.column_index += 1
         self.connection_kind = Column(self.column_index, "connection_kind", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -56,7 +57,7 @@ class TableTransformerEndInfo(TableAssetInfo):
         return "transformer_end_info"
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableTransformerEndInfo, self).non_unique_index_columns()
         cols.append([self.transformer_tank_info_mrid])
         return cols
 
@@ -65,7 +66,7 @@ class TableTransformerTankInfo(TableAssetInfo):
     power_transformer_info_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableTransformerTankInfo, self).__init__()
         self.column_index += 1
         self.power_transformer_info_mrid = Column(self.column_index, "power_transformer_info_mrid", "TEXT", Nullable.NULL)
 
@@ -73,7 +74,7 @@ class TableTransformerTankInfo(TableAssetInfo):
         return "transformer_tank_info"
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableTransformerTankInfo, self).non_unique_index_columns()
         cols.append([self.power_transformer_info_mrid])
         return cols
 
@@ -83,7 +84,7 @@ class TableWireInfo(TableAssetInfo):
     material: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableWireInfo, self).__init__()
         self.column_index += 1
         self.rated_current = Column(self.column_index, "rated_current", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1

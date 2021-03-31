@@ -23,7 +23,7 @@ class TableTransformerEnds(TableIdentifiedObjects):
     star_impedance_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableTransformerEnds, self).__init__()
         self.column_index += 1
         self.end_number = Column(self.column_index, "end_number", "INTEGER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -40,7 +40,7 @@ class TableTransformerEnds(TableIdentifiedObjects):
         self.star_impedance_mrid = Column(self.column_index, "star_impedance_mrid", "TEXT", Nullable.NULL)
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableTransformerEnds, self).non_unique_index_columns()
         cols.append([self.star_impedance_mrid])
         return cols
 
@@ -61,7 +61,7 @@ class TablePowerTransformerEnds(TableTransformerEnds):
     x0: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TablePowerTransformerEnds, self).__init__()
         self.column_index += 1
         self.power_transformer_mrid = Column(self.column_index, "power_transformer_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -93,12 +93,12 @@ class TablePowerTransformerEnds(TableTransformerEnds):
         return "power_transformer_ends"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TablePowerTransformerEnds, self).unique_index_columns()
         cols.append([self.power_transformer_mrid, self.end_number])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TablePowerTransformerEnds, self).non_unique_index_columns()
         cols.append([self.power_transformer_mrid])
         return cols
 
@@ -109,7 +109,7 @@ class TablePowerTransformers(TableConductingEquipment):
     power_transformer_info_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TablePowerTransformers, self).__init__()
         self.column_index += 1
         self.vector_group = Column(self.column_index, "vector_group", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -131,7 +131,7 @@ class TableTapChangers(TablePowerSystemResources):
     step: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableTapChangers, self).__init__()
         self.column_index += 1
         self.control_enabled = Column(self.column_index, "control_enabled", "BOOLEAN", Nullable.NOT_NULL)
         self.column_index += 1
@@ -153,7 +153,7 @@ class TableRatioTapChangers(TableTapChangers):
     step_voltage_increment: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableRatioTapChangers, self).__init__()
         self.column_index += 1
         self.transformer_end_mrid = Column(self.column_index, "transformer_end_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -163,7 +163,7 @@ class TableRatioTapChangers(TableTapChangers):
         return "ratio_tap_changers"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableRatioTapChangers, self).unique_index_columns()
         cols.append([self.transformer_end_mrid])
         return cols
 
@@ -176,7 +176,7 @@ class TableTransformerStarImpedance(TableIdentifiedObjects):
     transformer_end_info_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableTransformerStarImpedance, self).__init__()
         # Note r, r0, x, x0 use nullable number types.
         self.column_index += 1
         self.r = Column(self.column_index, "r", "NUMBER", Nullable.NULL)
@@ -190,6 +190,6 @@ class TableTransformerStarImpedance(TableIdentifiedObjects):
         self.transformer_end_info_mrid = Column(self.column_index, "transformer_end_info_mrid", "TEXT", Nullable.NULL)
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableTransformerStarImpedance, self).unique_index_columns()
         cols.append([self.transformer_end_info_mrid])
         return cols

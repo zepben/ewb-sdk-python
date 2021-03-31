@@ -17,7 +17,7 @@ class TableUsagePointsEndDevices(SqliteTable):
     end_device_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableUsagePointsEndDevices, self).__init__()
         self.column_index += 1
         self.usage_point_mrid = Column(self.column_index, "usage_point_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -27,12 +27,12 @@ class TableUsagePointsEndDevices(SqliteTable):
         return "usage_points_end_devices"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableUsagePointsEndDevices, self).unique_index_columns()
         cols.append([self.usage_point_mrid, self.end_device_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableUsagePointsEndDevices, self).non_unique_index_columns()
         cols.append([self.usage_point_mrid])
         cols.append([self.end_device_mrid])
         return cols

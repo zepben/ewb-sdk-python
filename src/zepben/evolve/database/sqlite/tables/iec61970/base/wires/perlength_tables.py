@@ -29,7 +29,7 @@ class TablePerLengthSequenceImpedances(TablePerLengthLineImpedances):
     g0ch: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TablePerLengthSequenceImpedances, self).__init__()
         self.column_index += 1
         self.r = Column(self.column_index, "r", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1

@@ -8,7 +8,7 @@ from typing import List
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableEquipment
 
-__all__ = ["TablePowerElectronicsUnit", "TablePowerElectronicsWindUnit", "TablePhotoVoltaicUnit", "TablePowerElectronicsWindUnit"]
+__all__ = ["TablePowerElectronicsUnit", "TablePowerElectronicsWindUnit", "TablePhotoVoltaicUnit", "TableBatteryUnit"]
 
 
 class TablePowerElectronicsUnit(TableEquipment):
@@ -17,7 +17,7 @@ class TablePowerElectronicsUnit(TableEquipment):
     min_p: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TablePowerElectronicsUnit, self).__init__()
         self.column_index += 1
         self.power_electronics_connection_mrid = Column(self.column_index, "power_electronics_connection_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -26,7 +26,7 @@ class TablePowerElectronicsUnit(TableEquipment):
         self.min_p = Column(self.column_index, "min_p", "INTEGER", Nullable.NOT_NULL)
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TablePowerElectronicsUnit, self).unique_index_columns()
         cols.append([self.power_electronics_connection_mrid])
         return cols
 
@@ -37,7 +37,7 @@ class TableBatteryUnit(TablePowerElectronicsUnit):
     stored_e: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableBatteryUnit, self).__init__()
         self.column_index += 1
         self.battery_state = Column(self.column_index, "battery_state", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1

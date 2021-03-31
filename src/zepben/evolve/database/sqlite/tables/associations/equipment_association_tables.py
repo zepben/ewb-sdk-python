@@ -16,7 +16,7 @@ class TableEquipmentEquipmentContainers(SqliteTable):
     equipment_container_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableEquipmentEquipmentContainers, self).__init__()
         self.column_index += 1
         self.equipment_mrid = Column(self.column_index, "equipment_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -26,12 +26,12 @@ class TableEquipmentEquipmentContainers(SqliteTable):
         return "equipment_equipment_containers"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableEquipmentEquipmentContainers, self).unique_index_columns()
         cols.append([self.equipment_mrid, self.equipment_container_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableEquipmentEquipmentContainers, self).non_unique_index_columns()
         cols.append([self.equipment_mrid])
         cols.append([self.equipment_container_mrid])
         return cols
@@ -42,7 +42,7 @@ class TableEquipmentOperationalRestrictions(SqliteTable):
     operational_restriction_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableEquipmentOperationalRestrictions, self).__init__()
         self.column_index += 1
         self.equipment_mrid = Column(self.column_index, "equipment_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -52,12 +52,12 @@ class TableEquipmentOperationalRestrictions(SqliteTable):
         return "equipment_operational_restrictions"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableEquipmentOperationalRestrictions, self).unique_index_columns()
         cols.append([self.equipment_mrid, self.operational_restriction_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableEquipmentOperationalRestrictions, self).non_unique_index_columns()
         cols.append([self.equipment_mrid])
         cols.append([self.operational_restriction_mrid])
         return cols
@@ -68,7 +68,7 @@ class TableEquipmentUsagePoints(SqliteTable):
     usage_point_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableEquipmentUsagePoints, self).__init__()
         self.column_index += 1
         self.equipment_mrid = Column(self.column_index, "equipment_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -78,12 +78,12 @@ class TableEquipmentUsagePoints(SqliteTable):
         return "equipment_usage_points"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableEquipmentUsagePoints, self).unique_index_columns()
         cols.append([self.equipment_mrid, self.usage_point_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableEquipmentUsagePoints, self).non_unique_index_columns()
         cols.append([self.equipment_mrid])
         cols.append([self.usage_point_mrid])
         return cols

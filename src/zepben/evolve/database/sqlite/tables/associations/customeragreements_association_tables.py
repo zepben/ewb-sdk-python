@@ -16,7 +16,7 @@ class TableCustomerAgreementsPricingStructures(SqliteTable):
     pricing_structure_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableCustomerAgreementsPricingStructures, self).__init__()
         self.column_index += 1
         self.customer_agreement_mrid = Column(self.column_index, "customer_agreement_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -26,12 +26,12 @@ class TableCustomerAgreementsPricingStructures(SqliteTable):
         return "customer_agreements_pricing_structures"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableCustomerAgreementsPricingStructures, self).unique_index_columns()
         cols.append([self.customer_agreement_mrid, self.pricing_structure_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableCustomerAgreementsPricingStructures, self).non_unique_index_columns()
         cols.append([self.customer_agreement_mrid])
         cols.append([self.pricing_structure_mrid])
         return cols

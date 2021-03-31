@@ -9,11 +9,12 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import Table
 
 __all__ = ["TableAuxiliaryEquipment", "TableFaultIndicators"]
 
+
 class TableAuxiliaryEquipment(TableEquipment):
     terminal_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableAuxiliaryEquipment, self).__init__()
         self.column_index += 1
         self.terminal_mrid = Column(self.column_index, "terminal_mrid", "TEXT", Nullable.NULL)
 

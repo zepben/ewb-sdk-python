@@ -16,7 +16,7 @@ class TableAssetOrganisationRolesAssets(SqliteTable):
     asset_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableAssetOrganisationRolesAssets, self).__init__()
         self.column_index += 1
         self.asset_organisation_role_mrid = Column(self.column_index, "asset_organisation_role_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -26,12 +26,12 @@ class TableAssetOrganisationRolesAssets(SqliteTable):
         return "asset_organisation_roles_assets"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableAssetOrganisationRolesAssets, self).unique_index_columns()
         cols.append([self.asset_organisation_role_mrid, self.asset_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableAssetOrganisationRolesAssets, self).non_unique_index_columns()
         cols.append([self.asset_organisation_role_mrid])
         cols.append([self.asset_mrid])
         return cols

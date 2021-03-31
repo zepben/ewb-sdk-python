@@ -16,7 +16,7 @@ class TableCircuits(TableLines):
     loop_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableCircuits, self).__init__()
         self.column_index += 1
         self.loop_mrid = Column(self.column_index, "loop_mrid", "TEXT", Nullable.NULL)
 
@@ -24,7 +24,7 @@ class TableCircuits(TableLines):
         return "circuits"
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableCircuits, self).non_unique_index_columns()
         cols.append([self.loop_mrid])
         return cols
 

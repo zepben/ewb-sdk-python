@@ -10,11 +10,12 @@ from zepben.evolve.database.sqlite.tables.iec61968.common_tables import TableAgr
 
 __all__ = ["TableCustomerAgreements", "TableCustomers", "TablePricingStructures", "TableTariffs"]
 
+
 class TableCustomerAgreements(TableAgreements):
     customer_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableCustomerAgreements, self).__init__()
         self.column_index += 1
         self.customer_mrid = Column(self.column_index, "customer_mrid", "TEXT", Nullable.NULL)
 
@@ -22,7 +23,7 @@ class TableCustomerAgreements(TableAgreements):
         return "customer_agreements"
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableCustomerAgreements, self).non_unique_index_columns()
         cols.append([self.customer_mrid])
         return cols
 
@@ -32,7 +33,7 @@ class TableCustomers(TableOrganisationRoles):
     num_end_devices: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableCustomers, self).__init__()
         self.column_index += 1
         self.kind = Column(self.column_index, "kind", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1

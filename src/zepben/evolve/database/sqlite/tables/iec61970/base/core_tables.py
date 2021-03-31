@@ -11,7 +11,7 @@ from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
 __all__ = ["TablePowerSystemResources", "TableSites", "TableNames", "TableTerminals", "TableFeeders", "TableIdentifiedObjects", "TableSubstations",
            "TableAcDcTerminals", "TableEquipmentContainers", "TableEquipment", "TableConnectivityNodeContainers", "TableConductingEquipment",
-           "TableBaseVoltages", "TableConnectivityNodes", "TableSubGeographicalRegions", "TableNameTypes", "TableEquipment"]
+           "TableBaseVoltages", "TableConnectivityNodes", "TableSubGeographicalRegions", "TableNameTypes", "TableEquipment", "TableGeographicalRegions"]
 
 
 class TableIdentifiedObjects(SqliteTable):
@@ -45,7 +45,7 @@ class TableBaseVoltages(TableIdentifiedObjects):
     nominal_voltage: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableBaseVoltages, self).__init__()
         self.column_index += 1
         self.nominal_voltage = Column(self.column_index, "nominal_voltage", "INTEGER", Nullable.NOT_NULL)
 
@@ -80,7 +80,7 @@ class TableEquipment(TablePowerSystemResources):
     in_service: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableEquipment, self).__init__()
         self.column_index += 1
         self.normally_in_service = Column(self.column_index, "normally_in_service", "BOOLEAN")
         self.column_index += 1
@@ -91,7 +91,7 @@ class TableConductingEquipment(TableEquipment):
     base_voltage_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableConductingEquipment, self).__init__()
         self.column_index += 1
         self.base_voltage_mrid = Column(self.column_index, "base_voltage_mrid", "TEXT", Nullable.NULL)
 
@@ -105,7 +105,7 @@ class TableFeeders(TableEquipmentContainers):
     normal_energizing_substation_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableFeeders, self).__init__()
         self.column_index += 1
         self.normal_head_terminal_mrid = Column(self.column_index, "normal_head_terminal_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -115,7 +115,7 @@ class TableFeeders(TableEquipmentContainers):
         return "feeders"
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableEquipmentContainers, self).non_unique_index_columns()
         cols.append([self.normal_energizing_substation_mrid])
         return cols
 
@@ -132,7 +132,7 @@ class TableNames(SqliteTable):
     name_type_name: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableNames, self).__init__()
         self.column_index += 1
         self.name_ = Column(self.column_index, "name", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -144,15 +144,15 @@ class TableNames(SqliteTable):
         return "names"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
-        cols.append([self.identified_object_mrid, self.name_type_name, self.name])
+        cols = super(TableNames, self).unique_index_columns()
+        cols.append([self.identified_object_mrid, self.name_type_name, self.name_])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableNames, self).non_unique_index_columns()
         cols.append([self.identified_object_mrid])
         cols.append([self.name_type_name])
-        cols.append([self.name])
+        cols.append([self.name_])
         return cols
 
 
@@ -161,7 +161,7 @@ class TableNameTypes(SqliteTable):
     description: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableNameTypes, self).__init__()
         self.column_index += 1
         self.name_ = Column(self.column_index, "name", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -171,7 +171,7 @@ class TableNameTypes(SqliteTable):
         return "name_types"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableNameTypes, self).unique_index_columns()
         cols.append([self.name_])
         return cols
 
@@ -186,7 +186,7 @@ class TableSubGeographicalRegions(TableIdentifiedObjects):
     geographical_region_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableSubGeographicalRegions, self).__init__()
         self.column_index += 1
         self.geographical_region_mrid = Column(self.column_index, "geographical_region_mrid", "TEXT", Nullable.NULL)
 
@@ -194,7 +194,7 @@ class TableSubGeographicalRegions(TableIdentifiedObjects):
         return "sub_geographical_regions"
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableSubGeographicalRegions, self).non_unique_index_columns()
         cols.append([self.geographical_region_mrid])
         return cols
 
@@ -203,7 +203,7 @@ class TableSubstations(TableEquipmentContainers):
     sub_geographical_region_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableSubstations, self).__init__()
         self.column_index += 1
         self.sub_geographical_region_mrid = Column(self.column_index, "sub_geographical_region_mrid", "TEXT", Nullable.NULL)
 
@@ -211,7 +211,7 @@ class TableSubstations(TableEquipmentContainers):
         return "substations"
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableSubstations, self).non_unique_index_columns()
         cols.append([self.sub_geographical_region_mrid])
         return cols
 
@@ -223,7 +223,7 @@ class TableTerminals(TableAcDcTerminals):
     phases: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableTerminals, self).__init__()
         self.column_index += 1
         self.conducting_equipment_mrid = Column(self.column_index, "conducting_equipment_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -237,11 +237,11 @@ class TableTerminals(TableAcDcTerminals):
         return "terminals"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableTerminals, self).unique_index_columns()
         cols.append([self.conducting_equipment_mrid, self.sequence_number])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableTerminals, self).non_unique_index_columns()
         cols.append([self.connectivity_node_mrid])
         return cols

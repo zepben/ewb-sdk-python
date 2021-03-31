@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from test.database.sqlite.tables.table_test_utils import verify_column
 from zepben.evolve import Nullable
-from zepben.evolve.database.sqlite.tables.metadata_tables import TableVersion, TableMetadataSources
+from zepben.evolve.database.sqlite.tables.metadata_tables import TableVersion, TableMetadataDataSources
 
 
 def test_table_version():
@@ -15,7 +15,7 @@ def test_table_version():
 
 
 def test_table_metadata_sources():
-    t = TableMetadataSources()
+    t = TableMetadataDataSources()
     verify_column(t.source, 1, "source", "TEXT", Nullable.NOT_NULL)
     verify_column(t.version, 2, "version", "TEXT", Nullable.NOT_NULL)
     verify_column(t.timestamp, 3, "timestamp", "TEXT", Nullable.NOT_NULL)

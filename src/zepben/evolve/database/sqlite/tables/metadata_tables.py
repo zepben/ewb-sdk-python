@@ -7,7 +7,7 @@
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
-__all__ = ["TableVersion", "TableMetadataSources"]
+__all__ = ["TableVersion", "TableMetadataDataSources"]
 
 
 class TableVersion(SqliteTable):
@@ -23,7 +23,7 @@ class TableVersion(SqliteTable):
         return "version"
 
 
-class TableMetadataSources(SqliteTable):
+class TableMetadataDataSources(SqliteTable):
     source: Column = None
     version: Column = None
     timestamp: Column = None

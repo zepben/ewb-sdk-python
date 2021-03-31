@@ -16,7 +16,7 @@ class TableSwitches(TableConductingEquipment):
     open: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableSwitches, self).__init__()
         self.column_index += 1
         self.normal_open = Column(self.column_index, "normal_open", "INTEGER", Nullable.NOT_NULL)
         self.column_index += 1

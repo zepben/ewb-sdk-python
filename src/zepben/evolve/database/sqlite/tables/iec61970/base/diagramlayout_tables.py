@@ -10,7 +10,7 @@ from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects
 from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
-__all__ = ["TableDiagrams", "TableDiagramObjects", "TableDiagramObjects"]
+__all__ = ["TableDiagrams", "TableDiagramObjects", "TableDiagramObjects", "TableDiagramObjectPoints"]
 
 
 class TableDiagramObjectPoints(SqliteTable):
@@ -20,7 +20,7 @@ class TableDiagramObjectPoints(SqliteTable):
     y_position: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableDiagramObjectPoints, self).__init__()
         self.column_index += 1
         self.diagram_object_mrid = Column(self.column_index, "diagram_object_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -34,12 +34,12 @@ class TableDiagramObjectPoints(SqliteTable):
         return "diagram_object_points"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableDiagramObjectPoints, self).unique_index_columns()
         cols.append([self.diagram_object_mrid, self.sequence_number])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableDiagramObjectPoints, self).non_unique_index_columns()
         cols.append([self.diagram_object_mrid])
         return cols
 
@@ -51,7 +51,7 @@ class TableDiagramObjects(TableIdentifiedObjects):
     rotation: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableDiagramObjects, self).__init__()
         self.column_index += 1
         self.identified_object_mrid = Column(self.column_index, "identified_object_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -65,7 +65,7 @@ class TableDiagramObjects(TableIdentifiedObjects):
         return "diagram_objects"
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableDiagramObjects, self).non_unique_index_columns()
         cols.append([self.identified_object_mrid])
         cols.append([self.diagram_mrid])
         return cols
@@ -76,7 +76,7 @@ class TableDiagrams(TableIdentifiedObjects):
     orientation_kind: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableDiagrams, self).__init__()
         self.column_index += 1
         self.diagram_style = Column(self.column_index, "diagram_style", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1

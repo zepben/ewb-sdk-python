@@ -23,7 +23,7 @@ class TableLoopsSubstations(SqliteTable):
     relationship: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableLoopsSubstations, self).__init__()
         self.column_index += 1
         self.loop_mrid = Column(self.column_index, "loop_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -35,12 +35,12 @@ class TableLoopsSubstations(SqliteTable):
         return "loops_substations"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableLoopsSubstations, self).unique_index_columns()
         cols.append([self.loop_mrid, self.substation_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableLoopsSubstations, self).non_unique_index_columns()
         cols.append([self.loop_mrid])
         cols.append([self.substation_mrid])
         return cols

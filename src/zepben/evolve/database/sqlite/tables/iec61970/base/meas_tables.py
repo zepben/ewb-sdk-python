@@ -20,7 +20,7 @@ class TableMeasurements(TableIdentifiedObjects):
     unit_symbol: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableMeasurements, self).__init__()
         self.column_index += 1
         self.power_system_resource_mrid = Column(self.column_index, "power_system_resource_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -33,7 +33,7 @@ class TableMeasurements(TableIdentifiedObjects):
         self.unit_symbol = Column(self.column_index, "unit_symbol", "TEXT", Nullable.NOT_NULL)
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableMeasurements, self).non_unique_index_columns()
         cols.append([self.power_system_resource_mrid])
         cols.append([self.remote_source_mrid])
         cols.append([self.terminal_mrid])
@@ -50,7 +50,7 @@ class TableAnalogs(TableMeasurements):
     positive_flow_in: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableMeasurements, self).__init__()
         self.column_index += 1
         self.positive_flow_in = Column(self.column_index, "positive_flow_in", "TEXT", Nullable.NOT_NULL)
 
@@ -66,7 +66,7 @@ class TableControls(TableIoPoints):
     power_system_resource_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableControls, self).__init__()
         self.column_index += 1
         self.power_system_resource_mrid = Column(self.column_index, "power_system_resource_mrid", "TEXT", Nullable.NULL)
 

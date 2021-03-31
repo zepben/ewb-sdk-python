@@ -13,6 +13,7 @@ __all__ = ["TableEnergyConnections", "TableEnergyConsumerPhases", "TableEnergyCo
            "TableRegulatingCondEq", "TableShuntCompensators", "TableLinearShuntCompensators", "TablePowerElectronicsConnection",
            "TablePowerElectronicsConnectionPhases"]
 
+
 class TableEnergyConnections(TableConductingEquipment):
     pass
 
@@ -26,7 +27,7 @@ class TableEnergyConsumerPhases(TablePowerSystemResources):
     q_fixed: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableEnergyConsumerPhases, self).__init__()
         self.column_index += 1
         self.energy_consumer_mrid = Column(self.column_index, "energy_consumer_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -44,12 +45,12 @@ class TableEnergyConsumerPhases(TablePowerSystemResources):
         return "energy_consumer_phases"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableEnergyConsumerPhases, self).unique_index_columns()
         cols.append([self.energy_consumer_mrid, self.phase])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableEnergyConsumerPhases, self).non_unique_index_columns()
         cols.append([self.energy_consumer_mrid])
         return cols
 
@@ -64,7 +65,7 @@ class TableEnergyConsumers(TableEnergyConnections):
     phase_connection: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableEnergyConsumers, self).__init__()
         self.column_index += 1
         self.customer_count = Column(self.column_index, "customer_count", "INTEGER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -89,7 +90,7 @@ class TableEnergySourcePhases(TablePowerSystemResources):
     phase: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableEnergySourcePhases, self).__init__()
         self.column_index += 1
         self.energy_source_mrid = Column(self.column_index, "energy_source_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -99,12 +100,12 @@ class TableEnergySourcePhases(TablePowerSystemResources):
         return "energy_source_phases"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableEnergySourcePhases, self).unique_index_columns()
         cols.append([self.energy_source_mrid, self.phase])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableEnergySourcePhases, self).non_unique_index_columns()
         cols.append([self.energy_source_mrid])
         return cols
 
@@ -124,7 +125,7 @@ class TableEnergySources(TableEnergyConnections):
     xn: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableEnergySources, self).__init__()
         self.column_index += 1
         self.active_power = Column(self.column_index, "active_power", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -158,7 +159,7 @@ class TableRegulatingCondEq(TableEnergyConnections):
     control_enabled: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableRegulatingCondEq, self).__init__()
         self.column_index += 1
         self.control_enabled = Column(self.column_index, "control_enbaled", "BOOLEAN", Nullable.NOT_NULL)
 
@@ -170,7 +171,7 @@ class TableShuntCompensators(TableRegulatingCondEq):
     sections: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableShuntCompensators, self).__init__()
         self.column_index += 1
         self.grounded = Column(self.column_index, "grounded", "BOOLEAN", Nullable.NOT_NULL)
         self.column_index += 1
@@ -188,7 +189,7 @@ class TableLinearShuntCompensators(TableShuntCompensators):
     g_per_section: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableShuntCompensators, self).__init__()
         self.column_index += 1
         self.b0_per_section = Column(self.column_index, "b0_per_section", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -212,7 +213,7 @@ class TablePowerElectronicsConnection(TableRegulatingCondEq):
     rated_u: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TablePowerElectronicsConnection, self).__init__()
         self.column_index += 1
         self.max_i_fault = Column(self.column_index, "max_i_fault", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -239,7 +240,7 @@ class TablePowerElectronicsConnectionPhases(TablePowerSystemResources):
     q: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TablePowerElectronicsConnectionPhases, self).__init__()
         self.column_index += 1
         self.power_electronics_connection_mrid = Column(self.column_index, "power_electronics_connection_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -253,6 +254,6 @@ class TablePowerElectronicsConnectionPhases(TablePowerSystemResources):
         return "power_electronics_connection_phase"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TablePowerElectronicsConnectionPhases, self).unique_index_columns()
         cols.append([self.power_electronics_connection_mrid])
         return cols

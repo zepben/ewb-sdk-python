@@ -16,7 +16,7 @@ class TableCircuitsSubstations(SqliteTable):
     substation_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableCircuitsSubstations, self).__init__()
         self.column_index += 1
         self.circuit_mrid = Column(self.column_index, "circuit_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -26,12 +26,12 @@ class TableCircuitsSubstations(SqliteTable):
         return "circuits_substations"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableCircuitsSubstations, self).unique_index_columns()
         cols.append([self.circuit_mrid, self.substation_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableCircuitsSubstations, self).non_unique_index_columns()
         cols.append([self.circuit_mrid])
         cols.append([self.substation_mrid])
         return cols
@@ -42,7 +42,7 @@ class TableCircuitsTerminals(SqliteTable):
     terminal_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableCircuitsTerminals, self).__init__()
         self.column_index += 1
         self.circuit_mrid = Column(self.column_index, "circuit_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -52,12 +52,12 @@ class TableCircuitsTerminals(SqliteTable):
         return "circuits_terminals"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableCircuitsTerminals, self).unique_index_columns()
         cols.append([self.circuit_mrid, self.terminal_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableCircuitsTerminals, self).non_unique_index_columns()
         cols.append([self.circuit_mrid])
         cols.append([self.terminal_mrid])
         return cols

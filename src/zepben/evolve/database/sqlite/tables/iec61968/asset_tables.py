@@ -16,7 +16,7 @@ class TableAssets(TableIdentifiedObjects):
     location_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableAssets, self).__init__()
         self.column_index += 1
         self.location_mrid = Column(self.column_index, "location_mrid", "TEXT", Nullable.NULL)
 
@@ -47,7 +47,7 @@ class TablePoles(TableStructures):
     classification: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TablePoles, self).__init__()
         self.column_index += 1
         self.classification = Column(self.column_index, "classification", "TEXT", Nullable.NOT_NULL)
 
@@ -61,7 +61,7 @@ class TableStreetlights(TableAssets):
     light_rating: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableStreetlights, self).__init__()
         self.column_index += 1
         self.pole_mrid = Column(self.column_index, "pole_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1

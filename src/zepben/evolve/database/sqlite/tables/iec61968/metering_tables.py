@@ -15,7 +15,7 @@ class TableEndDevices(TableAssetContainers):
     service_location: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableEndDevices, self).__init__()
         self.column_index += 1
         self.customer_mrid = Column(self.column_index, "customer_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -32,7 +32,7 @@ class TableUsagePoints(TableIdentifiedObjects):
     location_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableUsagePoints, self).__init__()
         self.column_index += 1
         self.location_mrid = Column(self.column_index, "location_mrid", "TEXT", Nullable.NULL)
 

@@ -18,7 +18,7 @@ class TableRemoteControls(TableRemotePoints):
     control_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableRemoteControls, self).__init__()
         self.column_index += 1
         self.control_mrid = Column(self.column_index, "control_mrid", "TEXT", Nullable.NULL)
 
@@ -30,7 +30,7 @@ class TableRemoteSources(TableRemotePoints):
     measurement_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableRemoteSources, self).__init__()
         self.column_index += 1
         self.measurement_mrid = Column(self.column_index, "measurement_mrid", "TEXT", Nullable.NULL)
 

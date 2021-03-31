@@ -11,7 +11,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import Table
 from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
 __all__ = ["TableDocuments", "TableAgreements", "TableLocations", "TableTownDetails", "TableStreetAddresses", "TableLocationStreetAddresses",
-           "TableLocationStreetAddressField", "TableOrganisationRoles", "TablePositionPoints"]
+           "TableLocationStreetAddressField", "TableOrganisationRoles", "TablePositionPoints", "TableOrganisations"]
 
 
 class TableDocuments(TableIdentifiedObjects):
@@ -23,11 +23,11 @@ class TableDocuments(TableIdentifiedObjects):
     comment: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableDocuments, self).__init__()
         self.column_index += 1
         self.title = Column(self.column_index, "title", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
-        self.created_date_time = Column(self.column_index, "created_date_time", "TEXT", Nullable.null)
+        self.created_date_time = Column(self.column_index, "created_date_time", "TEXT", Nullable.NULL)
         self.column_index += 1
         self.author_name = Column(self.column_index, "author_name", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -53,7 +53,7 @@ class TableTownDetails(SqliteTable):
     state_or_province: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableTownDetails, self).__init__()
         self.column_index += 1
         self.town_name = Column(self.column_index, "town_name", "TEXT", Nullable.NULL)
         self.column_index += 1
@@ -64,7 +64,7 @@ class TableStreetAddresses(TableTownDetails):
     postal_code: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableStreetAddresses, self).__init__()
         self.column_index += 1
         self.postal_code = Column(self.column_index, "postal_code", "TEXT", Nullable.NOT_NULL)
 
@@ -74,7 +74,7 @@ class TableLocationStreetAddresses(TableStreetAddresses):
     address_field: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableLocationStreetAddresses, self).__init__()
         self.column_index += 1
         self.location_mrid = Column(self.column_index, "location_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -84,12 +84,12 @@ class TableLocationStreetAddresses(TableStreetAddresses):
         return "location_street_addresses"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TableLocationStreetAddresses, self).unique_index_columns()
         cols.append([self.location_mrid, self.address_field])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super().non_unique_index_columns()
+        cols = super(TableLocationStreetAddresses, self).non_unique_index_columns()
         cols.append([self.location_mrid])
         return cols
 
@@ -103,9 +103,15 @@ class TableOrganisationRoles(TableIdentifiedObjects):
     organisation_mrid: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TableOrganisationRoles, self).__init__()
         self.column_index += 1
         self.organisation_mrid = Column(self.column_index, "organisation_mrid", "TEXT", Nullable.NULL)
+
+
+class TableOrganisations(TableIdentifiedObjects):
+
+    def name(self) -> str:
+        return "organisations"
 
 
 class TablePositionPoints(SqliteTable):
@@ -115,7 +121,7 @@ class TablePositionPoints(SqliteTable):
     y_position: Column = None
 
     def __init__(self):
-        super().__init__()
+        super(TablePositionPoints, self).__init__()
         self.column_index += 1
         self.location_mrid = Column(self.column_index, "location_mrid", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
@@ -129,6 +135,6 @@ class TablePositionPoints(SqliteTable):
         return "position_points"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super().unique_index_columns()
+        cols = super(TablePositionPoints, self).unique_index_columns()
         cols.append([self.location_mrid, self.sequence_number])
         return cols
