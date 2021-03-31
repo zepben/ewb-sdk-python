@@ -154,3 +154,5 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.connector_tables i
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.perlength_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.feeder_tables import *
+from zepben.evolve.database.sqlite.tables.database_tables import *
+from zepben.evolve.database.sqlite.tables.exceptions import *
