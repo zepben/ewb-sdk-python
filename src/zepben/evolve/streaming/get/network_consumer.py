@@ -78,19 +78,19 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def get_equipment_for_container(self, container: Union[str, EquipmentContainer]) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`EquipmentContainer` represented by `container`
-       
+
         Exceptions that occur during retrieval will be caught and passed to all error handlers that have been registered against this client.
-       
+
         Parameters
             - `service` - The :class:`NetworkService` to store fetched objects in.
             - `container` - The :class:`EquipmentContainer` (or its mRID) to fetch equipment for.
-       
+
         Returns a :class:`GrpcResult` with a result of one of the following:
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
               found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
               `BaseService.add`).
             - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
-        
+
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
         return await self._get_equipment_for_container(container)
@@ -98,19 +98,19 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def get_current_equipment_for_feeder(self, feeder: [str, Feeder]) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the current :class:`Equipment` for the :class:`Feeder` represented by `feeder`
-       
+
         Exceptions that occur during retrieval will be caught and passed to all error handlers that have been registered against this client.
-       
+
         Parameters
             - `service` - The :class:`NetworkService` to store fetched objects in.
             - `feeder` - The :class:`Feeder` (or its mRID) to fetch the current equipment for.
-       
+
         Returns a :class:`GrpcResult` with a result of one of the following:
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
               found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
               `BaseService.add`).
             - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
-        
+
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
         return await self._get_current_equipment_for_feeder(feeder)

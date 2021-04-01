@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta
-from typing import Callable, Any
+from typing import Callable, Any, List, Generator, Optional
 
 from dataclassy import dataclass
 
-from zepben.evolve.util import require, CopyableUUID
+from zepben.evolve.model.cim.iec61970.base.core.name import Name
+from zepben.evolve.util import require, CopyableUUID, nlen, ngen, safe_remove
 
 __all__ = ["IdentifiedObject"]
 
@@ -40,10 +41,13 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     description: str = ""
     """a free human readable text describing or naming the object. It may be non unique and may not correlate to a naming hierarchy."""
 
+    _names: Optional[List[Name]] = None
+
     def __str__(self):
         return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), str(self.name)) if a)}}}"
 
-    def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject], type_descr: str) -> bool:
+    def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject],
+                            type_descr: str) -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function.
 
@@ -60,7 +64,8 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         except (KeyError, AttributeError):
             return False
 
-    def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject], type_descr: str,
+    def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject],
+                                  type_descr: str,
                                   field_name: str = "sequence_number") -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function called with `field`.
@@ -73,7 +78,71 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         """
         try:
             get_result = getter(field)
-            require(get_result is other, lambda: f"{type_descr} with {field_name} {field} already exists in {str(self)}")
+            require(get_result is other,
+                    lambda: f"{type_descr} with {field_name} {field} already exists in {str(self)}")
             return True
         except IndexError:
             return False
+
+    @property
+    def names(self):
+        """The names for this identified object. The returned collection is read only."""
+        return ngen(self._names)
+
+    def num_names(self):
+        """Get the number of entries in the [Name] collection."""
+        return nlen(self._names)
+
+    def get_name(self, type: str, name: str) -> Optional[Name]:
+        """Return first element in _names or return None"""
+        if self._names is not None:
+            for name_ in self._names:
+                if name_.type.name == type and name_.name == name:
+                    return name_
+        return None
+
+    def add_name(self, name: Name) -> IdentifiedObject:
+        """
+        Associate an `zepben.evolve.cim.iec61970.base.core.name` with this `Name`
+
+        `name` The `zepben.evolve.cim.iec61970.base.core.name` to associate with this `Name`.
+        Returns A reference to this `Name` to allow fluent use.
+        Raises `ValueError` if another `EquipmentContainer` with the same `mrid` already exists for this `Name`.
+        """
+
+        require(name.identified_object is self,
+                lambda: f"Attempting to add a Name to {str(self)} that does not reference this identified object")
+
+        if self.get_name(name.type.name, name.name) is not None:
+            return self
+
+        self._names = list() if self._names is None else self._names
+        self._names.append(name)
+        return self
+
+    def remove_name(self, name: Name) -> Bool:
+        """
+        Disassociate `name` from this `Name`.
+
+        `name` The `zepben.evolve.cim.iec61970.base.core.name` to disassociate from this `Name`.
+        Returns A reference to this `Name` to allow fluent use.
+        Raises `ValueError` if `name` was not associated with this `Name`.
+        """
+
+        if name in self._names:
+            safe_remove(self._names, name)
+            return True
+        else:
+            return False
+
+        #safe_remove(self._names, name)
+        #return self
+        #check with kurt return self is not needed
+
+    def clear_names(self):
+        """
+        Clear all name.
+        Returns A reference to this `Name` to allow fluent use.
+        """
+        self._names = None
+        return self

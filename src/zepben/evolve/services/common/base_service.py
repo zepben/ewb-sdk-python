@@ -15,6 +15,8 @@ from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
+from zepben.evolve.model.cim.iec61970.base.core.name import Name
+from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 
 __all__ = ["BaseService"]
 
@@ -28,6 +30,7 @@ class BaseService(object, metaclass=ABCMeta):
     name: str
     _objectsByType: Dict[type, Dict[str, IdentifiedObject]] = OrderedDict()
     _unresolved_references_to: Dict[str, Set[UnresolvedReference]] = OrderedDict()
+    _name_types: Dict[str, NameType] = dict()
     """
     A dictionary of references between mRID's that as yet have not been resolved - typically when transferring services between systems.
     The key is the to_mrid of the `UnresolvedReference`s, and the value is a list of `UnresolvedReference`s for that specific object.
@@ -64,6 +67,14 @@ class BaseService(object, metaclass=ABCMeta):
         ]
     }
     """
+
+    @property
+    def name_types(self) -> Generator[str, None]:
+        """Associates the provided [nameType] with this service."""
+
+        for nametype in self._name_types.values():
+            yield nametype
+
 
     def __contains__(self, mrid: str) -> bool:
         """
@@ -341,3 +352,28 @@ class BaseService(object, metaclass=ABCMeta):
                     if issubclass(_type, obj_type):
                         for obj in object_map.values():
                             yield obj
+
+    def add_name_type(self, name_type: NameType) -> bool:
+        """
+        Associates the provided `name_type` with this service.
+        param `name_type` the `NameType` to add to this service
+        return true if the object is associated with this service, false if an object already exists in the service with
+        the same name.
+        """
+
+        if name_type.name in self._name_types:
+            return False
+        else:
+            self._name_types[name_type.name] = name_type
+            return True
+
+
+    def get_name_type(self, type: str) -> NameType:
+        """
+        Gets the `NameType` for the provided type name associated with this service.
+        Raises a KeyError if `type` doesn't exist in this service.
+        """
+
+        return self._name_types[type]
+
+

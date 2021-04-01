@@ -10,12 +10,21 @@ from dataclassy import dataclass
 # noinspection PyPackageRequirements
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
+from zepben.protobuf.cim.iec61970.base.core.Name_pb2 import Name as PBName
+from zepben.protobuf.cim.iec61970.base.core.NameType_pb2 import NameType as PBNameType
+
+from zepben.evolve.model.cim.iec61968.common.document import Document
+from zepben.evolve.model.cim.iec61968.common.organisation import Organisation
+from zepben.evolve.model.cim.iec61968.common.organisation_role import OrganisationRole
+from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 
 from zepben.evolve import Document, IdentifiedObject, Organisation, OrganisationRole
 from zepben.evolve.services.common import resolver
+from zepben.evolve.model.cim.iec61970.base.core.name import Name
+from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.services.common.base_service import BaseService
 
 __all__ = ["identified_object_to_cim", "document_to_cim", "organisation_to_cim", "organisation_role_to_cim", "BaseProtoToCim"]
@@ -54,11 +63,24 @@ def organisation_role_to_cim(pb: PBOrganisationRole, cim: OrganisationRole, serv
 
     identified_object_to_cim(pb.io, cim, service)
 
+def name_to_cim(pb: PBName, cim: Name, service: BaseService):
+    cim.name = pb.name
+    cim.type = pb.type
+    #todo fixme
+    identified_object_to_cim(pb.io, cim, service)
+
+def name_type_to_cim(pb : PBNameType, cim: Name, service: BaseService):
+    cim.name = pb.name
+    cim.description = pb.description
+    #todo fixme
+    identified_object_to_cim(pb.io, cim, service)
 
 PBDocument.to_cim = document_to_cim
 PBOrganisation.to_cim = organisation_to_cim
 PBOrganisationRole.to_cim = organisation_role_to_cim
 PBIdentifiedObject.to_cim = identified_object_to_cim
+PBName.to_cim = name_to_cim
+PBNameType.to_cim = name_type_to_cim
 
 
 @dataclass(slots=True)
