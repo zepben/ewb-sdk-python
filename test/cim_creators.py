@@ -5,10 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from random import choice
 
-from zepben.evolve import *
-
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes
 
+from zepben.evolve import *
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_state_kind import BatteryStateKind
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit
@@ -17,6 +16,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection im
 MIN_32_BIT_INTEGER = -2147483648
 MAX_32_BIT_INTEGER = 2147483647
 MAX_64_BIT_INTEGER = 9223372036854775807
+MIN_64_BIT_INTEGER = -9223372036854775808
 TEXT_MAX_SIZE = 6
 FLOAT_MIN = -100.0
 FLOAT_MAX = 1000.0
@@ -301,8 +301,9 @@ def batterystatekind():
 
 
 def batteryunit():
-    return builds(BatteryUnit, **powerelectronicsunit(), battery_state=batterystatekind(), rated_e=floats(min_value=0.0, max_value=FLOAT_MAX),
-                  stored_e=floats(min_value=0.0, max_value=FLOAT_MAX))
+    return builds(BatteryUnit, **powerelectronicsunit(), battery_state=batterystatekind(),
+                  rated_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER),
+                  stored_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER))
 
 
 def photovoltaicunit():
@@ -561,8 +562,9 @@ def unitsymbol():
 
 
 def measurement():
-    return {**identifiedobject(), "remote_source": builds(RemoteSource, **identifiedobject()), "power_system_resource_mrid": uuids(version=4).map(lambda x: str(x)),
-            "terminal_mrid": uuids(version=4).map(lambda x: str(x)), "phases": phasecode(), "unitSymbol": unitsymbol()}
+    return {**identifiedobject(), "remote_source": builds(RemoteSource, **identifiedobject()),
+            "power_system_resource_mrid": uuids(version=4).map(lambda x: str(x)),
+            "terminal_mrid": uuids(version=4).map(lambda x: str(x)), "phases": phasecode(), "unit_symbol": unitsymbol()}
 
 
 # IEC61970 SCADA #

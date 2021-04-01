@@ -653,7 +653,7 @@ def measurement_to_pb(cim: Measurement) -> PBMeasurement:
                          powerSystemResourceMRID=cim.power_system_resource_mrid,
                          terminalMRID=cim.terminal_mrid,
                          phases=PBPhaseCode.Value(cim.phases.short_name),
-                         unitSymbol=PBUnitSymbol.Value(cim.unitSymbol.short_name))
+                         unitSymbol=PBUnitSymbol.Value(cim.unit_symbol.short_name))
 
 
 # IEC61970 SCADA #

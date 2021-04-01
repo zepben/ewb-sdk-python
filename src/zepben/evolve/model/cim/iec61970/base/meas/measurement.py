@@ -54,7 +54,7 @@ class Measurement(IdentifiedObject):
     device, based on normal network phase. Their meaning will not change when the computed energizing phasing is changed due to jumpers or other reasons. 
     If the attribute is missing three phases (ABC) shall be assumed."""
 
-    unitSymbol: UnitSymbol = UnitSymbol.NONE
+    unit_symbol: UnitSymbol = UnitSymbol.NONE
     """Specifies the type of measurement.  For example, this specifies if the measurement represents an indoor temperature, outdoor temperature, bus voltage, 
     line flow, etc. When the measurementType is set to "Specialization", the type of Measurement is defined in more detail by the specialized class which 
     inherits from Measurement."""
