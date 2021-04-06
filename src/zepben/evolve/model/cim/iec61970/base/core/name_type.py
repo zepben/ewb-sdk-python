@@ -6,9 +6,11 @@
 
 from __future__ import annotations
 
+from collections.abc import MutableMapping
+
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
-class nameType(IdentifiedObject):
+class NameType(IdentifiedObject):
     """
     Type of name. Possible values for attribute 'name' are implementation dependent but standard profiles may specify types. An enterprise may have multiple
     IT systems each having its own local name for the same object, e.g. a planning system may have different names from an EMS. An object may also have
@@ -17,4 +19,25 @@ class nameType(IdentifiedObject):
     A power system related naming hierarchy may be: Substation, VoltageLevel, Equipment etc. Children of the same parent in such a hierarchy have names that
     typically are unique among them.
     """
+    namesIndex = {}
+
+    namesMultiIndex = {}
+
+    #create key:value pairs as dicts
+    #namesMultiIndex - nested list in dict
+
+    _namesIndex = namesIndex
+    _namesMultiIndex = namesMultiIndex
+    #create private instances of namesIndex/namesMultiIndex
+
+
+    def __init__(self):
+
+
+    def _has_name(self, name: str):
+        if namesIndex
+
+
+
+
 
