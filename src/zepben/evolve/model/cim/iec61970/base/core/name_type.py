@@ -19,23 +19,24 @@ class NameType(IdentifiedObject):
     A power system related naming hierarchy may be: Substation, VoltageLevel, Equipment etc. Children of the same parent in such a hierarchy have names that
     typically are unique among them.
     """
-    namesIndex = {}
 
-    namesMultiIndex = {}
-
-    #create key:value pairs as dicts
-    #namesMultiIndex - nested list in dict
-
-    _namesIndex = namesIndex
-    _namesMultiIndex = namesMultiIndex
-    #create private instances of namesIndex/namesMultiIndex
 
 
     def __init__(self):
 
+        self.__namesIndex = {}
+        self.__namesMultiIndex = {}
 
-    def _has_name(self, name: str):
-        if namesIndex
+
+    def _has_name(self, name: str, __namesIndex, __namesMultiIndex) -> bool:
+        if name in __namesIndex or name in __namesMultiIndex:
+            pass
+        else:
+            print("Name does not exist")
+
+
+
+
 
 
 
