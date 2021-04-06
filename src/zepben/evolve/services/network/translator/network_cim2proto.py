@@ -579,7 +579,7 @@ def shuntcompensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
                               sections=cim.sections,
                               grounded=cim.grounded,
                               nomU=cim.nom_u,
-                              phaseConnection=PBPhaseShuntConnectionKind.Value(cim.phase_connection))
+                              phaseConnection=PBPhaseShuntConnectionKind.Enum.Value(cim.phase_connection.short_name))
 
 
 def switch_to_pb(cim: Switch) -> PBSwitch:
@@ -653,7 +653,7 @@ def measurement_to_pb(cim: Measurement) -> PBMeasurement:
                          powerSystemResourceMRID=cim.power_system_resource_mrid,
                          terminalMRID=cim.terminal_mrid,
                          phases=PBPhaseCode.Value(cim.phases.short_name),
-                         unitSymbol=PBUnitSymbol.Value(cim.unitSymbol.short_name))
+                         unitSymbol=PBUnitSymbol.Value(cim.unit_symbol.short_name))
 
 
 # IEC61970 SCADA #

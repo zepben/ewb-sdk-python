@@ -463,7 +463,6 @@ PBSubGeographicalRegion.to_cim = subgeographicalregion_to_cim
 PBSubstation.to_cim = substation_to_cim
 PBTerminal.to_cim = terminal_to_cim
 
-
 ### IEC61970 MEAS ###
 def accumulator_to_cim(pb: PBAccumulator, network_service: NetworkService) -> Optional[Accumulator]:
     cim = Accumulator(mrid=pb.mrid())
@@ -498,7 +497,7 @@ def measurement_to_cim(pb: PBMeasurement, cim: Measurement, service: NetworkServ
     cim.power_system_resource_mrid = pb.powerSystemResourceMRID
     cim.terminal_mrid = pb.terminalMRID
     cim.phases = phasecode_by_id(pb.phases)
-    cim.unitSymbol = unit_symbol_from_id(pb.unitSymbol)
+    cim.unit_symbol = unit_symbol_from_id(pb.unitSymbol)
     service.resolve_or_defer_reference(resolver.remote_source(cim), pb.remoteSourceMRID)
     identifiedobject_to_cim(pb.io, cim, service)
 

@@ -114,14 +114,14 @@ class TapChanger(PowerSystemResource):
                 lambda: f"New value would invalidate current neutral_step of {self.neutral_step}")
 
     def _validate_steps(self):
-        require(self.high_step > self.low_step,
+        require(self._high_step > self._low_step,
                 lambda: f"High step [{self.high_step}] must be greater than low step [{self.low_step}]")
-        require(self.low_step <= self.neutral_step <= self.high_step,
+        require(self._low_step <= self._neutral_step <= self._high_step,
                 lambda: f"Neutral step [{self.neutral_step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
-        require(self._low_step <= self.normal_step <= self._high_step,
+        require(self._low_step <= self._normal_step <= self._high_step,
                 lambda: f"Normal step [{self.normal_step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
-        require(self._low_step <= self.step <= self._high_step,
-                lambda: f"Step [{self.step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+        require(self._low_step <= self._step <= self._high_step,
+                lambda: f"Step [{self._step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
 
 
 class RatioTapChanger(TapChanger):
@@ -311,6 +311,8 @@ class PowerTransformer(ConductingEquipment):
                                                terminals=terminals)
         if power_transformer_ends:
             for end in power_transformer_ends:
+                if end.power_transformer is None:
+                    end.power_transformer = self
                 self.add_end(end)
 
     def num_ends(self):

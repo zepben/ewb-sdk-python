@@ -14,19 +14,19 @@ class BatteryStateKind(Enum):
     UNKNOWN = 0
     """Battery state is not known."""
 
-    DISCHARGING = 1
+    discharging = 1
     """Stored energy is decreasing."""
 
-    FULL = 2
+    full = 2
     """Unable to charge, and not discharging."""
 
-    WAITING = 3
+    waiting = 3
     """Neither charging nor discharging, but able to do so."""
 
-    CHARGING = 4
+    charging = 4
     """Stored energy is increasing."""
 
-    EMPTY = 5
+    empty = 5
     """Unable to discharge, and not charging."""
 
     @property

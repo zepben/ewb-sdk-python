@@ -15,7 +15,7 @@ battery_kwargs = {**peu_kwargs, "battery_state": sampled_from(BatteryStateKind),
                   "stored_e": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
                   }
 
-battery_args = (*peu_args, BatteryStateKind.CHARGING, 1000, 2000)
+battery_args = (*peu_args, BatteryStateKind.charging, 1000, 2000)
 
 pv_kwargs = peu_kwargs
 
@@ -46,7 +46,7 @@ def test_battery_unit_constructor_kwargs(battery_state, rated_e, stored_e, **kwa
 
 def test_battery_unit_constructor_args():
     bu = BatteryUnit(*battery_args)
-    assert bu.battery_state == BatteryStateKind.CHARGING
+    assert bu.battery_state == BatteryStateKind.charging
     assert bu.rated_e == 1000
     assert bu.stored_e == 2000
     verify_peu_args(bu)
