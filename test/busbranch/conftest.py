@@ -7,11 +7,12 @@
 from typing import List
 
 from pytest import fixture
-from zepben.evolve import NetworkService, AcLineSegment, PerLengthSequenceImpedance, \
-    PowerTransformer, PowerTransformerEnd, Breaker, BaseVoltage, OverheadWireInfo, PowerTransformerInfo, EnergyConsumer, EnergySource
-from zepben.evolve.services.network.network import connect
 
 from test.network_fixtures import create_terminal, create_terminals
+from zepben.evolve import NetworkService, AcLineSegment, PerLengthSequenceImpedance, \
+    PowerTransformer, PowerTransformerEnd, Breaker, BaseVoltage, OverheadWireInfo, PowerTransformerInfo, EnergyConsumer, EnergySource, \
+    PowerElectronicsConnection
+from zepben.evolve.services.network.network import connect
 
 
 @fixture()
@@ -71,6 +72,76 @@ def simple_node_breaker_network() -> NetworkService:
     ec_t = create_terminal(network, ec)
 
     network.connect_terminals(line_terminals[1], ec_t)
+
+    return network
+
+
+@fixture()
+def simple_node_breaker_network_with_pec() -> NetworkService:
+    # Network
+    network = NetworkService()
+
+    # BaseVoltages
+    bv_hv: BaseVoltage = BaseVoltage(mrid="20kV", nominal_voltage=20000, name="20kV")
+    bv_lv: BaseVoltage = BaseVoltage(mrid="415V", nominal_voltage=400, name="415V")
+    network.add(bv_hv)
+    network.add(bv_lv)
+
+    # PerLengthSequenceImpedance
+    plsi = PerLengthSequenceImpedance(mrid="plsi", r=0.642 / 1000, x=0.083 / 1000)
+    network.add(plsi)
+
+    # WireInfo
+    wire_info = OverheadWireInfo(mrid="wire_info", rated_current=0.142 * 1000)
+    network.add(wire_info)
+
+    # PowerTransformerInfo
+    pt_info = PowerTransformerInfo(mrid="pt_info")
+    network.add(pt_info)
+
+    # EnergySource
+    es = EnergySource(mrid="grid_connection", name="Grid Connection", voltage_magnitude=1.02 * bv_hv.nominal_voltage)
+    es.base_voltage = bv_hv
+    network.add(es)
+    es_t = create_terminal(network, es)
+
+    # Transformer
+    tx = PowerTransformer(mrid="transformer", name="Transformer")
+    tx.asset_info = pt_info
+    network.add(tx)
+    tx_terminals = create_terminals(network, tx, 2)
+
+    ends = _create_transformer_ends(tx, [20000, 400])
+    for end in ends:
+        network.add(end)
+
+    network.connect_terminals(tx_terminals[0], es_t)
+
+    # Line
+    line = AcLineSegment(mrid="line", name="Line", length=100.0, per_length_sequence_impedance=plsi)
+    line.asset_info = wire_info
+    line.base_voltage = bv_lv
+    network.add(line)
+    line_terminals = create_terminals(network, line, 2)
+
+    network.connect_terminals(tx_terminals[1], line_terminals[0])
+
+    # Load
+    ec = EnergyConsumer(mrid="load", name="Load", p=100000., q=50000.)
+    ec.base_voltage = bv_lv
+    network.add(ec)
+    ec_t = create_terminal(network, ec)
+
+    network.connect_terminals(line_terminals[1], ec_t)
+
+    # PowerElectronicsConnection
+    pec = PowerElectronicsConnection(mrid="pec")
+    pec.base_voltage = bv_lv
+    network.add(pec)
+    pec_t = create_terminal(network, pec)
+    pec_t.mrid = "pec_t1"
+
+    network.connect_by_mrid(pec_t, line_terminals[1].connectivity_node.mrid)
 
     return network
 
@@ -297,6 +368,62 @@ def negligible_impedance_equipment_basic_network(request) -> NetworkService:
     a5_t = create_terminal(network, a5)
 
     network.connect_terminals(a4_ts[1], a5_t)
+
+    return network
+
+
+@fixture()
+def end_of_branch_multiple_ec_pec() -> NetworkService:
+    """
+    all same plsi
+                                pec1
+                              +
+        a1          a2       /
+     +---------+---------+ o + ec
+                            \
+                             +
+                              pec2
+    """
+    # Network
+    network = NetworkService()
+
+    # PerLineSequenceImpedance
+    plsi1 = _create_per_length_sequence_impedance(1.0)
+    network.add(plsi1)
+
+    # AcLineSegment1
+    a1 = AcLineSegment(mrid="a1", length=1.0, per_length_sequence_impedance=plsi1)
+    network.add(a1)
+    a1_terminals = create_terminals(network, a1, 2)
+
+    # AcLineSegment2
+    a2 = AcLineSegment(mrid="a2", length=2.0, per_length_sequence_impedance=plsi1)
+    network.add(a2)
+    a2_terminals = create_terminals(network, a2, 2)
+
+    network.connect_terminals(a1_terminals[1], a2_terminals[0])
+
+    # Load
+    ec = EnergyConsumer(mrid="ec", name="ec", p=100000., q=50000.)
+    network.add(ec)
+    ec_t = create_terminal(network, ec)
+
+    network.connect_terminals(a2_terminals[1], ec_t)
+
+    # PowerElectronicsConnection
+    pec1 = PowerElectronicsConnection(mrid="pec1")
+    network.add(pec1)
+    pec1_t = create_terminal(network, pec1)
+    pec1_t.mrid = "pec1_t1"
+
+    network.connect_by_mrid(pec1_t, a2_terminals[1].connectivity_node.mrid)
+
+    pec2 = PowerElectronicsConnection(mrid="pec2")
+    network.add(pec2)
+    pec2_t = create_terminal(network, pec2)
+    pec2_t.mrid = "pec2_t1"
+
+    network.connect_by_mrid(pec2_t, a2_terminals[1].connectivity_node.mrid)
 
     return network
 
