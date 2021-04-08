@@ -9,6 +9,7 @@ from functools import reduce
 from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Optional
 
 from dataclassy import dataclass
+
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
@@ -19,6 +20,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.connectors import Junction, Bus
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import ShuntCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch, Jumper
@@ -35,7 +37,12 @@ TBT = TypeVar('TBT')  # Topological Branch Type
 class ErrorType(Enum):
     invalid_number_of_terminals = "invalid_number_of_terminals"
     unsupported_class = "unsupported_class"
-    missing_required_data = "missing_required_data"
+    missing_per_length_sequence_impedance = "missing_per_length_sequence_impedance",
+    missing_wire_info = "missing_wire_info",
+    missing_power_transformer_info = "missing_power_transformer_info",
+    missing_nominal_voltage = "missing_nominal_voltage",
+    invalid_number_of_transformer_ends = "invalid_number_of_transformer_ends",
+    missing_transformer_end_terminal = "missing_transformer_end_terminal"
 
 
 @dataclass(slots=True)
@@ -58,7 +65,7 @@ class CreationResult:
     errors: Dict[ErrorType, Set[ErrorInfo]] = defaultdict(set)
 
     @property
-    def succeed(self) -> bool:
+    def was_successful(self) -> bool:
         """True if no errors were found while trying to create the bus-branch model, False otherwise."""
         return len(self.errors) == 0
 
@@ -67,18 +74,22 @@ class CreationResult:
 
 
 def create_bus_branch_model(
-        network_service: NetworkService,
+        topological_island_provider: Callable[[], NetworkService],
         bus_branch_network_creator: Callable[[NetworkService], BBN],
-        topological_node_creator: Callable[[BBN, int, FrozenSet[ConductingEquipment], FrozenSet[Terminal], FrozenSet[Terminal], NetworkService], TN],
+        topological_node_creator: Callable[
+            [BBN, int, FrozenSet[ConductingEquipment], FrozenSet[Terminal], FrozenSet[Terminal], NetworkService], TN],
         topological_branch_creator: Callable[
-            [BBN, Tuple[TN, TN], float, TBT, FrozenSet[AcLineSegment], FrozenSet[Terminal], FrozenSet[Terminal], NetworkService], None],
-        topological_branch_type_creator: Callable[[BBN, PerLengthSequenceImpedance, WireInfo], TBT],
-        get_topological_branch_type_id: Callable[[PerLengthSequenceImpedance, WireInfo], str],
-        two_winding_power_transformer_creator: Callable[[BBN, PowerTransformer, Tuple[TN, TN], PTT, NetworkService], None],
+            [BBN, Tuple[TN, TN], float, TBT, FrozenSet[AcLineSegment], FrozenSet[Terminal], FrozenSet[Terminal],
+             NetworkService], None],
+        topological_branch_type_creator: Callable[[BBN, PerLengthSequenceImpedance, WireInfo, int], TBT],
+        get_topological_branch_type_id: Callable[[PerLengthSequenceImpedance, WireInfo, int], str],
+        two_winding_power_transformer_creator: Callable[
+            [BBN, PowerTransformer, Tuple[TN, TN], PTT, NetworkService], None],
         power_transformer_type_creator: Callable[[BBN, PowerTransformer], PTT],
         get_power_transformer_type_id: Callable[[PowerTransformer], str],
         infeed_creator: Callable[[BBN, EnergySource, TN, NetworkService], None],
         energy_consumer_creator: Callable[[BBN, EnergyConsumer, TN, NetworkService], None],
+        power_electronics_connection_creator: Callable[[BBN, PowerElectronicsConnection, TN, NetworkService], None],
         use_normal_state: bool = True) -> CreationResult:
     """
     Computes the values needed to generate a bus-branch model from a source `zepben.evolve.services.network.network.NetworkService` object and calls the appropriate bus-branch model element creator callbacks passing in those values.
@@ -89,7 +100,7 @@ def create_bus_branch_model(
     PTT := The object used to represent a transformer datasheet information needed to run a loadflow.
     TBT := The object used to represent a topological branch's datasheet information needed to run a loadflow.
 
-    :param network_service: Source `zepben.evolve.services.network.network.NetworkService` used for the computation of the bus-branch model.
+    :param topological_island_provider: Function that provides source `zepben.evolve.services.network.network.NetworkService` that represents the topological island to be used for the computation of the bus-branch model.
     :param bus_branch_network_creator: Creates target bus-branch model instance of type BBN.
     :param topological_node_creator: Callback used to create a topological node instance of type TN.
         :param bus_branch_network: Instance of type BBN being used as a target bus-branch network.
@@ -115,11 +126,13 @@ def create_bus_branch_model(
         :param bus_branch_network: Instance of type BBN being used as a target bus-branch network.
         :param per_length_sequence_impedance: Instance of `zepben.evolve.model.cim.iec61970.base.wires.per_length.PerLengthSequenceImpedance` used to generate this topological branch type.
         :param wire_info: Instance of `zepben.evolve.model.cim.iec61968.assetinfo.wire_info.WireInfo` used to generate this topological branch type.
+        :param base_voltage: Base voltage value to be used for the topological branch type in Volts.
         :return: Instace of type TBT that represents a topological branch's datasheet information needed to run a loadflow.
 
     :param get_topological_branch_type_id: Function that returns a unique identifier for the topological branch type.
         :param per_length_sequence_impedance: Instance of `zepben.evolve.model.cim.iec61970.base.wires.per_length.PerLengthSequenceImpedance` used to generate this topological branch type id.
         :param wire_info: Instance of `zepben.evolve.model.cim.iec61968.assetinfo.wire_info.WireInfo` used to generate this topological branch type id.
+        :param base_voltage: Base voltage value to be used for the topological branch type id in Volts.
         :return: String that serves as an id that uniquely identifies this topological branch type.
 
     :param two_winding_power_transformer_creator: Callback used to create a two-winding transformer instance in target bus-branch network.
@@ -153,10 +166,18 @@ def create_bus_branch_model(
         :param node_breaker_network: Instance of type `zepben.evolve.services.network.network.NetworkService` being used as a source node-breaker network.
         :return: None
 
+    :param power_electronics_connection_creator: Callback used to pass all the required values to generate a power electronics connection object.
+        :param bus_branch_network: Instance of type BBN being used as a target bus-branch network.
+        :param power_electronics_connection: Instance of `zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection.PowerElectronicsConnection` used to generate power electronics connection in target bus-branch network.
+        :param connected_topological_node: Topological node of type TN that is connected to this power electronics connection.
+        :param node_breaker_network: Instance of type `zepben.evolve.services.network.network.NetworkService` being used as a source node-breaker network.
+        :return: None
+
     :param use_normal_state: Flag to determine the network state used when checking switch states. Uses 'normal state' if True, 'current state' otherwise. default: True
     :return: `CreationResult`
     """
     result = CreationResult()
+    network_service = topological_island_provider()
     _validate_node_breaker_model(network_service, result)
 
     if len(result.errors.values()) != 0:
@@ -175,7 +196,14 @@ def create_bus_branch_model(
         if cn.mrid not in processed_cn_ids:
             closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn, get_is_open)
             rated_u = next((_get_base_voltage(t.conducting_equipment, t) for t in border_terms), None)
-            tn = topological_node_creator(bus_branch_network, rated_u, closed_switches, border_terms, inner_terms, network_service)
+            tn = topological_node_creator(
+                bus_branch_network,
+                rated_u,
+                closed_switches,
+                border_terms,
+                inner_terms,
+                network_service
+            )
 
             for t in border_terms:
                 tns[t.mrid] = tn
@@ -191,11 +219,12 @@ def create_bus_branch_model(
             total_length = reduce(lambda s, l: l.length + s, (acls for acls in common_acls), 0.0)
             psli = next((common_acl for common_acl in common_acls)).per_length_sequence_impedance
             wire_info = next((common_acl for common_acl in common_acls)).wire_info
-            tb_type_id = get_topological_branch_type_id(psli, wire_info)
+            voltage = [acls.base_voltage.nominal_voltage for acls in common_acls][0]
+            tb_type_id = get_topological_branch_type_id(psli, wire_info, voltage)
 
             tb_type = tb_types.get(tb_type_id)
             if tb_type is None:
-                tb_type = topological_branch_type_creator(bus_branch_network, psli, wire_info)
+                tb_type = topological_branch_type_creator(bus_branch_network, psli, wire_info, voltage)
                 tb_types[tb_type_id] = tb_type
 
             topological_branch_creator(
@@ -212,7 +241,13 @@ def create_bus_branch_model(
             processed_acls_ids.update({acls.mrid for acls in common_acls})
 
     for pt in network_service.objects(PowerTransformer):
-        pt_tns = [tns[t.mrid] for t in (e.terminal for e in pt.ends)]
+        end_terminal_sorted_by_voltage = [end for end in
+                                          sorted(
+                                              [e for e in pt.ends],
+                                              key=lambda e: e.rated_u,
+                                              reverse=True
+                                          )]
+        pt_tns = [tns[t.mrid] for t in (e.terminal for e in end_terminal_sorted_by_voltage)]
 
         pt_type_id = get_power_transformer_type_id(pt)
         pt_type = pt_types.get(pt_type_id)
@@ -221,7 +256,13 @@ def create_bus_branch_model(
             pt_types[pt_type_id] = pt_type
 
         if len(pt_tns) == 2:
-            two_winding_power_transformer_creator(bus_branch_network, pt, (pt_tns[0], pt_tns[1]), pt_type, network_service)
+            two_winding_power_transformer_creator(
+                bus_branch_network,
+                pt,
+                (pt_tns[0], pt_tns[1]),
+                pt_type,
+                network_service
+            )
         else:
             result._add_error(ErrorType.invalid_number_of_terminals, pt)
             return result
@@ -233,6 +274,10 @@ def create_bus_branch_model(
     for ec in network_service.objects(EnergyConsumer):
         ec_tn = tns[next((t for t in ec.terminals)).mrid]
         energy_consumer_creator(bus_branch_network, ec, ec_tn, network_service)
+
+    for pec in network_service.objects(PowerElectronicsConnection):
+        pec_tn = tns[next((t for t in pec.terminals)).mrid]
+        power_electronics_connection_creator(bus_branch_network, pec, pec_tn, network_service)
 
     result.bus_branch_model = bus_branch_network
     return result
@@ -252,19 +297,25 @@ def _validate_node_breaker_model(network: NetworkService, result: CreationResult
         if acl.num_terminals() != 2:
             result._add_error(ErrorType.invalid_number_of_terminals, acl)
 
-        if acl.per_length_sequence_impedance is None or acl.wire_info is None:
-            result._add_error(ErrorType.missing_required_data, acl)
+        if acl.per_length_sequence_impedance is None:
+            result._add_error(ErrorType.missing_per_length_sequence_impedance, acl)
 
-    for sw in network.objects(Switch):
-        if sw.num_terminals() != 2:
-            result._add_error(ErrorType.invalid_number_of_terminals, sw)
+        if acl.wire_info is None:
+            result._add_error(ErrorType.missing_wire_info, acl)
 
     for tx in network.objects(PowerTransformer):
+        if len(list(tx.ends)) != 2:
+            result._add_error(ErrorType.invalid_number_of_transformer_ends, tx)
+
+        for end in tx.ends:
+            if end.terminal is None:
+                result._add_error(ErrorType.missing_transformer_end_terminal, end)
+
         if tx.num_terminals() != 2:
             result._add_error(ErrorType.invalid_number_of_terminals, tx)
 
         if tx.power_transformer_info is None:
-            result._add_error(ErrorType.missing_required_data, tx)
+            result._add_error(ErrorType.missing_power_transformer_info, tx)
 
     for es in network.objects(EnergySource):
         if es.num_terminals() != 1:
@@ -273,6 +324,17 @@ def _validate_node_breaker_model(network: NetworkService, result: CreationResult
     for ec in network.objects(EnergyConsumer):
         if ec.num_terminals() != 1:
             result._add_error(ErrorType.invalid_number_of_terminals, ec)
+
+    for pec in network.objects(PowerElectronicsConnection):
+        if pec.num_terminals() != 1:
+            result._add_error(ErrorType.invalid_number_of_terminals, pec)
+
+    for ceq in network.objects(ConductingEquipment):
+        if isinstance(ceq, PowerTransformer):
+            continue
+
+        if ceq.base_voltage is None or ceq.base_voltage.nominal_voltage is None:
+            result._add_error(ErrorType.missing_nominal_voltage, ceq)
 
     for sc in network.objects(ShuntCompensator):
         result._add_error(ErrorType.unsupported_class, sc)
