@@ -141,3 +141,36 @@ from zepben.evolve.services.common.translator.service_differences import *
 
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparator
+
+from zepben.evolve.database.sqlite.tables.column import *
+from zepben.evolve.database.sqlite.tables.sqlite_table import *
+from zepben.evolve.database.sqlite.tables.metadata_tables import *
+from zepben.evolve.database.sqlite.tables.associations.loop_association_tables import *
+from zepben.evolve.database.sqlite.tables.associations.circuit_association_tables import *
+from zepben.evolve.database.sqlite.tables.associations.customeragreements_association_tables import *
+from zepben.evolve.database.sqlite.tables.associations.equipment_association_tables import *
+from zepben.evolve.database.sqlite.tables.associations.usagepoints_association_tables import *
+from zepben.evolve.database.sqlite.tables.associations.assetorganisationroles_association_tables import *
+from zepben.evolve.database.sqlite.tables.associations.pricingstructure_association_tables import *
+from zepben.evolve.database.sqlite.tables.iec61968.common_tables import *
+from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import *
+from zepben.evolve.database.sqlite.tables.iec61968.customer_tables import *
+from zepben.evolve.database.sqlite.tables.iec61968.metering_tables import *
+from zepben.evolve.database.sqlite.tables.iec61968.assetinfo_tables import *
+from zepben.evolve.database.sqlite.tables.iec61968.operations_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.meas_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.scada_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.auxiliaryequipment_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.container_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.switch_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.energyconnection_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.transformer_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.conductor_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.connector_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.perlength_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.feeder_tables import *
+from zepben.evolve.database.sqlite.tables.database_tables import *
+from zepben.evolve.database.sqlite.tables.exceptions import *
