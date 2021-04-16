@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from test.database.sqlite.tables.table_test_utils import verify_column
 from zepben.evolve import Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects, TableBaseVoltages, \
@@ -28,6 +29,7 @@ def test_table_base_voltages():
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_]]
 
+
 def test_table_power_system_resources():
     t = TablePowerSystemResources()
     verify_column(t.location_mrid, 5, "location_mrid", "TEXT", Nullable.NULL)
@@ -35,11 +37,13 @@ def test_table_power_system_resources():
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_]]
 
+
 def test_table_connectivity_nodes():
     t = TableConnectivityNodes()
     assert t.name() == "connectivity_nodes"
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_]]
+
 
 def test_table_equipment():
     t = TableEquipment()
@@ -48,11 +52,13 @@ def test_table_equipment():
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_]]
 
+
 def test_table_conducting_equipment():
     t = TableConductingEquipment()
     verify_column(t.base_voltage_mrid, 9, "base_voltage_mrid", "TEXT", Nullable.NULL)
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_]]
+
 
 def test_table_feeders():
     t = TableFeeders()
@@ -62,11 +68,13 @@ def test_table_feeders():
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_], [t.normal_energizing_substation_mrid]]
 
+
 def test_table_geographical_regions():
     t = TableGeographicalRegions()
     assert t.name() == "geographical_regions"
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_]]
+
 
 def test_table_names():
     t = TableNames()
@@ -74,8 +82,9 @@ def test_table_names():
     verify_column(t.identified_object_mrid, 2, "identified_object_mrid", "TEXT", Nullable.NOT_NULL)
     verify_column(t.name_type_name, 3, "name_type_name", "TEXT", Nullable.NOT_NULL)
     assert t.name() == "names"
-    #assert t.unique_index_columns() == [[t.identified_object_mrid], [t.name_type_name], [t.name_]]
+    assert t.unique_index_columns() == [[t.identified_object_mrid, t.name_type_name, t.name_]]
     assert t.non_unique_index_columns() == [[t.identified_object_mrid], [t.name_type_name], [t.name_]]
+
 
 def test_table_name_types():
     t = TableNameTypes()
@@ -84,11 +93,13 @@ def test_table_name_types():
     assert t.name() == "name_types"
     assert t.unique_index_columns() == [[t.name_]]
 
+
 def test_table_table_sites():
     t = TableSites()
     assert t.name() == "sites"
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_]]
+
 
 def test_table_sub_geographical_regions():
     t = TableSubGeographicalRegions()
@@ -97,12 +108,14 @@ def test_table_sub_geographical_regions():
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_],[t.geographical_region_mrid]]
 
+
 def test_table_substations():
     t = TableSubstations()
     verify_column(t.sub_geographical_region_mrid, 7, "sub_geographical_region_mrid", "TEXT", Nullable.NULL)
     assert t.name() == "substations"
     assert t.unique_index_columns() == [[t.mrid]]
     assert t.non_unique_index_columns() == [[t.name_], [t.sub_geographical_region_mrid]]
+
 
 def test_table_terminals():
     t = TableTerminals()
