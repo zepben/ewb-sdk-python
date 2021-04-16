@@ -57,7 +57,7 @@ class TableDiagramObjects(TableIdentifiedObjects):
         self.column_index += 1
         self.diagram_mrid = Column(self.column_index, "diagram_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
-        self.style = Column(self.column_index, "style", "NUMBER", Nullable.NOT_NULL)
+        self.style = Column(self.column_index, "style", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
         self.rotation = Column(self.column_index, "rotation", "NUMBER", Nullable.NOT_NULL)
 

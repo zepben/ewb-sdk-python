@@ -19,7 +19,7 @@ class TableConductors(TableConductingEquipment):
         self.column_index += 1
         self.length = Column(self.column_index, "length", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
-        self.wire_info_mrid = Column(self.column_index, "wire_info_mrid", "TEXT", Nullable.NOT_NULL)
+        self.wire_info_mrid = Column(self.column_index, "wire_info_mrid", "TEXT", Nullable.NULL)
 
 
 class TableAcLineSegments(TableConductors):

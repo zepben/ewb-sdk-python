@@ -50,9 +50,9 @@ class TableAnalogs(TableMeasurements):
     positive_flow_in: Column = None
 
     def __init__(self):
-        super(TableMeasurements, self).__init__()
+        super(TableAnalogs, self).__init__()
         self.column_index += 1
-        self.positive_flow_in = Column(self.column_index, "positive_flow_in", "TEXT", Nullable.NOT_NULL)
+        self.positive_flow_in = Column(self.column_index, "positive_flow_in", "BOOLEAN", Nullable.NOT_NULL)
 
     def name(self) -> str:
         return "analogs"

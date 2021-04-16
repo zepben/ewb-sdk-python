@@ -67,7 +67,7 @@ class TableStreetlights(TableAssets):
         self.column_index += 1
         self.lamp_kind = Column(self.column_index, "lamp_kind", "TEXT", Nullable.NOT_NULL)
         self.column_index += 1
-        self.light_rating = Column(self.column_index, "light_rating", "TEXT", Nullable.NOT_NULL)
+        self.light_rating = Column(self.column_index, "light_rating", "INTEGER", Nullable.NOT_NULL)
 
     def name(self) -> str:
         return "streetlights"

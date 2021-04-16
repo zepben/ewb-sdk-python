@@ -69,7 +69,7 @@ class TableEnergyConsumers(TableEnergyConnections):
         self.column_index += 1
         self.customer_count = Column(self.column_index, "customer_count", "INTEGER", Nullable.NOT_NULL)
         self.column_index += 1
-        self.grounded = Column(self.column_index, "phase", "BOOLEAN", Nullable.NOT_NULL)
+        self.grounded = Column(self.column_index, "grounded", "BOOLEAN", Nullable.NOT_NULL)
         self.column_index += 1
         self.p = Column(self.column_index, "p", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -161,7 +161,7 @@ class TableRegulatingCondEq(TableEnergyConnections):
     def __init__(self):
         super(TableRegulatingCondEq, self).__init__()
         self.column_index += 1
-        self.control_enabled = Column(self.column_index, "control_enbaled", "BOOLEAN", Nullable.NOT_NULL)
+        self.control_enabled = Column(self.column_index, "control_enabled", "BOOLEAN", Nullable.NOT_NULL)
 
 
 class TableShuntCompensators(TableRegulatingCondEq):
@@ -189,7 +189,7 @@ class TableLinearShuntCompensators(TableShuntCompensators):
     g_per_section: Column = None
 
     def __init__(self):
-        super(TableShuntCompensators, self).__init__()
+        super(TableLinearShuntCompensators, self).__init__()
         self.column_index += 1
         self.b0_per_section = Column(self.column_index, "b0_per_section", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -215,7 +215,7 @@ class TablePowerElectronicsConnection(TableRegulatingCondEq):
     def __init__(self):
         super(TablePowerElectronicsConnection, self).__init__()
         self.column_index += 1
-        self.max_i_fault = Column(self.column_index, "max_i_fault", "NUMBER", Nullable.NOT_NULL)
+        self.max_i_fault = Column(self.column_index, "max_i_fault", "INTEGER", Nullable.NOT_NULL)
         self.column_index += 1
         self.max_q = Column(self.column_index, "max_q", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -225,9 +225,9 @@ class TablePowerElectronicsConnection(TableRegulatingCondEq):
         self.column_index += 1
         self.q = Column(self.column_index, "q", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
-        self.rated_s = Column(self.column_index, "rated_s", "NUMBER", Nullable.NOT_NULL)
+        self.rated_s = Column(self.column_index, "rated_s", "INTEGER", Nullable.NOT_NULL)
         self.column_index += 1
-        self.rated_u = Column(self.column_index, "rated_u", "NUMBER", Nullable.NOT_NULL)
+        self.rated_u = Column(self.column_index, "rated_u", "INTEGER", Nullable.NOT_NULL)
 
     def name(self) -> str:
         return "power_electronics_connection"

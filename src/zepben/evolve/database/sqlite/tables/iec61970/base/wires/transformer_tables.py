@@ -31,7 +31,7 @@ class TableTransformerEnds(TableIdentifiedObjects):
         self.column_index += 1
         self.base_voltage_mrid = Column(self.column_index, "base_voltage_mrid", "TEXT", Nullable.NULL)
         self.column_index += 1
-        self.grounded = Column(self.column_index, "phase", "BOOLEAN", Nullable.NOT_NULL)
+        self.grounded = Column(self.column_index, "grounded", "BOOLEAN", Nullable.NOT_NULL)
         self.column_index += 1
         self.r_ground = Column(self.column_index, "r_ground", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
@@ -77,17 +77,17 @@ class TablePowerTransformerEnds(TableTransformerEnds):
         self.column_index += 1
         self.g0 = Column(self.column_index, "g0", "NUMBER", Nullable.NOT_NULL)
         self.column_index += 1
-        self.r = Column(self.column_index, "r", "NUMBER", Nullable.NOT_NULL)
+        self.r = Column(self.column_index, "r", "NUMBER", Nullable.NULL)
         self.column_index += 1
-        self.r0 = Column(self.column_index, "r0", "NUMBER", Nullable.NOT_NULL)
+        self.r0 = Column(self.column_index, "r0", "NUMBER", Nullable.NULL)
         self.column_index += 1
-        self.rated_s = Column(self.column_index, "rated_s", "NUMBER", Nullable.NOT_NULL)
+        self.rated_s = Column(self.column_index, "rated_s", "INTEGER", Nullable.NOT_NULL)
         self.column_index += 1
-        self.rated_u = Column(self.column_index, "rated_u", "NUMBER", Nullable.NOT_NULL)
+        self.rated_u = Column(self.column_index, "rated_u", "INTEGER", Nullable.NOT_NULL)
         self.column_index += 1
-        self.x = Column(self.column_index, "x", "NUMBER", Nullable.NOT_NULL)
+        self.x = Column(self.column_index, "x", "NUMBER", Nullable.NULL)
         self.column_index += 1
-        self.x0 = Column(self.column_index, "x0", "NUMBER", Nullable.NOT_NULL)
+        self.x0 = Column(self.column_index, "x0", "NUMBER", Nullable.NULL)
 
     def name(self) -> str:
         return "power_transformer_ends"
@@ -179,13 +179,13 @@ class TableTransformerStarImpedance(TableIdentifiedObjects):
         super(TableTransformerStarImpedance, self).__init__()
         # Note r, r0, x, x0 use nullable number types.
         self.column_index += 1
-        self.r = Column(self.column_index, "r", "NUMBER", Nullable.NULL)
+        self.r = Column(self.column_index, "R", "NUMBER", Nullable.NULL)
         self.column_index += 1
-        self.r0 = Column(self.column_index, "r0", "NUMBER", Nullable.NULL)
+        self.r0 = Column(self.column_index, "R0", "NUMBER", Nullable.NULL)
         self.column_index += 1
-        self.x = Column(self.column_index, "x", "NUMBER", Nullable.NULL)
+        self.x = Column(self.column_index, "X", "NUMBER", Nullable.NULL)
         self.column_index += 1
-        self.x0 = Column(self.column_index, "x0", "NUMBER", Nullable.NULL)
+        self.x0 = Column(self.column_index, "X0", "NUMBER", Nullable.NULL)
         self.column_index += 1
         self.transformer_end_info_mrid = Column(self.column_index, "transformer_end_info_mrid", "TEXT", Nullable.NULL)
 
@@ -193,3 +193,6 @@ class TableTransformerStarImpedance(TableIdentifiedObjects):
         cols = super(TableTransformerStarImpedance, self).unique_index_columns()
         cols.append([self.transformer_end_info_mrid])
         return cols
+
+    def name(self) -> str:
+        return "transformer_star_impedance"
