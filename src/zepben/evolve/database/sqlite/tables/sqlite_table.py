@@ -11,7 +11,7 @@ from typing import List, Optional, Type, TypeVar, Any
 
 from dataclassy import dataclass
 
-from zepben.evolve import Column
+from zepben.evolve.database.sqlite.tables.column import Column
 
 __all__ = ["SqliteTable"]
 

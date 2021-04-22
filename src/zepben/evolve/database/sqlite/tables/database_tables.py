@@ -3,8 +3,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
-from typing import Dict, TypeVar, Type
+from sqlite3 import Cursor
+from typing import Dict, TypeVar, Type, Any, List
 
 from dataclassy import dataclass
 
@@ -15,7 +15,7 @@ from zepben.evolve.database.sqlite.tables.associations.equipment_association_tab
 from zepben.evolve.database.sqlite.tables.associations.loop_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.pricingstructure_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.usagepoints_association_tables import *
-from zepben.evolve.database.sqlite.tables.exceptions import MissingTableConfigException
+from zepben.evolve.database.sqlite.tables.exceptions import MissingTableConfigException, SqlException
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.common_tables import *
@@ -38,7 +38,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.transformer_tables
 from zepben.evolve.database.sqlite.tables.metadata_tables import *
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
 
-__all__ = ["DatabaseTables"]
+__all__ = ["DatabaseTables", "PreparedStatement"]
 
 
 T = TypeVar("T", bound=SqliteTable)
@@ -127,14 +127,70 @@ def _create_tables() -> Dict[Type[T], T]:
 
 
 @dataclass(slots=True)
+class PreparedStatement(object):
+    statement: str
+    _values: Dict[int, Any] = dict()
+    _num_cols: int = None
+
+    def __init__(self):
+        self._num_cols = self.statement.count('?')
+
+    @property
+    def num_columns(self):
+        return self._num_cols
+
+    @property
+    def parameters(self):
+        """
+        Get the string representation of the current parameters set on this PreparedStatement.
+        '(unset)' means this index has not yet been set.
+        This function should be used for error handling and debugging only.
+
+        Returns the string representation of all parameters that have been set on this PreparedStatement, separated by commas.
+        """
+        pm = []
+        for i in range(start=1, stop=self.num_columns):
+            try:
+                pm.append(str(self._values[i]))
+            except KeyError:
+                pm.append("(unset)")
+        return ", ".join(pm)
+
+    def execute(self, cursor: Cursor):
+        """
+        Execute this PreparedStatement using the given `cursor`.
+
+        Throws any exception possible from cursor.execute, typically `sqlite3.DatabaseError`
+        """
+        parameters = []
+        missing = []
+        for i in range(start=1, stop=self.num_columns):
+            try:
+                parameters.append(self._values[i])
+            except KeyError:
+                missing.append(str(i))
+
+        if missing:
+            raise SqlException(f"Missing values for indices {', '.join(missing)}. Ensure all ?'s have a corresponding value in the prepared statement.")
+
+        cursor.execute(self.statement, parameters)
+
+    def add_value(self, index: int, value: Any):
+        if 0 < index <= self._num_cols:
+            self._values[index] = value
+        else:
+            raise SqlException(f"index must be between 1 and {self.num_columns} for this statement")
+
+
+@dataclass(slots=True)
 class DatabaseTables(object):
     _tables: Dict[Type[T], T] = _create_tables()
-    _insert_statements: Dict[Type[T], str] = dict()
+    _insert_statements: Dict[Type[T], PreparedStatement] = dict()
 
     def __init__(self):
         self._insert_statements.clear()
         for t, table in self._tables.items():
-            self._insert_statements[t] = table.prepared_insert_sql()
+            self._insert_statements[t] = PreparedStatement(table.prepared_insert_sql())
 
     def get_table(self, clazz: Type[T]) -> T:
         try:
@@ -142,7 +198,7 @@ class DatabaseTables(object):
         except KeyError:
             raise MissingTableConfigException(f"No table has been registered for {clazz}. Add the table to database_tables.py")
 
-    def get_insert(self, clazz: Type[T]) -> str:
+    def get_insert(self, clazz: Type[T]) -> PreparedStatement:
         try:
             return self._insert_statements[clazz]
         except KeyError:
