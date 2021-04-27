@@ -69,7 +69,40 @@ def overheadwireinfo():
 
 
 def powertransformerinfo():
-    return builds(PowerTransformerInfo, **assetinfo())
+    return builds(PowerTransformerInfo, **assetinfo(), transformer_tank_infos=lists(builds(TransformerTankInfo, **identifiedobject()), max_size=2))
+
+
+def transformertankinfo():
+    return builds(TransformerTankInfo, **assetinfo(), transformer_end_infos=lists(builds(TransformerEndInfo, **identifiedobject()), max_size=2))
+
+
+def transformerendinfo():
+    return builds(
+        TransformerEndInfo,
+        **assetinfo(),
+        connection_kind=windingconnectionkind(),
+        emergency_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        end_number=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        insulation_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        phase_angle_clock=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        rated_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        short_term_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        transformer_star_impedance=lists(builds(TransformerStarImpedance, **identifiedobject()), max_size=2)
+    )
+
+
+def transformerstarimpedance():
+    return builds(
+        TransformerStarImpedance,
+        **identifiedobject(),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        transformer_end_info=builds(TransformerEndInfo, **identifiedobject())
+    )
 
 
 # IEC61968 ASSETS #
@@ -99,7 +132,8 @@ def structure():
 
 
 def pole():
-    return builds(Pole, **structure(), streetlights=lists(builds(Streetlight, **identifiedobject()), max_size=2), classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
+    return builds(Pole, **structure(), streetlights=lists(builds(Streetlight, **identifiedobject()), max_size=2),
+                  classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
 
 
 def customer():
@@ -151,7 +185,12 @@ def towndetail():
 
 # IEC61968 METERING #
 def enddevice():
-    return {**assetcontainer(), "usage_points": lists(builds(UsagePoint, **identifiedobject()), max_size=2), "customer": builds(Customer, **identifiedobject()), "service_location": builds(Location, **identifiedobject())}
+    return {
+        **assetcontainer(),
+        "usage_points": lists(builds(UsagePoint, **identifiedobject()), max_size=2),
+        "customer": builds(Customer, **identifiedobject()),
+        "service_location": builds(Location, **identifiedobject())
+    }
 
 
 def meter():
@@ -257,7 +296,8 @@ def equipmentcontainer():
 
 
 def feeder():
-    return builds(Feeder, **equipmentcontainer(), normal_head_terminal=builds(Terminal, **identifiedobject()), normal_energizing_substation=builds(Substation, **identifiedobject()))
+    return builds(Feeder, **equipmentcontainer(), normal_head_terminal=builds(Terminal, **identifiedobject()),
+                  normal_energizing_substation=builds(Substation, **identifiedobject()))
 
 
 def geographicalregion():
@@ -292,7 +332,8 @@ def phasecode():
 def terminal():
     return builds(Terminal, **acdcterminal(), conducting_equipment=sampled_conducting_equipment(),
                   connectivity_node=builds(ConnectivityNode, **identifiedobject()),
-                  traced_phases=builds(TracedPhases), phases=phasecode(), sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER))
+                  traced_phases=builds(TracedPhases), phases=phasecode(),
+                  sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER))
 
 
 # IEC61970 WIRES.GENERATION.PRODUCTION #
@@ -442,9 +483,9 @@ def powerelectronicsconnection():
 
 
 def powerelectronicsconnectionphase():
-    return builds(PowerElectronicsConnectionPhase, **powersystemresource(), power_electronics_connection=builds(PowerElectronicsConnection, **identifiedobject()),
+    return builds(PowerElectronicsConnectionPhase, **powersystemresource(),
+                  power_electronics_connection=builds(PowerElectronicsConnection, **identifiedobject()),
                   phase=singlephasekind(), p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-
 
 
 def powertransformer():
@@ -490,7 +531,8 @@ def shuntcompensator():
 
 
 def switch():
-    return {**conductingequipment(), "_normal_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER), "_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)}
+    return {**conductingequipment(), "_normal_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+            "_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)}
 
 
 MIN_TC_INT = 0
@@ -505,10 +547,17 @@ def tapchanger():
 
 
 def transformerend():
-    return {**identifiedobject(), "terminal": builds(Terminal, **identifiedobject()),
-            "base_voltage": builds(BaseVoltage, **identifiedobject()), "ratio_tap_changer": builds(RatioTapChanger, **identifiedobject()),
-            "end_number": integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_END_NUMBER), "grounded": booleans(),
-            "r_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), "x_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)}
+    return {
+        **identifiedobject(),
+        "terminal": builds(Terminal, **identifiedobject()),
+        "base_voltage": builds(BaseVoltage, **identifiedobject()),
+        "ratio_tap_changer": builds(RatioTapChanger, **identifiedobject()),
+        "end_number": integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_END_NUMBER),
+        "grounded": booleans(),
+        "r_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "x_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "star_impedance": builds(TransformerStarImpedance, **identifiedobject())
+    }
 
 
 def circuit():

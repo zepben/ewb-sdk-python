@@ -10,7 +10,7 @@ from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
            "asset_info", "streetlights", "pole", "cn_terminals", "remote_control", "agreements", "customer",
-           "pricing_structures","power_transformer_info",
+           "pricing_structures", "power_transformer_info",
            "diagram_objects", "diagram", "service_location", "ed_usage_points", "containers", "current_feeders",
            "operational_restrictions",
            "eq_usage_points", "ec_equipment", "ec_phases", "energy_consumer", "es_phases", "energy_source", "current_equipment",
@@ -20,9 +20,9 @@ __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location",
            "geographical_region", "substations",
            "normal_energizing_feeders", "sub_geographical_region", "conducting_equipment", "connectivity_node",
            "te_base_voltage", "ratio_tap_changer",
-           "te_terminal", "end_devices", "up_equipment", "usage_point_location"]
-
-from zepben.evolve.services.common.reference_resolvers import peu_to_pec_resolver, pec_to_peu_resolver, pecphase_to_pec_resolver, pec_to_pecphase_resolver
+           "te_terminal", "end_devices", "up_equipment", "usage_point_location",
+           "transformer_end_info", "powertransformerinfo_transformer_tank_info", "transformer_star_impedance",
+           "star_impedance_transformer_end_info", "transformer_end_transformer_star_impedance"]
 
 
 def per_length_sequence_impedance(aclinesegment):
@@ -51,6 +51,7 @@ def ce_terminals(conducting_equipment: ConductingEquipment) -> BoundReferenceRes
 
 def asset_info(conductor: Conductor) -> BoundReferenceResolver:
     return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)
+
 
 def power_transformer_info(power_transformer: PowerTransformer) -> BoundReferenceResolver:
     return BoundReferenceResolver(power_transformer, powertransformer_to_power_transformer_info_resolver, None)
@@ -285,8 +286,32 @@ def phase_power_electronics_connection(pec: PowerElectronicsConnectionPhase) -> 
 
 
 def power_electronics_unit(pec: PowerElectronicsConnection) -> BoundReferenceResolver:
-    return BoundReferenceResolver(pec, pec_to_peu_resolver,peu_to_pec_resolver)
+    return BoundReferenceResolver(pec, pec_to_peu_resolver, peu_to_pec_resolver)
 
 
 def power_electronics_connection_phase(pec: PowerElectronicsConnectionPhase) -> BoundReferenceResolver:
     return BoundReferenceResolver(pec, pec_to_pecphase_resolver, pecphase_to_pec_resolver)
+
+
+def transformer_end_info(tti: TransformerTankInfo) -> BoundReferenceResolver:
+    return BoundReferenceResolver(tti, tti_to_tei_resolver, tei_to_tti_resolver)
+
+
+def transformer_tank_info(tei: TransformerEndInfo) -> BoundReferenceResolver:
+    return BoundReferenceResolver(tei, tei_to_tti_resolver, tti_to_tei_resolver)
+
+
+def powertransformerinfo_transformer_tank_info(pti: PowerTransformerInfo) -> BoundReferenceResolver:
+    return BoundReferenceResolver(pti, pti_to_tti_resolver, None)
+
+
+def transformer_star_impedance(tei: TransformerEndInfo) -> BoundReferenceResolver:
+    return BoundReferenceResolver(tei, tei_to_tsi_resolver, tsi_to_tei_resolver)
+
+
+def star_impedance_transformer_end_info(tsi: TransformerStarImpedance) -> BoundReferenceResolver:
+    return BoundReferenceResolver(tsi, tsi_to_tei_resolver, tei_to_tsi_resolver)
+
+
+def transformer_end_transformer_star_impedance(te: TransformerEnd) -> BoundReferenceResolver:
+    return BoundReferenceResolver(te, te_to_tsi_resolver, None)

@@ -3,64 +3,19 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.evolve.services.common.translator.base_cim2proto import identifiedobject_to_pb, organisationrole_to_pb, document_to_pb
-from zepben.evolve.services.common.translator.util import mrid_or_empty
-from zepben.evolve.model.cim.iec61968.assets.structure import *
-from zepben.evolve.model.cim.iec61968.assets.asset import *
-from zepben.evolve.model.cim.iec61968.assets.pole import *
-from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import *
-from zepben.evolve.model.cim.iec61968.assets.asset_info import *
-from zepben.evolve.model.cim.iec61968.assets.streetlight import *
-from zepben.evolve.model.cim.iec61968.operations.operational_restriction import *
-from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
-from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
-from zepben.evolve.model.cim.iec61968.metering.metering import *
-from zepben.evolve.model.cim.iec61968.common.location import *
-from zepben.evolve.model.cim.iec61970.base.meas.control import *
-from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
-from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
-from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
-from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
-from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
-from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *
-from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
-from zepben.evolve.model.cim.iec61970.base.wires.line import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import *
-from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
-from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
-from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
-from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
-from zepben.evolve.model.cim.iec61970.base.wires.switch import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
-from zepben.evolve.model.cim.iec61970.base.core.substation import *
-from zepben.evolve.model.cim.iec61970.base.core.terminal import *
-from zepben.evolve.model.cim.iec61970.base.core.equipment import *
-from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import *
-from zepben.evolve.model.cim.iec61970.base.core.base_voltage import *
-from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import *
-from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import *
-from zepben.evolve.model.cim.iec61970.base.core.regions import *
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import *
-from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import *
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
-from zepben.evolve.model.phases import *
-
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
-from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
+from zepben.protobuf.cim.iec61968.assetinfo.TransformerEndInfo_pb2 import TransformerEndInfo as PBTransformerEndInfo
+from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import TransformerTankInfo as PBTransformerTankInfo
+from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer as PBAssetContainer
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo as PBAssetInfo
 from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import AssetOrganisationRole as PBAssetOrganisationRole
 from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner as PBAssetOwner
 from zepben.protobuf.cim.iec61968.assets.Asset_pb2 import Asset as PBAsset
-from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole as  PBPole
+from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole as PBPole
 from zepben.protobuf.cim.iec61968.assets.StreetlightLampKind_pb2 import StreetlightLampKind as PBStreetlightLampKind
 from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight as PBStreetlight
 from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure as PBStructure
@@ -97,15 +52,11 @@ from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete as PBDi
 from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPoint
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
-from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryStateKind_pb2 import BatteryStateKind as PBBatteryStateKind
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit as PBPhotoVoltaicUnit
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsUnit_pb2 import PowerElectronicsUnit as PBPowerElectronicsUnit
-from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
+from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
+from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor as PBConductor
 from zepben.protobuf.cim.iec61970.base.wires.Connector_pb2 import Connector as PBConnector
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector as PBDisconnector
@@ -117,7 +68,6 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySourc
 from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse as PBFuse
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper as PBJumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction as PBJunction
-from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
 from zepben.protobuf.cim.iec61970.base.wires.Line_pb2 import Line as PBLine
 from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import LinearShuntCompensator as PBLinearShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch as PBLoadBreakSwitch
@@ -125,8 +75,8 @@ from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLe
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter as PBPerLengthLineParameter
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PhaseShuntConnectionKind_pb2 import PhaseShuntConnectionKind as PBPhaseShuntConnectionKind
-from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection as PBPowerElectronicsConnection
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase as PBPowerElectronicsConnectionPhase
+from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection as PBPowerElectronicsConnection
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd as PBPowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer as PBPowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import ProtectedSwitch as PBProtectedSwitch
@@ -138,13 +88,67 @@ from zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePh
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger as PBTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
+from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
 from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup as PBVectorGroup
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection as PBWindingConnection
-from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryStateKind_pb2 import BatteryStateKind as PBBatteryStateKind
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit as PBPhotoVoltaicUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsUnit_pb2 import PowerElectronicsUnit as PBPowerElectronicsUnit
+from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
+from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.network.model.TracedPhases_pb2 import TracedPhases as PBTracedPhases
 
-__all__ = ["CimTranslationException", "cableinfo_to_pb", "overheadwireinfo_to_pb", "wireinfo_to_pb", "power_transformer_info_to_pb", "asset_to_pb",
+from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance
+from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
+from zepben.evolve.model.cim.iec61968.assets.asset import *
+from zepben.evolve.model.cim.iec61968.assets.asset_info import *
+from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import *
+from zepben.evolve.model.cim.iec61968.assets.pole import *
+from zepben.evolve.model.cim.iec61968.assets.streetlight import *
+from zepben.evolve.model.cim.iec61968.assets.structure import *
+from zepben.evolve.model.cim.iec61968.common.location import *
+from zepben.evolve.model.cim.iec61968.metering.metering import *
+from zepben.evolve.model.cim.iec61968.operations.operational_restriction import *
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *
+from zepben.evolve.model.cim.iec61970.base.core.base_voltage import *
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import *
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import *
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import *
+from zepben.evolve.model.cim.iec61970.base.core.equipment import *
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import *
+from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import *
+from zepben.evolve.model.cim.iec61970.base.core.regions import *
+from zepben.evolve.model.cim.iec61970.base.core.substation import *
+from zepben.evolve.model.cim.iec61970.base.core.terminal import *
+from zepben.evolve.model.cim.iec61970.base.meas.control import *
+from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
+from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
+from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
+from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
+from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
+from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
+from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
+from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
+from zepben.evolve.model.cim.iec61970.base.wires.line import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
+from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.switch import *
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
+from zepben.evolve.model.phases import *
+from zepben.evolve.services.common.translator.base_cim2proto import identifiedobject_to_pb, organisationrole_to_pb, document_to_pb
+from zepben.evolve.services.common.translator.util import mrid_or_empty
+
+__all__ = ["CimTranslationException", "cableinfo_to_pb", "overheadwireinfo_to_pb", "wireinfo_to_pb", "powertransformerinfo_to_pb", "asset_to_pb",
            "assetcontainer_to_pb", "assetinfo_to_pb",
            "assetorganisationrole_to_pb", "assetowner_to_pb", "pole_to_pb", "streetlight_to_pb", "structure_to_pb",
            "positionpoint_to_pb", "towndetail_to_pb", "streetaddress_to_pb",
@@ -160,7 +164,7 @@ __all__ = ["CimTranslationException", "cableinfo_to_pb", "overheadwireinfo_to_pb
            "linearshuntcompensator_to_pb", "perlengthsequenceimpedance_to_pb", "powerelectronicsconnection_to_pb", "powerelectronicsconnectionphase_to_pb",
            "powertransformer_to_pb", "powertransformerend_to_pb", "protectedswitch_to_pb", "ratiotapchanger_to_pb", "recloser_to_pb",
            "regulatingcondeq_to_pb", "shuntcompensator_to_pb", "switch_to_pb", "tapchanger_to_pb", "transformerend_to_pb",
-           "tracedphases_to_pb"]
+           "tracedphases_to_pb", "transformertankinfo_to_pb", "transformerendinfo_to_pb", "transformerstarimpedance_to_pb"]
 
 
 def get_or_none(getter, obj) -> object:
@@ -186,8 +190,34 @@ def wireinfo_to_pb(cim: WireInfo) -> PBWireInfo:
                       material=PBWireMaterialKind.Value(cim.material.short_name))
 
 
-def power_transformer_info_to_pb(cim: PowerTransformerInfo) -> PBPowerTransformerInfo:
-    return PBPowerTransformerInfo(ai=assetinfo_to_pb(cim))
+def powertransformerinfo_to_pb(cim: PowerTransformerInfo) -> PBPowerTransformerInfo:
+    return PBPowerTransformerInfo(
+        ai=assetinfo_to_pb(cim),
+        transformerTankInfoMRIDs=[str(tti.mrid) for tti in cim.transformer_tank_infos]
+    )
+
+
+def transformertankinfo_to_pb(cim: TransformerTankInfo) -> PBTransformerTankInfo:
+    return PBTransformerTankInfo(
+        ai=assetinfo_to_pb(cim),
+        transformerEndInfoMRIDs=[str(tei.mrid) for tei in cim.transformer_end_infos]
+    )
+
+
+def transformerendinfo_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
+    return PBTransformerEndInfo(
+        ai=assetinfo_to_pb(cim),
+        connectionKind=cim.connection_kind,
+        emergencyS=cim.emergency_s,
+        endNumber=cim.end_number,
+        insulationU=cim.insulation_u,
+        phaseAngleClock=cim.phase_angle_clock,
+        r=cim.r,
+        ratedS=cim.rated_s,
+        ratedU=cim.rated_u,
+        shortTermS=cim.short_term_s,
+        transformerStarImpedanceMRID=mrid_or_empty(cim.transformer_star_impedance.mrid)
+    )
 
 
 # IEC61968 ASSETS #
@@ -515,7 +545,7 @@ def powerelectronicsconnection_to_pb(cim: PowerElectronicsConnection) -> PBPower
     return PBPowerElectronicsConnection(rce=regulatingcondeq_to_pb(cim),
                                         powerElectronicsUnitMRIDs=[str(io.mrid) for io in cim.units],
                                         powerElectronicsConnectionPhaseMRIDs=[str(io.mrid) for io in cim.phases],
-                                        maxIFault = cim.max_i_fault,
+                                        maxIFault=cim.max_i_fault,
                                         maxQ=cim.max_q,
                                         minQ=cim.min_q,
                                         p=cim.p,
@@ -624,6 +654,17 @@ def loop_to_pb(cim: Loop) -> PBLoop:
                   normalEnergizingSubstationMRIDs=[str(io.mrid) for io in cim.energizing_substations])
 
 
+def transformerstarimpedance_to_pb(cim: TransformerStarImpedance) -> PBTransformerStarImpedance:
+    return PBTransformerStarImpedance(
+        io=identifiedobject_to_pb(cim),
+        r=cim.r if cim.r else 0.0,
+        r0=cim.r0 if cim.r0 else 0.0,
+        x=cim.x if cim.x else 0.0,
+        x0=cim.x0 if cim.x0 else 0.0,
+        transformerEndInfoMRID=mrid_or_empty(cim.transformer_end_info.mrid)
+    )
+
+
 # IEC61970 MEAS #
 def control_to_pb(cim: Control) -> PBControl:
     return PBControl(ip=iopoint_to_pb(cim),
@@ -678,8 +719,10 @@ def tracedphases_to_pb(cim: TracedPhases) -> PBTracedPhases:
 CableInfo.to_pb = lambda self: cableinfo_to_pb(self)
 OverheadWireInfo.to_pb = lambda self: overheadwireinfo_to_pb(self)
 WireInfo.to_pb = lambda self: wireinfo_to_pb(self)
-PowerTransformerInfo.to_pb = lambda self: power_transformer_info_to_pb(self)
+PowerTransformerInfo.to_pb = lambda self: powertransformerinfo_to_pb(self)
 Asset.to_pb = lambda self: asset_to_pb(self)
+TransformerTankInfo.to_pb = transformertankinfo_to_pb
+TransformerEndInfo.to_pb = transformerendinfo_to_pb
 AssetContainer.to_pb = lambda self: assetcontainer_to_pb(self)
 AssetInfo.to_pb = lambda self: assetinfo_to_pb(self)
 AssetOrganisationRole.to_pb = lambda self: assetorganisationrole_to_pb(self)
@@ -739,6 +782,7 @@ PowerElectronicsConnection.to_pb = powerelectronicsconnection_to_pb
 PowerElectronicsConnectionPhase.to_pb = powerelectronicsconnectionphase_to_pb
 PowerTransformer.to_pb = lambda self: powertransformer_to_pb(self)
 PowerTransformerEnd.to_pb = lambda self: powertransformerend_to_pb(self)
+TransformerStarImpedance.to_pb = transformerstarimpedance_to_pb
 ProtectedSwitch.to_pb = lambda self: protectedswitch_to_pb(self)
 RatioTapChanger.to_pb = lambda self: ratiotapchanger_to_pb(self)
 Recloser.to_pb = lambda self: recloser_to_pb(self)

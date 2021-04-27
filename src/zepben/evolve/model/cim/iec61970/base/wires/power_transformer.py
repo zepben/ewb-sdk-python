@@ -9,9 +9,15 @@ from __future__ import annotations
 from typing import List, Optional, Generator
 
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
+from zepben.evolve.model.cim.iec61968.metering.metering import UsagePoint
+from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
+from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer, Feeder
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.vector_group import VectorGroup
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import WindingConnection
 from zepben.evolve.util import require, nlen, get_by_mrid, ngen, safe_remove
@@ -167,6 +173,10 @@ class TransformerEnd(IdentifiedObject):
     """Number for this transformer end, corresponding to the end’s order in the power transformer vector group or phase angle clock number. 
     Highest voltage winding should be 1. Each end within a power transformer should have a unique subsequent end number. 
     Note the transformer end number need not match the terminal sequence number."""
+
+    star_impedance: Optional[TransformerStarImpedance] = None
+    """(accurate for 2- or 3-winding transformers only) Pi-model impedances of this transformer end. By convention, for a two winding transformer, the full
+     values of the transformer should be entered on the high voltage end (endNumber=1)."""
 
 
 class PowerTransformerEnd(TransformerEnd):

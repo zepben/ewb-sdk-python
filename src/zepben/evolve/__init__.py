@@ -19,6 +19,8 @@ from zepben.evolve.model.cim.iec61968.operations.operational_restriction import 
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
+from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import *
 from zepben.evolve.model.cim.iec61968.metering.metering import *
 from zepben.evolve.model.cim.iec61968.common.organisation import *
 from zepben.evolve.model.cim.iec61968.common.document import *
@@ -55,6 +57,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.evolve.model.cim.iec61970.base.core.substation import *
 from zepben.evolve.model.cim.iec61970.base.core.terminal import *
 from zepben.evolve.model.cim.iec61970.base.core.equipment import *
@@ -71,7 +74,6 @@ from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.phasedirection import *
 from zepben.evolve.model.phases import *
-
 
 from zepben.evolve.services.network.tracing.traversals.tracker import *
 from zepben.evolve.services.network.tracing.traversals.tracing import *
@@ -97,7 +99,6 @@ from zepben.evolve.services.common.translator.base_proto2cim import *
 from zepben.evolve.services.common.base_service import *
 from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, ReferenceResolver, UnresolvedReference
 import zepben.evolve.services.common.resolver as resolver
-
 
 from zepben.evolve.services.diagram.translator.diagram_proto2cim import *
 from zepben.evolve.services.diagram.translator.diagram_cim2proto import *
