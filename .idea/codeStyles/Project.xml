@@ -1,5 +1,6 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
+    <option name="RIGHT_MARGIN" value="160" />
     <JSCodeStyleSettings version="0">
       <option name="SPACES_WITHIN_OBJECT_LITERAL_BRACES" value="true" />
       <option name="SPACES_WITHIN_IMPORTS" value="true" />
@@ -27,10 +28,6 @@
       </indentOptions>
     </codeStyleSettings>
     <codeStyleSettings language="Python">
-      <option name="RIGHT_MARGIN" value="160" />
-      <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="2" />
-      <option name="KEEP_BLANK_LINES_IN_CODE" value="2" />
-      <option name="BLANK_LINES_AROUND_CLASS" value="2" />
       <indentOptions>
         <option name="CONTINUATION_INDENT_SIZE" value="4" />
       </indentOptions>
