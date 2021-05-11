@@ -10,10 +10,12 @@
 from __future__ import annotations
 
 from asyncio import get_event_loop
-from typing import Optional, Iterable, AsyncGenerator, List, Callable
+from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
 
-from zepben.evolve import CustomerService, IdentifiedObject
-from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult, extract_identified_object
+from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
+
+from zepben.evolve import CustomerService, IdentifiedObject, UnsupportedOperationException, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff
+from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
 from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest
@@ -21,7 +23,17 @@ from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest
 __all__ = ["CustomerConsumerClient", "SyncCustomerConsumerClient"]
 
 
-class CustomerConsumerClient(CimConsumerClient):
+class CustomerConsumerClient(CimConsumerClient[CustomerService]):
+    """
+    Consumer client for a :class:`CustomerService`.
+
+    ## WARNING ##
+        The :class:`MultiObjectResult` operations below are not atomic upon a :class:`CustomerService`, and thus if processing fails partway through, any
+        previously successful additions will have been processed by the service, and thus you may have an incomplete service. Also note that adding to the
+        service may not occur for an object if another object with the same mRID is already present in service. `MultiObjectResult.failed` can be used to
+        check for mRIDs that were not found or retrieved but not added to service (this should not be the case unless you are processing things concurrently).
+    """
+
     _stub: CustomerConsumerStub = None
 
     def __init__(self, channel=None, stub: CustomerConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
@@ -33,109 +45,120 @@ class CustomerConsumerClient(CimConsumerClient):
         else:
             self._stub = CustomerConsumerStub(channel)
 
-    async def get_identified_object(self, service: CustomerService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    async def get_identified_object(self, service: CustomerService, mrid: str) -> GrpcResult[IdentifiedObject]:
         """
-        Retrieve the object with the given `mrid` and store the result in the `service`.
+        Retrieve the object with the given `mRID` and store the result in the `service`.
 
-        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered against this client.
+        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered.
 
-        Returns a `GrpcResult` with a result of one of the following:
-             - The object if found
-             - None if an object could not be found or it was found but not added to `service` (see `zepben.evolve.common.base_service.BaseService.add`).
-             - An `Exception` if an error occurred while retrieving or processing the object, in which case, `GrpcResult.was_successful` will return false.
+        Parameters
+            - `service` - The :class:`CustomerService` to store fetched objects in.
+            - `mRID` - The mRID to retrieve.
+
+        Returns a :class:`GrpcResult` with a result of one of the following:
+            - When `GrpcResult.wasSuccessful`, the item found, accessible via `GrpcResult.value`.
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`. One of:
+                - :class:`NoSuchElementException` if the object could not be found.
+                - The gRPC error that occurred while retrieving the object
         """
-        async def y():
-            async for io, _ in self._process_identified_objects(service, [mrid]):
-                return io
-            else:
-                return None
-
-        return await self.try_rpc(y)
+        return await self._get_identified_object(service, mrid)
 
     async def get_identified_objects(self, service: CustomerService, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         """
-        Retrieve the objects with the given `mrids` and store the results in the `service`.
+        Retrieve the objects with the given [mRIDs] and store the results in the [service].
 
-        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered against this client.
+        Exceptions that occur during processing will be caught and passed to all error handlers that have been registered.
 
-        WARNING: This operation is not atomic upon `service`, and thus if processing fails partway through `mrids`, any previously successful mRID will have been
-        added to the service, and thus you may have an incomplete `BaseService`. Also note that adding to the `service` may not occur for an object if another
-        object with the same mRID is already present in `service`. `MultiObjectResult.failed` can be used to check for mRIDs that were retrieved but not
-        added to `service`.
+        Parameters
+            - `service` - The :class:`CustomerService` to store fetched objects in.
+            - `mRIDs` - The mRIDs to retrieve.
 
-        Returns a `GrpcResult` with a result of one of the following:
-        - A `MultiObjectResult` containing a map of the retrieved objects keyed by mRID. If an item is not found it will be excluded from the map.
-          If an item couldn't be added to `service` its mRID will be present in `MultiObjectResult.failed` (see `zepben.evolve.common.base_service.BaseService.add`).
-        - An `Exception` if an error occurred while retrieving or processing the objects, in which case, `GrpcResult.was_successful` will return false.
-          Note the warning above in this case.
+        Returns a :class:`GrpcResult` with a result of one of the following:
+            - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
+              found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
+              `BaseService.add`).
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
+
+        Note the :class:`CustomerConsumerClient` warning in this case.
         """
-        async def y():
-            results = dict()
-            failed = set()
-            async for io, mrid in self._process_identified_objects(service, mrids):
-                if io:
-                    results[io.mrid] = io
-                else:
-                    failed.add(mrid)
-            return MultiObjectResult(results, failed)
-        return await self.try_rpc(y)
+        return await self._get_identified_objects(service, mrids)
 
-    async def _process_identified_objects(self, service: CustomerService, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
+    async def _get_identified_object(self, service: CustomerService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+        async def rpc():
+            async for io, _ in self._process_identified_objects(service, [mrid]):
+                return io
+            else:
+                raise ValueError(f"No object with mRID {mrid} could be found.")
+
+        return await self.try_rpc(rpc)
+
+    async def _get_identified_objects(self, service: CustomerService, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        return await self.try_rpc(lambda: self._process_extract_results(mrids, self._process_identified_objects(service, set(mrids))))
+
+    async def _process_identified_objects(self, service: CustomerService, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+        if not mrids:
+            return
+
         to_fetch = set()
         existing = set()
         for mrid in mrids:
             try:
-                fetched = service.get(mrid)
-                existing.add((fetched, fetched.mrid))
+                io = service.get(mrid)
+                existing.add((io, io.mrid))
             except KeyError:
                 to_fetch.add(mrid)
 
-        responses = self._stub.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=to_fetch))
-        for response in responses:
-            og = response.objectGroup
-            io, mrid = extract_identified_object(service, og.identifiedObject)
-            if io:
-                yield io, mrid
-            else:
-                yield None, mrid
-            for owned_obj in og.ownedIdentifiedObject:
-                extracted, mrid = extract_identified_object(service, owned_obj)
-                if extracted:
-                    yield extracted, mrid
-                else:
-                    yield None, mrid
+        if to_fetch:
+            responses = self._stub.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=to_fetch))
+            for response in responses:
+                yield _extract_identified_object(service, response.identifiedObject, check_presence=False)  # Already checked presence above
+
+        for io in existing:
+            yield io
 
 
 class SyncCustomerConsumerClient(CustomerConsumerClient):
 
     def get_identified_object(self, service: CustomerService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
-        """
-        Retrieve the object with the given `mrid` and store the result in the `service`.
-
-        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered against this client.
-
-        Returns a `GrpcResult` with a result of one of the following:
-             - The object if found
-             - None if an object could not be found or it was found but not added to `service` (see `zepben.evolve.common.base_service.BaseService.add`).
-             - An `Exception` if an error occurred while retrieving or processing the object, in which case, `GrpcResult.was_successful` will return false.
-        """
         return get_event_loop().run_until_complete(super().get_identified_objects(service, mrid))
 
     def get_identified_objects(self, service: CustomerService, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
-        """
-        Retrieve the objects with the given `mrids` and store the results in the `service`.
-
-        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered against this client.
-
-        WARNING: This operation is not atomic upon `service`, and thus if processing fails partway through `mrids`, any previously successful mRID will have been
-        added to the service, and thus you may have an incomplete `BaseService`. Also note that adding to the `service` may not occur for an object if another
-        object with the same mRID is already present in `service`. `MultiObjectResult.failed` can be used to check for mRIDs that were retrieved but not
-        added to `service`.
-
-        Returns a `GrpcResult` with a result of one of the following:
-        - A `MultiObjectResult` containing a map of the retrieved objects keyed by mRID. If an item is not found it will be excluded from the map.
-          If an item couldn't be added to `service` its mRID will be present in `MultiObjectResult.failed` (see `zepben.evolve.common.base_service.BaseService.add`).
-        - An `Exception` if an error occurred while retrieving or processing the objects, in which case, `GrpcResult.was_successful` will return false.
-          Note the warning above in this case.
-        """
         return get_event_loop().run_until_complete(super().get_identified_objects(service, mrids))
+
+
+def _extract_identified_object(service: CustomerService, cio: CustomerIdentifiedObject, check_presence: bool = True) -> Tuple[Optional[IdentifiedObject], str]:
+    """
+    Add a :class:`CustomerIdentifiedObject` to the service. Will convert from protobuf to CIM type.
+
+    Parameters
+        - `service` - The :class:`CustomerService` to add the identified object to.
+        - `cio` - The :class:`CustomerIdentifiedObject` returned by the server.
+        - `check_presence` - Whether to check if `cio` already exists in the service and skip if it does.
+
+    Raises :class:`UnsupportedOperationException` if `cio` was invalid/unset.
+    """
+    io_type = cio.WhichOneof("identifiedObject")
+    if io_type:
+        cim_type = _cio_type_to_cim[io_type]
+        if cim_type is None:
+            raise UnsupportedOperationException(f"Identified object type ${io_type} is not supported by the customer service")
+
+        pb = getattr(cio, io_type)
+        if check_presence:
+            cim = service.get(pb.mrid(), cim_type, default=None)
+            if cim is not None:
+                return cim, cim.mrid
+
+        # noinspection PyUnresolvedReferences
+        return service.add_from_pb(pb), pb.mrid()
+    else:
+        raise UnsupportedOperationException(f"Received a CustomerIdentifiedObject where no field was set")
+
+
+_cio_type_to_cim = {
+    "organisation": Organisation,
+    "customer": Customer,
+    "customerAgreement": CustomerAgreement,
+    "pricingStructure": PricingStructure,
+    "tariff": Tariff
+}

@@ -25,33 +25,48 @@ After this you should be able to `pip install zepben.evolve` without issues.
 
 # Installation #
 
-    pip install zepben.evolve
-    
-    
+```
+pip install zepben.evolve
+```
+
 # Building #
 
-    python setup.py bdist_wheel
+```
+python setup.py bdist_wheel
+```
     
 # Developing ##
 
 This library depends on protobuf and gRPC for messaging. To set up for developing against this library, clone it first:
 
-    git clone https://github.com/zepben/evolve-sdk-python.git
+```
+git clone https://github.com/zepben/evolve-sdk-python.git
+```
 
 Install as an editable install. It's recommended to install in a [Python virtualenv](https://virtualenv.pypa.io/en/stable/)
 
-    cd evolve-sdk-python
-    pip install -e .[test]
+```
+cd evolve-sdk-python
+pip install -e .[test]
+```
 
 Run the tests: 
 
-    python -m pytest
+```
+python -m pytest
+```
+
+You can generate the [coverage report](htmlcov/index.html) using the following options:
+
+```
+ pytest --cov=zepben.evolve --cov-report=html --cov-branch
+ ```
 
 ## Checklist for model changes ##
 
-1. Update `setup.py` to import the correct version of `zepben.protobuf`.
+1. Update [`setup.py`](setup.py) to import the correct version of `zepben.protobuf`.
 1. Model updating:
-   1. Add new classes to the [model package](src/zepben/evolve/model/). 
+   1. Add new classes to the [model package](src/zepben/evolve/model).
    1. Descriptions copied from [Evolve CIM Profile documentation](https://zepben.github.io/evolve/docs/cim/evolve) and added as doc comments to new changes (on class, property etc)
 1. Update [translator package](src/zepben/evolve/services/network/translator):
    1. Update [```__init__.py```](src/zepben/evolve/services/network/translator/__init__.py):
@@ -73,7 +88,7 @@ Run the tests:
 1. Add reference resolver(s) to resolvers in [common package](src/zepben/evolve/services/common)  (if new associations).
 1. Testing:
    * Add the required creators to:
-     - [```pb_creators.py```]()
+     - [```pb_creators.py```](test/pb_creators.py)
      - [```cim_creators.py```](test/cim_creators.py)
    * Update [```constructor_validation.py```](test/cim/constructor_validation.py) 
    * Add test for each new class to  [test/cim/...](test/cim) package.

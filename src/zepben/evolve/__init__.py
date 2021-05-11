@@ -111,6 +111,7 @@ from zepben.evolve.services.measurement.translator.measurement_cim2proto import 
 from zepben.evolve.services.measurement.translator.measurement_proto2cim import *
 from zepben.evolve.services.measurement.measurements import *
 
+from zepben.evolve.streaming.exceptions import *
 from zepben.evolve.streaming.get.hierarchy.data import *
 from zepben.evolve.streaming.get.consumer import *
 from zepben.evolve.streaming.get.customer_consumer import *

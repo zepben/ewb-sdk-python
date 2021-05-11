@@ -115,7 +115,6 @@ from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import *
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import *
 from zepben.evolve.model.cim.iec61970.base.core.equipment import *
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import *
-from zepben.evolve.model.cim.iec61970.base.core.identified_object import *
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import *
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import *
 from zepben.evolve.model.cim.iec61970.base.core.regions import *
@@ -167,10 +166,10 @@ __all__ = ["cableinfo_to_cim", "overheadwireinfo_to_cim", "wireinfo_to_cim", "as
            "powerelectronicsconnectionphase_to_cim", "powertransformer_to_cim",
            "powertransformerend_to_cim", "power_transformer_info_to_cim", "protectedswitch_to_cim", "ratiotapchanger_to_cim", "recloser_to_cim",
            "regulatingcondeq_to_cim", "shuntcompensator_to_cim", "switch_to_cim", "tapchanger_to_cim", "transformerend_to_cim", "PBPerLengthImpedance",
-           "circuit_to_cim", "loop_to_cim", "_add_from_pb", "transformer_tank_info_to_cim", "transformer_end_info_to_cim", "transformerstarimpedance_to_cim"]
+           "circuit_to_cim", "loop_to_cim", "transformer_tank_info_to_cim", "transformer_end_info_to_cim", "transformerstarimpedance_to_cim"]
 
 
-### IEC61968 ASSET INFO
+# ### IEC61968 ASSET INFO
 def cableinfo_to_cim(pb: PBCableInfo, network_service: NetworkService) -> Optional[CableInfo]:
     cim = CableInfo(mrid=pb.mrid())
     wireinfo_to_cim(pb.wi, cim, network_service)
@@ -230,7 +229,9 @@ PBTransformerTankInfo.to_cim = transformer_tank_info_to_cim
 PBTransformerEndInfo.to_cim = transformer_end_info_to_cim
 
 
-### IEC61968 ASSETS
+###
+# IEC61968 ASSETS
+###
 def asset_to_cim(pb: PBAsset, cim: Asset, network_service: NetworkService):
     network_service.resolve_or_defer_reference(resolver.at_location(cim), pb.locationMRID)
     for mrid in pb.organisationRoleMRIDs:
@@ -286,7 +287,9 @@ PBStreetlight.to_cim = streetlight_to_cim
 PBStructure.to_cim = structure_to_cim
 
 
-### IEC61968 COMMON
+###
+# IEC61968 COMMON
+###
 def location_to_cim(pb: PBLocation, network_service: NetworkService) -> Optional[Location]:
     cim = Location(mrid=pb.mrid(), main_address=streetaddress_to_cim(pb.mainAddress) if pb.HasField('mainAddress') else None)
     for point in pb.positionPoints:
@@ -313,7 +316,9 @@ PBTownDetail.to_cim = towndetail_to_cim
 PBStreetAddress.to_cim = streetaddress_to_cim
 
 
-### IEC61968 METERING
+###
+# IEC61968 METERING###
+
 
 def enddevice_to_cim(pb: PBEndDevice, cim: EndDevice, network_service: NetworkService):
     for mrid in pb.usagePointMRIDs:
@@ -345,7 +350,9 @@ PBMeter.to_cim = meter_to_cim
 PBUsagePoint.to_cim = usagepoint_to_cim
 
 
-### IEC61968 OPERATIONS
+###
+# IEC61968 OPERATIONS
+###
 def operationalrestriction_to_cim(pb: PBOperationalRestriction, network_service: NetworkService) -> Optional[OperationalRestriction]:
     cim = OperationalRestriction(mrid=pb.mrid())
     document_to_cim(pb.doc, cim, network_service)
@@ -355,7 +362,9 @@ def operationalrestriction_to_cim(pb: PBOperationalRestriction, network_service:
 PBOperationalRestriction.to_cim = operationalrestriction_to_cim
 
 
-### IEC61970 AUXILIARY EQUIPMENT
+###
+# IEC61970 AUXILIARY EQUIPMENT
+###
 def auxiliaryequipment_to_cim(pb: PBAuxiliaryEquipment, cim: AuxiliaryEquipment, network_service: NetworkService):
     network_service.resolve_or_defer_reference(resolver.ae_terminal(cim), pb.terminalMRID)
     equipment_to_cim(pb.eq, cim, network_service)
@@ -371,7 +380,9 @@ PBAuxiliaryEquipment.to_cim = auxiliaryequipment_to_cim
 PBFaultIndicator.to_cim = faultindicator_to_cim
 
 
-### IEC61970 CORE
+###
+# IEC61970 CORE
+###
 def acdcterminal_to_cim(pb: PBAcDcTerminal, cim: AcDcTerminal, network_service: NetworkService):
     identifiedobject_to_cim(pb.io, cim, network_service)
 
@@ -495,7 +506,10 @@ PBSubGeographicalRegion.to_cim = subgeographicalregion_to_cim
 PBSubstation.to_cim = substation_to_cim
 PBTerminal.to_cim = terminal_to_cim
 
-### IEC61970 MEAS ###
+
+###
+# IEC61970 MEAS
+###
 def accumulator_to_cim(pb: PBAccumulator, network_service: NetworkService) -> Optional[Accumulator]:
     cim = Accumulator(mrid=pb.mrid())
     measurement_to_cim(pb.measurement, cim, network_service)
@@ -566,7 +580,9 @@ PBRemotePoint.to_cim = remotepoint_to_cim
 PBRemoteSource.to_cim = remotesource_to_cim
 
 
-### IEC61970 WIRES
+###
+# IEC61970 WIRES
+###
 def powerelectronicsunit_to_cim(pb: PBPowerElectronicsUnit, cim: PowerElectronicsUnit, network_service: NetworkService):
     network_service.resolve_or_defer_reference(resolver.unit_power_electronics_connection(cim), pb.powerElectronicsConnectionMRID)
     cim.max_p = pb.maxP
@@ -879,15 +895,3 @@ def loop_to_cim(pb: PBLoop, network_service: NetworkService) -> Optional[Loop]:
 
 PBCircuit.to_cim = circuit_to_cim
 PBLoop.to_cim = loop_to_cim
-
-
-# Extensions
-def _add_from_pb(network_service: NetworkService, pb) -> Optional[IdentifiedObject]:
-    """Must only be called by objects for which .to_cim() takes themselves and the network service."""
-    try:
-        return pb.to_cim(network_service)
-    except AttributeError as e:
-        raise TypeError(f"Type {pb.__class__.__name__} is not supported by NetworkService. (Error was: {e})")
-
-
-NetworkService.add_from_pb = _add_from_pb

@@ -67,43 +67,6 @@ from zepben.protobuf.dp.dp_requests_pb2 import *
 from zepben.protobuf.mp.mp_requests_pb2 import CreateAnalogValueRequest, CreateAccumulatorValueRequest, CreateDiscreteValueRequest
 from zepben.protobuf.np.np_requests_pb2 import *
 
-from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
-from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
-from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
-from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import CableInfo, OverheadWireInfo
-from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import AssetOwner
-from zepben.evolve.model.cim.iec61968.assets.pole import Pole
-from zepben.evolve.model.cim.iec61968.assets.streetlight import Streetlight
-from zepben.evolve.model.cim.iec61968.common.location import Location
-from zepben.evolve.model.cim.iec61968.common.organisation import Organisation
-from zepben.evolve.model.cim.iec61968.metering.metering import Meter, UsagePoint
-from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
-from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import FaultIndicator
-from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
-from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
-from zepben.evolve.model.cim.iec61970.base.core.regions import GeographicalRegion, SubGeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.model.cim.iec61970.base.meas.control import Control
-from zepben.evolve.model.cim.iec61970.base.meas.measurement import Accumulator, Analog, Discrete
-from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
-from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
-from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
-from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection, Junction
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
-from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
-from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
-from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit
-from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import LinearShuntCompensator
-from zepben.evolve.model.cim.iec61970.base.wires.switch import Breaker, Disconnector, Fuse, Jumper, LoadBreakSwitch, Recloser
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
-
 network_rpc_map = {
     PBCableInfo: ('CreateCableInfo', CreateCableInfoRequest),
     PBOverheadWireInfo: ('CreateOverheadWireInfo', CreateOverheadWireInfoRequest),
@@ -173,61 +136,4 @@ measurement_rpc_map = {
     PBAnalogValue: ('CreateAnalogValue', CreateAnalogValueRequest),
     PBAccumulatorValue: ('CreateAccumulatorValue', CreateAccumulatorValueRequest),
     PBDiscreteValue: ('CreateDiscreteValue', CreateDiscreteValueRequest),
-}
-
-nio_type_to_cim = {
-    "cableInfo": CableInfo,
-    "overheadWireInfo": OverheadWireInfo,
-    "assetOwner": AssetOwner,
-    "organisation": Organisation,
-    "location": Location,
-    "meter": Meter,
-    "usagePoint": UsagePoint,
-    "operationalRestriction": OperationalRestriction,
-    "faultIndicator": FaultIndicator,
-    "baseVoltage": BaseVoltage,
-    "connectivityNode": ConnectivityNode,
-    "feeder": Feeder,
-    "geographicalRegion": GeographicalRegion,
-    "site": Site,
-    "subGeographicalRegion": SubGeographicalRegion,
-    "substation": Substation,
-    "terminal": Terminal,
-    "acLineSegment": AcLineSegment,
-    "breaker": Breaker,
-    "disconnector": Disconnector,
-    "energyConsumer": EnergyConsumer,
-    "energyConsumerPhase": EnergyConsumerPhase,
-    "energySource": EnergySource,
-    "energySourcePhase": EnergySourcePhase,
-    "fuse": Fuse,
-    "jumper": Jumper,
-    "junction": Junction,
-    "linearShuntCompensator": LinearShuntCompensator,
-    "perLengthSequenceImpedance": PerLengthSequenceImpedance,
-    "powerTransformer": PowerTransformer,
-    "powerTransformerEnd": PowerTransformerEnd,
-    "ratioTapChanger": RatioTapChanger,
-    "recloser": Recloser,
-    "circuit": Circuit,
-    "loop": Loop,
-    "pole": Pole,
-    "streetlight": Streetlight,
-    "accumulator": Accumulator,
-    "analog": Analog,
-    "discrete": Discrete,
-    "control": Control,
-    "remoteControl": RemoteControl,
-    "remoteSource": RemoteSource,
-    "powerTransformerInfo": PowerTransformerInfo,
-    "powerElectronicsConnection": PowerElectronicsConnection,
-    "powerElectronicsConnectionPhase": PowerElectronicsConnectionPhase,
-    "batteryUnit": BatteryUnit,
-    "photoVoltaicUnit": PhotoVoltaicUnit,
-    "powerElectronicsWindUnit": PowerElectronicsWindUnit,
-    "busbarSection": BusbarSection,
-    "loadBreakSwitch": LoadBreakSwitch,
-    "transformerTankInfo": TransformerTankInfo,
-    "transformerEndInfo": TransformerEndInfo,
-    "transformerStarImpedance": TransformerStarImpedance
 }
