@@ -8,7 +8,7 @@ from __future__ import annotations
 import warnings
 from asyncio import get_event_loop
 from itertools import chain
-from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Generator, Tuple, Generic, TypeVar, Awaitable
+from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable, Iterator
 
 from dataclassy import dataclass
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
@@ -316,8 +316,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             if error:
                 return error
 
-            for container in chain(it.circuits, it.substations, it.energizing_substations):
-                result = await self.get_equipment_for_container(service, container.mRID)
+            containers: Iterator[EquipmentContainer] = chain(it.circuits, it.substations, it.energizing_substations)
+            for container in containers:
+                result = await self.get_equipment_for_container(service, container.mrid)
                 if result.was_failure:
                     return GrpcResult(result.thrown, result.was_error_handled)
 
@@ -342,17 +343,12 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         mor.objects.update(hierarchy.circuits)
         mor.objects.update(hierarchy.loops)
 
-        error = await self._resolve_references(service, mor)
-        if error:
-            return error
-
-        containers = set()
-        for _, loop in hierarchy.loops:
-            for container in chain(loop.circuits, loop.substations, loop.energizingSubstations):
-                containers.add(container)
+        containers: Set[EquipmentContainer] = set()
+        for loop in hierarchy.loops.values():
+            containers.update(chain(loop.circuits, loop.substations, loop.energizing_substations))
 
         for container in containers:
-            result = await self.get_equipment_for_container(service, container.mRID)
+            result = await self.get_equipment_for_container(service, container.mrid)
             if result.was_failure:
                 return GrpcResult(result.thrown, result.was_error_handled)
 
@@ -431,12 +427,12 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         response = self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest())
 
         return NetworkHierarchy(
-            _to_map(service, response.geographicalRegionsList),
-            _to_map(service, response.subGeographicalRegionsList),
-            _to_map(service, response.substationsList),
-            _to_map(service, response.feedersList),
-            _to_map(service, response.circuitsList),
-            _to_map(service, response.loopsList)
+            _to_map(service, response.geographicalRegions, GeographicalRegion),
+            _to_map(service, response.subGeographicalRegions, SubGeographicalRegion),
+            _to_map(service, response.substations, Substation),
+            _to_map(service, response.feeders, Feeder),
+            _to_map(service, response.circuits, Circuit),
+            _to_map(service, response.loops, Loop)
         )
 
     async def _handle_multi_object_rpc(self, processor: Callable[[], AsyncGenerator[IdentifiedObject, None]]) -> GrpcResult[MultiObjectResult]:
@@ -545,27 +541,17 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         return get_event_loop().run_until_complete(super().retrieve_network())
 
 
-def _get_unresolved_mrids(service: NetworkService, mrids: Iterable[str]) -> Generator[str, None, None]:
-    seen = set()
-    for m in mrids:
-        for i in service.get_unresolved_references_from(m):
-            if i in seen:
-                continue
-            yield i.to_mrid
-            seen.add(i)
-
-
 T = TypeVar('T')
 U = TypeVar('U', bound=IdentifiedObject)
 
 
-def _to_map(service: NetworkService, objects: Iterable[Generic[T]]) -> Dict[str, U]:
+def _to_map(service: NetworkService, objects: Iterable[Generic[T]], class_: type(Generic[U])) -> Dict[str, U]:
     result = {}
 
-    for it in objects:
+    for pb in objects:
         # noinspection PyUnresolvedReferences
-        io = service.get(it.mRID, U) or service.add_from_pb(it)
-        result[io.mrid] = io
+        cim = service.get(pb.mrid(), class_, None) or service.add_from_pb(pb)
+        result[cim.mrid] = cim
 
     return result
 
@@ -583,9 +569,9 @@ def _extract_identified_object(service: BaseService, nio: NetworkIdentifiedObjec
     """
     io_type = nio.WhichOneof("identifiedObject")
     if io_type:
-        cim_type = _nio_type_to_cim[io_type]
+        cim_type = _nio_type_to_cim.get(io_type, None)
         if cim_type is None:
-            raise UnsupportedOperationException(f"Identified object type ${io_type} is not supported by the network service")
+            raise UnsupportedOperationException(f"Identified object type '{io_type}' is not supported by the network service")
 
         pb = getattr(nio, io_type)
         if check_presence:

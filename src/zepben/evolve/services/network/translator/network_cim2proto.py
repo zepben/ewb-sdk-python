@@ -207,7 +207,7 @@ def transformertankinfo_to_pb(cim: TransformerTankInfo) -> PBTransformerTankInfo
 def transformerendinfo_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
     return PBTransformerEndInfo(
         ai=assetinfo_to_pb(cim),
-        connectionKind=cim.connection_kind,
+        connectionKind=PBWindingConnection.Value(cim.connection_kind.short_name),
         emergencyS=cim.emergency_s,
         endNumber=cim.end_number,
         insulationU=cim.insulation_u,
@@ -216,7 +216,7 @@ def transformerendinfo_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
         ratedS=cim.rated_s,
         ratedU=cim.rated_u,
         shortTermS=cim.short_term_s,
-        transformerStarImpedanceMRID=mrid_or_empty(cim.transformer_star_impedance.mrid)
+        transformerStarImpedanceMRID=mrid_or_empty(cim.transformer_star_impedance)
     )
 
 
@@ -251,7 +251,7 @@ def pole_to_pb(cim: Pole) -> PBPole:
 
 def streetlight_to_pb(cim: Streetlight) -> PBStreetlight:
     return PBStreetlight(at=asset_to_pb(cim),
-                         poleMRID=str(cim.pole.mrid),
+                         poleMRID=mrid_or_empty(cim.pole),
                          lightRating=cim.light_rating,
                          lampKind=PBStreetlightLampKind.Value(cim.lamp_kind.short_name))
 
@@ -642,7 +642,7 @@ def transformerend_to_pb(cim: TransformerEnd) -> PBTransformerEnd:
 
 def circuit_to_pb(cim: Circuit) -> PBCircuit:
     return PBCircuit(l=line_to_pb(cim),
-                     loopMRID=mrid_or_empty(cim.loop.mrid),
+                     loopMRID=mrid_or_empty(cim.loop),
                      endTerminalMRIDs=[str(io.mrid) for io in cim.end_terminals],
                      endSubstationMRIDs=[str(io.mrid) for io in cim.end_substations])
 
@@ -661,7 +661,7 @@ def transformerstarimpedance_to_pb(cim: TransformerStarImpedance) -> PBTransform
         r0=cim.r0 if cim.r0 else 0.0,
         x=cim.x if cim.x else 0.0,
         x0=cim.x0 if cim.x0 else 0.0,
-        transformerEndInfoMRID=mrid_or_empty(cim.transformer_end_info.mrid)
+        transformerEndInfoMRID=mrid_or_empty(cim.transformer_end_info)
     )
 
 
@@ -712,6 +712,7 @@ def remotesource_to_pb(cim: RemoteSource) -> PBRemoteSource:
 
 # MODEL #
 def tracedphases_to_pb(cim: TracedPhases) -> PBTracedPhases:
+    # noinspection PyProtectedMember
     return PBTracedPhases(normalStatus=cim._normal_status, currentStatus=cim._current_status)
 
 

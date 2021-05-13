@@ -257,14 +257,16 @@ up_to_loc_resolver = ReferenceResolver(UsagePoint, Location, lambda t, r: setatt
 
 circuit_to_term_resolver = ReferenceResolver(Circuit, Terminal, lambda t, r: t.add_terminal(r))
 circuit_to_loop_resolver = ReferenceResolver(Circuit, Loop, lambda t, r: setattr(t, 'loop', r))
-circuit_to_sub_resolver = ReferenceResolver(Circuit, Substation, lambda t, r: t.add_substation(r))
+circuit_to_sub_resolver = ReferenceResolver(Circuit, Substation, lambda t, r: t.add_end_substation(r))
 
 loop_to_circuit_resolver = ReferenceResolver(Loop, Circuit, lambda t, r: t.add_circuit(r))
 loop_to_sub_resolver = ReferenceResolver(Loop, Substation, lambda t, r: t.add_substation(r))
 loop_to_esub_resolver = ReferenceResolver(Loop, Substation, lambda t, r: t.add_energizing_substation(r))
 
 pec_to_pecphase_resolver = ReferenceResolver(PowerElectronicsConnection, PowerElectronicsConnectionPhase, lambda t, r: t.add_phase(r))
-pecphase_to_pec_resolver = ReferenceResolver(PowerElectronicsConnectionPhase, PowerElectronicsConnection, lambda t, r: setattr(t, 'power_electronics_connection', r))
+pecphase_to_pec_resolver = ReferenceResolver(PowerElectronicsConnectionPhase,
+                                             PowerElectronicsConnection,
+                                             lambda t, r: setattr(t, 'power_electronics_connection', r))
 
 pec_to_peu_resolver = ReferenceResolver(PowerElectronicsConnection, PowerElectronicsUnit, lambda t, r: t.add_unit(r))
 peu_to_pec_resolver = ReferenceResolver(PowerElectronicsUnit, PowerElectronicsConnection, lambda t, r: setattr(t, 'power_electronics_connection', r))

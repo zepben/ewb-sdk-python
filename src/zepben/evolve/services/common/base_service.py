@@ -196,7 +196,7 @@ class BaseService(object, metaclass=ABCMeta):
 
         objs = self._objectsByType.get(identified_object.__class__, dict())
         if mrid in objs:
-            return False
+            return objs[mrid] is identified_object
 
         # Check other types and make sure this mRID is unique
         for obj_map in self._objectsByType.values():

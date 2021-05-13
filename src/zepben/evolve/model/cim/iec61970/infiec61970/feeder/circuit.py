@@ -4,8 +4,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from zepben.evolve import Substation, Terminal, Equipment, Loop
 from zepben.evolve.model.cim.iec61970.base.wires.line import Line
 from zepben.evolve.util import ngen, get_by_mrid, safe_remove, nlen
 
@@ -57,7 +59,7 @@ class Circuit(Line):
         """
         return get_by_mrid(self._end_terminals, mrid)
 
-    def add_terminal(self, terminal: Terminal) -> Circuit:
+    def add_end_terminal(self, terminal: Terminal) -> Circuit:
         """
         Associate an `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` with this `Circuit`
 
@@ -71,7 +73,7 @@ class Circuit(Line):
         self._end_terminals.append(terminal)
         return self
 
-    def remove_end_terminals(self, terminal: Terminal) -> Circuit:
+    def remove_end_terminal(self, terminal: Terminal) -> Circuit:
         """
         Disassociate `terminal` from this `Circuit`
 
@@ -94,7 +96,7 @@ class Circuit(Line):
         """Return the number of end `Substation`s associated with this `Circuit`"""
         return nlen(self._end_substations)
 
-    def get_substation(self, mrid: str) -> Circuit:
+    def get_end_substation(self, mrid: str) -> Circuit:
         """
         Get the `zepben.evolve.cim.iec61970.base.core.substation.Substation` for this `Circuit` identified by `mrid`
 
@@ -104,7 +106,7 @@ class Circuit(Line):
         """
         return get_by_mrid(self._end_substations, mrid)
 
-    def add_substation(self, substation: Substation) -> Circuit:
+    def add_end_substation(self, substation: Substation) -> Circuit:
         """
         Associate an `zepben.evolve.cim.iec61970.base.core.substation.Substation` with this `Circuit`
 
@@ -112,13 +114,13 @@ class Circuit(Line):
         Returns A reference to this `Circuit` to allow fluent use.
         Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `Circuit`.
         """
-        if self._validate_reference(substation, self.get_substation, "An Substation"):
+        if self._validate_reference(substation, self.get_end_substation, "An Substation"):
             return self
         self._end_substations = list() if self._end_substations is None else self._end_substations
         self._end_substations.append(substation)
         return self
 
-    def remove_end_substations(self, substation: Substation) -> Circuit:
+    def remove_end_substation(self, substation: Substation) -> Circuit:
         """
         Disassociate `substation` from this `Circuit`
 

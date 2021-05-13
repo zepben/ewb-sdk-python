@@ -832,6 +832,28 @@ def transformerend_to_cim(pb: PBTransformerEnd, cim: TransformerEnd, network_ser
     identifiedobject_to_cim(pb.io, cim, network_service)
 
 
+def circuit_to_cim(pb: PBCircuit, network_service: NetworkService) -> Optional[Circuit]:
+    cim = Circuit(mrid=pb.mrid())
+    for mrid in pb.endTerminalMRIDs:
+        network_service.resolve_or_defer_reference(resolver.end_terminal(cim), mrid)
+    for mrid in pb.endSubstationMRIDs:
+        network_service.resolve_or_defer_reference(resolver.end_substation(cim), mrid)
+    line_to_cim(pb.l, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
+def loop_to_cim(pb: PBLoop, network_service: NetworkService) -> Optional[Loop]:
+    cim = Loop(mrid=pb.mrid())
+    for mrid in pb.circuitMRIDs:
+        network_service.resolve_or_defer_reference(resolver.loop_circuits(cim), mrid)
+    for mrid in pb.substationMRIDs:
+        network_service.resolve_or_defer_reference(resolver.loop_substations(cim), mrid)
+    for mrid in pb.normalEnergizingSubstationMRIDs:
+        network_service.resolve_or_defer_reference(resolver.loop_energizing_substations(cim), mrid)
+    identifiedobject_to_cim(pb.io, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 PBPowerElectronicsUnit.to_cim = powerelectronicsunit_to_cim
 PBBatteryUnit.to_cim = batteryunit_to_cim
 PBPhotoVoltaicUnit.to_cim = photovoltaicunit_to_cim
@@ -869,29 +891,5 @@ PBShuntCompensator.to_cim = shuntcompensator_to_cim
 PBSwitch.to_cim = switch_to_cim
 PBTapChanger.to_cim = tapchanger_to_cim
 PBTransformerEnd.to_cim = transformerend_to_cim
-
-
-def circuit_to_cim(pb: PBCircuit, network_service: NetworkService) -> Optional[Circuit]:
-    cim = Circuit(mrid=pb.mrid())
-    for mrid in pb.endTerminalMRIDs:
-        network_service.resolve_or_defer_reference(resolver.end_terminal(cim), mrid)
-    for mrid in pb.endSubstationMRIDs:
-        network_service.resolve_or_defer_reference(resolver.end_substation(cim), mrid)
-    line_to_cim(pb.l, cim, network_service)
-    return cim if network_service.add(cim) else None
-
-
-def loop_to_cim(pb: PBLoop, network_service: NetworkService) -> Optional[Loop]:
-    cim = Loop(mrid=pb.mrid())
-    for mrid in pb.circuitMRIDs:
-        network_service.resolve_or_defer_reference(resolver.loop_circuits(cim), mrid)
-    for mrid in pb.substationMRIDs:
-        network_service.resolve_or_defer_reference(resolver.loop_substations(cim), mrid)
-    for mrid in pb.normalEnergizingSubstationMRIDs:
-        network_service.resolve_or_defer_reference(resolver.loop_energizing_substations(cim), mrid)
-    identifiedobject_to_cim(pb.io, cim, network_service)
-    return cim if network_service.add(cim) else None
-
-
 PBCircuit.to_cim = circuit_to_cim
 PBLoop.to_cim = loop_to_cim

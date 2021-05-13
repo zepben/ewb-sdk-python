@@ -6,23 +6,82 @@
 from typing import List, Union
 
 from pytest import fixture
-from zepben.evolve import BaseService, Terminal, resolver, UnresolvedReference, Junction, BaseVoltage, Location, AcLineSegment, CableInfo, \
-PerLengthSequenceImpedance, IdentifiedObject, ConnectivityNode, Feeder, OperationalRestriction, NetworkService, IdentifiedObject, \
-BaseService, PowerTransformerInfo, CableInfo, OverheadWireInfo, Streetlight, Pole, Meter, Location, Organisation, AssetOwner, \
-Customer, CustomerAgreement, Tariff, PricingStructure, OperationalRestriction, UsagePoint, Junction, BusbarSection, EnergySource, PowerElectronicsConnection, \
-LinearShuntCompensator, EnergyConsumer, EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, Breaker, Recloser, \
-LoadBreakSwitch, Disconnector, Fuse, Jumper, RegulatingCondEq, BatteryUnit, PowerElectronicsWindUnit, PhotoVoltaicUnit, \
-FaultIndicator, Feeder, Site, Substation, Circuit, Substation, PowerElectronicsConnectionPhase, EnergySourcePhase, \
-RatioTapChanger, EnergyConsumerPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, EnergyConsumerPhase, \
-EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete, \
-Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo, \
-AssetContainer, OrganisationRole, Document, Agreement
+
+from zepben.evolve import Terminal, resolver, UnresolvedReference, NetworkService, IdentifiedObject, \
+    BaseService, PowerTransformerInfo, CableInfo, OverheadWireInfo, Streetlight, Pole, Meter, Location, Organisation, AssetOwner, \
+    Customer, CustomerAgreement, Tariff, PricingStructure, OperationalRestriction, UsagePoint, Junction, BusbarSection, PowerElectronicsConnection, \
+    LinearShuntCompensator, EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, Breaker, Recloser, \
+    LoadBreakSwitch, Disconnector, Fuse, Jumper, RegulatingCondEq, BatteryUnit, PowerElectronicsWindUnit, PhotoVoltaicUnit, \
+    FaultIndicator, Feeder, Site, Circuit, Substation, PowerElectronicsConnectionPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, \
+    EnergyConsumerPhase, EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete, \
+    Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo, \
+    AssetContainer, OrganisationRole, Document, Agreement
 
 
 @fixture
 def service():
     service = BaseService("base_service")
     yield service
+
+
+def test_add(service: BaseService):
+    b1 = Breaker(mrid="b1")
+    b2 = Breaker(mrid="b2")
+    b1_dup = Breaker(mrid="b1")
+
+    assert service.add(b1)
+    assert service.add(b2)
+    assert service.add(b1)
+    assert not service.add(b1_dup)
+
+
+def test_get(service: BaseService):
+    b1 = Breaker(mrid="b1")
+    service.add(b1)
+
+    assert service.get("b1") is b1
+    assert service["b1"] is b1
+    assert service.get("b1", Junction, default=None) is None
+    assert service.get("b2", default=None) is None
+
+    # NOTE: KeyError automatically adds single quotes so we need to add them to the comparison string.
+
+    try:
+        service.get("b1", Junction)
+        raise AssertionError("Should have thrown")
+    except KeyError as e:
+        assert str(e) == "'Failed to find Junction[b1]'"
+
+    try:
+        service.get("b3")
+        raise AssertionError("Should have thrown")
+    except KeyError as e:
+        assert str(e) == "'Failed to find [b3]'"
+
+    try:
+        service.get("b4", Junction, generate_error=lambda mrid, typ: f"my error: mrid={mrid}, typ={typ}")
+        raise AssertionError("Should have thrown")
+    except KeyError as e:
+        assert str(e) == "'my error: mrid=b4, typ=Junction'"
+
+    try:
+        service.get(mrid="")
+        raise AssertionError("Should have thrown")
+    except KeyError as e:
+        assert str(e) == "'You must specify an mRID to get. Empty/None is invalid.'"
+
+
+def test_remove(service: BaseService):
+    b1 = Breaker(mrid="b1")
+    b2 = Breaker(mrid="b2")
+
+    service.add(b1)
+    service.add(b2)
+
+    assert service.remove(b1)
+
+    assert service.get("b1", default=None) is None
+    assert service.get("b2", default=None) is b2
 
 
 def test_unresolved_bidirectional_references(service: BaseService):
@@ -32,8 +91,9 @@ def test_unresolved_bidirectional_references(service: BaseService):
 
     assert list(service.unresolved_references())[0] == UnresolvedReference(term, "j1", resolver.conducting_equipment(term).resolver)
     assert "j1" in service.get_unresolved_reference_mrids_by_resolver(resolver.conducting_equipment(term))
+    assert "j1" in service.get_unresolved_reference_mrids_by_resolver([resolver.conducting_equipment(term)])
 
-    j1 = Junction("j1")
+    j1 = Junction(mrid="j1")
     assert service.resolve_or_defer_reference(resolver.ce_terminals(j1), term.mrid)
     assert not list(service.unresolved_references())  # no unresolved refs now
     assert not list(service.get_unresolved_reference_mrids_by_resolver(resolver.conducting_equipment(term)))
@@ -46,7 +106,7 @@ def test_unresolved_bidirectional_references(service: BaseService):
 
 
 def test_unresolved_unidirectional_references(service: BaseService):
-    j1 = Junction("j1")
+    j1 = Junction(mrid="j1")
     assert service.add(j1)
     assert service.resolve_or_defer_reference(resolver.ce_base_voltage(j1), "bv1") is False
     assert list(service.unresolved_references())[0] == UnresolvedReference(j1, "bv1", resolver.ce_base_voltage(j1).resolver)
@@ -61,17 +121,17 @@ def test_unresolved_unidirectional_references(service: BaseService):
 
 
 def test_mrid_must_be_unique(service):
-    j1 = Junction("id1")
+    j1 = Junction(mrid="id1")
     assert service.add(j1)
 
-    loc = Location(j1.mrid)
+    loc = Location(mrid=j1.mrid)
     assert not service.add(loc)
 
 
 def test_unresolved_references(service: BaseService):
     f = Feeder("f")
-    acls1 = AcLineSegment("acls1")
-    acls2 = AcLineSegment("acls2")
+    acls1 = AcLineSegment(mrid="acls1")
+    acls2 = AcLineSegment(mrid="acls2")
     plsi1 = PerLengthSequenceImpedance("plsi1")
     service.resolve_or_defer_reference(resolver.per_length_sequence_impedance(acls1), "plsi1")
     t1 = Terminal("t1")
@@ -93,37 +153,88 @@ def test_unresolved_references(service: BaseService):
     refs = list(service.get_unresolved_reference_mrids_by_resolver(resolver.per_length_sequence_impedance(acls1)))
     assert plsi1.mrid in refs
 
-    check_unresolved_reference(t1.mrid, acls1.mrid, service.get_unresolved_references_to)
-    check_unresolved_reference(t2.mrid, acls1.mrid, service.get_unresolved_references_to)
-    check_unresolved_reference(plsi1.mrid, acls1.mrid, service.get_unresolved_references_to)
-    check_unresolved_reference(ci1.mrid, acls1.mrid, service.get_unresolved_references_to)
+    _check_unresolved_reference(t1.mrid, acls1.mrid, service.get_unresolved_references_to)
+    _check_unresolved_reference(t2.mrid, acls1.mrid, service.get_unresolved_references_to)
+    _check_unresolved_reference(plsi1.mrid, acls1.mrid, service.get_unresolved_references_to)
+    _check_unresolved_reference(ci1.mrid, acls1.mrid, service.get_unresolved_references_to)
 
-    add_and_check(service, f, [acls1, acls2], "equipment_containers")
+    _add_and_check(service, f, [acls1, acls2], "equipment_containers")
     assert service.num_unresolved_references() == 4
-    add_and_check(service, plsi1, acls1, "per_length_sequence_impedance")
+    _add_and_check(service, plsi1, acls1, "per_length_sequence_impedance")
     assert service.num_unresolved_references() == 3
-    add_and_check(service, ci1, acls1, "wire_info")
+    _add_and_check(service, ci1, acls1, "wire_info")
     assert service.num_unresolved_references() == 2
-    add_and_check(service, t1, acls1, "terminals")
+    _add_and_check(service, t1, acls1, "terminals")
     assert service.num_unresolved_references() == 1
-    add_and_check(service, t2, acls1, "terminals")
+    _add_and_check(service, t2, acls1, "terminals")
     assert service.num_unresolved_references() == 0
 
 
 def test_add_resolves_reverse_relationship():
-    or1 = OperationalRestriction("or1")
-    eq1 = AcLineSegment("eq1", operational_restrictions=[or1])
+    or1 = OperationalRestriction(mrid="or1")
+    eq1 = AcLineSegment(mrid="eq1", operational_restrictions=[or1])
     or1.add_equipment(eq1)
 
     ns = NetworkService("test")
+    # noinspection PyUnresolvedReferences
     ns.add_from_pb(eq1.to_pb())
+    # noinspection PyUnresolvedReferences
     ns.add_from_pb(or1.to_pb())
 
     assert ns.get("eq1") in ns.get("or1").equipment
     assert ns.get("or1") in ns.get("eq1").operational_restrictions
 
 
-def add_and_check(service: BaseService, to_add, to_check: Union[IdentifiedObject, List[IdentifiedObject]], to_check_reference):
+def test_resolve_thingo(service):
+    acls1 = AcLineSegment(mrid="acls1")
+    t1 = Terminal("t1")
+    service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t1")
+    service.resolve_or_defer_reference(resolver.conducting_equipment(t1), "acls1")
+
+    service.add(acls1)
+    service.add(t1)
+
+    assert t1.conducting_equipment is acls1
+    assert list(acls1.terminals) == [t1]
+
+
+def test_objects():
+    for part in _types:
+        _create_objects_test(BaseService(""), part)
+
+
+def test_objects_exclude(service: BaseService):
+    b1 = Breaker()
+    acls1 = AcLineSegment()
+    j1 = Junction()
+
+    service.add(b1)
+    service.add(acls1)
+    service.add(j1)
+
+    assert set(service.objects(exc_types=[AcLineSegment])) == {b1, j1}
+
+
+def test_contains(service: BaseService):
+    breaker = Breaker()
+    service.add(breaker)
+
+    assert breaker.mrid in service
+    assert "unknown" not in service
+
+
+def test_unresolved_references_by_id(service: BaseService):
+    breaker = Breaker()
+    service.add(breaker)
+    service.resolve_or_defer_reference(resolver.ce_terminals(breaker), "terminal")
+
+    assert len(set(service.get_unresolved_references_from(breaker.mrid))) == 1
+    assert service.num_unresolved_references(breaker.mrid) == 0
+    assert service.num_unresolved_references("terminal") == 1
+    assert service.num_unresolved_references("unknown") == 0
+
+
+def _add_and_check(service: BaseService, to_add, to_check: Union[IdentifiedObject, List[IdentifiedObject]], to_check_reference):
     service.add(to_add)
     if isinstance(to_check, IdentifiedObject):
         to_check = [to_check]
@@ -138,45 +249,28 @@ def add_and_check(service: BaseService, to_add, to_check: Union[IdentifiedObject
             assert to_add in attr
 
 
-def check_unresolved_reference(to_check, expected_from, getter):
+def _create_objects_test(service, type_):
+    obj = type_()
+    io = IdentifiedObject()
+    service.add(obj)
+    service.add(io)
+    for obj in service.objects(type_):
+        assert obj is obj
+        assert obj is not io
+
+
+def _check_unresolved_reference(to_check, expected_from, getter):
     refs = [x.from_ref.mrid for x in getter(to_check)]
     assert expected_from in refs
 
 
-def test_resolve_thingo(service):
-    acls1 = AcLineSegment("acls1")
-    t1 = Terminal("t1")
-    service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t1")
-    service.resolve_or_defer_reference(resolver.conducting_equipment(t1), "acls1")
-
-    service.add(acls1)
-    service.add(t1)
-
-
-types = [PowerTransformerInfo, CableInfo, OverheadWireInfo, Streetlight,
-Pole, Meter, Location, Organisation, AssetOwner, Customer, CustomerAgreement, Tariff, PricingStructure,
-OperationalRestriction, UsagePoint, Terminal, Junction, BusbarSection, EnergySource, PowerElectronicsConnection,
-LinearShuntCompensator, EnergyConsumer, EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, Breaker, Recloser,
-LoadBreakSwitch, Disconnector, Fuse, Jumper, RegulatingCondEq, BatteryUnit, PowerElectronicsWindUnit, PhotoVoltaicUnit,
-FaultIndicator, Feeder, Site, Substation, Circuit, Substation, PowerElectronicsConnectionPhase, EnergySourcePhase,
-RatioTapChanger, EnergyConsumerPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, EnergyConsumerPhase,
-EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete,
-Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo,
-AssetContainer, OrganisationRole, Document, Agreement]
-
-def create_objects_test(service, type_):
-
-    object = type_()
-    io = IdentifiedObject()
-    service.add(object)
-    service.add(io)
-    for obj in service.objects(type_):
-        assert obj is object
-        assert obj is not io
-
-
-def test_objects():
-    for part in types:
-        create_objects_test(BaseService(""), part)
-
-
+_types = [PowerTransformerInfo, CableInfo, OverheadWireInfo, Streetlight,
+          Pole, Meter, Location, Organisation, AssetOwner, Customer, CustomerAgreement, Tariff, PricingStructure,
+          OperationalRestriction, UsagePoint, Terminal, Junction, BusbarSection, EnergySource, PowerElectronicsConnection,
+          LinearShuntCompensator, EnergyConsumer, EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, Breaker, Recloser,
+          LoadBreakSwitch, Disconnector, Fuse, Jumper, RegulatingCondEq, BatteryUnit, PowerElectronicsWindUnit, PhotoVoltaicUnit,
+          FaultIndicator, Feeder, Site, Substation, Circuit, Substation, PowerElectronicsConnectionPhase, EnergySourcePhase,
+          RatioTapChanger, EnergyConsumerPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, EnergyConsumerPhase,
+          EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete,
+          Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo,
+          AssetContainer, OrganisationRole, Document, Agreement]

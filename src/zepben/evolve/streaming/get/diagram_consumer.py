@@ -139,9 +139,9 @@ def _extract_identified_object(service: DiagramService, dio: DiagramIdentifiedOb
     """
     io_type = dio.WhichOneof("identifiedObject")
     if io_type:
-        cim_type = _dio_type_to_cim[io_type]
+        cim_type = _dio_type_to_cim.get(io_type, None)
         if cim_type is None:
-            raise UnsupportedOperationException(f"Identified object type ${io_type} is not supported by the diagram service")
+            raise UnsupportedOperationException(f"Identified object type '{io_type}' is not supported by the diagram service")
 
         pb = getattr(dio, io_type)
         if check_presence:

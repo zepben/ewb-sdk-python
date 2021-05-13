@@ -6,9 +6,9 @@
 
 from __future__ import annotations
 
-from dataclassy import dataclass
-from typing import List, Optional, Generator, Tuple
+from typing import List, Optional, Generator
 
+from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import require, nlen, ngen, safe_remove
@@ -99,7 +99,7 @@ class Location(IdentifiedObject):
         return nlen(self._position_points)
 
     @property
-    def points(self) -> Generator[Tuple[int, PositionPoint], None, None]:
+    def points(self) -> Generator[PositionPoint, None, None]:
         """
         Returns Generator over the `PositionPoint`s of this `Location`.
         """

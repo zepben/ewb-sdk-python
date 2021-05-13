@@ -139,9 +139,9 @@ def _extract_identified_object(service: CustomerService, cio: CustomerIdentified
     """
     io_type = cio.WhichOneof("identifiedObject")
     if io_type:
-        cim_type = _cio_type_to_cim[io_type]
+        cim_type = _cio_type_to_cim.get(io_type, None)
         if cim_type is None:
-            raise UnsupportedOperationException(f"Identified object type ${io_type} is not supported by the customer service")
+            raise UnsupportedOperationException(f"Identified object type '{io_type}' is not supported by the customer service")
 
         pb = getattr(cio, io_type)
         if check_presence:
