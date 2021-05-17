@@ -25,6 +25,7 @@ through `zepben.evolve.services.network.network_extensions`.
 * Added utility function to generate bus-branch models from a NetworkService.
 * Passing token for authorization of connection to authenticated gRPC server.
 * Added API calls for getting loops.
+* Added CIM Class SwitchStateClient that allows you to set the current state of switches via a gRPC service.
 
 ##### Enhancements
 * [tests] cim_creators.py created with similar hypothesis derived functionality to pb_creators, and can be used to quickly build fake data for testing.
