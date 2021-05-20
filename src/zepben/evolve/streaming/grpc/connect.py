@@ -22,17 +22,25 @@ _AUTH_HEADER_KEY = 'authorization'
 
 class AuthTokenPlugin(grpc.AuthMetadataPlugin):
 
-    def __init__(self, host, conf_address, client_id, client_secret):
+    def __init__(self, host, conf_address=None, client_id=None, client_secret=None, authenticator=None):
         self.host = host
         self.conf_address = conf_address
         self.client_id = client_id
         self.client_secret = client_secret
-        self.token = ""
         self.token_expiry = 0
-        self._refresh_token()
+        self.authenticator = authenticator
+        if self.authenticator:
+            self.token = f"Bearer {self.authenticator.get_token()}"
+        elif conf_address and client_id and client_secret:
+            self.token = ""
+            self._refresh_token()
+        else:
+            raise AuthException("Please provide authenticator or all of conf_address, client_id and client_secret.")
 
     def __call__(self, context, callback):
-        if datetime.utcnow().timestamp() > self.token_expiry:
+        if self.authenticator:
+            self.token = f"Bearer {self.authenticator.get_token()}"
+        elif self.conf_address and datetime.utcnow().timestamp() > self.token_expiry:
             self._refresh_token()
         callback(((_AUTH_HEADER_KEY, self.token),), None)
 
@@ -57,7 +65,7 @@ def get_token(addr, conf_address, client_id, client_secret):
 
 
 def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "http://localhost/auth", client_id: str = None,
-          client_secret: str = None, pkey=None, cert=None, ca=None):
+          client_secret: str = None, pkey=None, cert=None, ca=None, authenticator=None):
     """
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
@@ -69,19 +77,32 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "h
                  CA.
     `ca` CA trust for the server.
     `secure_conf` Whether the server hosting configuration is secured (https)
+    `authenticator` An authenticator object that has a public get_token() method. If this is provided, it takes precedence over client credentials.
     Returns A gRPC channel
     """
+    # Channel credential will be valid for the entire channel
+    channel_credentials = grpc.ssl_channel_credentials(ca, pkey, cert) if ca else None
     # TODO: make this more robust so it can handle SSL without client verification
-    if pkey and cert and client_id and client_secret:
-        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(host, conf_address, client_id, client_secret))
-        # Channel credential will be valid for the entire channel
-        channel_credentials = grpc.ssl_channel_credentials(ca, pkey, cert)
+    if authenticator:
+        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(host=host, authenticator=authenticator))
+
         # Combining channel credentials and call credentials together
         composite_credentials = grpc.composite_channel_credentials(
             channel_credentials,
             call_credentials,
-        )
+        ) if channel_credentials else call_credentials
         channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+    elif pkey and cert and client_id and client_secret:
+        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(host, conf_address, client_id, client_secret))
+
+        # Combining channel credentials and call credentials together
+        composite_credentials = grpc.composite_channel_credentials(
+            channel_credentials,
+            call_credentials,
+        ) if channel_credentials else call_credentials
+        channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+    elif ca:
+        channel = grpc.secure_channel(f"{host}:{rpc_port}", channel_credentials)
     else:
         channel = grpc.insecure_channel(f"{host}:{rpc_port}")
 
@@ -96,7 +117,8 @@ def connect(host: str = "localhost",
             client_secret: str = None,
             pkey=None,
             cert=None,
-            ca=None):
+            ca=None,
+            authenticator=None):
     """
     Usage:
         with connect(args) as channel:
@@ -110,9 +132,10 @@ def connect(host: str = "localhost",
     `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
                  CA.
     `ca` CA trust for the server.
+    `authenticator` An authenticator object that has a public get_token() method. If this is provided, it takes precedence over client credentials.
     Returns A gRPC channel
     """
-    yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca)
+    yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca, authenticator)
 
 
 @contextlib.asynccontextmanager
@@ -123,7 +146,8 @@ async def connect_async(host: str = "localhost",
                         client_secret: str = None,
                         pkey=None,
                         cert=None,
-                        ca=None):
+                        ca=None,
+                        authenticator=None):
     """
     Usage:
         async with connect_async(args) as channel:
@@ -137,6 +161,7 @@ async def connect_async(host: str = "localhost",
     `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
                  CA.
     `ca` CA trust for the server.
+    `authenticator` An authenticator object that has a public get_token() method. If this is provided, it takes precedence over client credentials.
     Returns A gRPC channel
     """
-    yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca)
+    yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca, authenticator)
