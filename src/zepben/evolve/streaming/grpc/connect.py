@@ -40,7 +40,7 @@ class AuthTokenPlugin(grpc.AuthMetadataPlugin):
     def __call__(self, context, callback):
         if self.authenticator:
             self.token = f"Bearer {self.authenticator.get_token()}"
-        if self.conf_address and datetime.utcnow().timestamp() > self.token_expiry:
+        elif self.conf_address and datetime.utcnow().timestamp() > self.token_expiry:
             self._refresh_token()
         callback(((_AUTH_HEADER_KEY, self.token),), None)
 
@@ -77,6 +77,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "h
                  CA.
     `ca` CA trust for the server.
     `secure_conf` Whether the server hosting configuration is secured (https)
+    `authenticator` An authenticator object that has a public get_token() method. If this is provided, it takes precedence over client credentials.
     Returns A gRPC channel
     """
     # Channel credential will be valid for the entire channel
@@ -131,6 +132,7 @@ def connect(host: str = "localhost",
     `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
                  CA.
     `ca` CA trust for the server.
+    `authenticator` An authenticator object that has a public get_token() method. If this is provided, it takes precedence over client credentials.
     Returns A gRPC channel
     """
     yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca, authenticator)
@@ -159,6 +161,7 @@ async def connect_async(host: str = "localhost",
     `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
                  CA.
     `ca` CA trust for the server.
+    `authenticator` An authenticator object that has a public get_token() method. If this is provided, it takes precedence over client credentials.
     Returns A gRPC channel
     """
     yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca, authenticator)
