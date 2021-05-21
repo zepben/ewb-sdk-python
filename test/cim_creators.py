@@ -569,7 +569,7 @@ def circuit():
 def loop():
     return builds(Loop, **identifiedobject(), circuits=lists(builds(Circuit, **identifiedobject()), max_size=2),
                   substations=lists(builds(Substation, **identifiedobject()), max_size=2),
-                  normal_energizing_substations=lists(builds(Substation, **identifiedobject()), max_size=2))
+                  energizing_substations=lists(builds(Substation, **identifiedobject()), max_size=2))
 
 
 # IEC61970 MEAS #
@@ -627,6 +627,7 @@ def remotepoint():
 
 def remotesource():
     return builds(RemoteSource, **remotepoint(), measurement=sampled_measurement())
+
 
 # MODEL #
 def tracedphases():

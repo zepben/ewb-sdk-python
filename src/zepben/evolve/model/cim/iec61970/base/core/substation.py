@@ -6,7 +6,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Loop, Circuit, Feeder, Equipment
 
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.evolve.model.cim.iec61970.base.core.regions import SubGeographicalRegion

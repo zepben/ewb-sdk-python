@@ -5,16 +5,20 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+
 from abc import ABCMeta
 from collections import OrderedDict
-from dataclassy import dataclass
 from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set
+from typing import TypeVar, Type
+
+from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
 
 __all__ = ["BaseService"]
 
+T = TypeVar("T", bound=IdentifiedObject)
 
 _GET_DEFAULT = (1,)
 
@@ -31,10 +35,14 @@ class BaseService(object, metaclass=ABCMeta):
     and `perLengthSequenceImpedance` with mRID 'plsi-1', the following key value pairs would be present:
     {
         "plsi-1": [
-          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
+            UnresolvedReference(from_ref=AcLineSegment('acls1'),
+                                to_mrid='plsi-1',
+                                 resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
         ],
         "location-l1": [
-          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...)
+            UnresolvedReference(from_ref=AcLineSegment('acls1'),
+                                to_mrid='location-l1',
+                                resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...)
         ]
     }
     
@@ -47,8 +55,12 @@ class BaseService(object, metaclass=ABCMeta):
     An index of the unresolved references by their `from_ref.mrid`. For the above example this will be a dictionary of the form:
     {
         "acls1": [
-          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='location-l1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...),
-          UnresolvedReference(from_ref=AcLineSegment('acls1'), to_mrid='plsi-1', resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
+            UnresolvedReference(from_ref=AcLineSegment('acls1'),
+                                to_mrid='location-l1',
+                                resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...),
+            UnresolvedReference(from_ref=AcLineSegment('acls1'),
+                                to_mrid='plsi-1',
+                                resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
         ]
     }
     """
@@ -120,8 +132,8 @@ class BaseService(object, metaclass=ABCMeta):
             for ur in unresolved_refs:
                 yield ur
 
-    def get(self, mrid: str, type_: type = None, default=_GET_DEFAULT,
-            generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> IdentifiedObject:
+    def get(self, mrid: str, type_: Optional[Type[T]] = None, default=_GET_DEFAULT,
+            generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> T:
         """
         Get an object associated with this service.
 
@@ -184,7 +196,7 @@ class BaseService(object, metaclass=ABCMeta):
 
         objs = self._objectsByType.get(identified_object.__class__, dict())
         if mrid in objs:
-            return False
+            return objs[mrid] is identified_object
 
         # Check other types and make sure this mRID is unique
         for obj_map in self._objectsByType.values():
@@ -228,6 +240,7 @@ class BaseService(object, metaclass=ABCMeta):
         reverse_resolver = bound_resolver.reverse_resolver
         try:
             # If to_mrid is present in the service, we resolve any references immediately.
+            # noinspection PyTypeChecker
             to = self.get(to_mrid, resolver.to_class)
             resolver.resolve(from_, to)
             if reverse_resolver:
@@ -255,7 +268,8 @@ class BaseService(object, metaclass=ABCMeta):
             self._unresolved_references_from[from_.mrid] = rev_urefs
             return False
 
-    def get_unresolved_reference_mrids_by_resolver(self, bound_resolvers: Union[BoundReferenceResolver, Sized[BoundReferenceResolver]]) -> Generator[str, None, None]:
+    def get_unresolved_reference_mrids_by_resolver(self,
+                                                   bound_resolvers: Union[BoundReferenceResolver, Sized[BoundReferenceResolver]]) -> Generator[str, None, None]:
         """
         Gets a set of MRIDs that are referenced by the from_obj held by `bound_resolver` that are unresolved.
         `bound_resolver` The `BoundReferenceResolver` to retrieve unresolved references for.
@@ -306,7 +320,7 @@ class BaseService(object, metaclass=ABCMeta):
         del self._objectsByType[identified_object.__class__][identified_object.mrid]
         return True
 
-    def objects(self, obj_type: Optional[type] = None, exc_types: Optional[List[type]] = None) -> Generator[IdentifiedObject, None, None]:
+    def objects(self, obj_type: Optional[Type[T]] = None, exc_types: Optional[List[type]] = None) -> Generator[T, None, None]:
         """
         Generator for the objects in this service of type `obj_type`.
         `obj_type` The type of object to yield. If this is a base class it will yield all subclasses.

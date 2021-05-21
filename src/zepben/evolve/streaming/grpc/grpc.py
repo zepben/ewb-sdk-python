@@ -10,8 +10,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, TypeVar, Generic, Callable, List, Union
-from grpc import RpcError
+from typing import TypeVar, Generic, Callable, List, Union, Coroutine
 
 from dataclassy import dataclass
 
@@ -22,8 +21,20 @@ T = TypeVar("T")
 
 @dataclass(slots=True)
 class GrpcResult(Generic[T]):
-    result: Optional[Union[T, Exception]]
+    result: Union[T, Exception]
     was_error_handled: bool = False
+
+    @property
+    def value(self) -> T:
+        if self.result is not None and isinstance(self.result, Exception):
+            raise TypeError("You can only call value on a successful result.")
+        return self.result
+
+    @property
+    def thrown(self) -> Exception:
+        if self.result is None or not isinstance(self.result, Exception):
+            raise TypeError("You can only call thrown on an unsuccessful result.")
+        return self.result
 
     @property
     def was_successful(self):
@@ -32,6 +43,10 @@ class GrpcResult(Generic[T]):
     @property
     def was_failure(self):
         return isinstance(self.result, Exception)
+
+    @property
+    def was_error_unhandled(self):
+        return not self.was_error_handled
 
     def on_success(self, handler: Callable[[T], None]) -> GrpcResult[T]:
         """Calls `handler` with the `result` if this `was_successful`"""
@@ -86,7 +101,7 @@ class GrpcClient(object):
                 return True
         return False
 
-    async def try_rpc(self, rpc: Callable[[], IdentifiedObject]) -> GrpcResult:
+    async def try_rpc(self, rpc: Callable[[], Coroutine[None, None, T]]) -> GrpcResult[T]:
         try:
             return GrpcResult(await rpc())
         except Exception as e:

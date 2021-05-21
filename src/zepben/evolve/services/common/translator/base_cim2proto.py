@@ -39,7 +39,7 @@ def organisation_to_pb(cim: Organisation) -> PBOrganisation:
 
 def organisationrole_to_pb(cim: OrganisationRole) -> PBOrganisationRole:
     return PBOrganisationRole(io=identifiedobject_to_pb(cim),
-                              organisationMRID=mrid_or_empty(cim.organisation.mrid))
+                              organisationMRID=mrid_or_empty(cim.organisation))
 
 
 # IEC61970 CORE #

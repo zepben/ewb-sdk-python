@@ -7,25 +7,22 @@ from abc import ABCMeta
 from typing import Optional
 
 from dataclassy import dataclass
-
-
-from zepben.evolve.services.common.base_service import BaseService
-from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
-
-from zepben.evolve.model.cim.iec61968.common.document import Document
-from zepben.evolve.model.cim.iec61968.common.organisation import Organisation
-from zepben.evolve.model.cim.iec61968.common.organisation_role import OrganisationRole
-from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
-from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
+from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
+
+from zepben.evolve import Document, IdentifiedObject, Organisation, OrganisationRole
 from zepben.evolve.services.common import resolver
+from zepben.evolve.services.common.base_service import BaseService
 
 __all__ = ["identifiedobject_to_cim", "document_to_cim", "organisation_to_cim", "organisationrole_to_cim", "BaseProtoToCim"]
 
 
 # IEC61970 CORE #
-def identifiedobject_to_cim(pb: PBIdentifiedObject, cim: IdentifiedObject, service: BaseService):
+
+
+def identifiedobject_to_cim(pb: PBIdentifiedObject, cim: IdentifiedObject, _: BaseService):
     cim.mrid = pb.mRID
     cim.name = pb.name
     cim.description = pb.description
@@ -63,3 +60,14 @@ PBIdentifiedObject.to_cim = identifiedobject_to_cim
 class BaseProtoToCim(object, metaclass=ABCMeta):
     service: BaseService
 
+
+# Extensions
+def _add_from_pb(service: BaseService, pb) -> Optional[IdentifiedObject]:
+    """Must only be called by objects for which .to_cim() takes themselves and the network service."""
+    try:
+        return pb.to_cim(service)
+    except AttributeError as e:
+        raise TypeError(f"Type {pb.__class__.__name__} is not supported by {service.__class__.__name__}. (Error was: {e})")
+
+
+BaseService.add_from_pb = _add_from_pb

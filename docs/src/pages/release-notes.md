@@ -54,7 +54,7 @@ a 1.0.0 release.
           get_equipment_for_restriction(service: NetworkService, mrid: str)
     - For fetching terminals for a ConnectivityNode
       
-          get_terminals_for_connectivitynode(service: NetworkService, mrid: str)
+          get_terminals_for_connectivity_node(service: NetworkService, mrid: str)
 * `NetworkConsumerClient.get_feeder()` now resolves all references, and thus you can expect to receive a Feeder with all equipment and their associations populated.
 
 ##### Enhancements
