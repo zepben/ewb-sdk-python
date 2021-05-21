@@ -7,8 +7,11 @@
 from __future__ import annotations
 
 from typing import Optional
+from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
+if TYPE_CHECKING:
+    from zepben.evolve import ConnectivityNode, ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.phases import TracedPhases
@@ -44,7 +47,7 @@ class Terminal(AcDcTerminal):
     """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases 
     to match those in `phases`"""
 
-    _cn: ReferenceType = None
+    _cn: Optional[ReferenceType] = None
     """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
     reference does not cause everything connected to it in the network to stay in memory."""
 
@@ -70,14 +73,17 @@ class Terminal(AcDcTerminal):
 
     @property
     def connectivity_node(self):
-        try:
+        if self._cn:
             return self._cn()
-        except TypeError:
+        else:
             return None
 
     @connectivity_node.setter
-    def connectivity_node(self, cn):
-        self._cn = ref(cn)
+    def connectivity_node(self, cn: Optional[ConnectivityNode]):
+        if cn:
+            self._cn = ref(cn)
+        else:
+            self._cn = None
 
     @property
     def connected(self) -> bool:
@@ -111,4 +117,3 @@ class Terminal(AcDcTerminal):
 
     def disconnect(self):
         self.connectivity_node = None
-

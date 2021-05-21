@@ -6,25 +6,18 @@
 
 import pytest
 
-from zepben.evolve import BaseService, CimConsumerClient
+from zepben.evolve import CimConsumerClient
 
 
 @pytest.mark.asyncio
 async def test_abstract_coverage():
-    service = BaseService('service')
     client = CimConsumerClient()
-    try:
-        await client.get_identified_object(service, "id")
-        raise AssertionError("Should have thrown")
-    except NotImplementedError:
-        pass
-    except Exception as e:
-        raise e
 
-    try:
-        await client.get_identified_objects(service, ["id"])
-        raise AssertionError("Should have thrown")
-    except NotImplementedError:
-        pass
-    except Exception as e:
-        raise e
+    with pytest.raises(NotImplementedError):
+        (await client.service).throw_on_error()
+
+    with pytest.raises(NotImplementedError):
+        (await client.get_identified_object("id")).throw_on_error()
+
+    with pytest.raises(NotImplementedError):
+        (await client.get_identified_objects(["id"])).throw_on_error()

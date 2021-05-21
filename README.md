@@ -62,6 +62,13 @@ You can generate the [coverage report](htmlcov/index.html) using the following o
  pytest --cov=zepben.evolve --cov-report=html --cov-branch
  ```
 
+If you need to debug an async test, you will need to annotate the test with the following
+to prevent the test from timing out while you step through the code:
+
+```
+@pytest.mark.timeout(100000)
+```
+
 ## Checklist for model changes ##
 
 1. Update [`setup.py`](setup.py) to import the correct version of `zepben.protobuf`.

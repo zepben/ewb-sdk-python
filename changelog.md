@@ -7,6 +7,10 @@
 * `get_identified_object` now returns a `ValueError` error if the requested object does not exist rather than a `null` successful result.
 * Renamed `get_terminals_for_connectivitynode` to `get_terminals_for_connectivity_node` in `NetworkConsumerClient`.
 * Renamed `value` to `objects` in `MultiObjectResult`.
+* All `CimConsumerClient` implementations have been changed to control a single service rather than one per call.
+* All SDK methods that retrieve objects with references will now request the network hierarchy first to provide
+  a consistent result, regardless of call order.
+* Updated to use v0.15.0 gRPC protocols.
 
 ##### New Features
 * Added the following CIM classes:
@@ -31,6 +35,7 @@ through `zepben.evolve.services.network.network_extensions`.
 ##### Fixes
 * `get_identified_objects` now adds unknown mRIDs to the failed collection.
 * Fixed typing issues on all services.
+* Circuits now correctly link to loops when received via gRPC.
 
 ##### Notes
 * None.

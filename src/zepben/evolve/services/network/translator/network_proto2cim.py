@@ -834,6 +834,7 @@ def transformerend_to_cim(pb: PBTransformerEnd, cim: TransformerEnd, network_ser
 
 def circuit_to_cim(pb: PBCircuit, network_service: NetworkService) -> Optional[Circuit]:
     cim = Circuit(mrid=pb.mrid())
+    network_service.resolve_or_defer_reference(resolver.loop(cim), pb.loopMRID)
     for mrid in pb.endTerminalMRIDs:
         network_service.resolve_or_defer_reference(resolver.end_terminal(cim), mrid)
     for mrid in pb.endSubstationMRIDs:

@@ -6,6 +6,10 @@
 
 from __future__ import annotations
 import logging
+from typing import Optional
+
+from zepben.evolve import Switch, ConductingEquipment, SinglePhaseKind
+from zepben.evolve.services.network.tracing.queuing_functions import tracing_logger
 from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
 from zepben.evolve.services.network.tracing.traversals.queue import LifoQueue
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
@@ -21,9 +25,10 @@ def normally_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] =
     `phase` The Phase to test. If None tests all phases.
     Returns True if the equipment is open (de-energised), False otherwise
     """
-    try:
+    if isinstance(equip, Switch):
+        # noinspection PyUnresolvedReferences
         return not equip.normally_in_service or equip.is_normally_open(phase)
-    except AttributeError:
+    else:
         return not equip.normally_in_service
 
 
@@ -34,9 +39,10 @@ def currently_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] 
     `phase` The phase to test. If None tests all phases.
     Returns True if the equipment is open (de-energised), False otherwise
     """
-    try:
+    if isinstance(equip, Switch):
+        # noinspection PyUnresolvedReferences
         return not equip.in_service or equip.is_open(phase)
-    except AttributeError:
+    else:
         return not equip.in_service
 
 

@@ -8,15 +8,14 @@ from __future__ import annotations
 import warnings
 from asyncio import get_event_loop
 from itertools import chain
-from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable, Iterator
+from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable
 
 from dataclassy import dataclass
-from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
-from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainerRequest, \
+from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
     GetCurrentEquipmentForFeederRequest, GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest
 
-from zepben.evolve import NetworkService, Feeder, IdentifiedObject, BaseService, UnsupportedOperationException, CableInfo, OverheadWireInfo, AssetOwner, \
+from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, OverheadWireInfo, AssetOwner, \
     Organisation, Location, Meter, UsagePoint, OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, GeographicalRegion, Site, \
     SubGeographicalRegion, Substation, Terminal, AcLineSegment, Breaker, Disconnector, EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, \
     Fuse, Jumper, Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, Circuit, \
@@ -47,6 +46,16 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         check for mRIDs that were not found or retrieved but not added to service (this should not be the case unless you are processing things concurrently).
     """
 
+    CIM_IO = TypeVar('CIM_IO', bound=IdentifiedObject)
+    PB_IO = TypeVar('PB_IO')
+
+    __service: NetworkService
+    __network_hierarchy: Optional[NetworkHierarchy]
+
+    @property
+    def service(self) -> NetworkService:
+        return self.__service
+
     _stub: NetworkConsumerStub = None
 
     def __init__(self, channel=None, stub: NetworkConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
@@ -63,45 +72,10 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         else:
             self._stub = NetworkConsumerStub(channel)
 
-    async def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[IdentifiedObject]:
-        """
-        Retrieve the object with the given `mRID` and store the result in the `service`.
+        self.__service = NetworkService()
+        self.__network_hierarchy = None
 
-        Exceptions that occur during sending will be caught and passed to all error handlers that have been registered.
-
-        Parameters
-            - `service` - The :class:`NetworkService` to store fetched objects in.
-            - `mRID` - The mRID to retrieve.
-
-        Returns a :class:`GrpcResult` with a result of one of the following:
-            - When `GrpcResult.wasSuccessful`, the item found, accessible via `GrpcResult.value`.
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`. One of:
-                - :class:`NoSuchElementException` if the object could not be found.
-                - The gRPC error that occurred while retrieving the object
-        """
-        return await self._get_identified_object(service, mrid)
-
-    async def get_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
-        """
-        Retrieve the objects with the given [mRIDs] and store the results in the [service].
-
-        Exceptions that occur during processing will be caught and passed to all error handlers that have been registered.
-
-        Parameters
-            - `service` - The :class:`NetworkService` to store fetched objects in.
-            - `mRIDs` - The mRIDs to retrieve.
-
-        Returns a :class:`GrpcResult` with a result of one of the following:
-            - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
-              found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
-              `BaseService.add`).
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
-
-        Note the :class:`NetworkConsumerClient` warning in this case.
-        """
-        return await self._get_identified_objects(service, mrids)
-
-    async def get_equipment_for_container(self, service: NetworkService, container: Union[str, EquipmentContainer]) -> GrpcResult[MultiObjectResult]:
+    async def get_equipment_for_container(self, container: Union[str, EquipmentContainer]) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`EquipmentContainer` represented by `container`
        
@@ -119,9 +93,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
-        return await self._handle_multi_object_rpc(lambda: self._process_equipment_for_container(service, container))
+        return await self._get_equipment_for_container(container)
 
-    async def get_current_equipment_for_feeder(self, service: NetworkService, feeder: [str, Feeder]) -> GrpcResult[MultiObjectResult]:
+    async def get_current_equipment_for_feeder(self, feeder: [str, Feeder]) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the current :class:`Equipment` for the :class:`Feeder` represented by `feeder`
        
@@ -139,9 +113,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
-        return await self._handle_multi_object_rpc(lambda: self._process_current_equipment_for_feeder(service, feeder))
+        return await self._get_current_equipment_for_feeder(feeder)
 
-    async def get_equipment_for_restriction(self, service: NetworkService, restriction: [str, OperationalRestriction]) -> GrpcResult[MultiObjectResult]:
+    async def get_equipment_for_restriction(self, restriction: [str, OperationalRestriction]) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`OperationalRestriction` represented by `restriction`
 
@@ -159,9 +133,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
-        return await self._handle_multi_object_rpc(lambda: self._process_equipment_for_restriction(service, restriction))
+        return await self._get_equipment_for_restriction(restriction)
 
-    async def get_terminals_for_connectivity_node(self, service: NetworkService, node: [str, ConnectivityNode]) -> GrpcResult[MultiObjectResult]:
+    async def get_terminals_for_connectivity_node(self, node: [str, ConnectivityNode]) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Terminal`s for the :class:`ConnectivityNode` represented by `node`
 
@@ -179,9 +153,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
-        return await self._handle_multi_object_rpc(lambda: self._process_terminals_for_connectivity_node(service, node))
+        return await self._get_terminals_for_connectivity_node(node)
 
-    async def get_network_hierarchy(self, service: NetworkService) -> GrpcResult[NetworkHierarchy]:
+    async def get_network_hierarchy(self) -> GrpcResult[NetworkHierarchy]:
         """
         Retrieve the network hierarchy
 
@@ -190,9 +164,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Returns a simplified version of the network hierarchy that can be used to make further in-depth requests.
         """
-        return await self._get_network_hierarchy(service)
+        return await self._get_network_hierarchy()
 
-    async def get_feeder(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
+    async def get_feeder(self, mrid: str) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the feeder network for the specified `mrid` and store the results in the `service`.
 
@@ -210,9 +184,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
          * - :class:`ValueError` if the requested object was not found or was not a :class:`Feeder`.
         """
         warnings.warn('`get_feeder` is deprecated, prefer the more generic `get_equipment_container`', DeprecationWarning)
-        return await self._get_equipment_container(service, mrid, Feeder)
+        return await self._get_equipment_container(mrid, Feeder)
 
-    async def get_equipment_container(self, service: NetworkService, mrid: str, expected_class: type = EquipmentContainer) -> GrpcResult[MultiObjectResult]:
+    async def get_equipment_container(self, mrid: str, expected_class: type = EquipmentContainer) -> GrpcResult[MultiObjectResult]:
         """
         /***
          * Retrieve the equipment container network for the specified `mrid` and store the results in the `service`.
@@ -232,9 +206,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
          * - :class:`ValueError` if the requested object was not found or was of the wrong type.
          */
         """
-        return await self._get_equipment_container(service, mrid, expected_class)
+        return await self._get_equipment_container(mrid, expected_class)
 
-    async def get_equipment_for_loop(self, service: NetworkService, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
+    async def get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`Loop` represented by `mRID`
 
@@ -252,9 +226,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
-        return await self._get_equipment_for_loop(service, loop)
+        return await self._get_equipment_for_loop(loop)
 
-    async def get_all_loops(self, service: NetworkService) -> GrpcResult[MultiObjectResult]:
+    async def get_all_loops(self) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for all :class:`Loop` instances in `service`.
 
@@ -271,7 +245,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
-        return await self._get_all_loops(service)
+        return await self._get_all_loops()
 
     async def retrieve_network(self) -> GrpcResult[NetworkResult]:
         """
@@ -280,24 +254,29 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._retrieve_network()
 
-    async def _get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
-        async def rpc():
-            async for io, _ in self._process_identified_objects(service, [mrid]):
-                return io
-            else:
-                raise ValueError(f"No object with mRID {mrid} could be found.")
+    async def _get_equipment_for_container(self, container: Union[str, EquipmentContainer]) -> GrpcResult[MultiObjectResult]:
+        return await self._handle_multi_object_rpc(lambda: self._process_equipment_for_container(container))
 
-        return await self.try_rpc(rpc)
+    async def _get_equipment_for_containers(self, containers: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        return await self._handle_multi_object_rpc(lambda: self._process_equipment_for_containers(containers))
 
-    async def _get_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
-        return await self.try_rpc(lambda: self._process_extract_results(mrids, self._process_identified_objects(service, set(mrids))))
+    async def _get_current_equipment_for_feeder(self, feeder: [str, Feeder]) -> GrpcResult[MultiObjectResult]:
+        return await self._handle_multi_object_rpc(lambda: self._process_current_equipment_for_feeder(feeder))
 
-    async def _get_network_hierarchy(self, service: NetworkService) -> GrpcResult[NetworkHierarchy]:
-        return await self.try_rpc(lambda: self._handle_network_hierarchy(service))
+    async def _get_equipment_for_restriction(self, restriction: [str, OperationalRestriction]) -> GrpcResult[MultiObjectResult]:
+        return await self._handle_multi_object_rpc(lambda: self._process_equipment_for_restriction(restriction))
 
-    async def _get_equipment_container(self, service: NetworkService, mrid: str, expected_class: type = EquipmentContainer) -> GrpcResult[MultiObjectResult]:
+    async def _get_terminals_for_connectivity_node(self, node: [str, ConnectivityNode]) -> GrpcResult[MultiObjectResult]:
+        return await self._handle_multi_object_rpc(lambda: self._process_terminals_for_connectivity_node(node))
+
+    async def _get_network_hierarchy(self) -> GrpcResult[NetworkHierarchy]:
+        if self.__network_hierarchy:
+            return GrpcResult(self.__network_hierarchy)
+        return await self.try_rpc(lambda: self._handle_network_hierarchy())
+
+    async def _get_equipment_container(self, mrid: str, expected_class: type = EquipmentContainer) -> GrpcResult[MultiObjectResult]:
         async def get_additional(it: EquipmentContainer, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
-            result = await self.get_equipment_for_container(service, it)
+            result = await self._get_equipment_for_container(it)
 
             if result.was_failure:
                 return GrpcResult(result.thrown, result.was_error_handled)
@@ -305,31 +284,29 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             mor.objects.update(result.value.objects)
             return None
 
-        return await self._get_with_references(service, mrid, expected_class, get_additional)
+        return await self._get_with_references(mrid, expected_class, get_additional)
 
-    async def _get_equipment_for_loop(self, service: NetworkService, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
+    async def _get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
         mrid = loop.mrid if isinstance(loop, Loop) else loop
 
         async def get_additional(it: Loop, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
-            error = await self._resolve_references(service, mor)
+            mor.objects.update({cir.mrid: cir for cir in it.circuits})
+            mor.objects.update({sub.mrid: sub for sub in it.substations})
+            mor.objects.update({sub.mrid: sub for sub in it.energizing_substations})
 
-            if error:
-                return error
+            containers: Set[str] = set(map(lambda ec: ec.mrid, chain(it.circuits, it.substations, it.energizing_substations)))
+            result = await self._get_equipment_for_containers(containers)
+            if result.was_failure:
+                return GrpcResult(result.thrown, result.was_error_handled)
 
-            containers: Iterator[EquipmentContainer] = chain(it.circuits, it.substations, it.energizing_substations)
-            for container in containers:
-                result = await self.get_equipment_for_container(service, container.mrid)
-                if result.was_failure:
-                    return GrpcResult(result.thrown, result.was_error_handled)
-
-                mor.objects.update(result.value.objects)
+            mor.objects.update(result.value.objects)
 
             return None
 
-        return await self._get_with_references(service, mrid, Loop, get_additional)
+        return await self._get_with_references(mrid, Loop, get_additional)
 
-    async def _get_all_loops(self, service: NetworkService) -> GrpcResult[MultiObjectResult]:
-        response = await self.get_network_hierarchy(service)
+    async def _get_all_loops(self) -> GrpcResult[MultiObjectResult]:
+        response = await self._get_network_hierarchy()
         if response.was_failure:
             return GrpcResult(response.thrown, response.was_error_handled)
 
@@ -347,93 +324,88 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         for loop in hierarchy.loops.values():
             containers.update(chain(loop.circuits, loop.substations, loop.energizing_substations))
 
-        for container in containers:
-            result = await self.get_equipment_for_container(service, container.mrid)
-            if result.was_failure:
-                return GrpcResult(result.thrown, result.was_error_handled)
+        result = await self._get_equipment_for_containers(map(lambda it: it.mrid, containers))
+        if result.was_failure:
+            return GrpcResult(result.thrown, result.was_error_handled)
 
-            mor.objects.update(result.value.objects)
+        mor.objects.update(result.value.objects)
 
-        error = await self._resolve_references(service, mor)
+        error = await self._resolve_references(mor)
         if error:
             return error
 
         return GrpcResult(mor)
 
     async def _retrieve_network(self) -> GrpcResult[NetworkResult]:
-        service = NetworkService()
-        result = (await self._get_network_hierarchy(service)).throw_on_error()
+        result = (await self._get_network_hierarchy()).throw_on_error()
 
         hierarchy: NetworkHierarchy = result.result
         failed = set()
         for mrid in chain(hierarchy.substations, hierarchy.feeders, hierarchy.circuits):
-            result = await self._get_equipment_container(service, mrid, Feeder)
+            result = await self._get_equipment_container(mrid)
             if result.was_successful:
                 failed.update(result.result.failed)
 
-        return GrpcResult(NetworkResult(service, failed))
+        return GrpcResult(NetworkResult(self.service, failed))
 
-    async def _process_equipment_for_container(self, service: NetworkService, it: Union[str, EquipmentContainer]) -> AsyncGenerator[IdentifiedObject, None]:
+    async def _process_equipment_for_container(self, it: Union[str, EquipmentContainer]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, EquipmentContainer) else it
-        responses = self._stub.getEquipmentForContainer(GetEquipmentForContainerRequest(mrid=mrid))
+        responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), [mrid]))
         for response in responses:
-            yield _extract_identified_object(service, response.identifiedObject)
+            for nio in response.identifiedObjects:
+                yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
-    async def _process_current_equipment_for_feeder(self, service: NetworkService, it: Union[str, Feeder]) -> AsyncGenerator[IdentifiedObject, None]:
+    async def _process_equipment_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
+        responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), mrids))
+        for response in responses:
+            for nio in response.identifiedObjects:
+                yield self._extract_identified_object("network", nio, _nio_type_to_cim)
+
+    async def _process_current_equipment_for_feeder(self, it: Union[str, Feeder]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, Feeder) else it
         responses = self._stub.getCurrentEquipmentForFeeder(GetCurrentEquipmentForFeederRequest(mrid=mrid))
         for response in responses:
-            yield _extract_identified_object(service, response.identifiedObject)
+            for nio in response.identifiedObjects:
+                yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _process_equipment_for_restriction(self,
-                                                 service: NetworkService,
                                                  it: Union[str, OperationalRestriction]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, OperationalRestriction) else it
         responses = self._stub.getEquipmentForRestriction(GetEquipmentForRestrictionRequest(mrid=mrid))
         for response in responses:
-            yield _extract_identified_object(service, response.identifiedObject)
+            for nio in response.identifiedObjects:
+                yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _process_terminals_for_connectivity_node(self,
-                                                       service: NetworkService,
                                                        it: Union[str, ConnectivityNode]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, ConnectivityNode) else it
         responses = self._stub.getTerminalsForNode(GetTerminalsForNodeRequest(mrid=mrid))
         for response in responses:
             # noinspection PyUnresolvedReferences
-            yield service.get(response.terminal.mrid(), Terminal, default=None) or service.add_from_pb(response.terminal), response.terminal.mrid()
+            yield self.service.get(response.terminal.mrid(), Terminal, default=None) or self.service.add_from_pb(response.terminal), response.terminal.mrid()
 
-    async def _process_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
         if not mrids:
             return
 
-        to_fetch = set()
-        existing = set()
-        for mrid in mrids:
-            try:
-                io = service.get(mrid)
-                existing.add((io, io.mrid))
-            except KeyError:
-                to_fetch.add(mrid)
+        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids))
+        for response in responses:
+            for nio in response.identifiedObjects:
+                yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
-        if to_fetch:
-            responses = self._stub.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=to_fetch))
-            for response in responses:
-                yield _extract_identified_object(service, response.identifiedObject, check_presence=False)  # Already checked presence above
-
-        for io in existing:
-            yield io
-
-    async def _handle_network_hierarchy(self, service: NetworkService):
+    async def _handle_network_hierarchy(self):
         response = self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest())
 
-        return NetworkHierarchy(
-            _to_map(service, response.geographicalRegions, GeographicalRegion),
-            _to_map(service, response.subGeographicalRegions, SubGeographicalRegion),
-            _to_map(service, response.substations, Substation),
-            _to_map(service, response.feeders, Feeder),
-            _to_map(service, response.circuits, Circuit),
-            _to_map(service, response.loops, Loop)
+        self.__network_hierarchy = NetworkHierarchy(
+            self._to_map(response.geographicalRegions, GeographicalRegion),
+            self._to_map(response.subGeographicalRegions, SubGeographicalRegion),
+            self._to_map(response.substations, Substation),
+            self._to_map(response.feeders, Feeder),
+            self._to_map(response.circuits, Circuit),
+            self._to_map(response.loops, Loop)
         )
+
+        return self.__network_hierarchy
 
     async def _handle_multi_object_rpc(self, processor: Callable[[], AsyncGenerator[IdentifiedObject, None]]) -> GrpcResult[MultiObjectResult]:
         result = MultiObjectResult()
@@ -448,19 +420,23 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         return await self.try_rpc(rpc)
 
-    T = TypeVar('T', bound=IdentifiedObject)
-
     async def _get_with_references(self,
-                                   service: NetworkService,
                                    mrid: str,
-                                   expected_class: type(Generic[T]),
-                                   get_additional: Callable[[Generic[T], MultiObjectResult], Awaitable[Optional[GrpcResult[MultiObjectResult]]]]
+                                   expected_class: type(Generic[CIM_IO]),
+                                   get_additional: Callable[[Generic[CIM_IO], MultiObjectResult], Awaitable[Optional[GrpcResult[MultiObjectResult]]]]
                                    ) -> GrpcResult[MultiObjectResult]:
-        response = await self.get_identified_object(service, mrid)
-        if response.was_failure:
-            return GrpcResult(response.thrown, response.was_error_handled)
+        if not self.__network_hierarchy:
+            response = await self._get_network_hierarchy()
+            if response.was_failure:
+                return GrpcResult(response.thrown, response.was_error_handled)
 
-        io = response.value
+        io = self.service.get(mrid, default=None)
+        if not io:
+            response = await self._get_identified_object(mrid)
+            if response.was_failure:
+                return GrpcResult(response.thrown, response.was_error_handled)
+
+            io = response.value
 
         if not isinstance(io, expected_class):
             e = ValueError(f"Requested mrid {mrid} was not a {expected_class.__name__}, was {type(io).__name__}")
@@ -473,116 +449,83 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         if error:
             return error
 
-        error = await self._resolve_references(service, mor)
+        error = await self._resolve_references(mor)
         if error:
             return error
 
         return GrpcResult(mor)
 
-    async def _resolve_references(self, service: NetworkService, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
+    async def _resolve_references(self, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
         res = mor
         keep_processing = True
         while keep_processing:
             to_resolve = set()
             for obj in res.objects:
-                for ref in service.get_unresolved_references_from(obj):
+                for ref in self.service.get_unresolved_references_from(obj):
                     to_resolve.add(ref.to_mrid)
 
-            response = await self.get_identified_objects(service, to_resolve)
+            response = await self._get_identified_objects(to_resolve)
             if response.was_failure:
                 return GrpcResult(response.thrown, response.was_error_handled)
 
             res = response.value
 
             mor.objects.update(res.objects)
+            mor.failed.update(res.failed)
             keep_processing = bool(res.objects)
 
         return None
+
+    def _to_map(self, objects: Iterable[Generic[PB_IO]], class_: type(Generic[CIM_IO])) -> Dict[str, CIM_IO]:
+        result = {}
+
+        for pb in objects:
+            # noinspection PyUnresolvedReferences
+            cim = self.service.get(pb.mrid(), class_, None) or self.service.add_from_pb(pb)
+            result[cim.mrid] = cim
+
+        return result
 
 
 class SyncNetworkConsumerClient(NetworkConsumerClient):
     """Synchronised wrapper for :class:`NetworkConsumerClient`"""
 
-    def get_identified_object(self, service: NetworkService, mrid: str) -> GrpcResult[IdentifiedObject]:
-        return get_event_loop().run_until_complete(super().get_identified_objects(service, mrid))
+    def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject]:
+        return get_event_loop().run_until_complete(super().get_identified_objects(mrid))
 
-    def get_identified_objects(self, service: NetworkService, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_identified_objects(service, mrids))
+    def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_identified_objects(mrids))
 
-    def get_equipment_for_container(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_equipment_for_container(service, mrid))
+    def get_equipment_for_container(self, mrid: str) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_equipment_for_container(mrid))
 
-    def get_current_equipment_for_feeder(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_current_equipment_for_feeder(service, mrid))
+    def get_current_equipment_for_feeder(self, mrid: str) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_current_equipment_for_feeder(mrid))
 
-    def get_equipment_for_restriction(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_equipment_for_restriction(service, mrid))
+    def get_equipment_for_restriction(self, mrid: str) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_equipment_for_restriction(mrid))
 
-    def get_terminals_for_connectivity_node(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_terminals_for_connectivity_node(service, mrid))
+    def get_terminals_for_connectivity_node(self, mrid: str) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_terminals_for_connectivity_node(mrid))
 
-    def get_network_hierarchy(self, service: NetworkService):
-        return get_event_loop().run_until_complete(super().get_network_hierarchy(service))
+    def get_network_hierarchy(self):
+        return get_event_loop().run_until_complete(super().get_network_hierarchy())
 
-    def get_feeder(self, service: NetworkService, mrid: str) -> GrpcResult[MultiObjectResult]:
+    def get_feeder(self, mrid: str) -> GrpcResult[MultiObjectResult]:
         warnings.warn('`get_feeder` is deprecated, prefer the more generic `get_equipment_container`', DeprecationWarning)
-        return get_event_loop().run_until_complete(super().get_equipment_container(service, mrid, Feeder))
+        return get_event_loop().run_until_complete(super().get_equipment_container(mrid, Feeder))
 
-    def get_equipment_container(self, service: NetworkService, mrid: str, expected_class: type = EquipmentContainer) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_equipment_container(service, mrid, expected_class))
+    def get_equipment_container(self, mrid: str, expected_class: type = EquipmentContainer) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_equipment_container(mrid, expected_class))
 
-    def get_equipment_for_loop(self, service: NetworkService, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_equipment_for_loop(self, service, loop))
+    def get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_equipment_for_loop(self, loop))
 
-    def get_all_loops(self, service: NetworkService) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_all_loops(self, service))
+    def get_all_loops(self) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_all_loops(self))
 
     def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         return get_event_loop().run_until_complete(super().retrieve_network())
-
-
-T = TypeVar('T')
-U = TypeVar('U', bound=IdentifiedObject)
-
-
-def _to_map(service: NetworkService, objects: Iterable[Generic[T]], class_: type(Generic[U])) -> Dict[str, U]:
-    result = {}
-
-    for pb in objects:
-        # noinspection PyUnresolvedReferences
-        cim = service.get(pb.mrid(), class_, None) or service.add_from_pb(pb)
-        result[cim.mrid] = cim
-
-    return result
-
-
-def _extract_identified_object(service: BaseService, nio: NetworkIdentifiedObject, check_presence: bool = True) -> Tuple[Optional[IdentifiedObject], str]:
-    """
-    Add a :class:`NetworkIdentifiedObject` to the service. Will convert from protobuf to CIM type.
-
-    Parameters
-        - `service` - The :class:`NetworkService` to add the identified object to.
-        - `nio` - The :class:`NetworkIdentifiedObject` returned by the server.
-        - `check_presence` - Whether to check if `nio` already exists in the service and skip if it does.
-
-    Raises :class:`UnsupportedOperationException` if `nio` was invalid/unset.
-    """
-    io_type = nio.WhichOneof("identifiedObject")
-    if io_type:
-        cim_type = _nio_type_to_cim.get(io_type, None)
-        if cim_type is None:
-            raise UnsupportedOperationException(f"Identified object type '{io_type}' is not supported by the network service")
-
-        pb = getattr(nio, io_type)
-        if check_presence:
-            cim = service.get(pb.mrid(), cim_type, default=None)
-            if cim is not None:
-                return cim, cim.mrid
-
-        # noinspection PyUnresolvedReferences
-        return service.add_from_pb(pb), pb.mrid()
-    else:
-        raise UnsupportedOperationException(f"Received a NetworkIdentifiedObject where no field was set")
 
 
 _nio_type_to_cim = {
