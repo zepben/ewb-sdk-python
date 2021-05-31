@@ -3,341 +3,357 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import itertools
 import warnings
-from collections import Counter
-from typing import Dict, Iterable, List
-from unittest.mock import MagicMock, call
+from typing import Dict, Iterable, TypeVar, Generator, Callable, Optional
+from unittest.mock import MagicMock
 
+import grpc_testing
 import pytest
+# noinspection PyPackageRequirements
 from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
+from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
-from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainerRequest, GetCurrentEquipmentForFeederRequest, \
-    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, GetNetworkHierarchyRequest
-from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainerResponse, GetCurrentEquipmentForFeederResponse, \
+from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetCurrentEquipmentForFeederRequest, \
+    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest
+from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, GetCurrentEquipmentForFeederResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
 from test.pb_creators import networkidentifiedobjects, aclinesegment
 from test.streaming.get.data.hierarchy import create_hierarchy_network
 from test.streaming.get.data.loops import create_loops_network
+from test.streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
     Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
     SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException
 
+PBRequest = TypeVar('PBRequest')
+GrpcResponse = TypeVar('GrpcResponse')
 
-# TODO: Test behaviour of "failures" with get_feeder
-
-def test_constructor():
-    NetworkConsumerClient(channel=MagicMock())
-    NetworkConsumerClient(stub=MagicMock())
-
-    try:
-        NetworkConsumerClient()
-        raise AssertionError("Should have thrown")
-    except ValueError as e:
-        assert str(e) == "Must provide either a channel or a stub"
-    except Exception as e:
-        raise e
-
-
-@pytest.mark.asyncio
-@given(networkidentifiedobjects())
-@settings(max_examples=1, phases=(Phase.explicit, Phase.reuse, Phase.generate))
-async def test_retrieve_supported_types(network_identified_objects):
-    network_service = NetworkService()
-    for nio in network_identified_objects:
-        response = GetIdentifiedObjectsResponse(identifiedObject=nio)
-        stub = MagicMock(**{"getIdentifiedObjects.return_value": [response]})
-        client = NetworkConsumerClient(stub=stub)
-        pbio = getattr(nio, nio.WhichOneof("identifiedObject"), None)
-        result = (await client.get_identified_objects(network_service, [pbio.mrid()])).throw_on_error()
-        assert result.was_successful
-        if pbio.mrid():
-            assert result.result.objects[pbio.mrid()] is not None, f"type: {nio.WhichOneof('identifiedObject')} mrid: {pbio.mrid()}"
-            assert network_service.get(pbio.mrid()) is result.result.objects[pbio.mrid()]
-        else:
-            assert pbio.mrid() in result.result.failed
-
-
-@pytest.mark.asyncio
-@given(aclinesegment())
-async def test_get_identified_object(acls):
-    network_service = NetworkService()
-    nio = NetworkIdentifiedObject(acLineSegment=acls)
-    response = GetIdentifiedObjectsResponse(identifiedObject=nio)
-    stub = MagicMock(**{"getIdentifiedObjects.return_value": [response]})
-    client = NetworkConsumerClient(stub=stub)
-    pbio = getattr(nio, nio.WhichOneof("identifiedObject"), None)
-    result = await client.get_identified_object(network_service, pbio.mrid())
-    assert result.was_successful
-    assert result.result is not None
-    assert result.result.mrid == pbio.mrid()
-
-    stub = MagicMock(**{"getIdentifiedObjects.return_value": []})
-    client = NetworkConsumerClient(stub=stub)
-    result = await client.get_identified_object(network_service, "fakemrid")
-    assert result.was_failure
-    assert isinstance(result.thrown, ValueError)
-    assert str(result.thrown) == "No object with mRID fakemrid could be found."
-
-
-# noinspection PyUnresolvedReferences
-@pytest.mark.asyncio
-async def test_get_identified_objects():
-    network_service = NetworkService()
-    nio1 = NetworkIdentifiedObject(acLineSegment=AcLineSegment(mrid="acls1").to_pb())
-    nio2 = NetworkIdentifiedObject(acLineSegment=AcLineSegment(mrid="acls2").to_pb())
-    response1 = GetIdentifiedObjectsResponse(identifiedObject=nio1)
-    response2 = GetIdentifiedObjectsResponse(identifiedObject=nio2)
-    stub = MagicMock(**{"getIdentifiedObjects.return_value": [response1, response2]})
-    client = NetworkConsumerClient(stub=stub)
-    result = await client.get_identified_objects(network_service, ["acls1", "acls2", "acls3"])
-    assert result.was_successful
-    assert result.value.objects.keys() == {"acls1", "acls2"}
-    assert result.value.failed == {"acls3"}
-
-
-@pytest.mark.asyncio
-async def test_get_network_hierarchy(feeder_network: NetworkService):
-    expected_ns = create_hierarchy_network()
-    ns = NetworkService()
-    stub = MagicMock(**{"getNetworkHierarchy.return_value": _create_hierarchy_response(expected_ns)})
-    client = NetworkConsumerClient(stub=stub)
-
-    response = await client.get_network_hierarchy(ns)
-    stub.assert_has_calls([call.getNetworkHierarchy(GetNetworkHierarchyRequest())])
-
-    assert response.was_successful
-    assert response.value.geographical_regions.keys() == set(map(lambda it: it.mrid, expected_ns.objects(GeographicalRegion)))
-
-
-@pytest.mark.asyncio
-async def test_get_network_hierarchy_with_existing_items(feeder_network: NetworkService):
-    expected_ns = create_hierarchy_network()
-    ns = NetworkService()
-    ns.add(expected_ns["g1"])
-    stub = MagicMock(**{"getNetworkHierarchy.return_value": _create_hierarchy_response(expected_ns)})
-    client = NetworkConsumerClient(stub=stub)
-
-    response = await client.get_network_hierarchy(ns)
-    stub.assert_has_calls([call.getNetworkHierarchy(GetNetworkHierarchyRequest())])
-
-    assert response.was_successful
-    assert response.value.geographical_regions.keys() == set(map(lambda it: it.mrid, expected_ns.objects(GeographicalRegion)))
-
 
-@pytest.mark.asyncio
-async def test_retrieve_network():
-    pass
-
-
-@pytest.mark.asyncio
-async def test_get_feeder_deprecated(feeder_network: NetworkService):
-    client = NetworkConsumerClient(stub=MagicMock())
-    with pytest.warns(DeprecationWarning):
-        warnings.warn("`get_feeder` is deprecated, prefer the more generic `get_equipment_container`")
-        # noinspection PyDeprecation
-        await client.get_feeder(NetworkService(), "feeder")
-
-
-@pytest.mark.asyncio
-async def test_get_feeder_as_equipment_container(feeder_network: NetworkService):
-    ns = NetworkService()
-    feeder_mrid = "f001"
-
-    def create_feeder_response(request: GetIdentifiedObjectsRequest):
-        for mrid in request.mrids:
-            yield _response_of(feeder_network.get(mrid), GetIdentifiedObjectsResponse)
-
-    stub = MagicMock(**{"getIdentifiedObjects.side_effect": create_feeder_response,
-                        "getEquipmentForContainer.side_effect": _create_container_equipment_func(feeder_network)})
-    client = NetworkConsumerClient(stub=stub)
-    response = await client.get_equipment_container(ns, feeder_mrid, Feeder)
-    stub.assert_has_calls([call.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=["f001"]))])
-    assert stub.getIdentifiedObjects.call_count == 3
-    assert len(response.result.objects) == ns.len_of() == 21
-    assert response.was_successful
-    assert feeder_mrid in response.result.objects
-    for io in response.result.objects.values():
-        assert ns.get(io.mrid) == io
-
-    for io in ns.objects():
-        assert response.result.objects[io.mrid] == io
-    assert len(response.result.failed) == 0
-
-
-@pytest.mark.asyncio
-async def test_get_equipment_container_validates_type(feeder_network: NetworkService):
-    ns = NetworkService()
-    feeder_mrid = "f001"
-
-    stub = MagicMock(**{"getIdentifiedObjects.side_effect": _create_objects_response(feeder_network, [feeder_mrid]),
-                        "getEquipmentForContainer.side_effect": _create_container_equipment_func(feeder_network)})
-
-    client = NetworkConsumerClient(stub=stub)
-
-    response = await client.get_equipment_container(ns, feeder_mrid, Circuit)
-
-    stub.assert_has_calls([call.getIdentifiedObjects(GetIdentifiedObjectsRequest(mrids=["f001"]))])
-    assert response.was_failure
-    assert isinstance(response.thrown, ValueError)
-    assert str(response.thrown) == "Requested mrid f001 was not a Circuit, was Feeder"
-
-
-@pytest.mark.asyncio
-async def test_get_equipment_for_container(feeder_network: NetworkService):
-    ns = NetworkService()
-    feeder_mrid = "f001"
-
-    stub = MagicMock(**{"getEquipmentForContainer.side_effect": _create_container_equipment_func(feeder_network)})
-    client = NetworkConsumerClient(stub=stub)
-    objects = await client.get_equipment_for_container(ns, feeder_mrid)
-    assert len(objects.result.objects) == ns.len_of(Equipment) == 3
-    _assert_contains_mrids(ns, "fsp", "c2", "tx")
-
-
-@pytest.mark.asyncio
-async def test_get_current_equipment_for_feeder(feeder_with_current: NetworkService):
-    ns = NetworkService()
-    feeder_mrid = "f001"
-    stub = MagicMock(**{"getEquipmentForContainer.side_effect": _create_container_equipment_func(feeder_with_current),
-                        "getCurrentEquipmentForFeeder.side_effect": _create_container_current_equipment_func(feeder_with_current)})
-    client = NetworkConsumerClient(stub=stub)
-    objects = await client.get_equipment_for_container(ns, feeder_mrid)
-    assert len(objects.result.objects) == ns.len_of(Equipment) == 7
-    _assert_contains_mrids(ns, "fsp", "c2", "tx", "c3", "sw", "c4", "tx2")
-    ns2 = NetworkService()
-    objects = await client.get_current_equipment_for_feeder(ns2, feeder_mrid)
-    assert len(objects.result.objects) == ns2.len_of(Equipment) == 5
-    _assert_contains_mrids(ns2, "fsp", "c2", "tx", "c3", "sw")
-
-
-@pytest.mark.asyncio
-async def test_get_equipment_for_operational_restriction(operational_restriction_with_equipment: NetworkService):
-    ns = NetworkService()
-    or_mrid = "or1"
-    stub = MagicMock(**{"getEquipmentForRestriction.side_effect": _create_restriction_equipment_func(operational_restriction_with_equipment)})
-    client = NetworkConsumerClient(stub=stub)
-    objects = await client.get_equipment_for_restriction(ns, or_mrid)
-    assert len(objects.result.objects) == ns.len_of(Equipment) == 3
-    _assert_contains_mrids(ns, "fsp", "c2", "tx")
-
-
-@pytest.mark.asyncio
-async def test_get_terminals_for_connectivity_node(single_connectivitynode_network: NetworkService):
-    ns = NetworkService()
-    cn_mrid = "cn1"
-    cn1 = single_connectivitynode_network.get(cn_mrid, ConnectivityNode)
-
-    def create_cn_response(request: GetTerminalsForNodeRequest):
-        cn = single_connectivitynode_network.get(request.mrid, ConnectivityNode)
-        for terminal in cn.terminals:
-            yield GetTerminalsForNodeResponse(terminal=terminal.to_pb())
-
-    stub = MagicMock(**{"getTerminalsForNode.side_effect": create_cn_response})
-    client = NetworkConsumerClient(stub=stub)
-    response = await client.get_terminals_for_connectivity_node(ns, cn_mrid)
-    assert len(response.result.objects) == ns.len_of(Terminal) == 3
-    for term in cn1:
-        assert ns.get(term.mrid)
-
-
-@pytest.mark.asyncio
-async def test_get_equipment_for_loop():
-    ns = create_loops_network()
-    fetch_ns = NetworkService()
-
-    loop = "loop1"
-    loop_containers = ["cir1", "cir2", "cir3", "sub1", "sub2", "sub3"]
-    assoc_objs = [["loop2", "fdr1", "fdr2", "fdr3", "cir4"], ["sub4"], ["fdr4"], ["cir1-j-t", "cir2-j-t", "cir3-j-t", "sub1-j-t", "sub2-j-t", "sub3-j-t"]]
-    valid_objects = [loop] + loop_containers + list(itertools.chain.from_iterable(assoc_objs))
-
-    stub = MagicMock(**{"getEquipmentForContainer.side_effect": _create_containers_response(ns, loop_containers),
-                        "getIdentifiedObjects.side_effect": _create_objects_response(ns, valid_objects)})
-    client = NetworkConsumerClient(stub=stub)
-    response = await client.get_equipment_for_loop(fetch_ns, loop)
-
-    assert response.was_successful
-
-    expected_calls = [call.getIdentifiedObjects(MatchRequest(GetIdentifiedObjectsRequest, [loop])),
-                      call.getIdentifiedObjects(MatchRequest(GetIdentifiedObjectsRequest, loop_containers)),
-                      call.getIdentifiedObjects(MatchRequest(GetIdentifiedObjectsRequest, assoc_objs[0])),
-                      call.getIdentifiedObjects(MatchRequest(GetIdentifiedObjectsRequest, assoc_objs[1])),
-                      call.getIdentifiedObjects(MatchRequest(GetIdentifiedObjectsRequest, assoc_objs[2]))]
-    matcher = MatchRequest(GetEquipmentForContainerRequest, loop_containers)
-    for _ in loop_containers:
-        expected_calls.append(call.getEquipmentForContainer(matcher))
-    expected_calls.append(call.getIdentifiedObjects(MatchRequest(GetIdentifiedObjectsRequest, assoc_objs[3])))
-
-    stub.assert_has_calls(expected_calls)
-    assert not matcher.expected_mrids
-
-
-@pytest.mark.asyncio
-async def test_get_all_loop():
-    ns = create_loops_network()
-    fetch_ns = NetworkService()
-
-    containers = ["cir1", "cir2", "cir3", "cir4", "sub1", "sub2", "sub3", "sub4"]
-    assoc_objs = ["cir1-j-t", "cir2-j-t", "cir3-j-t", "cir4-j-t", "sub1-j-t", "sub2-j-t", "sub3-j-t", "sub4-j-t"]
-
-    stub = MagicMock(**{"getNetworkHierarchy.return_value": _create_hierarchy_response(ns),
-                        "getEquipmentForContainer.side_effect": _create_containers_response(ns, containers),
-                        "getIdentifiedObjects.side_effect": _create_objects_response(ns, assoc_objs)})
-    client = NetworkConsumerClient(stub=stub)
-    response = await client.get_all_loops(fetch_ns)
-
-    assert response.was_successful
-
-    expected_calls = [call.getNetworkHierarchy(GetNetworkHierarchyRequest())]
-    matcher = MatchRequest(GetEquipmentForContainerRequest, containers)
-    for _ in containers:
-        expected_calls.append(call.getEquipmentForContainer(matcher))
-    expected_calls.append(call.getIdentifiedObjects(MatchRequest(GetIdentifiedObjectsRequest, assoc_objs)))
-
-    stub.assert_has_calls(expected_calls)
-    assert not matcher.expected_mrids
-
-
-@pytest.mark.asyncio
-async def test_existing_equipment_used_for_repeats(feeder_network: NetworkService):
-    ns = NetworkService()
-    ns.add(feeder_network["tx"])
-    feeder_mrid = "f001"
-
-    stub = MagicMock(**{"getEquipmentForContainer.side_effect": _create_container_equipment_func(feeder_network)})
-    client = NetworkConsumerClient(stub=stub)
-
-    response = await client.get_equipment_for_container(ns, feeder_mrid)
-
-    assert response.was_successful
-    assert ns["tx"] is feeder_network["tx"]
-    assert ns["fsp"] is not feeder_network["fsp"]
-
-
-@pytest.mark.asyncio
-async def test_unknown_types_are_reported(feeder_network: NetworkService):
-    ns = NetworkService()
-    ns.add(feeder_network["tx"])
-    feeder_mrid = "f001"
-
-    def responses(_):
-        nio = Any()
-        # noinspection PyUnresolvedReferences
-        nio.Pack(Diagram().to_pb())
-        it = GetIdentifiedObjectsResponse(identifiedObject=NetworkIdentifiedObject(other=nio))
-        yield GetIdentifiedObjectsResponse(identifiedObject=NetworkIdentifiedObject(other=nio))
-
-    stub = MagicMock(**{"getEquipmentForContainer.side_effect": responses})
-    client = NetworkConsumerClient(stub=stub)
-
-    response = await client.get_equipment_for_container(ns, feeder_mrid)
-
-    assert response.was_failure
-    assert isinstance(response.thrown, UnsupportedOperationException)
-    assert str(response.thrown) == "Identified object type 'other' is not supported by the network service"
+class TestNetworkConsumer:
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.channel = grpc_testing.channel(nc_pb2.DESCRIPTOR.services_by_name.values(), grpc_testing.strict_real_time())
+        self.mock_server = MockServer(self.channel, nc_pb2.DESCRIPTOR.services_by_name['NetworkConsumer'])
+        self.client = NetworkConsumerClient(channel=self.channel)
+        self.service = self.client.service
+
+    def test_constructor(self):
+        NetworkConsumerClient(channel=MagicMock())
+        NetworkConsumerClient(stub=MagicMock())
+
+        with pytest.raises(ValueError, match="Must provide either a channel or a stub"):
+            NetworkConsumerClient()
+
+    @pytest.mark.asyncio
+    @given(networkidentifiedobjects())
+    @settings(max_examples=1, phases=(Phase.explicit, Phase.reuse, Phase.generate))
+    async def test_get_identified_objects_supported_types(self, network_identified_objects):
+        requested = []
+        for nio in network_identified_objects:
+            mrid = getattr(nio, nio.WhichOneof("identifiedObject"), None).mrid()
+            requested.append(mrid)
+
+            async def client_test():
+                mor = (await self.client.get_identified_objects([mrid])).throw_on_error().value
+
+                assert mrid in self.service, f"type: {nio.WhichOneof('identifiedObject')} mrid: {mrid}"
+                assert mor.objects[mrid] is not None, f"type: {nio.WhichOneof('identifiedObject')} mrid: {mrid}"
+                assert self.service[mrid] is mor.objects[mrid], f"type: {nio.WhichOneof('identifiedObject')} mrid: {mrid}"
+
+            response = GetIdentifiedObjectsResponse(identifiedObjects=[nio])
+            await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
+
+        assert len(requested) == len(network_identified_objects) == self.service.len_of()
+
+    @pytest.mark.asyncio
+    async def test_get_identified_objects_not_found(self):
+        mrid = "unknown"
+
+        async def client_test():
+            mor = (await self.client.get_identified_objects([mrid])).throw_on_error().value
+
+            assert mor.objects == {}
+            assert mor.failed == {mrid}
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
+
+    # noinspection PyUnresolvedReferences
+    @pytest.mark.asyncio
+    async def test_get_identified_objects_partial_not_found(self):
+        async def client_test():
+            mor = (await self.client.get_identified_objects(["acls1", "acls2", "acls3"])).throw_on_error().value
+
+            assert mor.objects.keys() == {"acls1", "acls2"}
+            assert mor.failed == {"acls3"}
+
+        response1 = GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(acLineSegment=AcLineSegment(mrid="acls1").to_pb())])
+        response2 = GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(acLineSegment=AcLineSegment(mrid="acls2").to_pb())])
+
+        await self.mock_server.validate(client_test,
+                                        [StreamGrpc('getIdentifiedObjects', stream_from_fixed(["acls1", "acls2", "acls3"], [response1, response2]))])
+
+    @pytest.mark.asyncio
+    @given(aclinesegment())
+    async def test_get_identified_object(self, acls):
+        mrid = acls.mrid()
+
+        async def client_test():
+            io = (await self.client.get_identified_object(mrid)).throw_on_error().value
+
+            assert mrid in self.service
+            assert io is not None
+            assert self.service[mrid] is io
+
+        response = GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(acLineSegment=acls)])
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
+
+    @pytest.mark.asyncio
+    async def test_get_identified_object_not_found(self):
+        mrid = "unknown"
+
+        async def client_test():
+            result = (await self.client.get_identified_object(mrid))
+
+            assert result.was_failure
+            assert isinstance(result.thrown, ValueError)
+            assert str(result.thrown) == f"No object with mRID {mrid} could be found."
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
+
+    @pytest.mark.asyncio
+    async def test_get_network_hierarchy(self):
+        expected_ns = create_hierarchy_network()
+
+        async def client_test():
+            hierarchy = (await self.client.get_network_hierarchy()).throw_on_error().value
+
+            _validate_hierarchy(hierarchy, expected_ns)
+            _validate_hierarchy(hierarchy, self.service)
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(expected_ns)))])
+
+    @pytest.mark.asyncio
+    async def test_get_network_hierarchy_is_cached(self):
+        expected_ns = create_hierarchy_network()
+
+        async def client_test():
+            hierarchy1 = (await self.client.get_network_hierarchy()).throw_on_error().value
+            hierarchy2 = (await self.client.get_network_hierarchy()).throw_on_error().value
+
+            assert hierarchy1 is hierarchy2
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(expected_ns)))])
+
+    @pytest.mark.asyncio
+    async def test_get_network_hierarchy_with_existing_items(self):
+        expected_ns = create_hierarchy_network()
+        self.service.add(expected_ns["g1"])
+
+        async def client_test():
+            hierarchy = (await self.client.get_network_hierarchy()).throw_on_error().value
+
+            assert hierarchy.geographical_regions["g1"] is expected_ns["g1"]
+            assert hierarchy.geographical_regions["g2"] is not expected_ns["g2"]
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(expected_ns)))])
+
+    @pytest.mark.asyncio
+    async def test_retrieve_network(self):
+        ns = create_loops_network()
+        containers = ["cir1", "cir2", "cir3", "cir4", "sub1", "sub2", "sub3", "sub4", "fdr1", "fdr2", "fdr3", "fdr4"]
+        assoc_objs = [
+            "cir1-j-t", "cir2-j-t", "cir3-j-t", "cir4-j-t",
+            "sub1-j-t", "sub2-j-t", "sub3-j-t", "sub4-j-t",
+            "fdr1-j-t", "fdr2-j-t", "fdr3-j-t", "fdr4-j-t"
+        ]
+
+        async def client_test():
+            (await self.client.retrieve_network()).throw_on_error()
+
+            assert self.service.len_of() == ns.len_of()
+            for io in self.service.objects():
+                assert io.mrid in ns
+
+        interactions = [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns)))]
+
+        for _ in ns.objects(EquipmentContainer):
+            interactions.extend([
+                StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, containers)]),
+                StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
+            ])
+
+        await self.mock_server.validate(client_test, interactions)
+
+    @pytest.mark.asyncio
+    async def test_get_feeder_deprecated(self):
+        client = NetworkConsumerClient(stub=MagicMock())
+        with pytest.warns(DeprecationWarning):
+            warnings.warn("`get_feeder` is deprecated, prefer the more generic `get_equipment_container`")
+            # noinspection PyDeprecation
+            await client.get_feeder("feeder")
+
+    @pytest.mark.asyncio
+    async def test_get_feeder_as_equipment_container(self, feeder_network: NetworkService):
+        feeder_mrid = "f001"
+
+        async def client_test():
+            mor = (await self.client.get_equipment_container(feeder_mrid, Feeder)).throw_on_error().value
+
+            assert self.service.len_of() == 21
+            assert len(mor.objects) == 20  # we do not include the substation in the results
+            assert feeder_mrid in mor.objects
+            for io in mor.objects.values():
+                assert self.service.get(io.mrid) == io
+
+            for io in self.service.objects():
+                if not isinstance(io, Substation):
+                    assert mor.objects[io.mrid] == io
+            assert len(mor.failed) == 0
+
+        object_responses = _create_object_responses(feeder_network)
+
+        await self.mock_server.validate(client_test,
+                                        [
+                                            UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network))),
+                                            StreamGrpc('getEquipmentForContainers', [_create_container_responses(feeder_network)]),
+                                            StreamGrpc('getIdentifiedObjects', [object_responses, object_responses])
+                                        ])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_container_validates_type(self, feeder_network: NetworkService):
+        feeder_mrid = "f001"
+
+        async def client_test():
+            response = (await self.client.get_equipment_container(feeder_mrid, Circuit))
+
+            assert response.was_failure
+            assert isinstance(response.thrown, ValueError)
+            assert str(response.thrown) == f"Requested mrid {feeder_mrid} was not a Circuit, was Feeder"
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network)))])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_for_container(self, feeder_network: NetworkService):
+        async def client_test():
+            mor = (await self.client.get_equipment_for_container("f001")).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 3
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
+
+    @pytest.mark.asyncio
+    async def test_get_current_equipment_for_feeder(self, feeder_with_current: NetworkService):
+        async def client_test():
+            mor = (await self.client.get_current_equipment_for_feeder("f001")).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 5
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx", "c3", "sw")
+
+        await self.mock_server.validate(client_test,
+                                        [StreamGrpc('getCurrentEquipmentForFeeder', [_create_container_current_equipment_responses(feeder_with_current)])])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_for_operational_restriction(self, operational_restriction_with_equipment: NetworkService):
+        async def client_test():
+            mor = (await self.client.get_equipment_for_restriction("or1")).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 3
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
+
+        await self.mock_server.validate(client_test,
+                                        [StreamGrpc('getEquipmentForRestriction',
+                                                    [_create_restriction_equipment_responses(operational_restriction_with_equipment)])])
+
+    @pytest.mark.asyncio
+    async def test_get_terminals_for_connectivity_node(self, single_connectivitynode_network: NetworkService):
+        cn_mrid = "cn1"
+        cn1 = single_connectivitynode_network.get(cn_mrid, ConnectivityNode)
+
+        async def client_test():
+            mor = (await self.client.get_terminals_for_connectivity_node(cn_mrid)).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Terminal) == 3
+            for term in cn1:
+                assert self.service[term.mrid]
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getTerminalsForNode', [_create_cn_responses(single_connectivitynode_network)])])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_for_loop(self):
+        ns = create_loops_network()
+        loop = "loop1"
+        loop_containers = ["cir1", "cir2", "cir3", "sub1", "sub2", "sub3"]
+        hierarchy_objs = ["loop2", "fdr1", "fdr2", "fdr3", "cir4", "sub4", "fdr4"]
+        container_equip = ["cir1-j", "cir2-j", "cir3-j", "sub1-j", "sub2-j", "sub3-j"]
+        assoc_objs = ["cir1-j-t", "cir2-j-t", "cir3-j-t", "sub1-j-t", "sub2-j-t", "sub3-j-t"]
+
+        async def client_test():
+            mor = (await self.client.get_equipment_for_loop(loop)).throw_on_error().value
+
+            assert self.service.len_of() == len([loop] + loop_containers + hierarchy_objs + container_equip + assoc_objs)
+            assert len(mor.objects) == len([loop] + loop_containers + container_equip + assoc_objs)
+
+        await self.mock_server.validate(client_test,
+                                        [
+                                            UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns))),
+                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, loop_containers)]),
+                                            StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
+                                        ])
+
+    @pytest.mark.asyncio
+    async def test_get_all_loops(self):
+        ns = create_loops_network()
+        loops = ["loop1", "loop2"]
+        loop_containers = ["cir1", "cir2", "cir3", "cir4", "sub1", "sub2", "sub3", "sub4"]
+        hierarchy_objs = ["fdr1", "fdr2", "fdr3", "fdr4"]
+        container_equip = ["cir1-j", "cir2-j", "cir3-j", "cir4-j", "sub1-j", "sub2-j", "sub3-j", "sub4-j"]
+        assoc_objs = ["cir1-j-t", "cir2-j-t", "cir3-j-t", "cir4-j-t", "sub1-j-t", "sub2-j-t", "sub3-j-t", "sub4-j-t"]
+
+        async def client_test():
+            mor = (await self.client.get_all_loops()).throw_on_error().value
+
+            assert self.service.len_of() == len(mor.objects) == len(loops + loop_containers + hierarchy_objs + container_equip + assoc_objs)
+
+        await self.mock_server.validate(client_test,
+                                        [
+                                            UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns))),
+                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, loop_containers)]),
+                                            StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
+                                        ])
+
+    @pytest.mark.asyncio
+    async def test_existing_equipment_used_for_repeats(self, feeder_network: NetworkService):
+        self.service.add(feeder_network["tx"])
+
+        async def client_test():
+            (await self.client.get_equipment_for_container("f001")).throw_on_error()
+
+            assert self.service["tx"] is feeder_network["tx"]
+            assert self.service["fsp"] is not feeder_network["fsp"]
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
+
+    @pytest.mark.asyncio
+    async def test_unknown_types_are_reported(self):
+        async def client_test():
+            result = await self.client.get_equipment_for_container("f001")
+
+            assert result.was_failure
+            assert isinstance(result.thrown, UnsupportedOperationException)
+            assert str(result.thrown) == "Identified object type 'other' is not supported by the network service"
+
+        def responses(_):
+            nio = Any()
+            # noinspection PyUnresolvedReferences
+            nio.Pack(Diagram().to_pb())
+            yield GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(other=nio)])
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [responses])])
 
 
 def _assert_contains_mrids(service: BaseService, *mrids):
@@ -346,7 +362,7 @@ def _assert_contains_mrids(service: BaseService, *mrids):
 
 
 def _response_of(io: IdentifiedObject, response_type):
-    return response_type(identifiedObject=_to_network_identified_object(io))
+    return response_type(identifiedObjects=[_to_network_identified_object(io)])
 
 
 # noinspection PyUnresolvedReferences
@@ -394,31 +410,65 @@ def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
     return nio
 
 
-def _create_container_equipment_func(network: NetworkService):
-    def create_equipment_response(request: GetEquipmentForContainerRequest):
-        ec = network.get(request.mrid, EquipmentContainer)
-        for equip in ec.equipment:
-            yield _response_of(equip, GetEquipmentForContainerResponse)
+def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
+    -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
+    valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
-    return create_equipment_response
+    def responses(request: GetEquipmentForContainersRequest):
+        for mrid in request.mrids:
+            ec = valid[mrid]
+            if ec:
+                for equip in ec.equipment:
+                    yield _response_of(equip, GetEquipmentForContainersResponse)
+            else:
+                raise AssertionError(f"Requested unexpected container {mrid}.")
 
-
-def _create_restriction_equipment_func(network: NetworkService):
-    def create_equipment_response(request: GetEquipmentForRestrictionRequest):
-        or1 = network.get(request.mrid, OperationalRestriction)
-        for equip in or1.equipment:
-            yield _response_of(equip, GetEquipmentForRestrictionResponse)
-
-    return create_equipment_response
+    return responses
 
 
-def _create_container_current_equipment_func(network: NetworkService):
-    def create_equipment_response(request: GetCurrentEquipmentForFeederRequest):
-        ec = network.get(request.mrid, Feeder)
-        for equip in ec.current_equipment:
-            yield _response_of(equip, GetCurrentEquipmentForFeederResponse)
+def _create_restriction_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
+    -> Callable[[GetEquipmentForRestrictionRequest], Generator[GetEquipmentForRestrictionResponse, None, None]]:
+    valid: Dict[str, OperationalRestriction] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
-    return create_equipment_response
+    def responses(request: GetEquipmentForRestrictionRequest) -> Generator[GetEquipmentForRestrictionResponse, None, None]:
+        or1 = valid[request.mrid]
+        if or1:
+            for equip in or1.equipment:
+                yield _response_of(equip, GetEquipmentForRestrictionResponse)
+        else:
+            raise AssertionError(f"Requested unexpected restriction {request.mrid}.")
+
+    return responses
+
+
+def _create_cn_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
+    -> Callable[[GetTerminalsForNodeRequest], Generator[GetTerminalsForNodeResponse, None, None]]:
+    valid: Dict[str, ConnectivityNode] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
+
+    def responses(request: GetTerminalsForNodeRequest) -> Generator[GetTerminalsForNodeResponse, None, None]:
+        cn = valid[request.mrid]
+        if cn:
+            for terminal in cn.terminals:
+                yield GetTerminalsForNodeResponse(terminal=terminal.to_pb())
+        else:
+            raise AssertionError(f"Requested unexpected cn {request.mrid}.")
+
+    return responses
+
+
+def _create_container_current_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
+    -> Callable[[GetCurrentEquipmentForFeederRequest], Generator[GetCurrentEquipmentForFeederResponse, None, None]]:
+    valid: Dict[str, Feeder] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
+
+    def responses(request: GetCurrentEquipmentForFeederRequest) -> Generator[GetCurrentEquipmentForFeederResponse, None, None]:
+        fdr = valid[request.mrid]
+        if fdr:
+            for equip in fdr.current_equipment:
+                yield _response_of(equip, GetCurrentEquipmentForFeederResponse)
+        else:
+            raise AssertionError(f"Requested unexpected feeder {request.mrid}.")
+
+    return responses
 
 
 # noinspection PyUnresolvedReferences
@@ -433,12 +483,22 @@ def _create_hierarchy_response(service: NetworkService) -> GetNetworkHierarchyRe
     )
 
 
-def _create_objects_response(ns: NetworkService, mrids: Iterable[str]):
-    valid: Dict[str, IdentifiedObject] = {mrid: ns[mrid] for mrid in mrids}
+def _validate_hierarchy(hierarchy, service):
+    assert hierarchy.geographical_regions.keys() == {it.mrid for it in service.objects(GeographicalRegion)}
+    assert hierarchy.sub_geographical_regions.keys() == {it.mrid for it in service.objects(SubGeographicalRegion)}
+    assert hierarchy.substations.keys() == {it.mrid for it in service.objects(Substation)}
+    assert hierarchy.feeders.keys() == {it.mrid for it in service.objects(Feeder)}
+    assert hierarchy.circuits.keys() == {it.mrid for it in service.objects(Circuit)}
+    assert hierarchy.loops.keys() == {it.mrid for it in service.objects(Loop)}
 
-    def responses(request: GetIdentifiedObjectsRequest):
+
+def _create_object_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
+    -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
+    valid: Dict[str, IdentifiedObject] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
+
+    def responses(request: GetIdentifiedObjectsRequest) -> Generator[GetIdentifiedObjectsResponse, None, None]:
         for mrid in request.mrids:
-            obj = valid.get(mrid)
+            obj = valid[mrid]
             if obj:
                 yield _response_of(obj, GetIdentifiedObjectsResponse)
             else:
@@ -447,39 +507,17 @@ def _create_objects_response(ns: NetworkService, mrids: Iterable[str]):
     return responses
 
 
-def _create_containers_response(ns: NetworkService, mrids: Iterable[str]):
-    valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids}
+def _create_container_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
+    -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
+    valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
-    def responses(request: GetEquipmentForContainerRequest):
-        container = valid.get(request.mrid)
-        if container:
-            for equipment in container.equipment:
-                yield _response_of(equipment, GetEquipmentForContainerResponse)
-        else:
-            raise AssertionError(f"Requested unexpected container {request.mrid}.")
+    def responses(request: GetEquipmentForContainersRequest) -> Generator[GetEquipmentForContainersResponse, None, None]:
+        for mrid in request.mrids:
+            container = valid[mrid]
+            if container:
+                for equipment in container.equipment:
+                    yield _response_of(equipment, GetEquipmentForContainersResponse)
+            else:
+                raise AssertionError(f"Requested unexpected container {mrid}.")
 
     return responses
-
-
-class MatchRequest(object):
-
-    def __init__(self, expected_type: type, expected_mrids: List[str]):
-        self.expected_type = expected_type
-        self.expected_mrids = expected_mrids.copy()
-
-    # noinspection PyUnresolvedReferences
-    def __eq__(self, other):
-        if not isinstance(other, self.expected_type):
-            return False
-
-        if isinstance(other, GetEquipmentForContainerRequest):
-            if other.mrid not in self.expected_mrids:
-                return False
-
-            self.expected_mrids.remove(other.mrid)
-            return True
-
-        elif isinstance(other, GetIdentifiedObjectsRequest):
-            return Counter(self.expected_mrids) == Counter(other.mrids)
-
-        return False

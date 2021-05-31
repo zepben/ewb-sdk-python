@@ -12,10 +12,13 @@ from __future__ import annotations
 
 import copy
 import logging
-from dataclassy import dataclass
 from enum import Enum
+from typing import TYPE_CHECKING
 
+from dataclassy import dataclass
 
+if TYPE_CHECKING:
+    from zepben.evolve import Terminal, ConductingEquipment, NetworkService
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Breaker
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -107,12 +110,11 @@ class SetPhases(object):
 
 async def find_es_breaker_terminal(es):
     """
-    From an EnergySource finds the closest connected Feeder CB (Breaker that is part of a substation).
-    At the moment we assume that all EnergySource's with EnergySourcePhase's will be associated with at least a
-    single feeder circuit breaker, and thus this function given an `EnergySource` will perform a trace that returns
-    the first `zepben.evolve.iec61970.base.core.terminal.Terminal` encountered from that `EnergySource` that belongs to a `Breaker`. This `zepben.evolve.iec61970.base.core.terminal.Terminal` should always
-    be the most downstream `zepben.evolve.iec61970.base.core.terminal.Terminal` on the `Breaker`, and thus can then be used for setting `Direction` downstream and
-    away from this `Breaker`.
+    From an EnergySource finds the closest connected Feeder CB (Breaker that is part of a substation). At the moment we assume that all EnergySource's with
+    EnergySourcePhase's will be associated with at least a single feeder circuit breaker, and thus this function given an `EnergySource` will perform a trace
+    that returns the first `zepben.evolve.iec61970.base.core.terminal.Terminal` encountered from that `EnergySource` that belongs to a `Breaker`. This
+    `zepben.evolve.iec61970.base.core.terminal.Terminal` should always be the most downstream `zepben.evolve.iec61970.base.core.terminal.Terminal` on the
+    `Breaker`, and thus can then be used for setting `Direction` downstream and away from this `Breaker`.
     TODO: check how ES are normally connected to feeder CB's.
     """
     out_terminals = set()
@@ -148,10 +150,12 @@ async def _apply_phases_from_feeder_cbs(network):
         esp = es.energy_source_phases
         if esp:
             if len(esp) != es.num_cores:
-                # TODO: java network phases doesn't throw here, but would throw in the below for loop if num_phases > len(esp). why does java silently handle less cores?
-                logger.error(f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_phases}. Number of phases should match number of cores. Phasing cannot be applied")
-                raise TracingException(
-                    f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_cores}. Number of phases should match number of cores. Phasing cannot be applied")
+                # TODO: java network phases doesn't throw here, but would throw in the below for loop if num_phases > len(esp). why does java silently handle
+                #  less cores?
+                logger.error(f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_phases}. "
+                             f"Number of phases should match number of cores. Phasing cannot be applied")
+                raise TracingException(f"Energy source {es.name} [{es.mrid}] is a source with {len(esp)} and {es.num_cores}. "
+                                       f"Number of phases should match number of cores. Phasing cannot be applied")
             breaker_terms = await find_es_breaker_terminal(es)
             for terminal in breaker_terms:
                 for phase in terminal.phases.single_phases:
@@ -283,14 +287,12 @@ def _get_phases_to_flow(terminal: Terminal,
                         open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool],
                         phase_selector: Callable[[Terminal, SinglePhaseKind], PhaseStatus]):
     phases_to_flow = set()
-    try:
-        if terminal.conducting_equipment.is_substation_breaker():
-            return phases_to_flow
-    except AttributeError:
-        pass
-
     if terminal.conducting_equipment is None:
         return phases_to_flow
+
+    if isinstance(terminal.conducting_equipment, Breaker):
+        if terminal.conducting_equipment.is_substation_breaker():
+            return phases_to_flow
 
     equip = terminal.conducting_equipment
     for phase in terminal.phases.single_phases:
@@ -306,8 +308,8 @@ def _flow_through_equipment(traversal: BranchRecursiveTraversal, in_terminal: Te
 
     for phase in phases_to_flow:
         out_phase_status = phase_selector(out_terminal, phase)
+        in_phase = phase_selector(in_terminal, phase).phase()
         try:
-            in_phase = phase_selector(in_terminal, phase).phase()
             applied = out_phase_status.add(in_phase, PhaseDirection.OUT)
             has_changes = applied or has_changes
         except PhaseException as ex:

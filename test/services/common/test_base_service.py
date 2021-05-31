@@ -3,8 +3,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import re
 from typing import List, Union
 
+import pytest
 from pytest import fixture
 
 from zepben.evolve import Terminal, resolver, UnresolvedReference, NetworkService, IdentifiedObject, \
@@ -41,34 +43,19 @@ def test_get(service: BaseService):
 
     assert service.get("b1") is b1
     assert service["b1"] is b1
-    assert service.get("b1", Junction, default=None) is None
     assert service.get("b2", default=None) is None
 
-    # NOTE: KeyError automatically adds single quotes so we need to add them to the comparison string.
-
-    try:
+    with pytest.raises(TypeError, match=re.escape("Invalid type for b1. Found Breaker, expected Junction.")):
         service.get("b1", Junction)
-        raise AssertionError("Should have thrown")
-    except KeyError as e:
-        assert str(e) == "'Failed to find Junction[b1]'"
 
-    try:
-        service.get("b3")
-        raise AssertionError("Should have thrown")
-    except KeyError as e:
-        assert str(e) == "'Failed to find [b3]'"
+    with pytest.raises(KeyError, match=re.escape("Failed to find Breaker[b3]")):
+        service.get("b3", Breaker)
 
-    try:
+    with pytest.raises(KeyError, match=re.escape("my error: mrid=b4, typ=Junction")):
         service.get("b4", Junction, generate_error=lambda mrid, typ: f"my error: mrid={mrid}, typ={typ}")
-        raise AssertionError("Should have thrown")
-    except KeyError as e:
-        assert str(e) == "'my error: mrid=b4, typ=Junction'"
 
-    try:
+    with pytest.raises(KeyError, match=re.escape("You must specify an mRID to get. Empty/None is invalid.")):
         service.get(mrid="")
-        raise AssertionError("Should have thrown")
-    except KeyError as e:
-        assert str(e) == "'You must specify an mRID to get. Empty/None is invalid.'"
 
 
 def test_remove(service: BaseService):
@@ -85,7 +72,7 @@ def test_remove(service: BaseService):
 
 
 def test_unresolved_bidirectional_references(service: BaseService):
-    term = Terminal("t1")
+    term = Terminal(mrid="t1")
     assert service.add(term)
     assert service.resolve_or_defer_reference(resolver.conducting_equipment(term), "j1") is False
 
@@ -134,8 +121,8 @@ def test_unresolved_references(service: BaseService):
     acls2 = AcLineSegment(mrid="acls2")
     plsi1 = PerLengthSequenceImpedance("plsi1")
     service.resolve_or_defer_reference(resolver.per_length_sequence_impedance(acls1), "plsi1")
-    t1 = Terminal("t1")
-    t2 = Terminal("t2")
+    t1 = Terminal(mrid="t1")
+    t2 = Terminal(mrid="t2")
     service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t1")
     service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t2")
     ci1 = CableInfo("ci1")
@@ -187,7 +174,7 @@ def test_add_resolves_reverse_relationship():
 
 def test_resolve_thingo(service):
     acls1 = AcLineSegment(mrid="acls1")
-    t1 = Terminal("t1")
+    t1 = Terminal(mrid="t1")
     service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t1")
     service.resolve_or_defer_reference(resolver.conducting_equipment(t1), "acls1")
 

@@ -132,7 +132,7 @@ class BaseService(object, metaclass=ABCMeta):
             for ur in unresolved_refs:
                 yield ur
 
-    def get(self, mrid: str, type_: Optional[Type[T]] = None, default=_GET_DEFAULT,
+    def get(self, mrid: str, type_: Type[T] = IdentifiedObject, default=_GET_DEFAULT,
             generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> T:
         """
         Get an object associated with this service.
@@ -150,27 +150,25 @@ class BaseService(object, metaclass=ABCMeta):
         if not mrid:
             raise KeyError("You must specify an mRID to get. Empty/None is invalid.")
 
-        if type_:
-            try:
-                return self._objectsByType[type_][mrid]
-            except KeyError:
-                for c, obj_map in self._objectsByType.items():
-                    if issubclass(c, type_):
-                        try:
-                            return obj_map[mrid]
-                        except KeyError:
-                            pass
-                if default is _GET_DEFAULT:
-                    raise KeyError(generate_error(mrid, type_.__name__))
-                else:
-                    return default
-        else:
-            for object_map in self._objectsByType.values():
-                if mrid in object_map:
-                    return object_map[mrid]
+        # This can be written much simpler than below but we want to avoid throwing any exceptions in this high frequency function
+        if type_ != IdentifiedObject:
+            objs = self._objectsByType.get(type_)
+            if objs:
+                obj = objs.get(mrid)
+                if obj:
+                    return obj
 
-            if default is _GET_DEFAULT:
-                raise KeyError(generate_error(mrid, ""))
+        for c, objs in self._objectsByType.items():
+            obj = objs.get(mrid)
+            if obj:
+                if isinstance(obj, type_):
+                    return obj
+                else:
+                    raise TypeError(f"Invalid type for {mrid}. Found {type(obj).__name__}, expected {type_.__name__}.")
+
+        if default is _GET_DEFAULT:
+            raise KeyError(generate_error(mrid, type_.__name__))
+        else:
             return default
 
     def __getitem__(self, mrid):

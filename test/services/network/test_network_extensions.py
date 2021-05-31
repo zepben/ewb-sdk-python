@@ -2,11 +2,11 @@ from collections import namedtuple
 
 from pytest import fixture
 
-from zepben.evolve import NetworkService, Junction, BaseVoltage, Terminal, EnergySource, \
+from zepben.evolve import NetworkService, BaseVoltage, Terminal, EnergySource, \
     PowerTransformer, AcLineSegment, EnergyConsumer, PowerTransformerInfo, PositionPoint, Location, \
     ConnectivityNode, Breaker
 
-TestNetworkCreator = namedtuple("TestNetworkCreator", ["net", "bv", "cn1", "cn2", "pt_info", "loc1", "loc2", "loc3"])
+NetworkCreator = namedtuple("TestNetworkCreator", ["net", "bv", "cn1", "cn2", "pt_info", "loc1", "loc2", "loc3"])
 
 
 @fixture()
@@ -21,7 +21,7 @@ def tnc():
     loc1 = Location().add_point(point1)
     loc2 = Location().add_point(point2)
     loc3 = Location().add_point(point2).add_point(point2)
-    yield TestNetworkCreator(net=net, bv=bv, cn1=cn1, cn2=cn2, pt_info=pt_info, loc1=loc1, loc2=loc2, loc3=loc3)
+    yield NetworkCreator(net=net, bv=bv, cn1=cn1, cn2=cn2, pt_info=pt_info, loc1=loc1, loc2=loc2, loc3=loc3)
 
 
 def test_create_energy_source(tnc):
