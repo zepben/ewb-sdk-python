@@ -11,8 +11,8 @@ from zepben.evolve.streaming.grpc.grpc import GrpcClient
 from zepben.protobuf.nm.set_switch_state_pb2_grpc import SwitchStateServiceStub
 from zepben.evolve.streaming.mutations.switch_state_update import SwitchStateUpdate
 
-class SwitchStateClient(GrpcClient):
 
+class SwitchStateClient(GrpcClient):
     _stub: SwitchStateServiceStub = None
 
     def __init__(self, channel=None, stub: SwitchStateServiceStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
@@ -33,8 +33,7 @@ class SwitchStateClient(GrpcClient):
 
         self.set_current_switch_states(list(PBSwitchStateUpdate))
 
-
-    def set_current_switch_states(self,switches_to_update: List[PBSwitchStateUpdate]):
+    def set_current_switch_states(self, switches_to_update: List[PBSwitchStateUpdate]):
         """
         Send a request to the server to update the current state of a group of switches as a batch.
         All switches included in the request will be treated as a batch. That is, the resulting network state will
@@ -53,7 +52,3 @@ def switch_state_update_to_pb(cim: SwitchStateUpdate) -> PBSwitchStateUpdate:
     return PBSwitchStateUpdate(mRID=cim.mrid,
                                setOpen=cim.set_open,
                                timestamp=cim.timestamp.timestamp())
-
-
-
-
