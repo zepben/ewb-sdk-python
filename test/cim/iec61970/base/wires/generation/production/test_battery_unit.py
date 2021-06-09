@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import integers, sampled_from
 
-from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
+from test.cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
 from cim_creators import MAX_32_BIT_INTEGER

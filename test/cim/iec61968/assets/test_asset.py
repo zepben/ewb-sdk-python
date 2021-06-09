@@ -6,8 +6,8 @@
 
 from hypothesis.strategies import builds, lists
 
-from cim.collection_validator import validate_collection_unordered
-from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from test.cim.collection_validator import validate_collection_unordered
+from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from zepben.evolve import Asset, Location, AssetOrganisationRole
 

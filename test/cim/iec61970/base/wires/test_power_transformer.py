@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, lists, floats
 
-from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
+from test.cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
 from cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import PowerTransformer, VectorGroup, PowerTransformerEnd

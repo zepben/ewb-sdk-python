@@ -6,7 +6,7 @@
 
 from hypothesis.strategies import booleans
 
-from cim.iec61970.base.wires.test_energy_connection import energy_connection_kwargs, verify_energy_connection_constructor_default, \
+from test.cim.iec61970.base.wires.test_energy_connection import energy_connection_kwargs, verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_args
 from zepben.evolve import RegulatingCondEq
 

@@ -5,8 +5,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import builds, lists
 
-from cim.collection_validator import validate_collection_unordered
-from cim.iec61970.base.core.test_connectivity_node_container import connectivity_node_container_kwargs, \
+from test.cim.collection_validator import validate_collection_unordered
+from test.cim.iec61970.base.core.test_connectivity_node_container import connectivity_node_container_kwargs, \
     verify_connectivity_node_container_constructor_default, verify_connectivity_node_container_constructor_kwargs, \
     verify_connectivity_node_container_constructor_args, connectivity_node_container_args
 from zepben.evolve import EquipmentContainer, Equipment

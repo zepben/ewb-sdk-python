@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import integers, text
 
-from cim.iec61970.base.meas.test_measurement_value import measurement_value_kwargs, verify_measurement_value_constructor_default, \
+from test.cim.iec61970.base.meas.test_measurement_value import measurement_value_kwargs, verify_measurement_value_constructor_default, \
     verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
 from cim_creators import MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import AccumulatorValue

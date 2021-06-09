@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds
 
-from cim.iec61970.base.scada.test_remote_point import remote_point_kwargs, verify_remote_point_constructor_default, \
+from test.cim.iec61970.base.scada.test_remote_point import remote_point_kwargs, verify_remote_point_constructor_default, \
     verify_remote_point_constructor_kwargs, verify_remote_point_constructor_args, remote_point_args
 from zepben.evolve import RemoteSource, Measurement
 

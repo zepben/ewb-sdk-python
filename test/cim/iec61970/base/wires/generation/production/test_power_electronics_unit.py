@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import integers, builds
 
-from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
+from test.cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
 from zepben.evolve import PowerElectronicsUnit, PowerElectronicsConnection
 from cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
