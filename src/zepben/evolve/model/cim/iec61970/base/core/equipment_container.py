@@ -6,10 +6,13 @@
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Generator, List
+from typing import Optional, Dict, Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Equipment, Terminal, Substation
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
-from zepben.evolve.util import nlen, ngen
+from zepben.evolve.util import nlen, ngen, safe_remove_by_id
 
 __all__ = ['EquipmentContainer', 'Feeder', 'Site']
 
@@ -77,13 +80,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns A reference to this `EquipmentContainer` to allow fluent use.
         Raises `KeyError` if `equipment` was not associated with this `EquipmentContainer`.
         """
-        if self._equipment:
-            del self._equipment[equipment.mrid]
-        else:
-            raise KeyError(equipment)
-
-        if not self._equipment:
-            self._equipment = None
+        self._equipment = safe_remove_by_id(self._equipment, equipment)
         return self
 
     def clear_equipment(self) -> EquipmentContainer:
@@ -133,9 +130,10 @@ class Feeder(EquipmentContainer):
 
     _current_equipment: Optional[Dict[str, Equipment]] = None
 
-    def __init__(self, normal_head_terminal: Terminal = None, equipment: List[Equipment] = None, current_equipment: List[Equipment] = None):
-        super(Feeder, self).__init__(equipment)
-        self.normal_head_terminal = normal_head_terminal
+    def __init__(self, normal_head_terminal: Terminal = None, current_equipment: List[Equipment] = None, **kwargs):
+        super(Feeder, self).__init__(**kwargs)
+        if normal_head_terminal:
+            self.normal_head_terminal = normal_head_terminal
         if current_equipment:
             for eq in current_equipment:
                 self.add_current_equipment(eq)
@@ -202,13 +200,7 @@ class Feeder(EquipmentContainer):
         Returns A reference to this `Feeder` to allow fluent use.
         Raises `KeyError` if `equipment` was not associated with this `Feeder`.
         """
-        if self._current_equipment:
-            del self._current_equipment[equipment.mrid]
-        else:
-            raise KeyError(equipment)
-
-        if not self._current_equipment:
-            self._current_equipment = None
+        self._current_equipment = safe_remove_by_id(self._current_equipment, equipment)
         return self
 
     def clear_current_equipment(self) -> Feeder:

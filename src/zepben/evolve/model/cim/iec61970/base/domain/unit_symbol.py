@@ -192,9 +192,11 @@ class UnitSymbol(Enum):
     """Apparent power in volt amperes. See also real power and reactive power."""
 
     VAR = (51, "VAr")
-    """Reactive power in volt amperes reactive. The “reactive” or “imaginary” component of electrical power (VIsin(phi)). (See also real power and apparent power). 
+    """
+    Reactive power in volt amperes reactive. The “reactive” or “imaginary” component of electrical power (VIsin(phi)). (See also real power and apparent power). 
     Note: Different meter designs use different methods to arrive at their results. Some meters may compute reactive power as an arithmetic value, while others 
-    compute the value vectorially. The data consumer should determine the method in use and the suitability of the measurement for the intended purpose."""
+    compute the value vectorially. The data consumer should determine the method in use and the suitability of the measurement for the intended purpose.
+    """
 
     COSPHI = (52, "cosPhi")
     """Power factor, dimensionless. 

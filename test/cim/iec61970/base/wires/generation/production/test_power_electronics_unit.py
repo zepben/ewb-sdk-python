@@ -3,68 +3,39 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
-from hypothesis.strategies import integers, sampled_from
+from hypothesis.strategies import integers, builds
 
-from test.cim.constructor_validation import peu_kwargs, verify_peu_args, verify_power_electronics_unit_constructor, peu_args
-from test.cim_creators import MAX_32_BIT_INTEGER, MIN_32_BIT_INTEGER
-from zepben.evolve import PowerElectronicsUnit, BatteryUnit, BatteryStateKind, PhotoVoltaicUnit, PowerElectronicsWindUnit
+from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
+    verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
+from zepben.evolve import PowerElectronicsUnit, PowerElectronicsConnection
+from cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 
-battery_kwargs = {**peu_kwargs, "battery_state": sampled_from(BatteryStateKind),
-                  "rated_e": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-                  "stored_e": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-                  }
+power_electronics_unit_kwargs = {
+    **equipment_kwargs,
+    "power_electronics_connection": builds(PowerElectronicsConnection),
+    "max_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+    "min_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+}
 
-battery_args = (*peu_args, BatteryStateKind.charging, 1000, 2000)
-
-pv_kwargs = peu_kwargs
-
-pv_args = peu_args
-
-pewu_kwargs = peu_kwargs
-
-pewu_args = peu_args
+power_electronics_unit_args = [*equipment_args, PowerElectronicsConnection(), 1, 2]
 
 
-@given(**peu_kwargs)
-def test_power_electronics_unit_constructor_kwargs(power_electronics_connection, max_p, min_p, **kwargs):
-    verify_power_electronics_unit_constructor(PowerElectronicsUnit, power_electronics_connection, max_p, min_p, **kwargs)
+def verify_power_electronics_unit_constructor_default(peu: PowerElectronicsUnit):
+    verify_equipment_constructor_default(peu)
+    assert peu.power_electronics_connection is None
+    assert peu.max_p == 0
+    assert peu.min_p == 0
 
 
-def test_power_electronics_unit_constructor_args():
-    verify_peu_args(PowerElectronicsUnit(*peu_args))
+def verify_power_electronics_unit_constructor_kwargs(peu: PowerElectronicsUnit, power_electronics_connection, max_p, min_p, **kwargs):
+    verify_equipment_constructor_kwargs(peu, **kwargs)
+    assert peu.power_electronics_connection == power_electronics_connection
+    assert peu.max_p == max_p
+    assert peu.min_p == min_p
 
 
-@given(**battery_kwargs)
-def test_battery_unit_constructor_kwargs(battery_state, rated_e, stored_e, **kwargs):
-    battery = BatteryUnit(battery_state=battery_state, rated_e=rated_e, stored_e=stored_e)
-    assert battery.battery_state == battery_state
-    assert battery.rated_e == rated_e
-    assert battery.stored_e == stored_e
-    verify_power_electronics_unit_constructor(BatteryUnit, **kwargs)
-
-
-def test_battery_unit_constructor_args():
-    bu = BatteryUnit(*battery_args)
-    assert bu.battery_state == BatteryStateKind.charging
-    assert bu.rated_e == 1000
-    assert bu.stored_e == 2000
-    verify_peu_args(bu)
-
-
-@given(**pewu_kwargs)
-def test_power_electronics_wind_unit_constructor_kwargs(**kwargs):
-    verify_power_electronics_unit_constructor(PowerElectronicsWindUnit, **kwargs)
-
-
-def test_power_electronics_wind_unit_constructor_args():
-    verify_peu_args(PowerElectronicsWindUnit(*pewu_args))
-
-
-@given(**pv_kwargs)
-def test_photo_voltaic_unit_constructor_kwargs(**kwargs):
-    verify_power_electronics_unit_constructor(PhotoVoltaicUnit, **kwargs)
-
-
-def test_photo_voltaic_unit_constructor_args():
-    verify_peu_args(PhotoVoltaicUnit(*pv_args))
+def verify_power_electronics_unit_constructor_args(peu: PowerElectronicsUnit):
+    verify_equipment_constructor_args(peu)
+    assert peu.power_electronics_connection is power_electronics_unit_args[-3]
+    assert peu.max_p == power_electronics_unit_args[-2]
+    assert peu.min_p == power_electronics_unit_args[-1]

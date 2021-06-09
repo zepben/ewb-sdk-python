@@ -6,15 +6,15 @@
 
 from __future__ import annotations
 
-from dataclassy import dataclass
-
 from typing import List, Optional, Dict, Generator
+
+from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_style import DiagramObjectStyle
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
-from zepben.evolve.util import nlen, require, contains_mrid, ngen, safe_remove
+from zepben.evolve.util import nlen, require, ngen, safe_remove, safe_remove_by_id
 
 __all__ = ["DiagramObjectPoint", "Diagram", "DiagramObject"]
 
@@ -51,13 +51,16 @@ class DiagramObject(IdentifiedObject):
 
     style: DiagramObjectStyle = DiagramObjectStyle.NONE
     """A diagram object has a style associated that provides a reference for the style used in the originating system."""
+
     rotation: float = 0.0
     """Sets the angle of rotation of the diagram object.  Zero degrees is pointing to the top of the diagram. Rotation is clockwise."""
 
     _diagram_object_points: Optional[List[DiagramObjectPoint]] = None
 
-    def __init__(self, diagram: Diagram = None, diagram_object_points: List[DiagramObjectPoint] = None):
-        self.diagram = diagram
+    def __init__(self, diagram: Diagram = None, diagram_object_points: List[DiagramObjectPoint] = None, **kwargs):
+        super(DiagramObject, self).__init__(**kwargs)
+        if diagram:
+            self.diagram = diagram
         if diagram_object_points:
             for point in diagram_object_points:
                 self.add_point(point)
@@ -125,8 +128,8 @@ class DiagramObject(IdentifiedObject):
             sequence_number = self.num_points()
         require(0 <= sequence_number <= self.num_points(),
                 lambda: f"Unable to add DiagramObjectPoint to {str(self)}. Sequence number {sequence_number}"
-                        f" is invalid. Expected a value between 0 and {self.num_points}. Make sure you are "
-                        f"adding the points in the correct order and there are no missing sequence numbers.")
+                        f" is invalid. Expected a value between 0 and {self.num_points()}. Make sure you are "
+                        f"adding the points in the correct order and there are no gaps in the numbering.")
         self._diagram_object_points = list() if self._diagram_object_points is None else self._diagram_object_points
         self._diagram_object_points.insert(sequence_number, point)
         return self
@@ -168,12 +171,13 @@ class Diagram(IdentifiedObject):
 
     _diagram_objects: Optional[Dict[str, DiagramObject]] = None
 
-    def __init__(self, diagram_objects: List[DiagramObject] = None):
+    def __init__(self, diagram_objects: List[DiagramObject] = None, **kwargs):
+        super(Diagram, self).__init__(**kwargs)
         if diagram_objects:
             for obj in diagram_objects:
-                self.add_object(obj)
+                self.add_diagram_object(obj)
 
-    def num_objects(self):
+    def num_diagram_objects(self):
         """
         Returns The number of `DiagramObject`s associated with this `Diagram`
         """
@@ -186,7 +190,7 @@ class Diagram(IdentifiedObject):
         """
         return ngen(self._diagram_objects.values() if self._diagram_objects is not None else None)
 
-    def get_object(self, mrid: str) -> DiagramObject:
+    def get_diagram_object(self, mrid: str) -> DiagramObject:
         """
         Get the `DiagramObject` for this `Diagram` identified by `mrid`
 
@@ -201,7 +205,7 @@ class Diagram(IdentifiedObject):
         except AttributeError:
             raise KeyError(mrid)
 
-    def add_object(self, diagram_object: DiagramObject) -> Diagram:
+    def add_diagram_object(self, diagram_object: DiagramObject) -> Diagram:
         """
         Associate a `DiagramObject` with this `Diagram`.
 
@@ -211,10 +215,12 @@ class Diagram(IdentifiedObject):
         Raises `ValueError` if another `DiagramObject` with the same `mrid` already exists for this `Diagram`, or if `diagram_object.diagram` is not this
         `Diagram`.
         """
+        if not diagram_object.diagram:
+            diagram_object.diagram = self
         require(diagram_object.diagram is self, lambda: f"{str(diagram_object)} references another Diagram "
                                                         f"{str(diagram_object.diagram)}, expected {str(self)}.")
 
-        if self._validate_reference(diagram_object, self.get_object, "A DiagramObject"):
+        if self._validate_reference(diagram_object, self.get_diagram_object, "A DiagramObject"):
             return self
 
         self._diagram_objects = dict() if self._diagram_objects is None else self._diagram_objects
@@ -222,7 +228,7 @@ class Diagram(IdentifiedObject):
 
         return self
 
-    def remove_object(self, diagram_object: DiagramObject) -> Diagram:
+    def remove_diagram_object(self, diagram_object: DiagramObject) -> Diagram:
         """
         Disassociate `diagram_object` from this `Diagram`
 
@@ -230,16 +236,10 @@ class Diagram(IdentifiedObject):
         Returns A reference to this `Diagram` to allow fluent use.
         Raises `KeyError` if `diagram_object` was not associated with this `Diagram`.
         """
-        if self._diagram_objects:
-            del self._diagram_objects[diagram_object.mrid]
-        else:
-            raise KeyError(diagram_object)
-
-        if not self._diagram_objects:
-            self._diagram_objects = None
+        self._diagram_objects = safe_remove_by_id(self._diagram_objects, diagram_object)
         return self
 
-    def clear_objects(self) -> Diagram:
+    def clear_diagram_objects(self) -> Diagram:
         """
         Clear all `DiagramObject`s.
         Returns A reference to this `Diagram` to allow fluent use.

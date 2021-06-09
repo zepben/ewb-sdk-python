@@ -4,13 +4,16 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
-from typing import Optional, List, Generator
 
-from zepben.evolve.util import ngen, nlen, get_by_mrid, safe_remove
+from typing import Optional, List, Generator, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import PowerElectronicsUnit
+
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
-
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from zepben.evolve.util import ngen, nlen, get_by_mrid, safe_remove
 
 __all__ = ["PowerElectronicsConnection", "PowerElectronicsConnectionPhase"]
 
@@ -68,12 +71,9 @@ class PowerElectronicsConnection(RegulatingCondEq):
     _power_electronics_connection_phases: Optional[List[PowerElectronicsConnectionPhase]] = None
     """The individual units models for the power electronics connection."""
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None,
-                 power_electronics_units: List[PowerElectronicsUnit] = None, power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] = None):
-        super(PowerElectronicsConnection, self).__init__(usage_points=usage_points, equipment_containers=equipment_containers,
-                                                         operational_restrictions=operational_restrictions,
-                                                         current_feeders=current_feeders, terminals=terminals)
+    def __init__(self, power_electronics_units: List[PowerElectronicsUnit] = None,
+                 power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] = None, **kwargs):
+        super(PowerElectronicsConnection, self).__init__(**kwargs)
         if power_electronics_units:
             for unit in power_electronics_units:
                 self.add_unit(unit)
@@ -109,17 +109,21 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
     def get_unit(self, mrid: str) -> PowerElectronicsUnit:
         """
-        Get the `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` for this `PowerElectronicsConnection` identified by `mrid`
+        Get the `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` for this
+        `PowerElectronicsConnection` identified by `mrid`
 
         `mrid` the mRID of the required `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit`
-        Returns The `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` with the specified `mrid` if it exists
+        Returns The `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` with the specified `mrid`
+        if it exists
+
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._power_electronics_units, mrid)
 
     def add_unit(self, unit: PowerElectronicsUnit) -> PowerElectronicsConnection:
         """
-        Associate an `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` with this `PowerElectronicsConnection`
+        Associate an `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` with this
+        `PowerElectronicsConnection`
 
         `unit` the `PowerElectronicsUnit` to associate with this `PowerElectronicsConnection`.
         Returns A reference to this `PowerElectronicsConnection` to allow fluent use.

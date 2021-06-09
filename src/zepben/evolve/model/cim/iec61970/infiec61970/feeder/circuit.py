@@ -4,10 +4,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
+
 from typing import Optional, Generator, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from zepben.evolve import Substation, Terminal, Equipment, Loop
+    from zepben.evolve import Substation, Terminal, Loop
 from zepben.evolve.model.cim.iec61970.base.wires.line import Line
 from zepben.evolve.util import ngen, get_by_mrid, safe_remove, nlen
 
@@ -21,8 +22,8 @@ class Circuit(Line):
     _end_terminals: Optional[List[Terminal]] = None
     _end_substations: Optional[List[Substation]] = None
 
-    def __init__(self, equipment: List[Equipment] = None, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None):
-        super(Circuit, self).__init__(equipment)
+    def __init__(self, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None, **kwargs):
+        super(Circuit, self).__init__(**kwargs)
         if end_terminals:
             for term in end_terminals:
                 self.add_end_terminal(term)
@@ -49,7 +50,7 @@ class Circuit(Line):
         """Return the number of end `Terminal`s associated with this `Circuit`"""
         return nlen(self._end_terminals)
 
-    def get_terminal(self, mrid: str) -> Circuit:
+    def get_end_terminal(self, mrid: str) -> Terminal:
         """
         Get the `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` for this `Circuit` identified by `mrid`
 
@@ -67,7 +68,7 @@ class Circuit(Line):
         Returns A reference to this `Circuit` to allow fluent use.
         Raises `ValueError` if another `Terminal` with the same `mrid` already exists for this `Circuit`.
         """
-        if self._validate_reference(terminal, self.get_terminal, "An Terminal"):
+        if self._validate_reference(terminal, self.get_end_terminal, "An Terminal"):
             return self
         self._end_terminals = list() if self._end_terminals is None else self._end_terminals
         self._end_terminals.append(terminal)
@@ -96,7 +97,7 @@ class Circuit(Line):
         """Return the number of end `Substation`s associated with this `Circuit`"""
         return nlen(self._end_substations)
 
-    def get_end_substation(self, mrid: str) -> Circuit:
+    def get_end_substation(self, mrid: str) -> Substation:
         """
         Get the `zepben.evolve.cim.iec61970.base.core.substation.Substation` for this `Circuit` identified by `mrid`
 

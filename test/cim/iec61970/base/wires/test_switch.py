@@ -3,33 +3,67 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from hypothesis.strategies import integers
 
-from hypothesis import given
+from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
+    verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
+from zepben.evolve import Switch, SinglePhaseKind
 
+switch_kwargs = {
+    **conducting_equipment_kwargs,
+    "_open": integers(min_value=0, max_value=15),
+    "_normally_open": integers(min_value=0, max_value=15),
+}
 
-from test.cim.constructor_validation import ps_kwargs, ps_args, verify_protected_switch_constructor, \
-    verify_ps_args
-from zepben.evolve import LoadBreakSwitch
-
-lbs_kwargs = ps_kwargs
-lbs_args = ps_args
-
-
-@given(**lbs_kwargs)
-def test_protected_switch_constructor_kwargs(**kwargs):
-    verify_protected_switch_constructor(LoadBreakSwitch, **kwargs)
+switch_args = [*conducting_equipment_args, 1, 2]
 
 
-def test_loadbreakswitch_constructor_args():
-    lbs = LoadBreakSwitch(*lbs_args)
-    verify_ps_args(lbs)
+# noinspection PyProtectedMember
+def verify_switch_constructor_default(s: Switch):
+    verify_conducting_equipment_constructor_default(s)
+    assert s._open == 0
+    assert s._normally_open == 0
 
 
-def test_set_open():
-    # TODO
-    pass
+# noinspection PyProtectedMember
+def verify_switch_constructor_kwargs(s: Switch, _open, _normally_open, **kwargs):
+    verify_conducting_equipment_constructor_kwargs(s, **kwargs)
+    assert s._open == _open
+    assert s._normally_open == _normally_open
 
 
-def test_set_normal_open():
-    # TODO
-    pass
+# noinspection PyProtectedMember
+def verify_switch_constructor_args(s: Switch):
+    verify_conducting_equipment_constructor_args(s)
+    assert s._open == switch_args[-2]
+    assert s._normally_open == switch_args[-1]
+
+
+def test_open_states():
+    _validate_open_phase(Switch.is_open, Switch.set_open)
+    _validate_open_phase(Switch.is_normally_open, Switch.set_normally_open)
+
+
+def _validate_open_phase(is_open, set_open):
+    s = Switch()
+
+    s.set_normally_open(True)
+    assert s.is_normally_open()
+    s.set_normally_open(False)
+    assert not s.is_normally_open()
+
+    valid_phases = list(SinglePhaseKind)[1:6]
+    for phase in valid_phases:
+        s = Switch()
+
+        set_open(s, True, phase)
+        for validate_phase in valid_phases:
+            expect_open = (phase.mask_index == validate_phase.mask_index)
+            assert is_open(s, validate_phase) == expect_open, f"open check: {phase} should have been {expect_open}"
+
+        set_open(s, True)
+        set_open(s, False, phase)
+
+        for validate_phase in valid_phases:
+            expect_closed = (phase.mask_index != validate_phase.mask_index)
+            assert is_open(s, validate_phase) == expect_closed, f"close check: {phase} should have been {expect_closed}"

@@ -6,14 +6,17 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, Generator
+from typing import List, Optional, Generator, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Terminal
 
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 
 __all__ = ['ConductingEquipment']
 
-from zepben.evolve.util import get_by_mrid, require
+from zepben.evolve.util import get_by_mrid, require, ngen
 
 
 class ConductingEquipment(Equipment):
@@ -33,9 +36,8 @@ class ConductingEquipment(Equipment):
 
     _terminals: List[Terminal] = []
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None):
-        super(ConductingEquipment, self).__init__(usage_points, equipment_containers, operational_restrictions, current_feeders)
+    def __init__(self, terminals: List[Terminal] = None, **kwargs):
+        super(ConductingEquipment, self).__init__(**kwargs)
         if terminals:
             for term in terminals:
                 if term.conducting_equipment is None:
@@ -58,8 +60,7 @@ class ConductingEquipment(Equipment):
         `ConductingEquipment` have `zepben.evolve.cim.iec61970.base.core.terminal.Terminal`s that may be connected to other `ConductingEquipment`
         `zepben.evolve.cim.iec61970.base.core.terminal.Terminal`s via `ConnectivityNode`s.
         """
-        for term in self._terminals:
-            yield term
+        return ngen(self._terminals)
 
     def num_terminals(self):
         """
@@ -155,4 +156,3 @@ class ConductingEquipment(Equipment):
         require(terminal.conducting_equipment is self,
                 lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.")
         return False
-

@@ -8,7 +8,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Tariff
 
 from zepben.evolve.model.cim.iec61968.common.document import Document
 from zepben.evolve.util import get_by_mrid, nlen, ngen, safe_remove
@@ -25,7 +28,8 @@ class PricingStructure(Document):
     """
     _tariffs: Optional[List[Tariff]] = None
 
-    def __init__(self, tariffs: List[Tariff] = None):
+    def __init__(self, tariffs: List[Tariff] = None, **kwargs):
+        super(PricingStructure, self).__init__(**kwargs)
         if tariffs:
             for tariff in tariffs:
                 self.add_tariff(tariff)

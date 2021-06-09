@@ -341,7 +341,7 @@ def equipment_to_pb(cim: Equipment) -> PBEquipment:
     pb = PBEquipment(psr=powersystemresource_to_pb(cim),
                      inService=cim.in_service,
                      normallyInService=cim.normally_in_service,
-                     equipmentContainerMRIDs=[str(io.mrid) for io in cim.equipment_containers],
+                     equipmentContainerMRIDs=[str(io.mrid) for io in cim.containers],
                      usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
                      operationalRestrictionMRIDs=[str(io.mrid) for io in cim.operational_restrictions],
                      currentFeederMRIDs=[str(io.mrid) for io in cim.current_feeders])

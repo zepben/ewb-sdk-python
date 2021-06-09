@@ -45,7 +45,7 @@ class Switch(ConductingEquipment):
     _open: int = 0
     """Tells if the switch is considered open when used as input to topology processing."""
 
-    _normal_open: int = 0
+    _normally_open: int = 0
     """The attribute is used in cases when no Measurement for the status value is present. If the Switch has a status measurement the Discrete.normalValue 
     is expected to match with the Switch.normalOpen."""
 
@@ -56,13 +56,13 @@ class Switch(ConductingEquipment):
         `phase` The `single_phase_kind.SinglePhaseKind` to check the normal status. A `phase` of `None` (default) checks if any phase is open.
         Returns True if `phase` is open in its normal state, False if it is closed
         """
-        return _check_open(self._normal_open, phase)
+        return _check_open(self._normally_open, phase)
 
     def get_normal_state(self) -> int:
         """
         Get the underlying normal open states. Stored as 4 bits, 1 per phase.
         """
-        return self._normal_open
+        return self._normally_open
 
     def is_open(self, phase: SinglePhaseKind = None):
         """
@@ -87,7 +87,7 @@ class Switch(ConductingEquipment):
         `phase` the phase to set the normal status. If set to None will default to all phases.
         Returns This `Switch` to be used fluently.
         """
-        self._normal_open = _calculate_open_state(self._normal_open, is_normally_open, phase)
+        self._normally_open = _calculate_open_state(self._normally_open, is_normally_open, phase)
         return self
 
     def set_open(self, is_open: bool, phase: SinglePhaseKind = None) -> Switch:

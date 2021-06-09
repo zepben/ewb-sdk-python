@@ -21,14 +21,12 @@ class EnergySource(EnergyConnection):
     """
 
     _energy_source_phases: Optional[List[EnergySourcePhase]] = None
+
     active_power: float = 0.0
-    """High voltage source active injection. Load sign convention is used, i.e. positive sign means flow out from a node. Starting value for steady state solutions"""
-
-    r: float = 0.0
-    """Positive sequence Thevenin resistance."""
-
-    x: float = 0.0
-    """Positive sequence Thevenin reactance."""
+    """
+    High voltage source active injection. Load sign convention is used, i.e. positive sign means flow out from a node. Starting value
+    for steady state solutions
+    """
 
     reactive_power: float = 0.0
     """High voltage source reactive injection. Load sign convention is used, i.e. positive sign means flow out from a node. 
@@ -41,18 +39,37 @@ class EnergySource(EnergyConnection):
     """Phase-to-phase open circuit voltage magnitude."""
 
     p_max: float = 0.0
-    p_min: float = 0.0
-    r0: float = 0.0
-    rn: float = 0.0
-    x0: float = 0.0
-    xn: float = 0.0
+    """
+    This is the maximum active power that can be produced by the source. Load sign convention is used, i.e. positive sign means flow out from a
+    TopologicalNode (bus) into the conducting equipment.
+    """
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None,
-                 energy_source_phases: List[EnergySourcePhase] = None):
-        super(EnergySource, self).__init__(usage_points=usage_points, equipment_containers=equipment_containers,
-                                           operational_restrictions=operational_restrictions,
-                                           current_feeders=current_feeders, terminals=terminals)
+    p_min: float = 0.0
+    """
+    This is the minimum active power that can be produced by the source. Load sign convention is used, i.e. positive sign means flow out from a
+    TopologicalNode (bus) into the conducting equipment.
+    """
+
+    r: float = 0.0
+    """Positive sequence Thevenin resistance."""
+
+    r0: float = 0.0
+    """Zero sequence Thevenin resistance."""
+
+    rn: float = 0.0
+    """Negative sequence Thevenin resistance."""
+
+    x: float = 0.0
+    """Positive sequence Thevenin reactance."""
+
+    x0: float = 0.0
+    """Zero sequence Thevenin reactance."""
+
+    xn: float = 0.0
+    """Negative sequence Thevenin reactance."""
+
+    def __init__(self, energy_source_phases: List[EnergySourcePhase] = None, **kwargs):
+        super(EnergySource, self).__init__(**kwargs)
         if energy_source_phases:
             for phase in energy_source_phases:
                 self.add_phase(phase)
@@ -75,7 +92,7 @@ class EnergySource(EnergyConnection):
         """Return the number of `EnergySourcePhase`s associated with this `EnergySource`"""
         return nlen(self._energy_source_phases)
 
-    def get_phase(self, mrid: str) -> EnergySource:
+    def get_phase(self, mrid: str) -> EnergySourcePhase:
         """
         Get the `zepben.evolve.cim.iec61970.base.wires.energy_source_phase.EnergySourcePhase` for this `EnergySource` identified by `mrid`
 
@@ -99,7 +116,7 @@ class EnergySource(EnergyConnection):
         self._energy_source_phases.append(phase)
         return self
 
-    def remove_phases(self, phase: EnergySourcePhase) -> EnergySource:
+    def remove_phase(self, phase: EnergySourcePhase) -> EnergySource:
         """
         Disassociate an `phase` from this `EnergySource`
 

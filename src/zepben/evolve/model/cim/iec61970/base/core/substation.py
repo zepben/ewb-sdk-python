@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Optional, Generator, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from zepben.evolve import Loop, Circuit, Feeder, Equipment
+    from zepben.evolve import Loop, Circuit, Feeder
 
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.evolve.model.cim.iec61970.base.core.regions import SubGeographicalRegion
@@ -35,9 +35,9 @@ class Substation(EquipmentContainer):
 
     _circuits: Optional[List[Circuit]] = None
 
-    def __init__(self, equipment: List[Equipment] = None, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None,
-                 energized_loops: List[Loop] = None, circuits: List[Circuit] = None):
-        super(Substation, self).__init__(equipment)
+    def __init__(self, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None, energized_loops: List[Loop] = None,
+                 circuits: List[Circuit] = None, **kwargs):
+        super(Substation, self).__init__(**kwargs)
         if normal_energized_feeders:
             for feeder in normal_energized_feeders:
                 self.add_feeder(feeder)
@@ -85,7 +85,7 @@ class Substation(EquipmentContainer):
         """
         return nlen(self._normal_energized_feeders)
 
-    def get_feeder(self, mrid: str) -> Substation:
+    def get_feeder(self, mrid: str) -> Feeder:
         """
         Get the `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder` for this `Substation` identified by `mrid`
 
@@ -134,7 +134,7 @@ class Substation(EquipmentContainer):
         """
         return nlen(self._loops)
 
-    def get_loop(self, mrid: str) -> Substation:
+    def get_loop(self, mrid: str) -> Loop:
         """
         Get the `zepben.evolve.cim.infiec61970.feeder.loop.Loop` for this `Substation` identified by `mrid`
 
@@ -183,7 +183,7 @@ class Substation(EquipmentContainer):
         """
         return nlen(self._energized_loops)
 
-    def get_energized_loop(self, mrid: str) -> Substation:
+    def get_energized_loop(self, mrid: str) -> Loop:
         """
         Get the `zepben.evolve.cim.infiec61970.feeder.loop.Loop` for this `Substation` identified by `mrid`
 
@@ -232,7 +232,7 @@ class Substation(EquipmentContainer):
         """
         return nlen(self._circuits)
 
-    def get_circuit(self, mrid: str) -> Substation:
+    def get_circuit(self, mrid: str) -> Circuit:
         """
         Get the `zepben.evolve.cim.infiec61970.feeder.circuit.Circuit` for this `Substation` identified by `mrid`
 

@@ -5,33 +5,40 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
-import re
+
 import os
+import re
 from collections.abc import Sized
-from typing import List, Optional, Iterable, Callable, Any, TypeVar, Generator
+from typing import List, Optional, Iterable, Callable, Any, TypeVar, Generator, Dict
 from uuid import UUID
 
-__all__ = ["get_by_mrid", "contains_mrid", "safe_remove", "nlen", "ngen", "is_none_or_empty", "require", "pb_or_none"]
+__all__ = ["get_by_mrid", "contains_mrid", "safe_remove", "safe_remove_by_id", "nlen", "ngen", "is_none_or_empty", "require", "pb_or_none", "CopyableUUID"]
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import IdentifiedObject
+    TIdentifiedObject = TypeVar('TIdentifiedObject', bound=IdentifiedObject)
 
 T = TypeVar('T')
 
 
-def snake2camelback(name):
+def snake2camelback(name: str):
     return ''.join(word.title() for word in name.split('_'))
 
 
 _camel_pattern = re.compile(r'(?<!^)(?=[A-Z])')
 
 
-def camel2snake(name):
+def camel2snake(name: str):
     return _camel_pattern.sub('_', name).lower()
 
 
-def iter_but_not_str(obj):
+def iter_but_not_str(obj: Any):
     return isinstance(obj, Iterable) and not isinstance(obj, (str, bytes, bytearray, dict))
 
 
-def get_by_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -> IdentifiedObject:
+def get_by_mrid(collection: Optional[Iterable[TIdentifiedObject]], mrid: str) -> TIdentifiedObject:
     """
     Get an `zepben.evolve.cim.iec61970.base.core.identified_object.IdentifiedObject` from `collection` based on
     its mRID.
@@ -65,7 +72,7 @@ def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -
         return False
 
 
-def safe_remove(collection: Optional[List], obj: IdentifiedObject):
+def safe_remove(collection: Optional[List[T]], obj: T):
     """
     Remove an IdentifiedObject from a collection safely.
     Raises `ValueError` if `obj` is not in the collection.
@@ -78,6 +85,21 @@ def safe_remove(collection: Optional[List], obj: IdentifiedObject):
         return collection
     else:
         raise ValueError(obj)
+
+
+def safe_remove_by_id(collection: Optional[Dict[str, IdentifiedObject]], obj: Optional[IdentifiedObject]):
+    """
+    Remove an IdentifiedObject from a collection safely.
+    Raises `ValueError` if `obj` is not in the collection.
+    Returns The collection if successfully removed or None if after removal the collection was empty.
+    """
+    if not obj or not collection:
+        raise KeyError(obj)
+
+    del collection[obj.mrid]
+    if not collection:
+        return None
+    return collection
 
 
 def nlen(sized: Optional[Sized]) -> int:
@@ -119,11 +141,10 @@ def pb_or_none(cim: Optional[Any]):
 
 
 class CopyableUUID(UUID):
-    
+
     def __init__(self):
         super().__init__(bytes=os.urandom(16), version=4)
 
-    def copy(self):
+    @staticmethod
+    def copy():
         return str(UUID(bytes=os.urandom(16), version=4))
-
-

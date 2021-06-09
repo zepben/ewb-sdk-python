@@ -51,10 +51,16 @@ class Terminal(AcDcTerminal):
     """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
     reference does not cause everything connected to it in the network to stay in memory."""
 
-    def __init__(self, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None):
-        self.conducting_equipment = conducting_equipment
+    def __init__(self, conducting_equipment: ConductingEquipment = None, connectivity_node: ConnectivityNode = None, **kwargs):
+        super(Terminal, self).__init__(**kwargs)
+        if conducting_equipment:
+            self.conducting_equipment = conducting_equipment
+
+        # We set the connectivity node to itself if the name parameter is not used to make sure the positional argument is wrapped in a reference.
         if connectivity_node:
             self.connectivity_node = connectivity_node
+        else:
+            self.connectivity_node = self._cn
 
     @property
     def conducting_equipment(self):

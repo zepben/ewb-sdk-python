@@ -6,7 +6,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import AssetOrganisationRole
 
 from zepben.evolve.model.cim.iec61968.common.location import Location
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -28,7 +31,8 @@ class Asset(IdentifiedObject):
 
     _organisation_roles: Optional[List[AssetOrganisationRole]] = None
 
-    def __init__(self, organisation_roles: List[AssetOrganisationRole] = None):
+    def __init__(self, organisation_roles: List[AssetOrganisationRole] = None, **kwargs):
+        super(Asset, self).__init__(**kwargs)
         if organisation_roles:
             for role in organisation_roles:
                 self.add_organisation_role(role)

@@ -84,10 +84,11 @@ class Location(IdentifiedObject):
 
     _position_points: Optional[List[PositionPoint]] = None
 
-    def __init__(self, position_points: List[PositionPoint] = None):
+    def __init__(self, position_points: List[PositionPoint] = None, **kwargs):
         """
         `position_points` A list of `PositionPoint`s to associate with this `Location`.
         """
+        super(Location, self).__init__(**kwargs)
         if position_points:
             for point in position_points:
                 self.add_point(point)
@@ -108,36 +109,46 @@ class Location(IdentifiedObject):
 
     def get_point(self, sequence_number: int) -> Optional[PositionPoint]:
         """
-        Get the `sequence_number` `PositionPoint` for this `DiagramObject`.
+        Get the `sequence_number` `PositionPoint` for this `Location`.
 
         `sequence_number` The sequence number of the `PositionPoint` to get.
         Returns The `PositionPoint` identified by `sequence_number`
         Raises IndexError if this `Location` didn't contain `sequence_number` points.
         """
-        return self._position_points[sequence_number] if 0 < nlen(self._position_points) < sequence_number else None
+        return self._position_points[sequence_number] if 0 <= sequence_number < nlen(self._position_points) else None
 
     def __getitem__(self, item):
         return self.get_point(item)
 
-    def add_point(self, point: PositionPoint, sequence_number: int = None) -> Location:
+    def add_point(self, point: PositionPoint) -> Location:
+        """
+        Associate a `PositionPoint` with this `Location`, assigning it a sequence_number of `num_points`.
+        `point` The `PositionPoint` to associate with this `Location`.
+        Returns A reference to this `Location` to allow fluent use.
+        """
+        return self.insert_point(point)
+
+    def insert_point(self, point: PositionPoint, sequence_number: int = None) -> Location:
         """
         Associate a `PositionPoint` with this `Location`
+
         `point` The `PositionPoint` to associate with this `Location`.
         `sequence_number` The sequence number of the `PositionPoint`.
         Returns A reference to this `Location` to allow fluent use.
-        Raises `ValueError` if `sequence_number` is set and not between 0 and `num_points()`
+        Raises `ValueError` if `sequence_number` < 0 or > `num_points()`.
         """
         if sequence_number is None:
             sequence_number = self.num_points()
         require(0 <= sequence_number <= self.num_points(),
-                lambda: f"Unable to add PositionPoint to Location {str(self)}. Sequence number {sequence_number} is invalid. "
-                        f"Expected a value between 0 and {self.num_points()}. Make sure you are adding the points in order and there are no gaps in the numbering.")
-        self._position_points = [] if self._position_points is None else self._position_points
+                lambda: f"Unable to add PositionPoint to {str(self)}. Sequence number {sequence_number} "
+                        f"is invalid. Expected a value between 0 and {self.num_points()}. Make sure you are "
+                        f"adding the points in the correct order and there are no gaps in the numbering.")
+        self._position_points = list() if self._position_points is None else self._position_points
         self._position_points.insert(sequence_number, point)
         return self
 
     def __setitem__(self, key, value):
-        return self.add_point(value, key)
+        return self.insert_point(value, key)
 
     def remove_point(self, point: PositionPoint) -> Location:
         """

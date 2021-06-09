@@ -7,8 +7,10 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional, Generator
-from typing import List
+from typing import Optional, Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Equipment
 
 from zepben.evolve.model.cim.iec61968.assets.asset import AssetContainer
 from zepben.evolve.model.cim.iec61968.common.location import Location
@@ -43,8 +45,8 @@ class EndDevice(AssetContainer):
 
     _usage_points: Optional[List[UsagePoint]] = None
 
-    def __init__(self, organisation_roles: List[AssetOrganisationRole] = None, usage_points: List[UsagePoint] = None):
-        super(EndDevice, self).__init__(organisation_roles=organisation_roles)
+    def __init__(self, usage_points: List[UsagePoint] = None, **kwargs):
+        super(EndDevice, self).__init__(**kwargs)
         if usage_points:
             for up in usage_points:
                 self.add_usage_point(up)
@@ -118,7 +120,8 @@ class UsagePoint(IdentifiedObject):
     _equipment: Optional[List[Equipment]] = None
     _end_devices: Optional[List[EndDevice]] = None
 
-    def __init__(self, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None):
+    def __init__(self, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, **kwargs):
+        super(UsagePoint, self).__init__(**kwargs)
         if equipment:
             for eq in equipment:
                 self.add_equipment(eq)
@@ -263,4 +266,3 @@ class Meter(EndDevice):
         `meter_id` The ID to set for this Meter. Will use `zepben.evolve.cim.iec61970.base.core.identified_object.IdentifiedObject.name` as a backing field.
         """
         self.name = meter_id
-

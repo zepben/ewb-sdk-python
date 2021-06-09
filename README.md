@@ -62,7 +62,7 @@ You can generate the [coverage report](htmlcov/index.html) using the following o
  pytest --cov=zepben.evolve --cov-report=html --cov-branch
  ```
 
-If you need to debug an async test, you will need to annotate the test with the following
+If you need to debug a test, you will need to annotate the test with the following
 to prevent the test from timing out while you step through the code:
 
 ```
@@ -97,7 +97,6 @@ to prevent the test from timing out while you step through the code:
    * Add the required creators to:
      - [```pb_creators.py```](test/pb_creators.py)
      - [```cim_creators.py```](test/cim_creators.py)
-   * Update [```constructor_validation.py```](test/cim/constructor_validation.py) 
    * Add test for each new class to  [test/cim/...](test/cim) package.
-   * Verify that al the test are passing. 
+   * Verify that all the test are passing. 
 1. Update release notes in [```changelog.md```](changelog.md).

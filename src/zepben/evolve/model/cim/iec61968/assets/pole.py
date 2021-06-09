@@ -6,7 +6,10 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, Generator
+from typing import List, Optional, Generator, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Streetlight
 
 from zepben.evolve.model.cim.iec61968.assets.structure import Structure
 from zepben.evolve.util import get_by_mrid, ngen, nlen, safe_remove
@@ -22,13 +25,12 @@ class Pole(Structure):
 
     _streetlights: Optional[List[Streetlight]] = None
 
-    def __init__(self, organisation_roles: List[AssetOrganisationRole] = None, streetlights: List[Streetlight] = None):
-        super(Pole, self).__init__(organisation_roles=organisation_roles)
+    def __init__(self, streetlights: List[Streetlight] = None, **kwargs):
+        super(Pole, self).__init__(**kwargs)
         if streetlights:
             for light in streetlights:
                 self.add_streetlight(light)
 
-    @property
     def num_streetlights(self) -> int:
         """
         Get the number of `zepben.evolve.cim.iec61968.assets.streetlight.Streetlight`s associated with this `Pole`.

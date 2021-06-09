@@ -26,61 +26,73 @@ MIN_SEQUENCE_NUMBER = 1
 ALPHANUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
 
-def identifiedobject():
-    return {"mrid": uuids(version=4).map(lambda x: str(x)), "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-            "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)}
-
-
-# IEC61968 COMMON #
-def document():
-    return {**identifiedobject(), "title": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), "created_date_time": datetimes(),
-            "author_name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), "type": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-            "status": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), "comment": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
-            }
-
-
-def agreement():
-    return {**document()}
-
-
-def organisation():
-    return builds(Organisation, **identifiedobject())
-
-
-def organisationrole():
-    return {**identifiedobject(), "organisations": builds(Organisation, **identifiedobject())}
-
-
+#######################
 # IEC61968 ASSET INFO #
-def cableinfo():
-    return builds(CableInfo, **wireinfo())
+#######################
 
 
-def wirematerialkind():
-    return sampled_from(WireMaterialKind)
+def create_cable_info():
+    return builds(CableInfo, **create_wire_info())
 
 
-def wireinfo():
-    return {**assetinfo(), "ratedCurrent": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER), "material": wirematerialkind()}
+def create_no_load_test():
+    return builds(
+        NoLoadTest,
+        **create_transformer_test(),
+        energised_end_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        exciting_current=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        exciting_current_zero=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        loss=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        loss_zero=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+    )
 
 
-def overheadwireinfo():
-    return builds(OverheadWireInfo, **wireinfo())
+def create_open_circuit_test():
+    return builds(
+        OpenCircuitTest,
+        **create_transformer_test(),
+        energised_end_step=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        energised_end_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        open_end_step=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        open_end_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        phase_shift=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
 
 
-def powertransformerinfo():
-    return builds(PowerTransformerInfo, **assetinfo(), transformer_tank_infos=lists(builds(TransformerTankInfo, **identifiedobject()), max_size=2))
+def create_overhead_wire_info():
+    return builds(OverheadWireInfo, **create_wire_info())
 
 
-def transformertankinfo():
-    return builds(TransformerTankInfo, **assetinfo(), transformer_end_infos=lists(builds(TransformerEndInfo, **identifiedobject()), max_size=2))
+def create_power_transformer_info():
+    return builds(
+        PowerTransformerInfo,
+        **create_asset_info(),
+        transformer_tank_infos=lists(builds(TransformerTankInfo, **create_identified_object()), max_size=2)
+    )
 
 
-def transformerendinfo():
+def create_short_circuit_test():
+    return builds(
+        ShortCircuitTest,
+        **create_transformer_test(),
+        current=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        energised_end_step=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        grounded_end_step=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        leakage_impedance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        leakage_impedance_zero=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        loss=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        loss_zero=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        power=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        voltage=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        voltage_ohmic_part=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_transformer_end_info():
     return builds(
         TransformerEndInfo,
-        **assetinfo(),
-        connection_kind=windingconnectionkind(),
+        **create_asset_info(),
+        connection_kind=sampled_winding_connection_kind(),
         emergency_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         end_number=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         insulation_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
@@ -89,550 +101,835 @@ def transformerendinfo():
         rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         rated_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         short_term_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        transformer_star_impedance=lists(builds(TransformerStarImpedance, **identifiedobject()), max_size=2)
+        transformer_tank_info=lists(builds(TransformerStarImpedance, **create_identified_object()), max_size=2),
+        transformer_star_impedance=lists(builds(TransformerStarImpedance, **create_identified_object()), max_size=2),
+        energised_end_no_load_tests=builds(NoLoadTest, **create_identified_object()),
+        energised_end_short_circuit_tests=builds(ShortCircuitTest, **create_identified_object()),
+        grounded_end_short_circuit_tests=builds(ShortCircuitTest, **create_identified_object()),
+        open_end_open_circuit_tests=builds(OpenCircuitTest, **create_identified_object()),
+        energised_end_open_circuit_tests=builds(OpenCircuitTest, **create_identified_object()),
     )
 
 
-def transformerstarimpedance():
+def create_transformer_tank_info():
+    return builds(TransformerTankInfo, **create_asset_info(), transformer_end_infos=lists(builds(TransformerEndInfo, **create_identified_object()), max_size=2))
+
+
+def create_transformer_test():
+    return {
+        **create_identified_object(),
+        "base_power": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        "temperature": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    }
+
+
+def create_wire_info():
+    return {
+        **create_asset_info(),
+        "rated_current": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        "material": sampled_wire_material_kind()
+    }
+
+
+def sampled_wire_material_kind():
+    return sampled_from(WireMaterialKind)
+
+
+###################
+# IEC61968 ASSETS #
+###################
+
+
+def create_asset():
+    return {
+        **create_identified_object(),
+        "location": builds(Location, **create_identified_object()),
+        "organisation_roles": lists(builds(AssetOwner, **create_identified_object()), max_size=2)
+    }
+
+
+def create_asset_info():
+    return {**create_identified_object()}
+
+
+def create_asset_container():
+    return {**create_asset()}
+
+
+def create_asset_organisation_role():
+    return {**create_organisation_role()}
+
+
+def create_asset_owner():
+    return builds(AssetOwner, **create_asset_organisation_role())
+
+
+def create_pole():
     return builds(
-        TransformerStarImpedance,
-        **identifiedobject(),
+        Pole,
+        **create_structure(),
+        streetlights=lists(builds(Streetlight, **create_identified_object()), max_size=2),
+        classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
+
+
+def create_streetlight():
+    return builds(
+        Streetlight,
+        **create_asset(),
+        pole=builds(Pole, **create_identified_object()),
+        light_rating=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        lamp_kind=sampled_streetlight_lamp_kind()
+    )
+
+
+def sampled_streetlight_lamp_kind():
+    return sampled_from(StreetlightLampKind)
+
+
+def create_structure():
+    return {**create_asset_container()}
+
+
+###################
+# IEC61968 COMMON #
+###################
+
+
+def create_agreement():
+    return {**create_document()}
+
+
+def create_document():
+    return {
+        **create_identified_object(),
+        "title": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        "created_date_time": datetimes(),
+        "author_name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        "type": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        "status": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        "comment": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    }
+
+
+def create_location():
+    return builds(Location, **create_identified_object(), main_address=builds(StreetAddress), position_points=lists(create_position_point(), max_size=4))
+
+
+def create_organisation():
+    return builds(Organisation, **create_identified_object())
+
+
+def create_organisation_role():
+    return {**create_identified_object(), "organisations": builds(Organisation, **create_identified_object())}
+
+
+def create_position_point():
+    return builds(PositionPoint, x_position=floats(min_value=-180.0, max_value=180.0), y_position=floats(min_value=-90.0, max_value=90.0))
+
+
+def create_street_address():
+    return builds(StreetAddress, postal_code=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), town_detail=builds(TownDetail))
+
+
+def create_town_detail():
+    return builds(TownDetail, name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), state_or_province=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
+
+
+######################
+# IEC61968 CUSTOMERS #
+######################
+
+
+def create_customer():
+    return builds(
+        Customer,
+        **create_organisation_role(),
+        kind=sampled_customer_kind(),
+        customer_agreements=builds(CustomerAgreement, **create_identified_object())
+    )
+
+
+def create_customer_agreement():
+    return builds(
+        CustomerAgreement,
+        **create_agreement(),
+        customer=builds(Customer, **create_identified_object()),
+        pricing_structures=lists(builds(PricingStructure, **create_identified_object()), max_size=2)
+    )
+
+
+def sampled_customer_kind():
+    return sampled_from(CustomerKind)
+
+
+def create_pricing_structure():
+    return builds(PricingStructure, **create_document(), tariffs=lists(builds(Tariff, **create_identified_object()), max_size=2))
+
+
+def create_tariffs():
+    return builds(Tariff, **create_document())
+
+
+#####################
+# IEC61968 METERING #
+#####################
+
+
+def create_end_device():
+    return {
+        **create_asset_container(),
+        "usage_points": lists(builds(UsagePoint, **create_identified_object()), max_size=2),
+        "customer": builds(Customer, **create_identified_object()),
+        "service_location": builds(Location, **create_identified_object())
+    }
+
+
+def create_meter():
+    return builds(Meter, **create_end_device())
+
+
+def create_usage_point():
+    return builds(
+        UsagePoint,
+        **create_identified_object(),
+        usage_point_location=builds(Location, **create_identified_object()),
+        equipment=lists(builds(EnergyConsumer, **create_identified_object()), max_size=2),
+        end_devices=lists(builds(Meter, **create_identified_object()), max_size=2)
+    )
+
+
+#######################
+# IEC61968 OPERATIONS #
+#######################
+
+
+def create_operational_restriction():
+    return builds(OperationalRestriction, **create_document(), equipment=lists(builds(PowerTransformer, **create_identified_object()), max_size=2))
+
+
+#####################################
+# IEC61970 BASE AUXILIARY EQUIPMENT #
+#####################################
+
+
+def create_auxiliary_equipment():
+    return {**create_equipment(), "terminal": builds(Terminal, **create_identified_object())}
+
+
+def create_fault_indicator():
+    return builds(FaultIndicator, **create_auxiliary_equipment())
+
+
+######################
+# IEC61970 BASE CORE #
+######################
+
+
+def create_ac_dc_terminal():
+    return {**create_identified_object()}
+
+
+def create_base_voltage():
+    return builds(BaseVoltage, **create_identified_object(), nominal_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER))
+
+
+def create_conducting_equipment():
+    return {
+        **create_equipment(),
+        "base_voltage": builds(BaseVoltage, **create_identified_object()),
+        "terminals": lists(builds(Terminal, phases=sampled_from(PhaseCode)), max_size=2)
+    }
+
+
+def create_connectivity_node():
+    return builds(ConnectivityNode, **create_identified_object(), terminals=lists(builds(Terminal, **create_identified_object()), max_size=10))
+
+
+def create_connectivity_node_container():
+    return {**create_power_system_resource()}
+
+
+def create_equipment():
+    return {
+        **create_power_system_resource(),
+        "in_service": booleans(),
+        "normally_in_service": booleans(),
+        "equipment_containers": lists(sampled_equipment_container(), max_size=2),
+        "usage_points": lists(builds(UsagePoint, **create_identified_object()), max_size=2),
+        "operational_restrictions": lists(builds(OperationalRestriction, **create_identified_object()), max_size=2),
+        "current_feeders": lists(builds(Feeder, **create_identified_object()), max_size=2)
+    }
+
+
+def create_equipment_container():
+    return {**create_connectivity_node_container(), "equipment": lists(sampled_equipment(), max_size=2)}
+
+
+def create_feeder():
+    return builds(
+        Feeder,
+        **create_equipment_container(),
+        normal_head_terminal=builds(Terminal, **create_identified_object()),
+        normal_energizing_substation=builds(Substation, **create_identified_object())
+    )
+
+
+def create_geographical_region():
+    return builds(
+        GeographicalRegion,
+        **create_identified_object(),
+        sub_geographical_regions=lists(builds(SubGeographicalRegion, **create_identified_object()), max_size=2)
+    )
+
+
+def create_identified_object():
+    return {
+        "mrid": uuids(version=4).map(lambda x: str(x)),
+        "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    }
+
+
+def sampled_phase_code():
+    return sampled_from(PhaseCode)
+
+
+def create_power_system_resource():
+    return {**create_identified_object(), "location": create_location(), "asset_info": sampled_asset_info()}
+
+
+def create_site():
+    return builds(Site, **create_equipment_container())
+
+
+def create_sub_geographical_region():
+    return builds(
+        SubGeographicalRegion,
+        **create_identified_object(),
+        geographical_region=builds(GeographicalRegion, **create_identified_object()),
+        substations=lists(builds(Substation, **create_identified_object()), max_size=2)
+    )
+
+
+def create_substation():
+    return builds(
+        Substation,
+        **create_equipment_container(),
+        sub_geographical_region=builds(SubGeographicalRegion, **create_identified_object()),
+        normal_energized_feeders=lists(builds(Feeder, **create_identified_object()), max_size=2),
+        loops=lists(builds(Loop, **create_identified_object()), max_size=2),
+        energized_loops=lists(builds(Loop, **create_identified_object()), max_size=2),
+        circuits=lists(builds(Circuit, **create_identified_object()), max_size=2)
+    )
+
+
+def create_terminal():
+    return builds(
+        Terminal,
+        **create_ac_dc_terminal(),
+        conducting_equipment=sampled_conducting_equipment(),
+        connectivity_node=builds(ConnectivityNode, **create_identified_object()),
+        traced_phases=builds(TracedPhases), phases=sampled_phase_code(),
+        sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER)
+    )
+
+
+################################
+# IEC61970 BASE DIAGRAM LAYOUT #
+################################
+
+
+def create_diagram_object_point():
+    return builds(DiagramObjectPoint, x_position=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), y_position=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+
+
+######################
+# IEC61970 BASE MEAS #
+######################
+
+
+def create_accumulator():
+    return builds(Accumulator, **create_measurement())
+
+
+def create_accumulator_value():
+    return builds(AccumulatorValue, **create_measurement())
+
+
+def create_analog():
+    return builds(Analog, **create_measurement(), positive_flow_in=booleans())
+
+
+def create_analog_value():
+    return builds(AnalogValue, **create_measurement())
+
+
+def create_control():
+    return builds(
+        Control,
+        **create_io_point(),
+        power_system_resource=sampled_equipment(),
+        remote_control=builds(RemoteControl, **create_identified_object())
+    )
+
+
+def create_discrete():
+    return builds(Discrete, **create_measurement())
+
+
+def create_discrete_value():
+    return builds(DiscreteValue, **create_measurement())
+
+
+def create_io_point():
+    return {**create_identified_object()}
+
+
+def create_measurement():
+    return {
+        **create_identified_object(),
+        "remote_source": builds(RemoteSource, **create_identified_object()),
+        "power_system_resource_mrid": uuids(version=4).map(lambda x: str(x)),
+        "terminal_mrid": uuids(version=4).map(lambda x: str(x)),
+        "phases": sampled_phase_code(),
+        "unit_symbol": sampled_unit_symbol()
+    }
+
+
+def sampled_unit_symbol():
+    return sampled_from(UnitSymbol)
+
+
+#######################
+# IEC61970 BASE SCADA #
+#######################
+
+def create_remote_control():
+    return builds(RemoteControl, **create_remote_point(), control=builds(Control, **create_identified_object()))
+
+
+def create_remote_point():
+    return {**create_identified_object()}
+
+
+def create_remote_source():
+    return builds(RemoteSource, **create_remote_point(), measurement=sampled_measurement())
+
+
+########################################
+# IEC61970 WIRES GENERATION PRODUCTION #
+########################################
+
+
+def sampled_battery_state_kind():
+    return sampled_from(BatteryStateKind)
+
+
+def create_battery_unit():
+    return builds(
+        BatteryUnit,
+        **create_power_electronics_unit(),
+        battery_state=sampled_battery_state_kind(),
+        rated_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER),
+        stored_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER)
+    )
+
+
+def create_photovoltaic_unit():
+    return builds(PhotoVoltaicUnit, **create_power_electronics_unit())
+
+
+def create_power_electronics_unit():
+    return {
+        **create_equipment(),
+        "power_electronics_connection": builds(PowerElectronicsConnection, **create_identified_object()),
+        "max_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        "min_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+    }
+
+
+def create_power_electronics_wind_unit():
+    return builds(PowerElectronicsWindUnit, **create_power_electronics_unit())
+
+
+#######################
+# IEC61970 BASE WIRES #
+#######################
+
+
+def create_ac_line_segment():
+    return builds(AcLineSegment, **create_conductor(), per_length_sequence_impedance=builds(PerLengthSequenceImpedance, **create_identified_object()))
+
+
+def create_breaker():
+    return builds(Breaker, **create_protected_switch())
+
+
+def create_busbar_section():
+    return builds(BusbarSection, **create_connector())
+
+
+def create_conductor():
+    return {**create_conducting_equipment(), "length": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)}
+
+
+def create_connector():
+    return {**create_conducting_equipment()}
+
+
+def create_disconnector():
+    return builds(Disconnector, **create_switch())
+
+
+def create_energy_connection():
+    return {**create_conducting_equipment()}
+
+
+def create_energy_consumer():
+    return builds(
+        EnergyConsumer,
+        **create_energy_connection(),
+        energy_consumer_phases=lists(builds(EnergyConsumerPhase, **create_identified_object()), max_size=2),
+        customer_count=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        grounded=booleans(),
+        p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        p_fixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        phase_connection=sampled_phase_shunt_connection_kind(),
+        q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        q_fixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_energy_consumer_phase():
+    return builds(
+        EnergyConsumerPhase,
+        **create_power_system_resource(),
+        energy_consumer=builds(EnergyConsumer, **create_identified_object()),
+        phase=sampled_single_phase_kind(),
+        p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        p_fixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        q_fixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_energy_source():
+    return builds(
+        EnergySource,
+        **create_energy_connection(),
+        energy_source_phases=lists(builds(EnergySourcePhase, **create_identified_object()), max_size=2),
+        active_power=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reactive_power=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        voltage_angle=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        voltage_magnitude=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        p_max=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        p_min=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rn=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xn=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_energy_source_phase():
+    return builds(
+        EnergySourcePhase,
+        **create_power_system_resource(),
+        energy_source=builds(EnergySource, **create_identified_object()),
+        phase=sampled_single_phase_kind()
+    )
+
+
+def create_fuse():
+    return builds(Fuse, **create_switch())
+
+
+def create_jumper():
+    return builds(Jumper, **create_switch())
+
+
+def create_junction():
+    return builds(Junction, **create_connector())
+
+
+def create_line():
+    return {**create_equipment_container()}
+
+
+def create_linear_shunt_compensator():
+    return builds(
+        LinearShuntCompensator,
+        **create_shunt_compensator(),
+        b0_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        b_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g0_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_load_break_switch():
+    return builds(LoadBreakSwitch, **create_protected_switch())
+
+
+def create_per_length_impedance():
+    return {**create_per_length_line_parameter()}
+
+
+def create_per_length_line_parameter():
+    return {**create_identified_object()}
+
+
+def create_per_length_sequence_impedance():
+    return builds(
+        PerLengthSequenceImpedance,
+        **create_per_length_impedance(),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        bch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        gch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        b0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def sampled_phase_shunt_connection_kind():
+    return sampled_from(PhaseShuntConnectionKind)
+
+
+def create_power_electronics_connection():
+    return builds(
+        PowerElectronicsConnection,
+        **create_power_system_resource(),
+        power_electronics_units=lists(builds(BatteryUnit, **create_identified_object()), max_size=2),
+        power_electronics_connection_phases=lists(builds(PowerElectronicsConnectionPhase, **create_identified_object()), max_size=2),
+        max_i_fault=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        max_q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        min_q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rated_s=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        rated_u=integers(min_value=0, max_value=MAX_32_BIT_INTEGER)
+    )
+
+
+def create_power_electronics_connection_phase():
+    return builds(
+        PowerElectronicsConnectionPhase,
+        **create_power_system_resource(),
+        power_electronics_connection=builds(PowerElectronicsConnection, **create_identified_object()),
+        phase=sampled_single_phase_kind(),
+        p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_power_transformer():
+    return builds(
+        PowerTransformer,
+        **create_conducting_equipment(),
+        power_transformer_ends=lists(builds(PowerTransformerEnd, **create_identified_object()), max_size=2),
+        vector_group=sampled_vector_group(),
+        transformer_utilisation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_power_transformer_end():
+    return builds(
+        PowerTransformerEnd,
+        **create_transformer_end(),
+        power_transformer=builds(PowerTransformer, **create_identified_object()),
+        rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        rated_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        transformer_end_info=builds(TransformerEndInfo, **identifiedobject())
+        connection_kind=sampled_winding_connection_kind(),
+        b=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        b0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        phase_angle_clock=integers(min_value=0, max_value=11)
     )
 
 
-# IEC61968 ASSETS #
-def asset():
-    return {**identifiedobject(), "location": builds(Location, **identifiedobject()),
-            "organisation_roles": lists(builds(AssetOwner, **identifiedobject()), max_size=2)}
+def create_protected_switch():
+    return {**create_switch()}
 
 
-def assetcontainer():
-    return {**asset()}
+def create_ratio_tap_changer():
+    return builds(
+        RatioTapChanger,
+        **create_tap_changer(),
+        transformer_end=builds(PowerTransformerEnd, **create_identified_object()),
+        step_voltage_increment=floats(min_value=0.0, max_value=1.0)
+    )
 
 
-def assetinfo():
-    return {**identifiedobject()}
+def create_recloser():
+    return builds(Recloser, **create_protected_switch())
 
 
-def assetorganisationrole():
-    return {**organisationrole()}
+def create_regulating_cond_eq():
+    return {**create_energy_connection(), "control_enabled": booleans()}
 
 
-def assetowner():
-    return builds(AssetOwner, **assetorganisationrole())
-
-
-def structure():
-    return {**assetcontainer()}
-
-
-def pole():
-    return builds(Pole, **structure(), streetlights=lists(builds(Streetlight, **identifiedobject()), max_size=2),
-                  classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
-
-
-def customer():
-    return builds(Customer, **organisationrole(), kind=customerkind(), customer_agreements=builds(CustomerAgreement, **identifiedobject()))
-
-
-def customeragreements():
-    # Note - customer is not set
-    return builds(CustomerAgreement, **agreement(), pricing_structures=lists(builds(PricingStructure, **identifiedobject()), max_size=2))
-
-
-def customerkind():
-    return sampled_from(CustomerKind)
-
-
-def pricingstructure():
-    return builds(PricingStructure, **document(), tariffs=lists(builds(Tariff, **identifiedobject()), max_size=2))
-
-
-def tariffs():
-    return builds(Tariff, **document())
-
-
-def streetlightlampkind():
-    return sampled_from(StreetlightLampKind)
-
-
-def streetlight():
-    return builds(Streetlight, **asset(), pole=builds(Pole, **identifiedobject()), light_rating=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-                  lamp_kind=streetlightlampkind())
-
-
-# IEC61968 COMMON #
-def location():
-    return builds(Location, **identifiedobject(), main_address=builds(StreetAddress), position_points=lists(positionpoint(), max_size=4))
-
-
-def positionpoint():
-    return builds(PositionPoint, x_position=floats(min_value=-180.0, max_value=180.0), y_position=floats(min_value=-90.0, max_value=90.0))
-
-
-def streetaddress():
-    return builds(StreetAddress, postal_code=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), town_detail=builds(TownDetail))
-
-
-def towndetail():
-    return builds(TownDetail, name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), state_or_province=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
-
-
-# IEC61968 METERING #
-def enddevice():
+def create_shunt_compensator():
     return {
-        **assetcontainer(),
-        "usage_points": lists(builds(UsagePoint, **identifiedobject()), max_size=2),
-        "customer": builds(Customer, **identifiedobject()),
-        "service_location": builds(Location, **identifiedobject())
+        **create_regulating_cond_eq(),
+        "sections": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "grounded": booleans(),
+        "nom_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        "phase_connection": sampled_phase_shunt_connection_kind()
     }
 
 
-def meter():
-    return builds(Meter, **enddevice())
+def sampled_single_phase_kind():
+    return sampled_from(SinglePhaseKind)
 
 
-def usagepoint():
-    return builds(UsagePoint, **identifiedobject(), usage_point_location=builds(Location, **identifiedobject()),
-                  equipment=lists(builds(EnergyConsumer, **identifiedobject()), max_size=2),
-                  end_devices=lists(builds(Meter, **identifiedobject()), max_size=2))
+def create_switch():
+    return {
+        **create_conducting_equipment(),
+        "_normally_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        "_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+    }
 
 
-# IEC61968 OPERATIONS #
-def operationalrestriction():
-    return builds(OperationalRestriction, **document(), equipment=lists(builds(PowerTransformer, **identifiedobject()), max_size=2))
+def create_tap_changer():
+    return {
+        **create_power_system_resource(),
+        "high_step": integers(min_value=10, max_value=15),
+        "low_step": integers(min_value=0, max_value=2),
+        "step": floats(min_value=2.0, max_value=10.0),
+        "neutral_step": integers(min_value=2, max_value=10),
+        "neutral_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        "normal_step": integers(min_value=2, max_value=10),
+        "control_enabled": booleans()
+    }
 
 
-# IEC61970 AUXILIARY EQUIPMENT #
-def auxiliaryequipment():
-    return {**equipment(), "terminal": builds(Terminal, **identifiedobject())}
+def create_transformer_end():
+    return {
+        **create_identified_object(),
+        "terminal": builds(Terminal, **create_identified_object()),
+        "base_voltage": builds(BaseVoltage, **create_identified_object()),
+        "ratio_tap_changer": builds(RatioTapChanger, **create_identified_object()),
+        "end_number": integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_END_NUMBER),
+        "grounded": booleans(),
+        "r_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "x_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "star_impedance": builds(TransformerStarImpedance, **create_identified_object())
+    }
 
 
-def faultindicator():
-    return builds(FaultIndicator, **auxiliaryequipment())
+def create_transformer_star_impedance():
+    return builds(
+        TransformerStarImpedance,
+        **create_identified_object(),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        transformer_end_info=builds(TransformerEndInfo, **create_identified_object())
+    )
 
 
-# IEC61970 CORE #
-def acdcterminal():
-    return {**identifiedobject()}
+def sampled_vector_group():
+    return sampled_from(VectorGroup)
 
 
-def basevoltage():
-    return builds(BaseVoltage, **identifiedobject(), nominal_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER))
+def sampled_winding_connection_kind():
+    return sampled_from(WindingConnection)
+
+
+#########################
+# IEC61970 INF IEC61970 #
+#########################
+
+
+def create_circuit():
+    return builds(
+        Circuit,
+        **create_line(),
+        loop=builds(Loop, **create_identified_object()),
+        end_terminals=lists(builds(Terminal, **create_identified_object()), max_size=2),
+        end_substations=lists(builds(Substation, **create_identified_object()), max_size=2)
+    )
+
+
+def create_loop():
+    return builds(
+        Loop,
+        **create_identified_object(),
+        circuits=lists(builds(Circuit, **create_identified_object()), max_size=2),
+        substations=lists(builds(Substation, **create_identified_object()), max_size=2),
+        energizing_substations=lists(builds(Substation, **create_identified_object()), max_size=2)
+    )
+
+
+#########
+# MODEL #
+#########
+
+
+def traced_phases():
+    return builds(
+        TracedPhases,
+        normal_status=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        current_status=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+    )
+
+
+###############
+# SAMPLE SETS #
+###############
 
 
 def sampled_asset_info():
     return choice([
-        builds(OverheadWireInfo, **identifiedobject()),
-        builds(CableInfo, **identifiedobject()),
-        builds(PowerTransformerInfo, **identifiedobject()),
-    ])
-
-
-def conductingequipment():
-    return {**equipment(), "base_voltage": builds(BaseVoltage, **identifiedobject()),
-            "terminals": lists(builds(Terminal, phases=sampled_from(PhaseCode)), max_size=2)
-            }
-
-
-def connectivitynode():
-    return builds(ConnectivityNode, **identifiedobject(), terminals=lists(builds(Terminal, **identifiedobject()), max_size=10))
-
-
-def connectivitynodecontainer():
-    return {**powersystemresource()}
-
-
-def sampled_equipment_container():
-    return choice([
-        builds(Feeder, **identifiedobject()),
-        builds(Site, **identifiedobject()),
-        builds(Circuit, **identifiedobject()),
-        builds(Loop, **identifiedobject()),
-        builds(Substation, **identifiedobject())
-    ])
-
-
-def sampled_equipment():
-    return choice([
-        builds(AcLineSegment, **identifiedobject()),
-        builds(PowerTransformer, **identifiedobject()),
-        builds(Breaker, **identifiedobject()),
-        builds(Disconnector, **identifiedobject()),
-        builds(EnergyConsumer, **identifiedobject()),
-        builds(EnergySource, **identifiedobject()),
-        builds(FaultIndicator, **identifiedobject())
+        builds(OverheadWireInfo, **create_identified_object()),
+        builds(CableInfo, **create_identified_object()),
+        builds(PowerTransformerInfo, **create_identified_object()),
     ])
 
 
 def sampled_conducting_equipment():
     return choice([
-        builds(AcLineSegment, **identifiedobject()),
-        builds(PowerTransformer, **identifiedobject()),
-        builds(Breaker, **identifiedobject()),
-        builds(Disconnector, **identifiedobject()),
-        builds(EnergyConsumer, **identifiedobject()),
-        builds(EnergySource, **identifiedobject()),
+        builds(AcLineSegment, **create_identified_object()),
+        builds(PowerTransformer, **create_identified_object()),
+        builds(Breaker, **create_identified_object()),
+        builds(Disconnector, **create_identified_object()),
+        builds(EnergyConsumer, **create_identified_object()),
+        builds(EnergySource, **create_identified_object()),
     ])
 
 
-def equipment():
-    # Note - usage_points, operational_restrictions, current_feeders, equipment_containers unset
-    return {**powersystemresource(), "in_service": booleans(), "normally_in_service": booleans(),
-            "equipment_containers": lists(sampled_equipment_container(), max_size=2),
-            "usage_points": lists(builds(UsagePoint, **identifiedobject()), max_size=2),
-            "operational_restrictions": lists(builds(OperationalRestriction, **identifiedobject()), max_size=2),
-            "current_feeders": lists(builds(Feeder, **identifiedobject()), max_size=2)}
-
-
-def equipmentcontainer():
-    # Note - equipment is not set
-    return {**connectivitynodecontainer()}
-
-
-def feeder():
-    return builds(Feeder, **equipmentcontainer(), normal_head_terminal=builds(Terminal, **identifiedobject()),
-                  normal_energizing_substation=builds(Substation, **identifiedobject()))
-
-
-def geographicalregion():
-    return builds(GeographicalRegion, **identifiedobject(), sub_geographical_regions=lists(builds(SubGeographicalRegion, **identifiedobject()), max_size=2))
-
-
-def powersystemresource():
-    return {**identifiedobject(), "location": location(), "asset_info": sampled_asset_info()}
-
-
-def site():
-    return builds(Site, **equipmentcontainer())
-
-
-def subgeographicalregion():
-    return builds(SubGeographicalRegion, **identifiedobject(), geographical_region=builds(GeographicalRegion, **identifiedobject()),
-                  substations=lists(builds(Substation, **identifiedobject()), max_size=2))
-
-
-def substation():
-    return builds(Substation, **equipmentcontainer(), sub_geographical_region=builds(SubGeographicalRegion, **identifiedobject()),
-                  normal_energized_feeders=lists(builds(Feeder, **identifiedobject()), max_size=2),
-                  loops=lists(builds(Loop, **identifiedobject()), max_size=2),
-                  energized_loops=lists(builds(Loop, **identifiedobject()), max_size=2),
-                  circuits=lists(builds(Circuit, **identifiedobject()), max_size=2))
-
-
-def phasecode():
-    return sampled_from(PhaseCode)
-
-
-def terminal():
-    return builds(Terminal, **acdcterminal(), conducting_equipment=sampled_conducting_equipment(),
-                  connectivity_node=builds(ConnectivityNode, **identifiedobject()),
-                  traced_phases=builds(TracedPhases), phases=phasecode(),
-                  sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER))
-
-
-# IEC61970 WIRES.GENERATION.PRODUCTION #
-def batterystatekind():
-    return sampled_from(BatteryStateKind)
-
-
-def batteryunit():
-    return builds(BatteryUnit, **powerelectronicsunit(), battery_state=batterystatekind(),
-                  rated_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER),
-                  stored_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER))
-
-
-def photovoltaicunit():
-    return builds(PhotoVoltaicUnit, **powerelectronicsunit())
-
-
-def powerelectronicsunit():
-    return {**equipment(), "power_electronics_connection": builds(PowerElectronicsConnection, **identifiedobject()),
-            "max_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-            "min_p": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)}
-
-
-def powerelectronicswindunit():
-    return builds(PowerElectronicsWindUnit, **powerelectronicsunit())
-
-
-# IEC61970 WIRES #
-def aclinesegment():
-    return builds(AcLineSegment, **conductor(), per_length_sequence_impedance=builds(PerLengthSequenceImpedance, **identifiedobject()))
-
-
-def breaker():
-    return builds(Breaker, **protectedswitch())
-
-
-def loadbreakswitch():
-    return builds(LoadBreakSwitch, **protectedswitch())
-
-
-def conductor():
-    return {**conductingequipment(), "length": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)}
-
-
-def connector():
-    return {**conductingequipment()}
-
-
-def disconnector():
-    return builds(Disconnector, **switch())
-
-
-def energyconnection():
-    return {**conductingequipment()}
-
-
-def phaseshuntconnectionkind():
-    return sampled_from(PhaseShuntConnectionKind)
-
-
-def energyconsumer():
-    return builds(EnergyConsumer, **energyconnection(), energy_consumer_phases=lists(builds(EnergyConsumerPhase, **identifiedobject()), max_size=2),
-                  customer_count=integers(min_value=0, max_value=MAX_32_BIT_INTEGER), grounded=booleans(),
-                  p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), p_fixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  phase_connection=phaseshuntconnectionkind(), q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  q_fixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-
-
-def singlephasekind():
-    return sampled_from(SinglePhaseKind)
-
-
-def energyconsumerphase():
-    return builds(EnergyConsumerPhase, **powersystemresource(), energy_consumer=builds(EnergyConsumer, **identifiedobject()),
-                  phase=singlephasekind(),
-                  p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), p_fixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), q_fixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-
-
-def energysource():
-    return builds(EnergySource, **energyconnection(), energy_source_phases=lists(builds(EnergySourcePhase, **identifiedobject()), max_size=2),
-                  active_power=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), reactive_power=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  voltage_angle=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), voltage_magnitude=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  p_max=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), p_min=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), rn=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), xn=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-
-
-def energysourcephase():
-    return builds(EnergySourcePhase, **powersystemresource(), energy_source=builds(EnergySource, **identifiedobject()), phase=singlephasekind())
-
-
-def fuse():
-    return builds(Fuse, **switch())
-
-
-def jumper():
-    return builds(Jumper, **switch())
-
-
-def junction():
-    return builds(Junction, **connector())
-
-
-def busbarsection():
-    return builds(BusbarSection, **connector())
-
-
-def line():
-    return {**equipmentcontainer()}
-
-
-def linearshuntcompensator():
-    return builds(LinearShuntCompensator, **shuntcompensator(), b0_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  b_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), g0_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  g_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-
-
-def perlengthlineparameter():
-    return {**identifiedobject()}
-
-
-def perlengthimpedance():
-    return {**perlengthlineparameter()}
-
-
-def perlengthsequenceimpedance():
-    return builds(PerLengthSequenceImpedance, **perlengthimpedance(), r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), bch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  gch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), b0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  g0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-
-
-def vectorgroup():
-    return sampled_from(VectorGroup)
-
-
-def powerelectronicsconnection():
-    return builds(PowerElectronicsConnection, **powersystemresource(), power_electronics_units=lists(builds(BatteryUnit, **identifiedobject()), max_size=2),
-                  power_electronics_connection_phases=lists(builds(PowerElectronicsConnectionPhase, **identifiedobject()), max_size=2),
-                  max_i_fault=integers(min_value=0, max_value=MAX_32_BIT_INTEGER), max_q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  min_q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), rated_s=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-                  rated_u=integers(min_value=0, max_value=MAX_32_BIT_INTEGER))
-
-
-def powerelectronicsconnectionphase():
-    return builds(PowerElectronicsConnectionPhase, **powersystemresource(),
-                  power_electronics_connection=builds(PowerElectronicsConnection, **identifiedobject()),
-                  phase=singlephasekind(), p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-
-
-def powertransformer():
-    return builds(PowerTransformer, **conductingequipment(), power_transformer_ends=lists(builds(PowerTransformerEnd, **identifiedobject()), max_size=2),
-                  vector_group=vectorgroup(), transformer_utilisation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
-
-
-def windingconnectionkind():
-    return sampled_from(WindingConnection)
-
-
-def powertransformerend():
-    # Note - powerTransformer not set
-    return builds(PowerTransformerEnd, **transformerend(), rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-                  rated_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER), r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), connection_kind=windingconnectionkind(),
-                  b=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), b0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), g0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-                  phase_angle_clock=integers(min_value=0, max_value=11))
-
-
-def protectedswitch():
-    return {**switch()}
-
-
-def ratiotapchanger():
-    return builds(RatioTapChanger, **tapchanger(), transformer_end=builds(PowerTransformerEnd, **identifiedobject()),
-                  step_voltage_increment=floats(min_value=0.0, max_value=1.0))
-
-
-def recloser():
-    return builds(Recloser, **protectedswitch())
-
-
-def regulatingcondeq():
-    return {**energyconnection(), "control_enabled": booleans()}
-
-
-def shuntcompensator():
-    return {**regulatingcondeq(), "sections": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), "grounded": booleans(),
-            "nom_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER), "phase_connection": phaseshuntconnectionkind()}
-
-
-def switch():
-    return {**conductingequipment(), "_normal_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-            "_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)}
-
-
-MIN_TC_INT = 0
-MAX_TC_INT = 3
-
-
-def tapchanger():
-    return {**powersystemresource(), "high_step": integers(min_value=10, max_value=15),
-            "low_step": integers(min_value=0, max_value=2), "step": floats(min_value=2.0, max_value=10.0),
-            "neutral_step": integers(min_value=2, max_value=10), "neutral_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-            "normal_step": integers(min_value=2, max_value=10), "control_enabled": booleans()}
-
-
-def transformerend():
-    return {
-        **identifiedobject(),
-        "terminal": builds(Terminal, **identifiedobject()),
-        "base_voltage": builds(BaseVoltage, **identifiedobject()),
-        "ratio_tap_changer": builds(RatioTapChanger, **identifiedobject()),
-        "end_number": integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_END_NUMBER),
-        "grounded": booleans(),
-        "r_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        "x_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        "star_impedance": builds(TransformerStarImpedance, **identifiedobject())
-    }
-
-
-def circuit():
-    return builds(Circuit, **line(), loop=builds(Loop, **identifiedobject()),
-                  end_terminals=lists(builds(Terminal, **identifiedobject()), max_size=2),
-                  end_substations=lists(builds(Substation, **identifiedobject()), max_size=2))
-
-
-def loop():
-    return builds(Loop, **identifiedobject(), circuits=lists(builds(Circuit, **identifiedobject()), max_size=2),
-                  substations=lists(builds(Substation, **identifiedobject()), max_size=2),
-                  energizing_substations=lists(builds(Substation, **identifiedobject()), max_size=2))
-
-
-# IEC61970 MEAS #
-def iopoint():
-    return {**identifiedobject()}
-
-
-def control():
-    return builds(Control, **iopoint(), power_system_resource=sampled_equipment(),
-                  remote_control=builds(RemoteControl, **identifiedobject()))
-
-
-def accumulator():
-    return builds(Accumulator, **measurement())
-
-
-def analog():
-    return builds(Analog, **measurement(), positive_flow_in=booleans())
-
-
-def discrete():
-    return builds(Discrete, **measurement())
-
-
-def discretevalue():
-    return builds(DiscreteValue, **measurement())
-
-
-def analogvalue():
-    return builds(AnalogValue, **measurement())
-
-
-def accumulatorvalue():
-    return builds(AccumulatorValue, **measurement())
-
-
-def unitsymbol():
-    return sampled_from(UnitSymbol)
-
-
-def measurement():
-    return {**identifiedobject(), "remote_source": builds(RemoteSource, **identifiedobject()),
-            "power_system_resource_mrid": uuids(version=4).map(lambda x: str(x)),
-            "terminal_mrid": uuids(version=4).map(lambda x: str(x)), "phases": phasecode(), "unit_symbol": unitsymbol()}
-
-
-# IEC61970 SCADA #
-def remotecontrol():
-    return builds(RemoteControl, **remotepoint(), control=builds(Control, **identifiedobject()))
-
-
-def remotepoint():
-    return {**identifiedobject()}
-
-
-def remotesource():
-    return builds(RemoteSource, **remotepoint(), measurement=sampled_measurement())
-
-
-# MODEL #
-def tracedphases():
-    return builds(TracedPhases, normal_status=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-                  current_status=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER))
+def sampled_equipment():
+    return choice([
+        builds(AcLineSegment, **create_identified_object()),
+        builds(PowerTransformer, **create_identified_object()),
+        builds(Breaker, **create_identified_object()),
+        builds(Disconnector, **create_identified_object()),
+        builds(EnergyConsumer, **create_identified_object()),
+        builds(EnergySource, **create_identified_object()),
+        builds(FaultIndicator, **create_identified_object())
+    ])
+
+
+def sampled_equipment_container():
+    return choice([
+        builds(Feeder, **create_identified_object()),
+        builds(Site, **create_identified_object()),
+        builds(Circuit, **create_identified_object()),
+        builds(Loop, **create_identified_object()),
+        builds(Substation, **create_identified_object())
+    ])
 
 
 def sampled_measurement():

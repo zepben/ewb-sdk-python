@@ -9,11 +9,8 @@ from __future__ import annotations
 from typing import List, Optional, Generator
 
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
-from zepben.evolve.model.cim.iec61968.metering.metering import UsagePoint
-from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer, Feeder
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
@@ -42,12 +39,18 @@ class TapChanger(PowerSystemResource):
     _normal_step: int = 0
     _step: float = 0.0
 
-    def __init__(self, high_step: int = 1, low_step: int = 0, neutral_step: int = 0, normal_step: int = 0, step: float = 0.0):
-        self._high_step = high_step
-        self._low_step = low_step
-        self._neutral_step = neutral_step
-        self._normal_step = normal_step
-        self._step = step
+    def __init__(self, high_step: int = None, low_step: int = None, neutral_step: int = None, normal_step: int = None, step: float = None, **kwargs):
+        super(TapChanger, self).__init__(**kwargs)
+        if high_step:
+            self._high_step = high_step
+        if low_step:
+            self._low_step = low_step
+        if neutral_step:
+            self._neutral_step = neutral_step
+        if normal_step:
+            self._normal_step = normal_step
+        if step:
+            self._step = step
         self._validate_steps()
 
     @property
@@ -57,7 +60,7 @@ class TapChanger(PowerSystemResource):
 
     @high_step.setter
     def high_step(self, val):
-        require(val > self._low_step, lambda: f"High step {val} must be greater than low step {self._low_step}")
+        require(val > self._low_step, lambda: f"High step [{val}] must be greater than low step [{self._low_step}]")
         self._check_steps(self.low_step, val)
         self._high_step = val
 
@@ -68,7 +71,7 @@ class TapChanger(PowerSystemResource):
 
     @low_step.setter
     def low_step(self, val):
-        require(val < self._high_step, lambda: f"Low step {val} must be less than high step {self._high_step}")
+        require(val < self._high_step, lambda: f"Low step [{val}] must be less than high step [{self._high_step}]")
         self._check_steps(val, self.high_step)
         self._low_step = val
 
@@ -80,7 +83,7 @@ class TapChanger(PowerSystemResource):
     @neutral_step.setter
     def neutral_step(self, val):
         require(self._low_step <= val <= self._high_step,
-                lambda: f"Neutral step {val} must be between high step {self._high_step} and low step {self._low_step}")
+                lambda: f"Neutral step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
         self._neutral_step = val
 
     @property
@@ -94,7 +97,7 @@ class TapChanger(PowerSystemResource):
     @normal_step.setter
     def normal_step(self, val):
         require(self._low_step <= val <= self._high_step,
-                lambda: f"Normal step {val} must be between high step {self._high_step} and low step {self._low_step}")
+                lambda: f"Normal step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
         self._normal_step = val
 
     @property
@@ -109,15 +112,15 @@ class TapChanger(PowerSystemResource):
 
     @step.setter
     def step(self, val):
-        require(self._low_step <= val <= self._high_step, lambda: f"Step {val} must be between high step {self._high_step} and low step {self._low_step}")
+        require(self._low_step <= val <= self._high_step, lambda: f"Step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
         self._step = val
 
     def _check_steps(self, low, high):
-        require(low <= self.step <= high, lambda: f"New value would invalidate current step of {self.step}")
+        require(low <= self.step <= high, lambda: f"New value would invalidate current step of [{self.step}]")
         require(low <= self.normal_step <= high,
-                lambda: f"New value would invalidate current normal_step of {self.normal_step}")
+                lambda: f"New value would invalidate current normal_step of [{self.normal_step}]")
         require(low <= self.neutral_step <= high,
-                lambda: f"New value would invalidate current neutral_step of {self.neutral_step}")
+                lambda: f"New value would invalidate current neutral_step of [{self.neutral_step}]")
 
     def _validate_steps(self):
         require(self._high_step > self._low_step,
@@ -239,7 +242,8 @@ class PowerTransformerEnd(TransformerEnd):
     secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the 
     clock as 11. The clock value of the transformer end number specified as 1, is assumed to be zero."""
 
-    def __init__(self, power_transformer: PowerTransformer = None):
+    def __init__(self, power_transformer: PowerTransformer = None, **kwargs):
+        super(PowerTransformerEnd, self).__init__(**kwargs)
         if power_transformer:
             self.power_transformer = power_transformer
 
@@ -307,18 +311,8 @@ class PowerTransformer(ConductingEquipment):
     result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
     """
 
-    def __init__(self,
-                 usage_points: List[UsagePoint] = None,
-                 equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None,
-                 current_feeders: List[Feeder] = None,
-                 terminals: List[Terminal] = None,
-                 power_transformer_ends: List[PowerTransformerEnd] = None):
-        super(PowerTransformer, self).__init__(usage_points=usage_points,
-                                               equipment_containers=equipment_containers,
-                                               operational_restrictions=operational_restrictions,
-                                               current_feeders=current_feeders,
-                                               terminals=terminals)
+    def __init__(self, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):
+        super(PowerTransformer, self).__init__(**kwargs)
         if power_transformer_ends:
             for end in power_transformer_ends:
                 if end.power_transformer is None:

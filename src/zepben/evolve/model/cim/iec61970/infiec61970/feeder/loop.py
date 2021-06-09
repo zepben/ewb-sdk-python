@@ -4,9 +4,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-
 from __future__ import annotations
-from typing import Optional, List, Generator
+
+from typing import Optional, List, Generator, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Circuit, Substation
 
 __all__ = ["Loop"]
 
@@ -17,12 +20,12 @@ from zepben.evolve.util import safe_remove, ngen, nlen, get_by_mrid
 class Loop(IdentifiedObject):
     """Missing description"""
 
-    loop: Optional[Loop] = None
     _circuits: Optional[List[Circuit]] = None
     _substations: Optional[List[Substation]] = None
     _energizing_substations: Optional[List[Substation]] = None
 
-    def __init__(self, circuits: List[Circuit] = None, substations: List[Substation] = None, energizing_substations: List[Substation] = None):
+    def __init__(self, circuits: List[Circuit] = None, substations: List[Substation] = None, energizing_substations: List[Substation] = None, **kwargs):
+        super(Loop, self).__init__(**kwargs)
         if circuits:
             for term in circuits:
                 self.add_circuit(term)
@@ -31,7 +34,7 @@ class Loop(IdentifiedObject):
             for sub in substations:
                 self.add_substation(sub)
 
-        if substations:
+        if energizing_substations:
             for sub in energizing_substations:
                 self.add_energizing_substation(sub)
 
@@ -60,7 +63,7 @@ class Loop(IdentifiedObject):
         """Return the number of end `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit`s associated with this `Loop`"""
         return nlen(self._circuits)
 
-    def get_circuit(self, mrid: str) -> Loop:
+    def get_circuit(self, mrid: str) -> Circuit:
         """
         Get the `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit` for this `Loop` identified by `mrid`
 
@@ -84,7 +87,7 @@ class Loop(IdentifiedObject):
         self._circuits.append(circuit)
         return self
 
-    def remove_circuits(self, circuit: Circuit) -> Loop:
+    def remove_circuit(self, circuit: Circuit) -> Loop:
         """
         Disassociate `circuit` from this `Loop`
 
@@ -107,7 +110,7 @@ class Loop(IdentifiedObject):
         """Return the number of end `zepben.evolve.cim.iec61970.base.core.substation.Substation`s associated with this `Loop`"""
         return nlen(self._substations)
 
-    def get_substation(self, mrid: str) -> Loop:
+    def get_substation(self, mrid: str) -> Substation:
         """
         Get the `zepben.evolve.cim.iec61970.base.core.substation.Substation` for this `Loop` identified by `mrid`
 
@@ -131,7 +134,7 @@ class Loop(IdentifiedObject):
         self._substations.append(substation)
         return self
 
-    def remove_substations(self, substation: Substation) -> Loop:
+    def remove_substation(self, substation: Substation) -> Loop:
         """
         Disassociate `substation` from this `Loop`
 
@@ -154,7 +157,7 @@ class Loop(IdentifiedObject):
         """Return the number of end `zepben.evolve.cim.iec61970.base.core.substation.Substation`s associated with this `Loop`"""
         return nlen(self._energizing_substations)
 
-    def get_energizing_substation(self, mrid: str) -> Loop:
+    def get_energizing_substation(self, mrid: str) -> Substation:
         """
         Get the `zepben.evolve.cim.iec61970.base.core.substation.Substation` for this `Loop` identified by `mrid`
 
@@ -178,7 +181,7 @@ class Loop(IdentifiedObject):
         self._energizing_substations.append(substation)
         return self
 
-    def remove_energizing_substations(self, substation: Substation) -> Loop:
+    def remove_energizing_substation(self, substation: Substation) -> Loop:
         """
         Disassociate `substation` from this `Loop`
 
