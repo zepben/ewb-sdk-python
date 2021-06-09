@@ -6,7 +6,12 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
+
+if TYPE_CHECKING:
+    from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction
+
+    TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
@@ -42,13 +47,13 @@ class Equipment(PowerSystemResource):
                 self.add_container(container)
         if operational_restrictions:
             for restriction in operational_restrictions:
-                self.add_restriction(restriction)
+                self.add_operational_restriction(restriction)
         if current_feeders:
             for cf in current_feeders:
                 self.add_current_feeder(cf)
 
     @property
-    def equipment_containers(self) -> Generator[Equipment, None, None]:
+    def containers(self) -> Generator[EquipmentContainer, None, None]:
         """
         The `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer`s this equipment belongs to.
         """
@@ -66,24 +71,21 @@ class Equipment(PowerSystemResource):
         """
         The normal `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder`s this equipment belongs to.
         """
-        for feeder in self._equipment_containers_of_type(Feeder):
-            yield feeder
+        return ngen(self._equipment_containers_of_type(Feeder))
 
     @property
     def sites(self) -> Generator[Site, None, None]:
         """
         The `zepben.evolve.cim.iec61970.base.core.equipment_container.Site`s this equipment belongs to.
         """
-        for site in self._equipment_containers_of_type(Site):
-            yield site
+        return ngen(self._equipment_containers_of_type(Site))
 
     @property
     def substations(self) -> Generator[Substation, None, None]:
         """
         The `zepben.evolve.cim.iec61970.base.core.substation.Substation`s this equipment belongs to.
         """
-        for sub in self._equipment_containers_of_type(Substation):
-            yield sub
+        return ngen(self._equipment_containers_of_type(Substation))
 
     @property
     def usage_points(self) -> Generator[UsagePoint, None, None]:
@@ -99,7 +101,7 @@ class Equipment(PowerSystemResource):
         """
         return ngen(self._operational_restrictions)
 
-    def num_equipment_containers(self) -> int:
+    def num_containers(self) -> int:
         """
         Returns The number of `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer`s associated with this `Equipment`
         """
@@ -135,13 +137,13 @@ class Equipment(PowerSystemResource):
         """
         return nlen(self._current_feeders)
 
-    def num_restrictions(self) -> int:
+    def num_operational_restrictions(self) -> int:
         """
         Returns The number of `zepben.evolve.cim.iec61968.operations.operational_restriction.OperationalRestriction`s associated with this `Equipment`
         """
         return nlen(self._operational_restrictions)
 
-    def get_container(self, mrid: str) -> Equipment:
+    def get_container(self, mrid: str) -> EquipmentContainer:
         """
         Get the `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer` for this `Equipment` identified by `mrid`
 
@@ -165,7 +167,7 @@ class Equipment(PowerSystemResource):
         self._equipment_containers.append(ec)
         return self
 
-    def remove_containers(self, ec: EquipmentContainer) -> Equipment:
+    def remove_container(self, ec: EquipmentContainer) -> Equipment:
         """
         Disassociate `ec` from this `Equipment`.
 
@@ -184,7 +186,7 @@ class Equipment(PowerSystemResource):
         self._equipment_containers = None
         return self
 
-    def get_current_feeder(self, mrid: str) -> Equipment:
+    def get_current_feeder(self, mrid: str) -> Feeder:
         """
         Get the `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder` for this `Equipment` identified by `mrid`
 
@@ -270,7 +272,7 @@ class Equipment(PowerSystemResource):
         self._usage_points = None
         return self
 
-    def get_restriction(self, mrid: str) -> OperationalRestriction:
+    def get_operational_restriction(self, mrid: str) -> OperationalRestriction:
         """
         Get the `zepben.evolve.cim.iec61968.operations.operational_restriction.OperationalRestriction` for this `Equipment` identified by `mrid`
 
@@ -280,7 +282,7 @@ class Equipment(PowerSystemResource):
         """
         return get_by_mrid(self._operational_restrictions, mrid)
 
-    def add_restriction(self, op: OperationalRestriction) -> Equipment:
+    def add_operational_restriction(self, op: OperationalRestriction) -> Equipment:
         """
         Associate `op` with this `Equipment`.
 
@@ -288,13 +290,13 @@ class Equipment(PowerSystemResource):
         Returns A reference to this `Equipment` to allow fluent use.
         Raises `ValueError` if another `OperationalRestriction` with the same `mrid` already exists for this `Equipment`.
         """
-        if self._validate_reference(op, self.get_restriction, "An OperationalRestriction"):
+        if self._validate_reference(op, self.get_operational_restriction, "An OperationalRestriction"):
             return self
         self._operational_restrictions = list() if self._operational_restrictions is None else self._operational_restrictions
         self._operational_restrictions.append(op)
         return self
 
-    def remove_restriction(self, op: OperationalRestriction) -> Equipment:
+    def remove_operational_restriction(self, op: OperationalRestriction) -> Equipment:
         """
         Disassociate `up` from this `Equipment`.
 
@@ -305,7 +307,7 @@ class Equipment(PowerSystemResource):
         self._operational_restrictions = safe_remove(self._operational_restrictions, op)
         return self
 
-    def clear_restrictions(self) -> Equipment:
+    def clear_operational_restrictions(self) -> Equipment:
         """
         Clear all `OperationalRestrictions`.
         Returns A reference to this `Equipment` to allow fluent use.
@@ -313,7 +315,7 @@ class Equipment(PowerSystemResource):
         self._operational_restrictions = None
         return self
 
-    def _equipment_containers_of_type(self, ectype: type) -> List[EquipmentContainer]:
+    def _equipment_containers_of_type(self, ectype: Type[TEquipmentContainer]) -> List[TEquipmentContainer]:
         """Get the `EquipmentContainer`s for this `Equipment` of type `ectype`"""
         if self._equipment_containers:
             return [ec for ec in self._equipment_containers if isinstance(ec, ectype)]

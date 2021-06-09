@@ -7,7 +7,10 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Pole
 
 from zepben.evolve.model.cim.iec61968.assets.asset import Asset
 

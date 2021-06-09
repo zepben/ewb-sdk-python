@@ -6,6 +6,7 @@
 from typing import Dict, List, Optional
 
 from pytest import fixture
+
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
@@ -14,7 +15,7 @@ from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, Energ
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
            "create_geographical_region", "create_subgeographical_region", "create_asset_owner", "create_meter", "create_power_transformer_end",
-           "basic_network_hierarchy", "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
+           "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
            "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals", "single_connectivitynode_network",
            "create_terminal", "network_service"]
 
@@ -49,8 +50,9 @@ def create_terminal(network: NetworkService, ce: Optional[ConductingEquipment], 
 
 
 def create_connectivitynode_with_terminals(ns: NetworkService, mrid: str, *terminal_phases: PhaseCode):
-    cn = ConnectivityNode(mrid)
+    cn = ConnectivityNode(mrid=mrid)
     ns.add(cn)
+    # noinspection PyTypeChecker
     for i, phase in enumerate(terminal_phases, start=1):
         t = create_terminal(ns, None, phase, i)
         ns.connect_by_mrid(t, mrid)
@@ -60,7 +62,7 @@ def create_junction_for_connecting(network: NetworkService, mrid: str = "", num_
     if not mrid:
         mrid = str(CopyableUUID())
 
-    junction = Junction(mrid, name="test junction")
+    junction = Junction(mrid=mrid, name="test junction")
     create_terminals(network, junction, num_terms, phases)
     network.add(junction)
     return junction
@@ -70,7 +72,7 @@ def create_source_for_connecting(network: NetworkService, mrid: str = "", num_te
     if not mrid:
         mrid = str(CopyableUUID())
 
-    source = EnergySource(mrid)
+    source = EnergySource(mrid=mrid)
     for phase in phases.single_phases:
         esp = EnergySourcePhase(energy_source=source, phase=phase)
 
@@ -87,7 +89,7 @@ def create_switch_for_connecting(network: NetworkService, mrid: str = "", num_te
     if not mrid:
         mrid = str(CopyableUUID())
 
-    cb = Breaker(mrid, name="test breaker")
+    cb = Breaker(mrid=mrid, name="test breaker")
     create_terminals(network, cb, num_terms, phases)
 
     cb.set_open(False)
@@ -113,7 +115,9 @@ def create_power_transformer_end(network: NetworkService, pt: PowerTransformer, 
 
 
 def create_asset_owner(network: NetworkService, company: str, customer_service: Optional[CustomerService] = None) -> AssetOwner:
+    # noinspection PyArgumentList
     ao = AssetOwner(mrid=f"{company}-owner-role")
+    # noinspection PyArgumentList
     org = Organisation(mrid=company, name=company)
     ao.organisation = org
     network.add(org)
@@ -125,12 +129,12 @@ def create_asset_owner(network: NetworkService, company: str, customer_service: 
     return ao
 
 
-def create_meter(network: NetworkService, id: str = "") -> Meter:
-    if not id:
-        id = str(CopyableUUID())
+def create_meter(network: NetworkService, mrid: str = "") -> Meter:
+    if not mrid:
+        mrid = str(CopyableUUID())
 
-    meter = Meter(id, name=f"companyMeterId{id}")
-    meter.add_organisation_role(create_asset_owner(network, f"company{id}"))
+    meter = Meter(mrid=mrid, name=f"companyMeterId{mrid}")
+    meter.add_organisation_role(create_asset_owner(network, f"company{mrid}"))
     network.add(meter)
     return meter
 
@@ -144,14 +148,14 @@ def create_power_transformer_for_connecting(network: NetworkService, mrid: str =
     if not mrid:
         mrid = str(CopyableUUID())
 
-    pt = PowerTransformer(mrid, name="test powertransformer")
+    pt = PowerTransformer(mrid=mrid, name="test powertransformer")
     terminals = create_terminals(network, pt, num_terms, phases)
 
     for eargs, t in zip(end_args, terminals):
         create_power_transformer_end(network, pt, t, **eargs)
 
     for i in range(num_usagepoints):
-        up = UsagePoint(f"{mrid}-up{i}")
+        up = UsagePoint(mrid=f"{mrid}-up{i}")
         pt.add_usage_point(up)
         up.add_equipment(pt)
         for j in range(num_meters):
@@ -173,16 +177,18 @@ def create_acls_for_connecting(network: NetworkService, mrid: str = "", phases: 
     try:
         plsi = network.get(plsi_mrid, PerLengthSequenceImpedance)
     except KeyError:
-        plsi = PerLengthSequenceImpedance(plsi_mrid)
+        # noinspection PyArgumentList
+        plsi = PerLengthSequenceImpedance(mrid=plsi_mrid)
         network.add(plsi)
 
     try:
         wi = network.get(wi_mrid, WireInfo)
     except KeyError:
-        wi = OverheadWireInfo(wi_mrid)
+        # noinspection PyArgumentList
+        wi = OverheadWireInfo(mrid=wi_mrid)
         network.add(wi)
 
-    acls = AcLineSegment(mrid, name=f"{mrid} name", per_length_sequence_impedance=plsi, asset_info=wi, length=length)
+    acls = AcLineSegment(mrid=mrid, name=f"{mrid} name", per_length_sequence_impedance=plsi, asset_info=wi, length=length)
     create_terminals(network, acls, 2, phases)
     network.add(acls)
     return acls
@@ -192,7 +198,7 @@ def create_energy_consumer_for_connecting(network: NetworkService, mrid: str = "
     if not mrid:
         mrid = str(CopyableUUID())
 
-    ec = EnergyConsumer(mrid, name=f"{mrid}-name")
+    ec = EnergyConsumer(mrid=mrid, name=f"{mrid}-name")
     create_terminals(network, ec, num_terms, phases)
     network.add(ec)
     return ec
@@ -202,7 +208,7 @@ def create_geographical_region(network: NetworkService, mrid: str = "", name: st
     if not mrid:
         mrid = str(CopyableUUID())
 
-    gr = GeographicalRegion(mrid, name=name)
+    gr = GeographicalRegion(mrid=mrid, name=name)
     network.add(gr)
     return gr
 
@@ -211,7 +217,7 @@ def create_subgeographical_region(network: NetworkService, mrid: str = "", name:
     if not mrid:
         mrid = str(CopyableUUID())
 
-    sgr = SubGeographicalRegion(mrid, name=name)
+    sgr = SubGeographicalRegion(mrid=mrid, name=name)
     if gr is not None:
         sgr.geographical_region = gr
         gr.add_sub_geographical_region(sgr)
@@ -224,7 +230,7 @@ def create_substation(network: NetworkService, mrid: str = "", name: str = "", s
     if not mrid:
         mrid = str(CopyableUUID())
 
-    sub = Substation(mrid, name=name, sub_geographical_region=sgr)
+    sub = Substation(mrid=mrid, name=name, sub_geographical_region=sgr)
     if sgr is not None:
         sgr.add_substation(sub)
 
@@ -239,7 +245,7 @@ def create_feeder(network: NetworkService, mrid: str = "", name: str = "", sub: 
     """
     if not mrid:
         mrid = str(CopyableUUID())
-    feeder = Feeder(mrid, name=name, normal_head_terminal=head_terminal, normal_energizing_substation=sub)
+    feeder = Feeder(mrid=mrid, name=name, normal_head_terminal=head_terminal, normal_energizing_substation=sub)
     sub.add_feeder(feeder)
     network.add(feeder)
 
@@ -254,13 +260,13 @@ def create_feeder(network: NetworkService, mrid: str = "", name: str = "", sub: 
 def create_operational_restriction(network: NetworkService, mrid: str = "", name: str = "", *equipment_mrids: str, **document_kwargs):
     if not mrid:
         mrid = str(CopyableUUID())
-    restriction = OperationalRestriction(mrid, name, **document_kwargs)
+    restriction = OperationalRestriction(mrid=mrid, name=name, **document_kwargs)
     network.add(restriction)
 
     for mrid in equipment_mrids:
         eq = network.get(mrid, Equipment)
         restriction.add_equipment(eq)
-        eq.add_restriction(restriction)
+        eq.add_operational_restriction(restriction)
 
     return restriction
 
@@ -271,7 +277,9 @@ def add_location(network: NetworkService, psr: PowerSystemResource, *coords: flo
     :return:
     """
     loc = Location()
+    # noinspection PyTypeChecker
     for i in range(0, len(coords), 2):
+        # noinspection PyArgumentList, PyUnresolvedReferences
         loc.add_point(PositionPoint(coords[i], coords[i + 1]))
     psr.location = loc
     network.add(loc)
@@ -429,13 +437,6 @@ def feeder_start_point_to_open_point_network(request):
 
     create_feeder(network_service, "f", "f", sub, fsp.get_terminal_by_sn(1))
     return network_service
-
-
-@fixture()
-def basic_network_hierarchy():
-    service = NetworkService()
-    feeder = Feeder(name="basic-feeder")
-    create_switch_for_connecting(service, "test_breaker", 2, PhaseCode.ABCN, normal_phase_states=[True] * 4, current_phase_states=[True] * 4)
 
 
 @fixture()

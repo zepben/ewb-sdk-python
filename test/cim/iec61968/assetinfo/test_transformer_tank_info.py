@@ -3,41 +3,51 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
 from test.cim.collection_validator import validate_collection_unordered
-from test.cim.constructor_validation import ai_kwargs, verify_asset_info_constructor, verify_ai_args, ai_args
-from zepben.evolve import TransformerEndInfo, TransformerTankInfo
+from test.cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
+    verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
+from zepben.evolve import TransformerTankInfo, TransformerEndInfo
 
-tti_args = (*ai_args, [TransformerEndInfo("tei1"), TransformerEndInfo("tei1")])
-
-tti_kwargs = {
-    **ai_kwargs,
+transformer_tank_info_kwargs = {
+    **asset_info_kwargs,
     "transformer_end_infos": lists(builds(TransformerEndInfo), max_size=2)
 }
 
-
-@given(**tti_kwargs)
-def test_tti_constructor_kwargs(transformer_end_infos, **kwargs):
-    tti = TransformerTankInfo(transformer_end_infos=transformer_end_infos)
-    assert [tei for tei in tti.transformer_end_infos] == transformer_end_infos
-    verify_asset_info_constructor(clazz=TransformerTankInfo, **kwargs)
+transformer_tank_info_args = [*asset_info_args, [TransformerEndInfo(), TransformerEndInfo()]]
 
 
-def test_tti_constructor_args():
-    tti = TransformerTankInfo(*tti_args)
-    assert tti._transformer_end_infos == tti_args[-1]
-    verify_ai_args(tti)
+def test_transformer_tank_info_constructor_default():
+    tti = TransformerTankInfo()
+
+    verify_asset_info_constructor_default(tti)
+    assert not list(tti.transformer_end_infos)
 
 
-def test_transformer_end_info_collection():
+@given(**transformer_tank_info_kwargs)
+def test_transformer_tank_info_constructor_kwargs(transformer_end_infos, **kwargs):
+    tti = TransformerTankInfo(transformer_end_infos=transformer_end_infos, **kwargs)
+
+    verify_asset_info_constructor_kwargs(tti, **kwargs)
+    assert list(tti.transformer_end_infos) == transformer_end_infos
+
+
+def test_transformer_tank_info_constructor_args():
+    tti = TransformerTankInfo(*transformer_tank_info_args)
+
+    verify_asset_info_constructor_args(tti)
+    assert list(tti.transformer_end_infos) == transformer_tank_info_args[-1]
+
+
+def test_transformer_tank_info_collection():
+    # noinspection PyArgumentList
     validate_collection_unordered(TransformerTankInfo,
                                   lambda mrid, _: TransformerEndInfo(mrid),
                                   TransformerTankInfo.num_transformer_end_infos,
                                   TransformerTankInfo.get_transformer_end_info,
-                                  lambda it: TransformerTankInfo.transformer_end_infos.fget(it),
+                                  TransformerTankInfo.transformer_end_infos,
                                   TransformerTankInfo.add_transformer_end_info,
                                   TransformerTankInfo.remove_transformer_end_info,
                                   TransformerTankInfo.clear_transformer_end_infos)

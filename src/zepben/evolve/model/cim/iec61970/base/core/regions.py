@@ -6,7 +6,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Substation
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
@@ -20,7 +23,8 @@ class GeographicalRegion(IdentifiedObject):
     """
     _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = None
 
-    def __init__(self, sub_geographical_regions: List[SubGeographicalRegion] = None):
+    def __init__(self, sub_geographical_regions: List[SubGeographicalRegion] = None, **kwargs):
+        super(GeographicalRegion, self).__init__(**kwargs)
         if sub_geographical_regions:
             for sgr in sub_geographical_regions:
                 self.add_sub_geographical_region(sgr)
@@ -56,7 +60,7 @@ class GeographicalRegion(IdentifiedObject):
         Returns A reference to this `GeographicalRegion` to allow fluent use.
         Raises `ValueError` if another `SubGeographicalRegion` with the same `mrid` already exists for this `GeographicalRegion`.
         """
-        if self._validate_reference(sub_geographical_region, self.get_sub_geographical_region, "A SubgeographicalRegion"):
+        if self._validate_reference(sub_geographical_region, self.get_sub_geographical_region, "A SubGeographicalRegion"):
             return self
         self._sub_geographical_regions = list() if self._sub_geographical_regions is None else self._sub_geographical_regions
         self._sub_geographical_regions.append(sub_geographical_region)
@@ -91,7 +95,8 @@ class SubGeographicalRegion(IdentifiedObject):
 
     _substations: Optional[List[Substation]] = None
 
-    def __init__(self, substations: List[Substation] = None):
+    def __init__(self, substations: List[Substation] = None, **kwargs):
+        super(SubGeographicalRegion, self).__init__(**kwargs)
         if substations:
             for sub in substations:
                 self.add_substation(sub)
@@ -124,8 +129,11 @@ class SubGeographicalRegion(IdentifiedObject):
         Associate a `Substation` with this `GeographicalRegion`
 
         `substation` the `zepben.evolve.iec61970.base.core.substation.Substation` to associate with this `SubGeographicalRegion`.
+
         Returns A reference to this `SubGeographicalRegion` to allow fluent use.
-        Raises `ValueError` if another `zepben.evolve.iec61970.base.core.substation.Substation` with the same `mrid` already exists for this `GeographicalRegion`.
+
+        Raises `ValueError` if another `zepben.evolve.iec61970.base.core.substation.Substation` with the same `mrid` already exists for this
+        `GeographicalRegion`.
         """
         if self._validate_reference(substation, self.get_substation, "A Substation"):
             return self

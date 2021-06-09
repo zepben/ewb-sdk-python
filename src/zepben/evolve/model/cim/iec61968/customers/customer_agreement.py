@@ -6,7 +6,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import PricingStructure, Customer
 
 from zepben.evolve.model.cim.iec61968.common.document import Agreement
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
@@ -26,8 +29,10 @@ class CustomerAgreement(Agreement):
 
     _pricing_structures: Optional[List[PricingStructure]] = None
 
-    def __init__(self, customer: Customer = None, pricing_structures: List[PricingStructure] = None):
-        self.customer = customer
+    def __init__(self, customer: Customer = None, pricing_structures: List[PricingStructure] = None, **kwargs):
+        super(CustomerAgreement, self).__init__(**kwargs)
+        if customer:
+            self.customer = customer
         if pricing_structures:
             for ps in pricing_structures:
                 self.add_pricing_structure(ps)

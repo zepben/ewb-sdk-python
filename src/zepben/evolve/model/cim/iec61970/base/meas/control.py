@@ -6,7 +6,10 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import RemoteControl
 
 from zepben.evolve.model.cim.iec61970.base.meas.iopoint import IoPoint
 

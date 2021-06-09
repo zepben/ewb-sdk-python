@@ -1,0 +1,26 @@
+#  Copyright 2021 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from hypothesis import given
+
+from test.cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
+    verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_kwargs, protected_switch_args
+from zepben.evolve import Breaker
+
+breaker_kwargs = protected_switch_kwargs
+breaker_args = protected_switch_args
+
+
+def test_breaker_constructor_default():
+    verify_protected_switch_constructor_default(Breaker())
+
+
+@given(**breaker_kwargs)
+def test_breaker_constructor_kwargs(**kwargs):
+    verify_protected_switch_constructor_kwargs(Breaker(**kwargs), **kwargs)
+
+
+def test_breaker_constructor_args():
+    verify_protected_switch_constructor_args(Breaker(*breaker_args))

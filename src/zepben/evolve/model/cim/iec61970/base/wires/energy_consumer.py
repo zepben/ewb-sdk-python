@@ -42,7 +42,8 @@ class EnergyConsumerPhase(PowerSystemResource):
     q_fixed: float = 0.0
     """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    def __init__(self, energy_consumer: EnergyConsumer = None):
+    def __init__(self, energy_consumer: EnergyConsumer = None, **kwargs):
+        super(EnergyConsumerPhase, self).__init__(**kwargs)
         if energy_consumer:
             self.energy_consumer = energy_consumer
 
@@ -89,11 +90,8 @@ class EnergyConsumer(EnergyConnection):
     q_fixed: float = 0.0
     """Power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, terminals: List[Terminal] = None,
-                 energy_consumer_phases: List[EnergyConsumerPhase] = None):
-        super(EnergyConsumer, self).__init__(usage_points=usage_points, equipment_containers=equipment_containers, operational_restrictions=operational_restrictions,
-                         current_feeders=current_feeders, terminals=terminals)
+    def __init__(self, energy_consumer_phases: List[EnergyConsumerPhase] = None, **kwargs):
+        super(EnergyConsumer, self).__init__(**kwargs)
         if energy_consumer_phases:
             for phase in energy_consumer_phases:
                 self.add_phase(phase)
@@ -114,7 +112,7 @@ class EnergyConsumer(EnergyConnection):
         """The individual phase models for this energy consumer."""
         return ngen(self._energy_consumer_phases)
 
-    def get_phase(self, mrid: str) -> EnergyConsumer:
+    def get_phase(self, mrid: str) -> EnergyConsumerPhase:
         """
         Get the `EnergyConsumerPhase` for this `EnergyConsumer` identified by `mrid`
 

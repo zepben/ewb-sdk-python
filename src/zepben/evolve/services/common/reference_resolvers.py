@@ -204,7 +204,7 @@ esp_to_es_resolver = ReferenceResolver(EnergySourcePhase, EnergySource, lambda t
 
 eq_to_curfeeder_resolver = ReferenceResolver(Equipment, Feeder, lambda t, r: t.add_current_feeder(r))
 eq_to_ec_resolver = ReferenceResolver(Equipment, EquipmentContainer, lambda t, r: t.add_container(r))
-eq_to_or_resolver = ReferenceResolver(Equipment, OperationalRestriction, lambda t, r: t.add_restriction(r))
+eq_to_or_resolver = ReferenceResolver(Equipment, OperationalRestriction, lambda t, r: t.add_operational_restriction(r))
 eq_to_up_resolver = ReferenceResolver(Equipment, UsagePoint, lambda t, r: t.add_usage_point(r))
 
 ec_to_eq_resolver = ReferenceResolver(EquipmentContainer, Equipment, lambda t, r: t.add_equipment(r))

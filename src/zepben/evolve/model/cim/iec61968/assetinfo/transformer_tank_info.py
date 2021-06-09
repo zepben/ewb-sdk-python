@@ -20,7 +20,8 @@ class TransformerTankInfo(AssetInfo):
     _transformer_end_infos: Optional[List[TransformerEndInfo]] = None
     """Data for all the ends described by this transformer tank data."""
 
-    def __init__(self, transformer_end_infos: List[TransformerEndInfo] = None):
+    def __init__(self, transformer_end_infos: List[TransformerEndInfo] = None, **kwargs):
+        super(TransformerTankInfo, self).__init__(**kwargs)
         if transformer_end_infos:
             for tei in transformer_end_infos:
                 self.add_transformer_end_info(tei)
@@ -52,8 +53,11 @@ class TransformerTankInfo(AssetInfo):
         """
         `tei` The `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo` to
         associate with this `TransformerTankInfo`.
+
         Returns A reference to this `TransformerTankInfo` to allow fluent use.
-        Raises `ValueError` if another `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo` with the same `mrid` already exists in this `TransformerTankInfo`
+
+        Raises `ValueError` if another `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo` with the same `mrid` already
+        exists in this `TransformerTankInfo`
         """
         if self._validate_reference(tei, self.get_transformer_end_info, "A TransformerEndInfo"):
             return self

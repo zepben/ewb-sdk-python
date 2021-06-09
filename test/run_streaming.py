@@ -20,7 +20,7 @@ profile = False
 def run_streaming():
     print(platform.architecture())
     _time("get feeder", run_feeder)
-    # This takes about 5:30 if you are not using profiling, about 7:30 if you are, so it is disabled by default.
+    # Depending on the database you have loaded this can take substantial time (minutes), so it is disabled by default.
     # _time("retrieve network", run_retrieve)
     _time("retrieve network hierarchy", run_network_hierarchy)
 

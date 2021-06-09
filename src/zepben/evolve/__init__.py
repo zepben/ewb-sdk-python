@@ -19,6 +19,10 @@ from zepben.evolve.model.cim.iec61968.operations.operational_restriction import 
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
+from zepben.evolve.model.cim.iec61968.assetinfo.transformer_test import *
+from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
+from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
+from zepben.evolve.model.cim.iec61968.assetinfo.short_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import *
 from zepben.evolve.model.cim.iec61968.metering.metering import *

@@ -6,7 +6,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import CustomerAgreement
 
 from zepben.evolve.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.evolve.model.cim.iec61968.customers.customer_kind import CustomerKind
@@ -25,7 +28,8 @@ class Customer(OrganisationRole):
 
     _customer_agreements: Optional[List[CustomerAgreement]] = None
 
-    def __init__(self, customer_agreements: List[CustomerAgreement] = None):
+    def __init__(self, customer_agreements: List[CustomerAgreement] = None, **kwargs):
+        super(Customer, self).__init__(**kwargs)
         if customer_agreements:
             for agreement in customer_agreements:
                 self.add_agreement(agreement)

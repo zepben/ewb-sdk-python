@@ -1,3 +1,8 @@
+#  Copyright 2021 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import namedtuple
 
 from pytest import fixture
@@ -16,7 +21,9 @@ def tnc():
     cn1 = ConnectivityNode()
     cn2 = ConnectivityNode()
     pt_info = PowerTransformerInfo()
+    # noinspection PyArgumentList
     point1 = PositionPoint(x_position=149.12791965570293, y_position=-35.277592101000934)
+    # noinspection PyArgumentList
     point2 = PositionPoint(x_position=149.12779472660375, y_position=-35.278183862759285)
     loc1 = Location().add_point(point1)
     loc2 = Location().add_point(point2)

@@ -20,7 +20,8 @@ class PowerTransformerInfo(AssetInfo):
     _transformer_tank_infos: Optional[List[TransformerTankInfo]] = None
     """Data for all the tanks described by this power transformer data."""
 
-    def __init__(self, transformer_tank_infos: List[TransformerTankInfo] = None):
+    def __init__(self, transformer_tank_infos: List[TransformerTankInfo] = None, **kwargs):
+        super(PowerTransformerInfo, self).__init__(**kwargs)
         if transformer_tank_infos:
             for ti in transformer_tank_infos:
                 self.add_transformer_tank_info(ti)
@@ -52,8 +53,11 @@ class PowerTransformerInfo(AssetInfo):
         """
         `tti` The `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo` to
         associate with this `PowerTransformerInfo`.
+
         Returns A reference to this `PowerTransformerInfo` to allow fluent use.
-        Raises `ValueError` if another `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo` with the same `mrid` already exists in this `PowerTransformerInfo`
+
+        Raises `ValueError` if another `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo` with the same `mrid` already
+        exists in this `PowerTransformerInfo`
         """
         if self._validate_reference(tti, self.get_transformer_tank_info, "A TransformerTankInfo"):
             return self

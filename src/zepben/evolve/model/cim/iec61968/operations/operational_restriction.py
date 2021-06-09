@@ -6,7 +6,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Equipment
 
 from zepben.evolve.model.cim.iec61968.common.document import Document
 from zepben.evolve.util import get_by_mrid, nlen, ngen, safe_remove
@@ -27,12 +30,12 @@ class OperationalRestriction(Document):
     """
     _equipment: Optional[List[Equipment]] = None
 
-    def __init__(self, equipment: List[Equipment] = None):
+    def __init__(self, equipment: List[Equipment] = None, **kwargs):
+        super(OperationalRestriction, self).__init__(**kwargs)
         if equipment:
             for eq in equipment:
                 self.add_equipment(eq)
 
-    @property
     def num_equipment(self):
         """
         Returns the number of `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` associated with this `OperationalRestriction`

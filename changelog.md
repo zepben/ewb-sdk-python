@@ -14,11 +14,15 @@
 
 ##### New Features
 * Added the following CIM classes:
-  * TransformerTankInfo
-  * TransformerStarImpedance.
-  * TransformerEndInfo
   * BusbarSection
+  * NoLoadTest
   * LoadBreakSwitch
+  * OpenCircuitTest
+  * ShortCircuitTest
+  * TransformerEndInfo
+  * TransformerStarImpedance.
+  * TransformerTankInfo
+  * TransformerTest
 * Example simple bus branch network added in `zepben.evolve.examples.simple_bus_branch`.
 * Helper factory methods for AcLineSegment, Junction (Bus), PowerTransformer, EnergySource, and EnergyConsumer added to `NetworkService` and available
 through `zepben.evolve.services.network.network_extensions`.

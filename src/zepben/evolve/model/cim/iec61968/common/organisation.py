@@ -10,4 +10,7 @@ __all__ = ["Organisation"]
 
 
 class Organisation(IdentifiedObject):
+    """
+    Organisation that might have roles as utility, contractor, supplier, manufacturer, customer, etc.
+    """
     pass

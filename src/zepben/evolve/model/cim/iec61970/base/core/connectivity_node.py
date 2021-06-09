@@ -6,12 +6,15 @@
 
 from __future__ import annotations
 
-from typing import Generator, List
+from typing import Generator, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Terminal
 
 from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.evolve.util import get_by_mrid
+from zepben.evolve.util import get_by_mrid, ngen
 
 __all__ = ["ConnectivityNode"]
 
@@ -21,10 +24,12 @@ class ConnectivityNode(IdentifiedObject):
     """
     Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance.
     """
+    # noinspection PyDunderSlots
     __slots__ = ["_terminals", "__weakref__"]
     _terminals: List[Terminal] = []
 
-    def __init__(self, terminals: List[Terminal] = None):
+    def __init__(self, terminals: List[Terminal] = None, **kwargs):
+        super(ConnectivityNode, self).__init__(**kwargs)
         if terminals:
             for term in terminals:
                 self.add_terminal(term)
@@ -43,10 +48,9 @@ class ConnectivityNode(IdentifiedObject):
         """
         The `zepben.evolve.cim.iec61970.base.core.terminal.Terminal`s attached to this `ConnectivityNode`
         """
-        for term in self._terminals:
-            yield term
+        return ngen(self._terminals)
 
-    def get_terminal_by_mrid(self, mrid: str) -> Terminal:
+    def get_terminal(self, mrid: str) -> Terminal:
         """
         Get the `zepben.evolve.iec61970.base.core.terminal.Terminal` for this `ConnectivityNode` identified by `mrid`
 
@@ -64,7 +68,7 @@ class ConnectivityNode(IdentifiedObject):
         Returns A reference to this `ConnectivityNode` to allow fluent use.
         Raises `ValueError` if another `Terminal` with the same `mrid` already exists for this `ConnectivityNode`.
         """
-        if self._validate_reference(terminal, self.get_terminal_by_mrid, "A Terminal"):
+        if self._validate_reference(terminal, self.get_terminal, "A Terminal"):
             return self
 
         self._terminals.append(terminal)
@@ -101,4 +105,3 @@ class ConnectivityNode(IdentifiedObject):
             except AttributeError:
                 pass
         return None
-

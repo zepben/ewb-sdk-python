@@ -22,7 +22,8 @@ from zepben.evolve import Terminal, resolver, UnresolvedReference, NetworkServic
 
 @fixture
 def service():
-    service = BaseService("base_service")
+    # noinspection PyArgumentList
+    service = BaseService(name="base_service")
     yield service
 
 
@@ -76,6 +77,7 @@ def test_unresolved_bidirectional_references(service: BaseService):
     assert service.add(term)
     assert service.resolve_or_defer_reference(resolver.conducting_equipment(term), "j1") is False
 
+    # noinspection PyArgumentList
     assert list(service.unresolved_references())[0] == UnresolvedReference(term, "j1", resolver.conducting_equipment(term).resolver)
     assert "j1" in service.get_unresolved_reference_mrids_by_resolver(resolver.conducting_equipment(term))
     assert "j1" in service.get_unresolved_reference_mrids_by_resolver([resolver.conducting_equipment(term)])
@@ -96,10 +98,12 @@ def test_unresolved_unidirectional_references(service: BaseService):
     j1 = Junction(mrid="j1")
     assert service.add(j1)
     assert service.resolve_or_defer_reference(resolver.ce_base_voltage(j1), "bv1") is False
+    # noinspection PyArgumentList
     assert list(service.unresolved_references())[0] == UnresolvedReference(j1, "bv1", resolver.ce_base_voltage(j1).resolver)
     assert "bv1" in service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(j1))
 
-    bv1 = BaseVoltage("bv1")
+    # noinspection PyArgumentList
+    bv1 = BaseVoltage(mrid="bv1")
     assert service.add(bv1)
     assert not service.has_unresolved_references()
     assert not list(service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(j1)))
@@ -116,16 +120,18 @@ def test_mrid_must_be_unique(service):
 
 
 def test_unresolved_references(service: BaseService):
-    f = Feeder("f")
+    f = Feeder(mrid="f")
     acls1 = AcLineSegment(mrid="acls1")
     acls2 = AcLineSegment(mrid="acls2")
-    plsi1 = PerLengthSequenceImpedance("plsi1")
+    # noinspection PyArgumentList
+    plsi1 = PerLengthSequenceImpedance(mrid="plsi1")
     service.resolve_or_defer_reference(resolver.per_length_sequence_impedance(acls1), "plsi1")
     t1 = Terminal(mrid="t1")
     t2 = Terminal(mrid="t2")
     service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t1")
     service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t2")
-    ci1 = CableInfo("ci1")
+    # noinspection PyArgumentList
+    ci1 = CableInfo(mrid="ci1")
     service.resolve_or_defer_reference(resolver.asset_info(acls1), "ci1")
     service.resolve_or_defer_reference(resolver.containers(acls1), "f")
     service.resolve_or_defer_reference(resolver.containers(acls2), "f")
@@ -145,7 +151,7 @@ def test_unresolved_references(service: BaseService):
     _check_unresolved_reference(plsi1.mrid, acls1.mrid, service.get_unresolved_references_to)
     _check_unresolved_reference(ci1.mrid, acls1.mrid, service.get_unresolved_references_to)
 
-    _add_and_check(service, f, [acls1, acls2], "equipment_containers")
+    _add_and_check(service, f, [acls1, acls2], "containers")
     assert service.num_unresolved_references() == 4
     _add_and_check(service, plsi1, acls1, "per_length_sequence_impedance")
     assert service.num_unresolved_references() == 3
@@ -162,7 +168,8 @@ def test_add_resolves_reverse_relationship():
     eq1 = AcLineSegment(mrid="eq1", operational_restrictions=[or1])
     or1.add_equipment(eq1)
 
-    ns = NetworkService("test")
+    # noinspection PyArgumentList
+    ns = NetworkService(name="test")
     # noinspection PyUnresolvedReferences
     ns.add_from_pb(eq1.to_pb())
     # noinspection PyUnresolvedReferences
@@ -187,7 +194,8 @@ def test_resolve_thingo(service):
 
 def test_objects():
     for part in _types:
-        _create_objects_test(BaseService(""), part)
+        # noinspection PyArgumentList
+        _create_objects_test(BaseService(name=""), part)
 
 
 def test_objects_exclude(service: BaseService):

@@ -8,10 +8,9 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta
-from dataclassy import dataclass
-from typing import Union, Callable, Any
-from uuid import UUID
+from typing import Callable, Any
 
+from dataclassy import dataclass
 
 from zepben.evolve.util import require, CopyableUUID
 
@@ -61,7 +60,8 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         except (KeyError, AttributeError):
             return False
 
-    def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject], type_descr: str, field_name: str = "sequence_number") -> bool:
+    def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject], type_descr: str,
+                                  field_name: str = "sequence_number") -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function called with `field`.
 
@@ -77,6 +77,3 @@ class IdentifiedObject(object, metaclass=ABCMeta):
             return True
         except IndexError:
             return False
-
-
-

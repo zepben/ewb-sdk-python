@@ -36,10 +36,11 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_p
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 
-from test.cim_creators import busbarsection, loadbreakswitch, energysource, energyconsumer, junction, aclinesegment, \
-    disconnector, fuse, jumper, breaker, linearshuntcompensator, powertransformer, powertransformerend, ratiotapchanger, \
-    terminal, connectivitynode, basevoltage, feeder, substation, geographicalregion, analog, discrete, accumulator, \
-    remotesource, remotecontrol, perlengthsequenceimpedance, batteryunit, subgeographicalregion, circuit, loop, location
+from test.cim_creators import create_busbar_section, create_load_break_switch, create_energy_source, create_energy_consumer, create_junction, \
+    create_ac_line_segment, create_disconnector, create_fuse, create_jumper, create_breaker, create_linear_shunt_compensator, create_power_transformer, \
+    create_power_transformer_end, create_ratio_tap_changer, create_terminal, create_connectivity_node, create_base_voltage, create_feeder, create_substation, \
+    create_geographical_region, create_analog, create_discrete, create_accumulator, create_remote_source, create_remote_control, \
+    create_per_length_sequence_impedance, create_battery_unit, create_sub_geographical_region, create_circuit, create_loop, create_location
 from zepben.evolve import phasecode_by_id, WindingConnection, PhaseShuntConnectionKind, unit_symbol_from_id, VectorGroup, BatteryStateKind, CableInfo, \
     OverheadWireInfo, WireInfo, PowerTransformerInfo, Asset, TransformerTankInfo, TransformerEndInfo, AssetContainer, AssetInfo, AssetOrganisationRole, \
     AssetOwner, Pole, Streetlight, Structure, PositionPoint, TownDetail, StreetAddress, Location, EndDevice, Meter, UsagePoint, OperationalRestriction, \
@@ -80,7 +81,7 @@ def verify_end_device_to_pb(cim, pb):
     verify_asset_container_to_pb(cim, pb.ac)
 
 
-@given(te=terminal())
+@given(te=create_terminal())
 def test_terminal_to_pb(te):
     pb = te.to_pb()
     assert pb.mrid() == te.mrid
@@ -89,7 +90,7 @@ def test_terminal_to_pb(te):
     verify_ac_dc_terminal_to_pb(te, pb.ad)
 
 
-@given(cnn=connectivitynode())
+@given(cnn=create_connectivity_node())
 def test_connectivity_node_to_pb(cnn):
     pb = cnn.to_pb()
     assert pb.mrid() == cnn.mrid
@@ -97,7 +98,7 @@ def test_connectivity_node_to_pb(cnn):
     verify_identified_object_to_pb(cnn, pb.io)
 
 
-@given(bv=basevoltage())
+@given(bv=create_base_voltage())
 def test_base_voltage_to_pb(bv):
     pb = bv.to_pb()
     assert pb.mrid() == bv.mrid
@@ -106,7 +107,7 @@ def test_base_voltage_to_pb(bv):
     verify_identified_object_to_pb(bv, pb.io)
 
 
-@given(fe=feeder())
+@given(fe=create_feeder())
 def test_feeder_to_pb(fe):
     pb = fe.to_pb()
     assert pb.mrid() == fe.mrid
@@ -114,7 +115,7 @@ def test_feeder_to_pb(fe):
     verify_equipment_container_to_pb(fe, pb.ec)
 
 
-@given(sub=substation())
+@given(sub=create_substation())
 def test_substation_to_pb(sub):
     pb = sub.to_pb()
     assert pb.mrid() == sub.mrid
@@ -122,7 +123,7 @@ def test_substation_to_pb(sub):
     verify_equipment_container_to_pb(sub, pb.ec)
 
 
-@given(ger=geographicalregion())
+@given(ger=create_geographical_region())
 def test_geographical_region_to_pb(ger):
     pb = ger.to_pb()
     assert pb.mrid() == ger.mrid
@@ -130,7 +131,7 @@ def test_geographical_region_to_pb(ger):
     verify_identified_object_to_pb(ger, pb.io)
 
 
-@given(sgr=subgeographicalregion())
+@given(sgr=create_sub_geographical_region())
 def test_sub_geographical_region_to_pb(sgr):
     pb = sgr.to_pb()
     assert pb.mrid() == sgr.mrid
@@ -144,7 +145,7 @@ def verify_measurement_to_pb(cim, pb):
     assert unit_symbol_from_id(pb.unitSymbol) == cim.unit_symbol
 
 
-@given(ana=analog())
+@given(ana=create_analog())
 def test_analog_to_pb(ana):
     pb = ana.to_pb()
     assert pb.mrid() == ana.mrid
@@ -153,7 +154,7 @@ def test_analog_to_pb(ana):
     verify_measurement_to_pb(ana, pb.measurement)
 
 
-@given(dis=discrete())
+@given(dis=create_discrete())
 def test_discrete_to_pb(dis):
     pb = dis.to_pb()
     assert pb.mrid() == dis.mrid
@@ -161,7 +162,7 @@ def test_discrete_to_pb(dis):
     verify_measurement_to_pb(dis, pb.measurement)
 
 
-@given(acc=accumulator())
+@given(acc=create_accumulator())
 def test_accumulator_to_pb(acc):
     pb = acc.to_pb()
     assert pb.mrid() == acc.mrid
@@ -174,7 +175,7 @@ def verify_remote_point_to_pb(cim, pb):
     verify_identified_object_to_pb(cim, pb.io)
 
 
-@given(rs=remotesource())
+@given(rs=create_remote_source())
 def test_remote_source_to_pb(rs):
     pb = rs.to_pb()
     assert pb.mrid() == rs.mrid
@@ -182,7 +183,7 @@ def test_remote_source_to_pb(rs):
     verify_remote_point_to_pb(rs, pb.rp)
 
 
-@given(rc=remotecontrol())
+@given(rc=create_remote_control())
 def test_remote_control_to_pb(rc):
     pb = rc.to_pb()
     assert pb.mrid() == rc.mrid
@@ -217,7 +218,7 @@ def verify_equipment_container_to_pb(cim, pb):
     verify_connectivity_node_container_to_pb(cim, pb.cnc)
 
 
-@given(bbs=busbarsection())
+@given(bbs=create_busbar_section())
 def test_busbar_section_to_pb(bbs):
     pb = bbs.to_pb()
     assert pb.mrid() == bbs.mrid
@@ -233,7 +234,7 @@ def verify_per_length_impedance_to_pb(cim, pb):
     verify_per_length_line_parameter_to_pb(cim, pb.lp)
 
 
-@given(imp=perlengthsequenceimpedance())
+@given(imp=create_per_length_sequence_impedance())
 def test_per_length_sequence_impedance_to_pb(imp):
     pb = imp.to_pb()
     assert isinstance(pb, PBPerLengthSequenceImpedance)
@@ -249,7 +250,7 @@ def test_per_length_sequence_impedance_to_pb(imp):
     verify_per_length_impedance_to_pb(imp, pb.pli)
 
 
-@given(jnc=junction())
+@given(jnc=create_junction())
 def test_junction_to_pb(jnc):
     pb = jnc.to_pb()
     assert pb.mrid() == jnc.mrid
@@ -257,7 +258,7 @@ def test_junction_to_pb(jnc):
     verify_connector_to_pb(jnc, pb.cn)
 
 
-@given(dis=disconnector())
+@given(dis=create_disconnector())
 def test_disconnector_to_pb(dis):
     pb = dis.to_pb()
     assert pb.mrid() == dis.mrid
@@ -265,7 +266,7 @@ def test_disconnector_to_pb(dis):
     verify_switch(dis, pb.sw)
 
 
-@given(fus=fuse())
+@given(fus=create_fuse())
 def test_fuse_to_pb(fus):
     pb = fus.to_pb()
     assert pb.mrid() == fus.mrid
@@ -273,7 +274,7 @@ def test_fuse_to_pb(fus):
     verify_switch(fus, pb.sw)
 
 
-@given(jum=jumper())
+@given(jum=create_jumper())
 def test_jumper_to_pb(jum):
     pb = jum.to_pb()
     assert pb.mrid() == jum.mrid
@@ -281,7 +282,7 @@ def test_jumper_to_pb(jum):
     verify_switch(jum, pb.sw)
 
 
-@given(brk=breaker())
+@given(brk=create_breaker())
 def test_breaker_to_pb(brk):
     pb = brk.to_pb()
     assert pb.mrid() == brk.mrid
@@ -289,7 +290,7 @@ def test_breaker_to_pb(brk):
     verify_protected_switch(brk, pb.sw)
 
 
-@given(lbs=loadbreakswitch())
+@given(lbs=create_load_break_switch())
 def test_load_break_switch_to_pb(lbs):
     pb = lbs.to_pb()
     assert pb.mrid() == lbs.mrid
@@ -327,7 +328,7 @@ def verify_transformer_end_to_pb(cim, pb):
     verify_identified_object_to_pb(cim, pb.io)
 
 
-@given(pwt=powertransformer())
+@given(pwt=create_power_transformer())
 def test_power_transformer_to_pb(pwt):
     pb = pwt.to_pb()
     assert pb.mrid() == pwt.mrid
@@ -337,7 +338,7 @@ def test_power_transformer_to_pb(pwt):
     verify_conducting_equipment_to_pb(pwt, pb.ce)
 
 
-@given(pte=powertransformerend())
+@given(pte=create_power_transformer_end())
 def test_power_transformer_end_to_pb(pte):
     pb = pte.to_pb()
     assert pb.mrid() == pte.mrid
@@ -357,7 +358,7 @@ def test_power_transformer_end_to_pb(pte):
     verify_transformer_end_to_pb(pte, pb.te)
 
 
-@given(ens=energysource())
+@given(ens=create_energy_source())
 def test_energy_source_to_pb(ens):
     pb = ens.to_pb()
     assert pb.mrid() == ens.mrid
@@ -377,7 +378,7 @@ def test_energy_source_to_pb(ens):
     verify_energy_connection_to_pb(ens, pb.ec)
 
 
-@given(enc=energyconsumer())
+@given(enc=create_energy_consumer())
 def test_energy_consumer_to_pb(enc):
     pb = enc.to_pb()
     assert pb.mrid() == enc.mrid
@@ -410,7 +411,7 @@ def verify_conductor_to_pb(cim, pb):
     verify_conducting_equipment_to_pb(cim, pb.ce)
 
 
-@given(acl=aclinesegment())
+@given(acl=create_ac_line_segment())
 def test_ac_line_segment_to_pb(acl):
     pb = acl.to_pb()
     assert pb.mrid() == acl.mrid
@@ -422,7 +423,7 @@ def verify_line_to_pb(cim, pb):
     verify_equipment_container_to_pb(cim, pb.ec)
 
 
-@given(lsc=linearshuntcompensator())
+@given(lsc=create_linear_shunt_compensator())
 def test_linear_shunt_compensator_to_pb(lsc):
     pb = lsc.to_pb()
     assert pb.mrid() == lsc.mrid
@@ -445,7 +446,7 @@ def verify_tap_changer_to_pb(cim, pb):
     verify_power_systems_resource_to_pb(cim, pb.psr)
 
 
-@given(rtc=ratiotapchanger())
+@given(rtc=create_ratio_tap_changer())
 def test_ratio_tap_changer_to_pb(rtc):
     pb = rtc.to_pb()
     assert pb.mrid() == rtc.mrid
@@ -460,7 +461,7 @@ def verify_power_electronics_unit_to_pb(cim, pb):
     verify_equipment_to_pb(cim, pb.eq)
 
 
-@given(bu=batteryunit())
+@given(bu=create_battery_unit())
 def test_battery_unit_to_pb(bu):
     pb = bu.to_pb()
     assert pb.mrid() == bu.mrid
@@ -471,7 +472,7 @@ def test_battery_unit_to_pb(bu):
     verify_power_electronics_unit_to_pb(bu, pb.peu)
 
 
-@given(c=circuit())
+@given(c=create_circuit())
 def test_circuit_to_pb(c):
     pb = c.to_pb()
     assert pb.mrid() == c.mrid
@@ -479,7 +480,7 @@ def test_circuit_to_pb(c):
     verify_line_to_pb(c, pb.l)
 
 
-@given(lp=loop())
+@given(lp=create_loop())
 def test_loop_to_pb(lp):
     pb = lp.to_pb()
     assert pb.mrid() == lp.mrid
@@ -487,7 +488,7 @@ def test_loop_to_pb(lp):
     verify_identified_object_to_pb(lp, pb.io)
 
 
-@given(loc=location())
+@given(loc=create_location())
 def test_location_to_pb(loc):
     pb = loc.to_pb()
     assert pb.mrid() == loc.mrid
@@ -513,6 +514,7 @@ def test_empty_objects():
     Pole().to_pb()
     Streetlight().to_pb()
     Structure().to_pb()
+    # noinspection PyArgumentList
     PositionPoint(0, 0).to_pb()
     TownDetail().to_pb()
     StreetAddress().to_pb()

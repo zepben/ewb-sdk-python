@@ -6,13 +6,17 @@
 
 from __future__ import annotations
 
-from dataclassy import dataclass
 from operator import attrgetter
+from typing import List, Optional, Tuple, Set, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import SinglePhaseKind
+
+from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.phases import NominalPhasePath
-from typing import List, Optional, Tuple, Set
 
 __all__ = ["ConnectivityResult", "get_connectivity", "terminal_compare", "get_connected_equipment"]
 
@@ -66,7 +70,7 @@ def get_connected_equipment(cond_equip, exclude: Set = None):
     if exclude is None:
         exclude = []
     connected_equip = []
-    for terminal in cond_equip._terminals:
+    for terminal in cond_equip.terminals:
         conn_node = terminal.connectivity_node
         for term in conn_node:
             if term.conducting_equipment in exclude:
@@ -80,6 +84,7 @@ ConductingEquipment.connected_equipment = get_connected_equipment
 
 
 def _terminal_connectivity(terminal: Terminal, connected_terminal: Terminal, phases: Set[SinglePhaseKind]) -> ConnectivityResult:
+    # noinspection PyArgumentList
     nominal_phase_paths = [NominalPhasePath(phase, phase) for phase in phases if phase in connected_terminal.phases.single_phases]
 
     if not nominal_phase_paths:
@@ -98,6 +103,7 @@ def _process_xy_phases(terminal: Terminal, connected_terminal: Terminal, phases:
     for phase in xy_phases:
         i = terminal.phases.single_phases.index(phase)
         if i < len(connected_terminal.phases.single_phases):
+            # noinspection PyArgumentList
             nominal_phase_paths.append(NominalPhasePath(from_phase=phase, to_phase=connected_terminal.phases.single_phases[i]))
 
     for phase in connectied_xy_phases:
@@ -105,6 +111,7 @@ def _process_xy_phases(terminal: Terminal, connected_terminal: Terminal, phases:
         if i < len(terminal.phases.single_phases):
             terminal_phase = terminal.phases.single_phases[i]
             if terminal_phase in phases:
+                # noinspection PyArgumentList
                 nominal_phase_paths.append(NominalPhasePath(from_phase=terminal_phase, to_phase=phase))
 
 
@@ -132,17 +139,21 @@ class ConnectivityResult(object):
     def __eq__(self, other: ConnectivityResult):
         if self is other:
             return True
+        # noinspection PyBroadException
         try:
             return self.from_terminal is other.from_terminal and self.to_terminal is other.to_terminal and self.nominal_phase_paths != other.nominal_phase_paths
-        except:
+        except Exception:
             return False
 
     def __ne__(self, other):
         if self is other:
             return False
+        # noinspection PyBroadException
         try:
-            return self.from_terminal is not other.from_terminal or self.to_terminal is not other.to_terminal or self.nominal_phase_paths != other.nominal_phase_paths
-        except:
+            return self.from_terminal is not other.from_terminal \
+                   or self.to_terminal is not other.to_terminal \
+                   or self.nominal_phase_paths != other.nominal_phase_paths
+        except Exception:
             return True
 
     def __str__(self):
@@ -174,5 +185,3 @@ class ConnectivityResult(object):
     def to_nominal_phases(self) -> List[SinglePhaseKind]:
         """The nominal phases that are connected in the `to_terminal`."""
         return [npp.to_phase for npp in self.nominal_phase_paths]
-
-
