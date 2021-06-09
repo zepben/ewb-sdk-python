@@ -9,7 +9,7 @@ from hypothesis.strategies import builds, lists, integers, booleans, sampled_fro
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
-from cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
+from test.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import EnergyConsumer, EnergyConsumerPhase, PhaseShuntConnectionKind
 
 energy_consumer_kwargs = {

@@ -8,7 +8,7 @@ from hypothesis.strategies import text, builds, sampled_from
 
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from test.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import Measurement, RemoteSource, PhaseCode, UnitSymbol
 
 measurement_kwargs = {

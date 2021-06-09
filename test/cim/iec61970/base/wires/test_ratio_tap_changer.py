@@ -9,7 +9,7 @@ from hypothesis.strategies import builds, floats
 
 from test.cim.iec61970.base.wires.test_tap_changer import verify_tap_changer_constructor_default, \
     verify_tap_changer_constructor_kwargs, verify_tap_changer_constructor_args, tap_changer_kwargs, tap_changer_args, assume_step_values
-from cim_creators import FLOAT_MIN, FLOAT_MAX
+from test.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import RatioTapChanger, TransformerEnd
 
 ratio_tap_changer_kwargs = {

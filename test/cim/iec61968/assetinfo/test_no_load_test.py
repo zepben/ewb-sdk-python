@@ -8,7 +8,7 @@ from hypothesis.strategies import integers, floats
 
 from test.cim.iec61968.assetinfo.test_transformer_test import transformer_test_kwargs, verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
-from cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
+from test.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import NoLoadTest
 
 no_load_test_kwargs = {

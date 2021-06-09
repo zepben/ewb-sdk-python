@@ -7,7 +7,7 @@ from hypothesis.strategies import builds
 
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim_creators import sampled_asset_info
+from test.cim_creators import sampled_asset_info
 from zepben.evolve import PowerSystemResource, Location, PowerTransformerInfo
 
 power_system_resource_kwargs = {

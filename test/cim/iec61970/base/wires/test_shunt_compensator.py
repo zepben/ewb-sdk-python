@@ -8,7 +8,7 @@ from hypothesis.strategies import floats, booleans, integers, sampled_from
 
 from test.cim.iec61970.base.wires.test_regulating_cond_eq import regulating_cond_eq_kwargs, verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
-from cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from test.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from zepben.evolve import ShuntCompensator, PhaseShuntConnectionKind
 
 shunt_compensator_kwargs = {

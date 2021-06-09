@@ -9,7 +9,7 @@ from hypothesis.strategies import booleans, lists, builds
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
-from cim_creators import sampled_equipment_container
+from test.cim_creators import sampled_equipment_container
 from zepben.evolve import Equipment, UsagePoint, OperationalRestriction, Feeder, EquipmentContainer
 
 equipment_kwargs = {
