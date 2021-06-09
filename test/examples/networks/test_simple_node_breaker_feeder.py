@@ -1,7 +1,13 @@
+#  Copyright 2021 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import unittest
-from zepben.evolve.examples import *
+
 from zepben.evolve import BaseVoltage, EnergySource, Junction, Terminal, Feeder, PowerTransformer, \
     ConnectivityNode, DiagramObject, Breaker
+from zepben.evolve.examples import *
 
 
 class TestSimpleNodeBreaker(unittest.TestCase):
@@ -50,5 +56,3 @@ class TestSimpleNodeBreaker(unittest.TestCase):
         breaker2 = breakers2[0]
         assert isinstance(breaker2, Breaker)
         assert breaker2.is_open() is False
-
-
