@@ -271,6 +271,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
     async def _get_network_hierarchy(self) -> GrpcResult[NetworkHierarchy]:
         if self.__network_hierarchy:
+            # noinspection PyArgumentList
             return GrpcResult(self.__network_hierarchy)
         return await self.try_rpc(lambda: self._handle_network_hierarchy())
 
@@ -279,6 +280,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             result = await self._get_equipment_for_container(it)
 
             if result.was_failure:
+                # noinspection PyArgumentList
                 return GrpcResult(result.thrown, result.was_error_handled)
 
             mor.objects.update(result.value.objects)
@@ -297,6 +299,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             containers: Set[str] = set(map(lambda ec: ec.mrid, chain(it.circuits, it.substations, it.energizing_substations)))
             result = await self._get_equipment_for_containers(containers)
             if result.was_failure:
+                # noinspection PyArgumentList
                 return GrpcResult(result.thrown, result.was_error_handled)
 
             mor.objects.update(result.value.objects)
@@ -308,6 +311,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _get_all_loops(self) -> GrpcResult[MultiObjectResult]:
         response = await self._get_network_hierarchy()
         if response.was_failure:
+            # noinspection PyArgumentList
             return GrpcResult(response.thrown, response.was_error_handled)
 
         hierarchy = response.value
@@ -326,6 +330,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         result = await self._get_equipment_for_containers(map(lambda it: it.mrid, containers))
         if result.was_failure:
+            # noinspection PyArgumentList
             return GrpcResult(result.thrown, result.was_error_handled)
 
         mor.objects.update(result.value.objects)
@@ -334,6 +339,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         if error:
             return error
 
+        # noinspection PyArgumentList
         return GrpcResult(mor)
 
     async def _retrieve_network(self) -> GrpcResult[NetworkResult]:
@@ -346,6 +352,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             if result.was_successful:
                 failed.update(result.result.failed)
 
+        # noinspection PyArgumentList
         return GrpcResult(NetworkResult(self.service, failed))
 
     async def _process_equipment_for_container(self, it: Union[str, EquipmentContainer]) -> AsyncGenerator[IdentifiedObject, None]:
@@ -396,6 +403,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _handle_network_hierarchy(self):
         response = self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest())
 
+        # noinspection PyArgumentList
         self.__network_hierarchy = NetworkHierarchy(
             self._to_map(response.geographicalRegions, GeographicalRegion),
             self._to_map(response.subGeographicalRegions, SubGeographicalRegion),
@@ -428,18 +436,21 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         if not self.__network_hierarchy:
             response = await self._get_network_hierarchy()
             if response.was_failure:
+                # noinspection PyArgumentList
                 return GrpcResult(response.thrown, response.was_error_handled)
 
         io = self.service.get(mrid, default=None)
         if not io:
             response = await self._get_identified_object(mrid)
             if response.was_failure:
+                # noinspection PyArgumentList
                 return GrpcResult(response.thrown, response.was_error_handled)
 
             io = response.value
 
         if not isinstance(io, expected_class):
             e = ValueError(f"Requested mrid {mrid} was not a {expected_class.__name__}, was {type(io).__name__}")
+            # noinspection PyArgumentList
             return GrpcResult(e, self.try_handle_error(e))
 
         mor = MultiObjectResult()
@@ -453,6 +464,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         if error:
             return error
 
+        # noinspection PyArgumentList
         return GrpcResult(mor)
 
     async def _resolve_references(self, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
@@ -466,6 +478,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
             response = await self._get_identified_objects(to_resolve)
             if response.was_failure:
+                # noinspection PyArgumentList
                 return GrpcResult(response.thrown, response.was_error_handled)
 
             res = response.value
@@ -491,7 +504,7 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
     """Synchronised wrapper for :class:`NetworkConsumerClient`"""
 
     def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject]:
-        return get_event_loop().run_until_complete(super().get_identified_objects(mrid))
+        return get_event_loop().run_until_complete(super().get_identified_object(mrid))
 
     def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super().get_identified_objects(mrids))
@@ -519,9 +532,11 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         return get_event_loop().run_until_complete(super().get_equipment_container(mrid, expected_class))
 
     def get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
+        # noinspection PyArgumentList
         return get_event_loop().run_until_complete(super().get_equipment_for_loop(self, loop))
 
     def get_all_loops(self) -> GrpcResult[MultiObjectResult]:
+        # noinspection PyArgumentList
         return get_event_loop().run_until_complete(super().get_all_loops(self))
 
     def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:

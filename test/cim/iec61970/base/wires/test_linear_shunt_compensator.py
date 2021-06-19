@@ -27,10 +27,10 @@ def test_linear_shunt_compensator_constructor_default():
     lsc = LinearShuntCompensator()
 
     verify_shunt_compensator_constructor_default(lsc)
-    assert lsc.b0_per_section == 0.0
-    assert lsc.b_per_section == 0.0
-    assert lsc.g0_per_section == 0.0
-    assert lsc.g_per_section == 0.0
+    assert lsc.b0_per_section is None
+    assert lsc.b_per_section is None
+    assert lsc.g0_per_section is None
+    assert lsc.g_per_section is None
 
 
 @given(**linear_shunt_compensator_kwargs)

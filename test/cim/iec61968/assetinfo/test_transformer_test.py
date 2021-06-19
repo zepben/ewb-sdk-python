@@ -21,8 +21,8 @@ transformer_test_args = [*identified_object_args, 1, 2.2]
 
 def verify_transformer_test_constructor_default(tt: TransformerTest):
     verify_identified_object_constructor_default(tt)
-    assert tt.base_power == 0
-    assert tt.temperature == 0.0
+    assert tt.base_power is None
+    assert tt.temperature is None
 
 
 def verify_transformer_test_constructor_kwargs(tt: TransformerTest, base_power, temperature, **kwargs):

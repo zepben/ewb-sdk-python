@@ -28,18 +28,18 @@ class EnergyConsumerPhase(PowerSystemResource):
     neutral point. If the energy consumer is delta connected, the phase indicates an energy consumer connected from the indicated phase to the next
     logical non-neutral phase. """
 
-    p: float = 0.0
+    p: Optional[float] = None
     """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
     rated voltage. Starting value for a steady state solution."""
 
-    q: float = 0.0
+    q: Optional[float] = None
     """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
     rated voltage. Starting value for a steady state solution."""
 
-    p_fixed: float = 0.0
+    p_fixed: Optional[float] = None
     """Active power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    q_fixed: float = 0.0
+    q_fixed: Optional[float] = None
     """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
     def __init__(self, energy_consumer: EnergyConsumer = None, **kwargs):
@@ -66,7 +66,7 @@ class EnergyConsumer(EnergyConnection):
     _energy_consumer_phases: Optional[List[EnergyConsumerPhase]] = None
     """The individual phase models for this energy consumer."""
 
-    customer_count: int = 0
+    customer_count: Optional[int] = None
     """Number of individual customers represented by this demand."""
 
     grounded: bool = False
@@ -76,18 +76,18 @@ class EnergyConsumer(EnergyConnection):
     """`zepben.protobuf.cim.iec61970.base.wires.phase_shunt_connection_kind.PhaseShuntConnectionKind` - The type of phase connection, 
     such as wye, delta, I (single phase)."""
 
-    p: float = 0.0
+    p: Optional[float] = None
     """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
     rated voltage. Starting value for a steady state solution."""
 
-    p_fixed: float = 0.0
+    p_fixed: Optional[float] = None
     """Active power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    q: float = 0.0
+    q: Optional[float] = None
     """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
     rated voltage. Starting value for a steady state solution."""
 
-    q_fixed: float = 0.0
+    q_fixed: Optional[float] = None
     """Power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
     def __init__(self, energy_consumer_phases: List[EnergyConsumerPhase] = None, **kwargs):

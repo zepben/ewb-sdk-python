@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from datetime import datetime
 from random import choice
 
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes
@@ -67,7 +68,7 @@ def create_power_transformer_info():
     return builds(
         PowerTransformerInfo,
         **create_asset_info(),
-        transformer_tank_infos=lists(builds(TransformerTankInfo, **create_identified_object()), max_size=2)
+        transformer_tank_infos=lists(builds(TransformerTankInfo, **create_identified_object()), min_size=1, max_size=2)
     )
 
 
@@ -101,8 +102,8 @@ def create_transformer_end_info():
         rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         rated_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         short_term_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        transformer_tank_info=lists(builds(TransformerStarImpedance, **create_identified_object()), max_size=2),
-        transformer_star_impedance=lists(builds(TransformerStarImpedance, **create_identified_object()), max_size=2),
+        transformer_tank_info=builds(TransformerStarImpedance, **create_identified_object()),
+        transformer_star_impedance=builds(TransformerStarImpedance, **create_identified_object()),
         energised_end_no_load_tests=builds(NoLoadTest, **create_identified_object()),
         energised_end_short_circuit_tests=builds(ShortCircuitTest, **create_identified_object()),
         grounded_end_short_circuit_tests=builds(ShortCircuitTest, **create_identified_object()),
@@ -112,7 +113,11 @@ def create_transformer_end_info():
 
 
 def create_transformer_tank_info():
-    return builds(TransformerTankInfo, **create_asset_info(), transformer_end_infos=lists(builds(TransformerEndInfo, **create_identified_object()), max_size=2))
+    return builds(
+        TransformerTankInfo,
+        **create_asset_info(),
+        transformer_end_infos=lists(builds(TransformerEndInfo, **create_identified_object()), min_size=1, max_size=2)
+    )
 
 
 def create_transformer_test():
@@ -144,7 +149,7 @@ def create_asset():
     return {
         **create_identified_object(),
         "location": builds(Location, **create_identified_object()),
-        "organisation_roles": lists(builds(AssetOwner, **create_identified_object()), max_size=2)
+        "organisation_roles": lists(builds(AssetOwner, **create_identified_object()), min_size=1, max_size=2)
     }
 
 
@@ -168,7 +173,7 @@ def create_pole():
     return builds(
         Pole,
         **create_structure(),
-        streetlights=lists(builds(Streetlight, **create_identified_object()), max_size=2),
+        streetlights=lists(builds(Streetlight, **create_identified_object()), min_size=1, max_size=2),
         classification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
@@ -178,7 +183,7 @@ def create_streetlight():
         Streetlight,
         **create_asset(),
         pole=builds(Pole, **create_identified_object()),
-        light_rating=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        light_rating=integers(min_value=0, max_value=MAX_32_BIT_INTEGER * 2),
         lamp_kind=sampled_streetlight_lamp_kind()
     )
 
@@ -204,7 +209,7 @@ def create_document():
     return {
         **create_identified_object(),
         "title": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        "created_date_time": datetimes(),
+        "created_date_time": datetimes(min_value=datetime(1970, 1, 2)),
         "author_name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         "type": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         "status": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
@@ -221,7 +226,7 @@ def create_organisation():
 
 
 def create_organisation_role():
-    return {**create_identified_object(), "organisations": builds(Organisation, **create_identified_object())}
+    return {**create_identified_object(), "organisation": builds(Organisation, **create_identified_object())}
 
 
 def create_position_point():
@@ -246,7 +251,7 @@ def create_customer():
         Customer,
         **create_organisation_role(),
         kind=sampled_customer_kind(),
-        customer_agreements=builds(CustomerAgreement, **create_identified_object())
+        customer_agreements=lists(builds(CustomerAgreement, **create_identified_object()), min_size=1, max_size=2)
     )
 
 
@@ -255,7 +260,7 @@ def create_customer_agreement():
         CustomerAgreement,
         **create_agreement(),
         customer=builds(Customer, **create_identified_object()),
-        pricing_structures=lists(builds(PricingStructure, **create_identified_object()), max_size=2)
+        pricing_structures=lists(builds(PricingStructure, **create_identified_object()), min_size=1, max_size=2)
     )
 
 
@@ -264,7 +269,7 @@ def sampled_customer_kind():
 
 
 def create_pricing_structure():
-    return builds(PricingStructure, **create_document(), tariffs=lists(builds(Tariff, **create_identified_object()), max_size=2))
+    return builds(PricingStructure, **create_document(), tariffs=lists(builds(Tariff, **create_identified_object()), min_size=1, max_size=2))
 
 
 def create_tariffs():
@@ -279,8 +284,8 @@ def create_tariffs():
 def create_end_device():
     return {
         **create_asset_container(),
-        "usage_points": lists(builds(UsagePoint, **create_identified_object()), max_size=2),
-        "customer": builds(Customer, **create_identified_object()),
+        "usage_points": lists(builds(UsagePoint, **create_identified_object()), min_size=1, max_size=2),
+        "customer_mrid": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
         "service_location": builds(Location, **create_identified_object())
     }
 
@@ -294,8 +299,8 @@ def create_usage_point():
         UsagePoint,
         **create_identified_object(),
         usage_point_location=builds(Location, **create_identified_object()),
-        equipment=lists(builds(EnergyConsumer, **create_identified_object()), max_size=2),
-        end_devices=lists(builds(Meter, **create_identified_object()), max_size=2)
+        equipment=lists(builds(EnergyConsumer, **create_identified_object()), min_size=1, max_size=2),
+        end_devices=lists(builds(Meter, **create_identified_object()), min_size=1, max_size=2)
     )
 
 
@@ -305,7 +310,7 @@ def create_usage_point():
 
 
 def create_operational_restriction():
-    return builds(OperationalRestriction, **create_document(), equipment=lists(builds(PowerTransformer, **create_identified_object()), max_size=2))
+    return builds(OperationalRestriction, **create_document(), equipment=lists(builds(PowerTransformer, **create_identified_object()), min_size=1, max_size=2))
 
 
 #####################################
@@ -338,7 +343,7 @@ def create_conducting_equipment():
     return {
         **create_equipment(),
         "base_voltage": builds(BaseVoltage, **create_identified_object()),
-        "terminals": lists(builds(Terminal, phases=sampled_from(PhaseCode)), max_size=2)
+        "terminals": lists(builds(Terminal, phases=sampled_from(PhaseCode)), min_size=1, max_size=2)
     }
 
 
@@ -355,15 +360,15 @@ def create_equipment():
         **create_power_system_resource(),
         "in_service": booleans(),
         "normally_in_service": booleans(),
-        "equipment_containers": lists(sampled_equipment_container(), max_size=2),
-        "usage_points": lists(builds(UsagePoint, **create_identified_object()), max_size=2),
-        "operational_restrictions": lists(builds(OperationalRestriction, **create_identified_object()), max_size=2),
-        "current_feeders": lists(builds(Feeder, **create_identified_object()), max_size=2)
+        "equipment_containers": lists(sampled_equipment_container(), min_size=1, max_size=2),
+        "usage_points": lists(builds(UsagePoint, **create_identified_object()), min_size=1, max_size=2),
+        "operational_restrictions": lists(builds(OperationalRestriction, **create_identified_object()), min_size=1, max_size=2),
+        "current_feeders": lists(builds(Feeder, **create_identified_object()), min_size=1, max_size=2)
     }
 
 
 def create_equipment_container():
-    return {**create_connectivity_node_container(), "equipment": lists(sampled_equipment(), max_size=2)}
+    return {**create_connectivity_node_container(), "equipment": lists(sampled_equipment(), min_size=1, max_size=2)}
 
 
 def create_feeder():
@@ -379,7 +384,7 @@ def create_geographical_region():
     return builds(
         GeographicalRegion,
         **create_identified_object(),
-        sub_geographical_regions=lists(builds(SubGeographicalRegion, **create_identified_object()), max_size=2)
+        sub_geographical_regions=lists(builds(SubGeographicalRegion, **create_identified_object()), min_size=1, max_size=2)
     )
 
 
@@ -396,7 +401,10 @@ def sampled_phase_code():
 
 
 def create_power_system_resource():
-    return {**create_identified_object(), "location": create_location(), "asset_info": sampled_asset_info()}
+    #
+    # NOTE: We do not create the asset_info here, create it where it is actually used.
+    #
+    return {**create_identified_object(), "location": create_location()}
 
 
 def create_site():
@@ -408,7 +416,7 @@ def create_sub_geographical_region():
         SubGeographicalRegion,
         **create_identified_object(),
         geographical_region=builds(GeographicalRegion, **create_identified_object()),
-        substations=lists(builds(Substation, **create_identified_object()), max_size=2)
+        substations=lists(builds(Substation, **create_identified_object()), min_size=1, max_size=2)
     )
 
 
@@ -417,10 +425,10 @@ def create_substation():
         Substation,
         **create_equipment_container(),
         sub_geographical_region=builds(SubGeographicalRegion, **create_identified_object()),
-        normal_energized_feeders=lists(builds(Feeder, **create_identified_object()), max_size=2),
-        loops=lists(builds(Loop, **create_identified_object()), max_size=2),
-        energized_loops=lists(builds(Loop, **create_identified_object()), max_size=2),
-        circuits=lists(builds(Circuit, **create_identified_object()), max_size=2)
+        normal_energized_feeders=lists(builds(Feeder, **create_identified_object()), min_size=1, max_size=2),
+        loops=lists(builds(Loop, **create_identified_object()), min_size=1, max_size=2),
+        energized_loops=lists(builds(Loop, **create_identified_object()), min_size=1, max_size=2),
+        circuits=lists(builds(Circuit, **create_identified_object()), min_size=1, max_size=2)
     )
 
 
@@ -438,6 +446,28 @@ def create_terminal():
 ################################
 # IEC61970 BASE DIAGRAM LAYOUT #
 ################################
+
+
+def create_diagram():
+    return builds(
+        Diagram,
+        **create_identified_object(),
+        diagram_style=sampled_from(DiagramStyle),
+        orientation_kind=sampled_from(OrientationKind),
+        diagram_objects=lists(builds(DiagramObject, **create_identified_object()), min_size=1, max_size=2)
+    )
+
+
+def create_diagram_object():
+    return builds(
+        DiagramObject,
+        **create_identified_object(),
+        diagram=builds(Diagram, **create_identified_object()),
+        identified_object_mrid=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        style=sampled_from(DiagramObjectStyle),
+        rotation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        diagram_object_points=lists(create_diagram_object_point(), min_size=1, max_size=2)
+    )
 
 
 def create_diagram_object_point():
@@ -469,7 +499,7 @@ def create_control():
     return builds(
         Control,
         **create_io_point(),
-        power_system_resource=sampled_equipment(),
+        power_system_resource_mrid=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
         remote_control=builds(RemoteControl, **create_identified_object())
     )
 
@@ -517,9 +547,9 @@ def create_remote_source():
     return builds(RemoteSource, **create_remote_point(), measurement=sampled_measurement())
 
 
-########################################
-# IEC61970 WIRES GENERATION PRODUCTION #
-########################################
+#############################################
+# IEC61970 BASE WIRES GENERATION PRODUCTION #
+#############################################
 
 
 def sampled_battery_state_kind():
@@ -571,7 +601,7 @@ def create_busbar_section():
 
 
 def create_conductor():
-    return {**create_conducting_equipment(), "length": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)}
+    return {**create_conducting_equipment(), "asset_info": sampled_wire_info(), "length": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)}
 
 
 def create_connector():
@@ -590,7 +620,7 @@ def create_energy_consumer():
     return builds(
         EnergyConsumer,
         **create_energy_connection(),
-        energy_consumer_phases=lists(builds(EnergyConsumerPhase, **create_identified_object()), max_size=2),
+        energy_consumer_phases=lists(builds(EnergyConsumerPhase, **create_identified_object()), min_size=1, max_size=2),
         customer_count=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         grounded=booleans(),
         p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -618,7 +648,7 @@ def create_energy_source():
     return builds(
         EnergySource,
         **create_energy_connection(),
-        energy_source_phases=lists(builds(EnergySourcePhase, **create_identified_object()), max_size=2),
+        energy_source_phases=lists(builds(EnergySourcePhase, **create_identified_object()), min_size=1, max_size=2),
         active_power=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         reactive_power=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         voltage_angle=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -705,8 +735,8 @@ def create_power_electronics_connection():
     return builds(
         PowerElectronicsConnection,
         **create_power_system_resource(),
-        power_electronics_units=lists(builds(BatteryUnit, **create_identified_object()), max_size=2),
-        power_electronics_connection_phases=lists(builds(PowerElectronicsConnectionPhase, **create_identified_object()), max_size=2),
+        power_electronics_units=lists(builds(BatteryUnit, **create_identified_object()), min_size=1, max_size=2),
+        power_electronics_connection_phases=lists(builds(PowerElectronicsConnectionPhase, **create_identified_object()), min_size=1, max_size=2),
         max_i_fault=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         max_q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         min_q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -732,7 +762,8 @@ def create_power_transformer():
     return builds(
         PowerTransformer,
         **create_conducting_equipment(),
-        power_transformer_ends=lists(builds(PowerTransformerEnd, **create_identified_object()), max_size=2),
+        asset_info=builds(PowerTransformerInfo, **create_identified_object()),
+        power_transformer_ends=lists(builds(PowerTransformerEnd, **create_identified_object()), min_size=1, max_size=2),
         vector_group=sampled_vector_group(),
         transformer_utilisation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
@@ -858,8 +889,8 @@ def create_circuit():
         Circuit,
         **create_line(),
         loop=builds(Loop, **create_identified_object()),
-        end_terminals=lists(builds(Terminal, **create_identified_object()), max_size=2),
-        end_substations=lists(builds(Substation, **create_identified_object()), max_size=2)
+        end_terminals=lists(builds(Terminal, **create_identified_object()), min_size=1, max_size=2),
+        end_substations=lists(builds(Substation, **create_identified_object()), min_size=1, max_size=2)
     )
 
 
@@ -867,9 +898,9 @@ def create_loop():
     return builds(
         Loop,
         **create_identified_object(),
-        circuits=lists(builds(Circuit, **create_identified_object()), max_size=2),
-        substations=lists(builds(Substation, **create_identified_object()), max_size=2),
-        energizing_substations=lists(builds(Substation, **create_identified_object()), max_size=2)
+        circuits=lists(builds(Circuit, **create_identified_object()), min_size=1, max_size=2),
+        substations=lists(builds(Substation, **create_identified_object()), min_size=1, max_size=2),
+        energizing_substations=lists(builds(Substation, **create_identified_object()), min_size=1, max_size=2)
     )
 
 
@@ -891,11 +922,10 @@ def traced_phases():
 ###############
 
 
-def sampled_asset_info():
+def sampled_wire_info():
     return choice([
         builds(OverheadWireInfo, **create_identified_object()),
         builds(CableInfo, **create_identified_object()),
-        builds(PowerTransformerInfo, **create_identified_object()),
     ])
 
 

@@ -27,11 +27,11 @@ def test_no_load_test_constructor_default():
     nlt = NoLoadTest()
 
     verify_transformer_test_constructor_default(nlt)
-    assert nlt.energised_end_voltage == 0
-    assert nlt.exciting_current == 0.0
-    assert nlt.exciting_current_zero == 0.0
-    assert nlt.loss == 0
-    assert nlt.loss_zero == 0
+    assert nlt.energised_end_voltage is None
+    assert nlt.exciting_current is None
+    assert nlt.exciting_current_zero is None
+    assert nlt.loss is None
+    assert nlt.loss_zero is None
 
 
 @given(**no_load_test_kwargs)

@@ -36,18 +36,18 @@ def test_power_transformer_end_constructor_default():
 
     verify_transformer_end_constructor_default(pte)
     assert not pte.power_transformer
-    assert pte.rated_s == 0
-    assert pte.rated_u == 0
-    assert pte.r == 0.0
-    assert pte.x == 0.0
-    assert pte.r0 == 0.0
-    assert pte.x0 == 0.0
-    assert pte.g == 0.0
-    assert pte.g0 == 0.0
-    assert pte.b == 0.0
-    assert pte.b0 == 0.0
+    assert pte.rated_s is None
+    assert pte.rated_u is None
+    assert pte.r is None
+    assert pte.x is None
+    assert pte.r0 is None
+    assert pte.x0 is None
+    assert pte.g is None
+    assert pte.g0 is None
+    assert pte.b is None
+    assert pte.b0 is None
     assert pte.connection_kind == WindingConnection.UNKNOWN_WINDING
-    assert pte.phase_angle_clock == 0
+    assert pte.phase_angle_clock is None
 
 
 @given(**power_transformer_end_kwargs)

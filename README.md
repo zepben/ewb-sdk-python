@@ -66,6 +66,7 @@ If you need to debug a test, you will need to annotate the test with the followi
 to prevent the test from timing out while you step through the code:
 
 ```
+# todo remove timeout before commit
 @pytest.mark.timeout(100000)
 ```
 

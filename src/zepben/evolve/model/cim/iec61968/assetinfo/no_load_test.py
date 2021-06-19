@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import Optional
 
 from zepben.evolve import TransformerTest
 
@@ -15,27 +16,27 @@ class NoLoadTest(TransformerTest):
     winding. The excitation may be positive sequence or zero sequence. The test may be repeated at different voltages to measure saturation.
     """
 
-    energised_end_voltage: int = 0
+    energised_end_voltage: Optional[int] = None
     """
     Voltage applied to the winding (end) during test in volts.
     """
 
-    exciting_current: float = 0.0
+    exciting_current: Optional[float] = None
     """
     Exciting current measured from a positive-sequence or single-phase excitation test as a percentage.
     """
 
-    exciting_current_zero: float = 0.0
+    exciting_current_zero: Optional[float] = None
     """
     Exciting current measured from a zero-sequence open-circuit excitation test as a percentage.
     """
 
-    loss: int = 0
+    loss: Optional[int] = None
     """
     Losses measured from a positive-sequence or single-phase excitation test in watts.
     """
 
-    loss_zero: int = 0
+    loss_zero: Optional[int] = None
     """
     Losses measured from a zero-sequence excitation test in watts.
     """

@@ -30,26 +30,26 @@ class TapChanger(PowerSystemResource):
     control_enabled: bool = True
     """Specifies the regulation status of the equipment.  True is regulating, false is not regulating."""
 
-    neutral_u: int = 0
+    neutral_u: Optional[int] = None
     """Voltage at which the winding operates at the neutral tap setting."""
 
-    _high_step: int = 1
-    _low_step: int = 0
-    _neutral_step: int = 0
-    _normal_step: int = 0
-    _step: float = 0.0
+    _high_step: Optional[int] = None
+    _low_step: Optional[int] = None
+    _neutral_step: Optional[int] = None
+    _normal_step: Optional[int] = None
+    _step: Optional[float] = None
 
     def __init__(self, high_step: int = None, low_step: int = None, neutral_step: int = None, normal_step: int = None, step: float = None, **kwargs):
         super(TapChanger, self).__init__(**kwargs)
-        if high_step:
+        if high_step is not None:
             self._high_step = high_step
-        if low_step:
+        if low_step is not None:
             self._low_step = low_step
-        if neutral_step:
+        if neutral_step is not None:
             self._neutral_step = neutral_step
-        if normal_step:
+        if normal_step is not None:
             self._normal_step = normal_step
-        if step:
+        if step is not None:
             self._step = step
         self._validate_steps()
 
@@ -60,7 +60,8 @@ class TapChanger(PowerSystemResource):
 
     @high_step.setter
     def high_step(self, val):
-        require(val > self._low_step, lambda: f"High step [{val}] must be greater than low step [{self._low_step}]")
+        require((val is None) or (self._low_step is None) or (val > self._low_step),
+                lambda: f"High step [{val}] must be greater than low step [{self._low_step}]")
         self._check_steps(self.low_step, val)
         self._high_step = val
 
@@ -71,7 +72,8 @@ class TapChanger(PowerSystemResource):
 
     @low_step.setter
     def low_step(self, val):
-        require(val < self._high_step, lambda: f"Low step [{val}] must be less than high step [{self._high_step}]")
+        require((val is None) or (self._high_step is None) or (val < self._high_step),
+                lambda: f"Low step [{val}] must be less than high step [{self._high_step}]")
         self._check_steps(val, self.high_step)
         self._low_step = val
 
@@ -82,8 +84,7 @@ class TapChanger(PowerSystemResource):
 
     @neutral_step.setter
     def neutral_step(self, val):
-        require(self._low_step <= val <= self._high_step,
-                lambda: f"Neutral step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+        require(self._is_in_range(val), lambda: f"Neutral step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
         self._neutral_step = val
 
     @property
@@ -96,8 +97,7 @@ class TapChanger(PowerSystemResource):
 
     @normal_step.setter
     def normal_step(self, val):
-        require(self._low_step <= val <= self._high_step,
-                lambda: f"Normal step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+        require(self._is_in_range(val), lambda: f"Normal step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
         self._normal_step = val
 
     @property
@@ -112,25 +112,44 @@ class TapChanger(PowerSystemResource):
 
     @step.setter
     def step(self, val):
-        require(self._low_step <= val <= self._high_step, lambda: f"Step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+        require(self._is_in_range(val), lambda: f"Step [{val}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
         self._step = val
 
     def _check_steps(self, low, high):
-        require(low <= self.step <= high, lambda: f"New value would invalidate current step of [{self.step}]")
-        require(low <= self.normal_step <= high,
-                lambda: f"New value would invalidate current normal_step of [{self.normal_step}]")
-        require(low <= self.neutral_step <= high,
-                lambda: f"New value would invalidate current neutral_step of [{self.neutral_step}]")
+        if low is not None:
+            require((self.step is None) or (low <= self.step), lambda: f"New value would invalidate current step of [{self.step}]")
+            require((self.normal_step is None) or (low <= self.normal_step), lambda: f"New value would invalidate current normal_step of [{self.normal_step}]")
+            require((self.neutral_step is None) or (low <= self.neutral_step),
+                    lambda: f"New value would invalidate current neutral_step of [{self.neutral_step}]")
+
+        if high is not None:
+            require((self.step is None) or (self.step <= high), lambda: f"New value would invalidate current step of [{self.step}]")
+            require((self.normal_step is None) or (self.normal_step <= high), lambda: f"New value would invalidate current normal_step of [{self.normal_step}]")
+            require((self.neutral_step is None) or (self.neutral_step <= high),
+                    lambda: f"New value would invalidate current neutral_step of [{self.neutral_step}]")
 
     def _validate_steps(self):
-        require(self._high_step > self._low_step,
-                lambda: f"High step [{self.high_step}] must be greater than low step [{self.low_step}]")
-        require(self._low_step <= self._neutral_step <= self._high_step,
+        require((self._high_step is None) or (self._low_step is None) or (self._high_step > self._low_step),
+                lambda: f"High step [{self._high_step}] must be greater than low step [{self._low_step}]")
+        require(self._is_in_range(self._neutral_step),
                 lambda: f"Neutral step [{self.neutral_step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
-        require(self._low_step <= self._normal_step <= self._high_step,
+        require(self._is_in_range(self._normal_step),
                 lambda: f"Normal step [{self.normal_step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
-        require(self._low_step <= self._step <= self._high_step,
-                lambda: f"Step [{self._step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+        require(self._is_in_range(self._step), lambda: f"Step [{self._step}] must be between high step [{self._high_step}] and low step [{self._low_step}]")
+
+    def _is_in_range(self, val) -> bool:
+        if val is None:
+            return True
+
+        if self._low_step is not None:
+            if val < self._low_step:
+                return False
+
+        if self._high_step is not None:
+            if val > self._high_step:
+                return False
+
+        return True
 
 
 class RatioTapChanger(TapChanger):
@@ -144,7 +163,7 @@ class RatioTapChanger(TapChanger):
     transformer_end: Optional[TransformerEnd] = None
     """`TransformerEnd` to which this ratio tap changer belongs."""
 
-    step_voltage_increment: float = 0.0
+    step_voltage_increment: Optional[float] = None
     """Tap step increment, in per cent of neutral voltage, per step position."""
 
 
@@ -157,10 +176,10 @@ class TransformerEnd(IdentifiedObject):
     grounded: bool = False
     """(for Yn and Zn connections) True if the neutral is solidly grounded."""
 
-    r_ground: float = 0.0
+    r_ground: Optional[float] = None
     """(for Yn and Zn connections) Resistance part of neutral impedance where 'grounded' is true"""
 
-    x_ground: float = 0.0
+    x_ground: Optional[float] = None
     """(for Yn and Zn connections) Reactive part of neutral impedance where 'grounded' is true"""
 
     ratio_tap_changer: Optional[RatioTapChanger] = None
@@ -202,42 +221,42 @@ class PowerTransformerEnd(TransformerEnd):
     _power_transformer: Optional[PowerTransformer] = None
     """The power transformer of this power transformer end."""
 
-    rated_s: int = 0
+    rated_s: Optional[int] = None
     """Normal apparent power rating. The attribute shall be a positive value. For a two-winding transformer the values for the high and low voltage sides 
     shall be identical."""
 
-    rated_u: int = 0
+    rated_u: Optional[int] = None
     """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings. A high voltage side, as given by 
     TransformerEnd.endNumber, shall have a ratedU that is greater or equal than ratedU for the lower voltage sides."""
 
-    r: float = 0.0
+    r: Optional[float] = None
     """Resistance (star-phases) of the transformer end. The attribute shall be equal or greater than zero for non-equivalent transformers."""
 
-    x: float = 0.0
+    x: Optional[float] = None
     """Positive sequence series reactance (star-phases) of the transformer end."""
 
-    r0: float = 0.0
+    r0: Optional[float] = None
     """Zero sequence series resistance (star-phases) of the transformer end."""
 
-    x0: float = 0.0
+    x0: Optional[float] = None
     """Zero sequence series reactance of the transformer end."""
 
-    g: float = 0.0
+    g: Optional[float] = None
     """Magnetizing branch conductance."""
 
-    g0: float = 0.0
+    g0: Optional[float] = None
     """Zero sequence magnetizing branch conductance (star-phases)."""
 
-    b: float = 0.0
+    b: Optional[float] = None
     """Magnetizing branch susceptance (B mag).  The value can be positive or negative."""
 
-    b0: float = 0.0
+    b0: Optional[float] = None
     """Zero sequence magnetizing branch susceptance."""
 
     connection_kind: WindingConnection = WindingConnection.UNKNOWN_WINDING
     """Kind of `zepben.protobuf.cim.iec61970.base.wires.winding_connection.WindingConnection` for this end."""
 
-    phase_angle_clock: int = 0
+    phase_angle_clock: Optional[int] = None
     """Terminal voltage phase angle displacement where 360 degrees are represented with clock hours. The valid values are 0 to 11. For example, for the 
     secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the 
     clock as 11. The clock value of the transformer end number specified as 1, is assumed to be zero."""
@@ -305,7 +324,7 @@ class PowerTransformer(ConductingEquipment):
 
     _power_transformer_ends: Optional[List[PowerTransformerEnd]] = None
 
-    transformer_utilisation: float = 0.0
+    transformer_utilisation: Optional[float] = None
     """
     The fraction of the transformer’s normal capacity (nameplate rating) that is in use. It may be expressed as the
     result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
@@ -331,7 +350,7 @@ class PowerTransformer(ConductingEquipment):
         return ngen(self._power_transformer_ends)
 
     @property
-    def power_transformer_info(self) -> PowerTransformerInfo:
+    def power_transformer_info(self) -> Optional[PowerTransformerInfo]:
         """The `zepben.evolve.cim.iec61968.assetinfo.power_transformer_info.PowerTransformerInfo` for this `PowerTransformer`"""
         return self.asset_info
 

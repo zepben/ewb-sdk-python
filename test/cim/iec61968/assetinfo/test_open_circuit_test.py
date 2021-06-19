@@ -27,11 +27,11 @@ def test_open_circuit_test_constructor_default():
     test = OpenCircuitTest()
 
     verify_transformer_test_constructor_default(test)
-    assert test.energised_end_step == 0
-    assert test.energised_end_voltage == 0
-    assert test.open_end_step == 0
-    assert test.open_end_voltage == 0
-    assert test.phase_shift == 0.0
+    assert test.energised_end_step is None
+    assert test.energised_end_voltage is None
+    assert test.open_end_step is None
+    assert test.open_end_voltage is None
+    assert test.phase_shift is None
 
 
 @given(**open_circuit_test_kwargs)

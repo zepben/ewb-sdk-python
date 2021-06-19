@@ -10,7 +10,7 @@ from typing import Callable, Optional
 
 from dataclassy import dataclass
 
-from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance
+from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, ShortCircuitTest, OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
 from zepben.evolve.model.cim.iec61968.assets.asset import Asset
@@ -53,23 +53,23 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerT
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
 
-__all__ = ["acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_to_location_resolver", "pole_to_streetlight_resolver",
-           "streetlight_to_pole_resolver", "aux_equip_to_term_resolver", "cond_equip_to_bv_resolver", "cond_equip_to_terminal_resolver",
-           "conductor_to_wire_info_resolver", "conn_node_to_term_resolver", "control_to_remote_control_resolver", "cust_to_custagr_resolver",
-           "custagr_to_cust_resolver", "custagr_to_ps_resolver", "diag_to_diagobj_resolver", "diagobj_to_diag_resolver", "ed_to_up_resolver",
-           "ed_to_loc_resolver", "ec_to_ecp_resolver", "ecp_to_ec_resolver", "es_to_esp_resolver", "esp_to_es_resolver", "eq_to_curfeeder_resolver",
-           "powertransformer_to_power_transformer_info_resolver", "eq_to_ec_resolver", "eq_to_or_resolver", "eq_to_up_resolver", "ec_to_eq_resolver",
-           "curfeeder_to_eq_resolver", "feeder_to_nes_resolver", "feeder_to_nht_resolver", "gr_to_sgr_resolver", "meas_to_rs_resolver", "or_to_eq_resolver",
-           "orgr_to_org_resolver", "psr_to_loc_resolver", "pt_to_pte_resolver", "pte_to_pt_resolver", "ps_to_tariff_resolver", "rtc_to_te_resolver",
-           "rc_to_cont_resolver", "rs_to_meas_resolver", "sgr_to_gr_resolver", "sgr_to_sub_resolver", "sub_to_feeder_resolver", "sub_to_sgr_resolver",
-           "sub_to_circuit_resolver", "sub_to_eloop_resolver", "sub_to_loop_resolver", "term_to_ce_resolver", "term_to_cn_resolver", "te_to_term_resolver",
-           "te_to_bv_resolver", "te_to_rtc_resolver", "up_to_ed_resolver", "up_to_eq_resolver", "up_to_loc_resolver", "circuit_to_loop_resolver",
-           "circuit_to_sub_resolver", "circuit_to_term_resolver", "loop_to_circuit_resolver", "loop_to_esub_resolver", "loop_to_sub_resolver",
-           "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference", "tei_to_tti_resolver", "tti_to_tei_resolver",
-           "tei_to_tsi_resolver", "tsi_to_tei_resolver",
-           "te_to_tsi_resolver", "pti_to_tti_resolver", "peu_to_pec_resolver",
-           "pec_to_peu_resolver",
-           "pecphase_to_pec_resolver", "pec_to_pecphase_resolver"]
+__all__ = [
+    "acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_to_location_resolver", "pole_to_streetlight_resolver", "streetlight_to_pole_resolver",
+    "aux_equip_to_term_resolver", "cond_equip_to_bv_resolver", "cond_equip_to_terminal_resolver", "conductor_to_wire_info_resolver",
+    "conn_node_to_term_resolver", "control_to_remote_control_resolver", "cust_to_custagr_resolver", "custagr_to_cust_resolver", "custagr_to_ps_resolver",
+    "diag_to_diagobj_resolver", "diagobj_to_diag_resolver", "ed_to_up_resolver", "ed_to_loc_resolver", "ec_to_ecp_resolver", "ecp_to_ec_resolver",
+    "es_to_esp_resolver", "esp_to_es_resolver", "eq_to_curfeeder_resolver", "powertransformer_to_power_transformer_info_resolver", "eq_to_ec_resolver",
+    "eq_to_or_resolver", "eq_to_up_resolver", "ec_to_eq_resolver", "curfeeder_to_eq_resolver", "feeder_to_nes_resolver", "feeder_to_nht_resolver",
+    "gr_to_sgr_resolver", "meas_to_rs_resolver", "or_to_eq_resolver", "orgr_to_org_resolver", "psr_to_loc_resolver", "pt_to_pte_resolver", "pte_to_pt_resolver",
+    "ps_to_tariff_resolver", "rtc_to_te_resolver", "rc_to_cont_resolver", "rs_to_meas_resolver", "sgr_to_gr_resolver", "sgr_to_sub_resolver",
+    "sub_to_feeder_resolver", "sub_to_sgr_resolver", "sub_to_circuit_resolver", "sub_to_eloop_resolver", "sub_to_loop_resolver", "term_to_ce_resolver",
+    "term_to_cn_resolver", "te_to_term_resolver", "te_to_bv_resolver", "te_to_rtc_resolver", "up_to_ed_resolver", "up_to_eq_resolver", "up_to_loc_resolver",
+    "circuit_to_loop_resolver", "circuit_to_sub_resolver", "circuit_to_term_resolver", "loop_to_circuit_resolver", "loop_to_esub_resolver",
+    "loop_to_sub_resolver", "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference", "tei_to_tti_resolver", "tti_to_tei_resolver",
+    "tei_to_tsi_resolver", "tsi_to_tei_resolver", "te_to_tsi_resolver", "pti_to_tti_resolver", "peu_to_pec_resolver", "pec_to_peu_resolver",
+    "pecphase_to_pec_resolver", "pec_to_pecphase_resolver", "tei_to_ee_nlt_resolver", "tei_to_ee_sct_resolver", "tei_to_ge_sct_resolver",
+    "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver"
+]
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -169,7 +169,7 @@ conductor_to_wire_info_resolver = ReferenceResolver(Conductor, WireInfo, lambda 
 
 powertransformer_to_power_transformer_info_resolver = ReferenceResolver(PowerTransformer, PowerTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 
-tei_to_tti_resolver = ReferenceResolver(TransformerEndInfo, TransformerTankInfo, lambda t, r: setattr(t, 'transformer_end_info', r))
+tei_to_tti_resolver = ReferenceResolver(TransformerEndInfo, TransformerTankInfo, lambda t, r: setattr(t, 'transformer_tank_info', r))
 
 tti_to_tei_resolver = ReferenceResolver(TransformerTankInfo, TransformerEndInfo, lambda t, r: t.add_transformer_end_info(r))
 
@@ -227,7 +227,7 @@ psr_to_loc_resolver = ReferenceResolver(PowerSystemResource, Location, lambda t,
 pt_to_pte_resolver = ReferenceResolver(PowerTransformer, PowerTransformerEnd, _resolve_pt_pte)
 pte_to_pt_resolver = ReferenceResolver(PowerTransformerEnd, PowerTransformer, lambda t, r: setattr(t, 'power_transformer', r))
 
-ps_to_tariff_resolver = ReferenceResolver(PricingStructure, Tariff, lambda t, r: t.tariff_to_cim(r))
+ps_to_tariff_resolver = ReferenceResolver(PricingStructure, Tariff, lambda t, r: t.add_tariff(r))
 
 rtc_to_te_resolver = ReferenceResolver(RatioTapChanger, PowerTransformerEnd, lambda t, r: setattr(t, 'transformer_end', r))
 
@@ -255,7 +255,7 @@ up_to_ed_resolver = ReferenceResolver(UsagePoint, EndDevice, lambda t, r: t.add_
 up_to_eq_resolver = ReferenceResolver(UsagePoint, Equipment, lambda t, r: t.add_equipment(r))
 up_to_loc_resolver = ReferenceResolver(UsagePoint, Location, lambda t, r: setattr(t, 'usage_point_location', r))
 
-circuit_to_term_resolver = ReferenceResolver(Circuit, Terminal, lambda t, r: t.add_terminal(r))
+circuit_to_term_resolver = ReferenceResolver(Circuit, Terminal, lambda t, r: t.add_end_terminal(r))
 circuit_to_loop_resolver = ReferenceResolver(Circuit, Loop, lambda t, r: setattr(t, 'loop', r))
 circuit_to_sub_resolver = ReferenceResolver(Circuit, Substation, lambda t, r: t.add_end_substation(r))
 
@@ -270,3 +270,9 @@ pecphase_to_pec_resolver = ReferenceResolver(PowerElectronicsConnectionPhase,
 
 pec_to_peu_resolver = ReferenceResolver(PowerElectronicsConnection, PowerElectronicsUnit, lambda t, r: t.add_unit(r))
 peu_to_pec_resolver = ReferenceResolver(PowerElectronicsUnit, PowerElectronicsConnection, lambda t, r: setattr(t, 'power_electronics_connection', r))
+
+tei_to_ee_nlt_resolver = ReferenceResolver(TransformerEndInfo, NoLoadTest, lambda t, r: setattr(t, 'energised_end_no_load_tests', r))
+tei_to_ee_sct_resolver = ReferenceResolver(TransformerEndInfo, ShortCircuitTest, lambda t, r: setattr(t, 'energised_end_short_circuit_tests', r))
+tei_to_ge_sct_resolver = ReferenceResolver(TransformerEndInfo, ShortCircuitTest, lambda t, r: setattr(t, 'grounded_end_short_circuit_tests', r))
+tei_to_oe_oct_resolver = ReferenceResolver(TransformerEndInfo, OpenCircuitTest, lambda t, r: setattr(t, 'open_end_open_circuit_tests', r))
+tei_to_ee_oct_resolver = ReferenceResolver(TransformerEndInfo, OpenCircuitTest, lambda t, r: setattr(t, 'energised_end_open_circuit_tests', r))
