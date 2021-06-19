@@ -71,10 +71,12 @@ class DiagramService(BaseService):
         `diagram_object` The `DiagramObject` to remove from the indexes.
         Returns True if the index was updated.
         """
-        self._diagram_objects_by_diagram_mrid.setdefault(diagram_object.diagram.mrid, dict())[diagram_object.mrid] = diagram_object
-        iomrid = diagram_object.identified_object_mrid
-        if iomrid is not None:
-            self._diagram_objects_by_identified_object_mrid.setdefault(iomrid, dict())[diagram_object.mrid] = diagram_object
+        if diagram_object.diagram:
+            self._diagram_objects_by_diagram_mrid.setdefault(diagram_object.diagram.mrid, dict())[diagram_object.mrid] = diagram_object
+
+        io_mrid = diagram_object.identified_object_mrid
+        if io_mrid:
+            self._diagram_objects_by_identified_object_mrid.setdefault(io_mrid, dict())[diagram_object.mrid] = diagram_object
 
         return True
 
@@ -85,18 +87,19 @@ class DiagramService(BaseService):
         `diagram_object` The `DiagramObject` to remove from the indexes.
         Returns True if the index was updated.
         """
-        diagram_map = self._diagram_objects_by_diagram_mrid[diagram_object.diagram.mrid]
-        if diagram_map is not None:
-            del diagram_map[diagram_object.mrid]
-            if not diagram_map:
-                del self._diagram_objects_by_diagram_mrid[diagram_object.diagram.mrid]
+        if diagram_object.diagram.mrid:
+            diagram_map = self._diagram_objects_by_diagram_mrid[diagram_object.diagram.mrid]
+            if diagram_map is not None:
+                del diagram_map[diagram_object.mrid]
+                if not diagram_map:
+                    del self._diagram_objects_by_diagram_mrid[diagram_object.diagram.mrid]
 
-        iomrid = diagram_object.identified_object_mrid
-        if iomrid is not None:
-            io_map = self._diagram_objects_by_identified_object_mrid[iomrid]
+        io_mrid = diagram_object.identified_object_mrid
+        if io_mrid is not None:
+            io_map = self._diagram_objects_by_identified_object_mrid[io_mrid]
             if io_map is not None:
                 del io_map[diagram_object.mrid]
                 if not io_map:
-                    del self._diagram_objects_by_identified_object_mrid[iomrid]
+                    del self._diagram_objects_by_identified_object_mrid[io_mrid]
 
         return True

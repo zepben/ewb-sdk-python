@@ -31,12 +31,12 @@ tap_changer_args = [*power_system_resource_args, False, 1, 10, 2, 3, 4, 5.5]
 def verify_tap_changer_constructor_default(tc: TapChanger):
     verify_power_system_resource_constructor_default(tc)
     assert tc.control_enabled
-    assert tc.neutral_u == 0
-    assert tc.high_step == 1
-    assert tc.low_step == 0
-    assert tc.neutral_step == 0
-    assert tc.normal_step == 0
-    assert tc.step == 0.0
+    assert tc.neutral_u is None
+    assert tc.high_step is None
+    assert tc.low_step is None
+    assert tc.neutral_step is None
+    assert tc.normal_step is None
+    assert tc.step is None
 
 
 def assume_step_values(high_step, low_step, neutral_step, normal_step, step):
@@ -85,7 +85,7 @@ def test_detected_invalid_steps_via_constructor_args():
 
 
 def test_validates_step_changes():
-    tc = TapChanger()
+    tc = TapChanger(high_step=1, low_step=0, neutral_step=0, normal_step=0, step=0.0)
     with raises(ValueError, match=re.escape("High step [0] must be greater than low step [0]")):
         tc.high_step = 0
     with raises(ValueError, match=re.escape("Low step [2] must be less than high step [1]")):

@@ -32,16 +32,16 @@ def test_short_circuit_test_constructor_default():
     sct = ShortCircuitTest()
 
     verify_transformer_test_constructor_default(sct)
-    assert sct.current == 0.0
-    assert sct.energised_end_step == 0
-    assert sct.grounded_end_step == 0
-    assert sct.leakage_impedance == 0.0
-    assert sct.leakage_impedance_zero == 0.0
-    assert sct.loss == 0
-    assert sct.loss_zero == 0
-    assert sct.power == 0
-    assert sct.voltage == 0.0
-    assert sct.voltage_ohmic_part == 0.0
+    assert sct.current is None
+    assert sct.energised_end_step is None
+    assert sct.grounded_end_step is None
+    assert sct.leakage_impedance is None
+    assert sct.leakage_impedance_zero is None
+    assert sct.loss is None
+    assert sct.loss_zero is None
+    assert sct.power is None
+    assert sct.voltage is None
+    assert sct.voltage_ohmic_part is None
 
 
 @given(**short_circuit_test_kwargs)

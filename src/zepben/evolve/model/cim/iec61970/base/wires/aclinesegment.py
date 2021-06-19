@@ -19,7 +19,7 @@ class Conductor(ConductingEquipment):
     system, used to carry current between points in the power system.
     """
 
-    length: float = 0.0
+    length: Optional[float] = None
     """Segment length for calculating line section capabilities."""
 
     @property

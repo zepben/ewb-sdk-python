@@ -25,9 +25,9 @@ shunt_compensator_args = [*regulating_cond_eq_args, True, 1, PhaseShuntConnectio
 def verify_shunt_compensator_constructor_default(sc: ShuntCompensator):
     verify_regulating_cond_eq_constructor_default(sc)
     assert not sc.grounded
-    assert sc.nom_u == 0
+    assert sc.nom_u is None
     assert sc.phase_connection == PhaseShuntConnectionKind.UNKNOWN
-    assert sc.sections == 0.0
+    assert sc.sections is None
 
 
 def verify_shunt_compensator_constructor_kwargs(sc: ShuntCompensator, grounded, nom_u, phase_connection, sections, **kwargs):

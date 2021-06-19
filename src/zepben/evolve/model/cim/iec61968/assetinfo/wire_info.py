@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import WireMaterialKind
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 
@@ -21,7 +23,7 @@ class WireInfo(AssetInfo):
         rated_current : Current carrying capacity of the wire under stated thermal conditions in amperes.
         material : `zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind` - Conductor material.
     """
-    rated_current: int = 0
+    rated_current: Optional[int] = None
     material: WireMaterialKind = WireMaterialKind.UNKNOWN
 
 

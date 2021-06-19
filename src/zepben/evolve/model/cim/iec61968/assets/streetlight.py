@@ -41,7 +41,7 @@ class Streetlight(Asset):
     pole: Optional[Pole] = None
     """The `zepben.evolve.cim.iec61968.assets.pole.Pole` this Streetlight is attached to."""
 
-    light_rating: int = 0
+    light_rating: Optional[int] = None
     """The power rating of the light in watts."""
 
     lamp_kind: StreetlightLampKind = StreetlightLampKind.UNKNOWN

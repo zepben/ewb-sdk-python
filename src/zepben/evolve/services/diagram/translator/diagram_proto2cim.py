@@ -4,49 +4,60 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import zepben.evolve.services.common.resolver as resolver
-
-from zepben.evolve.services.diagram.diagrams import DiagramService
-from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
-from zepben.protobuf.cim.iec61970.base.diagramlayout.OrientationKind_pb2 import OrientationKind as PBOrientationKind
-from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramStyle_pb2 import DiagramStyle as PBDiagramStyle
-from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject as PBDiagramObject
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectPoint_pb2 import DiagramObjectPoint as PBDiagramObjectPoint
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectStyle_pb2 import DiagramObjectStyle as PBDiagramObjectStyle
+from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject as PBDiagramObject
+from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
 
+import zepben.evolve.services.common.resolver as resolver
+from zepben.evolve import identified_object_to_cim, OrientationKind, DiagramStyle, DiagramObjectStyle
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject, DiagramObjectPoint
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_style import DiagramObjectStyle
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
+from zepben.evolve.services.diagram.diagrams import DiagramService
 
-__all__ = ["diagramobjectpoint_to_cim", "diagram_to_cim", "diagramobject_to_cim"]
+__all__ = ["diagram_object_point_to_cim", "diagram_to_cim", "diagram_object_to_cim"]
 
 
-def diagramobjectpoint_to_cim(pb: PBDiagramObjectPoint) -> DiagramObjectPoint:
+################################
+# IEC61970 BASE DIAGRAM LAYOUT #
+################################
+
+def diagram_to_cim(pb: PBDiagram, service: DiagramService):
+    cim = Diagram(
+        mrid=pb.mrid(),
+        orientation_kind=OrientationKind(pb.orientationKind),
+        diagram_style=DiagramStyle(pb.diagramStyle)
+    )
+
+    for mrid in pb.diagramObjectMRIDs:
+        service.resolve_or_defer_reference(resolver.diagram_objects(cim), mrid)
+
+    identified_object_to_cim(pb.io, cim, service)
+    return cim if service.add(cim) else None
+
+
+def diagram_object_to_cim(pb: PBDiagramObject, service: DiagramService):
+    cim = DiagramObject(
+        mrid=pb.mrid(),
+        identified_object_mrid=pb.identifiedObjectMRID if pb.identifiedObjectMRID else None,
+        # todo revert to int check commented out below once the enum checks are in place
+        # style=DiagramObjectStyle(pb.diagramObjectStyle),
+        style=DiagramObjectStyle[PBDiagramObjectStyle.DESCRIPTOR.values_by_number[pb.diagramObjectStyle].name],
+        rotation=pb.rotation,
+    )
+
+    service.resolve_or_defer_reference(resolver.diagram(cim), pb.diagramMRID)
+    for point in pb.diagramObjectPoints:
+        cim.add_point(diagram_object_point_to_cim(point))
+
+    identified_object_to_cim(pb.io, cim, service)
+    return cim if service.add_diagram_object(cim) else None
+
+
+def diagram_object_point_to_cim(pb: PBDiagramObjectPoint) -> DiagramObjectPoint:
+    # noinspection PyArgumentList
     return DiagramObjectPoint(pb.xPosition, pb.yPosition)
 
 
-# IEC61970 DIAGRAM LAYOUT #
-def diagram_to_cim(pb: PBDiagram, service: DiagramService):
-    cim = Diagram(mrid=pb.mrid(),
-                  orientation_kind=OrientationKind[PBOrientationKind.Name(pb.orientationKind)],
-                  diagram_style=DiagramStyle[PBDiagramStyle.Name(pb.diagramStyle)])
-    for mrid in pb.diagramObjectMRIDs:
-        service.resolve_or_defer_reference(resolver.diagram_objects(cim), mrid)
-    identifiedobject_to_cim(pb.io, cim, service)
-    service.add(cim)
-
-
-def diagramobject_to_cim(pb: PBDiagramObject, service: DiagramService):
-    cim = DiagramObject(mrid=pb.mrid(), identified_object_mrid=pb.identifiedObjectMRID,
-                        style=DiagramObjectStyle[PBDiagramObjectStyle.Name(pb.diagramObjectStyle)])
-    service.resolve_or_defer_reference(resolver.diagram(cim), pb.diagramMRID)
-    for point in pb.diagramObjectPoints:
-        cim.add_point(diagramobjectpoint_to_cim(point))
-    identifiedobject_to_cim(pb.io, cim, service)
-    service.add_diagram_object(cim)
-
-
 PBDiagram.to_cim = diagram_to_cim
-PBDiagramObject.to_cim = diagramobject_to_cim
-PBDiagramObjectPoint.to_cim = diagramobjectpoint_to_cim
+PBDiagramObject.to_cim = diagram_object_to_cim
+PBDiagramObjectPoint.to_cim = diagram_object_point_to_cim

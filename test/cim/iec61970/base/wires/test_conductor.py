@@ -20,7 +20,7 @@ conductor_args = [*conducting_equipment_args, 1]
 
 def verify_conductor_constructor_default(c: Conductor):
     verify_conducting_equipment_constructor_default(c)
-    assert c.length == 0.0
+    assert c.length is None
 
 
 def verify_conductor_constructor_kwargs(c: Conductor, length, **kwargs):

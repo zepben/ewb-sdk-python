@@ -130,3 +130,9 @@ from zepben.evolve.util import *
 
 from zepben.evolve.services.network.network_extensions import *
 from zepben.evolve.model.busbranch.bus_branch import *
+
+from zepben.evolve.services.common.difference import *
+from zepben.evolve.services.common.translator.service_differences import *
+
+from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
+from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparator

@@ -27,8 +27,8 @@ def test_battery_unit_constructor_default():
 
     verify_power_electronics_unit_constructor_default(b)
     assert b.battery_state == BatteryStateKind.UNKNOWN
-    assert b.rated_e == 0
-    assert b.stored_e == 0
+    assert b.rated_e is None
+    assert b.stored_e is None
 
 
 @given(**battery_unit_kwargs)

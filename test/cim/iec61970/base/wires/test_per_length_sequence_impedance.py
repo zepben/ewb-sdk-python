@@ -30,14 +30,14 @@ def test_per_length_sequence_impedance_constructor_default():
     plsi = PerLengthSequenceImpedance()
 
     verify_per_length_impedance_constructor_default(plsi)
-    assert plsi.r == 0.0
-    assert plsi.x == 0.0
-    assert plsi.bch == 0.0
-    assert plsi.gch == 0.0
-    assert plsi.r0 == 0.0
-    assert plsi.x0 == 0.0
-    assert plsi.b0ch == 0.0
-    assert plsi.g0ch == 0.0
+    assert plsi.r is None
+    assert plsi.x is None
+    assert plsi.bch is None
+    assert plsi.gch is None
+    assert plsi.r0 is None
+    assert plsi.x0 is None
+    assert plsi.b0ch is None
+    assert plsi.g0ch is None
 
 
 @given(**per_length_sequence_impedance_kwargs)

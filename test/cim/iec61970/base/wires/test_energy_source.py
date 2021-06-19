@@ -37,18 +37,18 @@ def test_energy_source_constructor_default():
 
     verify_energy_connection_constructor_default(es)
     assert not list(es.phases)
-    assert es.active_power == 0.0
-    assert es.reactive_power == 0.0
-    assert es.voltage_angle == 0.0
-    assert es.voltage_magnitude == 0.0
-    assert es.p_max == 0.0
-    assert es.p_min == 0.0
-    assert es.r == 0.0
-    assert es.r0 == 0.0
-    assert es.rn == 0.0
-    assert es.x == 0.0
-    assert es.x0 == 0.0
-    assert es.xn == 0.0
+    assert es.active_power is None
+    assert es.reactive_power is None
+    assert es.voltage_angle is None
+    assert es.voltage_magnitude is None
+    assert es.p_max is None
+    assert es.p_min is None
+    assert es.r is None
+    assert es.r0 is None
+    assert es.rn is None
+    assert es.x is None
+    assert es.x0 is None
+    assert es.xn is None
 
 
 @given(**energy_source_kwargs)

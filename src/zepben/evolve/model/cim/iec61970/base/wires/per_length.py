@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import Optional
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
@@ -27,26 +28,26 @@ class PerLengthSequenceImpedance(PerLengthImpedance):
     Typically, one PerLengthSequenceImpedance is used for many ACLineSegments.
     """
 
-    r: float = 0.0
+    r: Optional[float] = None
     """Positive sequence series resistance, per unit of length."""
 
-    x: float = 0.0
+    x: Optional[float] = None
     """Positive sequence series reactance, per unit of length."""
 
-    bch: float = 0.0
+    bch: Optional[float] = None
     """Positive sequence shunt (charging) susceptance, per unit of length."""
 
-    gch: float = 0.0
+    gch: Optional[float] = None
     """Positive sequence shunt (charging) conductance, per unit of length."""
 
-    r0: float = 0.0
+    r0: Optional[float] = None
     """Zero sequence series resistance, per unit of length."""
 
-    x0: float = 0.0
+    x0: Optional[float] = None
     """Zero sequence series reactance, per unit of length."""
 
-    b0ch: float = 0.0
+    b0ch: Optional[float] = None
     """Zero sequence shunt (charging) susceptance, per unit of length."""
 
-    g0ch: float = 0.0
+    g0ch: Optional[float] = None
     """Zero sequence shunt (charging) conductance, per unit of length."""

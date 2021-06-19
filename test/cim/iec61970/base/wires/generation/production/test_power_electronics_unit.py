@@ -23,8 +23,8 @@ power_electronics_unit_args = [*equipment_args, PowerElectronicsConnection(), 1,
 def verify_power_electronics_unit_constructor_default(peu: PowerElectronicsUnit):
     verify_equipment_constructor_default(peu)
     assert peu.power_electronics_connection is None
-    assert peu.max_p == 0
-    assert peu.min_p == 0
+    assert peu.max_p is None
+    assert peu.min_p is None
 
 
 def verify_power_electronics_unit_constructor_kwargs(peu: PowerElectronicsUnit, power_electronics_connection, max_p, min_p, **kwargs):

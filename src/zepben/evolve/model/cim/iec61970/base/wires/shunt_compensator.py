@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import Optional
 
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
 from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
@@ -20,14 +21,14 @@ class ShuntCompensator(RegulatingCondEq):
     """Used for Yn and Zn connections. True if the neutral is solidly grounded. nom_u : The voltage at which the nominal reactive power may be calculated. 
     This should normally be within 10% of the voltage at which the capacitor is connected to the network."""
 
-    nom_u: int = 0
+    nom_u: Optional[int] = None
     """The voltage at which the nominal reactive power may be calculated. This should normally be within 10% of the voltage at which the capacitor is connected 
     to the network."""
 
     phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.UNKNOWN
     """The type of phase connection, such as wye or delta."""
 
-    sections: float = 0.0
+    sections: Optional[float] = None
     """
     Shunt compensator sections in use. Starting value for steady state solution. Non integer values are allowed to support continuous variables. The 
     reasons for continuous value are to support study cases where no discrete shunt compensator's has yet been designed, a solutions where a narrow voltage 
@@ -45,14 +46,14 @@ class ShuntCompensator(RegulatingCondEq):
 class LinearShuntCompensator(ShuntCompensator):
     """A linear shunt compensator has banks or sections with equal admittance values."""
 
-    b0_per_section: float = 0.0
+    b0_per_section: Optional[float] = None
     """Zero sequence shunt (charging) susceptance per section"""
 
-    b_per_section: float = 0.0
+    b_per_section: Optional[float] = None
     """Positive sequence shunt (charging) susceptance per section"""
 
-    g0_per_section: float = 0.0
+    g0_per_section: Optional[float] = None
     """Zero sequence shunt (charging) conductance per section"""
 
-    g_per_section: float = 0.0
+    g_per_section: Optional[float] = None
     """Positive sequence shunt (charging) conductance per section"""

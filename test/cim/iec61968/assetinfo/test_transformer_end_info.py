@@ -44,14 +44,14 @@ def test_transformer_end_info_constructor_default():
 
     verify_asset_info_constructor_default(tei)
     assert tei.connection_kind == WindingConnection.UNKNOWN_WINDING
-    assert tei.emergency_s == 0
+    assert tei.emergency_s is None
     assert tei.end_number == 0
-    assert tei.insulation_u == 0
-    assert tei.phase_angle_clock == 0
-    assert tei.r == 0.0
-    assert tei.rated_s == 0
-    assert tei.rated_u == 0
-    assert tei.short_term_s == 0
+    assert tei.insulation_u is None
+    assert tei.phase_angle_clock is None
+    assert tei.r is None
+    assert tei.rated_s is None
+    assert tei.rated_u is None
+    assert tei.short_term_s is None
     assert tei.transformer_tank_info is None
     assert tei.transformer_star_impedance is None
     assert tei.energised_end_no_load_tests is None

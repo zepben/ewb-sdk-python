@@ -62,4 +62,4 @@ class CustomerKind(Enum):
 
     @property
     def short_name(self):
-        return str(self)[16:]
+        return str(self)[13:]
