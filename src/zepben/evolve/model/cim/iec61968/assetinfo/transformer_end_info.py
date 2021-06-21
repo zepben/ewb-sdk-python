@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
+import math
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -92,4 +93,37 @@ class TransformerEndInfo(AssetInfo):
             return self.calculate_resistance_reactance_from_tests()
 
     def calculate_resistance_reactance_from_tests(self) -> Optional[ResistanceReactance]:
-        return None
+        """
+        Get the `ResistanceReactance` for this `TransformerEndInfo` calculated from the associated test data.
+
+        Returns the `ResistanceReactance` for this `TransformerEndInfo` or None if it could not be calculated
+        """
+
+        def calculate_r_x_from_test(short_circuit_test: ShortCircuitTest, rated_u: int, rated_s: int) -> Optional[float, float]:
+            if short_circuit_test is not None:
+                r = None
+                if short_circuit_test.voltage_ohmic_part is not None and short_circuit_test.voltage is not None:
+                    r = (short_circuit_test.voltage_ohmic_part * rated_u ** 2) / rated_s
+                elif short_circuit_test.loss is not None and short_circuit_test.voltage is not None:
+                    r = short_circuit_test.power * (rated_u / rated_s) ** 2
+                x = math.sqrt((short_circuit_test.voltage * rated_u ** 2 / rated_s) - r ** 2)
+                return [r, x]
+            else:
+                return None
+
+        if self.rated_u and self.rated_s:
+            if self.energised_end_short_circuit_tests is not None:
+                rr = ResistanceReactance()
+                [rr.r, rr.x] = calculate_r_x_from_test(self.energised_end_short_circuit_tests, self.rated_u, self.rated_s)
+                if self.grounded_end_short_circuit_tests is not None:
+                    [rr.r0, rr.x0] = calculate_r_x_from_test(self.grounded_end_short_circuit_tests, self.rated_u, self.rated_s)
+                return rr
+            else:
+                rr = ResistanceReactance()
+                if self.grounded_end_short_circuit_tests is not None:
+                    [rr.r0, rr.x0] = calculate_r_x_from_test(self.grounded_end_short_circuit_tests, self.rated_u, self.rated_s)
+                    return rr
+                else:
+                    return None
+        else:
+            return None
