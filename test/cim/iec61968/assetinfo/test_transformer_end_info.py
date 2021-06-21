@@ -160,7 +160,7 @@ def test_calculates_resistance_reactance_off_end_info_tests_if_available():
     info = TransformerEndInfo()
     assert info.calculate_resistance_reactance_from_tests() is None
     info.rated_u = 400000
-    info.rated_s = 1630000
+    info.rated_s = 1630000000
     short_circuit_test = ShortCircuitTest()
     info.energised_end_short_circuit_tests = short_circuit_test
     assert info.calculate_resistance_reactance_from_tests() is None
@@ -169,7 +169,13 @@ def test_calculates_resistance_reactance_off_end_info_tests_if_available():
     assert info.calculate_resistance_reactance_from_tests() is None
     short_circuit_test.loss = 2020180
     short_circuit_test.voltage = 11.85
-    validate_resistance_reactance(info.resistance_reactance(), r=0.1, x=11.6, r0=None, x0=None)
+    info.calculate_resistance_reactance_from_tests()
+    validate_resistance_reactance(info.resistance_reactance(), r=0.12, x=11.63, r0=None, x0=None)
+    short_circuit_test = ShortCircuitTest()
+    short_circuit_test.voltage_ohmic_part = 0.124
+    short_circuit_test.voltage = 11.85
+    info.energised_end_short_circuit_tests = short_circuit_test
+    validate_resistance_reactance(info.resistance_reactance(), r=0.12, x=11.63, r0=None, x0=None)
 
 
 def validate_resistance_reactance(rr: ResistanceReactance, r, r0, x, x0):

@@ -15,52 +15,52 @@ class ShortCircuitTest(TransformerTest):
     can be a positive sequence (the default) or a zero sequence. There shall be at least one grounded winding.
     """
 
-    current: float = 0.0
+    current: float = None
     """
     Short circuit current in amps.
     """
 
-    energised_end_step: int = 0
+    energised_end_step: int = None
     """
     Tap step number for the energised end of the test pair.
     """
 
-    grounded_end_step: int = 0
+    grounded_end_step: int = None
     """
     Tap step number for the grounded end of the test pair.
     """
 
-    leakage_impedance: float = 0.0
+    leakage_impedance: float = None
     """
     Leakage impedance measured from a positive-sequence or single-phase short-circuit test in ohms.
     """
 
-    leakage_impedance_zero: float = 0.0
+    leakage_impedance_zero: float = None
     """
     Leakage impedance measured from a zero-sequence short-circuit test in ohms.
     """
 
-    loss: int = 0
+    loss: int = None
     """
     Load losses from a positive-sequence or single-phase short-circuit test in watts.
     """
 
-    loss_zero: int = 0
+    loss_zero: int = None
     """
     Load losses from a zero-sequence short-circuit test in watts.
     """
 
-    power: int = 0
+    power: int = None
     """
     Short circuit apparent power in VA.
     """
 
-    voltage: float = 0.0
+    voltage: float = None
     """
     Short circuit voltage as a percentage.
     """
 
-    voltage_ohmic_part: float = 0.0
+    voltage_ohmic_part: float = None
     """
     Short Circuit Voltage – Ohmic Part as a percentage.
     """
