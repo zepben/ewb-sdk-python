@@ -6,8 +6,8 @@
 
 from hypothesis import given
 
-from cim_creators import *
-from services.common.translator.base_test_translator import validate_service_translations
+from test.cim_creators import *
+from test.services.common.translator.base_test_translator import validate_service_translations
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 
 T = TypeVar("T", bound=IdentifiedObject)
