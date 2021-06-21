@@ -26,7 +26,7 @@ def test_streetlight_constructor_default():
 
     verify_asset_constructor_default(p)
     assert not p.pole
-    assert p.light_rating == 0
+    assert p.light_rating is None
     assert p.lamp_kind == StreetlightLampKind.UNKNOWN
 
 

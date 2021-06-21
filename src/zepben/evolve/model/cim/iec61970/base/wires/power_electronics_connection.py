@@ -24,7 +24,7 @@ class PowerElectronicsConnectionPhase(PowerSystemResource):
     power_electronics_connection: Optional[PowerElectronicsConnection] = None
     """The power electronics connection to which the phase belongs."""
 
-    p: float = 0.0
+    p: Optional[float] = None
     """Active power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""
 
     phase: SinglePhaseKind = SinglePhaseKind.X
@@ -34,7 +34,7 @@ class PowerElectronicsConnectionPhase(PowerSystemResource):
     logical non-neutral phase.
     """
 
-    q: float = 0.0
+    q: Optional[float] = None
     """Reactive power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""
 
 
@@ -43,25 +43,25 @@ class PowerElectronicsConnection(RegulatingCondEq):
     A connection to the AC network for energy production or consumption that uses power electronics rather than rotating machines.
     """
 
-    max_i_fault: int = 0
+    max_i_fault: Optional[int] = None
     """Maximum fault current this device will contribute, in per-unit of rated current, before the converter protection will trip or bypass."""
 
-    p: float = 0.0
+    p: Optional[float] = None
     """Active power injection. Load sign convention is used, i.e. positive sign means flow out from a node. Starting value for a steady state solution."""
 
-    q: float = 0.0
+    q: Optional[float] = None
     """Reactive power injection. Load sign convention is used, i.e. positive sign means flow out from a node. Starting value for a steady state solution."""
 
-    max_q: float = 0.0
+    max_q: Optional[float] = None
     """Maximum reactive power limit. This is the maximum (nameplate) limit for the unit."""
 
-    min_q: float = 0.0
+    min_q: Optional[float] = None
     """Minimum reactive power limit for the unit. This is the minimum (nameplate) limit for the unit."""
 
-    rated_s: int = 0
+    rated_s: Optional[int] = None
     """Nameplate apparent power rating for the unit. The attribute shall have a positive value."""
 
-    rated_u: int = 0
+    rated_u: Optional[int] = None
     """Rated voltage (nameplate data, Ur in IEC 60909-0). It is primarily used for short circuit data exchange according to IEC 60909. 
     The attribute shall be a positive value."""
 

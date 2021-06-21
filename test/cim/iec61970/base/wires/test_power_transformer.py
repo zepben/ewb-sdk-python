@@ -27,7 +27,7 @@ def test_power_transformer_constructor_default():
     verify_conducting_equipment_constructor_default(pt)
     assert pt.vector_group == VectorGroup.UNKNOWN
     assert not list(pt.ends)
-    assert pt.transformer_utilisation == 0.0
+    assert pt.transformer_utilisation is None
 
 
 @given(**power_transformer_kwargs)

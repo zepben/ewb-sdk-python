@@ -33,13 +33,13 @@ def test_power_electronics_connection_constructor_default():
     pec = PowerElectronicsConnection()
 
     verify_regulating_cond_eq_constructor_default(pec)
-    assert pec.max_i_fault == 0
-    assert pec.p == 0.0
-    assert pec.q == 0.0
-    assert pec.max_q == 0.0
-    assert pec.min_q == 0.0
-    assert pec.rated_s == 0
-    assert pec.rated_u == 0
+    assert pec.max_i_fault is None
+    assert pec.p is None
+    assert pec.q is None
+    assert pec.max_q is None
+    assert pec.min_q is None
+    assert pec.rated_s is None
+    assert pec.rated_u is None
     assert not list(pec.units)
     assert not list(pec.phases)
 

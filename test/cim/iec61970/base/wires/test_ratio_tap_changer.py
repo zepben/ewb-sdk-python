@@ -26,7 +26,7 @@ def test_ratio_tap_changer_constructor_default():
 
     verify_tap_changer_constructor_default(rtc)
     assert not rtc.transformer_end
-    assert rtc.step_voltage_increment == 0.0
+    assert rtc.step_voltage_increment is None
 
 
 @given(**ratio_tap_changer_kwargs)

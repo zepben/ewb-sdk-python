@@ -6,7 +6,11 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Organisation
+
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 __all__ = ["OrganisationRole"]

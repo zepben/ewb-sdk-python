@@ -22,30 +22,30 @@ class TransformerEndInfo(AssetInfo):
     connection_kind: WindingConnection = WindingConnection.UNKNOWN_WINDING
     """Kind of connection."""
 
-    emergency_s: int = 0
+    emergency_s: Optional[int] = None
     """Apparent power that the winding can carry under emergency conditions (also called long-term emergency power). Unit: VA"""
 
     end_number: int = 0
     """Number for this transformer end, corresponding to the end's order in the PowerTransformer.vectorGroup attribute. Highest voltage winding
          should be 1."""
 
-    insulation_u: int = 0
+    insulation_u: Optional[int] = None
     """Basic insulation level voltage rating. Unit: Volts"""
 
-    phase_angle_clock: int = 0
+    phase_angle_clock: Optional[int] = None
     """Winding phase angle where 360 degrees are represented with clock hours, so the valid values are {0, ..., 11}. For example,
          to express the second winding in code 'Dyn11', set attributes as follows: 'endNumber'=2, 'connectionKind' = Yn and 'phaseAngleClock' = 11."""
 
-    r: float = 0.0
+    r: Optional[float] = None
     """DC resistance. Unit: Ohms"""
 
-    rated_s: int = 0
+    rated_s: Optional[int] = None
     """Normal apparent power rating. Unit: VA"""
 
-    rated_u: int = 0
+    rated_u: Optional[int] = None
     """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings. Unit: Volts"""
 
-    short_term_s: int = 0
+    short_term_s: Optional[int] = None
     """Apparent power that this winding can carry for a short period of time (in emergency). Unit: VA"""
 
     transformer_tank_info: Optional[TransformerTankInfo] = None

@@ -5,10 +5,14 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo
+from zepben.protobuf.cim.iec61968.assetinfo.NoLoadTest_pb2 import NoLoadTest
+from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircuitTest
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo
+from zepben.protobuf.cim.iec61968.assetinfo.ShortCircuitTest_pb2 import ShortCircuitTest
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerEndInfo_pb2 import TransformerEndInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import TransformerTankInfo
+from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo
@@ -34,6 +38,7 @@ from zepben.protobuf.cim.iec61970.base.core.EquipmentContainer_pb2 import Equipm
 from zepben.protobuf.cim.iec61970.base.core.Equipment_pb2 import Equipment
 from zepben.protobuf.cim.iec61970.base.core.Feeder_pb2 import Feeder
 from zepben.protobuf.cim.iec61970.base.core.GeographicalRegion_pb2 import GeographicalRegion
+from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject
 from zepben.protobuf.cim.iec61970.base.core.PowerSystemResource_pb2 import PowerSystemResource
 from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion
@@ -91,47 +96,53 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop
 __all__ = []
 
 CableInfo.mrid = lambda self: self.wi.mrid()
+NoLoadTest.mrid = lambda self: self.tt.mrid()
+OpenCircuitTest.mrid = lambda self: self.tt.mrid()
 OverheadWireInfo.mrid = lambda self: self.wi.mrid()
 PowerTransformerInfo.mrid = lambda self: self.ai.mrid()
+ShortCircuitTest.mrid = lambda self: self.tt.mrid()
 TransformerEndInfo.mrid = lambda self: self.ai.mrid()
 TransformerTankInfo.mrid = lambda self: self.ai.mrid()
-TransformerStarImpedance.mrid = lambda self: self.io.mRID
+TransformerTest.mrid = lambda self: self.io.mrid()
+TransformerStarImpedance.mrid = lambda self: self.io.mrid()
 WireInfo.mrid = lambda self: self.ai.mrid()
-Asset.mrid = lambda self: self.io.mRID
+Asset.mrid = lambda self: self.io.mrid()
 AssetContainer.mrid = lambda self: self.at.mrid()
-AssetInfo.mrid = lambda self: self.io.mRID
+AssetInfo.mrid = lambda self: self.io.mrid()
 AssetOrganisationRole.mrid = lambda self: getattr(self, "or").mrid()
 AssetOwner.mrid = lambda self: self.aor.mrid()
 Pole.mrid = lambda self: self.st.mrid()
 Streetlight.mrid = lambda self: self.at.mrid()
 Structure.mrid = lambda self: self.ac.mrid()
-Location.mrid = lambda self: self.io.mRID
+Location.mrid = lambda self: self.io.mrid()
 EndDevice.mrid = lambda self: self.ac.mrid()
 Meter.mrid = lambda self: self.ed.mrid()
-UsagePoint.mrid = lambda self: self.io.mRID
+UsagePoint.mrid = lambda self: self.io.mrid()
 OperationalRestriction.mrid = lambda self: self.doc.mrid()
 AuxiliaryEquipment.mrid = lambda self: self.eq.mrid()
 FaultIndicator.mrid = lambda self: self.ae.mrid()
-AcDcTerminal.mrid = lambda self: self.io.mRID
-BaseVoltage.mrid = lambda self: self.io.mRID
+AcDcTerminal.mrid = lambda self: self.io.mrid()
+BaseVoltage.mrid = lambda self: self.io.mrid()
 ConductingEquipment.mrid = lambda self: self.eq.mrid()
-ConnectivityNode.mrid = lambda self: self.io.mRID
+ConnectivityNode.mrid = lambda self: self.io.mrid()
 ConnectivityNodeContainer.mrid = lambda self: self.psr.mrid()
 Equipment.mrid = lambda self: self.psr.mrid()
 EquipmentContainer.mrid = lambda self: self.cnc.mrid()
 Feeder.mrid = lambda self: self.ec.mrid()
-GeographicalRegion.mrid = lambda self: self.io.mRID
-PowerSystemResource.mrid = lambda self: self.io.mRID
+GeographicalRegion.mrid = lambda self: self.io.mrid()
+IdentifiedObject.mrid = lambda self: self.mRID
+PowerSystemResource.mrid = lambda self: self.io.mrid()
 Site.mrid = lambda self: self.ec.mrid()
-SubGeographicalRegion.mrid = lambda self: self.io.mRID
+SubGeographicalRegion.mrid = lambda self: self.io.mrid()
 Substation.mrid = lambda self: self.ec.mrid()
 Terminal.mrid = lambda self: self.ad.mrid()
-PowerElectronicsUnit.mrid = lambda self: self.eq.mrid()
 BatteryUnit.mrid = lambda self: self.peu.mrid()
 PhotoVoltaicUnit.mrid = lambda self: self.peu.mrid()
+PowerElectronicsUnit.mrid = lambda self: self.eq.mrid()
 PowerElectronicsWindUnit.mrid = lambda self: self.peu.mrid()
 AcLineSegment.mrid = lambda self: self.cd.mrid()
 Breaker.mrid = lambda self: self.sw.mrid()
+BusbarSection.mrid = lambda self: self.cn.mrid()
 Conductor.mrid = lambda self: self.ce.mrid()
 Connector.mrid = lambda self: self.ce.mrid()
 Disconnector.mrid = lambda self: self.sw.mrid()
@@ -143,12 +154,11 @@ EnergySourcePhase.mrid = lambda self: self.psr.mrid()
 Fuse.mrid = lambda self: self.sw.mrid()
 Jumper.mrid = lambda self: self.sw.mrid()
 Junction.mrid = lambda self: self.cn.mrid()
-BusbarSection.mrid = lambda self: self.cn.mrid()
 Line.mrid = lambda self: self.ec.mrid()
 LinearShuntCompensator.mrid = lambda self: self.sc.mrid()
 LoadBreakSwitch.mrid = lambda self: self.ps.mrid()
 PerLengthImpedance.mrid = lambda self: self.lp.mrid()
-PerLengthLineParameter.mrid = lambda self: self.io.mRID
+PerLengthLineParameter.mrid = lambda self: self.io.mrid()
 PerLengthSequenceImpedance.mrid = lambda self: self.pli.mrid()
 PowerTransformer.mrid = lambda self: self.ce.mrid()
 PowerElectronicsConnection.mrid = lambda self: self.rce.mrid()
@@ -161,17 +171,17 @@ RegulatingCondEq.mrid = lambda self: self.ec.mrid()
 ShuntCompensator.mrid = lambda self: self.rce.mrid()
 Switch.mrid = lambda self: self.ce.mrid()
 TapChanger.mrid = lambda self: self.psr.mrid()
-TransformerEnd.mrid = lambda self: self.io.mRID
-Loop.mrid = lambda self: self.io.mRID
+TransformerEnd.mrid = lambda self: self.io.mrid()
+Loop.mrid = lambda self: self.io.mrid()
 Circuit.mrid = lambda self: self.l.mrid()
 Accumulator.mrid = lambda self: self.measurement.mrid()
 Analog.mrid = lambda self: self.measurement.mrid()
 Discrete.mrid = lambda self: self.measurement.mrid()
 Control.mrid = lambda self: self.ip.mrid()
-IoPoint.mrid = lambda self: self.io.mRID
-Measurement.mrid = lambda self: self.io.mRID
+IoPoint.mrid = lambda self: self.io.mrid()
+Measurement.mrid = lambda self: self.io.mrid()
 RemoteControl.mrid = lambda self: self.rp.mrid()
-RemotePoint.mrid = lambda self: self.io.mRID
+RemotePoint.mrid = lambda self: self.io.mrid()
 RemoteSource.mrid = lambda self: self.rp.mrid()
 
 PowerSystemResource.name_and_mrid = lambda self: self.io.name_and_mrid()

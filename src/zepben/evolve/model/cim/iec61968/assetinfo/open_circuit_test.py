@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import Optional
 
 from zepben.evolve import TransformerTest
 
@@ -15,27 +16,27 @@ class OpenCircuitTest(TransformerTest):
     with voltage applied to the energised end. For three-phase windings, the excitation can be a positive sequence (the default) or a zero sequence.
     """
 
-    energised_end_step: int = 0
+    energised_end_step: Optional[int] = None
     """
     Tap step number for the energised end of the test pair.
     """
 
-    energised_end_voltage: int = 0
+    energised_end_voltage: Optional[int] = None
     """
     Voltage applied to the winding (end) during test in volts.
     """
 
-    open_end_step: int = 0
+    open_end_step: Optional[int] = None
     """
     Tap step number for the open end of the test pair.
     """
 
-    open_end_voltage: int = 0
+    open_end_voltage: Optional[int] = None
     """
     Voltage measured at the open-circuited end, with the energised end set to rated voltage and all other ends open in volts.
     """
 
-    phase_shift: float = 0.0
+    phase_shift: Optional[float] = None
     """
     Phase shift measured at the open end with the energised end set to rated voltage and all other ends open in angle degrees.
     """

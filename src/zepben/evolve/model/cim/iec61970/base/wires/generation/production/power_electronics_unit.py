@@ -21,10 +21,10 @@ class PowerElectronicsUnit(Equipment):
     power_electronics_connection: Optional[PowerElectronicsConnection] = None
     """An AC network connection may have several power electronics units connecting through it."""
 
-    max_p: int = 0
+    max_p: Optional[int] = None
     """Maximum active power limit. This is the maximum (nameplate) limit for the unit."""
 
-    min_p: int = 0
+    min_p: Optional[int] = None
     """Minimum active power limit. This is the minimum (nameplate) limit for the unit."""
 
 
@@ -34,10 +34,10 @@ class BatteryUnit(PowerElectronicsUnit):
     battery_state: BatteryStateKind = BatteryStateKind.UNKNOWN
     """The current state of the battery (charging, full, etc.)."""
 
-    rated_e: int = 0
+    rated_e: Optional[int] = None
     """Full energy storage capacity of the battery in watt hours (Wh). The attribute shall be a positive value."""
 
-    stored_e: int = 0
+    stored_e: Optional[int] = None
     """Amount of energy currently stored in watt hours (Wh). The attribute shall be a positive value or zero and lower than `rated_e`."""
 
 

@@ -5,15 +5,15 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import builds
 
+from test.cim_creators import sampled_wire_info
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from test.cim_creators import sampled_asset_info
 from zepben.evolve import PowerSystemResource, Location, PowerTransformerInfo
 
 power_system_resource_kwargs = {
     **identified_object_kwargs,
     "location": builds(Location),
-    "asset_info": sampled_asset_info()
+    "asset_info": sampled_wire_info()
 }
 
 power_system_resource_args = [*identified_object_args, Location(), PowerTransformerInfo()]

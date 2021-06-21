@@ -21,7 +21,7 @@ wire_info_args = [*identified_object_args, 1, WireMaterialKind.acsr]
 
 def verify_wire_info_constructor_default(wi: WireInfo):
     verify_identified_object_constructor_default(wi)
-    assert wi.rated_current == 0
+    assert wi.rated_current is None
     assert wi.material == WireMaterialKind.UNKNOWN
 
 

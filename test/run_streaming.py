@@ -19,6 +19,7 @@ profile = False
 
 def run_streaming():
     print(platform.architecture())
+    _time("get object", run_get_object)
     _time("get feeder", run_feeder)
     # Depending on the database you have loaded this can take substantial time (minutes), so it is disabled by default.
     # _time("retrieve network", run_retrieve)
@@ -30,6 +31,16 @@ def run_retrieve():
         client = SyncNetworkConsumerClient(channel=channel)
 
         client.retrieve_network().throw_on_error()
+
+        _log(f"Num unresolved: {client.service.num_unresolved_references()}")
+        _log(f"Num objects: {client.service.len_of()}")
+
+
+def run_get_object():
+    with connect(rpc_port=rpc_port) as channel:
+        client = SyncNetworkConsumerClient(channel=channel)
+
+        client.get_identified_object("21527151-6fce-423d-84e5-8254a00b05b1").throw_on_error()
 
         _log(f"Num unresolved: {client.service.num_unresolved_references()}")
         _log(f"Num objects: {client.service.len_of()}")
