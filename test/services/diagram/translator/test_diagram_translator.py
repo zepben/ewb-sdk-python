@@ -6,8 +6,8 @@
 from hypothesis import given, assume
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectStyle_pb2 import DiagramObjectStyle as PBDiagramObjectStyle
 
-from cim_creators import *
-from services.common.translator.base_test_translator import validate_service_translations
+from test.cim_creators import *
+from test.services.common.translator.base_test_translator import validate_service_translations
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
 T = TypeVar("T", bound=IdentifiedObject)
