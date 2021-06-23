@@ -464,7 +464,7 @@ def create_diagram_object():
         **create_identified_object(),
         diagram=builds(Diagram, **create_identified_object()),
         identified_object_mrid=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
-        style=sampled_from(DiagramObjectStyle),
+        style=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
         rotation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         diagram_object_points=lists(create_diagram_object_point(), min_size=1, max_size=2)
     )
