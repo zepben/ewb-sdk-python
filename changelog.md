@@ -10,7 +10,7 @@
 * All `CimConsumerClient` implementations have been changed to control a single service rather than one per call.
 * All SDK methods that retrieve objects with references will now request the network hierarchy first to provide
   a consistent result, regardless of call order.
-* Changed `IdentifiedObject.style` to be a string and removed `DiagramObjectStyle` enum.
+* Changed `DiagramObject.style` to be a string and removed `DiagramObjectStyle` enum.
 * Updated to use v0.15.0 gRPC protocols.
 
 ##### New Features
