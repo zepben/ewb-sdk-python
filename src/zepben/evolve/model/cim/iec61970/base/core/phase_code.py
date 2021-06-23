@@ -8,11 +8,17 @@ from enum import Enum, unique
 
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
-__all__ = ["PhaseCode", "phasecode_by_id"]
+__all__ = ["PhaseCode", "phase_code_by_id"]
 
 
-def phasecode_by_id(id: int):
-    return _phasecode_members[id]
+def phase_code_by_id(value: int):
+    """
+    Get a PhaseCode by its value
+
+    `value` ID of the PhaseCode from 0 as per the order of definition
+    Returns The PhaseCode
+    """
+    return _PHASE_CODE_VALUES[value]
 
 
 @unique
@@ -28,70 +34,70 @@ class PhaseCode(Enum):
     loads, use the A, B, C phase codes instead of s12N.
     """
 
-    NONE = (SinglePhaseKind.NONE,)
+    NONE = (0, [SinglePhaseKind.NONE])
     """No phases specified"""
 
-    A = (SinglePhaseKind.A,)
+    A = (1, [SinglePhaseKind.A])
     """Phase A"""
 
-    B = (SinglePhaseKind.B,)
+    B = (2, [SinglePhaseKind.B])
     """Phase B"""
 
-    C = (SinglePhaseKind.C,)
+    C = (3, [SinglePhaseKind.C])
     """Phase C"""
 
-    N = (SinglePhaseKind.N,)
+    N = (4, [SinglePhaseKind.N])
     """Neutral Phase"""
 
-    AB = (SinglePhaseKind.A, SinglePhaseKind.B)
+    AB = (5, [SinglePhaseKind.A, SinglePhaseKind.B])
     """Phases A and B"""
 
-    AC = (SinglePhaseKind.A, SinglePhaseKind.C)
+    AC = (6, [SinglePhaseKind.A, SinglePhaseKind.C])
     """Phases A and C"""
 
-    AN = (SinglePhaseKind.A, SinglePhaseKind.N)
+    AN = (7, [SinglePhaseKind.A, SinglePhaseKind.N])
     """Phases A and N"""
 
-    BC = (SinglePhaseKind.B, SinglePhaseKind.C)
+    BC = (8, [SinglePhaseKind.B, SinglePhaseKind.C])
     """Phases B and C"""
 
-    BN = (SinglePhaseKind.B, SinglePhaseKind.N)
+    BN = (9, [SinglePhaseKind.B, SinglePhaseKind.N])
     """Phases B and N"""
 
-    CN = (SinglePhaseKind.C, SinglePhaseKind.N)
+    CN = (10, [SinglePhaseKind.C, SinglePhaseKind.N])
     """Phases C and N"""
 
-    ABC = (SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C)
+    ABC = (11, [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C])
     """Phases A, B and C"""
 
-    ABN = (SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.N)
+    ABN = (12, [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.N])
     """Phases A, B and neutral"""
 
-    ACN = (SinglePhaseKind.A, SinglePhaseKind.C, SinglePhaseKind.N)
+    ACN = (13, [SinglePhaseKind.A, SinglePhaseKind.C, SinglePhaseKind.N])
     """Phases A, C and neutral"""
 
-    BCN = (SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N)
+    BCN = (14, [SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N])
     """Phases B, C and neutral"""
 
-    ABCN = (SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N)
+    ABCN = (15, [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N])
     """Phases A, B, C and neutral"""
 
-    X = (SinglePhaseKind.X,)
+    X = (16, [SinglePhaseKind.X])
     """Unknown non-neutral phase"""
 
-    XN = (SinglePhaseKind.X, SinglePhaseKind.N)
+    XN = (17, [SinglePhaseKind.X, SinglePhaseKind.N])
     """Unknown non-neutral phase plus neutral"""
 
-    XY = (SinglePhaseKind.X, SinglePhaseKind.Y)
+    XY = (18, [SinglePhaseKind.X, SinglePhaseKind.Y])
     """Two Unknown non-neutral phases"""
 
-    XYN = (SinglePhaseKind.X, SinglePhaseKind.Y, SinglePhaseKind.N)
+    XYN = (19, [SinglePhaseKind.X, SinglePhaseKind.Y, SinglePhaseKind.N])
     """Two Unknown non-neutral phases plus neutral"""
 
-    Y = (SinglePhaseKind.Y,)
+    Y = (20, [SinglePhaseKind.Y])
     """Unknown non-neutral phase"""
 
-    YN = (SinglePhaseKind.Y, SinglePhaseKind.N)
+    YN = (21, [SinglePhaseKind.Y, SinglePhaseKind.N])
     """Unknown non-neutral phase plus neutral"""
 
     @property
@@ -100,11 +106,11 @@ class PhaseCode(Enum):
 
     @property
     def single_phases(self):
-        return self.value
+        return self.value[1]
 
     @property
     def num_phases(self):
         return len(self.value)
 
 
-_phasecode_members = list(PhaseCode.__members__.values())
+_PHASE_CODE_VALUES = list(PhaseCode.__members__.values())

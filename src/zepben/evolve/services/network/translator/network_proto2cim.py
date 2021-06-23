@@ -619,7 +619,7 @@ def substation_to_cim(pb: PBSubstation, network_service: NetworkService) -> Opti
 def terminal_to_cim(pb: PBTerminal, network_service: NetworkService) -> Optional[Terminal]:
     cim = Terminal(
         mrid=pb.mrid(),
-        phases=phasecode_by_id(pb.phases),
+        phases=phase_code_by_id(pb.phases),
         sequence_number=pb.sequenceNumber,
         traced_phases=TracedPhases(pb.tracedPhases.normalStatus, pb.tracedPhases.currentStatus),
     )
@@ -695,7 +695,7 @@ def io_point_to_cim(pb: PBIoPoint, cim: IoPoint, service: NetworkService):
 def measurement_to_cim(pb: PBMeasurement, cim: Measurement, service: NetworkService):
     cim.power_system_resource_mrid = str_or_none(pb.powerSystemResourceMRID)
     cim.terminal_mrid = str_or_none(pb.terminalMRID)
-    cim.phases = phasecode_by_id(pb.phases)
+    cim.phases = phase_code_by_id(pb.phases)
     cim.unit_symbol = unit_symbol_from_id(pb.unitSymbol)
 
     service.resolve_or_defer_reference(resolver.remote_source(cim), pb.remoteSourceMRID)
@@ -854,7 +854,7 @@ def energy_consumer_to_cim(pb: PBEnergyConsumer, network_service: NetworkService
 def energy_consumer_phase_to_cim(pb: PBEnergyConsumerPhase, network_service: NetworkService) -> Optional[EnergyConsumerPhase]:
     cim = EnergyConsumerPhase(
         mrid=pb.mrid(),
-        phase=phasekind_by_id(pb.phase),
+        phase=single_phase_kind_by_id(pb.phase),
         p=float_or_none(pb.p),
         p_fixed=float_or_none(pb.pFixed),
         q=float_or_none(pb.q),
@@ -892,7 +892,7 @@ def energy_source_to_cim(pb: PBEnergySource, network_service: NetworkService) ->
 
 
 def energy_source_phase_to_cim(pb: PBEnergySourcePhase, network_service: NetworkService) -> Optional[EnergySourcePhase]:
-    cim = EnergySourcePhase(mrid=pb.mrid(), phase=phasekind_by_id(pb.phase))
+    cim = EnergySourcePhase(mrid=pb.mrid(), phase=single_phase_kind_by_id(pb.phase))
 
     network_service.resolve_or_defer_reference(resolver.energy_source(cim), pb.energySourceMRID)
 
@@ -1005,7 +1005,7 @@ def power_electronics_connection_phase_to_cim(pb: PBPowerElectronicsConnection, 
         mrid=pb.mrid(),
         p=float_or_none(pb.p),
         q=float_or_none(pb.q),
-        phase=phasekind_by_id(pb.phase)
+        phase=single_phase_kind_by_id(pb.phase)
     )
 
     network_service.resolve_or_defer_reference(resolver.phase_power_electronics_connection(cim), pb.powerElectronicsConnectionMRID)
