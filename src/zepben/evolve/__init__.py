@@ -37,7 +37,6 @@ from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import *
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import *
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import *
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_style import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *

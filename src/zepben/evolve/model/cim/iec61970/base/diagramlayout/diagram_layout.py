@@ -11,7 +11,6 @@ from typing import List, Optional, Dict, Generator
 from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_style import DiagramObjectStyle
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
 from zepben.evolve.util import nlen, require, ngen, safe_remove, safe_remove_by_id
@@ -49,7 +48,7 @@ class DiagramObject(IdentifiedObject):
     identified_object_mrid: Optional[str] = None
     """The domain object to which this diagram object is associated."""
 
-    style: DiagramObjectStyle = DiagramObjectStyle.NONE
+    style: Optional[str] = None
     """A diagram object has a style associated that provides a reference for the style used in the originating system."""
 
     rotation: float = 0.0
