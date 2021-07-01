@@ -7,7 +7,7 @@ import re
 
 from hypothesis.strategies import uuids, text, lists, builds, none
 
-from cim.iec61970.base.core.test_name_type import name_type_kwargs
+from test.cim.iec61970.base.core.test_name_type import name_type_kwargs
 from test.cim.collection_validator import validate_collection
 from test.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import IdentifiedObject, Junction
