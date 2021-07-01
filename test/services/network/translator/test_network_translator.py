@@ -174,3 +174,33 @@ def test_network_service_iec61970_wires_cont_translations(**kwargs):
 @given(**iec61970_inf_types_to_test)
 def test_network_service_iec61970_inf_translations(**kwargs):
     validate_service_translations(NetworkService, NetworkServiceComparator(), **kwargs)
+
+
+#
+# NOTE: NameType is not sent via any grpc messages at this stage, so test it separately
+#
+
+def test_creates_new_name_type():
+    # noinspection PyArgumentList, PyUnresolvedReferences
+    pb = NameType("nt1 name", "nt1 desc").to_pb()
+
+    # noinspection PyUnresolvedReferences
+    cim = NetworkService().add_from_pb(pb)
+
+    assert cim.name == pb.name
+    assert cim.description == pb.description
+
+
+def test_updates_existing_name_type():
+    # noinspection PyArgumentList, PyUnresolvedReferences
+    pb = NameType("nt1 name", "nt1 desc").to_pb()
+
+    # noinspection PyArgumentList
+    nt = NameType("nt1 name")
+    ns = NetworkService()
+    ns.add_name_type(nt)
+    # noinspection PyUnresolvedReferences
+    cim = ns.add_from_pb(pb)
+
+    assert cim is nt
+    assert cim.description == pb.description

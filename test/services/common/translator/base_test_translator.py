@@ -4,21 +4,21 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from traceback import print_exc
-from typing import TypeVar, Type
+from typing import TypeVar, Type, Callable
 
 from zepben.evolve import IdentifiedObject, BaseService, BaseServiceComparator, EquipmentContainer, OperationalRestriction, Feeder, ConnectivityNode
 
 T = TypeVar("T", bound=IdentifiedObject)
 
 
-def validate_service_translations(service_type: Type[BaseService], comparator: BaseServiceComparator, **kwargs):
+def validate_service_translations(service_type: Type[BaseService], comparator: BaseServiceComparator, create_blank: Callable[[T], T] = None, **kwargs):
     print()
     diffs = {}
     processing = ""
     try:
         for desc, cim in kwargs.items():
             processing = f"blank {desc}"
-            blank = type(cim)()
+            blank = create_blank(cim) if create_blank else type(cim)()
             # noinspection PyUnresolvedReferences
             result = comparator.compare_objects(blank, service_type().add_from_pb(blank.to_pb()))
             if result.differences:

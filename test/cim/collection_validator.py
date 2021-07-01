@@ -20,20 +20,21 @@ E = TypeVar("E", bound=Exception)
 # NOTE: The callables below that use `...` do so to work around bugs in the type checking of both the IDE and mypy.
 #       Ideally they should have `get: Callable[[T, str]], U]`, `add: Callable[[T, U], T]` and `remove: Callable[[T, U], T]`
 #
-def validate_collection_unordered(create_it: Callable[[], T],
-                                  create_other: Callable[[str, T], U],
-                                  num: Callable[[T], int],
-                                  get: Callable[..., U],
-                                  get_all: property,
-                                  add: Callable[..., T],
-                                  remove: Callable[..., T],
-                                  clear: Callable[[T], T],
-                                  expected_remove_error: Type[E] = ValueError):
+def validate_collection(create_it: Callable[[], T],
+                        create_other: Callable[[str, T], U],
+                        num: Callable[[T], int],
+                        get: Callable[[T, U], U],
+                        get_all: property,
+                        add: Callable[..., T],
+                        remove: Callable[..., T],
+                        clear: Callable[[T], T],
+                        expected_error_message: Callable[[T, U], str],
+                        expected_remove_error: Type[E] = ValueError):
     it = create_it()
     other1 = create_other("1", it)
     other2 = create_other("2", it)
     other3 = create_other("3", it)
-    duplicate = create_other("1", it)
+    duplicate = create_other("2", it)
     assert other1 != other2
     assert other1 != other3
     assert other2 != other3
@@ -44,7 +45,7 @@ def validate_collection_unordered(create_it: Callable[[], T],
     add(it, other3)
     assert num(it) == 3
 
-    with raises(ValueError, match=rf"An? (current )?{other1.__class__.__name__} with mRID {other1.mrid} already exists in {str(it)}"):
+    with raises(ValueError, match=expected_error_message(it, duplicate)):
         add(it, duplicate)
 
     assert num(it) == 3
@@ -58,7 +59,7 @@ def validate_collection_unordered(create_it: Callable[[], T],
 
     assert num(it) == 2
 
-    assert get(it, other2.mrid) == other2
+    assert get(it, duplicate) == other2
 
     # noinspection PyArgumentList
     all_objects = list(get_all.fget(it))
@@ -79,6 +80,32 @@ def validate_collection_unordered(create_it: Callable[[], T],
     with raises(expected_remove_error):
         remove(it, other2)
     assert num(it) == 0
+
+
+#
+# NOTE: The callables below that use `...` do so to work around bugs in the type checking of both the IDE and mypy.
+#       Ideally they should have `get: Callable[[T, str]], U]`, `add: Callable[[T, U], T]` and `remove: Callable[[T, U], T]`
+#
+def validate_collection_unordered(create_it: Callable[[], T],
+                                  create_other: Callable[[str, T], U],
+                                  num: Callable[[T], int],
+                                  get: Callable[..., U],
+                                  get_all: property,
+                                  add: Callable[..., T],
+                                  remove: Callable[..., T],
+                                  clear: Callable[[T], T],
+                                  expected_remove_error: Type[E] = ValueError):
+    validate_collection(
+        create_it,
+        create_other,
+        num,
+        lambda it, other: get(it, other.mrid),
+        get_all,
+        add,
+        remove,
+        clear,
+        lambda it, dup: rf"An? (current )?{dup.__class__.__name__} with mRID {dup.mrid} already exists in {str(it)}",
+        expected_remove_error)
 
 
 #

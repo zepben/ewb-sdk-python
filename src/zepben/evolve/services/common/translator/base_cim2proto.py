@@ -58,6 +58,11 @@ def organisation_role_to_pb(cim: OrganisationRole) -> PBOrganisationRole:
     )
 
 
+Document.to_pb = document_to_pb
+Organisation.to_pb = organisation_to_pb
+OrganisationRole.to_pb = organisation_role_to_pb
+
+
 ######################
 # IEC61970 BASE CORE #
 ######################
@@ -66,28 +71,25 @@ def identified_object_to_pb(cim: IdentifiedObject) -> PBIdentifiedObject:
     return PBIdentifiedObject(
         mRID=str(cim.mrid),
         name=cim.name,
-        description=cim.description
+        description=cim.description,
+        names=[name_to_pb(name) for name in cim.names]
     )
 
 
 def name_to_pb(cim: Name) -> PBName:
-    #todo fixme
-    return PBName(io=identified_object_to_pb(cim),
-                  name=cim.name,
-                  type=cim.type,
-                  identified_object=cim.identified_object)
+    return PBName(
+        name=cim.name,
+        type=cim.type.name if cim.type else None
+    )
 
 
 def name_type_to_pb(cim: NameType) -> PBNameType:
-    #todo fixme
-    return PBNameType(io=identified_object_to_pb(cim),
-                      name=cim.name,
-                      description=cim.description)
+    return PBNameType(
+        name=cim.name,
+        description=cim.description
+    )
 
 
-Document.to_pb = document_to_pb
-Organisation.to_pb = organisation_to_pb
-OrganisationRole.to_pb = organisation_role_to_pb
 IdentifiedObject.to_pb = identified_object_to_pb
 Name.to_pb = name_to_pb
 NameType.to_pb = name_type_to_pb

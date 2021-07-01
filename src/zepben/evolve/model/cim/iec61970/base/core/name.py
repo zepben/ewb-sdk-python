@@ -9,24 +9,24 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from dataclassy import dataclass
+
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
     from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 
 
 @dataclass()
-class Name():
+class Name:
     """
     The Name class provides the means to define any number of human readable names for an object. A name is **not** to be used for defining inter-object
     relationships. For inter-object relationships instead use the object identification 'mRID'.
-
-    @property name Any free text that name the object.
-    @property type [NameType] for the object
-    @property identifiedObject [IdentifiedObject] for the object
     """
 
     name: str
+    """Any free text that name the object."""
 
     type: NameType
+    """Type of this name."""
 
     identified_object: IdentifiedObject
+    """Identified object that this name designates."""

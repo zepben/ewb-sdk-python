@@ -43,19 +43,88 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
     _names: Optional[List[Name]] = None
 
+    def __init__(self, names: Optional[List[Name]] = None, **kwargs):
+        super(IdentifiedObject, self).__init__(**kwargs)
+        if names:
+            for name in names:
+                self.add_name(name)
+
     def __str__(self):
         return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), str(self.name)) if a)}}}"
 
-    def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject],
-                            type_descr: str) -> bool:
+    @property
+    def names(self) -> Generator[Name, None, None]:
+        """All names of this identified object. The returned collection is read only."""
+        return ngen(self._names)
+
+    def num_names(self) -> int:
+        """Get the number of entries in the `Name` collection."""
+        return nlen(self._names)
+
+    def get_name(self, name_type: str, name: str) -> Optional[Name]:
+        """
+        Find the `Name` with the matching `name_type` and `name`
+
+        :return: The matched Name or None
+        """
+        if self._names:
+            for name_ in self._names:
+                if name_.type.name == name_type and name_.name == name:
+                    return name_
+        return None
+
+    def add_name(self, name: Name) -> IdentifiedObject:
+        """
+        Associate a `Name` with this `IdentifiedObject`
+
+        :param name: The `Name` to associate with this `IdentifiedObject`.
+        :return: A reference to this `IdentifiedObject` to allow fluent use.
+        :raise ValueError: If `name` references another `IdentifiedObject`, or another `Name` already exists with the matching `type` and `name`.
+        """
+        if not name.identified_object:
+            name.identified_object = self
+        require(name.identified_object is self, lambda: f"Attempting to add a Name to {str(self)} that does not reference this identified object")
+
+        existing = self.get_name(name.type.name, name.name)
+        if existing:
+            if existing is self:
+                return self
+            else:
+                raise ValueError(f"Failed to add duplicate name {str(name)} to {str(self)}.")
+
+        self._names = list() if not self._names else self._names
+        self._names.append(name)
+        return self
+
+    def remove_name(self, name: Name) -> IdentifiedObject:
+        """
+        Disassociate a `Name` from this `IdentifiedObject`.
+
+        :param name: The `Name` to disassociate from this `IdentifiedObject`.
+        :return: A reference to this `IdentifiedObject` to allow fluent use.
+        :raises ValueError: Iif `name` was not associated with this `IdentifiedObject`.
+        """
+        self._names = safe_remove(self._names, name)
+        return self
+
+    def clear_names(self) -> IdentifiedObject:
+        """
+        Clear all names.
+
+        :return: A reference to this `IdentifiedObject` to allow fluent use.
+        """
+        self._names = None
+        return self
+
+    def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject], type_descr: str) -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function.
 
-        `other` The object to look up with the getter using its mRID.
-        `getter` A function that takes an mRID and returns an object if it exists, and throws a ``KeyError`` if it couldn't be found.
-        `type_descr` The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
-        Returns True if `other` was retrieved with `getter` and was equivalent, False otherwise.
-        Raises `ValueError` if the object retrieved from `getter` is not `other`.
+        :param other: The object to look up with the getter using its mRID.
+        :param getter: A function that takes an mRID and returns an `IdentifiedObject`, and throws a `KeyError` if it couldn't be found.
+        :param type_descr: The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
+        :return: True if `other` was retrieved with `getter` and was equivalent, False otherwise.
+        :raises ValueError: If the object retrieved from `getter` is not `other`.
         """
         try:
             get_result = getter(other.mrid)
@@ -64,85 +133,20 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         except (KeyError, AttributeError):
             return False
 
-    def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject],
-                                  type_descr: str,
+    def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject], type_descr: str,
                                   field_name: str = "sequence_number") -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function called with `field`.
 
-        `other` The object to compare against.
-        `getter` A function that takes `field` and returns an `IdentifiedObject` if it exists, and throws an `IndexError` if it couldn't be found.
-        `type_descr` The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
-        Returns True if `other` was retrieved with a call to `getter(field)` and was equivalent, False otherwise.
-        Raises `ValueError` if an object is retrieved from `getter` and it is not `other`.
+        :param other: The object to look up with the getter using its mRID.
+        :param getter: A function that takes takes `field` and returns an `IdentifiedObject`, and throws an `IndexError` if it couldn't be found.
+        :param type_descr: The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
+        :return: True if `other` was retrieved with `getter` and was equivalent, False otherwise.
+        :raises ValueError: If the object retrieved from `getter` is not `other`.
         """
         try:
             get_result = getter(field)
-            require(get_result is other,
-                    lambda: f"{type_descr} with {field_name} {field} already exists in {str(self)}")
+            require(get_result is other, lambda: f"{type_descr} with {field_name} {field} already exists in {str(self)}")
             return True
         except IndexError:
             return False
-
-    @property
-    def names(self):
-        """The names for this identified object. The returned collection is read only."""
-        return ngen(self._names)
-
-    def num_names(self):
-        """Get the number of entries in the [Name] collection."""
-        return nlen(self._names)
-
-    def get_name(self, type: str, name: str) -> Optional[Name]:
-        """Return first element in _names or return None"""
-        if self._names is not None:
-            for name_ in self._names:
-                if name_.type.name == type and name_.name == name:
-                    return name_
-        return None
-
-    def add_name(self, name: Name) -> IdentifiedObject:
-        """
-        Associate an `zepben.evolve.cim.iec61970.base.core.name` with this `Name`
-
-        `name` The `zepben.evolve.cim.iec61970.base.core.name` to associate with this `Name`.
-        Returns A reference to this `Name` to allow fluent use.
-        Raises `ValueError` if another `EquipmentContainer` with the same `mrid` already exists for this `Name`.
-        """
-
-        require(name.identified_object is self,
-                lambda: f"Attempting to add a Name to {str(self)} that does not reference this identified object")
-
-        if self.get_name(name.type.name, name.name) is not None:
-            return self
-
-        self._names = list() if self._names is None else self._names
-        self._names.append(name)
-        return self
-
-    def remove_name(self, name: Name) -> Bool:
-        """
-        Disassociate `name` from this `Name`.
-
-        `name` The `zepben.evolve.cim.iec61970.base.core.name` to disassociate from this `Name`.
-        Returns A reference to this `Name` to allow fluent use.
-        Raises `ValueError` if `name` was not associated with this `Name`.
-        """
-
-        if name in self._names:
-            safe_remove(self._names, name)
-            return True
-        else:
-            return False
-
-        #safe_remove(self._names, name)
-        #return self
-        #check with kurt return self is not needed
-
-    def clear_names(self):
-        """
-        Clear all name.
-        Returns A reference to this `Name` to allow fluent use.
-        """
-        self._names = None
-        return self

@@ -6,8 +6,7 @@
 
 from __future__ import annotations
 
-from collections.abc import MutableMapping
-from typing import Dict, List, Generator, TYPE_CHECKING
+from typing import Dict, List, Generator
 
 from dataclassy import dataclass
 
@@ -15,7 +14,7 @@ from zepben.evolve.model.cim.iec61970.base.core.name import Name
 
 
 @dataclass()
-class NameType():
+class NameType:
     """
     Type of name. Possible values for attribute 'name' are implementation dependent but standard profiles may specify types. An enterprise may have multiple
     IT systems each having its own local name for the same object, e.g. a planning system may have different names from an EMS. An object may also have
@@ -26,77 +25,80 @@ class NameType():
     """
 
     name: str
-    """name of the NameType"""
+    """Name of the name type."""
 
     description: str = ""
-    """Description of NameType"""
+    """Description of the name type."""
 
     _names_index: Dict[str, Name] = dict()
     _names_multi_index: Dict[str, List[Name]] = dict()
 
+    def __str__(self):
+        return f"NameType(name='{self.name}', description='{self.description}')"
 
     @property
-    def names(self) -> Generator[str, None, None]:
-        """The names for this name type."""
-
+    def names(self) -> Generator[Name, None, None]:
+        """All names of this type."""
         for names_ in self._names_multi_index.values():
             for name in names_:
                 yield name
+
         for name_ in self._names_index.values():
             yield name_
 
-
-    def has_name(self, name):
-
+    def has_name(self, name: str):
+        """Indicates if this :class:`NameType` contains `name`."""
         return name in self._names_index or name in self._names_multi_index
 
+    def get_names(self, name) -> Generator[Name, None, None]:
+        """Get all the :class:`Name` instances for the provided `name`.
 
-    def get_names(self, name):
-        """Get all the [Name] instances for the provided [name]. @return A list of [Name]"""
-
+        :return: A `Generator` of `Name`
+        """
         try:
-            return [self._names_index[name]]
-
+            yield self._names_index[name]
         except KeyError:
-            return self._names_multi_index[name]
-
+            try:
+                for name_ in self._names_multi_index[name]:
+                    yield name_
+            except KeyError:
+                pass
 
     def get_or_add_name(self, name, identified_object):
         """
-            Gets a [Name] for the given [name] and [identifiedObject] combination or adds a new [Name]
-            to this name type with the combination and returns the new instance.
+        Gets a :class:`Name` for the given `name` and `identifiedObject` combination or adds a new :class:`Name`
+        to this :class:`NameType` with the combination and returns the new instance.
         """
-
         if name in self._names_index:
             existing = self._names_index[name]
             if existing.identified_object == identified_object:
                 return existing
-
             else:
+                # noinspection PyArgumentList
                 name_obj = Name(name, self, identified_object)
                 self._names_multi_index[name] = [existing, name_obj]
                 del self._names_index[name]
                 return name_obj
-
         elif name in self._names_multi_index:
             for n in self._names_multi_index[name]:
                 if n.identified_object == identified_object:
                     return n
-
-            else:
-                name_obj = Name(name, self, identified_object)
-                self._names_multi_index[name].append(name_obj)
-                return name_obj
-
+            # noinspection PyArgumentList
+            name_obj = Name(name, self, identified_object)
+            self._names_multi_index[name].append(name_obj)
+            return name_obj
         else:
+            # noinspection PyArgumentList
             name_obj = Name(name, self, identified_object)
             self._names_index[name] = name_obj
             return name_obj
 
-
     def remove_name(self, name: Name):
-        """Removes the [name] from this name type. return true if the name instance was successfully removed"""
+        """
+        Removes the `name` from this name type.
 
+        :return: True if the name instance was successfully removed
+        """
         if name.type is not self:
             return False
 
@@ -104,42 +106,32 @@ class NameType():
             del self._names_index[name.name]
             return True
         except KeyError:
-
-            if name.name in self._names_multi_index:
+            try:
                 names = self._names_multi_index[name.name]
-                try:
-                    names.remove(name)
-                    if not names:
-                        del self._names_multi_index[name.name]
-                    return True
-                except KeyError:
-                    return False
-            else:
+                names.remove(name)
+                if not names:
+                    del self._names_multi_index[name.name]
+                return True
+            except KeyError:
                 return False
 
-
-
-
     def remove_names(self, name: str):
-        """Removes all [Name] instances associated with name [name]. return true if a matching name was removed."""
+        """
+        Removes all :class:`Name` instances associated with name `name`.
 
+        :return: True if a matching name was removed.
+        """
         try:
             del self._names_index[name]
             return True
         except KeyError:
-            if name in self._names_multi_index:
+            try:
                 del self._names_multi_index[name]
                 return True
-            else:
+            except KeyError:
                 return False
-
 
     def clear_names(self) -> NameType:
         self._names_index = dict()
         self._names_multi_index = dict()
         return self
-
-
-
-
-
