@@ -25,7 +25,8 @@ class EquipmentContainer(ConnectivityNodeContainer):
     _equipment: Optional[Dict[str, Equipment]] = None
     """Map of Equipment in this EquipmentContainer by their mRID"""
 
-    def __init__(self, equipment: List[Equipment] = None):
+    def __init__(self, equipment: List[Equipment] = None, **kwargs):
+        super(EquipmentContainer, self).__init__(**kwargs)
         if equipment:
             for eq in equipment:
                 self.add_equipment(eq)

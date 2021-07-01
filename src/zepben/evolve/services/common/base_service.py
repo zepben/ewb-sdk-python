@@ -14,6 +14,7 @@ from typing import TypeVar, Type
 from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
 
 __all__ = ["BaseService"]
@@ -27,6 +28,7 @@ _GET_DEFAULT = (1,)
 class BaseService(object, metaclass=ABCMeta):
     name: str
     _objectsByType: Dict[type, Dict[str, IdentifiedObject]] = OrderedDict()
+    _name_types: Dict[str, NameType] = dict()
     _unresolved_references_to: Dict[str, Set[UnresolvedReference]] = OrderedDict()
     """
     A dictionary of references between mRID's that as yet have not been resolved - typically when transferring services between systems.
@@ -246,6 +248,7 @@ class BaseService(object, metaclass=ABCMeta):
 
                 # Clean up any reverse resolvers now that the reference has been resolved
                 if from_.mrid in self._unresolved_references_to:
+                    # noinspection PyArgumentList
                     to_remove = UnresolvedReference(from_ref=to, to_mrid=from_.mrid, resolver=reverse_resolver)
                     self._unresolved_references_to[from_.mrid].remove(to_remove)
                     self._unresolved_references_from[to_remove.from_ref.mrid].remove(to_remove)
@@ -258,6 +261,7 @@ class BaseService(object, metaclass=ABCMeta):
         except KeyError:
             # to_mrid didn't exist in the service, populate the reference caches for resolution when it is added.
             urefs = self._unresolved_references_to.get(to_mrid, set())
+            # noinspection PyArgumentList
             uref = UnresolvedReference(from_ref=from_, to_mrid=to_mrid, resolver=resolver, reverse_resolver=reverse_resolver)
             urefs.add(uref)
             self._unresolved_references_to[to_mrid] = urefs
@@ -341,3 +345,29 @@ class BaseService(object, metaclass=ABCMeta):
                     if issubclass(_type, obj_type):
                         for obj in object_map.values():
                             yield obj
+
+    @property
+    def name_types(self) -> Generator[str, None, None]:
+        """Associates the provided [nameType] with this service."""
+        for name_type in self._name_types.values():
+            yield name_type
+
+    def add_name_type(self, name_type: NameType) -> bool:
+        """
+        Associates the provided `name_type` with this service.
+        param `name_type` the `NameType` to add to this service
+        return true if the object is associated with this service, false if an object already exists in the service with
+        the same name.
+        """
+        if name_type.name in self._name_types:
+            return False
+        else:
+            self._name_types[name_type.name] = name_type
+            return True
+
+    def get_name_type(self, name: str) -> NameType:
+        """
+        Gets the `NameType` for the provided type name associated with this service.
+        :raises KeyError: if `name` doesn't exist in this service.
+        """
+        return self._name_types[name]

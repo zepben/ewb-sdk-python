@@ -10,6 +10,8 @@ from hypothesis.strategies import builds, text, integers, sampled_from, lists, f
 
 from zepben.evolve import *
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
+from zepben.evolve.model.cim.iec61970.base.core.name import Name
+from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_state_kind import BatteryStateKind
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
@@ -394,6 +396,23 @@ def create_identified_object():
         "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     }
+
+
+def create_name():
+    return builds(
+        Name,
+        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        type=create_name_type(),
+        identified_object=sampled_equipment()
+    )
+
+
+def create_name_type():
+    return builds(
+        NameType,
+        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        description=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
 
 
 def sampled_phase_code():
