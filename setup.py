@@ -12,7 +12,7 @@ with open("README.md", "r") as fh:
 test_deps = ["pytest", "pytest-cov", "pytest-asyncio", "pytest-timeout", "hypothesis<6", "grpcio-testing==1.36.0"]
 setup(
     name="zepben.evolve",
-    version="0.23.0b22",
+    version="0.23.0b23",
     description="Python SDK for interacting with the Evolve platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
