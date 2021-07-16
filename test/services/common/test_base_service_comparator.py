@@ -6,7 +6,7 @@
 from datetime import datetime
 from typing import Type
 
-from services.common.service_comparator_validator import ServiceComparatorValidator
+from test.services.common.service_comparator_validator import ServiceComparatorValidator
 from zepben.evolve import IdentifiedObject, Document, OrganisationRole, Organisation, Junction, ObjectDifference, ValueDifference, CollectionDifference, \
     BaseService, BaseServiceComparator
 from zepben.evolve.model.cim.iec61970.base.core.name import Name

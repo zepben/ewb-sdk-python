@@ -6,8 +6,8 @@
 
 from typing import Type
 
-from services.common.service_comparator_validator import ServiceComparatorValidator
-from services.common.test_base_service_comparator import TestBaseServiceComparator
+from test.services.common.service_comparator_validator import ServiceComparatorValidator
+from test.services.common.test_base_service_comparator import TestBaseServiceComparator
 from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
     TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, AssetOwner, Location, AssetContainer, AssetInfo, \
     AssetOrganisationRole, Pole, Streetlight, WindingConnection, StreetlightLampKind, Structure, StreetAddress, TownDetail, PositionPoint, EndDevice, \
