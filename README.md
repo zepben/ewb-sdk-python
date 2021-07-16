@@ -74,8 +74,9 @@ to prevent the test from timing out while you step through the code:
 
 1. Update [`setup.py`](setup.py) to import the correct version of `zepben.protobuf`.
 1. Model updating:
-   1. Add new classes to the [model package](src/zepben/evolve/model).
+   1. Add new classes to the [cim model package](src/zepben/evolve/model/cim).
    1. Descriptions copied from [Evolve CIM Profile documentation](https://zepben.github.io/evolve/docs/cim/evolve) and added as doc comments to new changes (on class, property etc)
+1. Add comparisons to [service packages](src/zepben/evolve/services).
 1. Update [translator package](src/zepben/evolve/services/network/translator):
    1. Update [```__init__.py```](src/zepben/evolve/services/network/translator/__init__.py):
       * ```from zepben.protobuf...<new_class_name>_pb2 import <new_class_name>```
@@ -89,15 +90,18 @@ to prevent the test from timing out while you step through the code:
       * ```import <new_class_name> as PB<new_class_name>```
       * Add ```def <new_class_name>_to_pb```  
       * Add ```"<new_class_name>_to_cim"``` to ```__all__```
-      * Add ```<new_class_name>_to_cim = <new_class_name>_to_cim```                
+      * Add ```<new_class_name>_to_cim = <new_class_name>_to_cim```
 1. Update [network_rpc.py](src/zepben/evolve/streaming/put/network_rpc.py)
    * Add ```from zepben.protobuf...<new_class_name>_pb2 import <new_class_name>```
    * Add ```<new_class_name>: ('Create<new_class_name>', Create<new_class_name>),```
 1. Add reference resolver(s) to resolvers in [common package](src/zepben/evolve/services/common)  (if new associations).
 1. Testing:
+   * Test for model classes.
+   * Added new classes to service translator test.
    * Add the required creators to:
      - [```pb_creators.py```](test/pb_creators.py)
      - [```cim_creators.py```](test/cim_creators.py)
+   * Add test for each new comparison to  [test/services/...](test/services) package.
    * Add test for each new class to  [test/cim/...](test/cim) package.
    * Verify that all the test are passing. 
 1. Update release notes in [```changelog.md```](changelog.md).

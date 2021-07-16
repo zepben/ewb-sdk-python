@@ -19,7 +19,7 @@ from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetE
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, GetCurrentEquipmentForFeederResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
-from test.pb_creators import networkidentifiedobjects, aclinesegment
+from test.pb_creators import network_identified_objects, ac_line_segment
 from test.streaming.get.data.hierarchy import create_hierarchy_network
 from test.streaming.get.data.loops import create_loops_network
 from test.streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
@@ -49,11 +49,11 @@ class TestNetworkConsumer:
             NetworkConsumerClient()
 
     @pytest.mark.asyncio
-    @given(networkidentifiedobjects())
+    @given(network_identified_objects())
     @settings(max_examples=1, phases=(Phase.explicit, Phase.reuse, Phase.generate))
-    async def test_get_identified_objects_supported_types(self, network_identified_objects):
+    async def test_get_identified_objects_supported_types(self, nios):
         requested = []
-        for nio in network_identified_objects:
+        for nio in nios:
             mrid = getattr(nio, nio.WhichOneof("identifiedObject"), None).mrid()
             requested.append(mrid)
 
@@ -67,7 +67,7 @@ class TestNetworkConsumer:
             response = GetIdentifiedObjectsResponse(identifiedObjects=[nio])
             await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
 
-        assert len(requested) == len(network_identified_objects) == self.service.len_of()
+        assert len(requested) == len(nios) == self.service.len_of()
 
     @pytest.mark.asyncio
     async def test_get_identified_objects_not_found(self):
@@ -97,7 +97,7 @@ class TestNetworkConsumer:
                                         [StreamGrpc('getIdentifiedObjects', stream_from_fixed(["acls1", "acls2", "acls3"], [response1, response2]))])
 
     @pytest.mark.asyncio
-    @given(aclinesegment())
+    @given(ac_line_segment())
     async def test_get_identified_object(self, acls):
         mrid = acls.mrid()
 
@@ -449,6 +449,7 @@ def _create_cn_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = No
         cn = valid[request.mrid]
         if cn:
             for terminal in cn.terminals:
+                # noinspection PyUnresolvedReferences
                 yield GetTerminalsForNodeResponse(terminal=terminal.to_pb())
         else:
             raise AssertionError(f"Requested unexpected cn {request.mrid}.")

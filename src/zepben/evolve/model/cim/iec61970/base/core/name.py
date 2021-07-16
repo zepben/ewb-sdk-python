@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 
 
-@dataclass()
+@dataclass(slots=True)
 class Name:
     """
     The Name class provides the means to define any number of human readable names for an object. A name is **not** to be used for defining inter-object

@@ -347,7 +347,7 @@ class BaseService(object, metaclass=ABCMeta):
                             yield obj
 
     @property
-    def name_types(self) -> Generator[str, None, None]:
+    def name_types(self) -> Generator[NameType, None, None]:
         """Associates the provided [nameType] with this service."""
         for name_type in self._name_types.values():
             yield name_type

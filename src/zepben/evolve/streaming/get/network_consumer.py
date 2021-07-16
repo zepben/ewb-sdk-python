@@ -21,7 +21,8 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     Fuse, Jumper, Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, Circuit, \
     Loop, Pole, Streetlight, Accumulator, Analog, Discrete, Control, RemoteControl, RemoteSource, PowerTransformerInfo, PowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
-    TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient
+    TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
+    ShortCircuitTest, EquivalentBranch
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -544,15 +545,36 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
 
 
 _nio_type_to_cim = {
+    # IEC61968 ASSET INFO #
     "cableInfo": CableInfo,
+    "noLoadTest": NoLoadTest,
+    "openCircuitTest": OpenCircuitTest,
     "overheadWireInfo": OverheadWireInfo,
+    "powerTransformerInfo": PowerTransformerInfo,
+    "shortCircuitTest": ShortCircuitTest,
+    "transformerEndInfo": TransformerEndInfo,
+    "transformerTankInfo": TransformerTankInfo,
+
+    # IEC61968 ASSETS #
     "assetOwner": AssetOwner,
+
+    # IEC61968 COMMON #
     "organisation": Organisation,
     "location": Location,
+    "pole": Pole,
+    "streetlight": Streetlight,
+
+    # IEC61968 METERING #
     "meter": Meter,
     "usagePoint": UsagePoint,
+
+    # IEC61968 OPERATIONS #
     "operationalRestriction": OperationalRestriction,
+
+    # IEC61970 BASE AUXILIARY EQUIPMENT #
     "faultIndicator": FaultIndicator,
+
+    # IEC61970 BASE CORE #
     "baseVoltage": BaseVoltage,
     "connectivityNode": ConnectivityNode,
     "feeder": Feeder,
@@ -561,8 +583,29 @@ _nio_type_to_cim = {
     "subGeographicalRegion": SubGeographicalRegion,
     "substation": Substation,
     "terminal": Terminal,
+
+    # IEC61970 BASE EQUIVALENTS #
+    "equivalentBranch": EquivalentBranch,
+
+    # IEC61970 BASE MEAS #
+    "accumulator": Accumulator,
+    "analog": Analog,
+    "control": Control,
+    "discrete": Discrete,
+
+    # IEC61970 BASE SCADA #
+    "remoteControl": RemoteControl,
+    "remoteSource": RemoteSource,
+
+    # IEC61970 BASE WIRES GENERATION PRODUCTION #
+    "batteryUnit": BatteryUnit,
+    "photoVoltaicUnit": PhotoVoltaicUnit,
+    "powerElectronicsWindUnit": PowerElectronicsWindUnit,
+
+    # IEC61970 BASE WIRES #
     "acLineSegment": AcLineSegment,
     "breaker": Breaker,
+    "busbarSection": BusbarSection,
     "disconnector": Disconnector,
     "energyConsumer": EnergyConsumer,
     "energyConsumerPhase": EnergyConsumerPhase,
@@ -572,30 +615,17 @@ _nio_type_to_cim = {
     "jumper": Jumper,
     "junction": Junction,
     "linearShuntCompensator": LinearShuntCompensator,
+    "loadBreakSwitch": LoadBreakSwitch,
     "perLengthSequenceImpedance": PerLengthSequenceImpedance,
+    "powerElectronicsConnection": PowerElectronicsConnection,
+    "powerElectronicsConnectionPhase": PowerElectronicsConnectionPhase,
     "powerTransformer": PowerTransformer,
     "powerTransformerEnd": PowerTransformerEnd,
     "ratioTapChanger": RatioTapChanger,
     "recloser": Recloser,
+    "transformerStarImpedance": TransformerStarImpedance,
+
+    # IEC61970 InfIEC61970 FEEDER #
     "circuit": Circuit,
-    "loop": Loop,
-    "pole": Pole,
-    "streetlight": Streetlight,
-    "accumulator": Accumulator,
-    "analog": Analog,
-    "discrete": Discrete,
-    "control": Control,
-    "remoteControl": RemoteControl,
-    "remoteSource": RemoteSource,
-    "powerTransformerInfo": PowerTransformerInfo,
-    "powerElectronicsConnection": PowerElectronicsConnection,
-    "powerElectronicsConnectionPhase": PowerElectronicsConnectionPhase,
-    "batteryUnit": BatteryUnit,
-    "photoVoltaicUnit": PhotoVoltaicUnit,
-    "powerElectronicsWindUnit": PowerElectronicsWindUnit,
-    "busbarSection": BusbarSection,
-    "loadBreakSwitch": LoadBreakSwitch,
-    "transformerTankInfo": TransformerTankInfo,
-    "transformerEndInfo": TransformerEndInfo,
-    "transformerStarImpedance": TransformerStarImpedance
+    "loop": Loop
 }

@@ -439,6 +439,9 @@ class PowerTransformer(ConductingEquipment):
         if self._validate_reference_by_sn(end.end_number, end, self.get_end_by_num, "A PowerTransformerEnd", "end_number"):
             return True
 
+        if not end.power_transformer:
+            end.power_transformer = self
+
         require(end.power_transformer is self,
                 lambda: f"PowerTransformerEnd {end} references another PowerTransformer {end.power_transformer}, expected {str(self)}.")
         return False

@@ -30,6 +30,8 @@ from zepben.evolve.model.cim.iec61968.common.organisation import *
 from zepben.evolve.model.cim.iec61968.common.document import *
 from zepben.evolve.model.cim.iec61968.common.organisation_role import *
 from zepben.evolve.model.cim.iec61968.common.location import *
+from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_branch import *
+from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_equipment import *
 from zepben.evolve.model.cim.iec61970.base.meas.control import *
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
 from zepben.evolve.model.cim.iec61970.base.meas.value import *
