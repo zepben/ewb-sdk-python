@@ -13,7 +13,7 @@ from dataclassy import dataclass
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 
 
-@dataclass()
+@dataclass(slots=True)
 class NameType:
     """
     Type of name. Possible values for attribute 'name' are implementation dependent but standard profiles may specify types. An enterprise may have multiple

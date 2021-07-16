@@ -5,9 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from math import isnan
 from types import MemberDescriptorType
-from typing import get_type_hints, Dict, Type, Callable, Any, TypeVar, Optional, Union
+from typing import get_type_hints, Dict, Type, Callable, Any, TypeVar, Optional, Union, List, Tuple
 
 from zepben.evolve import BaseService, IdentifiedObject, Organisation, Document, OrganisationRole
+from zepben.evolve.model.cim.iec61970.base.core.name import Name
+from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.services.common.difference import ObjectDifference, Difference, ValueDifference, ReferenceDifference, CollectionDifference, IndexedDifference
 from zepben.evolve.services.common.translator.service_differences import ServiceDifferences
 
@@ -52,7 +54,12 @@ class BaseServiceComparator:
 
         :return: The differences detected between the source and the target
         """
-        differences = ServiceDifferences(lambda mrid: source.get(mrid, default=None), lambda mrid: target.get(mrid, default=None))
+        differences = ServiceDifferences(
+            lambda mrid: source.get(mrid, default=None),
+            lambda mrid: target.get(mrid, default=None),
+            lambda name: source.get_name_type(name),
+            lambda name: target.get_name_type(name)
+        )
 
         for s in source.objects():
             t = target.get(s.mrid, default=None)
@@ -71,6 +78,21 @@ class BaseServiceComparator:
         for t in target.objects():
             if t.mrid not in source:
                 differences.add_to_missing_from_source(t.mrid)
+
+        for s in source.name_types:
+            try:
+                t = target.get_name_type(s.name)
+                difference = self._compare_name_type(s, t)
+                if difference.differences:
+                    differences.add_modifications(s.name, difference)
+            except KeyError:
+                differences.add_to_missing_from_target(s.name)
+
+        for t in target.name_types:
+            try:
+                source.get_name_type(t.name)
+            except KeyError:
+                differences.add_to_missing_from_source(t.name)
 
         return differences
 
@@ -103,6 +125,29 @@ class BaseServiceComparator:
 
     def _compare_identified_object(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, IdentifiedObject.mrid, IdentifiedObject.name, IdentifiedObject.description)
+        self._compare_names(diff, IdentifiedObject.names)
+        return diff
+
+    def _compare_name_type(self, source: NameType, target: NameType) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, NameType.description)
+
+        def compare_names(s: Name, t: Name) -> bool:
+            return s.name == t.name and s.type.name == t.type.name and s.identified_object.mrid == t.identified_object.mrid
+
+        differences = CollectionDifference()
+
+        for s_name in source.names:
+            if not [t_name for t_name in target.names if compare_names(s_name, t_name)]:
+                differences.missing_from_target.append(s_name)
+
+        for t_name in target.names:
+            if not [s_name for s_name in source.names if compare_names(s_name, t_name)]:
+                differences.missing_from_source.append(t_name)
+
+        if differences.missing_from_source or differences.missing_from_target:
+            diff.differences[NameType.names.fget.__name__] = differences
         return diff
 
     def _compare_document(self, diff: ObjectDifference) -> ObjectDifference:
@@ -135,6 +180,14 @@ class BaseServiceComparator:
                 self._add_if_different(diff, it.fget.__name__, self._calculate_id_reference_diff(it, diff))
             else:
                 self._add_if_different(diff, it.__name__, self._calculate_id_reference_diff(it, diff))
+        return diff
+
+    def _compare_names(self, diff: ObjectDifference, *properties) -> ObjectDifference:
+        for it in properties:
+            if isinstance(it, property):
+                self._add_if_different(diff, it.fget.__name__, self.calculate_name_diff(it, diff))
+            else:
+                self._add_if_different(diff, it.__name__, self.calculate_name_diff(it, diff))
         return diff
 
     def _compare_id_reference_collections(self, diff: ObjectDifference, *properties) -> ObjectDifference:
@@ -206,10 +259,32 @@ class BaseServiceComparator:
         else:
             return ReferenceDifference(s_ref, t_ref)
 
+    def calculate_name_diff(self, prop: property, diff: ObjectDifference) -> Optional[CollectionDifference]:
+        differences = CollectionDifference()
+
+        if isinstance(prop, property):
+            source_collection = list(getattr(diff.source, prop.fget.__name__)) if diff.source else None
+            target_collection = list(getattr(diff.target, prop.fget.__name__)) if diff.target else None
+        else:
+            source_collection = list(getattr(diff.source, prop.__name__)) if diff.source else None
+            target_collection = list(getattr(diff.target, prop.__name__)) if diff.target else None
+
+        source_name_type_names: List[Tuple[str, str]] = []
+        for source_io in source_collection:
+            source_name_type_names.append((source_io.type.name, source_io.name))
+            if not next((io for io in target_collection if (io.name == source_io.name) and (io.type.name == source_io.type.name)), None):
+                differences.missing_from_target.append(source_io)
+
+        for target_io in target_collection:
+            if not next((io for io in source_collection if (io.name == target_io.name) and (io.type.name == target_io.type.name)), None):
+                differences.missing_from_source.append(target_io)
+
+        return self._none_if_empty(differences)
+
     def _calculate_id_reference_collection_diff(self, prop: property, diff: ObjectDifference) -> Optional[CollectionDifference]:
         differences = CollectionDifference()
-        source_collection = getattr(diff.source, prop.fget.__name__)
-        target_collection = getattr(diff.target, prop.fget.__name__)
+        source_collection = list(getattr(diff.source, prop.fget.__name__))
+        target_collection = list(getattr(diff.target, prop.fget.__name__))
 
         source_mrids = set()
         for s_obj in source_collection:
@@ -240,8 +315,8 @@ class BaseServiceComparator:
             elif t_obj.mrid != s_obj.mrid:
                 differences.modifications.append(IndexedDifference(index, ReferenceDifference(s_obj, t_obj)))
 
-        for index, t_obj in range(len(source_list), len(target_list)):
-            differences.missing_from_source.append(IndexedDifference(index, ReferenceDifference(None, t_obj)))
+        for index in range(len(source_list), len(target_list)):
+            differences.missing_from_source.append(IndexedDifference(index, ReferenceDifference(None, target_list[index])))
 
         return self._none_if_empty(differences)
 
@@ -261,8 +336,8 @@ class BaseServiceComparator:
             elif target_value != source_value:
                 differences.modifications.append(IndexedDifference(index, ValueDifference(source_value, target_value)))
 
-        for index, target_value in range(len(source_list), len(target_list)):
-            differences.missing_from_source.append(IndexedDifference(index, ValueDifference(None, target_value)))
+        for index in range(len(source_list), len(target_list)):
+            differences.missing_from_source.append(IndexedDifference(index, ValueDifference(None, target_list[index])))
 
         return self._none_if_empty(differences)
 

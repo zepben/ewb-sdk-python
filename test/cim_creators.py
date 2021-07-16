@@ -26,7 +26,7 @@ FLOAT_MAX = 1000.0
 MAX_END_NUMBER = 3
 MAX_SEQUENCE_NUMBER = 40
 MIN_SEQUENCE_NUMBER = 1
-ALPHANUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
+ALPHANUM = "abcdefghijbklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
 
 #######################
@@ -462,6 +462,38 @@ def create_terminal():
     )
 
 
+#############################
+# IEC61970 BASE EQUIVALENTS #
+#############################
+
+
+def create_equivalent_branch():
+    return builds(
+        EquivalentBranch,
+        **create_equivalent_equipment(),
+        negative_r12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        negative_r21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        negative_x12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        negative_x21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positive_r12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positive_r21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positive_x12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positive_x21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zero_r12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zero_r21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zero_x12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zero_x21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_equivalent_equipment():
+    return {**create_conducting_equipment()}
+
+
 ################################
 # IEC61970 BASE DIAGRAM LAYOUT #
 ################################
@@ -846,8 +878,11 @@ def sampled_single_phase_kind():
 def create_switch():
     return {
         **create_conducting_equipment(),
-        "_normally_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        "_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+        # NOTE: These are not currently encoded properly in protobuf so we can only use all or none.
+        "_normally_open": sampled_from([0, 15]),
+        "_open": sampled_from([0, 15])
+        # "_normally_open": integers(min_value=0, max_value=15),
+        # "_open": integers(min_value=0, max_value=15)
     }
 
 

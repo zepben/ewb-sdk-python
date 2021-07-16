@@ -44,6 +44,8 @@ from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentBranch_pb2 import EquivalentBranch
+from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentEquipment_pb2 import EquivalentEquipment
 from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator
 from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog
 from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control
@@ -136,6 +138,17 @@ Site.mrid = lambda self: self.ec.mrid()
 SubGeographicalRegion.mrid = lambda self: self.io.mrid()
 Substation.mrid = lambda self: self.ec.mrid()
 Terminal.mrid = lambda self: self.ad.mrid()
+EquivalentBranch.mrid = lambda self: self.ee.mrid()
+EquivalentEquipment.mrid = lambda self: self.ce.mrid()
+Accumulator.mrid = lambda self: self.measurement.mrid()
+Analog.mrid = lambda self: self.measurement.mrid()
+Discrete.mrid = lambda self: self.measurement.mrid()
+Control.mrid = lambda self: self.ip.mrid()
+IoPoint.mrid = lambda self: self.io.mrid()
+Measurement.mrid = lambda self: self.io.mrid()
+RemoteControl.mrid = lambda self: self.rp.mrid()
+RemotePoint.mrid = lambda self: self.io.mrid()
+RemoteSource.mrid = lambda self: self.rp.mrid()
 BatteryUnit.mrid = lambda self: self.peu.mrid()
 PhotoVoltaicUnit.mrid = lambda self: self.peu.mrid()
 PowerElectronicsUnit.mrid = lambda self: self.eq.mrid()
@@ -174,15 +187,6 @@ TapChanger.mrid = lambda self: self.psr.mrid()
 TransformerEnd.mrid = lambda self: self.io.mrid()
 Loop.mrid = lambda self: self.io.mrid()
 Circuit.mrid = lambda self: self.l.mrid()
-Accumulator.mrid = lambda self: self.measurement.mrid()
-Analog.mrid = lambda self: self.measurement.mrid()
-Discrete.mrid = lambda self: self.measurement.mrid()
-Control.mrid = lambda self: self.ip.mrid()
-IoPoint.mrid = lambda self: self.io.mrid()
-Measurement.mrid = lambda self: self.io.mrid()
-RemoteControl.mrid = lambda self: self.rp.mrid()
-RemotePoint.mrid = lambda self: self.io.mrid()
-RemoteSource.mrid = lambda self: self.rp.mrid()
 
 PowerSystemResource.name_and_mrid = lambda self: self.io.name_and_mrid()
 ConductingEquipment.name_and_mrid = lambda self: self.eq.name_and_mrid()

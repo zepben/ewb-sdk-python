@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https:#mozilla.org/MPL/2.0/.
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable, Optional, Any
 
 from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, TransformerEndInfo, \
     TransformerTankInfo, TransformerTest, WireInfo, AssetOwner, Pole, Asset, Streetlight, Location, EndDevice, Meter, UsagePoint, OperationalRestriction, \
@@ -13,7 +13,8 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     Breaker, LoadBreakSwitch, BusbarSection, Conductor, Disconnector, EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, \
     Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, \
     PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
-    Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource
+    Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
+    Switch
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
@@ -44,6 +45,10 @@ class NetworkServiceComparator(BaseServiceComparator):
         """
         super().__init__()
         self._options = options
+
+    #######################
+    # IEC61968 ASSET INFO #
+    #######################
 
     def _compare_cable_info(self, source: CableInfo, target: CableInfo) -> ObjectDifference:
         return self._compare_wire_info(ObjectDifference(source, target))
@@ -146,6 +151,10 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_asset_info(diff)
 
+    ###################
+    # IEC61968 ASSETS #
+    ###################
+
     def _compare_asset(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_id_references(diff, Asset.location)
         self._compare_id_reference_collections(diff, Asset.organisation_roles)
@@ -164,9 +173,6 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_asset_owner(self, source: AssetOwner, target: AssetOwner) -> ObjectDifference:
         return self._compare_asset_organisation_role(ObjectDifference(source, target))
 
-    def _compare_structure(self, diff: ObjectDifference) -> ObjectDifference:
-        return self._compare_asset_container(diff)
-
     def _compare_pole(self, source: Pole, target: Pole) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
@@ -183,6 +189,13 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_asset(diff)
 
+    def _compare_structure(self, diff: ObjectDifference) -> ObjectDifference:
+        return self._compare_asset_container(diff)
+
+    ###################
+    # IEC61968 COMMON #
+    ###################
+
     def _compare_location(self, source: Location, target: Location) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
@@ -190,6 +203,10 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_indexed_value_collections(diff, Location.points)
 
         return self._compare_identified_object(diff)
+
+    #####################
+    # IEC61968 METERING #
+    #####################
 
     def _compare_end_device(self, diff: ObjectDifference) -> ObjectDifference:
         if self._options.compare_lv_simplification:
@@ -215,12 +232,20 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_identified_object(diff)
 
+    #######################
+    # IEC61968 OPERATIONS #
+    #######################
+
     def _compare_operational_restriction(self, source: OperationalRestriction, target: OperationalRestriction) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
         self._compare_id_reference_collections(diff, OperationalRestriction.equipment)
 
         return self._compare_document(diff)
+
+    #####################################
+    # IEC61970 BASE AUXILIARY EQUIPMENT #
+    #####################################
 
     def _compare_auxiliary_equipment(self, diff: ObjectDifference) -> ObjectDifference:
         if self._options.compare_terminals:
@@ -230,6 +255,10 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_fault_indicator(self, source: FaultIndicator, target: FaultIndicator) -> ObjectDifference:
         return self._compare_auxiliary_equipment(ObjectDifference(source, target))
+
+    ######################
+    # IEC61970 BASE CORE #
+    ######################
 
     def _compare_ac_dc_terminal(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_identified_object(diff)
@@ -325,11 +354,96 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_ac_dc_terminal(diff)
 
-    def _compare_power_electronics_unit(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_id_references(diff, PowerElectronicsUnit.power_electronics_connection)
-        self._compare_values(diff, PowerElectronicsUnit.max_p, PowerElectronicsUnit.min_p)
+    #############################
+    # IEC61970 BASE EQUIVALENTS #
+    #############################
 
-        return self._compare_equipment(diff)
+    def _compare_equivalent_branch(self, source: EquivalentBranch, target: EquivalentBranch) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_floats(
+            diff,
+            EquivalentBranch.negative_r12,
+            EquivalentBranch.negative_r21,
+            EquivalentBranch.negative_x12,
+            EquivalentBranch.negative_x21,
+            EquivalentBranch.positive_r12,
+            EquivalentBranch.positive_r21,
+            EquivalentBranch.positive_x12,
+            EquivalentBranch.positive_x21,
+            EquivalentBranch.r,
+            EquivalentBranch.r21,
+            EquivalentBranch.x,
+            EquivalentBranch.x21,
+            EquivalentBranch.zero_r12,
+            EquivalentBranch.zero_r21,
+            EquivalentBranch.zero_x12,
+            EquivalentBranch.zero_x21
+        )
+
+        return self._compare_equivalent_equipment(diff)
+
+    def _compare_equivalent_equipment(self, diff: ObjectDifference) -> ObjectDifference:
+        return self._compare_conducting_equipment(diff)
+
+    ######################
+    # IEC61970 BASE MEAS #
+    ######################
+
+    def _compare_accumulator(self, source: Accumulator, target: Accumulator) -> ObjectDifference:
+        return self._compare_measurement(ObjectDifference(source, target))
+
+    def _compare_analog(self, source: Analog, target: Analog) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, Analog.positive_flow_in)
+
+        return self._compare_measurement(diff)
+
+    def _compare_control(self, source: Control, target: Control) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, Control.power_system_resource_mrid)
+        self._compare_id_references(diff, Control.remote_control)
+
+        return self._compare_io_point(diff)
+
+    def _compare_discrete(self, source: Discrete, target: Discrete) -> ObjectDifference:
+        return self._compare_measurement(ObjectDifference(source, target))
+
+    def _compare_io_point(self, diff: ObjectDifference) -> ObjectDifference:
+        return self._compare_identified_object(diff)
+
+    def _compare_measurement(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(diff, Measurement.power_system_resource_mrid, Measurement.unit_symbol, Measurement.phases, Measurement.terminal_mrid)
+        self._compare_id_references(diff, Measurement.remote_source)
+
+        return self._compare_identified_object(diff)
+
+    #######################
+    # IEC61970 BASE SCADA #
+    #######################
+
+    def _compare_remote_control(self, source: RemoteControl, target: RemoteControl) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_id_references(diff, RemoteControl.control)
+
+        return self._compare_remote_point(diff)
+
+    def _compare_remote_point(self, diff: ObjectDifference) -> ObjectDifference:
+        return self._compare_identified_object(diff)
+
+    def _compare_remote_source(self, source: RemoteSource, target: RemoteSource) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_id_references(diff, RemoteSource.measurement)
+
+        return self._compare_remote_point(diff)
+
+    #############################################
+    # IEC61970 BASE WIRES GENERATION PRODUCTION #
+    #############################################
 
     def _compare_battery_unit(self, source: BatteryUnit, target: BatteryUnit) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -341,8 +455,18 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_photo_voltaic_unit(self, source: PhotoVoltaicUnit, target: PhotoVoltaicUnit) -> ObjectDifference:
         return self._compare_power_electronics_unit(ObjectDifference(source, target))
 
+    def _compare_power_electronics_unit(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_id_references(diff, PowerElectronicsUnit.power_electronics_connection)
+        self._compare_values(diff, PowerElectronicsUnit.max_p, PowerElectronicsUnit.min_p)
+
+        return self._compare_equipment(diff)
+
     def _compare_power_electronics_wind_unit(self, source: PowerElectronicsWindUnit, target: PowerElectronicsWindUnit) -> ObjectDifference:
         return self._compare_power_electronics_unit(ObjectDifference(source, target))
+
+    #######################
+    # IEC61970 BASE WIRES #
+    #######################
 
     def _compare_ac_line_segment(self, source: AcLineSegment, target: AcLineSegment) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -352,9 +476,6 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_conductor(diff)
 
     def _compare_breaker(self, source: Breaker, target: Breaker) -> ObjectDifference:
-        return self._compare_protected_switch(ObjectDifference(source, target))
-
-    def _compare_load_break_switch(self, source: LoadBreakSwitch, target: LoadBreakSwitch) -> ObjectDifference:
         return self._compare_protected_switch(ObjectDifference(source, target))
 
     def _compare_busbar_section(self, source: BusbarSection, target: BusbarSection) -> ObjectDifference:
@@ -446,6 +567,9 @@ class NetworkServiceComparator(BaseServiceComparator):
         )
 
         return self._compare_shunt_compensator(diff)
+
+    def _compare_load_break_switch(self, source: LoadBreakSwitch, target: LoadBreakSwitch) -> ObjectDifference:
+        return self._compare_protected_switch(ObjectDifference(source, target))
 
     def _compare_per_length_impedance(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_per_length_line_parameter(diff)
@@ -550,8 +674,8 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_regulating_cond_eq(diff)
 
     def _compare_switch(self, diff: ObjectDifference) -> ObjectDifference:
-        self._add_if_different(diff, "isNormallyOpen", self._compare_open_status(diff.source.is_normally_open))
-        self._add_if_different(diff, "isOpen", self._compare_open_status(diff.target.is_open))
+        self._add_if_different(diff, "isNormallyOpen", self._compare_open_status(diff, Switch.is_normally_open))
+        self._add_if_different(diff, "isOpen", self._compare_open_status(diff, Switch.is_open))
 
         return self._compare_conducting_equipment(diff)
 
@@ -584,6 +708,10 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_identified_object(diff)
 
+    #########################
+    # IEC61970 INF IEC61970 #
+    #########################
+
     def _compare_circuit(self, source: Circuit, target: Circuit) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
@@ -599,56 +727,10 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_identified_object(diff)
 
-    def _compare_control(self, source: Control, target: Control) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_values(diff, Control.power_system_resource_mrid)
-        self._compare_id_references(diff, Control.remote_control)
-
-        return self._compare_io_point(diff)
-
-    def _compare_io_point(self, diff: ObjectDifference) -> ObjectDifference:
-        return self._compare_identified_object(diff)
-
-    def _compare_measurement(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(diff, Measurement.power_system_resource_mrid, Measurement.unit_symbol, Measurement.phases, Measurement.terminal_mrid)
-        self._compare_id_references(diff, Measurement.remote_source)
-
-        return self._compare_identified_object(diff)
-
-    def _compare_analog(self, source: Analog, target: Analog) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_values(diff, Analog.positive_flow_in)
-
-        return self._compare_measurement(diff)
-
-    def _compare_accumulator(self, source: Accumulator, target: Accumulator) -> ObjectDifference:
-        return self._compare_measurement(ObjectDifference(source, target))
-
-    def _compare_discrete(self, source: Discrete, target: Discrete) -> ObjectDifference:
-        return self._compare_measurement(ObjectDifference(source, target))
-
-    def _compare_remote_control(self, source: RemoteControl, target: RemoteControl) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_id_references(diff, RemoteControl.control)
-
-        return self._compare_remote_point(diff)
-
-    def _compare_remote_point(self, diff: ObjectDifference) -> ObjectDifference:
-        return self._compare_identified_object(diff)
-
-    def _compare_remote_source(self, source: RemoteSource, target: RemoteSource) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_id_references(diff, RemoteSource.measurement)
-
-        return self._compare_remote_point(diff)
-
     @staticmethod
-    def _compare_open_status(open_test: Callable[[SinglePhaseKind], bool]) -> Optional[ValueDifference]:
-        source_status = {phase: open_test(phase) for phase in PhaseCode.ABCN.single_phases}
-        target_status = {phase: open_test(phase) for phase in PhaseCode.ABCN.single_phases}
+    # NOTE: Should be Callable[[Switch, SinglePhaseKind], bool], but type inference does not work correctly.
+    def _compare_open_status(diff: ObjectDifference, open_test: Callable[[Any, SinglePhaseKind], bool]) -> Optional[ValueDifference]:
+        source_status = {phase: open_test(diff.source, phase) for phase in PhaseCode.ABCN.single_phases}
+        target_status = {phase: open_test(diff.target, phase) for phase in PhaseCode.ABCN.single_phases}
 
         return ValueDifference(source_status, target_status) if source_status != target_status else None

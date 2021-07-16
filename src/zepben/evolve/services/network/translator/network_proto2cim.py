@@ -49,6 +49,8 @@ from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site as PBSite
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion as PBSubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation as PBSubstation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
+from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentBranch_pb2 import EquivalentBranch as PBEquivalentBranch
+from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentEquipment_pb2 import EquivalentEquipment as PBEquivalentEquipment
 from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator as PBAccumulator
 from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog as PBAnalog
 from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control as PBControl
@@ -126,6 +128,8 @@ from zepben.evolve.model.cim.iec61970.base.core.regions import *
 from zepben.evolve.model.cim.iec61970.base.core.substation import *
 from zepben.evolve.model.cim.iec61970.base.core.terminal import *
 from zepben.evolve.model.cim.iec61970.base.domain.unit_symbol import *
+from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_branch import *
+from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_equipment import *
 from zepben.evolve.model.cim.iec61970.base.meas.control import *
 from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
@@ -164,15 +168,16 @@ __all__ = [
     "usage_point_to_cim", "operational_restriction_to_cim", "auxiliary_equipment_to_cim", "fault_indicator_to_cim", "ac_dc_terminal_to_cim",
     "base_voltage_to_cim", "conducting_equipment_to_cim", "connectivity_node_to_cim", "connectivity_node_container_to_cim", "equipment_to_cim",
     "equipment_container_to_cim", "feeder_to_cim", "geographical_region_to_cim", "power_system_resource_to_cim", "site_to_cim",
-    "sub_geographical_region_to_cim", "substation_to_cim", "terminal_to_cim", "accumulator_to_cim", "analog_to_cim", "control_to_cim", "discrete_to_cim",
-    "io_point_to_cim", "measurement_to_cim", "remote_control_to_cim", "remote_point_to_cim", "remote_source_to_cim", "battery_unit_to_cim",
-    "photo_voltaic_unit_to_cim", "power_electronics_unit_to_cim", "power_electronics_wind_unit_to_cim", "ac_line_segment_to_cim", "breaker_to_cim",
-    "conductor_to_cim", "connector_to_cim", "disconnector_to_cim", "energy_connection_to_cim", "energy_consumer_to_cim", "energy_consumer_phase_to_cim",
-    "energy_source_to_cim", "energy_source_phase_to_cim", "fuse_to_cim", "jumper_to_cim", "junction_to_cim", "busbar_section_to_cim", "line_to_cim",
-    "linear_shunt_compensator_to_cim", "load_break_switch_to_cim", "per_length_line_parameter_to_cim", "per_length_impedance_to_cim",
-    "per_length_sequence_impedance_to_cim", "power_electronics_connection_to_cim", "power_electronics_connection_phase_to_cim", "power_transformer_to_cim",
-    "power_transformer_end_to_cim", "transformer_star_impedance_to_cim", "protected_switch_to_cim", "ratio_tap_changer_to_cim", "recloser_to_cim",
-    "regulating_cond_eq_to_cim", "shunt_compensator_to_cim", "switch_to_cim", "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim",
+    "sub_geographical_region_to_cim", "substation_to_cim", "terminal_to_cim", "equivalent_branch_to_cim", "equivalent_equipment_to_cim", "accumulator_to_cim",
+    "analog_to_cim", "control_to_cim", "discrete_to_cim", "io_point_to_cim", "measurement_to_cim", "remote_control_to_cim", "remote_point_to_cim",
+    "remote_source_to_cim", "battery_unit_to_cim", "photo_voltaic_unit_to_cim", "power_electronics_unit_to_cim", "power_electronics_wind_unit_to_cim",
+    "ac_line_segment_to_cim", "breaker_to_cim", "conductor_to_cim", "connector_to_cim", "disconnector_to_cim", "energy_connection_to_cim",
+    "energy_consumer_to_cim", "energy_consumer_phase_to_cim", "energy_source_to_cim", "energy_source_phase_to_cim", "fuse_to_cim", "jumper_to_cim",
+    "junction_to_cim", "busbar_section_to_cim", "line_to_cim", "linear_shunt_compensator_to_cim", "load_break_switch_to_cim",
+    "per_length_line_parameter_to_cim", "per_length_impedance_to_cim", "per_length_sequence_impedance_to_cim", "power_electronics_connection_to_cim",
+    "power_electronics_connection_phase_to_cim", "power_transformer_to_cim", "power_transformer_end_to_cim", "transformer_star_impedance_to_cim",
+    "protected_switch_to_cim", "ratio_tap_changer_to_cim", "recloser_to_cim", "regulating_cond_eq_to_cim", "shunt_compensator_to_cim", "switch_to_cim",
+    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim",
 ]
 
 
@@ -617,6 +622,7 @@ def substation_to_cim(pb: PBSubstation, network_service: NetworkService) -> Opti
 
 
 def terminal_to_cim(pb: PBTerminal, network_service: NetworkService) -> Optional[Terminal]:
+    # noinspection PyArgumentList
     cim = Terminal(
         mrid=pb.mrid(),
         phases=phase_code_by_id(pb.phases),
@@ -645,6 +651,43 @@ PBSite.to_cim = site_to_cim
 PBSubGeographicalRegion.to_cim = sub_geographical_region_to_cim
 PBSubstation.to_cim = substation_to_cim
 PBTerminal.to_cim = terminal_to_cim
+
+
+#############################
+# IEC61970 BASE EQUIVALENTS #
+#############################
+
+def equivalent_branch_to_cim(pb: PBEquivalentBranch, network_service: NetworkService) -> Optional[EquivalentBranch]:
+    cim = EquivalentBranch(
+        mrid=pb.mrid(),
+        negative_r12=float_or_none(pb.negativeR12),
+        negative_r21=float_or_none(pb.negativeR21),
+        negative_x12=float_or_none(pb.negativeX12),
+        negative_x21=float_or_none(pb.negativeX21),
+        positive_r12=float_or_none(pb.positiveR12),
+        positive_r21=float_or_none(pb.positiveR21),
+        positive_x12=float_or_none(pb.positiveX12),
+        positive_x21=float_or_none(pb.positiveX21),
+        r=float_or_none(pb.r),
+        r21=float_or_none(pb.r21),
+        x=float_or_none(pb.x),
+        x21=float_or_none(pb.x21),
+        zero_r12=float_or_none(pb.zeroR12),
+        zero_r21=float_or_none(pb.zeroR21),
+        zero_x12=float_or_none(pb.zeroX12),
+        zero_x21=float_or_none(pb.zeroX21),
+    )
+
+    equivalent_equipment_to_cim(pb.ee, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
+def equivalent_equipment_to_cim(pb: PBEquivalentEquipment, cim: EquivalentEquipment, network_service: NetworkService):
+    conducting_equipment_to_cim(pb.ce, cim, network_service)
+
+
+PBEquivalentEquipment.to_cim = equivalent_equipment_to_cim
+PBEquivalentBranch.to_cim = equivalent_branch_to_cim
 
 
 ######################

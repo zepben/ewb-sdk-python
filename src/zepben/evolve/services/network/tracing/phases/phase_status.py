@@ -6,6 +6,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zepben.evolve import Terminal
+
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.model.phasedirection import PhaseDirection
 from abc import ABC, abstractmethod
@@ -80,15 +85,15 @@ class NormalPhases(PhaseStatus):
     def direction(self):
         return self.terminal.traced_phases.direction_normal(self.nominal_phase)
 
-    def set(self, phase_kind: SinglePhaseKind, dir: PhaseDirection):
-        return self.terminal.traced_phases.set_normal(phase_kind, self.nominal_phase, dir)
+    def set(self, phase_kind: SinglePhaseKind, dir_: PhaseDirection):
+        return self.terminal.traced_phases.set_normal(phase_kind, self.nominal_phase, dir_)
 
-    def add(self, phase_kind: SinglePhaseKind, dir: PhaseDirection):
-        return self.terminal.traced_phases.add_normal(phase_kind, self.nominal_phase, dir)
+    def add(self, phase_kind: SinglePhaseKind, dir_: PhaseDirection):
+        return self.terminal.traced_phases.add_normal(phase_kind, self.nominal_phase, dir_)
 
-    def remove(self, phase_kind: SinglePhaseKind, dir: PhaseDirection = None):
-        if dir is not None:
-            return self.terminal.traced_phases.remove_normal(phase_kind, self.nominal_phase, dir)
+    def remove(self, phase_kind: SinglePhaseKind, dir_: PhaseDirection = None):
+        if dir_ is not None:
+            return self.terminal.traced_phases.remove_normal(phase_kind, self.nominal_phase, dir_)
         else:
             return self.terminal.traced_phases.remove_normal(phase_kind, self.nominal_phase)
 
@@ -105,15 +110,14 @@ class CurrentPhases(PhaseStatus):
     def direction(self):
         return self.terminal.traced_phases.direction_current(self.nominal_phase)
 
-    def set(self, phase_kind: SinglePhaseKind, dir: PhaseDirection):
-        return self.terminal.traced_phases.set_current(phase_kind, self.nominal_phase, dir)
+    def set(self, phase_kind: SinglePhaseKind, dir_: PhaseDirection):
+        return self.terminal.traced_phases.set_current(phase_kind, self.nominal_phase, dir_)
 
-    def add(self, phase_kind: SinglePhaseKind, dir: PhaseDirection):
-        return self.terminal.traced_phases.add_current(phase_kind, self.nominal_phase, dir)
+    def add(self, phase_kind: SinglePhaseKind, dir_: PhaseDirection):
+        return self.terminal.traced_phases.add_current(phase_kind, self.nominal_phase, dir_)
 
-    def remove(self, phase_kind: SinglePhaseKind, dir: PhaseDirection = None):
-        if dir is not None:
-            return self.terminal.traced_phases.remove_current(phase_kind, self.nominal_phase, dir)
+    def remove(self, phase_kind: SinglePhaseKind, dir_: PhaseDirection = None):
+        if dir_ is not None:
+            return self.terminal.traced_phases.remove_current(phase_kind, self.nominal_phase, dir_)
         else:
             return self.terminal.traced_phases.remove_current(phase_kind, self.nominal_phase)
-

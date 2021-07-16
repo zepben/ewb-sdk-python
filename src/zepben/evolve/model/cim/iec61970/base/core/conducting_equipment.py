@@ -153,6 +153,9 @@ class ConductingEquipment(Equipment):
         if self._validate_reference_by_sn(terminal.sequence_number, terminal, self.get_terminal_by_sn, "A Terminal"):
             return True
 
+        if not terminal.conducting_equipment:
+            terminal.conducting_equipment = self
+
         require(terminal.conducting_equipment is self,
                 lambda: f"Terminal {terminal} references another piece of conducting equipment {terminal.conducting_equipment}, expected {str(self)}.")
         return False

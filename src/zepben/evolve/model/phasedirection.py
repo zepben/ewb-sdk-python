@@ -34,7 +34,7 @@ class PhaseDirection(Enum):
 
     @property
     def short_name(self):
-        return str(self)[10:]
+        return str(self)[15:]
 
 
 def phasedirection_from_value(value: int) -> PhaseDirection:

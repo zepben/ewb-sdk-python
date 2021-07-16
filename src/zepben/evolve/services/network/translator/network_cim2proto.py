@@ -49,6 +49,8 @@ from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import Sub
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation as PBSubstation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
 from zepben.protobuf.cim.iec61970.base.domain.UnitSymbol_pb2 import UnitSymbol as PBUnitSymbol
+from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentBranch_pb2 import EquivalentBranch as PBEquivalentBranch
+from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentEquipment_pb2 import EquivalentEquipment as PBEquivalentEquipment
 from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator as PBAccumulator
 from zepben.protobuf.cim.iec61970.base.meas.Analog_pb2 import Analog as PBAnalog
 from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control as PBControl
@@ -127,6 +129,8 @@ from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import *
 from zepben.evolve.model.cim.iec61970.base.core.regions import *
 from zepben.evolve.model.cim.iec61970.base.core.substation import *
 from zepben.evolve.model.cim.iec61970.base.core.terminal import *
+from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_branch import *
+from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_equipment import *
 from zepben.evolve.model.cim.iec61970.base.meas.control import *
 from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
@@ -160,15 +164,15 @@ __all__ = [
     "operational_restriction_to_pb", "auxiliary_equipment_to_pb", "fault_indicator_to_pb", "ac_dc_terminal_to_pb", "base_voltage_to_pb",
     "conducting_equipment_to_pb", "connectivity_node_to_pb", "connectivity_node_container_to_pb", "equipment_to_pb", "equipment_container_to_pb",
     "feeder_to_pb", "geographical_region_to_pb", "power_system_resource_to_pb", "site_to_pb", "sub_geographical_region_to_pb", "substation_to_pb",
-    "terminal_to_pb", "control_to_pb", "io_point_to_pb", "accumulator_to_pb", "analog_to_pb", "discrete_to_pb", "measurement_to_pb", "remote_control_to_pb",
-    "remote_point_to_pb", "remote_source_to_pb", "battery_unit_to_pb", "photo_voltaic_unit_to_pb", "power_electronics_unit_to_pb",
-    "power_electronics_wind_unit_to_pb", "ac_line_segment_to_pb", "breaker_to_pb", "conductor_to_pb", "connector_to_pb", "disconnector_to_pb",
-    "energy_connection_to_pb", "energy_consumer_to_pb", "energy_consumer_phase_to_pb", "energy_source_to_pb", "energy_source_phase_to_pb", "fuse_to_pb",
-    "jumper_to_pb", "junction_to_pb", "busbar_section_to_pb", "line_to_pb", "linear_shunt_compensator_to_pb", "load_break_switch_to_pb",
-    "per_length_line_parameter_to_pb", "per_length_impedance_to_pb", "per_length_sequence_impedance_to_pb", "power_electronics_connection_to_pb",
-    "power_electronics_connection_phase_to_pb", "power_transformer_to_pb", "power_transformer_end_to_pb", "protected_switch_to_pb", "ratio_tap_changer_to_pb",
-    "recloser_to_pb", "regulating_cond_eq_to_pb", "shunt_compensator_to_pb", "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb", "circuit_to_pb",
-    "loop_to_pb", "transformer_star_impedance_to_pb", "traced_phases_to_pb",
+    "terminal_to_pb", "equivalent_branch_to_pb", "equivalent_equipment_to_pb", "control_to_pb", "io_point_to_pb", "accumulator_to_pb", "analog_to_pb",
+    "discrete_to_pb", "measurement_to_pb", "remote_control_to_pb", "remote_point_to_pb", "remote_source_to_pb", "battery_unit_to_pb",
+    "photo_voltaic_unit_to_pb", "power_electronics_unit_to_pb", "power_electronics_wind_unit_to_pb", "ac_line_segment_to_pb", "breaker_to_pb",
+    "conductor_to_pb", "connector_to_pb", "disconnector_to_pb", "energy_connection_to_pb", "energy_consumer_to_pb", "energy_consumer_phase_to_pb",
+    "energy_source_to_pb", "energy_source_phase_to_pb", "fuse_to_pb", "jumper_to_pb", "junction_to_pb", "busbar_section_to_pb", "line_to_pb",
+    "linear_shunt_compensator_to_pb", "load_break_switch_to_pb", "per_length_line_parameter_to_pb", "per_length_impedance_to_pb",
+    "per_length_sequence_impedance_to_pb", "power_electronics_connection_to_pb", "power_electronics_connection_phase_to_pb", "power_transformer_to_pb",
+    "power_transformer_end_to_pb", "protected_switch_to_pb", "ratio_tap_changer_to_pb", "recloser_to_pb", "regulating_cond_eq_to_pb", "shunt_compensator_to_pb",
+    "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb", "circuit_to_pb", "loop_to_pb", "transformer_star_impedance_to_pb", "traced_phases_to_pb",
 ]
 
 
@@ -180,6 +184,7 @@ class CimTranslationException(Exception):
     pass
 
 
+#######################
 # IEC61968 ASSET INFO #
 #######################
 
@@ -281,6 +286,18 @@ def wire_info_to_pb(cim: WireInfo) -> PBWireInfo:
     )
 
 
+CableInfo.to_pb = cable_info_to_pb
+NoLoadTest.to_pb = no_load_test_to_pb
+OpenCircuitTest.to_pb = open_circuit_test_to_pb
+OverheadWireInfo.to_pb = overhead_wire_info_to_pb
+PowerTransformerInfo.to_pb = power_transformer_info_to_pb
+ShortCircuitTest.to_pb = short_circuit_test_to_pb
+TransformerEndInfo.to_pb = transformer_end_info_to_pb
+TransformerTankInfo.to_pb = transformer_tank_info_to_pb
+TransformerTest.to_pb = transformer_test_to_pb
+WireInfo.to_pb = wire_info_to_pb
+
+
 ###################
 # IEC61968 ASSETS #
 ###################
@@ -332,6 +349,16 @@ def structure_to_pb(cim: Structure) -> PBStructure:
     return PBStructure(ac=asset_container_to_pb(cim))
 
 
+Asset.to_pb = asset_to_pb
+AssetContainer.to_pb = asset_container_to_pb
+AssetInfo.to_pb = asset_info_to_pb
+AssetOrganisationRole.to_pb = asset_organisation_role_to_pb
+AssetOwner.to_pb = asset_owner_to_pb
+Pole.to_pb = pole_to_pb
+Streetlight.to_pb = streetlight_to_pb
+Structure.to_pb = structure_to_pb
+
+
 ###################
 # IEC61968 COMMON #
 ###################
@@ -354,6 +381,12 @@ def street_address_to_pb(cim: StreetAddress) -> PBStreetAddress:
 
 def town_detail_to_pb(cim: TownDetail) -> PBTownDetail:
     return PBTownDetail(name=cim.name, stateOrProvince=cim.state_or_province)
+
+
+Location.to_pb = location_to_pb
+PositionPoint.to_pb = position_point_to_pb
+StreetAddress.to_pb = street_address_to_pb
+TownDetail.to_pb = town_detail_to_pb
 
 
 #####################
@@ -382,12 +415,20 @@ def usage_point_to_pb(cim: UsagePoint) -> PBUsagePoint:
     )
 
 
+EndDevice.to_pb = end_device_to_pb
+Meter.to_pb = meter_to_pb
+UsagePoint.to_pb = usage_point_to_pb
+
+
 #######################
 # IEC61968 OPERATIONS #
 #######################
 
 def operational_restriction_to_pb(cim: OperationalRestriction) -> PBOperationalRestriction:
     return PBOperationalRestriction(doc=document_to_pb(cim))
+
+
+OperationalRestriction.to_pb = operational_restriction_to_pb
 
 
 #####################################
@@ -403,6 +444,10 @@ def auxiliary_equipment_to_pb(cim: AuxiliaryEquipment) -> PBAuxiliaryEquipment:
 
 def fault_indicator_to_pb(cim: FaultIndicator) -> PBFaultIndicator:
     return PBFaultIndicator(ae=auxiliary_equipment_to_pb(cim))
+
+
+AuxiliaryEquipment.to_pb = auxiliary_equipment_to_pb
+FaultIndicator.to_pb = fault_indicator_to_pb
 
 
 ######################
@@ -509,21 +554,59 @@ def terminal_to_pb(cim: Terminal) -> PBTerminal:
     )
 
 
-######################
-# IEC61970 BASE MEAS #
-######################
+AcDcTerminal.to_pb = ac_dc_terminal_to_pb
+BaseVoltage.to_pb = base_voltage_to_pb
+ConductingEquipment.to_pb = conducting_equipment_to_pb
+ConnectivityNode.to_pb = connectivity_node_to_pb
+ConnectivityNodeContainer.to_pb = connectivity_node_container_to_pb
+Equipment.to_pb = equipment_to_pb
+EquipmentContainer.to_pb = equipment_container_to_pb
+Feeder.to_pb = feeder_to_pb
+GeographicalRegion.to_pb = geographical_region_to_pb
+PowerSystemResource.to_pb = power_system_resource_to_pb
+Site.to_pb = site_to_pb
+SubGeographicalRegion.to_pb = sub_geographical_region_to_pb
+Substation.to_pb = substation_to_pb
+Terminal.to_pb = terminal_to_pb
 
-def control_to_pb(cim: Control) -> PBControl:
-    return PBControl(
-        ip=io_point_to_pb(cim),
-        remoteControlMRID=mrid_or_empty(cim.remote_control),
-        powerSystemResourceMRID=cim.power_system_resource_mrid
+
+#############################
+# IEC61970 BASE EQUIVALENTS #
+#############################
+
+def equivalent_branch_to_pb(cim: EquivalentBranch) -> PBEquivalentBranch:
+    return PBEquivalentBranch(
+        ee=equivalent_equipment_to_pb(cim),
+        negativeR12=from_nullable_float(cim.negative_r12),
+        negativeR21=from_nullable_float(cim.negative_r21),
+        negativeX12=from_nullable_float(cim.negative_x12),
+        negativeX21=from_nullable_float(cim.negative_x21),
+        positiveR12=from_nullable_float(cim.positive_r12),
+        positiveR21=from_nullable_float(cim.positive_r21),
+        positiveX12=from_nullable_float(cim.positive_x12),
+        positiveX21=from_nullable_float(cim.positive_x21),
+        r=from_nullable_float(cim.r),
+        r21=from_nullable_float(cim.r21),
+        x=from_nullable_float(cim.x),
+        x21=from_nullable_float(cim.x21),
+        zeroR12=from_nullable_float(cim.zero_r12),
+        zeroR21=from_nullable_float(cim.zero_r21),
+        zeroX12=from_nullable_float(cim.zero_x12),
+        zeroX21=from_nullable_float(cim.zero_x21),
     )
 
 
-def io_point_to_pb(cim: IoPoint) -> PBIoPoint:
-    return PBIoPoint(io=identified_object_to_pb(cim))
+def equivalent_equipment_to_pb(cim: EquivalentEquipment) -> PBEquivalentEquipment:
+    return PBEquivalentEquipment(ce=conducting_equipment_to_pb(cim))
 
+
+EquivalentBranch.to_pb = equivalent_branch_to_pb
+EquivalentEquipment.to_pb = equivalent_equipment_to_pb
+
+
+######################
+# IEC61970 BASE MEAS #
+######################
 
 def accumulator_to_pb(cim: Accumulator) -> PBAccumulator:
     return PBAccumulator(measurement=measurement_to_pb(cim))
@@ -536,8 +619,20 @@ def analog_to_pb(cim: Analog) -> PBAnalog:
     )
 
 
+def control_to_pb(cim: Control) -> PBControl:
+    return PBControl(
+        ip=io_point_to_pb(cim),
+        remoteControlMRID=mrid_or_empty(cim.remote_control),
+        powerSystemResourceMRID=cim.power_system_resource_mrid
+    )
+
+
 def discrete_to_pb(cim: Discrete) -> PBDiscrete:
     return PBDiscrete(measurement=measurement_to_pb(cim))
+
+
+def io_point_to_pb(cim: IoPoint) -> PBIoPoint:
+    return PBIoPoint(io=identified_object_to_pb(cim))
 
 
 def measurement_to_pb(cim: Measurement) -> PBMeasurement:
@@ -549,6 +644,14 @@ def measurement_to_pb(cim: Measurement) -> PBMeasurement:
         phases=PBPhaseCode.Value(cim.phases.short_name),
         unitSymbol=PBUnitSymbol.Value(cim.unit_symbol.short_name)
     )
+
+
+Accumulator.to_pb = accumulator_to_pb
+Analog.to_pb = analog_to_pb
+Control.to_pb = control_to_pb
+Discrete.to_pb = discrete_to_pb
+IoPoint.to_pb = io_point_to_pb
+Measurement.to_pb = measurement_to_pb
 
 
 #######################
@@ -571,6 +674,11 @@ def remote_source_to_pb(cim: RemoteSource) -> PBRemoteSource:
         rp=remote_point_to_pb(cim),
         measurementMRID=mrid_or_empty(cim.measurement)
     )
+
+
+RemoteControl.to_pb = remote_control_to_pb
+RemotePoint.to_pb = remote_point_to_pb
+RemoteSource.to_pb = remote_source_to_pb
 
 
 #############################################
@@ -601,6 +709,12 @@ def power_electronics_unit_to_pb(cim: PowerElectronicsUnit) -> PBPowerElectronic
 
 def power_electronics_wind_unit_to_pb(cim: PowerElectronicsWindUnit) -> PBPowerElectronicsWindUnit:
     return PBPowerElectronicsWindUnit(peu=power_electronics_unit_to_pb(cim))
+
+
+BatteryUnit.to_pb = battery_unit_to_pb
+PhotoVoltaicUnit.to_pb = photo_voltaic_unit_to_pb
+PowerElectronicsUnit.to_pb = power_electronics_unit_to_pb
+PowerElectronicsWindUnit.to_pb = power_electronics_wind_unit_to_pb
 
 
 #######################
@@ -867,6 +981,57 @@ def transformer_end_to_pb(cim: TransformerEnd) -> PBTransformerEnd:
     )
 
 
+def transformer_star_impedance_to_pb(cim: TransformerStarImpedance) -> PBTransformerStarImpedance:
+    return PBTransformerStarImpedance(
+        io=identified_object_to_pb(cim),
+        r=cim.r if cim.r else 0.0,
+        r0=cim.r0 if cim.r0 else 0.0,
+        x=cim.x if cim.x else 0.0,
+        x0=cim.x0 if cim.x0 else 0.0,
+        transformerEndInfoMRID=mrid_or_empty(cim.transformer_end_info)
+    )
+
+
+AcLineSegment.to_pb = ac_line_segment_to_pb
+Breaker.to_pb = breaker_to_pb
+BusbarSection.to_pb = busbar_section_to_pb
+Conductor.to_pb = conductor_to_pb
+Connector.to_pb = connector_to_pb
+Disconnector.to_pb = disconnector_to_pb
+EnergyConnection.to_pb = energy_connection_to_pb
+EnergyConsumer.to_pb = energy_consumer_to_pb
+EnergyConsumerPhase.to_pb = energy_consumer_phase_to_pb
+EnergySource.to_pb = energy_source_to_pb
+EnergySourcePhase.to_pb = energy_source_phase_to_pb
+Fuse.to_pb = fuse_to_pb
+Jumper.to_pb = jumper_to_pb
+Junction.to_pb = junction_to_pb
+Line.to_pb = line_to_pb
+LinearShuntCompensator.to_pb = linear_shunt_compensator_to_pb
+LoadBreakSwitch.to_pb = load_break_switch_to_pb
+PerLengthImpedance.to_pb = per_length_impedance_to_pb
+PerLengthLineParameter.to_pb = per_length_line_parameter_to_pb
+PerLengthSequenceImpedance.to_pb = per_length_sequence_impedance_to_pb
+PowerElectronicsConnection.to_pb = power_electronics_connection_to_pb
+PowerElectronicsConnectionPhase.to_pb = power_electronics_connection_phase_to_pb
+PowerTransformer.to_pb = power_transformer_to_pb
+PowerTransformerEnd.to_pb = power_transformer_end_to_pb
+ProtectedSwitch.to_pb = protected_switch_to_pb
+RatioTapChanger.to_pb = ratio_tap_changer_to_pb
+Recloser.to_pb = recloser_to_pb
+RegulatingCondEq.to_pb = regulating_cond_eq_to_pb
+ShuntCompensator.to_pb = shunt_compensator_to_pb
+Switch.to_pb = switch_to_pb
+TapChanger.to_pb = tap_changer_to_pb
+TransformerEnd.to_pb = transformer_end_to_pb
+TransformerStarImpedance.to_pb = transformer_star_impedance_to_pb
+
+
+###############################
+# IEC61970 INFIEC61970 FEEDER #
+###############################
+
+
 def circuit_to_pb(cim: Circuit) -> PBCircuit:
     return PBCircuit(
         l=line_to_pb(cim),
@@ -885,115 +1050,18 @@ def loop_to_pb(cim: Loop) -> PBLoop:
     )
 
 
-def transformer_star_impedance_to_pb(cim: TransformerStarImpedance) -> PBTransformerStarImpedance:
-    return PBTransformerStarImpedance(
-        io=identified_object_to_pb(cim),
-        r=cim.r if cim.r else 0.0,
-        r0=cim.r0 if cim.r0 else 0.0,
-        x=cim.x if cim.x else 0.0,
-        x0=cim.x0 if cim.x0 else 0.0,
-        transformerEndInfoMRID=mrid_or_empty(cim.transformer_end_info)
-    )
+Circuit.to_pb = circuit_to_pb
+Loop.to_pb = loop_to_pb
 
 
 #########
 # MODEL #
 #########
 
+
 def traced_phases_to_pb(cim: TracedPhases) -> PBTracedPhases:
     # noinspection PyProtectedMember
-    return PBTracedPhases(normalStatus=cim._normal_status, currentStatus=cim._current_status)
+    return PBTracedPhases(normalStatus=cim.normal_status, currentStatus=cim.current_status)
 
 
-# Extension functions for each CIM type.
-CableInfo.to_pb = lambda self: cable_info_to_pb(self)
-NoLoadTest.to_pb = no_load_test_to_pb
-OpenCircuitTest.to_pb = open_circuit_test_to_pb
-OverheadWireInfo.to_pb = lambda self: overhead_wire_info_to_pb(self)
-PowerTransformerInfo.to_pb = lambda self: power_transformer_info_to_pb(self)
-ShortCircuitTest.to_pb = short_circuit_test_to_pb
-TransformerEndInfo.to_pb = transformer_end_info_to_pb
-TransformerTankInfo.to_pb = transformer_tank_info_to_pb
-TransformerTest.to_pb = transformer_test_to_pb
-WireInfo.to_pb = lambda self: wire_info_to_pb(self)
-Asset.to_pb = lambda self: asset_to_pb(self)
-AssetContainer.to_pb = lambda self: asset_container_to_pb(self)
-AssetInfo.to_pb = lambda self: asset_info_to_pb(self)
-AssetOrganisationRole.to_pb = lambda self: asset_organisation_role_to_pb(self)
-AssetOwner.to_pb = lambda self: asset_owner_to_pb(self)
-Pole.to_pb = lambda self: pole_to_pb(self)
-Streetlight.to_pb = lambda self: streetlight_to_pb(self)
-Structure.to_pb = lambda self: structure_to_pb(self)
-PositionPoint.to_pb = lambda self: position_point_to_pb(self)
-TownDetail.to_pb = lambda self: town_detail_to_pb(self)
-StreetAddress.to_pb = lambda self: street_address_to_pb(self)
-Location.to_pb = lambda self: location_to_pb(self)
-EndDevice.to_pb = lambda self: end_device_to_pb(self)
-Meter.to_pb = lambda self: meter_to_pb(self)
-UsagePoint.to_pb = lambda self: usage_point_to_pb(self)
-OperationalRestriction.to_pb = lambda self: operational_restriction_to_pb(self)
-AuxiliaryEquipment.to_pb = lambda self: auxiliary_equipment_to_pb(self)
-FaultIndicator.to_pb = lambda self: fault_indicator_to_pb(self)
-AcDcTerminal.to_pb = lambda self: ac_dc_terminal_to_pb(self)
-BaseVoltage.to_pb = lambda self: base_voltage_to_pb(self)
-ConductingEquipment.to_pb = lambda self: conducting_equipment_to_pb(self)
-ConnectivityNode.to_pb = lambda self: connectivity_node_to_pb(self)
-ConnectivityNodeContainer.to_pb = lambda self: connectivity_node_container_to_pb(self)
-Equipment.to_pb = lambda self: equipment_to_pb(self)
-EquipmentContainer.to_pb = lambda self: equipment_container_to_pb(self)
-Feeder.to_pb = lambda self: feeder_to_pb(self)
-GeographicalRegion.to_pb = lambda self: geographical_region_to_pb(self)
-PowerSystemResource.to_pb = lambda self: power_system_resource_to_pb(self)
-Site.to_pb = lambda self: site_to_pb(self)
-SubGeographicalRegion.to_pb = lambda self: sub_geographical_region_to_pb(self)
-Substation.to_pb = lambda self: substation_to_pb(self)
-Terminal.to_pb = lambda self: terminal_to_pb(self)
-PerLengthLineParameter.to_pb = lambda self: per_length_line_parameter_to_pb(self)
-PerLengthImpedance.to_pb = lambda self: per_length_impedance_to_pb(self)
-PowerElectronicsUnit.to_pb = power_electronics_unit_to_pb
-BatteryUnit.to_pb = battery_unit_to_pb
-PhotoVoltaicUnit.to_pb = photo_voltaic_unit_to_pb
-PowerElectronicsWindUnit.to_pb = power_electronics_wind_unit_to_pb
-AcLineSegment.to_pb = lambda self: ac_line_segment_to_pb(self)
-Breaker.to_pb = lambda self: breaker_to_pb(self)
-Conductor.to_pb = lambda self: conductor_to_pb(self)
-Connector.to_pb = lambda self: connector_to_pb(self)
-Disconnector.to_pb = lambda self: disconnector_to_pb(self)
-EnergyConnection.to_pb = lambda self: energy_connection_to_pb(self)
-EnergyConsumer.to_pb = lambda self: energy_consumer_to_pb(self)
-EnergyConsumerPhase.to_pb = lambda self: energy_consumer_phase_to_pb(self)
-EnergySource.to_pb = lambda self: energy_source_to_pb(self)
-EnergySourcePhase.to_pb = lambda self: energy_source_phase_to_pb(self)
-Fuse.to_pb = lambda self: fuse_to_pb(self)
-Jumper.to_pb = lambda self: jumper_to_pb(self)
-Junction.to_pb = lambda self: junction_to_pb(self)
-BusbarSection.to_pb = busbar_section_to_pb
-Line.to_pb = line_to_pb
-LinearShuntCompensator.to_pb = lambda self: linear_shunt_compensator_to_pb(self)
-LoadBreakSwitch.to_pb = load_break_switch_to_pb
-PerLengthSequenceImpedance.to_pb = lambda self: per_length_sequence_impedance_to_pb(self)
-PowerElectronicsConnection.to_pb = power_electronics_connection_to_pb
-PowerElectronicsConnectionPhase.to_pb = power_electronics_connection_phase_to_pb
-PowerTransformer.to_pb = lambda self: power_transformer_to_pb(self)
-PowerTransformerEnd.to_pb = lambda self: power_transformer_end_to_pb(self)
-TransformerStarImpedance.to_pb = transformer_star_impedance_to_pb
-ProtectedSwitch.to_pb = lambda self: protected_switch_to_pb(self)
-RatioTapChanger.to_pb = lambda self: ratio_tap_changer_to_pb(self)
-Recloser.to_pb = lambda self: recloser_to_pb(self)
-RegulatingCondEq.to_pb = lambda self: regulating_cond_eq_to_pb(self)
-ShuntCompensator.to_pb = lambda self: shunt_compensator_to_pb(self)
-Switch.to_pb = lambda self: switch_to_pb(self)
-TapChanger.to_pb = lambda self: tap_changer_to_pb(self)
-TransformerEnd.to_pb = lambda self: transformer_end_to_pb(self)
-Circuit.to_pb = circuit_to_pb
-Loop.to_pb = loop_to_pb
-Control.to_pb = control_to_pb
-IoPoint.to_pb = io_point_to_pb
-Accumulator.to_pb = accumulator_to_pb
-Analog.to_pb = analog_to_pb
-Discrete.to_pb = discrete_to_pb
-Measurement.to_pb = measurement_to_pb
-RemoteControl.to_pb = remote_control_to_pb
-RemotePoint.to_pb = remote_point_to_pb
-RemoteSource.to_pb = remote_source_to_pb
 TracedPhases.to_pb = traced_phases_to_pb
