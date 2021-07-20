@@ -6,17 +6,17 @@
 
 from enum import Enum
 
-__all__ = ["SinglePhaseKind", "phasekind_by_id", "SINGLE_PHASE_KIND_VALUES"]
+__all__ = ["SinglePhaseKind", "single_phase_kind_by_id", "SINGLE_PHASE_KIND_VALUES"]
 
 
-def phasekind_by_id(spk_id):
+def single_phase_kind_by_id(value):
     """
-    Get a SinglePhaseKind by its ID
+    Get a SinglePhaseKind by its value
 
-    `spk_id` ID of the SinglePhaseKind from 0 as per the order of definition
+    `value` ID of the SinglePhaseKind from 0 as per the order of definition
     Returns The SinglePhaseKind
     """
-    return SINGLE_PHASE_KIND_VALUES[spk_id]
+    return SINGLE_PHASE_KIND_VALUES[value]
 
 
 class SinglePhaseKind(Enum):

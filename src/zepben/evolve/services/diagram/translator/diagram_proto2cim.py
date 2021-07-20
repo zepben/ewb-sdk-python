@@ -5,12 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectPoint_pb2 import DiagramObjectPoint as PBDiagramObjectPoint
-from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectStyle_pb2 import DiagramObjectStyle as PBDiagramObjectStyle
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject as PBDiagramObject
 from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
 
 import zepben.evolve.services.common.resolver as resolver
-from zepben.evolve import identified_object_to_cim, OrientationKind, DiagramStyle, DiagramObjectStyle
+from zepben.evolve import identified_object_to_cim, OrientationKind, DiagramStyle
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject, DiagramObjectPoint
 from zepben.evolve.services.diagram.diagrams import DiagramService
 
@@ -39,9 +38,7 @@ def diagram_object_to_cim(pb: PBDiagramObject, service: DiagramService):
     cim = DiagramObject(
         mrid=pb.mrid(),
         identified_object_mrid=pb.identifiedObjectMRID if pb.identifiedObjectMRID else None,
-        # todo revert to int check commented out below once the enum checks are in place
-        # style=DiagramObjectStyle(pb.diagramObjectStyle),
-        style=DiagramObjectStyle[PBDiagramObjectStyle.DESCRIPTOR.values_by_number[pb.diagramObjectStyle].name],
+        style=pb.diagramObjectStyle if pb.diagramObjectStyle else None,
         rotation=pb.rotation,
     )
 

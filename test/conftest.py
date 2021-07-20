@@ -304,7 +304,7 @@ def network2():
     node11 = ar_b2.node[0]
     node18 = ar_b2.node[1]
     ar_b2 = nb.add_acls(node11, mrid="acls7", phases=PhaseCode.AB)
-    ar_b2 = nb.add_cb(ar_b2.node, mrid="br0", open_=[True, True], phases=PhaseCode.AB)  # TODO: TracedPhases?
+    ar_b2 = nb.add_cb(ar_b2.node, mrid="br0", open_=[True, True], phases=PhaseCode.AB)
     ar_b2 = nb.add_acls(ar_b2.node, mrid="acls8", phases=PhaseCode.AB)
     ar_b2 = nb.add_junction(ar_b2.node, mrid="junc5", phases=PhaseCode.AB)
 
