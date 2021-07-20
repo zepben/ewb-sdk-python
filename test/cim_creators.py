@@ -10,6 +10,8 @@ from hypothesis.strategies import builds, text, integers, sampled_from, lists, f
 
 from zepben.evolve import *
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
+from zepben.evolve.model.cim.iec61970.base.core.name import Name
+from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_state_kind import BatteryStateKind
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
@@ -24,7 +26,7 @@ FLOAT_MAX = 1000.0
 MAX_END_NUMBER = 3
 MAX_SEQUENCE_NUMBER = 40
 MIN_SEQUENCE_NUMBER = 1
-ALPHANUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
+ALPHANUM = "abcdefghijbklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
 
 #######################
@@ -396,6 +398,23 @@ def create_identified_object():
     }
 
 
+def create_name():
+    return builds(
+        Name,
+        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        type=create_name_type(),
+        identified_object=sampled_equipment()
+    )
+
+
+def create_name_type():
+    return builds(
+        NameType,
+        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        description=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
+
+
 def sampled_phase_code():
     return sampled_from(PhaseCode)
 
@@ -443,6 +462,38 @@ def create_terminal():
     )
 
 
+#############################
+# IEC61970 BASE EQUIVALENTS #
+#############################
+
+
+def create_equivalent_branch():
+    return builds(
+        EquivalentBranch,
+        **create_equivalent_equipment(),
+        negative_r12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        negative_r21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        negative_x12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        negative_x21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positive_r12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positive_r21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positive_x12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        positive_x21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zero_r12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zero_r21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zero_x12=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        zero_x21=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_equivalent_equipment():
+    return {**create_conducting_equipment()}
+
+
 ################################
 # IEC61970 BASE DIAGRAM LAYOUT #
 ################################
@@ -464,7 +515,7 @@ def create_diagram_object():
         **create_identified_object(),
         diagram=builds(Diagram, **create_identified_object()),
         identified_object_mrid=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
-        style=sampled_from(DiagramObjectStyle),
+        style=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
         rotation=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         diagram_object_points=lists(create_diagram_object_point(), min_size=1, max_size=2)
     )
@@ -827,8 +878,11 @@ def sampled_single_phase_kind():
 def create_switch():
     return {
         **create_conducting_equipment(),
-        "_normally_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        "_open": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+        # NOTE: These are not currently encoded properly in protobuf so we can only use all or none.
+        "_normally_open": sampled_from([0, 15]),
+        "_open": sampled_from([0, 15])
+        # "_normally_open": integers(min_value=0, max_value=15),
+        # "_open": integers(min_value=0, max_value=15)
     }
 
 

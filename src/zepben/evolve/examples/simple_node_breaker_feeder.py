@@ -4,10 +4,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import NetworkService, DiagramService, Diagram, \
-    DiagramStyle, BaseVoltage, PositionPoint, Location, Feeder, EnergySource, PowerTransformerInfo, DiagramObject, \
-    AcLineSegment, DiagramObjectStyle, ConductingEquipment, Junction, EnergyConsumer, \
-    PowerTransformer, DiagramObjectPoint, ConnectivityNode
+from zepben.evolve import NetworkService, DiagramService, Diagram, DiagramStyle, BaseVoltage, PositionPoint, Location, Feeder, EnergySource, \
+    PowerTransformerInfo, DiagramObject, AcLineSegment, ConductingEquipment, Junction, EnergyConsumer, PowerTransformer, DiagramObjectPoint, ConnectivityNode
 
 __all__ = ["SimpleNodeBreakerFeeder"]
 
@@ -85,30 +83,30 @@ class SimpleNodeBreakerFeeder:
         ce_list = self.network_service.objects(ConductingEquipment)
         for ce in ce_list:
             # diagram_object_mapping = defaultdict(
-            #     lambda: DiagramObject(identified_object_mrid=ce.mrid, style=DiagramObjectStyle.JUNCTION,
+            #     lambda: DiagramObject(identified_object_mrid=ce.mrid, style="JUNCTION",
             #                           diagram=self.diagram))
             if isinstance(ce, Junction):
                 diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
-                                               style=DiagramObjectStyle.JUNCTION,
+                                               style="JUNCTION",
                                                diagram=self.diagram)
             elif isinstance(ce, EnergySource):
                 diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
-                                               style=DiagramObjectStyle.ENERGY_SOURCE,
+                                               style="ENERGY_SOURCE",
                                                diagram=self.diagram)
             elif isinstance(ce, EnergyConsumer):
                 diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
-                                               style=DiagramObjectStyle.USAGE_POINT,
+                                               style="USAGE_POINT",
                                                diagram=self.diagram)
             elif isinstance(ce, PowerTransformer):
                 diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
-                                               style=DiagramObjectStyle.DIST_TRANSFORMER,
+                                               style="DIST_TRANSFORMER",
                                                diagram=self.diagram)
 
             elif isinstance(ce, AcLineSegment):
                 diagram_object = self._add_diagram_objects_to_ac_line_segment(ce)
             else:
                 diagram_object = DiagramObject(identified_object_mrid=ce.mrid,
-                                               style=DiagramObjectStyle.JUNCTION,
+                                               style="JUNCTION",
                                                diagram=self.diagram)
             self.diagram.add_diagram_object(diagram_object)
             self.diagram_service.add(diagram_object)
@@ -117,7 +115,7 @@ class SimpleNodeBreakerFeeder:
         # Create DiagramObject for AcLineSegments
         diagram_object = DiagramObject(diagram=self.diagram)
         diagram_object.mrid = ac_line_segment.mrid + "-do"
-        diagram_object.style = DiagramObjectStyle.CONDUCTOR_LV
+        diagram_object.style = "CONDUCTOR_LV"
         diagram_object.diagram = self.diagram
         for position_point in ac_line_segment.location.points:
             # noinspection PyArgumentList

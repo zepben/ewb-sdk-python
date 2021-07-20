@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta
-from typing import Callable, Any
+from typing import Callable, Any, List, Generator, Optional
 
 from dataclassy import dataclass
 
-from zepben.evolve.util import require, CopyableUUID
+from zepben.evolve.model.cim.iec61970.base.core.name import Name
+from zepben.evolve.util import require, CopyableUUID, nlen, ngen, safe_remove
 
 __all__ = ["IdentifiedObject"]
 
@@ -40,18 +41,90 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     description: str = ""
     """a free human readable text describing or naming the object. It may be non unique and may not correlate to a naming hierarchy."""
 
+    _names: Optional[List[Name]] = None
+
+    def __init__(self, names: Optional[List[Name]] = None, **kwargs):
+        super(IdentifiedObject, self).__init__(**kwargs)
+        if names:
+            for name in names:
+                self.add_name(name)
+
     def __str__(self):
         return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), str(self.name)) if a)}}}"
+
+    @property
+    def names(self) -> Generator[Name, None, None]:
+        """All names of this identified object. The returned collection is read only."""
+        return ngen(self._names)
+
+    def num_names(self) -> int:
+        """Get the number of entries in the `Name` collection."""
+        return nlen(self._names)
+
+    def get_name(self, name_type: str, name: str) -> Optional[Name]:
+        """
+        Find the `Name` with the matching `name_type` and `name`
+
+        :return: The matched Name or None
+        """
+        if self._names:
+            for name_ in self._names:
+                if name_.type.name == name_type and name_.name == name:
+                    return name_
+        return None
+
+    def add_name(self, name: Name) -> IdentifiedObject:
+        """
+        Associate a `Name` with this `IdentifiedObject`
+
+        :param name: The `Name` to associate with this `IdentifiedObject`.
+        :return: A reference to this `IdentifiedObject` to allow fluent use.
+        :raise ValueError: If `name` references another `IdentifiedObject`, or another `Name` already exists with the matching `type` and `name`.
+        """
+        if not name.identified_object:
+            name.identified_object = self
+        require(name.identified_object is self, lambda: f"Attempting to add a Name to {str(self)} that does not reference this identified object")
+
+        existing = self.get_name(name.type.name, name.name)
+        if existing:
+            if existing is self:
+                return self
+            else:
+                raise ValueError(f"Failed to add duplicate name {str(name)} to {str(self)}.")
+
+        self._names = list() if not self._names else self._names
+        self._names.append(name)
+        return self
+
+    def remove_name(self, name: Name) -> IdentifiedObject:
+        """
+        Disassociate a `Name` from this `IdentifiedObject`.
+
+        :param name: The `Name` to disassociate from this `IdentifiedObject`.
+        :return: A reference to this `IdentifiedObject` to allow fluent use.
+        :raises ValueError: Iif `name` was not associated with this `IdentifiedObject`.
+        """
+        self._names = safe_remove(self._names, name)
+        return self
+
+    def clear_names(self) -> IdentifiedObject:
+        """
+        Clear all names.
+
+        :return: A reference to this `IdentifiedObject` to allow fluent use.
+        """
+        self._names = None
+        return self
 
     def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject], type_descr: str) -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function.
 
-        `other` The object to look up with the getter using its mRID.
-        `getter` A function that takes an mRID and returns an object if it exists, and throws a ``KeyError`` if it couldn't be found.
-        `type_descr` The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
-        Returns True if `other` was retrieved with `getter` and was equivalent, False otherwise.
-        Raises `ValueError` if the object retrieved from `getter` is not `other`.
+        :param other: The object to look up with the getter using its mRID.
+        :param getter: A function that takes an mRID and returns an `IdentifiedObject`, and throws a `KeyError` if it couldn't be found.
+        :param type_descr: The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
+        :return: True if `other` was retrieved with `getter` and was equivalent, False otherwise.
+        :raises ValueError: If the object retrieved from `getter` is not `other`.
         """
         try:
             get_result = getter(other.mrid)
@@ -65,11 +138,11 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         """
         Validate whether a given reference exists to `other` using the provided getter function called with `field`.
 
-        `other` The object to compare against.
-        `getter` A function that takes `field` and returns an `IdentifiedObject` if it exists, and throws an `IndexError` if it couldn't be found.
-        `type_descr` The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
-        Returns True if `other` was retrieved with a call to `getter(field)` and was equivalent, False otherwise.
-        Raises `ValueError` if an object is retrieved from `getter` and it is not `other`.
+        :param other: The object to look up with the getter using its mRID.
+        :param getter: A function that takes takes `field` and returns an `IdentifiedObject`, and throws an `IndexError` if it couldn't be found.
+        :param type_descr: The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
+        :return: True if `other` was retrieved with `getter` and was equivalent, False otherwise.
+        :raises ValueError: If the object retrieved from `getter` is not `other`.
         """
         try:
             get_result = getter(field)

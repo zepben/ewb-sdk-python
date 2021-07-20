@@ -5,7 +5,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectPoint_pb2 import DiagramObjectPoint as PBDiagramObjectPoint
-from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectStyle_pb2 import DiagramObjectStyle as PBDiagramObjectStyle
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject as PBDiagramObject
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramStyle_pb2 import DiagramStyle as PBDiagramStyle
 from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
@@ -33,7 +32,7 @@ def diagram_object_to_pb(cim: DiagramObject) -> PBDiagramObject:
         io=identified_object_to_pb(cim),
         diagramMRID=mrid_or_empty(cim.diagram),
         identifiedObjectMRID=cim.identified_object_mrid,
-        diagramObjectStyle=PBDiagramObjectStyle.Value(cim.style.short_name),
+        diagramObjectStyle=cim.style,
         rotation=cim.rotation,
         diagramObjectPoints=[diagram_object_point_to_pb(io) for io in cim.points]
     )
