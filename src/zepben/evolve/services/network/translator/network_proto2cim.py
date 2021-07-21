@@ -456,6 +456,8 @@ def usage_point_to_cim(pb: PBUsagePoint, network_service: NetworkService) -> Opt
     cim = UsagePoint(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.usage_point_location(cim), pb.usagePointLocationMRID)
+    cim.is_virtual = pb.isVirtual
+    cim.connection_category = pb.connectionCategory if pb.connectionCategory else None
     for mrid in pb.equipmentMRIDs:
         network_service.resolve_or_defer_reference(resolver.up_equipment(cim), mrid)
     for mrid in pb.endDeviceMRIDs:

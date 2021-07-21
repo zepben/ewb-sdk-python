@@ -117,6 +117,19 @@ class UsagePoint(IdentifiedObject):
     usage_point_location: Optional[Location] = None
     """Service `zepben.evolve.cim.iec61968.common.location.Location` where the service delivered by this `UsagePoint` is consumed."""
 
+    is_virtual: bool = False
+    """
+    If true, this usage point is virtual, i.e., no physical location exists in the network where a meter could be located to
+    collect the meter readings. For example, one may define a virtual usage point to serve as an aggregation of usage for all
+    of a company's premises distributed widely across the distribution territory. Otherwise, the usage point is physical,
+    i.e., there is a logical point in the network where a meter could be located to collect meter readings.
+    """
+
+    connection_category: Optional[str] = None
+    """
+    A code used to specify the connection category, e.g., low voltage or low pressure, where the usage point is defined.
+    """
+
     _equipment: Optional[List[Equipment]] = None
     _end_devices: Optional[List[EndDevice]] = None
 

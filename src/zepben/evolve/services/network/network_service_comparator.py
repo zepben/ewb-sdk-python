@@ -224,10 +224,9 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_id_references(diff, UsagePoint.usage_point_location)
+        self._compare_values(diff, UsagePoint.is_virtual, UsagePoint.connection_category)
         if self._options.compare_lv_simplification:
             self._compare_id_reference_collections(diff, UsagePoint.equipment)
-
-        if self._options.compare_lv_simplification:
             self._compare_id_reference_collections(diff, UsagePoint.end_devices)
 
         return self._compare_identified_object(diff)

@@ -290,7 +290,8 @@ def streetlight():
 def document():
     return builds(
         PBDocument,
-        io=identified_object(), title=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        io=identified_object(),
+        title=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         createdDateTime=timestamp(),
         authorName=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         type=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
@@ -330,7 +331,8 @@ def town_detail():
 def end_device():
     return builds(
         PBEndDevice,
-        ac=asset_container(), usagePointMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        ac=asset_container(),
+        usagePointMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         customerMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         serviceLocationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
@@ -343,9 +345,12 @@ def meter():
 def usage_point():
     return builds(
         PBUsagePoint,
-        io=identified_object(), usagePointLocationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        io=identified_object(),
+        usagePointLocationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         equipmentMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        endDeviceMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+        endDeviceMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        isVirtual=booleans(),
+        connectionCategory=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
 
