@@ -12,6 +12,7 @@
 * All SDK methods that retrieve objects with references will now request the network hierarchy first to provide a consistent result, regardless of call order.
 * Changed `DiagramObject.style` to be a string and removed `DiagramObjectStyle` enum.
 * Updated to use v0.15.0 gRPC protocols.
+* Updated bus-branch network creator code to allow for the collapsing of equipment with negligible impedance.
 
 ##### New Features
 
