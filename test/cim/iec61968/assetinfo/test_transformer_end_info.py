@@ -156,9 +156,22 @@ def test_merges_resistance_reactance_if_required():
         method.assert_called_once()
 
 
-def test_calculates_resistance_reactance_off_end_info_tests_if_available():
-    info = TransformerEndInfo()
+def test_calculates_resistance_reactance_of_end_info_tests_if_available():
+    grounded_short_circuit_test = ShortCircuitTest()
+
+    # noinspection PyArgumentList
+    info = TransformerEndInfo(rated_u=400000, rated_s=1630000000, grounded_end_short_circuit_tests=grounded_short_circuit_test)
     assert info.calculate_resistance_reactance_from_tests() is None
+
+    # check via loss
+    # noinspection PyArgumentList
+    info.energised_end_short_circuit_tests = ShortCircuitTest(loss=2020180, voltage=11.85)
+    validate_resistance_reactance(info.resistance_reactance(), r=0.12, x=11.63, r0=None, x0=None)
+
+    # check via ohmic part
+    # noinspection PyArgumentList
+    info.energised_end_short_circuit_tests = ShortCircuitTest(voltage_ohmic_part=0.124, voltage=11.85)
+    validate_resistance_reactance(info.resistance_reactance(), r=0.12, x=11.63, r0=None, x0=None)
 
 
 def validate_resistance_reactance(rr: ResistanceReactance, r, r0, x, x0):
