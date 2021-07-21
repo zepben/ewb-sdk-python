@@ -16,23 +16,24 @@
 ##### New Features
 
 * Added the following CIM classes:
-    * BusbarSection
-    * EquivalentBranch
-    * EquivalentEquipment
-    * NoLoadTest
-    * LoadBreakSwitch
-    * OpenCircuitTest
-    * ShortCircuitTest
-    * TransformerEndInfo
-    * TransformerStarImpedance.
-    * TransformerTankInfo
-    * TransformerTest
+    * `BusbarSection`
+    * `EquivalentBranch`
+    * `EquivalentEquipment`
+    * `NoLoadTest`
+    * `LoadBreakSwitch`
+    * `OpenCircuitTest`
+    * `ShortCircuitTest`
+    * `TransformerEndInfo`
+    * `TransformerStarImpedance`
+    * `TransformerTankInfo`
+    * `TransformerTest`
 * Example simple bus branch network added in `zepben.evolve.examples.simple_bus_branch`.
 * Helper factory methods for AcLineSegment, Junction (Bus), PowerTransformer, EnergySource, and EnergyConsumer added to `NetworkService` and available
   through `zepben.evolve.services.network.network_extensions`.
 * Added utility function to generate bus-branch models from a NetworkService.
 * Passing token for authorization of connection to authenticated gRPC server.
 * Added API calls for getting loops.
+* Added `isVirtual` and `connectionCategory` to `UsagePoint`
 
 ##### Enhancements
 

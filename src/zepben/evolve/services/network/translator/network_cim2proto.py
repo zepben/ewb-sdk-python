@@ -411,7 +411,9 @@ def usage_point_to_pb(cim: UsagePoint) -> PBUsagePoint:
         io=identified_object_to_pb(cim),
         usagePointLocationMRID=mrid_or_empty(cim.usage_point_location),
         equipmentMRIDs=[str(io.mrid) for io in cim.equipment],
-        endDeviceMRIDs=[str(io.mrid) for io in cim.end_devices]
+        endDeviceMRIDs=[str(io.mrid) for io in cim.end_devices],
+        isVirtual=cim.is_virtual,
+        connectionCategory=cim.connection_category
     )
 
 

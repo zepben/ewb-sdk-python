@@ -219,6 +219,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_identified_object(UsagePoint)
 
         self.validator.validate_property(UsagePoint.usage_point_location, UsagePoint, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
+        self.validator.validate_property(UsagePoint.is_virtual, UsagePoint, lambda _: False, lambda _: True)
+        self.validator.validate_property(UsagePoint.connection_category, UsagePoint, lambda _: "first", lambda _: "second")
         self.validator.validate_collection(
             UsagePoint.end_devices,
             UsagePoint.add_end_device,

@@ -301,6 +301,8 @@ def create_usage_point():
         UsagePoint,
         **create_identified_object(),
         usage_point_location=builds(Location, **create_identified_object()),
+        is_virtual=booleans(),
+        connection_category=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
         equipment=lists(builds(EnergyConsumer, **create_identified_object()), min_size=1, max_size=2),
         end_devices=lists(builds(Meter, **create_identified_object()), min_size=1, max_size=2)
     )
