@@ -5,40 +5,15 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import Optional, Callable, TYPE_CHECKING
-
-from dataclassy import dataclass
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.model.resistance_reactance import ResistanceReactance
 
-__all__ = ["TransformerStarImpedance", "ResistanceReactance"]
-
-
-@dataclass(slots=True)
-class ResistanceReactance(object):
-    r: Optional[float] = None
-    r0: Optional[float] = None
-    x: Optional[float] = None
-    x0: Optional[float] = None
-
-    def is_complete(self) -> bool:
-        return self.r is not None and self.r0 is not None and self.x is not None and self.x0 is not None
-
-    def merge_if_incomplete(self, to_merge: Callable[[], Optional[ResistanceReactance]]) -> ResistanceReactance:
-        if self.is_complete():
-            return self
-        else:
-            rr = to_merge()
-            if rr is not None:
-                return ResistanceReactance(self.r if self.r is not None else rr.r,
-                                           self.r0 if self.r0 is not None else rr.r0,
-                                           self.x if self.x is not None else rr.x,
-                                           self.x0 if self.x0 is not None else rr.x0)
-            else:
-                return self
+__all__ = ["TransformerStarImpedance"]
 
 
 class TransformerStarImpedance(IdentifiedObject):
@@ -69,6 +44,7 @@ class TransformerStarImpedance(IdentifiedObject):
         attempt to calculate them from the `TransformerEndInfo` tests.
         Returns the `ResistanceReactance` for this `TransformerStarImpedance`
         """
-        return ResistanceReactance(self.r, self.r0, self.x, self.x0).merge_if_incomplete(
+        # noinspection PyArgumentList
+        return ResistanceReactance(self.r, self.x, self.r0, self.x0).merge_if_incomplete(
             lambda: self.transformer_end_info.calculate_resistance_reactance_from_tests() if self.transformer_end_info is not None else None
         )

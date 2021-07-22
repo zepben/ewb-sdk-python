@@ -132,7 +132,7 @@ def test_transformer_end_info_constructor_args():
 def test_populates_resistance_reactance_off_end_star_impedance_if_available():
     with patch.object(TransformerEndInfo, "calculate_resistance_reactance_from_tests") as method:
         # noinspection PyArgumentList
-        info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, r0=1.2, x=1.3, x0=1.4))
+        info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, x=1.2, r0=1.3, x0=1.4))
         validate_resistance_reactance(info.resistance_reactance(), 1.1, 1.2, 1.3, 1.4)
         method.assert_not_called()
 
@@ -151,18 +151,55 @@ def test_merges_resistance_reactance_if_required():
         # noinspection PyArgumentList
         method.return_value = ResistanceReactance(None, 2.2, None, None)
         # noinspection PyArgumentList
-        info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, r0=None, x=None, x0=None))
+        info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, x=None, r0=None, x0=None))
         validate_resistance_reactance(info.resistance_reactance(), 1.1, 2.2, None, None)
         method.assert_called_once()
 
 
-def test_calculates_resistance_reactance_off_end_info_tests_if_available():
-    info = TransformerEndInfo()
-    assert info.calculate_resistance_reactance_from_tests() is None
+# noinspection PyArgumentList
+def test_calculates_resistance_reactance_of_end_info_tests_if_available():
+    loss_test = ShortCircuitTest(loss=2020180, voltage=11.85)
+    loss_no_voltage_test = ShortCircuitTest(loss=2020180)
+    ohmic_test = ShortCircuitTest(voltage_ohmic_part=0.124, voltage=11.85)
+    ohmic_no_voltage_test = ShortCircuitTest(voltage_ohmic_part=0.124)
+    voltage_only_test = ShortCircuitTest(voltage=11.85)
+
+    # check via loss
+    validate_resistance_reactance_from_test(400000, 1630000000, loss_test, loss_test, ResistanceReactance(0.12, 11.63, 0.12, 11.63))
+    validate_resistance_reactance_from_test(None, 1630000000, loss_test, loss_test, None)
+    validate_resistance_reactance_from_test(400000, None, loss_test, loss_test, None)
+    validate_resistance_reactance_from_test(400000, 1630000000, None, loss_test, ResistanceReactance(None, None, 0.12, 11.63))
+    validate_resistance_reactance_from_test(400000, 1630000000, loss_test, None, ResistanceReactance(0.12, 11.63, None, None))
+    validate_resistance_reactance_from_test(400000, 1630000000, loss_no_voltage_test, loss_no_voltage_test, ResistanceReactance(0.12, None, 0.12, None))
+
+    # check via ohmic part
+    validate_resistance_reactance_from_test(400000, 1630000000, ohmic_test, ohmic_test, ResistanceReactance(0.12, 11.63, 0.12, 11.63))
+    validate_resistance_reactance_from_test(None, 1630000000, ohmic_test, ohmic_test, None)
+    validate_resistance_reactance_from_test(400000, None, ohmic_test, ohmic_test, None)
+    validate_resistance_reactance_from_test(400000, 1630000000, None, ohmic_test, ResistanceReactance(None, None, 0.12, 11.63))
+    validate_resistance_reactance_from_test(400000, 1630000000, ohmic_test, None, ResistanceReactance(0.12, 11.63, None, None))
+    validate_resistance_reactance_from_test(400000, 1630000000, ohmic_no_voltage_test, ohmic_no_voltage_test, ResistanceReactance(0.12, None, 0.12, None))
+
+    # check invalid
+    validate_resistance_reactance_from_test(400000, 1630000000, voltage_only_test, voltage_only_test, None)
 
 
-def validate_resistance_reactance(rr: ResistanceReactance, r, r0, x, x0):
+def validate_resistance_reactance_from_test(rated_u, rated_s, energised_test, grounded_test, expected_rr):
+    info = TransformerEndInfo(
+        rated_u=rated_u,
+        rated_s=rated_s,
+        grounded_end_short_circuit_tests=grounded_test,
+        energised_end_short_circuit_tests=energised_test
+    )
+
+    if expected_rr is not None:
+        assert info.calculate_resistance_reactance_from_tests() == expected_rr
+    else:
+        assert info.calculate_resistance_reactance_from_tests() is None
+
+
+def validate_resistance_reactance(rr: ResistanceReactance, r, x, r0, x0):
     assert rr.r == r
-    assert rr.r0 == r0
     assert rr.x == x
+    assert rr.r0 == r0
     assert rr.x0 == x0
