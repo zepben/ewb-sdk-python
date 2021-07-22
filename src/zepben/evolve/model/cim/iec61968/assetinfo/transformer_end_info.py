@@ -11,7 +11,8 @@ from typing import Optional, TYPE_CHECKING, Tuple
 if TYPE_CHECKING:
     from zepben.evolve import TransformerTankInfo, NoLoadTest, OpenCircuitTest, ShortCircuitTest
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance, ResistanceReactance
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
+from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import WindingConnection
 
 __all__ = ["TransformerEndInfo"]
@@ -101,39 +102,34 @@ class TransformerEndInfo(AssetInfo):
         Calculation  of r0 and x0 from Test data is not supported. r0 nad x0 must be populated directly in the
         associated TransformerStarImpedance
         """
-
-        def calculate_r_x(voltage: float, r: float, rated_u: int, rated_s: int) -> Optional[Tuple[float, float]]:
-            if not any(elem is None for elem in [voltage, r, rated_u, rated_s]):
-                x = round(math.sqrt((((voltage / 100) * (rated_u ** 2) / rated_s) ** 2) - (r ** 2)), 2)
-                return r, x
-            else:
-                return None
-
-        def calculate_r_x_from_test(short_circuit_test: ShortCircuitTest, rated_u: int, rated_s: int) -> Optional[Tuple[float, float]]:
-            if short_circuit_test is not None:
-                if short_circuit_test.voltage_ohmic_part is not None:
-                    r = round((short_circuit_test.voltage_ohmic_part * (rated_u ** 2)) / (rated_s * 100), 2)
-                    return calculate_r_x(short_circuit_test.voltage, r, rated_u, rated_s)
-                elif short_circuit_test.loss is not None:
-                    r = round(short_circuit_test.loss * ((rated_u / rated_s) ** 2), 2)
-                    return calculate_r_x(short_circuit_test.voltage, r, rated_u, rated_s)
-                else:
-                    return None
-            else:
-                return None
-
-        if self.rated_u and self.rated_s:
-            if calculate_r_x_from_test(self.energised_end_short_circuit_tests, self.rated_u, self.rated_s) is not None:
-                rr = ResistanceReactance()
-                rr.r, rr.x = calculate_r_x_from_test(self.energised_end_short_circuit_tests, self.rated_u, self.rated_s)
-                if calculate_r_x_from_test(self.grounded_end_short_circuit_tests, self.rated_u, self.rated_s) is not None:
-                    rr.r0, rr.x0 = calculate_r_x_from_test(self.grounded_end_short_circuit_tests, self.rated_u, self.rated_s)
-                return rr
-            elif calculate_r_x_from_test(self.grounded_end_short_circuit_tests, self.rated_u, self.rated_s) is not None:
-                rr = ResistanceReactance()
-                rr.r0, rr.x0 = calculate_r_x_from_test(self.grounded_end_short_circuit_tests, self.rated_u, self.rated_s)
-                return rr
-            else:
-                return None
-        else:
+        if not self.rated_u or not self.rated_s:
             return None
+
+        def calculate_x(voltage: float, r: float) -> Optional[float]:
+            if voltage is None or r is None:
+                return None
+
+            return round(math.sqrt((((voltage / 100) * (self.rated_u ** 2) / self.rated_s) ** 2) - (r ** 2)), 2)
+
+        def calculate_r_x_from_test(short_circuit_test: ShortCircuitTest) -> Optional[Tuple[float, float]]:
+            if short_circuit_test is None:
+                return None
+            elif short_circuit_test.voltage_ohmic_part is not None:
+                r = round((short_circuit_test.voltage_ohmic_part * (self.rated_u ** 2)) / (self.rated_s * 100), 2)
+            elif short_circuit_test.loss is not None:
+                r = round(short_circuit_test.loss * ((self.rated_u / self.rated_s) ** 2), 2)
+            else:
+                return None
+
+            return r, calculate_x(short_circuit_test.voltage, r)
+
+        rr = ResistanceReactance()
+        rx = calculate_r_x_from_test(self.energised_end_short_circuit_tests)
+        if rx is not None:
+            rr.r, rr.x = rx
+
+        r0x0 = calculate_r_x_from_test(self.grounded_end_short_circuit_tests)
+        if r0x0 is not None:
+            rr.r0, rr.x0 = r0x0
+
+        return rr if not rr.is_empty() else None
