@@ -905,10 +905,18 @@ def _next_common_acls(
     common_acls: TerminalGrouping[AcLineSegment]
 ) -> Set[AcLineSegment]:
     acls_terminals = {*acls.terminals}
-    return {o.conducting_equipment
-            for t in acls.terminals
-            if t.connectivity_node is not None and len(list(t.connectivity_node.terminals)) == 2
-            for o in t.connectivity_node.terminals
-            if o not in acls_terminals and isinstance(o.conducting_equipment, AcLineSegment) and has_common_impedance(
-            o.conducting_equipment)
-            if o.conducting_equipment not in common_acls.conducting_equipment_group}
+
+    def can_process_ac_line(o: Terminal) -> bool:
+        return o not in acls_terminals \
+               and isinstance(o.conducting_equipment, AcLineSegment) \
+               and has_common_impedance(o.conducting_equipment) \
+               and o.conducting_equipment not in common_acls.conducting_equipment_group
+
+    def is_non_forking_ac_line(t: Terminal) -> bool:
+        return t.connectivity_node is not None and len(list(t.connectivity_node.terminals)) == 2
+
+    return {
+        o.conducting_equipment
+        for t in acls.terminals if is_non_forking_ac_line(t)
+        for o in t.connectivity_node.terminals if can_process_ac_line(o)
+    }
