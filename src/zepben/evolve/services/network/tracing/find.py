@@ -6,8 +6,10 @@
 
 from __future__ import annotations
 from dataclassy import dataclass
+from typing import TYPE_CHECKING
 
-
+if TYPE_CHECKING:
+    from zepben.evolve import ConductingEquipment, Traversal
 from zepben.evolve.services.network.tracing.phases.phase_step import PhaseStep
 from zepben.evolve.services.network.tracing.traces import normal_downstream_trace, current_downstream_trace
 from typing import Callable, List, Optional, Dict
@@ -28,7 +30,7 @@ class Result(object):
     equipment: Optional[Dict[str, ConductingEquipment]] = dict()
 
 
-async def _trace(traversal_supplier: Callable[[...], Traversal], from_: ConductingEquipment, to: Optional[ConductingEquipment]):
+async def _trace(traversal_supplier: Callable[[], Traversal], from_: ConductingEquipment, to: Optional[ConductingEquipment]):
     if from_.num_terminals() == 0:
         if to is not None:
             return Result(status=Status.NO_PATH)
@@ -55,6 +57,7 @@ async def _trace(traversal_supplier: Callable[[...], Traversal], from_: Conducti
     traversal.add_stop_condition(stop_contains)
     traversal.add_step_action(step)
     traversal.reset()
+    # noinspection PyArgumentList
     await traversal.trace(PhaseStep(from_, frozenset(next(from_.terminals).phases.single_phases)), can_stop_on_start_item=False)
     # this works off a downstream trace, so if we didn't find a path try reverse from and to in case the "to" point was higher up in the network.
     if to is not None and not path_found[0]:
@@ -62,7 +65,8 @@ async def _trace(traversal_supplier: Callable[[...], Traversal], from_: Conducti
             return Result(status=Status.NO_PATH)
         with_usage_points.clear()
         traversal.reset()
-        traversal.trace(PhaseStep(to, frozenset(next(to.terminals).phases.single_phases)), can_stop_on_start_item=False)
+        # noinspection PyArgumentList
+        await traversal.trace(PhaseStep(to, frozenset(next(to.terminals).phases.single_phases)), can_stop_on_start_item=False)
 
     if path_found[0]:
         return Result(conducting_equipment=with_usage_points)

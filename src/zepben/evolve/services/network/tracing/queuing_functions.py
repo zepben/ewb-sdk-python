@@ -10,7 +10,7 @@ from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import Cond
 from zepben.evolve.services.network.tracing.connectivity import get_connected_equipment
 
 
-__all__ = ["conducting_equipment_queue_next", "queue_next_terminal"]
+__all__ = ["conducting_equipment_queue_next", "queue_next_terminal", "tracing_logger"]
 
 
 tracing_logger = logging.getLogger("queue_next")
