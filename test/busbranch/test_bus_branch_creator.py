@@ -5,13 +5,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from dataclasses import field, dataclass
-from typing import Set, FrozenSet, Tuple, List, Iterable, Optional, Dict
+from typing import Set, FrozenSet, Tuple, List, Iterable, Optional, Dict, TypeVar
 
 from zepben.evolve import Terminal, NetworkService, AcLineSegment, PowerTransformer, EnergySource, EnergyConsumer, ConductingEquipment, \
     PowerElectronicsConnection, BusBranchNetworkCreator, \
     BusBranchNetworkCreationValidator, PowerTransformerEnd
-from zepben.evolve.model.busbranch.bus_branch import BBN
 
+BBN = TypeVar('BBN')
 TN = Tuple[int, FrozenSet[ConductingEquipment], FrozenSet[Terminal], FrozenSet[Terminal], NetworkService, BusBranchNetworkCreationValidator]
 TB = Tuple[Tuple[TN, TN], float, FrozenSet[AcLineSegment], FrozenSet[Terminal], FrozenSet[Terminal], NetworkService, BusBranchNetworkCreationValidator]
 PT = Tuple[PowerTransformer, List[Tuple[PowerTransformerEnd, TN]], NetworkService, BusBranchNetworkCreationValidator]
@@ -23,15 +23,10 @@ PEC = Tuple[PowerElectronicsConnection, TN, NetworkService, BusBranchNetworkCrea
 @dataclass()
 class ArgsContainer:
     bus: Set[Tuple[str, TN]] = field(default_factory=set)
-
     branch: Set[Tuple[str, TB]] = field(default_factory=set)
-
     transformer: Set[Tuple[str, Set[PT]]] = field(default_factory=set)
-
     energy_source: Set[Tuple[str, Set[ES]]] = field(default_factory=set)
-
     energy_consumer: Set[Tuple[str, Set[EC]]] = field(default_factory=set)
-
     power_electronics_connection: Set[Tuple[str, Set[PEC]]] = field(default_factory=set)
 
 
@@ -98,31 +93,37 @@ class TestBusBranchCreator(BusBranchNetworkCreator[ArgsContainer, TN, TB, PT, ES
     def bus_branch_network_creator(self, node_breaker_network: NetworkService) -> ArgsContainer:
         return ArgsContainer()
 
+    # noinspection PyTypeChecker
     def topological_node_creator(self, bus_branch_network: ArgsContainer, *args) -> Tuple[str, TN]:
         id_args = (create_terminal_based_id(args[2]), args)
         bus_branch_network.bus.add(id_args)
         return id_args
 
+    # noinspection PyTypeChecker
     def topological_branch_creator(self, bus_branch_network: ArgsContainer, *args) -> Tuple[str, TB]:
         id_args = (f"tb_{next(iter(args[2])).mrid}", args)
         bus_branch_network.branch.add(id_args)
         return id_args
 
+    # noinspection PyTypeChecker
     def power_transformer_creator(self, bus_branch_network: ArgsContainer, *args) -> Dict[str, PT]:
         id_args = (f"pt_{args[0].mrid}", tuple(tuple(e for e in arg) if isinstance(arg, list) else arg for arg in args))
         bus_branch_network.transformer.add(id_args)
         return {id_args[0]: id_args[1]}
 
+    # noinspection PyTypeChecker
     def energy_source_creator(self, bus_branch_network: ArgsContainer, *args) -> Dict[str, ES]:
         id_args = (f"es_{args[0].mrid}", args)
         bus_branch_network.energy_source.add(id_args)
         return {id_args[0]: id_args[1]}
 
+    # noinspection PyTypeChecker
     def energy_consumer_creator(self, bus_branch_network: ArgsContainer, *args) -> Dict[str, EC]:
         id_args = (f"ec_{args[0].mrid}", args)
         bus_branch_network.energy_consumer.add(id_args)
         return {id_args[0]: id_args[1]}
 
+    # noinspection PyTypeChecker
     def power_electronics_connection_creator(self, bus_branch_network: ArgsContainer, *args) -> Dict[str, PEC]:
         id_args = (f"pec_{args[0].mrid}", args)
         bus_branch_network.power_electronics_connection.add(id_args)
