@@ -3,863 +3,438 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Set, Union, FrozenSet, Tuple
+from typing import Set, Callable, Dict
 
 import pytest
+from hypothesis import given
+from hypothesis.strategies import booleans, sampled_from
 
-from zepben.evolve import ConnectivityNode, Junction, Disconnector, BusbarSection, Switch, Terminal, NetworkService, AcLineSegment, PerLengthSequenceImpedance, \
-    WireInfo, PowerTransformer, EnergySource, EnergyConsumer, ConductingEquipment, create_bus_branch_model, PowerElectronicsConnection
+from test.busbranch.data.end_of_branch_multiple_ec_pec import end_of_branch_multiple_ec_pec
+from test.busbranch.data.multi_branch_common_lines_network import multi_branch_common_lines_network
+from test.busbranch.data.negligible_impedance_equipment_basic_network import negligible_impedance_equipment_basic_network
+from test.busbranch.data.simple_node_breaker_network import simple_node_breaker_network
+from test.busbranch.data.single_branch_common_lines_network import single_branch_common_lines_network
+from test.busbranch.data.three_common_lines_network import three_common_lines_network
+from test.busbranch.test_bus_branch_creator import TestBusBranchCreator, create_terminal_based_id
+from zepben.evolve import ConnectivityNode, Junction, Disconnector, BusbarSection, Switch, ConductingEquipment, AcLineSegment, Terminal, NetworkService, \
+    BusBranchNetworkCreationMappings
+# noinspection PyProtectedMember
 from zepben.evolve.model.busbranch.bus_branch import _group_negligible_impedance_terminals, _group_common_ac_line_segment_terminals
 
 
-def test_create_bus_branch_model_callbacks(simple_node_breaker_network):
-    assert simple_node_breaker_network is not None
+@pytest.mark.asyncio
+async def test_create_bus_branch_model_callbacks():
+    nb_network = simple_node_breaker_network()
+    plsi, wire_info, pt_info, es, pt, line, ec, pec = _get_validated_conducting_equipment(nb_network)
+    exp_bb0, exp_bb1, exp_bb2, exp_branch, exp_tx, exp_es, exp_ec, exp_pec = _get_expected(nb_network, line, pt, es, ec, pec)
 
-    plsi = simple_node_breaker_network.get("plsi")
-    assert plsi is not None
+    creator = TestBusBranchCreator()
+    result = await creator.create(nb_network)
 
-    wire_info = simple_node_breaker_network.get("wire_info")
-    assert wire_info is not None
+    validator, mappings, bb_network = _get_validated_results(result)
 
-    pt_info = simple_node_breaker_network.get("pt_info")
-    assert pt_info is not None
+    _validate_validator_calls(validator)
+    _validate_mappings(mappings, exp_bb0, exp_bb1, exp_bb2, exp_branch, exp_tx, exp_es, exp_ec, exp_pec, line, pt, es, ec, pec)
+    _validate_network(bb_network, exp_bb0, exp_bb1, exp_bb2, exp_branch, exp_tx, exp_es, exp_ec, exp_pec)
 
-    es = simple_node_breaker_network.get("grid_connection")
-    assert es is not None
 
-    pt = simple_node_breaker_network.get("transformer")
-    assert pt is not None
+@pytest.mark.asyncio
+async def test_topological_nodes_inside_grouped_lines_do_not_get_created():
+    nb_network = three_common_lines_network()
+    creator = TestBusBranchCreator()
+    result = await creator.create(nb_network)
 
-    line = simple_node_breaker_network.get("line")
-    assert line is not None
+    validator, mappings, bb_network = _get_validated_results(result)
 
-    ec = simple_node_breaker_network.get("load")
-    assert ec is not None
+    assert len(bb_network.bus) == 2
+    assert len(bb_network.branch) == 1
 
-    bus_args = set()
-    branch_args = set()
-    branch_type_args = set()
-    transformer_args = set()
-    transformer_type_args = set()
-    source_args = set()
-    consumer_args = set()
-    pec_args = set()
 
-    bb_model_network = "bb_model_network"
+@pytest.mark.asyncio
+@given(sw_is_open=booleans())
+async def test_group_common_ac_line_segment_terminals_single_branch(sw_is_open: bool):
+    nb_network = single_branch_common_lines_network(sw_is_open)
 
-    def create_terminal_based_id(terminals: Union[Set[Terminal], FrozenSet[Terminal]]) -> str:
-        return "_".join(sorted([t.mrid for t in terminals]))
+    acls1 = nb_network.get("acls1")
+    acls2 = nb_network.get("acls2")
+    acls3 = nb_network.get("acls3")
+    acls4 = nb_network.get("acls4")
+    acls5 = nb_network.get("acls5")
 
-    def create_bus_branch_network(n: NetworkService):
-        return bb_model_network
+    await _validate_line_grouping({acls1, acls2, acls3}, {*acls1.terminals, *acls2.terminals, get_term(acls3, 1)}, {get_term(acls3, 2)})
+    await _validate_line_grouping({acls4}, set(), {*acls4.terminals})
+    await _validate_line_grouping({acls5}, set(), {*acls5.terminals})
 
-    def create_bus(
-            bus_branch_model: str,
-            base_voltage: int,
-            closed_switches: FrozenSet[ConductingEquipment],
-            border_terminals: FrozenSet[Terminal],
-            inner_terminals: FrozenSet[Terminal],
-            node_breaker_model: NetworkService
-    ) -> str:
-        bus_args.add((bus_branch_model, base_voltage, closed_switches, border_terminals, inner_terminals, node_breaker_model))
-        return create_terminal_based_id(border_terminals)
 
-    def create_branch(
-            bus_branch_model: str,
-            line_busses: Tuple[str, str],
-            length: float,
-            line_type: str,
-            common_lines: FrozenSet[AcLineSegment],
-            border_terminals: FrozenSet[Terminal],
-            inner_terminals: FrozenSet[Terminal],
-            node_breaker_model: NetworkService
-    ):
-        branch_args.add((bus_branch_model, line_busses, length, line_type, common_lines, border_terminals, inner_terminals, node_breaker_model))
+@pytest.mark.asyncio
+async def test_group_common_ac_line_segment_terminals_multi_branch():
+    nb_network = multi_branch_common_lines_network()
 
-    def get_branch_type_id(per_length_sequence_impedance: PerLengthSequenceImpedance, wi: WireInfo, voltage: int) -> str:
-        return wi.mrid + ":" + per_length_sequence_impedance.mrid
+    a0 = nb_network.get("a0")
+    a1 = nb_network.get("a1")
+    a2 = nb_network.get("a2")
+    a3 = nb_network.get("a3")
+    a4 = nb_network.get("a4")
+    a5 = nb_network.get("a5")
+    a6 = nb_network.get("a6")
+    a7 = nb_network.get("a7")
+    a8 = nb_network.get("a8")
 
-    def create_branch_type(bus_branch_model: str, per_length_sequence_impedance: PerLengthSequenceImpedance,
-                           wi: WireInfo, voltage: int) -> str:
-        branch_type_args.add((bus_branch_model, per_length_sequence_impedance, wire_info))
-        return get_branch_type_id(per_length_sequence_impedance, wi, voltage)
+    await _validate_line_grouping({a0, a1, a2}, {get_term(a0, 1), *a1.terminals, get_term(a2, 1)}, {get_term(a2, 2)})
+    await _validate_line_grouping({a0, a1, a2}, {get_term(a0, 1), *a1.terminals, get_term(a2, 1)}, {get_term(a2, 2)})
+    await _validate_line_grouping({a3}, set(), {*a3.terminals})
+    await _validate_line_grouping({a4, a5}, {get_term(a4, 2), get_term(a5, 1)}, {get_term(a4, 1), get_term(a5, 2)})
+    await _validate_line_grouping({a6, a7}, {get_term(a6, 2), *a7.terminals}, {get_term(a6, 1)})
+    await _validate_line_grouping({a8}, set(), {*a8.terminals})
 
-    def create_transformer(bus_branch_model: str, pt: PowerTransformer, busses: Tuple[str, str],
-                           pt_type: str, node_breaker_model: NetworkService):
-        transformer_args.add((bus_branch_model, pt, busses, pt_type, node_breaker_model))
 
-    def get_transformer_type_id(transformer: PowerTransformer) -> str:
-        return transformer.mrid + "_type"
+@pytest.mark.asyncio
+async def test_group_common_ac_line_segment_terminals_end_of_branch_multiple_ec_pec():
+    nb_network = end_of_branch_multiple_ec_pec()
 
-    def create_transformer_type(bus_branch_model: str, transformer: PowerTransformer) -> str:
-        transformer_type_args.add((bus_branch_model, transformer))
-        return get_transformer_type_id(transformer)
+    a1 = nb_network.get("a1")
+    a2 = nb_network.get("a2")
 
-    def create_source(bus_branch_model: str, source: EnergySource, bus, node_breaker_model: NetworkService):
-        source_args.add((bus_branch_model, source, bus, node_breaker_model))
+    await _validate_line_grouping({a1, a2}, {get_term(a1, 2), get_term(a2, 1)}, {get_term(a1, 1), get_term(a2, 2)})
 
-    def create_consumer(bus_branch_model: str, consumer: EnergyConsumer, bus, node_breaker_model: NetworkService):
-        consumer_args.add((bus_branch_model, consumer, bus, node_breaker_model))
 
-    def create_power_electronics(bus_branch_model: str, power_electronics_connection: PowerElectronicsConnection, bus, node_breaker_model: NetworkService):
-        pec_args.add((bus_branch_model, power_electronics_connection, bus, node_breaker_model))
+@pytest.mark.asyncio
+async def test_group_negligible_impedance_terminals_single_branch_closed_switch():
+    nb_network = single_branch_common_lines_network(False)
 
-    result = create_bus_branch_model(
-        lambda: simple_node_breaker_network,
-        create_bus_branch_network,
-        create_bus,
-        create_branch,
-        create_branch_type,
-        get_branch_type_id,
-        create_transformer,
-        create_transformer_type,
-        get_transformer_type_id,
-        create_source,
-        create_consumer,
-        create_power_electronics
-    )
+    acls1 = nb_network.get("acls1")
+    acls2 = nb_network.get("acls2")
+    acls3 = nb_network.get("acls3")
+    acls4 = nb_network.get("acls4")
+    acls5 = nb_network.get("acls5")
+    sw = nb_network.get("sw")
 
+    def has_neg_imp(ce) -> bool:
+        if isinstance(ce, Switch):
+            return not ce.is_open()
+        else:
+            return False
+
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls1_acls2", set(), set(), {get_term(acls2, 1), *acls1.terminals})
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls2_acls3", set(), set(), {get_term(acls2, 2), get_term(acls3, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls3_sw", {sw}, {*sw.terminals}, {get_term(acls3, 2), get_term(acls4, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls4_sw", {sw}, {*sw.terminals}, {get_term(acls3, 2), get_term(acls4, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls4_acls5", set(), set(), {get_term(acls4, 2), *acls5.terminals})
+
+
+@pytest.mark.asyncio
+async def test_group_negligible_impedance_terminals_single_branch_open_switch():
+    nb_network = single_branch_common_lines_network(True)
+
+    acls1 = nb_network.get("acls1")
+    acls2 = nb_network.get("acls2")
+    acls3 = nb_network.get("acls3")
+    acls4 = nb_network.get("acls4")
+    acls5 = nb_network.get("acls5")
+    sw = nb_network.get("sw")
+
+    def has_neg_imp(ce) -> bool:
+        if isinstance(ce, Switch):
+            return not ce.is_open()
+        else:
+            return False
+
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls1_acls2", set(), set(), {get_term(acls2, 1), *acls1.terminals})
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls2_acls3", set(), set(), {get_term(acls2, 2), get_term(acls3, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls3_sw", set(), set(), {get_term(acls3, 2), get_term(sw, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls4_sw", set(), set(), {get_term(sw, 2), get_term(acls4, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "acls4_acls5", set(), set(), {get_term(acls4, 2), *acls5.terminals})
+
+
+@pytest.mark.asyncio
+async def test_group_negligible_impedance_terminals_multi_branch():
+    nb_network = multi_branch_common_lines_network()
+
+    a0 = nb_network.get("a0")
+    a1 = nb_network.get("a1")
+    a2 = nb_network.get("a2")
+    a3 = nb_network.get("a3")
+    a4 = nb_network.get("a4")
+    a5 = nb_network.get("a5")
+    a6 = nb_network.get("a6")
+    a7 = nb_network.get("a7")
+    a8 = nb_network.get("a8")
+
+    def has_neg_imp(ce) -> bool:
+        if isinstance(ce, Switch):
+            return not ce.is_open()
+        else:
+            return False
+
+    await _validate_term_grouping(has_neg_imp, nb_network, "a0_a1", set(), set(), {get_term(a1, 1), *a0.terminals})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a1_a2", set(), set(), {get_term(a1, 2), get_term(a2, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a2_a3_a6", set(), set(), {get_term(a2, 2), get_term(a3, 1), get_term(a6, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a3_a4_a8", set(), set(), {get_term(a3, 2), get_term(a4, 1), *a8.terminals})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a4_a5", set(), set(), {get_term(a4, 2), get_term(a5, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a5", set(), set(), {get_term(a4, 2), get_term(a5, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a6_a7", set(), set(), {get_term(a6, 2), *a7.terminals})
+
+
+@pytest.mark.asyncio
+@given(nie_constructor=sampled_from([Junction, Disconnector, BusbarSection]))
+async def test_group_negligible_impedance_terminals_groups_negligible_impedance_equipment(nie_constructor):
+    nb_network = negligible_impedance_equipment_basic_network(lambda mrid: nie_constructor(mrid=mrid))
+
+    nie1 = nb_network.get("nie1")
+    nie2 = nb_network.get("nie2")
+    a0 = nb_network.get("a0")
+    a1 = nb_network.get("a1")
+    a2 = nb_network.get("a2")
+    a3 = nb_network.get("a3")
+    a4 = nb_network.get("a4")
+    a5 = nb_network.get("a5")
+
+    def has_neg_imp(ce) -> bool:
+        if isinstance(ce, Junction) or isinstance(ce, BusbarSection):
+            return True
+        if isinstance(ce, AcLineSegment):
+            return ce.length == 0
+        if isinstance(ce, Switch):
+            return not ce.is_open()
+        else:
+            return False
+
+    await _validate_term_grouping(has_neg_imp, nb_network, "a0_nie1", {nie1, a0, a1}, {*nie1.terminals, *a0.terminals, *a1.terminals}, {get_term(a2, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a1_nie1", {nie1, a0, a1}, {*nie1.terminals, *a0.terminals, *a1.terminals}, {get_term(a2, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a1_a2", {nie1, a0, a1}, {*nie1.terminals, *a0.terminals, *a1.terminals}, {get_term(a2, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a2_nie2", {nie2}, {*nie2.terminals}, {get_term(a2, 2), get_term(a3, 1), get_term(a4, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a3_nie2", {nie2}, {*nie2.terminals}, {get_term(a2, 2), get_term(a3, 1), get_term(a4, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a4_nie2", {nie2}, {*nie2.terminals}, {get_term(a2, 2), get_term(a3, 1), get_term(a4, 1)})
+    await _validate_term_grouping(has_neg_imp, nb_network, "a4_a5", set(), set(), {get_term(a4, 2), *a5.terminals})
+
+
+@pytest.mark.asyncio
+async def test_group_negligible_impedance_terminals_end_of_branch_multiple_ec_pec():
+    nb_network = end_of_branch_multiple_ec_pec()
+
+    a2 = nb_network.get("a2")
+    ec = nb_network.get("ec")
+    pec1 = nb_network.get("pec1")
+    pec2 = nb_network.get("pec2")
+
+    def has_neg_imp(_) -> bool:
+        return False
+
+    await _validate_term_grouping(has_neg_imp, nb_network, "a2_ec_pec1_pec2", set(), set(), get_terms({a2: 2, ec: 1, pec1: 1, pec2: 1}))
+
+
+def _get_expected(nb_network, line, pt, es, ec, pec):
+    # -- Bus
+    exp_bb0 = (create_terminal_based_id({next(es.terminals), get_term(pt, 1)}),
+               (20000, frozenset(), frozenset({get_term(es, 1), get_term(pt, 1)}), frozenset(), nb_network))
+    exp_bb1 = (create_terminal_based_id({get_term(pt, 2), get_term(line, 1)}),
+               (400, frozenset(), frozenset({get_term(line, 1), get_term(pt, 2)}), frozenset(), nb_network))
+    exp_bb2 = (create_terminal_based_id({get_term(line, 2), next(ec.terminals), next(pec.terminals)}),
+               (400, frozenset(), frozenset({get_term(ec, 1), get_term(line, 2), get_term(pec, 1)}), frozenset(), nb_network))
+
+    # -- Branch
+    exp_branch = (f"tb_{line.mrid}", ((exp_bb1[1], exp_bb2[1]), 100, frozenset({line}), frozenset({*line.terminals}), frozenset(), nb_network))
+
+    # -- Transformer
+    exp_end_to_bus_pairs = ((list(pt.ends)[0], exp_bb0[1]), (list(pt.ends)[1], exp_bb1[1]))
+    exp_tx = (f"pt_{pt.mrid}", (pt, exp_end_to_bus_pairs, nb_network))
+
+    # -- Source
+    exp_es = (f"es_{es.mrid}", (es, exp_bb0[1], nb_network))
+
+    # -- Consumer
+    exp_ec = (f"ec_{ec.mrid}", (ec, exp_bb2[1], nb_network))
+
+    # -- PowerElectronicsConnection
+    exp_pec = (f"pec_{pec.mrid}", (pec, exp_bb2[1], nb_network))
+
+    return exp_bb0, exp_bb1, exp_bb2, exp_branch, exp_tx, exp_es, exp_ec, exp_pec
+
+
+def _get_validated_results(result):
     assert result.was_successful is True
+    assert result.validator is not None
+    assert result.mappings is not None
+    assert result.network is not None
+
+    return result.validator, result.mappings, result.network
+
+
+def _get_validated_conducting_equipment(nb_network):
+    plsi = nb_network.get("plsi")
+    wire_info = nb_network.get("wire_info")
+    pt_info = nb_network.get("pt_info")
+    es = nb_network.get("grid_connection")
+    pt = nb_network.get("transformer")
+    line = nb_network.get("line")
+    ec = nb_network.get("load")
+    pec = nb_network.get("pec")
+
+    return plsi, wire_info, pt_info, es, pt, line, ec, pec
+
+
+def _validate_validator_calls(validator):
+    assert validator.network_data_count is 1
+    assert validator.topological_node_data_count is 3
+    assert validator.topological_branch_data_count is 1
+    assert validator.power_transformer_data_count is 1
+    assert validator.energy_source_data_count is 1
+    assert validator.energy_consumer_data_count is 1
+    assert validator.power_electronics_connection_data_count is 1
+
+
+def _validate_network(
+    bb_network,
+    expected_bus_0,
+    expected_bus_1,
+    expected_bus_2,
+    expected_branch,
+    expected_transformer,
+    expected_energy_source,
+    expected_energy_consumer,
+    expected_power_electronics_connection,
+):
+    assert bb_network.bus == {expected_bus_0, expected_bus_1, expected_bus_2}
+
+    # Branch Comparison
+    branch = list(bb_network.branch)[0]
+    assert branch[0] == expected_branch[0]
+    assert set(branch[1][0]) == set(expected_branch[1][0])
+    assert branch[1][1] == expected_branch[1][1]
+    assert branch[1][2] == expected_branch[1][2]
+    assert branch[1][3] == expected_branch[1][3]
+    assert branch[1][4] == expected_branch[1][4]
+    assert branch[1][5] == expected_branch[1][5]
+
+    assert bb_network.transformer == {expected_transformer}
+    assert bb_network.energy_source == {expected_energy_source}
+    assert bb_network.energy_consumer == {expected_energy_consumer}
+    assert bb_network.power_electronics_connection == {expected_power_electronics_connection}
+
+
+def _validate_mappings(
+    mappings: BusBranchNetworkCreationMappings,
+    expected_bus_0,
+    expected_bus_1,
+    expected_bus_2,
+    expected_branch,
+    expected_transformer,
+    expected_energy_source,
+    expected_energy_consumer,
+    expected_power_electronics_connection,
+    line,
+    pt,
+    es,
+    ec,
+    pec
+):
+    # -- Bus
+    _validate_bus_mapping(mappings, expected_bus_0)
+    _validate_bus_mapping(mappings, expected_bus_1)
+    _validate_bus_mapping(mappings, expected_bus_2)
+
+    # -- Branch
+    _validate_branch_mapping(mappings, expected_branch)
+
+    assert list(mappings.to_nbn.power_transformers[expected_transformer[0]])[0] is pt
+    assert list(mappings.to_nbn.energy_sources[expected_energy_source[0]])[0] is es
+    assert list(mappings.to_nbn.energy_consumers[expected_energy_consumer[0]])[0] is ec
+    assert list(mappings.to_nbn.power_electronics_connections[expected_power_electronics_connection[0]])[0] is pec
+
+    # -- Identified Objects
+    # --- inner terminals and collapsed conducting equipment maps to bus
+    for io in (*expected_bus_0[1][1], *expected_bus_0[1][3]):
+        _assert_equal_bus(mappings.to_bbn.objects[io.mrid], expected_bus_0)
+
+    for io in (*expected_bus_1[1][1], *expected_bus_1[1][3]):
+        _assert_equal_bus(mappings.to_bbn.objects[io.mrid], expected_bus_1)
+
+    for io in (*expected_bus_2[1][1], *expected_bus_2[1][3]):
+        _assert_equal_bus(mappings.to_bbn.objects[io.mrid], expected_bus_2)
+
+    # --- branch
+    assert set(list(mappings.to_bbn.objects[line.mrid])[0][0]) == set(expected_branch[1][0])
+    assert list(mappings.to_bbn.objects[line.mrid])[0][1] == expected_branch[1][1]
+    assert list(mappings.to_bbn.objects[line.mrid])[0][2] == expected_branch[1][2]
+    assert list(mappings.to_bbn.objects[line.mrid])[0][3] == expected_branch[1][3]
+    assert list(mappings.to_bbn.objects[line.mrid])[0][4] == expected_branch[1][4]
+    assert list(mappings.to_bbn.objects[line.mrid])[0][5] == expected_branch[1][5]
 
-    # Validation
-    # Bus
-    _assert_are_equal(
-        bus_args,
-        {
-            (bb_model_network, 400, frozenset(), frozenset({list(line.terminals)[0], list(pt.terminals)[1]}), frozenset(), simple_node_breaker_network),
-            (bb_model_network, 400, frozenset(), frozenset({list(ec.terminals)[0], list(line.terminals)[1]}), frozenset(), simple_node_breaker_network),
-            (bb_model_network, 20000, frozenset(), frozenset({list(es.terminals)[0], list(pt.terminals)[0]}), frozenset(), simple_node_breaker_network)
-        }
-    )
-
-    # Branch
-    _assert_are_equal(
-        branch_args,
-        {
-            (
-                bb_model_network,
-                tuple((create_terminal_based_id(t.connectivity_node) for t in line.terminals)),
-                100,
-                "wire_info:plsi",
-                frozenset({line}),
-                frozenset({*line.terminals}),
-                frozenset(),
-                simple_node_breaker_network
-            )
-        }
-    )
-
-    # Branch Type
-    _assert_are_equal(
-        branch_type_args,
-        {
-            (bb_model_network, plsi, wire_info)
-        }
-    )
-
-    # Transformer
-    _assert_are_equal(
-        transformer_args,
-        {
-            (
-                bb_model_network,
-                pt,
-                tuple((create_terminal_based_id(t.connectivity_node) for t in pt.terminals)),
-                "transformer_type",
-                simple_node_breaker_network
-            )
-        }
-    )
-
-    # Transformer Type
-    _assert_are_equal(
-        transformer_type_args,
-        {
-            (bb_model_network, pt)
-        }
-    )
-
-    # Source
-    _assert_are_equal(
-        source_args,
-        {
-            (
-                bb_model_network,
-                es,
-                create_terminal_based_id(list(es.terminals)[0].connectivity_node),
-                simple_node_breaker_network
-            )
-        }
-    )
-
-    # Consumer
-    _assert_are_equal(
-        consumer_args,
-        {
-            (
-                bb_model_network,
-                ec,
-                create_terminal_based_id(list(ec.terminals)[0].connectivity_node),
-                simple_node_breaker_network
-            )
-        }
-    )
-
-    # PowerElectronicsConnection
-    _assert_are_equal(pec_args, set())
-
-
-def test_create_bus_branch_model_callbacks_with_pec(simple_node_breaker_network_with_pec):
-    assert simple_node_breaker_network_with_pec is not None
-
-    plsi = simple_node_breaker_network_with_pec.get("plsi")
-    assert plsi is not None
-
-    wire_info = simple_node_breaker_network_with_pec.get("wire_info")
-    assert wire_info is not None
-
-    pt_info = simple_node_breaker_network_with_pec.get("pt_info")
-    assert pt_info is not None
-
-    es = simple_node_breaker_network_with_pec.get("grid_connection")
-    assert es is not None
-
-    pt = simple_node_breaker_network_with_pec.get("transformer")
-    assert pt is not None
-
-    line = simple_node_breaker_network_with_pec.get("line")
-    assert line is not None
-
-    ec = simple_node_breaker_network_with_pec.get("load")
-    assert ec is not None
-
-    pec = simple_node_breaker_network_with_pec.get("pec")
-    assert pec is not None
-
-    bus_args = set()
-    branch_args = set()
-    branch_type_args = set()
-    transformer_args = set()
-    transformer_type_args = set()
-    source_args = set()
-    consumer_args = set()
-    pec_args = set()
-
-    bb_model_network = "bb_model_network"
-
-    def create_terminal_based_id(terminals: Union[Set[Terminal], FrozenSet[Terminal]]) -> str:
-        return "_".join(sorted([t.mrid for t in terminals]))
-
-    def create_bus_branch_network(n: NetworkService):
-        return bb_model_network
-
-    def create_bus(
-            bus_branch_model: str,
-            base_voltage: int,
-            closed_switches: FrozenSet[ConductingEquipment],
-            border_terminals: FrozenSet[Terminal],
-            inner_terminals: FrozenSet[Terminal],
-            node_breaker_model: NetworkService
-    ) -> str:
-        bus_args.add((bus_branch_model, base_voltage, closed_switches, border_terminals, inner_terminals, node_breaker_model))
-        return create_terminal_based_id(border_terminals)
-
-    def create_branch(
-            bus_branch_model: str,
-            line_busses: Tuple[str, str],
-            length: float,
-            line_type: str,
-            common_lines: FrozenSet[AcLineSegment],
-            border_terminals: FrozenSet[Terminal],
-            inner_terminals: FrozenSet[Terminal],
-            node_breaker_model: NetworkService
-    ):
-        branch_args.add((bus_branch_model, line_busses, length, line_type, common_lines, border_terminals, inner_terminals, node_breaker_model))
-
-    def get_branch_type_id(per_length_sequence_impedance: PerLengthSequenceImpedance, wi: WireInfo, voltage: int) -> str:
-        return wi.mrid + ":" + per_length_sequence_impedance.mrid
-
-    def create_branch_type(bus_branch_model: str, per_length_sequence_impedance: PerLengthSequenceImpedance,
-                           wi: WireInfo, voltage: int) -> str:
-        branch_type_args.add((bus_branch_model, per_length_sequence_impedance, wire_info))
-        return get_branch_type_id(per_length_sequence_impedance, wi, voltage)
-
-    def create_transformer(bus_branch_model: str, pt: PowerTransformer, busses: Tuple[str, str],
-                           pt_type: str, node_breaker_model: NetworkService):
-        transformer_args.add((bus_branch_model, pt, busses, pt_type, node_breaker_model))
-
-    def get_transformer_type_id(transformer: PowerTransformer) -> str:
-        return transformer.mrid + "_type"
-
-    def create_transformer_type(bus_branch_model: str, transformer: PowerTransformer) -> str:
-        transformer_type_args.add((bus_branch_model, transformer))
-        return get_transformer_type_id(transformer)
-
-    def create_source(bus_branch_model: str, source: EnergySource, bus, node_breaker_model: NetworkService):
-        source_args.add((bus_branch_model, source, bus, node_breaker_model))
-
-    def create_consumer(bus_branch_model: str, consumer: EnergyConsumer, bus, node_breaker_model: NetworkService):
-        consumer_args.add((bus_branch_model, consumer, bus, node_breaker_model))
-
-    def create_power_electronics(bus_branch_model: str, power_electronics_connection: PowerElectronicsConnection, bus, node_breaker_model: NetworkService):
-        pec_args.add((bus_branch_model, power_electronics_connection, bus, node_breaker_model))
-
-    result = create_bus_branch_model(
-        lambda: simple_node_breaker_network_with_pec,
-        create_bus_branch_network,
-        create_bus,
-        create_branch,
-        create_branch_type,
-        get_branch_type_id,
-        create_transformer,
-        create_transformer_type,
-        get_transformer_type_id,
-        create_source,
-        create_consumer,
-        create_power_electronics
-    )
-
-    assert result.was_successful is True
-
-    # Validation
-    # Bus
-    _assert_are_equal(
-        bus_args,
-        {
-            (
-                bb_model_network,
-                400,
-                frozenset(),
-                frozenset({list(line.terminals)[0], list(pt.terminals)[1]}),
-                frozenset(),
-                simple_node_breaker_network_with_pec
-            ),
-            (
-                bb_model_network,
-                400,
-                frozenset(),
-                frozenset({list(ec.terminals)[0], list(line.terminals)[1], list(pec.terminals)[0]}),
-                frozenset(),
-                simple_node_breaker_network_with_pec
-            ),
-            (
-                bb_model_network,
-                20000,
-                frozenset(),
-                frozenset({list(es.terminals)[0], list(pt.terminals)[0]}),
-                frozenset(),
-                simple_node_breaker_network_with_pec
-            )
-        }
-    )
-
-    # Branch
-    _assert_are_equal(
-        branch_args,
-        {
-            (
-                bb_model_network,
-                tuple((create_terminal_based_id(t.connectivity_node) for t in line.terminals)),
-                100,
-                "wire_info:plsi",
-                frozenset({line}),
-                frozenset({*line.terminals}),
-                frozenset(),
-                simple_node_breaker_network_with_pec
-            )
-        }
-    )
-
-    # Branch Type
-    _assert_are_equal(
-        branch_type_args,
-        {
-            (bb_model_network, plsi, wire_info)
-        }
-    )
-
-    # Transformer
-    _assert_are_equal(
-        transformer_args,
-        {
-            (
-                bb_model_network,
-                pt,
-                tuple((create_terminal_based_id(t.connectivity_node) for t in pt.terminals)),
-                "transformer_type",
-                simple_node_breaker_network_with_pec
-            )
-        }
-    )
-
-    # Transformer Type
-    _assert_are_equal(
-        transformer_type_args,
-        {
-            (bb_model_network, pt)
-        }
-    )
-
-    # Source
-    _assert_are_equal(
-        source_args,
-        {
-            (
-                bb_model_network,
-                es,
-                create_terminal_based_id(list(es.terminals)[0].connectivity_node),
-                simple_node_breaker_network_with_pec
-            )
-        }
-    )
-
-    # Consumer
-    _assert_are_equal(
-        consumer_args,
-        {
-            (
-                bb_model_network,
-                ec,
-                create_terminal_based_id(list(ec.terminals)[0].connectivity_node),
-                simple_node_breaker_network_with_pec
-            )
-        }
-    )
-
-    # PowerElectronicsConnection
-    _assert_are_equal(
-        pec_args,
-        {
-            (
-                bb_model_network,
-                pec,
-                create_terminal_based_id(list(pec.terminals)[0].connectivity_node),
-                simple_node_breaker_network_with_pec
-            )
-        }
-    )
-
-
-@pytest.mark.parametrize(
-    'single_branch_common_lines_network',
-    [False, True],
-    indirect=True
-)
-def test_group_common_ac_line_segment_terminals_single_branch(single_branch_common_lines_network):
-    assert single_branch_common_lines_network is not None
-
-    acls1 = single_branch_common_lines_network.get("acls1")
-    assert acls1 is not None
-    acls2 = single_branch_common_lines_network.get("acls2")
-    assert acls2 is not None
-    acls3 = single_branch_common_lines_network.get("acls3")
-    assert acls3 is not None
-    acls4 = single_branch_common_lines_network.get("acls4")
-    assert acls4 is not None
-    acls5 = single_branch_common_lines_network.get("acls5")
-    assert acls5 is not None
-
-    # Validation
-    # acls1, acls2, acls3
-    for a in acls1, acls2, acls3:
-        common_lines, inner_terms, border_terms = _group_common_ac_line_segment_terminals(a)
-        _assert_are_equal(common_lines, {acls1, acls2, acls3})
-        _assert_are_equal(inner_terms, {*acls1.terminals, *acls2.terminals, list(acls3.terminals)[0]})
-        _assert_are_equal(border_terms, {list(acls3.terminals)[1]})
-
-    # acls4
-    common_lines, inner_terms, border_terms = _group_common_ac_line_segment_terminals(acls4)
-    _assert_are_equal(common_lines, {acls4})
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {*acls4.terminals})
-
-    # acls5
-    common_lines, inner_terms, border_terms = _group_common_ac_line_segment_terminals(acls5)
-    _assert_are_equal(common_lines, {acls5})
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {*acls5.terminals})
-
-
-def test_group_common_ac_line_segment_terminals_multi_branch(multi_branch_common_lines_network):
-    assert multi_branch_common_lines_network is not None
-
-    a0 = multi_branch_common_lines_network.get("a0")
-    assert a0 is not None
-    a1 = multi_branch_common_lines_network.get("a1")
-    assert a1 is not None
-    a2 = multi_branch_common_lines_network.get("a2")
-    assert a2 is not None
-    a3 = multi_branch_common_lines_network.get("a3")
-    assert a3 is not None
-    a4 = multi_branch_common_lines_network.get("a4")
-    assert a4 is not None
-    a5 = multi_branch_common_lines_network.get("a5")
-    assert a5 is not None
-    a6 = multi_branch_common_lines_network.get("a6")
-    assert a6 is not None
-    a7 = multi_branch_common_lines_network.get("a7")
-    assert a7 is not None
-    a8 = multi_branch_common_lines_network.get("a8")
-    assert a8 is not None
-
-    # Validation
-    # a0, a1, a2
-    for a in a0, a1, a2:
-        common_lines, inner_terms, border_terms = _group_common_ac_line_segment_terminals(a)
-        _assert_are_equal(common_lines, {a0, a1, a2})
-        _assert_are_equal(inner_terms, {list(a0.terminals)[0], *a1.terminals, list(a2.terminals)[0]})
-        _assert_are_equal(border_terms, {list(a2.terminals)[1]})
-
-    # a3
-    common_lines, inner_terms, border_terms = _group_common_ac_line_segment_terminals(a3)
-    _assert_are_equal(common_lines, {a3})
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {*a3.terminals})
-
-    # a4, a5
-    for a in a4, a5:
-        common_lines, inner_terms, border_terms = _group_common_ac_line_segment_terminals(a)
-        _assert_are_equal(common_lines, {a4, a5})
-        _assert_are_equal(inner_terms, {list(a4.terminals)[1], list(a5.terminals)[0]})
-        _assert_are_equal(border_terms, {list(a4.terminals)[0], list(a5.terminals)[1]})
-
-    # a6, a7
-    for a in a6, a7:
-        common_lines, inner_terms, border_terms = _group_common_ac_line_segment_terminals(a)
-        _assert_are_equal(common_lines, {a6, a7})
-        _assert_are_equal(inner_terms, {list(a6.terminals)[1], *a7.terminals})
-        _assert_are_equal(border_terms, {list(a6.terminals)[0]})
-
-    # a8
-    common_lines, inner_terms, border_terms = _group_common_ac_line_segment_terminals(a8)
-    _assert_are_equal(common_lines, {a8})
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {*a8.terminals})
-
-
-def test_group_common_ac_line_segment_terminals_end_of_branch_multiple_ec_pec(end_of_branch_multiple_ec_pec):
-    assert end_of_branch_multiple_ec_pec is not None
-
-    a1 = end_of_branch_multiple_ec_pec.get("a1")
-    assert a1 is not None
-    a2 = end_of_branch_multiple_ec_pec.get("a2")
-    assert a2 is not None
-    ec = end_of_branch_multiple_ec_pec.get("ec")
-    assert ec is not None
-    pec1 = end_of_branch_multiple_ec_pec.get("pec1")
-    assert pec1 is not None
-    pec2 = end_of_branch_multiple_ec_pec.get("pec2")
-    assert pec2 is not None
-
-    # Validation
-    # a1, a2
-    for a in a1, a2:
-        common_lines, inner_terms, border_terms = _group_common_ac_line_segment_terminals(a)
-        _assert_are_equal(common_lines, {a1, a2})
-        _assert_are_equal(inner_terms, {list(a1.terminals)[1], list(a2.terminals)[0]})
-        _assert_are_equal(border_terms, {list(a1.terminals)[0], list(a2.terminals)[1]})
-
-
-@pytest.mark.parametrize(
-    'single_branch_common_lines_network',
-    [False],
-    indirect=True
-)
-def test_group_negligible_impedance_terminals_single_branch_closed_switch(single_branch_common_lines_network):
-    assert single_branch_common_lines_network is not None
-
-    acls1 = single_branch_common_lines_network.get("acls1")
-    assert acls1 is not None
-    acls2 = single_branch_common_lines_network.get("acls2")
-    assert acls2 is not None
-    acls3 = single_branch_common_lines_network.get("acls3")
-    assert acls3 is not None
-    acls4 = single_branch_common_lines_network.get("acls4")
-    assert acls4 is not None
-    acls5 = single_branch_common_lines_network.get("acls5")
-    assert acls5 is not None
-    sw = single_branch_common_lines_network.get("sw")
-    assert sw is not None
-
-    def get_is_open(switch: Switch) -> bool:
-        return switch.is_open()
-
-    cn = {"_".join(sorted([t.conducting_equipment.mrid for t in cn.terminals])): cn for cn in single_branch_common_lines_network.objects(ConnectivityNode)}
-
-    # Validation
-    # a1_a2
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls1_acls2"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(acls2.terminals)[0], *acls1.terminals})
-
-    # a2_a3
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls2_acls3"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(acls2.terminals)[1], list(acls3.terminals)[0]})
-
-    # a3_sw
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls3_sw"], get_is_open)
-    _assert_are_equal(closed_switches, {sw})
-    _assert_are_equal(inner_terms, {*sw.terminals})
-    _assert_are_equal(border_terms, {list(acls3.terminals)[1], list(acls4.terminals)[0]})
-
-    # sw_a4
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls4_sw"], get_is_open)
-    _assert_are_equal(closed_switches, {sw})
-    _assert_are_equal(inner_terms, {*sw.terminals})
-    _assert_are_equal(border_terms, {list(acls3.terminals)[1], list(acls4.terminals)[0]})
-
-    # a4_a5
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls4_acls5"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(acls4.terminals)[1], *acls5.terminals})
-
-
-@pytest.mark.parametrize(
-    'single_branch_common_lines_network',
-    [True],
-    indirect=True
-)
-def test_group_negligible_impedance_terminals_single_branch_open_switch(single_branch_common_lines_network):
-    assert single_branch_common_lines_network is not None
-
-    acls1 = single_branch_common_lines_network.get("acls1")
-    assert acls1 is not None
-    acls2 = single_branch_common_lines_network.get("acls2")
-    assert acls2 is not None
-    acls3 = single_branch_common_lines_network.get("acls3")
-    assert acls3 is not None
-    acls4 = single_branch_common_lines_network.get("acls4")
-    assert acls4 is not None
-    acls5 = single_branch_common_lines_network.get("acls5")
-    assert acls5 is not None
-    sw = single_branch_common_lines_network.get("sw")
-    assert sw is not None
-
-    def get_is_open(switch: Switch) -> bool:
-        return switch.is_open()
-
-    cn = {"_".join(sorted([t.conducting_equipment.mrid for t in cn.terminals])): cn for cn in single_branch_common_lines_network.objects(ConnectivityNode)}
-
-    # Validation
-    # a1_a2
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls1_acls2"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(acls2.terminals)[0], *acls1.terminals})
-
-    # a2_a3
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls2_acls3"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(acls2.terminals)[1], list(acls3.terminals)[0]})
-
-    # a3_sw
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls3_sw"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(acls3.terminals)[1], list(sw.terminals)[0]})
-
-    # sw_a4
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls4_sw"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(sw.terminals)[1], list(acls4.terminals)[0]})
-
-    # a4_a5
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["acls4_acls5"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(acls4.terminals)[1], *acls5.terminals})
-
-
-def test_group_negligible_impedance_terminals_multi_branch(multi_branch_common_lines_network):
-    assert multi_branch_common_lines_network is not None
-
-    a0 = multi_branch_common_lines_network.get("a0")
-    assert a0 is not None
-    a1 = multi_branch_common_lines_network.get("a1")
-    assert a1 is not None
-    a2 = multi_branch_common_lines_network.get("a2")
-    assert a2 is not None
-    a3 = multi_branch_common_lines_network.get("a3")
-    assert a3 is not None
-    a4 = multi_branch_common_lines_network.get("a4")
-    assert a4 is not None
-    a5 = multi_branch_common_lines_network.get("a5")
-    assert a5 is not None
-    a6 = multi_branch_common_lines_network.get("a6")
-    assert a6 is not None
-    a7 = multi_branch_common_lines_network.get("a7")
-    assert a7 is not None
-    a8 = multi_branch_common_lines_network.get("a8")
-    assert a8 is not None
-
-    def get_is_open(switch: Switch) -> bool:
-        return switch.is_open()
-
-    cn = {"_".join(sorted([t.conducting_equipment.mrid for t in cn.terminals])): cn for cn in multi_branch_common_lines_network.objects(ConnectivityNode)}
-
-    # Validation
-    # a0_a1
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a0_a1"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(a1.terminals)[0], *a0.terminals})
-
-    # a1_a2
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a1_a2"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(a1.terminals)[1], list(a2.terminals)[0]})
-
-    # a2_a3_a6
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a2_a3_a6"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(a2.terminals)[1], list(a3.terminals)[0], list(a6.terminals)[0]})
-
-    # a3_a4_a8
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a3_a4_a8"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(a3.terminals)[1], list(a4.terminals)[0], *a8.terminals})
-
-    # a4_a5
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a4_a5"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(a4.terminals)[1], list(a5.terminals)[0]})
-
-    # a6_a7
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a6_a7"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(a6.terminals)[1], *a7.terminals})
-
-
-@pytest.mark.parametrize(
-    'negligible_impedance_equipment_basic_network',
-    [
-        lambda mrid: Junction(mrid=mrid),
-        lambda mrid: Disconnector(mrid=mrid),
-        lambda mrid: BusbarSection(mrid=mrid)
-    ],
-    indirect=True
-)
-def test_group_negligible_impedance_terminals_groups_negligible_impedance_equipment(negligible_impedance_equipment_basic_network):
-    assert negligible_impedance_equipment_basic_network is not None
-
-    nie1 = negligible_impedance_equipment_basic_network.get("nie1")
-    assert nie1 is not None
-    nie2 = negligible_impedance_equipment_basic_network.get("nie2")
-    assert nie2 is not None
-    a0 = negligible_impedance_equipment_basic_network.get("a0")
-    assert a0 is not None
-    a1 = negligible_impedance_equipment_basic_network.get("a1")
-    assert a1 is not None
-    a2 = negligible_impedance_equipment_basic_network.get("a2")
-    assert a2 is not None
-    a3 = negligible_impedance_equipment_basic_network.get("a3")
-    assert a3 is not None
-    a4 = negligible_impedance_equipment_basic_network.get("a4")
-    assert a4 is not None
-    a5 = negligible_impedance_equipment_basic_network.get("a5")
-
-    def get_is_open(switch: Switch) -> bool:
-        return switch.is_open()
-
-    cn = {"_".join(sorted([t.conducting_equipment.mrid for t in cn.terminals])): cn for cn in
-          negligible_impedance_equipment_basic_network.objects(ConnectivityNode)}
-
-    # Validation
-    # a0_nie1
-    ni_equipment, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a0_nie1"], get_is_open)
-    _assert_are_equal(ni_equipment, {nie1})
-    _assert_are_equal(inner_terms, {*nie1.terminals})
-    _assert_are_equal(border_terms, {list(a1.terminals)[0], *a0.terminals})
-
-    # j1_a1
-    ni_equipment, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a1_nie1"], get_is_open)
-    _assert_are_equal(ni_equipment, {nie1})
-    _assert_are_equal(inner_terms, {*nie1.terminals})
-    _assert_are_equal(border_terms, {list(a1.terminals)[0], *a0.terminals})
-
-    # a1_a2
-    ni_equipment, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a1_a2"], get_is_open)
-    _assert_are_equal(ni_equipment, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(a1.terminals)[1], list(a2.terminals)[0]})
-
-    # a2_nie2
-    ni_equipment, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a2_nie2"], get_is_open)
-    _assert_are_equal(ni_equipment, {nie2})
-    _assert_are_equal(inner_terms, {*nie2.terminals})
-    _assert_are_equal(border_terms, {list(a2.terminals)[1], list(a3.terminals)[0], list(a4.terminals)[0]})
-
-    # a3_nie2
-    ni_equipment, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a3_nie2"], get_is_open)
-    _assert_are_equal(ni_equipment, {nie2})
-    _assert_are_equal(inner_terms, {*nie2.terminals})
-    _assert_are_equal(border_terms, {list(a2.terminals)[1], list(a3.terminals)[0], list(a4.terminals)[0]})
-
-    # a4_nie2
-    ni_equipment, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a4_nie2"], get_is_open)
-    _assert_are_equal(ni_equipment, {nie2})
-    _assert_are_equal(inner_terms, {*nie2.terminals})
-    _assert_are_equal(border_terms, {list(a2.terminals)[1], list(a3.terminals)[0], list(a4.terminals)[0]})
-
-    # a4_a5
-    ni_equipment, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a4_a5"], get_is_open)
-    _assert_are_equal(ni_equipment, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(a4.terminals)[1], *a5.terminals})
-
-
-def test_group_negligible_impedance_terminals_end_of_branch_multiple_ec_pec(end_of_branch_multiple_ec_pec):
-    assert end_of_branch_multiple_ec_pec is not None
-
-    a1 = end_of_branch_multiple_ec_pec.get("a1")
-    assert a1 is not None
-    a2 = end_of_branch_multiple_ec_pec.get("a2")
-    assert a2 is not None
-    ec = end_of_branch_multiple_ec_pec.get("ec")
-    assert ec is not None
-    pec1 = end_of_branch_multiple_ec_pec.get("pec1")
-    assert pec1 is not None
-    pec2 = end_of_branch_multiple_ec_pec.get("pec2")
-    assert pec2 is not None
-
-    def get_is_open(switch: Switch) -> bool:
-        return switch.is_open()
-
-    cn = {"_".join(sorted([t.conducting_equipment.mrid for t in cn.terminals])): cn for cn in end_of_branch_multiple_ec_pec.objects(ConnectivityNode)}
-
-    # Validation
-    # a2_ec
-    closed_switches, inner_terms, border_terms = _group_negligible_impedance_terminals(cn["a2_ec_pec1_pec2"], get_is_open)
-    _assert_are_equal(closed_switches, set())
-    _assert_are_equal(inner_terms, set())
-    _assert_are_equal(border_terms, {list(a2.terminals)[1], list(ec.terminals)[0], list(pec1.terminals)[0], list(pec2.terminals)[0]})
-
-
-def _assert_are_equal(a: Union[Set, FrozenSet], b: Union[Set, FrozenSet]):
-    diff = a ^ b
-    assert not diff, f"Sets {a} and {b} are different"
-
-
-def _assert_sets_of_sets_are_equal(a: Union[Set, FrozenSet], b: Union[Set, FrozenSet]):
-    b_c = b.copy()
-    for cl in a:
-        matched_group = None
-        for ex_g in b_c:
-            diff = cl ^ ex_g
-            if not diff:
-                matched_group = ex_g
-                break
-        if matched_group is not None:
-            b_c.remove(matched_group)
-    assert len(b_c) == 0, f"Sets are not equal. Number of non-matching elements: {len(b_c)}"
+    # --- transformer
+    assert list(mappings.to_bbn.objects[pt.mrid])[0] == expected_transformer[1]
+
+    # --- energy source
+    assert list(mappings.to_bbn.objects[es.mrid])[0] == expected_energy_source[1]
+
+    # --- energy consumer
+    assert list(mappings.to_bbn.objects[ec.mrid])[0] == expected_energy_consumer[1]
+
+    # --- power electronics connection
+    assert list(mappings.to_bbn.objects[pec.mrid])[0] == expected_power_electronics_connection[1]
+
+
+def _validate_bus_mapping(mappings, expected_bus):
+    mapped_tn = mappings.to_nbn.topological_nodes[expected_bus[0]]
+    _assert_equal_bus(mapped_tn, expected_bus)
+    assert [list(mappings.to_bbn.objects[t.mrid])[0] for t in mapped_tn.terminals()][0] == expected_bus[1]
+
+    if mapped_tn.conducting_equipment_group:
+        assert [list(mappings.to_bbn.objects[ce.mrid])[0] for ce in mapped_tn.conducting_equipment_group][0] == expected_bus[1]
+
+
+def _assert_equal_bus(terminal_grouping, expected_bus):
+    assert terminal_grouping.conducting_equipment_group == expected_bus[1][1]
+    assert terminal_grouping.border_terminals == expected_bus[1][2]
+    assert terminal_grouping.inner_terminals == expected_bus[1][3]
+
+
+def _validate_branch_mapping(mappings, expected_branch):
+    mapped_branch = mappings.to_nbn.topological_branches[expected_branch[0]]
+    _assert_equal_branch(mapped_branch, expected_branch)
+
+
+def _assert_equal_branch(terminal_grouping, expected_branch):
+    assert terminal_grouping.conducting_equipment_group == expected_branch[1][2]
+    assert terminal_grouping.border_terminals == expected_branch[1][3]
+    assert terminal_grouping.inner_terminals == expected_branch[1][4]
+
+
+async def _validate_line_grouping(
+    expected_acls: Set[AcLineSegment],
+    expected_inner: Set[Terminal],
+    expected_border: Set[Terminal]
+):
+    for a in expected_acls:
+        grouping = await _group_common_ac_line_segment_terminals(a)
+        assert grouping.conducting_equipment_group == expected_acls
+        assert grouping.inner_terminals == expected_inner
+        assert grouping.border_terminals == expected_border
+
+
+async def _validate_term_grouping(
+    has_negligible_impedance: Callable[[ConductingEquipment], bool],
+    nb_network: NetworkService,
+    mrid: str,
+    expected_ce: Set[ConductingEquipment],
+    expected_inner: Set[Terminal],
+    expected_border: Set[Terminal]
+):
+    ce = nb_network.get(mrid, ConductingEquipment, None)
+    if ce is not None:
+        terminal = get_term(ce, 1)
+    else:
+        cn = {"_".join(sorted([t.conducting_equipment.mrid for t in cn.terminals])): cn for cn in nb_network.objects(ConnectivityNode)}
+        terminal = list(cn[mrid].terminals)[0]
+
+    grouping = await _group_negligible_impedance_terminals(terminal, has_negligible_impedance)
+    assert grouping.conducting_equipment_group == expected_ce
+    assert grouping.inner_terminals == expected_inner
+    assert grouping.border_terminals == expected_border
+
+
+def get_term(ce: ConductingEquipment, term: int) -> Terminal:
+    return ce.get_terminal_by_sn(term)
+
+
+def get_terms(request: Dict[ConductingEquipment, int]) -> Set[Terminal]:
+    return {get_term(ce, term) for ce, term in request.items()}

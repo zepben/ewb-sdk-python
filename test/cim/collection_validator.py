@@ -84,7 +84,7 @@ def validate_collection(create_it: Callable[[], T],
 
 #
 # NOTE: The callables below that use `...` do so to work around bugs in the type checking of both the IDE and mypy.
-#       Ideally they should have `get: Callable[[T, str]], U]`, `add: Callable[[T, U], T]` and `remove: Callable[[T, U], T]`
+#       Ideally they should have `get: Callable[[T, str], U]`, `add: Callable[[T, U], T]` and `remove: Callable[[T, U], T]`
 #
 def validate_collection_unordered(create_it: Callable[[], T],
                                   create_other: Callable[[str, T], U],

@@ -4,7 +4,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
-from typing import List, Optional, Generator
+
+from typing import List, Optional, Generator, TYPE_CHECKING
+
+from zepben.evolve import MeasurementValue
+
+if TYPE_CHECKING:
+    from zepben.evolve import IdentifiedObject
 
 from zepben.evolve.services.common.base_service import BaseService
 
