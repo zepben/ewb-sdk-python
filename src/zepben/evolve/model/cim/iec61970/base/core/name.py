@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from dataclassy import dataclass
 
@@ -28,5 +28,5 @@ class Name:
     type: NameType
     """Type of this name."""
 
-    identified_object: IdentifiedObject
+    identified_object: Optional[IdentifiedObject] = None
     """Identified object that this name designates."""

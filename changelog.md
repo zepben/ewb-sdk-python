@@ -19,6 +19,8 @@
     * `BusbarSection`
     * `EquivalentBranch`
     * `EquivalentEquipment`
+    * `Name`
+    * `NameType`
     * `NoLoadTest`
     * `LoadBreakSwitch`
     * `OpenCircuitTest`

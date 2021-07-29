@@ -69,8 +69,9 @@ def identified_object_to_cim(pb: PBIdentifiedObject, cim: IdentifiedObject, serv
 
 
 def name_to_cim(pb: PBName, io: IdentifiedObject, service: BaseService):
-    nt = service.get_name_type(pb.type)
-    if not nt:
+    try:
+        nt = service.get_name_type(pb.type)
+    except KeyError:
         # noinspection PyArgumentList
         nt = NameType(pb.type)
         service.add_name_type(nt)
