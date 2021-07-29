@@ -5,11 +5,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 
-from hypothesis.strategies import uuids, text, lists, builds, none
+from hypothesis.strategies import uuids, text, lists, builds
 
 from test.cim.collection_validator import validate_collection
-from test.cim.iec61970.base.core.test_name_type import name_type_kwargs
-from test.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from test.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
 from zepben.evolve import IdentifiedObject, Junction
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
@@ -25,7 +24,7 @@ identified_object_kwargs = {
     "mrid": uuids(version=4).map(lambda x: str(x)),
     "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "names": lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), builds(NameType, **name_type_kwargs), none()),
+    "names": lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), create_name_type()),
                    max_size=2,
                    unique_by=lambda it: it.name)
 }

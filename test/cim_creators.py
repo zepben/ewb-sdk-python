@@ -396,7 +396,10 @@ def create_identified_object():
     return {
         "mrid": uuids(version=4).map(lambda x: str(x)),
         "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        "description": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        "names": lists(builds(Name, text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), create_name_type()),
+                       max_size=2,
+                       unique_by=lambda it: it.name)
     }
 
 
