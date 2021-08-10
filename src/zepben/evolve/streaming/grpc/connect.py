@@ -12,7 +12,7 @@ import contextlib
 import grpc
 import requests
 import json
-from jose import jwt
+import jwt
 from datetime import datetime
 from zepben.evolve.streaming.exceptions import AuthException
 
@@ -24,44 +24,49 @@ class AuthTokenPlugin(grpc.AuthMetadataPlugin):
 
     def __init__(self, host, conf_address=None, client_id=None, client_secret=None, authenticator=None):
         self.host = host
-        self.conf_address = conf_address
-        self.client_id = client_id
-        self.client_secret = client_secret
         self.token_expiry = 0
-        self.authenticator = authenticator
-        if self.authenticator:
-            self.token = f"Bearer {self.authenticator.get_token()}"
-        elif conf_address and client_id and client_secret:
-            self.token = ""
-            self._refresh_token()
-        else:
-            raise AuthException("Please provide authenticator or all of conf_address, client_id and client_secret.")
+        self.token = ""
+        self.authenticator = authenticator if authenticator is not None else EwbAuthenticator(conf_address, client_id, client_secret)
+        self._refresh_token()
 
     def __call__(self, context, callback):
-        if self.authenticator:
-            self.token = f"Bearer {self.authenticator.get_token()}"
-        elif self.conf_address and datetime.utcnow().timestamp() > self.token_expiry:
+        # if self.authenticator:
+        #     self.token = f"Bearer {self.authenticator.get_token()}"
+        if datetime.utcnow().timestamp() > self.token_expiry:
             self._refresh_token()
         callback(((_AUTH_HEADER_KEY, self.token),), None)
 
     def _refresh_token(self):
-        parts = get_token(self.host, self.conf_address, self.client_id, self.client_secret)
+        parts = self.authenticator.get_token()
         self.token = f"{parts['token_type']} {parts['access_token']}"
-        self.token_expiry = jwt.get_unverified_claims(parts['access_token'])['exp']
+        self.token_expiry = jwt.decode(parts['access_token'], options={"verify_signature": False})['exp']
 
 
-def get_token(addr, conf_address, client_id, client_secret):
-    # Get the configuration TODO: this probably needs to be OAuth2 compliant or something
-    with requests.session() as session:
-        with session.get(conf_address) as resp:
-            result = json.loads(resp.text)
-            domain = result["dom"]
-            aud = result["aud"]
-        with session.post(domain, data={'client_id': client_id, 'client_secret': client_secret, 'audience': aud, 'grant_type': 'client_credentials'}) as resp:
-            token = json.loads(resp.text)
-    if 'error' in token:
-        raise AuthException(f"{token['error']}: {token['error_description']}")
-    return token
+class EwbAuthenticator(object):
+
+    def __init__(self, conf_address, client_id, client_secret):
+        self.conf_address = conf_address
+        self.client_id = client_id
+        self.client_secret = client_secret
+        try:
+            self.get_token()
+        except AuthException as ae:
+            raise ae
+        except Exception as e:
+            raise AuthException("Please provide authenticator or all of conf_address, client_id and client_secret.", e)
+
+    def get_token(self):
+        # Get the configuration TODO: this probably needs to be OAuth2 compliant or something
+        with requests.session() as session:
+            with session.get(self.conf_address) as resp:
+                result = json.loads(resp.text)
+                domain = result["dom"]
+                aud = result["aud"]
+            with session.post(domain, data={'client_id': self.client_id, 'client_secret': self.client_secret, 'audience': aud, 'grant_type': 'client_credentials'}) as resp:
+                token = json.loads(resp.text)
+        if 'error' in token:
+            raise AuthException(f"{token['error']}: {token['error_description']}")
+        return token
 
 
 def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "http://localhost/auth", client_id: str = None,
