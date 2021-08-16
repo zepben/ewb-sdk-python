@@ -36,6 +36,7 @@ setup(
         "protobuf==3.14.0",
         "requests<2.26.0,>=2.25.0",
         "zepben.protobuf>=0.15.0b10, < 0.16.0",
+        "zepben.auth==0.4.0",
         "PyJWT==2.1.0",
         "dataclassy==0.6.2",
         "grpcio==1.36.0"
