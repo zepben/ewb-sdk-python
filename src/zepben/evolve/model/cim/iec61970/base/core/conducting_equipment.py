@@ -49,8 +49,8 @@ class ConductingEquipment(Equipment):
         Get the `zepben.evolve.iec61970.base.core.base_voltage.BaseVoltage` of this `ConductingEquipment`.
         Note `terminal` is not used here, but this method can be overridden in child classes (e.g PowerTransformer).
 
-        :param terminal: The `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` to get the voltage at.
-        :return: The BaseVoltage of this `ConductingEquipment` at `terminal`
+        `terminal` The `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` to get the voltage at.
+        Returns thee BaseVoltage of this `ConductingEquipment` at `terminal`
         """
         return self.base_voltage
 

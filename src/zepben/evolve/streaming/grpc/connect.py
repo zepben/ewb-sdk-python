@@ -7,14 +7,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
 import contextlib
+from typing import Optional
+
 import grpc
-import requests
-import json
-from jose import jwt
-from datetime import datetime
-from zepben.evolve.streaming.exceptions import AuthException
+from zepben.auth import ZepbenAuthenticator, create_authenticator
 
 __all__ = ["connect", "connect_async"]
 _AUTH_HEADER_KEY = 'authorization'
@@ -22,69 +19,42 @@ _AUTH_HEADER_KEY = 'authorization'
 
 class AuthTokenPlugin(grpc.AuthMetadataPlugin):
 
-    def __init__(self, host, conf_address=None, client_id=None, client_secret=None, authenticator=None):
-        self.host = host
-        self.conf_address = conf_address
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.token_expiry = 0
+    def __init__(self, authenticator: ZepbenAuthenticator):
         self.authenticator = authenticator
-        if self.authenticator:
-            self.token = f"Bearer {self.authenticator.get_token()}"
-        elif conf_address and client_id and client_secret:
-            self.token = ""
-            self._refresh_token()
-        else:
-            raise AuthException("Please provide authenticator or all of conf_address, client_id and client_secret.")
 
     def __call__(self, context, callback):
-        if self.authenticator:
-            self.token = f"Bearer {self.authenticator.get_token()}"
-        elif self.conf_address and datetime.utcnow().timestamp() > self.token_expiry:
-            self._refresh_token()
-        callback(((_AUTH_HEADER_KEY, self.token),), None)
-
-    def _refresh_token(self):
-        parts = get_token(self.host, self.conf_address, self.client_id, self.client_secret)
-        self.token = f"{parts['token_type']} {parts['access_token']}"
-        self.token_expiry = jwt.get_unverified_claims(parts['access_token'])['exp']
+        token = self.authenticator.fetch_token()
+        if token:
+            callback(((_AUTH_HEADER_KEY, token),), None)
+        else:
+            callback()
 
 
-def get_token(addr, conf_address, client_id, client_secret):
-    # Get the configuration TODO: this probably needs to be OAuth2 compliant or something
-    with requests.session() as session:
-        with session.get(conf_address) as resp:
-            result = json.loads(resp.text)
-            domain = result["dom"]
-            aud = result["aud"]
-        with session.post(domain, data={'client_id': client_id, 'client_secret': client_secret, 'audience': aud, 'grant_type': 'client_credentials'}) as resp:
-            token = json.loads(resp.text)
-    if 'error' in token:
-        raise AuthException(f"{token['error']}: {token['error_description']}")
-    return token
-
-
-def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "http://localhost/auth", client_id: str = None,
-          client_secret: str = None, pkey=None, cert=None, ca=None, authenticator=None):
+def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "http://localhost/auth", client_id: Optional[str] = None,
+          client_secret: Optional[str] = None, pkey=None, cert=None, ca=None, authenticator: Optional[ZepbenAuthenticator] = None):
     """
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
-    `conf_address` The complete address for the auth configuration endpoint.
-    `client_id` Your client id for your OAuth Auth provider.
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
+
+    Either client_id and client_secret need to be provided, or authenticator.
+    `client_id` Optional Your client id for your OAuth Auth provider.
     `client_secret` Corresponding client secret.
+
+    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above client credentials.
+
     `pkey` Private key for client authentication
-    `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
-                 CA.
+    `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers CA.
     `ca` CA trust for the server.
-    `secure_conf` Whether the server hosting configuration is secured (https)
-    `authenticator` An authenticator object that has a public get_token() method. If this is provided, it takes precedence over client credentials.
-    Returns A gRPC channel
+
+    Raises `ValueError` upon incompatible arguments.
+    Returns a gRPC channel
     """
     # Channel credential will be valid for the entire channel
     channel_credentials = grpc.ssl_channel_credentials(ca, pkey, cert) if ca else None
     # TODO: make this more robust so it can handle SSL without client verification
-    if authenticator:
-        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(host=host, authenticator=authenticator))
+    if ca and authenticator:
+        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(authenticator=authenticator))
 
         # Combining channel credentials and call credentials together
         composite_credentials = grpc.composite_channel_credentials(
@@ -92,8 +62,12 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "h
             call_credentials,
         ) if channel_credentials else call_credentials
         channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
-    elif pkey and cert and client_id and client_secret:
-        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(host, conf_address, client_id, client_secret))
+    elif ca and client_id and client_secret:
+        # Create a basic ClientCredentials authenticator
+        authenticator = create_authenticator(conf_address)
+        authenticator.token_request_data.update({'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'})
+
+        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(authenticator))
 
         # Combining channel credentials and call credentials together
         composite_credentials = grpc.composite_channel_credentials(
@@ -101,10 +75,13 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "h
             call_credentials,
         ) if channel_credentials else call_credentials
         channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
-    elif ca:
+    elif ca and (not client_id and not client_secret and not authenticator):
         channel = grpc.secure_channel(f"{host}:{rpc_port}", channel_credentials)
-    else:
+    elif not ca and not client_secret and not client_id and not pkey and not cert and not authenticator:
         channel = grpc.insecure_channel(f"{host}:{rpc_port}")
+    else:
+        raise ValueError("Incompatible arguments passed to connect. You must specify at least (client_id, client_secret, ca) or (authenticator, "
+                         "ca) for a secure connection with token based auth.")
 
     return channel
 
@@ -113,27 +90,32 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "h
 def connect(host: str = "localhost",
             rpc_port: int = 50051,
             conf_address: str = "http://localhost/auth",
-            client_id: str = None,
-            client_secret: str = None,
+            client_id: Optional[str] = None,
+            client_secret: Optional[str] = None,
             pkey=None,
             cert=None,
             ca=None,
-            authenticator=None):
+            authenticator: Optional[ZepbenAuthenticator] = None):
     """
     Usage:
         with connect(args) as channel:
 
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
-    `conf_address` The complete address for the auth configuration endpoint.
-    `client_id` Your client id for your OAuth Auth provider.
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
+
+    Either client_id and client_secret need to be provided, or authenticator.
+    `client_id` Optional Your client id for your OAuth Auth provider.
     `client_secret` Corresponding client secret.
+
+    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above client credentials.
+
     `pkey` Private key for client authentication
-    `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
-                 CA.
+    `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers CA.
     `ca` CA trust for the server.
-    `authenticator` An authenticator object that has a public get_token() method. If this is provided, it takes precedence over client credentials.
-    Returns A gRPC channel
+
+    Raises `ValueError` upon incompatible arguments.
+    Returns a gRPC channel
     """
     yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca, authenticator)
 
@@ -142,26 +124,31 @@ def connect(host: str = "localhost",
 async def connect_async(host: str = "localhost",
                         rpc_port: int = 50051,
                         conf_address: str = "http://localhost/auth",
-                        client_id: str = None,
-                        client_secret: str = None,
+                        client_id: Optional[str] = None,
+                        client_secret: Optional[str] = None,
                         pkey=None,
                         cert=None,
                         ca=None,
-                        authenticator=None):
+                        authenticator: Optional[ZepbenAuthenticator] = None):
     """
     Usage:
         async with connect_async(args) as channel:
 
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
-    `conf_address` The complete address for the auth configuration endpoint.
-    `client_id` Your client id for your OAuth Auth provider.
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
+
+    Either client_id and client_secret need to be provided, or authenticator.
+    `client_id` Optional Your client id for your OAuth Auth provider.
     `client_secret` Corresponding client secret.
+
+    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above client credentials.
+
     `pkey` Private key for client authentication
-    `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers
-                 CA.
+    `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers CA.
     `ca` CA trust for the server.
-    `authenticator` An authenticator object that has a public get_token() method. If this is provided, it takes precedence over client credentials.
-    Returns A gRPC channel
+
+    Raises `ValueError` upon incompatible arguments.
+    Returns a gRPC channel
     """
     yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca, authenticator)
