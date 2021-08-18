@@ -31,7 +31,8 @@ class AuthTokenPlugin(grpc.AuthMetadataPlugin):
 
 
 def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "http://localhost/auth", client_id: Optional[str] = None,
-          client_secret: Optional[str] = None, pkey=None, cert=None, ca=None, authenticator: Optional[ZepbenAuthenticator] = None):
+          username: Optional[str] = None, password: Optional[str] = None, client_secret: Optional[str] = None, pkey=None, cert=None, ca=None,
+          authenticator: Optional[ZepbenAuthenticator] = None):
     """
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
@@ -62,6 +63,25 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "h
             call_credentials,
         ) if channel_credentials else call_credentials
         channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+    elif ca and client_id and username and password:
+        # Create a basic ClientCredentials authenticator
+        authenticator = create_authenticator(conf_address)
+        authenticator.token_request_data.update({
+            'client_id': client_id,
+            'username': username,
+            'password': password,
+            'grant_type': 'password',
+            'scope': 'offline_access'
+        })
+
+        call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(authenticator))
+
+        # Combining channel credentials and call credentials together
+        composite_credentials = grpc.composite_channel_credentials(
+            channel_credentials,
+            call_credentials,
+        ) if channel_credentials else call_credentials
+        channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
     elif ca and client_id and client_secret:
         # Create a basic ClientCredentials authenticator
         authenticator = create_authenticator(conf_address)
@@ -80,8 +100,8 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "h
     elif not ca and not client_secret and not client_id and not pkey and not cert and not authenticator:
         channel = grpc.insecure_channel(f"{host}:{rpc_port}")
     else:
-        raise ValueError("Incompatible arguments passed to connect. You must specify at least (client_id, client_secret, ca) or (authenticator, "
-                         "ca) for a secure connection with token based auth.")
+        raise ValueError("Incompatible arguments passed to connect. You must specify at least (client_id, username, password, ca),"
+                         "(client_id, client_secret, ca) or (authenticator, ca) for a secure connection with token based auth.")
 
     return channel
 
@@ -126,6 +146,8 @@ async def connect_async(host: str = "localhost",
                         conf_address: str = "http://localhost/auth",
                         client_id: Optional[str] = None,
                         client_secret: Optional[str] = None,
+                        username: Optional[str] = None,
+                        password: Optional[str] = None,
                         pkey=None,
                         cert=None,
                         ca=None,
@@ -151,4 +173,4 @@ async def connect_async(host: str = "localhost",
     Raises `ValueError` upon incompatible arguments.
     Returns a gRPC channel
     """
-    yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca, authenticator)
+    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, authenticator)
