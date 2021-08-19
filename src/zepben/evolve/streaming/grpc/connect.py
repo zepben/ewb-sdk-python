@@ -38,11 +38,15 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "h
     `rpc_port` The gRPC port for host.
     `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
 
-    Either client_id and client_secret need to be provided, or client_id, username, and password, or authenticator.
-    `client_id` Optional Your client id for your OAuth Auth provider.
-    `client_secret` Corresponding client secret.
+    One of the following sets of arguments must be provided:
+        `client_id` and `client_secret` for client credentials based authentication (usually M2M tokens), or
+        `client_id`, `username`, and `password` for user credentials authentication. Note this is not recommended for untrusted and insecure servers as
+        user credentials will be sent to the server in the clear. Or,
+        `authenticator`, for custom connection options.
 
     `client_id` Your client id for your OAuth Auth provider.
+    `client_secret` Corresponding client secret if required.
+
     `username` The username to use for an OAuth password grant.
     `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
 
@@ -130,11 +134,15 @@ def connect(host: str = "localhost",
     `rpc_port` The gRPC port for host.
     `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
 
-    Either client_id and client_secret need to be provided, or client_id, username, and password, or authenticator.
-    `client_id` Optional Your client id for your OAuth Auth provider.
-    `client_secret` Corresponding client secret.
+    One of the following sets of arguments must be provided:
+        `client_id` and `client_secret` for client credentials based authentication (usually M2M tokens), or
+        `client_id`, `username`, and `password` for user credentials authentication. Note this is not recommended for untrusted and insecure servers as
+        user credentials will be sent to the server in the clear. Or,
+        `authenticator`, for custom connection options.
 
     `client_id` Your client id for your OAuth Auth provider.
+    `client_secret` Corresponding client secret if required.
+
     `username` The username to use for an OAuth password grant.
     `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
 
@@ -170,11 +178,15 @@ async def connect_async(host: str = "localhost",
     `rpc_port` The gRPC port for host.
     `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
 
-    Either client_id and client_secret need to be provided, or client_id, username, and password, or authenticator.
-    `client_id` Optional Your client id for your OAuth Auth provider.
-    `client_secret` Corresponding client secret.
+    One of the following sets of arguments must be provided:
+        `client_id` and `client_secret` for client credentials based authentication (usually M2M tokens), or
+        `client_id`, `username`, and `password` for user credentials authentication. Note this is not recommended for untrusted and insecure servers as
+        user credentials will be sent to the server in the clear. Or,
+        `authenticator`, for custom connection options.
 
     `client_id` Your client id for your OAuth Auth provider.
+    `client_secret` Corresponding client secret if required.
+
     `username` The username to use for an OAuth password grant.
     `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
 
