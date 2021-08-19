@@ -112,6 +112,8 @@ def connect(host: str = "localhost",
             conf_address: str = "http://localhost/auth",
             client_id: Optional[str] = None,
             client_secret: Optional[str] = None,
+            username: Optional[str] = None,
+            password: Optional[str] = None,
             pkey=None,
             cert=None,
             ca=None,
@@ -124,11 +126,15 @@ def connect(host: str = "localhost",
     `rpc_port` The gRPC port for host.
     `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
 
-    Either client_id and client_secret need to be provided, or authenticator.
+    Either client_id and client_secret need to be provided, client_id, username, and password, or authenticator.
     `client_id` Optional Your client id for your OAuth Auth provider.
     `client_secret` Corresponding client secret.
 
-    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above client credentials.
+    `client_id` Your client id for your OAuth Auth provider.
+    `username` The username to use for an OAuth password grant.
+    `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
+
+    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above credentials.
 
     `pkey` Private key for client authentication
     `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers CA.
@@ -137,7 +143,7 @@ def connect(host: str = "localhost",
     Raises `ValueError` upon incompatible arguments.
     Returns a gRPC channel
     """
-    yield _conn(host, rpc_port, conf_address, client_id, client_secret, pkey, cert, ca, authenticator)
+    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, authenticator)
 
 
 @contextlib.asynccontextmanager
@@ -164,7 +170,11 @@ async def connect_async(host: str = "localhost",
     `client_id` Optional Your client id for your OAuth Auth provider.
     `client_secret` Corresponding client secret.
 
-    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above client credentials.
+    `client_id` Your client id for your OAuth Auth provider.
+    `username` The username to use for an OAuth password grant.
+    `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
+
+    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above credentials.
 
     `pkey` Private key for client authentication
     `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers CA.
