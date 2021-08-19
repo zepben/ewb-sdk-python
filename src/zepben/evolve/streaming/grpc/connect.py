@@ -38,11 +38,15 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = "h
     `rpc_port` The gRPC port for host.
     `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
 
-    Either client_id and client_secret need to be provided, or authenticator.
+    Either client_id and client_secret need to be provided, or client_id, username, and password, or authenticator.
     `client_id` Optional Your client id for your OAuth Auth provider.
     `client_secret` Corresponding client secret.
 
-    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above client credentials.
+    `client_id` Your client id for your OAuth Auth provider.
+    `username` The username to use for an OAuth password grant.
+    `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
+
+    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above credentials.
 
     `pkey` Private key for client authentication
     `cert` Corresponding signed certificate. CN must reflect your hosts FQDN, and must be signed by the servers CA.
@@ -126,7 +130,7 @@ def connect(host: str = "localhost",
     `rpc_port` The gRPC port for host.
     `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
 
-    Either client_id and client_secret need to be provided, client_id, username, and password, or authenticator.
+    Either client_id and client_secret need to be provided, or client_id, username, and password, or authenticator.
     `client_id` Optional Your client id for your OAuth Auth provider.
     `client_secret` Corresponding client secret.
 
@@ -166,7 +170,7 @@ async def connect_async(host: str = "localhost",
     `rpc_port` The gRPC port for host.
     `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
 
-    Either client_id and client_secret need to be provided, or authenticator.
+    Either client_id and client_secret need to be provided, or client_id, username, and password, or authenticator.
     `client_id` Optional Your client id for your OAuth Auth provider.
     `client_secret` Corresponding client secret.
 
