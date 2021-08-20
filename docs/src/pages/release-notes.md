@@ -2,6 +2,7 @@
 
 | Version | Released |
 | --- | --- |
+|[0.24.0](#v0240)| `20 August 2021` |
 |[0.23.0](#v0230)| `16 August 2021` |
 |[0.22.0](#v0220)| `12 February 2021` |
 |[0.21.0](#v0210)| `17 December 2020` |
@@ -26,6 +27,25 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+### v0.24.0
+
+##### Breaking Changes
+* None.
+
+##### New Features
+* None.
+
+##### Enhancements
+* None.
+
+##### Fixes
+* None.
+
+##### Notes
+* None.
 
 ---
 
