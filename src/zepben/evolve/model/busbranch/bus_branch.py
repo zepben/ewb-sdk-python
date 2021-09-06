@@ -380,27 +380,31 @@ class TerminalGrouping(Generic[CE]):
         return {*self.border_terminals, *self.inner_terminals}
 
 
-@dataclass
+class BusBranchToNodeBreakerMappings:
+
+    def __init__(self):
+        self.topological_nodes: Dict[Any, TerminalGrouping[ConductingEquipment]] = {}
+        self.topological_branches: Dict[Any, TerminalGrouping[AcLineSegment]] = {}
+        self.power_transformers: Dict[Any, Set[PowerTransformer]] = {}
+        self.energy_sources: Dict[Any, Set[EnergySource]] = {}
+        self.energy_consumers: Dict[Any, Set[EnergyConsumer]] = {}
+        self.power_electronics_connections: Dict[Any, Set[PowerElectronicsConnection]] = {}
+
+
+class NodeBreakerToBusBranchMappings:
+
+    def __init__(self):
+        self.objects: Dict[str, Set[Any]] = {}
+
+
 class BusBranchNetworkCreationMappings:
     """
     Holds mappings between a bus-branch network (bbn) and a node-breaker network (nbn) of type `NetworkService`.
     """
 
-    @dataclass()
-    class _BusBranchToNodeBreakerMappings:
-        topological_nodes: Dict[Any, TerminalGrouping[ConductingEquipment]] = field(default_factory=dict)
-        topological_branches: Dict[Any, TerminalGrouping[AcLineSegment]] = field(default_factory=dict)
-        power_transformers: Dict[Any, Set[PowerTransformer]] = field(default_factory=dict)
-        energy_sources: Dict[Any, Set[EnergySource]] = field(default_factory=dict)
-        energy_consumers: Dict[Any, Set[EnergyConsumer]] = field(default_factory=dict)
-        power_electronics_connections: Dict[Any, Set[PowerElectronicsConnection]] = field(default_factory=dict)
-
-    @dataclass()
-    class _NodeBreakerToBusBranchMappings:
-        objects: Dict[str, Set[Any]] = field(default_factory=dict)
-
-    to_nbn = _BusBranchToNodeBreakerMappings()
-    to_bbn = _NodeBreakerToBusBranchMappings()
+    def __init__(self):
+        self.to_nbn = BusBranchToNodeBreakerMappings()
+        self.to_bbn = NodeBreakerToBusBranchMappings()
 
 
 def _add_to_mapping(mapping: Dict[Any, Set[Any]], uuid: Any, obj_to_add: Any) -> None:
@@ -409,15 +413,16 @@ def _add_to_mapping(mapping: Dict[Any, Set[Any]], uuid: Any, obj_to_add: Any) ->
     mapping[uuid].add(obj_to_add)
 
 
-@dataclass
 class BusBranchNetworkCreationResult(Generic[BBN, BNV]):
     """
     Represents the results of creating a bus-branch network from a node-breaker network.
     """
-    validator: BNV
-    mappings: BusBranchNetworkCreationMappings = field(default_factory=BusBranchNetworkCreationMappings)
-    network: BBN = None
-    was_successful: bool = False
+
+    def __init__(self, validator: BNV):
+        self.validator: BNV = validator
+        self.mappings: BusBranchNetworkCreationMappings = BusBranchNetworkCreationMappings()
+        self.network: BBN = None
+        self.was_successful: bool = False
 
 
 async def _create_bus_branch_network(
