@@ -10,7 +10,7 @@
 * None.
 
 ##### Fixes
-* None.
+* Fixed bug that would cause bus-branch creation mappings to be shared between bus-branch creation result instances.
 
 ##### Notes
 * None.
