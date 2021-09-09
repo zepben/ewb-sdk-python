@@ -19,7 +19,7 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     EnergyConsumer, PhaseShuntConnectionKind, EnergyConsumerPhase, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
     LinearShuntCompensator, PerLengthImpedance, PerLengthLineParameter, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, VectorGroup, \
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
-    Circuit, Loop, NetworkService, TracedPhases, PhaseDirection
+    Circuit, Loop, NetworkService, TracedPhases, PhaseDirection, ShuntCompensatorInfo
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 
@@ -78,6 +78,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(ShortCircuitTest.power, ShortCircuitTest, lambda _: 1, lambda _: 2)
         self.validator.validate_property(ShortCircuitTest.voltage, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(ShortCircuitTest.voltage_ohmic_part, ShortCircuitTest, lambda _: 1.0, lambda _: 2.0)
+
+    def test_compare_shunt_compensator_info(self):
+        self._compare_asset_info(ShuntCompensatorInfo)
+        self.validator.validate_property(ShuntCompensatorInfo.max_power_loss, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShuntCompensatorInfo.rated_current, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShuntCompensatorInfo.rated_reactive_power, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(ShuntCompensatorInfo.rated_voltage, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
 
     def test_compare_transformer_end_info(self):
         self._compare_asset_info(TransformerEndInfo)

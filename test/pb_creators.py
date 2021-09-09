@@ -14,6 +14,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import Trans
 from zepben.protobuf.cim.iec61968.assetinfo.NoLoadTest_pb2 import NoLoadTest as PBNoLoadTest
 from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircuitTest as PBOpenCircuitTest
 from zepben.protobuf.cim.iec61968.assetinfo.ShortCircuitTest_pb2 import ShortCircuitTest as PBShortCircuitTest
+from zepben.protobuf.cim.iec61968.assetinfo.ShuntCompensatorInfo_pb2 import ShuntCompensatorInfo as PBShuntCompensatorInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest as PBTransformerTest
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
@@ -184,6 +185,17 @@ def short_circuit_test():
         power=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         voltage=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         voltageOhmicPart=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def shunt_compensator_info():
+    return builds(
+        PBShuntCompensatorInfo,
+        ai=asset_info(),
+        maxPowerLoss=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ratedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ratedReactivePower=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ratedVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     )
 
 
@@ -936,6 +948,7 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, overheadWireInfo=overhead_wire_info())),
         draw(builds(NetworkIdentifiedObject, powerTransformerInfo=power_transformer_info())),
         draw(builds(NetworkIdentifiedObject, shortCircuitTest=short_circuit_test())),
+        draw(builds(NetworkIdentifiedObject, shuntCompensatorInfo=shunt_compensator_info())),
         draw(builds(NetworkIdentifiedObject, transformerEndInfo=transformer_end_info())),
         draw(builds(NetworkIdentifiedObject, transformerTankInfo=transformer_tank_info())),
 

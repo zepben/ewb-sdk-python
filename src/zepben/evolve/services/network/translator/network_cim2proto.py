@@ -9,6 +9,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircu
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.ShortCircuitTest_pb2 import ShortCircuitTest as PBShortCircuitTest
+from zepben.protobuf.cim.iec61968.assetinfo.ShuntCompensatorInfo_pb2 import ShuntCompensatorInfo as PBShuntCompensatorInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerEndInfo_pb2 import TransformerEndInfo as PBTransformerEndInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import TransformerTankInfo as PBTransformerTankInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest as PBTransformerTest
@@ -106,7 +107,8 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit 
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.network.model.TracedPhases_pb2 import TracedPhases as PBTracedPhases
 
-from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, OpenCircuitTest, ShortCircuitTest, TransformerTest
+from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, OpenCircuitTest, ShortCircuitTest, TransformerTest, \
+    ShuntCompensatorInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
 from zepben.evolve.model.cim.iec61968.assets.asset import *
@@ -158,14 +160,14 @@ from zepben.evolve.services.common.translator.util import mrid_or_empty, from_nu
 
 __all__ = [
     "CimTranslationException", "cable_info_to_pb", "no_load_test_to_pb", "open_circuit_test_to_pb", "overhead_wire_info_to_pb", "power_transformer_info_to_pb",
-    "short_circuit_test_to_pb", "transformer_end_info_to_pb", "transformer_tank_info_to_pb", "transformer_test_to_pb", "wire_info_to_pb", "asset_to_pb",
-    "asset_container_to_pb", "asset_info_to_pb", "asset_organisation_role_to_pb", "asset_owner_to_pb", "pole_to_pb", "streetlight_to_pb", "structure_to_pb",
-    "location_to_pb", "position_point_to_pb", "street_address_to_pb", "town_detail_to_pb", "end_device_to_pb", "meter_to_pb", "usage_point_to_pb",
-    "operational_restriction_to_pb", "auxiliary_equipment_to_pb", "fault_indicator_to_pb", "ac_dc_terminal_to_pb", "base_voltage_to_pb",
-    "conducting_equipment_to_pb", "connectivity_node_to_pb", "connectivity_node_container_to_pb", "equipment_to_pb", "equipment_container_to_pb",
-    "feeder_to_pb", "geographical_region_to_pb", "power_system_resource_to_pb", "site_to_pb", "sub_geographical_region_to_pb", "substation_to_pb",
-    "terminal_to_pb", "equivalent_branch_to_pb", "equivalent_equipment_to_pb", "control_to_pb", "io_point_to_pb", "accumulator_to_pb", "analog_to_pb",
-    "discrete_to_pb", "measurement_to_pb", "remote_control_to_pb", "remote_point_to_pb", "remote_source_to_pb", "battery_unit_to_pb",
+    "short_circuit_test_to_pb", "shunt_compensator_info_to_pb", "transformer_end_info_to_pb", "transformer_tank_info_to_pb", "transformer_test_to_pb",
+    "wire_info_to_pb", "asset_to_pb", "asset_container_to_pb", "asset_info_to_pb", "asset_organisation_role_to_pb", "asset_owner_to_pb", "pole_to_pb",
+    "streetlight_to_pb", "structure_to_pb", "location_to_pb", "position_point_to_pb", "street_address_to_pb", "town_detail_to_pb", "end_device_to_pb",
+    "meter_to_pb", "usage_point_to_pb", "operational_restriction_to_pb", "auxiliary_equipment_to_pb", "fault_indicator_to_pb", "ac_dc_terminal_to_pb",
+    "base_voltage_to_pb", "conducting_equipment_to_pb", "connectivity_node_to_pb", "connectivity_node_container_to_pb", "equipment_to_pb",
+    "equipment_container_to_pb", "feeder_to_pb", "geographical_region_to_pb", "power_system_resource_to_pb", "site_to_pb", "sub_geographical_region_to_pb",
+    "substation_to_pb", "terminal_to_pb", "equivalent_branch_to_pb", "equivalent_equipment_to_pb", "control_to_pb", "io_point_to_pb", "accumulator_to_pb",
+    "analog_to_pb", "discrete_to_pb", "measurement_to_pb", "remote_control_to_pb", "remote_point_to_pb", "remote_source_to_pb", "battery_unit_to_pb",
     "photo_voltaic_unit_to_pb", "power_electronics_unit_to_pb", "power_electronics_wind_unit_to_pb", "ac_line_segment_to_pb", "breaker_to_pb",
     "conductor_to_pb", "connector_to_pb", "disconnector_to_pb", "energy_connection_to_pb", "energy_consumer_to_pb", "energy_consumer_phase_to_pb",
     "energy_source_to_pb", "energy_source_phase_to_pb", "fuse_to_pb", "jumper_to_pb", "junction_to_pb", "busbar_section_to_pb", "line_to_pb",
@@ -241,6 +243,16 @@ def short_circuit_test_to_pb(cim: ShortCircuitTest) -> PBShortCircuitTest:
     )
 
 
+def shunt_compensator_info_to_pb(cim: ShuntCompensatorInfo) -> PBShuntCompensatorInfo:
+    return PBShuntCompensatorInfo(
+        ai=asset_info_to_pb(cim),
+        maxPowerLoss=from_nullable_int(cim.max_power_loss),
+        ratedCurrent=from_nullable_int(cim.rated_current),
+        ratedReactivePower=from_nullable_int(cim.rated_reactive_power),
+        ratedVoltage=from_nullable_int(cim.rated_voltage),
+    )
+
+
 def transformer_end_info_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
     return PBTransformerEndInfo(
         ai=asset_info_to_pb(cim),
@@ -292,6 +304,7 @@ OpenCircuitTest.to_pb = open_circuit_test_to_pb
 OverheadWireInfo.to_pb = overhead_wire_info_to_pb
 PowerTransformerInfo.to_pb = power_transformer_info_to_pb
 ShortCircuitTest.to_pb = short_circuit_test_to_pb
+ShuntCompensatorInfo.to_pb = shunt_compensator_info_to_pb
 TransformerEndInfo.to_pb = transformer_end_info_to_pb
 TransformerTankInfo.to_pb = transformer_tank_info_to_pb
 TransformerTest.to_pb = transformer_test_to_pb

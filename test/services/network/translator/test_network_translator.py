@@ -8,7 +8,6 @@ from hypothesis import given, HealthCheck, settings
 
 from test.cim_creators import *
 from test.services.common.translator.base_test_translator import validate_service_translations
-from zepben.evolve import NetworkService, NetworkServiceComparator
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -23,6 +22,7 @@ types_to_test = {
     "create_overhead_wire_info": create_overhead_wire_info(),
     "create_power_transformer_info": create_power_transformer_info(),
     "create_short_circuit_test": create_short_circuit_test(),
+    "create_shunt_compensator_info": create_shunt_compensator_info(),
     "create_transformer_end_info": create_transformer_end_info(),
     "create_transformer_tank_info": create_transformer_tank_info(),
 

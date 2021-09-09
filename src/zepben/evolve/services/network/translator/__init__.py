@@ -10,6 +10,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircu
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.ShortCircuitTest_pb2 import ShortCircuitTest
+from zepben.protobuf.cim.iec61968.assetinfo.ShuntCompensatorInfo_pb2 import ShuntCompensatorInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerEndInfo_pb2 import TransformerEndInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import TransformerTankInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest
@@ -103,6 +104,7 @@ OpenCircuitTest.mrid = lambda self: self.tt.mrid()
 OverheadWireInfo.mrid = lambda self: self.wi.mrid()
 PowerTransformerInfo.mrid = lambda self: self.ai.mrid()
 ShortCircuitTest.mrid = lambda self: self.tt.mrid()
+ShuntCompensatorInfo.mrid = lambda self: self.ai.mrid()
 TransformerEndInfo.mrid = lambda self: self.ai.mrid()
 TransformerTankInfo.mrid = lambda self: self.ai.mrid()
 TransformerTest.mrid = lambda self: self.io.mrid()

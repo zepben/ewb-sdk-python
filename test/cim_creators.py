@@ -91,6 +91,17 @@ def create_short_circuit_test():
     )
 
 
+def create_shunt_compensator_info():
+    return builds(
+        ShuntCompensatorInfo,
+        **create_asset_info(),
+        max_power_loss=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        rated_current=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        rated_reactive_power=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        rated_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+    )
+
+
 def create_transformer_end_info():
     return builds(
         TransformerEndInfo,
