@@ -54,13 +54,10 @@ to prevent the test from timing out while you step through the code:
       * Add ```def <new_class_name>_to_pb```  
       * Add ```"<new_class_name>_to_cim"``` to ```__all__```
       * Add ```<new_class_name>_to_cim = <new_class_name>_to_cim```
-1. Update [network_rpc.py](src/zepben/evolve/streaming/put/network_rpc.py)
-   * Add ```from zepben.protobuf...<new_class_name>_pb2 import <new_class_name>```
-   * Add ```<new_class_name>: ('Create<new_class_name>', Create<new_class_name>),```
 1. Add reference resolver(s) to resolvers in [common package](src/zepben/evolve/services/common)  (if new associations).
 1. Testing:
    * Test for model classes.
-   * Added new classes to service translator test.
+   * Added new classes to corresponding service translator test. [```test/services/...```](test/services)
    * Add the required creators to:
      - [```pb_creators.py```](test/pb_creators.py)
      - [```cim_creators.py```](test/cim_creators.py)
