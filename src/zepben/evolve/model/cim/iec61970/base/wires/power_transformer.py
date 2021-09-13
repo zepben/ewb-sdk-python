@@ -354,6 +354,14 @@ class PowerTransformer(ConductingEquipment):
         """The `zepben.evolve.cim.iec61968.assetinfo.power_transformer_info.PowerTransformerInfo` for this `PowerTransformer`"""
         return self.asset_info
 
+    @power_transformer_info.setter
+    def power_transformer_info(self, pti: Optional[PowerTransformerInfo]):
+        """
+        Set the `zepben.evolve.cim.iec61968.assetinfo.power_transformer_info.PowerTransformerInfo` for this `PowerTransformer`
+        `pti` The `PowerTransformerInfo` to associate with this `PowerTransformer`
+        """
+        self.asset_info = pti
+
     def get_base_voltage(self, terminal: Terminal = None):
         if terminal is None:
             return self.base_voltage

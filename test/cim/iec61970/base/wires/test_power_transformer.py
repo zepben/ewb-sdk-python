@@ -8,8 +8,9 @@ from hypothesis.strategies import builds, sampled_from, lists, floats
 
 from test.cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
+from test.cim.property_validator import validate_property_accessor
 from test.cim_creators import FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import PowerTransformer, VectorGroup, PowerTransformerEnd
+from zepben.evolve import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo
 
 power_transformer_kwargs = {
     **conducting_equipment_kwargs,
@@ -47,3 +48,9 @@ def test_power_transformer_constructor_args():
     assert pt.vector_group == power_transformer_args[-3]
     assert list(pt.ends) == power_transformer_args[-2]
     assert pt.transformer_utilisation == power_transformer_args[-1]
+
+
+def test_power_transformer_info_accessor():
+    validate_property_accessor(PowerTransformer, PowerTransformerInfo, PowerTransformer.power_transformer_info)
+
+

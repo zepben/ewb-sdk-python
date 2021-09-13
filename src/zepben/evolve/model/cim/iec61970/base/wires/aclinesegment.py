@@ -6,7 +6,7 @@
 
 from typing import Optional
 
-from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import CableInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import CableInfo, WireInfo
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
 
@@ -26,6 +26,14 @@ class Conductor(ConductingEquipment):
     def wire_info(self):
         """The `zepben.evolve.cim.iec61968.assetinfo.wire_info.WireInfo` for this `Conductor`"""
         return self.asset_info
+
+    @wire_info.setter
+    def wire_info(self, wi: Optional[WireInfo]):
+        """
+        Set the `zepben.evolve.cim.iec61968.assetinfo.wire_info.WireInfo` for this `Conductor`
+        `wi` The `WireInfo` for this `Conductor`
+        """
+        self.asset_info = wi
 
     def is_underground(self):
         """
