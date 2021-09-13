@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional
 
+from zepben.evolve import ShuntCompensatorInfo
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
 from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 
@@ -41,6 +42,19 @@ class ShuntCompensator(RegulatingCondEq):
     For `NonlinearShuntCompensator`s shall only be set to one of the NonlinearShuntCompensatorPoint.sectionNumber. There is no interpolation between 
     NonlinearShuntCompensatorPoint-s.
     """
+
+    @property
+    def shunt_compensator_info(self) -> Optional[ShuntCompensatorInfo]:
+        """The `zepben.evolve.cim.iec61968.assetinfo.shunt_compensator_info.ShuntCompensatorInfo` for this `ShuntCompensator`"""
+        return self.asset_info
+
+    @shunt_compensator_info.setter
+    def shunt_compensator_info(self, sci: Optional[ShuntCompensatorInfo]):
+        """
+        Set the `zepben.evolve.cim.iec61968.assetinfo.shunt_compensator_info.ShuntCompensatorInfo` for this `ShuntCompensator`
+        `sci` The `ShuntCompensatorInfo` for this `ShuntCompensator`
+        """
+        self.asset_info = sci
 
 
 class LinearShuntCompensator(ShuntCompensator):

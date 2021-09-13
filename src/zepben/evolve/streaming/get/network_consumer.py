@@ -22,7 +22,7 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     Loop, Pole, Streetlight, Accumulator, Analog, Discrete, Control, RemoteControl, RemoteSource, PowerTransformerInfo, PowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
-    ShortCircuitTest, EquivalentBranch
+    ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -552,6 +552,7 @@ _nio_type_to_cim = {
     "overheadWireInfo": OverheadWireInfo,
     "powerTransformerInfo": PowerTransformerInfo,
     "shortCircuitTest": ShortCircuitTest,
+    "shuntCompensatorInfo": ShuntCompensatorInfo,
     "transformerEndInfo": TransformerEndInfo,
     "transformerTankInfo": TransformerTankInfo,
 

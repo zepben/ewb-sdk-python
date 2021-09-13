@@ -4,7 +4,7 @@
 * None.
 
 ##### New Features
-* None.
+* Added CIM class `ShuntCompensatorInfo`
 
 ##### Enhancements
 * None.

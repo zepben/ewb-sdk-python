@@ -14,7 +14,7 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, \
     PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
     Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
-    Switch
+    Switch, ShuntCompensatorInfo
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
@@ -105,6 +105,19 @@ class NetworkServiceComparator(BaseServiceComparator):
             ShortCircuitTest.voltage_ohmic_part
         )
         return self._compare_transformer_test(diff)
+
+    def _compare_shunt_compensator_info(self, source: ShuntCompensatorInfo, target: ShuntCompensatorInfo) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(
+            diff,
+            ShuntCompensatorInfo.max_power_loss,
+            ShuntCompensatorInfo.rated_current,
+            ShuntCompensatorInfo.rated_reactive_power,
+            ShuntCompensatorInfo.rated_voltage,
+        )
+
+        return self._compare_asset_info(diff)
 
     def _compare_transformer_end_info(self, source: TransformerEndInfo, target: TransformerEndInfo) -> ObjectDifference:
         diff = ObjectDifference(source, target)

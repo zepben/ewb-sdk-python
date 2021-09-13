@@ -11,7 +11,7 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     EnergySourcePhase, Feeder, GeographicalRegion, Measurement, OperationalRestriction, OrganisationRole, PowerSystemResource, PowerTransformerEnd, \
     PricingStructure, RatioTapChanger, RemoteControl, RemoteSource, SubGeographicalRegion, Substation, Terminal, TransformerEnd, UsagePoint, Circuit, Loop, \
     PowerElectronicsUnit, PowerElectronicsConnectionPhase, PowerElectronicsConnection, TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, \
-    TransformerStarImpedance
+    TransformerStarImpedance, ShuntCompensator
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
@@ -26,7 +26,7 @@ __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location",
            "geographical_region", "substations",
            "normal_energizing_feeders", "sub_geographical_region", "conducting_equipment", "connectivity_node",
            "te_base_voltage", "ratio_tap_changer",
-           "te_terminal", "end_devices", "up_equipment", "usage_point_location",
+           "te_terminal", "end_devices", "up_equipment", "usage_point_location", "shunt_compensator_info",
            "transformer_end_info", "power_transformer_info_transformer_tank_info", "transformer_star_impedance",
            "star_impedance_transformer_end_info", "transformer_end_transformer_star_impedance"]
 
@@ -69,6 +69,11 @@ def asset_info(conductor: Conductor) -> BoundReferenceResolver:
 def power_transformer_info(pt: PowerTransformer) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(pt, powertransformer_to_power_transformer_info_resolver, None)
+
+
+def shunt_compensator_info(sc: ShuntCompensator) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(sc, shunt_compensator_to_shunt_compensator_info_resolver, None)
 
 
 def streetlights(p: Pole) -> BoundReferenceResolver:

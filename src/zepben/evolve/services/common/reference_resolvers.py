@@ -10,7 +10,8 @@ from typing import Callable, Optional
 
 from dataclassy import dataclass
 
-from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, ShortCircuitTest, OpenCircuitTest
+from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, ShortCircuitTest, OpenCircuitTest, ShuntCompensator, \
+    ShuntCompensatorInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
 from zepben.evolve.model.cim.iec61968.assets.asset import Asset
@@ -68,7 +69,7 @@ __all__ = [
     "loop_to_sub_resolver", "BoundReferenceResolver", "ReferenceResolver", "UnresolvedReference", "tei_to_tti_resolver", "tti_to_tei_resolver",
     "tei_to_tsi_resolver", "tsi_to_tei_resolver", "te_to_tsi_resolver", "pti_to_tti_resolver", "peu_to_pec_resolver", "pec_to_peu_resolver",
     "pecphase_to_pec_resolver", "pec_to_pecphase_resolver", "tei_to_ee_nlt_resolver", "tei_to_ee_sct_resolver", "tei_to_ge_sct_resolver",
-    "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver"
+    "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver", "shunt_compensator_to_shunt_compensator_info_resolver",
 ]
 
 
@@ -168,6 +169,8 @@ cond_equip_to_terminal_resolver = ReferenceResolver(ConductingEquipment, Termina
 conductor_to_wire_info_resolver = ReferenceResolver(Conductor, WireInfo, lambda t, r: setattr(t, 'asset_info', r))
 
 powertransformer_to_power_transformer_info_resolver = ReferenceResolver(PowerTransformer, PowerTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
+
+shunt_compensator_to_shunt_compensator_info_resolver = ReferenceResolver(ShuntCompensator, ShuntCompensatorInfo, lambda t, r: setattr(t, 'asset_info', r))
 
 tei_to_tti_resolver = ReferenceResolver(TransformerEndInfo, TransformerTankInfo, lambda t, r: setattr(t, 'transformer_tank_info', r))
 

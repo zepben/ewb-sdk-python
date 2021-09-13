@@ -10,6 +10,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircu
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.ShortCircuitTest_pb2 import ShortCircuitTest
+from zepben.protobuf.cim.iec61968.assetinfo.ShuntCompensatorInfo_pb2 import ShuntCompensatorInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerEndInfo_pb2 import TransformerEndInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import TransformerTankInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest
@@ -103,6 +104,7 @@ OpenCircuitTest.mrid = lambda self: self.tt.mrid()
 OverheadWireInfo.mrid = lambda self: self.wi.mrid()
 PowerTransformerInfo.mrid = lambda self: self.ai.mrid()
 ShortCircuitTest.mrid = lambda self: self.tt.mrid()
+ShuntCompensatorInfo.mrid = lambda self: self.ai.mrid()
 TransformerEndInfo.mrid = lambda self: self.ai.mrid()
 TransformerTankInfo.mrid = lambda self: self.ai.mrid()
 TransformerTest.mrid = lambda self: self.io.mrid()
@@ -287,9 +289,10 @@ Feeder.normal_energizing_substation_mrid = lambda self: getattr(self, "normalEne
 AcLineSegment.per_length_sequence_impedance_mrid = lambda self: getattr(self, "perLengthSequenceImpedanceMRID", None)
 
 # asset_info_mrid
-Conductor.asset_info_mrid = lambda self: self.ce.eq.psr.assetInfoMRID
-AcLineSegment.asset_info_mrid = lambda self: self.cd.asset_info_mrid()
-PowerTransformer.asset_info_mrid = lambda self: self.ce.eq.psr.assetInfoMRID
+ConductingEquipment.asset_info_mrid = lambda self: self.eq.psr.assetInfoMRID
+Conductor.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
+PowerTransformer.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
+ShuntCompensator.asset_info_mrid = lambda self: self.rce.ec.ce.asset_info_mrid()
 
 # ratio_tap_changer_mrid
 TransformerEnd.ratio_tap_changer_mrid = lambda self: getattr(self, "ratioTapChangerMRID", None)

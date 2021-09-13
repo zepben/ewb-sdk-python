@@ -13,6 +13,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircu
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.ShortCircuitTest_pb2 import ShortCircuitTest as PBShortCircuitTest
+from zepben.protobuf.cim.iec61968.assetinfo.ShuntCompensatorInfo_pb2 import ShuntCompensatorInfo as PBShuntCompensatorInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerEndInfo_pb2 import TransformerEndInfo as PBTransformerEndInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import TransformerTankInfo as PBTransformerTankInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest as PBTransformerTest
@@ -102,7 +103,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBL
 
 import zepben.evolve.services.common.resolver as resolver
 from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, OpenCircuitTest, ShortCircuitTest, TransformerTest, \
-    TracedPhases
+    TracedPhases, ShuntCompensatorInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
@@ -162,10 +163,10 @@ from zepben.evolve.services.network.network import NetworkService
 
 __all__ = [
     "cable_info_to_cim", "no_load_test_to_cim", "open_circuit_test_to_cim", "overhead_wire_info_to_cim", "power_transformer_info_to_cim",
-    "short_circuit_test_to_cim", "transformer_end_info_to_cim", "transformer_tank_info_to_cim", "transformer_test_to_cim", "wire_info_to_cim", "asset_to_cim",
-    "asset_container_to_cim", "asset_info_to_cim", "asset_organisation_role_to_cim", "asset_owner_to_cim", "pole_to_cim", "streetlight_to_cim",
-    "structure_to_cim", "location_to_cim", "position_point_to_cim", "street_address_to_cim", "town_detail_to_cim", "end_device_to_cim", "meter_to_cim",
-    "usage_point_to_cim", "operational_restriction_to_cim", "auxiliary_equipment_to_cim", "fault_indicator_to_cim", "ac_dc_terminal_to_cim",
+    "short_circuit_test_to_cim", "shunt_compensator_info_to_cim", "transformer_end_info_to_cim", "transformer_tank_info_to_cim", "transformer_test_to_cim",
+    "wire_info_to_cim", "asset_to_cim", "asset_container_to_cim", "asset_info_to_cim", "asset_organisation_role_to_cim", "asset_owner_to_cim", "pole_to_cim",
+    "streetlight_to_cim", "structure_to_cim", "location_to_cim", "position_point_to_cim", "street_address_to_cim", "town_detail_to_cim", "end_device_to_cim",
+    "meter_to_cim", "usage_point_to_cim", "operational_restriction_to_cim", "auxiliary_equipment_to_cim", "fault_indicator_to_cim", "ac_dc_terminal_to_cim",
     "base_voltage_to_cim", "conducting_equipment_to_cim", "connectivity_node_to_cim", "connectivity_node_container_to_cim", "equipment_to_cim",
     "equipment_container_to_cim", "feeder_to_cim", "geographical_region_to_cim", "power_system_resource_to_cim", "site_to_cim",
     "sub_geographical_region_to_cim", "substation_to_cim", "terminal_to_cim", "equivalent_branch_to_cim", "equivalent_equipment_to_cim", "accumulator_to_cim",
@@ -261,6 +262,19 @@ def short_circuit_test_to_cim(pb: PBShortCircuitTest, network_service: NetworkSe
     return cim if network_service.add(cim) else None
 
 
+def shunt_compensator_info_to_cim(pb: PBShuntCompensatorInfo, network_service: NetworkService) -> Optional[ShuntCompensatorInfo]:
+    cim = ShuntCompensatorInfo(
+        mrid=pb.mrid(),
+        max_power_loss=int_or_none(pb.maxPowerLoss),
+        rated_current=int_or_none(pb.ratedCurrent),
+        rated_reactive_power=int_or_none(pb.ratedReactivePower),
+        rated_voltage=int_or_none(pb.ratedVoltage),
+    )
+
+    asset_info_to_cim(pb.ai, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 def transformer_end_info_to_cim(pb: PBTransformerEndInfo, network_service: NetworkService) -> Optional[TransformerEndInfo]:
     # noinspection PyArgumentList
     cim = TransformerEndInfo(
@@ -318,6 +332,7 @@ PBOpenCircuitTest.to_cim = open_circuit_test_to_cim
 PBOverheadWireInfo.to_cim = overhead_wire_info_to_cim
 PBPowerTransformerInfo.to_cim = power_transformer_info_to_cim
 PBShortCircuitTest.to_cim = short_circuit_test_to_cim
+PBShuntCompensatorInfo.to_cim = shunt_compensator_info_to_cim
 PBTransformerEndInfo.to_cim = transformer_end_info_to_cim
 PBTransformerTankInfo.to_cim = transformer_tank_info_to_cim
 PBTransformerTest.to_cim = transformer_test_to_cim
@@ -1137,6 +1152,7 @@ def regulating_cond_eq_to_cim(pb: PBRegulatingCondEq, cim: RegulatingCondEq, net
 
 
 def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, network_service: NetworkService):
+    network_service.resolve_or_defer_reference(resolver.shunt_compensator_info(cim), pb.asset_info_mrid())
     cim.sections = float_or_none(pb.sections)
     cim.grounded = pb.grounded
     cim.nom_u = int_or_none(pb.nomU)

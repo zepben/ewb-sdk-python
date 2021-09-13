@@ -23,6 +23,7 @@ from zepben.evolve.model.cim.iec61968.assetinfo.transformer_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.short_circuit_test import *
+from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import *
 from zepben.evolve.model.cim.iec61968.metering.metering import *
