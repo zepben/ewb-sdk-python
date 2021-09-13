@@ -762,8 +762,8 @@ def disconnector_to_pb(cim: Disconnector) -> PBDisconnector:
     return PBDisconnector(sw=switch_to_pb(cim))
 
 
-def energy_connection_to_pb(cim: EnergyConnection) -> PBEnergyConnection:
-    return PBEnergyConnection(ce=conducting_equipment_to_pb(cim))
+def energy_connection_to_pb(cim: EnergyConnection, include_asset_info = False) -> PBEnergyConnection:
+    return PBEnergyConnection(ce=conducting_equipment_to_pb(cim, include_asset_info))
 
 
 def energy_consumer_to_pb(cim: EnergyConsumer) -> PBEnergyConsumer:
@@ -944,16 +944,16 @@ def recloser_to_pb(cim: Recloser) -> PBRecloser:
     return PBRecloser(sw=protected_switch_to_pb(cim))
 
 
-def regulating_cond_eq_to_pb(cim: RegulatingCondEq) -> PBRegulatingCondEq:
+def regulating_cond_eq_to_pb(cim: RegulatingCondEq, include_asset_info = False) -> PBRegulatingCondEq:
     return PBRegulatingCondEq(
-        ec=energy_connection_to_pb(cim),
+        ec=energy_connection_to_pb(cim, include_asset_info),
         controlEnabled=cim.control_enabled
     )
 
 
 def shunt_compensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
     return PBShuntCompensator(
-        rce=regulating_cond_eq_to_pb(cim),
+        rce=regulating_cond_eq_to_pb(cim, True),
         sections=from_nullable_float(cim.sections),
         grounded=cim.grounded,
         nomU=from_nullable_int(cim.nom_u),

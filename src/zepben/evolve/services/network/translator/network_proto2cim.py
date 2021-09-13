@@ -1152,6 +1152,7 @@ def regulating_cond_eq_to_cim(pb: PBRegulatingCondEq, cim: RegulatingCondEq, net
 
 
 def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, network_service: NetworkService):
+    network_service.resolve_or_defer_reference(resolver.shunt_compensator_info(cim), pb.asset_info_mrid())
     cim.sections = float_or_none(pb.sections)
     cim.grounded = pb.grounded
     cim.nom_u = int_or_none(pb.nomU)

@@ -289,9 +289,10 @@ Feeder.normal_energizing_substation_mrid = lambda self: getattr(self, "normalEne
 AcLineSegment.per_length_sequence_impedance_mrid = lambda self: getattr(self, "perLengthSequenceImpedanceMRID", None)
 
 # asset_info_mrid
-Conductor.asset_info_mrid = lambda self: self.ce.eq.psr.assetInfoMRID
-AcLineSegment.asset_info_mrid = lambda self: self.cd.asset_info_mrid()
-PowerTransformer.asset_info_mrid = lambda self: self.ce.eq.psr.assetInfoMRID
+ConductingEquipment.asset_info_mrid = lambda self: self.eq.psr.assetInfoMRID
+Conductor.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
+PowerTransformer.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
+ShuntCompensator.asset_info_mrid = lambda self: self.rce.ec.ce.asset_info_mrid()
 
 # ratio_tap_changer_mrid
 TransformerEnd.ratio_tap_changer_mrid = lambda self: getattr(self, "ratioTapChangerMRID", None)

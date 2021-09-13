@@ -6,8 +6,6 @@
 
 from typing import Type
 
-from test.services.common.service_comparator_validator import ServiceComparatorValidator
-from test.services.common.test_base_service_comparator import TestBaseServiceComparator
 from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
     TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, AssetOwner, Location, AssetContainer, AssetInfo, \
     AssetOrganisationRole, Pole, Streetlight, WindingConnection, StreetlightLampKind, Structure, StreetAddress, TownDetail, PositionPoint, EndDevice, \
@@ -21,6 +19,9 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
     Circuit, Loop, NetworkService, TracedPhases, PhaseDirection, ShuntCompensatorInfo
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
+
+from test.services.common.service_comparator_validator import ServiceComparatorValidator
+from test.services.common.test_base_service_comparator import TestBaseServiceComparator
 
 
 class TestNetworkServiceComparator(TestBaseServiceComparator):
@@ -823,6 +824,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: PhaseShuntConnectionKind.G
         )
         self.validator.validate_property(ShuntCompensator.sections, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(ShuntCompensator.asset_info, creator, lambda _: ShuntCompensatorInfo(mrid="sci1"),
+                                         lambda _: ShuntCompensatorInfo(mrid="sci2"))
 
     def _compare_switch(self, creator: Type[Switch]):
         self._compare_conducting_equipment(creator)
