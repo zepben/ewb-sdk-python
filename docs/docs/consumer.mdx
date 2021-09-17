@@ -23,23 +23,86 @@ run any analytics you may wish to perform across the whole model.
 
 ## Connecting to a server
 
+The library provides two functions, `connect()` and `connect_async()`. They have the exact same arguments, however the async version is to be used with Python
+asyncio.
+
 ```python
-from zepben.evolve import connect, connect_async, NetworkService, SyncNetworkConsumerClient, NetworkConsumerClient
+from zepben.evolve import connect, connect_async, Feeder, SyncNetworkConsumerClient, NetworkConsumerClient
 
 # Synchronous
 with connect(host="localhost", rpc_port=50051) as channel:
-    service = NetworkService()
     client = SyncNetworkConsumerClient(channel)
-    result = client.get_feeder(service, "xxx")
+    result = client.get_equipment_container("xxx", Feeder)
     # do stuff with service
+    client.service.get('...')
 
 # Asyncio
 async with connect_async(host="localhost", rpc_port=50051) as channel:
-    service = NetworkService()
     client = NetworkConsumerClient(channel)
-    result = await client.get_feeder(service, "xxx")
+    result = await client.get_equipment_container("xxx", Feeder)
     # do stuff with service
+    client.service.get('...')
 ```
+
+### Connecting with HTTPS
+
+To connect to a HTTPS server with no auth all that's needed is the CA for the server. If the CA is in your system certificates it should be picked up
+automatically and the following should suffice:
+
+```python
+with connect(host="ewb.zepben.com", rpc_port=443) as channel:
+    client = SyncNetworkConsumerClient(channel)
+    result = client.get_equipment_container("xxx", Feeder)
+    client.service.get('...')
+```
+
+To specify a CA bundle pass the ca parameter:
+```python
+with open('path/to/ca/bundle', 'rb') as f:
+    ca = f.read()
+
+    with connect(host="ewb.zepben.com", rpc_port=443, ca=ca) as channel:
+        client = SyncNetworkConsumerClient(channel)
+        result = client.get_equipment_container("xxx", Feeder)
+        client.service.get('...')
+```
+
+And if client authentication is required by the server, additionally pass a key and certificate signed by the servers trusted CA:
+```python
+with open(args.key, 'rb') as f:
+    key = f.read()
+with open(args.ca, 'rb') as f:
+    ca = f.read()
+with open(args.cert, 'rb') as f:
+    cert = f.read()
+
+with connect(host="ewb.zepben.com", rpc_port=443, ca=ca, key=key, cert=cert) as channel:
+    client = SyncNetworkConsumerClient(channel)
+    result = client.get_equipment_container("xxx", Feeder)
+    client.service.get('...')
+```
+
+### Authentication
+
+Password Credentials and Client credentials OAuth2 flows are supported through the username/password and client_id/client_secret parameters:
+
+```python
+from zepben.evolve import connect, NetworkService, SyncNetworkConsumerClient
+
+# Password credentials configuration - client_secret optional.
+with connect(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
+             username="user@email.com", password="password1") as channel:
+    client = SyncNetworkConsumerClient(channel)
+    # ...
+
+# Client credentials configuration
+with connect(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
+             client_secret="some_client_secret") as channel:
+    client = SyncNetworkConsumerClient(channel)
+    # ...
+```
+
+Custom OAuth2 authenticators can be created by passing an `authenticator` to `connect` or `connect_async`.
 
 ## Network Hierarchy
 
