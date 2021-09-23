@@ -2,6 +2,7 @@
 
 | Version | Released |
 | --- | --- |
+|[0.25.0](#v0250)| `23 September 2021` |
 |[0.24.0](#v0240)| `20 August 2021` |
 |[0.23.0](#v0230)| `16 August 2021` |
 |[0.22.0](#v0220)| `12 February 2021` |
@@ -27,6 +28,26 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+### v0.25.0
+
+##### Breaking Changes
+* Added `secure` flag to `connect()` and `connect_async()` that defaults to False. This flag needs to be True when a secure connection is required or credentials are used.
+
+##### New Features
+* Added CIM class `ShuntCompensatorInfo`
+
+##### Enhancements
+* None.
+
+##### Fixes
+* Fixed bug that would cause bus-branch creation mappings to be shared between bus-branch creation result instances.
+* `connect()` and `connect_async()` will now use the OS CA bundle by default if no `ca` is specified.
+
+##### Notes
+* None.
 
 ---
 

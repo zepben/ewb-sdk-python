@@ -1,0 +1,143 @@
+---
+id: sdk-tracing
+title: Tracing
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+:::warning
+The tracing module is in an experimental state and bugs will be present.
+:::
+
+Once you have a connected network model you can start following the connectivity to do some interesting analyses, from
+simple tasks such as adding up cable lengths along a line to advanced functions like a full load flow analysis.
+
+The Evolve SDK provides an API to make following connectivity (what we will call tracing) less cumbersome and more
+productive. It provides a variety of use-case specific traces out of the box, but also a generic mechanism to write
+your own traces in an easy to use manner. The
+[Tracing](#)
+package is a great place to get an overview of the kind of tools we provide as part of the SDK.
+
+## Basic Connectivity 
+
+So, let's start at the absolute basic use case. "What is directly connected to this piece of equipment?".
+Obviously we provide a function to let you to find out. Let's see it in code:
+
+TODO: Take example from datamodel page and code then explain in context of that
+
+```python
+from zepben.evolve import Junction
+from zepben.evolve.tracing import ConnectivityResult, connected_equipment
+
+switch: Breaker = network.get("aSwitch")
+connectivity: List<ConnectivityResult> = switch.connected_equipment(PhaseCode.ABCN)
+# or:
+connectivity: List<ConnectivityResult> = connected_equipment(switch, PhaseCode.ABCN)
+for cr in connectivity:
+    print(f"{cr.from_equip()} is connected to {it.to_equip()} via terminals {cr.from_terminal()} -> {it.to_terminal()} ",
+          'through phases {map(cr.nominal_phase_paths(), lambda path: f"{path.from_phase()}:{path.to_phase()}" })')
+
+```
+
+Sometimes you want to be a bit more specific about your connectivity, such as "what is connected only to one side of the
+equipment?". You can do this by using specific terminals:
+
+```python
+from zepben.evolve import Breaker
+from zepben.evolve.tracing import ConnectivityResult, connected_terminals
+
+switch: Breaker = network.get("aSwitch")
+connectivity: List<ConnectivityResult> = switch.connected_terminals(PhaseCode.ABCN)
+# or
+connectivity: List<ConnectivityResult> = connected_terminals(switch, PhaseCode.ABCN)
+```
+
+This will produce a subset of the result above, with just the equipment connected to the given terminal. The 
+connectivity result instances in the subset will be exactly the same as the previous example.
+
+## Tracing
+
+### Basic Traversal
+
+To trace a network, we obviously need to repeat the above process for each piece of equipment in the connectivity result
+list. In computer science, stepping between nodes in a data structure like this is known as a traversal. Conveniently, 
+the SDK provides a [Traversal](#) interface with a number of implementations also provided for different use cases.
+
+The most common type you will use is the [BasicTraversal](#).
+In a nutshell, this class lets you easily specify how to step to connected objects, add custom actions to perform at
+each step to an object, and conditions on which the tracing should stop. It has some more advanced features, such as 
+allowing you to specify how to queue steps (for breadth, or depth or priority traversals) as well as custom tracking
+of objects. See the code docs for more details.
+
+There are a number of traces which we have identified as being frequently required. So, the SDK provides a number of 
+preconfigured BasicTraversal creators for these common use cases. These can be found in the tracing [package](#).
+
+To get started, lets take a look at the `tracing.connected_equipment_trace()`. This returns a `BasicTraversal` that is
+preconfigured to continuously step to equipment that is connected in any way. Under the covers it uses the
+`Tracing.connected_equipment` function we looked at above to continuously step to connected objects. Now, say we wanted to
+identify the nearest circuit breakers to a piece of equipment, capturing all equipment between those breakers. We can do
+that with the following:
+
+```python
+from zepben.evolve import NetworkService, AcLineSegment, Breaker, ConductingEquipment
+from zepben.evolve.tracing import connected_equipment_trace
+network = NetworkService()
+
+# Populate network service with your network
+
+acls = network.get("my conductor", AcLineSegment)
+if acls:
+    breakers = []
+    equipment_between_breakers = []
+    trace = connected_equipment_trace()
+    trace.add_stop_condition(lambda equip: isinstance(equip, Breaker))
+    trace.add_step_action(lambda equipment, stopping: breakers.append(equipment) if isinstance(equipment, Breaker) elif not stopping equipment_between_breakers.append(equipment))
+    await trace.trace(acls)
+
+print(f"The closest circuit breakers are: {breakers}")
+print(f"The equipment between the above breakers: {equipment_between_breakers}")
+```
+
+Let's break down what is happening with the trace:
+- `add_stop_condition` is returning true if the equipment at the current step is a `Breaker`. This will make the trace
+  stop at the current step if the equipment is a breaker. Note that this will not terminate the trace, it simply stops
+  any more traversing from the current step. That is, no more equipment will be queued to be stepped to from the equipment
+  at this step. If there are other paths / branches in the trace in the queue, they will still be stepped to.
+- `add_step_action` is capturing the equipment as a breaker if it is a breaker, otherwise it captures the equipment as
+   between breakers equipment if it is not stopping (as stopping happens on the breaker).
+
+As you can see this provides an extremely simple but powerful way to perform useful traces over your network. 
+
+### Useful traces
+
+There are a number of traces that will be common between all networks. We have identified numerous of these and 
+provide an easy way to instantiate them.
+
+#### Set phases trace
+
+`traces.set_phases()` returns a `zepben.evolve.tracing.phasing.SetPhases` instance. This provides a way to dynamically set phases at runtime based
+on a network's energy sources and the nominal phase connectivity within the network.
+
+#### Phase traces 
+
+There are numerous traces to trace based on various types of phasing data:
+- `traces.phase_trace()` will trace based on nominal phase connectivity, ignoring open switches or in service flags.
+- `traces.normal_phase_trace()` will trace based on nominal phase connectivity, stopping at normally open switches or
+  equipment flagged as not normally in service. 
+- `traces.current_phase_trace()` will trace based on nominal phase connectivity, stopping at currently open switches or
+  equipment flagged as not currently in service. 
+
+#### Downstream / Upstream traces 
+
+There are traces configured to find all upstream or downstream equipment from any piece of equipment that is on a feeder:
+- `traces.normal_downstream_trace()` will trace downstream of the start equipment based on the normal state of the network.
+- `traces.current_downstream_trace()` will trace downstream of the start equipment based on the current state of the network.
+- `traces.normal_upstream_trace()` will trace upstream of the start equipment based on the normal state of the network.
+- `traces.current_upstream_trace()` will trace upstream of the start equipment based on the current state of the network.
+
+#### Other traces
+
+There are other useful but less common traces available. See the 
+[code](#)
+for all the available traces.
