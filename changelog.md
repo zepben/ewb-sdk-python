@@ -1,17 +1,16 @@
-### v0.25.0
+### v0.26.0
 
 ##### Breaking Changes
-* Added `secure` flag to `connect()` and `connect_async()` that defaults to False. This flag needs to be True when a secure connection is required or credentials are used.
+* None.
 
 ##### New Features
-* Added CIM class `ShuntCompensatorInfo`
+* None.
 
 ##### Enhancements
 * None.
 
 ##### Fixes
-* Fixed bug that would cause bus-branch creation mappings to be shared between bus-branch creation result instances.
-* `connect()` and `connect_async()` will now use the OS CA bundle by default if no `ca` is specified.
+* None.
 
 ##### Notes
 * None.
