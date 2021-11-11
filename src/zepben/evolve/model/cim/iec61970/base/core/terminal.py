@@ -12,6 +12,7 @@ from weakref import ref, ReferenceType
 
 if TYPE_CHECKING:
     from zepben.evolve import ConnectivityNode, ConductingEquipment
+
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.phases import TracedPhases
@@ -33,18 +34,18 @@ class Terminal(AcDcTerminal):
     """
 
     _conducting_equipment: Optional[ConductingEquipment] = None
-    """The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via 
+    """The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
     connectivity nodes."""
 
     phases: PhaseCode = PhaseCode.ABC
     """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
 
     sequence_number: int = 0
-    """The orientation of the terminal connections for a multiple terminal conducting equipment. The sequence numbering starts with 1 and additional 
+    """The orientation of the terminal connections for a multiple terminal conducting equipment. The sequence numbering starts with 1 and additional
     terminals should follow in increasing order. The first terminal is the "starting point" for a two terminal branch."""
 
     traced_phases: TracedPhases = TracedPhases()
-    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases 
+    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases
     to match those in `phases`"""
 
     _cn: Optional[ReferenceType] = None
