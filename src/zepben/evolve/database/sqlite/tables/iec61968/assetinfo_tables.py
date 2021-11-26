@@ -9,7 +9,7 @@ from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import TableAssetInfo
 
 __all__ = ["TablePowerTransformerInfo", "TableTransformerEndInfo", "TableTransformerTankInfo", "TableWireInfo", "TableCableInfo", "TableAssetInfo",
-           "TableOverheadWireInfo"]
+           "TableOverheadWireInfo", "TableNoLoadTests", "TableOpenCircuitTests", "TableShortCircuitTests", "TableTransformerTest"]
 
 
 class TableTransformerTest(TableAssetInfo):
