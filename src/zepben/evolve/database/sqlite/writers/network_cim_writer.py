@@ -18,7 +18,7 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     TablePowerTransformerEnds, TableTransformerEnds, TransformerEnd, TransformerStarImpedance, TableTransformerStarImpedance, TableTapChangers, TapChanger, \
     RatioTapChanger, TableRatioTapChangers, TableCircuits, Circuit, Loop, TableLoops, LoopSubstationRelationship, UsagePoint, EndDevice, \
     TableUsagePointsEndDevices, AssetOrganisationRole, Asset, TableAssetOrganisationRolesAssets, TableEquipmentEquipmentContainers, TableCircuitsSubstations, \
-    TableCircuitsTerminals, TableLoopsSubstations
+    TableCircuitsTerminals, TableLoopsSubstations, TransformerEndInfo, TableTransformerEndInfo, TransformerTankInfo, TableTransformerTankInfo
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
 
@@ -31,10 +31,48 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         return self._save_wire_info(table, insert, cable_info, "cable info")
 
-    # todo: def save(self, short_circuit_test: ShortCircuitTest):
-    # todo: def save(self, no_load_test: NoLoadTest):
-    # todo: def save(self, open_circuit_test: OpenCircuitTest):
-    # todo: def save(ShuntCompensatorInfo)
+    # todo: Uncomment when TableNoLoadTests and TableTransformerTest are added.
+    # def save(self, no_load_test: NoLoadTest) -> bool:
+    #     table = self.database_tables.get_table(TableNoLoadTests)
+    #     insert = self.database_tables.get_insert(TableNoLoadTests)
+    #     insert.add_value(table.ENERGISED_END_VOLTAGE.queryIndex, no_load_test.energised_end_voltage)
+    #     insert.add_value(table.EXCITING_CURRENT.queryIndex, no_load_test.exciting_current)
+    #     insert.add_value(table.EXCITING_CURRENT_ZERO.queryIndex, no_load_test.exciting_current_zero)
+    #     insert.add_value(table.LOSS.queryIndex, no_load_test.loss)
+    #     insert.add_value(table.LOSS_ZERO.queryIndex, no_load_test.loss_zero)
+    #
+    #     return self._save_transformer_test(table, insert, no_load_test, "no load test")
+    #
+    # def _save_transformer_test(self, table: TableTransformerTest, insert: PreparedStatement,
+    #                            transformer_test: TransformerTest, description: str) -> bool:
+    #     insert.add_value(table.BASE_POWER.queryIndex, transformer_test.base_power)
+    #     insert.add_value(table.TEMPERATURE.queryIndex, transformer_test.temperature)
+    #     return self.save_identified_object(table, insert, transformer_test, description)
+
+    # def save(self, short_circuit_test: ShortCircuitTest) -> bool:
+    #     table = self.database_tables.get_table(TableShortCircuitTests)
+    #     insert = self.database_tables.get_insert(TableShortCircuitTests)
+    #     insert.add_value(table.CURRENT.queryIndex, short_circuit_test.current)
+    #     insert.add_value(table.ENERGISED_END_STEP.queryIndex, short_circuit_test.energised_end_step)
+    #     insert.add_value(table.GROUNDED_END_STEP.queryIndex, short_circuit_test.grounded_end_step)
+    #     insert.add_value(table.LEAKAGE_IMPEDANCE.queryIndex, short_circuit_test.leakage_impedance)
+    #     insert.add_value(table.LEAKAGE_IMPEDANCE_ZERO.queryIndex, short_circuit_test.leakage_impedance_zero)
+    #     insert.add_value(table.LOSS.queryIndex, short_circuit_test.loss)
+    #     insert.add_value(table.LOSS_ZERO.queryIndex, short_circuit_test.loss_zero)
+    #     insert.add_value(table.POWER.queryIndex, short_circuit_test.power)
+    #     insert.add_value(table.VOLTAGE.queryIndex, short_circuit_test.voltage)
+    #     insert.add_value(table.VOLTAGE_OHMIC_PART.queryIndex, short_circuit_test.voltage_ohmic_part)
+    #     return self._save_transformer_test(table, insert, short_circuit_test, "short circuit test")
+
+    # def save(self, openCircuitTest: OpenCircuitTest) -> bool:
+    #     table = self.database_tables.get_table(TableOpenCircuitTests)
+    #     insert = self.database_tables.get_insert(TableOpenCircuitTests)
+    #     insert.add_value(table.ENERGISED_END_STEP.queryIndex, openCircuitTest.energised_end_step)
+    #     insert.add_value(table.ENERGISED_END_VOLTAGE.queryIndex, openCircuitTest.energised_end_voltage)
+    #     insert.add_value(table.OPEN_END_STEP.queryIndex, openCircuitTest.open_end_step)
+    #     insert.add_value(table.OPEN_END_VOLTAGE.queryIndex, openCircuitTest.open_end_voltage)
+    #     insert.add_value(table.PHASE_SHIFT.queryIndex, openCircuitTest.phase_shift)
+    #     return self._save_transformer_test(table, insert, openCircuitTest, "open circuit test")
 
     def save(self, overhead_wire_info: OverheadWireInfo) -> bool:
         table = self.database_tables.get_table(TableOverheadWireInfo)
@@ -48,23 +86,27 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         return self._save_asset_info(table, insert, power_transformer_info, "power transformer info")
 
-    # todo: save (self, transformer_end_info: TransformerEndInfo) when TransformerEndInfo is merged.
-    # def save(self, transformer_end_info: TransformerEndInfo) -> bool:
-    #     table = self.database_tables.get_table(TableTransformerEndInfo)
-    #     insert = self.database_tables.get_insert(TableTransformerEndInfo)
-    #
-    #     insert.add_value(table.connection_kind.query_index, transformer_end_info.connection_kind.name)
-    #     insert.add_value(table.emergency_s.query_index, transformer_end_info.emergency_s)
-    #     insert.add_value(table.end_number.query_index, transformer_end_info.end_number)
-    #     insert.add_value(table.insulation_u.query_index, transformer_end_info.insulation_u)
-    #     insert.add_value(table.phase_angle_clock.query_index, transformer_end_info.phase_angle_clock)
-    #     insert.add_value(table.r.query_index, transformer_end_info.r)
-    #     return self._save_asset_info(table, insert, transformer_end_info, "transformer end info")
+    def save(self, transformer_end_info: TransformerEndInfo) -> bool:
+        table = self.database_tables.get_table(TableTransformerEndInfo)
+        insert = self.database_tables.get_insert(TableTransformerEndInfo)
+        insert.add_value(table.connection_kind.query_index, transformer_end_info.connection_kind.name)
+        insert.add_value(table.emergency_s.query_index, transformer_end_info.emergency_s)
+        insert.add_value(table.end_number.query_index, transformer_end_info.end_number)
+        insert.add_value(table.insulation_u.query_index, transformer_end_info.insulation_u)
+        insert.add_value(table.phase_angle_clock.query_index, transformer_end_info.phase_angle_clock)
+        insert.add_value(table.r.query_index, transformer_end_info.r)
+        return self._save_asset_info(table, insert, transformer_end_info, "transformer end info")
+
+    def save(self, transformer_tank_info: TransformerTankInfo) -> bool:
+        table = self.database_tables.get_table(TableTransformerTankInfo)
+        insert = self.database_tables.get_insert(TableTransformerTankInfo)
+        insert.add_value(table.power_transformer_info_mrid.query_index, transformer_tank_info.mrid)
+        return self._save_asset_info(table, insert, transformer_tank_info, "transformer tank info")
 
     def _save_wire_info(self, table: TableWireInfo, insert: PreparedStatement, wire_info: WireInfo, description: str) -> bool:
         insert.add_value(table.rated_current.query_index, wire_info.rated_current)
         insert.add_value(table.material.query_index, wire_info.material.name)
-        return True
+        return self._save_asset_info(table, insert, wire_info, description)
 
     def _save_asset_info(self, table: TableAssetInfo, insert: PreparedStatement, asset_info: AssetInfo, description: str) -> bool:
         return self.save_identified_object(table, insert, asset_info, description)
