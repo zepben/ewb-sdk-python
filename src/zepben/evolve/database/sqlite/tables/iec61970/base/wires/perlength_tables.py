@@ -7,7 +7,7 @@
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects
 
-__all__ = ["TablePerLengthLineImpedances", "TablePerLengthLineParameters", "TablePerLengthSequenceImpedances"]
+__all__ = ["TablePerLengthLineImpedances", "TablePerLengthLineParameters", "TablePerLengthSequenceImpedances", "TablePerLengthImpedances"]
 
 
 class TablePerLengthLineParameters(TableIdentifiedObjects):
@@ -15,6 +15,10 @@ class TablePerLengthLineParameters(TableIdentifiedObjects):
 
 
 class TablePerLengthLineImpedances(TablePerLengthLineParameters):
+    pass
+
+
+class TablePerLengthImpedances(TablePerLengthLineParameters):
     pass
 
 

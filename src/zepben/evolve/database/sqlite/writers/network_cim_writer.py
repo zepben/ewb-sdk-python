@@ -19,7 +19,8 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     RatioTapChanger, TableRatioTapChangers, TableCircuits, Circuit, Loop, TableLoops, LoopSubstationRelationship, UsagePoint, EndDevice, \
     TableUsagePointsEndDevices, AssetOrganisationRole, Asset, TableAssetOrganisationRolesAssets, TableEquipmentEquipmentContainers, TableCircuitsSubstations, \
     TableCircuitsTerminals, TableLoopsSubstations, TransformerEndInfo, TableTransformerEndInfo, TransformerTankInfo, TableTransformerTankInfo, NoLoadTest, \
-    TableNoLoadTests, TableTransformerTest, TransformerTest, ShortCircuitTest, TableShortCircuitTests, OpenCircuitTest, TableOpenCircuitTests
+    TableNoLoadTests, TableTransformerTest, TransformerTest, ShortCircuitTest, TableShortCircuitTests, OpenCircuitTest, TableOpenCircuitTests, \
+    PerLengthImpedance, TablePerLengthImpedances
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
 
@@ -374,11 +375,10 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.g_per_section.query_index, linear_shunt_compensator.g_per_section)
         return self._save_shunt_compensator(table, insert, linear_shunt_compensator, "linear shunt compensator")
 
-    # todo: Add _save_per_length_impedance with  TablePerLengthImpedances input
-    # def _save_per_length_impedance(self, table: TablePerLengthImpedances,
-    #                               insert: PreparedStatement,
-    #                               per_length_sequence_impedance: PerLengthImpedance, description: str) -> bool:
-    #    return self._save_per_length_line_parameter(table, insert, per_length_sequence_impedance, description)
+    def _save_per_length_impedance(self, table: TablePerLengthImpedances,
+                                   insert: PreparedStatement,
+                                   per_length_sequence_impedance: PerLengthImpedance, description: str) -> bool:
+        return self._save_per_length_line_parameter(table, insert, per_length_sequence_impedance, description)
 
     def _save_per_length_line_parameter(self, table: TablePerLengthLineParameters,
                                         insert: PreparedStatement,
@@ -386,7 +386,7 @@ class NetworkCIMWriter(BaseCIMWriter):
                                         description: str) -> bool:
         return self._save_identified_object(table, insert, per_length_line_parameter, description)
 
-    def save(self, per_length_sequence_impedance: PerLengthSequenceImpedance) -> bool:
+    def save_per_length_sequence_impedance(self, per_length_sequence_impedance: PerLengthSequenceImpedance) -> bool:
         table = self.database_tables.get_table(TablePerLengthSequenceImpedances)
         insert = self.database_tables.get_insert(TablePerLengthSequenceImpedances)
         insert.add_value(table.r.query_index, per_length_sequence_impedance.r)
