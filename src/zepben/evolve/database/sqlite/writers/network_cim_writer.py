@@ -26,13 +26,13 @@ from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 @dataclass
 class NetworkCIMWriter(BaseCIMWriter):
     # ** ** ** ** ** ** IEC61968 ASSET INFO ** ** ** ** ** ** #
-    def save(self, cable_info: CableInfo) -> bool:
+    def save_cable_info(self, cable_info: CableInfo) -> bool:
         table = self.database_tables.get_table(TableCableInfo)
         insert = self.database_tables.get_insert(TableCableInfo)
 
         return self._save_wire_info(table, insert, cable_info, "cable info")
 
-    def save(self, no_load_test: NoLoadTest) -> bool:
+    def save_no_load_test(self, no_load_test: NoLoadTest) -> bool:
         table = self.database_tables.get_table(TableNoLoadTests)
         insert = self.database_tables.get_insert(TableNoLoadTests)
         insert.add_value(table.energized_end_voltage.queryIndex, no_load_test.energised_end_voltage)
@@ -49,7 +49,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.temperature.query_index, transformer_test.temperature)
         return self.save_identified_object(table, insert, transformer_test, description)
 
-    def save(self, short_circuit_test: ShortCircuitTest) -> bool:
+    def save_short_circuit_test(self, short_circuit_test: ShortCircuitTest) -> bool:
         table = self.database_tables.get_table(TableShortCircuitTests)
         insert = self.database_tables.get_insert(TableShortCircuitTests)
         insert.add_value(table.current.queryIndex, short_circuit_test.current)
@@ -64,29 +64,29 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.voltage_ohmic_part.queryIndex, short_circuit_test.voltage_ohmic_part)
         return self._save_transformer_test(table, insert, short_circuit_test, "short circuit test")
 
-    def save(self, openCircuitTest: OpenCircuitTest) -> bool:
+    def save_open_circuit_test(self, open_circuit_test: OpenCircuitTest) -> bool:
         table = self.database_tables.get_table(TableOpenCircuitTests)
         insert = self.database_tables.get_insert(TableOpenCircuitTests)
-        insert.add_value(table.energized_end_step.queryIndex, openCircuitTest.energised_end_step)
-        insert.add_value(table.energized_end_voltage.queryIndex, openCircuitTest.energised_end_voltage)
-        insert.add_value(table.open_end_step.queryIndex, openCircuitTest.open_end_step)
-        insert.add_value(table.open_end_voltage.queryIndex, openCircuitTest.open_end_voltage)
-        insert.add_value(table.phase_shift.queryIndex, openCircuitTest.phase_shift)
-        return self._save_transformer_test(table, insert, openCircuitTest, "open circuit test")
+        insert.add_value(table.energized_end_step.queryIndex, open_circuit_test.energised_end_step)
+        insert.add_value(table.energized_end_voltage.queryIndex, open_circuit_test.energised_end_voltage)
+        insert.add_value(table.open_end_step.queryIndex, open_circuit_test.open_end_step)
+        insert.add_value(table.open_end_voltage.queryIndex, open_circuit_test.open_end_voltage)
+        insert.add_value(table.phase_shift.queryIndex, open_circuit_test.phase_shift)
+        return self._save_transformer_test(table, insert, open_circuit_test, "open circuit test")
 
-    def save(self, overhead_wire_info: OverheadWireInfo) -> bool:
+    def save_overhead_wire_info(self, overhead_wire_info: OverheadWireInfo) -> bool:
         table = self.database_tables.get_table(TableOverheadWireInfo)
         insert = self.database_tables.get_insert(TableOverheadWireInfo)
 
         return self._save_wire_info(table, insert, overhead_wire_info, "overhead wire info")
 
-    def save(self, power_transformer_info: PowerTransformerInfo) -> bool:
+    def save_power_transformer_info(self, power_transformer_info: PowerTransformerInfo) -> bool:
         table = self.database_tables.get_table(TablePowerTransformerInfo)
         insert = self.database_tables.get_insert(TablePowerTransformerInfo)
 
         return self._save_asset_info(table, insert, power_transformer_info, "power transformer info")
 
-    def save(self, transformer_end_info: TransformerEndInfo) -> bool:
+    def save_transformer_end_info(self, transformer_end_info: TransformerEndInfo) -> bool:
         table = self.database_tables.get_table(TableTransformerEndInfo)
         insert = self.database_tables.get_insert(TableTransformerEndInfo)
         insert.add_value(table.connection_kind.query_index, transformer_end_info.connection_kind.name)
@@ -97,7 +97,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.r.query_index, transformer_end_info.r)
         return self._save_asset_info(table, insert, transformer_end_info, "transformer end info")
 
-    def save(self, transformer_tank_info: TransformerTankInfo) -> bool:
+    def save_transformer_tank_info(self, transformer_tank_info: TransformerTankInfo) -> bool:
         table = self.database_tables.get_table(TableTransformerTankInfo)
         insert = self.database_tables.get_insert(TableTransformerTankInfo)
         insert.add_value(table.power_transformer_info_mrid.query_index, transformer_tank_info.mrid)
@@ -134,7 +134,7 @@ class NetworkCIMWriter(BaseCIMWriter):
                              ac_dc_terminal: AcDcTerminal, description: str) -> bool:
         return self.save_identified_object(table, insert, ac_dc_terminal, description)
 
-    def save(self, base_voltage: BaseVoltage) -> bool:
+    def save_base_voltage(self, base_voltage: BaseVoltage) -> bool:
         table = self.database_tables.get_table(TableBaseVoltages)
         insert = self.database_tables.get_insert(TableBaseVoltages)
 
@@ -147,7 +147,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.base_voltage_mrid.query_index, conducting_equipment.base_voltage.mrid)
         return self.save_equipment(table, insert, conducting_equipment, description)
 
-    def save(self, connectivity_node: ConnectivityNode) -> bool:
+    def save_connectivity_node(self, connectivity_node: ConnectivityNode) -> bool:
         table = self.database_tables.get_table(TableConnectivityNodes)
         insert = self.database_tables.get_insert(TableConnectivityNodes)
         return self.save_identified_object(table, insert, connectivity_node, "connectivity node")
@@ -178,14 +178,14 @@ class NetworkCIMWriter(BaseCIMWriter):
                                   description: str) -> bool:
         return self._save_connectivity_node_container(table, insert, equipment_container, description)
 
-    def save(self, feeder: Feeder):
+    def save_feeder(self, feeder: Feeder):
         table = self.database_tables.get_table(TableFeeders)
         insert = self.database_tables.get_insert(TableFeeders)
         insert.add_value(table.normal_head_terminal_mrid.query_index, feeder.normal_head_terminal.mrid)
         insert.add_value(table.normal_energizing_substation_mrid.query_index, feeder.normal_energizing_substation.mrid)
         return self._save_equipment_container(table, insert, feeder, "feeder")
 
-    def save(self, geographical_region: GeographicalRegion) -> bool:
+    def save_geographical_region(self, geographical_region: GeographicalRegion) -> bool:
         table = self.database_tables.get_table(TableGeographicalRegions)
         insert = self.database_tables.get_insert(TableGeographicalRegions)
         return self.save_identified_object(table, insert, geographical_region, "geographical region")
@@ -199,24 +199,24 @@ class NetworkCIMWriter(BaseCIMWriter):
         # todo: insert.add_value(table.num_controls.query_index, power_system_resource.num_controls)
         return self.save_identified_object(table, insert, power_system_resource, description)
 
-    def save(self, site: Site) -> bool:
+    def save_site(self, site: Site) -> bool:
         table = self.database_tables.get_table(TableSites)
         insert = self.database_tables.get_insert(TableSites)
         return self._save_equipment_container(table, insert, site, "site")
 
-    def save(self, sub_geographical_region: SubGeographicalRegion) -> bool:
+    def save_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> bool:
         table = self.database_tables.get_table(TableSubGeographicalRegions)
         insert = self.database_tables.get_insert(TableSubGeographicalRegions)
         insert.add_value(table.geographical_region_mrid.query_index, sub_geographical_region.geographical_region.mrid)
         return self.save_identified_object(table, insert, sub_geographical_region, "sub-geographical region")
 
-    def save(self, substation: Substation) -> bool:
+    def save_substation(self, substation: Substation) -> bool:
         table = self.database_tables.get_table(TableSubstations)
         insert = self.database_tables.get_insert(TableSubstations)
         insert.add_value(table.sub_geographical_region_mrid.query_index, substation.sub_geographical_region.mrid)
         return self.save_identified_object(table, insert, substation, "substation")
 
-    def save(self, terminal: Terminal) -> bool:
+    def save_terminal(self, terminal: Terminal) -> bool:
         table = self.database_tables.get_table(TableTerminals)
         insert = self.database_tables.get_insert(TableTerminals)
         insert.add_value(table.connectivity_node_mrid.query_index, terminal.conducting_equipment.mrid)
@@ -239,7 +239,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.min_p.query_index, power_electronics_unit.min_p)
         return self.save_equipment(table, insert, power_electronics_unit, description)
 
-    def save(self, battery_unit: BatteryUnit) -> bool:
+    def save_battery_unit(self, battery_unit: BatteryUnit) -> bool:
         table = self.database_tables.get_table(TableBatteryUnit)
         insert = self.database_tables.get_insert(TableBatteryUnit)
         insert.add_value(table.battery_state.query_index, battery_unit.battery_state.name)
@@ -247,37 +247,37 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.stored_e.query_index, battery_unit.stored_e)
         return self.save_power_electronics_unit(table, insert, battery_unit, "battery unit")
 
-    def save(self, photovoltaic_unit: PhotoVoltaicUnit) -> bool:
+    def save_photovoltaic_unit(self, photovoltaic_unit: PhotoVoltaicUnit) -> bool:
         table = self.database_tables.get_table(TablePhotoVoltaicUnit)
         insert = self.database_tables.get_insert(TablePhotoVoltaicUnit)
         return self.save_power_electronics_unit(table, insert, photovoltaic_unit, "photo voltaic unit")
 
-    def save(self, power_electronics_wind_unit: PowerElectronicsWindUnit) -> bool:
+    def save_power_electronics_wind_unit(self, power_electronics_wind_unit: PowerElectronicsWindUnit) -> bool:
         table = self.database_tables.get_table(TablePowerElectronicsWindUnit)
         insert = self.database_tables.get_insert(TablePowerElectronicsWindUnit)
         return self.save_power_electronics_unit(table, insert, power_electronics_wind_unit, "power electronics wind unit")
 
-    def save(self, ac_line_segment: AcLineSegment) -> bool:
+    def save_ac_line_segment(self, ac_line_segment: AcLineSegment) -> bool:
         table = self.database_tables.get_table(TableAcLineSegments)
         insert = self.database_tables.get_insert(TableAcLineSegments)
         insert.add_value(table.per_length_sequence_impedance_mrid.query_index,
                          ac_line_segment.per_length_sequence_impedance.mrid)
         return self._save_conductor(table, insert, ac_line_segment, "AC line segment")
 
-    def save(self, breaker: Breaker) -> bool:
+    def save_breaker(self, breaker: Breaker) -> bool:
         table = self.database_tables.get_table(TableBreakers)
         insert = self.database_tables.get_insert(TableBreakers)
         return self._save_protected_switch(table, insert, breaker, "breaker")
 
-    def save(self, loadBreakSwitch: LoadBreakSwitch) -> bool:
+    def save(self, load_break_switch: LoadBreakSwitch) -> bool:
         table = self.database_tables.get_table(TableLoadBreakSwitches)
         insert = self.database_tables.get_insert(TableLoadBreakSwitches)
-        return self._save_protected_switch(table, insert, loadBreakSwitch, "load break switch")
+        return self._save_protected_switch(table, insert, load_break_switch, "load break switch")
 
-    def save(self, busbarSection: BusbarSection) -> bool:
+    def save_bus_bar_section(self, bus_bar_section: BusbarSection) -> bool:
         table = self.database_tables.get_table(TableBusbarSections)
         insert = self.database_tables.get_insert(TableBusbarSections)
-        return self._save(table, insert, busbarSection, "busbar section")
+        return self._save(table, insert, bus_bar_section, "busbar section")
 
     def _save_conductor(self, table: TableConductors,
                         insert: PreparedStatement,
@@ -291,7 +291,7 @@ class NetworkCIMWriter(BaseCIMWriter):
                         insert: PreparedStatement, connector: Connector, description: str) -> bool: \
         return self._save_conducting_equipment(table, insert, connector, description)
 
-    def save(self, disconnector: Disconnector) -> bool:
+    def save_disconnector(self, disconnector: Disconnector) -> bool:
         table = self.database_tables.get_table(TableDisconnectors)
         insert = self.database_tables.get_insert(TableDisconnectors)
         return self._save_switch(table, insert, disconnector, "disconnector")
@@ -300,19 +300,19 @@ class NetworkCIMWriter(BaseCIMWriter):
                                 energyConnection: EnergyConnection, description: str) -> bool:
         return self._save_conducting_equipment(table, insert, energyConnection, description)
 
-    def save(self, energyConsumer: EnergyConsumer) -> bool:
+    def save_energy_consumer(self, energy_consumer: EnergyConsumer) -> bool:
         table = self.database_tables.get_table(TableEnergyConsumers)
         insert = self.database_tables.get_insert(TableEnergyConsumers)
-        insert.add_value(table.customer_count.query_index, energyConsumer.customer_count)
-        insert.add_value(table.grounded.query_index, energyConsumer.grounded)
-        insert.add_value(table.p.query_index, energyConsumer.p)
-        insert.add_value(table.q.query_index, energyConsumer.q)
-        insert.add_value(table.p_fixed.query_index, energyConsumer.p_fixed)
-        insert.add_value(table.q_fixed.query_index, energyConsumer.q_fixed)
-        insert.add_value(table.phase_connection.query_index, energyConsumer.phase_connection.name)
-        return self._save_energy_connection(table, insert, energyConsumer, "energy consumer")
+        insert.add_value(table.customer_count.query_index, energy_consumer.customer_count)
+        insert.add_value(table.grounded.query_index, energy_consumer.grounded)
+        insert.add_value(table.p.query_index, energy_consumer.p)
+        insert.add_value(table.q.query_index, energy_consumer.q)
+        insert.add_value(table.p_fixed.query_index, energy_consumer.p_fixed)
+        insert.add_value(table.q_fixed.query_index, energy_consumer.q_fixed)
+        insert.add_value(table.phase_connection.query_index, energy_consumer.phase_connection.name)
+        return self._save_energy_connection(table, insert, energy_consumer, "energy consumer")
 
-    def save(self, energy_consumer_phase: EnergyConsumerPhase) -> bool:
+    def save_energy_consumer_phase(self, energy_consumer_phase: EnergyConsumerPhase) -> bool:
         table = self.database_tables.get_table(TableEnergyConsumerPhases)
         insert = self.database_tables.get_insert(TableEnergyConsumerPhases)
         insert.add_value(table.energy_consumer_mrid.query_index, energy_consumer_phase.energy_consumer.mrid)
@@ -323,7 +323,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.q_fixed.query_index, energy_consumer_phase.q_fixed)
         return self._save_power_system_resource(table, insert, energy_consumer_phase, "energy consumer phase")
 
-    def save(self, energy_source: EnergySource) -> bool:
+    def save_energy_source(self, energy_source: EnergySource) -> bool:
         table = self.database_tables.get_table(TableEnergySources)
         insert = self.database_tables.get_insert(TableEnergySources)
         insert.add_value(table.active_power.query_index, energy_source.active_power)
@@ -340,24 +340,24 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.xn.query_index, energy_source.xn)
         return self._save_energy_connection(table, insert, energy_source, "energy source")
 
-    def save(self, energy_source_phase: EnergySourcePhase) -> bool:
+    def save_energy_source_phase(self, energy_source_phase: EnergySourcePhase) -> bool:
         table = self.database_tables.get_table(TableEnergySourcePhases)
         insert = self.database_tables.get_insert(TableEnergySourcePhases)
         insert.add_value(table.energy_source_mrid.query_index, energy_source_phase.energy_source.mrid)
         insert.add_value(table.phase.query_index, energy_source_phase.phase.name)
         return self._save_power_system_resource(table, insert, energy_source_phase, "energy source phase")
 
-    def save(self, fuse: Fuse) -> bool:
+    def save_fuse(self, fuse: Fuse) -> bool:
         table = self.database_tables.get_table(TableFuses)
         insert = self.database_tables.get_insert(TableFuses)
         return self._save_switch(table, insert, fuse, "fuse")
 
-    def save(self, jumper: Jumper) -> bool:
+    def save_jumper(self, jumper: Jumper) -> bool:
         table = self.database_tables.get_table(TableJumpers)
         insert = self.database_tables.get_insert(TableJumpers)
         return self._save_switch(table, insert, jumper, "jumper")
 
-    def save(self, junction: Junction) -> bool:
+    def save_junction(self, junction: Junction) -> bool:
         table = self.database_tables.get_table(TableJunctions)
         insert = self.database_tables.get_insert(TableJunctions)
         return self._save_connector(table, insert, junction, "junction")
@@ -365,7 +365,7 @@ class NetworkCIMWriter(BaseCIMWriter):
     def _save_line(self, table: TableLines, insert: PreparedStatement, line: Line, description: str) -> bool:
         return self._save_equipment_container(table, insert, line, description)
 
-    def save(self, linear_shunt_compensator: LinearShuntCompensator) -> bool:
+    def save_linear_shunt_compensator(self, linear_shunt_compensator: LinearShuntCompensator) -> bool:
         table = self.database_tables.get_table(TableLinearShuntCompensators)
         insert = self.database_tables.get_insert(TableLinearShuntCompensators)
         insert.add_value(table.b0_per_section.query_index, linear_shunt_compensator.b0_per_section)
@@ -382,24 +382,24 @@ class NetworkCIMWriter(BaseCIMWriter):
 
     def _save_per_length_line_parameter(self, table: TablePerLengthLineParameters,
                                         insert: PreparedStatement,
-                                        perLengthLineParameter: PerLengthLineParameter,
+                                        per_length_line_parameter: PerLengthLineParameter,
                                         description: str) -> bool:
-        return self._save_identified_object(table, insert, perLengthLineParameter, description)
+        return self._save_identified_object(table, insert, per_length_line_parameter, description)
 
-    def save(self, perLengthSequenceImpedance: PerLengthSequenceImpedance) -> bool:
+    def save(self, per_length_sequence_impedance: PerLengthSequenceImpedance) -> bool:
         table = self.database_tables.get_table(TablePerLengthSequenceImpedances)
         insert = self.database_tables.get_insert(TablePerLengthSequenceImpedances)
-        insert.add_value(table.r.query_index, perLengthSequenceImpedance.r)
-        insert.add_value(table.x.query_index, perLengthSequenceImpedance.x)
-        insert.add_value(table.r0.query_index, perLengthSequenceImpedance.r0)
-        insert.add_value(table.x0.query_index, perLengthSequenceImpedance.x0)
-        insert.add_value(table.bch.query_index, perLengthSequenceImpedance.bch)
-        insert.add_value(table.gch.query_index, perLengthSequenceImpedance.gch)
-        insert.add_value(table.b0ch.query_index, perLengthSequenceImpedance.b0ch)
-        insert.add_value(table.g0ch.query_index, perLengthSequenceImpedance.g0ch)
-        return self._save_per_length_impedance(table, insert, perLengthSequenceImpedance, "per length sequence impedance")
+        insert.add_value(table.r.query_index, per_length_sequence_impedance.r)
+        insert.add_value(table.x.query_index, per_length_sequence_impedance.x)
+        insert.add_value(table.r0.query_index, per_length_sequence_impedance.r0)
+        insert.add_value(table.x0.query_index, per_length_sequence_impedance.x0)
+        insert.add_value(table.bch.query_index, per_length_sequence_impedance.bch)
+        insert.add_value(table.gch.query_index, per_length_sequence_impedance.gch)
+        insert.add_value(table.b0ch.query_index, per_length_sequence_impedance.b0ch)
+        insert.add_value(table.g0ch.query_index, per_length_sequence_impedance.g0ch)
+        return self._save_per_length_impedance(table, insert, per_length_sequence_impedance, "per length sequence impedance")
 
-    def save(self, power_electronics_connection: PowerElectronicsConnection) -> bool:
+    def save_power_electronics_connection(self, power_electronics_connection: PowerElectronicsConnection) -> bool:
         table = self.database_tables.get_table(TablePowerElectronicsConnection)
         insert = self.database_tables.get_insert(TablePowerElectronicsConnection)
         insert.add_value(table.max_i_fault.query_index, power_electronics_connection.max_i_fault)
@@ -411,7 +411,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.rated_u.query_index, power_electronics_connection.rated_u)
         return self._save_regulating_cond_eq(table, insert, power_electronics_connection, "power electronics connection")
 
-    def save(self, power_electronics_connection_phase: PowerElectronicsConnectionPhase) -> bool:
+    def save_power_electronics_connection_phase(self, power_electronics_connection_phase: PowerElectronicsConnectionPhase) -> bool:
         table = self.database_tables.get_table(TablePowerElectronicsConnectionPhases)
         insert = self.database_tables.get_insert(TablePowerElectronicsConnectionPhases)
         insert.add_value(table.power_electronics_connection_mrid.query_index,
@@ -422,7 +422,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         return self._save_power_system_resource(table, insert, power_electronics_connection_phase,
                                                 "power electronics connection phase")
 
-    def save(self, power_transformer: PowerTransformer) -> bool:
+    def save_power_transformer(self, power_transformer: PowerTransformer) -> bool:
         table = self.database_tables.get_table(TablePowerTransformers)
         insert = self.database_tables.get_insert(TablePowerTransformers)
         insert.add_value(table.vector_group.query_index, power_transformer.vector_group.name)
@@ -430,7 +430,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.power_transformer_info_mrid.query_index, power_transformer.asset_info.mrid)
         return self._save_conducting_equipment(table, insert, power_transformer, "power transformer")
 
-    def save(self, power_transformer_end: PowerTransformerEnd) -> bool:
+    def save_power_transformer_end(self, power_transformer_end: PowerTransformerEnd) -> bool:
         table = self.database_tables.get_table(TablePowerTransformerEnds)
         insert = self.daabase_tables.get_insert(TablePowerTransformerEnds)
         insert.add_value(table.power_transformer_mrid.query_index, power_transformer_end.power_transformer.mrid)
@@ -454,7 +454,7 @@ class NetworkCIMWriter(BaseCIMWriter):
                                description: str) -> bool:
         return self._save_switch(table, insert, protected_switch, description)
 
-    def save(self, ratio_tap_changer: RatioTapChanger) -> bool:
+    def save_ratio_tap_changer(self, ratio_tap_changer: RatioTapChanger) -> bool:
         table = self.database_tables.get_table(TableRatioTapChangers)
         insert = self.database_tables.get_insert(TableRatioTapChangers)
         insert.add_value(table.transformer_end_mrid.query_index, ratio_tap_changer.transformer_end.mrid)
@@ -505,7 +505,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.star_impedance_mrid.query_index, transformer_end.star_impedance.mrid)
         return self.save_identified_object(table, insert, transformer_end, description)
 
-    def save(self, transformer_star_impedance: TransformerStarImpedance) -> bool:
+    def save_transformer_star_impedance(self, transformer_star_impedance: TransformerStarImpedance) -> bool:
         table = self.database_tables.get_table(TableTransformerStarImpedance)
         insert = self.database_tables.get_insert(TableTransformerStarImpedance)
         insert.add_value(table.r.query_index, transformer_star_impedance.r)
@@ -517,7 +517,7 @@ class NetworkCIMWriter(BaseCIMWriter):
 
     # ** ** ** ** ** ** IEC61970 InfIEC61970 ** ** ** ** ** ** #
 
-    def save(self, circuit: Circuit) -> bool:
+    def save_circuit(self, circuit: Circuit) -> bool:
         table = self.database_tables.get_table(TableCircuits)
         insert = self.database_tables.get_insert(TableCircuits)
         insert.add_value(table.loop_mrid.query_index, circuit.loop.mrid)
@@ -528,7 +528,7 @@ class NetworkCIMWriter(BaseCIMWriter):
             status = status and self._save_circuit_to_terminal_association(circuit, t)
         return status and self._save_line(table, insert, circuit, "circuit")
 
-    def save(self, loop: Loop) -> bool:
+    def save_loop(self, loop: Loop) -> bool:
         table = self.database_tables.get_table(TableLoops)
         insert = self.database_tables.get_insert(TableLoops)
         status = True
