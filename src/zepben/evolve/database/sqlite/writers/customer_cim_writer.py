@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from zepben.evolve.database.sqlite.tables.associations.customeragreements_association_tables import TableCustomerAgreementsPricingStructures
 from zepben.evolve.database.sqlite.tables.associations.pricingstructure_association_tables import TablePricingStructuresTariffs
 from zepben.evolve.database.sqlite.tables.database_tables import PreparedStatement
