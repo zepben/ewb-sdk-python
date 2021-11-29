@@ -13,6 +13,9 @@ from dataclassy import dataclass
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 
 
+__all__ = ["NameType"]
+
+
 @dataclass(slots=True)
 class NameType:
     """
