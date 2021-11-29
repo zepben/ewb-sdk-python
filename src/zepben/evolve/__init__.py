@@ -76,6 +76,8 @@ from zepben.evolve.model.cim.iec61970.base.core.regions import *
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import *
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import *
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import *
+from zepben.evolve.model.cim.iec61970.base.core.name import *
+from zepben.evolve.model.cim.iec61970.base.core.name_type import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.phasedirection import *
