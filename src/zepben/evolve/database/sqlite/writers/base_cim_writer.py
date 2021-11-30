@@ -9,18 +9,20 @@ from __future__ import annotations
 import sqlite3
 import logging
 from contextlib import contextmanager
-from sqlite3 import DatabaseError
+from sqlite3 import DatabaseError, Cursor
 from typing import Set, Generator
 
 from dataclassy import dataclass
 
+from zepben.evolve import NameType, Name
+from zepben.evolve.database.sqlite.writers.utils import try_execute_single_update
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61968.common.organisation import Organisation
 from zepben.evolve.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.evolve.model.cim.iec61968.common.document import Document
 from zepben.evolve.database.sqlite.tables.database_tables import DatabaseTables, PreparedStatement
 from zepben.evolve.database.sqlite.tables.iec61968.common_tables import TableDocuments, TableOrganisations, TableOrganisationRoles
-from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects
+from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects, TableNameTypes, TableNames
 
 logger = logging.getLogger(__name__)
 
@@ -32,25 +34,8 @@ class BaseCIMWriter(object):
     """
 
     database_tables: DatabaseTables
-    connection_string: str
+    cursor: Cursor
     _failed_ids: Set[str] = set()
-
-    @contextmanager
-    def connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.connection_string)
-        conn.isolation_level = None  # autocommit off
-        yield conn
-        conn.commit()
-        conn.close()
-
-    @contextmanager
-    def cursor(self) -> Generator[sqlite3.Cursor, None, None]:
-        with self.connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("PRAGMA journal_mode = OFF")
-            cursor.execute("PRAGMA synchronous = OFF")
-            yield cursor
-            cursor.close()
 
     def save_document(self, table: TableDocuments, insert: PreparedStatement, document: Document, description: str) -> bool:
         insert.add_value(table.title.query_index, document.title)
@@ -67,6 +52,25 @@ class BaseCIMWriter(object):
         insert = self.database_tables.get_insert(TableOrganisations)
 
         return self.save_identified_object(table, insert, organisation, "Organisation")
+
+    def save_name_type(self, name_type: NameType) -> bool:
+        table = self.database_tables.get_table(TableNameTypes)
+        insert = self.database_tables.get_insert(TableNameTypes)
+
+        insert.add_value(table.name_.query_index, name_type.name)
+        insert.add_value(table.description.query_index, name_type.description)
+
+        return self.try_execute_single_update(insert, name_type.name, "name type")
+
+    def save_name(self, name: Name) -> bool:
+        table = self.database_tables.get_table(TableNames)
+        insert = self.database_tables.get_insert(TableNames)
+
+        insert.add_value(table.name_.query_index, name.name)
+        insert.add_value(table.name_type_name.query_index, name.type.name)
+        insert.add_value(table.identified_object_mrid.query_index, name.identified_object.mrid)
+
+        return self.try_execute_single_update(insert, name.name, "name")
 
     def save_organisation_role(self, table: TableOrganisationRoles, insert: PreparedStatement, organisation_role: OrganisationRole, description: str) -> bool:
         if organisation_role.organisation is not None:
@@ -90,8 +94,11 @@ class BaseCIMWriter(object):
         `description` A description of the type of object (e.g AcLineSegment)
         Returns True if the execute was successful, False otherwise.
         """
+        if not try_execute_single_update(query, self.cursor, description):
+            self._failed_ids.add(id)
+
         try:
-            with self.cursor() as c:
+            with self.cursor as c:
                 query.execute(c)
             return True
         except DatabaseError as de:
