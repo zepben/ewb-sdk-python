@@ -11,22 +11,27 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     ConductingEquipment, TableEquipment, Equipment, Feeder, TableEquipmentUsagePoints, ConnectivityNode, TableConnectivityNodes, \
     TableConnectivityNodeContainers, ConnectivityNodeContainer, TablePowerSystemResources, PowerSystemResource, TableEquipmentContainers, EquipmentContainer, \
     TableFeeders, GeographicalRegion, TableGeographicalRegions, Site, TableSites, TableSubGeographicalRegions, SubGeographicalRegion, TableSubstations, \
-    Substation, Terminal, TableTerminals, TableAssetInfo, TablePowerElectronicsUnit, PowerElectronicsUnit, BatteryUnit, TableBatteryUnit, \
-    PhotoVoltaicUnit, TablePhotoVoltaicUnit, PowerElectronicsWindUnit, TablePowerElectronicsWindUnit, AcLineSegment, TableAcLineSegments, TableConductors, \
-    Conductor, Breaker, TableBreakers, LoadBreakSwitch, TableLoadBreakSwitches, BusbarSection, \
+    Substation, Terminal, TableTerminals, TableAssets, TableAssetInfo, TableAssetContainers, TablePowerElectronicsUnit, PowerElectronicsUnit, BatteryUnit, \
+    TableBatteryUnit, PhotoVoltaicUnit, TablePhotoVoltaicUnit, PowerElectronicsWindUnit, TablePowerElectronicsWindUnit, AcLineSegment, TableAcLineSegments, \
+    TableConductors, Conductor, Breaker, TableBreakers, LoadBreakSwitch, TableLoadBreakSwitches, BusbarSection, \
     TableBusbarSections, TableConnectors, Connector, Disconnector, TableDisconnectors, TableEnergyConnections, EnergyConnection, TableEnergyConsumers, \
     EnergyConsumer, EnergyConsumerPhase, TableEnergyConsumerPhases, EnergySource, TableEnergySources, TableEnergySourcePhases, EnergySourcePhase, Fuse, \
     TableFuses, Jumper, TableJumpers, Junction, TableJunctions, TableLines, Line, LinearShuntCompensator, TableLinearShuntCompensators, \
-    TablePerLengthSequenceImpedances, TablePerLengthLineParameters, \
+    TablePerLengthSequenceImpedances, TablePerLengthLineParameters, TableCircuitsSubstations, \
     PerLengthLineParameter, PerLengthSequenceImpedance, TableRegulatingCondEq, RegulatingCondEq, TableShuntCompensators, ShuntCompensator, \
     TableProtectedSwitches, ProtectedSwitch, TableSwitches, Switch, PowerElectronicsConnection, TablePowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, TablePowerElectronicsConnectionPhases, PowerTransformer, TablePowerTransformers, PowerTransformerEnd, \
     TablePowerTransformerEnds, TableTransformerEnds, TransformerEnd, TransformerStarImpedance, TableTransformerStarImpedance, TableTapChangers, TapChanger, \
     RatioTapChanger, TableRatioTapChangers, TableCircuits, Circuit, Loop, TableLoops, LoopSubstationRelationship, UsagePoint, EndDevice, \
-    TableUsagePointsEndDevices, AssetOrganisationRole, Asset, TableAssetOrganisationRolesAssets, TableEquipmentEquipmentContainers, TableCircuitsSubstations, \
+    TableUsagePointsEndDevices, AssetOrganisationRole, Asset, AssetContainer, TableAssetOrganisationRolesAssets, TableEquipmentEquipmentContainers, \
     TableCircuitsTerminals, TableLoopsSubstations, TransformerEndInfo, TableTransformerEndInfo, TransformerTankInfo, TableTransformerTankInfo, NoLoadTest, \
     TableNoLoadTests, TableTransformerTest, TransformerTest, ShortCircuitTest, TableShortCircuitTests, OpenCircuitTest, TableOpenCircuitTests, \
-    PerLengthImpedance, TablePerLengthImpedances
+    PerLengthImpedance, TablePerLengthImpedances, TableAssetOrganisationRoles, AssetOwner, TableAssetOwners, TableStructures, Structure, Pole, TablePoles, \
+    Streetlight, TableStreetlights, Location, TableLocations, TableLocationStreetAddressField, StreetAddress, TableLocationStreetAddresses, PositionPoint, \
+    TablePositionPoints, TableStreetAddresses, TableTownDetails, TownDetail, TableEndDevices, Meter, TableMeters, TableUsagePoints, OperationalRestriction, \
+    TableOperationalRestrictions, TableFaultIndicators, TableAuxiliaryEquipment, AuxiliaryEquipment, FaultIndicator, TableMeasurements, Measurement, Analog, \
+    TableAnalogs, Accumulator, TableAccumulators, Discrete, TableDiscretes, Control, TableControls, TableIoPoints, IoPoint, TableRemotePoints, RemotePoint, \
+    RemoteControl, TableRemoteControls, RemoteSource, TableRemoteSources
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
 
@@ -119,22 +124,166 @@ class NetworkCIMWriter(BaseCIMWriter):
         return self.save_identified_object(table, insert, asset_info, description)
 
     # ** ** ** ** ** ** IEC61968 ASSETS ** ** ** ** ** ** #
-    # TODO: Writer for IEC61968 Assets
+    def _save_asset(self, table: TableAssets, insert: PreparedStatement, asset: Asset, description: str) -> bool:
+        status = True
+        insert.add_value(table.LOCATION_MRID.queryIndex, asset.location.mrid)
+        for e in asset.organisation_roles:
+            status = status and self.save_association(e, asset)
+        return status and self.save_identified_object(table, insert, asset, description)
+
+    def save_asset_container(self, table: TableAssetContainers, insert: PreparedStatement, asset_container: AssetContainer, description: str) -> bool:
+        return self.save_asset(table, insert, asset_container, description)
+
+    def save_asset_info(self, table: TableAssetInfo, insert: PreparedStatement, asset_info: AssetInfo, description: str) -> bool:
+        return self.save_identified_object(table, insert, asset_info, description)
+
+    def save_asset_organisation_role(
+            self,
+            table: TableAssetOrganisationRoles,
+            insert: PreparedStatement,
+            asset_organisation_role: AssetOrganisationRole,
+            description: str
+            ) -> bool:
+        return self.save_organisation_role(table, insert, asset_organisation_role, description)
+
+    def save_asset_owner(self, asset_owner: AssetOwner) -> bool:
+        table = self.databaseTables.getTable(TableAssetOwners)
+        insert = self.databaseTables.getInsert(TableAssetOwners)
+        return self.save_asset_organisation_role(table, insert, asset_owner, "asset owner")
+
+    def save_structure(self, table: TableStructures, insert: PreparedStatement, structure: Structure, description: str) -> bool:
+        return self.save_asset_container(table, insert, structure, description)
+
+    def save_pole(self, pole: Pole) -> bool:
+        table = self.databaseTables.getTable(TablePoles)
+        insert = self.databaseTables.getInsert(TablePoles)
+        insert.add_value(table.CLASSIFICATION.queryIndex, pole.classification)
+        return self.save_structure(table, insert, pole, "pole")
+
+    def save_streetlight(self, streetlight: Streetlight) -> bool:
+        table = self.databaseTables.getTable(TableStreetlights)
+        insert = self.databaseTables.getInsert(TableStreetlights)
+        insert.add_value(table.POLE_MRID.queryIndex, streetlight.pole.mRID)
+        insert.add_value(table.LIGHT_RATING.queryIndex, streetlight.lightRating)
+        insert.add_value(table.LAMP_KIND.queryIndex, streetlight.lampKind.name)
+        return self.save_asset(table, insert, streetlight, "streetlight")
 
     # ** ** ** ** ** ** IEC61968 COMMON ** ** ** ** ** ** #
-    # TODO: Writer for IEC61968 COMMON
+    def save_location(self, location: Location) -> bool:
+        table = self.databaseTables.getTable(TableLocations)
+        insert = self.databaseTables.getInsert(TableLocations)
+        status = self.save_location_street_address(location, TableLocationStreetAddressField.mainAddress, location.mainAddress, "location main address")
+        for sequence_number, point in enumerate(location.points):
+            status = status and self.save_position_point(location, sequence_number, point)
+        return status and self.save_identified_object(table, insert, location, "location")
+
+    def save_location_street_address(
+        self,
+        location: Location,
+        field: TableLocationStreetAddressField,
+        street_address: StreetAddress,
+        description: str
+    ) -> bool:
+        if street_address is None:
+            return True
+        table = self.databaseTables.getTable(TableLocationStreetAddresses)
+        insert = self.databaseTables.getInsert(TableLocationStreetAddresses)
+        insert.add_value(table.LOCATION_MRID.queryIndex, location.mRID)
+        insert.add_value(table.ADDRESS_FIELD.queryIndex, field.name)
+        return self.save_street_address(
+            table,
+            insert,
+            street_address,
+            "{}-{}".format(location.mRID, field),
+            description
+        )
+
+    def save_position_point(self, location: Location, sequence_number: int, position_point: PositionPoint) -> bool:
+        table = self.databaseTables.getTable(TablePositionPoints)
+        insert = self.databaseTables.getInsert(TablePositionPoints)
+        insert.add_value(table.LOCATION_MRID.queryIndex, location.mRID)
+        insert.add_value(table.SEQUENCE_NUMBER.queryIndex, sequence_number)
+        insert.add_value(table.X_POSITION.queryIndex, position_point.xPosition)
+        insert.add_value(table.Y_POSITION.queryIndex, position_point.yPosition)
+        return self.try_execute_single_update(
+            insert,
+            "{}-point{}".format(location.mRID, sequence_number),
+            "position point"
+        )
+
+    def save_street_address(
+            self,
+            table: TableStreetAddresses,
+            insert: PreparedStatement,
+            street_address: StreetAddress,
+            street_id: str,
+            description: str
+    ) -> bool:
+        insert.add_value(table.POSTAL_CODE.queryIndex, street_address.postalCode)
+        return self.save_town_detail(table, insert, street_address.townDetail, street_id, description)
+
+    def save_town_detail(self, table: TableTownDetails, insert: PreparedStatement, town_detail: TownDetail, town_id: str, description: str) -> bool:
+        insert.setNullableString(table.TOWN_NAME.queryIndex, town_detail.name)
+        insert.setNullableString(table.STATE_OR_PROVINCE.queryIndex, town_detail.stateOrProvince)
+
+        return self.try_execute_single_update(insert, town_id, description)
 
     # ** ** ** ** ** ** IEC61968 METERING ** ** ** ** ** ** #
-    # TODO: Writer for IEC61968 METERING
+    def save_end_device(self, table: TableEndDevices, insert: PreparedStatement, end_device: EndDevice, description: str) -> bool:
+        insert.setNullableString(table.CUSTOMER_MRID.queryIndex, end_device.customerMRID)
+        insert.setNullableString(table.SERVICE_LOCATION_MRID.queryIndex, end_device.serviceLocation.mRID)
+
+        status = True
+        for e in end_device.usagePoints:
+            status = status and self.save_association(e, end_device)
+        return status and self.save_asset_container(table, insert, end_device, description)
+
+    def save_meter(self, meter: Meter) -> bool:
+        table = self.databaseTables.getTable(TableMeters)
+        insert = self.databaseTables.getInsert(TableMeters)
+
+        return self.save_end_device(table, insert, meter, "meter")
+
+    def save_usage_point(self, usage_point: UsagePoint) -> bool:
+        table = self.databaseTables.getTable(TableUsagePoints)
+        insert = self.databaseTables.getInsert(TableUsagePoints)
+
+        insert.add_value(table.LOCATION_MRID.queryIndex, usage_point.usagePointLocation.mRID)
+        insert.add_value(table.IS_VIRTUAL.queryIndex, usage_point.isVirtual)
+        insert.add_value(table.CONNECTION_CATEGORY.queryIndex, usage_point.connectionCategory)
+
+        status = True
+        for e in usage_point.equipment:
+            status = status and self.save_association(e, usage_point)
+
+        return status and self.save_identified_object(table, insert, usage_point, "usage point")
 
     # ** ** ** ** ** ** IEC61968 OPERATIONS ** ** ** ** ** ** #
-    # TODO: Writer for IEC61968 OPERATIONS
+    def save_operational_restriction(self, operational_restriction: OperationalRestriction) -> bool:
+        table = self.databaseTables.getTable(TableOperationalRestrictions)
+        insert = self.databaseTables.getInsert(TableOperationalRestrictions)
 
-    # ** ** ** ** ** ** IEC61968 AUXILIARY EQUIPMENT ** ** ** #
-    # TODO: Writer for IEC61968 AUXILIARY EQUIPMENT
+        status = True
+        for e in operational_restriction.equipment:
+            status = status and self.save_association(e, operational_restriction)
 
-    # ** ** ** ** ** ** IEC61968 AUXILIARY EQUIPMENT ** ** ** #
-    # TODO: Writer for IEC61968 AUXILIARY EQUIPMENT
+        return status and self.save_document(table, insert, operational_restriction, "operational restriction")
+
+    # ** ** ** ** ** ** IEC61970 AUXILIARY EQUIPMENT ** ** ** #
+    def save_auxiliary_equipment(
+            self,
+            table: TableAuxiliaryEquipment,
+            insert: PreparedStatement,
+            auxiliary_equipment: AuxiliaryEquipment,
+            description: str
+    ) -> bool:
+        insert.add_value(table.TERMINAL_MRID.queryIndex, auxiliary_equipment.terminal.mRID)  
+        return self.save_equipment(table, insert, auxiliary_equipment, description)
+
+    def save(self, fault_indicator: FaultIndicator) -> bool:
+        table = self.databaseTables.getTable(TableFaultIndicators)
+        insert = self.databaseTables.getInsert(TableFaultIndicators)
+        return self.save_auxiliary_equipment(table, insert, fault_indicator, "fault indicator")
 
     # ** ** ** ** ** ** IEC61970 CORE ** ** ** #
     def _save_ac_dc_terminal(self, table: TableAcDcTerminals, insert: PreparedStatement,
@@ -203,7 +352,7 @@ class NetworkCIMWriter(BaseCIMWriter):
                                     power_system_resource: PowerSystemResource,
                                     description: str) -> bool:
         insert.add_value(table.location_mrid.query_index, power_system_resource.location.mrid)
-        # todo: insert.add_value(table.num_controls.query_index, power_system_resource.num_controls)
+        insert.add_value(table.num_controls.query_index, power_system_resource.num_controls)
         return self.save_identified_object(table, insert, power_system_resource, description)
 
     def save_site(self, site: Site) -> bool:
@@ -546,9 +695,61 @@ class NetworkCIMWriter(BaseCIMWriter):
                                                                           LoopSubstationRelationship.LOOP_ENERGIZES_SUBSTATION)
         return status and self.save_identified_object(table, insert, loop, "loop")
 
-    # todo: add  /************ IEC61970 MEAS ************/
+    # ** ** ** ** ** ** IEC61970 MEAS ** ** ** ** ** ** #
+    def save_measurement(
+        self,
+        table: TableMeasurements,
+        insert: PreparedStatement,
+        measurement: Measurement,
+        description: str
+    ) -> bool:
+        insert.add_value(table.POWER_SYSTEM_RESOURCE_MRID.queryIndex, measurement.powerSystemResourceMRID)
+        insert.add_value(table.REMOTE_SOURCE_MRID.queryIndex, measurement.remoteSource.mRID)
+        insert.add_value(table.TERMINAL_MRID.queryIndex, measurement.terminalMRID)
+        insert.add_value(table.PHASES.queryIndex, measurement.phases.name)
+        insert.add_value(table.UNIT_SYMBOL.queryIndex, measurement.unitSymbol.name)
+        return self.save_identified_object(table, insert, measurement, description)
 
-    # todo: add /************ IEC61970 SCADA ************/
+    def save_analog(self, analog: Analog) -> bool:
+        table = self.databaseTables.getTable(TableAnalogs)
+        insert = self.databaseTables.getInsert(TableAnalogs)
+        insert.setBoolean(table.POSITIVE_FLOW_IN.queryIndex, analog.positiveFlowIn)
+        return self.save_measurement(table, insert, analog, "analog")
+
+    def save_accumulator(self, accumulator: Accumulator) -> bool:
+        table = self.databaseTables.getTable(TableAccumulators)
+        insert = self.databaseTables.getInsert(TableAccumulators)
+        return self.save_measurement(table, insert, accumulator, "accumulator")
+
+    def save_discrete(self, discrete: Discrete) -> bool:
+        table = self.databaseTables.getTable(TableDiscretes)
+        insert = self.databaseTables.getInsert(TableDiscretes)        
+        return self.saveMeasurement(table, insert, discrete, "discrete")
+
+    def save_control(self, control: Control) -> bool:
+        table = self.databaseTables.getTable(TableControls)
+        insert = self.databaseTables.getInsert(TableControls)
+        insert.add_value(table.POWER_SYSTEM_RESOURCE_MRID.queryIndex, control.powerSystemResourceMRID)
+        return self.saveIoPoint(table, insert, control, "control")
+
+    def save_io_point(self, table: TableIoPoints, insert: PreparedStatement, io_point: IoPoint, description: str) -> bool:
+        return self.save_identified_object(table, insert, io_point, description)
+
+    # ** ** ** ** ** ** IEC61970 SCADA ** ** ** ** ** ** #
+    def save_remote_control(self, remote_control: RemoteControl) -> bool:
+        table = self.databaseTables.getTable(TableRemoteControls)
+        insert = self.databaseTables.getInsert(TableRemoteControls)
+        insert.add_value(table.CONTROL_MRID.queryIndex, remote_control.control.mRID)
+        return self.save_remote_point(table, insert, remote_control, "remote control")
+
+    def save_remote_point(self, table: TableRemotePoints, insert: PreparedStatement, remote_point: RemotePoint, description: str) -> bool:
+        return self.save_identified_object(table, insert, remote_point, description)
+
+    def save_remote_source(self, remote_source: RemoteSource) -> bool:
+        table = self.databaseTables.getTable(TableRemoteSources)
+        insert = self.databaseTables.getInsert(TableRemoteSources)
+        insert.add_value(table.MEASUREMENT_MRID.queryIndex, remote_source.measurement.mRID)
+        return self.save_remote_point(table, insert, remote_source, "remote source")
 
     # ** ** ** ** ** ** ASSOCIATIONS ** ** ** ** ** **  #
     def _save_asset_organisation_role_to_asset_association(self, asset_organisation_role: AssetOrganisationRole, asset: Asset) -> bool:
