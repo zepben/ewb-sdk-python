@@ -16,34 +16,34 @@ class DiagramCIMWriter(BaseCIMWriter):
     # ** ** ** ** ** ** IEC61970 DIAGRAM LAYOUT ** ** ** ** ** ** #
 
     def save_diagram(self, diagram: Diagram) -> bool:
-        table = self.databaseTables.getTable(TableDiagrams)
-        insert = self.databaseTables.getInsert(TableDiagrams)
-        insert.add_value(table.DIAGRAM_STYLE.queryIndex, diagram.diagramStyle.name)
-        insert.add_value(table.ORIENTATION_KIND.queryIndex, diagram.orientationKind.name)
+        table = self.database_tables.get_table(TableDiagrams)
+        insert = self.database_tables.get_insert(TableDiagrams)
+        insert.add_value(table.diagram_style.query_index, diagram.diagram_style.name)
+        insert.add_value(table.orientation_kind.query_index, diagram.orientation_kind.name)
         return self.save_identified_object(table, insert, diagram, "diagram")
 
     def save_diagram_object(self, diagram_object: DiagramObject) -> bool:
-        table = self.databaseTables.getTable(TableDiagramObjects)
-        insert = self.databaseTables.getInsert(TableDiagramObjects)
+        table = self.database_tables.get_table(TableDiagramObjects)
+        insert = self.database_tables.get_insert(TableDiagramObjects)
         status = True
         for sequence, point in enumerate(diagram_object.points):
             status = status and self.save_diagram_object_point(diagram_object, point, sequence) 
-        insert.add_value(table.IDENTIFIED_OBJECT_MRID.queryIndex, diagram_object.identifiedObjectMRID)
-        insert.add_value(table.DIAGRAM_MRID.queryIndex, diagram_object.diagram.mRID)
-        insert.add_value(table.STYLE.queryIndex, diagram_object.style)
-        insert.add_value(table.ROTATION.queryIndex, diagram_object.rotation)
+        insert.add_value(table.identified_object_mrid.query_index, diagram_object.identified_object_mrid)
+        insert.add_value(table.diagram_mrid.query_index, diagram_object.diagram.mrid)
+        insert.add_value(table.style.query_index, diagram_object.style)
+        insert.add_value(table.rotation.query_index, diagram_object.rotation)
         return status and self.save_identified_object(table, insert, diagram_object, "diagram object")
 
     def save_diagram_object_point(self, diagram_object: DiagramObject, diagram_object_point: DiagramObjectPoint, sequence_number: int) -> bool:
-        table = self.databaseTables.getTable(TableDiagramObjectPoints)
-        insert = self.databaseTables.getInsert(TableDiagramObjectPoints)
-        insert.add_value(table.DIAGRAM_OBJECT_MRID.queryIndex, diagram_object.mRID)
-        insert.add_value(table.SEQUENCE_NUMBER.queryIndex, sequence_number)
-        insert.add_value(table.X_POSITION.queryIndex, diagram_object_point.xPosition)
-        insert.add_value(table.Y_POSITION.queryIndex, diagram_object_point.yPosition)
+        table = self.database_tables.get_table(TableDiagramObjectPoints)
+        insert = self.database_tables.get_insert(TableDiagramObjectPoints)
+        insert.add_value(table.diagram_object_mrid.query_index, diagram_object.mrid)
+        insert.add_value(table.sequence_number.query_index, sequence_number)
+        insert.add_value(table.x_position.query_index, diagram_object_point.x_position)
+        insert.add_value(table.y_position.query_index, diagram_object_point.y_position)
         return self.try_execute_single_update(
             insert,
-            "{}-point{}".format(diagram_object.mRID, sequence_number),
+            "{}-point{}".format(diagram_object.mrid, sequence_number),
             "diagram object point"
         )
 
