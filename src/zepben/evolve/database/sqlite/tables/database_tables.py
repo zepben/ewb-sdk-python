@@ -208,3 +208,7 @@ class DatabaseTables(object):
     def tables(self):
         for t in self._tables.values():
             yield t
+
+    @staticmethod
+    def copy():
+        return DatabaseTables()
