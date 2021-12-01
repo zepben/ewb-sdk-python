@@ -27,8 +27,9 @@ jobs:
           PATH: src
 
       - name: Build and test
+        uses: codecov/codecov-action@v2
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           tox
         shell: bash
