@@ -27,8 +27,6 @@ jobs:
           PATH: src
 
       - name: Build and test
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           tox
         shell: bash
