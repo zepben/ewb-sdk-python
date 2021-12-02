@@ -1,5 +1,5 @@
 ![Build Status](https://img.shields.io/github/workflow/status/zepben/evolve-sdk-python/Deploy%20snapshot%20to%20Pypi)
-[![Coverage](https://coveralls.io/repos/github/zepben/evolve-sdk-python/badge.svg)](https://coveralls.io/github/zepben/evolve-sdk-python)
+[![codecov]()](https://codecov.io/gh/zepben/evolve-sdk-python)
 
 # Zepben Evolve Python SDK #
 The Python Evolve SDK contains everything necessary to communicate with a [Zepben EWB Server](https://github.com/zepben/energy-workbench-server). See the complete [Evolve Python SDK Documentation](https://zepben.github.io/evolve/docs/python-sdk/) for more details.
