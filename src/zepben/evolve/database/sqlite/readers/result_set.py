@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime
-from typing import Any, Optional, Union, Type, TypeVar
+from typing import Any, Optional, Union, Type, TypeVar, List
 
 __all__ = ["ResultSet"]
 
@@ -16,15 +16,15 @@ class ResultSet:
     Wrapper class for records read from a database.
     """
     # The values of this row
-    _rows: list[list[Any]]
+    _rows: List[List[Any]]
 
     # The index of the next row to process
     _next_row_index: int = 0
 
     # The current row being processed
-    _current_row: Optional[list[Any]] = None
+    _current_row: Optional[List[Any]] = None
 
-    def __init__(self, rows: list[list[Any]]):
+    def __init__(self, rows: List[List[Any]]):
         self._rows = rows
 
     def next(self) -> bool:
