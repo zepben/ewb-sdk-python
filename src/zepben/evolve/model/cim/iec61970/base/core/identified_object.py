@@ -44,7 +44,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     _names: Optional[List[Name]] = None
 
     def __init__(self, names: Optional[List[Name]] = None, **kwargs):
-        super(IdentifiedObject, self).__init__(**kwargs)
+        super(IdentifiedObject, self).__init__()
         if names:
             for name in names:
                 self.add_name(name)
