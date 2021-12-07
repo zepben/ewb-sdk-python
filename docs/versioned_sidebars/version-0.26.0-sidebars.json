@@ -1,0 +1,39 @@
+{
+  "version-0.26.0/someSidebar": [
+    {
+      "collapsed": true,
+      "type": "category",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-0.26.0/venv-setup"
+        },
+        {
+          "type": "doc",
+          "id": "version-0.26.0/intellij-setup"
+        }
+      ],
+      "label": "Setup Guide"
+    },
+    {
+      "type": "doc",
+      "id": "version-0.26.0/sdk-data-model"
+    },
+    {
+      "type": "doc",
+      "id": "version-0.26.0/sdk-services"
+    },
+    {
+      "type": "doc",
+      "id": "version-0.26.0/sdk-tracing"
+    },
+    {
+      "type": "doc",
+      "id": "version-0.26.0/sdk-persistence"
+    },
+    {
+      "type": "doc",
+      "id": "version-0.26.0/sdk-consumer"
+    }
+  ]
+}
