@@ -3,13 +3,16 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis import given
+import copy
+
+from hypothesis import given, settings
 from hypothesis.strategies import floats
 
 from test.cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \
     verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import EquivalentBranch
+from zepben.evolve.model.cim.iec61970.base.equivalents.create_equivalents_components import create_equivalent_branch
 
 equivalent_branch_kwargs = {
     **equivalent_equipment_kwargs,
@@ -36,7 +39,13 @@ equivalent_branch_args = [*equivalent_equipment_args, 1.1, 2.2, 3.3, 4.4, 5.5, 6
 
 def test_equivalent_branch_constructor_default():
     t = EquivalentBranch()
+    t2 = create_equivalent_branch()
 
+    validate_equivalent_branch(t)
+    validate_equivalent_branch(t2)
+
+
+def validate_equivalent_branch(t):
     verify_equivalent_equipment_constructor_default(t)
     assert not t.negative_r12
     assert not t.negative_r21
@@ -78,7 +87,38 @@ def test_equivalent_branch_constructor_kwargs(negative_r12, negative_r21, negati
         zero_x21=zero_x21,
         **kwargs
     )
+    validate_equivalent_branch_values(t, negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
+                                      x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs)
 
+
+@given(**equivalent_branch_kwargs)
+def test_equivalent_branch_creator_constructor_kwargs(negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
+                                                      x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):
+    t = create_equivalent_branch(
+        negative_r12=negative_r12,
+        negative_r21=negative_r21,
+        negative_x12=negative_x12,
+        negative_x21=negative_x21,
+        positive_r12=positive_r12,
+        positive_r21=positive_r21,
+        positive_x12=positive_x12,
+        positive_x21=positive_x21,
+        r=r,
+        r21=r21,
+        x=x,
+        x21=x21,
+        zero_r12=zero_r12,
+        zero_r21=zero_r21,
+        zero_x12=zero_x12,
+        zero_x21=zero_x21,
+        **kwargs
+    )
+    validate_equivalent_branch_values(t, negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
+                                      x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs)
+
+
+def validate_equivalent_branch_values(t, negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
+                                      x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):
     verify_equivalent_equipment_constructor_kwargs(t, **kwargs)
     assert t.negative_r12 == negative_r12
     assert t.negative_r21 == negative_r21

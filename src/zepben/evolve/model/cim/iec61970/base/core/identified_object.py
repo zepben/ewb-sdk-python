@@ -45,6 +45,8 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
     def __init__(self, names: Optional[List[Name]] = None, **kwargs):
         super(IdentifiedObject, self).__init__()
+        if self.mrid is None:
+            self.mrid = CopyableUUID.copy()
         if names:
             for name in names:
                 self.add_name(name)
