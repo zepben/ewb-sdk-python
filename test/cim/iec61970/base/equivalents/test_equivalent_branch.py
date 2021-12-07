@@ -8,6 +8,7 @@ import copy
 from hypothesis import given, settings
 from hypothesis.strategies import floats
 
+from cim import extract_testing_args
 from test.cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \
     verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
@@ -68,53 +69,17 @@ def validate_equivalent_branch(t):
 @given(**equivalent_branch_kwargs)
 def test_equivalent_branch_constructor_kwargs(negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
                                               x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):
-    t = EquivalentBranch(
-        negative_r12=negative_r12,
-        negative_r21=negative_r21,
-        negative_x12=negative_x12,
-        negative_x21=negative_x21,
-        positive_r12=positive_r12,
-        positive_r21=positive_r21,
-        positive_x12=positive_x12,
-        positive_x21=positive_x21,
-        r=r,
-        r21=r21,
-        x=x,
-        x21=x21,
-        zero_r12=zero_r12,
-        zero_r21=zero_r21,
-        zero_x12=zero_x12,
-        zero_x21=zero_x21,
-        **kwargs
-    )
-    validate_equivalent_branch_values(t, negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
-                                      x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs)
+    args = extract_testing_args(locals())
+    t = EquivalentBranch(**args, **kwargs)
+    validate_equivalent_branch_values(t, **args, **kwargs)
 
 
 @given(**equivalent_branch_kwargs)
-def test_equivalent_branch_creator_constructor_kwargs(negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
+def test_equivalent_branch_creator(negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
                                                       x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):
-    t = create_equivalent_branch(
-        negative_r12=negative_r12,
-        negative_r21=negative_r21,
-        negative_x12=negative_x12,
-        negative_x21=negative_x21,
-        positive_r12=positive_r12,
-        positive_r21=positive_r21,
-        positive_x12=positive_x12,
-        positive_x21=positive_x21,
-        r=r,
-        r21=r21,
-        x=x,
-        x21=x21,
-        zero_r12=zero_r12,
-        zero_r21=zero_r21,
-        zero_x12=zero_x12,
-        zero_x21=zero_x21,
-        **kwargs
-    )
-    validate_equivalent_branch_values(t, negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
-                                      x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs)
+    args = extract_testing_args(locals())
+    t = create_equivalent_branch(**args, **kwargs)
+    validate_equivalent_branch_values(t, **args, **kwargs)
 
 
 def validate_equivalent_branch_values(t, negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
