@@ -9,7 +9,7 @@ from hypothesis.strategies import builds, sampled_from, floats
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_kwargs, power_system_resource_args
-from cim_creators import FLOAT_MIN, FLOAT_MAX
+from test.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import SinglePhaseKind, EnergySource, EnergySourcePhase, PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_energy_source_phase, create_power_electronics_connection_phase
 
