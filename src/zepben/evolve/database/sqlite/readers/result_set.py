@@ -121,7 +121,8 @@ class ResultSet:
         if value is None:
             return self._value_or_raise(on_none)
         else:
-            return datetime.fromisoformat(value)
+            # TODO: JVM seems to use Z as TZ offset (for UTC+0?) while python uses +HH:mm format. Need to investigate here
+            return datetime.fromisoformat(value.rstrip('Z'))
 
     @staticmethod
     def _value_or_raise(on_none: Union[Optional[T], Type[Exception]]) -> T:
