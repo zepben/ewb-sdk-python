@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import integers, sampled_from
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from test.cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args

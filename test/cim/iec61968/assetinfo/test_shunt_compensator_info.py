@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import integers
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from zepben.evolve import ShuntCompensatorInfo
 
 from test.cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, \

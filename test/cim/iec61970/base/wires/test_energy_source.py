@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, floats, booleans
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args

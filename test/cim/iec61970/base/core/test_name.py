@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import text, builds
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from test.cim.iec61970.base.core.test_name_type import name_type_kwargs
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
 from zepben.evolve import Junction

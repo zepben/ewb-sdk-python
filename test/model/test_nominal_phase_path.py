@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import sampled_from
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from zepben.evolve import SinglePhaseKind, NominalPhasePath
 from zepben.evolve.model.create_basic_model_components import create_nominal_phase_path
 

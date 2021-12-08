@@ -7,7 +7,7 @@ from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from zepben.evolve import PositionPoint
 from zepben.evolve.model.cim.iec61968.common.create_common_components import create_position_point
 

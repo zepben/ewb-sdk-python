@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, floats
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from test.cim.iec61970.base.wires.test_tap_changer import verify_tap_changer_constructor_default, \
     verify_tap_changer_constructor_kwargs, verify_tap_changer_constructor_args, tap_changer_kwargs, tap_changer_args, assume_step_values
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX

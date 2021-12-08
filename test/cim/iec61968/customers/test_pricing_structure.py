@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args

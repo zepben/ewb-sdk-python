@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import integers, floats
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from test.cim.iec61968.assetinfo.test_transformer_test import transformer_test_kwargs, verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX

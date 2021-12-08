@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from test.cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \
     verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX

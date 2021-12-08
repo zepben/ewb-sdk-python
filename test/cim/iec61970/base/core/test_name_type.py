@@ -7,7 +7,7 @@ from collections import Counter
 
 from hypothesis import given
 from hypothesis.strategies import text
-from cim import extract_testing_args
+from test.cim import extract_testing_args
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve.model.cim.iec61970.base.core.create_core_components import create_name_type
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
