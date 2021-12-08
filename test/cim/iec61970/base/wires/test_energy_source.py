@@ -6,11 +6,13 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, floats, booleans
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import EnergySource, EnergySourcePhase
+from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_energy_source
 
 energy_source_kwargs = {
     **energy_connection_kwargs,
@@ -48,7 +50,12 @@ energy_source_args = [*energy_connection_args, [EnergySourcePhase()], 1.1, 2.2, 
 
 def test_energy_source_constructor_default():
     es = EnergySource()
+    es2 = create_energy_source()
+    validate_default_energy_source_constructor(es)
+    validate_default_energy_source_constructor(es2)
 
+
+def validate_default_energy_source_constructor(es):
     verify_energy_connection_constructor_default(es)
     assert not list(es.phases)
     assert es.active_power is None
@@ -80,36 +87,23 @@ def test_energy_source_constructor_default():
 
 @given(**energy_source_kwargs)
 def test_energy_source_constructor_kwargs(energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min,
-                                          r, r0, rn, x, x0, xn, is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min,
-                                          r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs):
-    es = EnergySource(energy_source_phases=energy_source_phases,
-                      active_power=active_power,
-                      reactive_power=reactive_power,
-                      voltage_angle=voltage_angle,
-                      voltage_magnitude=voltage_magnitude,
-                      p_max=p_max,
-                      p_min=p_min,
-                      r=r,
-                      r0=r0,
-                      rn=rn,
-                      x=x,
-                      x0=x0,
-                      xn=xn,
-                      is_external_grid=is_external_grid,
-                      r_min=r_min,
-                      rn_min=rn_min,
-                      r0_min=r0_min,
-                      x_min=x_min,
-                      xn_min=xn_min,
-                      x0_min=x0_min,
-                      r_max=r_max,
-                      rn_max=rn_max,
-                      r0_max=r0_max,
-                      x_max=x_max,
-                      xn_max=xn_max,
-                      x0_max=x0_max,
-                      **kwargs)
+                                          r, r0, rn, x, x0, xn, is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min, r_max, rn_max, r0_max, x_max,
+                                          xn_max, x0_max, **kwargs):
+    args = extract_testing_args(locals())
+    es = EnergySource(**args, **kwargs)
+    validate_energy_source_values(es, **args, **kwargs)
 
+
+@given(**energy_source_kwargs)
+def test_energy_source_creator(energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min, r, r0, rn, x, x0, xn,
+                               is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min, r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs):
+    args = extract_testing_args(locals())
+    es = create_energy_source(**args, **kwargs)
+    validate_energy_source_values(es, **args, **kwargs)
+
+
+def validate_energy_source_values(es, energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min, r, r0, rn, x, x0, xn,
+                                  is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min, r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs):
     verify_energy_connection_constructor_kwargs(es, **kwargs)
     assert list(es.phases) == energy_source_phases
     assert es.active_power == active_power

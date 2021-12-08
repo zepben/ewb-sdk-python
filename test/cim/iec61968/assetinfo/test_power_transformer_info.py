@@ -6,10 +6,12 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
 from zepben.evolve import PowerTransformerInfo, TransformerTankInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.create_asset_info_components import create_power_transformer_info
 
 power_transformer_info_kwargs = {
     **asset_info_kwargs,
@@ -21,15 +23,31 @@ power_transformer_info_args = [*asset_info_args, [TransformerTankInfo(), Transfo
 
 def test_power_transformer_info_constructor_default():
     pti = PowerTransformerInfo()
+    pti2 = create_power_transformer_info()
+    validate_default_power_transformer_info(pti)
+    validate_default_power_transformer_info(pti2)
 
+
+def validate_default_power_transformer_info(pti):
     verify_asset_info_constructor_default(pti)
     assert not list(pti.transformer_tank_infos)
 
 
 @given(**power_transformer_info_kwargs)
 def test_power_transformer_info_constructor_kwargs(transformer_tank_infos, **kwargs):
-    pti = PowerTransformerInfo(transformer_tank_infos=transformer_tank_infos, **kwargs)
+    args = extract_testing_args(locals())
+    pti = PowerTransformerInfo(**args, **kwargs)
+    validate_power_transformer_info_value(pti, **args, **kwargs)
 
+
+@given(**power_transformer_info_kwargs)
+def test_power_transformer_info_creator(transformer_tank_infos, **kwargs):
+    args = extract_testing_args(locals())
+    pti = create_power_transformer_info(**args, **kwargs)
+    validate_power_transformer_info_value(pti, **args, **kwargs)
+
+
+def validate_power_transformer_info_value(pti, transformer_tank_infos, **kwargs):
     verify_asset_info_constructor_kwargs(pti, **kwargs)
     assert list(pti.transformer_tank_infos) == transformer_tank_infos
 

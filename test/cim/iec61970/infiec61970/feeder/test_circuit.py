@@ -7,10 +7,12 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, verify_line_constructor_args, line_kwargs, \
     line_args
 from zepben.evolve import Circuit, Loop, Terminal, Substation
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.create_feeder_components import create_circuit
 
 circuit_kwargs = {
     **line_kwargs,
@@ -24,7 +26,12 @@ circuit_args = [*line_args, Loop(), [Terminal], [Substation]]
 
 def test_circuit_constructor_default():
     c = Circuit()
+    c2 = create_circuit()
+    validate_default_circuit_constructor(c)
+    validate_default_circuit_constructor(c2)
 
+
+def validate_default_circuit_constructor(c):
     verify_line_constructor_default(c)
     assert not c.loop
     assert not list(c.end_terminals)
@@ -33,8 +40,19 @@ def test_circuit_constructor_default():
 
 @given(**circuit_kwargs)
 def test_circuit_constructor_kwargs(loop, end_terminals, end_substations, **kwargs):
-    c = Circuit(loop=loop, end_terminals=end_terminals, end_substations=end_substations, **kwargs)
+    args = extract_testing_args(locals())
+    c = Circuit(**args, **kwargs)
+    validate_circuit_constructor_values(c, **args, **kwargs)
 
+
+@given(**circuit_kwargs)
+def test_circuit_creator(loop, end_terminals, end_substations, **kwargs):
+    args = extract_testing_args(locals())
+    c = create_circuit(**args, **kwargs)
+    validate_circuit_constructor_values(c, **args, **kwargs)
+
+
+def validate_circuit_constructor_values(c, loop, end_terminals, end_substations, **kwargs):
     verify_line_constructor_kwargs(c, **kwargs)
     assert c.loop == loop
     assert list(c.end_terminals) == end_terminals

@@ -49,15 +49,15 @@ def create_battery_unit(mrid: str = None, name: str = '', description: str = "",
 def create_breaker(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
                    asset_info: AssetInfo = None, in_service: bool = True, normally_in_service: bool = True, usage_points: List[UsagePoint] = None,
                    equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None,
-                   current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, open: int = 0,
-                   normally_open: int = 0) -> Breaker:
+                   current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, _open: int = 0,
+                   _normally_open: int = 0) -> Breaker:
     """
     Breaker(ProtectedSwitch(Switch(ConductingEquipment(Equipment(PowerSystemResource(IdentifiedObject))))))
     IdentifiedObject: mrid, name, description, names
     PowerSystemResource: location, asset_info
     Equipment: in_service, normally_in_service, usage_points, equipment_containers, operational_restrictions, current_feeders
     ConductingEquipment: base_voltage, terminals
-    Switch: open, normally_open
+    Switch: _open, _normally_open
     ProtectedSwitch:
     Breaker:
     """
@@ -86,15 +86,15 @@ def create_busbar_section(mrid: str = None, name: str = '', description: str = "
 def create_disconnector(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
                         asset_info: AssetInfo = None, in_service: bool = True, normally_in_service: bool = True, usage_points: List[UsagePoint] = None,
                         equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None,
-                        current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, open: int = 0,
-                        normally_open: int = 0) -> Disconnector:
+                        current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, _open: int = 0,
+                        _normally_open: int = 0) -> Disconnector:
     """
     Disconnector(Switch(ConductingEquipment(Equipment(PowerSystemResource(IdentifiedObject)))))
     IdentifiedObject: mrid, name, description, names
     PowerSystemResource: location, asset_info
     Equipment: in_service, normally_in_service, usage_points, equipment_containers, operational_restrictions, current_feeders
     ConductingEquipment: base_voltage, terminals
-    Switch: open, normally_open
+    Switch: _open, _normally_open
     Disconnector:
     """
     args = locals()
@@ -123,19 +123,13 @@ def create_energy_consumer(mrid: str = None, name: str = '', description: str = 
 
 # noinspection PyShadowingNames
 def create_energy_consumer_phase(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
-                                 asset_info: AssetInfo = None, in_service: bool = True, normally_in_service: bool = True, usage_points: List[UsagePoint] = None,
-                                 equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None,
-                                 current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None,
-                                 energy_consumer: EnergyConsumer = None, phase: SinglePhaseKind = SinglePhaseKind.X, p: float = None, p_fixed: float = None,
-                                 q: float = None, q_fixed: float = None) -> EnergyConsumerPhase:
+                                 asset_info: AssetInfo = None, energy_consumer: EnergyConsumer = None, phase: SinglePhaseKind = SinglePhaseKind.X,
+                                 p: float = None, q: float = None, p_fixed: float = None, q_fixed: float = None) -> EnergyConsumerPhase:
     """
     EnergyConsumerPhase(EnergyConnection(ConductingEquipment(Equipment(PowerSystemResource(IdentifiedObject)))))
     IdentifiedObject: mrid, name, description, names
     PowerSystemResource: location, asset_info
-    Equipment: in_service, normally_in_service, usage_points, equipment_containers, operational_restrictions, current_feeders
-    ConductingEquipment: base_voltage, terminals
-    EnergyConnection:
-    EnergyConsumerPhase: energy_consumer, phase, p, p_fixed, q, q_fixed
+    EnergyConsumerPhase: energy_consumer, phase, p, q, p_fixed, q_fixed
     """
     args = locals()
     return EnergyConsumerPhase(**args)
@@ -147,7 +141,10 @@ def create_energy_source(mrid: str = None, name: str = '', description: str = ""
                          current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None,
                          energy_source_phases: List[EnergySourcePhase] = None, active_power: float = None, reactive_power: float = None,
                          voltage_angle: float = None, voltage_magnitude: float = None, p_max: float = None, p_min: float = None, r: float = None,
-                         r0: float = None, rn: float = None, x: float = None, x0: float = None, xn: float = None) -> EnergySource:
+                         r0: float = None, rn: float = None, x: float = None, x0: float = None, xn: float = None, is_external_grid: bool = False,
+                         r_min: float = None, rn_min: float = None, r0_min: float = None, x_min: float = None, xn_min: float = None, x0_min: float = None,
+                         r_max: float = None, rn_max: float = None, r0_max: float = None, x_max: float = None, xn_max: float = None, x0_max: float = None
+                         ) -> EnergySource:
     """
     EnergyConsumer(EnergyConnection(ConductingEquipment(Equipment(PowerSystemResource(IdentifiedObject)))))
     IdentifiedObject: mrid, name, description, names
@@ -169,7 +166,7 @@ def create_energy_source_phase(mrid: str = None, name: str = '', description: st
     EnergySourcePhase(PowerSystemResource(IdentifiedObject))
     IdentifiedObject: mrid, name, description, names
     PowerSystemResource: location, asset_info
-    EnergySourcePhase: energy_source
+    EnergySourcePhase: energy_source, phase
     """
     args = locals()
     return EnergySourcePhase(**args)
@@ -179,15 +176,15 @@ def create_energy_source_phase(mrid: str = None, name: str = '', description: st
 def create_fuse(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
                 asset_info: AssetInfo = None, in_service: bool = True, normally_in_service: bool = True, usage_points: List[UsagePoint] = None,
                 equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None,
-                current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, open: int = 0,
-                normally_open: int = 0) -> Fuse:
+                current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, _open: int = 0,
+                _normally_open: int = 0) -> Fuse:
     """
     Fuse(Switch(ConductingEquipment(Equipment(PowerSystemResource(IdentifiedObject)))))
     IdentifiedObject: mrid, name, description, names
     PowerSystemResource: location, asset_info
     Equipment: in_service, normally_in_service, usage_points, equipment_containers, operational_restrictions, current_feeders
     ConductingEquipment: base_voltage, terminals
-    Switch: open, normally_open
+    Switch: _open, _normally_open
     Fuse:
     """
     args = locals()
@@ -198,15 +195,15 @@ def create_fuse(mrid: str = None, name: str = '', description: str = "", names: 
 def create_jumper(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
                   asset_info: AssetInfo = None, in_service: bool = True, normally_in_service: bool = True, usage_points: List[UsagePoint] = None,
                   equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None,
-                  current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, open: int = 0,
-                  normally_open: int = 0) -> Jumper:
+                  current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, _open: int = 0,
+                  _normally_open: int = 0) -> Jumper:
     """
     Jumper(Switch(ConductingEquipment(Equipment(PowerSystemResource(IdentifiedObject)))))
     IdentifiedObject: mrid, name, description, names
     PowerSystemResource: location, asset_info
     Equipment: in_service, normally_in_service, usage_points, equipment_containers, operational_restrictions, current_feeders
     ConductingEquipment: base_voltage, terminals
-    Switch: open, normally_open
+    Switch: _open, _normally_open
     Jumper:
     """
     args = locals()
@@ -257,15 +254,15 @@ def create_linear_shunt_compensator(mrid: str = None, name: str = '', descriptio
 def create_load_break_switch(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
                              asset_info: AssetInfo = None, in_service: bool = True, normally_in_service: bool = True, usage_points: List[UsagePoint] = None,
                              equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None,
-                             current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, open: int = 0,
-                             normally_open: int = 0) -> LoadBreakSwitch:
+                             current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, _open: int = 0,
+                             _normally_open: int = 0) -> LoadBreakSwitch:
     """
     LoadBreakSwitch(ProtectedSwitch(Switch(ConductingEquipment(Equipment(PowerSystemResource(IdentifiedObject))))))
     IdentifiedObject: mrid, name, description, names
     PowerSystemResource: location, asset_info
     Equipment: in_service, normally_in_service, usage_points, equipment_containers, operational_restrictions, current_feeders
     ConductingEquipment: base_voltage, terminals
-    Switch: open, normally_open
+    Switch: _open, _normally_open
     ProtectedSwitch:
     LoadBreakSwitch:
     """
@@ -362,8 +359,9 @@ def create_power_transformer(mrid: str = None, name: str = '', description: str 
                              asset_info: AssetInfo = None, in_service: bool = True, normally_in_service: bool = True, usage_points: List[UsagePoint] = None,
                              equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None,
                              current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None,
-                             vector_group: VectorGroup = None, power_transformer_ends: List[PowerTransformerEnd] = None, transformer_utilisation: float = None
-                             ) -> PowerTransformer:
+                             vector_group: VectorGroup = VectorGroup.UNKNOWN, power_transformer_ends: List[PowerTransformerEnd] = None,
+                             transformer_utilisation: float = None, construction_kind: TransformerConstructionKind = TransformerConstructionKind.unknown,
+                             function: TransformerFunctionKind = TransformerFunctionKind.other) -> PowerTransformer:
     """
     PowerTransformer(ConductingEquipment(Equipment(PowerSystemResource(IdentifiedObject))))
     IdentifiedObject: mrid, name, description, names
@@ -411,15 +409,15 @@ def create_ratio_tap_changer(mrid: str = None, name: str = '', description: str 
 def create_recloser(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
                     asset_info: AssetInfo = None, in_service: bool = True, normally_in_service: bool = True, usage_points: List[UsagePoint] = None,
                     equipment_containers: List[EquipmentContainer] = None, operational_restrictions: List[OperationalRestriction] = None,
-                    current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, open: int = 0,
-                    normally_open: int = 0) -> Recloser:
+                    current_feeders: List[Feeder] = None, base_voltage: BaseVoltage = None, terminals: List[Terminal] = None, _open: int = 0,
+                    _normally_open: int = 0) -> Recloser:
     """
     Recloser(ProtectedSwitch(Switch(ConductingEquipment(Equipment(PowerSystemResource(IdentifiedObject))))))
     IdentifiedObject: mrid, name, description, names
     PowerSystemResource: location, asset_info
     Equipment: in_service, normally_in_service, usage_points, equipment_containers, operational_restrictions, current_feeders
     ConductingEquipment: base_voltage, terminals
-    Switch: open, normally_open
+    Switch: _open, _normally_open
     ProtectedSwitch:
     Recloser:
     """

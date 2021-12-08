@@ -8,6 +8,7 @@ from hypothesis import given
 from test.cim.iec61970.base.meas.test_measurement import measurement_kwargs, verify_measurement_constructor_default, \
     verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
 from zepben.evolve import Discrete
+from zepben.evolve.model.cim.iec61970.base.meas.create_meas_components import create_discrete
 
 discrete_kwargs = measurement_kwargs
 discrete_args = measurement_args
@@ -15,12 +16,19 @@ discrete_args = measurement_args
 
 def test_discrete_constructor_default():
     verify_measurement_constructor_default(Discrete())
+    verify_measurement_constructor_default(create_discrete())
 
 
 @given(**discrete_kwargs)
 def test_discrete_constructor_kwargs(**kwargs):
     # noinspection PyArgumentList
     verify_measurement_constructor_kwargs(Discrete(**kwargs), **kwargs)
+
+
+@given(**discrete_kwargs)
+def test_discrete_creator(**kwargs):
+    # noinspection PyArgumentList
+    verify_measurement_constructor_kwargs(create_discrete(**kwargs), **kwargs)
 
 
 def test_discrete_constructor_args():

@@ -6,10 +6,12 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from zepben.evolve import Substation, Feeder, Loop, Circuit, SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.create_core_components import create_substation
 
 substation_kwargs = {
     **equipment_container_kwargs,
@@ -24,42 +26,53 @@ substation_args = [*equipment_container_args, Substation(), [Feeder()], [Loop()]
 
 
 def test_substation_constructor_default():
-    cn = Substation()
+    ss = Substation()
+    ss2 = create_substation()
+    validate_default_substation(ss)
+    validate_default_substation(ss2)
 
-    verify_equipment_container_constructor_default(cn)
-    assert not cn.sub_geographical_region
-    assert not list(cn.feeders)
-    assert not list(cn.loops)
-    assert not list(cn.energized_loops)
-    assert not list(cn.circuits)
+
+def validate_default_substation(ss):
+    verify_equipment_container_constructor_default(ss)
+    assert not ss.sub_geographical_region
+    assert not list(ss.feeders)
+    assert not list(ss.loops)
+    assert not list(ss.energized_loops)
+    assert not list(ss.circuits)
 
 
 @given(**substation_kwargs)
 def test_substation_constructor_kwargs(sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits, **kwargs):
-    cn = Substation(sub_geographical_region=sub_geographical_region,
-                    normal_energized_feeders=normal_energized_feeders,
-                    loops=loops,
-                    energized_loops=energized_loops,
-                    circuits=circuits,
-                    **kwargs)
+    args = extract_testing_args(locals())
+    ss = Substation(**args, **kwargs)
+    validate_substation_values(ss, **args, **kwargs)
 
-    verify_equipment_container_constructor_kwargs(cn, **kwargs)
-    assert cn.sub_geographical_region == sub_geographical_region
-    assert list(cn.feeders) == normal_energized_feeders
-    assert list(cn.loops) == loops
-    assert list(cn.energized_loops) == energized_loops
-    assert list(cn.circuits) == circuits
+
+@given(**substation_kwargs)
+def test_substation_creator(sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits, **kwargs):
+    args = extract_testing_args(locals())
+    ss = create_substation(**args, **kwargs)
+    validate_substation_values(ss, **args, **kwargs)
+
+
+def validate_substation_values(ss, sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits, **kwargs):
+    verify_equipment_container_constructor_kwargs(ss, **kwargs)
+    assert ss.sub_geographical_region == sub_geographical_region
+    assert list(ss.feeders) == normal_energized_feeders
+    assert list(ss.loops) == loops
+    assert list(ss.energized_loops) == energized_loops
+    assert list(ss.circuits) == circuits
 
 
 def test_substation_constructor_args():
-    cn = Substation(*substation_args)
+    ss = Substation(*substation_args)
 
-    verify_equipment_container_constructor_args(cn)
-    assert cn.sub_geographical_region == substation_args[-5]
-    assert list(cn.feeders) == substation_args[-4]
-    assert list(cn.loops) == substation_args[-3]
-    assert list(cn.energized_loops) == substation_args[-2]
-    assert list(cn.circuits) == substation_args[-1]
+    verify_equipment_container_constructor_args(ss)
+    assert ss.sub_geographical_region == substation_args[-5]
+    assert list(ss.feeders) == substation_args[-4]
+    assert list(ss.loops) == substation_args[-3]
+    assert list(ss.energized_loops) == substation_args[-2]
+    assert list(ss.circuits) == substation_args[-1]
 
 
 def test_normal_energized_feeders_collection():

@@ -8,6 +8,7 @@ from hypothesis import given
 from test.cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from zepben.evolve import Site
+from zepben.evolve.model.cim.iec61970.base.core.create_core_components import create_site
 
 site_kwargs = equipment_container_kwargs
 site_args = equipment_container_args
@@ -15,11 +16,17 @@ site_args = equipment_container_args
 
 def test_site_constructor_default():
     verify_equipment_container_constructor_default(Site())
+    verify_equipment_container_constructor_default(create_site())
 
 
 @given(**site_kwargs)
 def test_site_constructor_kwargs(**kwargs):
     verify_equipment_container_constructor_kwargs(Site(**kwargs), **kwargs)
+
+
+@given(**site_kwargs)
+def test_site_creator(**kwargs):
+    verify_equipment_container_constructor_kwargs(create_site(**kwargs), **kwargs)
 
 
 def test_site_constructor_args():

@@ -7,10 +7,12 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 
+from cim import extract_testing_args
 from test.cim.iec61970.base.wires.test_shunt_compensator import verify_shunt_compensator_constructor_default, \
     verify_shunt_compensator_constructor_kwargs, verify_shunt_compensator_constructor_args, shunt_compensator_kwargs, shunt_compensator_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import LinearShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_linear_shunt_compensator
 
 linear_shunt_compensator_kwargs = {
     **shunt_compensator_kwargs,
@@ -25,7 +27,12 @@ linear_shunt_compensator_args = [*shunt_compensator_args, 1.1, 2.2, 3.3, 4.4]
 
 def test_linear_shunt_compensator_constructor_default():
     lsc = LinearShuntCompensator()
+    lsc2 = create_linear_shunt_compensator()
+    validate_default_linear_shunt_compensator_constructor(lsc)
+    validate_default_linear_shunt_compensator_constructor(lsc2)
 
+
+def validate_default_linear_shunt_compensator_constructor(lsc):
     verify_shunt_compensator_constructor_default(lsc)
     assert lsc.b0_per_section is None
     assert lsc.b_per_section is None
@@ -35,12 +42,19 @@ def test_linear_shunt_compensator_constructor_default():
 
 @given(**linear_shunt_compensator_kwargs)
 def test_linear_shunt_compensator_constructor_kwargs(b0_per_section, b_per_section, g0_per_section, g_per_section, **kwargs):
-    lsc = LinearShuntCompensator(b0_per_section=b0_per_section,
-                                 b_per_section=b_per_section,
-                                 g0_per_section=g0_per_section,
-                                 g_per_section=g_per_section,
-                                 **kwargs)
+    args = extract_testing_args(locals())
+    lsc = LinearShuntCompensator(**args, **kwargs)
+    validate_linear_shunt_compensator_values(lsc, **args, **kwargs)
 
+
+@given(**linear_shunt_compensator_kwargs)
+def test_linear_shunt_compensator_creator(b0_per_section, b_per_section, g0_per_section, g_per_section, **kwargs):
+    args = extract_testing_args(locals())
+    lsc = create_linear_shunt_compensator(**args, **kwargs)
+    validate_linear_shunt_compensator_values(lsc, **args, **kwargs)
+
+
+def validate_linear_shunt_compensator_values(lsc, b0_per_section, b_per_section, g0_per_section, g_per_section, **kwargs):
     verify_shunt_compensator_constructor_kwargs(lsc, **kwargs)
     assert lsc.b0_per_section == b0_per_section
     assert lsc.b_per_section == b_per_section

@@ -6,11 +6,13 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
 
+from cim import extract_testing_args
 from test.cim.iec61970.base.core.test_ac_dc_terminal import ac_dc_terminal_kwargs, verify_ac_dc_terminal_constructor_default, \
     verify_ac_dc_terminal_constructor_kwargs, verify_ac_dc_terminal_constructor_args, ac_dc_terminal_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from zepben.evolve import Terminal, ConnectivityNode, TracedPhases, ConductingEquipment, PhaseCode
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
+from zepben.evolve.model.cim.iec61970.base.core.create_core_components import create_terminal
 
 terminal_kwargs = {
     **ac_dc_terminal_kwargs,
@@ -30,7 +32,12 @@ terminal_args = [*ac_dc_terminal_args, ConductingEquipment(), PhaseCode.XYN, 1, 
 
 def test_terminal_constructor_default():
     t = Terminal()
+    t2 = create_terminal()
+    validate_default_terminal(t)
+    validate_default_terminal(t2)
 
+
+def validate_default_terminal(t):
     verify_ac_dc_terminal_constructor_default(t)
     assert not t.conducting_equipment
     assert t.phases == PhaseCode.ABC
@@ -44,15 +51,21 @@ def test_terminal_constructor_default():
 @given(**terminal_kwargs)
 def test_terminal_constructor_kwargs(conducting_equipment, phases, sequence_number, normal_feeder_direction, current_feeder_direction, traced_phases,
                                      connectivity_node, **kwargs):
-    t = Terminal(conducting_equipment=conducting_equipment,
-                 phases=phases,
-                 sequence_number=sequence_number,
-                 normal_feeder_direction=normal_feeder_direction,
-                 current_feeder_direction=current_feeder_direction,
-                 traced_phases=traced_phases,
-                 connectivity_node=connectivity_node,
-                 **kwargs)
+    args = extract_testing_args(locals())
+    t = Terminal(**args, **kwargs)
+    validate_terminal_values(t, **args, **kwargs)
 
+
+@given(**terminal_kwargs)
+def test_terminal_creator(conducting_equipment, phases, sequence_number, normal_feeder_direction, current_feeder_direction, traced_phases, connectivity_node,
+                          **kwargs):
+    args = extract_testing_args(locals())
+    t = create_terminal(**args, **kwargs)
+    validate_terminal_values(t, **args, **kwargs)
+
+
+def validate_terminal_values(t, conducting_equipment, phases, sequence_number, normal_feeder_direction, current_feeder_direction, traced_phases,
+                             connectivity_node, **kwargs):
     verify_ac_dc_terminal_constructor_kwargs(t, **kwargs)
     assert t.conducting_equipment == conducting_equipment
     assert t.phases == phases

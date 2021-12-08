@@ -9,6 +9,7 @@ from test.cim.iec61970.base.wires.generation.production.test_power_electronics_u
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
 from zepben.evolve import PowerElectronicsWindUnit
+from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_power_electronics_wind_unit
 
 power_electronics_wind_unit_kwargs = power_electronics_unit_kwargs
 power_electronics_wind_unit_args = power_electronics_unit_args
@@ -16,11 +17,17 @@ power_electronics_wind_unit_args = power_electronics_unit_args
 
 def test_power_electronics_wind_unit_constructor_default():
     verify_power_electronics_unit_constructor_default(PowerElectronicsWindUnit())
+    verify_power_electronics_unit_constructor_default(create_power_electronics_wind_unit())
 
 
 @given(**power_electronics_wind_unit_kwargs)
 def test_power_electronics_wind_unit_constructor_kwargs(**kwargs):
     verify_power_electronics_unit_constructor_kwargs(PowerElectronicsWindUnit(**kwargs), **kwargs)
+
+
+@given(**power_electronics_wind_unit_kwargs)
+def test_power_electronics_wind_unit_creator(**kwargs):
+    verify_power_electronics_unit_constructor_kwargs(create_power_electronics_wind_unit(**kwargs), **kwargs)
 
 
 def test_power_electronics_wind_unit_constructor_args():

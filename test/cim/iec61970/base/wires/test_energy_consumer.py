@@ -6,11 +6,13 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, integers, booleans, sampled_from, floats
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import EnergyConsumer, EnergyConsumerPhase, PhaseShuntConnectionKind
+from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_energy_consumer
 
 energy_consumer_kwargs = {
     **energy_connection_kwargs,
@@ -29,7 +31,12 @@ energy_consumer_args = [*energy_connection_args, [EnergyConsumerPhase()], 1, Tru
 
 def test_energy_consumer_constructor_default():
     ec = EnergyConsumer()
+    ec2 = create_energy_consumer()
+    validate_default_energy_consumer_constructor(ec)
+    validate_default_energy_consumer_constructor(ec2)
 
+
+def validate_default_energy_consumer_constructor(ec):
     verify_energy_connection_constructor_default(ec)
     assert not list(ec.phases)
     assert ec.customer_count is None
@@ -43,16 +50,19 @@ def test_energy_consumer_constructor_default():
 
 @given(**energy_consumer_kwargs)
 def test_energy_consumer_constructor_kwargs(energy_consumer_phases, customer_count, grounded, phase_connection, p, p_fixed, q, q_fixed, **kwargs):
-    ec = EnergyConsumer(energy_consumer_phases=energy_consumer_phases,
-                        customer_count=customer_count,
-                        grounded=grounded,
-                        phase_connection=phase_connection,
-                        p=p,
-                        p_fixed=p_fixed,
-                        q=q,
-                        q_fixed=q_fixed,
-                        **kwargs)
+    args = extract_testing_args(locals())
+    ec = EnergyConsumer(**args, **kwargs)
+    validate_energy_consumer_values(ec, **args, **kwargs)
 
+
+@given(**energy_consumer_kwargs)
+def test_energy_consumer_creator(energy_consumer_phases, customer_count, grounded, phase_connection, p, p_fixed, q, q_fixed, **kwargs):
+    args = extract_testing_args(locals())
+    ec = create_energy_consumer(**args, **kwargs)
+    validate_energy_consumer_values(ec, **args, **kwargs)
+
+
+def validate_energy_consumer_values(ec, energy_consumer_phases, customer_count, grounded, phase_connection, p, p_fixed, q, q_fixed, **kwargs):
     verify_energy_connection_constructor_kwargs(ec, **kwargs)
     assert list(ec.phases) == energy_consumer_phases
     assert ec.customer_count == customer_count

@@ -6,11 +6,13 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds, text, floats
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_ordered
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
 from zepben.evolve import DiagramObject, DiagramObjectPoint, Diagram
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.create_diagram_layout_components import create_diagram_object
 
 diagram_object_kwargs = {
     **identified_object_kwargs,
@@ -27,7 +29,12 @@ diagram_object_args = [*identified_object_args, Diagram(), "a", "CB", 1.1, [Diag
 
 def test_diagram_object_constructor_default():
     do = DiagramObject()
+    do2 = create_diagram_object()
+    validate_default_diagram_object(do)
+    validate_default_diagram_object(do2)
 
+
+def validate_default_diagram_object(do):
     verify_identified_object_constructor_default(do)
     assert not do.diagram
     assert not do.identified_object_mrid
@@ -38,13 +45,19 @@ def test_diagram_object_constructor_default():
 
 @given(**diagram_object_kwargs)
 def test_diagram_object_constructor_kwargs(diagram, identified_object_mrid, style, rotation, diagram_object_points, **kwargs):
-    do = DiagramObject(diagram=diagram,
-                       identified_object_mrid=identified_object_mrid,
-                       style=style,
-                       rotation=rotation,
-                       diagram_object_points=diagram_object_points,
-                       **kwargs)
+    args = extract_testing_args(locals())
+    do = DiagramObject(**args, **kwargs)
+    validate_diagram_object_values(do, **args, **kwargs)
 
+
+@given(**diagram_object_kwargs)
+def test_diagram_object_creator(diagram, identified_object_mrid, style, rotation, diagram_object_points, **kwargs):
+    args = extract_testing_args(locals())
+    do = create_diagram_object(**args, **kwargs)
+    validate_diagram_object_values(do, **args, **kwargs)
+
+
+def validate_diagram_object_values(do, diagram, identified_object_mrid, style, rotation, diagram_object_points, **kwargs):
     verify_identified_object_constructor_kwargs(do, **kwargs)
     assert do.diagram == diagram
     assert do.identified_object_mrid == identified_object_mrid

@@ -67,10 +67,10 @@ def create_name(name: str, type: NameType, identified_object: IdentifiedObject =
     return Name(**args)
 
 
-def create_name_type(name: str, description: str = "", names_index: Dict[str, Name] = None, names_multi_index: Dict[str, List[Name]] = None) -> NameType:
+def create_name_type(name: str, description: str = "", _names_index: Dict[str, Name] = dict(), _names_multi_index: Dict[str, List[Name]] = dict()) -> NameType:
     """
     NameType()
-    NameType: name, description, names_index, names_multi_index
+    NameType: name, description, _names_index, _names_multi_index
     """
     args = locals()
     # noinspection PyArgumentList
@@ -119,13 +119,14 @@ def create_substation(mrid: str = None, name: str = '', description: str = "", n
 
 
 def create_terminal(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, conducting_equipment: ConductingEquipment = None,
-                    phases: PhaseCode = PhaseCode.ABC, sequence_number: int = 0, traced_phases: TracedPhases = TracedPhases(), cn: ReferenceType = None
-                    ) -> Terminal:
+                    phases: PhaseCode = PhaseCode.ABC, sequence_number: int = 0, normal_feeder_direction: FeederDirection = FeederDirection.NONE,
+                    current_feeder_direction: FeederDirection = FeederDirection.NONE, traced_phases: TracedPhases = TracedPhases(), cn: ReferenceType = None,
+                    connectivity_node: ConnectivityNode = None) -> Terminal:
     """
     Terminal(AcDcTerminal(IdentifiedObject))
     IdentifiedObject: mrid, name, description, names
     AcDcTerminal:
-    Terminal: conducting_equipment, phases, sequence_number, traced_phases, cn
+    Terminal: conducting_equipment, phases, sequence_number, traced_phases, cn, connectivity_node
     """
     args = locals()
     return Terminal(**args)

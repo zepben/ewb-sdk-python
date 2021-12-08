@@ -6,10 +6,12 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from zepben.evolve import SubGeographicalRegion, Substation, GeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.create_core_components import create_sub_geographical_region
 
 sub_geographical_region_kwargs = {
     **identified_object_kwargs,
@@ -22,17 +24,31 @@ sub_geographical_region_args = [*identified_object_args, GeographicalRegion(), [
 
 def test_sub_geographical_region_constructor_default():
     sgr = SubGeographicalRegion()
+    sgr2 = create_sub_geographical_region()
+    validate_default_sub_geographical_region(sgr)
+    validate_default_sub_geographical_region(sgr2)
 
+
+def validate_default_sub_geographical_region(sgr):
     verify_identified_object_constructor_default(sgr)
     assert not list(sgr.substations)
 
 
 @given(**sub_geographical_region_kwargs)
 def test_sub_geographical_region_constructor_kwargs(geographical_region, substations, **kwargs):
-    sgr = SubGeographicalRegion(geographical_region=geographical_region,
-                                substations=substations,
-                                **kwargs)
+    args = extract_testing_args(locals())
+    sgr = SubGeographicalRegion(**args, **kwargs)
+    validate_sub_geographical_region_values(sgr, **args, **kwargs)
 
+
+@given(**sub_geographical_region_kwargs)
+def test_sub_geographical_region_constructor_kwargs(geographical_region, substations, **kwargs):
+    args = extract_testing_args(locals())
+    sgr = create_sub_geographical_region(**args, **kwargs)
+    validate_sub_geographical_region_values(sgr, **args, **kwargs)
+
+
+def validate_sub_geographical_region_values(sgr, geographical_region, substations, **kwargs):
     verify_identified_object_constructor_kwargs(sgr, **kwargs)
     assert sgr.geographical_region == geographical_region
     assert list(sgr.substations) == substations

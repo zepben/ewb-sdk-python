@@ -7,8 +7,9 @@ from collections import Counter
 
 from hypothesis import given
 from hypothesis.strategies import text
-
+from cim import extract_testing_args
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from zepben.evolve.model.cim.iec61970.base.core.create_core_components import create_name_type
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import Junction
 
@@ -24,17 +25,33 @@ name_type_args = ["1", "2"]
 def test_name_type_constructor_default():
     # noinspection PyArgumentList
     nt = NameType("nt")
+    nt2 = create_name_type("nt")
+    validate_default_name_type(nt)
+    validate_default_name_type(nt2)
 
+
+def validate_default_name_type(nt):
     assert nt.name == "nt"
     assert not nt.description
     assert not list(nt.names)
 
 
+# noinspection PyArgumentList
 @given(**name_type_kwargs)
 def test_name_type_constructor_kwargs(name, description, **kwargs):
-    # noinspection PyArgumentList
-    nt = NameType(name=name, description=description, **kwargs)
+    args = extract_testing_args(locals())
+    nt = NameType(**args, **kwargs)
+    validate_name_type_values(nt, **args)
 
+
+@given(**name_type_kwargs)
+def test_name_type_constructor_kwargs(name, description, **kwargs):
+    args = extract_testing_args(locals())
+    nt = create_name_type(**args, **kwargs)
+    validate_name_type_values(nt, **args)
+
+
+def validate_name_type_values(nt, name, description):
     assert nt.name == name
     assert nt.description == description
     assert not list(nt.names)

@@ -6,11 +6,13 @@
 from hypothesis import given
 from hypothesis.strategies import integers, builds, lists, floats
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_kwargs, regulating_cond_eq_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import PowerElectronicsUnit, PowerElectronicsConnectionPhase, BatteryUnit, PowerElectronicsConnection
+from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_power_electronics_connection
 
 power_electronics_connection_kwargs = {
     **regulating_cond_eq_kwargs,
@@ -31,7 +33,12 @@ power_electronics_connection_args = [*regulating_cond_eq_args, 1, 2.2, 3.3, 4.4,
 
 def test_power_electronics_connection_constructor_default():
     pec = PowerElectronicsConnection()
+    pec2 = create_power_electronics_connection()
+    validate_default_power_electronics_connection_constructor(pec)
+    validate_default_power_electronics_connection_constructor(pec2)
 
+
+def validate_default_power_electronics_connection_constructor(pec):
     verify_regulating_cond_eq_constructor_default(pec)
     assert pec.max_i_fault is None
     assert pec.p is None
@@ -47,10 +54,21 @@ def test_power_electronics_connection_constructor_default():
 @given(**power_electronics_connection_kwargs)
 def test_power_electronics_connection_constructor_kwargs(max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units,
                                                          power_electronics_connection_phases, **kwargs):
-    pec = PowerElectronicsConnection(max_i_fault=max_i_fault, p=p, q=q, max_q=max_q, min_q=min_q, rated_s=rated_s, rated_u=rated_u,
-                                     power_electronics_units=power_electronics_units,
-                                     power_electronics_connection_phases=power_electronics_connection_phases, **kwargs)
+    args = extract_testing_args(locals())
+    pec = PowerElectronicsConnection(**args, **kwargs)
+    validate_power_electronics_connection_constructor_values(pec, **args, **kwargs)
 
+
+@given(**power_electronics_connection_kwargs)
+def test_power_electronics_connection_creator(max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units,
+                                                         power_electronics_connection_phases, **kwargs):
+    args = extract_testing_args(locals())
+    pec = create_power_electronics_connection(**args, **kwargs)
+    validate_power_electronics_connection_constructor_values(pec, **args, **kwargs)
+
+
+def validate_power_electronics_connection_constructor_values(pec, max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units,
+                                                             power_electronics_connection_phases, **kwargs):
     verify_regulating_cond_eq_constructor_kwargs(pec, **kwargs)
     assert pec.max_i_fault == max_i_fault
     assert pec.p == p

@@ -6,10 +6,12 @@
 from hypothesis import given
 from hypothesis.strategies import builds, text
 
+from cim import extract_testing_args
 from test.cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_point_constructor_default, \
     verify_io_point_constructor_kwargs, verify_io_point_constructor_args, io_point_args
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import Control, RemoteControl
+from zepben.evolve.model.cim.iec61970.base.meas.create_meas_components import create_control
 
 control_kwargs = {
     **io_point_kwargs,
@@ -22,7 +24,12 @@ control_args = [*io_point_args, "a", RemoteControl()]
 
 def test_control_constructor_default():
     c = Control()
+    c2 = create_control()
+    validate_default_control_constructor(c)
+    validate_default_control_constructor(c2)
 
+
+def validate_default_control_constructor(c):
     verify_io_point_constructor_default(c)
     assert not c.power_system_resource_mrid
     assert not c.remote_control
@@ -30,9 +37,19 @@ def test_control_constructor_default():
 
 @given(**control_kwargs)
 def test_control_constructor_kwargs(power_system_resource_mrid, remote_control, **kwargs):
-    # noinspection PyArgumentList
-    c = Control(power_system_resource_mrid=power_system_resource_mrid, remote_control=remote_control, **kwargs)
+    args = extract_testing_args(locals())
+    c = Control(**args, **kwargs)
+    validate_control_values(c, **args, **kwargs)
 
+
+@given(**control_kwargs)
+def test_control_creator(power_system_resource_mrid, remote_control, **kwargs):
+    args = extract_testing_args(locals())
+    c = create_control(**args, **kwargs)
+    validate_control_values(c, **args, **kwargs)
+
+
+def validate_control_values(c, power_system_resource_mrid, remote_control, **kwargs):
     verify_io_point_constructor_kwargs(c, **kwargs)
     assert c.power_system_resource_mrid == power_system_resource_mrid
     assert c.remote_control == remote_control

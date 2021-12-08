@@ -6,10 +6,12 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
 
+from cim import extract_testing_args
 from test.cim.iec61968.assets.test_asset import asset_kwargs, verify_asset_constructor_default, \
     verify_asset_constructor_kwargs, verify_asset_constructor_args, asset_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from zepben.evolve import Streetlight, Pole, StreetlightLampKind
+from zepben.evolve.model.cim.iec61968.assets.create_assets_components import create_streetlight
 
 streetlight_kwargs = {
     **asset_kwargs,
@@ -22,31 +24,44 @@ streetlight_args = [*asset_args, Pole(), 1, StreetlightLampKind.HIGH_PRESSURE_SO
 
 
 def test_streetlight_constructor_default():
-    p = Streetlight()
+    sl = Streetlight()
+    sl2 = create_streetlight()
+    validate_default_streetlight(sl)
+    validate_default_streetlight(sl2)
 
-    verify_asset_constructor_default(p)
-    assert not p.pole
-    assert p.light_rating is None
-    assert p.lamp_kind == StreetlightLampKind.UNKNOWN
+
+def validate_default_streetlight(sl):
+    verify_asset_constructor_default(sl)
+    assert not sl.pole
+    assert sl.light_rating is None
+    assert sl.lamp_kind == StreetlightLampKind.UNKNOWN
 
 
 @given(**streetlight_kwargs)
 def test_streetlight_constructor_kwargs(pole, light_rating, lamp_kind, **kwargs):
-    p = Streetlight(pole=pole,
-                    light_rating=light_rating,
-                    lamp_kind=lamp_kind,
-                    **kwargs)
+    args = extract_testing_args(locals())
+    sl = Streetlight(**args, **kwargs)
+    validate_streetlight_values(sl, **args, **kwargs)
 
-    verify_asset_constructor_kwargs(p, **kwargs)
-    assert p.pole == pole
-    assert p.light_rating == light_rating
-    assert p.lamp_kind == lamp_kind
+
+@given(**streetlight_kwargs)
+def test_streetlight_creator(pole, light_rating, lamp_kind, **kwargs):
+    args = extract_testing_args(locals())
+    sl = create_streetlight(**args, **kwargs)
+    validate_streetlight_values(sl, **args, **kwargs)
+
+
+def validate_streetlight_values(sl, pole, light_rating, lamp_kind, **kwargs):
+    verify_asset_constructor_kwargs(sl, **kwargs)
+    assert sl.pole == pole
+    assert sl.light_rating == light_rating
+    assert sl.lamp_kind == lamp_kind
 
 
 def test_streetlight_constructor_args():
-    p = Streetlight(*streetlight_args)
+    sl = Streetlight(*streetlight_args)
 
-    verify_asset_constructor_args(p)
-    assert p.pole == streetlight_args[-3]
-    assert p.light_rating == streetlight_args[-2]
-    assert p.lamp_kind == streetlight_args[-1]
+    verify_asset_constructor_args(sl)
+    assert sl.pole == streetlight_args[-3]
+    assert sl.light_rating == streetlight_args[-2]
+    assert sl.lamp_kind == streetlight_args[-1]

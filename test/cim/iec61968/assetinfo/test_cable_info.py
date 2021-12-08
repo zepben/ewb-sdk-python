@@ -8,6 +8,7 @@ from hypothesis import given
 from test.cim.iec61968.assetinfo.test_wire_info import wire_info_kwargs, verify_wire_info_constructor_default, \
     verify_wire_info_constructor_kwargs, verify_wire_info_constructor_args, wire_info_args
 from zepben.evolve import CableInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.create_asset_info_components import create_cable_info
 
 cable_info_kwargs = wire_info_kwargs
 cable_info_args = wire_info_args
@@ -21,6 +22,12 @@ def test_cable_info_constructor_default():
 def test_cable_info_constructor_kwargs(**kwargs):
     # noinspection PyArgumentList
     verify_wire_info_constructor_kwargs(CableInfo(**kwargs), **kwargs)
+
+
+@given(**cable_info_kwargs)
+def test_cable_info_creator(**kwargs):
+    # noinspection PyArgumentList
+    verify_wire_info_constructor_kwargs(create_cable_info(**kwargs), **kwargs)
 
 
 def test_cable_info_constructor_args():

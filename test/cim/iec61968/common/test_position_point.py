@@ -7,7 +7,9 @@ from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import floats
 
+from cim import extract_testing_args
 from zepben.evolve import PositionPoint
+from zepben.evolve.model.cim.iec61968.common.create_common_components import create_position_point
 
 position_point_kwargs = {
     "x_position": floats(min_value=-180, max_value=180),
@@ -24,21 +26,38 @@ def test_position_point_constructor_default():
     #
     with raises(TypeError):
         PositionPoint()
+        create_position_point()
     with raises(TypeError):
         PositionPoint(1.0)
+        create_position_point(1.0)
     with raises(TypeError):
         PositionPoint(x_position=2.0)
+        create_position_point(x_position=2.0)
     with raises(TypeError):
         PositionPoint(y_position=2.0)
+        create_position_point(y_position=2.0)
+
+
+# noinspection PyArgumentList
+@given(**position_point_kwargs)
+def test_position_point_constructor_kwargs(x_position, y_position, **kwargs):
+    args = extract_testing_args(locals())
+    assert not kwargs
+
+    pp = PositionPoint(**args)
+    validate_position_point_values(pp, **args)
 
 
 @given(**position_point_kwargs)
-def test_position_point_constructor_kwargs(x_position, y_position, **kwargs):
+def test_position_point_creator(x_position, y_position, **kwargs):
+    args = extract_testing_args(locals())
     assert not kwargs
 
-    # noinspection PyArgumentList
-    pp = PositionPoint(x_position=x_position, y_position=y_position)
+    pp = create_position_point(**args)
+    validate_position_point_values(pp, **args)
 
+
+def validate_position_point_values(pp, x_position, y_position):
     assert pp.x_position == x_position
     assert pp.y_position == y_position
 

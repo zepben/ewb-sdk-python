@@ -5,11 +5,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers, floats
-
+from cim import extract_testing_args
 from test.cim.iec61968.assetinfo.test_transformer_test import transformer_test_kwargs, verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import NoLoadTest
+from zepben.evolve.model.cim.iec61968.assetinfo.create_asset_info_components import create_no_load_test
 
 no_load_test_kwargs = {
     **transformer_test_kwargs,
@@ -25,7 +26,13 @@ no_load_test_args = [*transformer_test_args, 1, 2.2, 3.3, 4, 5]
 
 def test_no_load_test_constructor_default():
     nlt = NoLoadTest()
+    nlt2 = create_no_load_test()
 
+    validate_default_no_load_test(nlt)
+    validate_default_no_load_test(nlt2)
+
+
+def validate_default_no_load_test(nlt):
     verify_transformer_test_constructor_default(nlt)
     assert nlt.energised_end_voltage is None
     assert nlt.exciting_current is None
@@ -36,14 +43,19 @@ def test_no_load_test_constructor_default():
 
 @given(**no_load_test_kwargs)
 def test_no_load_test_constructor_kwargs(energised_end_voltage, exciting_current, exciting_current_zero, loss, loss_zero, **kwargs):
-    # noinspection PyArgumentList
-    nlt = NoLoadTest(energised_end_voltage=energised_end_voltage,
-                     exciting_current=exciting_current,
-                     exciting_current_zero=exciting_current_zero,
-                     loss=loss,
-                     loss_zero=loss_zero,
-                     **kwargs)
+    args = extract_testing_args(locals())
+    nlt = NoLoadTest(**args, **kwargs)
+    validate_no_load_test_values(nlt, **args, **kwargs)
 
+
+@given(**no_load_test_kwargs)
+def test_no_load_test_creator(energised_end_voltage, exciting_current, exciting_current_zero, loss, loss_zero, **kwargs):
+    args = extract_testing_args(locals())
+    nlt = create_no_load_test(**args, **kwargs)
+    validate_no_load_test_values(nlt, **args, **kwargs)
+
+
+def validate_no_load_test_values(nlt, energised_end_voltage, exciting_current, exciting_current_zero, loss, loss_zero, **kwargs):
     verify_transformer_test_constructor_kwargs(nlt, **kwargs)
     assert nlt.energised_end_voltage == energised_end_voltage
     assert nlt.exciting_current == exciting_current

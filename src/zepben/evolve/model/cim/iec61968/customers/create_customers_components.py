@@ -49,8 +49,8 @@ def create_pricing_structure(mrid: str = None, name: str = '', description: str 
     return PricingStructure(**args)
 
 
-def create_tariffs(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, title: str = "", created_date_time: datetime = None,
-                   author_name: str = "", type: str = "", status: str = "", comment: str = "") -> Tariff:
+def create_tariff(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, title: str = "", created_date_time: datetime = None,
+                  author_name: str = "", type: str = "", status: str = "", comment: str = "") -> Tariff:
     """
     Tariff(Document(IdentifiedObject))
     IdentifiedObject: mrid, name, description, names

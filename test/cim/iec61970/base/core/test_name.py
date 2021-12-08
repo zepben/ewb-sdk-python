@@ -7,9 +7,11 @@
 from hypothesis import given
 from hypothesis.strategies import text, builds
 
+from cim import extract_testing_args
 from test.cim.iec61970.base.core.test_name_type import name_type_kwargs
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
 from zepben.evolve import Junction
+from zepben.evolve.model.cim.iec61970.base.core.create_core_components import create_name
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 
@@ -29,12 +31,23 @@ name_args = ["1", NameType("nt1"), Junction()]
 # def test_name_constructor_default():
 
 
-# noinspection PyShadowingBuiltins
+# noinspection PyShadowingBuiltins,PyArgumentList
 @given(**name_kwargs)
 def test_name_constructor_kwargs(name, type, identified_object, **kwargs):
-    # noinspection PyArgumentList
-    n = Name(name, type, identified_object, **kwargs)
+    args = extract_testing_args(locals())
+    n = Name(**args, **kwargs)
+    validate_name_values(n, **args)
 
+
+# noinspection PyShadowingBuiltins
+@given(**name_kwargs)
+def test_name_creator(name, type, identified_object, **kwargs):
+    args = extract_testing_args(locals())
+    n = create_name(**args, **kwargs)
+    validate_name_values(n, **args)
+
+
+def validate_name_values(n, name, type, identified_object):
     assert n.name == name
     assert n.type == type
     assert n.identified_object == identified_object

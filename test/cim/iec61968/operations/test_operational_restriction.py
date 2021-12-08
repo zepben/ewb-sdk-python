@@ -7,10 +7,12 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
 from zepben.evolve import OperationalRestriction, Equipment
+from zepben.evolve.model.cim.iec61968.operations.create_operational_restriction_components import create_operational_restriction
 
 operational_restriction_kwargs = {
     **document_kwargs,
@@ -22,19 +24,31 @@ operational_restriction_args = [*document_args, [Equipment()]]
 
 def test_operational_restriction_constructor_default():
     or_ = OperationalRestriction()
+    or_2 = create_operational_restriction()
+    validate_default_operational_restriction(or_)
+    validate_default_operational_restriction(or_2)
 
+
+def validate_default_operational_restriction(or_):
     verify_document_constructor_default(or_)
     assert not list(or_.equipment)
 
 
 @given(**operational_restriction_kwargs)
 def test_operational_restriction_constructor_kwargs(equipment, **kwargs):
-    # noinspection PyArgumentList
-    or_ = OperationalRestriction(
-        equipment=equipment,
-        **kwargs
-    )
+    args = extract_testing_args(locals())
+    or_ = OperationalRestriction(**args, **kwargs)
+    validate_operational_restriction_values(or_, **args, **kwargs)
 
+
+@given(**operational_restriction_kwargs)
+def test_operational_restriction_creator(equipment, **kwargs):
+    args = extract_testing_args(locals())
+    or_ = create_operational_restriction(**args, **kwargs)
+    validate_operational_restriction_values(or_, **args, **kwargs)
+
+
+def validate_operational_restriction_values(or_, equipment, **kwargs):
     verify_document_constructor_kwargs(or_, **kwargs)
     assert list(or_.equipment) == equipment
 

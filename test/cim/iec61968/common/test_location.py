@@ -6,11 +6,13 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_ordered
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from test.cim.cim_creators import create_position_point
 from zepben.evolve import Location, PositionPoint, StreetAddress
+from zepben.evolve.model.cim.iec61968.common.create_common_components import create_location
 
 location_kwargs = {
     **identified_object_kwargs,
@@ -24,7 +26,12 @@ location_args = [*identified_object_args, StreetAddress(), [PositionPoint(1.1, 2
 
 def test_location_constructor_default():
     loc = Location()
+    loc2 = create_location()
+    validate_default_location(loc)
+    validate_default_location(loc2)
 
+
+def validate_default_location(loc):
     verify_identified_object_constructor_default(loc)
     assert not loc.main_address
     assert not list(loc.points)
@@ -32,8 +39,19 @@ def test_location_constructor_default():
 
 @given(**location_kwargs)
 def test_location_constructor_kwargs(main_address, position_points, **kwargs):
-    loc = Location(main_address=main_address, position_points=position_points, **kwargs)
+    args = extract_testing_args(locals())
+    loc = Location(**args, **kwargs)
+    validate_location_values(loc, **args, **kwargs)
 
+
+@given(**location_kwargs)
+def test_location_creator(main_address, position_points, **kwargs):
+    args = extract_testing_args(locals())
+    loc = create_location(**args, **kwargs)
+    validate_location_values(loc, **args, **kwargs)
+
+
+def validate_location_values(loc, main_address, position_points, **kwargs):
     verify_identified_object_constructor_kwargs(loc, **kwargs)
     assert loc.main_address == main_address
     assert list(loc.points) == position_points

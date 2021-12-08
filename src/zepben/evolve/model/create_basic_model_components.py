@@ -29,7 +29,7 @@ def create_resistance_reactance(r: float = None, x: float = None, r0: float = No
     return ResistanceReactance(**args)
 
 
-def create_traced_phases(normal_status: int = 0, current_status: int = 0) -> TracedPhases:
+def create_traced_phases() -> TracedPhases:
     """
     TracedPhases()
     TracedPhases: normal_status, current_status

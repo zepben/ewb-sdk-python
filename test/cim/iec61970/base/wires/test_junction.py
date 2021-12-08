@@ -8,6 +8,7 @@ from hypothesis import given
 from test.cim.iec61970.base.wires.test_connector import verify_connector_constructor_default, \
     verify_connector_constructor_kwargs, verify_connector_constructor_args, connector_kwargs, connector_args
 from zepben.evolve import Junction
+from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_junction
 
 junction_kwargs = connector_kwargs
 junction_args = connector_args
@@ -15,11 +16,17 @@ junction_args = connector_args
 
 def test_junction_constructor_default():
     verify_connector_constructor_default(Junction())
+    verify_connector_constructor_default(create_junction())
 
 
 @given(**junction_kwargs)
 def test_junction_constructor_kwargs(**kwargs):
     verify_connector_constructor_kwargs(Junction(**kwargs), **kwargs)
+
+
+@given(**junction_kwargs)
+def test_junction_creator(**kwargs):
+    verify_connector_constructor_kwargs(create_junction(**kwargs), **kwargs)
 
 
 def test_junction_constructor_args():

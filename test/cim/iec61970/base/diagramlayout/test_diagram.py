@@ -6,10 +6,12 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds, sampled_from
 
+from cim import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from zepben.evolve import DiagramObject, DiagramStyle, Diagram, OrientationKind
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.create_diagram_layout_components import create_diagram
 
 diagram_kwargs = {
     **identified_object_kwargs,
@@ -24,7 +26,12 @@ diagram_args = [*identified_object_args, DiagramStyle.GEOGRAPHIC, OrientationKin
 
 def test_diagram_constructor_default():
     d = Diagram()
+    d2 = create_diagram()
+    validate_default_diagram(d)
+    validate_default_diagram(d2)
 
+
+def validate_default_diagram(d):
     verify_identified_object_constructor_default(d)
     assert d.diagram_style == DiagramStyle.SCHEMATIC
     assert d.orientation_kind == OrientationKind.POSITIVE
@@ -33,11 +40,19 @@ def test_diagram_constructor_default():
 
 @given(**diagram_kwargs)
 def test_diagram_constructor_kwargs(diagram_style, orientation_kind, diagram_objects, **kwargs):
-    d = Diagram(diagram_style=diagram_style,
-                orientation_kind=orientation_kind,
-                diagram_objects=diagram_objects,
-                **kwargs)
+    args = extract_testing_args(locals())
+    d = Diagram(**args, **kwargs)
+    validate_diagram_values(d, **args, **kwargs)
 
+
+@given(**diagram_kwargs)
+def test_diagram_creator(diagram_style, orientation_kind, diagram_objects, **kwargs):
+    args = extract_testing_args(locals())
+    d = create_diagram(**args, **kwargs)
+    validate_diagram_values(d, **args, **kwargs)
+
+
+def validate_diagram_values(d, diagram_style, orientation_kind, diagram_objects, **kwargs):
     verify_identified_object_constructor_kwargs(d, **kwargs)
     assert d.diagram_style == diagram_style
     assert d.orientation_kind == orientation_kind

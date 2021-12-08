@@ -9,9 +9,11 @@ from typing import List
 from zepben.evolve import *
 
 
-def create_location(main_address: StreetAddress = None, position_points: List[PositionPoint] = None) -> Location:
+def create_location(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, main_address: StreetAddress = None,
+                    position_points: List[PositionPoint] = None) -> Location:
     """
-    Location()
+    Location(IdentifiedObject)
+    IdentifiedObject: mrid, name, description, names
     Location: main_address, position_points
     """
     args = locals()
@@ -39,7 +41,8 @@ def create_position_point(x_position: float, y_position: float) -> PositionPoint
     return PositionPoint(**args)
 
 
-def create_street_address(postal_code: str = "", town_detail: TownDetail = None) -> StreetAddress:
+def create_street_address(postal_code: str = "", town_detail: TownDetail = None, po_box: str = "", street_detail: Optional[StreetDetail] = None
+                          ) -> StreetAddress:
     """
     StreetAddress()
     StreetAddress: postal_code, town_detail
@@ -49,7 +52,7 @@ def create_street_address(postal_code: str = "", town_detail: TownDetail = None)
     return StreetAddress(**args)
 
 
-def create_town_detail(name: str = "", state_or_province: str = "") -> TownDetail:
+def create_town_detail(name: str = None, state_or_province: str = None) -> TownDetail:
     """
     TownDetail()
     TownDetail: name, state_or_province

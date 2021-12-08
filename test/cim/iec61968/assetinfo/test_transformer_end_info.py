@@ -8,12 +8,15 @@ from unittest.mock import patch
 from hypothesis import given
 from hypothesis.strategies import integers, floats
 
+from cim import extract_testing_args
 from test.cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args, asset_info_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection_kind, create_transformer_tank_info, \
     create_transformer_star_impedance, create_no_load_test, create_short_circuit_test, create_open_circuit_test
 from zepben.evolve import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
     ShortCircuitTest, OpenCircuitTest
+from zepben.evolve.model.cim.iec61968.assetinfo.create_asset_info_components import create_transformer_end_info
+from zepben.evolve.model.create_basic_model_components import create_resistance_reactance
 
 transformer_end_info_kwargs = {
     **asset_info_kwargs,
@@ -41,7 +44,12 @@ transformer_end_info_args = [*asset_info_args, WindingConnection.UNKNOWN_WINDING
 
 def test_transformer_end_info_constructor_default():
     tei = TransformerEndInfo()
+    tei2 = create_transformer_end_info()
+    validate_default_transformer_end_info(tei)
+    validate_default_transformer_end_info(tei2)
 
+
+def validate_default_transformer_end_info(tei):
     verify_asset_info_constructor_default(tei)
     assert tei.connection_kind == WindingConnection.UNKNOWN_WINDING
     assert tei.emergency_s is None
@@ -66,27 +74,23 @@ def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, e
                                                  transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests,
                                                  energised_end_short_circuit_tests, grounded_end_short_circuit_tests, open_end_open_circuit_tests,
                                                  energised_end_open_circuit_tests, **kwargs):
-    # noinspection PyArgumentList
-    tei = TransformerEndInfo(
-        connection_kind=connection_kind,
-        emergency_s=emergency_s,
-        end_number=end_number,
-        insulation_u=insulation_u,
-        phase_angle_clock=phase_angle_clock,
-        r=r,
-        rated_s=rated_s,
-        rated_u=rated_u,
-        short_term_s=short_term_s,
-        transformer_tank_info=transformer_tank_info,
-        transformer_star_impedance=transformer_star_impedance,
-        energised_end_no_load_tests=energised_end_no_load_tests,
-        energised_end_short_circuit_tests=energised_end_short_circuit_tests,
-        grounded_end_short_circuit_tests=grounded_end_short_circuit_tests,
-        open_end_open_circuit_tests=open_end_open_circuit_tests,
-        energised_end_open_circuit_tests=energised_end_open_circuit_tests,
-        **kwargs
-    )
+    args = extract_testing_args(locals())
+    tei = TransformerEndInfo(**args, **kwargs)
+    validate_transformer_end_info_values(tei, **args, **kwargs)
 
+
+@given(**transformer_end_info_kwargs)
+def test_transformer_end_info_creator(connection_kind, emergency_s, end_number, insulation_u, phase_angle_clock, r, rated_s, rated_u, short_term_s,
+                                      transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests, energised_end_short_circuit_tests,
+                                      grounded_end_short_circuit_tests, open_end_open_circuit_tests, energised_end_open_circuit_tests, **kwargs):
+    args = extract_testing_args(locals())
+    tei = create_transformer_end_info(**args, **kwargs)
+    validate_transformer_end_info_values(tei, **args, **kwargs)
+
+
+def validate_transformer_end_info_values(tei, connection_kind, emergency_s, end_number, insulation_u, phase_angle_clock, r, rated_s, rated_u, short_term_s,
+                                     transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests, energised_end_short_circuit_tests,
+                                     grounded_end_short_circuit_tests, open_end_open_circuit_tests, energised_end_open_circuit_tests, **kwargs):
     verify_asset_info_constructor_kwargs(tei, **kwargs)
     assert tei.connection_kind == connection_kind
     assert tei.emergency_s == emergency_s

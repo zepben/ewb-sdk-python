@@ -9,6 +9,7 @@ from hypothesis import given
 from test.cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
 from zepben.evolve import Tariff
+from zepben.evolve.model.cim.iec61968.customers.create_customers_components import create_tariff
 
 tariff_kwargs = document_kwargs
 tariff_args = document_args
@@ -16,12 +17,19 @@ tariff_args = document_args
 
 def test_tariff_constructor_default():
     verify_document_constructor_default(Tariff())
+    verify_document_constructor_default(create_tariff())
 
 
 @given(**tariff_kwargs)
 def test_tariff_constructor_kwargs(**kwargs):
     # noinspection PyArgumentList
     verify_document_constructor_kwargs(Tariff(**kwargs), **kwargs)
+
+
+@given(**tariff_kwargs)
+def test_tariff_creator(**kwargs):
+    # noinspection PyArgumentList
+    verify_document_constructor_kwargs(create_tariff(**kwargs), **kwargs)
 
 
 def test_tariff_constructor_args():

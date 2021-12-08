@@ -9,6 +9,7 @@ from test.cim.iec61970.base.wires.generation.production.test_power_electronics_u
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
 from zepben.evolve import PhotoVoltaicUnit
+from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_photo_voltaic_unit
 
 photo_voltaic_unit_kwargs = power_electronics_unit_kwargs
 photo_voltaic_unit_args = power_electronics_unit_args
@@ -16,11 +17,17 @@ photo_voltaic_unit_args = power_electronics_unit_args
 
 def test_photo_voltaic_unit_constructor_default():
     verify_power_electronics_unit_constructor_default(PhotoVoltaicUnit())
+    verify_power_electronics_unit_constructor_default(create_photo_voltaic_unit())
 
 
 @given(**photo_voltaic_unit_kwargs)
 def test_photo_voltaic_unit_constructor_kwargs(**kwargs):
     verify_power_electronics_unit_constructor_kwargs(PhotoVoltaicUnit(**kwargs), **kwargs)
+
+
+@given(**photo_voltaic_unit_kwargs)
+def test_photo_voltaic_unit_creator(**kwargs):
+    verify_power_electronics_unit_constructor_kwargs(create_photo_voltaic_unit(**kwargs), **kwargs)
 
 
 def test_photo_voltaic_unit_constructor_args():

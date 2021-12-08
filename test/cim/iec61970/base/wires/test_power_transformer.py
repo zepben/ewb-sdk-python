@@ -5,12 +5,14 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, lists, floats
-
+from cim import extract_testing_args
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from test.cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
 from test.cim.property_validator import validate_property_accessor
-from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo, TransformerConstructionKind, TransformerFunctionKind
+from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_power_transformer
+
 
 power_transformer_kwargs = {
     **conducting_equipment_kwargs,
@@ -27,7 +29,12 @@ power_transformer_args = [*conducting_equipment_args, VectorGroup.DD6, [PowerTra
 
 def test_power_transformer_constructor_default():
     pt = PowerTransformer()
+    pt2 = create_power_transformer()
+    validate_default_power_transformer_constructor(pt)
+    validate_default_power_transformer_constructor(pt2)
 
+
+def validate_default_power_transformer_constructor(pt):
     verify_conducting_equipment_constructor_default(pt)
     assert pt.vector_group == VectorGroup.UNKNOWN
     assert pt.construction_kind == TransformerConstructionKind.unknown
@@ -38,9 +45,19 @@ def test_power_transformer_constructor_default():
 
 @given(**power_transformer_kwargs)
 def test_power_transformer_constructor_kwargs(vector_group, power_transformer_ends, transformer_utilisation, construction_kind, function, **kwargs):
-    pt = PowerTransformer(vector_group=vector_group, power_transformer_ends=power_transformer_ends, transformer_utilisation=transformer_utilisation,
-                          construction_kind=construction_kind, function=function, **kwargs)
+    args = extract_testing_args(locals())
+    pt = PowerTransformer(**args, **kwargs)
+    validate_power_transformer_values(pt, **args, **kwargs)
 
+
+@given(**power_transformer_kwargs)
+def test_power_transformer_creator(vector_group, power_transformer_ends, transformer_utilisation, construction_kind, function, **kwargs):
+    args = extract_testing_args(locals())
+    pt = create_power_transformer(**args, **kwargs)
+    validate_power_transformer_values(pt, **args, **kwargs)
+
+
+def validate_power_transformer_values(pt, vector_group, power_transformer_ends, transformer_utilisation, construction_kind, function, **kwargs):
     verify_conducting_equipment_constructor_kwargs(pt, **kwargs)
     assert pt.vector_group == vector_group
     assert list(pt.ends) == power_transformer_ends
@@ -62,5 +79,3 @@ def test_power_transformer_constructor_args():
 
 def test_power_transformer_info_accessor():
     validate_property_accessor(PowerTransformer, PowerTransformerInfo, PowerTransformer.power_transformer_info)
-
-
