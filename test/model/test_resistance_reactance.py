@@ -6,9 +6,8 @@
 
 from hypothesis import given
 from hypothesis.strategies import floats
-
 from test.cim.extract_testing_args import extract_testing_args
-from cim.iec61968.assetinfo.test_transformer_end_info import validate_resistance_reactance
+from test.cim.iec61968.assetinfo.test_transformer_end_info import validate_resistance_reactance
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import ResistanceReactance
 from zepben.evolve.model.create_basic_model_components import create_resistance_reactance

@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
-from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, identified_object_kwargs, identified_object_args, \
+from test.cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, identified_object_kwargs, identified_object_args, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args
 from zepben.evolve import Organisation
 from zepben.evolve.model.cim.iec61968.common.create_common_components import create_organisation

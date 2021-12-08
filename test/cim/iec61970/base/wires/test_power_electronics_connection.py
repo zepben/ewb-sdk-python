@@ -60,8 +60,8 @@ def test_power_electronics_connection_constructor_kwargs(max_i_fault, p, q, max_
 
 
 @given(**power_electronics_connection_kwargs)
-def test_power_electronics_connection_creator(max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units,
-                                                         power_electronics_connection_phases, **kwargs):
+def test_power_electronics_connection_creator(max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units, power_electronics_connection_phases,
+                                              **kwargs):
     args = extract_testing_args(locals())
     pec = create_power_electronics_connection(**args, **kwargs)
     validate_power_electronics_connection_constructor_values(pec, **args, **kwargs)

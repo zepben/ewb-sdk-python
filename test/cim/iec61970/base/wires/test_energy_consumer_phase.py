@@ -7,7 +7,7 @@ from hypothesis import given
 from hypothesis.strategies import builds, floats, sampled_from
 
 from test.cim.extract_testing_args import extract_testing_args
-from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
+from test.cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_kwargs, power_system_resource_args
 from test.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import SinglePhaseKind, EnergyConsumer, EnergyConsumerPhase
