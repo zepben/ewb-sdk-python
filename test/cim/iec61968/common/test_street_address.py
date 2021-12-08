@@ -7,6 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, text
 from test.cim import extract_testing_args
+from test.cim.extract_testing_args import extract_testing_args
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import StreetAddress, TownDetail, StreetDetail
 from zepben.evolve.model.cim.iec61968.common.create_common_components import create_street_address

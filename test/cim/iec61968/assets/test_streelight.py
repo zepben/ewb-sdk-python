@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
 
-from test.cim import extract_testing_args
+from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61968.assets.test_asset import asset_kwargs, verify_asset_constructor_default, \
     verify_asset_constructor_kwargs, verify_asset_constructor_args, asset_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER

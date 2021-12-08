@@ -7,6 +7,7 @@ from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import floats
 from test.cim import extract_testing_args
+from test.cim.extract_testing_args import extract_testing_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import DiagramObjectPoint
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.create_diagram_layout_components import create_diagram_object_point

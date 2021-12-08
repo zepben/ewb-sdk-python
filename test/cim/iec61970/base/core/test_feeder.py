@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists
 
-from test.cim import extract_testing_args
+from test.cim.extract_testing_args import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args

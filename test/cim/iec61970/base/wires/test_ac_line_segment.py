@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds
 
-from test.cim import extract_testing_args
+from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
     verify_conductor_constructor_kwargs, verify_conductor_constructor_args, conductor_kwargs, conductor_args
 from zepben.evolve import AcLineSegment, PerLengthSequenceImpedance

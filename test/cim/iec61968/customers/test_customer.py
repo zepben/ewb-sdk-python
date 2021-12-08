@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds, sampled_from
 
-from test.cim import extract_testing_args
+from test.cim.extract_testing_args import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61968.common.test_organisation_role import organisation_role_kwargs, verify_organisation_role_constructor_default, \
     verify_organisation_role_constructor_kwargs, \

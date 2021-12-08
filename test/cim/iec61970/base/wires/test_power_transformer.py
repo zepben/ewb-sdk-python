@@ -5,8 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, lists, floats
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from test.cim import extract_testing_args
+from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
 from test.cim.property_validator import validate_property_accessor

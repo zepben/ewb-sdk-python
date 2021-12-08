@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from
 
-from test.cim import extract_testing_args
+from test.cim.extract_testing_args import extract_testing_args
 from cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_kwargs, power_system_resource_args
 from zepben.evolve import SinglePhaseKind, EnergySource, EnergySourcePhase

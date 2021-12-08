@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, text
 
-from test.cim import extract_testing_args
+from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_point_constructor_default, \
     verify_io_point_constructor_kwargs, verify_io_point_constructor_args, io_point_args
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
