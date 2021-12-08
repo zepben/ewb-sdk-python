@@ -24,6 +24,7 @@ class MetadataEntryWriter(object):
 
         insert.add_value(table.source.query_index, data_source.source)
         insert.add_value(table.version.query_index, data_source.version)
-        insert.add_value(table.timestamp.query_index, str(data_source.timestamp))
+        # TODO: JVM seems to use Z as TZ offset (for UTC+0?) while python uses +HH:mm format. Need to investigate here
+        insert.add_value(table.timestamp.query_index, f"{data_source.timestamp.isoformat()}Z")
 
         return try_execute_single_update(insert, self.cursor, "data source")
