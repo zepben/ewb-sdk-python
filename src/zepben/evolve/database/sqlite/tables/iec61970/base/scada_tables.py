@@ -20,7 +20,7 @@ class TableRemoteControls(TableRemotePoints):
 
     def __init__(self):
         super(TableRemoteControls, self).__init__()
-        self.control_mrid = self._create_column("control_mrid", "TEXT", Nullable.NULL)
+        self.control_mrid = self._create_column("power_system_resource_mrid", "TEXT", Nullable.NULL)
 
     def name(self) -> str:
         return "remote_controls"
@@ -31,7 +31,7 @@ class TableRemoteSources(TableRemotePoints):
 
     def __init__(self):
         super(TableRemoteSources, self).__init__()
-        self.measurement_mrid = self._create_column("measurement_mrid", "TEXT", Nullable.NULL)
+        self.measurement_mrid = self._create_column("power_system_resource_mrid", "TEXT", Nullable.NULL)
 
     def name(self) -> str:
         return "remote_sources"
