@@ -100,6 +100,24 @@ class PhaseCode(Enum):
     YN = (21, [SinglePhaseKind.Y, SinglePhaseKind.N])
     """Unknown non-neutral phase plus neutral"""
 
+    s1 = (22, [SinglePhaseKind.s1])
+    """Secondary phase 1"""
+
+    s1N = (23, [SinglePhaseKind.s1, SinglePhaseKind.N])
+    """Secondary phase 1 plus neutral"""
+
+    s12 = (24, [SinglePhaseKind.s1, SinglePhaseKind.s2])
+    """Secondary phase 1 and 2"""
+
+    s12N = (25, [SinglePhaseKind.s1, SinglePhaseKind.s2, SinglePhaseKind.N])
+    """Secondary phases 1, 2, and neutral"""
+
+    s2 = (26, [SinglePhaseKind.s2])
+    """Secondary phase 2"""
+
+    s2N = (27, [SinglePhaseKind.s2, SinglePhaseKind.N])
+    """Secondary phase 2 plus neutral"""
+
     @property
     def short_name(self):
         return str(self)[10:]

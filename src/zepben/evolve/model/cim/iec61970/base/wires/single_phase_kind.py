@@ -43,7 +43,13 @@ class SinglePhaseKind(Enum):
     Y = (6, 1)
     """An unknown primary phase."""
 
-    INVALID = (7, -1)
+    s1 = (7, 0)
+    """Secondary phase 1."""
+
+    s2 = (8, 1)
+    """Secondary phase 2."""
+
+    INVALID = (9, -1)
     """Invalid phase. Caused by trying to energise with multiple phases simultaneously."""
 
     @property
