@@ -21,5 +21,4 @@ def create_fault_indicator(mrid: str = None, name: str = '', description: str = 
     AuxiliaryEquipment: terminal
     FaultIndicator:
     """
-    args = locals()
-    return FaultIndicator(**args)
+    return FaultIndicator(**locals())

@@ -17,8 +17,7 @@ def create_asset_owner(mrid: str = None, name: str = '', description: str = "", 
     AssetOrganisationRole: 
     AssetOwner:
     """
-    args = locals()
-    return AssetOwner(**args)
+    return AssetOwner(**locals())
 
 
 def create_pole(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None, 
@@ -31,8 +30,7 @@ def create_pole(mrid: str = None, name: str = '', description: str = "", names: 
     Structure:
     Pole: classification, streetlights
     """
-    args = locals()
-    return Pole(**args)
+    return Pole(**locals())
 
 
 def create_streetlight(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -44,5 +42,4 @@ def create_streetlight(mrid: str = None, name: str = '', description: str = "", 
     Asset: location, organisation_roles
     Streetlight: pole, light_rating, lamp_kind
     """
-    args = locals()
-    return Streetlight(**args)
+    return Streetlight(**locals())

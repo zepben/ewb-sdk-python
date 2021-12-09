@@ -18,8 +18,7 @@ def create_accumulator(mrid: str = None, name: str = '', description: str = "", 
     Measurement: power_system_resource_mrid, remote_source, terminal_mrid, phases, unit_symbol
     Accumulator:
     """
-    args = locals()
-    return Accumulator(**args)
+    return Accumulator(**locals())
 
 
 def create_accumulator_value(time_stamp: datetime = None, value: int = 0, accumulator_mrid: str = None) -> AccumulatorValue:
@@ -28,9 +27,8 @@ def create_accumulator_value(time_stamp: datetime = None, value: int = 0, accumu
     MeasurementValue: time_stamp
     AccumulatorValue: value, accumulator_mrid
     """
-    args = locals()
     # noinspection PyArgumentList
-    return AccumulatorValue(**args)
+    return AccumulatorValue(**locals())
 
 
 def create_analog(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, power_system_resource_mrid: str = None,
@@ -42,8 +40,7 @@ def create_analog(mrid: str = None, name: str = '', description: str = "", names
     Measurement: power_system_resource_mrid, remote_source, terminal_mrid, phases, unit_symbol
     Analog: positive_flow_in
     """
-    args = locals()
-    return Analog(**args)
+    return Analog(**locals())
 
 
 def create_analog_value(time_stamp: datetime = None, value: float = 0.0, analog_mrid: str = None) -> AnalogValue:
@@ -52,9 +49,8 @@ def create_analog_value(time_stamp: datetime = None, value: float = 0.0, analog_
     MeasurementValue: time_stamp
     AnalogValue: value, analog_mrid
     """
-    args = locals()
     # noinspection PyArgumentList
-    return AnalogValue(**args)
+    return AnalogValue(**locals())
 
 
 def create_control(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, power_system_resource_mrid: str = None, 
@@ -65,8 +61,7 @@ def create_control(mrid: str = None, name: str = '', description: str = "", name
     IoPoint:
     Control: power_system_resource_mrid, remote_control
     """
-    args = locals()
-    return Control(**args)
+    return Control(**locals())
 
 
 def create_discrete(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, power_system_resource_mrid: str = None,
@@ -78,8 +73,7 @@ def create_discrete(mrid: str = None, name: str = '', description: str = "", nam
     Measurement: power_system_resource_mrid, remote_source, terminal_mrid, phases, unit_symbol
     Discrete:
     """
-    args = locals()
-    return Discrete(**args)
+    return Discrete(**locals())
 
 
 def create_discrete_value(time_stamp: datetime = None, value: int = 0, discrete_mrid: str = None) -> DiscreteValue:
@@ -88,6 +82,5 @@ def create_discrete_value(time_stamp: datetime = None, value: int = 0, discrete_
     MeasurementValue: time_stamp
     DiscreteValue: value, discrete_mrid
     """
-    args = locals()
     # noinspection PyArgumentList
-    return DiscreteValue(**args)
+    return DiscreteValue(**locals())

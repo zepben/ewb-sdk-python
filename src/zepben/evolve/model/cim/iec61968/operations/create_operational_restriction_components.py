@@ -19,5 +19,4 @@ def create_operational_restriction(mrid: str = None, name: str = '', description
     Document: title, created_date_time, author_name, type, status, comment
     OperationalRestriction: equipment
     """
-    args = locals()
-    return OperationalRestriction(**args)
+    return OperationalRestriction(**locals())

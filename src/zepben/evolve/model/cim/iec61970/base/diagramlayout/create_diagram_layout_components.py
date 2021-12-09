@@ -16,8 +16,7 @@ def create_diagram(mrid: str = None, name: str = '', description: str = "", name
     IdentifiedObject: mrid, name, description, names
     Diagram: diagram_style, orientation_kind, diagram_objects
     """
-    args = locals()
-    return Diagram(**args)
+    return Diagram(**locals())
 
 
 def create_diagram_object(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, diagram: Diagram = None,
@@ -28,8 +27,7 @@ def create_diagram_object(mrid: str = None, name: str = '', description: str = "
     IdentifiedObject: mrid, name, description, names
     DiagramObject: diagram, identified_object_mrid, style, rotation, diagram_object_points
     """
-    args = locals()
-    return DiagramObject(**args)
+    return DiagramObject(**locals())
 
 
 def create_diagram_object_point(x_position: float, y_position: float) -> DiagramObjectPoint:
@@ -37,7 +35,6 @@ def create_diagram_object_point(x_position: float, y_position: float) -> Diagram
     DiagramObjectPoint()
     DiagramObjectPoint: x_position, y_position
     """
-    args = locals()
     # noinspection PyArgumentList
-    return DiagramObjectPoint(**args)
+    return DiagramObjectPoint(**locals())
 

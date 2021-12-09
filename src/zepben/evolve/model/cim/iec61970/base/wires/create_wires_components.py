@@ -23,8 +23,7 @@ def create_ac_line_segment(mrid: str = None, name: str = '', description: str = 
     Conductor: length
     AcLineSegment: per_length_sequence_impedance
     """
-    args = locals()
-    return AcLineSegment(**args)
+    return AcLineSegment(**locals())
 
 
 def create_battery_unit(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -41,8 +40,7 @@ def create_battery_unit(mrid: str = None, name: str = '', description: str = "",
     PowerElectronicsUnit: power_electronics_connection, max_p, min_p
     BatteryUnit: battery_state, rated_e, stored_e
     """
-    args = locals()
-    return BatteryUnit(**args)
+    return BatteryUnit(**locals())
 
 
 # noinspection PyShadowingBuiltins,PyShadowingNames
@@ -61,8 +59,7 @@ def create_breaker(mrid: str = None, name: str = '', description: str = "", name
     ProtectedSwitch:
     Breaker:
     """
-    args = locals()
-    return Breaker(**args)
+    return Breaker(**locals())
 
 
 def create_busbar_section(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -78,8 +75,7 @@ def create_busbar_section(mrid: str = None, name: str = '', description: str = "
     Connector:
     BusbarSection:
     """
-    args = locals()
-    return BusbarSection(**args)
+    return BusbarSection(**locals())
 
 
 # noinspection PyShadowingBuiltins,PyShadowingNames
@@ -97,8 +93,7 @@ def create_disconnector(mrid: str = None, name: str = '', description: str = "",
     Switch: _open, _normally_open
     Disconnector:
     """
-    args = locals()
-    return Disconnector(**args)
+    return Disconnector(**locals())
 
 
 def create_energy_consumer(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -117,8 +112,7 @@ def create_energy_consumer(mrid: str = None, name: str = '', description: str = 
     EnergyConnection:
     EnergyConsumer: energy_consumer_phases, customer_count, grounded, phase_connection, p, p_fixed, q, q_fixed
     """
-    args = locals()
-    return EnergyConsumer(**args)
+    return EnergyConsumer(**locals())
 
 
 # noinspection PyShadowingNames
@@ -131,8 +125,7 @@ def create_energy_consumer_phase(mrid: str = None, name: str = '', description: 
     PowerSystemResource: location, asset_info
     EnergyConsumerPhase: energy_consumer, phase, p, q, p_fixed, q_fixed
     """
-    args = locals()
-    return EnergyConsumerPhase(**args)
+    return EnergyConsumerPhase(**locals())
 
 
 def create_energy_source(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -154,8 +147,7 @@ def create_energy_source(mrid: str = None, name: str = '', description: str = ""
     EnergyConnection:
     EnergySource: energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min, r, r0, rn, x, x0, xn
     """
-    args = locals()
-    return EnergySource(**args)
+    return EnergySource(**locals())
 
 
 # noinspection PyShadowingNames
@@ -168,8 +160,7 @@ def create_energy_source_phase(mrid: str = None, name: str = '', description: st
     PowerSystemResource: location, asset_info
     EnergySourcePhase: energy_source, phase
     """
-    args = locals()
-    return EnergySourcePhase(**args)
+    return EnergySourcePhase(**locals())
 
 
 # noinspection PyShadowingBuiltins,PyShadowingNames
@@ -187,8 +178,7 @@ def create_fuse(mrid: str = None, name: str = '', description: str = "", names: 
     Switch: _open, _normally_open
     Fuse:
     """
-    args = locals()
-    return Fuse(**args)
+    return Fuse(**locals())
 
 
 # noinspection PyShadowingBuiltins,PyShadowingNames
@@ -206,8 +196,7 @@ def create_jumper(mrid: str = None, name: str = '', description: str = "", names
     Switch: _open, _normally_open
     Jumper:
     """
-    args = locals()
-    return Jumper(**args)
+    return Jumper(**locals())
 
 
 def create_junction(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -223,8 +212,7 @@ def create_junction(mrid: str = None, name: str = '', description: str = "", nam
     Connector:
     Junction:
     """
-    args = locals()
-    return Junction(**args)
+    return Junction(**locals())
 
 
 def create_linear_shunt_compensator(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -246,8 +234,7 @@ def create_linear_shunt_compensator(mrid: str = None, name: str = '', descriptio
     ShuntCompensator: grounded, nom_u, phase_connection, sections
     LinearShuntCompensator: b0_per_section, b_per_section, g0_per_section, g_per_section
     """
-    args = locals()
-    return LinearShuntCompensator(**args)
+    return LinearShuntCompensator(**locals())
 
 
 # noinspection PyShadowingBuiltins,PyShadowingNames
@@ -266,8 +253,7 @@ def create_load_break_switch(mrid: str = None, name: str = '', description: str 
     ProtectedSwitch:
     LoadBreakSwitch:
     """
-    args = locals()
-    return LoadBreakSwitch(**args)
+    return LoadBreakSwitch(**locals())
 
 
 def create_per_length_sequence_impedance(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, r: float = None, x: float = None, 
@@ -280,8 +266,7 @@ def create_per_length_sequence_impedance(mrid: str = None, name: str = '', descr
     PerLengthImpedance:
     PerLengthSequenceImpedance: r, x, bch, gch, r0, x0, b0ch, g0ch
     """
-    args = locals()
-    return PerLengthSequenceImpedance(**args)
+    return PerLengthSequenceImpedance(**locals())
 
 
 def create_photo_voltaic_unit(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -297,8 +282,7 @@ def create_photo_voltaic_unit(mrid: str = None, name: str = '', description: str
     PowerElectronicsUnit: power_electronics_connection, max_p, min_p
     PhotoVoltaicUnit:
     """
-    args = locals()
-    return PhotoVoltaicUnit(**args)
+    return PhotoVoltaicUnit(**locals())
 
 
 def create_power_electronics_connection(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -319,8 +303,7 @@ def create_power_electronics_connection(mrid: str = None, name: str = '', descri
     RegulatingCondEq: control_enabled
     PowerElectronicsConnection: max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units, power_electronics_connection_phases
     """
-    args = locals()
-    return PowerElectronicsConnection(**args)
+    return PowerElectronicsConnection(**locals())
 
 
 # noinspection PyShadowingNames
@@ -333,8 +316,7 @@ def create_power_electronics_connection_phase(mrid: str = None, name: str = '', 
     PowerSystemResource: location, asset_info
     PowerElectronicsConnectionPhase: power_electronics_connection, p, phase, q
     """
-    args = locals()
-    return PowerElectronicsConnectionPhase(**args)
+    return PowerElectronicsConnectionPhase(**locals())
 
 
 def create_power_electronics_wind_unit(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -351,8 +333,7 @@ def create_power_electronics_wind_unit(mrid: str = None, name: str = '', descrip
     PowerElectronicsUnit: power_electronics_connection, max_p, min_p
     PowerElectronicsWindUnit:
     """
-    args = locals()
-    return PowerElectronicsWindUnit(**args)
+    return PowerElectronicsWindUnit(**locals())
 
 
 def create_power_transformer(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -370,8 +351,7 @@ def create_power_transformer(mrid: str = None, name: str = '', description: str 
     ConductingEquipment: base_voltage, terminals
     PowerTransformer: vector_group, power_transformer_ends, transformer_utilisation
     """
-    args = locals()
-    return PowerTransformer(**args)
+    return PowerTransformer(**locals())
 
 
 def create_power_transformer_end(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, grounded: bool = False,
@@ -386,8 +366,7 @@ def create_power_transformer_end(mrid: str = None, name: str = '', description: 
     TransformerEnd: grounded, r_ground, x_ground, ratio_tap_changer, terminal, base_voltage, end_number, star_impedance
     PowerTransformerEnd: power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock
     """
-    args = locals()
-    return PowerTransformerEnd(**args)
+    return PowerTransformerEnd(**locals())
 
 
 def create_ratio_tap_changer(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None,  location: Location = None,
@@ -401,8 +380,7 @@ def create_ratio_tap_changer(mrid: str = None, name: str = '', description: str 
     TapChanger: control_enabled, neutral_u, high_step, low_step, neutral_step, normal_step, step
     RatioTapChanger: transformer_end, step_voltage_increment
     """
-    args = locals()
-    return RatioTapChanger(**args)
+    return RatioTapChanger(**locals())
 
 
 # noinspection PyShadowingBuiltins,PyShadowingNames
@@ -421,8 +399,7 @@ def create_recloser(mrid: str = None, name: str = '', description: str = "", nam
     ProtectedSwitch:
     Recloser:
     """
-    args = locals()
-    return Recloser(**args)
+    return Recloser(**locals())
 
 
 def create_transformer_star_impedance(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, r: float = 0.0, r0: float = 0.0,
@@ -432,5 +409,4 @@ def create_transformer_star_impedance(mrid: str = None, name: str = '', descript
     IdentifiedObject: mrid, name, description, names
     TransformerStarImpedance: r, r0, x, x0, transformer_end_info
     """
-    args = locals()
-    return TransformerStarImpedance(**args)
+    return TransformerStarImpedance(**locals())

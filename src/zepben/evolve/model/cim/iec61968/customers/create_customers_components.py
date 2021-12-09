@@ -18,8 +18,7 @@ def create_customer(mrid: str = None, name: str = '', description: str = "", nam
     OrganisationRole: organisation
     Customer: kind, customer_agreements
     """
-    args = locals()
-    return Customer(**args)
+    return Customer(**locals())
 
 
 def create_customer_agreement(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, title: str = "",
@@ -32,8 +31,7 @@ def create_customer_agreement(mrid: str = None, name: str = '', description: str
     Agreement: 
     CustomerAgreement: customer, pricing_structures
     """
-    args = locals()
-    return CustomerAgreement(**args)
+    return CustomerAgreement(**locals())
 
 
 def create_pricing_structure(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, title: str = "",
@@ -45,8 +43,7 @@ def create_pricing_structure(mrid: str = None, name: str = '', description: str 
     Document: title, created_date_time, author_name, type, status, comment
     PricingStructure: tariffs
     """
-    args = locals()
-    return PricingStructure(**args)
+    return PricingStructure(**locals())
 
 
 def create_tariff(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, title: str = "", created_date_time: datetime = None,
@@ -57,5 +54,4 @@ def create_tariff(mrid: str = None, name: str = '', description: str = "", names
     Document: title, created_date_time, author_name, type, status, comment
     Tariff:
     """
-    args = locals()
-    return Tariff(**args)
+    return Tariff(**locals())

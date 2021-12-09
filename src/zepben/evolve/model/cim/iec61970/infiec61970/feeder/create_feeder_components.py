@@ -21,8 +21,7 @@ def create_circuit(mrid: str = None, name: str = '', description: str = "", name
     Line:
     Circuit: loop, end_terminals, end_substations
     """
-    args = locals()
-    return Circuit(**args)
+    return Circuit(**locals())
 
 
 def create_loop(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, circuits: List[Circuit] = None,
@@ -32,5 +31,4 @@ def create_loop(mrid: str = None, name: str = '', description: str = "", names: 
     IdentifiedObject: mrid, name, description, names
     Loop: circuits, substations, energizing_substations
     """
-    args = locals()
-    return Loop(**args)
+    return Loop(**locals())

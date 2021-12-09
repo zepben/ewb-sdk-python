@@ -18,8 +18,7 @@ def create_cable_info(mrid: str = None, name: str = '', description: str = "", n
     WireInfo: rated_current, material
     CableInfo:
     """
-    args = locals()
-    return CableInfo(**args)
+    return CableInfo(**locals())
 
 
 def create_no_load_test(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, base_power: int = None, temperature: float = None, 
@@ -31,8 +30,7 @@ def create_no_load_test(mrid: str = None, name: str = '', description: str = "",
     TransformerTest: base_power, temperature
     NoLoadTest: energised_end_voltage, exciting_current, exciting_current_zero, loss, loss_zero
     """
-    args = locals()
-    return NoLoadTest(**args)
+    return NoLoadTest(**locals())
 
 
 def create_open_circuit_test(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, base_power: int = None, 
@@ -44,8 +42,7 @@ def create_open_circuit_test(mrid: str = None, name: str = '', description: str 
     TransformerTest: base_power, temperature
     OpenCircuitTest: energised_end_step, energised_end_voltage, open_end_step, open_end_voltage, phase_shift
     """
-    args = locals()
-    return OpenCircuitTest(**args)
+    return OpenCircuitTest(**locals())
 
 
 def create_overhead_wire_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, rated_current: int = None,
@@ -57,8 +54,7 @@ def create_overhead_wire_info(mrid: str = None, name: str = '', description: str
     WireInfo: rated_current, material
     OverheadWireInfo:
     """
-    args = locals()
-    return OverheadWireInfo(**args)
+    return OverheadWireInfo(**locals())
 
 
 def create_power_transformer_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, 
@@ -69,8 +65,7 @@ def create_power_transformer_info(mrid: str = None, name: str = '', description:
     AssetInfo:
     PowerTransformerInfo: transformer_tank_infos
     """
-    args = locals()
-    return PowerTransformerInfo(**args)
+    return PowerTransformerInfo(**locals())
 
 
 def create_short_circuit_test(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, base_power: int = None,
@@ -84,8 +79,7 @@ def create_short_circuit_test(mrid: str = None, name: str = '', description: str
     ShortCircuitTest: current, energised_end_step, grounded_end_step, leakage_impedance, leakage_impedance_zero, loss, loss_zero, power, voltage, 
                       voltage_ohmic_part
     """
-    args = locals()
-    return ShortCircuitTest(**args)
+    return ShortCircuitTest(**locals())
 
 
 def create_shunt_compensator_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, max_power_loss: int = None, 
@@ -96,8 +90,7 @@ def create_shunt_compensator_info(mrid: str = None, name: str = '', description:
     AssetInfo:
     ShuntCompensatorInfo: max_power_loss, rated_current, rated_reactive_power, rated_voltage
     """
-    args = locals()
-    return ShuntCompensatorInfo(**args)
+    return ShuntCompensatorInfo(**locals())
 
 
 def create_transformer_end_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, 
@@ -117,8 +110,7 @@ def create_transformer_end_info(mrid: str = None, name: str = '', description: s
                         transformer_star_impedance, energised_end_no_load_tests, energised_end_short_circuit_tests, grounded_end_short_circuit_tests, 
                         open_end_open_circuit_tests, energised_end_open_circuit_tests
     """
-    args = locals()
-    return TransformerEndInfo(**args)
+    return TransformerEndInfo(**locals())
 
 
 def create_transformer_tank_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, 
@@ -129,5 +121,4 @@ def create_transformer_tank_info(mrid: str = None, name: str = '', description: 
     AssetInfo:
     TransformerTankInfo: transformer_end_infos
     """
-    args = locals()
-    return TransformerTankInfo(**args)
+    return TransformerTankInfo(**locals())

@@ -20,8 +20,7 @@ def create_meter(mrid: str = None, name: str = '', description: str = "", names:
     EndDevice:
     Meter:
     """
-    args = locals()
-    return Meter(**args)
+    return Meter(**locals())
 
 
 def create_usage_point(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, usage_point_location: Location = None,
@@ -32,5 +31,4 @@ def create_usage_point(mrid: str = None, name: str = '', description: str = "", 
     IdentifiedObject: mrid, name, description, names
     UsagePoint: usage_point_location, is_virtual, connection_category, equipment, end_devices
     """
-    args = locals()
-    return UsagePoint(**args)
+    return UsagePoint(**locals())

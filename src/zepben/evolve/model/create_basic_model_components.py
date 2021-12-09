@@ -14,9 +14,8 @@ def create_nominal_phase_path(from_phase: SinglePhaseKind, to_phase: SinglePhase
     NominalPhasePath()
     NominalPhasePath: from_phase, to_phase
     """
-    args = locals()
     # noinspection PyArgumentList
-    return NominalPhasePath(**args)
+    return NominalPhasePath(**locals())
 
 
 def create_resistance_reactance(r: float = None, x: float = None, r0: float = None, x0: float = None) -> ResistanceReactance:
@@ -24,9 +23,8 @@ def create_resistance_reactance(r: float = None, x: float = None, r0: float = No
     ResistanceReactance()
     ResistanceReactance: r, x, r0, x0
     """
-    args = locals()
     # noinspection PyArgumentList
-    return ResistanceReactance(**args)
+    return ResistanceReactance(**locals())
 
 
 def create_traced_phases() -> TracedPhases:
@@ -34,6 +32,5 @@ def create_traced_phases() -> TracedPhases:
     TracedPhases()
     TracedPhases: normal_status, current_status
     """
-    args = locals()
     # noinspection PyArgumentList
-    return TracedPhases(**args)
+    return TracedPhases(**locals())

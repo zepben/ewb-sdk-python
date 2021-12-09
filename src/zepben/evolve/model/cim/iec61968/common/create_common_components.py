@@ -16,9 +16,8 @@ def create_location(mrid: str = None, name: str = '', description: str = "", nam
     IdentifiedObject: mrid, name, description, names
     Location: main_address, position_points
     """
-    args = locals()
     # noinspection PyArgumentList
-    return Location(**args)
+    return Location(**locals())
 
 
 def create_organisation(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None) -> Organisation:
@@ -27,8 +26,7 @@ def create_organisation(mrid: str = None, name: str = '', description: str = "",
     IdentifiedObject: mrid, name, description, names
     Organisation:
     """
-    args = locals()
-    return Organisation(**args)
+    return Organisation(**locals())
 
 
 def create_position_point(x_position: float, y_position: float) -> PositionPoint:
@@ -36,9 +34,8 @@ def create_position_point(x_position: float, y_position: float) -> PositionPoint
     PositionPoint()
     PositionPoint: x_position, y_position
     """
-    args = locals()
     # noinspection PyArgumentList
-    return PositionPoint(**args)
+    return PositionPoint(**locals())
 
 
 def create_street_address(postal_code: str = "", town_detail: TownDetail = None, po_box: str = "", street_detail: Optional[StreetDetail] = None
@@ -47,9 +44,8 @@ def create_street_address(postal_code: str = "", town_detail: TownDetail = None,
     StreetAddress()
     StreetAddress: postal_code, town_detail
     """
-    args = locals()
     # noinspection PyArgumentList
-    return StreetAddress(**args)
+    return StreetAddress(**locals())
 
 
 def create_town_detail(name: str = None, state_or_province: str = None) -> TownDetail:
@@ -57,6 +53,5 @@ def create_town_detail(name: str = None, state_or_province: str = None) -> TownD
     TownDetail()
     TownDetail: name, state_or_province
     """
-    args = locals()
     # noinspection PyArgumentList
-    return TownDetail(**args)
+    return TownDetail(**locals())

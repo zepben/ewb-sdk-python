@@ -27,5 +27,4 @@ def create_equivalent_branch(mrid: str = None, name: str = '', description: str 
     EquivalentBranch: negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x, x21, zero_r12,
                       zero_r21, zero_x12, zero_x21
     """
-    args = locals()
-    return EquivalentBranch(**args)
+    return EquivalentBranch(**locals())

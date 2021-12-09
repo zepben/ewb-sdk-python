@@ -16,8 +16,7 @@ def create_base_voltage(mrid: str = None, name: str = '', description: str = "",
     IdentifiedObject: mrid, name, description, names
     BaseVoltage: nominal_voltage
     """
-    args = locals()
-    return BaseVoltage(**args)
+    return BaseVoltage(**locals())
 
 
 def create_connectivity_node(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, terminals: List[Terminal] = None
@@ -27,8 +26,7 @@ def create_connectivity_node(mrid: str = None, name: str = '', description: str 
     IdentifiedObject: mrid, name, description, names
     ConnectivityNode: terminals
     """
-    args = locals()
-    return ConnectivityNode(**args)
+    return ConnectivityNode(**locals())
 
 
 def create_feeder(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -42,8 +40,7 @@ def create_feeder(mrid: str = None, name: str = '', description: str = "", names
     EquipmentContainer: equipment
     Feeder: normal_head_terminal, normal_energizing_substation, current_equipment
     """
-    args = locals()
-    return Feeder(**args)
+    return Feeder(**locals())
 
 
 def create_geographical_region(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None,
@@ -53,8 +50,7 @@ def create_geographical_region(mrid: str = None, name: str = '', description: st
     IdentifiedObject: mrid, name, description, names
     GeographicalRegion: sub_geographical_regions
     """
-    args = locals()
-    return GeographicalRegion(**args)
+    return GeographicalRegion(**locals())
 
 
 def create_name(name: str, type: NameType, identified_object: IdentifiedObject = None) -> Name:
@@ -62,9 +58,8 @@ def create_name(name: str, type: NameType, identified_object: IdentifiedObject =
     Name()
     Name: name, type, identified_object
     """
-    args = locals()
     # noinspection PyArgumentList
-    return Name(**args)
+    return Name(**locals())
 
 
 def create_name_type(name: str, description: str = "", _names_index: Dict[str, Name] = dict(), _names_multi_index: Dict[str, List[Name]] = dict()) -> NameType:
@@ -72,9 +67,8 @@ def create_name_type(name: str, description: str = "", _names_index: Dict[str, N
     NameType()
     NameType: name, description, _names_index, _names_multi_index
     """
-    args = locals()
     # noinspection PyArgumentList
-    return NameType(**args)
+    return NameType(**locals())
 
 
 def create_site(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -87,8 +81,7 @@ def create_site(mrid: str = None, name: str = '', description: str = "", names: 
     EquipmentContainer: equipment
     Site:
     """
-    args = locals()
-    return Site(**args)
+    return Site(**locals())
 
 
 def create_sub_geographical_region(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None,
@@ -98,8 +91,7 @@ def create_sub_geographical_region(mrid: str = None, name: str = '', description
     IdentifiedObject: mrid, name, description, names
     SubGeographicalRegion: geographical_region, substations
     """
-    args = locals()
-    return SubGeographicalRegion(**args)
+    return SubGeographicalRegion(**locals())
 
 
 def create_substation(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -114,8 +106,7 @@ def create_substation(mrid: str = None, name: str = '', description: str = "", n
     EquipmentContainer: equipment
     Substation: sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits
     """
-    args = locals()
-    return Substation(**args)
+    return Substation(**locals())
 
 
 def create_terminal(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, conducting_equipment: ConductingEquipment = None,
@@ -128,5 +119,4 @@ def create_terminal(mrid: str = None, name: str = '', description: str = "", nam
     AcDcTerminal:
     Terminal: conducting_equipment, phases, sequence_number, traced_phases, cn, connectivity_node
     """
-    args = locals()
-    return Terminal(**args)
+    return Terminal(**locals())
