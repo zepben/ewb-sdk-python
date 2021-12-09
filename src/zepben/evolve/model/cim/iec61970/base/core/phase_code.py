@@ -97,7 +97,22 @@ class PhaseCode(Enum):
     Y = (20, [SinglePhaseKind.Y])
     """Unknown non-neutral phase"""
 
-    YN = (21, [SinglePhaseKind.Y, SinglePhaseKind.N])
+    s1 = (21, [SinglePhaseKind.s1])
+    """Unknown non-neutral phase plus neutral"""
+
+    s1N = (22, [SinglePhaseKind.s1, SinglePhaseKind.N])
+    """Unknown non-neutral phase plus neutral"""
+
+    s12 = (23, [SinglePhaseKind.s1, SinglePhaseKind.s2])
+    """Unknown non-neutral phase plus neutral"""
+
+    s12N = (24, [SinglePhaseKind.s1, SinglePhaseKind.s2, SinglePhaseKind.N])
+    """Unknown non-neutral phase plus neutral"""
+
+    s2 = (25, [SinglePhaseKind.s2])
+    """Unknown non-neutral phase plus neutral"""
+
+    s2N = (26, [SinglePhaseKind.s2, SinglePhaseKind.N])
     """Unknown non-neutral phase plus neutral"""
 
     @property
