@@ -43,7 +43,7 @@ class TableBaseVoltages(TableIdentifiedObjects):
 
     def __init__(self):
         super(TableBaseVoltages, self).__init__()
-        self.nominal_voltage = self._create_column("base_voltage", "INTEGER", Nullable.NOT_NULL)
+        self.nominal_voltage = self._create_column("nominal_voltage", "INTEGER", Nullable.NOT_NULL)
 
     def name(self) -> str:
         return "base_voltages"
