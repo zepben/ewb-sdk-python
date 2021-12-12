@@ -41,6 +41,11 @@ jobs:
           twine upload dist/*
         shell: bash
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: false
+
   update-snapshot-version:
     needs: deploy
     runs-on: ubuntu-latest

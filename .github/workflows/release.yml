@@ -68,6 +68,11 @@ jobs:
         shell: bash
         continue-on-error: true
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: false
+
       - uses: actions/upload-artifact@master
         if: steps.build.outcome == 'success'
         with:
