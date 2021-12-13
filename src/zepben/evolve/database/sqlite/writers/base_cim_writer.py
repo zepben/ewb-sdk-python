@@ -40,7 +40,7 @@ class BaseCIMWriter(object):
     def _save_document(self, table: TableDocuments, insert: PreparedStatement, document: Document, description: str) -> bool:
         insert.add_value(table.title.query_index, document.title)
         # TODO: JVM seems to use Z as TZ offset (for UTC+0?) while python uses +HH:mm format. Need to investigate here
-        insert.add_value(table.created_date_time.query_index, f"{document.created_date_time.isoformat()}Z")
+        insert.add_value(table.created_date_time.query_index, f"{document.created_date_time.isoformat()}Z" if document.created_date_time else None)
         insert.add_value(table.author_name.query_index, document.author_name)
         insert.add_value(table.type.query_index, document.type)
         insert.add_value(table.status.query_index, document.status)
