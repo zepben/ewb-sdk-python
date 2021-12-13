@@ -17,7 +17,7 @@ equipment_kwargs = {
     "in_service": booleans(),
     "normally_in_service": booleans(),
     "usage_points": lists(builds(UsagePoint), max_size=2),
-    "equipment_containers": lists(sampled_equipment_container(), max_size=2),
+    "equipment_containers": lists(sampled_equipment_container(True), max_size=2),
     "operational_restrictions": lists(builds(OperationalRestriction), max_size=2),
     "current_feeders": lists(builds(Feeder), max_size=2)
 }

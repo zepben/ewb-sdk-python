@@ -16,7 +16,7 @@ from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 name_kwargs = {
     "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "type": builds(NameType, **name_type_kwargs),
-    "identified_object": sampled_equipment()
+    "identified_object": sampled_equipment(True)
 }
 
 # noinspection PyArgumentList

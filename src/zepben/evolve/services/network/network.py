@@ -7,7 +7,9 @@
 from __future__ import annotations
 import logging
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, TYPE_CHECKING
+if TYPE_CHECKING:
+    from zepben.evolve import Terminal
 
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import Measurement
 from zepben.evolve.services.common.base_service import BaseService
@@ -50,11 +52,11 @@ def _attempt_to_reuse_connection(terminal1: Terminal, terminal2: Terminal) -> Pr
         if cn2 is not None:
             if cn1 is cn2:
                 return ProcessStatus.PROCESSED
-            elif connect(terminal2, cn1.mrid):
+            elif connect(terminal2, cn1):
                 return ProcessStatus.PROCESSED
             return ProcessStatus.INVALID
     elif cn2 is not None:
-        return ProcessStatus.PROCESSED if connect(terminal1, cn2.mrid) else ProcessStatus.INVALID
+        return ProcessStatus.PROCESSED if connect(terminal1, cn2) else ProcessStatus.INVALID
     return ProcessStatus.SKIPPED
 
 
@@ -74,7 +76,7 @@ class NetworkService(BaseService):
     _measurements: Dict[str, List[Measurement]] = []
 
     def __init__(self):
-        self._objectsByType[ConnectivityNode] = self._connectivity_nodes
+        self._objects_by_type[ConnectivityNode] = self._connectivity_nodes
 
     def get_measurements(self, mrid: str, t: type) -> List[Measurement]:
         """
@@ -85,6 +87,7 @@ class NetworkService(BaseService):
         Returns all `Measurement`s indexed by `mrid` in this service.
         Raises `KeyError` if `mrid` isn't present in this service.
         """
+        # noinspection PyTypeChecker
         return [meas for meas in self._measurements[mrid] if isinstance(meas, t)]
 
     def add_measurement(self, measurement: Measurement) -> bool:
@@ -94,7 +97,7 @@ class NetworkService(BaseService):
         `measurement` The `Measurement` to add.
         Returns `True` if `measurement` was added, `False` otherwise
         """
-        return self._index_measurement(measurement) and self.add(measurement)
+        return self._index_measurement(measurement, measurement.mrid) and self.add(measurement)
 
     def remove_measurement(self, measurement) -> bool:
         """
@@ -182,7 +185,8 @@ class NetworkService(BaseService):
         Get the primary source for this network. All directions are applied relative to this EnergySource
         Returns The primary EnergySource
         """
-        return [source for source in self._objectsByType[EnergySource].values() if source.has_phases()]
+        # noinspection PyUnresolvedReferences
+        return [source for source in self._objects_by_type[EnergySource].values() if source.has_phases()]
 
     def add_connectivitynode(self, mrid: str):
         """
