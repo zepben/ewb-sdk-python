@@ -1,16 +1,26 @@
 ### v0.27.0
 
 ##### Breaking Changes
-* None.
+* Removed CIM gRPC producers.
 
 ##### New Features
-* None.
+* Implemented database module for persisting to sqlite database.
+* Added PhaseCodes:
+  - s1
+  - s2
+* Added SinglePhaseKinds:
+  - s1
+  - s1N
+  - s12
+  - s12N
+  - s2
+  - s2N
 
 ##### Enhancements
 * None.
 
 ##### Fixes
-* None.
+* Updated gRPC to fix support for latest LetsEncrypt certificates.
 
 ##### Notes
 * None.
