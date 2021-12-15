@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds
 
-from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
+from test.cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
     verify_conductor_constructor_kwargs, verify_conductor_constructor_args, conductor_kwargs, conductor_args

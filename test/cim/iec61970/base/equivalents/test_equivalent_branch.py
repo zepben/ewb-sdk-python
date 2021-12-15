@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from cim.test_common_two_way_connections import check_common_equipment_two_way_link_test, \
+from test.cim.test_common_two_way_connections import check_common_equipment_two_way_link_test, \
     set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \

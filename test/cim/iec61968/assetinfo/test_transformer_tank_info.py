@@ -43,15 +43,17 @@ def test_transformer_tank_info_constructor_kwargs(power_transformer_info, transf
 
 
 @given(**transformer_tank_info_kwargs)
-def test_transformer_tank_info_creator(transformer_end_infos, **kwargs):
+def test_transformer_tank_info_creator(power_transformer_info, transformer_end_infos, **kwargs):
     args = extract_testing_args(locals())
     tti = create_transformer_tank_info(**args, **kwargs)
     validate_transformer_tank_info_values(tti, **args, **kwargs)
 
 
-def validate_transformer_tank_info_values(tti, transformer_end_infos, **kwargs):
+def validate_transformer_tank_info_values(tti, power_transformer_info, transformer_end_infos, **kwargs):
     verify_asset_info_constructor_kwargs(tti, **kwargs)
+    assert tti.power_transformer_info == power_transformer_info
     assert list(tti.transformer_end_infos) == transformer_end_infos
+
 
 
 def test_transformer_tank_info_constructor_args():
@@ -74,7 +76,9 @@ def test_transformer_tank_info_collection():
 
 
 def test_auto_two_way_connections_for_transformer_tank_info_constructor():
+    pti = PowerTransformerInfo()
     tei = TransformerEndInfo()
-    tti = create_transformer_tank_info(transformer_end_infos=[tei])
+    tti = create_transformer_tank_info(power_transformer_info=pti, transformer_end_infos=[tei])
 
+    assert pti.get_transformer_tank_info(tti.mrid) == tti
     assert tei.transformer_tank_info == tti

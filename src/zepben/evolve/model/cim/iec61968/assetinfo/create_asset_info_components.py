@@ -115,8 +115,9 @@ def create_transformer_end_info(mrid: str = None, name: str = '', description: s
     return tei
 
 
-def create_transformer_tank_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, 
-                                 transformer_end_infos: List[TransformerEndInfo] = None) -> TransformerTankInfo:
+def create_transformer_tank_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None,
+                                 power_transformer_info: Optional[PowerTransformerInfo] = None, transformer_end_infos: List[TransformerEndInfo] = None
+                                 ) -> TransformerTankInfo:
     """
     TransformerTankInfo(AssetInfo(IdentifiedObject))
     IdentifiedObject: mrid, name, description, names
@@ -124,6 +125,8 @@ def create_transformer_tank_info(mrid: str = None, name: str = '', description: 
     TransformerTankInfo: transformer_end_infos
     """
     tti = TransformerTankInfo(**locals())
+    if power_transformer_info:
+        power_transformer_info.add_transformer_tank_info(tti)
     if transformer_end_infos:
         for tei in transformer_end_infos:
             tei.transformer_tank_info = tti

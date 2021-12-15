@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
-from cim.test_common_two_way_connections import check_equipment_container_connection
+from test.cim.test_common_two_way_connections import check_equipment_container_connection
 from test.cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from zepben.evolve import Site, Equipment

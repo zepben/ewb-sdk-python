@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
-from cim.test_common_two_way_connections import set_up_common_equipment_two_way_link_test, check_common_equipment_two_way_link_test
+from test.cim.test_common_two_way_connections import set_up_common_equipment_two_way_link_test, check_common_equipment_two_way_link_test
 from test.cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxiliary_equipment_kwargs, verify_auxiliary_equipment_constructor_default, \
     verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
 from zepben.evolve import FaultIndicator

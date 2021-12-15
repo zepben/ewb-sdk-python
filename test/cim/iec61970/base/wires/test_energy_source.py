@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, floats, booleans
 
-from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
+from test.cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
