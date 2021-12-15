@@ -57,7 +57,7 @@ def _create_downstream_queue_next(open_test: Callable[[ConductingEquipment, Opti
             return connected_terms
         out_phases = set()
         for term in phase_step.conducting_equipment.terminals:
-            _get_phases_with_direction(open_test, active_phases, term, phase_step.phases, PhaseDirection.OUT, out_phases)
+            _get_phases_with_direction(open_test, active_phases, term, phase_step.phases.single_phases, PhaseDirection.OUT, out_phases)
 
             if out_phases:
                 crs = get_connectivity(term, out_phases)
