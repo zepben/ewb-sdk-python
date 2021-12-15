@@ -71,3 +71,13 @@ def test_substations_collection():
                                   SubGeographicalRegion.add_substation,
                                   SubGeographicalRegion.remove_substation,
                                   SubGeographicalRegion.clear_substations)
+
+
+def test_auto_two_way_connections_for_sub_geographical_region_constructor():
+    gr = GeographicalRegion()
+    s = Substation()
+    p = create_sub_geographical_region(geographical_region=gr, substations=[s])
+
+    assert gr.get_sub_geographical_region(p.mrid) == p
+    assert s.sub_geographical_region == p
+

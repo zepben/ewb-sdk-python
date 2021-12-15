@@ -7,10 +7,11 @@
 from typing import List
 
 from zepben.evolve import *
+from zepben.evolve.model.common_two_way_connections import add_equipment_container_connection
 
 
 def create_circuit(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None, asset_info: AssetInfo = None, 
-                   equipment: Dict[str, Equipment] = None, loop: Loop = None, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None
+                   equipment: List[Equipment] = None, loop: Loop = None, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None
                    ) -> Circuit:
     """
     Circuit(Line(EquipmentContainer(ConnectivityNodeContainer(PowerSystemResource(IdentifiedObject)))))
@@ -21,7 +22,14 @@ def create_circuit(mrid: str = None, name: str = '', description: str = "", name
     Line:
     Circuit: loop, end_terminals, end_substations
     """
-    return Circuit(**locals())
+    c = Circuit(**locals())
+    add_equipment_container_connection(c, equipment)
+    if loop:
+        loop.add_circuit(c)
+    if end_substations:
+        for es in end_substations:
+            es.add_circuit(c)
+    return c
 
 
 def create_loop(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, circuits: List[Circuit] = None,
@@ -31,4 +39,15 @@ def create_loop(mrid: str = None, name: str = '', description: str = "", names: 
     IdentifiedObject: mrid, name, description, names
     Loop: circuits, substations, energizing_substations
     """
-    return Loop(**locals())
+    loop = Loop(**locals())
+    if circuits:
+        for c in circuits:
+            c.loop = loop
+    if substations:
+        for s in substations:
+            s.add_loop(loop)
+    if energizing_substations:
+        for es in energizing_substations:
+            if substations and es not in substations:
+                es.add_loop(loop)
+    return loop

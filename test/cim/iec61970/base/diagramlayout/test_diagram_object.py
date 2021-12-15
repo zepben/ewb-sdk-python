@@ -88,3 +88,10 @@ def test_points_collection():
                                 DiagramObject.insert_point,
                                 DiagramObject.remove_point,
                                 DiagramObject.clear_points)
+
+
+def test_auto_two_way_connections_for_diagram_object_constructor():
+    d = Diagram()
+    do = create_diagram_object(diagram=d)
+
+    assert d.get_diagram_object(do.mrid) == do

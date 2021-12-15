@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
+from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.iec61970.base.wires.test_connector import verify_connector_constructor_default, \
     verify_connector_constructor_kwargs, verify_connector_constructor_args, connector_kwargs, connector_args
 from zepben.evolve import BusbarSection
@@ -31,3 +32,9 @@ def test_busbar_section_creator(**kwargs):
 
 def test_busbar_section_constructor_args():
     verify_connector_constructor_args(BusbarSection(*busbar_section_args))
+
+
+def test_auto_two_way_connections_for_busbar_section_constructor():
+    up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
+    bs = create_busbar_section(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t])
+    check_conducting_equipment_two_way_link_test(bs, up, ec, opr, f, t)

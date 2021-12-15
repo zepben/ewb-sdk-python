@@ -18,7 +18,11 @@ def create_customer(mrid: str = None, name: str = '', description: str = "", nam
     OrganisationRole: organisation
     Customer: kind, customer_agreements
     """
-    return Customer(**locals())
+    c = Customer(**locals())
+    if customer_agreements:
+        for ca in customer_agreements:
+            ca.customer = c
+    return c
 
 
 def create_customer_agreement(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, title: str = "",
@@ -31,7 +35,10 @@ def create_customer_agreement(mrid: str = None, name: str = '', description: str
     Agreement: 
     CustomerAgreement: customer, pricing_structures
     """
-    return CustomerAgreement(**locals())
+    ca = CustomerAgreement(**locals())
+    if customer:
+        customer.add_agreement(ca)
+    return ca
 
 
 def create_pricing_structure(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, title: str = "",

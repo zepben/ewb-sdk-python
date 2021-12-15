@@ -11,7 +11,7 @@ from test.cim.extract_testing_args import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, verify_line_constructor_args, line_kwargs, \
     line_args
-from zepben.evolve import Circuit, Loop, Terminal, Substation
+from zepben.evolve import Circuit, Loop, Terminal, Substation, Equipment
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.create_feeder_components import create_circuit
 
 circuit_kwargs = {
@@ -88,3 +88,14 @@ def test_end_substations_collection():
                                   Circuit.add_end_substation,
                                   Circuit.remove_end_substation,
                                   Circuit.clear_end_substations)
+
+
+def test_auto_two_way_connections_for_circuit_constructor():
+    e = Equipment()
+    loop = Loop()
+    s = Substation()
+    c = create_circuit(equipment=[e], loop=loop, end_substations=[s])
+
+    assert e.get_container(c.mrid) == c
+    assert loop.get_circuit(c.mrid) == c
+    assert s.get_circuit(c.mrid) == c

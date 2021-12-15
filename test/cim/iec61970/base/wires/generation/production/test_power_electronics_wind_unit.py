@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
+from cim.test_common_two_way_connections import set_up_power_electronics_unit_two_way_link_test, check_power_electronics_unit_two_way_link_test
 from test.cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
@@ -32,3 +33,11 @@ def test_power_electronics_wind_unit_creator(**kwargs):
 
 def test_power_electronics_wind_unit_constructor_args():
     verify_power_electronics_unit_constructor_args(PowerElectronicsWindUnit(*power_electronics_wind_unit_args))
+
+
+# noinspection SpellCheckingInspection
+def test_auto_two_way_connections_for_power_electronics_wind_unit_constructor():
+    up, ec, opr, f, pec = set_up_power_electronics_unit_two_way_link_test()
+    pewu = create_power_electronics_wind_unit(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f],
+                                              power_electronics_connection=pec)
+    check_power_electronics_unit_two_way_link_test(pewu, up, ec, opr, f, pec)

@@ -6,6 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import integers, sampled_from
 
+from cim.test_common_two_way_connections import check_power_electronics_unit_two_way_link_test, set_up_power_electronics_unit_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
@@ -66,3 +67,10 @@ def test_battery_unit_constructor_args():
     assert bu.battery_state == battery_unit_args[-3]
     assert bu.rated_e == battery_unit_args[-2]
     assert bu.stored_e == battery_unit_args[-1]
+
+
+def test_auto_two_way_connections_for_battery_unit_constructor():
+    up, ec, opr, f, pec = set_up_power_electronics_unit_two_way_link_test()
+    bu = create_battery_unit(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f],
+                             power_electronics_connection=pec)
+    check_power_electronics_unit_two_way_link_test(bu, up, ec, opr, f, pec)

@@ -77,3 +77,12 @@ def test_current_equipment_collection():
                                   Feeder.remove_current_equipment,
                                   Feeder.clear_current_equipment,
                                   KeyError)
+
+
+def test_auto_two_way_connections_for_feeder_constructor():
+    s = Substation()
+    e = Equipment()
+    f = create_feeder(normal_energizing_substation=s, current_equipment=[e])
+
+    assert s.get_feeder(f.mrid) == f
+    assert e.get_current_feeder(f.mrid) == f

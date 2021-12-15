@@ -98,3 +98,14 @@ def test_energizing_substations_collection():
                                   Loop.add_energizing_substation,
                                   Loop.remove_energizing_substation,
                                   Loop.clear_energizing_substations)
+
+
+def test_auto_two_way_connections_loop_constructor():
+    c = Circuit()
+    s = Substation()
+    s2 = Substation()
+    loop = create_loop(circuits=[c], substations=[s], energizing_substations=[s2])
+
+    assert c.loop == loop
+    assert s.get_loop(loop.mrid) == loop
+    assert s2.get_loop(loop.mrid) == loop

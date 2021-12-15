@@ -6,6 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, integers, booleans, sampled_from, floats
 
+from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
@@ -97,3 +98,13 @@ def test_phases_collection():
                                   EnergyConsumer.add_phase,
                                   EnergyConsumer.remove_phase,
                                   EnergyConsumer.clear_phases)
+
+
+def test_auto_two_way_connections_for_energy_consumer_constructor():
+    up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
+    ecp = EnergyConsumerPhase
+    enc = create_energy_consumer(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t],
+                                 energy_consumer_phases=[ecp])
+
+    check_conducting_equipment_two_way_link_test(enc, up, ec, opr, f, t)
+    assert ecp.energy_consumer == enc

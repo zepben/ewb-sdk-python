@@ -7,6 +7,7 @@ from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, lists, floats
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from test.cim import extract_testing_args
+from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
@@ -80,3 +81,13 @@ def test_power_transformer_constructor_args():
 
 def test_power_transformer_info_accessor():
     validate_property_accessor(PowerTransformer, PowerTransformerInfo, PowerTransformer.power_transformer_info)
+
+
+def test_auto_two_way_connections_for_power_transformer_constructor():
+    up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
+    pte = PowerTransformerEnd()
+    pt = create_power_transformer(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t],
+                                  power_transformer_ends=[pte])
+
+    check_conducting_equipment_two_way_link_test(pt, up, ec, opr, f, t)
+    assert pte.power_transformer == pt

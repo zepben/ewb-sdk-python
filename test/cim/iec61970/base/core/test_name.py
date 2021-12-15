@@ -10,7 +10,7 @@ from hypothesis.strategies import text, builds
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.core.test_name_type import name_type_kwargs
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
-from zepben.evolve import Junction
+from zepben.evolve import Junction, IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.create_core_components import create_name
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
@@ -60,3 +60,13 @@ def test_name_constructor_args():
     assert n.name == name_args[0]
     assert n.type == name_args[1]
     assert n.identified_object == name_args[2]
+
+
+def test_auto_two_way_connections_for_name_constructor():
+    nt = NameType(name='nameType')
+    io = IdentifiedObject()
+    n = create_name(name='name', type=nt, identified_object=io)
+
+    assert nt.get_or_add_name(n, io).name == n
+    assert nt.get_or_add_name(n, io).identified_object == io
+    assert io.get_name(nt.name, n.name) == n

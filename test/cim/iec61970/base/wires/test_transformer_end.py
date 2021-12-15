@@ -60,3 +60,20 @@ def verify_transformer_end_constructor_args(te: TransformerEnd):
     assert te.base_voltage == transformer_end_args[-3]
     assert te.end_number == transformer_end_args[-2]
     assert te.star_impedance == transformer_end_args[-1]
+
+
+def verify_transformer_end_creator(te: TransformerEnd, grounded, r_ground, x_ground, ratio_tap_changer, terminal, base_voltage, end_number,
+                                   star_impedance, **kwargs):
+    verify_identified_object_constructor_kwargs(te, **kwargs)
+    assert te.grounded == grounded
+    assert te.r_ground == r_ground
+    assert te.x_ground == x_ground
+    assert te.ratio_tap_changer == ratio_tap_changer
+    assert te.terminal == terminal
+    assert te.base_voltage == base_voltage
+    # Compensate for automatic two way connection in the creator
+    if end_number == 0:
+        assert te.end_number == end_number+1
+    else:
+        assert te.end_number == end_number
+    assert te.star_impedance == star_impedance

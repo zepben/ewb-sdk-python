@@ -74,3 +74,10 @@ def test_customer_agreements_collection():
                                   Customer.add_agreement,
                                   Customer.remove_agreement,
                                   Customer.clear_agreements)
+
+
+def test_auto_two_way_connections_for_customer_constructor():
+    ca = CustomerAgreement()
+    c = create_customer(customer_agreements=[ca])
+
+    assert ca.customer == c

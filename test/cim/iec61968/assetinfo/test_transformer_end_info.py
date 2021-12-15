@@ -16,7 +16,7 @@ from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_
 from zepben.evolve import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
     ShortCircuitTest, OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.create_asset_info_components import create_transformer_end_info
-from zepben.evolve.model.create_basic_model_components import create_resistance_reactance
+
 
 transformer_end_info_kwargs = {
     **asset_info_kwargs,
@@ -207,3 +207,12 @@ def validate_resistance_reactance(rr: ResistanceReactance, r, x, r0, x0):
     assert rr.x == x
     assert rr.r0 == r0
     assert rr.x0 == x0
+
+
+def test_auto_two_way_connections_for_transformer_end_info_constructor():
+    tti = TransformerTankInfo()
+    tsi = TransformerStarImpedance()
+    tei = create_transformer_end_info(transformer_tank_info=tti, transformer_star_impedance=tsi)
+
+    assert tti.get_transformer_end_info(tei.mrid) == tei
+    assert tsi.transformer_end_info == tei

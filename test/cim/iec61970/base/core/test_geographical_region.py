@@ -68,3 +68,10 @@ def test_sub_geographical_regions_collection():
                                   GeographicalRegion.add_sub_geographical_region,
                                   GeographicalRegion.remove_sub_geographical_region,
                                   GeographicalRegion.clear_sub_geographical_regions)
+
+
+def test_auto_two_way_connections_for_geographical_region_constructor():
+    sgr = SubGeographicalRegion()
+    gr = create_geographical_region(sub_geographical_regions=[sgr])
+
+    assert sgr.geographical_region == gr

@@ -16,7 +16,10 @@ def create_remote_control(mrid: str = None, name: str = '', description: str = "
     RemotePoint:
     RemoteControl: control
     """
-    return RemoteControl(**locals())
+    rc = RemoteControl(**locals())
+    if control:
+        control.remote_control = rc
+    return rc
 
 
 def create_remote_source(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, measurement: Measurement = None) -> RemoteSource:
@@ -26,4 +29,7 @@ def create_remote_source(mrid: str = None, name: str = '', description: str = ""
     RemotePoint:
     RemoteSource: measurement
     """
-    return RemoteSource(**locals())
+    rs = RemoteSource(**locals())
+    if measurement:
+        measurement.remote_source = rs
+    return rs

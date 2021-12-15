@@ -65,3 +65,10 @@ def test_streetlight_constructor_args():
     assert sl.pole == streetlight_args[-3]
     assert sl.light_rating == streetlight_args[-2]
     assert sl.lamp_kind == streetlight_args[-1]
+
+
+def test_auto_two_way_connections_for_street_light_constructor():
+    p = Pole()
+    s = create_streetlight(pole=p)
+
+    assert p.get_streetlight(s.mrid) == s

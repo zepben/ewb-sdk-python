@@ -117,3 +117,22 @@ def test_circuits_collection():
                                   Substation.add_circuit,
                                   Substation.remove_circuit,
                                   Substation.clear_circuits)
+
+
+def test_auto_two_way_connections_for_substation_constructor():
+    sgr = SubGeographicalRegion()
+    nef = Feeder()
+    loop = Loop()
+    el = Loop()
+    c = Circuit()
+    p1 = create_substation(sub_geographical_region=sgr)
+    p2 = create_substation(normal_energized_feeders=[nef])
+    p3 = create_substation(loops=[loop])
+    p4 = create_substation(energized_loops=[el])
+    p5 = create_substation(circuits=[c])
+
+    assert sgr.get_substation(p1.mrid) == p1
+    assert nef.normal_energizing_substation == p2
+    assert loop.get_substation(p3.mrid) == p3
+    assert el.get_energizing_substation(p4.mrid) == p4
+    assert c.get_end_substation(p5.mrid) == p5

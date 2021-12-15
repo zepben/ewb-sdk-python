@@ -57,3 +57,10 @@ def test_remote_source_constructor_args():
 
     verify_remote_point_constructor_args(rs)
     assert rs.measurement == remote_source_args[-1]
+
+
+def test_auto_two_way_connections_for_remote_source_constructor():
+    m = Measurement()
+    rs = create_remote_source(measurement=m)
+
+    assert m.remote_source == rs

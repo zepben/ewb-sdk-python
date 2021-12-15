@@ -73,3 +73,11 @@ def test_pricing_structures_collection():
                                   CustomerAgreement.add_pricing_structure,
                                   CustomerAgreement.remove_pricing_structure,
                                   CustomerAgreement.clear_pricing_structures)
+
+
+def test_auto_two_way_connections_for_customer_agreement_constructor():
+    c = Customer()
+    ca = create_customer_agreement(customer=c)
+
+    assert c.get_agreement(ca.mrid) == ca
+

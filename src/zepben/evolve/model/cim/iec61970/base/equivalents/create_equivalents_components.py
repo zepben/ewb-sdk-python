@@ -7,6 +7,7 @@
 from typing import List
 
 from zepben.evolve import *
+from zepben.evolve.model.common_two_way_connections import add_common_equipment_connections, add_conducting_equipment_connection
 
 
 def create_equivalent_branch(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -27,4 +28,7 @@ def create_equivalent_branch(mrid: str = None, name: str = '', description: str 
     EquivalentBranch: negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x, x21, zero_r12,
                       zero_r21, zero_x12, zero_x21
     """
-    return EquivalentBranch(**locals())
+    eb = EquivalentBranch(**locals())
+    add_conducting_equipment_connection(eb, usage_points, equipment_containers, operational_restrictions, current_feeders, terminals)
+    return eb
+

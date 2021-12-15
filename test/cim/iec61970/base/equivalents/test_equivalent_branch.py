@@ -7,6 +7,8 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 
+from cim.test_common_two_way_connections import check_common_equipment_two_way_link_test, \
+    set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \
     verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
@@ -122,3 +124,10 @@ def test_equivalent_branch_constructor_args():
     assert eb.zero_r21 == equivalent_branch_args[-3]
     assert eb.zero_x12 == equivalent_branch_args[-2]
     assert eb.zero_x21 == equivalent_branch_args[-1]
+
+
+def test_auto_two_way_connections_for_pole_constructor():
+    up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
+    eb = create_equivalent_branch(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t])
+    check_conducting_equipment_two_way_link_test(eb, up, ec, opr, f, t)
+

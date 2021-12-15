@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
+from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, verify_switch_constructor_args, \
     switch_kwargs, switch_args
 from zepben.evolve import Disconnector
@@ -31,3 +32,9 @@ def test_disconnector_creator(**kwargs):
 
 def test_disconnector_constructor_args():
     verify_switch_constructor_args(Disconnector(*disconnector_args))
+
+
+def test_auto_two_way_connections_for_disconnector_constructor():
+    up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
+    d = create_disconnector(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t])
+    check_conducting_equipment_two_way_link_test(d, up, ec, opr, f, t)

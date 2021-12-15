@@ -10,13 +10,17 @@ from zepben.evolve import *
 
 
 def create_diagram(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, diagram_style: DiagramStyle = DiagramStyle.SCHEMATIC,
-                   orientation_kind: OrientationKind = OrientationKind.POSITIVE, diagram_objects: Dict[str, DiagramObject] = None) -> Diagram:
+                   orientation_kind: OrientationKind = OrientationKind.POSITIVE, diagram_objects: List[DiagramObject] = None) -> Diagram:
     """
     Diagram(IdentifiedObject)
     IdentifiedObject: mrid, name, description, names
     Diagram: diagram_style, orientation_kind, diagram_objects
     """
-    return Diagram(**locals())
+    d = Diagram(**locals())
+    if diagram_objects:
+        for obj in diagram_objects:
+            obj.diagram = d
+    return d
 
 
 def create_diagram_object(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, diagram: Diagram = None,
@@ -27,7 +31,10 @@ def create_diagram_object(mrid: str = None, name: str = '', description: str = "
     IdentifiedObject: mrid, name, description, names
     DiagramObject: diagram, identified_object_mrid, style, rotation, diagram_object_points
     """
-    return DiagramObject(**locals())
+    do = DiagramObject(**locals())
+    if diagram:
+        diagram.add_diagram_object(do)
+    return do
 
 
 def create_diagram_object_point(x_position: float, y_position: float) -> DiagramObjectPoint:

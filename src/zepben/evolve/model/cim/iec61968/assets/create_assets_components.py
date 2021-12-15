@@ -30,7 +30,11 @@ def create_pole(mrid: str = None, name: str = '', description: str = "", names: 
     Structure:
     Pole: classification, streetlights
     """
-    return Pole(**locals())
+    p = Pole(**locals())
+    if streetlights:
+        for sl in streetlights:
+            sl.pole = p
+    return p
 
 
 def create_streetlight(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -42,4 +46,7 @@ def create_streetlight(mrid: str = None, name: str = '', description: str = "", 
     Asset: location, organisation_roles
     Streetlight: pole, light_rating, lamp_kind
     """
-    return Streetlight(**locals())
+    sl = Streetlight(**locals())
+    if pole:
+        pole.add_streetlight(sl)
+    return sl

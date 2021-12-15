@@ -78,3 +78,10 @@ def test_diagram_objects_collection():
                                   Diagram.remove_diagram_object,
                                   Diagram.clear_diagram_objects,
                                   KeyError)
+
+
+def test_auto_two_way_connections_for_diagram_constructor():
+    do = DiagramObject()
+    d = create_diagram(diagram_objects=[do])
+
+    assert do.diagram == d

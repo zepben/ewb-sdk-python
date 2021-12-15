@@ -66,3 +66,10 @@ def test_ratio_tap_changer_constructor_args():
     verify_tap_changer_constructor_args(rtc)
     assert rtc.transformer_end == ratio_tap_changer_args[-2]
     assert rtc.step_voltage_increment == ratio_tap_changer_args[-1]
+
+
+def test_auto_two_way_connections_for_ratio_tap_changer_constructor():
+    te = TransformerEnd()
+    rtc = create_ratio_tap_changer(transformer_end=te)
+
+    assert te.ratio_tap_changer == rtc

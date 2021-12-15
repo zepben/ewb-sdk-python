@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
+from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
     verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_kwargs, protected_switch_args
 from zepben.evolve import Breaker
@@ -31,3 +32,9 @@ def test_breaker_creator(**kwargs):
 
 def test_breaker_constructor_args():
     verify_protected_switch_constructor_args(Breaker(*breaker_args))
+
+
+def test_auto_two_way_connections_for_breaker_constructor():
+    up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
+    b = create_breaker(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t])
+    check_conducting_equipment_two_way_link_test(b, up, ec, opr, f, t)

@@ -68,3 +68,10 @@ def test_terminals_collection():
                                   ConnectivityNode.add_terminal,
                                   ConnectivityNode.remove_terminal,
                                   ConnectivityNode.clear_terminals)
+
+
+def test_auto_two_way_connections_for_connectivity_node_constructor():
+    t = Terminal()
+    cn = create_connectivity_node(terminals=[t])
+
+    assert t.connectivity_node == cn

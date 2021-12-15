@@ -60,3 +60,10 @@ def test_energy_consumer_phase_constructor_args():
     verify_power_system_resource_constructor_args(esp)
     assert esp.energy_source == energy_source_phase_args[-2]
     assert esp.phase == energy_source_phase_args[-1]
+
+
+def test_auto_two_way_connections_for_energy_source_phase_constructor():
+    es = EnergySource()
+    esp = create_energy_source_phase(energy_source=es)
+
+    assert es.get_phase(esp.mrid) == esp

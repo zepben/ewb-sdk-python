@@ -71,3 +71,10 @@ def test_transformer_tank_info_collection():
                                   TransformerTankInfo.add_transformer_end_info,
                                   TransformerTankInfo.remove_transformer_end_info,
                                   TransformerTankInfo.clear_transformer_end_infos)
+
+
+def test_auto_two_way_connections_for_transformer_tank_info_constructor():
+    tei = TransformerEndInfo()
+    tti = create_transformer_tank_info(transformer_end_infos=[tei])
+
+    assert tei.transformer_tank_info == tti

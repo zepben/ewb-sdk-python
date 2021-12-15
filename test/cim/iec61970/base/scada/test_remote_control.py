@@ -57,3 +57,10 @@ def test_remote_control_constructor_args():
 
     verify_remote_point_constructor_args(c)
     assert c.control == remote_control_args[-1]
+
+
+def test_auto_two_way_connections_for_remote_control_constructor():
+    c = Control()
+    rc = create_remote_control(control=c)
+
+    assert c.remote_control == rc

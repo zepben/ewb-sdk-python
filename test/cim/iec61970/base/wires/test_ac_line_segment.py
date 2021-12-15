@@ -6,6 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds
 
+from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.wires.test_conductor import verify_conductor_constructor_default, \
     verify_conductor_constructor_kwargs, verify_conductor_constructor_args, conductor_kwargs, conductor_args
@@ -56,3 +57,9 @@ def test_ac_line_segment_constructor_args():
 
     verify_conductor_constructor_args(als)
     assert als.per_length_sequence_impedance == ac_line_segment_args[-1]
+
+
+def test_auto_two_way_connections_for_ac_line_segment_constructor():
+    up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
+    als = create_ac_line_segment(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t])
+    check_conducting_equipment_two_way_link_test(als, up, ec, opr, f, t)

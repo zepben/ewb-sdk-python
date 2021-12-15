@@ -53,6 +53,9 @@ def test_terminal_constructor_kwargs(conducting_equipment, phases, sequence_numb
                                      connectivity_node, **kwargs):
     args = extract_testing_args(locals())
     t = Terminal(**args, **kwargs)
+
+    verify_ac_dc_terminal_constructor_kwargs(t, **kwargs)
+    assert t.sequence_number == sequence_number
     validate_terminal_values(t, **args, **kwargs)
 
 
@@ -61,6 +64,12 @@ def test_terminal_creator(conducting_equipment, phases, sequence_number, normal_
                           **kwargs):
     args = extract_testing_args(locals())
     t = create_terminal(**args, **kwargs)
+
+    verify_ac_dc_terminal_constructor_kwargs(t, **kwargs)
+    # Constructor supports auto two way linking, thus initializing sequence_number of terminal to 1
+    if sequence_number == 0:
+        assert t.sequence_number == 1
+        args['sequence_number'] = 1
     validate_terminal_values(t, **args, **kwargs)
 
 
@@ -87,3 +96,16 @@ def test_terminal_constructor_args():
     assert t.current_feeder_direction == terminal_args[-3]
     assert t.traced_phases == terminal_args[-2]
     assert t.connectivity_node == terminal_args[-1]
+
+
+def test_auto_two_way_connections_for_terminal_constructor():
+    ce = ConductingEquipment()
+    cn = ConnectivityNode()
+    t = create_terminal(conducting_equipment=ce, connectivity_node=cn)
+    t2 = create_terminal(conducting_equipment=ce)
+
+    assert ce.get_terminal_by_mrid(t.mrid) == t
+    assert ce.get_terminal_by_mrid(t2.mrid) == t2
+    assert ce.get_terminal_by_sn(1) == t
+    assert ce.get_terminal_by_sn(2) == t2
+    assert cn.get_terminal(t.mrid) == t

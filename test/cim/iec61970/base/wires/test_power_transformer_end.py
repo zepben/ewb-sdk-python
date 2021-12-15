@@ -8,9 +8,10 @@ from hypothesis.strategies import builds, integers, floats, sampled_from
 
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
-    verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
+    verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args, \
+    verify_transformer_end_creator
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import PowerTransformerEnd, PowerTransformer, WindingConnection
+from zepben.evolve import PowerTransformerEnd, PowerTransformer, WindingConnection, RatioTapChanger
 from zepben.evolve.model.cim.iec61970.base.wires.create_wires_components import create_power_transformer_end
 
 power_transformer_end_kwargs = {
@@ -69,11 +70,15 @@ def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, ra
 def test_power_transformer_end_creator(power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock, **kwargs):
     args = extract_testing_args(locals())
     pte = create_power_transformer_end(**args, **kwargs)
-    validate_power_transformer_end_values(pte, **args, **kwargs)
+    validate_power_transformer_end_values(pte, **args, creator=True, **kwargs)
 
 
-def validate_power_transformer_end_values(pte, power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock, **kwargs):
-    verify_transformer_end_constructor_kwargs(pte, **kwargs)
+def validate_power_transformer_end_values(pte, power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock,
+                                          creator: bool = False, **kwargs):
+    if creator and power_transformer:
+        verify_transformer_end_creator(pte, **kwargs)
+    else:
+        verify_transformer_end_constructor_kwargs(pte, **kwargs)
     assert pte.power_transformer == power_transformer
     assert pte.rated_s == rated_s
     assert pte.rated_u == rated_u
@@ -106,3 +111,12 @@ def test_power_transformer_end_constructor_args():
     assert pte.b0 == power_transformer_end_args[-3]
     assert pte.connection_kind == power_transformer_end_args[-2]
     assert pte.phase_angle_clock == power_transformer_end_args[-1]
+
+
+def test_auto_two_way_connections_for_power_transformer_end_constructor():
+    pt = PowerTransformer()
+    rtc = RatioTapChanger()
+    pte = create_power_transformer_end(power_transformer=pt, ratio_tap_changer=rtc)
+
+    assert pt.get_end_by_mrid(pte.mrid) == pte
+    assert rtc.transformer_end == pte

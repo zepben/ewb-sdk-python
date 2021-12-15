@@ -3,9 +3,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
-from typing import List
-
 from zepben.evolve import *
 
 
@@ -110,7 +107,12 @@ def create_transformer_end_info(mrid: str = None, name: str = '', description: s
                         transformer_star_impedance, energised_end_no_load_tests, energised_end_short_circuit_tests, grounded_end_short_circuit_tests, 
                         open_end_open_circuit_tests, energised_end_open_circuit_tests
     """
-    return TransformerEndInfo(**locals())
+    tei = TransformerEndInfo(**locals())
+    if transformer_tank_info:
+        transformer_tank_info.add_transformer_end_info(tei)
+    if transformer_star_impedance:
+        transformer_star_impedance.transformer_end_info = tei
+    return tei
 
 
 def create_transformer_tank_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, 
@@ -121,4 +123,8 @@ def create_transformer_tank_info(mrid: str = None, name: str = '', description: 
     AssetInfo:
     TransformerTankInfo: transformer_end_infos
     """
-    return TransformerTankInfo(**locals())
+    tti = TransformerTankInfo(**locals())
+    if transformer_end_infos:
+        for tei in transformer_end_infos:
+            tei.transformer_tank_info = tti
+    return tti

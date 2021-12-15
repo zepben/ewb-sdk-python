@@ -77,3 +77,10 @@ def test_energy_consumer_phase_constructor_args():
     assert ecp.q == energy_consumer_phase_args[-3]
     assert ecp.p_fixed == energy_consumer_phase_args[-2]
     assert ecp.q_fixed == energy_consumer_phase_args[-1]
+
+
+def test_auto_two_way_connections_for_energy_consumer_phase_constructor():
+    ec = EnergyConsumer()
+    ecp = create_energy_consumer_phase(energy_consumer=ec)
+
+    assert ec.get_phase(ecp.mrid) == ecp

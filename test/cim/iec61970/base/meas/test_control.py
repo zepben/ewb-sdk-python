@@ -62,3 +62,10 @@ def test_control_constructor_args():
     verify_io_point_constructor_args(c)
     assert c.power_system_resource_mrid == control_args[-2]
     assert c.remote_control == control_args[-1]
+
+
+def test_auto_two_way_connections_for_accumulator_constructor():
+    rc = RemoteControl()
+    c = create_control(remote_control=rc)
+
+    assert rc.control == c

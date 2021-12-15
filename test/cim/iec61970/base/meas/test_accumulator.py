@@ -7,7 +7,7 @@ from hypothesis import given
 
 from test.cim.iec61970.base.meas.test_measurement import measurement_kwargs, verify_measurement_constructor_default, \
     verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
-from zepben.evolve import Accumulator
+from zepben.evolve import Accumulator, RemoteSource
 from zepben.evolve.model.cim.iec61970.base.meas.create_meas_components import create_accumulator
 
 accumulator_kwargs = measurement_kwargs
@@ -34,3 +34,10 @@ def test_accumulator_creator(**kwargs):
 def test_accumulator_constructor_args():
     # noinspection PyArgumentList
     verify_measurement_constructor_args(Accumulator(*accumulator_args))
+
+
+def test_auto_two_way_connections_for_accumulator_constructor():
+    rs = RemoteSource()
+    a = create_accumulator(remote_source=rs)
+
+    assert rs.measurement == a

@@ -74,3 +74,12 @@ def test_usage_point_constructor_args():
     assert up.connection_category == usage_point_args[-3]
     assert list(up.equipment) == usage_point_args[-2]
     assert list(up.end_devices) == usage_point_args[-1]
+
+
+def test_auto_two_way_connections_for_usage_point_constructor():
+    e = Equipment()
+    ed = EndDevice()
+    up = create_usage_point(equipment=[e], end_devices=[ed])
+
+    assert e.get_usage_point(up.mrid) == up
+    assert ed.get_usage_point(up.mrid) == up

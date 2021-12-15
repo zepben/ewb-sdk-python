@@ -6,6 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import integers, builds, lists, floats
 
+from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.collection_validator import validate_collection_unordered
 from test.cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
@@ -117,3 +118,16 @@ def test_power_electronics_connection_phases_collection():
                                   PowerElectronicsConnection.add_phase,
                                   PowerElectronicsConnection.remove_phase,
                                   PowerElectronicsConnection.clear_phases)
+
+
+# noinspection SpellCheckingInspection
+def test_auto_two_way_connections_for_power_electronics_connection_constructor():
+    up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
+    peu = PowerElectronicsUnit()
+    pecp = PowerElectronicsConnectionPhase()
+    pec = create_power_electronics_connection(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t],
+                                              power_electronics_units=[peu], power_electronics_connection_phases=[pecp])
+
+    check_conducting_equipment_two_way_link_test(pec, up, ec, opr, f, t)
+    assert peu.power_electronics_connection == pec
+    assert pecp.power_electronics_connection == pec

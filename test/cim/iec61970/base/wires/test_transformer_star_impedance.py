@@ -74,3 +74,10 @@ def test_transformer_star_impedance_constructor_args():
     assert tsi.x == transformer_star_impedance_args[-3]
     assert tsi.x0 == transformer_star_impedance_args[-2]
     assert tsi.transformer_end_info == transformer_star_impedance_args[-1]
+
+
+def test_auto_two_way_connections_for_transformer_star_impedance_constructor():
+    tei = TransformerEndInfo()
+    tsi = create_transformer_star_impedance(transformer_end_info=tei)
+
+    assert tei.transformer_star_impedance == tsi

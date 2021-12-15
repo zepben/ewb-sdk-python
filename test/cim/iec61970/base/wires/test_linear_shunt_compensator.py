@@ -7,6 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 
+from cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.extract_testing_args import extract_testing_args
 from test.cim.iec61970.base.wires.test_shunt_compensator import verify_shunt_compensator_constructor_default, \
     verify_shunt_compensator_constructor_kwargs, verify_shunt_compensator_constructor_args, shunt_compensator_kwargs, shunt_compensator_args
@@ -70,3 +71,9 @@ def test_linear_shunt_compensator_constructor_args():
     assert lsc.b_per_section == linear_shunt_compensator_args[-3]
     assert lsc.g0_per_section == linear_shunt_compensator_args[-2]
     assert lsc.g_per_section == linear_shunt_compensator_args[-1]
+
+
+def test_auto_two_way_connections_for_linear_shunt_compensator_constructor():
+    up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
+    lsc = create_linear_shunt_compensator(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t])
+    check_conducting_equipment_two_way_link_test(lsc, up, ec, opr, f, t)

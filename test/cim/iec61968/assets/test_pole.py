@@ -73,3 +73,10 @@ def test_streetlights_collection():
                                   Pole.add_streetlight,
                                   Pole.remove_streetlight,
                                   Pole.clear_streetlights)
+
+
+def test_auto_two_way_connections_for_pole_constructor():
+    s = Streetlight()
+    p = create_pole(streetlights=[s])
+
+    assert s.pole == p

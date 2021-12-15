@@ -18,7 +18,10 @@ def create_accumulator(mrid: str = None, name: str = '', description: str = "", 
     Measurement: power_system_resource_mrid, remote_source, terminal_mrid, phases, unit_symbol
     Accumulator:
     """
-    return Accumulator(**locals())
+    a = Accumulator(**locals())
+    if remote_source:
+        remote_source.measurement = a
+    return a
 
 
 def create_accumulator_value(time_stamp: datetime = None, value: int = 0, accumulator_mrid: str = None) -> AccumulatorValue:
@@ -40,7 +43,10 @@ def create_analog(mrid: str = None, name: str = '', description: str = "", names
     Measurement: power_system_resource_mrid, remote_source, terminal_mrid, phases, unit_symbol
     Analog: positive_flow_in
     """
-    return Analog(**locals())
+    a = Analog(**locals())
+    if remote_source:
+        remote_source.measurement = a
+    return a
 
 
 def create_analog_value(time_stamp: datetime = None, value: float = 0.0, analog_mrid: str = None) -> AnalogValue:
@@ -61,7 +67,10 @@ def create_control(mrid: str = None, name: str = '', description: str = "", name
     IoPoint:
     Control: power_system_resource_mrid, remote_control
     """
-    return Control(**locals())
+    c = Control(**locals())
+    if remote_control:
+        remote_control.control = c
+    return c
 
 
 def create_discrete(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, power_system_resource_mrid: str = None,
@@ -73,7 +82,10 @@ def create_discrete(mrid: str = None, name: str = '', description: str = "", nam
     Measurement: power_system_resource_mrid, remote_source, terminal_mrid, phases, unit_symbol
     Discrete:
     """
-    return Discrete(**locals())
+    d = Discrete(**locals())
+    if remote_source:
+        remote_source.measurement = d
+    return d
 
 
 def create_discrete_value(time_stamp: datetime = None, value: int = 0, discrete_mrid: str = None) -> DiscreteValue:

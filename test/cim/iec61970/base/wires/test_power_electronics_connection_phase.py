@@ -69,3 +69,11 @@ def test_power_electronics_connection_phase_constructor_args():
     assert pecp.p == power_electronics_connection_phase_args[-3]
     assert pecp.phase == power_electronics_connection_phase_args[-2]
     assert pecp.q == power_electronics_connection_phase_args[-1]
+
+
+# noinspection SpellCheckingInspection
+def test_auto_two_way_connections_for_power_electronics_connection_phase_constructor():
+    pec = PowerElectronicsConnection()
+    pecp = create_power_electronics_connection_phase(power_electronics_connection=pec)
+
+    assert pec.get_phase(pecp.mrid) == pecp
