@@ -102,7 +102,7 @@ def test_phases_collection():
 
 def test_auto_two_way_connections_for_energy_consumer_constructor():
     up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
-    ecp = EnergyConsumerPhase
+    ecp = EnergyConsumerPhase()
     enc = create_energy_consumer(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t],
                                  energy_consumer_phases=[ecp])
 
