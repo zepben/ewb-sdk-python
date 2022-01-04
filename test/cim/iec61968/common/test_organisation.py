@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import data
 
-from cim.common_testing_functions import verify
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, identified_object_kwargs, identified_object_args, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args
 from zepben.evolve import Organisation

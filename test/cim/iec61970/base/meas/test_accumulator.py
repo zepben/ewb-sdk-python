@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import data
 
-from cim.common_testing_functions import verify
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.meas.test_measurement import measurement_kwargs, verify_measurement_constructor_default, \
     verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
 from zepben.evolve import Accumulator, RemoteSource

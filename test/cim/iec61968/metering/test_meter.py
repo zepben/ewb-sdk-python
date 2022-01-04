@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import data
 
-from cim.common_testing_functions import verify
+from test.cim.common_testing_functions import verify
 from test.cim.iec61968.metering.test_end_device import end_device_kwargs, verify_end_device_constructor_default, verify_end_device_constructor_kwargs, \
     verify_end_device_constructor_args, end_device_args
 from zepben.evolve import Meter, UsagePoint

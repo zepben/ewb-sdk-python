@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import data
 
-from cim.common_testing_functions import verify
+from test.cim.common_testing_functions import verify
 from test.cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, verify_switch_constructor_args, \
     switch_kwargs, switch_args
