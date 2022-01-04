@@ -5,10 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import text
-from test.cim import extract_testing_args
+from hypothesis.strategies import text, data
+from test.cim.common_testing_functions import verify
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from test.cim.extract_testing_args import extract_testing_args
 from zepben.evolve import TownDetail
 from zepben.evolve.model.cim.iec61968.common.create_common_components import create_town_detail
 
@@ -23,35 +22,25 @@ town_detail_args = ["a", "b"]
 def test_town_detail_constructor_default():
     td = TownDetail()
     td2 = create_town_detail()
-    validate_default_town_detail(td)
-    validate_default_town_detail(td2)
+    verify_default_town_detail(td)
+    verify_default_town_detail(td2)
 
 
-def validate_default_town_detail(td):
+def verify_default_town_detail(td):
     assert td.name is None
     assert td.state_or_province is None
 
 
-# noinspection PyArgumentList
-@given(**town_detail_kwargs)
-def test_town_detail_constructor_kwargs(name, state_or_province, **kwargs):
-    args = extract_testing_args(locals())
-    assert not kwargs
-
-    td = TownDetail(**args)
-    validate_town_detail_values(td, **args)
-
-
-@given(**town_detail_kwargs)
-def test_town_detail_creator(name, state_or_province, **kwargs):
-    args = extract_testing_args(locals())
-    assert not kwargs
-
-    td = create_town_detail(**args)
-    validate_town_detail_values(td, **args)
+# noinspection PyShadowingNames
+@given(data())
+def test_town_detail_constructor_kwargs(data):
+    verify(
+        [TownDetail, create_town_detail],
+        data, town_detail_kwargs, verify_town_detail_values
+    )
 
 
-def validate_town_detail_values(td, name, state_or_province):
+def verify_town_detail_values(td, name, state_or_province):
     assert td.name == name
     assert td.state_or_province == state_or_province
 

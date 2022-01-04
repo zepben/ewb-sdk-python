@@ -8,6 +8,8 @@ from typing import List
 
 from zepben.evolve import *
 
+__all__ = ["create_diagram", "create_diagram_object", "create_diagram_object_point"]
+
 
 def create_diagram(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, diagram_style: DiagramStyle = DiagramStyle.SCHEMATIC,
                    orientation_kind: OrientationKind = OrientationKind.POSITIVE, diagram_objects: List[DiagramObject] = None) -> Diagram:

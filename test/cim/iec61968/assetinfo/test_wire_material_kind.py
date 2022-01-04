@@ -5,9 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
 
-from test.cim.enum_validator import validate_enum
+from test.cim.enum_verifier import verify_enum
 from zepben.evolve import WireMaterialKind
 
 
 def test_wire_material_kind_enum():
-    validate_enum(WireMaterialKind, PBWireMaterialKind)
+    verify_enum(WireMaterialKind, PBWireMaterialKind)

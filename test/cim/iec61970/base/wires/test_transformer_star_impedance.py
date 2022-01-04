@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats, builds
+from hypothesis.strategies import floats, builds, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
@@ -28,11 +28,11 @@ transformer_star_impedance_args = [*identified_object_args, 1.1, 2.2, 3.3, 4.4, 
 def test_transformer_star_impedance_constructor_default():
     tsi = TransformerStarImpedance()
     tsi2 = create_transformer_star_impedance()
-    validate_default_transformer_star_impedance_constructor(tsi)
-    validate_default_transformer_star_impedance_constructor(tsi2)
+    verify_default_transformer_star_impedance_constructor(tsi)
+    verify_default_transformer_star_impedance_constructor(tsi2)
 
 
-def validate_default_transformer_star_impedance_constructor(tsi):
+def verify_default_transformer_star_impedance_constructor(tsi):
     verify_identified_object_constructor_default(tsi)
     assert tsi.r == 0.0
     assert tsi.r0 == 0.0
@@ -41,21 +41,16 @@ def validate_default_transformer_star_impedance_constructor(tsi):
     assert not tsi.transformer_end_info
 
 
-@given(**transformer_star_impedance_kwargs)
-def test_transformer_star_impedance_constructor_kwargs(r, r0, x, x0, transformer_end_info, **kwargs):
-    args = extract_testing_args(locals())
-    tsi = TransformerStarImpedance(**args, **kwargs)
-    validate_transformer_star_impedance_values(tsi, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_transformer_star_impedance_constructor_kwargs(data):
+    verify(
+        [TransformerStarImpedance, create_transformer_star_impedance],
+        data, transformer_star_impedance_kwargs, verify_transformer_star_impedance_values
+    )
 
 
-@given(**transformer_star_impedance_kwargs)
-def test_transformer_star_impedance_creator(r, r0, x, x0, transformer_end_info, **kwargs):
-    args = extract_testing_args(locals())
-    tsi = create_transformer_star_impedance(**args, **kwargs)
-    validate_transformer_star_impedance_values(tsi, **args, **kwargs)
-
-
-def validate_transformer_star_impedance_values(tsi, r, r0, x, x0, transformer_end_info, **kwargs):
+def verify_transformer_star_impedance_values(tsi, r, r0, x, x0, transformer_end_info, **kwargs):
     verify_identified_object_constructor_kwargs(tsi, **kwargs)
     assert tsi.r == r
     assert tsi.r0 == r0

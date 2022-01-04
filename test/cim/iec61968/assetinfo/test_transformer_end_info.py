@@ -6,9 +6,9 @@
 from unittest.mock import patch
 
 from hypothesis import given
-from hypothesis.strategies import integers, floats
+from hypothesis.strategies import integers, floats, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args, asset_info_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection_kind, create_transformer_tank_info, \
@@ -45,11 +45,11 @@ transformer_end_info_args = [*asset_info_args, WindingConnection.UNKNOWN_WINDING
 def test_transformer_end_info_constructor_default():
     tei = TransformerEndInfo()
     tei2 = create_transformer_end_info()
-    validate_default_transformer_end_info(tei)
-    validate_default_transformer_end_info(tei2)
+    verify_default_transformer_end_info(tei)
+    verify_default_transformer_end_info(tei2)
 
 
-def validate_default_transformer_end_info(tei):
+def verify_default_transformer_end_info(tei):
     verify_asset_info_constructor_default(tei)
     assert tei.connection_kind == WindingConnection.UNKNOWN_WINDING
     assert tei.emergency_s is None
@@ -69,28 +69,18 @@ def validate_default_transformer_end_info(tei):
     assert tei.energised_end_open_circuit_tests is None
 
 
-@given(**transformer_end_info_kwargs)
-def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, end_number, insulation_u, phase_angle_clock, r, rated_s, rated_u, short_term_s,
-                                                 transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests,
-                                                 energised_end_short_circuit_tests, grounded_end_short_circuit_tests, open_end_open_circuit_tests,
-                                                 energised_end_open_circuit_tests, **kwargs):
-    args = extract_testing_args(locals())
-    tei = TransformerEndInfo(**args, **kwargs)
-    validate_transformer_end_info_values(tei, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_transformer_end_info_constructor_kwargs(data):
+    verify(
+        [TransformerEndInfo, create_transformer_end_info],
+        data, transformer_end_info_kwargs, verify_transformer_end_info_values
+    )
 
 
-@given(**transformer_end_info_kwargs)
-def test_transformer_end_info_creator(connection_kind, emergency_s, end_number, insulation_u, phase_angle_clock, r, rated_s, rated_u, short_term_s,
-                                      transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests, energised_end_short_circuit_tests,
-                                      grounded_end_short_circuit_tests, open_end_open_circuit_tests, energised_end_open_circuit_tests, **kwargs):
-    args = extract_testing_args(locals())
-    tei = create_transformer_end_info(**args, **kwargs)
-    validate_transformer_end_info_values(tei, **args, **kwargs)
-
-
-def validate_transformer_end_info_values(tei, connection_kind, emergency_s, end_number, insulation_u, phase_angle_clock, r, rated_s, rated_u, short_term_s,
-                                     transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests, energised_end_short_circuit_tests,
-                                     grounded_end_short_circuit_tests, open_end_open_circuit_tests, energised_end_open_circuit_tests, **kwargs):
+def verify_transformer_end_info_values(tei, connection_kind, emergency_s, end_number, insulation_u, phase_angle_clock, r, rated_s, rated_u, short_term_s,
+                                       transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests, energised_end_short_circuit_tests,
+                                       grounded_end_short_circuit_tests, open_end_open_circuit_tests, energised_end_open_circuit_tests, **kwargs):
     verify_asset_info_constructor_kwargs(tei, **kwargs)
     assert tei.connection_kind == connection_kind
     assert tei.emergency_s == emergency_s
@@ -137,7 +127,7 @@ def test_populates_resistance_reactance_off_end_star_impedance_if_available():
     with patch.object(TransformerEndInfo, "calculate_resistance_reactance_from_tests") as method:
         # noinspection PyArgumentList
         info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, x=1.2, r0=1.3, x0=1.4))
-        validate_resistance_reactance(info.resistance_reactance(), 1.1, 1.2, 1.3, 1.4)
+        verify_resistance_reactance(info.resistance_reactance(), 1.1, 1.2, 1.3, 1.4)
         method.assert_not_called()
 
 
@@ -146,7 +136,7 @@ def test_populates_resistance_reactance_off_end_info_tests_if_available():
         # noinspection PyArgumentList
         method.return_value = ResistanceReactance(2.1, 2.2, 2.3, 2.4)
         info = TransformerEndInfo()
-        validate_resistance_reactance(info.resistance_reactance(), 2.1, 2.2, 2.3, 2.4)
+        verify_resistance_reactance(info.resistance_reactance(), 2.1, 2.2, 2.3, 2.4)
         method.assert_called_once()
 
 
@@ -156,7 +146,7 @@ def test_merges_resistance_reactance_if_required():
         method.return_value = ResistanceReactance(None, 2.2, None, None)
         # noinspection PyArgumentList
         info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, x=None, r0=None, x0=None))
-        validate_resistance_reactance(info.resistance_reactance(), 1.1, 2.2, None, None)
+        verify_resistance_reactance(info.resistance_reactance(), 1.1, 2.2, None, None)
         method.assert_called_once()
 
 
@@ -169,26 +159,26 @@ def test_calculates_resistance_reactance_of_end_info_tests_if_available():
     voltage_only_test = ShortCircuitTest(voltage=11.85)
 
     # check via loss
-    validate_resistance_reactance_from_test(400000, 1630000000, loss_test, loss_test, ResistanceReactance(0.12, 11.63, 0.12, 11.63))
-    validate_resistance_reactance_from_test(None, 1630000000, loss_test, loss_test, None)
-    validate_resistance_reactance_from_test(400000, None, loss_test, loss_test, None)
-    validate_resistance_reactance_from_test(400000, 1630000000, None, loss_test, ResistanceReactance(None, None, 0.12, 11.63))
-    validate_resistance_reactance_from_test(400000, 1630000000, loss_test, None, ResistanceReactance(0.12, 11.63, None, None))
-    validate_resistance_reactance_from_test(400000, 1630000000, loss_no_voltage_test, loss_no_voltage_test, ResistanceReactance(0.12, None, 0.12, None))
+    verify_resistance_reactance_from_test(400000, 1630000000, loss_test, loss_test, ResistanceReactance(0.12, 11.63, 0.12, 11.63))
+    verify_resistance_reactance_from_test(None, 1630000000, loss_test, loss_test, None)
+    verify_resistance_reactance_from_test(400000, None, loss_test, loss_test, None)
+    verify_resistance_reactance_from_test(400000, 1630000000, None, loss_test, ResistanceReactance(None, None, 0.12, 11.63))
+    verify_resistance_reactance_from_test(400000, 1630000000, loss_test, None, ResistanceReactance(0.12, 11.63, None, None))
+    verify_resistance_reactance_from_test(400000, 1630000000, loss_no_voltage_test, loss_no_voltage_test, ResistanceReactance(0.12, None, 0.12, None))
 
     # check via ohmic part
-    validate_resistance_reactance_from_test(400000, 1630000000, ohmic_test, ohmic_test, ResistanceReactance(0.12, 11.63, 0.12, 11.63))
-    validate_resistance_reactance_from_test(None, 1630000000, ohmic_test, ohmic_test, None)
-    validate_resistance_reactance_from_test(400000, None, ohmic_test, ohmic_test, None)
-    validate_resistance_reactance_from_test(400000, 1630000000, None, ohmic_test, ResistanceReactance(None, None, 0.12, 11.63))
-    validate_resistance_reactance_from_test(400000, 1630000000, ohmic_test, None, ResistanceReactance(0.12, 11.63, None, None))
-    validate_resistance_reactance_from_test(400000, 1630000000, ohmic_no_voltage_test, ohmic_no_voltage_test, ResistanceReactance(0.12, None, 0.12, None))
+    verify_resistance_reactance_from_test(400000, 1630000000, ohmic_test, ohmic_test, ResistanceReactance(0.12, 11.63, 0.12, 11.63))
+    verify_resistance_reactance_from_test(None, 1630000000, ohmic_test, ohmic_test, None)
+    verify_resistance_reactance_from_test(400000, None, ohmic_test, ohmic_test, None)
+    verify_resistance_reactance_from_test(400000, 1630000000, None, ohmic_test, ResistanceReactance(None, None, 0.12, 11.63))
+    verify_resistance_reactance_from_test(400000, 1630000000, ohmic_test, None, ResistanceReactance(0.12, 11.63, None, None))
+    verify_resistance_reactance_from_test(400000, 1630000000, ohmic_no_voltage_test, ohmic_no_voltage_test, ResistanceReactance(0.12, None, 0.12, None))
 
     # check invalid
-    validate_resistance_reactance_from_test(400000, 1630000000, voltage_only_test, voltage_only_test, None)
+    verify_resistance_reactance_from_test(400000, 1630000000, voltage_only_test, voltage_only_test, None)
 
 
-def validate_resistance_reactance_from_test(rated_u, rated_s, energised_test, grounded_test, expected_rr):
+def verify_resistance_reactance_from_test(rated_u, rated_s, energised_test, grounded_test, expected_rr):
     info = TransformerEndInfo(
         rated_u=rated_u,
         rated_s=rated_s,
@@ -202,7 +192,7 @@ def validate_resistance_reactance_from_test(rated_u, rated_s, energised_test, gr
         assert info.calculate_resistance_reactance_from_tests() is None
 
 
-def validate_resistance_reactance(rr: ResistanceReactance, r, x, r0, x0):
+def verify_resistance_reactance(rr: ResistanceReactance, r, x, r0, x0):
     assert rr.r == r
     assert rr.x == x
     assert rr.r0 == r0

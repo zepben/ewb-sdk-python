@@ -7,7 +7,7 @@ import re
 
 from hypothesis.strategies import uuids, text, lists, builds
 
-from test.cim.collection_validator import validate_collection
+from test.cim.collection_verifier import verify_collection
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
 from zepben.evolve import IdentifiedObject, Junction
 #
@@ -58,12 +58,12 @@ def verify_identified_object_constructor_args(io: IdentifiedObject):
 
 def test_names_collection():
     # noinspection PyTypeChecker, PyArgumentList
-    validate_collection(IdentifiedObject,
-                        lambda mrid, io: Name(mrid, NameType("name_type"), io),
-                        IdentifiedObject.num_names,
-                        lambda io, name: io.get_name(name.type.name, name.name),
-                        IdentifiedObject.names,
-                        IdentifiedObject.add_name,
-                        IdentifiedObject.remove_name,
-                        IdentifiedObject.clear_names,
-                        lambda it, dup: re.escape(rf"Failed to add duplicate name {str(dup)} to {str(it)}."))
+    verify_collection(IdentifiedObject,
+                      lambda mrid, io: Name(mrid, NameType("name_type"), io),
+                      IdentifiedObject.num_names,
+                      lambda io, name: io.get_name(name.type.name, name.name),
+                      IdentifiedObject.names,
+                      IdentifiedObject.add_name,
+                      IdentifiedObject.remove_name,
+                      IdentifiedObject.clear_names,
+                      lambda it, dup: re.escape(rf"Failed to add duplicate name {str(dup)} to {str(it)}."))

@@ -4,11 +4,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers, builds, lists, floats
+from hypothesis.strategies import integers, builds, lists, floats, data
 
 from test.cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
-from test.cim.extract_testing_args import extract_testing_args
-from test.cim.collection_validator import validate_collection_unordered
+from test.cim.common_testing_functions import verify
+from test.cim.collection_verifier import verify_collection_unordered
 from test.cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_kwargs, regulating_cond_eq_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
@@ -35,11 +35,11 @@ power_electronics_connection_args = [*regulating_cond_eq_args, 1, 2.2, 3.3, 4.4,
 def test_power_electronics_connection_constructor_default():
     pec = PowerElectronicsConnection()
     pec2 = create_power_electronics_connection()
-    validate_default_power_electronics_connection_constructor(pec)
-    validate_default_power_electronics_connection_constructor(pec2)
+    verify_default_power_electronics_connection_constructor(pec)
+    verify_default_power_electronics_connection_constructor(pec2)
 
 
-def validate_default_power_electronics_connection_constructor(pec):
+def verify_default_power_electronics_connection_constructor(pec):
     verify_regulating_cond_eq_constructor_default(pec)
     assert pec.max_i_fault is None
     assert pec.p is None
@@ -52,23 +52,16 @@ def validate_default_power_electronics_connection_constructor(pec):
     assert not list(pec.phases)
 
 
-@given(**power_electronics_connection_kwargs)
-def test_power_electronics_connection_constructor_kwargs(max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units,
-                                                         power_electronics_connection_phases, **kwargs):
-    args = extract_testing_args(locals())
-    pec = PowerElectronicsConnection(**args, **kwargs)
-    validate_power_electronics_connection_constructor_values(pec, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_power_electronics_connection_constructor_kwargs(data):
+    verify(
+        [PowerElectronicsConnection, create_power_electronics_connection],
+        data, power_electronics_connection_kwargs, verify_power_electronics_connection_constructor_values
+    )
 
 
-@given(**power_electronics_connection_kwargs)
-def test_power_electronics_connection_creator(max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units, power_electronics_connection_phases,
-                                              **kwargs):
-    args = extract_testing_args(locals())
-    pec = create_power_electronics_connection(**args, **kwargs)
-    validate_power_electronics_connection_constructor_values(pec, **args, **kwargs)
-
-
-def validate_power_electronics_connection_constructor_values(pec, max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units,
+def verify_power_electronics_connection_constructor_values(pec, max_i_fault, p, q, max_q, min_q, rated_s, rated_u, power_electronics_units,
                                                              power_electronics_connection_phases, **kwargs):
     verify_regulating_cond_eq_constructor_kwargs(pec, **kwargs)
     assert pec.max_i_fault == max_i_fault
@@ -98,26 +91,26 @@ def test_power_electronics_connection_constructor_args():
 
 
 def test_power_electronics_units_collection():
-    validate_collection_unordered(PowerElectronicsConnection,
-                                  lambda mrid, _: PowerElectronicsUnit(mrid),
-                                  PowerElectronicsConnection.num_units,
-                                  PowerElectronicsConnection.get_unit,
-                                  PowerElectronicsConnection.units,
-                                  PowerElectronicsConnection.add_unit,
-                                  PowerElectronicsConnection.remove_unit,
-                                  PowerElectronicsConnection.clear_units)
+    verify_collection_unordered(PowerElectronicsConnection,
+                                lambda mrid, _: PowerElectronicsUnit(mrid),
+                                PowerElectronicsConnection.num_units,
+                                PowerElectronicsConnection.get_unit,
+                                PowerElectronicsConnection.units,
+                                PowerElectronicsConnection.add_unit,
+                                PowerElectronicsConnection.remove_unit,
+                                PowerElectronicsConnection.clear_units)
 
 
 def test_power_electronics_connection_phases_collection():
     # noinspection PyArgumentList
-    validate_collection_unordered(PowerElectronicsConnection,
-                                  lambda mrid, _: PowerElectronicsConnectionPhase(mrid),
-                                  PowerElectronicsConnection.num_phases,
-                                  PowerElectronicsConnection.get_phase,
-                                  PowerElectronicsConnection.phases,
-                                  PowerElectronicsConnection.add_phase,
-                                  PowerElectronicsConnection.remove_phase,
-                                  PowerElectronicsConnection.clear_phases)
+    verify_collection_unordered(PowerElectronicsConnection,
+                                lambda mrid, _: PowerElectronicsConnectionPhase(mrid),
+                                PowerElectronicsConnection.num_phases,
+                                PowerElectronicsConnection.get_phase,
+                                PowerElectronicsConnection.phases,
+                                PowerElectronicsConnection.add_phase,
+                                PowerElectronicsConnection.remove_phase,
+                                PowerElectronicsConnection.clear_phases)
 
 
 # noinspection SpellCheckingInspection

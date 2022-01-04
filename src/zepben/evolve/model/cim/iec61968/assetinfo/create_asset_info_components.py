@@ -3,7 +3,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+from typing import List
 from zepben.evolve import *
+
+__all__ = ["create_cable_info", "create_no_load_test", "create_open_circuit_test", "create_overhead_wire_info", "create_power_transformer_info",
+           "create_short_circuit_test", "create_shunt_compensator_info", "create_transformer_end_info", "create_transformer_tank_info"]
 
 
 def create_cable_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, rated_current: int = None,
@@ -116,7 +121,7 @@ def create_transformer_end_info(mrid: str = None, name: str = '', description: s
 
 
 def create_transformer_tank_info(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None,
-                                 power_transformer_info: Optional[PowerTransformerInfo] = None, transformer_end_infos: List[TransformerEndInfo] = None
+                                 power_transformer_info: List[PowerTransformerInfo] = None, transformer_end_infos: List[TransformerEndInfo] = None
                                  ) -> TransformerTankInfo:
     """
     TransformerTankInfo(AssetInfo(IdentifiedObject))
@@ -126,7 +131,8 @@ def create_transformer_tank_info(mrid: str = None, name: str = '', description: 
     """
     tti = TransformerTankInfo(**locals())
     if power_transformer_info:
-        power_transformer_info.add_transformer_tank_info(tti)
+        for pti in power_transformer_info:
+            pti.add_transformer_tank_info(tti)
     if transformer_end_infos:
         for tei in transformer_end_infos:
             tei.transformer_tank_info = tti

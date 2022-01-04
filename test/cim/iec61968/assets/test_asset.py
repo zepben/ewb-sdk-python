@@ -6,7 +6,7 @@
 
 from hypothesis.strategies import builds, lists
 
-from test.cim.collection_validator import validate_collection_unordered
+from test.cim.collection_verifier import verify_collection_unordered
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from zepben.evolve import Asset, Location, AssetOrganisationRole
@@ -40,11 +40,11 @@ def verify_asset_constructor_args(a: Asset):
 
 def test_organisation_roles_collection():
     # noinspection PyArgumentList
-    validate_collection_unordered(Asset,
-                                  lambda mrid, _: AssetOrganisationRole(mrid),
-                                  Asset.num_organisation_roles,
-                                  Asset.get_organisation_role,
-                                  Asset.organisation_roles,
-                                  Asset.add_organisation_role,
-                                  Asset.remove_organisation_role,
-                                  Asset.clear_organisation_roles)
+    verify_collection_unordered(Asset,
+                                lambda mrid, _: AssetOrganisationRole(mrid),
+                                Asset.num_organisation_roles,
+                                Asset.get_organisation_role,
+                                Asset.organisation_roles,
+                                Asset.add_organisation_role,
+                                Asset.remove_organisation_role,
+                                Asset.clear_organisation_roles)

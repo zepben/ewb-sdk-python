@@ -4,10 +4,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import text, lists, builds
+from hypothesis.strategies import text, lists, builds, data
 
-from test.cim.extract_testing_args import extract_testing_args
-from test.cim.collection_validator import validate_collection_unordered
+from test.cim.common_testing_functions import verify
+from test.cim.collection_verifier import verify_collection_unordered
 from test.cim.iec61968.assets.test_structure import structure_kwargs, verify_structure_constructor_default, \
     verify_structure_constructor_kwargs, verify_structure_constructor_args, structure_args
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
@@ -26,31 +26,26 @@ pole_args = [*structure_args, "a", [Streetlight()]]
 def test_pole_constructor_default():
     p = Pole()
     p2 = create_pole()
-    validate_default_pole(p)
-    validate_default_pole(p2)
+    verify_default_pole(p)
+    verify_default_pole(p2)
 
 
-def validate_default_pole(p):
+def verify_default_pole(p):
     verify_structure_constructor_default(p)
     assert p.classification == ""
     assert not list(p.streetlights)
 
 
-@given(**pole_kwargs)
-def test_pole_constructor_kwargs(classification, streetlights, **kwargs):
-    args = extract_testing_args(locals())
-    p = Pole(**args, **kwargs)
-    validate_pole_values(p, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_pole_constructor_kwargs(data):
+    verify(
+        [Pole, create_pole],
+        data, pole_kwargs, verify_pole_values
+    )
 
 
-@given(**pole_kwargs)
-def test_pole_creator(classification, streetlights, **kwargs):
-    args = extract_testing_args(locals())
-    p = create_pole(**args, **kwargs)
-    validate_pole_values(p, **args, **kwargs)
-
-
-def validate_pole_values(p, classification, streetlights, **kwargs):
+def verify_pole_values(p, classification, streetlights, **kwargs):
     verify_structure_constructor_kwargs(p, **kwargs)
     assert p.classification == classification
     assert list(p.streetlights) == streetlights
@@ -65,7 +60,7 @@ def test_pole_constructor_args():
 
 
 def test_streetlights_collection():
-    validate_collection_unordered(Pole,
+    verify_collection_unordered(Pole,
                                   lambda mrid, _: Streetlight(mrid),
                                   Pole.num_streetlights,
                                   Pole.get_streetlight,

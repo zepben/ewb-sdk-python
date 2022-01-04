@@ -4,7 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from hypothesis.strategies import data
 
+from cim.common_testing_functions import verify
 from test.cim.iec61970.base.meas.test_measurement import measurement_kwargs, verify_measurement_constructor_default, \
     verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
 from zepben.evolve import Analog, RemoteSource
@@ -19,16 +21,13 @@ def test_analog_constructor_default():
     verify_measurement_constructor_default(create_analog())
 
 
-@given(**analog_kwargs)
-def test_analog_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
-    verify_measurement_constructor_kwargs(Analog(**kwargs), **kwargs)
-
-
-@given(**analog_kwargs)
-def test_analog_creator(**kwargs):
-    # noinspection PyArgumentList
-    verify_measurement_constructor_kwargs(create_analog(**kwargs), **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_analog_constructor_kwargs(data):
+    verify(
+        [Analog, create_analog],
+        data, analog_kwargs, verify_measurement_constructor_kwargs
+    )
 
 
 def test_analog_constructor_args():

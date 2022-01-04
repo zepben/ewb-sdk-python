@@ -4,7 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from hypothesis.strategies import data
 
+from cim.common_testing_functions import verify
 from test.cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, verify_switch_constructor_args, \
     switch_kwargs, switch_args
@@ -20,14 +22,13 @@ def test_fuse_constructor_default():
     verify_switch_constructor_default(create_fuse())
 
 
-@given(**fuse_kwargs)
-def test_fuse_constructor_kwargs(**kwargs):
-    verify_switch_constructor_kwargs(Fuse(**kwargs), **kwargs)
-
-
-@given(**fuse_kwargs)
-def test_fuse_creator(**kwargs):
-    verify_switch_constructor_kwargs(create_fuse(**kwargs), **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_fuse_constructor_kwargs(data):
+    verify(
+        [Fuse, create_fuse],
+        data, fuse_kwargs, verify_switch_constructor_kwargs
+    )
 
 
 def test_fuse_constructor_args():

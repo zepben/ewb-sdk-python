@@ -4,7 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from hypothesis.strategies import data
 
+from cim.common_testing_functions import verify
 from test.cim.test_common_two_way_connections import check_equipment_container_connection
 from test.cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
@@ -20,14 +22,13 @@ def test_site_constructor_default():
     verify_equipment_container_constructor_default(create_site())
 
 
-@given(**site_kwargs)
-def test_site_constructor_kwargs(**kwargs):
-    verify_equipment_container_constructor_kwargs(Site(**kwargs), **kwargs)
-
-
-@given(**site_kwargs)
-def test_site_creator(**kwargs):
-    verify_equipment_container_constructor_kwargs(create_site(**kwargs), **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_site_constructor_kwargs(data):
+    verify(
+        [Site, create_site],
+        data, site_kwargs, verify_equipment_container_constructor_kwargs
+    )
 
 
 def test_site_constructor_args():

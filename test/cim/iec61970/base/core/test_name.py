@@ -5,9 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import text, builds
+from hypothesis.strategies import text, builds, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.core.test_name_type import name_type_kwargs
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
 from zepben.evolve import Junction, IdentifiedObject
@@ -31,23 +31,16 @@ name_args = ["1", NameType("nt1"), Junction()]
 # def test_name_constructor_default():
 
 
-# noinspection PyShadowingBuiltins,PyArgumentList
-@given(**name_kwargs)
-def test_name_constructor_kwargs(name, type, identified_object, **kwargs):
-    args = extract_testing_args(locals())
-    n = Name(**args, **kwargs)
-    validate_name_values(n, **args)
+# noinspection PyShadowingNames
+@given(data())
+def test_name_constructor_kwargs(data):
+    verify(
+        [Name, create_name],
+        data, name_kwargs, verify_name_values
+    )
 
 
-# noinspection PyShadowingBuiltins
-@given(**name_kwargs)
-def test_name_creator(name, type, identified_object, **kwargs):
-    args = extract_testing_args(locals())
-    n = create_name(**args, **kwargs)
-    validate_name_values(n, **args)
-
-
-def validate_name_values(n, name, type, identified_object):
+def verify_name_values(n, name, type, identified_object):
     assert n.name == name
     assert n.type == type
     assert n.identified_object == identified_object

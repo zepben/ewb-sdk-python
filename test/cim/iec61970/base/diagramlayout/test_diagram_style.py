@@ -5,9 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramStyle_pb2 import DiagramStyle as PBDiagramStyle
 
-from test.cim.enum_validator import validate_enum
+from test.cim.enum_verifier import verify_enum
 from zepben.evolve import DiagramStyle
 
 
 def test_diagram_style_enum():
-    validate_enum(DiagramStyle, PBDiagramStyle)
+    verify_enum(DiagramStyle, PBDiagramStyle)

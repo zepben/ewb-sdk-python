@@ -15,3 +15,9 @@ def extract_testing_args(locals):
     args = copy.copy(locals)
     del args['kwargs']
     return args
+
+
+def verify(creators, hypothesis, args, verifier):
+    for creator in creators:
+        kwargs = {k: hypothesis.draw(v) for k, v in args.items()}
+        verifier(creator(**kwargs), **kwargs)

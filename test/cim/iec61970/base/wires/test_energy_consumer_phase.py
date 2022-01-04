@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, floats, sampled_from
+from hypothesis.strategies import builds, floats, sampled_from, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.core.test_power_system_resource import verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_kwargs, power_system_resource_args
 from test.cim_creators import FLOAT_MIN, FLOAT_MAX
@@ -29,11 +29,11 @@ energy_consumer_phase_args = [*power_system_resource_args, EnergyConsumer(), Sin
 def test_energy_consumer_phase_constructor_default():
     ecp = EnergyConsumerPhase()
     ecp2 = create_energy_consumer_phase()
-    validate_default_energy_consumer_phase_constructor(ecp)
-    validate_default_energy_consumer_phase_constructor(ecp2)
+    verify_default_energy_consumer_phase_constructor(ecp)
+    verify_default_energy_consumer_phase_constructor(ecp2)
 
 
-def validate_default_energy_consumer_phase_constructor(ecp):
+def verify_default_energy_consumer_phase_constructor(ecp):
     verify_power_system_resource_constructor_default(ecp)
     assert ecp.energy_consumer is None
     assert ecp.phase is SinglePhaseKind.X
@@ -43,21 +43,16 @@ def validate_default_energy_consumer_phase_constructor(ecp):
     assert ecp.q_fixed is None
 
 
-@given(**energy_consumer_phase_kwargs)
-def test_energy_consumer_phase_constructor_kwargs(energy_consumer, phase, p, p_fixed, q, q_fixed, **kwargs):
-    args = extract_testing_args(locals())
-    ecp = EnergyConsumerPhase(**args, **kwargs)
-    validate_energy_consumer_phase_values(ecp, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_energy_consumer_phase_constructor_kwargs(data):
+    verify(
+        [EnergyConsumerPhase, create_energy_consumer_phase],
+        data, energy_consumer_phase_kwargs, verify_energy_consumer_phase_values
+    )
 
 
-@given(**energy_consumer_phase_kwargs)
-def test_energy_consumer_phase_creator(energy_consumer, phase, p, p_fixed, q, q_fixed, **kwargs):
-    args = extract_testing_args(locals())
-    ecp = create_energy_consumer_phase(**args, **kwargs)
-    validate_energy_consumer_phase_values(ecp, **args, **kwargs)
-
-
-def validate_energy_consumer_phase_values(ecp, energy_consumer, phase, p, p_fixed, q, q_fixed, **kwargs):
+def verify_energy_consumer_phase_values(ecp, energy_consumer, phase, p, p_fixed, q, q_fixed, **kwargs):
     verify_power_system_resource_constructor_kwargs(ecp, **kwargs)
     assert ecp.energy_consumer == energy_consumer
     assert ecp.phase == phase

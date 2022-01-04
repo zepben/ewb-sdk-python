@@ -7,7 +7,9 @@
 from typing import List
 
 from zepben.evolve import *
-from zepben.evolve.model.common_two_way_connections import add_common_equipment_connections, add_conducting_equipment_connection
+from zepben.evolve.model.common_two_way_connections import add_conducting_equipment_connection
+
+__all__ = ["create_equivalent_branch"]
 
 
 def create_equivalent_branch(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,

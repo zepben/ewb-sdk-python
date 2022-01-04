@@ -4,7 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from hypothesis.strategies import data
 
+from cim.common_testing_functions import verify
 from test.cim.test_common_two_way_connections import set_up_common_equipment_two_way_link_test, check_common_equipment_two_way_link_test
 from test.cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxiliary_equipment_kwargs, verify_auxiliary_equipment_constructor_default, \
     verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
@@ -20,16 +22,13 @@ def test_fault_indicator_info_constructor_default():
     verify_auxiliary_equipment_constructor_default(create_fault_indicator())
 
 
-@given(**fault_indicator_info_kwargs)
-def test_fault_indicator_info_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
-    verify_auxiliary_equipment_constructor_kwargs(FaultIndicator(**kwargs), **kwargs)
-
-
-@given(**fault_indicator_info_kwargs)
-def test_fault_indicator_info_creator(**kwargs):
-    # noinspection PyArgumentList
-    verify_auxiliary_equipment_constructor_kwargs(create_fault_indicator(**kwargs), **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_fault_indicator_info_constructor_kwargs(data):
+    verify(
+        [FaultIndicator, create_fault_indicator],
+        data, fault_indicator_info_kwargs, verify_auxiliary_equipment_constructor_kwargs
+    )
 
 
 def test_fault_indicator_info_constructor_args():

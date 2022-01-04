@@ -5,10 +5,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import lists, builds
+from hypothesis.strategies import lists, builds, data
 
-from test.cim.extract_testing_args import extract_testing_args
-from test.cim.collection_validator import validate_collection_unordered
+from test.cim.common_testing_functions import verify
+from test.cim.collection_verifier import verify_collection_unordered
 from test.cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
 from zepben.evolve import OperationalRestriction, Equipment
@@ -25,30 +25,25 @@ operational_restriction_args = [*document_args, [Equipment()]]
 def test_operational_restriction_constructor_default():
     or_ = OperationalRestriction()
     or_2 = create_operational_restriction()
-    validate_default_operational_restriction(or_)
-    validate_default_operational_restriction(or_2)
+    verify_default_operational_restriction(or_)
+    verify_default_operational_restriction(or_2)
 
 
-def validate_default_operational_restriction(or_):
+def verify_default_operational_restriction(or_):
     verify_document_constructor_default(or_)
     assert not list(or_.equipment)
 
 
-@given(**operational_restriction_kwargs)
-def test_operational_restriction_constructor_kwargs(equipment, **kwargs):
-    args = extract_testing_args(locals())
-    or_ = OperationalRestriction(**args, **kwargs)
-    validate_operational_restriction_values(or_, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_operational_restriction_constructor_kwargs(data):
+    verify(
+        [OperationalRestriction, create_operational_restriction],
+        data, operational_restriction_kwargs, verify_operational_restriction_values
+    )
 
 
-@given(**operational_restriction_kwargs)
-def test_operational_restriction_creator(equipment, **kwargs):
-    args = extract_testing_args(locals())
-    or_ = create_operational_restriction(**args, **kwargs)
-    validate_operational_restriction_values(or_, **args, **kwargs)
-
-
-def validate_operational_restriction_values(or_, equipment, **kwargs):
+def verify_operational_restriction_values(or_, equipment, **kwargs):
     verify_document_constructor_kwargs(or_, **kwargs)
     assert list(or_.equipment) == equipment
 
@@ -63,14 +58,14 @@ def test_operational_restriction_constructor_args():
 
 def test_equipment_collection():
     # noinspection PyArgumentList
-    validate_collection_unordered(OperationalRestriction,
-                                  lambda mrid, _: Equipment(mrid),
-                                  OperationalRestriction.num_equipment,
-                                  OperationalRestriction.get_equipment,
-                                  OperationalRestriction.equipment,
-                                  OperationalRestriction.add_equipment,
-                                  OperationalRestriction.remove_equipment,
-                                  OperationalRestriction.clear_equipment)
+    verify_collection_unordered(OperationalRestriction,
+                                lambda mrid, _: Equipment(mrid),
+                                OperationalRestriction.num_equipment,
+                                OperationalRestriction.get_equipment,
+                                OperationalRestriction.equipment,
+                                OperationalRestriction.add_equipment,
+                                OperationalRestriction.remove_equipment,
+                                OperationalRestriction.clear_equipment)
 
 
 def test_auto_two_way_connections_for_operational_restriction_constructor():

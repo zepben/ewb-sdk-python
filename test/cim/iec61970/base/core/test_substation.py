@@ -4,10 +4,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import lists, builds
+from hypothesis.strategies import lists, builds, data
 
-from test.cim.extract_testing_args import extract_testing_args
-from test.cim.collection_validator import validate_collection_unordered
+from test.cim.common_testing_functions import verify
+from test.cim.collection_verifier import verify_collection_unordered
 from test.cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from zepben.evolve import Substation, Feeder, Loop, Circuit, SubGeographicalRegion
@@ -28,11 +28,11 @@ substation_args = [*equipment_container_args, Substation(), [Feeder()], [Loop()]
 def test_substation_constructor_default():
     ss = Substation()
     ss2 = create_substation()
-    validate_default_substation(ss)
-    validate_default_substation(ss2)
+    verify_default_substation(ss)
+    verify_default_substation(ss2)
 
 
-def validate_default_substation(ss):
+def verify_default_substation(ss):
     verify_equipment_container_constructor_default(ss)
     assert not ss.sub_geographical_region
     assert not list(ss.feeders)
@@ -41,21 +41,16 @@ def validate_default_substation(ss):
     assert not list(ss.circuits)
 
 
-@given(**substation_kwargs)
-def test_substation_constructor_kwargs(sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits, **kwargs):
-    args = extract_testing_args(locals())
-    ss = Substation(**args, **kwargs)
-    validate_substation_values(ss, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_substation_constructor_kwargs(data):
+    verify(
+        [Substation, create_substation],
+        data, substation_kwargs, verify_substation_values
+    )
 
 
-@given(**substation_kwargs)
-def test_substation_creator(sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits, **kwargs):
-    args = extract_testing_args(locals())
-    ss = create_substation(**args, **kwargs)
-    validate_substation_values(ss, **args, **kwargs)
-
-
-def validate_substation_values(ss, sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits, **kwargs):
+def verify_substation_values(ss, sub_geographical_region, normal_energized_feeders, loops, energized_loops, circuits, **kwargs):
     verify_equipment_container_constructor_kwargs(ss, **kwargs)
     assert ss.sub_geographical_region == sub_geographical_region
     assert list(ss.feeders) == normal_energized_feeders
@@ -76,47 +71,47 @@ def test_substation_constructor_args():
 
 
 def test_normal_energized_feeders_collection():
-    validate_collection_unordered(Substation,
-                                  lambda mrid, _: Feeder(mrid),
-                                  Substation.num_feeders,
-                                  Substation.get_feeder,
-                                  Substation.feeders,
-                                  Substation.add_feeder,
-                                  Substation.remove_feeder,
-                                  Substation.clear_feeders)
+    verify_collection_unordered(Substation,
+                                lambda mrid, _: Feeder(mrid),
+                                Substation.num_feeders,
+                                Substation.get_feeder,
+                                Substation.feeders,
+                                Substation.add_feeder,
+                                Substation.remove_feeder,
+                                Substation.clear_feeders)
 
 
 def test_loops_collection():
-    validate_collection_unordered(Substation,
-                                  lambda mrid, _: Loop(mrid),
-                                  Substation.num_loops,
-                                  Substation.get_loop,
-                                  Substation.loops,
-                                  Substation.add_loop,
-                                  Substation.remove_loop,
-                                  Substation.clear_loops)
+    verify_collection_unordered(Substation,
+                                lambda mrid, _: Loop(mrid),
+                                Substation.num_loops,
+                                Substation.get_loop,
+                                Substation.loops,
+                                Substation.add_loop,
+                                Substation.remove_loop,
+                                Substation.clear_loops)
 
 
 def test_energized_loops_collection():
-    validate_collection_unordered(Substation,
-                                  lambda mrid, _: Loop(mrid),
-                                  Substation.num_energized_loops,
-                                  Substation.get_energized_loop,
-                                  Substation.energized_loops,
-                                  Substation.add_energized_loop,
-                                  Substation.remove_energized_loop,
-                                  Substation.clear_energized_loops)
+    verify_collection_unordered(Substation,
+                                lambda mrid, _: Loop(mrid),
+                                Substation.num_energized_loops,
+                                Substation.get_energized_loop,
+                                Substation.energized_loops,
+                                Substation.add_energized_loop,
+                                Substation.remove_energized_loop,
+                                Substation.clear_energized_loops)
 
 
 def test_circuits_collection():
-    validate_collection_unordered(Substation,
-                                  lambda mrid, _: Circuit(mrid),
-                                  Substation.num_circuits,
-                                  Substation.get_circuit,
-                                  Substation.circuits,
-                                  Substation.add_circuit,
-                                  Substation.remove_circuit,
-                                  Substation.clear_circuits)
+    verify_collection_unordered(Substation,
+                                lambda mrid, _: Circuit(mrid),
+                                Substation.num_circuits,
+                                Substation.get_circuit,
+                                Substation.circuits,
+                                Substation.add_circuit,
+                                Substation.remove_circuit,
+                                Substation.clear_circuits)
 
 
 def test_auto_two_way_connections_for_substation_constructor():

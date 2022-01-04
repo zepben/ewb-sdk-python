@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import builds, lists
 
-from test.cim.collection_validator import validate_collection_unordered
+from test.cim.collection_verifier import verify_collection_unordered
 from test.cim.iec61970.base.core.test_connectivity_node_container import connectivity_node_container_kwargs, \
     verify_connectivity_node_container_constructor_default, verify_connectivity_node_container_constructor_kwargs, \
     verify_connectivity_node_container_constructor_args, connectivity_node_container_args
@@ -35,12 +35,12 @@ def verify_equipment_container_constructor_args(ec: EquipmentContainer):
 
 
 def test_equipment_collection():
-    validate_collection_unordered(EquipmentContainer,
-                                  lambda mrid, _: Equipment(mrid),
-                                  EquipmentContainer.num_equipment,
-                                  EquipmentContainer.get_equipment,
-                                  EquipmentContainer.equipment,
-                                  EquipmentContainer.add_equipment,
-                                  EquipmentContainer.remove_equipment,
-                                  EquipmentContainer.clear_equipment,
-                                  KeyError)
+    verify_collection_unordered(EquipmentContainer,
+                                lambda mrid, _: Equipment(mrid),
+                                EquipmentContainer.num_equipment,
+                                EquipmentContainer.get_equipment,
+                                EquipmentContainer.equipment,
+                                EquipmentContainer.add_equipment,
+                                EquipmentContainer.remove_equipment,
+                                EquipmentContainer.clear_equipment,
+                                KeyError)

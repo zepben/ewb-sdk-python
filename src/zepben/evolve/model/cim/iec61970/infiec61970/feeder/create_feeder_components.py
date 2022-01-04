@@ -9,6 +9,8 @@ from typing import List
 from zepben.evolve import *
 from zepben.evolve.model.common_two_way_connections import add_equipment_container_connection
 
+__all__ = ["create_circuit", "create_loop"]
+
 
 def create_circuit(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None, asset_info: AssetInfo = None, 
                    equipment: List[Equipment] = None, loop: Loop = None, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None
@@ -49,5 +51,5 @@ def create_loop(mrid: str = None, name: str = '', description: str = "", names: 
     if energizing_substations:
         for es in energizing_substations:
             if substations and es not in substations:
-                es.add_loop(loop)
+                es.add_energized_loop(loop)
     return loop

@@ -9,6 +9,8 @@ from typing import List
 
 from zepben.evolve import *
 
+__all__ = ["create_operational_restriction"]
+
 
 def create_operational_restriction(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, title: str = "",
                                    created_date_time: datetime = None, author_name: str = "", type: str = "", status: str = "", comment: str = "",

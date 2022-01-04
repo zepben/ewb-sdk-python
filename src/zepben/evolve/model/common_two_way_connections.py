@@ -6,11 +6,11 @@
 from typing import List
 
 from zepben.evolve import UsagePoint, Equipment, Feeder, OperationalRestriction, EquipmentContainer, ConductingEquipment, Terminal, PowerElectronicsConnection, \
-    PowerElectronicsUnit
+    PowerElectronicsUnit, Name
 
 
-def add_common_equipment_connections(eq: Equipment, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                                     operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None):
+def add_equipment_connections(eq: Equipment, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
+                              operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None):
     if usage_points:
         for usage_point in usage_points:
             usage_point.add_equipment(eq)
@@ -28,7 +28,7 @@ def add_common_equipment_connections(eq: Equipment, usage_points: List[UsagePoin
 def add_conducting_equipment_connection(ce: ConductingEquipment, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
                                         operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None,
                                         terminals: List[Terminal] = None):
-    add_common_equipment_connections(ce, usage_points, equipment_containers, operational_restrictions, current_feeders)
+    add_equipment_connections(ce, usage_points, equipment_containers, operational_restrictions, current_feeders)
     if terminals:
         for terminal in terminals:
             terminal.conducting_equipment = ce
@@ -40,10 +40,16 @@ def add_equipment_container_connection(ec, equipments: List[Equipment] = None):
             e.add_container(ec)
 
 
+def add_identified_object_connection(identified_object, names: List[Name] = None):
+    if names:
+        for name in names:
+            name.identified_object = identified_object
+
+
 def add_power_electronics_connection_connection(peu: PowerElectronicsUnit, usage_points: List[UsagePoint] = None,
                                                 equipment_containers: List[EquipmentContainer] = None,
                                                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None,
                                                 power_electronics_connection: PowerElectronicsConnection = None):
-    add_common_equipment_connections(peu, usage_points, equipment_containers, operational_restrictions, current_feeders)
+    add_equipment_connections(peu, usage_points, equipment_containers, operational_restrictions, current_feeders)
     if power_electronics_connection:
         power_electronics_connection.add_unit(peu)

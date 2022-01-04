@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers, text
+from hypothesis.strategies import integers, text, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.meas.test_measurement_value import measurement_value_kwargs, verify_measurement_value_constructor_default, \
     verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
@@ -25,32 +25,26 @@ discrete_value_args = [*measurement_value_args, 1, "a"]
 def test_discrete_value_constructor_default():
     dv = DiscreteValue()
     dv2 = create_discrete_value()
-    validate_default_discrete_value_constructor(dv)
-    validate_default_discrete_value_constructor(dv2)
+    verify_default_discrete_value_constructor(dv)
+    verify_default_discrete_value_constructor(dv2)
 
 
-def validate_default_discrete_value_constructor(dv):
+def verify_default_discrete_value_constructor(dv):
     verify_measurement_value_constructor_default(dv)
     assert dv.value == 0
     assert not dv.discrete_mrid
 
 
-# noinspection PyArgumentList
-@given(**discrete_value_kwargs)
-def test_discrete_value_constructor_kwargs(value, discrete_mrid, **kwargs):
-    args = extract_testing_args(locals())
-    dv = DiscreteValue(**args, **kwargs)
-    validate_discrete_value_values(dv, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_discrete_value_constructor_kwargs(data):
+    verify(
+        [DiscreteValue, create_discrete_value],
+        data, discrete_value_kwargs, verify_discrete_value_values
+    )
 
 
-@given(**discrete_value_kwargs)
-def test_discrete_value_creator(value, discrete_mrid, **kwargs):
-    args = extract_testing_args(locals())
-    dv = create_discrete_value(**args, **kwargs)
-    validate_discrete_value_values(dv, **args, **kwargs)
-
-
-def validate_discrete_value_values(dv, value, discrete_mrid, **kwargs):
+def verify_discrete_value_values(dv, value, discrete_mrid, **kwargs):
     verify_measurement_value_constructor_kwargs(dv, **kwargs)
     assert dv.value == value
     assert dv.discrete_mrid == discrete_mrid

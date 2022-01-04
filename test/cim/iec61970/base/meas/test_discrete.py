@@ -4,7 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from hypothesis.strategies import data
 
+from cim.common_testing_functions import verify
 from test.cim.iec61970.base.meas.test_measurement import measurement_kwargs, verify_measurement_constructor_default, \
     verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
 from zepben.evolve import Discrete, RemoteSource
@@ -19,16 +21,13 @@ def test_discrete_constructor_default():
     verify_measurement_constructor_default(create_discrete())
 
 
-@given(**discrete_kwargs)
-def test_discrete_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
-    verify_measurement_constructor_kwargs(Discrete(**kwargs), **kwargs)
-
-
-@given(**discrete_kwargs)
-def test_discrete_creator(**kwargs):
-    # noinspection PyArgumentList
-    verify_measurement_constructor_kwargs(create_discrete(**kwargs), **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_discrete_constructor_kwargs(data):
+    verify(
+        [Discrete, create_discrete],
+        data, discrete_kwargs, verify_measurement_constructor_kwargs
+    )
 
 
 def test_discrete_constructor_args():

@@ -4,11 +4,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, lists, floats, booleans
-
+from hypothesis.strategies import builds, lists, floats, data, booleans
 from test.cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
-from test.cim.extract_testing_args import extract_testing_args
-from test.cim.collection_validator import validate_collection_unordered
+from test.cim.common_testing_functions import verify
+from test.cim.collection_verifier import verify_collection_unordered
 from test.cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
@@ -52,11 +51,11 @@ energy_source_args = [*energy_connection_args, [EnergySourcePhase()], 1.1, 2.2, 
 def test_energy_source_constructor_default():
     es = EnergySource()
     es2 = create_energy_source()
-    validate_default_energy_source_constructor(es)
-    validate_default_energy_source_constructor(es2)
+    verify_default_energy_source_constructor(es)
+    verify_default_energy_source_constructor(es2)
 
 
-def validate_default_energy_source_constructor(es):
+def verify_default_energy_source_constructor(es):
     verify_energy_connection_constructor_default(es)
     assert not list(es.phases)
     assert es.active_power is None
@@ -86,25 +85,17 @@ def validate_default_energy_source_constructor(es):
     assert es.x0_max is None
 
 
-@given(**energy_source_kwargs)
-def test_energy_source_constructor_kwargs(energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min,
-                                          r, r0, rn, x, x0, xn, is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min, r_max, rn_max, r0_max, x_max,
-                                          xn_max, x0_max, **kwargs):
-    args = extract_testing_args(locals())
-    es = EnergySource(**args, **kwargs)
-    validate_energy_source_values(es, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_energy_source_constructor_kwargs(data):
+    verify(
+        [EnergySource, create_energy_source],
+        data, energy_source_kwargs, verify_energy_source_values
+    )
 
 
-@given(**energy_source_kwargs)
-def test_energy_source_creator(energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min, r, r0, rn, x, x0, xn,
-                               is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min, r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs):
-    args = extract_testing_args(locals())
-    es = create_energy_source(**args, **kwargs)
-    validate_energy_source_values(es, **args, **kwargs)
-
-
-def validate_energy_source_values(es, energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min, r, r0, rn, x, x0, xn,
-                                  is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min, r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs):
+def verify_energy_source_values(es, energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min, r, r0, rn, x, x0, xn,
+                                is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min, r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs):
     verify_energy_connection_constructor_kwargs(es, **kwargs)
     assert list(es.phases) == energy_source_phases
     assert es.active_power == active_power
@@ -167,14 +158,14 @@ def test_energy_source_constructor_args():
 
 
 def test_phases_collection():
-    validate_collection_unordered(EnergySource,
-                                  lambda mrid, _: EnergySourcePhase(mrid),
-                                  EnergySource.num_phases,
-                                  EnergySource.get_phase,
-                                  EnergySource.phases,
-                                  EnergySource.add_phase,
-                                  EnergySource.remove_phase,
-                                  EnergySource.clear_phases)
+    verify_collection_unordered(EnergySource,
+                                lambda mrid, _: EnergySourcePhase(mrid),
+                                EnergySource.num_phases,
+                                EnergySource.get_phase,
+                                EnergySource.phases,
+                                EnergySource.add_phase,
+                                EnergySource.remove_phase,
+                                EnergySource.clear_phases)
 
 
 def test_auto_two_way_connections_for_energy_consumer_constructor():

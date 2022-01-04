@@ -4,7 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from hypothesis.strategies import data
 
+from cim.common_testing_functions import verify
 from test.cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
     verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_kwargs, protected_switch_args
@@ -20,14 +22,13 @@ def test_breaker_constructor_default():
     verify_protected_switch_constructor_default(create_breaker())
 
 
-@given(**breaker_kwargs)
-def test_breaker_constructor_kwargs(**kwargs):
-    verify_protected_switch_constructor_kwargs(Breaker(**kwargs), **kwargs)
-
-
-@given(**breaker_kwargs)
-def test_breaker_creator(**kwargs):
-    verify_protected_switch_constructor_kwargs(create_breaker(**kwargs), **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_breaker_constructor_kwargs(data):
+    verify(
+        [Breaker, create_breaker],
+        data, breaker_kwargs, verify_protected_switch_constructor_kwargs
+    )
 
 
 def test_breaker_constructor_args():

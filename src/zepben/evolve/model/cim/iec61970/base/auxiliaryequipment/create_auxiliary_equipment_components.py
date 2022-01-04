@@ -7,7 +7,9 @@
 from typing import List
 
 from zepben.evolve import *
-from zepben.evolve.model.common_two_way_connections import add_common_equipment_connections
+from zepben.evolve.model.common_two_way_connections import add_equipment_connections
+
+__all__ = ["create_fault_indicator"]
 
 
 def create_fault_indicator(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None,
@@ -23,6 +25,5 @@ def create_fault_indicator(mrid: str = None, name: str = '', description: str = 
     FaultIndicator:
     """
     fi = FaultIndicator(**locals())
-    add_common_equipment_connections(fi, usage_points, equipment_containers, operational_restrictions, current_feeders)
+    add_equipment_connections(fi, usage_points, equipment_containers, operational_restrictions, current_feeders)
     return fi
-

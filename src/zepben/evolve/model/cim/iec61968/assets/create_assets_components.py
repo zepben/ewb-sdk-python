@@ -8,6 +8,8 @@ from typing import List
 
 from zepben.evolve import *
 
+__all__ = ["create_asset_owner", "create_pole", "create_streetlight"]
+
 
 def create_asset_owner(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, organisation: Organisation = None) -> AssetOwner:
     """
@@ -17,7 +19,8 @@ def create_asset_owner(mrid: str = None, name: str = '', description: str = "", 
     AssetOrganisationRole: 
     AssetOwner:
     """
-    return AssetOwner(**locals())
+    ao = AssetOwner(**locals())
+    return ao
 
 
 def create_pole(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, location: Location = None, 

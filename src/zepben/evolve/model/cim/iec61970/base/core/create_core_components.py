@@ -5,10 +5,14 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from _weakref import ReferenceType
-from typing import List
+from typing import List, Dict
 
-from zepben.evolve import *
+from zepben.evolve import Name, BaseVoltage, Terminal, ConnectivityNode, AssetInfo, Equipment, Substation, Feeder, Location, SubGeographicalRegion, \
+    GeographicalRegion, NameType, IdentifiedObject, Site, Loop, Circuit, ConductingEquipment, PhaseCode, FeederDirection, TracedPhases
 from zepben.evolve.model.common_two_way_connections import add_equipment_container_connection
+
+__all__ = ["create_base_voltage", "create_connectivity_node", "create_feeder", "create_geographical_region", "create_name", "create_name_type",
+           "create_site", "create_sub_geographical_region", "create_substation", "create_terminal"]
 
 
 def create_base_voltage(mrid: str = None, name: str = '', description: str = "", names: List[Name] = None, nominal_voltage: int = 0) -> BaseVoltage:
@@ -78,8 +82,8 @@ def create_name(name: str, type: NameType, identified_object: IdentifiedObject =
     n = Name(**locals())
     if identified_object:
         type.get_or_add_name(n, identified_object)
-    if identified_object.name is not n.name:
-        identified_object.add_name(n)
+        if identified_object.name is not n.name:
+            identified_object.add_name(n)
     return n
 
 

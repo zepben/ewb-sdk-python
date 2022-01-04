@@ -20,16 +20,16 @@ E = TypeVar("E", bound=Exception)
 # NOTE: The callables below that use `...` do so to work around bugs in the type checking of both the IDE and mypy.
 #       Ideally they should have `get: Callable[[T, str]], U]`, `add: Callable[[T, U], T]` and `remove: Callable[[T, U], T]`
 #
-def validate_collection(create_it: Callable[[], T],
-                        create_other: Callable[[str, T], U],
-                        num: Callable[[T], int],
-                        get: Callable[[T, U], U],
-                        get_all: property,
-                        add: Callable[..., T],
-                        remove: Callable[..., T],
-                        clear: Callable[[T], T],
-                        expected_error_message: Callable[[T, U], str],
-                        expected_remove_error: Type[E] = ValueError):
+def verify_collection(create_it: Callable[[], T],
+                      create_other: Callable[[str, T], U],
+                      num: Callable[[T], int],
+                      get: Callable[[T, U], U],
+                      get_all: property,
+                      add: Callable[..., T],
+                      remove: Callable[..., T],
+                      clear: Callable[[T], T],
+                      expected_error_message: Callable[[T, U], str],
+                      expected_remove_error: Type[E] = ValueError):
     it = create_it()
     other1 = create_other("1", it)
     other2 = create_other("2", it)
@@ -86,16 +86,16 @@ def validate_collection(create_it: Callable[[], T],
 # NOTE: The callables below that use `...` do so to work around bugs in the type checking of both the IDE and mypy.
 #       Ideally they should have `get: Callable[[T, str], U]`, `add: Callable[[T, U], T]` and `remove: Callable[[T, U], T]`
 #
-def validate_collection_unordered(create_it: Callable[[], T],
-                                  create_other: Callable[[str, T], U],
-                                  num: Callable[[T], int],
-                                  get: Callable[..., U],
-                                  get_all: property,
-                                  add: Callable[..., T],
-                                  remove: Callable[..., T],
-                                  clear: Callable[[T], T],
-                                  expected_remove_error: Type[E] = ValueError):
-    validate_collection(
+def verify_collection_unordered(create_it: Callable[[], T],
+                                create_other: Callable[[str, T], U],
+                                num: Callable[[T], int],
+                                get: Callable[..., U],
+                                get_all: property,
+                                add: Callable[..., T],
+                                remove: Callable[..., T],
+                                clear: Callable[[T], T],
+                                expected_remove_error: Type[E] = ValueError):
+    verify_collection(
         create_it,
         create_other,
         num,
@@ -113,15 +113,15 @@ def validate_collection_unordered(create_it: Callable[[], T],
 #       Ideally they should have `get: Callable[[T, int], Optional[V]]`, `add: Callable[[T, V], T]`, `add_with_index: Callable[[T, V, int], T]`
 #       and `remove: Callable[[T, Optional[V]], T]`
 #
-def validate_collection_ordered(create_it: Callable[[], T],
-                                create_other: Callable[[int, T], V],
-                                num: Callable[[T], int],
-                                get: Callable[..., Optional[V]],
-                                get_all: property,
-                                add: Callable[..., T],
-                                add_with_index: Callable[..., T],
-                                remove: Callable[..., T],
-                                clear: Callable[[T], T]):
+def verify_collection_ordered(create_it: Callable[[], T],
+                              create_other: Callable[[int, T], V],
+                              num: Callable[[T], int],
+                              get: Callable[..., Optional[V]],
+                              get_all: property,
+                              add: Callable[..., T],
+                              add_with_index: Callable[..., T],
+                              remove: Callable[..., T],
+                              clear: Callable[[T], T]):
     it = create_it()
     other1 = create_other(1, it)
     other2 = create_other(2, it)

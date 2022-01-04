@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers, floats
+from hypothesis.strategies import integers, floats, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61968.assetinfo.test_transformer_test import transformer_test_kwargs, verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
@@ -28,11 +28,11 @@ open_circuit_test_args = [*transformer_test_args, 1, 2, 3, 4, 5.5]
 def test_open_circuit_test_constructor_default():
     oc = OpenCircuitTest()
     oc2 = create_open_circuit_test()
-    validate_default_open_circuit(oc)
-    validate_default_open_circuit(oc2)
+    verify_default_open_circuit(oc)
+    verify_default_open_circuit(oc2)
 
 
-def validate_default_open_circuit(oc):
+def verify_default_open_circuit(oc):
     verify_transformer_test_constructor_default(oc)
     assert oc.energised_end_step is None
     assert oc.energised_end_voltage is None
@@ -41,21 +41,16 @@ def validate_default_open_circuit(oc):
     assert oc.phase_shift is None
 
 
-@given(**open_circuit_test_kwargs)
-def test_open_circuit_test_constructor_kwargs(energised_end_step, energised_end_voltage, open_end_step, open_end_voltage, phase_shift, **kwargs):
-    args = extract_testing_args(locals())
-    oc = OpenCircuitTest(**args, **kwargs)
-    validate_open_circuit_test_values(oc, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_energy_open_circuit_test_constructor_kwargs(data):
+    verify(
+        [OpenCircuitTest, create_open_circuit_test],
+        data, open_circuit_test_kwargs, verify_open_circuit_test_values
+    )
 
 
-@given(**open_circuit_test_kwargs)
-def test_open_circuit_test_creator(energised_end_step, energised_end_voltage, open_end_step, open_end_voltage, phase_shift, **kwargs):
-    args = extract_testing_args(locals())
-    oc = create_open_circuit_test(**args, **kwargs)
-    validate_open_circuit_test_values(oc, **args, **kwargs)
-
-
-def validate_open_circuit_test_values(oc, energised_end_step, energised_end_voltage, open_end_step, open_end_voltage, phase_shift, **kwargs):
+def verify_open_circuit_test_values(oc, energised_end_step, energised_end_voltage, open_end_step, open_end_voltage, phase_shift, **kwargs):
     verify_transformer_test_constructor_kwargs(oc, **kwargs)
     assert oc.energised_end_step == energised_end_step
     assert oc.energised_end_voltage == energised_end_voltage

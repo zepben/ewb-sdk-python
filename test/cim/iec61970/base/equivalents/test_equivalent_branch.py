@@ -5,11 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import floats
+from hypothesis.strategies import floats, data
 
-from test.cim.test_common_two_way_connections import check_common_equipment_two_way_link_test, \
-    set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, \
+    check_conducting_equipment_two_way_link_test
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \
     verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
@@ -43,11 +43,11 @@ def test_equivalent_branch_constructor_default():
     eb = EquivalentBranch()
     eb2 = create_equivalent_branch()
 
-    validate_default_equivalent_branch(eb)
-    validate_default_equivalent_branch(eb2)
+    verify_default_equivalent_branch(eb)
+    verify_default_equivalent_branch(eb2)
 
 
-def validate_default_equivalent_branch(eb):
+def verify_default_equivalent_branch(eb):
     verify_equivalent_equipment_constructor_default(eb)
     assert not eb.negative_r12
     assert not eb.negative_r21
@@ -67,24 +67,17 @@ def validate_default_equivalent_branch(eb):
     assert not eb.zero_x21
 
 
-@given(**equivalent_branch_kwargs)
-def test_equivalent_branch_constructor_kwargs(negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r,
-                                              r21, x, x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):
-    args = extract_testing_args(locals())
-    eb = EquivalentBranch(**args, **kwargs)
-    validate_equivalent_branch_values(eb, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_equivalent_branch_constructor_kwargs(data):
+    verify(
+        [EquivalentBranch, create_equivalent_branch],
+        data, equivalent_branch_kwargs, verify_equivalent_branch_values
+    )
 
 
-@given(**equivalent_branch_kwargs)
-def test_equivalent_branch_creator(negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
-                                   x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):
-    args = extract_testing_args(locals())
-    eb = create_equivalent_branch(**args, **kwargs)
-    validate_equivalent_branch_values(eb, **args, **kwargs)
-
-
-def validate_equivalent_branch_values(eb, negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r,
-                                      r21, x, x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):
+def verify_equivalent_branch_values(eb, negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r,
+                                    r21, x, x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):
     verify_equivalent_equipment_constructor_kwargs(eb, **kwargs)
     assert eb.negative_r12 == negative_r12
     assert eb.negative_r21 == negative_r21
@@ -130,4 +123,3 @@ def test_auto_two_way_connections_for_pole_constructor():
     up, ec, opr, f, t = set_up_conducting_equipment_two_way_link_test()
     eb = create_equivalent_branch(usage_points=[up], equipment_containers=[ec], operational_restrictions=[opr], current_feeders=[f], terminals=[t])
     check_conducting_equipment_two_way_link_test(eb, up, ec, opr, f, t)
-

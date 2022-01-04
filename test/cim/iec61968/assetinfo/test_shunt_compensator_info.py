@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers
+from hypothesis.strategies import integers, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from zepben.evolve import ShuntCompensatorInfo
 
 from test.cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, \
@@ -29,11 +29,11 @@ shunt_compensator_info_args = [*asset_info_args, 1, 2, 3, 4]
 def test_shunt_compensator_info_constructor_default():
     sci = ShuntCompensatorInfo()
     sci2 = create_shunt_compensator_info()
-    validate_default_shunt_compensator_info(sci)
-    validate_default_shunt_compensator_info(sci2)
+    verify_default_shunt_compensator_info(sci)
+    verify_default_shunt_compensator_info(sci2)
 
 
-def validate_default_shunt_compensator_info(sci):
+def verify_default_shunt_compensator_info(sci):
     verify_asset_info_constructor_default(sci)
     assert sci.max_power_loss is None
     assert sci.rated_current is None
@@ -41,21 +41,16 @@ def validate_default_shunt_compensator_info(sci):
     assert sci.rated_voltage is None
 
 
-@given(**shunt_compensator_info_kwargs)
-def test_shunt_compensator_info_constructor_kwargs(max_power_loss, rated_current, rated_reactive_power, rated_voltage, **kwargs):
-    args = extract_testing_args(locals())
-    sci = ShuntCompensatorInfo(**args, **kwargs)
-    validate_shunt_compensator_info_value(sci, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_shunt_compensator_info_constructor_kwargs(data):
+    verify(
+        [ShuntCompensatorInfo, create_shunt_compensator_info],
+        data, shunt_compensator_info_kwargs, verify_shunt_compensator_info_value
+    )
 
 
-@given(**shunt_compensator_info_kwargs)
-def test_shunt_compensator_info_creator(max_power_loss, rated_current, rated_reactive_power, rated_voltage, **kwargs):
-    args = extract_testing_args(locals())
-    sci = create_shunt_compensator_info(**args, **kwargs)
-    validate_shunt_compensator_info_value(sci, **args, **kwargs)
-
-
-def validate_shunt_compensator_info_value(sci, max_power_loss, rated_current, rated_reactive_power, rated_voltage, **kwargs):
+def verify_shunt_compensator_info_value(sci, max_power_loss, rated_current, rated_reactive_power, rated_voltage, **kwargs):
     verify_asset_info_constructor_kwargs(sci, **kwargs)
     assert sci.max_power_loss == max_power_loss
     assert sci.rated_current == rated_current

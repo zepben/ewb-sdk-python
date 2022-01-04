@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import floats
+from hypothesis.strategies import floats, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.wires.test_per_length_impedance import verify_per_length_impedance_constructor_default, \
     verify_per_length_impedance_constructor_kwargs, verify_per_length_impedance_constructor_args, per_length_impedance_kwargs, per_length_impedance_args
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
@@ -31,11 +31,11 @@ per_length_sequence_impedance_args = [*per_length_impedance_args, 1.1, 2.2, 3.3,
 def test_per_length_sequence_impedance_constructor_default():
     plsi = PerLengthSequenceImpedance()
     plsi2 = create_per_length_sequence_impedance()
-    validate_default_per_length_sequence_impedance_constructor(plsi)
-    validate_default_per_length_sequence_impedance_constructor(plsi2)
+    verify_default_per_length_sequence_impedance_constructor(plsi)
+    verify_default_per_length_sequence_impedance_constructor(plsi2)
 
 
-def validate_default_per_length_sequence_impedance_constructor(plsi):
+def verify_default_per_length_sequence_impedance_constructor(plsi):
     verify_per_length_impedance_constructor_default(plsi)
     assert plsi.r is None
     assert plsi.x is None
@@ -47,21 +47,16 @@ def validate_default_per_length_sequence_impedance_constructor(plsi):
     assert plsi.g0ch is None
 
 
-@given(**per_length_sequence_impedance_kwargs)
-def test_per_length_sequence_impedance_constructor_kwargs(r, x, bch, gch, r0, x0, b0ch, g0ch, **kwargs):
-    args = extract_testing_args(locals())
-    plsi = PerLengthSequenceImpedance(**args, ** kwargs)
-    validate_per_length_sequence_impedance_values(plsi, **args, ** kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_per_length_sequence_impedance_constructor_kwargs(data):
+    verify(
+        [PerLengthSequenceImpedance, create_per_length_sequence_impedance],
+        data, per_length_sequence_impedance_kwargs, verify_per_length_sequence_impedance_values
+    )
 
 
-@given(**per_length_sequence_impedance_kwargs)
-def test_per_length_sequence_impedance_creator(r, x, bch, gch, r0, x0, b0ch, g0ch, **kwargs):
-    args = extract_testing_args(locals())
-    plsi = create_per_length_sequence_impedance(**args, ** kwargs)
-    validate_per_length_sequence_impedance_values(plsi, **args, ** kwargs)
-
-
-def validate_per_length_sequence_impedance_values(plsi, r, x, bch, gch, r0, x0, b0ch, g0ch, **kwargs):
+def verify_per_length_sequence_impedance_values(plsi, r, x, bch, gch, r0, x0, b0ch, g0ch, **kwargs):
     verify_per_length_impedance_constructor_kwargs(plsi, **kwargs)
     assert plsi.r == r
     assert plsi.x == x

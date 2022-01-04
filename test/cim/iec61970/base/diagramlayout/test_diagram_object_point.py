@@ -5,9 +5,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from _pytest.python_api import raises
 from hypothesis import given
-from hypothesis.strategies import floats
-from test.cim import extract_testing_args
-from test.cim.extract_testing_args import extract_testing_args
+from hypothesis.strategies import floats, data
+from test.cim.common_testing_functions import verify
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import DiagramObjectPoint
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.create_diagram_layout_components import create_diagram_object_point
@@ -39,26 +38,16 @@ def test_diagram_object_point_constructor_default():
         create_diagram_object_point(y_position=2.0)
 
 
-# noinspection PyArgumentList
-@given(**diagram_object_point_kwargs)
-def test_diagram_object_point_constructor_kwargs(x_position, y_position, **kwargs):
-    args = extract_testing_args(locals())
-    assert not kwargs
-
-    dop = DiagramObjectPoint(**args)
-    validate_diagram_object_point_values(dop, **args)
-
-
-@given(**diagram_object_point_kwargs)
-def test_diagram_object_point_creator(x_position, y_position, **kwargs):
-    args = extract_testing_args(locals())
-    assert not kwargs
-
-    dop = create_diagram_object_point(**args)
-    validate_diagram_object_point_values(dop, **args)
+# noinspection PyShadowingNames
+@given(data())
+def test_diagram_object_point_constructor_kwargs(data):
+    verify(
+        [DiagramObjectPoint, create_diagram_object_point],
+        data, diagram_object_point_kwargs, verify_diagram_object_point_values
+    )
 
 
-def validate_diagram_object_point_values(dop, x_position, y_position):
+def verify_diagram_object_point_values(dop, x_position, y_position):
     assert dop.x_position == x_position
     assert dop.y_position == y_position
 

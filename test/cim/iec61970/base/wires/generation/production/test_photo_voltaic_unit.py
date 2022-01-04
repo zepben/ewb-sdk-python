@@ -4,7 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from hypothesis.strategies import data
 
+from cim.common_testing_functions import verify
 from test.cim.test_common_two_way_connections import set_up_power_electronics_unit_two_way_link_test, check_power_electronics_unit_two_way_link_test
 from test.cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
@@ -21,14 +23,13 @@ def test_photo_voltaic_unit_constructor_default():
     verify_power_electronics_unit_constructor_default(create_photo_voltaic_unit())
 
 
-@given(**photo_voltaic_unit_kwargs)
-def test_photo_voltaic_unit_constructor_kwargs(**kwargs):
-    verify_power_electronics_unit_constructor_kwargs(PhotoVoltaicUnit(**kwargs), **kwargs)
-
-
-@given(**photo_voltaic_unit_kwargs)
-def test_photo_voltaic_unit_creator(**kwargs):
-    verify_power_electronics_unit_constructor_kwargs(create_photo_voltaic_unit(**kwargs), **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_photo_voltaic_unit_constructor_kwargs(data):
+    verify(
+        [PhotoVoltaicUnit, create_photo_voltaic_unit],
+        data, photo_voltaic_unit_kwargs, verify_power_electronics_unit_constructor_kwargs
+    )
 
 
 def test_photo_voltaic_unit_constructor_args():

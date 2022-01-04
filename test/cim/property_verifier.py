@@ -4,10 +4,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-__all__ = ["validate_property_accessor"]
+__all__ = ["verify_property_accessor"]
 
 
-def validate_property_accessor(t, info, prop):
+def verify_property_accessor(t, info, prop):
     obj = t()
     assert getattr(obj, prop.fget.__name__) is None
 

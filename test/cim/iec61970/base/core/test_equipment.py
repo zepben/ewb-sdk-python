@@ -6,7 +6,7 @@
 
 from hypothesis.strategies import booleans, lists, builds
 
-from test.cim.collection_validator import validate_collection_unordered
+from test.cim.collection_verifier import verify_collection_unordered
 from test.cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from test.cim.cim_creators import sampled_equipment_container
@@ -58,44 +58,44 @@ def verify_equipment_constructor_args(eq: Equipment):
 
 
 def test_usage_points_collection():
-    validate_collection_unordered(Equipment,
-                                  lambda mrid, _: UsagePoint(mrid),
-                                  Equipment.num_usage_points,
-                                  Equipment.get_usage_point,
-                                  Equipment.usage_points,
-                                  Equipment.add_usage_point,
-                                  Equipment.remove_usage_point,
-                                  Equipment.clear_usage_points)
+    verify_collection_unordered(Equipment,
+                                lambda mrid, _: UsagePoint(mrid),
+                                Equipment.num_usage_points,
+                                Equipment.get_usage_point,
+                                Equipment.usage_points,
+                                Equipment.add_usage_point,
+                                Equipment.remove_usage_point,
+                                Equipment.clear_usage_points)
 
 
 def test_equipment_containers_collection():
-    validate_collection_unordered(Equipment,
-                                  lambda mrid, _: EquipmentContainer(mrid),
-                                  Equipment.num_containers,
-                                  Equipment.get_container,
-                                  Equipment.containers,
-                                  Equipment.add_container,
-                                  Equipment.remove_container,
-                                  Equipment.clear_containers)
+    verify_collection_unordered(Equipment,
+                                lambda mrid, _: EquipmentContainer(mrid),
+                                Equipment.num_containers,
+                                Equipment.get_container,
+                                Equipment.containers,
+                                Equipment.add_container,
+                                Equipment.remove_container,
+                                Equipment.clear_containers)
 
 
 def test_operational_restrictions_collection():
-    validate_collection_unordered(Equipment,
-                                  lambda mrid, _: OperationalRestriction(mrid),
-                                  Equipment.num_operational_restrictions,
-                                  Equipment.get_operational_restriction,
-                                  Equipment.operational_restrictions,
-                                  Equipment.add_operational_restriction,
-                                  Equipment.remove_operational_restriction,
-                                  Equipment.clear_operational_restrictions)
+    verify_collection_unordered(Equipment,
+                                lambda mrid, _: OperationalRestriction(mrid),
+                                Equipment.num_operational_restrictions,
+                                Equipment.get_operational_restriction,
+                                Equipment.operational_restrictions,
+                                Equipment.add_operational_restriction,
+                                Equipment.remove_operational_restriction,
+                                Equipment.clear_operational_restrictions)
 
 
 def test_current_feeders_collection():
-    validate_collection_unordered(Equipment,
-                                  lambda mrid, _: Feeder(mrid),
-                                  Equipment.num_current_feeders,
-                                  Equipment.get_current_feeder,
-                                  Equipment.current_feeders,
-                                  Equipment.add_current_feeder,
-                                  Equipment.remove_current_feeder,
-                                  Equipment.clear_current_feeders)
+    verify_collection_unordered(Equipment,
+                                lambda mrid, _: Feeder(mrid),
+                                Equipment.num_current_feeders,
+                                Equipment.get_current_feeder,
+                                Equipment.current_feeders,
+                                Equipment.add_current_feeder,
+                                Equipment.remove_current_feeder,
+                                Equipment.clear_current_feeders)

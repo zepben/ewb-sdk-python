@@ -5,12 +5,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.protobuf.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode as PBPhaseCode
 
-from test.cim.enum_validator import validate_enum
+from test.cim.enum_verifier import verify_enum
 from zepben.evolve import PhaseCode, phase_code_by_id
 
 
 def test_phase_code_enum():
-    validate_enum(PhaseCode, PBPhaseCode)
+    verify_enum(PhaseCode, PBPhaseCode)
 
 
 def test_phase_code_value_lookup():

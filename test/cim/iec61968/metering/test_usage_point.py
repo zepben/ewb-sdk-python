@@ -5,9 +5,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import builds, lists, booleans, text
-from test.cim import extract_testing_args
-from test.cim.extract_testing_args import extract_testing_args
+from hypothesis.strategies import builds, lists, booleans, text, data
+from test.cim.common_testing_functions import verify
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
@@ -29,11 +28,11 @@ usage_point_args = [*identified_object_args, Location(), True, "1", [Equipment()
 def test_usage_point_constructor_default():
     up = UsagePoint()
     up2 = create_usage_point()
-    validate_default_usage_point(up)
-    validate_default_usage_point(up2)
+    verify_default_usage_point(up)
+    verify_default_usage_point(up2)
 
 
-def validate_default_usage_point(up):
+def verify_default_usage_point(up):
     verify_identified_object_constructor_default(up)
     assert not up.usage_point_location
     assert not up.is_virtual
@@ -42,21 +41,16 @@ def validate_default_usage_point(up):
     assert not list(up.end_devices)
 
 
-@given(**usage_point_kwargs)
-def test_usage_point_constructor_kwargs(usage_point_location, is_virtual, connection_category, equipment, end_devices, **kwargs):
-    args = extract_testing_args(locals())
-    up = UsagePoint(**args, **kwargs)
-    validate_usage_point_values(up, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_usage_point_constructor_kwargs(data):
+    verify(
+        [UsagePoint, create_usage_point],
+        data, usage_point_kwargs, verify_usage_point_values
+    )
 
 
-@given(**usage_point_kwargs)
-def test_usage_point_creator(usage_point_location, is_virtual, connection_category, equipment, end_devices, **kwargs):
-    args = extract_testing_args(locals())
-    up = create_usage_point(**args, **kwargs)
-    validate_usage_point_values(up, **args, **kwargs)
-
-
-def validate_usage_point_values(up, usage_point_location, is_virtual, connection_category, equipment, end_devices, **kwargs):
+def verify_usage_point_values(up, usage_point_location, is_virtual, connection_category, equipment, end_devices, **kwargs):
     verify_identified_object_constructor_kwargs(up, **kwargs)
     assert up.usage_point_location == usage_point_location
     assert up.is_virtual == is_virtual

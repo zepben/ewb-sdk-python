@@ -8,7 +8,7 @@ from hypothesis.strategies import floats, booleans, integers, sampled_from
 
 from test.cim.iec61970.base.wires.test_regulating_cond_eq import regulating_cond_eq_kwargs, verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
-from test.cim.property_validator import validate_property_accessor
+from test.cim.property_verifier import verify_property_accessor
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from zepben.evolve import ShuntCompensator, PhaseShuntConnectionKind, ShuntCompensatorInfo
 
@@ -48,4 +48,4 @@ def verify_shunt_compensator_constructor_args(sc: ShuntCompensator):
 
 
 def test_shunt_compensator_info_accessor():
-    validate_property_accessor(ShuntCompensator, ShuntCompensatorInfo, ShuntCompensator.shunt_compensator_info)
+    verify_property_accessor(ShuntCompensator, ShuntCompensatorInfo, ShuntCompensator.shunt_compensator_info)

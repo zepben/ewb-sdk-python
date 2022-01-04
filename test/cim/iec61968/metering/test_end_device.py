@@ -6,7 +6,7 @@
 
 from hypothesis.strategies import text, builds, lists
 
-from test.cim.collection_validator import validate_collection_unordered
+from test.cim.collection_verifier import verify_collection_unordered
 from test.cim.iec61968.assets.test_asset_container import asset_container_kwargs, verify_asset_container_constructor_default, \
     verify_asset_container_constructor_kwargs, verify_asset_container_constructor_args, asset_container_args
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
@@ -44,11 +44,11 @@ def verify_end_device_constructor_args(ed: EndDevice):
 
 
 def test_usage_points_collection():
-    validate_collection_unordered(EndDevice,
-                                  lambda mrid, _: UsagePoint(mrid),
-                                  EndDevice.num_usage_points,
-                                  EndDevice.get_usage_point,
-                                  EndDevice.usage_points,
-                                  EndDevice.add_usage_point,
-                                  EndDevice.remove_usage_point,
-                                  EndDevice.clear_usage_points)
+    verify_collection_unordered(EndDevice,
+                                lambda mrid, _: UsagePoint(mrid),
+                                EndDevice.num_usage_points,
+                                EndDevice.get_usage_point,
+                                EndDevice.usage_points,
+                                EndDevice.add_usage_point,
+                                EndDevice.remove_usage_point,
+                                EndDevice.clear_usage_points)

@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import extract_testing_args
 from test.cim.iec61970.base.core.test_ac_dc_terminal import ac_dc_terminal_kwargs, verify_ac_dc_terminal_constructor_default, \
     verify_ac_dc_terminal_constructor_kwargs, verify_ac_dc_terminal_constructor_args, ac_dc_terminal_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
@@ -33,11 +33,11 @@ terminal_args = [*ac_dc_terminal_args, ConductingEquipment(), PhaseCode.XYN, 1, 
 def test_terminal_constructor_default():
     t = Terminal()
     t2 = create_terminal()
-    validate_default_terminal(t)
-    validate_default_terminal(t2)
+    verify_default_terminal(t)
+    verify_default_terminal(t2)
 
 
-def validate_default_terminal(t):
+def verify_default_terminal(t):
     verify_ac_dc_terminal_constructor_default(t)
     assert not t.conducting_equipment
     assert t.phases == PhaseCode.ABC
@@ -56,7 +56,7 @@ def test_terminal_constructor_kwargs(conducting_equipment, phases, sequence_numb
 
     verify_ac_dc_terminal_constructor_kwargs(t, **kwargs)
     assert t.sequence_number == sequence_number
-    validate_terminal_values(t, **args, **kwargs)
+    verify_terminal_values(t, **args, **kwargs)
 
 
 @given(**terminal_kwargs)
@@ -69,12 +69,14 @@ def test_terminal_creator(conducting_equipment, phases, sequence_number, normal_
     # Constructor supports auto two way linking, thus initializing sequence_number of terminal to 1
     if sequence_number == 0:
         assert t.sequence_number == 1
+
         args['sequence_number'] = 1
-    validate_terminal_values(t, **args, **kwargs)
+
+    verify_terminal_values(t, **args, **kwargs)
 
 
-def validate_terminal_values(t, conducting_equipment, phases, sequence_number, normal_feeder_direction, current_feeder_direction, traced_phases,
-                             connectivity_node, **kwargs):
+def verify_terminal_values(t, conducting_equipment, phases, sequence_number, normal_feeder_direction, current_feeder_direction, traced_phases,
+                           connectivity_node, **kwargs):
     verify_ac_dc_terminal_constructor_kwargs(t, **kwargs)
     assert t.conducting_equipment == conducting_equipment
     assert t.phases == phases

@@ -10,7 +10,7 @@ from typing import Type, Tuple
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
 
 
-def validate_enum(cim_enum: Type[Enum], pb_enum: EnumTypeWrapper):
+def verify_enum(cim_enum: Type[Enum], pb_enum: EnumTypeWrapper):
     if len(cim_enum) != len(pb_enum.items()):
         print()
         print(f"cim {list(map(lambda it: (it.name, it.value), cim_enum.__members__.values()))}")

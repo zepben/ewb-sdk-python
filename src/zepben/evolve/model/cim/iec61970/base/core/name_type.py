@@ -36,11 +36,13 @@ class NameType:
     _names_index: Dict[str, Name] = dict()
     _names_multi_index: Dict[str, List[Name]] = dict()
 
-    def __str__(self, _names_index, _names_multi_index):
+    def __init__(self, _names_index=dict(), _names_multi_index=dict()):
         if _names_index is None:
-            _names_index: Dict[str, Name] = dict()
+            _names_index = dict()
         if _names_multi_index is None:
-            _names_multi_index: Dict[str, List[Name]] = dict()
+            _names_multi_index = dict()
+
+    def __str__(self):
         return f"NameType(name='{self.name}', description='{self.description}')"
 
     @property

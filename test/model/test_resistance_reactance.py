@@ -6,8 +6,8 @@
 
 from hypothesis import given
 from hypothesis.strategies import floats
-from test.cim.extract_testing_args import extract_testing_args
-from test.cim.iec61968.assetinfo.test_transformer_end_info import validate_resistance_reactance
+from test.cim.common_testing_functions import extract_testing_args
+from test.cim.iec61968.assetinfo.test_transformer_end_info import verify_resistance_reactance
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import ResistanceReactance
 from zepben.evolve.model.create_basic_model_components import create_resistance_reactance
@@ -34,7 +34,7 @@ resistance_reactance_args = [1.1, 2.2, 3.3, 4.4]
 def test_resistance_reactance_constructor_kwargs(r, x, r0, x0, **kwargs):
     args = extract_testing_args(locals())
     rr = ResistanceReactance(**args, **kwargs)
-    validate_resistance_reactance(rr, **args)
+    verify_resistance_reactance(rr, **args)
 
 
 # noinspection PyShadowingBuiltins
@@ -42,7 +42,7 @@ def test_resistance_reactance_constructor_kwargs(r, x, r0, x0, **kwargs):
 def test_resistance_reactance_creator(r, x, r0, x0, **kwargs):
     args = extract_testing_args(locals())
     rr = create_resistance_reactance(**args, **kwargs)
-    validate_resistance_reactance(rr, **args)
+    verify_resistance_reactance(rr, **args)
 
 
 def test_name_constructor_args():

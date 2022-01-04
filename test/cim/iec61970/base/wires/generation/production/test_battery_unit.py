@@ -4,10 +4,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import integers, sampled_from
+from hypothesis.strategies import integers, sampled_from, data
 
 from test.cim.test_common_two_way_connections import check_power_electronics_unit_two_way_link_test, set_up_power_electronics_unit_two_way_link_test
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
@@ -28,32 +28,27 @@ battery_unit_args = [*power_electronics_unit_args, BatteryStateKind.full, 1, 2]
 def test_battery_unit_constructor_default():
     bu = BatteryUnit()
     bu2 = create_battery_unit()
-    validate_default_battery_unit_constructor(bu)
-    validate_default_battery_unit_constructor(bu2)
+    verify_default_battery_unit_constructor(bu)
+    verify_default_battery_unit_constructor(bu2)
 
 
-def validate_default_battery_unit_constructor(bu):
+def verify_default_battery_unit_constructor(bu):
     verify_power_electronics_unit_constructor_default(bu)
     assert bu.battery_state == BatteryStateKind.UNKNOWN
     assert bu.rated_e is None
     assert bu.stored_e is None
 
 
-@given(**battery_unit_kwargs)
-def test_battery_unit_constructor_kwargs(battery_state, rated_e, stored_e, **kwargs):
-    args = extract_testing_args(locals())
-    bu = BatteryUnit(**args, **kwargs)
-    validate_battery_unit_values(bu, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_battery_unit_constructor_kwargs(data):
+    verify(
+        [BatteryUnit, create_battery_unit],
+        data, battery_unit_kwargs, verify_battery_unit_values
+    )
 
 
-@given(**battery_unit_kwargs)
-def test_battery_unit_creator(battery_state, rated_e, stored_e, **kwargs):
-    args = extract_testing_args(locals())
-    bu = create_battery_unit(**args, **kwargs)
-    validate_battery_unit_values(bu, **args, **kwargs)
-
-
-def validate_battery_unit_values(bu, battery_state, rated_e, stored_e, **kwargs):
+def verify_battery_unit_values(bu, battery_state, rated_e, stored_e, **kwargs):
     verify_power_electronics_unit_constructor_kwargs(bu, **kwargs)
     assert bu.battery_state == battery_state
     assert bu.rated_e == rated_e

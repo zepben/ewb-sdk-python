@@ -4,7 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
+from hypothesis.strategies import data
 
+from cim.common_testing_functions import verify
 from test.cim.test_common_two_way_connections import set_up_conducting_equipment_two_way_link_test, check_conducting_equipment_two_way_link_test
 from test.cim.iec61970.base.wires.test_connector import verify_connector_constructor_default, \
     verify_connector_constructor_kwargs, verify_connector_constructor_args, connector_kwargs, connector_args
@@ -20,14 +22,13 @@ def test_junction_constructor_default():
     verify_connector_constructor_default(create_junction())
 
 
-@given(**junction_kwargs)
-def test_junction_constructor_kwargs(**kwargs):
-    verify_connector_constructor_kwargs(Junction(**kwargs), **kwargs)
-
-
-@given(**junction_kwargs)
-def test_junction_creator(**kwargs):
-    verify_connector_constructor_kwargs(create_junction(**kwargs), **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_junction_constructor_kwargs(data):
+    verify(
+        [Junction, create_junction],
+        data, junction_kwargs, verify_connector_constructor_kwargs
+    )
 
 
 def test_junction_constructor_args():

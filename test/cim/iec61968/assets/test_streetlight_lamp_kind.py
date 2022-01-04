@@ -5,9 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.protobuf.cim.iec61968.assets.StreetlightLampKind_pb2 import StreetlightLampKind as PBStreetlightLampKind
 
-from test.cim.enum_validator import validate_enum
+from test.cim.enum_verifier import verify_enum
 from zepben.evolve import StreetlightLampKind
 
 
 def test_streetlight_lamp_kind_enum():
-    validate_enum(StreetlightLampKind, PBStreetlightLampKind)
+    verify_enum(StreetlightLampKind, PBStreetlightLampKind)

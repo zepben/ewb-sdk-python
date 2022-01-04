@@ -5,9 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from _pytest.python_api import raises
 from hypothesis import given
-from hypothesis.strategies import floats
+from hypothesis.strategies import floats, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from zepben.evolve import PositionPoint
 from zepben.evolve.model.cim.iec61968.common.create_common_components import create_position_point
 
@@ -38,26 +38,16 @@ def test_position_point_constructor_default():
         create_position_point(y_position=2.0)
 
 
-# noinspection PyArgumentList
-@given(**position_point_kwargs)
-def test_position_point_constructor_kwargs(x_position, y_position, **kwargs):
-    args = extract_testing_args(locals())
-    assert not kwargs
-
-    pp = PositionPoint(**args)
-    validate_position_point_values(pp, **args)
-
-
-@given(**position_point_kwargs)
-def test_position_point_creator(x_position, y_position, **kwargs):
-    args = extract_testing_args(locals())
-    assert not kwargs
-
-    pp = create_position_point(**args)
-    validate_position_point_values(pp, **args)
+# noinspection PyShadowingNames
+@given(data())
+def test_position_point_constructor_kwargs(data):
+    verify(
+        [PositionPoint, create_position_point],
+        data, position_point_kwargs, verify_position_point_values
+    )
 
 
-def validate_position_point_values(pp, x_position, y_position):
+def verify_position_point_values(pp, x_position, y_position):
     assert pp.x_position == x_position
     assert pp.y_position == y_position
 
@@ -71,7 +61,7 @@ def test_position_point_constructor_args():
 
 
 # noinspection PyArgumentList
-def test_position_point_constructor_validates():
+def test_position_point_constructor_verifies():
     with raises(ValueError, match="Longitude is out of range. Expected -180 to 180, got -181.0."):
         PositionPoint(-181.0, 0)
     with raises(ValueError, match="Longitude is out of range. Expected -180 to 180, got 181.0."):

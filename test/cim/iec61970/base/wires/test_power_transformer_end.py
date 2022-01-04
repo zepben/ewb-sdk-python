@@ -6,7 +6,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, integers, floats, sampled_from
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import extract_testing_args
 from test.cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
     verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args, \
     verify_transformer_end_creator
@@ -37,11 +37,11 @@ power_transformer_end_args = [*transformer_end_args, PowerTransformer(), 1, 2, 3
 def test_power_transformer_end_constructor_default():
     pte = PowerTransformerEnd()
     pte2 = create_power_transformer_end()
-    validate_default_power_transformer_end_constructor(pte)
-    validate_default_power_transformer_end_constructor(pte2)
+    verify_default_power_transformer_end_constructor(pte)
+    verify_default_power_transformer_end_constructor(pte2)
 
 
-def validate_default_power_transformer_end_constructor(pte):
+def verify_default_power_transformer_end_constructor(pte):
     verify_transformer_end_constructor_default(pte)
     assert not pte.power_transformer
     assert pte.rated_s is None
@@ -63,17 +63,17 @@ def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, ra
                                                   **kwargs):
     args = extract_testing_args(locals())
     pte = PowerTransformerEnd(**args, **kwargs)
-    validate_power_transformer_end_values(pte, **args, **kwargs)
+    verify_power_transformer_end_values(pte, **args, **kwargs)
 
 
 @given(**power_transformer_end_kwargs)
 def test_power_transformer_end_creator(power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock, **kwargs):
     args = extract_testing_args(locals())
     pte = create_power_transformer_end(**args, **kwargs)
-    validate_power_transformer_end_values(pte, **args, creator=True, **kwargs)
+    verify_power_transformer_end_values(pte, **args, creator=True, **kwargs)
 
 
-def validate_power_transformer_end_values(pte, power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock,
+def verify_power_transformer_end_values(pte, power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock,
                                           creator: bool = False, **kwargs):
     if creator and power_transformer:
         verify_transformer_end_creator(pte, **kwargs)

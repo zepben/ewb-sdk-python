@@ -4,13 +4,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds, sampled_from, integers
+from hypothesis.strategies import builds, sampled_from, integers, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61968.assets.test_asset import asset_kwargs, verify_asset_constructor_default, \
     verify_asset_constructor_kwargs, verify_asset_constructor_args, asset_args
 from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from zepben.evolve import Streetlight, Pole, StreetlightLampKind
+from zepben.evolve import Streetlight, Pole, StreetlightLampKind, create_name, create_name_type
 from zepben.evolve.model.cim.iec61968.assets.create_assets_components import create_streetlight
 
 streetlight_kwargs = {
@@ -37,18 +37,13 @@ def validate_default_streetlight(sl):
     assert sl.lamp_kind == StreetlightLampKind.UNKNOWN
 
 
-@given(**streetlight_kwargs)
-def test_streetlight_constructor_kwargs(pole, light_rating, lamp_kind, **kwargs):
-    args = extract_testing_args(locals())
-    sl = Streetlight(**args, **kwargs)
-    validate_streetlight_values(sl, **args, **kwargs)
-
-
-@given(**streetlight_kwargs)
-def test_streetlight_creator(pole, light_rating, lamp_kind, **kwargs):
-    args = extract_testing_args(locals())
-    sl = create_streetlight(**args, **kwargs)
-    validate_streetlight_values(sl, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_streetlight_constructor_kwargs(data):
+    verify(
+        [Streetlight, create_streetlight],
+        data, streetlight_kwargs, validate_streetlight_values
+    )
 
 
 def validate_streetlight_values(sl, pole, light_rating, lamp_kind, **kwargs):
@@ -68,7 +63,9 @@ def test_streetlight_constructor_args():
 
 
 def test_auto_two_way_connections_for_street_light_constructor():
+    name = create_name(name='name', type=create_name_type(name='nameType'))
     p = Pole()
-    s = create_streetlight(pole=p)
+    s = create_streetlight(names=[name], pole=p)
 
+    assert name.identified_object == s
     assert p.get_streetlight(s.mrid) == s

@@ -7,7 +7,7 @@ from hypothesis.strategies import floats
 
 from test.cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
-from test.cim.property_validator import validate_property_accessor
+from test.cim.property_verifier import verify_property_accessor
 from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import Conductor, WireInfo
 
@@ -35,4 +35,4 @@ def verify_conductor_constructor_args(c: Conductor):
 
 
 def test_wire_info_accessor():
-    validate_property_accessor(Conductor, WireInfo, Conductor.wire_info)
+    verify_property_accessor(Conductor, WireInfo, Conductor.wire_info)

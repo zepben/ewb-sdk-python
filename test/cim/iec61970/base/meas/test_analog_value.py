@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import text, floats
+from hypothesis.strategies import text, floats, data
 
-from test.cim.extract_testing_args import extract_testing_args
+from test.cim.common_testing_functions import verify
 from test.cim.iec61970.base.meas.test_measurement_value import measurement_value_kwargs, verify_measurement_value_constructor_default, \
     verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
 from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, FLOAT_MIN, FLOAT_MAX
@@ -25,32 +25,26 @@ analog_value_args = [*measurement_value_args, 1.1, "a"]
 def test_analog_value_constructor_default():
     av = AnalogValue()
     av2 = create_analog_value()
-    validate_default_analog_value_constructor(av)
-    validate_default_analog_value_constructor(av2)
+    verify_default_analog_value_constructor(av)
+    verify_default_analog_value_constructor(av2)
 
 
-def validate_default_analog_value_constructor(av):
+def verify_default_analog_value_constructor(av):
     verify_measurement_value_constructor_default(av)
     assert av.value == 0.0
     assert not av.analog_mrid
 
 
-# noinspection PyArgumentList
-@given(**analog_value_kwargs)
-def test_analog_value_constructor_kwargs(value, analog_mrid, **kwargs):
-    args = extract_testing_args(locals())
-    av = AnalogValue(**args, **kwargs)
-    validate_analog_value_values(av, **args, **kwargs)
+# noinspection PyShadowingNames
+@given(data())
+def test_analog_value_constructor_kwargs(data):
+    verify(
+        [AnalogValue, create_analog_value],
+        data, analog_value_kwargs, verify_analog_value_values
+    )
 
 
-@given(**analog_value_kwargs)
-def test_analog_value_creator(value, analog_mrid, **kwargs):
-    args = extract_testing_args(locals())
-    av = create_analog_value(**args, **kwargs)
-    validate_analog_value_values(av, **args, **kwargs)
-
-
-def validate_analog_value_values(av, value, analog_mrid, **kwargs):
+def verify_analog_value_values(av, value, analog_mrid, **kwargs):
     verify_measurement_value_constructor_kwargs(av, **kwargs)
     assert av.value == value
     assert av.analog_mrid == analog_mrid

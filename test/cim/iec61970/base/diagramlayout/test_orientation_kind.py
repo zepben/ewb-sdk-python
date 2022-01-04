@@ -5,9 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.protobuf.cim.iec61970.base.diagramlayout.OrientationKind_pb2 import OrientationKind as PBOrientationKind
 
-from test.cim.enum_validator import validate_enum
+from test.cim.enum_verifier import verify_enum
 from zepben.evolve import OrientationKind
 
 
 def test_orientation_kind_enum():
-    validate_enum(OrientationKind, PBOrientationKind)
+    verify_enum(OrientationKind, PBOrientationKind)
