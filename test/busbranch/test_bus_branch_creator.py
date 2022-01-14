@@ -9,11 +9,12 @@ from typing import Set, FrozenSet, Tuple, List, Iterable, Optional, Dict, TypeVa
 
 from zepben.evolve import Terminal, NetworkService, AcLineSegment, PowerTransformer, EnergySource, EnergyConsumer, ConductingEquipment, \
     PowerElectronicsConnection, BusBranchNetworkCreator, \
-    BusBranchNetworkCreationValidator, PowerTransformerEnd
+    BusBranchNetworkCreationValidator, PowerTransformerEnd, EquivalentBranch
 
 BBN = TypeVar('BBN')
 TN = Tuple[int, FrozenSet[ConductingEquipment], FrozenSet[Terminal], FrozenSet[Terminal], NetworkService, BusBranchNetworkCreationValidator]
 TB = Tuple[Tuple[TN, TN], float, FrozenSet[AcLineSegment], FrozenSet[Terminal], FrozenSet[Terminal], NetworkService, BusBranchNetworkCreationValidator]
+EB = Tuple[List[TN], EquivalentBranch, NetworkService, BusBranchNetworkCreationValidator]
 PT = Tuple[PowerTransformer, List[Tuple[PowerTransformerEnd, TN]], NetworkService, BusBranchNetworkCreationValidator]
 ES = Tuple[EnergySource, TN, NetworkService, BusBranchNetworkCreationValidator]
 EC = Tuple[EnergyConsumer, TN, NetworkService, BusBranchNetworkCreationValidator]
@@ -23,17 +24,19 @@ PEC = Tuple[PowerElectronicsConnection, TN, NetworkService, BusBranchNetworkCrea
 @dataclass()
 class ArgsContainer:
     bus: Set[Tuple[str, TN]] = field(default_factory=set)
-    branch: Set[Tuple[str, TB]] = field(default_factory=set)
+    topological_branch: Set[Tuple[str, TB]] = field(default_factory=set)
+    equivalent_branch: Set[Tuple[str, EB]] = field(default_factory=set)
     transformer: Set[Tuple[str, Set[PT]]] = field(default_factory=set)
     energy_source: Set[Tuple[str, Set[ES]]] = field(default_factory=set)
     energy_consumer: Set[Tuple[str, Set[EC]]] = field(default_factory=set)
     power_electronics_connection: Set[Tuple[str, Set[PEC]]] = field(default_factory=set)
 
 
-class TestValidator(BusBranchNetworkCreationValidator[ArgsContainer, TN, TB, PT, ES, EC, PEC]):
+class TestValidator(BusBranchNetworkCreationValidator[ArgsContainer, TN, TB, EB, PT, ES, EC, PEC]):
     network_data_count: int
     topological_node_data_count: int
     topological_branch_data_count: int
+    equivalent_branch_data_count: int
     power_transformer_data_count: int
     energy_source_data_count: int
     energy_consumer_data_count: int
@@ -43,6 +46,7 @@ class TestValidator(BusBranchNetworkCreationValidator[ArgsContainer, TN, TB, PT,
         self.network_data_count = 0
         self.topological_node_data_count = 0
         self.topological_branch_data_count = 0
+        self.equivalent_branch_data_count = 0
         self.power_transformer_data_count = 0
         self.energy_source_data_count = 0
         self.energy_consumer_data_count = 0
@@ -62,6 +66,11 @@ class TestValidator(BusBranchNetworkCreationValidator[ArgsContainer, TN, TB, PT,
                                          collapsed_ac_line_segments: FrozenSet[AcLineSegment], border_terminals: FrozenSet[Terminal],
                                          inner_terminals: FrozenSet[Terminal], node_breaker_network: NetworkService) -> bool:
         self.topological_branch_data_count += 1
+        return True
+
+    def is_valid_equivalent_branch_data(self, bus_branch_network: BBN, connected_topological_nodes: List[TN],
+                                        equivalent_branch: EquivalentBranch, node_breaker_network: NetworkService) -> bool:
+        self.equivalent_branch_data_count += 1
         return True
 
     def is_valid_power_transformer_data(self, bus_branch_network: BBN, power_transformer: PowerTransformer,
@@ -85,7 +94,7 @@ class TestValidator(BusBranchNetworkCreationValidator[ArgsContainer, TN, TB, PT,
         return True
 
 
-class TestBusBranchCreator(BusBranchNetworkCreator[ArgsContainer, TN, TB, PT, ES, EC, PEC, TestValidator]):
+class TestBusBranchCreator(BusBranchNetworkCreator[ArgsContainer, TN, TB, EB, PT, ES, EC, PEC, TestValidator]):
 
     def validator_creator(self) -> TestValidator:
         return TestValidator()
@@ -102,7 +111,13 @@ class TestBusBranchCreator(BusBranchNetworkCreator[ArgsContainer, TN, TB, PT, ES
     # noinspection PyTypeChecker
     def topological_branch_creator(self, bus_branch_network: ArgsContainer, *args) -> Tuple[str, TB]:
         id_args = (f"tb_{next(iter(args[2])).mrid}", args)
-        bus_branch_network.branch.add(id_args)
+        bus_branch_network.topological_branch.add(id_args)
+        return id_args
+
+    # noinspection PyTypeChecker
+    def equivalent_branch_creator(self, bus_branch_network: ArgsContainer, *args) -> Tuple[str, EB]:
+        id_args = (f"eb_{args[1].mrid}", tuple(tuple(arg) if isinstance(arg, list) else arg for arg in args))
+        bus_branch_network.equivalent_branch.add(id_args)
         return id_args
 
     # noinspection PyTypeChecker

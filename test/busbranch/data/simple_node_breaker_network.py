@@ -6,7 +6,7 @@
 from test.busbranch.data.creators import _create_transformer_ends
 from test.network_fixtures import create_terminal, create_terminals
 from zepben.evolve import NetworkService, AcLineSegment, PerLengthSequenceImpedance, PowerTransformer, BaseVoltage, OverheadWireInfo, PowerTransformerInfo, \
-    EnergyConsumer, EnergySource, PowerElectronicsConnection
+    EnergyConsumer, EnergySource, PowerElectronicsConnection, EquivalentBranch
 
 
 def simple_node_breaker_network() -> NetworkService:
@@ -69,10 +69,33 @@ def simple_node_breaker_network() -> NetworkService:
     # PowerElectronicsConnection
     pec = PowerElectronicsConnection(mrid="pec")
     pec.base_voltage = bv_lv
-    network.add(pec)
     pec_t = create_terminal(network, pec)
-    pec_t.mrid = "pec_t1"
+    network.add(pec)
 
     network.connect_by_mrid(pec_t, line_terminals[1].connectivity_node.mrid)
+
+    # EquivalentBranch + Load
+    eb = EquivalentBranch(mrid="eb")
+    eb.r = 1.0
+    eb.x = 1.0
+    eb.base_voltage = bv_lv
+    eb_terminals = create_terminals(network, eb, 2)
+    network.add(eb)
+
+    network.connect_by_mrid(eb_terminals[0], line_terminals[1].connectivity_node.mrid)
+
+    ec_eb1 = EnergyConsumer(mrid="load_eb1", name="Load_EB1", p=100000., q=50000.)
+    ec_eb1.base_voltage = bv_lv
+    ec_eb1_t = create_terminal(network, ec_eb1)
+    network.add(ec_eb1)
+
+    network.connect_terminals(eb_terminals[1], ec_eb1_t)
+
+    ec_eb2 = EnergyConsumer(mrid="load_eb2", name="Load_EB2", p=100000., q=50000.)
+    ec_eb2.base_voltage = bv_lv
+    ec_eb2_t = create_terminal(network, ec_eb2)
+    network.add(ec_eb2)
+
+    network.connect_by_mrid(ec_eb2_t, eb_terminals[1].connectivity_node.mrid)
 
     return network

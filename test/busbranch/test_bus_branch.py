@@ -9,6 +9,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import booleans, sampled_from
 
+from test.busbranch.data.lv_equivalent_branch_network import lv_equivalent_branch_network
 from test.busbranch.data.end_of_branch_multiple_ec_pec import end_of_branch_multiple_ec_pec
 from test.busbranch.data.multi_branch_common_lines_network import multi_branch_common_lines_network
 from test.busbranch.data.negligible_impedance_equipment_basic_network import negligible_impedance_equipment_basic_network
@@ -25,8 +26,18 @@ from zepben.evolve.model.busbranch.bus_branch import _group_negligible_impedance
 @pytest.mark.asyncio
 async def test_create_bus_branch_model_callbacks():
     nb_network = simple_node_breaker_network()
-    plsi, wire_info, pt_info, es, pt, line, ec, pec = _get_validated_conducting_equipment(nb_network)
-    exp_bb0, exp_bb1, exp_bb2, exp_branch, exp_tx, exp_es, exp_ec, exp_pec = _get_expected(nb_network, line, pt, es, ec, pec)
+    plsi, wire_info, pt_info, es, pt, line, ec, pec, eb, ec_eb1, ec_eb2 = _get_validated_conducting_equipment(nb_network)
+    exp_bb0, exp_bb1, exp_bb2, exp_bb3, exp_branch, exp_tx, exp_es, exp_ec, exp_pec, exp_eb, exp_ec_eb1, exp_ec_eb2 = _get_expected(
+        nb_network,
+        line,
+        pt,
+        es,
+        ec,
+        pec,
+        eb,
+        ec_eb1,
+        ec_eb2
+    )
 
     creator = TestBusBranchCreator()
     result = await creator.create(nb_network)
@@ -34,8 +45,9 @@ async def test_create_bus_branch_model_callbacks():
     validator, mappings, bb_network = _get_validated_results(result)
 
     _validate_validator_calls(validator)
-    _validate_mappings(mappings, exp_bb0, exp_bb1, exp_bb2, exp_branch, exp_tx, exp_es, exp_ec, exp_pec, line, pt, es, ec, pec)
-    _validate_network(bb_network, exp_bb0, exp_bb1, exp_bb2, exp_branch, exp_tx, exp_es, exp_ec, exp_pec)
+    _validate_mappings(mappings, exp_bb0, exp_bb1, exp_bb2, exp_bb3, exp_branch, exp_tx, exp_es, exp_ec, exp_pec, exp_eb, exp_ec_eb1, exp_ec_eb2,
+                       line, pt, es, ec, pec, eb, ec_eb1, ec_eb2)
+    _validate_network(bb_network, exp_bb0, exp_bb1, exp_bb2, exp_bb3, exp_branch, exp_tx, exp_es, exp_ec, exp_pec, exp_eb, exp_ec_eb1, exp_ec_eb2)
 
 
 @pytest.mark.asyncio
@@ -47,7 +59,59 @@ async def test_topological_nodes_inside_grouped_lines_do_not_get_created():
     validator, mappings, bb_network = _get_validated_results(result)
 
     assert len(bb_network.bus) == 2
-    assert len(bb_network.branch) == 1
+    assert len(bb_network.topological_branch) == 1
+
+
+@pytest.mark.asyncio
+async def test_equivalent_branches_created_only_if_they_have_impedance():
+    nb_network = lv_equivalent_branch_network(False)
+    creator = TestBusBranchCreator()
+    result = await creator.create(nb_network)
+
+    validator, mappings, bb_network = _get_validated_results(result)
+
+    assert len(bb_network.bus) == 1
+    assert len(bb_network.topological_branch) == 0
+    assert len(bb_network.equivalent_branch) == 0
+    assert len(bb_network.transformer) == 1
+    assert len(bb_network.energy_consumer) == 2
+    assert len(bb_network.power_electronics_connection) == 1
+
+    bus = next(iter(result.mappings.to_bbn.objects.get("ec_t1")))
+    ec_bus = next(iter(result.mappings.to_bbn.objects.get("ec")))[1]
+    ec_eb_bus = next(iter(result.mappings.to_bbn.objects.get("ec_eb")))[1]
+    pec_bus = next(iter(result.mappings.to_bbn.objects.get("pec")))[1]
+    pt_bus = next(iter(result.mappings.to_bbn.objects.get("pt")))[1][1][1]
+
+    assert bus == ec_bus
+    assert bus == ec_eb_bus
+    assert bus == pec_bus
+    assert bus == pt_bus
+
+    nb_network = lv_equivalent_branch_network(True)
+    creator = TestBusBranchCreator()
+    result = await creator.create(nb_network)
+
+    validator, mappings, bb_network = _get_validated_results(result)
+
+    assert len(bb_network.bus) == 2
+    assert len(bb_network.topological_branch) == 0
+    assert len(bb_network.equivalent_branch) == 1
+    assert len(bb_network.transformer) == 1
+    assert len(bb_network.energy_consumer) == 2
+    assert len(bb_network.power_electronics_connection) == 1
+
+    bus_1 = next(iter(result.mappings.to_bbn.objects.get("ec_t1")))
+    bus_2 = next(iter(result.mappings.to_bbn.objects.get("ec_eb_t1")))
+    ec_bus = next(iter(result.mappings.to_bbn.objects.get("ec")))[1]
+    ec_eb_bus = next(iter(result.mappings.to_bbn.objects.get("ec_eb")))[1]
+    pec_bus = next(iter(result.mappings.to_bbn.objects.get("pec")))[1]
+    pt_bus = next(iter(result.mappings.to_bbn.objects.get("pt")))[1][1][1]
+
+    assert bus_1 == ec_bus
+    assert bus_1 == pec_bus
+    assert bus_1 == pt_bus
+    assert bus_2 == ec_eb_bus
 
 
 @pytest.mark.asyncio
@@ -223,14 +287,17 @@ async def test_group_negligible_impedance_terminals_end_of_branch_multiple_ec_pe
     await _validate_term_grouping(has_neg_imp, nb_network, "a2_ec_pec1_pec2", set(), set(), get_terms({a2: 2, ec: 1, pec1: 1, pec2: 1}))
 
 
-def _get_expected(nb_network, line, pt, es, ec, pec):
+def _get_expected(nb_network, line, pt, es, ec, pec, eb, ec_eb1, ec_eb2):
     # -- Bus
     exp_bb0 = (create_terminal_based_id({next(es.terminals), get_term(pt, 1)}),
                (20000, frozenset(), frozenset({get_term(es, 1), get_term(pt, 1)}), frozenset(), nb_network))
     exp_bb1 = (create_terminal_based_id({get_term(pt, 2), get_term(line, 1)}),
                (400, frozenset(), frozenset({get_term(line, 1), get_term(pt, 2)}), frozenset(), nb_network))
-    exp_bb2 = (create_terminal_based_id({get_term(line, 2), next(ec.terminals), next(pec.terminals)}),
-               (400, frozenset(), frozenset({get_term(ec, 1), get_term(line, 2), get_term(pec, 1)}), frozenset(), nb_network))
+    exp_bb2 = (create_terminal_based_id({get_term(line, 2), next(ec.terminals), next(pec.terminals), get_term(eb, 1)}),
+               (400, frozenset(), frozenset({get_term(ec, 1), get_term(line, 2), get_term(pec, 1), get_term(eb, 1)}), frozenset(), nb_network))
+
+    exp_bb3 = (create_terminal_based_id({get_term(eb, 2), next(ec_eb1.terminals), next(ec_eb2.terminals)}),
+               (400, frozenset(), frozenset({get_term(eb, 2), next(ec_eb1.terminals), next(ec_eb2.terminals)}), frozenset(), nb_network))
 
     # -- Branch
     exp_branch = (f"tb_{line.mrid}", ((exp_bb1[1], exp_bb2[1]), 100, frozenset({line}), frozenset({*line.terminals}), frozenset(), nb_network))
@@ -244,11 +311,16 @@ def _get_expected(nb_network, line, pt, es, ec, pec):
 
     # -- Consumer
     exp_ec = (f"ec_{ec.mrid}", (ec, exp_bb2[1], nb_network))
+    exp_ec_eb1 = (f"ec_{ec_eb1.mrid}", (ec_eb1, exp_bb3[1], nb_network))
+    exp_ec_eb2 = (f"ec_{ec_eb2.mrid}", (ec_eb2, exp_bb3[1], nb_network))
 
     # -- PowerElectronicsConnection
     exp_pec = (f"pec_{pec.mrid}", (pec, exp_bb2[1], nb_network))
 
-    return exp_bb0, exp_bb1, exp_bb2, exp_branch, exp_tx, exp_es, exp_ec, exp_pec
+    # -- EquivalentBranch + Consumer
+    exp_eb = (f"eb_{eb.mrid}", ((exp_bb2[1], exp_bb3[1]), eb, nb_network))
+
+    return exp_bb0, exp_bb1, exp_bb2, exp_bb3, exp_branch, exp_tx, exp_es, exp_ec, exp_pec, exp_eb, exp_ec_eb1, exp_ec_eb2
 
 
 def _get_validated_results(result):
@@ -269,18 +341,22 @@ def _get_validated_conducting_equipment(nb_network):
     line = nb_network.get("line")
     ec = nb_network.get("load")
     pec = nb_network.get("pec")
+    eb = nb_network.get("eb")
+    ec_eb1 = nb_network.get("load_eb1")
+    ec_eb2 = nb_network.get("load_eb2")
 
-    return plsi, wire_info, pt_info, es, pt, line, ec, pec
+    return plsi, wire_info, pt_info, es, pt, line, ec, pec, eb, ec_eb1, ec_eb2
 
 
 def _validate_validator_calls(validator):
-    assert validator.network_data_count is 1
-    assert validator.topological_node_data_count is 3
-    assert validator.topological_branch_data_count is 1
-    assert validator.power_transformer_data_count is 1
-    assert validator.energy_source_data_count is 1
-    assert validator.energy_consumer_data_count is 1
-    assert validator.power_electronics_connection_data_count is 1
+    assert validator.network_data_count == 1
+    assert validator.topological_node_data_count == 4
+    assert validator.topological_branch_data_count == 1
+    assert validator.equivalent_branch_data_count == 1
+    assert validator.power_transformer_data_count == 1
+    assert validator.energy_source_data_count == 1
+    assert validator.energy_consumer_data_count == 3
+    assert validator.power_electronics_connection_data_count == 1
 
 
 def _validate_network(
@@ -288,16 +364,20 @@ def _validate_network(
     expected_bus_0,
     expected_bus_1,
     expected_bus_2,
+    expected_bus_3,
     expected_branch,
     expected_transformer,
     expected_energy_source,
     expected_energy_consumer,
     expected_power_electronics_connection,
+    expected_equivalent_branch,
+    expected_consumer_eb1,
+    expected_consumer_eb2
 ):
-    assert bb_network.bus == {expected_bus_0, expected_bus_1, expected_bus_2}
+    assert bb_network.bus == {expected_bus_0, expected_bus_1, expected_bus_2, expected_bus_3}
 
     # Branch Comparison
-    branch = list(bb_network.branch)[0]
+    branch = list(bb_network.topological_branch)[0]
     assert branch[0] == expected_branch[0]
     assert set(branch[1][0]) == set(expected_branch[1][0])
     assert branch[1][1] == expected_branch[1][1]
@@ -308,8 +388,9 @@ def _validate_network(
 
     assert bb_network.transformer == {expected_transformer}
     assert bb_network.energy_source == {expected_energy_source}
-    assert bb_network.energy_consumer == {expected_energy_consumer}
+    assert bb_network.energy_consumer == {expected_energy_consumer, expected_consumer_eb1, expected_consumer_eb2}
     assert bb_network.power_electronics_connection == {expected_power_electronics_connection}
+    assert bb_network.equivalent_branch == {expected_equivalent_branch}
 
 
 def _validate_mappings(
@@ -317,21 +398,29 @@ def _validate_mappings(
     expected_bus_0,
     expected_bus_1,
     expected_bus_2,
+    expected_bus_3,
     expected_branch,
     expected_transformer,
     expected_energy_source,
     expected_energy_consumer,
     expected_power_electronics_connection,
+    expected_equivalent_branch,
+    expected_consumer_eb1,
+    expected_consumer_eb2,
     line,
     pt,
     es,
     ec,
-    pec
+    pec,
+    eb,
+    ec_eb1,
+    ec_eb2
 ):
     # -- Bus
     _validate_bus_mapping(mappings, expected_bus_0)
     _validate_bus_mapping(mappings, expected_bus_1)
     _validate_bus_mapping(mappings, expected_bus_2)
+    _validate_bus_mapping(mappings, expected_bus_3)
 
     # -- Branch
     _validate_branch_mapping(mappings, expected_branch)
@@ -368,9 +457,14 @@ def _validate_mappings(
 
     # --- energy consumer
     assert list(mappings.to_bbn.objects[ec.mrid])[0] == expected_energy_consumer[1]
+    assert list(mappings.to_bbn.objects[ec_eb1.mrid])[0] == expected_consumer_eb1[1]
+    assert list(mappings.to_bbn.objects[ec_eb2.mrid])[0] == expected_consumer_eb2[1]
 
     # --- power electronics connection
     assert list(mappings.to_bbn.objects[pec.mrid])[0] == expected_power_electronics_connection[1]
+
+    # --- equivalent branch
+    assert list(mappings.to_bbn.objects[eb.mrid])[0] == expected_equivalent_branch[1]
 
 
 def _validate_bus_mapping(mappings, expected_bus):

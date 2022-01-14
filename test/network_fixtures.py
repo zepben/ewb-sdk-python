@@ -42,9 +42,11 @@ def create_terminal(network: NetworkService, ce: Optional[ConductingEquipment], 
         pass
 
     if terminal is None:
-        terminal = Terminal(conducting_equipment=ce, phases=phases, sequence_number=sequence_number)
         if ce:
+            terminal = Terminal(mrid=f"{ce.mrid}_t{len(list(ce.terminals)) + 1}", conducting_equipment=ce, phases=phases, sequence_number=sequence_number)
             ce.add_terminal(terminal)
+        else:
+            terminal = Terminal(phases=phases, sequence_number=sequence_number)
         network.add(terminal)
     return terminal
 
