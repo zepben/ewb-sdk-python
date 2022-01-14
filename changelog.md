@@ -2,6 +2,7 @@
 
 ##### Breaking Changes
 * Removed CIM gRPC producers.
+* Added support for EquivalentBranches in BusBranchNetworkCreator.
 
 ##### New Features
 * Implemented database module for persisting to sqlite database.
