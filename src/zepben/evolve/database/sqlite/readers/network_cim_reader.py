@@ -11,21 +11,22 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TableTransformerTankInfo, TransformerTest, TableTransformerTest, WireInfo, TableWireInfo, WireMaterialKind, Asset, TableAssets, Location, AssetContainer, \
     TableAssetContainers, AssetInfo, TableAssetInfo, AssetOrganisationRole, TableAssetOrganisationRoles, Structure, TableStructures, TableAssetOwners, \
     AssetOwner, TablePoles, Pole, TableStreetlights, Streetlight, StreetlightLampKind, TableLocations, TableLocationStreetAddresses, \
-    TableLocationStreetAddressField, TablePositionPoints, PositionPoint, TableStreetAddresses, StreetAddress, TableTownDetails, TownDetail, EndDevice, \
-    TableEndDevices, TableMeters, Meter, TableUsagePoints, UsagePoint, TableOperationalRestrictions, OperationalRestriction, AuxiliaryEquipment, \
-    TableAuxiliaryEquipment, Terminal, TableFaultIndicators, FaultIndicator, AcDcTerminal, TableAcDcTerminals, TableBaseVoltages, BaseVoltage, \
-    ConductingEquipment, TableConductingEquipment, TableConnectivityNodes, ConnectivityNode, ConnectivityNodeContainer, TableConnectivityNodeContainers, \
-    Equipment, TableEquipment, EquipmentContainer, TableEquipmentContainers, TableFeeders, Feeder, Substation, GeographicalRegion, TableGeographicalRegions, \
-    PowerSystemResource, TablePowerSystemResources, TableSites, Site, TableSubGeographicalRegions, SubGeographicalRegion, TableSubstations, TableTerminals, \
-    PhaseCode, TableEquivalentBranches, EquivalentBranch, EquivalentEquipment, TableEquivalentEquipment, TableAccumulators, Accumulator, TableAnalogs, Analog, \
-    TableControls, Control, TableDiscretes, Discrete, IoPoint, TableIoPoints, Measurement, TableMeasurements, RemoteSource, UnitSymbol, TableRemoteControls, \
-    RemoteControl, RemotePoint, TableRemotePoints, TableRemoteSources, TableBatteryUnit, BatteryUnit, BatteryStateKind, TablePhotoVoltaicUnit, \
-    PhotoVoltaicUnit, PowerElectronicsUnit, TablePowerElectronicsUnit, PowerElectronicsConnection, TablePowerElectronicsWindUnit, PowerElectronicsWindUnit, \
-    TableAcLineSegments, AcLineSegment, PerLengthSequenceImpedance, TableBreakers, Breaker, TableLoadBreakSwitches, LoadBreakSwitch, TableBusbarSections, \
-    BusbarSection, Conductor, TableConductors, Connector, TableConnectors, TableDisconnectors, Disconnector, EnergyConnection, TableEnergyConnections, \
-    TableEnergyConsumers, EnergyConsumer, PhaseShuntConnectionKind, TableEnergyConsumerPhases, EnergyConsumerPhase, SinglePhaseKind, TableEnergySources, \
-    EnergySource, TableEnergySourcePhases, EnergySourcePhase, TableFuses, Fuse, TableJumpers, Jumper, TableJunctions, Junction, Line, TableLines, \
-    TableLinearShuntCompensators, LinearShuntCompensator, PerLengthImpedance, TablePerLengthImpedances, PerLengthLineParameter, TablePerLengthLineParameters, \
+    TableLocationStreetAddressField, TablePositionPoints, PositionPoint, TableStreetAddresses, StreetAddress, TableTownDetails, TownDetail, \
+    TransformerConstructionKind, TransformerFunctionKind, EndDevice, TableEndDevices, TableMeters, Meter, TableUsagePoints, UsagePoint, \
+    TableOperationalRestrictions, OperationalRestriction, AuxiliaryEquipment, TableAuxiliaryEquipment, Terminal, TableFaultIndicators, FaultIndicator, \
+    AcDcTerminal, TableAcDcTerminals, TableBaseVoltages, BaseVoltage, ConductingEquipment, TableConductingEquipment, TableConnectivityNodes, ConnectivityNode, \
+    ConnectivityNodeContainer, TableConnectivityNodeContainers, Equipment, TableEquipment, EquipmentContainer, TableEquipmentContainers, TableFeeders, Feeder, \
+    Substation, GeographicalRegion, TableGeographicalRegions, PowerSystemResource, TablePowerSystemResources, TableSites, Site, TableSubGeographicalRegions, \
+    SubGeographicalRegion, TableSubstations, TableTerminals, PhaseCode, TableEquivalentBranches, EquivalentBranch, EquivalentEquipment, \
+    TableEquivalentEquipment, TableAccumulators, Accumulator, TableAnalogs, Analog, TableControls, Control, TableDiscretes, Discrete, IoPoint, TableIoPoints, \
+    Measurement, TableMeasurements, RemoteSource, UnitSymbol, TableRemoteControls, RemoteControl, RemotePoint, TableRemotePoints, TableRemoteSources, \
+    TableBatteryUnit, BatteryUnit, BatteryStateKind, TablePhotoVoltaicUnit, PhotoVoltaicUnit, PowerElectronicsUnit, TablePowerElectronicsUnit, \
+    PowerElectronicsConnection, TablePowerElectronicsWindUnit, PowerElectronicsWindUnit, TableAcLineSegments, AcLineSegment, PerLengthSequenceImpedance, \
+    TableBreakers, Breaker, TableLoadBreakSwitches, LoadBreakSwitch, TableBusbarSections, BusbarSection, Conductor, TableConductors, Connector, \
+    TableConnectors, TableDisconnectors, Disconnector, EnergyConnection, TableEnergyConnections, TableEnergyConsumers, EnergyConsumer, \
+    PhaseShuntConnectionKind, TableEnergyConsumerPhases, EnergyConsumerPhase, SinglePhaseKind, TableEnergySources, EnergySource, TableEnergySourcePhases, \
+    EnergySourcePhase, TableFuses, Fuse, TableJumpers, Jumper, TableJunctions, Junction, Line, TableLines, TableLinearShuntCompensators, \
+    LinearShuntCompensator, PerLengthImpedance, TablePerLengthImpedances, PerLengthLineParameter, TablePerLengthLineParameters, \
     TablePerLengthSequenceImpedances, TablePowerElectronicsConnection, TablePowerElectronicsConnectionPhases, PowerElectronicsConnectionPhase, \
     TablePowerTransformers, PowerTransformer, VectorGroup, TablePowerTransformerEnds, PowerTransformerEnd, ProtectedSwitch, TableProtectedSwitches, \
     TableRatioTapChangers, RatioTapChanger, TransformerEnd, TableReclosers, Recloser, RegulatingCondEq, TableRegulatingCondEq, ShuntCompensator, \
@@ -691,6 +692,8 @@ class NetworkCIMReader(BaseCIMReader):
 
         power_transformer.vector_group = VectorGroup[rs.get_string(table.vector_group.query_index)]
         power_transformer.transformer_utilisation = rs.get_double(table.transformer_utilisation.query_index, None)
+        power_transformer.construction_kind = TransformerConstructionKind[rs.get_string(table.construction_kind.query_index)]
+        power_transformer.function = TransformerFunctionKind[rs.get_string(table.function.query_index)]
         power_transformer.asset_info = self._ensure_get(rs.get_string(table.power_transformer_info_mrid.query_index, None), PowerTransformerInfo)
 
         return self._load_conducting_equipment(power_transformer, table, rs) and self._add_or_throw(power_transformer)

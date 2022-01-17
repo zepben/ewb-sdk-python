@@ -16,6 +16,9 @@
   - s12N
   - s2
   - s2N
+* Added the following CIM classes/enums:
+  * `TransformerConstructionKind`
+  * `TransformerFunctionKind`
 
 ##### Enhancements
 * None.

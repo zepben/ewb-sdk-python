@@ -630,7 +630,7 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         self._compare_id_references(diff, PowerTransformer.asset_info)
         self._compare_indexed_id_reference_collections(diff, PowerTransformer.ends)
-        self._compare_values(diff, PowerTransformer.vector_group)
+        self._compare_values(diff, PowerTransformer.vector_group, PowerTransformer.construction_kind, PowerTransformer.function)
         self._compare_floats(diff, PowerTransformer.transformer_utilisation)
 
         return self._compare_conducting_equipment(diff)

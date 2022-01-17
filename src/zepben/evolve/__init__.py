@@ -31,6 +31,8 @@ from zepben.evolve.model.cim.iec61968.common.organisation import *
 from zepben.evolve.model.cim.iec61968.common.document import *
 from zepben.evolve.model.cim.iec61968.common.organisation_role import *
 from zepben.evolve.model.cim.iec61968.common.location import *
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import *
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import *
 from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_branch import *
 from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_equipment import *
 from zepben.evolve.model.cim.iec61970.base.meas.control import *

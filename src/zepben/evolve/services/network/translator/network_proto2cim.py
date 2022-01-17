@@ -30,6 +30,8 @@ from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location as PBLocat
 from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint as PBPositionPoint
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
 from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerConstructionKind_pb2 import TransformerConstructionKind as PBTransformerConstructionKind
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerFunctionKind_pb2 import TransformerFunctionKind as PBTransformerFunctionKind
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice as PBEndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter as PBMeter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint as PBUsagePoint
@@ -103,7 +105,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBL
 
 import zepben.evolve.services.common.resolver as resolver
 from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, OpenCircuitTest, ShortCircuitTest, TransformerTest, \
-    TracedPhases, ShuntCompensatorInfo
+    TracedPhases, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
@@ -1078,6 +1080,8 @@ def power_transformer_to_cim(pb: PBPowerTransformer, network_service: NetworkSer
     cim = PowerTransformer(
         mrid=pb.mrid(),
         vector_group=VectorGroup(pb.vectorGroup),
+        construction_kind=TransformerConstructionKind(pb.constructionKind),
+        function=TransformerFunctionKind(pb.function),
         transformer_utilisation=float_or_none(pb.transformerUtilisation)
     )
 
