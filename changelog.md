@@ -19,6 +19,9 @@
 * Added the following CIM classes/enums:
   * `TransformerConstructionKind`
   * `TransformerFunctionKind`
+* Added the following `PowerTransformer` fields:
+  * `construction_kind: TransformerConstructionKind`
+  * `function: TransformerFunctionKind`
 
 ##### Enhancements
 * None.

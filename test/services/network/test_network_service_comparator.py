@@ -758,6 +758,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(PowerTransformer.transformer_utilisation, PowerTransformer, lambda _: 0.1, lambda _: 0.9)
         self.validator.validate_property(PowerTransformer.construction_kind, PowerTransformer, lambda _: TransformerConstructionKind.subway,
                                          lambda _: TransformerConstructionKind.overhead)
+        self.validator.validate_property(PowerTransformer.function, PowerTransformer, lambda _: TransformerFunctionKind.isolationTransformer,
+                                         lambda _: TransformerFunctionKind.voltageRegulator)
         self.validator.validate_indexed_collection(
             PowerTransformer.ends,
             PowerTransformer.add_end,

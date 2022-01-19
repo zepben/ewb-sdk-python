@@ -43,10 +43,10 @@ def test_power_transformer_constructor_kwargs(vector_group, power_transformer_en
 
     verify_conducting_equipment_constructor_kwargs(pt, **kwargs)
     assert pt.vector_group == vector_group
-    assert pt.construction_kind == construction_kind
-    assert pt.function == function
     assert list(pt.ends) == power_transformer_ends
     assert pt.transformer_utilisation == transformer_utilisation
+    assert pt.construction_kind == construction_kind
+    assert pt.function == function
 
 
 def test_power_transformer_constructor_args():

@@ -28,8 +28,10 @@ class TransformerFunctionKind(Enum):
     """ A transformer with a special winding divided into several sections enabling the voltage to be varied at will. (IEC ref 811-26-04). """
 
     powerTransformer = 5
+    """"""
 
     secondaryTransformer = 6
+    """"""
 
     @property
     def short_name(self):

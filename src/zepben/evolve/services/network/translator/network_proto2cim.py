@@ -1080,9 +1080,9 @@ def power_transformer_to_cim(pb: PBPowerTransformer, network_service: NetworkSer
     cim = PowerTransformer(
         mrid=pb.mrid(),
         vector_group=VectorGroup(pb.vectorGroup),
+        transformer_utilisation=float_or_none(pb.transformerUtilisation),
         construction_kind=TransformerConstructionKind(pb.constructionKind),
-        function=TransformerFunctionKind(pb.function),
-        transformer_utilisation=float_or_none(pb.transformerUtilisation)
+        function=TransformerFunctionKind(pb.function)
     )
 
     for mrid in pb.powerTransformerEndMRIDs:
