@@ -211,9 +211,7 @@ class TablePowerElectronicsConnectionPhases(TablePowerSystemResources):
     def name(self) -> str:
         return "power_electronics_connection_phase"
 
-    def unique_index_columns(self) -> List[List[Column]]:
-        cols = super(TablePowerElectronicsConnectionPhases, self).unique_index_columns()
-        # todo https://app.clickup.com/t/6929263/EWB-1043
-        #  copied correctly form JVM but is it incorrect. should be able to have multiple units connected.
+    def non_unique_index_columns(self) -> List[List[Column]]:
+        cols = super(TablePowerElectronicsConnectionPhases, self).non_unique_index_columns()
         cols.append([self.power_electronics_connection_mrid])
         return cols
