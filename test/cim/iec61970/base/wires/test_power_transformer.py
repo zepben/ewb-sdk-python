@@ -10,16 +10,19 @@ from test.cim.iec61970.base.core.test_conducting_equipment import verify_conduct
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
 from test.cim.property_validator import validate_property_accessor
 from test.cim_creators import FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo
+from zepben.evolve import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo, TransformerConstructionKind, TransformerFunctionKind
 
 power_transformer_kwargs = {
     **conducting_equipment_kwargs,
     "vector_group": sampled_from(VectorGroup),
     "power_transformer_ends": lists(builds(PowerTransformerEnd), max_size=2),
-    "transformer_utilisation": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    "transformer_utilisation": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    "construction_kind": sampled_from(TransformerConstructionKind),
+    "function": sampled_from(TransformerFunctionKind)
 }
 
-power_transformer_args = [*conducting_equipment_args, VectorGroup.DD6, [PowerTransformerEnd], 1.1]
+power_transformer_args = [*conducting_equipment_args, VectorGroup.DD6, [PowerTransformerEnd], 1.1, TransformerConstructionKind.padmountFeedThrough,
+                          TransformerFunctionKind.secondaryTransformer]
 
 
 def test_power_transformer_constructor_default():
@@ -27,27 +30,34 @@ def test_power_transformer_constructor_default():
 
     verify_conducting_equipment_constructor_default(pt)
     assert pt.vector_group == VectorGroup.UNKNOWN
+    assert pt.construction_kind == TransformerConstructionKind.unknown
+    assert pt.function == TransformerFunctionKind.other
     assert not list(pt.ends)
     assert pt.transformer_utilisation is None
 
 
 @given(**power_transformer_kwargs)
-def test_power_transformer_constructor_kwargs(vector_group, power_transformer_ends, transformer_utilisation, **kwargs):
-    pt = PowerTransformer(vector_group=vector_group, power_transformer_ends=power_transformer_ends, transformer_utilisation=transformer_utilisation, **kwargs)
+def test_power_transformer_constructor_kwargs(vector_group, power_transformer_ends, transformer_utilisation, construction_kind, function, **kwargs):
+    pt = PowerTransformer(vector_group=vector_group, power_transformer_ends=power_transformer_ends, transformer_utilisation=transformer_utilisation,
+                          construction_kind=construction_kind, function=function, **kwargs)
 
     verify_conducting_equipment_constructor_kwargs(pt, **kwargs)
     assert pt.vector_group == vector_group
     assert list(pt.ends) == power_transformer_ends
     assert pt.transformer_utilisation == transformer_utilisation
+    assert pt.construction_kind == construction_kind
+    assert pt.function == function
 
 
 def test_power_transformer_constructor_args():
     pt = PowerTransformer(*power_transformer_args)
 
     verify_conducting_equipment_constructor_args(pt)
-    assert pt.vector_group == power_transformer_args[-3]
-    assert list(pt.ends) == power_transformer_args[-2]
-    assert pt.transformer_utilisation == power_transformer_args[-1]
+    assert pt.vector_group == power_transformer_args[-5]
+    assert list(pt.ends) == power_transformer_args[-4]
+    assert pt.transformer_utilisation == power_transformer_args[-3]
+    assert pt.construction_kind == power_transformer_args[-2]
+    assert pt.function == power_transformer_args[-1]
 
 
 def test_power_transformer_info_accessor():

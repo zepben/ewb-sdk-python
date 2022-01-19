@@ -17,7 +17,7 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     EnergyConsumer, PhaseShuntConnectionKind, EnergyConsumerPhase, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
     LinearShuntCompensator, PerLengthImpedance, PerLengthLineParameter, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, VectorGroup, \
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
-    Circuit, Loop, NetworkService, TracedPhases, PhaseDirection, ShuntCompensatorInfo
+    Circuit, Loop, NetworkService, TracedPhases, PhaseDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from test.services.common.service_comparator_validator import ServiceComparatorValidator
@@ -756,6 +756,10 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
         self.validator.validate_property(PowerTransformer.vector_group, PowerTransformer, lambda _: VectorGroup.DYN11, lambda _: VectorGroup.D0)
         self.validator.validate_property(PowerTransformer.transformer_utilisation, PowerTransformer, lambda _: 0.1, lambda _: 0.9)
+        self.validator.validate_property(PowerTransformer.construction_kind, PowerTransformer, lambda _: TransformerConstructionKind.subway,
+                                         lambda _: TransformerConstructionKind.overhead)
+        self.validator.validate_property(PowerTransformer.function, PowerTransformer, lambda _: TransformerFunctionKind.isolationTransformer,
+                                         lambda _: TransformerFunctionKind.voltageRegulator)
         self.validator.validate_indexed_collection(
             PowerTransformer.ends,
             PowerTransformer.add_end,

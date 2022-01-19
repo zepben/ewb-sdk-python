@@ -23,10 +23,8 @@ class TablePowerElectronicsUnit(TableEquipment):
         self.max_p = self._create_column("max_p", "INTEGER", Nullable.NULL)
         self.min_p = self._create_column("min_p", "INTEGER", Nullable.NULL)
 
-    def unique_index_columns(self) -> List[List[Column]]:
-        cols = super(TablePowerElectronicsUnit, self).unique_index_columns()
-        # todo https://app.clickup.com/t/6929263/EWB-1043
-        #  copied correctly form JVM but is it correct? test data indicates this is not a unique field, perhaps should have a composite key with phase
+    def non_unique_index_columns(self) -> List[List[Column]]:
+        cols = super(TablePowerElectronicsUnit, self).non_unique_index_columns()
         cols.append([self.power_electronics_connection_mrid])
         return cols
 

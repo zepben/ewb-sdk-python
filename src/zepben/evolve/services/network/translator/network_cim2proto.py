@@ -15,6 +15,8 @@ from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import Trans
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest as PBTransformerTest
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerConstructionKind_pb2 import TransformerConstructionKind as PBTransformerConstructionKind
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerFunctionKind_pb2 import TransformerFunctionKind as PBTransformerFunctionKind
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer as PBAssetContainer
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo as PBAssetInfo
 from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import AssetOrganisationRole as PBAssetOrganisationRole
@@ -905,7 +907,9 @@ def power_transformer_to_pb(cim: PowerTransformer) -> PBPowerTransformer:
         ce=conducting_equipment_to_pb(cim, True),
         powerTransformerEndMRIDs=[str(io.mrid) for io in cim.ends],
         vectorGroup=PBVectorGroup.Value(cim.vector_group.short_name),
-        transformerUtilisation=from_nullable_float(cim.transformer_utilisation)
+        transformerUtilisation=from_nullable_float(cim.transformer_utilisation),
+        constructionKind=PBTransformerConstructionKind.Value(cim.construction_kind.short_name),
+        function=PBTransformerFunctionKind.Value(cim.function.short_name)
     )
 
 

@@ -9,6 +9,8 @@ from __future__ import annotations
 from typing import List, Optional, Generator
 
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -328,6 +330,16 @@ class PowerTransformer(ConductingEquipment):
     """
     The fraction of the transformer’s normal capacity (nameplate rating) that is in use. It may be expressed as the
     result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
+    """
+
+    construction_kind: TransformerConstructionKind = TransformerConstructionKind.unknown
+    """
+    The construction kind of this transformer.
+    """
+
+    function: TransformerFunctionKind = TransformerFunctionKind.other
+    """
+    The function of this transformer.
     """
 
     def __init__(self, power_transformer_ends: List[PowerTransformerEnd] = None, **kwargs):

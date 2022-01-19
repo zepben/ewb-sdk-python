@@ -87,12 +87,16 @@ class TablePowerTransformerEnds(TableTransformerEnds):
 class TablePowerTransformers(TableConductingEquipment):
     vector_group: Column = None
     transformer_utilisation: Column = None
+    construction_kind: Column = None
+    function: Column = None
     power_transformer_info_mrid: Column = None
 
     def __init__(self):
         super(TablePowerTransformers, self).__init__()
         self.vector_group = self._create_column("vector_group", "TEXT", Nullable.NOT_NULL)
         self.transformer_utilisation = self._create_column("transformer_utilisation", "NUMBER", Nullable.NULL)
+        self.construction_kind = self._create_column("construction_kind", "TEXT", Nullable.NOT_NULL)
+        self.function = self._create_column("function", "TEXT", Nullable.NOT_NULL)
         self.power_transformer_info_mrid = self._create_column("power_transformer_info_mrid", "TEXT", Nullable.NULL)
 
     def name(self) -> str:

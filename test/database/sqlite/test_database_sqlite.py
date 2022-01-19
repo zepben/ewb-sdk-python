@@ -393,14 +393,7 @@ class TestDatabaseSqlite(object):
     @settings(deadline=1000)
     @given(data())
     def test_schema_power_electronics_connection(self, caplog, data):
-        connection: PowerElectronicsConnection = data.draw(create_power_electronics_connection(False))
-        assume(len(list(connection.phases)) <= 1)
-        assume(len(list(connection.units)) <= 1)
-        self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnection, connection))
-        # todo https://app.clickup.com/t/6929263/EWB-1043
-        #  You can't have multiple phases/units on a connection in the DB but you can in model.
-        #  Replace the above with the following once the schema/creator issue has been fixed.
-        #  self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnection, data.draw(create_power_electronics_connection(False))))
+        self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnection, data.draw(create_power_electronics_connection(False))))
         pass
 
     # noinspection PyShadowingNames

@@ -669,6 +669,8 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         insert.add_value(table.vector_group.query_index, power_transformer.vector_group.short_name)
         insert.add_value(table.transformer_utilisation.query_index, power_transformer.transformer_utilisation)
+        insert.add_value(table.construction_kind.query_index, power_transformer.construction_kind.short_name)
+        insert.add_value(table.function.query_index, power_transformer.function.short_name)
         insert.add_value(table.power_transformer_info_mrid.query_index, self._mrid_or_none(power_transformer.asset_info))
 
         return self._save_conducting_equipment(table, insert, power_transformer, "power transformer")
