@@ -263,7 +263,22 @@ def create_street_address():
     return builds(
         StreetAddress,
         postal_code=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        town_detail=builds(TownDetail)
+        town_detail=builds(TownDetail),
+        po_box=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        street_detail=builds(StreetDetail)
+    )
+
+
+def create_street_detail():
+    return builds(
+        StreetDetail,
+        building_name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        floor_identification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        number=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        suite_number=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        type=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        display_address=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
 

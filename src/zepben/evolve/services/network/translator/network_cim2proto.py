@@ -30,6 +30,7 @@ from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location as PBLocat
 from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint as PBPositionPoint
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
 from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
+from zepben.protobuf.cim.iec61968.common.StreetDetail_pb2 import StreetDetail as PBStreetDetail
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice as PBEndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter as PBMeter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint as PBUsagePoint
@@ -392,6 +393,18 @@ def position_point_to_pb(cim: PositionPoint) -> PBPositionPoint:
 
 def street_address_to_pb(cim: StreetAddress) -> PBStreetAddress:
     return PBStreetAddress(postalCode=cim.postal_code, townDetail=_get_or_none(town_detail_to_pb, cim.town_detail))
+
+
+def street_detail_to_pb(cim: StreetDetail) -> PBStreetDetail:
+    return PBStreetDetail(
+        buildingName=cim.building_name,
+        floorIdentification=cim.floor_identification,
+        name=cim.name,
+        number=cim.number,
+        suiteNumber=cim.suite_number,
+        type=cim.type,
+        displayAddress=cim.display_address
+    )
 
 
 def town_detail_to_pb(cim: TownDetail) -> PBTownDetail:

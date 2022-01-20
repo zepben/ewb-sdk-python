@@ -34,6 +34,7 @@ from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as
 from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint as PBPositionPoint
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
 from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
+from zepben.protobuf.cim.iec61968.common.StreetDetail_pb2 import StreetDetail as PBStreetDetail
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice as PBEndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter as PBMeter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint as PBUsagePoint
@@ -329,7 +330,26 @@ def position_point():
 
 
 def street_address():
-    return builds(PBStreetAddress, postalCode=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), townDetail=town_detail())
+    return builds(
+        PBStreetAddress,
+        postalCode=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        townDetail=town_detail(),
+        poBox=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        streetDetail=street_detail()
+    )
+
+
+def street_detail():
+    return builds(
+        PBStreetDetail,
+        buildingName=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        floorIdentification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        number=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        suiteNumber=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        type=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        displayAddress=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
 
 
 def town_detail():

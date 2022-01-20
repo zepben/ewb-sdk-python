@@ -12,21 +12,21 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TableAssetContainers, AssetInfo, TableAssetInfo, AssetOrganisationRole, TableAssetOrganisationRoles, Structure, TableStructures, TableAssetOwners, \
     AssetOwner, TablePoles, Pole, TableStreetlights, Streetlight, StreetlightLampKind, TableLocations, TableLocationStreetAddresses, \
     TableLocationStreetAddressField, TablePositionPoints, PositionPoint, TableStreetAddresses, StreetAddress, TableTownDetails, TownDetail, \
-    TransformerConstructionKind, TransformerFunctionKind, EndDevice, TableEndDevices, TableMeters, Meter, TableUsagePoints, UsagePoint, \
-    TableOperationalRestrictions, OperationalRestriction, AuxiliaryEquipment, TableAuxiliaryEquipment, Terminal, TableFaultIndicators, FaultIndicator, \
-    AcDcTerminal, TableAcDcTerminals, TableBaseVoltages, BaseVoltage, ConductingEquipment, TableConductingEquipment, TableConnectivityNodes, ConnectivityNode, \
-    ConnectivityNodeContainer, TableConnectivityNodeContainers, Equipment, TableEquipment, EquipmentContainer, TableEquipmentContainers, TableFeeders, Feeder, \
-    Substation, GeographicalRegion, TableGeographicalRegions, PowerSystemResource, TablePowerSystemResources, TableSites, Site, TableSubGeographicalRegions, \
-    SubGeographicalRegion, TableSubstations, TableTerminals, PhaseCode, TableEquivalentBranches, EquivalentBranch, EquivalentEquipment, \
-    TableEquivalentEquipment, TableAccumulators, Accumulator, TableAnalogs, Analog, TableControls, Control, TableDiscretes, Discrete, IoPoint, TableIoPoints, \
-    Measurement, TableMeasurements, RemoteSource, UnitSymbol, TableRemoteControls, RemoteControl, RemotePoint, TableRemotePoints, TableRemoteSources, \
-    TableBatteryUnit, BatteryUnit, BatteryStateKind, TablePhotoVoltaicUnit, PhotoVoltaicUnit, PowerElectronicsUnit, TablePowerElectronicsUnit, \
-    PowerElectronicsConnection, TablePowerElectronicsWindUnit, PowerElectronicsWindUnit, TableAcLineSegments, AcLineSegment, PerLengthSequenceImpedance, \
-    TableBreakers, Breaker, TableLoadBreakSwitches, LoadBreakSwitch, TableBusbarSections, BusbarSection, Conductor, TableConductors, Connector, \
-    TableConnectors, TableDisconnectors, Disconnector, EnergyConnection, TableEnergyConnections, TableEnergyConsumers, EnergyConsumer, \
-    PhaseShuntConnectionKind, TableEnergyConsumerPhases, EnergyConsumerPhase, SinglePhaseKind, TableEnergySources, EnergySource, TableEnergySourcePhases, \
-    EnergySourcePhase, TableFuses, Fuse, TableJumpers, Jumper, TableJunctions, Junction, Line, TableLines, TableLinearShuntCompensators, \
-    LinearShuntCompensator, PerLengthImpedance, TablePerLengthImpedances, PerLengthLineParameter, TablePerLengthLineParameters, \
+    TableStreetDetails, StreetDetail, TransformerConstructionKind, TransformerFunctionKind, EndDevice, TableEndDevices, TableMeters, Meter, TableUsagePoints, \
+    UsagePoint, TableOperationalRestrictions, OperationalRestriction, AuxiliaryEquipment, TableAuxiliaryEquipment, Terminal, TableFaultIndicators, \
+    FaultIndicator, AcDcTerminal, TableAcDcTerminals, TableBaseVoltages, BaseVoltage, ConductingEquipment, TableConductingEquipment, TableConnectivityNodes, \
+    ConnectivityNode, ConnectivityNodeContainer, TableConnectivityNodeContainers, Equipment, TableEquipment, EquipmentContainer, TableEquipmentContainers, \
+    TableFeeders, Feeder, Substation, GeographicalRegion, TableGeographicalRegions, PowerSystemResource, TablePowerSystemResources, TableSites, Site, \
+    TableSubGeographicalRegions, SubGeographicalRegion, TableSubstations, TableTerminals, PhaseCode, TableEquivalentBranches, EquivalentBranch, \
+    EquivalentEquipment, TableEquivalentEquipment, TableAccumulators, Accumulator, TableAnalogs, Analog, TableControls, Control, TableDiscretes, Discrete, \
+    IoPoint, TableIoPoints, Measurement, TableMeasurements, RemoteSource, UnitSymbol, TableRemoteControls, RemoteControl, RemotePoint, TableRemotePoints, \
+    TableRemoteSources, TableBatteryUnit, BatteryUnit, BatteryStateKind, TablePhotoVoltaicUnit, PhotoVoltaicUnit, PowerElectronicsUnit, \
+    TablePowerElectronicsUnit, PowerElectronicsConnection, TablePowerElectronicsWindUnit, PowerElectronicsWindUnit, TableAcLineSegments, AcLineSegment, \
+    PerLengthSequenceImpedance, TableBreakers, Breaker, TableLoadBreakSwitches, LoadBreakSwitch, TableBusbarSections, BusbarSection, Conductor, \
+    TableConductors, Connector, TableConnectors, TableDisconnectors, Disconnector, EnergyConnection, TableEnergyConnections, TableEnergyConsumers, \
+    EnergyConsumer, PhaseShuntConnectionKind, TableEnergyConsumerPhases, EnergyConsumerPhase, SinglePhaseKind, TableEnergySources, EnergySource, \
+    TableEnergySourcePhases, EnergySourcePhase, TableFuses, Fuse, TableJumpers, Jumper, TableJunctions, Junction, Line, TableLines, \
+    TableLinearShuntCompensators, LinearShuntCompensator, PerLengthImpedance, TablePerLengthImpedances, PerLengthLineParameter, TablePerLengthLineParameters, \
     TablePerLengthSequenceImpedances, TablePowerElectronicsConnection, TablePowerElectronicsConnectionPhases, PowerElectronicsConnectionPhase, \
     TablePowerTransformers, PowerTransformer, VectorGroup, TablePowerTransformerEnds, PowerTransformerEnd, ProtectedSwitch, TableProtectedSwitches, \
     TableRatioTapChangers, RatioTapChanger, TransformerEnd, TableReclosers, Recloser, RegulatingCondEq, TableRegulatingCondEq, ShuntCompensator, \
@@ -237,19 +237,35 @@ class NetworkCIMReader(BaseCIMReader):
         # noinspection PyArgumentList
         return StreetAddress(
             rs.get_string(table.postal_code.query_index, ""),
-            self._load_town_detail(table, rs)
+            self._load_town_detail(table, rs),
+            rs.get_string(table.po_box.query_index, ""),
+            self._load_street_detail(table, rs)
         )
 
     @staticmethod
-    def _load_town_detail(table: TableTownDetails, rs: ResultSet) -> Optional[TownDetail]:
-        town_name = rs.get_string(table.town_name.query_index, None)
-        state_or_province = rs.get_string(table.state_or_province.query_index, None)
-
-        if (town_name is None) and (state_or_province is None):
-            return None
-
+    def _load_street_detail(table: TableStreetDetails, rs: ResultSet) -> Optional[StreetDetail]:
         # noinspection PyArgumentList
-        return TownDetail(town_name if town_name is not None else "", state_or_province if state_or_province is not None else "")
+        street_detail = StreetDetail(
+            rs.get_string(table.building_name.query_index, ""),
+            rs.get_string(table.floor_identification.query_index, ""),
+            rs.get_string(table.street_name.query_index, ""),
+            rs.get_string(table.number.query_index, ""),
+            rs.get_string(table.suite_number.query_index, ""),
+            rs.get_string(table.type.query_index, ""),
+            rs.get_string(table.display_address.query_index, "")
+        )
+
+        return None if street_detail.all_fields_empty() else street_detail
+
+    @staticmethod
+    def _load_town_detail(table: TableTownDetails, rs: ResultSet) -> Optional[TownDetail]:
+        # noinspection PyArgumentList
+        town_detail = TownDetail(
+            rs.get_string(table.town_name.query_index, ""),
+            rs.get_string(table.state_or_province.query_index, "")
+        )
+
+        return None if town_detail.all_fields_empty() else town_detail
 
     # ************ IEC61968 METERING ************
 

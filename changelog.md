@@ -19,9 +19,13 @@
 * Added the following CIM classes/enums:
   * `TransformerConstructionKind`
   * `TransformerFunctionKind`
+  * `StreetDetail`
 * Added the following `PowerTransformer` fields:
   * `construction_kind: TransformerConstructionKind`
   * `function: TransformerFunctionKind`
+* Added the following `StreetAddress` fields:
+  * `po_box: str`
+  * `street_detail: Optional[StreetDetail]`
 
 ##### Enhancements
 * None.
