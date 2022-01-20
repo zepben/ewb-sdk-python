@@ -11,8 +11,8 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TableTransformerTankInfo, TransformerTest, TableTransformerTest, WireInfo, TableWireInfo, WireMaterialKind, Asset, TableAssets, Location, AssetContainer, \
     TableAssetContainers, AssetInfo, TableAssetInfo, AssetOrganisationRole, TableAssetOrganisationRoles, Structure, TableStructures, TableAssetOwners, \
     AssetOwner, TablePoles, Pole, TableStreetlights, Streetlight, StreetlightLampKind, TableLocations, TableLocationStreetAddresses, \
-    TableLocationStreetAddressField, TablePositionPoints, PositionPoint, TableStreetAddresses, StreetAddress, TableTownDetails, TownDetail, \
-    TableStreetDetails, StreetDetail, TransformerConstructionKind, TransformerFunctionKind, EndDevice, TableEndDevices, TableMeters, Meter, TableUsagePoints, \
+    TableLocationStreetAddressField, TablePositionPoints, PositionPoint, TableStreetAddresses, StreetAddress, TableTownDetails, TownDetail, StreetDetail, \
+    TransformerConstructionKind, TransformerFunctionKind, EndDevice, TableEndDevices, TableMeters, Meter, TableUsagePoints, \
     UsagePoint, TableOperationalRestrictions, OperationalRestriction, AuxiliaryEquipment, TableAuxiliaryEquipment, Terminal, TableFaultIndicators, \
     FaultIndicator, AcDcTerminal, TableAcDcTerminals, TableBaseVoltages, BaseVoltage, ConductingEquipment, TableConductingEquipment, TableConnectivityNodes, \
     ConnectivityNode, ConnectivityNodeContainer, TableConnectivityNodeContainers, Equipment, TableEquipment, EquipmentContainer, TableEquipmentContainers, \
@@ -243,7 +243,7 @@ class NetworkCIMReader(BaseCIMReader):
         )
 
     @staticmethod
-    def _load_street_detail(table: TableStreetDetails, rs: ResultSet) -> Optional[StreetDetail]:
+    def _load_street_detail(table: TableStreetAddresses, rs: ResultSet) -> Optional[StreetDetail]:
         # noinspection PyArgumentList
         street_detail = StreetDetail(
             rs.get_string(table.building_name.query_index, ""),

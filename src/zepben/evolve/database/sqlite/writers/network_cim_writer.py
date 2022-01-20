@@ -26,12 +26,11 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     TableNoLoadTests, TableTransformerTest, TransformerTest, ShortCircuitTest, TableShortCircuitTests, OpenCircuitTest, TableOpenCircuitTests, \
     PerLengthImpedance, TablePerLengthImpedances, TableAssetOrganisationRoles, AssetOwner, TableAssetOwners, TableStructures, Structure, Pole, TablePoles, \
     Streetlight, TableStreetlights, Location, TableLocations, TableLocationStreetAddressField, StreetAddress, TableLocationStreetAddresses, PositionPoint, \
-    TablePositionPoints, TableStreetAddresses, TableTownDetails, TownDetail, TableStreetDetails, StreetDetail, TableEndDevices, Meter, TableMeters, \
-    TableUsagePoints, OperationalRestriction, \
-    TableOperationalRestrictions, TableFaultIndicators, TableAuxiliaryEquipment, AuxiliaryEquipment, FaultIndicator, TableMeasurements, Measurement, Analog, \
-    TableAnalogs, Accumulator, TableAccumulators, Discrete, TableDiscretes, Control, TableControls, TableIoPoints, IoPoint, TableRemotePoints, RemotePoint, \
-    RemoteControl, TableRemoteControls, RemoteSource, TableRemoteSources, ShuntCompensatorInfo, TableShuntCompensatorInfo, EquivalentBranch, \
-    EquivalentEquipment, Recloser, TableReclosers, TableEquipmentOperationalRestrictions
+    TablePositionPoints, TableStreetAddresses, TableTownDetails, TownDetail, StreetDetail, TableEndDevices, Meter, TableMeters, TableUsagePoints, \
+    OperationalRestriction, TableOperationalRestrictions, TableFaultIndicators, TableAuxiliaryEquipment, AuxiliaryEquipment, FaultIndicator, \
+    TableMeasurements, Measurement, Analog, TableAnalogs, Accumulator, TableAccumulators, Discrete, TableDiscretes, Control, TableControls, TableIoPoints, \
+    IoPoint, TableRemotePoints, RemotePoint, RemoteControl, TableRemoteControls, RemoteSource, TableRemoteSources, ShuntCompensatorInfo, \
+    TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, Recloser, TableReclosers, TableEquipmentOperationalRestrictions
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -211,14 +210,14 @@ class NetworkCIMWriter(BaseCIMWriter):
     # ************ IEC61968 COMMON ************
 
     @staticmethod
-    def insert_street_detail(table: TableStreetDetails, insert: PreparedStatement, street_detail: StreetDetail):
-        insert.add_value(table.building_name.query_index, street_detail.building_name)
-        insert.add_value(table.floor_identification.query_index, street_detail.floor_identification)
-        insert.add_value(table.street_name.query_index, street_detail.name)
-        insert.add_value(table.number.query_index, street_detail.number)
-        insert.add_value(table.suite_number.query_index, street_detail.suite_number)
-        insert.add_value(table.type.query_index, street_detail.type)
-        insert.add_value(table.display_address.query_index, street_detail.display_address)
+    def insert_street_detail(table: TableStreetAddresses, insert: PreparedStatement, street_detail: StreetDetail):
+        insert.add_value(table.building_name.query_index, street_detail.building_name if street_detail else "")
+        insert.add_value(table.floor_identification.query_index, street_detail.floor_identification if street_detail else "")
+        insert.add_value(table.street_name.query_index, street_detail.name if street_detail else "")
+        insert.add_value(table.number.query_index, street_detail.number if street_detail else "")
+        insert.add_value(table.suite_number.query_index, street_detail.suite_number if street_detail else "")
+        insert.add_value(table.type.query_index, street_detail.type if street_detail else "")
+        insert.add_value(table.display_address.query_index, street_detail.display_address if street_detail else "")
 
     @staticmethod
     def insert_town_detail(table: TableTownDetails, insert: PreparedStatement, town_detail: TownDetail):
@@ -263,8 +262,8 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.postal_code.query_index, street_address.postal_code)
         insert.add_value(table.po_box.query_index, street_address.po_box)
 
-        NetworkCIMWriter.insert_street_detail(table, insert, street_address.street_detail)
-        NetworkCIMWriter.insert_town_detail(table, insert, street_address.town_detail)
+        self.insert_street_detail(table, insert, street_address.street_detail)
+        self.insert_town_detail(table, insert, street_address.town_detail)
 
         return self.try_execute_single_update(insert, street_id, description)
 

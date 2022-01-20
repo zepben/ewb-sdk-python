@@ -16,7 +16,7 @@ street_detail_kwargs = {
     "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "number": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "suite_number": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-    "type": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+    "street_type": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "display_address": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
 }
 

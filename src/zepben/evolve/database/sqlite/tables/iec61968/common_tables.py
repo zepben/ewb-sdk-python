@@ -10,8 +10,8 @@ from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects
 from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
-__all__ = ["TableDocuments", "TableAgreements", "TableLocations", "TableTownDetails", "TableStreetDetails", "TableStreetAddresses",
-           "TableLocationStreetAddresses", "TableLocationStreetAddressField", "TableOrganisationRoles", "TablePositionPoints", "TableOrganisations"]
+__all__ = ["TableDocuments", "TableAgreements", "TableLocations", "TableTownDetails", "TableStreetAddresses", "TableLocationStreetAddresses",
+           "TableLocationStreetAddressField", "TableOrganisationRoles", "TablePositionPoints", "TableOrganisations"]
 
 
 # noinspection PyAbstractClass
@@ -56,7 +56,9 @@ class TableTownDetails(SqliteTable):
 
 
 # noinspection PyAbstractClass
-class TableStreetDetails(SqliteTable):
+class TableStreetAddresses(TableTownDetails):
+    postal_code: Column = None
+    po_box: Column = None
     building_name: Column = None
     floor_identification: Column = None
     street_name: Column = None
@@ -66,25 +68,16 @@ class TableStreetDetails(SqliteTable):
     display_address: Column = None
 
     def __init__(self):
-        super(TableStreetDetails, self).__init__()
+        super(TableStreetAddresses, self).__init__()
+        self.postal_code = self._create_column("postal_code", "TEXT", Nullable.NOT_NULL)
+        self.po_box = self._create_column("po_box", "TEXT", Nullable.NOT_NULL)
         self.building_name = self._create_column("building_name", "TEXT", Nullable.NOT_NULL)
         self.floor_identification = self._create_column("floor_identification", "TEXT", Nullable.NOT_NULL)
-        self.street_name = self._create_column("street_name", "TEXT", Nullable.NOT_NULL)
+        self.street_name = self._create_column("name", "TEXT", Nullable.NOT_NULL)
         self.number = self._create_column("number", "TEXT", Nullable.NOT_NULL)
         self.suite_number = self._create_column("suite_number", "TEXT", Nullable.NOT_NULL)
         self.type = self._create_column("type", "TEXT", Nullable.NOT_NULL)
         self.display_address = self._create_column("display_address", "TEXT", Nullable.NOT_NULL)
-
-
-# noinspection PyAbstractClass
-class TableStreetAddresses(TableTownDetails, TableStreetDetails):
-    postal_code: Column = None
-    po_box: Column = None
-
-    def __init__(self):
-        super(TableStreetAddresses, self).__init__()
-        self.postal_code = self._create_column("postal_code", "TEXT", Nullable.NOT_NULL)
-        self.po_box = self._create_column("po_box", "TEXT", Nullable.NOT_NULL)
 
 
 class TableLocationStreetAddresses(TableStreetAddresses):
