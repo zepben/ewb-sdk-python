@@ -45,7 +45,7 @@
   * `x0_max: Optional[float]`
 
 ##### Enhancements
-* None.
+* Enable asyncio for gRPC from the newest update of grpcio and grpcio-tool
 
 ##### Fixes
 * Updated gRPC to fix support for latest LetsEncrypt certificates.
