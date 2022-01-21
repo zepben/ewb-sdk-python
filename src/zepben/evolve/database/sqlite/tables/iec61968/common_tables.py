@@ -69,15 +69,15 @@ class TableStreetAddresses(TableTownDetails):
 
     def __init__(self):
         super(TableStreetAddresses, self).__init__()
-        self.postal_code = self._create_column("postal_code", "TEXT", Nullable.NOT_NULL)
-        self.po_box = self._create_column("po_box", "TEXT", Nullable.NOT_NULL)
-        self.building_name = self._create_column("building_name", "TEXT", Nullable.NOT_NULL)
-        self.floor_identification = self._create_column("floor_identification", "TEXT", Nullable.NOT_NULL)
-        self.street_name = self._create_column("name", "TEXT", Nullable.NOT_NULL)
-        self.number = self._create_column("number", "TEXT", Nullable.NOT_NULL)
-        self.suite_number = self._create_column("suite_number", "TEXT", Nullable.NOT_NULL)
-        self.type = self._create_column("type", "TEXT", Nullable.NOT_NULL)
-        self.display_address = self._create_column("display_address", "TEXT", Nullable.NOT_NULL)
+        self.postal_code = self._create_column("postal_code", "TEXT", Nullable.NULL)
+        self.po_box = self._create_column("po_box", "TEXT", Nullable.NULL)
+        self.building_name = self._create_column("building_name", "TEXT", Nullable.NULL)
+        self.floor_identification = self._create_column("floor_identification", "TEXT", Nullable.NULL)
+        self.street_name = self._create_column("name", "TEXT", Nullable.NULL)
+        self.number = self._create_column("number", "TEXT", Nullable.NULL)
+        self.suite_number = self._create_column("suite_number", "TEXT", Nullable.NULL)
+        self.type = self._create_column("type", "TEXT", Nullable.NULL)
+        self.display_address = self._create_column("display_address", "TEXT", Nullable.NULL)
 
 
 class TableLocationStreetAddresses(TableStreetAddresses):
