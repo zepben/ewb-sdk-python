@@ -27,6 +27,20 @@
 * Added the following `StreetAddress` fields:
   * `po_box: str`
   * `street_detail: Optional[StreetDetail]`
+* Added the following `EnergySource` fields:
+  * `is_external_grid: bool = False`
+  * `r_min: Optional[float]`
+  * `rn_min: Optional[float]`
+  * `r0_min: Optional[float]`
+  * `x_min: Optional[float]`
+  * `xn_min: Optional[float]`
+  * `x0_min: Optional[float]`
+  * `r_max: Optional[float]`
+  * `rn_max: Optional[float]`
+  * `r0_max: Optional[float]`
+  * `x_max: Optional[float]`
+  * `xn_max: Optional[float]`
+  * `x0_max: Optional[float]`
 
 ##### Enhancements
 * None.
