@@ -960,7 +960,20 @@ def energy_source_to_cim(pb: PBEnergySource, network_service: NetworkService) ->
         r0=float_or_none(pb.r0),
         rn=float_or_none(pb.rn),
         x0=float_or_none(pb.x0),
-        xn=float_or_none(pb.xn)
+        xn=float_or_none(pb.xn),
+        is_external_grid=pb.isExternalGrid,
+        r_min=float_or_none(pb.rMin),
+        rn_min=float_or_none(pb.rnMin),
+        r0_min=float_or_none(pb.r0Min),
+        x_min=float_or_none(pb.xMin),
+        xn_min=float_or_none(pb.xnMin),
+        x0_min=float_or_none(pb.x0Min),
+        r_max=float_or_none(pb.rMax),
+        rn_max=float_or_none(pb.rnMax),
+        r0_max=float_or_none(pb.r0Max),
+        x_max=float_or_none(pb.xMax),
+        xn_max=float_or_none(pb.xnMax),
+        x0_max=float_or_none(pb.x0Max)
     )
 
     for mrid in pb.energySourcePhasesMRIDs:

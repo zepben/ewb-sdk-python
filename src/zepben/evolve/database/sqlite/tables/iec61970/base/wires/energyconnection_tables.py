@@ -109,6 +109,19 @@ class TableEnergySources(TableEnergyConnections):
     x: Column = None
     x0: Column = None
     xn: Column = None
+    is_external_grid: Column = None
+    r_min: Column = None
+    rn_min: Column = None
+    r0_min: Column = None
+    x_min: Column = None
+    xn_min: Column = None
+    x0_min: Column = None
+    r_max: Column = None
+    rn_max: Column = None
+    r0_max: Column = None
+    x_max: Column = None
+    xn_max: Column = None
+    x0_max: Column = None
 
     def __init__(self):
         super(TableEnergySources, self).__init__()
@@ -124,6 +137,19 @@ class TableEnergySources(TableEnergyConnections):
         self.x = self._create_column("x", "NUMBER", Nullable.NULL)
         self.x0 = self._create_column("x0", "NUMBER", Nullable.NULL)
         self.xn = self._create_column("xn", "NUMBER", Nullable.NULL)
+        self.is_external_grid = self._create_column("is_external_grid", "BOOLEAN", Nullable.NULL)
+        self.r_min = self._create_column("r_min", "NUMBER", Nullable.NULL)
+        self.rn_min = self._create_column("rn_min", "NUMBER", Nullable.NULL)
+        self.r0_min = self._create_column("r0_min", "NUMBER", Nullable.NULL)
+        self.x_min = self._create_column("x_min", "NUMBER", Nullable.NULL)
+        self.xn_min = self._create_column("xn_min", "NUMBER", Nullable.NULL)
+        self.x0_min = self._create_column("x0_min", "NUMBER", Nullable.NULL)
+        self.r_max = self._create_column("r_max", "NUMBER", Nullable.NULL)
+        self.rn_max = self._create_column("rn_max", "NUMBER", Nullable.NULL)
+        self.r0_max = self._create_column("r0_max", "NUMBER", Nullable.NULL)
+        self.x_max = self._create_column("x_max", "NUMBER", Nullable.NULL)
+        self.xn_max = self._create_column("xn_max", "NUMBER", Nullable.NULL)
+        self.x0_max = self._create_column("x0_max", "NUMBER", Nullable.NULL)
 
     def name(self) -> str:
         return "energy_sources"

@@ -844,7 +844,20 @@ def create_energy_source(include_runtime: bool = True):
         r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         rn=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        xn=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        xn=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        is_external_grid=booleans(),
+        r_min=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rn_min=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0_min=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x_min=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xn_min=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0_min=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r_max=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        rn_max=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0_max=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x_max=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        xn_max=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0_max=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 

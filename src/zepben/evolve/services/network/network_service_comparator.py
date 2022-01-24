@@ -542,7 +542,23 @@ class NetworkServiceComparator(BaseServiceComparator):
             EnergySource.rn,
             EnergySource.x,
             EnergySource.x0,
-            EnergySource.xn
+            EnergySource.xn,
+            EnergySource.r_min,
+            EnergySource.rn_min,
+            EnergySource.r0_min,
+            EnergySource.x_min,
+            EnergySource.xn_min,
+            EnergySource.x0_min,
+            EnergySource.r_max,
+            EnergySource.rn_max,
+            EnergySource.r0_max,
+            EnergySource.x_max,
+            EnergySource.xn_max,
+            EnergySource.x0_max
+        )
+        self._compare_values(
+            diff,
+            EnergySource.is_external_grid
         )
 
         return self._compare_energy_connection(diff)

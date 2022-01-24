@@ -68,6 +68,48 @@ class EnergySource(EnergyConnection):
     xn: Optional[float] = None
     """Negative sequence Thevenin reactance."""
 
+    is_external_grid: bool = False
+    """
+    True if this energy source represents the higher-level power grid connection to an external grid
+    that normally is modelled as the slack bus for power flow calculations.
+    """
+
+    r_min: Optional[float] = None
+    """Minimum positive sequence Thevenin resistance."""
+
+    rn_min: Optional[float] = None
+    """Minimum negative sequence Thevenin resistance."""
+
+    r0_min: Optional[float] = None
+    """Minimum zero sequence Thevenin resistance."""
+
+    x_min: Optional[float] = None
+    """Minimum positive sequence Thevenin reactance."""
+
+    xn_min: Optional[float] = None
+    """Minimum negative sequence Thevenin reactance."""
+
+    x0_min: Optional[float] = None
+    """Minimum zero sequence Thevenin reactance."""
+
+    r_max: Optional[float] = None
+    """Maximum positive sequence Thevenin resistance."""
+
+    rn_max: Optional[float] = None
+    """Maximum negative sequence Thevenin resistance."""
+
+    r0_max: Optional[float] = None
+    """Maximum zero sequence Thevenin resistance."""
+
+    x_max: Optional[float] = None
+    """Maximum positive sequence Thevenin reactance."""
+
+    xn_max: Optional[float] = None
+    """Maximum negative sequence Thevenin reactance."""
+
+    x0_max: Optional[float] = None
+    """Maximum zero sequence Thevenin reactance."""
+
     def __init__(self, energy_source_phases: List[EnergySourcePhase] = None, **kwargs):
         super(EnergySource, self).__init__(**kwargs)
         if energy_source_phases:
