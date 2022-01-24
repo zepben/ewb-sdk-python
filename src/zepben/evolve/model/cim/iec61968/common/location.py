@@ -62,6 +62,7 @@ class TownDetail(object):
     """Name of the state or province."""
 
     def all_fields_empty(self):
+        """Check to see if all fields of this `TownDetail` are null or empty."""
         return not (self.name or self.state_or_province)
 
 
@@ -90,6 +91,7 @@ class StreetDetail(object):
     """The address as it should be displayed to a user."""
 
     def all_fields_empty(self):
+        """Check to see if all fields of this `StreetDetail` are empty."""
         return not (
             self.building_name or
             self.floor_identification or
