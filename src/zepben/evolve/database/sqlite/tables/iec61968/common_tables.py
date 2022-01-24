@@ -69,7 +69,7 @@ class TableStreetAddresses(TableTownDetails):
 
     def __init__(self):
         super(TableStreetAddresses, self).__init__()
-        self.postal_code = self._create_column("postal_code", "TEXT", Nullable.NULL)
+        self.postal_code = self._create_column("postal_code", "TEXT", Nullable.NOT_NULL)
         self.po_box = self._create_column("po_box", "TEXT", Nullable.NULL)
         self.building_name = self._create_column("building_name", "TEXT", Nullable.NULL)
         self.floor_identification = self._create_column("floor_identification", "TEXT", Nullable.NULL)
