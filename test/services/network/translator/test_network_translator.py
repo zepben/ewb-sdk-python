@@ -6,7 +6,7 @@
 import pytest
 from hypothesis import given, HealthCheck, settings
 
-from database.sqlite.schema_utils import assume_non_blank_street_address_details
+from test.database.sqlite.schema_utils import assume_non_blank_street_address_details
 from test.cim_creators import *
 from test.services.common.translator.base_test_translator import validate_service_translations
 

@@ -392,7 +392,12 @@ def position_point_to_pb(cim: PositionPoint) -> PBPositionPoint:
 
 
 def street_address_to_pb(cim: StreetAddress) -> PBStreetAddress:
-    return PBStreetAddress(postalCode=cim.postal_code, townDetail=_get_or_none(town_detail_to_pb, cim.town_detail))
+    return PBStreetAddress(
+        postalCode=cim.postal_code,
+        townDetail=_get_or_none(town_detail_to_pb, cim.town_detail),
+        poBox=cim.po_box,
+        streetDetail=_get_or_none(street_detail_to_pb, cim.street_detail)
+    )
 
 
 def street_detail_to_pb(cim: StreetDetail) -> PBStreetDetail:

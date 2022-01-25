@@ -432,7 +432,12 @@ def position_point_to_cim(pb: PBPositionPoint) -> Optional[PositionPoint]:
 
 def street_address_to_cim(pb: PBStreetAddress) -> Optional[StreetAddress]:
     # noinspection PyArgumentList
-    return StreetAddress(postal_code=pb.postalCode, town_detail=town_detail_to_cim(pb.townDetail) if pb.HasField('townDetail') else None)
+    return StreetAddress(
+        postal_code=pb.postalCode,
+        town_detail=town_detail_to_cim(pb.townDetail) if pb.HasField('townDetail') else None,
+        po_box=pb.poBox,
+        street_detail=street_detail_to_cim(pb.streetDetail) if pb.HasField('streetDetail') else None
+    )
 
 
 def street_detail_to_cim(pb: PBStreetDetail) -> Optional[StreetDetail]:
