@@ -21,8 +21,8 @@ town_detail_args = ["a", "b"]
 def test_town_detail_constructor_default():
     sa = TownDetail()
 
-    assert sa.name == ""
-    assert sa.state_or_province == ""
+    assert sa.name is None
+    assert sa.state_or_province is None
 
 
 @given(**town_detail_kwargs)

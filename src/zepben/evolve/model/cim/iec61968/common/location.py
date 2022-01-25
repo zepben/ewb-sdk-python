@@ -56,12 +56,12 @@ class TownDetail(object):
     Town details, in the context of address.
     """
 
-    name: str = ""
+    name: Optional[str] = None
     """Town name."""
-    state_or_province: str = ""
+    state_or_province: Optional[str] = None
     """Name of the state or province."""
 
-    def all_fields_empty(self):
+    def all_fields_null_or_empty(self):
         """Check to see if all fields of this `TownDetail` are null or empty."""
         return not (self.name or self.state_or_province)
 

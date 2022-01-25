@@ -265,7 +265,7 @@ class NetworkCIMReader(BaseCIMReader):
             rs.get_string(table.state_or_province.query_index, "")
         )
 
-        return None if town_detail.all_fields_empty() else town_detail
+        return None if town_detail.all_fields_null_or_empty() else town_detail
 
     # ************ IEC61968 METERING ************
 
