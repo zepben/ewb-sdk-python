@@ -34,7 +34,7 @@ setup(
     python_requires='>=3.7',
     install_requires=[
         "requests<2.27.0,>=2.26.0",
-        "zepben.protobuf==0.19.0b3",
+        "zepben.protobuf==0.19.0b4",
         "zepben.auth==0.6.0",
         "dataclassy==0.6.2",
         "grpcio==1.41.1"

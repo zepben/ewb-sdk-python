@@ -30,8 +30,7 @@ from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location as PBLocat
 from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint as PBPositionPoint
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
 from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
-from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerConstructionKind_pb2 import TransformerConstructionKind as PBTransformerConstructionKind
-from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerFunctionKind_pb2 import TransformerFunctionKind as PBTransformerFunctionKind
+from zepben.protobuf.cim.iec61968.common.StreetDetail_pb2 import StreetDetail as PBStreetDetail
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice as PBEndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter as PBMeter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint as PBUsagePoint
@@ -433,7 +432,25 @@ def position_point_to_cim(pb: PBPositionPoint) -> Optional[PositionPoint]:
 
 def street_address_to_cim(pb: PBStreetAddress) -> Optional[StreetAddress]:
     # noinspection PyArgumentList
-    return StreetAddress(postal_code=pb.postalCode, town_detail=town_detail_to_cim(pb.townDetail) if pb.HasField('townDetail') else None)
+    return StreetAddress(
+        postal_code=pb.postalCode,
+        town_detail=town_detail_to_cim(pb.townDetail) if pb.HasField('townDetail') else None,
+        po_box=pb.poBox,
+        street_detail=street_detail_to_cim(pb.streetDetail) if pb.HasField('streetDetail') else None
+    )
+
+
+def street_detail_to_cim(pb: PBStreetDetail) -> Optional[StreetDetail]:
+    # noinspection PyArgumentList
+    return StreetDetail(
+        building_name=pb.buildingName,
+        floor_identification=pb.floorIdentification,
+        name=pb.name,
+        number=pb.number,
+        suite_number=pb.suiteNumber,
+        type=pb.type,
+        display_address=pb.displayAddress
+    )
 
 
 def town_detail_to_cim(pb: PBTownDetail) -> Optional[TownDetail]:

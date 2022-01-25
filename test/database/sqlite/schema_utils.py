@@ -4,7 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime
-from typing import TypeVar, Type
+from typing import TypeVar, Type, Optional
+
+from hypothesis import assume
 
 from zepben.evolve import MetadataCollection, NetworkService, DiagramService, CustomerService, MeasurementService, NameType, Organisation, DataSource, \
     IdentifiedObject, EnergyConsumerPhase, EnergyConsumer, EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, \
@@ -12,7 +14,7 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, Name, \
     PowerSystemResource, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, \
     PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, \
-    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop
+    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -30,6 +32,10 @@ class Services(object):
         self.diagram_service = DiagramService()
         self.customer_service = CustomerService()
         self.measurement_service = MeasurementService()
+
+
+def assume_non_blank_street_address_details(address: Optional[StreetAddress]):
+    assume(not address or (not address.town_detail.all_fields_null_or_empty() and not address.street_detail.all_fields_empty()))
 
 
 class SchemaNetworks:

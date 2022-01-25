@@ -6,6 +6,7 @@
 import pytest
 from hypothesis import given, HealthCheck, settings
 
+from test.database.sqlite.schema_utils import assume_non_blank_street_address_details
 from test.cim_creators import *
 from test.services.common.translator.base_test_translator import validate_service_translations
 
@@ -38,7 +39,8 @@ types_to_test = {
     # IEC61968 COMMON #
     ###################
 
-    "create_location": create_location(),
+    # NOTE: location is tested separately due to constraints on the translation.
+    # "create_location": create_location(),
     "create_organisation": create_organisation(),
 
     #####################
@@ -144,6 +146,14 @@ types_to_test = {
 @pytest.mark.timeout(10000)
 def test_network_service_translations(**kwargs):
     validate_service_translations(NetworkService, NetworkServiceComparator(), **kwargs)
+
+
+@given(location=create_location())
+@settings(suppress_health_check=[HealthCheck.too_slow])
+@pytest.mark.timeout(10000)
+def test_network_service_translations_location(location: Location):
+    assume_non_blank_street_address_details(location.main_address)
+    validate_service_translations(NetworkService, NetworkServiceComparator(), location=location)
 
 
 #

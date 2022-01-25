@@ -13,7 +13,7 @@ from dataclassy import dataclass
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import require, nlen, ngen, safe_remove
 
-__all__ = ["PositionPoint", "Location", "StreetAddress", "TownDetail"]
+__all__ = ["PositionPoint", "Location", "StreetAddress", "TownDetail", "StreetDetail"]
 
 
 @dataclass(slots=True, frozen=True)
@@ -56,10 +56,51 @@ class TownDetail(object):
     Town details, in the context of address.
     """
 
-    name: str = ""
+    name: Optional[str] = None
     """Town name."""
-    state_or_province: str = ""
+    state_or_province: Optional[str] = None
     """Name of the state or province."""
+
+    def all_fields_null_or_empty(self):
+        """Check to see if all fields of this `TownDetail` are null or empty."""
+        return not (self.name or self.state_or_province)
+
+
+@dataclass(slots=True)
+class StreetDetail(object):
+    """
+    Street details, in the context of address.
+    """
+
+    building_name: str = ""
+    """
+    (if applicable) In certain cases the physical location of the place of interest does not have a direct point of entry from the street, 
+    but may be located inside a larger structure such as a building, complex, office block, apartment, etc.
+    """
+    floor_identification: str = ""
+    """The identification by name or number, expressed as text, of the floor in the building as part of this address."""
+    name: str = ""
+    """Name of the street."""
+    number: str = ""
+    """Designator of the specific location on the street."""
+    suite_number: str = ""
+    """Number of the apartment or suite."""
+    type: str = ""
+    """Type of street. Examples include: street, circle, boulevard, avenue, road, drive, etc."""
+    display_address: str = ""
+    """The address as it should be displayed to a user."""
+
+    def all_fields_empty(self):
+        """Check to see if all fields of this `StreetDetail` are empty."""
+        return not (
+            self.building_name or
+            self.floor_identification or
+            self.name or
+            self.number or
+            self.suite_number or
+            self.type or
+            self.display_address
+        )
 
 
 @dataclass(slots=True)
@@ -72,6 +113,10 @@ class StreetAddress(object):
     """Postal code for the address."""
     town_detail: Optional[TownDetail] = None
     """Optional `TownDetail` for this address."""
+    po_box: str = ""
+    """Post office box for the address."""
+    street_detail: Optional[StreetDetail] = None
+    """Optional `StreetDetail` for this address."""
 
 
 class Location(IdentifiedObject):

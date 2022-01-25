@@ -235,7 +235,7 @@ def create_location(include_runtime: bool = True):
     return builds(
         Location,
         **create_identified_object(include_runtime),
-        main_address=builds(StreetAddress),
+        main_address=create_street_address(),
         position_points=lists(create_position_point(), max_size=4)
     )
 
@@ -263,7 +263,22 @@ def create_street_address():
     return builds(
         StreetAddress,
         postal_code=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        town_detail=builds(TownDetail)
+        town_detail=create_town_detail(),
+        po_box=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        street_detail=create_street_detail()
+    )
+
+
+def create_street_detail():
+    return builds(
+        StreetDetail,
+        building_name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        floor_identification=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        number=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        suite_number=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        type=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        display_address=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
 
 
