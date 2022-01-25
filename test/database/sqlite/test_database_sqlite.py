@@ -26,8 +26,8 @@ from test.cim_creators import create_cable_info, create_no_load_test, create_ope
     create_junction, create_linear_shunt_compensator, create_load_break_switch, create_per_length_sequence_impedance, create_power_electronics_connection, \
     create_power_electronics_connection_phase, create_power_transformer, create_power_transformer_end, create_ratio_tap_changer, create_recloser, \
     create_transformer_star_impedance, create_circuit, create_loop
-from test.database.sqlite.schema_utils import SchemaNetworks, Services
-from zepben.evolve import MetadataCollection, NetworkService, DiagramService, CustomerService, IdentifiedObject, AcLineSegment, CableInfo, \
+from test.database.sqlite.schema_utils import SchemaNetworks, Services, assume_non_blank_street_address_details
+from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, \
     NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, \
     AssetOwner, Pole, Streetlight, Customer, CustomerAgreement, PricingStructure, Tariff, Meter, UsagePoint, Location, Organisation, OperationalRestriction, \
     FaultIndicator, BaseVoltage, ConnectivityNode, Feeder, GeographicalRegion, Site, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, \
@@ -35,7 +35,7 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     PhotoVoltaicUnit, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, \
     EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, BaseService, \
-    DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator
+    DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
@@ -45,7 +45,6 @@ std_err = io.StringIO()
 
 
 def log_on_failure_decorator(func):
-
     @functools.wraps(func)
     def log_on_failure(*args, **kwargs):
         try:
@@ -62,7 +61,6 @@ def log_on_failure_decorator(func):
 
 
 class TestDatabaseSqlite(object):
-
     _caplog: Any
 
     # ************ IEC61968 ASSET INFO ************
@@ -333,6 +331,7 @@ class TestDatabaseSqlite(object):
         self._validate_schema(SchemaNetworks().network_services_of(Accumulator, data.draw(create_accumulator(False))))
 
         # self._validate_schema(SchemaNetworks().measurement_services_of(AccumulatorValue, data.draw(create_accumulator_value(False))))
+
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=1000)
@@ -341,6 +340,7 @@ class TestDatabaseSqlite(object):
         self._validate_schema(SchemaNetworks().network_services_of(Analog, data.draw(create_analog(False))))
 
         # self._validate_schema(SchemaNetworks().measurement_services_of(AnalogValue, data.draw(create_analog_value(False))))
+
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=1000)
@@ -356,6 +356,7 @@ class TestDatabaseSqlite(object):
         self._validate_schema(SchemaNetworks().network_services_of(Discrete, data.draw(create_discrete(False))))
 
         # self._validate_schema(SchemaNetworks().measurement_services_of(DiscreteValue, data.draw(create_discrete_value(False))))
+
     # ************ IEC61970 BASE SCADA ************
 
     # noinspection PyShadowingNames
@@ -611,6 +612,28 @@ class TestDatabaseSqlite(object):
 
         self._test_duplicate_mrid_error(write_services, read_services, read_services.network_service, junction)
 
+    @log_on_failure_decorator
+    def test_only_loads_street_address_fields_if_required(self, caplog):
+        write_services = Services()
+        read_services = Services()
+
+        # noinspection PyArgumentList
+        location = Location(mrid="loc1", main_address=StreetAddress(town_detail=TownDetail(), street_detail=StreetDetail()))
+        write_services.network_service.add(location)
+
+        read_services = Services()
+
+        def validate_read(success):
+            assert success
+            loc = read_services.network_service.get("loc1", Location)
+            assert loc.main_address == StreetAddress()
+
+        self._test_write_read(
+            write_services,
+            read_services,
+            validate_read
+        )
+
     def _test_duplicate_mrid_error(
         self,
         write_services: Services,
@@ -620,9 +643,6 @@ class TestDatabaseSqlite(object):
     ):
         expected_error = f"Failed to load {duplicate}. Unable to add to service '{service_with_duplicate.name}': duplicate MRID"
 
-        def validate_write(success):
-            assert success
-
         def validate_read(success):
             assert not success
             assert expected_error in self._caplog.text
@@ -630,81 +650,54 @@ class TestDatabaseSqlite(object):
         self._test_write_read(
             write_services,
             read_services,
-            validate_write,
             validate_read
         )
 
     def _validate_schema(self, expected: Services):
-        self._caplog.clear()
-        schema_test_file_temp = tempfile.NamedTemporaryFile()
-        schema_test_file = schema_test_file_temp.name
-        try:
-            # noinspection PyArgumentList
-            was_written = DatabaseWriter(schema_test_file).save(
-                expected.metadata_collection,
-                [
-                    expected.network_service,
-                    expected.diagram_service,
-                    expected.customer_service
-                ]
-            )
-        except Exception as e:
-            print_exc()
-            raise e
-        if not was_written:
-            print(self._caplog.text)
-        assert was_written
+        for location in expected.network_service.objects(Location):
+            assume_non_blank_street_address_details(location.main_address)
 
-        assert f"Creating database schema v{TableVersion.SUPPORTED_VERSION}" in self._caplog.text
-        assert os.path.isfile(schema_test_file)
+        read_services = Services()
 
-        metadata_collection = MetadataCollection()
-        network_service = NetworkService()
-        diagram_service = DiagramService()
-        customer_service = CustomerService()
+        def validate_read(success):
+            assert success
+            self._validate_metadata(read_services.metadata_collection, expected.metadata_collection)
+            self._validate_service(read_services.network_service, expected.network_service, NetworkServiceComparator())
+            self._validate_service(read_services.diagram_service, expected.diagram_service, DiagramServiceComparator())
+            self._validate_service(read_services.customer_service, expected.customer_service, CustomerServiceComparator())
+            for d_obj in filter(lambda it: it.identified_object_mrid is not None, expected.diagram_service.objects(DiagramObject)):
+                assert read_services.diagram_service.get_diagram_objects(d_obj.identified_object_mrid)
 
-        try:
-            was_read = DatabaseReader(schema_test_file).load(metadata_collection, network_service, diagram_service, customer_service)
-        except Exception as e:
-            print_exc()
-            raise e
-        if not was_read:
-            print(self._caplog.text)
-        assert was_read
+        self._test_write_read(
+            expected,
+            read_services,
+            validate_read
+        )
 
-        self._validate_metadata(metadata_collection, expected.metadata_collection)
-        self._validate_service(network_service, expected.network_service, NetworkServiceComparator())
-        self._validate_service(diagram_service, expected.diagram_service, DiagramServiceComparator())
-        self._validate_service(customer_service, expected.customer_service, CustomerServiceComparator())
-        for d_obj in filter(lambda it: it.identified_object_mrid is not None, expected.diagram_service.objects(DiagramObject)):
-            assert diagram_service.get_diagram_objects(d_obj.identified_object_mrid)
-
-    @staticmethod
     def _test_write_read(
+        self,
         write: Services,
         read: Services,
-        validate_write: Callable[[bool], None],
         validate_read: Callable[[bool], None]
     ):
+        self._caplog.clear()
         global std_err
         std_err = io.StringIO()
         with contextlib.redirect_stderr(std_err):
             schema_test_file_temp = tempfile.NamedTemporaryFile()
             schema_test_file = schema_test_file_temp.name
             # noinspection PyArgumentList
-            validate_write(
-                DatabaseWriter(schema_test_file).save(
-                    write.metadata_collection,
-                    [
-                        write.network_service,
-                        write.diagram_service,
-                        write.customer_service
-                    ]
-                )
+            assert DatabaseWriter(schema_test_file).save(
+                write.metadata_collection,
+                [
+                    write.network_service,
+                    write.diagram_service,
+                    write.customer_service
+                ]
             )
 
-            if not os.path.isfile(schema_test_file):
-                return
+            assert f"Creating database schema v{TableVersion.SUPPORTED_VERSION}" in self._caplog.text
+            assert os.path.isfile(schema_test_file)
 
             validate_read(
                 DatabaseReader(schema_test_file).load(
