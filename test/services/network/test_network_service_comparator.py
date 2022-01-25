@@ -653,6 +653,19 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(EnergySource.x, EnergySource, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(EnergySource.x0, EnergySource, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(EnergySource.xn, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.is_external_grid, EnergySource, lambda _: False, lambda _: True)
+        self.validator.validate_property(EnergySource.r_min, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.rn_min, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.r0_min, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.x_min, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.xn_min, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.x0_min, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.r_max, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.rn_max, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.r0_max, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.x_max, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.xn_max, EnergySource, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EnergySource.x0_max, EnergySource, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_collection(
             EnergySource.phases,
             EnergySource.add_phase,

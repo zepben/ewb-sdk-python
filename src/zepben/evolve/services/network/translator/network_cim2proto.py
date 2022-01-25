@@ -827,7 +827,20 @@ def energy_source_to_pb(cim: EnergySource) -> PBEnergySource:
         r0=from_nullable_float(cim.r0),
         rn=from_nullable_float(cim.rn),
         x0=from_nullable_float(cim.x0),
-        xn=from_nullable_float(cim.xn)
+        xn=from_nullable_float(cim.xn),
+        isExternalGrid=cim.is_external_grid,
+        rMin=from_nullable_float(cim.r_min),
+        rnMin=from_nullable_float(cim.rn_min),
+        r0Min=from_nullable_float(cim.r0_min),
+        xMin=from_nullable_float(cim.x_min),
+        xnMin=from_nullable_float(cim.xn_min),
+        x0Min=from_nullable_float(cim.x0_min),
+        rMax=from_nullable_float(cim.r_max),
+        rnMax=from_nullable_float(cim.rn_max),
+        r0Max=from_nullable_float(cim.r0_max),
+        xMax=from_nullable_float(cim.x_max),
+        xnMax=from_nullable_float(cim.xn_max),
+        x0Max=from_nullable_float(cim.x0_max)
     )
 
 
