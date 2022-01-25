@@ -24,15 +24,15 @@ street_detail_args = ["a", "b", "c", "d", "e", "f", "g"]
 
 
 def test_street_detail_constructor_default():
-    sa = StreetDetail()
+    sd = StreetDetail()
 
-    assert sa.building_name == ""
-    assert sa.floor_identification == ""
-    assert sa.name == ""
-    assert sa.number == ""
-    assert sa.suite_number == ""
-    assert sa.type == ""
-    assert sa.display_address == ""
+    assert sd.building_name == ""
+    assert sd.floor_identification == ""
+    assert sd.name == ""
+    assert sd.number == ""
+    assert sd.suite_number == ""
+    assert sd.type == ""
+    assert sd.display_address == ""
 
 
 @given(**street_detail_kwargs)
@@ -40,7 +40,7 @@ def test_street_detail_constructor_kwargs(building_name, floor_identification, n
     assert not kwargs
 
     # noinspection PyArgumentList
-    sa = StreetDetail(
+    sd = StreetDetail(
         building_name=building_name,
         floor_identification=floor_identification,
         name=name,
@@ -50,23 +50,37 @@ def test_street_detail_constructor_kwargs(building_name, floor_identification, n
         display_address=display_address
     )
 
-    assert sa.building_name == building_name
-    assert sa.floor_identification == floor_identification
-    assert sa.name == name
-    assert sa.number == number
-    assert sa.suite_number == suite_number
-    assert sa.type == street_type
-    assert sa.display_address == display_address
+    assert sd.building_name == building_name
+    assert sd.floor_identification == floor_identification
+    assert sd.name == name
+    assert sd.number == number
+    assert sd.suite_number == suite_number
+    assert sd.type == street_type
+    assert sd.display_address == display_address
 
 
 def test_street_detail_constructor_args():
     # noinspection PyArgumentList
-    sa = StreetDetail(*street_detail_args)
+    sd = StreetDetail(*street_detail_args)
 
-    assert sa.building_name == street_detail_args[-7]
-    assert sa.floor_identification == street_detail_args[-6]
-    assert sa.name == street_detail_args[-5]
-    assert sa.number == street_detail_args[-4]
-    assert sa.suite_number == street_detail_args[-3]
-    assert sa.type == street_detail_args[-2]
-    assert sa.display_address == street_detail_args[-1]
+    assert sd.building_name == street_detail_args[-7]
+    assert sd.floor_identification == street_detail_args[-6]
+    assert sd.name == street_detail_args[-5]
+    assert sd.number == street_detail_args[-4]
+    assert sd.suite_number == street_detail_args[-3]
+    assert sd.type == street_detail_args[-2]
+    assert sd.display_address == street_detail_args[-1]
+
+
+# noinspection PyArgumentList
+def test_all_fields_empty():
+    assert StreetDetail().all_fields_empty()
+
+    assert not StreetDetail(building_name="value").all_fields_empty()
+    assert not StreetDetail(floor_identification="value").all_fields_empty()
+    assert not StreetDetail(name="value").all_fields_empty()
+    assert not StreetDetail(number="value").all_fields_empty()
+    assert not StreetDetail(suite_number="value").all_fields_empty()
+    assert not StreetDetail(type="value").all_fields_empty()
+    assert not StreetDetail(display_address="value").all_fields_empty()
+
