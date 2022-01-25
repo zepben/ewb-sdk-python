@@ -612,7 +612,7 @@ class NetworkCIMReader(BaseCIMReader):
         energy_source.x = rs.get_double(table.x.query_index, None)
         energy_source.x0 = rs.get_double(table.x0.query_index, None)
         energy_source.xn = rs.get_double(table.xn.query_index, None)
-        energy_source.is_external_grid = rs.get_boolean(table.is_external_grid.query_index, None)
+        energy_source.is_external_grid = rs.get_boolean(table.is_external_grid.query_index)
         energy_source.r_min = rs.get_double(table.r_min.query_index, None)
         energy_source.rn_min = rs.get_double(table.rn_min.query_index, None)
         energy_source.r0_min = rs.get_double(table.r0_min.query_index, None)

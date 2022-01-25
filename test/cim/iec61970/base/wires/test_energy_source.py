@@ -27,7 +27,7 @@ energy_source_kwargs = {
     "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "x0": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "xn": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "is_external_grid": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    "is_external_grid": booleans(),
     "r_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "rn_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "r0_min": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
