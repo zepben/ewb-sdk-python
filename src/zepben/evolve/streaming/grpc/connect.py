@@ -42,7 +42,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
 
-    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `token_fetcher` is not provided.
         Defaults to http://<host>/auth
     `secure` True if SSL is required, False otherwise (default). Must be True for authentication settings to be utilised.
 
@@ -72,7 +72,6 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
     """
     if secure:
         if conf_address is None:
-            # TODO: Why is this http instead of https?
             conf_address = f"http://{host}/auth"
         # Channel credential will be valid for the entire channel
         channel_credentials = grpc.ssl_channel_credentials(ca, pkey, cert)
@@ -144,14 +143,16 @@ def connect(host: str = "localhost",
             cert=None,
             ca=None,
             token_fetcher: Optional[ZepbenTokenFetcher] = None,
-            secure=False):
+            secure=False,
+            verify_auth_certificate=False,
+            auth_ca=None):
     """
     Connect to a Zepben gRPC service.
 
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
 
-    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `token_fetcher` is not provided.
         Defaults to http://<host>/auth
     `secure` True if SSL is required, False otherwise (default). Must be True for authentication settings to be utilised.
 
@@ -176,7 +177,8 @@ def connect(host: str = "localhost",
     Raises `ConnectionError` if unable to make a connection to the server.
     Returns a gRPC channel
     """
-    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, token_fetcher, secure)
+    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, token_fetcher, secure, verify_auth_certificate,
+                auth_ca)
 
 
 @contextlib.asynccontextmanager
@@ -191,14 +193,16 @@ async def connect_async(host: str = "localhost",
                         cert=None,
                         ca=None,
                         token_fetcher: Optional[ZepbenTokenFetcher] = None,
-                        secure=False):
+                        secure=False,
+                        verify_auth_certificate=False,
+                        auth_ca=None):
     """
     Connect to a Zepben gRPC service.
 
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
 
-    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `token_fetcher` is not provided.
         Defaults to http://<host>/auth
     `secure` True if SSL is required, False otherwise (default). Must be True for authentication settings to be utilised.
 
@@ -223,4 +227,5 @@ async def connect_async(host: str = "localhost",
     Raises `ConnectionError` if unable to make a connection to the server.
     Returns a gRPC channel
     """
-    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, token_fetcher, secure)
+    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, token_fetcher, secure, verify_auth_certificate,
+                auth_ca)
