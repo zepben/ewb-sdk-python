@@ -12,21 +12,21 @@ import warnings
 from typing import Optional
 
 import grpc
-from zepben.auth import ZepbenAuthenticator, create_authenticator
+from zepben.auth.client import ZepbenTokenFetcher, create_token_fetcher
 
 __all__ = ["connect", "connect_async"]
 _AUTH_HEADER_KEY = 'authorization'
 
-GRPC_READY_TIMEOUT = 5 # seconds
+GRPC_READY_TIMEOUT = 5  # seconds
 
 
 class AuthTokenPlugin(grpc.AuthMetadataPlugin):
 
-    def __init__(self, authenticator: ZepbenAuthenticator):
-        self.authenticator = authenticator
+    def __init__(self, token_fetcher: ZepbenTokenFetcher):
+        self.token_fetcher = token_fetcher
 
     def __call__(self, context, callback):
-        token = self.authenticator.fetch_token()
+        token = self.token_fetcher.fetch_token()
         if token:
             callback(((_AUTH_HEADER_KEY, token),), None)
         else:
@@ -35,14 +35,15 @@ class AuthTokenPlugin(grpc.AuthMetadataPlugin):
 
 def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = None, client_id: Optional[str] = None,
           username: Optional[str] = None, password: Optional[str] = None, client_secret: Optional[str] = None, pkey=None, cert=None, ca=None,
-          authenticator: Optional[ZepbenAuthenticator] = None, secure: bool = False):
+          token_fetcher: Optional[ZepbenTokenFetcher] = None, secure: bool = False, verify_auth_certificate=False, auth_ca=None):
     """
     Connect to a Zepben gRPC service.
 
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
 
-    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided. Defaults to http://<host>/auth
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
+        Defaults to http://<host>/auth
     `secure` True if SSL is required, False otherwise (default). Must be True for authentication settings to be utilised.
 
     One of the following sets of arguments must be provided when authentication is configured on the server:
@@ -57,22 +58,26 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
     `username` The username to use for an OAuth password grant.
     `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
 
-    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above credentials.
+    `token_fetcher` A token fetcher that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above credentials.
 
     `pkey` Private key for client authentication if client authentication is required.
     `cert` Corresponding signed certificate if client authentication is required. CN must reflect your hosts FQDN, and must be signed by the servers CA.
     `ca` CA trust for the server, or None to use OS default certificate bundle.
+
+    `verify_auth_certificate` Whether to authenticate the certificate from the authentication provider.
+    `auth_ca` CA trust for the authentication provider, or None to use OS default certificate bundle.
 
     Raises `ConnectionError` if unable to make a connection to the server.
     Returns a gRPC channel
     """
     if secure:
         if conf_address is None:
+            # TODO: Why is this http instead of https?
             conf_address = f"http://{host}/auth"
         # Channel credential will be valid for the entire channel
         channel_credentials = grpc.ssl_channel_credentials(ca, pkey, cert)
-        if authenticator:
-            call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(authenticator=authenticator))
+        if token_fetcher:
+            call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(token_fetcher=token_fetcher))
 
             # Combining channel credentials and call credentials together
             composite_credentials = grpc.composite_channel_credentials(
@@ -82,8 +87,8 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
             channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
         elif client_id and username and password:
             # Create a basic ClientCredentials authenticator
-            authenticator = create_authenticator(conf_address)
-            authenticator.token_request_data.update({
+            token_fetcher = create_token_fetcher(conf_address, verify_auth_certificate, ca_filename=auth_ca)
+            token_fetcher.token_request_data.update({
                 'client_id': client_id,
                 'username': username,
                 'password': password,
@@ -91,7 +96,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
                 'scope': 'offline_access'
             })
 
-            call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(authenticator))
+            call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(token_fetcher))
 
             # Combining channel credentials and call credentials together
             composite_credentials = grpc.composite_channel_credentials(
@@ -101,10 +106,10 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
             channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
         elif client_id and client_secret:
             # Create a basic ClientCredentials authenticator
-            authenticator = create_authenticator(conf_address)
-            authenticator.token_request_data.update({'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'})
+            token_fetcher = create_token_fetcher(conf_address, verify_auth_certificate, ca_filename=auth_ca)
+            token_fetcher.token_request_data.update({'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'})
 
-            call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(authenticator))
+            call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(token_fetcher))
 
             # Combining channel credentials and call credentials together
             composite_credentials = grpc.composite_channel_credentials(
@@ -121,7 +126,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
 
     try:
         grpc.channel_ready_future(channel).result(timeout=GRPC_READY_TIMEOUT)
-    except grpc.FutureTimeoutError as f:
+    except grpc.FutureTimeoutError:
         raise ConnectionError(f"Timed out connecting to server {host}:{rpc_port}")
 
     return channel
@@ -138,7 +143,7 @@ def connect(host: str = "localhost",
             pkey=None,
             cert=None,
             ca=None,
-            authenticator: Optional[ZepbenAuthenticator] = None,
+            token_fetcher: Optional[ZepbenTokenFetcher] = None,
             secure=False):
     """
     Connect to a Zepben gRPC service.
@@ -146,7 +151,8 @@ def connect(host: str = "localhost",
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
 
-    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided. Defaults to http://<host>/auth
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
+        Defaults to http://<host>/auth
     `secure` True if SSL is required, False otherwise (default). Must be True for authentication settings to be utilised.
 
     One of the following sets of arguments must be provided when authentication is configured on the server:
@@ -161,7 +167,7 @@ def connect(host: str = "localhost",
     `username` The username to use for an OAuth password grant.
     `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
 
-    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above credentials.
+    `token_fetcher` A token fetcher that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above credentials.
 
     `pkey` Private key for client authentication if client authentication is required.
     `cert` Corresponding signed certificate if client authentication is required. CN must reflect your hosts FQDN, and must be signed by the servers CA.
@@ -170,7 +176,7 @@ def connect(host: str = "localhost",
     Raises `ConnectionError` if unable to make a connection to the server.
     Returns a gRPC channel
     """
-    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, authenticator, secure)
+    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, token_fetcher, secure)
 
 
 @contextlib.asynccontextmanager
@@ -184,7 +190,7 @@ async def connect_async(host: str = "localhost",
                         pkey=None,
                         cert=None,
                         ca=None,
-                        authenticator: Optional[ZepbenAuthenticator] = None,
+                        token_fetcher: Optional[ZepbenTokenFetcher] = None,
                         secure=False):
     """
     Connect to a Zepben gRPC service.
@@ -192,7 +198,8 @@ async def connect_async(host: str = "localhost",
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
 
-    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided. Defaults to http://<host>/auth
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `authenticator` is not provided.
+        Defaults to http://<host>/auth
     `secure` True if SSL is required, False otherwise (default). Must be True for authentication settings to be utilised.
 
     One of the following sets of arguments must be provided when authentication is configured on the server:
@@ -207,7 +214,7 @@ async def connect_async(host: str = "localhost",
     `username` The username to use for an OAuth password grant.
     `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
 
-    `authenticator` An authenticator that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above credentials.
+    `token_fetcher` A token fetcher that can provide OAuth2 tokens the `host` can validate. If this is provided, it takes precedence over the above credentials.
 
     `pkey` Private key for client authentication if client authentication is required.
     `cert` Corresponding signed certificate if client authentication is required. CN must reflect your hosts FQDN, and must be signed by the servers CA.
@@ -216,4 +223,4 @@ async def connect_async(host: str = "localhost",
     Raises `ConnectionError` if unable to make a connection to the server.
     Returns a gRPC channel
     """
-    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, authenticator, secure)
+    yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, token_fetcher, secure)

@@ -35,7 +35,7 @@ setup(
     install_requires=[
         "requests<2.27.0,>=2.26.0",
         "zepben.protobuf==0.19.0b6",
-        "zepben.auth==0.6.0",
+        "zepben.auth==0.7.0b2",
         "dataclassy==0.6.2",
         "grpcio==1.41.1"
     ],
