@@ -65,7 +65,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
     `ca` CA trust for the server, or None to use OS default certificate bundle.
 
     `verify_auth_certificate` Whether to authenticate the certificate from the authentication provider.
-    `auth_ca` CA trust for the authentication provider, or None to use OS default certificate bundle.
+    `auth_ca` Filename of CA bundle for the authentication provider, or None to use OS default certificate bundle.
 
     Raises `ConnectionError` if unable to make a connection to the server.
     Returns a gRPC channel
@@ -174,6 +174,9 @@ def connect(host: str = "localhost",
     `cert` Corresponding signed certificate if client authentication is required. CN must reflect your hosts FQDN, and must be signed by the servers CA.
     `ca` CA trust for the server, or None to use OS default certificate bundle.
 
+    `verify_auth_certificate` Whether to authenticate the certificate from the authentication provider.
+    `auth_ca` Filename of CA bundle for the authentication provider, or None to use OS default certificate bundle.
+
     Raises `ConnectionError` if unable to make a connection to the server.
     Returns a gRPC channel
     """
@@ -223,6 +226,9 @@ async def connect_async(host: str = "localhost",
     `pkey` Private key for client authentication if client authentication is required.
     `cert` Corresponding signed certificate if client authentication is required. CN must reflect your hosts FQDN, and must be signed by the servers CA.
     `ca` CA trust for the server, or None to use OS default certificate bundle.
+
+    `verify_auth_certificate` Whether to authenticate the certificate from the authentication provider.
+    `auth_ca` Filename of CA bundle for the authentication provider, or None to use OS default certificate bundle.
 
     Raises `ConnectionError` if unable to make a connection to the server.
     Returns a gRPC channel
