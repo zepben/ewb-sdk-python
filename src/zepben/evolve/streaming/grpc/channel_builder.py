@@ -4,9 +4,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import contextlib
-import warnings
 from abc import ABC
-from typing import Optional, List
+from typing import Optional
 
 import grpc
 from zepben.auth.client import ZepbenTokenFetcher
@@ -19,11 +18,10 @@ class GrpcChannelBuilder(ABC):
     def __init__(self):
         self._socket_address: str = "localhost:50051"
         self._channel_credentials: Optional[grpc.ChannelCredentials] = None
-        self._auth_conf_address: Optional[str] = None
 
     def _build(self) -> grpc.Channel:
         if self._channel_credentials:
-            return grpc.secure_channel(self._socket_address, grpc.composite_channel_credentials(self._channel_credentials, *self._call_credentials))
+            return grpc.secure_channel(self._socket_address, self._channel_credentials)
 
         return grpc.insecure_channel(self._socket_address)
 
@@ -33,7 +31,7 @@ class GrpcChannelBuilder(ABC):
             grpc.channel_ready_future(channel).result(timeout=timeout)
         except grpc.FutureTimeoutError:
             raise ConnectionError(f"Timed out connecting to server {self._socket_address}")
-        yield channel
+        return channel
 
     @contextlib.contextmanager
     def connect(self, timeout=5) -> grpc.Channel:
@@ -45,8 +43,6 @@ class GrpcChannelBuilder(ABC):
 
     def socket_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
         self._socket_address = f"{host}:{port}"
-        if not self._auth_conf_address:
-            self._auth_conf_address = f"http://{host}/auth"
         return self
 
     def make_secure(
@@ -59,10 +55,6 @@ class GrpcChannelBuilder(ABC):
         Secures channel with SSL credentials.
         """
         self._channel_credentials = grpc.ssl_channel_credentials(root_certificates, private_key, certificate_chain)
-        return self
-
-    def auth_config_address(self, conf_address: str) -> 'GrpcChannelBuilder':
-        self._auth_conf_address = conf_address
         return self
 
     def token_fetcher(self, token_fetcher: ZepbenTokenFetcher) -> 'GrpcChannelBuilder':
