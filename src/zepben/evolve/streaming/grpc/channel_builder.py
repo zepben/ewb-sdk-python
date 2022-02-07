@@ -3,14 +3,27 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import contextlib
 from abc import ABC
 from typing import Optional
 
 import grpc
 from zepben.auth.client import ZepbenTokenFetcher
 
-from zepben.evolve.streaming.grpc.connect import AuthTokenPlugin
+__all__ = ["GrpcChannelBuilder"]
+_AUTH_HEADER_KEY = 'authorization'
+
+
+class AuthTokenPlugin(grpc.AuthMetadataPlugin):
+
+    def __init__(self, token_fetcher: ZepbenTokenFetcher):
+        self.token_fetcher = token_fetcher
+
+    def __call__(self, context, callback):
+        token = self.token_fetcher.fetch_token()
+        if token:
+            callback(((_AUTH_HEADER_KEY, token),), None)
+        else:
+            callback()
 
 
 class GrpcChannelBuilder(ABC):
@@ -19,27 +32,19 @@ class GrpcChannelBuilder(ABC):
         self._socket_address: str = "localhost:50051"
         self._channel_credentials: Optional[grpc.ChannelCredentials] = None
 
-    def _build(self) -> grpc.Channel:
+    def build(self) -> grpc.Channel:
         if self._channel_credentials:
             return grpc.secure_channel(self._socket_address, self._channel_credentials)
 
         return grpc.insecure_channel(self._socket_address)
 
-    def _conn(self, timeout):
-        channel = self._build()
+    def connect(self, timeout) -> grpc.Channel:
+        channel = self.build()
         try:
             grpc.channel_ready_future(channel).result(timeout=timeout)
         except grpc.FutureTimeoutError:
             raise ConnectionError(f"Timed out connecting to server {self._socket_address}")
         return channel
-
-    @contextlib.contextmanager
-    def connect(self, timeout=5) -> grpc.Channel:
-        yield self._conn(timeout)
-
-    @contextlib.asynccontextmanager
-    async def connect_async(self, timeout=5) -> grpc.Channel:
-        yield self._conn(timeout)
 
     def socket_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
         self._socket_address = f"{host}:{port}"

@@ -132,6 +132,7 @@ from zepben.evolve.streaming.get.diagram_consumer import *
 from zepben.evolve.streaming.get.network_consumer import *
 from zepben.evolve.streaming.exceptions import *
 from zepben.evolve.streaming.grpc.grpc import *
+from zepben.evolve.streaming.grpc.channel_builder import *
 from zepben.evolve.streaming.grpc.connect import *
 
 
