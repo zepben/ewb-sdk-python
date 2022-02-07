@@ -4,6 +4,7 @@
 * Removed CIM gRPC producers.
 * Added support for `EquivalentBranches` in `BusBranchNetworkCreator`.
 * `TownDetail` fields are now nullable.
+* Simplified `connect` and `connect_async` by refactoring optional settings (e.g. password authentication) to other functions
 
 ##### New Features
 * Implemented database module for persisting to sqlite database.
