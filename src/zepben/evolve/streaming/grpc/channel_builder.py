@@ -9,7 +9,7 @@ from typing import Optional
 import grpc
 from zepben.auth.client import ZepbenTokenFetcher
 
-__all__ = ["GrpcChannelBuilder"]
+__all__ = ["GrpcChannelBuilder", "AuthTokenPlugin"]
 _AUTH_HEADER_KEY = 'authorization'
 
 
