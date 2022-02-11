@@ -19,6 +19,7 @@ from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetE
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, GetCurrentEquipmentForFeederResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
+from test.streaming.get.grpcio_aio_testing.mock_async_channel import testing_async_channel
 from test.pb_creators import network_identified_objects, ac_line_segment
 from test.streaming.get.data.hierarchy import create_hierarchy_network
 from test.streaming.get.data.loops import create_loops_network
@@ -36,7 +37,7 @@ class TestNetworkConsumer:
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.channel = grpc_testing.channel(nc_pb2.DESCRIPTOR.services_by_name.values(), grpc_testing.strict_real_time())
+        self.channel = testing_async_channel(nc_pb2.DESCRIPTOR.services_by_name.values(), grpc_testing.strict_real_time())
         self.mock_server = MockServer(self.channel, nc_pb2.DESCRIPTOR.services_by_name['NetworkConsumer'])
         self.client = NetworkConsumerClient(channel=self.channel)
         self.service = self.client.service
