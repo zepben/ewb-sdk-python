@@ -362,7 +362,14 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_id_references(diff, Terminal.conducting_equipment, Terminal.connectivity_node)
-        self._compare_values(diff, Terminal.phases, Terminal.traced_phases, Terminal.sequence_number)
+        self._compare_values(
+            diff,
+            Terminal.phases,
+            Terminal.sequence_number,
+            Terminal.normal_feeder_direction,
+            Terminal.current_feeder_direction,
+            Terminal.traced_phases
+        )
 
         return self._compare_ac_dc_terminal(diff)
 

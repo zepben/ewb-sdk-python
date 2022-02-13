@@ -186,6 +186,8 @@ __all__ = [
 #######################
 # IEC61968 ASSET INFO #
 #######################
+from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
+
 
 def cable_info_to_cim(pb: PBCableInfo, network_service: NetworkService) -> Optional[CableInfo]:
     # noinspection PyArgumentList
@@ -663,7 +665,9 @@ def terminal_to_cim(pb: PBTerminal, network_service: NetworkService) -> Optional
         mrid=pb.mrid(),
         phases=phase_code_by_id(pb.phases),
         sequence_number=pb.sequenceNumber,
-        traced_phases=TracedPhases(pb.tracedPhases.normalStatus, pb.tracedPhases.currentStatus),
+        normal_feeder_direction=FeederDirection(pb.normalFeederDirection),
+        current_feeder_direction=FeederDirection(pb.currentFeederDirection),
+        traced_phases=TracedPhases(pb.tracedPhases),
     )
 
     network_service.resolve_or_defer_reference(resolver.conducting_equipment(cim), pb.conductingEquipmentMRID)

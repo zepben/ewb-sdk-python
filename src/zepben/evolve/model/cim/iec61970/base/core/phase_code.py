@@ -130,5 +130,8 @@ class PhaseCode(Enum):
     def num_phases(self):
         return len(self.value)
 
+    def __contains__(self, item):
+        return item in self.single_phases
+
 
 _PHASE_CODE_VALUES = list(PhaseCode.__members__.values())

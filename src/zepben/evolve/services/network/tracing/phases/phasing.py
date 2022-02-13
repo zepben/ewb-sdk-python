@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Breaker
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.evolve.model.phasedirection import PhaseDirection
 from zepben.evolve.exceptions import PhaseException
 from zepben.evolve.services.network.tracing.connectivity import get_connectivity
 from zepben.evolve.exceptions import TracingException

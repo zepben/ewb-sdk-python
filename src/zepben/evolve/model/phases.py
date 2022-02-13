@@ -16,66 +16,48 @@ from dataclassy import dataclass
 
 from zepben.evolve.exceptions import PhaseException
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind, SINGLE_PHASE_KIND_VALUES
-from zepben.evolve.model.phasedirection import PhaseDirection
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
-__all__ = ["phase", "direction", "pos_shift", "add", "setphs", "remove", "remove_all", "TracedPhases", "NominalPhasePath"]
-CORE_MASKS = [0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000]
-DIR_MASK = 0b11
+__all__ = ["get_phase", "set_phase", "TracedPhases", "NominalPhasePath"]
 
-PHASE_DIR_MAP = defaultdict(lambda: SinglePhaseKind.NONE)
-PHASE_DIR_MAP[0b01] = SinglePhaseKind.A
-PHASE_DIR_MAP[0b10] = SinglePhaseKind.A
-PHASE_DIR_MAP[0b11] = SinglePhaseKind.A
-PHASE_DIR_MAP[0b0100] = SinglePhaseKind.B
-PHASE_DIR_MAP[0b1000] = SinglePhaseKind.B
-PHASE_DIR_MAP[0b1100] = SinglePhaseKind.B
-PHASE_DIR_MAP[0b010000] = SinglePhaseKind.C
-PHASE_DIR_MAP[0b100000] = SinglePhaseKind.C
-PHASE_DIR_MAP[0b110000] = SinglePhaseKind.C
-PHASE_DIR_MAP[0b01000000] = SinglePhaseKind.N
-PHASE_DIR_MAP[0b10000000] = SinglePhaseKind.N
-PHASE_DIR_MAP[0b11000000] = SinglePhaseKind.N
+BITS_TO_PHASE = defaultdict(lambda: SinglePhaseKind.NONE)
+BITS_TO_PHASE[0b0001] = SinglePhaseKind.A
+BITS_TO_PHASE[0b0010] = SinglePhaseKind.B
+BITS_TO_PHASE[0b0100] = SinglePhaseKind.C
+BITS_TO_PHASE[0b1000] = SinglePhaseKind.N
+
+PHASE_TO_BITS = defaultdict(lambda: 0)
+PHASE_TO_BITS[SinglePhaseKind.A] = 0b0001
+PHASE_TO_BITS[SinglePhaseKind.B] = 0b0010
+PHASE_TO_BITS[SinglePhaseKind.C] = 0b0100
+PHASE_TO_BITS[SinglePhaseKind.N] = 0b1000
+
+NOMINAL_PHASE_MASKS = [0x000f, 0x00f0, 0x0f00, 0xf000]
 
 
 def _valid_phase_check(nominal_phase):
-    if nominal_phase not in SINGLE_PHASE_KIND_VALUES[1:7]:
-        raise ValueError(f"INTERNAL ERROR: Phase {nominal_phase} is invalid. Must be one of {[it.short_name for it in SINGLE_PHASE_KIND_VALUES[1:7]]}.")
+    if nominal_phase == SinglePhaseKind.NONE or nominal_phase == SinglePhaseKind.INVALID:
+        raise ValueError(f"INTERNAL ERROR: Phase {nominal_phase} is invalid. Must not be NONE or INVALID.")
 
 
-def phase(status: int, nominal_phase: SinglePhaseKind):
-    core_val = (status >> (nominal_phase.mask_index * 8)) & 0xff
-    return PHASE_DIR_MAP[core_val]
+def get_phase(status: int, nominal_phase: SinglePhaseKind):
+    return BITS_TO_PHASE[(status >> _byte_selector(nominal_phase)) & 0x0f]
 
 
-def direction(status: int, nominal_phase: SinglePhaseKind):
-    dir_val = (status >> pos_shift(phase(status, nominal_phase), nominal_phase)) & DIR_MASK
-    return PhaseDirection(dir_val)
+def set_phase(status: int, traced_phase: SinglePhaseKind, nominal_phase: SinglePhaseKind) -> int:
+    if traced_phase == SinglePhaseKind.NONE:
+        return status & ~NOMINAL_PHASE_MASKS[nominal_phase.mask_index]
+    else:
+        return (status & ~NOMINAL_PHASE_MASKS[nominal_phase.mask_index]) | _shifted_value(traced_phase, nominal_phase)
 
 
-def pos_shift(phs: SinglePhaseKind, nominal_phase: SinglePhaseKind):
-    return (2 * max(phs.id - 1, 0)) + (nominal_phase.mask_index * 8)
+def _byte_selector(nominal_phase: SinglePhaseKind) -> int:
+    return nominal_phase.mask_index * 4
 
 
-def setphs(status: int, phs: SinglePhaseKind, direction_: PhaseDirection, nominal_phs: SinglePhaseKind) -> int:
-    return (status & ~CORE_MASKS[nominal_phs.mask_index]) | _shifted_value(direction_, phs, nominal_phs)
-
-
-def add(status: int, phs: SinglePhaseKind, direction_: PhaseDirection, nominal_phs: SinglePhaseKind) -> int:
-    return status | _shifted_value(direction_, phs, nominal_phs)
-
-
-def remove_all(status: int, nominal_phase: SinglePhaseKind) -> int:
-    return status & ~CORE_MASKS[nominal_phase.mask_index]
-
-
-def remove(status: int, phs: SinglePhaseKind, direction_: PhaseDirection, nominal_phs: SinglePhaseKind) -> int:
-    return status & ~_shifted_value(direction_, phs, nominal_phs)
-
-
-def _shifted_value(pd: PhaseDirection, spk: SinglePhaseKind, nom: SinglePhaseKind) -> int:
-    return pd.value << pos_shift(spk, nom)
-
+def _shifted_value(traced_phase: SinglePhaseKind, nominal_phase: SinglePhaseKind) -> int:
+    return PHASE_TO_BITS[traced_phase] << _byte_selector(nominal_phase)
+#todo split file into correct packages
 
 @dataclass(slots=True)
 class NominalPhasePath(object):
@@ -94,181 +76,109 @@ class NominalPhasePath(object):
 class TracedPhases(object):
     """
     Class that holds the traced phase statuses for the current and normal state of the network.
-    Each byte in an int is used to store all possible phases and directions for a core.
-    Each byte has 2 bits that represent the direction for a phase. If none of those bits are set the direction is equal to NONE.
-    Use the figures below as a reference.
-    <p>
-    PhaseStatus:     |          integer          |
-                     | byte | byte | byte | byte |
-                     |Core 3|Core 2|Core 1|Core 0|
-    <p>
-    Core:            |                 byte                  |
-                     |  2bits  |  2bits  |  2bits  |  2bits  |
-    Phase:           |    N    |    C    |    B    |    A    |
-    Direction:       |OUT | IN |OUT | IN |OUT | IN |OUT | IN |
+
+    Traced phase status:
+    |     integer      |
+    | 16 bits |16 bits |
+    | current | normal |
+
+    See [TracedPhasesBitManipulation] for details on bit representation for normal and current status.
     """
-    normal_status: int = 0
-    current_status: int = 0
+
+    phase_status: int = 0
+    """
+    The underlying implementation value tracking the phase statuses for the current and normal state of the network.
+    It is primarily used for data serialisation and debugging within official evolve libraries and utilities.
+
+    NOTE: This property should be considered evolve internal and not for public use as the underlying
+          data structure to store the status could change at any time (and thus be a breaking change).
+          Use at your own risk.
+    """
+
+    _NORMAL_MASK = 0x0000ffff
+    _CURRENT_MASK = 0xffff0000
+    _CURRENT_SHIFT = 16
 
     def __str__(self):
-        def to_string(select_phase, select_direction):
-            return ', '.join([f"{select_phase(phs).short_name}:{select_direction(phs).short_name}" for phs in PhaseCode.ABCN.single_phases])
+        def to_string(select_phase):
+            return ', '.join([select_phase(phs).short_name for phs in PhaseCode.ABCN.single_phases])
 
-        normal = to_string(self.phase_normal, self.direction_normal)
-        current = to_string(self.phase_current, self.direction_current)
-        return f"TracedPhases(normalStatus={{{normal}}}, currentStatus={{{current}}})"
+        return f"TracedPhases(normal={{{to_string(self.normal)}}}, current={{{to_string(self.current)}}})"
 
-    def phase_normal(self, nominal_phase: SinglePhaseKind):
+    def normal(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
         """
-        Get the normal (nominal) phase for a core.
-        `nominal_phase` The number of the core to check (between 0 - 4)
-        Returns `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` for the core
-        Raises `CoreException` if core is invalid.
+        Get the phase that was traced in the normal state of the network on this nominal phase.
+
+        `nominal_phase` The nominal phase to check.
+
+        Returns The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` traced in the normal state of the network for the nominal phase, or
+        SinglePhaseKind.NONE if the nominal phase is de-energised.
+
+        Raises `NominalPhaseException` if the nominal phase is invalid.
         """
         _valid_phase_check(nominal_phase)
-        return phase(self.normal_status, nominal_phase)
+        return get_phase(self.phase_status, nominal_phase)
 
-    def phase_current(self, nominal_phase: SinglePhaseKind):
+    def current(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
         """
-        Get the current (actual) phase for a core.
-        `nominal_phase` The number of the core to check (between 0 - 4)
-        Returns `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` for the core
+        Get the phase that was traced in the current state of the network on this nominal phase.
+
+        `nominal_phase` The nominal phase to check.
+
+        Returns The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` traced in the current state of the network for the nominal phase, or
+        SinglePhaseKind.NONE if the nominal phase is de-energised.
+
+        Raises `NominalPhaseException` if the nominal phase is invalid.
         """
         _valid_phase_check(nominal_phase)
-        return phase(self.current_status, nominal_phase)
+        return get_phase(self.phase_status >> self._CURRENT_SHIFT, nominal_phase)
 
-    def direction_normal(self, nominal_phase: SinglePhaseKind):
+    def set_normal(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
         """
-        Get the normal (nominal) direction for a core.
-        `nominal_phase` The number of the core to check (between 0 - 4)
-        Returns `zepben.phases.direction.Direction` for the core
-        """
-        _valid_phase_check(nominal_phase)
-        return direction(self.normal_status, nominal_phase)
+        Set the phase that was traced in the normal state of the network on this nominal phase.
 
-    def direction_current(self, nominal_phase: SinglePhaseKind):
-        """
-        Get the current (actual) direction for a core.
-        `nominal_phase` The number of the core to check (between 0 - 4)
-        Returns `zepben.phases.direction.Direction` for the core
-        """
-        _valid_phase_check(nominal_phase)
-        return direction(self.current_status, nominal_phase)
+        `nominal_phase` The nominal phase to use.
 
-    def add_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection):
+        `traced_phase` The traced phase to apply to the nominal phase.
+
+        Returns True if there was a change, otherwise False.
+
+        Raises `PhaseException` if phases cross. i.e. you try to apply more than one phase to a nominal phase.
+
+        Raises `NominalPhaseException` if the nominal phase is invalid.
         """
-        Add a normal phase
-        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        `nominal_phase` The core number this phase should be applied to
-        `dir_` The direction of this phase relative to the location of the `zepben.evolve.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
-        Returns True if phase status was changed, False otherwise.
-        Raises `zepben.phases.exceptions.PhaseException` if phases cross,
-                 `zepben.phases.exceptions.CoreException` if `nominal_phase` is invalid.
-        """
-        _valid_phase_check(nominal_phase)
-        if phs == SinglePhaseKind.NONE or dir_ == PhaseDirection.NONE:
+        it = self.normal(nominal_phase)
+        if it == traced_phase:
             return False
-        if self.phase_normal(nominal_phase) != SinglePhaseKind.NONE and phs != self.phase_normal(nominal_phase):
-            raise PhaseException("Crossing phases")
-        if self.direction_normal(nominal_phase).has(dir_):
-            return False
-
-        self.normal_status = add(self.normal_status, phs, dir_, nominal_phase)
-        return True
-
-    def add_current(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection):
-        """
-        Add a current phase
-        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        `nominal_phase` The core number this phase should be applied to
-        `dir_` The direction of this phase relative to the location of the `zepben.evolve.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
-        Returns True if phase status was changed, False otherwise.
-        Raises `zepben.phases.exceptions.PhaseException` if phases cross
-        """
-        _valid_phase_check(nominal_phase)
-        if phs == SinglePhaseKind.NONE or dir_ == PhaseDirection.NONE:
-            return False
-        if self.phase_current(nominal_phase) != SinglePhaseKind.NONE and phs != self.phase_current(nominal_phase):
-            raise PhaseException("Crossing phases")
-        if self.direction_current(nominal_phase).has(dir_):
-            return False
-
-        self.current_status = add(self.current_status, phs, dir_, nominal_phase)
-        return True
-
-    def set_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection):
-        """
-        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        `nominal_phase` The core number this phase should be applied to
-        `dir_` The direction of this phase relative to the location of the `zepben.evolve.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
-        Returns True if phase status was changed, False otherwise.
-        """
-        _valid_phase_check(nominal_phase)
-        if phs == SinglePhaseKind.NONE or dir_ == PhaseDirection.NONE:
-            self.remove_normal(self.phase_normal(nominal_phase), nominal_phase)
+        elif (it == SinglePhaseKind.NONE) or (traced_phase == SinglePhaseKind.NONE):
+            self.phase_status = (self.phase_status & self._CURRENT_MASK) | set_phase(self.phase_status, nominal_phase, traced_phase)
             return True
-
-        if self.phase_normal(nominal_phase) == phs and self.direction_normal(nominal_phase) == dir_:
-            return False
-
-        self.normal_status = setphs(self.normal_status, phs, dir_, nominal_phase)
-        return True
-
-    def set_current(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection):
-        """
-        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        `nominal_phase` The core number this phase should be applied to
-        `dir_` The direction of this phase relative to the location of the `zepben.evolve.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
-        Returns True if phase status was changed, False otherwise.
-        """
-        _valid_phase_check(nominal_phase)
-        if phs == SinglePhaseKind.NONE or dir_ == PhaseDirection.NONE:
-            self.remove_current(self.phase_current(nominal_phase), nominal_phase)
-            return True
-
-        if self.phase_current(nominal_phase) == phs and self.direction_current(nominal_phase) == dir_:
-            return False
-
-        self.current_status = setphs(self.current_status, phs, dir_, nominal_phase)
-        return True
-
-    def remove_normal(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection = None):
-        """
-        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        `nominal_phase` The core number this phase should be applied to
-        `dir_` The direction of this phase relative to the location of the `zepben.evolve.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
-        Returns True if phase status was changed, False otherwise.
-        """
-        _valid_phase_check(nominal_phase)
-        if phs != self.phase_normal(nominal_phase):
-            return False
-
-        if dir_ is not None:
-            if not self.direction_normal(nominal_phase).has(dir_):
-                return False
-            self.normal_status = remove(self.normal_status, phs, dir_, nominal_phase)
         else:
-            self.normal_status = remove_all(self.normal_status, nominal_phase)
-            return True
+            raise PhaseException("Crossing Phases.")
 
-    def remove_current(self, phs: SinglePhaseKind, nominal_phase: SinglePhaseKind, dir_: PhaseDirection = None):
+    def set_current(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
         """
-        `phs` The `zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind` to add.
-        `nominal_phase` The core number this phase should be applied to
-        `dir_` The direction of this phase relative to the location of the `zepben.evolve.iec61970.base.core.terminal.Terminal` to its feeder circuit breaker.
-        Returns True if phase status was changed, False otherwise.
+        Set the phase that was traced in the current state of the network on this nominal phase.
+
+        `nominal_phase` The nominal phase to use.
+
+        `traced_phase` The traced phase to apply to the nominal phase.
+
+        Returns True if there was a change, otherwise False.
+
+        Raises `PhaseException` if phases cross. i.e. you try to apply more than one phase to a nominal phase.
+
+        Raises `NominalPhaseException` if the nominal phase is invalid.
         """
-        _valid_phase_check(nominal_phase)
-        if phs != self.phase_current(nominal_phase):
+        it = self.current(nominal_phase)
+        if it == traced_phase:
             return False
-
-        if dir_ is not None:
-            if not self.direction_current(nominal_phase).has(dir_):
-                return False
-            self.current_status = remove(self.current_status, phs, dir_, nominal_phase)
-        else:
-            self.current_status = remove_all(self.current_status, nominal_phase)
+        elif (it == SinglePhaseKind.NONE) or (traced_phase == SinglePhaseKind.NONE):
+            self.phase_status = (self.phase_status & self._NORMAL_MASK) | (
+                    set_phase(self.phase_status >> self._CURRENT_MASK, nominal_phase, traced_phase) << self._CURRENT_MASK)
             return True
+        else:
+            raise PhaseException("Crossing Phases.")
 
     @staticmethod
     def copy():

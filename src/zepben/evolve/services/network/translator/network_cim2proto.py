@@ -15,8 +15,6 @@ from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import Trans
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest as PBTransformerTest
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
-from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerConstructionKind_pb2 import TransformerConstructionKind as PBTransformerConstructionKind
-from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerFunctionKind_pb2 import TransformerFunctionKind as PBTransformerFunctionKind
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer as PBAssetContainer
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo as PBAssetInfo
 from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import AssetOrganisationRole as PBAssetOrganisationRole
@@ -29,8 +27,10 @@ from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure as PBStr
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location as PBLocation
 from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint as PBPositionPoint
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
-from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
 from zepben.protobuf.cim.iec61968.common.StreetDetail_pb2 import StreetDetail as PBStreetDetail
+from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerConstructionKind_pb2 import TransformerConstructionKind as PBTransformerConstructionKind
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerFunctionKind_pb2 import TransformerFunctionKind as PBTransformerFunctionKind
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice as PBEndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter as PBMeter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint as PBUsagePoint
@@ -108,7 +108,7 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
-from zepben.protobuf.network.model.TracedPhases_pb2 import TracedPhases as PBTracedPhases
+from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
 
 from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, OpenCircuitTest, ShortCircuitTest, TransformerTest, \
     ShuntCompensatorInfo
@@ -157,7 +157,6 @@ from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.switch import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
-from zepben.evolve.model.phases import *
 from zepben.evolve.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb
 from zepben.evolve.services.common.translator.util import mrid_or_empty, from_nullable_int, from_nullable_float, from_nullable_long, from_nullable_uint
 
@@ -177,7 +176,7 @@ __all__ = [
     "linear_shunt_compensator_to_pb", "load_break_switch_to_pb", "per_length_line_parameter_to_pb", "per_length_impedance_to_pb",
     "per_length_sequence_impedance_to_pb", "power_electronics_connection_to_pb", "power_electronics_connection_phase_to_pb", "power_transformer_to_pb",
     "power_transformer_end_to_pb", "protected_switch_to_pb", "ratio_tap_changer_to_pb", "recloser_to_pb", "regulating_cond_eq_to_pb", "shunt_compensator_to_pb",
-    "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb", "circuit_to_pb", "loop_to_pb", "transformer_star_impedance_to_pb", "traced_phases_to_pb",
+    "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb", "circuit_to_pb", "loop_to_pb", "transformer_star_impedance_to_pb",
 ]
 
 
@@ -579,13 +578,16 @@ def substation_to_pb(cim: Substation) -> PBSubstation:
 
 
 def terminal_to_pb(cim: Terminal) -> PBTerminal:
+    # noinspection PyProtectedMember
     return PBTerminal(
         ad=ac_dc_terminal_to_pb(cim),
         conductingEquipmentMRID=mrid_or_empty(cim.conducting_equipment),
         connectivityNodeMRID=mrid_or_empty(cim.connectivity_node),
-        tracedPhases=traced_phases_to_pb(cim.traced_phases),
         phases=PBPhaseCode.Value(cim.phases.short_name),
-        sequenceNumber=cim.sequence_number
+        sequenceNumber=cim.sequence_number,
+        normalFeederDirection=PBFeederDirection.Value(cim.normal_feeder_direction.short_name),
+        currentFeederDirection=PBFeederDirection.Value(cim.current_feeder_direction.short_name),
+        tracedPhases=cim.traced_phases.phase_status
     )
 
 
@@ -782,7 +784,7 @@ def disconnector_to_pb(cim: Disconnector) -> PBDisconnector:
     return PBDisconnector(sw=switch_to_pb(cim))
 
 
-def energy_connection_to_pb(cim: EnergyConnection, include_asset_info = False) -> PBEnergyConnection:
+def energy_connection_to_pb(cim: EnergyConnection, include_asset_info=False) -> PBEnergyConnection:
     return PBEnergyConnection(ce=conducting_equipment_to_pb(cim, include_asset_info))
 
 
@@ -979,7 +981,7 @@ def recloser_to_pb(cim: Recloser) -> PBRecloser:
     return PBRecloser(sw=protected_switch_to_pb(cim))
 
 
-def regulating_cond_eq_to_pb(cim: RegulatingCondEq, include_asset_info = False) -> PBRegulatingCondEq:
+def regulating_cond_eq_to_pb(cim: RegulatingCondEq, include_asset_info=False) -> PBRegulatingCondEq:
     return PBRegulatingCondEq(
         ec=energy_connection_to_pb(cim, include_asset_info),
         controlEnabled=cim.control_enabled
@@ -1102,16 +1104,3 @@ def loop_to_pb(cim: Loop) -> PBLoop:
 
 Circuit.to_pb = circuit_to_pb
 Loop.to_pb = loop_to_pb
-
-
-#########
-# MODEL #
-#########
-
-
-def traced_phases_to_pb(cim: TracedPhases) -> PBTracedPhases:
-    # noinspection PyProtectedMember
-    return PBTracedPhases(normalStatus=cim.normal_status, currentStatus=cim.current_status)
-
-
-TracedPhases.to_pb = traced_phases_to_pb

@@ -224,7 +224,7 @@ class NetworkBuilder(object):
                     terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=phases, connectivity_node=node, name=f"Terminal {i}", wiring=wiring, **kwargs))
 
                 for j in range(start=i+1, stop=count):
-                    conn_node = self.network.add_connectivitynode(uuid.uuid4())
+                    conn_node = self.network.add_connectivity_node(uuid.uuid4())
                     wiring = wiring_supplier(conn_node)
                     terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=phases, connectivity_node=conn_node, name=f"Terminal {j}", wiring=wiring, **kwargs))
             elif count == len(conn_nodes):
@@ -240,7 +240,7 @@ class NetworkBuilder(object):
             for i, _ in enumerate(range(count), start=0):
                 if conn_nodes is None or i > 0:
                     # These conditions require creating new connectivity nodes.
-                    conn_node = self.network.add_connectivitynode(uuid.uuid4())
+                    conn_node = self.network.add_connectivity_node(uuid.uuid4())
                     wiring = wiring_supplier(conn_node)
                     terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=phases, connectivity_node=conn_node, name=f"Terminal {i}", wiring=wiring, **kwargs))
                 elif i == 0 and conn_nodes is not None:
