@@ -6,10 +6,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from zepben.evolve import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode
 
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from abc import ABC, abstractmethod
@@ -26,6 +27,11 @@ def current_phases(terminal: Terminal):
 
 
 class PhaseStatus(ABC):
+
+    terminal: Terminal
+
+    def __init__(self, terminal: Terminal):
+        self.terminal = terminal
 
     @abstractmethod
     def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
@@ -51,14 +57,29 @@ class PhaseStatus(ABC):
         """
         raise NotImplementedError()
 
+    def as_phase_code(self) -> Optional[PhaseCode]:
+        """
+        Get the traced phase for each nominal phase as a `PhaseCode`.
+
+        Returns The `PhaseCode` if the combination of phases makes sense, otherwise `None`.
+        """
+        traced_phases = [self[it] for it in self.terminal.phases]
+        phases = set(traced_phases)
+
+        if phases == {SinglePhaseKind.NONE}:
+            return PhaseCode.NONE
+        elif SinglePhaseKind.NONE in phases:
+            return None
+        elif len(phases) == len(traced_phases):
+            return phase_code_from_single_phases(phases)
+        else:
+            return None
+
 
 class NormalPhases(PhaseStatus):
     """
     The traced phases in the normal state of the network.
     """
-
-    def __init__(self, terminal: Terminal):
-        self.terminal = terminal
 
     def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
         return self.terminal.traced_phases.normal(nominal_phase)
@@ -71,9 +92,6 @@ class CurrentPhases(PhaseStatus):
     """
     The traced phases in the current state of the network.
     """
-
-    def __init__(self, terminal: Terminal):
-        self.terminal = terminal
 
     def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
         return self.terminal.traced_phases.current(nominal_phase)

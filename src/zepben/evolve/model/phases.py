@@ -44,18 +44,18 @@ def get_phase(status: int, nominal_phase: SinglePhaseKind):
     return BITS_TO_PHASE[(status >> _byte_selector(nominal_phase)) & 0x0f]
 
 
-def set_phase(status: int, traced_phase: SinglePhaseKind, nominal_phase: SinglePhaseKind) -> int:
+def set_phase(status: int, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> int:
     if traced_phase == SinglePhaseKind.NONE:
         return status & ~NOMINAL_PHASE_MASKS[nominal_phase.mask_index]
     else:
-        return (status & ~NOMINAL_PHASE_MASKS[nominal_phase.mask_index]) | _shifted_value(traced_phase, nominal_phase)
+        return (status & ~NOMINAL_PHASE_MASKS[nominal_phase.mask_index]) | _shifted_value(nominal_phase, traced_phase)
 
 
 def _byte_selector(nominal_phase: SinglePhaseKind) -> int:
     return nominal_phase.mask_index * 4
 
 
-def _shifted_value(traced_phase: SinglePhaseKind, nominal_phase: SinglePhaseKind) -> int:
+def _shifted_value(nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> int:
     return PHASE_TO_BITS[traced_phase] << _byte_selector(nominal_phase)
 #todo split file into correct packages
 
@@ -175,7 +175,7 @@ class TracedPhases(object):
             return False
         elif (it == SinglePhaseKind.NONE) or (traced_phase == SinglePhaseKind.NONE):
             self.phase_status = (self.phase_status & self._NORMAL_MASK) | (
-                    set_phase(self.phase_status >> self._CURRENT_MASK, nominal_phase, traced_phase) << self._CURRENT_MASK)
+                    set_phase(self.phase_status >> self._CURRENT_SHIFT, nominal_phase, traced_phase) << self._CURRENT_SHIFT)
             return True
         else:
             raise PhaseException("Crossing Phases.")

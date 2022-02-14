@@ -55,6 +55,7 @@
 
 ##### Enhancements
 * Reworked phase connectivity to better handle unknown primary phases (X/Y).
+* You can now get a `PhaseCode` representation from traced phases if it is valid.
 
 ##### Fixes
 * Updated gRPC to fix support for latest LetsEncrypt certificates.

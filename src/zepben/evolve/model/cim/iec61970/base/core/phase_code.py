@@ -5,10 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from enum import Enum, unique
+from typing import List, Set
 
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
-__all__ = ["PhaseCode", "phase_code_by_id"]
+__all__ = ["PhaseCode", "phase_code_by_id", "phase_code_from_single_phases"]
 
 
 def phase_code_by_id(value: int):
@@ -119,19 +120,50 @@ class PhaseCode(Enum):
     """Secondary phase 2 plus neutral"""
 
     @property
-    def short_name(self):
+    def short_name(self) -> str:
         return str(self)[10:]
 
     @property
-    def single_phases(self):
+    def single_phases(self) -> List[SinglePhaseKind]:
         return self.value[1]
 
     @property
-    def num_phases(self):
+    def num_phases(self) -> int:
         return len(self.value)
+
+    @property
+    def without_neutral(self) -> 'PhaseCode':
+        if SinglePhaseKind.N not in self:
+            return self
+        else:
+            return phase_code_from_single_phases({it for it in self.single_phases if it != SinglePhaseKind.N})
+
+    def __iter__(self):
+        return PhaseCodeIter(self.single_phases)
 
     def __contains__(self, item):
         return item in self.single_phases
 
 
+class PhaseCodeIter:
+
+    def __init__(self, single_phases: List[SinglePhaseKind]):
+        self._index = -1
+        self._single_phases = single_phases
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self._index += 1
+        if self._index < len(self._single_phases):
+            return self._single_phases[self._index]
+        raise StopIteration
+
+
+def phase_code_from_single_phases(single_phases: Set[SinglePhaseKind]) -> PhaseCode:
+    return _PHASE_CODE_BY_PHASES.get(frozenset(single_phases), PhaseCode.NONE)
+
+
 _PHASE_CODE_VALUES = list(PhaseCode.__members__.values())
+_PHASE_CODE_BY_PHASES = {frozenset(it.single_phases): it for it in PhaseCode}
