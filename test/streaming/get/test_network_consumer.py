@@ -11,7 +11,12 @@ import grpc_testing
 import pytest
 # noinspection PyPackageRequirements
 from google.protobuf.any_pb2 import Any
+from grpc import StatusCode
 from hypothesis import given, settings, Phase
+from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
+    EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
+    Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
+    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetCurrentEquipmentForFeederRequest, \
@@ -19,15 +24,12 @@ from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetE
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, GetCurrentEquipmentForFeederResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
-from test.streaming.get.grpcio_aio_testing.mock_async_channel import testing_async_channel
+from time import sleep
 from test.pb_creators import network_identified_objects, ac_line_segment
 from test.streaming.get.data.hierarchy import create_hierarchy_network
 from test.streaming.get.data.loops import create_loops_network
+from test.streaming.get.grpcio_aio_testing.mock_async_channel import testing_async_channel
 from test.streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
-from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
-    EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
-    Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
-    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')
@@ -356,6 +358,26 @@ class TestNetworkConsumer:
 
         await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [responses])])
 
+    @pytest.mark.asyncio
+    async def test_timeout(self):
+        pass
+        # TODO: EWB-1249 this is dumb and doesn't actually test the client configured timeout
+        # Ideally this should be changed so that this tests EVERY gRPC call passing in a timeout
+        # and that the client times out the request.
+        # It seems that the client never times out the request (???) and passes the timeout to the server. This means we'll
+        # need to create a real server that times out or mock the behaviour (in which case what's the point?)
+        #ns = create_loops_network()
+        #client = NetworkConsumerClient(channel=self.channel, timeout=1)
+
+        #async def client_test():
+        #    res = await self.client.get_network_hierarchy()
+        #    assert res.was_failure
+        #    res.thrown.args[0]._code == StatusCode.DEADLINE_EXCEEDED
+
+        #await self.mock_server.validate(client_test, [
+        #    UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response_with_sleep(ns, 3))),
+        #])
+
 
 def _assert_contains_mrids(service: BaseService, *mrids):
     for mrid in mrids:
@@ -471,6 +493,12 @@ def _create_container_current_equipment_responses(ns: NetworkService, mrids: Opt
             raise AssertionError(f"Requested unexpected feeder {request.mrid}.")
 
     return responses
+
+
+# noinspection PyUnresolvedReferences
+def _create_hierarchy_response_with_sleep(service: NetworkService, sleep_time: int) -> GetNetworkHierarchyResponse:
+    sleep(sleep_time)
+    return _create_hierarchy_response(service)
 
 
 # noinspection PyUnresolvedReferences

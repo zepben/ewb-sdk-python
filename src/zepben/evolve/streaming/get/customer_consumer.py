@@ -3,21 +3,17 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-#
-#  This Source Code Form is subject to the terms of the Mozilla Public
-#  License, v. 2.0. If a copy of the MPL was not distributed with this
-#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from __future__ import annotations
 
 from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
 
-from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
-from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest
-
 from zepben.evolve import CustomerService, IdentifiedObject, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
+from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
+from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest
 
 __all__ = ["CustomerConsumerClient", "SyncCustomerConsumerClient"]
 
@@ -41,8 +37,8 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
 
     _stub: CustomerConsumerStub = None
 
-    def __init__(self, channel=None, stub: CustomerConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
-        super().__init__(error_handlers=error_handlers)
+    def __init__(self, channel=None, stub: CustomerConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
+        super().__init__(error_handlers=error_handlers, timeout=timeout)
         if channel is None and stub is None:
             raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
@@ -56,7 +52,7 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
         if not mrids:
             return
 
-        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids))
+        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
         for response in responses:
             for cio in response.identifiedObjects:
                 yield self._extract_identified_object("customer", cio, _cio_type_to_cim)

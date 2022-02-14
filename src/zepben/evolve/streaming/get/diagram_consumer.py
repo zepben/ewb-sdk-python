@@ -3,21 +3,16 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-#
-#  This Source Code Form is subject to the terms of the Mozilla Public
-#  License, v. 2.0. If a copy of the MPL was not distributed with this
-#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
 from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
 
-from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
-from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest
-
 from zepben.evolve import DiagramService, IdentifiedObject, Diagram, DiagramObject
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
+from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
+from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest
 
 __all__ = ["DiagramConsumerClient", "SyncDiagramConsumerClient"]
 
@@ -41,8 +36,8 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
 
     _stub: DiagramConsumerStub = None
 
-    def __init__(self, channel=None, stub: DiagramConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
-        super().__init__(error_handlers=error_handlers)
+    def __init__(self, channel=None, stub: DiagramConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
+        super().__init__(error_handlers=error_handlers, timeout=timeout)
         if channel is None and stub is None:
             raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
@@ -56,7 +51,7 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
         if not mrids:
             return
 
-        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids))
+        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
         for response in responses:
             for dio in response.identifiedObjects:
                 yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
