@@ -1,11 +1,24 @@
-#  Copyright 2022 Zeppelin Bend Pty Ltd
+# Copyright 2017 gRPC authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#  Modifications Copyright 2021 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import asyncio
 from abc import ABC
-from typing import Awaitable, TypeVar, Union, AsyncIterable, Optional, Coroutine, Any, Iterable
+from typing import TypeVar, Union, AsyncIterable, Optional
 
 import grpc
 from grpc.aio import UnaryUnaryCall, StreamUnaryCall, UnaryStreamCall, StreamStreamCall, Metadata
@@ -14,7 +27,7 @@ __all__ = ["UnaryResponse", "ResponseIteratorCall"]
 
 from grpc.aio._typing import RequestType, DoneCallbackType
 
-from grpc_testing._channel._invocation import _RpcErrorCall, _next, _initial_metadata, _trailing_metadata, _code, _details, _add_callback, _time_remaining, \
+from grpc_testing._channel._invocation import _RpcErrorCall, _initial_metadata, _trailing_metadata, _code, _details, _add_callback, _time_remaining, \
     _is_active, _cancel
 
 ResponseType = TypeVar("ResponseType")
