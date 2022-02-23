@@ -359,20 +359,20 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _process_equipment_for_container(self, it: Union[str, EquipmentContainer]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, EquipmentContainer) else it
         responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), [mrid]))
-        for response in responses:
+        async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _process_equipment_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
         responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), mrids))
-        for response in responses:
+        async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _process_current_equipment_for_feeder(self, it: Union[str, Feeder]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, Feeder) else it
         responses = self._stub.getCurrentEquipmentForFeeder(GetCurrentEquipmentForFeederRequest(mrid=mrid))
-        for response in responses:
+        async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
@@ -380,7 +380,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
                                                  it: Union[str, OperationalRestriction]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, OperationalRestriction) else it
         responses = self._stub.getEquipmentForRestriction(GetEquipmentForRestrictionRequest(mrid=mrid))
-        for response in responses:
+        async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
@@ -388,7 +388,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
                                                        it: Union[str, ConnectivityNode]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, ConnectivityNode) else it
         responses = self._stub.getTerminalsForNode(GetTerminalsForNodeRequest(mrid=mrid))
-        for response in responses:
+        async for response in responses:
             # noinspection PyUnresolvedReferences
             yield self.service.get(response.terminal.mrid(), Terminal, default=None) or self.service.add_from_pb(response.terminal), response.terminal.mrid()
 
@@ -397,12 +397,12 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             return
 
         responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids))
-        for response in responses:
+        async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _handle_network_hierarchy(self):
-        response = self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest())
+        response = await self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest())
 
         # noinspection PyArgumentList
         self.__network_hierarchy = NetworkHierarchy(

@@ -9,7 +9,7 @@ from setuptools import setup, find_namespace_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-test_deps = ["pytest", "pytest-cov", "pytest-asyncio", "pytest-timeout", "hypothesis<6", "grpcio-testing==1.36.0"]
+test_deps = ["pytest", "pytest-cov", "pytest-asyncio", "pytest-timeout", "hypothesis<6", "grpcio-testing==1.43.0"]
 setup(
     name="zepben.evolve",
     version="0.27.0b13",
@@ -34,10 +34,11 @@ setup(
     python_requires='>=3.7',
     install_requires=[
         "requests<2.27.0,>=2.26.0",
-        "zepben.protobuf==0.19.0b6",
+        "zepben.protobuf==0.19.0b7",
         "zepben.auth==0.7.0b2",
         "dataclassy==0.6.2",
-        "grpcio==1.41.1"
+        "grpcio==1.43.0",
+        "six==1.16.0"
     ],
     extras_require={
         "test": test_deps,

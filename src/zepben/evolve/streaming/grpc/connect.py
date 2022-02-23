@@ -20,7 +20,7 @@ __all__ = ["connect", "connect_async", "connect_secure", "connect_secure_async",
 
 from zepben.evolve.streaming.grpc.channel_builder import AuthTokenPlugin
 
-GRPC_READY_TIMEOUT = 5.0
+GRPC_READY_TIMEOUT = 20  # seconds
 
 
 def _secure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051) -> GrpcChannelBuilder:
@@ -123,7 +123,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
                 channel_credentials,
                 call_credentials,
             ) if channel_credentials else call_credentials
-            channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+            channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
         elif client_id and username and password:
             # Create a basic ClientCredentials authenticator
             token_fetcher = create_token_fetcher(conf_address, verify_auth_certificates, conf_ca_filename=conf_ca, auth_ca_filename=auth_ca)
@@ -142,7 +142,8 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
                 channel_credentials,
                 call_credentials,
             ) if channel_credentials else call_credentials
-            channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+            channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+
         elif client_id and client_secret:
             # Create a basic ClientCredentials authenticator
             token_fetcher = create_token_fetcher(conf_address, verify_auth_certificates, conf_ca_filename=conf_ca, auth_ca_filename=auth_ca)
@@ -155,18 +156,13 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
                 channel_credentials,
                 call_credentials,
             ) if channel_credentials else call_credentials
-            channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+            channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
         else:
-            channel = grpc.secure_channel(f"{host}:{rpc_port}", channel_credentials)
+            channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", channel_credentials)
     else:
         if client_id or client_secret or username or password or pkey or cert:
             warnings.warn("An insecure connection is being used but some credentials were specified for connecting, did you forget to set secure=True?")
-        channel = grpc.insecure_channel(f"{host}:{rpc_port}")
-
-    try:
-        grpc.channel_ready_future(channel).result(timeout=GRPC_READY_TIMEOUT)
-    except grpc.FutureTimeoutError:
-        raise ConnectionError(f"Timed out connecting to server {host}:{rpc_port}")
+        channel = grpc.aio.insecure_channel(f"{host}:{rpc_port}")
 
     return channel
 
