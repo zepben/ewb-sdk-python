@@ -9,7 +9,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import contextlib
 import warnings
-
 from typing import Optional
 
 import grpc
@@ -21,7 +20,7 @@ __all__ = ["connect", "connect_async", "connect_secure", "connect_secure_async",
 
 from zepben.evolve.streaming.grpc.channel_builder import AuthTokenPlugin
 
-GRPC_READY_TIMEOUT = 20 # seconds
+GRPC_READY_TIMEOUT = 20  # seconds
 
 
 def _secure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051) -> GrpcChannelBuilder:
@@ -76,7 +75,7 @@ def connect_with_password_async(client_id: str, username: str, password: str, ho
 
 def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = None, client_id: Optional[str] = None,
           username: Optional[str] = None, password: Optional[str] = None, client_secret: Optional[str] = None, pkey=None, cert=None, ca=None,
-          token_fetcher: Optional[ZepbenTokenFetcher] = None, secure: bool = False, verify_auth_certificates=False, conf_ca=None, auth_ca=None, aio: bool = False):
+          token_fetcher: Optional[ZepbenTokenFetcher] = None, secure: bool = False, verify_auth_certificates=False, conf_ca=None, auth_ca=None):
     """
     Connect to a Zepben gRPC service.
 
@@ -124,10 +123,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
                 channel_credentials,
                 call_credentials,
             ) if channel_credentials else call_credentials
-            if aio:
-                channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
-            else:
-                channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+            channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
         elif client_id and username and password:
             # Create a basic ClientCredentials authenticator
             token_fetcher = create_token_fetcher(conf_address, verify_auth_certificates, conf_ca_filename=conf_ca, auth_ca_filename=auth_ca)
@@ -146,10 +142,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
                 channel_credentials,
                 call_credentials,
             ) if channel_credentials else call_credentials
-            if aio:
-                channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
-            else:
-                channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+            channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
 
         elif client_id and client_secret:
             # Create a basic ClientCredentials authenticator
@@ -163,28 +156,13 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
                 channel_credentials,
                 call_credentials,
             ) if channel_credentials else call_credentials
-            if aio:
-                channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
-            else:
-                channel = grpc.secure_channel(f"{host}:{rpc_port}", composite_credentials)
+            channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
         else:
-            if aio:
-                channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", channel_credentials)
-            else:
-                channel = grpc.secure_channel(f"{host}:{rpc_port}", channel_credentials)
+            channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", channel_credentials)
     else:
         if client_id or client_secret or username or password or pkey or cert:
             warnings.warn("An insecure connection is being used but some credentials were specified for connecting, did you forget to set secure=True?")
-        if aio:
-            channel = grpc.aio.insecure_channel(f"{host}:{rpc_port}")
-        else:
-            channel = grpc.insecure_channel(f"{host}:{rpc_port}")
-
-    try:
-        if not aio:
-            grpc.channel_ready_future(channel).result(timeout=GRPC_READY_TIMEOUT)
-    except grpc.FutureTimeoutError as f:
-        raise ConnectionError(f"Timed out connecting to server {host}:{rpc_port} {f}")
+        channel = grpc.aio.insecure_channel(f"{host}:{rpc_port}")
 
     return channel
 
@@ -297,4 +275,4 @@ async def connect_async(host: str = "localhost",
     warnings.warn('The connect_async function is deprecated. It will be replaced with other functions like connect_secure_async.',
                   DeprecationWarning, stacklevel=2)
     yield _conn(host, rpc_port, conf_address, client_id, username, password, client_secret, pkey, cert, ca, token_fetcher, secure, verify_auth_certificates,
-                conf_ca, auth_ca, True)
+                conf_ca, auth_ca)
