@@ -3,8 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from collections import Callable
-from typing import List, Iterable, Optional, Set, Dict
+from typing import List, Iterable, Optional, Set, Dict, Callable
 
 from zepben.evolve import Terminal, PhaseCode, ConnectivityResult, SinglePhaseKind, NominalPhasePath, Queue, Switch
 from zepben.evolve.services.network.tracing.connectivity_trace.xy_candidate_phase_paths import XyCandidatePhasePaths
@@ -19,7 +18,7 @@ class TerminalConnectivity(object):
     _create_candidate_phases: Callable[[], XyCandidatePhasePaths]
 
     def __init__(self, create_candidate_phases: Callable[[], XyCandidatePhasePaths] = lambda: XyCandidatePhasePaths()):
-        pass
+        self._create_candidate_phases = create_candidate_phases
 
     def connected_terminals(
         self,
@@ -150,7 +149,7 @@ class TerminalConnectivity(object):
 
         visited.add(step)
 
-        without_neutral = step.terminal.phases.without_neutral()
+        without_neutral = step.terminal.phases.without_neutral
         if (SinglePhaseKind.X in without_neutral) or (SinglePhaseKind.Y in without_neutral):
             if not self._check_traced_phases(step, candidate_phases):
                 self._queue_next(step.terminal, without_neutral, queue)

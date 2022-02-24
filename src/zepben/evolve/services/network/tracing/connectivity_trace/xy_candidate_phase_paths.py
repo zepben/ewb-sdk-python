@@ -5,14 +5,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
 from itertools import takewhile
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Counter as CounterType
 
 from dataclassy import dataclass
 
 from zepben.evolve import SinglePhaseKind, PhaseCode
 
 __all__ = ["X_PRIORITY", "Y_PRIORITY", "XyCandidatePhasePaths"]
-
 
 X_PRIORITY = [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C]
 """
@@ -119,7 +118,7 @@ class XyCandidatePhasePaths:
 
         return paths
 
-    def _process_candidates(self, candidate_phase_counts: Dict[SinglePhaseKind, Counter[SinglePhaseKind]]) -> Tuple[SinglePhaseKind, SinglePhaseKind]:
+    def _process_candidates(self, candidate_phase_counts: Dict[SinglePhaseKind, CounterType[SinglePhaseKind]]) -> Tuple[SinglePhaseKind, SinglePhaseKind]:
         candidate_x_counts = candidate_phase_counts.get(SinglePhaseKind.X, {})
         candidate_y_counts = candidate_phase_counts.get(SinglePhaseKind.Y, {})
 
@@ -160,7 +159,7 @@ class XyCandidatePhasePaths:
 
     @staticmethod
     def _find_candidate(
-        candidate_counts: Counter[SinglePhaseKind],
+        candidate_counts: CounterType[SinglePhaseKind],
         priority: List[SinglePhaseKind],
         before: Optional[SinglePhaseKind] = None,
         after: Optional[SinglePhaseKind] = None
