@@ -7,6 +7,13 @@
 * Simplified `connect` and `connect_async` by refactoring optional settings (e.g. password authentication) to other functions.
   These functions are now deprecated.
 * Use asyncio for gRPC from the newest update of `grpcio` and `grpcio-tool`.
+* Renamed `PhaseDirection` to `FeederDirection`:
+  * `IN` renamed to `UPSTREAM`
+  * `OUT` renamed to `DOWNSTREAM`
+* Separated feeder direction from phase.
+  * Direction has been removed from `TracedPhases` and is now accessed directly off the `Terminal`.
+  * Direction has been removed from `PhaseStatus` and is now accessed via `DirectionStatus`.
+* Renamed `NetworkService.add_connectivitynode` to `NetworkService.add_connectivity_node`
 
 ##### New Features
 * Implemented database module for persisting to sqlite database.
@@ -44,9 +51,11 @@
   * `x_max: Optional[float]`
   * `xn_max: Optional[float]`
   * `x0_max: Optional[float]`
+* Added `TestNetworkBuilder` which can be used to create simple test networks.
 
 ##### Enhancements
-* None.
+* Reworked phase connectivity to better handle unknown primary phases (X/Y).
+* You can now get a `PhaseCode` representation from traced phases if it is valid.
 
 ##### Fixes
 * Updated gRPC to fix support for latest LetsEncrypt certificates.

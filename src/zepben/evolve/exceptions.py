@@ -42,7 +42,7 @@ class PhaseException(Exception):
     pass
 
 
-class CoreException(Exception):
+class NominalPhaseException(Exception):
     pass
 
 

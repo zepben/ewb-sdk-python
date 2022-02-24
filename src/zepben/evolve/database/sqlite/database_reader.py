@@ -108,8 +108,12 @@ class DatabaseReader:
 
     def _post_load(self, network_service: NetworkService) -> bool:
         #
-        # NOTE: phase tracing is not yet supported
+        # NOTE: phase and direction tracing is not yet supported
         #
+
+        # logger.info("Applying feeder direction to network...")
+        # traces.set_direction().run(network_service)
+        # logger.info("Feeder direction applied to network.")
 
         # logger.info("Applying phases to network...")
         # traces.set_phases().run(network_service)
@@ -138,12 +142,12 @@ class DatabaseReader:
         feeder_start_points = set(filter(lambda it: it is not None, map(get_head_equipment, network_service.objects(Feeder))))
 
         def has_been_assigned_to_feeder(energy_source: EnergySource) -> bool:
-            return (energy_source.num_phases() > 0) \
+            return energy_source.is_external_grid \
                    and self._is_on_feeder(energy_source) \
                    and get_connected_equipment(energy_source, feeder_start_points)
 
         for es in filter(has_been_assigned_to_feeder, network_service.objects(EnergySource)):
-            logger.warning(f"Primary source {es} has been assigned to the following feeders: normal {es.normal_feeders}, current {es.current_feeders}")
+            logger.warning(f"External grid source {es} has been assigned to the following feeders: normal {es.normal_feeders}, current {es.current_feeders}")
 
     @staticmethod
     def _is_on_feeder(energy_source: EnergySource) -> bool:

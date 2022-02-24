@@ -10,8 +10,10 @@ from typing import Optional
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
+from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
+
 if TYPE_CHECKING:
-    from zepben.evolve import ConnectivityNode, ConductingEquipment
+    from zepben.evolve import ConnectivityNode, ConductingEquipment, PhaseStatus, NormalPhases, CurrentPhases
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -43,6 +45,14 @@ class Terminal(AcDcTerminal):
     sequence_number: int = 0
     """The orientation of the terminal connections for a multiple terminal conducting equipment. The sequence numbering starts with 1 and additional
     terminals should follow in increasing order. The first terminal is the "starting point" for a two terminal branch."""
+
+    normal_feeder_direction: FeederDirection = FeederDirection.NONE
+    """ Stores the direction of the feeder head relative to this [Terminal] in the normal state of the network.
+    """
+
+    current_feeder_direction: FeederDirection = FeederDirection.NONE
+    """ Stores the direction of the feeder head relative to this [Terminal] in the current state of the network.
+    """
 
     traced_phases: TracedPhases = TracedPhases()
     """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases
@@ -118,6 +128,24 @@ class Terminal(AcDcTerminal):
 
     def get_other_terminals(self):
         return [t for t in self.conducting_equipment.terminals if t is not self]
+
+    @property
+    def normal_phases(self) -> PhaseStatus:
+        """
+        Convenience method for accessing the normal phases.
+
+        :return: The [PhaseStatus] for the terminal in the normal state of the network.
+        """
+        return NormalPhases(self)
+
+    @property
+    def current_phases(self) -> PhaseStatus:
+        """
+        Convenience method for accessing the current phases.
+
+        :return: The `PhaseStatus` for the terminal in the normal state of the network.
+        """
+        return CurrentPhases(self)
 
     def connect(self, connectivity_node: ConnectivityNode):
         self.connectivity_node = connectivity_node

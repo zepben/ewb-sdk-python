@@ -17,7 +17,7 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     EnergyConsumer, PhaseShuntConnectionKind, EnergyConsumerPhase, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
     LinearShuntCompensator, PerLengthImpedance, PerLengthLineParameter, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, VectorGroup, \
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
-    Circuit, Loop, NetworkService, TracedPhases, PhaseDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind
+    Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from test.services.common.service_comparator_validator import ServiceComparatorValidator
@@ -430,6 +430,20 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         cn2 = ConnectivityNode(mrid="c2")
 
         self.validator.validate_property(Terminal.phases, Terminal, lambda _: PhaseCode.ABC, lambda _: PhaseCode.ABCN)
+        self.validator.validate_property(Terminal.sequence_number, Terminal, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(Terminal.normal_feeder_direction, Terminal, lambda _: FeederDirection.UPSTREAM, lambda _: FeederDirection.DOWNSTREAM)
+        self.validator.validate_property(Terminal.current_feeder_direction, Terminal, lambda _: FeederDirection.UPSTREAM, lambda _: FeederDirection.DOWNSTREAM)
+
+        for i in range(0, 32, 4):
+            # noinspection PyArgumentList
+            self.validator.validate_property(Terminal.traced_phases, Terminal, lambda _: TracedPhases(0x00000001 << i), lambda _: TracedPhases(0x00000002 << i))
+            # noinspection PyArgumentList
+            self.validator.validate_property(Terminal.traced_phases, Terminal, lambda _: TracedPhases(0x00000004 << i), lambda _: TracedPhases(0x00000008 << i))
+            # noinspection PyArgumentList
+            self.validator.validate_property(Terminal.traced_phases, Terminal, lambda _: TracedPhases(0x00000010 << i), lambda _: TracedPhases(0x00000020 << i))
+            # noinspection PyArgumentList
+            self.validator.validate_property(Terminal.traced_phases, Terminal, lambda _: TracedPhases(0x00000040 << i), lambda _: TracedPhases(0x00000080 << i))
+
         self.validator.validate_val_property(
             Terminal.connectivity_node,
             Terminal,
@@ -437,32 +451,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda terminal, _: terminal.connect(cn2)
         )
         self.validator.validate_property(Terminal.conducting_equipment, Terminal, lambda _: Junction(mrid="j1"), lambda _: Junction(mrid="j2"))
-
-        def validate(nominal_phase, actual_phase, direction):
-            def create_terminal(mrid: str) -> Terminal:
-                return Terminal(mrid=mrid, phases=PhaseCode.ABCN)
-
-            def init_traced_phases(_: Terminal, traced_phases: TracedPhases):
-                for it in PhaseCode.ABCN.single_phases:
-                    traced_phases.set_normal(it, it, PhaseDirection.BOTH)
-                    traced_phases.set_current(it, it, PhaseDirection.BOTH)
-
-            def set_normal(_, traced_phases):
-                init_traced_phases(_, traced_phases)
-                traced_phases.set_normal(actual_phase, nominal_phase, direction)
-
-            def set_current(_, traced_phases):
-                init_traced_phases(_, traced_phases)
-                traced_phases.set_current(actual_phase, nominal_phase, direction)
-
-            self.validator.validate_val_property(Terminal.traced_phases, create_terminal, init_traced_phases, set_normal)
-            self.validator.validate_val_property(Terminal.traced_phases, create_terminal, init_traced_phases, set_current)
-
-        for phase in PhaseCode.ABCN.single_phases:
-            validate(phase, SinglePhaseKind.A if phase != SinglePhaseKind.A else SinglePhaseKind.B, PhaseDirection.BOTH)
-            validate(phase, phase, PhaseDirection.IN)
-            validate(phase, phase, PhaseDirection.OUT)
-            validate(phase, phase, PhaseDirection.NONE)
 
     #############################
     # IEC61970 BASE EQUIVALENTS #

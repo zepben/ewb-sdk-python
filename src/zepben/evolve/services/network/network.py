@@ -124,7 +124,7 @@ class NetworkService(BaseService):
         if terminal.connectivity_node:
             return connectivity_node_mrid == terminal.connectivity_node.mrid
 
-        cn = self.add_connectivitynode(connectivity_node_mrid)
+        cn = self.add_connectivity_node(connectivity_node_mrid)
         connect(terminal, cn)
         return True
 
@@ -139,7 +139,7 @@ class NetworkService(BaseService):
         elif status == ProcessStatus.INVALID:
             return False
 
-        cn = self.add_connectivitynode(self._generate_cn_mrid())
+        cn = self.add_connectivity_node(self._generate_cn_mrid())
         connect(terminal2, cn)
         connect(terminal1, cn)
 
@@ -186,9 +186,9 @@ class NetworkService(BaseService):
         Returns The primary EnergySource
         """
         # noinspection PyUnresolvedReferences
-        return [source for source in self._objects_by_type[EnergySource].values() if source.has_phases()]
+        return [source for source in self._objects_by_type[EnergySource].values() if source.is_external_grid]
 
-    def add_connectivitynode(self, mrid: str):
+    def add_connectivity_node(self, mrid: str):
         """
         Add a connectivity node to the network.
         `mrid` mRID of the ConnectivityNode

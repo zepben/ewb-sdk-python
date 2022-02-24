@@ -114,7 +114,6 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
-from zepben.protobuf.network.model.TracedPhases_pb2 import TracedPhases as PBTracedPhases
 
 MIN_32_BIT_INTEGER = -2147483648
 MAX_32_BIT_INTEGER = 2147483647
@@ -514,7 +513,8 @@ def terminal():
         ad=ac_dc_terminal(),
         conductingEquipmentMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         connectivityNodeMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        tracedPhases=traced_phases(), phases=sampled_from(PBPhaseCode.values()),
+        tracedPhases=integers(min_value=0, max_value=65535),
+        phases=sampled_from(PBPhaseCode.values()),
         sequenceNumber=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER)
     )
 
@@ -944,14 +944,6 @@ def loop():
 
 def timestamp():
     return builds(Timestamp, seconds=integers(min_value=0, max_value=MAX_32_BIT_INTEGER), nanos=integers(min_value=0, max_value=MAX_32_BIT_INTEGER))
-
-
-def traced_phases():
-    return builds(
-        PBTracedPhases,
-        normalStatus=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        currentStatus=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-    )
 
 
 ##############################

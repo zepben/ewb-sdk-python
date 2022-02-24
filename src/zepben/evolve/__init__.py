@@ -82,7 +82,6 @@ from zepben.evolve.model.cim.iec61970.base.core.name import *
 from zepben.evolve.model.cim.iec61970.base.core.name_type import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
-from zepben.evolve.model.phasedirection import *
 from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 
@@ -101,6 +100,12 @@ from zepben.evolve.services.network.tracing.util import *
 from zepben.evolve.services.network.tracing.find import *
 from zepben.evolve.services.network.tracing.traces import *
 from zepben.evolve.services.network.tracing.connectivity import *
+from zepben.evolve.services.network.tracing.connectivity_trace.phase_paths import *
+from zepben.evolve.services.network.tracing.connectivity_trace.terminal_connectivity import *
+from zepben.evolve.services.network.tracing.connectivity_trace.xy_candidate_phase_paths import *
+from zepben.evolve.services.network.tracing.connectivity_trace.xy_phase_step import *
+from zepben.evolve.services.network.tracing.feeder.feeder_direction import *
+from zepben.evolve.services.network.tracing.feeder.direction_status import *
 
 from zepben.evolve.services.network.translator.network_proto2cim import *
 from zepben.evolve.services.network.translator.network_cim2proto import *
@@ -203,3 +208,5 @@ from zepben.evolve.database.sqlite.readers.metadata_collection_reader import *
 from zepben.evolve.database.sqlite.readers.network_cim_reader import *
 from zepben.evolve.database.sqlite.readers.network_service_reader import *
 from zepben.evolve.database.sqlite.database_reader import *
+
+from zepben.evolve.testing.test_network_builder import *
