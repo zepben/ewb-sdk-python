@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
-from test.cim_creators import *
+from test.cim.cim_creators import *
 from test.services.common.translator.base_test_translator import validate_service_translations
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 

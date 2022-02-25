@@ -8,7 +8,7 @@ from hypothesis.strategies import builds, sampled_from, integers
 
 from test.cim.iec61970.base.core.test_ac_dc_terminal import ac_dc_terminal_kwargs, verify_ac_dc_terminal_constructor_default, \
     verify_ac_dc_terminal_constructor_kwargs, verify_ac_dc_terminal_constructor_args, ac_dc_terminal_args
-from test.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from zepben.evolve import Terminal, ConnectivityNode, TracedPhases, ConductingEquipment, PhaseCode
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 

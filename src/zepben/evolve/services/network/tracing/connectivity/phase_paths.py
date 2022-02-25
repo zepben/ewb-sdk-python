@@ -23,20 +23,19 @@ _KNOWN_PHASE_CODES = [pc for pc in PhaseCode if any(it in PhaseCode.ABC.single_p
 _UNKNOWN_PHASE_CODES = [pc for pc in PhaseCode if any(it in PhaseCode.XY.single_phases for it in pc.single_phases)]
 
 straight_phase_connectivity: Dict[PhaseCode, Dict[PhaseCode, List[NominalPhasePath]]] = {
-    #todo **{
-    #     from_phases: {
-    #         to_phases: [
-    #             _STRAIGHT_PHASE_PATHS[it] for it in to_phases if it in from_phases
-    #         ] for to_phases in _KNOWN_PHASE_CODES
-    #     } for from_phases in _KNOWN_PHASE_CODES
-    # }, **{
-    #     from_phases: {
-    #         to_phases: [
-    #             _STRAIGHT_PHASE_PATHS[it] for it in to_phases if it in from_phases
-    #         ] for to_phases in _UNKNOWN_PHASE_CODES
-    #     } for from_phases in _UNKNOWN_PHASE_CODES
-    # }
+    from_phases: {
+        to_phases: [
+            _STRAIGHT_PHASE_PATHS[phase] for phase in from_phases.single_phases if phase in to_phases.single_phases
+        ] for to_phases in _KNOWN_PHASE_CODES
+    } for from_phases in _KNOWN_PHASE_CODES
 }
+straight_phase_connectivity.update({
+    from_phases: {
+        to_phases: [
+            _STRAIGHT_PHASE_PATHS[phase] for phase in from_phases.single_phases if phase in to_phases.single_phases
+        ] for to_phases in _UNKNOWN_PHASE_CODES
+    } for from_phases in _UNKNOWN_PHASE_CODES
+})
 
 viable_inferred_phase_connectivity: Dict[PhaseCode, Dict[PhaseCode, Dict[SinglePhaseKind, List[SinglePhaseKind]]]] = {
     PhaseCode.XY: {

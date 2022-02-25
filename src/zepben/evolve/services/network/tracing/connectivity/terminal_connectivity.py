@@ -5,10 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import List, Iterable, Optional, Set, Dict, Callable
 
-from zepben.evolve import Terminal, PhaseCode, ConnectivityResult, SinglePhaseKind, NominalPhasePath, Queue, Switch
-from zepben.evolve.services.network.tracing.connectivity_trace.xy_candidate_phase_paths import XyCandidatePhasePaths
-from zepben.evolve.services.network.tracing.connectivity_trace.xy_phase_step import XyPhaseStep
-from zepben.evolve.services.network.tracing.connectivity_trace.phase_paths import viable_inferred_phase_connectivity, straight_phase_connectivity
+from zepben.evolve import Terminal, PhaseCode, SinglePhaseKind, NominalPhasePath, Queue, LifoQueue, Switch
+from zepben.evolve.services.network.tracing.connectivity.connectivity_result import ConnectivityResult
+from zepben.evolve.services.network.tracing.connectivity.xy_candidate_phase_paths import XyCandidatePhasePaths
+from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import XyPhaseStep
+from zepben.evolve.services.network.tracing.connectivity.phase_paths import viable_inferred_phase_connectivity, straight_phase_connectivity
 
 __all__ = ["TerminalConnectivity"]
 
@@ -23,16 +24,13 @@ class TerminalConnectivity(object):
     def connected_terminals(
         self,
         terminal: Terminal,
-        phase_code: Optional[PhaseCode],
         phases: Optional[Iterable[SinglePhaseKind]] = None
     ) -> List[ConnectivityResult]:
-        phases = phase_code.single_phases if phase_code else phases if phases else terminal.phases.singlePhases
-        trace_phases = phases.intersect(terminal.phases.singlePhases.toSet())
-
-        if not terminal.connectivity_node:
-            return []
-
+        phases = set(phases or terminal.phases.single_phases)
+        trace_phases = phases.intersection(terminal.phases.single_phases)
         connectivity_node = terminal.connectivity_node
+        if connectivity_node is None:
+            return []
 
         results = []
         for connected_terminal in connectivity_node.terminals:
@@ -64,10 +62,7 @@ class TerminalConnectivity(object):
     def _find_straight_phase_paths(terminal: Terminal, connected_terminal: Terminal) -> Optional[List[NominalPhasePath]]:
         paths = straight_phase_connectivity[terminal.phases]
 
-        if not paths:
-            return None
-
-        return connected_terminal.phases or None
+        return paths and paths.get(connected_terminal.phases)
 
     def _find_xy_phase_paths(self, terminal: Terminal, connected_terminal: Terminal) -> Optional[List[NominalPhasePath]]:
         xy_phases = _find_xy_phases(terminal)
@@ -77,7 +72,7 @@ class TerminalConnectivity(object):
             return None
 
         nominal_phase_paths = []
-        if terminal.phases.contains(SinglePhaseKind.N) and connected_terminal.phases.contains(SinglePhaseKind.N):
+        if SinglePhaseKind.N in terminal.phases and SinglePhaseKind.N in connected_terminal.phases:
             # noinspection PyArgumentList
             nominal_phase_paths.append(NominalPhasePath(SinglePhaseKind.N, SinglePhaseKind.N))
 
@@ -115,18 +110,18 @@ class TerminalConnectivity(object):
         primary_phases = {it: _find_primary_phases(it) for it in cn.terminals if _is_not_none(_find_primary_phases(it))}
 
         candidate_phases = self._find_xy_candidate_phases(xy_phases, primary_phases)
-        for from_phase, to_phase in candidate_phases.calculate_paths():
-            if (to_phase != SinglePhaseKind.NONE) and ((from_phase in terminal.phases.singlePhases) or (to_phase in terminal.phases.singlePhases)):
+        for from_phase, to_phase in candidate_phases.calculate_paths().items():
+            if (to_phase != SinglePhaseKind.NONE) and ((from_phase in terminal.phases.single_phases) or (to_phase in terminal.phases.single_phases)):
                 add_path(from_phase, to_phase)
 
     def _find_xy_candidate_phases(self, xy_phases: Dict[Terminal, PhaseCode], primary_phases: Dict[Terminal, PhaseCode]) -> XyCandidatePhasePaths:
-        queue = Queue()
+        queue = LifoQueue()
         visited = set()
         candidate_phases = self._create_candidate_phases()
 
-        for terminal, xy_phase_code in xy_phases:
+        for terminal, xy_phase_code in xy_phases.items():
             for primary_phase_code in primary_phases.values():
-                for phase, candidates in viable_inferred_phase_connectivity.get(xy_phase_code, {}).get(primary_phase_code, {}):
+                for phase, candidates in viable_inferred_phase_connectivity.get(xy_phase_code, {}).get(primary_phase_code, {}).items():
                     candidate_phases.add_candidates(phase, candidates)
 
             # noinspection PyArgumentList

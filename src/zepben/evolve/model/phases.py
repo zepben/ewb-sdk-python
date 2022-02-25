@@ -37,7 +37,7 @@ NOMINAL_PHASE_MASKS = [0x000f, 0x00f0, 0x0f00, 0xf000]
 
 def _valid_phase_check(nominal_phase):
     if nominal_phase == SinglePhaseKind.NONE or nominal_phase == SinglePhaseKind.INVALID:
-        raise ValueError(f"INTERNAL ERROR: Phase {nominal_phase} is invalid. Must not be NONE or INVALID.")
+        raise ValueError(f"INTERNAL ERROR: Phase {nominal_phase.name} is invalid. Must not be NONE or INVALID.")
 
 
 def get_phase(status: int, nominal_phase: SinglePhaseKind):

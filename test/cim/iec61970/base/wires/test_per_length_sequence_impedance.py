@@ -8,7 +8,7 @@ from hypothesis.strategies import floats
 
 from test.cim.iec61970.base.wires.test_per_length_impedance import verify_per_length_impedance_constructor_default, \
     verify_per_length_impedance_constructor_kwargs, verify_per_length_impedance_constructor_args, per_length_impedance_kwargs, per_length_impedance_args
-from test.cim_creators import FLOAT_MIN, FLOAT_MAX
+from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import PerLengthSequenceImpedance
 
 per_length_sequence_impedance_kwargs = {

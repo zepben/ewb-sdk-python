@@ -28,6 +28,7 @@
       </indentOptions>
     </codeStyleSettings>
     <codeStyleSettings language="Python">
+      <option name="BLANK_LINES_AFTER_IMPORTS" value="0" />
       <indentOptions>
         <option name="CONTINUATION_INDENT_SIZE" value="4" />
       </indentOptions>

@@ -6,14 +6,11 @@
 
 from __future__ import annotations
 
+from typing import List, Optional, Tuple, Set
 from operator import attrgetter
-from typing import List, Optional, Tuple, Set, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from zepben.evolve import SinglePhaseKind
-
 from dataclassy import dataclass
 
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.phases import NominalPhasePath
@@ -56,10 +53,7 @@ def get_connectivity(terminal: Terminal, phases: Set[SinglePhaseKind] = None, ex
     return results
 
 
-Terminal.connected_terminals = get_connectivity
-
-
-def get_connected_equipment(cond_equip, exclude: Set = None):
+def get_connected_equipment(cond_equip: ConductingEquipment, exclude: Set[ConductingEquipment] = None) -> List[ConductingEquipment]:
     """
     Get all `ConductingEquipment` connected to this piece of equipment. An `Equipment` is connected if it has
     a `zepben.evolve.iec61970.base.core.terminal.Terminal` associated with a `ConnectivityNode` that this `ConductingEquipment` is also associated with.
@@ -68,19 +62,16 @@ def get_connected_equipment(cond_equip, exclude: Set = None):
     Returns A list of `ConductingEquipment` that are connected to this.
     """
     if exclude is None:
-        exclude = []
+        exclude = set()
     connected_equip = []
     for terminal in cond_equip.terminals:
         conn_node = terminal.connectivity_node
         for term in conn_node:
-            if term.conducting_equipment in exclude:
+            if term.conducting_equipment in exclude or term.conducting_equipment is None:
                 continue
             if term != terminal:  # Don't include ourselves.
                 connected_equip.append(term.conducting_equipment)
     return connected_equip
-
-
-ConductingEquipment.connected_equipment = get_connected_equipment
 
 
 def _terminal_connectivity(terminal: Terminal, connected_terminal: Terminal, phases: Set[SinglePhaseKind]) -> ConnectivityResult:
@@ -97,8 +88,8 @@ def _terminal_connectivity(terminal: Terminal, connected_terminal: Terminal, pha
 
 
 def _process_xy_phases(terminal: Terminal, connected_terminal: Terminal, phases: Set[SinglePhaseKind], xy_phases: Set[SinglePhaseKind],
-                       connectied_xy_phases: Set[SinglePhaseKind], nominal_phase_paths: List[NominalPhasePath]):
-    if (not xy_phases and not connectied_xy_phases) or (xy_phases and connectied_xy_phases):
+                       connected_xy_phases: Set[SinglePhaseKind], nominal_phase_paths: List[NominalPhasePath]):
+    if (not xy_phases and not connected_xy_phases) or (xy_phases and connected_xy_phases):
         return
     for phase in xy_phases:
         i = terminal.phases.single_phases.index(phase)
@@ -106,7 +97,7 @@ def _process_xy_phases(terminal: Terminal, connected_terminal: Terminal, phases:
             # noinspection PyArgumentList
             nominal_phase_paths.append(NominalPhasePath(from_phase=phase, to_phase=connected_terminal.phases.single_phases[i]))
 
-    for phase in connectied_xy_phases:
+    for phase in connected_xy_phases:
         i = connected_terminal.phases.single_phases.index(phase)
         if i < len(terminal.phases.single_phases):
             terminal_phase = terminal.phases.single_phases[i]

@@ -25,10 +25,10 @@ from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, Ge
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
 from time import sleep
-from test.pb_creators import network_identified_objects, ac_line_segment
+from test.streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
+from test.streaming.get.pb_creators import network_identified_objects, ac_line_segment
 from test.streaming.get.data.hierarchy import create_hierarchy_network
 from test.streaming.get.data.loops import create_loops_network
-from test.streaming.get.grpcio_aio_testing.mock_async_channel import testing_async_channel
 from test.streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
 
 PBRequest = TypeVar('PBRequest')
@@ -39,7 +39,7 @@ class TestNetworkConsumer:
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        self.channel = testing_async_channel(nc_pb2.DESCRIPTOR.services_by_name.values(), grpc_testing.strict_real_time())
+        self.channel = async_testing_channel(nc_pb2.DESCRIPTOR.services_by_name.values(), grpc_testing.strict_real_time())
         self.mock_server = MockServer(self.channel, nc_pb2.DESCRIPTOR.services_by_name['NetworkConsumer'])
         self.client = NetworkConsumerClient(channel=self.channel)
         self.service = self.client.service
@@ -199,66 +199,66 @@ class TestNetworkConsumer:
             # noinspection PyDeprecation
             await client.get_feeder("feeder")
 
-    # PROJ-1945 - @pytest.mark.asyncio
-    # async def test_get_feeder_as_equipment_container(self, feeder_network: NetworkService):
-    #     feeder_mrid = "f001"
-    #
-    #     async def client_test():
-    #         mor = (await self.client.get_equipment_container(feeder_mrid, Feeder)).throw_on_error().value
-    #
-    #         assert self.service.len_of() == 21
-    #         assert len(mor.objects) == 20  # we do not include the substation in the results
-    #         assert feeder_mrid in mor.objects
-    #         for io in mor.objects.values():
-    #             assert self.service.get(io.mrid) == io
-    #
-    #         for io in self.service.objects():
-    #             if not isinstance(io, Substation):
-    #                 assert mor.objects[io.mrid] == io
-    #         assert len(mor.failed) == 0
-    #
-    #     object_responses = _create_object_responses(feeder_network)
-    #
-    #     await self.mock_server.validate(client_test,
-    #                                     [
-    #                                         UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network))),
-    #                                         StreamGrpc('getEquipmentForContainers', [_create_container_responses(feeder_network)]),
-    #                                         StreamGrpc('getIdentifiedObjects', [object_responses, object_responses])
-    #                                     ])
+    @pytest.mark.asyncio
+    async def test_get_feeder_as_equipment_container(self, feeder_network: NetworkService):
+        feeder_mrid = "f001"
 
-    # PROJ-1945 - @pytest.mark.asyncio
-    # async def test_get_equipment_container_validates_type(self, feeder_network: NetworkService):
-    #     feeder_mrid = "f001"
-    #
-    #     async def client_test():
-    #         response = (await self.client.get_equipment_container(feeder_mrid, Circuit))
-    #
-    #         assert response.was_failure
-    #         assert isinstance(response.thrown, ValueError)
-    #         assert str(response.thrown) == f"Requested mrid {feeder_mrid} was not a Circuit, was Feeder"
-    #
-    #     await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network)))])
+        async def client_test():
+            mor = (await self.client.get_equipment_container(feeder_mrid, Feeder)).throw_on_error().value
 
-    # PROJ-1945 - @pytest.mark.asyncio
-    # async def test_get_equipment_for_container(self, feeder_network: NetworkService):
-    #     async def client_test():
-    #         mor = (await self.client.get_equipment_for_container("f001")).throw_on_error().value
-    #
-    #         assert len(mor.objects) == self.service.len_of(Equipment) == 3
-    #         _assert_contains_mrids(self.service, "fsp", "c2", "tx")
-    #
-    #     await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
+            assert self.service.len_of() == 21
+            assert len(mor.objects) == 20  # we do not include the substation in the results
+            assert feeder_mrid in mor.objects
+            for io in mor.objects.values():
+                assert self.service.get(io.mrid) == io
 
-    # PROJ-1945 - @pytest.mark.asyncio
-    # async def test_get_current_equipment_for_feeder(self, feeder_with_current: NetworkService):
-    #     async def client_test():
-    #         mor = (await self.client.get_current_equipment_for_feeder("f001")).throw_on_error().value
-    #
-    #         assert len(mor.objects) == self.service.len_of(Equipment) == 5
-    #         _assert_contains_mrids(self.service, "fsp", "c2", "tx", "c3", "sw")
-    #
-    #     await self.mock_server.validate(client_test,
-    #                                     [StreamGrpc('getCurrentEquipmentForFeeder', [_create_container_current_equipment_responses(feeder_with_current)])])
+            for io in self.service.objects():
+                if not isinstance(io, Substation):
+                    assert mor.objects[io.mrid] == io
+            assert len(mor.failed) == 0
+
+        object_responses = _create_object_responses(feeder_network)
+
+        await self.mock_server.validate(client_test,
+                                        [
+                                            UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network))),
+                                            StreamGrpc('getEquipmentForContainers', [_create_container_responses(feeder_network)]),
+                                            StreamGrpc('getIdentifiedObjects', [object_responses, object_responses])
+                                        ])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_container_validates_type(self, feeder_network: NetworkService):
+        feeder_mrid = "f001"
+
+        async def client_test():
+            response = (await self.client.get_equipment_container(feeder_mrid, Circuit))
+
+            assert response.was_failure
+            assert isinstance(response.thrown, ValueError)
+            assert str(response.thrown) == f"Requested mrid {feeder_mrid} was not a Circuit, was Feeder"
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network)))])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_for_container(self, feeder_network: NetworkService):
+        async def client_test():
+            mor = (await self.client.get_equipment_for_container("f001")).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 3
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
+
+    @pytest.mark.asyncio
+    async def test_get_current_equipment_for_feeder(self, feeder_with_current: NetworkService):
+        async def client_test():
+            mor = (await self.client.get_current_equipment_for_feeder("f001")).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 5
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx", "c3", "sw")
+
+        await self.mock_server.validate(client_test,
+                                        [StreamGrpc('getCurrentEquipmentForFeeder', [_create_container_current_equipment_responses(feeder_with_current)])])
 
     @pytest.mark.asyncio
     async def test_get_equipment_for_operational_restriction(self, operational_restriction_with_equipment: NetworkService):
@@ -329,17 +329,17 @@ class TestNetworkConsumer:
                                             StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
                                         ])
 
-    # PROJ-1945 - @pytest.mark.asyncio
-    # async def test_existing_equipment_used_for_repeats(self, feeder_network: NetworkService):
-    #     self.service.add(feeder_network["tx"])
-    #
-    #     async def client_test():
-    #         (await self.client.get_equipment_for_container("f001")).throw_on_error()
-    #
-    #         assert self.service["tx"] is feeder_network["tx"]
-    #         assert self.service["fsp"] is not feeder_network["fsp"]
-    #
-    #     await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
+    @pytest.mark.asyncio
+    async def test_existing_equipment_used_for_repeats(self, feeder_network: NetworkService):
+        self.service.add(feeder_network["tx"])
+
+        async def client_test():
+            (await self.client.get_equipment_for_container("f001")).throw_on_error()
+
+            assert self.service["tx"] is feeder_network["tx"]
+            assert self.service["fsp"] is not feeder_network["fsp"]
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
 
     @pytest.mark.asyncio
     async def test_unknown_types_are_reported(self):

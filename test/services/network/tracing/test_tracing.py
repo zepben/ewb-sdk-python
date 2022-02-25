@@ -29,8 +29,8 @@ async def _validate_can_stop(t: Traversal, visit_order: List[int], expected_orde
         assert stop_count == len(visit_order) - 1
 
 
-def queue_next(item: int, exclude=None):
-    return filter(lambda x: x > 0 and x not in exclude, [item - 2, item - 1, item + 1, item + 2])
+def queue_next(item: int, traversal: Traversal[int]):
+    traversal.process_queue.extend(filter(lambda x: x > 0, [item - 2, item - 1, item + 1, item + 2]))
 
 
 class TestTracing(object):
@@ -96,7 +96,8 @@ class TestTracing(object):
             if s:
                 stopping_on.add(i)
 
-        t = Traversal(queue_next=lambda i, exc: [i + 1, i + 2], start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
+        t = Traversal(queue_next=lambda i, traversal: traversal.process_queue.extend([i + 1, i + 2]),
+                      start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
 
         await t.trace(can_stop_on_start_item=True)
         for x in range(1, 4):

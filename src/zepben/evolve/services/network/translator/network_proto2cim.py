@@ -160,7 +160,7 @@ from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.services.common.translator.base_proto2cim import identified_object_to_cim, organisation_role_to_cim, document_to_cim
 from zepben.evolve.services.common.translator.util import int_or_none, float_or_none, long_or_none, str_or_none, uint_or_none
-from zepben.evolve.services.network.network import NetworkService
+from zepben.evolve.services.network.network_service import NetworkService
 
 __all__ = [
     "cable_info_to_cim", "no_load_test_to_cim", "open_circuit_test_to_cim", "overhead_wire_info_to_cim", "power_transformer_info_to_cim",

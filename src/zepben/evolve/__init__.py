@@ -86,7 +86,7 @@ from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 
 from zepben.evolve.services.network.tracing.traversals.tracker import *
-from zepben.evolve.services.network.tracing.traversals.tracing import *
+from zepben.evolve.services.network.tracing.traversals.traversal import *
 from zepben.evolve.services.network.tracing.traversals.queue import *
 from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import *
 
@@ -95,21 +95,26 @@ from zepben.evolve.services.network.tracing.feeder.associated_terminal_trace imp
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_tracker import *
 from zepben.evolve.services.network.tracing.phases.phase_step import *
 from zepben.evolve.services.network.tracing.phases.phase_status import *
-from zepben.evolve.services.network.tracing.phases.phasing import *
+from zepben.evolve.services.network.tracing.phases.phase_step_tracker import *
+from zepben.evolve.services.network.tracing.phases.phase_trace import *
+from zepben.evolve.services.network.tracing.phases.set_phases import *
+from zepben.evolve.services.network.tracing.phases.remove_phases import *
 from zepben.evolve.services.network.tracing.util import *
 from zepben.evolve.services.network.tracing.find import *
-from zepben.evolve.services.network.tracing.traces import *
+from zepben.evolve.services.network.tracing.tracing import *
 from zepben.evolve.services.network.tracing.connectivity import *
-from zepben.evolve.services.network.tracing.connectivity_trace.phase_paths import *
-from zepben.evolve.services.network.tracing.connectivity_trace.terminal_connectivity import *
-from zepben.evolve.services.network.tracing.connectivity_trace.xy_candidate_phase_paths import *
-from zepben.evolve.services.network.tracing.connectivity_trace.xy_phase_step import *
+from zepben.evolve.services.network.tracing.connectivity.connectivity_result import *
+from zepben.evolve.services.network.tracing.connectivity.connectivity_trace import *
+from zepben.evolve.services.network.tracing.connectivity.phase_paths import *
+from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity import *
+from zepben.evolve.services.network.tracing.connectivity.xy_candidate_phase_paths import *
+from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import *
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import *
 from zepben.evolve.services.network.tracing.feeder.direction_status import *
 
 from zepben.evolve.services.network.translator.network_proto2cim import *
 from zepben.evolve.services.network.translator.network_cim2proto import *
-from zepben.evolve.services.network.network import *
+from zepben.evolve.services.network.network_service import *
 
 from zepben.evolve.services.common.meta.data_source import *
 from zepben.evolve.services.common.meta.metadata_collection import *
@@ -143,6 +148,7 @@ from zepben.evolve.streaming.grpc.connect import *
 
 from zepben.evolve.util import *
 
+from zepben.evolve.services.network.tracing.connected_equipment_trace import *
 from zepben.evolve.services.network.network_extensions import *
 from zepben.evolve.model.busbranch.bus_branch import *
 

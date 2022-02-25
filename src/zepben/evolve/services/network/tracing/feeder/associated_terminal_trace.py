@@ -10,7 +10,7 @@ from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import Cond
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_tracker import AssociatedTerminalTracker
-from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
+from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 from zepben.evolve.services.network.tracing.util import ignore_open, normally_open, currently_open
 
 __all__ = ["new_normal_trace", "new_current_trace", "new_trace", "get_associated_terminals", "queue_next_terminal_if_closed"]
@@ -49,7 +49,7 @@ def get_associated_terminals(terminal: Terminal, exclude: Set[Terminal] = None) 
 
 def queue_next_terminal_if_closed(
     open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool]
-) -> Callable[[Terminal, Set[Terminal]], List[Terminal]]:
+) -> Callable[[Terminal, Traversal[Terminal]], None]:
     """
     Creates a queue next function based on the given `open_test` that given a `zepben.evolve.model.cim.iec61970.base.core.terminal.Terminal` where all its
     `phases` are closed, will return all its associated `Terminal`s for queuing as per `get_associated_terminals`.
@@ -58,18 +58,14 @@ def queue_next_terminal_if_closed(
     Returns the queuing function to be used to populate a `zepben.evolve.services.network.tracing.traversals.tracing.Traversal`s `process_queue`.
     """
 
-    def qn(terminal: Terminal, visited: Set[Terminal]) -> List[Terminal]:
+    def qn(terminal: Terminal, traversal: Traversal[Terminal]):
         if terminal is not None:
             if terminal.conducting_equipment is not None:
                 for phase in terminal.phases.single_phases:
                     # Return all associations as soon as we find a closed phase
                     if not open_test(terminal.conducting_equipment, phase):
-                        assoc_terminals = []
                         for term in terminal.conducting_equipment.terminals:
                             if terminal is not term:
-                                assoc_terminals.extend(get_associated_terminals(term, visited))
-                        return assoc_terminals
-        # Return nothing only if all phases are open.
-        return []
+                                traversal.process_queue.extend(get_associated_terminals(term))
 
     return qn

@@ -3,7 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import copy
+from __future__ import annotations
 from collections import deque
 from abc import abstractmethod, ABC
 from typing import TypeVar, Generic, Iterable
@@ -29,15 +29,15 @@ class Queue(Generic[T], ABC):
             self.queue = queue
 
     @abstractmethod
-    def put(self, item):
+    def put(self, item: T):
         raise NotImplementedError()
 
     @abstractmethod
-    def extend(self, items: Iterable):
+    def extend(self, items: Iterable[T]):
         raise NotImplementedError()
 
     @abstractmethod
-    def get(self):
+    def get(self) -> T:
         """
         Pop an item off the queue.
         Raises `IndexError` if the queue is empty.
@@ -45,7 +45,7 @@ class Queue(Generic[T], ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def empty(self):
+    def empty(self) -> bool:
         """
         Check if queue is empty
         Returns True if empty, False otherwise
@@ -53,7 +53,7 @@ class Queue(Generic[T], ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def peek(self):
+    def peek(self) -> T:
         """
         Retrieve next item on queue, but don't remove from queue.
         Returns Next item on the queue
@@ -66,7 +66,7 @@ class Queue(Generic[T], ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def copy(self):
+    def copy(self) -> Queue[T]:
         """Create a copy of this Queue"""
         raise NotImplementedError()
 
@@ -74,27 +74,27 @@ class Queue(Generic[T], ABC):
 class FifoQueue(Queue[T]):
     """Used for Breadth-first Traversal's"""
 
-    def put(self, item):
+    def put(self, item: T):
         self.queue.append(item)
 
-    def extend(self, items: Iterable):
+    def extend(self, items: Iterable[T]):
         self.queue.extend(items)
 
-    def get(self):
+    def get(self) -> T:
         """
         Pop an item off the queue.
         Raises `IndexError` if the queue is empty.
         """
         return self.queue.popleft()
 
-    def empty(self):
+    def empty(self) -> bool:
         """
         Check if queue is empty
         Returns True if empty, False otherwise
         """
         return len(self.queue) == 0
 
-    def peek(self):
+    def peek(self) -> T:
         """
         Retrieve next item on queue, but don't remove from queue.
         Returns Next item on the queue
@@ -105,34 +105,34 @@ class FifoQueue(Queue[T]):
         """Clear the queue."""
         self.queue.clear()
 
-    def copy(self):
+    def copy(self) -> FifoQueue[T]:
         return FifoQueue(self.queue.copy())
 
 
 class LifoQueue(Queue[T]):
     """Used for Depth-first Traversal's"""
 
-    def put(self, item):
+    def put(self, item: T):
         self.queue.append(item)
 
-    def extend(self, items: Iterable):
+    def extend(self, items: Iterable[T]):
         self.queue.extend(items)
 
-    def get(self):
+    def get(self) -> T:
         """
         Pop an item off the queue.
         Raises `IndexError` if the queue is empty.
         """
         return self.queue.pop()
 
-    def empty(self):
+    def empty(self) -> bool:
         """
         Check if queue is empty
         Returns True if empty, False otherwise
         """
         return len(self.queue) == 0
 
-    def peek(self):
+    def peek(self) -> T:
         """
         Retrieve next item on queue, but don't remove from queue.
         Returns Next item on the queue
@@ -143,20 +143,23 @@ class LifoQueue(Queue[T]):
         """Clear the queue."""
         self.queue.clear()
 
-    def copy(self):
+    def copy(self) -> LifoQueue[T]:
         return LifoQueue(self.queue.copy())
 
 
 class PriorityQueue(Queue[T]):
     """Used for custom `Traversal`s"""
 
-    def __init__(self):
-        super().__init__([])
+    def __init__(self, queue=None):
+        if queue is None:
+            super().__init__([])
+        else:
+            super().__init__(queue)
 
     def __len__(self):
         return len(self.queue)
 
-    def put(self, item):
+    def put(self, item: T):
         """
         Place an item in the queue based on its priority.
         `item` The item to place on the queue. Must implement `__lt__`
@@ -164,11 +167,11 @@ class PriorityQueue(Queue[T]):
         """
         heappush(self.queue, item)
 
-    def extend(self, items: Iterable):
+    def extend(self, items: Iterable[T]):
         for item in items:
             heappush(self.queue, item)
 
-    def get(self):
+    def get(self) -> T:
         """
         Get the next item in the queue, removing it from the queue.
         Returns The next item in the queue by priority.
@@ -176,7 +179,7 @@ class PriorityQueue(Queue[T]):
         """
         return heappop(self.queue)
 
-    def peek(self):
+    def peek(self) -> T:
         """
         Retrieve the next item in the queue, but don't remove it from the queue.
         Note that you shouldn't modify the returned item after using this function, as you could change its
@@ -185,12 +188,12 @@ class PriorityQueue(Queue[T]):
         """
         return self.queue[0]
 
-    def empty(self):
+    def empty(self) -> bool:
         return len(self) == 0
 
     def clear(self):
         """Clear the queue."""
         self.queue.clear()
 
-    def copy(self):
+    def copy(self) -> PriorityQueue[T]:
         return PriorityQueue(self.queue.copy())

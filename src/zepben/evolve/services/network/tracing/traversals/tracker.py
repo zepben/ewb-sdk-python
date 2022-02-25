@@ -8,15 +8,14 @@ from abc import abstractmethod
 
 __all__ = ["BaseTracker", "Tracker"]
 
-from typing import Set
-
+from typing import TYPE_CHECKING, TypeVar, Set, Generic
 from dataclassy import dataclass
 
-
+T = TypeVar("T")
 
 
 @dataclass(slots=True)
-class BaseTracker(object):
+class BaseTracker(Generic[T]):
     """
     An interface used by `zepben.evolve.tracing.Traversal`'s to 'track' items that have been visited.
 
@@ -24,7 +23,7 @@ class BaseTracker(object):
     """
 
     @abstractmethod
-    def has_visited(self, item):
+    def has_visited(self, item: T) -> bool:
         """
         Check if the tracker has already seen an item.
         `item` The item to check if it has been visited.
@@ -33,7 +32,7 @@ class BaseTracker(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def visit(self, item):
+    def visit(self, item: T) -> bool:
         """
         Visit an item. Item will not be visited if it has previously been visited.
         `item` The item to visit.
@@ -49,13 +48,13 @@ class BaseTracker(object):
         raise NotImplementedError()
 
 
-class Tracker(BaseTracker):
+class Tracker(BaseTracker[T]):
     """
     An interface used by `zepben.evolve.traversals.tracing.Traversal`'s to 'track' items that have been visited.
     """
     visited: Set = set()
 
-    def has_visited(self, item):
+    def has_visited(self, item: T) -> bool:
         """
         Check if the tracker has already seen an item.
         `item` The item to check if it has been visited.
@@ -63,7 +62,7 @@ class Tracker(BaseTracker):
         """
         return item in self.visited
 
-    def visit(self, item):
+    def visit(self, item: T) -> bool:
         """
         Visit an item. Item will not be visited if it has previously been visited.
         `item` The item to visit.
