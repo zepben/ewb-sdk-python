@@ -16,7 +16,7 @@ from zepben.auth.client import ZepbenTokenFetcher, AuthMethod, create_token_fetc
 
 from zepben.evolve import GrpcChannelBuilder
 
-__all__ = ["connect", "connect_async", "connect_secure", "connect_secure_async", "connect_with_password", "connect_with_password_async"]
+__all__ = ["connect", "connect_async", "connect_secure", "connect_with_password"]
 
 from zepben.evolve.streaming.grpc.channel_builder import AuthTokenPlugin
 
