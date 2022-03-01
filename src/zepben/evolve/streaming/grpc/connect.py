@@ -16,7 +16,7 @@ from zepben.auth.client import ZepbenTokenFetcher, AuthMethod, create_token_fetc
 
 from zepben.evolve import GrpcChannelBuilder
 
-__all__ = ["connect", "connect_async", "connect_secure", "connect_secure_async", "connect_with_password", "connect_with_password_async"]
+__all__ = ["connect", "connect_async", "connect_secure", "connect_with_password"]
 
 from zepben.evolve.streaming.grpc.channel_builder import AuthTokenPlugin
 
@@ -51,26 +51,12 @@ def _grpc_channel_builder_from_password(client_id: str, username: str, password:
         .token_fetcher(token_fetcher)
 
 
-@contextlib.contextmanager
-def connect_secure(host: str = "localhost", rpc_port: int = 50051, timeout: float = GRPC_READY_TIMEOUT) -> grpc.Channel:
-    yield _secure_grpc_channel_builder(host, rpc_port).connect(timeout)
+def connect_secure(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
+    return _secure_grpc_channel_builder(host, rpc_port).build()
 
 
-@contextlib.asynccontextmanager
-def connect_secure_async(host: str = "localhost", rpc_port: int = 50051, timeout: float = GRPC_READY_TIMEOUT) -> grpc.Channel:
-    yield _secure_grpc_channel_builder(host, rpc_port).connect(timeout)
-
-
-@contextlib.contextmanager
-def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051,
-                          timeout: float = GRPC_READY_TIMEOUT) -> grpc.Channel:
-    yield _grpc_channel_builder_from_password(client_id, username, password, host, rpc_port).connect(timeout)
-
-
-@contextlib.asynccontextmanager
-def connect_with_password_async(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051,
-                                timeout: float = GRPC_READY_TIMEOUT) -> grpc.Channel:
-    yield _grpc_channel_builder_from_password(client_id, username, password, host, rpc_port).connect(timeout)
+def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
+    return _grpc_channel_builder_from_password(client_id, username, password, host, rpc_port).build()
 
 
 def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = None, client_id: Optional[str] = None,

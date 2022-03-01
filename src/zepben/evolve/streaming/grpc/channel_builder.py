@@ -32,19 +32,11 @@ class GrpcChannelBuilder(ABC):
         self._socket_address: str = "localhost:50051"
         self._channel_credentials: Optional[grpc.ChannelCredentials] = None
 
-    def build(self) -> grpc.Channel:
+    def build(self) -> grpc.aio.Channel:
         if self._channel_credentials:
-            return grpc.secure_channel(self._socket_address, self._channel_credentials)
+            return grpc.aio.secure_channel(self._socket_address, self._channel_credentials)
 
-        return grpc.insecure_channel(self._socket_address)
-
-    def connect(self, timeout) -> grpc.Channel:
-        channel = self.build()
-        try:
-            grpc.channel_ready_future(channel).result(timeout=timeout)
-        except grpc.FutureTimeoutError:
-            raise ConnectionError(f"Timed out connecting to server {self._socket_address}")
-        return channel
+        return grpc.aio.insecure_channel(self._socket_address)
 
     def socket_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
         self._socket_address = f"{host}:{port}"
