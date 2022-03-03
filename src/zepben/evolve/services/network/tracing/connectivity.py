@@ -44,7 +44,7 @@ def get_connectivity(terminal: Terminal, phases: Set[SinglePhaseKind] = None, ex
     if exclude is None:
         exclude = set()
     if phases is None:
-        phases = terminal.phases.single_phases
+        phases = set(terminal.phases.single_phases)
     trace_phases = phases.intersection(terminal.phases.single_phases)
     cn = terminal.connectivity_node if terminal.connectivity_node else []
     results = []

@@ -52,9 +52,9 @@ def _attempt_to_reuse_connection(terminal1: Terminal, terminal2: Terminal) -> Pr
         if cn2 is not None:
             if cn1 is cn2:
                 return ProcessStatus.PROCESSED
-            elif connect(terminal2, cn1):
-                return ProcessStatus.PROCESSED
-            return ProcessStatus.INVALID
+        elif connect(terminal2, cn1):
+            return ProcessStatus.PROCESSED
+        return ProcessStatus.INVALID
     elif cn2 is not None:
         return ProcessStatus.PROCESSED if connect(terminal1, cn2) else ProcessStatus.INVALID
     return ProcessStatus.SKIPPED
