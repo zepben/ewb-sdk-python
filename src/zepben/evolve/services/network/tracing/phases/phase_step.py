@@ -5,11 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-
+from zepben.evolve import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
-from typing import FrozenSet, Optional
+from typing import FrozenSet, Optional, Union, Iterable
 from dataclassy import dataclass
 
 __all__ = ["PhaseStep"]
@@ -52,3 +52,17 @@ class PhaseStep(object):
 
     def __hash__(self):
         return hash((self.conducting_equipment, self.phases))
+
+
+def start_at(conducting_equipment: ConductingEquipment, phases: Union[PhaseCode, Iterable[SinglePhaseKind]]):
+    if isinstance(phases, PhaseCode):
+        phases = phases.single_phases
+
+    return PhaseStep(conducting_equipment, frozenset(phases), None)
+
+
+def continue_at(conducting_equipment: ConductingEquipment, phases: Union[PhaseCode, Iterable[SinglePhaseKind]], previous: Optional[ConductingEquipment]):
+    if isinstance(phases, PhaseCode):
+        phases = phases.single_phases
+
+    return PhaseStep(conducting_equipment, frozenset(phases), previous)

@@ -25,9 +25,9 @@ if TYPE_CHECKING:
 
 
 __all__ = ["create_basic_depth_trace", "create_basic_breadth_trace", "connected_equipment_trace", "connected_equipment_breadth_trace",
-           "normal_connected_equipment_trace", "current_connected_equipment_trace", "connectivity_trace", "connectivity_breadth_trace",
-           "normal_connectivity_trace", "current_connectivity_trace", "normal_downstream_trace", "current_downstream_trace", "set_phases", "remove_phases",
-           "assign_equipment_containers_to_feeders"]
+           "normal_connected_equipment_trace", "current_connected_equipment_trace", "phase_trace", "normal_phase_trace", "current_phase_trace",
+           "connectivity_trace", "connectivity_breadth_trace", "normal_connectivity_trace", "current_connectivity_trace", "normal_downstream_trace",
+           "current_downstream_trace", "set_phases", "remove_phases", "assign_equipment_containers_to_feeders"]
 
 
 # --- Helper functions that create depth-first/breadth-first traversals ---
