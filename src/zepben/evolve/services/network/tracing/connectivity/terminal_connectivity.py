@@ -88,6 +88,7 @@ class TerminalConnectivity(object):
             self._add_xy_phase_paths(terminal, add_from_to)
         else:
             self._add_xy_phase_paths(terminal, add_to_from)
+            self._add_xy_phase_paths(terminal, add_to_from)
 
         return nominal_phase_paths
 
@@ -173,7 +174,7 @@ class TerminalConnectivity(object):
         if not ce:
             return
 
-        if isinstance(ce, Switch) or not ce.is_normally_open:
+        if not isinstance(ce, Switch) or not ce.is_normally_open:
             for other in ce.terminals:
                 if (other != terminal) and other.connectivity_node:
                     for connected in other.connectivity_node.terminals:

@@ -86,26 +86,26 @@ class XyCandidatePhasePaths:
         paths = {}
 
         known_x = self._known_tracking.get(SinglePhaseKind.X)
-        if known_x != SinglePhaseKind.NONE:
+        if known_x is not None:
             paths[SinglePhaseKind.X] = known_x
 
         known_y = self._known_tracking.get(SinglePhaseKind.Y)
-        if (known_y != SinglePhaseKind.NONE) and (known_x != known_y):
+        if (known_y is not None) and (known_x != known_y):
             paths[SinglePhaseKind.Y] = known_y
         else:
             known_y = None
 
-        if (known_x != SinglePhaseKind.NONE) and (known_y != SinglePhaseKind.NONE):
+        if (known_x is not None) and (known_y is not None):
             return paths
 
-        candidate_phase_counts = {xy: Counter(candidates) for xy, candidates in self._candidate_tracking}
-        if known_x != SinglePhaseKind.NONE:
+        candidate_phase_counts = {xy: Counter(candidates) for xy, candidates in self._candidate_tracking.items()}
+        if known_x is not None:
             candidates = candidate_phase_counts.get(SinglePhaseKind.Y)
             if candidates:
                 paths[SinglePhaseKind.Y] = self._find_candidate(candidates, priority=Y_PRIORITY, after=known_x)
             else:
                 paths[SinglePhaseKind.Y] = SinglePhaseKind.NONE
-        elif known_y != SinglePhaseKind.NONE:
+        elif known_y is not None:
             candidates = candidate_phase_counts.get(SinglePhaseKind.X)
             if candidates:
                 paths[SinglePhaseKind.X] = self._find_candidate(candidates, priority=X_PRIORITY, after=known_y)
@@ -136,7 +136,7 @@ class XyCandidatePhasePaths:
             x_candidate = self._find_candidate(candidate_x_counts, priority=X_PRIORITY)
             y_candidate = self._find_candidate(candidate_y_counts, priority=Y_PRIORITY)
 
-            if x_candidate.isBefore(y_candidate):
+            if _is_before(x_candidate, y_candidate):
                 return x_candidate, y_candidate
             elif candidate_x_counts[x_candidate] > candidate_y_counts[y_candidate]:
                 return x_candidate, self._find_candidate(candidate_y_counts, priority=Y_PRIORITY, after=x_candidate)
@@ -164,13 +164,13 @@ class XyCandidatePhasePaths:
         before: Optional[SinglePhaseKind] = None,
         after: Optional[SinglePhaseKind] = None
     ) -> SinglePhaseKind:
-        valid_candidates = list(takewhile(lambda it, _: _is_before(it, before) and _is_after(it, after), candidate_counts.most_common()))
+        valid_candidates = list(takewhile(lambda cand: _is_before(cand[0], before) and _is_after(cand[0], after), candidate_counts.most_common()))
         if not valid_candidates:
             return SinglePhaseKind.NONE
         elif len(valid_candidates) == 1:
             return valid_candidates[0][0]
 
-        candidates = list(takewhile(lambda _, value: value == valid_candidates[0][1], valid_candidates))
+        candidates = list(takewhile(lambda cand: cand[1] == valid_candidates[0][1], valid_candidates))
         if len(candidates) == 1:
             return candidates[0][0]
 

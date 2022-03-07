@@ -69,6 +69,7 @@ def connected_equipment(conducting_equipment: ConductingEquipment,
     if isinstance(phases, PhaseCode):
         phases = phases.single_phases
 
+    a = list(itertools.chain(*(connected_terminals(term, phases or term.phases.single_phases) for term in conducting_equipment.terminals)))
     return list(itertools.chain(*(connected_terminals(term, phases or term.phases.single_phases) for term in conducting_equipment.terminals)))
 
 
