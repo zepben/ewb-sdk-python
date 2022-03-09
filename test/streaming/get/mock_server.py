@@ -22,12 +22,14 @@ GrpcResponse = TypeVar('GrpcResponse')
 class StreamGrpc:
     function: str
     processors: List[Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]]
+    force_timeout: bool = False
 
 
 @dataclass
 class UnaryGrpc:
     function: str
     processor: Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]
+    force_timeout: bool = False
 
 
 def stream_from_fixed(expected_requests: List[str], responses: Iterable[GrpcResponse]) -> List[Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]]:
@@ -83,6 +85,9 @@ class MockServer:
 
             try:
                 request = rpc.take_request()
+                if interaction.force_timeout:
+                    rpc.terminate(None, (), grpc.StatusCode.DEADLINE_EXCEEDED, '')
+                    return
 
                 for response in processor(request):
                     rpc.send_response(response)
@@ -94,6 +99,9 @@ class MockServer:
     def _run_unary_server_logic(self, interaction: UnaryGrpc):
         _, request, rpc = self.channel.take_unary_unary(self.grpc_service.methods_by_name[interaction.function])
         rpc.send_initial_metadata(())
+        if interaction.force_timeout:
+            rpc.terminate(None, (), grpc.StatusCode.DEADLINE_EXCEEDED, '')
+            return
 
         try:
             for response in interaction.processor(request):

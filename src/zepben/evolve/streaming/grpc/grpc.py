@@ -89,11 +89,15 @@ class GrpcResult(Generic[T]):
 class GrpcClient(object):
     error_handlers: List[Callable[[Exception], bool]] = []
 
-    def __init__(self, error_handlers: List[Callable[[Exception], bool]] = None):
+    timeout: int = 0
+    '''Timeout for client gRPC requests'''
+
+    def __init__(self, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
         if error_handlers:
             self.error_handlers = error_handlers.copy()
         else:
             self.error_handlers = list()
+        self.timeout = timeout
 
     def try_handle_error(self, e: Exception) -> bool:
         for handler in self.error_handlers:

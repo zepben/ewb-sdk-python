@@ -59,13 +59,13 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
     _stub: NetworkConsumerStub = None
 
-    def __init__(self, channel=None, stub: NetworkConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None):
+    def __init__(self, channel=None, stub: NetworkConsumerStub = None, error_handlers: List[Callable[[Exception], bool]] = None, timeout: int = 60):
         """
         :param channel: a gRPC channel used to create a stub if no stub is provided.
         :param stub: the gRPC stub to use for this consumer client.
         :param error_handlers: a collection of handlers to be processed for any errors that occur.
         """
-        super().__init__(error_handlers=error_handlers)
+        super().__init__(error_handlers=error_handlers, timeout=timeout)
         if channel is None and stub is None:
             raise ValueError("Must provide either a channel or a stub")
         if stub is not None:
@@ -358,20 +358,20 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
     async def _process_equipment_for_container(self, it: Union[str, EquipmentContainer]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, EquipmentContainer) else it
-        responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), [mrid]))
+        responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), [mrid]), timeout=self.timeout)
         async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _process_equipment_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
-        responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), mrids))
+        responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), mrids), timeout=self.timeout)
         async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _process_current_equipment_for_feeder(self, it: Union[str, Feeder]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, Feeder) else it
-        responses = self._stub.getCurrentEquipmentForFeeder(GetCurrentEquipmentForFeederRequest(mrid=mrid))
+        responses = self._stub.getCurrentEquipmentForFeeder(GetCurrentEquipmentForFeederRequest(mrid=mrid), timeout=self.timeout)
         async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
@@ -379,7 +379,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _process_equipment_for_restriction(self,
                                                  it: Union[str, OperationalRestriction]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, OperationalRestriction) else it
-        responses = self._stub.getEquipmentForRestriction(GetEquipmentForRestrictionRequest(mrid=mrid))
+        responses = self._stub.getEquipmentForRestriction(GetEquipmentForRestrictionRequest(mrid=mrid), timeout=self.timeout)
         async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
@@ -387,7 +387,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _process_terminals_for_connectivity_node(self,
                                                        it: Union[str, ConnectivityNode]) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, ConnectivityNode) else it
-        responses = self._stub.getTerminalsForNode(GetTerminalsForNodeRequest(mrid=mrid))
+        responses = self._stub.getTerminalsForNode(GetTerminalsForNodeRequest(mrid=mrid), timeout=self.timeout)
         async for response in responses:
             # noinspection PyUnresolvedReferences
             yield self.service.get(response.terminal.mrid(), Terminal, default=None) or self.service.add_from_pb(response.terminal), response.terminal.mrid()
@@ -396,13 +396,13 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         if not mrids:
             return
 
-        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids))
+        responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
         async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
     async def _handle_network_hierarchy(self):
-        response = await self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest())
+        response = await self._stub.getNetworkHierarchy(GetNetworkHierarchyRequest(), timeout=self.timeout)
 
         # noinspection PyArgumentList
         self.__network_hierarchy = NetworkHierarchy(
