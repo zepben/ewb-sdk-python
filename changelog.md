@@ -2,7 +2,7 @@
 * None.
 
 ##### New Features
-* None.
+* Allow specification of timeout for CimConsumerClients
 
 ##### Enhancements
 * None.
