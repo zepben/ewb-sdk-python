@@ -6,9 +6,12 @@
 import logging
 from typing import Optional, Iterable, Set
 
-from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.services.network.tracing.connectivity import get_connected_equipment
+from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.evolve.services.network.tracing.connectivity.connectivity_result import get_connected_equipment, get_connectivity
 
 __all__ = ["conducting_equipment_queue_next", "queue_next_terminal", "tracing_logger"]
 
@@ -32,7 +35,7 @@ def conducting_equipment_queue_next(conducting_equipment: Optional[ConductingEqu
     return []
 
 
-def queue_next_terminal(item, exclude: Optional[Set] = None):
+def queue_next_terminal(item: Terminal, traversal: Traversal[Terminal]):
     """
     Wrapper tracing queue function for fetching the terminals that should be queued based on their connectivity
 
@@ -45,16 +48,17 @@ def queue_next_terminal(item, exclude: Optional[Set] = None):
         # If there are no other terminals we get connectivity for this one and return that. Note that this will
         # also return connections for EnergyConsumer's, but upstream will be covered by the exclude parameter and thus
         # should yield an empty list.
-        to_terms = [cr.to_terminal for cr in item.get_connectivity(exclude=exclude)]
+        to_terms = [cr.to_terminal for cr in get_connectivity(item)]
         if len(to_terms) > 0:
             tracing_logger.debug(f"Queuing {to_terms[0].mrid} from single terminal equipment {item.mrid}")
-        return to_terms
+        traversal.process_queue.extend(to_terms)
+        return
 
     crs = []
     for term in other_terms:
-        crs.extend(term.get_connectivity(exclude=exclude))
+        crs.extend(get_connectivity(term))
 
     to_terms = [cr.to_terminal for cr in crs]
     tracing_logger.debug(f"Queuing terminals: [{', '.join(t.mrid for t in to_terms)}] from {item.mrid}")
-    return to_terms
+    traversal.process_queue.extend(to_terms)
 

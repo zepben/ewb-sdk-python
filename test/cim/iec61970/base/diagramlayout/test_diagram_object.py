@@ -9,7 +9,7 @@ from hypothesis.strategies import lists, builds, text, floats
 from test.cim.collection_validator import validate_collection_ordered
 from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from test.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
+from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
 from zepben.evolve import DiagramObject, DiagramObjectPoint, Diagram
 
 diagram_object_kwargs = {

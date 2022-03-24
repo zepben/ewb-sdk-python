@@ -6,7 +6,7 @@
 
 from hypothesis import given
 
-from test.cim_creators import *
+from test.cim.cim_creators import *
 from test.services.common.translator.base_test_translator import validate_service_translations
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 

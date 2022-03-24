@@ -10,10 +10,11 @@ from typing import Optional
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
+from zepben.evolve.services.network.tracing.phases.phase_status import NormalPhases, CurrentPhases
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 
 if TYPE_CHECKING:
-    from zepben.evolve import ConnectivityNode, ConductingEquipment, PhaseStatus, NormalPhases, CurrentPhases
+    from zepben.evolve import ConnectivityNode, ConductingEquipment, PhaseStatus
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode

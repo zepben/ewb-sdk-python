@@ -10,7 +10,7 @@ from typing import Optional
 
 from zepben.evolve import Switch, ConductingEquipment, SinglePhaseKind
 from zepben.evolve.services.network.tracing.queuing_functions import tracing_logger
-from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
+from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 from zepben.evolve.services.network.tracing.traversals.queue import LifoQueue
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
 
@@ -18,7 +18,7 @@ __all__ = ["normally_open", "currently_open", "ignore_open", "phase_log"]
 phase_logger = logging.getLogger("phase_logger")
 
 
-def normally_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] = None):
+def normally_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] = None) -> bool:
     """
     Test if a given phase on an equipment is normally open.
     `equip` The equipment to test
@@ -32,7 +32,7 @@ def normally_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] =
         return not equip.normally_in_service
 
 
-def currently_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] = None):
+def currently_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] = None) -> bool:
     """
     Test if a given phase on an equipment is open.
     `equip` The equipment to test
@@ -46,7 +46,7 @@ def currently_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] 
         return not equip.in_service
 
 
-def ignore_open(ce: ConductingEquipment, phase: Optional[SinglePhaseKind] = None):
+def ignore_open(_ce: ConductingEquipment, _phase: Optional[SinglePhaseKind] = None) -> bool:
     """
     Test that always returns that the phase is closed.
     `equip` The equipment to test
@@ -87,7 +87,7 @@ async def _phase_log_trace(cond_equip):
     return "\n".join([", ".join(x) for x in log_msg])
 
 
-def queue_next_equipment(item, exclude=None):
-    connected_equips = item.get_connected_equipment(exclude=exclude)
+def queue_next_equipment(item, traversal):
+    connected_equips = item.get_connected_equipment()
     tracing_logger.debug(f"Queuing connections [{', '.join(e.mrid for e in connected_equips)}] from {item.mrid}")
-    return connected_equips
+    return traversal.process_queue.extend(connected_equips)

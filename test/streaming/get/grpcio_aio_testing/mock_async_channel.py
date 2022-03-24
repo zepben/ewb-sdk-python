@@ -28,7 +28,7 @@ from grpc_testing._channel._channel_state import State
 
 from test.streaming.get.grpcio_aio_testing.mock_async_multi_callable import UnaryUnary, UnaryStream, StreamUnary, StreamStream
 
-__all__ = ["testing_async_channel"]
+__all__ = ["async_testing_channel"]
 
 
 class AsyncChannel(six.with_metaclass(abc.ABCMeta, grpc.aio.Channel)):
@@ -186,6 +186,5 @@ class TestingAsyncChannel(AsyncChannel):
         await asyncio.sleep(0)
 
 
-@pytest.mark.skip
-def testing_async_channel(descriptors, time):
+def async_testing_channel(descriptors, time):
     return TestingAsyncChannel(time, _channel_state.State())

@@ -18,7 +18,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySour
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
-from zepben.evolve.services.network.network import NetworkService
+from zepben.evolve.services.network.network_service import NetworkService
 
 __all__ = [
     "BusBranchNetworkCreationValidator",
@@ -67,13 +67,13 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
 
     @abc.abstractmethod
     def is_valid_topological_node_data(
-            self,
-            bus_branch_network: BBN,
-            base_voltage: Optional[int],
-            collapsed_conducting_equipment: FrozenSet[ConductingEquipment],
-            border_terminals: FrozenSet[Terminal],
-            inner_terminals: FrozenSet[Terminal],
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        base_voltage: Optional[int],
+        collapsed_conducting_equipment: FrozenSet[ConductingEquipment],
+        border_terminals: FrozenSet[Terminal],
+        inner_terminals: FrozenSet[Terminal],
+        node_breaker_network: NetworkService
     ) -> bool:
         """
         Validates if provided data is fit for the creation of a topological node.
@@ -85,14 +85,14 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
 
     @abc.abstractmethod
     def is_valid_topological_branch_data(
-            self,
-            bus_branch_network: BBN,
-            connected_topological_nodes: Tuple[TN, TN],
-            length: Optional[float],
-            collapsed_ac_line_segments: FrozenSet[AcLineSegment],
-            border_terminals: FrozenSet[Terminal],
-            inner_terminals: FrozenSet[Terminal],
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        connected_topological_nodes: Tuple[TN, TN],
+        length: Optional[float],
+        collapsed_ac_line_segments: FrozenSet[AcLineSegment],
+        border_terminals: FrozenSet[Terminal],
+        inner_terminals: FrozenSet[Terminal],
+        node_breaker_network: NetworkService
     ) -> bool:
         """
         Validates if provided data is fit for the creation of a topological branch.
@@ -104,11 +104,11 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
 
     @abc.abstractmethod
     def is_valid_equivalent_branch_data(
-            self,
-            bus_branch_network: BBN,
-            connected_topological_nodes: List[TN],
-            equivalent_branch: EquivalentBranch,
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        connected_topological_nodes: List[TN],
+        equivalent_branch: EquivalentBranch,
+        node_breaker_network: NetworkService
     ) -> bool:
         """
         Validates if provided data is fit for the creation of an equivalent branch.
@@ -120,11 +120,11 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
 
     @abc.abstractmethod
     def is_valid_power_transformer_data(
-            self,
-            bus_branch_network: BBN,
-            power_transformer: PowerTransformer,
-            ends_to_topological_nodes: List[Tuple[PowerTransformerEnd, Optional[TN]]],
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        power_transformer: PowerTransformer,
+        ends_to_topological_nodes: List[Tuple[PowerTransformerEnd, Optional[TN]]],
+        node_breaker_network: NetworkService
     ) -> bool:
         """
         Validates if provided data is fit for the creation of a power transformer.
@@ -136,11 +136,11 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
 
     @abc.abstractmethod
     def is_valid_energy_source_data(
-            self,
-            bus_branch_network: BBN,
-            energy_source: EnergySource,
-            connected_topological_node: TN,
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        energy_source: EnergySource,
+        connected_topological_node: TN,
+        node_breaker_network: NetworkService
     ) -> bool:
         """
         Validates if provided data is fit for the creation of an energy source.
@@ -152,11 +152,11 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
 
     @abc.abstractmethod
     def is_valid_energy_consumer_data(
-            self,
-            bus_branch_network: BBN,
-            energy_consumer: EnergyConsumer,
-            connected_topological_node: TN,
-            node_breaker_network: NetworkService,
+        self,
+        bus_branch_network: BBN,
+        energy_consumer: EnergyConsumer,
+        connected_topological_node: TN,
+        node_breaker_network: NetworkService,
     ) -> bool:
         """
         Validates if provided data is fit for the creation of an energy consumer.
@@ -168,11 +168,11 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
 
     @abc.abstractmethod
     def is_valid_power_electronics_connection_data(
-            self,
-            bus_branch_network: BBN,
-            power_electronics_connection: PowerElectronicsConnection,
-            connected_topological_node: TN,
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        power_electronics_connection: PowerElectronicsConnection,
+        connected_topological_node: TN,
+        node_breaker_network: NetworkService
     ) -> bool:
         """
         Validates if provided data is fit for the creation of a power electronics connection.
@@ -229,13 +229,13 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
 
     @abc.abstractmethod
     def topological_node_creator(
-            self,
-            bus_branch_network: BBN,
-            base_voltage: Optional[int],
-            collapsed_conducting_equipment: FrozenSet[ConductingEquipment],
-            border_terminals: FrozenSet[Terminal],
-            inner_terminals: FrozenSet[Terminal],
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        base_voltage: Optional[int],
+        collapsed_conducting_equipment: FrozenSet[ConductingEquipment],
+        border_terminals: FrozenSet[Terminal],
+        inner_terminals: FrozenSet[Terminal],
+        node_breaker_network: NetworkService
     ) -> Tuple[Any, TN]:
         """
         Callback used to create a topological node instance of type TN.
@@ -254,14 +254,14 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
 
     @abc.abstractmethod
     def topological_branch_creator(
-            self,
-            bus_branch_network: BBN,
-            connected_topological_nodes: Tuple[TN, TN],
-            length: Optional[float],
-            collapsed_ac_line_segments: FrozenSet[AcLineSegment],
-            border_terminals: FrozenSet[Terminal],
-            inner_terminals: FrozenSet[Terminal],
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        connected_topological_nodes: Tuple[TN, TN],
+        length: Optional[float],
+        collapsed_ac_line_segments: FrozenSet[AcLineSegment],
+        border_terminals: FrozenSet[Terminal],
+        inner_terminals: FrozenSet[Terminal],
+        node_breaker_network: NetworkService
     ) -> Tuple[Any, TB]:
         """
         Callback used to create a topological branch instance in target bus-branch network.
@@ -281,11 +281,11 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
 
     @abc.abstractmethod
     def equivalent_branch_creator(
-            self,
-            bus_branch_network: BBN,
-            connected_topological_nodes: List[TN],
-            equivalent_branch: EquivalentBranch,
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        connected_topological_nodes: List[TN],
+        equivalent_branch: EquivalentBranch,
+        node_breaker_network: NetworkService
     ) -> Tuple[Any, EB]:
         """
         Callback used to create an equivalent branch instance in target bus-branch network.
@@ -301,11 +301,11 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
 
     @abc.abstractmethod
     def power_transformer_creator(
-            self,
-            bus_branch_network: BBN,
-            power_transformer: PowerTransformer,
-            ends_to_topological_nodes: List[Tuple[PowerTransformerEnd, Optional[TN]]],
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        power_transformer: PowerTransformer,
+        ends_to_topological_nodes: List[Tuple[PowerTransformerEnd, Optional[TN]]],
+        node_breaker_network: NetworkService
     ) -> Dict[Any, PT]:
         """
         Callback used to create a power transformer instance in target bus-branch network.
@@ -320,11 +320,11 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
 
     @abc.abstractmethod
     def energy_source_creator(
-            self,
-            bus_branch_network: BBN,
-            energy_source: EnergySource,
-            connected_topological_node: TN,
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        energy_source: EnergySource,
+        connected_topological_node: TN,
+        node_breaker_network: NetworkService
     ) -> Dict[Any, ES]:
         """
         Callback used to create an energy source instance in target bus-branch network.
@@ -339,11 +339,11 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
 
     @abc.abstractmethod
     def energy_consumer_creator(
-            self,
-            bus_branch_network: BBN,
-            energy_consumer: EnergyConsumer,
-            connected_topological_node: TN,
-            node_breaker_network: NetworkService,
+        self,
+        bus_branch_network: BBN,
+        energy_consumer: EnergyConsumer,
+        connected_topological_node: TN,
+        node_breaker_network: NetworkService,
     ) -> Dict[Any, EC]:
         """
         Callback used to pass all the required values to generate an energy consumer object.
@@ -358,11 +358,11 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
 
     @abc.abstractmethod
     def power_electronics_connection_creator(
-            self,
-            bus_branch_network: BBN,
-            power_electronics_connection: PEC,
-            connected_topological_node: TN,
-            node_breaker_network: NetworkService
+        self,
+        bus_branch_network: BBN,
+        power_electronics_connection: PEC,
+        connected_topological_node: TN,
+        node_breaker_network: NetworkService
     ) -> Dict[Any, PEC]:
         """
         Callback used to pass all the required values to generate a power electronics connection object.
@@ -469,8 +469,8 @@ class BusBranchNetworkCreationResult(Generic[BBN, BNV]):
 
 
 async def _create_bus_branch_network(
-        bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
-        node_breaker_network: NetworkService
+    bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
+    node_breaker_network: NetworkService
 ) -> BusBranchNetworkCreationResult[BBN, BNV]:
     """
     Creates bus-branch network.
@@ -538,13 +538,13 @@ async def _create_bus_branch_network(
 
 
 async def _get_or_create_topological_node(
-        terminal: Terminal,
-        terminals_to_tns: Dict[str, TN],
-        node_breaker_network: NetworkService,
-        bus_branch_network: BBN,
-        bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
-        result: BusBranchNetworkCreationResult[BBN, BNV],
-        validator: BNV
+    terminal: Terminal,
+    terminals_to_tns: Dict[str, TN],
+    node_breaker_network: NetworkService,
+    bus_branch_network: BBN,
+    bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
+    result: BusBranchNetworkCreationResult[BBN, BNV],
+    validator: BNV
 ) -> (bool, TN):
     cached_tn = terminals_to_tns.get(terminal.mrid)
     if cached_tn is not None:
@@ -598,12 +598,12 @@ async def _get_or_create_topological_node(
 
 
 async def _create_topological_branches(
-        node_breaker_network: NetworkService,
-        bus_branch_network: BBN,
-        bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
-        result: BusBranchNetworkCreationResult[BBN, BNV],
-        terminals_to_tns: Dict[str, TN],
-        validator: BNV
+    node_breaker_network: NetworkService,
+    bus_branch_network: BBN,
+    bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
+    result: BusBranchNetworkCreationResult[BBN, BNV],
+    terminals_to_tns: Dict[str, TN],
+    validator: BNV
 ) -> bool:
     processed_acls_ids = set()
     for acls in node_breaker_network.objects(AcLineSegment):
@@ -665,12 +665,12 @@ async def _create_topological_branches(
 
 
 async def _create_equivalent_branches(
-        node_breaker_network: NetworkService,
-        bus_branch_network: BBN,
-        bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
-        result: BusBranchNetworkCreationResult[BBN, BNV],
-        terminals_to_tns: Dict[str, TN],
-        validator: BNV
+    node_breaker_network: NetworkService,
+    bus_branch_network: BBN,
+    bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
+    result: BusBranchNetworkCreationResult[BBN, BNV],
+    terminals_to_tns: Dict[str, TN],
+    validator: BNV
 ) -> bool:
     for eb in node_breaker_network.objects(EquivalentBranch):
         if eb.mrid in result.mappings.to_bbn.objects:
@@ -706,12 +706,12 @@ async def _create_equivalent_branches(
 
 
 async def _create_power_transformers(
-        node_breaker_network: NetworkService,
-        bus_branch_network: BBN,
-        bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
-        result: BusBranchNetworkCreationResult[BBN, BNV],
-        terminals_to_tns: Dict[str, TN],
-        validator: BNV
+    node_breaker_network: NetworkService,
+    bus_branch_network: BBN,
+    bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
+    result: BusBranchNetworkCreationResult[BBN, BNV],
+    terminals_to_tns: Dict[str, TN],
+    validator: BNV
 ) -> bool:
     for pt in node_breaker_network.objects(PowerTransformer):
         # create list of ends with their connected topological nodes
@@ -746,12 +746,12 @@ async def _create_power_transformers(
 
 
 async def _create_energy_sources(
-        node_breaker_network: NetworkService,
-        bus_branch_network: BBN,
-        bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
-        result: BusBranchNetworkCreationResult[BBN, BNV],
-        terminals_to_tns: Dict[str, TN],
-        validator: BNV
+    node_breaker_network: NetworkService,
+    bus_branch_network: BBN,
+    bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
+    result: BusBranchNetworkCreationResult[BBN, BNV],
+    terminals_to_tns: Dict[str, TN],
+    validator: BNV
 ) -> bool:
     for es in node_breaker_network.objects(EnergySource):
         es_terminal = next((t for t in es.terminals))
@@ -776,12 +776,12 @@ async def _create_energy_sources(
 
 
 async def _create_energy_consumers(
-        node_breaker_network: NetworkService,
-        bus_branch_network: BBN,
-        bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
-        result: BusBranchNetworkCreationResult[BBN, BNV],
-        terminals_to_tns: Dict[str, TN],
-        validator: BNV
+    node_breaker_network: NetworkService,
+    bus_branch_network: BBN,
+    bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
+    result: BusBranchNetworkCreationResult[BBN, BNV],
+    terminals_to_tns: Dict[str, TN],
+    validator: BNV
 ):
     for ec in node_breaker_network.objects(EnergyConsumer):
         ec_terminal = next((t for t in ec.terminals))
@@ -807,12 +807,12 @@ async def _create_energy_consumers(
 
 
 async def _create_power_electronics_connections(
-        node_breaker_network: NetworkService,
-        bus_branch_network: BBN,
-        bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
-        result: BusBranchNetworkCreationResult[BBN, BNV],
-        terminals_to_tns: Dict[str, TN],
-        validator: BNV
+    node_breaker_network: NetworkService,
+    bus_branch_network: BBN,
+    bus_branch_network_creator: BusBranchNetworkCreator[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV],
+    result: BusBranchNetworkCreationResult[BBN, BNV],
+    terminals_to_tns: Dict[str, TN],
+    validator: BNV
 ):
     for pec in node_breaker_network.objects(PowerElectronicsConnection):
         pec_terminal = next((t for t in pec.terminals))
@@ -890,8 +890,8 @@ def _validate_number_of_terminals(network: NetworkService):
 
 
 async def _group_negligible_impedance_terminals(
-        terminal: Terminal,
-        has_negligible_impedance: Callable[[ConductingEquipment], bool]
+    terminal: Terminal,
+    has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ) -> TerminalGrouping[ConductingEquipment]:
     tg = TerminalGrouping[ConductingEquipment]()
     # noinspection PyArgumentList
@@ -906,8 +906,8 @@ async def _group_negligible_impedance_terminals(
 
 
 def _process_terminal(
-        tg: TerminalGrouping[ConductingEquipment],
-        has_negligible_impedance: Callable[[ConductingEquipment], bool]
+    tg: TerminalGrouping[ConductingEquipment],
+    has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ):
     async def add_to_group(t: Terminal, _):
         if t in tg.terminals():
@@ -923,21 +923,17 @@ def _process_terminal(
 
 
 def _queue_terminals_across_negligible_impedance(
-        tg: TerminalGrouping[ConductingEquipment],
-        has_negligible_impedance: Callable[[ConductingEquipment], bool]
+    tg: TerminalGrouping[ConductingEquipment],
+    has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ):
-    def queue_next(terminal: Terminal, _):
-        terminals_to_queue = []
-
+    def queue_next(terminal: Terminal, traversal: Traversal[Terminal]):
         if terminal.connectivity_node is not None:
-            terminals_to_queue.extend({ot for ot in terminal.connectivity_node.terminals
-                                       if ot != terminal and ot not in tg.terminals()})
+            traversal.process_queue.extend({ot for ot in terminal.connectivity_node.terminals
+                                            if ot != terminal and ot not in tg.terminals()})
 
         if has_negligible_impedance(terminal.conducting_equipment):
-            terminals_to_queue.extend({ot for ot in terminal.conducting_equipment.terminals
-                                       if ot != terminal and ot not in tg.terminals()})
-
-        return terminals_to_queue
+            traversal.process_queue.extend({ot for ot in terminal.conducting_equipment.terminals
+                                            if ot != terminal and ot not in tg.terminals()})
 
     return queue_next
 
@@ -973,8 +969,8 @@ async def _group_common_ac_line_segment_terminals(acls: AcLineSegment) -> Termin
 
 
 def _process_acls(
-        common_acls: TerminalGrouping[AcLineSegment],
-        connectivity_node_counter: Counter
+    common_acls: TerminalGrouping[AcLineSegment],
+    connectivity_node_counter: Counter
 ):
     async def add_to_group(acls: AcLineSegment, _):
         if acls in common_acls.conducting_equipment_group:
@@ -988,19 +984,19 @@ def _process_acls(
 
 
 def _queue_common_impedance_lines(
-        common_acls: TerminalGrouping[AcLineSegment],
-        has_common_impedance: Callable[[AcLineSegment], bool]
+    common_acls: TerminalGrouping[AcLineSegment],
+    has_common_impedance: Callable[[AcLineSegment], bool]
 ):
-    def queue_next(acls: AcLineSegment, _):
-        return _next_common_acls(acls, has_common_impedance, common_acls)
+    def queue_next(acls: AcLineSegment, traversal: Traversal[AcLineSegment]):
+        traversal.process_queue.extend(_next_common_acls(acls, has_common_impedance, common_acls))
 
     return queue_next
 
 
 def _next_common_acls(
-        acls: AcLineSegment,
-        has_common_impedance: Callable[[AcLineSegment], bool],
-        common_acls: TerminalGrouping[AcLineSegment]
+    acls: AcLineSegment,
+    has_common_impedance: Callable[[AcLineSegment], bool],
+    common_acls: TerminalGrouping[AcLineSegment]
 ) -> Set[AcLineSegment]:
     acls_terminals = {*acls.terminals}
 

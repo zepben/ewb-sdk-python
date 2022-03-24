@@ -8,12 +8,12 @@ from typing import Set, Callable, Optional, Awaitable
 from dataclassy import dataclass
 from zepben.evolve import Equipment
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
-from zepben.evolve.services.network.network import NetworkService
+from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, EquipmentContainer
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_trace import new_normal_trace, new_current_trace, get_associated_terminals
-from zepben.evolve.services.network.tracing.traversals.tracing import Traversal
+from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 
 __all__ = ["AssignToFeeders"]
 

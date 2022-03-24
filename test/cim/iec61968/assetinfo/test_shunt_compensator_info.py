@@ -9,7 +9,7 @@ from zepben.evolve import ShuntCompensatorInfo
 
 from test.cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args
-from test.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 
 shunt_compensator_info_kwargs = {
     **asset_info_kwargs,

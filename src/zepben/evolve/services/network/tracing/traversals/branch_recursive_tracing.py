@@ -4,10 +4,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from __future__ import annotations
 from zepben.evolve.services.network.tracing.traversals.queue import Queue
-from zepben.evolve.services.network.tracing.traversals.tracing import BaseTraversal
+from zepben.evolve.services.network.tracing.traversals.traversal import BaseTraversal
 from zepben.evolve.services.network.tracing.traversals.tracker import Tracker
-from typing import Callable, Set, TypeVar, Optional
+from typing import Callable, TypeVar, Optional
 
 __all__ = ["BranchRecursiveTraversal"]
 T = TypeVar('T')
@@ -15,21 +16,21 @@ T = TypeVar('T')
 
 class BranchRecursiveTraversal(BaseTraversal[T]):
 
-    queue_next: Callable[[T, BaseTraversal[T], Set[T]], None]
+    queue_next: Callable[[T, BaseTraversal[T]], None]
     """A callable for each item encountered during the trace, that should queue the next items found on the given traversal's `process_queue`. 
     The first argument will be the current item, the second this traversal, and the third a set of already visited items that can be used as an optional 
     optimisation to skip queuing."""
 
-    branch_queue: Queue
+    branch_queue: Queue[BranchRecursiveTraversal[T]]
     """Queue containing branches to be processed"""
 
-    process_queue: Queue
+    process_queue: Queue[T]
     """Queue containing the items to process for this branch"""
 
     tracker: Tracker = Tracker()
     """Tracker for the items in this branch"""
 
-    parent: Optional[BaseTraversal] = None
+    parent: Optional[BranchRecursiveTraversal[T]] = None
     """The parent branch for this branch, None implies this branch has no parent"""
 
     on_branch_start: Optional[Callable[[T], None]] = None
@@ -92,8 +93,8 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
     def reset(self):
         """Reset the run state, queues and tracker for this this traversal"""
         self._reset_run_flag()
-        self.process_queue.queue.clear()
-        self.branch_queue.queue.clear()
+        self.process_queue.clear()
+        self.branch_queue.clear()
         self.tracker.clear()
 
     def create_branch(self):
@@ -102,6 +103,7 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
         pass this `Traversal` as the parent. The new Traversal will be :meth:`reset` prior to being returned.
         Returns A new `BranchRecursiveTraversal` the same as this, but with this Traversal as its parent
         """
+        # noinspection PyArgumentList
         branch = BranchRecursiveTraversal(queue_next=self.queue_next,
                                           branch_queue=self.branch_queue.copy(),
                                           tracker=self.tracker.copy(),
@@ -131,17 +133,17 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
         self.tracker.visit(self.start_item)
         # If we can't stop on the start item we don't run any stop conditions. if this causes a problem for you,
         # work around it by running the stop conditions for the start item prior to running the trace.
-        stopping = can_stop_on_start_item and await self.matches_stop_condition(self.start_item)
+        stopping = can_stop_on_start_item and await self.matches_any_stop_condition(self.start_item)
         await self.apply_step_actions(self.start_item, stopping)
         if not stopping:
-            self.queue_next(self.start_item, self, self.tracker.visited)
+            self.queue_next(self.start_item, self)
 
         while not self.process_queue.empty():
             current = self.process_queue.get()
             if self.visit(current):
-                stopping = await self.matches_stop_condition(current)
+                stopping = await self.matches_any_stop_condition(current)
                 await self.apply_step_actions(current, stopping)
                 if not stopping:
-                    self.queue_next(current, self, self.tracker.visited)
+                    self.queue_next(current, self)
 
         await self.traverse_branches()

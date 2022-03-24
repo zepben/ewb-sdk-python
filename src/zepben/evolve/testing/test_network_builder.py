@@ -6,7 +6,7 @@
 from typing import Optional, Callable, List
 
 from .. import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, PowerTransformerEnd, \
-    PowerTransformer
+    PowerTransformer, set_phases
 
 
 def null_action(_):
@@ -304,9 +304,9 @@ class TestNetworkBuilder(object):
    
     :return: The `NetworkService` created by this `TestNetworkBuilder`
     """
-    def build(self, apply_directions_from_sources: bool = True) -> NetworkService:
+    async def build(self, apply_directions_from_sources: bool = True) -> NetworkService:
         # The traces are broken, add them back in later.
-        # PROJ-1945 - Tracing.setPhases().run(network)
+        await set_phases().run(self.network)
         # PROJ-1952 - Tracing.setDirection().run(network)
 
         if apply_directions_from_sources:

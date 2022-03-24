@@ -8,7 +8,7 @@ from hypothesis import given
 from hypothesis.strategies import text, builds
 
 from test.cim.iec61970.base.core.test_name_type import name_type_kwargs
-from test.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
+from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
 from zepben.evolve import Junction
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType

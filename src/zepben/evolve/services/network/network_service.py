@@ -5,20 +5,22 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+
+import itertools
 import logging
 from enum import Enum
-from typing import Dict, List, TYPE_CHECKING
-if TYPE_CHECKING:
-    from zepben.evolve import Terminal
+from typing import TYPE_CHECKING, Dict, List, Union, Iterable
 
-from zepben.evolve.model.cim.iec61970.base.meas.measurement import Measurement
-from zepben.evolve.services.common.base_service import BaseService
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
-from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
-from zepben.evolve.services.network.tracing.phases.phasing import SetPhases
+from zepben.evolve.services.common.base_service import BaseService
+from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity import TerminalConnectivity
 from pathlib import Path
+if TYPE_CHECKING:
+    from zepben.evolve import Terminal, SinglePhaseKind, ConnectivityResult, Measurement, ConductingEquipment
 
-__all__ = ["connect", "NetworkService"]
+__all__ = ["connect", "connected_terminals", "connected_equipment", "NetworkService"]
 logger = logging.getLogger(__name__)
 TRACED_NETWORK_FILE = str(Path.home().joinpath(Path("traced.json")))
 
@@ -37,6 +39,37 @@ def connect(terminal: Terminal, connectivity_node: ConnectivityNode):
     """
     terminal.connect(connectivity_node)
     connectivity_node.add_terminal(terminal)
+
+
+def connected_terminals(terminal: Terminal, phases: Union[None, PhaseCode, Iterable[SinglePhaseKind]] = None) -> List[ConnectivityResult]:
+    """
+    Find the connected `Terminal`s for the specified `terminal` using only the phases of the specified `phaseCode`.
+
+    @param terminal: The `Terminal` to process.
+    @param phases: Which phases should be used for the connectivity check. If omitted, the phases of `terminal` will be used.
+    @return: A list of `ConnectivityResult` specifying the connections between `terminal` and the connected `Terminal`s
+    """
+    phases = phases or terminal.phases
+    if isinstance(phases, PhaseCode):
+        phases = phases.single_phases
+
+    return TerminalConnectivity().connected_terminals(terminal, phases)
+
+
+def connected_equipment(conducting_equipment: ConductingEquipment,
+                        phases: Union[None, PhaseCode, Iterable[SinglePhaseKind]] = None) -> List[ConnectivityResult]:
+    """
+    Find the connected `ConductingEquipment` for each `Terminal` of `conductingEquipment` using only the specified `phases`.
+
+    @param conducting_equipment: The `ConductingEquipment` to process.
+    @param phases: Which phases should be used for the connectivity check. If omitted,
+                  all valid phases will be used.
+    @return: A list of `ConnectivityResult` specifying the connections between `conductingEquipment` and the connected `ConductingEquipment`
+    """
+    if isinstance(phases, PhaseCode):
+        phases = phases.single_phases
+
+    return list(itertools.chain(*(connected_terminals(term, phases) for term in conducting_equipment.terminals)))
 
 
 def _attempt_to_reuse_connection(terminal1: Terminal, terminal2: Terminal) -> ProcessStatus:
@@ -201,10 +234,6 @@ class NetworkService(BaseService):
         else:
             return self._connectivity_nodes[mrid]
 
-    async def set_phases(self):
-        set_phases = SetPhases()
-        await set_phases.run(self)
-
     def _index_measurement(self, measurement: Measurement, mrid: str) -> bool:
         if not mrid:
             return False
@@ -229,7 +258,3 @@ class NetworkService(BaseService):
             self._measurements[measurement.power_system_resource_mrid].remove(measurement)
         except KeyError:
             pass
-
-
-
-

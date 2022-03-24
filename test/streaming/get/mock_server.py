@@ -12,7 +12,7 @@ import grpc_testing
 # noinspection PyPackageRequirements
 from google.protobuf.descriptor import ServiceDescriptor
 
-from test.catching_thread import CatchingThread
+from test.streaming.get.catching_thread import CatchingThread
 
 GrpcRequest = TypeVar('GrpcRequest')
 GrpcResponse = TypeVar('GrpcResponse')

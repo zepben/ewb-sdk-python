@@ -11,7 +11,7 @@ from hypothesis.strategies import floats, booleans, integers
 
 from test.cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
-from test.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from zepben.evolve import TapChanger
 
 tap_changer_kwargs = {

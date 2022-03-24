@@ -12,7 +12,7 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     TableVersion, MetadataCollectionReader, DiagramServiceReader, CustomerServiceReader, Feeder, EnergySource, get_connected_equipment, ConductingEquipment
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 from zepben.evolve.database.sqlite.readers.network_service_reader import NetworkServiceReader
-from zepben.evolve.services.network.tracing import traces
+from zepben.evolve.services.network.tracing import tracing
 
 logger = logging.getLogger(__name__)
 __all__ = ["DatabaseReader"]
@@ -112,16 +112,16 @@ class DatabaseReader:
         #
 
         # logger.info("Applying feeder direction to network...")
-        # traces.set_direction().run(network_service)
+        # tracing.set_direction().run(network_service)
         # logger.info("Feeder direction applied to network.")
 
         # logger.info("Applying phases to network...")
-        # traces.set_phases().run(network_service)
-        # traces.phase_inferrer().run(network_service)
+        # tracing.set_phases().run(network_service)
+        # tracing.phase_inferrer().run(network_service)
         # logger.info("Phasing applied to network.")
 
         logger.info("Assigning equipment to feeders...")
-        traces.assign_equipment_containers_to_feeders().run(network_service)
+        tracing.assign_equipment_containers_to_feeders().run(network_service)
         logger.info("Equipment assigned to feeders.")
 
         logger.info("Validating primary sources vs feeders...")

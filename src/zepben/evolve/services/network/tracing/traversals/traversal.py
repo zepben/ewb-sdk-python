@@ -12,8 +12,8 @@ from dataclassy import dataclass
 
 from zepben.evolve.services.network.tracing.traversals.queue import FifoQueue, LifoQueue, PriorityQueue, Queue
 from zepben.evolve.exceptions import TracingException
-from zepben.evolve.services.network.tracing.traversals.tracker import Tracker
-from typing import List, Callable, Awaitable, TypeVar, Generic, Set, Iterable
+from zepben.evolve.services.network.tracing.traversals.tracker import Tracker, BaseTracker
+from typing import List, Callable, Awaitable, TypeVar, Generic
 from enum import Enum
 
 __all__ = ["SearchType", "create_queue", "BaseTraversal", "Traversal"]
@@ -68,7 +68,7 @@ class BaseTraversal(Generic[T]):
     _running: bool = False
     """Whether this traversal is currently running"""
 
-    async def matches_stop_condition(self, item: T):
+    async def matches_any_stop_condition(self, item: T):
         """
         Checks all the stop conditions for the passed in item and returns true if any match.
         This calls all registered stop conditions even if one has already returned true to make sure everything is
@@ -173,7 +173,7 @@ class BaseTraversal(Generic[T]):
         raise NotImplementedError()
 
 
-class Traversal(BaseTraversal):
+class Traversal(BaseTraversal[T]):
     """
     A basic traversal implementation that can be used to traverse any type of item.
 
@@ -190,13 +190,13 @@ class Traversal(BaseTraversal):
     to track items in unique ways, more than just "has this item been visited" e.g. visiting more than once,
     visiting under different conditions etc.
     """
-    queue_next: Callable[[T, Set[T]], Iterable[T]]
+    queue_next: Callable[[T, Traversal[T]], None]
     """A function that will return a list of `T` to add to the queue. The function must take the item to queue and optionally a set of already visited items."""
 
-    process_queue: Queue
+    process_queue: Queue[T]
     """Dictates the type of search to be performed on the network graph. Breadth-first, Depth-first, and Priority based searches are possible."""
 
-    tracker: Tracker = Tracker()
+    tracker: BaseTracker = Tracker()
     """A `zepben.evolve.traversals.tracker.Tracker` for tracking which items have been seen. If not provided a `Tracker` will be created for this trace."""
 
     async def _run_trace(self, can_stop_on_start_item: bool = True):
@@ -207,29 +207,22 @@ class Traversal(BaseTraversal):
         `can_stop_on_start_item` Whether the trace can stop on the start_item. Actions will still be applied to
                                        the start_item.
         """
-        if self.start_item is None:
-            try:
-                self.start_item = self.process_queue.get()
-            except IndexError:
-                raise TracingException("Starting item wasn't specified and the process queue is empty. Cannot start the trace.")
+        can_stop = True
 
-        self.tracker.visit(self.start_item)
-        # If we can't stop on the start item we don't run any stop conditions. if this causes a problem for you,
-        # you should run the stop conditions for the start item prior to running the traversal.
-        stopping = can_stop_on_start_item and await self.matches_stop_condition(self.start_item)
-        await self.apply_step_actions(self.start_item, stopping)
-        if not stopping:
-            for x in self.queue_next(self.start_item, self.tracker.visited):
-                self.process_queue.put(x)
+        if self.start_item:
+            self.process_queue.put(self.start_item)
+            can_stop = can_stop_on_start_item
 
         while not self.process_queue.empty():
             current = self.process_queue.get()
             if self.tracker.visit(current):
-                stopping = await self.matches_stop_condition(current)
+                stopping = can_stop and await self.matches_any_stop_condition(current)
+
                 await self.apply_step_actions(current, stopping)
                 if not stopping:
-                    for x in self.queue_next(current, self.tracker.visited):
-                        self.process_queue.put(x)
+                    self.queue_next(current, self)
+
+                can_stop = True
 
     def reset(self):
         self._reset_run_flag()

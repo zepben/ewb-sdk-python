@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, text
 
-from test.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import StreetAddress, TownDetail, StreetDetail
 
 street_address_kwargs = {

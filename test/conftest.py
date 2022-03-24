@@ -11,7 +11,7 @@ from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import Windin
 from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup
 
 
-from zepben.evolve.services.network.network import NetworkService
+from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve import EnergySource, EnergyConsumer, Terminal, ConnectivityNode, IdentifiedObject, AcLineSegment, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Breaker, EnergySourcePhase, Junction
 from zepben.evolve import PhaseCode

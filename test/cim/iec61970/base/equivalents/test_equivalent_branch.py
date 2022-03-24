@@ -8,7 +8,7 @@ from hypothesis.strategies import floats
 
 from test.cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \
     verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
-from test.cim_creators import FLOAT_MIN, FLOAT_MAX
+from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import EquivalentBranch
 
 equivalent_branch_kwargs = {

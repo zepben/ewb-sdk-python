@@ -10,14 +10,14 @@ from pytest import fixture
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode
+    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, connected_equipment, TerminalConnectivity
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
            "create_geographical_region", "create_subgeographical_region", "create_asset_owner", "create_meter", "create_power_transformer_end",
            "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
            "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals", "single_connectivitynode_network",
-           "create_terminal", "network_service"]
+           "create_terminal", "phase_swap_loop_network", "network_service"]
 
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
 from zepben.evolve.util import CopyableUUID
@@ -248,7 +248,8 @@ def create_feeder(network: NetworkService, mrid: str = "", name: str = "", sub: 
     if not mrid:
         mrid = str(CopyableUUID())
     feeder = Feeder(mrid=mrid, name=name, normal_head_terminal=head_terminal, normal_energizing_substation=sub)
-    sub.add_feeder(feeder)
+    if sub:
+        sub.add_feeder(feeder)
     network.add(feeder)
 
     for mrid in equipment_mrids:
@@ -438,6 +439,98 @@ def feeder_start_point_to_open_point_network(request):
     network_service.connect_terminals(c2.get_terminal_by_sn(1), op.get_terminal_by_sn(2))
 
     create_feeder(network_service, "f", "f", sub, fsp.get_terminal_by_sn(1))
+    return network_service
+
+
+@fixture()
+def phase_swap_loop_network():
+    """
+    n0 ac0        ac1     n1   ac2        ac3   n2
+    *==ABCN==+====ABCN====*====ABCN====+==ABCN==*
+             |                         |
+         ac4 AB                        BC ac9
+             |                         |
+          n3 *                         * n7
+             |                         |
+         ac5 XY                        XY ac8
+             |            n5           |
+          n4 *-----XY-----*-----XY-----* n6 (open)
+             |     ac6    |     ac7
+        ac10 X            Y ac11
+             |            |
+          n8 *            * n9
+    """
+    network_service = NetworkService()
+    n0 = create_source_for_connecting(network_service, "n0", 1, PhaseCode.ABCN)
+    n1 = create_junction_for_connecting(network_service, "n1", 2, PhaseCode.ABCN)
+    n2 = create_junction_for_connecting(network_service, "n2", 1, PhaseCode.ABCN)
+    n3 = create_junction_for_connecting(network_service, "n3", 2, PhaseCode.AB)
+    n4 = create_junction_for_connecting(network_service, "n4", 3, PhaseCode.XY)
+    n5 = create_junction_for_connecting(network_service, "n5", 3, PhaseCode.XY)
+    n6 = create_switch_for_connecting(network_service, "n6", 2, PhaseCode.XY, [True, True], [True, True])
+    n7 = create_junction_for_connecting(network_service, "n7", 2, PhaseCode.BC)
+    n8 = create_junction_for_connecting(network_service, "n8", 1, PhaseCode.X)
+    n9 = create_junction_for_connecting(network_service, "n9", 1, PhaseCode.Y)
+
+    ac0 = create_acls_for_connecting(network_service, "ac0", PhaseCode.ABCN)
+    ac1 = create_acls_for_connecting(network_service, "ac1", PhaseCode.ABCN)
+    ac2 = create_acls_for_connecting(network_service, "ac2", PhaseCode.ABCN)
+    ac3 = create_acls_for_connecting(network_service, "ac3", PhaseCode.ABCN)
+    ac4 = create_acls_for_connecting(network_service, "ac4", PhaseCode.AB)
+    ac5 = create_acls_for_connecting(network_service, "ac5", PhaseCode.XY)
+    ac6 = create_acls_for_connecting(network_service, "ac6", PhaseCode.XY)
+    ac7 = create_acls_for_connecting(network_service, "ac7", PhaseCode.XY)
+    ac8 = create_acls_for_connecting(network_service, "ac8", PhaseCode.XY)
+    ac9 = create_acls_for_connecting(network_service, "ac9", PhaseCode.BC)
+    ac10 = create_acls_for_connecting(network_service, "ac10", PhaseCode.X)
+    ac11 = create_acls_for_connecting(network_service, "ac11", PhaseCode.Y)
+
+    fdr = create_feeder(network_service, "fdr", head_terminal=n0.get_terminal_by_sn(1))
+
+    # Connect up a network so we can check connectivity
+    network_service.connect_by_mrid(n0.get_terminal_by_sn(1), "cn_0")
+    network_service.connect_by_mrid(ac0.get_terminal_by_sn(1), "cn_0")
+    network_service.connect_by_mrid(ac0.get_terminal_by_sn(2), "cn_1")
+    network_service.connect_by_mrid(ac1.get_terminal_by_sn(1), "cn_1")
+    network_service.connect_by_mrid(ac1.get_terminal_by_sn(2), "cn_2")
+    network_service.connect_by_mrid(n1.get_terminal_by_sn(1), "cn_2")
+    network_service.connect_by_mrid(n1.get_terminal_by_sn(2), "cn_3")
+    network_service.connect_by_mrid(ac2.get_terminal_by_sn(1), "cn_3")
+    network_service.connect_by_mrid(ac2.get_terminal_by_sn(2), "cn_4")
+    network_service.connect_by_mrid(ac3.get_terminal_by_sn(1), "cn_4")
+    network_service.connect_by_mrid(ac3.get_terminal_by_sn(2), "cn_5")
+    network_service.connect_by_mrid(n2.get_terminal_by_sn(1), "cn_5")
+    network_service.connect_by_mrid(ac4.get_terminal_by_sn(1), "cn_1")
+    network_service.connect_by_mrid(ac4.get_terminal_by_sn(2), "cn_6")
+    network_service.connect_by_mrid(n3.get_terminal_by_sn(1), "cn_6")
+    network_service.connect_by_mrid(n3.get_terminal_by_sn(2), "cn_7")
+    network_service.connect_by_mrid(ac5.get_terminal_by_sn(1), "cn_7")
+    network_service.connect_by_mrid(ac5.get_terminal_by_sn(2), "cn_8")
+    network_service.connect_by_mrid(n4.get_terminal_by_sn(1), "cn_8")
+    network_service.connect_by_mrid(n4.get_terminal_by_sn(2), "cn_9")
+    network_service.connect_by_mrid(n4.get_terminal_by_sn(3), "cn_16")
+    network_service.connect_by_mrid(ac6.get_terminal_by_sn(1), "cn_9")
+    network_service.connect_by_mrid(ac6.get_terminal_by_sn(2), "cn_10")
+    network_service.connect_by_mrid(n5.get_terminal_by_sn(1), "cn_10")
+    network_service.connect_by_mrid(n5.get_terminal_by_sn(2), "cn_11")
+    network_service.connect_by_mrid(n5.get_terminal_by_sn(3), "cn_18")
+    network_service.connect_by_mrid(ac7.get_terminal_by_sn(1), "cn_11")
+    network_service.connect_by_mrid(ac7.get_terminal_by_sn(2), "cn_12")
+    network_service.connect_by_mrid(n6.get_terminal_by_sn(1), "cn_12")
+    network_service.connect_by_mrid(n6.get_terminal_by_sn(2), "cn_13")
+    network_service.connect_by_mrid(ac8.get_terminal_by_sn(1), "cn_13")
+    network_service.connect_by_mrid(ac8.get_terminal_by_sn(2), "cn_14")
+    network_service.connect_by_mrid(n7.get_terminal_by_sn(1), "cn_14")
+    network_service.connect_by_mrid(n7.get_terminal_by_sn(2), "cn_15")
+    network_service.connect_by_mrid(ac9.get_terminal_by_sn(1), "cn_15")
+    network_service.connect_by_mrid(ac9.get_terminal_by_sn(2), "cn_4")
+    network_service.connect_by_mrid(ac10.get_terminal_by_sn(1), "cn_16")
+    network_service.connect_by_mrid(ac10.get_terminal_by_sn(2), "cn_17")
+    network_service.connect_by_mrid(n8.get_terminal_by_sn(1), "cn_17")
+    network_service.connect_by_mrid(ac11.get_terminal_by_sn(1), "cn_18")
+    network_service.connect_by_mrid(ac11.get_terminal_by_sn(2), "cn_19")
+    network_service.connect_by_mrid(n9.get_terminal_by_sn(1), "cn_19")
+
     return network_service
 
 
