@@ -88,7 +88,6 @@ class TerminalConnectivity(object):
             self._add_xy_phase_paths(terminal, add_from_to)
         else:
             self._add_xy_phase_paths(terminal, add_to_from)
-            self._add_xy_phase_paths(terminal, add_to_from)
 
         return nominal_phase_paths
 
