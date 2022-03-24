@@ -49,7 +49,7 @@ async def test_applies_phases_from_sources():
         .from_source(PhaseCode.ABCN)  # s0
         .to_acls(PhaseCode.ABCN)  # c1
         .to_acls(PhaseCode.ABCN)  # c2
-        .split_from("c1")
+        .branch_from("c1")
         .to_acls(PhaseCode.AB)  # c3
         .from_acls(PhaseCode.ABCN)  # c4
         .build()

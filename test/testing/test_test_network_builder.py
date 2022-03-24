@@ -5,6 +5,7 @@
 #  file, You can obtain one at https:#mozilla.org/MPL/2.0/.
 from typing import Callable, List
 
+import pytest
 from pytest import raises
 
 from zepben.evolve import start_with_source, PhaseCode, start_with_acls, start_with_breaker, start_with_junction, start_with_power_transformer, \
@@ -13,13 +14,14 @@ from zepben.evolve import start_with_source, PhaseCode, start_with_acls, start_w
 
 class TestTestNetworkBuilder(object):
 
-    def test_sample_network_starting_with_source(self):
+    @pytest.mark.asyncio
+    async def test_sample_network_starting_with_source(self):
         #
         # s0 11--c1--21 b2 21 s3
         #
         # s4 11--c5--2
         #
-        n = (start_with_source(PhaseCode.ABC)  # s0
+        n = await (start_with_source(PhaseCode.ABC)  # s0
              .to_acls(PhaseCode.ABC)  # c1
              .to_breaker(PhaseCode.ABC)  # b2
              .to_source(PhaseCode.ABC)  # s3
@@ -35,14 +37,15 @@ class TestTestNetworkBuilder(object):
         self._validate_connections(n, "s4", [["c5-t1"]])
         self._validate_connections(n, "c5", [["s4-t1"], []])
 
-    def test_sample_network_starting_with_acls(self):
+    @pytest.mark.asyncio
+    async def test_sample_network_starting_with_acls(self):
         #
         # 1--c0--21 b1 21--c2--2
         #         1 b3 21--c4--2
         #
         # 1--c5--21--c6--2
         #
-        n = (start_with_acls(PhaseCode.ABC)  # c0
+        n = await (start_with_acls(PhaseCode.ABC)  # c0
              .to_breaker(PhaseCode.ABC, is_normally_open=True)  # b1
              .to_acls(PhaseCode.AB)  # c2
              .branch_from("c0")
@@ -62,13 +65,14 @@ class TestTestNetworkBuilder(object):
         self._validate_connections(n, "c5", [[], ["c6-t1"]])
         self._validate_connections(n, "c6", [["c5-t2"], []])
 
-    def test_sample_network_starting_with_breaker(self):
+    @pytest.mark.asyncio
+    async def test_sample_network_starting_with_breaker(self):
         #
         # 1 b0*21--c1--21--c2--21--c4--2
         #
         # 1 b5*21--c6--2
         #
-        n = (start_with_breaker(PhaseCode.ABC)  # b0
+        n = await (start_with_breaker(PhaseCode.ABC)  # b0
              .to_acls(PhaseCode.ABC)  # c1
              .to_acls(PhaseCode.ABC)  # c2
              .add_feeder("b0")  # fdr3
@@ -88,14 +92,15 @@ class TestTestNetworkBuilder(object):
         self._validate_connections(n, "c6", [["b5-t2"], []])
         self._validate_feeder(n, "fdr7", "b5-t1")
 
-    def test_sample_network_starting_with_junction(self):
+    @pytest.mark.asyncio
+    async def test_sample_network_starting_with_junction(self):
         #
         # 1 j0 21--c1--21 j2 2
         #
         # 1 j3 31--c4--2
         #   2
         #
-        n = (start_with_junction(PhaseCode.ABC)  # j0
+        n = await (start_with_junction(PhaseCode.ABC)  # j0
              .to_acls(PhaseCode.ABC)  # c1
              .to_junction(PhaseCode.ABC)  # j2
              .from_junction(PhaseCode.AB, 3)  # j3
@@ -109,14 +114,15 @@ class TestTestNetworkBuilder(object):
         self._validate_connections(n, "j3", [[], [], ["c4-t1"]])
         self._validate_connections(n, "c4", [["j3-t3"], []])
 
-    def test_sample_network_starting_with_power_transformer(self):
+    @pytest.mark.asyncio
+    async def test_sample_network_starting_with_power_transformer(self):
         #
         # 1 tx0 21--c1--21 tx2 2
         #
         # 1 tx3 31--c4--2
         #    2
         #
-        n = (start_with_power_transformer()  # tx0
+        n = await (start_with_power_transformer()  # tx0
              .to_acls(PhaseCode.ABC)  # c1
              .to_power_transformer([PhaseCode.ABC])  # tx2
              .from_power_transformer([PhaseCode.AB, PhaseCode.AB, PhaseCode.AN])  # tx3
@@ -134,14 +140,15 @@ class TestTestNetworkBuilder(object):
         self._validate_ends(n, "tx2", [PhaseCode.ABC])
         self._validate_ends(n, "tx3", [PhaseCode.AB, PhaseCode.AB, PhaseCode.AN])
 
-    def test_can_start_with_open_points(self):
+    @pytest.mark.asyncio
+    async def test_can_start_with_open_points(self):
         #
         # 1 b0 2
         # 1 b1 2
         # 1 b2 2
         # 1 b3 2
         #
-        n = (start_with_breaker(PhaseCode.A, is_normally_open=True, is_open=False)  # b0
+        n = await (start_with_breaker(PhaseCode.A, is_normally_open=True, is_open=False)  # b0
              .from_breaker(PhaseCode.B, is_normally_open=True, is_open=False)  # b1
              .from_breaker(PhaseCode.B)  # b2
              .from_breaker(PhaseCode.B, is_normally_open=True)  # b3
@@ -153,7 +160,8 @@ class TestTestNetworkBuilder(object):
         self._validate_open_states(n, "b2", expected_is_normally_open=False, expected_is_open=False)
         self._validate_open_states(n, "b3", expected_is_normally_open=True, expected_is_open=True)
 
-    def test_can_branch_from_junction(self):
+    @pytest.mark.asyncio
+    async def test_can_branch_from_junction(self):
         #
         #           2
         #           |
@@ -169,7 +177,7 @@ class TestTestNetworkBuilder(object):
         #           |
         #           2
         #
-        n = (start_with_junction(PhaseCode.A, 4)  # j0
+        n = await (start_with_junction(PhaseCode.A, 4)  # j0
              .to_acls(PhaseCode.A)  # c1
              .branch_from("j0", 1)
              .to_acls(PhaseCode.A)  # c2
@@ -196,7 +204,8 @@ class TestTestNetworkBuilder(object):
             (start_with_source(PhaseCode.ABC)
              .from_source(PhaseCode.XYN))
 
-    def test_can_initialise_ends(self):
+    @pytest.mark.asyncio
+    async def test_can_initialise_ends(self):
         #
         # 1 tx0 21 tx1
         #
@@ -221,7 +230,7 @@ class TestTestNetworkBuilder(object):
 
             return set_b
 
-        n = (start_with_power_transformer([PhaseCode.ABC, PhaseCode.ABC], [init_rated_u(1), init_rated_u(2)])  # tx0
+        n = await (start_with_power_transformer([PhaseCode.ABC, PhaseCode.ABC], [init_rated_u(1), init_rated_u(2)])  # tx0
              .to_power_transformer([PhaseCode.ABC], [init_rated_s(3)])  # tx1
              .from_power_transformer([PhaseCode.AB, PhaseCode.AB, PhaseCode.AN], [init_b(4.0), init_b(5.0), init_b(6.0)])  # tx2
              .build())
@@ -234,7 +243,8 @@ class TestTestNetworkBuilder(object):
         assert n.get("tx2-e2", PowerTransformerEnd).b == 5.0
         assert n.get("tx2-e3", PowerTransformerEnd).b == 6.0
 
-    def test_sample_network_with_generics(self):
+    @pytest.mark.asyncio
+    async def test_sample_network_with_generics(self):
         #
         # o1 11 o2
         #
@@ -247,7 +257,7 @@ class TestTestNetworkBuilder(object):
         o0.add_terminal(Terminal(mrid="o0-t1"))
         o1.add_terminal(Terminal(mrid="o1-t1"))
 
-        n = (start_with_other(o0)
+        n = await (start_with_other(o0)
              .to_other(o1)
              .from_other(o2)
              .build())

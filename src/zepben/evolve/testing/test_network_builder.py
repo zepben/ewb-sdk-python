@@ -34,9 +34,6 @@ class TestNetworkBuilder(object):
         self._current: Optional[ConductingEquipment] = None
         self._current_terminal: Optional[int] = None
 
-    def __init__(self):
-        self.network = NetworkService()
-
     def from_source(self, nominal_phases: PhaseCode = PhaseCode.ABC, action: Callable[[EnergySource], None] = null_action) -> 'TestNetworkBuilder':
         """
         Start a new network island from an `EnergySource`, updating the network pointer to the new `EnergySource`.
