@@ -29,21 +29,26 @@ def _secure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051)
         .make_secure()
 
 
-def _grpc_channel_builder_from_password(client_id: str, username: str, password: str, host: str, rpc_port: int) -> GrpcChannelBuilder:
-    # noinspection PyArgumentList
-    token_fetcher = ZepbenTokenFetcher(
-        audience="https://evolve-ewb/",
-        issuer_domain="zepben.au.auth0.com",
-        auth_method=AuthMethod.AUTH0,
-        verify_certificate=True,
-        token_request_data={
-            'client_id': client_id,
-            'username': username,
-            'password': password,
-            'grant_type': 'password',
-            'scope': 'offline_access'
-        }
-    )
+def _grpc_channel_builder_from_password(client_id: str, username: str, password: str, host: str, rpc_port: int,
+                                        conf_address: Optional[str]) -> GrpcChannelBuilder:
+    token_fetcher: ZepbenTokenFetcher
+    if conf_address:
+        token_fetcher = create_token_fetcher(conf_address=conf_address)
+    else:
+        # noinspection PyArgumentList
+        token_fetcher = ZepbenTokenFetcher(
+            audience="https://evolve-ewb/",
+            issuer_domain="zepben.au.auth0.com",
+            auth_method=AuthMethod.AUTH0,
+            verify_certificate=True
+        )
+    token_fetcher.token_request_data.update({
+        'client_id': client_id,
+        'username': username,
+        'password': password,
+        'grant_type': 'password',
+        'scope': 'offline_access'
+    })
 
     return GrpcChannelBuilder() \
         .socket_address(host, rpc_port) \
@@ -55,8 +60,9 @@ def connect_secure(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.C
     return _secure_grpc_channel_builder(host, rpc_port).build()
 
 
-def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
-    return _grpc_channel_builder_from_password(client_id, username, password, host, rpc_port).build()
+def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051,
+                          conf_address: Optional[str] = None) -> grpc.aio.Channel:
+    return _grpc_channel_builder_from_password(client_id, username, password, host, rpc_port, conf_address).build()
 
 
 def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = None, client_id: Optional[str] = None,
