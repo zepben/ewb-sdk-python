@@ -61,7 +61,7 @@ def connect_with_password(client_id: str, username: str, password: str, host: st
             auth_method=kwargs["auth_method"]
         )
     else:
-        raise ValueError("Either token_fetcher or (audience and issuer_domain and auth_method) must be specified in the parameters for connect_with_password.")
+        raise ValueError("Either conf_address or (audience and issuer_domain and auth_method) must be specified in the parameters for connect_with_password.")
 
     return _grpc_channel_builder_from_password(client_id, username, password, host, rpc_port, token_fetcher).build()
 
