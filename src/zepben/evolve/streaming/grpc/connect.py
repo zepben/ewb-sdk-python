@@ -16,7 +16,7 @@ from zepben.auth.client import ZepbenTokenFetcher, AuthMethod, create_token_fetc
 
 from zepben.evolve import GrpcChannelBuilder
 
-__all__ = ["connect", "connect_async", "connect_tls", "connect_with_password"]
+__all__ = ["connect", "connect_async", "connect_tls", "connect_insecure", "connect_with_password"]
 
 from zepben.evolve.streaming.grpc.channel_builder import AuthTokenPlugin
 
@@ -27,6 +27,11 @@ def _secure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051)
     return GrpcChannelBuilder() \
         .socket_address(host, rpc_port) \
         .make_secure()
+
+
+def _insecure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051) -> GrpcChannelBuilder:
+    return GrpcChannelBuilder() \
+        .socket_address(host, rpc_port)
 
 
 def _grpc_channel_builder_from_password(client_id: str, username: str, password: str, host: str, rpc_port: int, token_fetcher: ZepbenTokenFetcher
@@ -46,6 +51,10 @@ def _grpc_channel_builder_from_password(client_id: str, username: str, password:
 
 def connect_tls(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
     return _secure_grpc_channel_builder(host, rpc_port).build()
+
+
+def connect_insecure(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
+    return _insecure_grpc_channel_builder(host, rpc_port).build()
 
 
 def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051,
