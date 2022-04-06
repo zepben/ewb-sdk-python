@@ -50,6 +50,14 @@ def _grpc_channel_builder_from_password(client_id: str, username: str, password:
 
 
 def connect_tls(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
+    """
+    Connect to a Zepben gRPC service.
+
+    `host` The host to connect to.
+    `rpc_port` The gRPC port for host.
+
+    Returns a gRPC channel
+    """
     return _secure_grpc_channel_builder(host, rpc_port).build()
 
 
@@ -59,6 +67,22 @@ def connect_insecure(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio
 
 def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051,
                           conf_address: Optional[str] = None, **kwargs) -> grpc.aio.Channel:
+    """
+    Connect to a Zepben gRPC service.
+
+    `client_id` Your client id for your OAuth Auth provider.
+    `username` The username to use for an OAuth password grant.
+    `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
+    `host` The host to connect to.
+    `rpc_port` The gRPC port for host.
+    `conf_address` The complete address for the auth configuration endpoint. This is used when an `token_fetcher` is not provided.
+        Defaults to http://<host>/auth
+    '**kwargs' Contains information of 'audience', 'issuer_domain', 'auth_method'
+
+    Raises error if the token_fetcher could not be configured
+
+    Returns a gRPC channel
+    """
     token_fetcher: ZepbenTokenFetcher
     if conf_address:
         token_fetcher = create_token_fetcher(conf_address=conf_address)
