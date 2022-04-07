@@ -15,7 +15,7 @@ from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.evolve.services.common.base_service import BaseService
-from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity import TerminalConnectivity
+from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 from pathlib import Path
 if TYPE_CHECKING:
     from zepben.evolve import Terminal, SinglePhaseKind, ConnectivityResult, Measurement, ConductingEquipment
@@ -53,7 +53,7 @@ def connected_terminals(terminal: Terminal, phases: Union[None, PhaseCode, Itera
     if isinstance(phases, PhaseCode):
         phases = phases.single_phases
 
-    return TerminalConnectivity().connected_terminals(terminal, phases)
+    return TerminalConnectivityConnected().connected_terminals(terminal, phases)
 
 
 def connected_equipment(conducting_equipment: ConductingEquipment,

@@ -203,7 +203,7 @@ async def test_detects_cross_phasing_connected():
     with pytest.raises(PhaseException) as e_info:
         await SetPhases().run_with_terminal(get_t(network_service, "c0", 2))
 
-    assert e_info.value.args[0] == f"Attempted to flow conflicting phase A onto B on nominal phase path A to A. This occurred while flowing between "\
+    assert e_info.value.args[0] == f"Attempted to flow conflicting phase A onto B on nominal phase A. This occurred while flowing between "\
                                    f"{list(c1.terminals)[1]} on {c1} and {list(c2.terminals)[0]} on {c2}. This is caused by "\
                                    f"missing open points, or incorrect phases in upstream equipment that should be corrected in the source data."
 

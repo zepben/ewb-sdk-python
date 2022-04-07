@@ -119,8 +119,8 @@ class XyCandidatePhasePaths:
         return paths
 
     def _process_candidates(self, candidate_phase_counts: Dict[SinglePhaseKind, CounterType[SinglePhaseKind]]) -> Tuple[SinglePhaseKind, SinglePhaseKind]:
-        candidate_x_counts = candidate_phase_counts.get(SinglePhaseKind.X, {})
-        candidate_y_counts = candidate_phase_counts.get(SinglePhaseKind.Y, {})
+        candidate_x_counts = candidate_phase_counts.get(SinglePhaseKind.X, Counter())
+        candidate_y_counts = candidate_phase_counts.get(SinglePhaseKind.Y, Counter())
 
         if not candidate_x_counts:
             return SinglePhaseKind.NONE, self._find_candidate(candidate_y_counts, priority=Y_PRIORITY)
@@ -164,7 +164,7 @@ class XyCandidatePhasePaths:
         before: Optional[SinglePhaseKind] = None,
         after: Optional[SinglePhaseKind] = None
     ) -> SinglePhaseKind:
-        valid_candidates = list(takewhile(lambda cand: _is_before(cand[0], before) and _is_after(cand[0], after), candidate_counts.most_common()))
+        valid_candidates = [(phase, count) for (phase, count) in candidate_counts.most_common() if _is_before(phase, before) and _is_after(phase, after)]
         if not valid_candidates:
             return SinglePhaseKind.NONE
         elif len(valid_candidates) == 1:
