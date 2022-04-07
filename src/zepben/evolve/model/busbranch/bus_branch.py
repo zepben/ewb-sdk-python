@@ -7,7 +7,7 @@ import abc
 from collections import Counter
 from dataclasses import dataclass, field
 from functools import reduce
-from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional
+from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable
 
 from zepben.evolve import Traversal, LifoQueue, Junction, BusbarSection, EquivalentBranch
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -267,7 +267,7 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
         Callback used to create a topological branch instance in target bus-branch network.
 
         :param bus_branch_network: Instance of type BBN being used as a target bus-branch network.
-        :param connected_topological_nodes: Instances of type TN connected to this topological branch.
+        :param connected_topological_nodes: Instances of type TN connected to this topological branch sorted by `FeederDirection`.
         :param length: Length of the topological branch in meters.
         :param collapsed_ac_line_segments: Set that contains all instances of `AcLineSegment` being collapsed in this topological branch. e.g. connected lines
                with the same impedance values.
@@ -291,7 +291,7 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
         Callback used to create an equivalent branch instance in target bus-branch network.
 
         :param bus_branch_network: Instance of type BBN being used as a target bus-branch network.
-        :param connected_topological_nodes: Instances of type TN connected to this topological branch.
+        :param connected_topological_nodes: Instances of type TN connected to this topological branch sorted by `FeederDirection`.
         :param equivalent_branch: Instance of `EquivalentBranch` used to generate the equivalent branch in target bus-branch network.
         :param node_breaker_network: Instance of type `NetworkService` being used as a source node-breaker network.
         :return: A 2-tuple with the first element being an id for the topological branch and the second element being an instance of type TB that represents a
@@ -312,7 +312,7 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
 
         :param bus_branch_network: Instance of type BBN being used as a target bus-branch network.
         :param power_transformer: Instance of `PowerTransformer` used to generate power transformer in target bus-branch network.
-        :param ends_to_topological_nodes: List holding power transformer ends with the topological nodes they are connected to.
+        :param ends_to_topological_nodes: List holding power transformer ends with the topological nodes they are connected to sorted by `FeederDirection`.
         :param node_breaker_network: Instance of type `NetworkService` being used as a source node-breaker network.
         :return: A dictionary with keys being uuids for the instance/s of type PT that represents a power transformer in the target bus-branch network.
         """
@@ -615,7 +615,7 @@ async def _create_topological_branches(
 
             # get/create connected topological nodes
             acls_tns = []
-            for t in border_terms:
+            for t in _sort_terminals_by_feeder_direction(border_terms):
                 tn_creation_success, tn = await _get_or_create_topological_node(t, terminals_to_tns,
                                                                                 node_breaker_network,
                                                                                 bus_branch_network,
@@ -679,7 +679,7 @@ async def _create_equivalent_branches(
 
         # get/create connected topological nodes
         eb_tns = []
-        for t in eb.terminals:
+        for t in _sort_terminals_by_feeder_direction(eb.terminals):
             tn_creation_success, tn = await _get_or_create_topological_node(t, terminals_to_tns,
                                                                             node_breaker_network,
                                                                             bus_branch_network,
@@ -716,7 +716,7 @@ async def _create_power_transformers(
     for pt in node_breaker_network.objects(PowerTransformer):
         # create list of ends with their connected topological nodes
         ends_to_topological_nodes = []
-        for end in pt.ends:
+        for end in _sort_ends_by_feeder_direction(pt.ends):
             if end.terminal is not None:
                 tn_creation_success, tn = await _get_or_create_topological_node(end.terminal, terminals_to_tns,
                                                                                 node_breaker_network,
@@ -1018,3 +1018,11 @@ def _next_common_acls(
 
 def _is_no_impedance_branch(eb: EquivalentBranch):
     return eb.r is None or eb.x is None or eb.r == 0.0 or eb.x == 0.0
+
+
+def _sort_ends_by_feeder_direction(ends: Iterable[PowerTransformerEnd]) -> List[PowerTransformerEnd]:
+    return sorted(iter(ends), key=lambda pte: 999 if pte.terminal is None else pte.terminal.normal_feeder_direction.value)
+
+
+def _sort_terminals_by_feeder_direction(terminals: Iterable[Terminal]) -> List[Terminal]:
+    return sorted(iter(terminals), key=lambda ter: ter.normal_feeder_direction.value)
