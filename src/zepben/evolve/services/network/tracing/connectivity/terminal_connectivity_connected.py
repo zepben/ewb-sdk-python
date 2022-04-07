@@ -11,10 +11,10 @@ from zepben.evolve.services.network.tracing.connectivity.xy_candidate_phase_path
 from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import XyPhaseStep
 from zepben.evolve.services.network.tracing.connectivity.phase_paths import viable_inferred_phase_connectivity, straight_phase_connectivity
 
-__all__ = ["TerminalConnectivity"]
+__all__ = ["TerminalConnectivityConnected"]
 
 
-class TerminalConnectivity(object):
+class TerminalConnectivityConnected(object):
 
     _create_candidate_phases: Callable[[], XyCandidatePhasePaths]
 
@@ -27,7 +27,7 @@ class TerminalConnectivity(object):
         phases: Optional[Iterable[SinglePhaseKind]] = None
     ) -> List[ConnectivityResult]:
         phases = set(phases or terminal.phases.single_phases)
-        trace_phases = phases.intersection(terminal.phases.single_phases)
+        include_phases = phases.intersection(terminal.phases.single_phases)
         connectivity_node = terminal.connectivity_node
         if connectivity_node is None:
             return []
@@ -35,7 +35,7 @@ class TerminalConnectivity(object):
         results = []
         for connected_terminal in connectivity_node.terminals:
             if connected_terminal != terminal:
-                cr = self._terminal_connectivity(terminal, connected_terminal, trace_phases)
+                cr = self._terminal_connectivity(terminal, connected_terminal, include_phases)
                 if cr.nominal_phase_paths:
                     results.append(cr)
 
@@ -45,7 +45,7 @@ class TerminalConnectivity(object):
         self,
         terminal: Terminal,
         connected_terminal: Terminal,
-        traced_phases: Set[SinglePhaseKind]
+        include_phases: Set[SinglePhaseKind]
     ) -> ConnectivityResult:
         return ConnectivityResult(
             from_terminal=terminal,
@@ -54,7 +54,7 @@ class TerminalConnectivity(object):
                 path for path in (
                     self._find_straight_phase_paths(terminal, connected_terminal)
                     or self._find_xy_phase_paths(terminal, connected_terminal)
-                    or []) if (path.from_phase in traced_phases) and (path.to_phase in connected_terminal.phases)
+                    or []) if (path.from_phase in include_phases) and (path.to_phase in connected_terminal.phases)
             ]
         )
 
@@ -149,7 +149,7 @@ class TerminalConnectivity(object):
             if not self._check_traced_phases(step, candidate_phases):
                 self._queue_next(step.terminal, without_neutral, queue)
         else:
-            for phase, candidates in viable_inferred_phase_connectivity.get(step.phase_code, {}).get(without_neutral, {}):
+            for (phase, candidates) in viable_inferred_phase_connectivity.get(step.phase_code, {}).get(without_neutral, {}).items():
                 candidate_phases.add_candidates(phase, candidates)
 
     @staticmethod
@@ -160,7 +160,7 @@ class TerminalConnectivity(object):
             candidate_phases.add_known(SinglePhaseKind.X, normal_x)
             found_traced = True
 
-        normal_y = step.terminal.normal_phases[SinglePhaseKind.X]
+        normal_y = step.terminal.normal_phases[SinglePhaseKind.Y]
         if normal_y != SinglePhaseKind.NONE:
             candidate_phases.add_known(SinglePhaseKind.Y, normal_y)
             found_traced = True
