@@ -51,7 +51,7 @@ def _grpc_channel_builder_from_password(client_id: str, username: str, password:
 
 def connect_tls(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
     """
-    Connect to a Zepben gRPC service.
+    Connect to a Zepben gRPC service using TLS.
 
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
@@ -62,22 +62,30 @@ def connect_tls(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Chan
 
 
 def connect_insecure(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
+    """
+    Connect to a Zepben gRPC service without auth and without HTTPS.
+
+    `host` The host to connect to.
+    `rpc_port` The gRPC port for host.
+
+    Returns a gRPC channel
+    """
     return _insecure_grpc_channel_builder(host, rpc_port).build()
 
 
 def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051,
                           conf_address: Optional[str] = None, **kwargs) -> grpc.aio.Channel:
     """
-    Connect to a Zepben gRPC service.
+    Connect to a Zepben gRPC service using credentials.
 
     `client_id` Your client id for your OAuth Auth provider.
     `username` The username to use for an OAuth password grant.
-    `password` Corresponding password. If both `username` and `password` are provided, it takes precedence over the above client credentials.
+    `password` Corresponding password.
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
-    `conf_address` The complete address for the auth configuration endpoint. This is used when an `token_fetcher` is not provided.
-        Defaults to http://<host>/auth
-    '**kwargs' Contains information of 'audience', 'issuer_domain', 'auth_method'
+    `conf_path` The complete address for the auth configuration endpoint. This is used when a `token_fetcher` is not provided.
+        "Defaults to checking https:///auth and https:///ewb/auth"
+    `**kwargs` Keyword Arguments to be passed to ZepbenTokenFetcher initialiser if conf_address is None.
 
     Raises error if the token_fetcher could not be configured
 
