@@ -27,7 +27,7 @@ GRPC_READY_TIMEOUT = 20  # seconds
 def _secure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051, ca=None) -> GrpcChannelBuilder:
     return GrpcChannelBuilder() \
         .socket_address(host, rpc_port) \
-        .make_secure(private_key=ca)
+        .make_secure(root_certificates=ca)
 
 
 def _insecure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051) -> GrpcChannelBuilder:
