@@ -10,6 +10,7 @@
 import contextlib
 import warnings
 from typing import Optional
+from urllib.parse import urlparse
 
 import grpc
 from zepben.auth.client import ZepbenTokenFetcher, AuthMethod, create_token_fetcher
@@ -74,7 +75,7 @@ def connect_insecure(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio
 
 
 def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051,
-                          conf_address: Optional[str] = None, **kwargs) -> grpc.aio.Channel:
+                          conf_path: Optional[str] = None, **kwargs) -> grpc.aio.Channel:
     """
     Connect to a Zepben gRPC service using credentials.
 
@@ -83,27 +84,33 @@ def connect_with_password(client_id: str, username: str, password: str, host: st
     `password` Corresponding password.
     `host` The host to connect to.
     `rpc_port` The gRPC port for host.
-    `conf_path` The complete address for the auth configuration endpoint. This is used when a `token_fetcher` is not provided.
-        "Defaults to checking https:///auth and https:///ewb/auth"
-    `**kwargs` Keyword Arguments to be passed to ZepbenTokenFetcher initialiser if conf_address is None.
+    `conf_path` The path for the auth configuration endpoint. This is used when a `token_fetcher` is not provided.
+        "Defaults to checking /auth and /ewb/auth"
+    `**kwargs` Keyword Arguments to be passed to ZepbenTokenFetcher initialiser if conf_path is None.
 
     Raises error if the token_fetcher could not be configured
 
     Returns a gRPC channel
     """
     token_fetcher: ZepbenTokenFetcher
-    if conf_address:
-        token_fetcher = create_token_fetcher(conf_address=conf_address)
-    elif {"audience", "issuer_domain", "auth_method"} <= kwargs.keys():
-        # noinspection PyArgumentList
-        token_fetcher = ZepbenTokenFetcher(
-            audience=kwargs["audience"],
-            issuer_domain=kwargs["issuer_domain"],
-            auth_method=kwargs["auth_method"]
-        )
+    errors = None
+    if conf_path:
+        token_fetcher = create_token_fetcher(host, port=kwargs.get("port", 443), path=conf_path)
     else:
-        raise ValueError("Either conf_address or (audience and issuer_domain and auth_method) must be specified in the parameters for connect_with_password.")
+        try:
+            token_fetcher = create_token_fetcher(host)
+        except Exception as e:
+            errors = e
 
+    if {"audience", "issuer_domain", "auth_method"} <= kwargs.keys():
+        # noinspection PyArgumentList
+        token_fetcher = ZepbenTokenFetcher(**kwargs)
+
+    if not token_fetcher:
+        if errors:
+            raise ValueError(f"Failed to connect to {host}:{rpc_port}, did you pass a correct conf_path?")
+        else:
+            raise ValueError("token_fetcher could not be created, this is likely a bug.")
     return _grpc_channel_builder_from_password(client_id, username, password, host, rpc_port, token_fetcher).build()
 
 
@@ -159,8 +166,17 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
             ) if channel_credentials else call_credentials
             channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
         elif client_id and username and password:
+
+            # parsing the conf_address to host port and path
+            parsed_url = urlparse(
+                conf_address
+            )
+            host = parsed_url.hostname
+            port = parsed_url.port
+            path = parsed_url.path
+
             # Create a basic ClientCredentials authenticator
-            token_fetcher = create_token_fetcher(conf_address, verify_auth_certificates, conf_ca_filename=conf_ca, auth_ca_filename=auth_ca)
+            token_fetcher = create_token_fetcher(host, port, path, verify_auth_certificates, conf_ca_filename=conf_ca, auth_ca_filename=auth_ca)
             token_fetcher.token_request_data.update({
                 'client_id': client_id,
                 'username': username,
