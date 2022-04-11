@@ -15,6 +15,7 @@ module.exports = {
         },
         "sdk-data-model",
         "sdk-services",
+        "sdk-phases",
         "sdk-tracing",
         "sdk-persistence",
         "sdk-consumer"
