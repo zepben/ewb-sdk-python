@@ -24,10 +24,10 @@ from zepben.evolve.streaming.grpc.channel_builder import AuthTokenPlugin
 GRPC_READY_TIMEOUT = 20  # seconds
 
 
-def _secure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051) -> GrpcChannelBuilder:
+def _secure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051, ca=None) -> GrpcChannelBuilder:
     return GrpcChannelBuilder() \
         .socket_address(host, rpc_port) \
-        .make_secure()
+        .make_secure(private_key=ca)
 
 
 def _insecure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051) -> GrpcChannelBuilder:
@@ -50,7 +50,7 @@ def _grpc_channel_builder_from_password(client_id: str, username: str, password:
         .token_fetcher(token_fetcher)
 
 
-def connect_tls(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
+def connect_tls(host: str = "localhost", rpc_port: int = 50051, ca=None) -> grpc.aio.Channel:
     """
     Connect to a Zepben gRPC service using TLS.
 
@@ -59,7 +59,7 @@ def connect_tls(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Chan
 
     Returns a gRPC channel
     """
-    return _secure_grpc_channel_builder(host, rpc_port).build()
+    return _secure_grpc_channel_builder(host, rpc_port, ca).build()
 
 
 def connect_insecure(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
@@ -156,6 +156,15 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
             conf_address = f"http://{host}/auth"
         # Channel credential will be valid for the entire channel
         channel_credentials = grpc.ssl_channel_credentials(ca, pkey, cert)
+
+        # parsing the conf_address to host port and path
+        parsed_url = urlparse(
+            conf_address
+        )
+        host = parsed_url.hostname
+        port = parsed_url.port
+        path = parsed_url.path
+
         if token_fetcher:
             call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(token_fetcher=token_fetcher))
 
@@ -166,14 +175,6 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
             ) if channel_credentials else call_credentials
             channel = grpc.aio.secure_channel(f"{host}:{rpc_port}", composite_credentials)
         elif client_id and username and password:
-
-            # parsing the conf_address to host port and path
-            parsed_url = urlparse(
-                conf_address
-            )
-            host = parsed_url.hostname
-            port = parsed_url.port
-            path = parsed_url.path
 
             # Create a basic ClientCredentials authenticator
             token_fetcher = create_token_fetcher(host, port, path, verify_auth_certificates, conf_ca_filename=conf_ca, auth_ca_filename=auth_ca)
@@ -196,7 +197,7 @@ def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = No
 
         elif client_id and client_secret:
             # Create a basic ClientCredentials authenticator
-            token_fetcher = create_token_fetcher(conf_address, verify_auth_certificates, conf_ca_filename=conf_ca, auth_ca_filename=auth_ca)
+            token_fetcher = create_token_fetcher(host, port, path, verify_auth_certificates, conf_ca_filename=conf_ca, auth_ca_filename=auth_ca)
             token_fetcher.token_request_data.update({'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'})
 
             call_credentials = grpc.metadata_call_credentials(AuthTokenPlugin(token_fetcher))
