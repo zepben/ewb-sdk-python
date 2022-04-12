@@ -12,7 +12,7 @@ from zepben.evolve.services.network.tracing.tree.downstream_tree import Downstre
 
 from test.network_fixtures import phase_swap_loop_network  # noqa (fixture)
 from zepben.evolve import Traversal, SetPhases, RemovePhases, AssignToFeeders, Breaker, Terminal, PhaseCode, ConductingEquipment, \
-    connected_equipment_trace
+    connected_equipment_trace, SetDirection, RemoveDirection
 from zepben.evolve.services.network.tracing import tracing
 
 T = TypeVar("T")
@@ -51,9 +51,8 @@ def test_suppliers():
     validate_supplier(tracing.set_phases, SetPhases)
     validate_supplier(tracing.remove_phases, RemovePhases)
 
-    # PROJ-1952
-    # validate_supplier(tracing.set_direction, SetDirection)
-    # validate_supplier(tracing.remove_direction, RemoveDirection)
+    validate_supplier(tracing.set_direction, SetDirection)
+    validate_supplier(tracing.remove_direction, RemoveDirection)
 
     validate_supplier(tracing.assign_equipment_containers_to_feeders, AssignToFeeders)
     validate_supplier(tracing.normal_downstream_tree, DownstreamTree)

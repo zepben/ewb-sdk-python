@@ -90,12 +90,13 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
                     self.on_branch_start(t.start_item)
                 await t.trace()
 
-    def reset(self):
-        """Reset the run state, queues and tracker for this this traversal"""
+    def reset(self) -> BranchRecursiveTraversal:
+        """Reset the run state, queues and tracker for this traversal"""
         self._reset_run_flag()
         self.process_queue.clear()
         self.branch_queue.clear()
         self.tracker.clear()
+        return self
 
     def create_branch(self):
         """
@@ -130,7 +131,8 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
                 await self.traverse_branches()
                 return
 
-        self.tracker.visit(self.start_item)
+        if not self.visit(self.start_item):
+            return
         # If we can't stop on the start item we don't run any stop conditions. if this causes a problem for you,
         # work around it by running the stop conditions for the start item prior to running the trace.
         stopping = can_stop_on_start_item and await self.matches_any_stop_condition(self.start_item)
