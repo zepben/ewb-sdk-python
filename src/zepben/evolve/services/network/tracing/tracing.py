@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, TypeVar
 
 from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
+from zepben.evolve.services.network.tracing.feeder.remove_direction import RemoveDirection
+from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
 from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
 from zepben.evolve.services.network.tracing.feeder.direction_status import normal_direction, current_direction
@@ -27,7 +29,7 @@ if TYPE_CHECKING:
 __all__ = ["create_basic_depth_trace", "create_basic_breadth_trace", "connected_equipment_trace", "connected_equipment_breadth_trace",
            "normal_connected_equipment_trace", "current_connected_equipment_trace", "phase_trace", "normal_phase_trace", "current_phase_trace",
            "connectivity_trace", "connectivity_breadth_trace", "normal_connectivity_trace", "current_connectivity_trace", "normal_downstream_trace",
-           "current_downstream_trace", "set_phases", "remove_phases", "assign_equipment_containers_to_feeders"]
+           "current_downstream_trace", "set_phases", "remove_phases", "set_direction", "remove_direction", "assign_equipment_containers_to_feeders"]
 
 
 # --- Helper functions that create depth-first/breadth-first traversals ---
@@ -233,13 +235,12 @@ def remove_phases() -> RemovePhases:
     return RemovePhases()
 
 
-# PROJ-1952
-# def set_direction() -> SetDirection:
-#     return SetDirection()
-#
-#
-# def remove_direction() -> RemoveDirection:
-#     return RemoveDirection()
+def set_direction() -> SetDirection:
+    return SetDirection()
+
+
+def remove_direction() -> RemoveDirection:
+    return RemoveDirection()
 
 
 # TODO

@@ -111,14 +111,14 @@ class DatabaseReader:
         # NOTE: phase and direction tracing is not yet supported
         #
 
-        # logger.info("Applying feeder direction to network...")
-        # tracing.set_direction().run(network_service)
-        # logger.info("Feeder direction applied to network.")
+        logger.info("Applying feeder direction to network...")
+        tracing.set_direction().run(network_service)
+        logger.info("Feeder direction applied to network.")
 
-        # logger.info("Applying phases to network...")
-        # tracing.set_phases().run(network_service)
+        logger.info("Applying phases to network...")
+        tracing.set_phases().run(network_service)
         # tracing.phase_inferrer().run(network_service)
-        # logger.info("Phasing applied to network.")
+        logger.info("Phasing applied to network.")
 
         logger.info("Assigning equipment to feeders...")
         tracing.assign_equipment_containers_to_feeders().run(network_service)

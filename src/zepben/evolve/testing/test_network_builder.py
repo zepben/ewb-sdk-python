@@ -6,7 +6,7 @@
 from typing import Optional, Callable, List
 
 from .. import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, PowerTransformerEnd, \
-    PowerTransformer, set_phases
+    PowerTransformer, set_phases, set_direction
 
 
 def null_action(_):
@@ -271,49 +271,48 @@ class TestNetworkBuilder(object):
         self._current_terminal = terminal
         return self
 
-    """
-    Connect the specified `from` and `to` without moving the current network pointer.
-   
-    :param from: The mRID of the first `ConductingEquipment` to be connected.
-    :param to: The mRID of the second `ConductingEquipment` to be connected.
-    :param from_terminal: The sequence number of the terminal on `from` which will be connected.
-    :param to_terminal: The sequence number of the terminal on `to` which will be connected.
-   
-    :return: This `TestNetworkBuilder` to allow for fluent use.
-    """
     def connect(self, from_: str, to: str, from_terminal: int, to_terminal: int) -> 'TestNetworkBuilder':
+        """
+        Connect the specified `from` and `to` without moving the current network pointer.
+
+        :param from: The mRID of the first `ConductingEquipment` to be connected.
+        :param to: The mRID of the second `ConductingEquipment` to be connected.
+        :param from_terminal: The sequence number of the terminal on `from` which will be connected.
+        :param to_terminal: The sequence number of the terminal on `to` which will be connected.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
         self._connect(self.network.get(from_, ConductingEquipment), self.network.get(to, ConductingEquipment), from_terminal, to_terminal)
         return self
 
-    """
-    Create a new feeder with the specified terminal as the head terminal.
-   
-    :param head_mrid: The mRID of the head `ConductingEquipment`.
-    :param sequence_number: The `Terminal` sequence number of the head terminal. Defaults to last terminal.
-   
-    :return: This `TestNetworkBuilder` to allow for fluent use.
-    """
     def add_feeder(self, head_mrid: str, sequence_number: Optional[int] = None) -> 'TestNetworkBuilder':
+        """
+        Create a new feeder with the specified terminal as the head terminal.
+
+        :param head_mrid: The mRID of the head `ConductingEquipment`.
+        :param sequence_number: The `Terminal` sequence number of the head terminal. Defaults to last terminal.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
         self._create_feeder(self.network.get(head_mrid, ConductingEquipment), sequence_number)
         return self
 
-    """
-    Get the `NetworkService` after apply traced phasing and feeder directions.
-   
-    Does not infer phasing.
-   
-    :return: The `NetworkService` created by this `TestNetworkBuilder`
-    """
     async def build(self, apply_directions_from_sources: bool = True) -> NetworkService:
+        """
+        Get the `NetworkService` after apply traced phasing and feeder directions.
+
+        Does not infer phasing.
+
+        :return: The `NetworkService` created by this `TestNetworkBuilder`
+        """
         # The traces are broken, add them back in later.
         await set_phases().run(self.network)
-        # PROJ-1952 - Tracing.setDirection().run(network)
+        await set_direction().run(self.network)
 
         if apply_directions_from_sources:
             for es in self.network.objects(EnergySource):
                 for terminal in es.terminals:
-                    # PROJ-1952 - Tracing.setDirection().run(terminal)
-                    pass
+                    await set_direction().run_terminal(terminal)
 
         return self.network
 
