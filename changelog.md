@@ -4,12 +4,13 @@
 ##### New Features
 * Allow specification of timeout for CimConsumerClients
 * Added convenience classes `SetPhases` and `RemovePhases` to set and remove phases on a `NetworkService`.
+* Added new connect_tls helper function for connecting to TLS secured EWB with no auth.
 
 ##### Enhancements
 * None.
 
 ##### Fixes
-* None.
+* `connect_with_password()` now works
 
 ##### Notes
 * None.
