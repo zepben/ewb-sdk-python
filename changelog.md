@@ -5,9 +5,10 @@
 * Allow specification of timeout for CimConsumerClients
 * Added convenience classes `SetPhases` and `RemovePhases` to set and remove phases on a `NetworkService`.
 * Added new connect_tls helper function for connecting to TLS secured EWB with no auth.
+* Added convenience classes `SetDirection` and `RemoveDirection` to set and remove feeder directions on a `NetworkService`.
 
 ##### Enhancements
-* None.
+* BusBranchNetworkCreator logic updated so that the factory methods for topological_branches, equivalent_branches, and power_transformers get the topological nodes passed in as arguments sorted by feeder_direction.
 
 ##### Fixes
 * `connect_with_password()` now works

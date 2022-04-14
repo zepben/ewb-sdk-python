@@ -81,7 +81,7 @@ async def test_equivalent_branches_created_only_if_they_have_impedance():
     ec_bus = next(iter(result.mappings.to_bbn.objects.get("ec")))[1]
     ec_eb_bus = next(iter(result.mappings.to_bbn.objects.get("ec_eb")))[1]
     pec_bus = next(iter(result.mappings.to_bbn.objects.get("pec")))[1]
-    pt_bus = next(iter(result.mappings.to_bbn.objects.get("pt")))[1][1][1]
+    pt_bus = next(iter(result.mappings.to_bbn.objects.get("pt")))[1][0][1]
 
     assert bus == ec_bus
     assert bus == ec_eb_bus
@@ -106,7 +106,7 @@ async def test_equivalent_branches_created_only_if_they_have_impedance():
     ec_bus = next(iter(result.mappings.to_bbn.objects.get("ec")))[1]
     ec_eb_bus = next(iter(result.mappings.to_bbn.objects.get("ec_eb")))[1]
     pec_bus = next(iter(result.mappings.to_bbn.objects.get("pec")))[1]
-    pt_bus = next(iter(result.mappings.to_bbn.objects.get("pt")))[1][1][1]
+    pt_bus = next(iter(result.mappings.to_bbn.objects.get("pt")))[1][0][1]
 
     assert bus_1 == ec_bus
     assert bus_1 == pec_bus

@@ -30,13 +30,7 @@ class FeederDirection(Enum):
         return FeederDirection(self.value | other.value)
 
     def __sub__(self, other):
-        return FeederDirection(self.value - (self.value and other.value))
-
-    def plus(self, rhs: 'FeederDirection') -> 'FeederDirection':
-        return feeder_direction_from_value(self.value or rhs.value)
-
-    def minus(self, rhs: 'FeederDirection') -> 'FeederDirection':
-        return feeder_direction_from_value(self.value - (self.value and rhs.value))
+        return FeederDirection(self.value - (self.value & other.value))
 
     @property
     def short_name(self):
