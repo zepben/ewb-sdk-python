@@ -35,6 +35,19 @@ def _insecure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 5005
         .socket_address(host, rpc_port)
 
 
+def _grpc_channel_builder_from_secret(host: str, rpc_port: int, client_id: str, client_secret: str, token_fetcher: ZepbenTokenFetcher
+                                      ) -> GrpcChannelBuilder:
+    token_fetcher.token_request_data.update({
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'grant_type': 'client_credentials'
+    })
+    return GrpcChannelBuilder() \
+        .socket_address(host, rpc_port) \
+        .make_secure() \
+        .token_fetcher(token_fetcher)
+
+
 def _grpc_channel_builder_from_password(client_id: str, username: str, password: str, host: str, rpc_port: int, token_fetcher: ZepbenTokenFetcher
                                         ) -> GrpcChannelBuilder:
     token_fetcher.token_request_data.update({
@@ -72,6 +85,47 @@ def connect_insecure(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio
     Returns a gRPC channel
     """
     return _insecure_grpc_channel_builder(host, rpc_port).build()
+
+
+def connect_with_secret(host: str = "localhost", rpc_port: int = 50051, conf_path: str = None, client_id: Optional[str] = None,
+                        client_secret: Optional[str] = None, token_fetcher: Optional[ZepbenTokenFetcher] = None, **kwargs) -> grpc.aio.Channel:
+    """
+    Connect to a Zepben gRPC service using client secret.
+    `client_id` and `client_secret` for client credentials based authentication (usually M2M tokens)
+
+    `client_id` Your client id for your OAuth Auth provider.
+    `client_secret` Corresponding client secret if required.
+    `host` The host to connect to.
+    `rpc_port` The gRPC port for host.
+    `conf_path` The path for the auth configuration endpoint. This is used when a `token_fetcher` is not provided.
+        "Defaults to checking /auth and /ewb/auth"
+    `**kwargs` Keyword Arguments to be passed to ZepbenTokenFetcher initialiser if conf_path is None.
+
+    Raises error if the token_fetcher could not be configured
+
+    Returns a gRPC channel
+    """
+    token_fetcher: ZepbenTokenFetcher
+    errors = None
+    if conf_path:
+        token_fetcher = create_token_fetcher(host, port=kwargs.get("port", 443), path=conf_path)
+    else:
+        try:
+            token_fetcher = create_token_fetcher(host)
+        except Exception as e:
+            errors = e
+
+    if {"audience", "issuer_domain", "auth_method"} <= kwargs.keys():
+        # noinspection PyArgumentList
+        token_fetcher = ZepbenTokenFetcher(**kwargs)
+
+    if not token_fetcher:
+        if errors:
+            raise ValueError(f"Failed to connect to {host}:{rpc_port}, did you pass a correct conf_path?")
+        else:
+            raise ValueError("token_fetcher could not be created, this is likely a bug.")
+
+    return _grpc_channel_builder_from_secret(host, rpc_port, client_id, client_secret, token_fetcher).build()
 
 
 def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051,
