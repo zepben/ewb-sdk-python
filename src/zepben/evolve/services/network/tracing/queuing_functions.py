@@ -6,12 +6,12 @@
 import logging
 from typing import Optional, Iterable, Set
 
+from zepben.evolve.services.network.network_service import connected_equipment, connected_terminals
 from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.services.network.tracing.connectivity.connectivity_result import get_connected_equipment, get_connectivity
 
 __all__ = ["conducting_equipment_queue_next", "queue_next_terminal", "tracing_logger"]
 
@@ -30,7 +30,7 @@ def conducting_equipment_queue_next(conducting_equipment: Optional[ConductingEqu
         exclude = []
 
     if conducting_equipment:
-        crs = get_connected_equipment(conducting_equipment, exclude)
+        crs = connected_equipment(conducting_equipment, exclude)
         return [cr.to_equip for cr in crs if cr.to_equip and cr.to_equip not in exclude]
     return []
 
@@ -48,7 +48,7 @@ def queue_next_terminal(item: Terminal, traversal: Traversal[Terminal]):
         # If there are no other terminals we get connectivity for this one and return that. Note that this will
         # also return connections for EnergyConsumer's, but upstream will be covered by the exclude parameter and thus
         # should yield an empty list.
-        to_terms = [cr.to_terminal for cr in get_connectivity(item)]
+        to_terms = [cr.to_terminal for cr in connected_terminals(item)]
         if len(to_terms) > 0:
             tracing_logger.debug(f"Queuing {to_terms[0].mrid} from single terminal equipment {item.mrid}")
         traversal.process_queue.extend(to_terms)
@@ -56,7 +56,7 @@ def queue_next_terminal(item: Terminal, traversal: Traversal[Terminal]):
 
     crs = []
     for term in other_terms:
-        crs.extend(get_connectivity(term))
+        crs.extend(connected_terminals(term))
 
     to_terms = [cr.to_terminal for cr in crs]
     tracing_logger.debug(f"Queuing terminals: [{', '.join(t.mrid for t in to_terms)}] from {item.mrid}")

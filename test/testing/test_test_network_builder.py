@@ -9,7 +9,7 @@ import pytest
 from pytest import raises
 
 from zepben.evolve import start_with_source, PhaseCode, start_with_acls, start_with_breaker, start_with_junction, start_with_power_transformer, \
-    PowerTransformerEnd, start_with_other, Junction, Terminal, NetworkService, ConductingEquipment, get_connectivity, Breaker, Feeder, PowerTransformer
+    PowerTransformerEnd, start_with_other, Junction, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, connected_terminals
 
 
 class TestTestNetworkBuilder(object):
@@ -275,12 +275,12 @@ class TestTestNetworkBuilder(object):
     @staticmethod
     def _validate_terminal_connections(terminal: Terminal, expected_terms: List[str]):
         if expected_terms:
-            diff = set([it.to_terminal.mrid for it in get_connectivity(terminal)]) ^ set(expected_terms)
+            diff = set([it.to_terminal.mrid for it in connected_terminals(terminal)]) ^ set(expected_terms)
             if diff:
                 assert not diff
             assert not diff
         else:
-            assert not get_connectivity(terminal)
+            assert not connected_terminals(terminal)
 
     @staticmethod
     def _validate_open_states(n: NetworkService, mrid: str, expected_is_normally_open: bool, expected_is_open: bool):
