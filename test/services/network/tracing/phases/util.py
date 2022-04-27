@@ -67,7 +67,8 @@ def do_phase_validation(terminal: Terminal, phase_status: PhaseStatus, expected_
     else:
         count = -1
         for (count, (nominal_phase, expected_phase)) in enumerate(zip(terminal.phases.single_phases, expected_phases)):
-            assert phase_status[nominal_phase] == expected_phase, f"nominal phase {nominal_phase}"
+            assert phase_status[nominal_phase] == expected_phase, \
+                f"nominal phase {nominal_phase}. expected {expected_phase}, found {phase_status[nominal_phase]}"
 
         assert len(terminal.phases.single_phases) == count + 1, f"{terminal.phases.single_phases} should be of length {count + 1}"
 

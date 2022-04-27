@@ -8,10 +8,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Tuple, Set, Callable, Optional, Union, FrozenSet
 
+from zepben.evolve import connected_terminals
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.services.network.tracing.connectivity.connectivity_result import get_connectivity
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
 from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
 from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import BranchRecursiveTraversal
@@ -76,7 +76,7 @@ def _ebb_and_queue(ebb_phases: EbbPhases, traversal: BranchRecursiveTraversal[Eb
     terminal, nominal_phases = ebb_phases
     ebbed_phases = _ebb(terminal, nominal_phases, phase_selector)
 
-    for cr in get_connectivity(terminal, nominal_phases):
+    for cr in connected_terminals(terminal, nominal_phases):
         _queue_through_equipment(traversal, cr.to_equip, cr.to_terminal, _ebb_from_connected_terminal(ebbed_phases, cr, phase_selector))
 
 

@@ -8,12 +8,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Union, Set, Callable, List, Iterable, Optional
 
+from zepben.evolve import connected_terminals
 from zepben.evolve.exceptions import PhaseException
 from zepben.evolve.exceptions import TracingException
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.evolve.services.network.tracing.connectivity.connectivity_result import get_connectivity, ConnectivityResult
+from zepben.evolve.services.network.tracing.connectivity.connectivity_result import ConnectivityResult
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_internal import TerminalConnectivityInternal
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
 from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import BranchRecursiveTraversal
@@ -201,7 +202,7 @@ class SetPhases:
         """
         Applies all the `phases_to_flow` from the `from_terminal` to the connected terminals and queues them.
         """
-        connectivity_results = get_connectivity(from_terminal, phases_to_flow)
+        connectivity_results = connected_terminals(from_terminal, phases_to_flow)
 
         conducting_equip = from_terminal.conducting_equipment
         use_branch_queue = len(connectivity_results) > 1 or (conducting_equip and conducting_equip.num_terminals() > 2)
@@ -224,7 +225,8 @@ class SetPhases:
         for path in cr.nominal_phase_paths:
             try:
                 # If the path comes from NONE, then we want to apply the `to phase`.
-                phase = from_phases[path.from_phase] if path.from_phase != SinglePhaseKind.NONE else path.to_phase
+                phase = from_phases[path.from_phase] if path.from_phase != SinglePhaseKind.NONE else \
+                    path.to_phase if path.to_phase not in PhaseCode.XY else to_phases[path.to_phase]
 
                 if (phase != SinglePhaseKind.NONE) and to_phases.__setitem__(path.to_phase, phase):
                     changed_phases.add(path.to_phase)

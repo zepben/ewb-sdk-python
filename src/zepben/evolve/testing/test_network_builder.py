@@ -305,9 +305,8 @@ class TestNetworkBuilder(object):
 
         :return: The `NetworkService` created by this `TestNetworkBuilder`
         """
-        # The traces are broken, add them back in later.
-        await set_phases().run(self.network)
         await set_direction().run(self.network)
+        await set_phases().run(self.network)
 
         if apply_directions_from_sources:
             for es in self.network.objects(EnergySource):

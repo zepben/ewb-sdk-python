@@ -9,7 +9,7 @@ from sqlite3 import Connection, Cursor
 from typing import Callable, Optional
 
 from zepben.evolve import MetadataCollection, NetworkService, DiagramService, CustomerService, MetadataEntryReader, DiagramCIMReader, CustomerCIMReader, \
-    TableVersion, MetadataCollectionReader, DiagramServiceReader, CustomerServiceReader, Feeder, EnergySource, get_connected_equipment, ConductingEquipment
+    TableVersion, MetadataCollectionReader, DiagramServiceReader, CustomerServiceReader, Feeder, EnergySource, ConductingEquipment, connected_equipment
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 from zepben.evolve.database.sqlite.readers.network_service_reader import NetworkServiceReader
 from zepben.evolve.services.network.tracing import tracing
@@ -144,7 +144,7 @@ class DatabaseReader:
         def has_been_assigned_to_feeder(energy_source: EnergySource) -> bool:
             return energy_source.is_external_grid \
                    and self._is_on_feeder(energy_source) \
-                   and get_connected_equipment(energy_source, feeder_start_points)
+                   and feeder_start_points.isdisjoint(set(connected_equipment(energy_source)))
 
         for es in filter(has_been_assigned_to_feeder, network_service.objects(EnergySource)):
             logger.warning(f"External grid source {es} has been assigned to the following feeders: normal {es.normal_feeders}, current {es.current_feeders}")
