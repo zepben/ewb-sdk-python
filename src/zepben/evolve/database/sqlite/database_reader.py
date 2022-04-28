@@ -117,7 +117,7 @@ class DatabaseReader:
 
         logger.info("Applying phases to network...")
         tracing.set_phases().run(network_service)
-        # tracing.phase_inferrer().run(network_service)
+        tracing.phase_inferrer().run(network_service)
         logger.info("Phasing applied to network.")
 
         logger.info("Assigning equipment to feeders...")

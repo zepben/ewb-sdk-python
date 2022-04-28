@@ -21,8 +21,8 @@ from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing 
 from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
 from zepben.evolve.services.network.tracing.util import normally_open, currently_open
 if TYPE_CHECKING:
-    from zepben.evolve import Terminal, ConductingEquipment, NetworkService, PhaseStatus
-    PhaseSelector = Callable[[Terminal], PhaseStatus]
+    from zepben.evolve import Terminal, ConductingEquipment, NetworkService
+    from zepben.evolve.types import PhaseSelector
 
 __all__ = ["SetPhases"]
 

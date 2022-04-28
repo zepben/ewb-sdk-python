@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https: #mozilla.org/MPL/2.0/.
 import logging
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Union
 
-from zepben.evolve import ConductingEquipment, connected_equipment_trace, NetworkService, SinglePhaseKind as SPK, Terminal, PhaseStatus
+from zepben.evolve import ConductingEquipment, connected_equipment_trace, NetworkService, SinglePhaseKind as SPK, Terminal, PhaseStatus, PhaseCode
 
 logger = logging.getLogger("phase_logger.py")
 
@@ -16,13 +16,12 @@ async def connected_equipment_trace_with_logging(assets: Iterable[ConductingEqui
         await connected_equipment_trace().add_step_action(log_equipment).trace(asset)
 
 
-async def log_equipment(conducting_equipment: ConductingEquipment, stopping: bool):
+async def log_equipment(conducting_equipment: ConductingEquipment, _: bool):
     logger.info(f"\n###############################"
                 f"\nTracing phases from: {conducting_equipment}"
                 f"\n")
 
     for term in conducting_equipment.terminals:
-
         def phase_info(phase):
             nps = term.normal_phases[phase]
             cps = term.current_phases[phase]
@@ -32,8 +31,13 @@ async def log_equipment(conducting_equipment: ConductingEquipment, stopping: boo
         logger.info(f"{conducting_equipment.mrid}-T{term.sequence_number}: " + ", ".join(phase_info(phase) for phase in term.phases.single_phases))
 
 
-def validate_phases_from_term_or_equip(network: NetworkService, id: str, expected_phases1: Iterable[SPK], expected_phases2: Optional[Iterable[SPK]] = None):
-    io = network[id]
+def validate_phases_from_term_or_equip(
+    network: NetworkService,
+    mrid: str,
+    expected_phases1: Union[Iterable[SPK], PhaseCode],
+    expected_phases2: Optional[Union[Iterable[SPK], PhaseCode]] = None
+):
+    io = network[mrid]
     if isinstance(io, Terminal):
         validate_phases(io, expected_phases1, expected_phases2)
 
@@ -44,12 +48,14 @@ def validate_phases_from_term_or_equip(network: NetworkService, id: str, expecte
             validate_phases(io.get_terminal_by_sn(2), expected_phases2)
 
     else:
-        raise "network[id] must be a Terminal or ConductingEquipment."
+        raise f"network[{mrid}] must be a Terminal or ConductingEquipment."
 
 
-def validate_phases(terminal: Optional[Terminal],
-                    expected_phases_normal: Iterable[SPK],
-                    expected_phases_current: Optional[Iterable[SPK]] = None):
+def validate_phases(
+    terminal: Optional[Terminal],
+    expected_phases_normal: Union[Iterable[SPK], PhaseCode],
+    expected_phases_current: Optional[Union[Iterable[SPK], PhaseCode]] = None
+):
     if terminal is None:
         return
 
@@ -59,7 +65,7 @@ def validate_phases(terminal: Optional[Terminal],
     do_phase_validation(terminal, terminal.current_phases, expected_phases_current)
 
 
-def do_phase_validation(terminal: Terminal, phase_status: PhaseStatus, expected_phases: Iterable[SPK]):
+def do_phase_validation(terminal: Terminal, phase_status: PhaseStatus, expected_phases: Union[Iterable[SPK], PhaseCode]):
     if list(expected_phases) == [SPK.NONE]:
         for nominal_phase in terminal.phases.single_phases:
             assert phase_status[nominal_phase] == SPK.NONE, f"nominal phase {nominal_phase}"
@@ -73,5 +79,5 @@ def do_phase_validation(terminal: Terminal, phase_status: PhaseStatus, expected_
         assert len(terminal.phases.single_phases) == count + 1, f"{terminal.phases.single_phases} should be of length {count + 1}"
 
 
-def get_t(network: NetworkService, id: str, sn: int):
-    return network[id].get_terminal_by_sn(sn)
+def get_t(network: NetworkService, mrid: str, sn: int):
+    return network[mrid].get_terminal_by_sn(sn)

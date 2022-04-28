@@ -168,8 +168,8 @@ async def test_detects_cross_phasing_flow():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_acls(PhaseCode.A, set_normal_phase(1, SPK.A, SPK.A))
-            .to_acls(PhaseCode.A, set_normal_phase(1, SPK.A, SPK.B))
+            .from_acls(PhaseCode.A, _set_normal_phase(1, SPK.A, SPK.A))
+            .to_acls(PhaseCode.A, _set_normal_phase(1, SPK.A, SPK.B))
             .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
@@ -191,9 +191,9 @@ async def test_detects_cross_phasing_connected():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_acls(PhaseCode.A, set_normal_phase(1, SPK.A, SPK.A))
+            .from_acls(PhaseCode.A, _set_normal_phase(1, SPK.A, SPK.A))
             .to_acls(PhaseCode.A)
-            .to_acls(PhaseCode.A, set_normal_phase(0, SPK.A, SPK.B))
+            .to_acls(PhaseCode.A, _set_normal_phase(0, SPK.A, SPK.B))
             .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
@@ -253,7 +253,7 @@ async def test_can_back_trace_through_xn_xy_transformer_spur():
     validate_phases_from_term_or_equip(network_service, "tx3", PhaseCode.AN.single_phases, [SPK.A, SPK.NONE])
 
 
-def set_normal_phase(terminal_index, from_phase: SPK, to_phase: SPK):
+def _set_normal_phase(terminal_index, from_phase: SPK, to_phase: SPK):
     def action(ce: ConductingEquipment):
         list(ce.terminals)[terminal_index].normal_phases[from_phase] = to_phase
 

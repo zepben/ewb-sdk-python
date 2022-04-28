@@ -7,24 +7,24 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
-from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
+from zepben.evolve import PhaseInferrer
+from zepben.evolve.services.network.tracing.connected_equipment_trace import queue_next_connected_equipment_with_open_test
+from zepben.evolve.services.network.tracing.connectivity.connectivity_trace import queue_next_connectivity_result_with_open_test
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
+from zepben.evolve.services.network.tracing.feeder.direction_status import normal_direction, current_direction
 from zepben.evolve.services.network.tracing.feeder.remove_direction import RemoveDirection
 from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
+from zepben.evolve.services.network.tracing.phases.phase_trace import new_phase_trace, new_downstream_phase_trace, new_upstream_phase_trace
 from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
-from zepben.evolve.services.network.tracing.feeder.direction_status import normal_direction, current_direction
-from zepben.evolve.services.network.tracing.connected_equipment_trace import queue_next_connected_equipment_with_open_test
+from zepben.evolve.services.network.tracing.traversals.queue import depth_first, breadth_first
+from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
 from zepben.evolve.services.network.tracing.util import ignore_open, normally_open, currently_open
-from zepben.evolve.services.network.tracing.phases.phase_trace import new_phase_trace, new_downstream_phase_trace, new_upstream_phase_trace
-from zepben.evolve.services.network.tracing.connectivity.connectivity_trace import queue_next_connectivity_result_with_open_test
-from zepben.evolve.services.network.tracing.traversals.queue import depth_first, breadth_first
 if TYPE_CHECKING:
     from zepben.evolve import ConductingEquipment, ConnectivityResult, PhaseStep
     from zepben.evolve.types import QueueNext
     T = TypeVar("T")
-
 
 __all__ = ["create_basic_depth_trace", "create_basic_breadth_trace", "connected_equipment_trace", "connected_equipment_breadth_trace",
            "normal_connected_equipment_trace", "current_connected_equipment_trace", "phase_trace", "normal_phase_trace", "current_phase_trace",
@@ -228,7 +228,7 @@ def set_phases() -> SetPhases:
 
 def remove_phases() -> RemovePhases:
     """
-    Returns an instance of `RemovePhases` convenience class for setting phases on a network.
+    Returns an instance of `RemovePhases` convenience class for removing phases from a network.
 
     @return A new `RemovePhases` instance.
     """
@@ -236,16 +236,30 @@ def remove_phases() -> RemovePhases:
 
 
 def set_direction() -> SetDirection:
+    """
+    Returns an instance of `SetDirection` convenience class for setting feeder directions on a network.
+
+    @return A new `SetDirection` instance.
+    """
     return SetDirection()
 
 
 def remove_direction() -> RemoveDirection:
+    """
+    Returns an instance of `RemoveDirection` convenience class for removing feeder directions from a network.
+
+    @return A new `RemoveDirection` instance.
+    """
     return RemoveDirection()
 
 
-# TODO
-# def phase_inferrer() -> PhaseInferrer:
-#     return PhaseInferrer()
+def phase_inferrer() -> PhaseInferrer:
+    """
+    Returns an instance of `PhaseInferrer` convenience class for inferring missing phases on a network.
+
+    @return A new `PhaseInferrer` instance.
+    """
+    return PhaseInferrer()
 
 
 def assign_equipment_containers_to_feeders() -> AssignToFeeders:
@@ -254,7 +268,6 @@ def assign_equipment_containers_to_feeders() -> AssignToFeeders:
     containers to feeders on a network.
     """
     return AssignToFeeders()
-
 
 # TODO
 # def find_with_usage_points() -> FindWithUsagePoints:
