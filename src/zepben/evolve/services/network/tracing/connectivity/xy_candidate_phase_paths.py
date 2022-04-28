@@ -11,7 +11,7 @@ from dataclassy import dataclass
 
 from zepben.evolve import SinglePhaseKind, PhaseCode
 
-__all__ = ["X_PRIORITY", "Y_PRIORITY", "XyCandidatePhasePaths"]
+__all__ = ["X_PRIORITY", "Y_PRIORITY", "XyCandidatePhasePaths", "is_before", "is_after"]
 
 X_PRIORITY = [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C]
 """
@@ -22,6 +22,34 @@ Y_PRIORITY = [SinglePhaseKind.C, SinglePhaseKind.B]
 """
 The pathing priority for nominal phase X
  """
+
+
+def is_before(phase: SinglePhaseKind, before: Optional[SinglePhaseKind]) -> bool:
+    if (before is None) or (before == SinglePhaseKind.NONE):
+        return True
+    elif before == SinglePhaseKind.A:
+        return False
+    elif before == SinglePhaseKind.B:
+        return phase == SinglePhaseKind.A
+    elif before == SinglePhaseKind.C:
+        return (phase == SinglePhaseKind.A) or (phase == SinglePhaseKind.B)
+    else:
+        raise ValueError("INTERNAL ERROR: is_before should only ever be checking against valid Y phases. If you get this message you need to ask the dev "
+                         "team to go put the planets back into alignment as they stuffed something up!")
+
+
+def is_after(phase: SinglePhaseKind, after: Optional[SinglePhaseKind]) -> bool:
+    if (after is None) or (after == SinglePhaseKind.NONE):
+        return True
+    elif after == SinglePhaseKind.C:
+        return False
+    elif after == SinglePhaseKind.B:
+        return phase == SinglePhaseKind.C
+    elif after == SinglePhaseKind.A:
+        return (phase == SinglePhaseKind.C) or (phase == SinglePhaseKind.B)
+    else:
+        raise ValueError("INTERNAL ERROR: is_after should only ever be checking against valid X phases. If you get this message you need to ask the dev "
+                         "team to go put the planets back into alignment as they stuffed something up!")
 
 
 @dataclass(slots=True)
@@ -108,7 +136,7 @@ class XyCandidatePhasePaths:
         elif known_y is not None:
             candidates = candidate_phase_counts.get(SinglePhaseKind.X)
             if candidates:
-                paths[SinglePhaseKind.X] = self._find_candidate(candidates, priority=X_PRIORITY, after=known_y)
+                paths[SinglePhaseKind.X] = self._find_candidate(candidates, priority=X_PRIORITY, before=known_y)
             else:
                 paths[SinglePhaseKind.X] = SinglePhaseKind.NONE
         else:
@@ -136,7 +164,7 @@ class XyCandidatePhasePaths:
             x_candidate = self._find_candidate(candidate_x_counts, priority=X_PRIORITY)
             y_candidate = self._find_candidate(candidate_y_counts, priority=Y_PRIORITY)
 
-            if _is_before(x_candidate, y_candidate):
+            if is_before(x_candidate, y_candidate):
                 return x_candidate, y_candidate
             elif candidate_x_counts[x_candidate] > candidate_y_counts[y_candidate]:
                 return x_candidate, self._find_candidate(candidate_y_counts, priority=Y_PRIORITY, after=x_candidate)
@@ -164,7 +192,7 @@ class XyCandidatePhasePaths:
         before: Optional[SinglePhaseKind] = None,
         after: Optional[SinglePhaseKind] = None
     ) -> SinglePhaseKind:
-        valid_candidates = [(phase, count) for (phase, count) in candidate_counts.most_common() if _is_before(phase, before) and _is_after(phase, after)]
+        valid_candidates = [(phase, count) for (phase, count) in candidate_counts.most_common() if is_before(phase, before) and is_after(phase, after)]
         if not valid_candidates:
             return SinglePhaseKind.NONE
         elif len(valid_candidates) == 1:
@@ -184,7 +212,7 @@ class XyCandidatePhasePaths:
 
 def _validate_for_tracking(phase: SinglePhaseKind):
     if phase not in PhaseCode.XY:
-        raise ValueError("Unable to track phase $this, expected X or Y.")
+        raise ValueError(f"Unable to track phase {phase}, expected X or Y.")
 
 
 def _is_valid_candidate(phase: SinglePhaseKind, xy_phase: SinglePhaseKind) -> bool:
@@ -198,39 +226,11 @@ def _is_valid_candidate_x(phase: SinglePhaseKind) -> bool:
     if phase in PhaseCode.ABC:
         return True
     else:
-        raise ValueError("Unable to use phase $this as a candidate, expected A, B or C.")
+        raise ValueError(f"Unable to use phase {phase} as a candidate, expected A, B or C.")
 
 
 def _is_valid_candidate_y(phase: SinglePhaseKind) -> bool:
     if phase in PhaseCode.BC:
         return True
     else:
-        raise ValueError("Unable to use phase $this as a candidate, expected B or C.")
-
-
-def _is_before(phase: SinglePhaseKind, before: Optional[SinglePhaseKind]) -> bool:
-    if (before is None) or (before == SinglePhaseKind.NONE):
-        return True
-    elif before == SinglePhaseKind.A:
-        return False
-    elif before == SinglePhaseKind.B:
-        return phase == SinglePhaseKind.A
-    elif before == SinglePhaseKind.C:
-        return (phase == SinglePhaseKind.A) or (phase == SinglePhaseKind.B)
-    else:
-        raise ValueError("INTERNAL ERROR: _is_before should only ever be checking against valid Y phases. If you get this message you need to ask the dev "
-                         "team to go put the planets back into alignment as they stuffed something up!")
-
-
-def _is_after(phase: SinglePhaseKind, after: Optional[SinglePhaseKind]) -> bool:
-    if (after is None) or (after == SinglePhaseKind.NONE):
-        return True
-    elif after == SinglePhaseKind.C:
-        return False
-    elif after == SinglePhaseKind.B:
-        return phase == SinglePhaseKind.C
-    elif after == SinglePhaseKind.A:
-        return (phase == SinglePhaseKind.C) or (phase == SinglePhaseKind.B)
-    else:
-        raise ValueError("INTERNAL ERROR: _is_after should only ever be checking against valid X phases. If you get this message you need to ask the dev "
-                         "team to go put the planets back into alignment as they stuffed something up!")
+        raise ValueError(f"Unable to use phase {phase} as a candidate, expected B or C.")
