@@ -2,6 +2,7 @@
 
 * `queue_next` functions now take an item and a `Traversal`, and they now hold the responsibility of adding the next items to the traversal's queue.
 * Removed `get_connectivity` and `get_connected_equipment` from `connectivity_result.py`. Use `connected_terminals` and `connected_equipment` instead.
+* Moved `PhaseSelector` definition to `types.py`.
 
 ##### New Features
 

@@ -6,19 +6,19 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Tuple, Set, Callable, Optional, Union, FrozenSet
+from typing import TYPE_CHECKING, Tuple, Set, Optional, Union, FrozenSet
 
 from zepben.evolve import connected_terminals
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
-from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
 from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import BranchRecursiveTraversal
+from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
 if TYPE_CHECKING:
-    from zepben.evolve import ConnectivityResult, ConductingEquipment, PhaseStatus, NetworkService
+    from zepben.evolve import ConnectivityResult, ConductingEquipment, NetworkService
+    from zepben.evolve.types import PhaseSelector
     EbbPhases = Tuple[Terminal, FrozenSet[SinglePhaseKind]]
-    PhaseSelector = Callable[[Terminal], PhaseStatus]
 
 __all__ = ["RemovePhases", "remove_all_traced_phases"]
 
