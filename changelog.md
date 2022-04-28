@@ -7,10 +7,14 @@
 ##### New Features
 
 * Allow specification of timeout for CimConsumerClients
-* Added convenience classes `SetPhases` and `RemovePhases` to set and remove phases on a `NetworkService`.
+* Added the following traces to process a `NetworkService`, which can be accessed via the `tracing` package:
+  * `SetPhases`
+  * `RemovePhases`
+  * `SetDirection`
+  * `RemoveDirection`
+  * `PhaseInferrer`
 * Added new `connect_tls()` helper function for connecting to TLS secured EWB with no auth.
 * Added new `connect_with_secret()` helper function for connecting to a secure EWB server with a client id and secret.
-* Added convenience classes `SetDirection` and `RemoveDirection` to set and remove feeder directions on a `NetworkService`.
 
 ##### Enhancements
 
