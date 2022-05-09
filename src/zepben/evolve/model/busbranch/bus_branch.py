@@ -841,6 +841,8 @@ def _get_base_voltage(border_terminals: FrozenSet[Terminal]) -> Union[int, None]
     voltages = set()
     for t in border_terminals:
         ce = t.conducting_equipment
+        if isinstance(ce, Switch):
+            continue
         if isinstance(ce, PowerTransformer):
             end_voltage = next((e.rated_u for e in ce.ends if e.terminal is t), None)
             if end_voltage is not None:
