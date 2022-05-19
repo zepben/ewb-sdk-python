@@ -95,7 +95,7 @@ class SetDirection:
         if not ce:
             return False
 
-        return any(f.normal_head_terminal for f in ce.containers if isinstance(f, Feeder))
+        return any(f.normal_head_terminal == terminal for f in ce.containers if isinstance(f, Feeder))
 
     def _flow_upstream_and_queue_next_straight(
         self,
