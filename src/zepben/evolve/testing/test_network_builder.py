@@ -297,7 +297,7 @@ class TestNetworkBuilder(object):
         self._create_feeder(self.network.get(head_mrid, ConductingEquipment), sequence_number)
         return self
 
-    async def build(self, apply_directions_from_sources: bool = True) -> NetworkService:
+    async def build(self, apply_directions_from_sources: bool = True, assign_feeders: bool = True) -> NetworkService:
         """
         Get the `NetworkService` after apply traced phasing and feeder directions.
 
@@ -305,7 +305,7 @@ class TestNetworkBuilder(object):
 
         :return: The `NetworkService` created by this `TestNetworkBuilder`
         """
-        if len(list(self.network.objects(Feeder))) != 0:
+        if assign_feeders and len(list(self.network.objects(Feeder))) != 0:
             await AssignToFeeders().run(self.network)
         await set_direction().run(self.network)
         await set_phases().run(self.network)

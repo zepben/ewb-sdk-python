@@ -416,7 +416,7 @@ class TestPhaseInferrer:
                         .branch_from("c5")
                         .to_acls(PhaseCode.ABC)  # c9
                         .add_feeder("s0")
-                        .build())
+                        .build(assign_feeders=False))
 
         terminals = [network.get("c6-t2", Terminal)] + [t for t in network.objects(Terminal) if t.mrid != "c6-t2"]
         with patch.object(NetworkService, 'objects', wraps=lambda _: terminals):
