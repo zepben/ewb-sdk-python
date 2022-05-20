@@ -6,7 +6,7 @@
 from typing import Optional, Callable, List
 
 from .. import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, PowerTransformerEnd, \
-    PowerTransformer, set_phases, set_direction
+    PowerTransformer, set_phases, set_direction, AssignToFeeders
 
 
 def null_action(_):
@@ -305,6 +305,8 @@ class TestNetworkBuilder(object):
 
         :return: The `NetworkService` created by this `TestNetworkBuilder`
         """
+        if len(list(self.network.objects(Feeder))) != 0:
+            await AssignToFeeders().run(self.network)
         await set_direction().run(self.network)
         await set_phases().run(self.network)
 
