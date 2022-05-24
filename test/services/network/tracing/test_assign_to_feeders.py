@@ -6,7 +6,7 @@
 from typing import Iterable
 
 import pytest
-from zepben.evolve import assign_equipment_containers_to_feeders, Equipment
+from zepben.evolve import assign_equipment_containers_to_feeders, Equipment, TestNetworkBuilder, PhaseCode, Feeder
 
 
 def validate_equipment(equipment: Iterable[Equipment], *expected_mrids: str):
@@ -15,7 +15,7 @@ def validate_equipment(equipment: Iterable[Equipment], *expected_mrids: str):
         assert mrid in equip_mrids
 
 
-class TestAssignToFeeders(object):
+class TestAssignToFeeders:
 
     @pytest.mark.asyncio
     async def test_applies_to_equipment_on_head_terminal_side(self, feeder_start_point_between_conductors_network):
@@ -31,5 +31,24 @@ class TestAssignToFeeders(object):
         validate_equipment(feeder.equipment, "fsp", "c1", "op")
         validate_equipment(feeder.current_equipment, "fsp", "c1", "op", "c2")
 
+    @pytest.mark.asyncio
+    async def test_assigns_equipment_to_feeders_with_loops(self, caplog):
+        """
+        # s0 1 * 1--c1--2 * 1--c2--2 * 1--c4--2
+        #                 2----c3----1
+        """
+        network = (TestNetworkBuilder()
+                        .from_source()  # s0
+                        .to_acls()  # c1
+                        .to_acls()  # c2
+                        .to_acls()  # c3
+                        .connect("c3", "c1", 2, 2)
+                        .branch_from("c2")
+                        .to_acls()  # c4
+                        .add_feeder("s0")  # fdr5
+                        .network)
 
+        await assign_equipment_containers_to_feeders().run(network)
 
+        feeder = network.get("fdr5", Feeder)
+        validate_equipment(feeder.equipment, "s0", "c1", "c2", "c3", "c4")

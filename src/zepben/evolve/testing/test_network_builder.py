@@ -18,7 +18,7 @@ def null_action(_):
     pass
 
 
-class TestNetworkBuilder(object):
+class TestNetworkBuilder:
     """
     A class for building simple test networks, often used for unit testing.
     """
@@ -305,8 +305,6 @@ class TestNetworkBuilder(object):
 
         :return: The `NetworkService` created by this `TestNetworkBuilder`
         """
-        if assign_feeders and len(list(self.network.objects(Feeder))) != 0:
-            await AssignToFeeders().run(self.network)
         await set_direction().run(self.network)
         await set_phases().run(self.network)
 
@@ -314,6 +312,9 @@ class TestNetworkBuilder(object):
             for es in self.network.objects(EnergySource):
                 for terminal in es.terminals:
                     await set_direction().run_terminal(terminal)
+
+        if assign_feeders and len(list(self.network.objects(Feeder))) != 0:
+            await AssignToFeeders().run(self.network)
 
         return self.network
 
