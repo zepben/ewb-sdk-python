@@ -6,7 +6,7 @@
 from typing import Optional, Callable, List
 
 from .. import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, PowerTransformerEnd, \
-    PowerTransformer, set_phases, set_direction
+    PowerTransformer, set_phases, set_direction, AssignToFeeders
 
 
 def null_action(_):
@@ -18,7 +18,7 @@ def null_action(_):
     pass
 
 
-class TestNetworkBuilder(object):
+class TestNetworkBuilder:
     """
     A class for building simple test networks, often used for unit testing.
     """
@@ -297,7 +297,7 @@ class TestNetworkBuilder(object):
         self._create_feeder(self.network.get(head_mrid, ConductingEquipment), sequence_number)
         return self
 
-    async def build(self, apply_directions_from_sources: bool = True) -> NetworkService:
+    async def build(self, apply_directions_from_sources: bool = True, assign_feeders: bool = True) -> NetworkService:
         """
         Get the `NetworkService` after apply traced phasing and feeder directions.
 
@@ -312,6 +312,9 @@ class TestNetworkBuilder(object):
             for es in self.network.objects(EnergySource):
                 for terminal in es.terminals:
                     await set_direction().run_terminal(terminal)
+
+        if assign_feeders and len(list(self.network.objects(Feeder))) != 0:
+            await AssignToFeeders().run(self.network)
 
         return self.network
 

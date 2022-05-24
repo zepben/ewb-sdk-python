@@ -333,6 +333,45 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "c3", 1), NONE)
         self._check_expected_direction(self._get_t(n, "c3", 2), NONE)
 
+    @pytest.mark.asyncio
+    async def test_upstream_terminal_to_feeder_head_not_set(self):
+        # feeder_heads:     feeder
+        #                   v
+        # network:          b0 -- c1 -- j2
+        n = await TestNetworkBuilder() \
+            .from_breaker() \
+            .to_acls() \
+            .to_junction() \
+            .add_feeder(head_mrid="b0") \
+            .build()
+
+        self._check_expected_direction(self._get_t(n, "b0", 1), NONE)
+        self._check_expected_direction(self._get_t(n, "b0", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "c1", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "j2", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "j2", 2), DOWNSTREAM)
+
+    @pytest.mark.asyncio
+    async def test_set_direction_doesnt_flow_through_feeder_heads(self):
+        # feeder_heads:     feeder1     feeder2
+        #                   v           v
+        # network:          b0 -- c1 -- b2
+        n = await TestNetworkBuilder() \
+            .from_breaker() \
+            .to_acls() \
+            .to_breaker() \
+            .add_feeder(head_mrid="b0", sequence_number=2) \
+            .add_feeder(head_mrid="b2", sequence_number=1) \
+            .build()
+
+        self._check_expected_direction(self._get_t(n, "b0", 1), NONE)
+        self._check_expected_direction(self._get_t(n, "b0", 2), BOTH)
+        self._check_expected_direction(self._get_t(n, "c1", 1), BOTH)
+        self._check_expected_direction(self._get_t(n, "c1", 2), BOTH)
+        self._check_expected_direction(self._get_t(n, "b2", 1), BOTH)
+        self._check_expected_direction(self._get_t(n, "b2", 2), NONE)
+
     @staticmethod
     async def _do_set_direction_trace(n: NetworkService):
         await SetDirection().run(n)

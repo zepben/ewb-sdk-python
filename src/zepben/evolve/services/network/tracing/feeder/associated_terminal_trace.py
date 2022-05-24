@@ -58,14 +58,13 @@ def queue_next_terminal_if_closed(
     Returns the queuing function to be used to populate a `zepben.evolve.services.network.tracing.traversals.tracing.Traversal`s `process_queue`.
     """
 
-    def qn(terminal: Terminal, traversal: Traversal[Terminal]):
+    def queue_next(terminal: Terminal, traversal: Traversal[Terminal]):
         if terminal is not None:
             if terminal.conducting_equipment is not None:
-                for phase in terminal.phases.single_phases:
-                    # Return all associations as soon as we find a closed phase
-                    if not open_test(terminal.conducting_equipment, phase):
-                        for term in terminal.conducting_equipment.terminals:
-                            if terminal is not term:
-                                traversal.process_queue.extend(get_associated_terminals(term))
+                # Stop only if all phases are open.
+                if any(not open_test(terminal.conducting_equipment, phase) for phase in terminal.phases.single_phases):
+                    for term in terminal.conducting_equipment.terminals:
+                        if terminal is not term:
+                            traversal.process_queue.extend(get_associated_terminals(term))
 
-    return qn
+    return queue_next

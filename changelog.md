@@ -25,6 +25,7 @@
 
 * `connect_with_password()` now works
 * `SetPhases` now supports setting backwards through XN/XY transformers.
+* `TestNetworkBuilder` now assigns equipment to feeders if there are any feeders present.
 
 ##### Notes
 
