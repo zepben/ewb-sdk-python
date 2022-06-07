@@ -2,6 +2,8 @@
 
 | Version | Released |
 | --- | --- |
+|[0.29.0](#v0290)| `TBD` |
+|[0.28.0](#v0280)| `07 June 2022` |
 |[0.27.0](#v0270)| `03 March 2022` |
 |[0.26.0](#v0260)| `07 December 2021` |
 |[0.25.0](#v0250)| `23 September 2021` |
@@ -30,6 +32,43 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+### v0.28.0
+
+##### Breaking Changes
+
+* `queue_next` functions now take an item and a `Traversal`, and they now hold the responsibility of adding the next items to the traversal's queue.
+* Removed `get_connectivity` and `get_connected_equipment` from `connectivity_result.py`. Use `connected_terminals` and `connected_equipment` instead.
+* Moved `PhaseSelector` definition to `types.py`.
+
+##### New Features
+
+* Allow specification of timeout for CimConsumerClients
+* Added the following traces to process a `NetworkService`, which can be accessed via the `tracing` package:
+  * `SetPhases`
+  * `RemovePhases`
+  * `SetDirection`
+  * `RemoveDirection`
+  * `PhaseInferrer`
+* Added new `connect_tls()` helper function for connecting to TLS secured EWB with no auth.
+* Added new `connect_with_secret()` helper function for connecting to a secure EWB server with a client id and secret.
+
+##### Enhancements
+
+* BusBranchNetworkCreator logic updated so that the factory methods for topological_branches, equivalent_branches, and power_transformers get the topological
+  nodes passed in as arguments sorted by feeder_direction.
+
+##### Fixes
+
+* `connect_with_password()` now works
+* `SetPhases` now supports setting backwards through XN/XY transformers.
+* `TestNetworkBuilder` now assigns equipment to feeders if there are any feeders present.
+
+##### Notes
+
+* None.
 
 ---
 
