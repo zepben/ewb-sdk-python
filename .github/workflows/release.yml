@@ -15,6 +15,8 @@ jobs:
       - name: Release checks and update version for release
         id: check
         run: |
+          ls
+          echo hi
           /scripts/release-checks.sh --python setup.py
           /scripts/finalize-version.sh --python setup.py
         shell: bash
