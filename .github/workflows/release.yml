@@ -113,7 +113,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           tox
-#          twine upload dist/*
+          #twine upload dist/*
           version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
           artifact="zepben.evolve-${version}-py3-none-any.whl"
           echo "::set-output name=version::$(echo $version)"
