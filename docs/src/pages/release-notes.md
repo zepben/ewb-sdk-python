@@ -2,7 +2,7 @@
 
 | Version | Released |
 | --- | --- |
-|[0.29.0](#v0290)| `TBD` |
+|[0.29.0](#v0290)| `14 June 2022` |
 |[0.28.0](#v0280)| `07 June 2022` |
 |[0.27.0](#v0270)| `03 March 2022` |
 |[0.26.0](#v0260)| `07 December 2021` |
@@ -32,6 +32,32 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+### v0.29.0
+
+##### Breaking Changes
+
+* None
+
+##### New Features
+
+* None
+
+##### Enhancements
+
+* Updated zepben.protobuf which includes version 1.46.3 of grpcio and grpcio-tools,
+  plus version 4.21.1 of protobuf, enabling support for M1 macs and significant
+  performance improvements.
+
+##### Fixes
+
+* None
+
+##### Notes
+
+* None.
 
 ---
 
