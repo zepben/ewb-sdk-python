@@ -72,11 +72,11 @@ jobs:
           NPM_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         continue-on-error: true
 
-      - uses: actions/upload-artifact@master
-        if: steps.build.outcome == 'success'
-        with:
-          name: docs
-          path: docs/build/
+#      - uses: actions/upload-artifact@master
+#        if: steps.build.outcome == 'success'
+#        with:
+#          name: docs
+#          path: docs/build/
 
       - name: Fail build
         if: steps.build.outcome == 'failure'
@@ -113,7 +113,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           tox
-          twine upload dist/*
+#          twine upload dist/*
           version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
           artifact="zepben.evolve-${version}-py3-none-any.whl"
           echo "::set-output name=version::$(echo $version)"
@@ -127,11 +127,11 @@ jobs:
         with:
           fail_ci_if_error: false
 
-      - uses: actions/upload-artifact@master
-        if: steps.build.outcome == 'success'
-        with:
-          name: ${{ steps.build.outputs.artifact }}
-          path: ${{ steps.build.outputs.artifact-path }}
+#      - uses: actions/upload-artifact@master
+#        if: steps.build.outcome == 'success'
+#        with:
+#          name: ${{ steps.build.outputs.artifact }}
+#          path: ${{ steps.build.outputs.artifact-path }}
 
       - name: Delete release branch if deploy failed and fail
         if: steps.build.outcome == 'failure'
@@ -144,7 +144,7 @@ jobs:
   create-release:
     needs: [deploy, build-docs]
     runs-on: ubuntu-latest
-    container: zepben/pipeline-basic:5.0.0
+    container: zepben/pipeline-basic:5.6.0
     steps:
       - uses: actions/checkout@v2
       - name: Merge and Tag
@@ -169,69 +169,53 @@ jobs:
           exit 1
         shell: bash
 
-      - name: Create Release
-        if: steps.merge.outcome == 'success'
+#      - name: Download binary
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: ${{ needs.deploy.outputs.artifact }}
+#          path: built-artifacts
+#
+#      - name: Download docs
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: docs
+#          path: docs-site
+#
+#      - name: Zip documentation
+#        run: |
+#          cd docs-site
+#          zip -r docs-site.zip .
+#        shell: bash
+
+
+      - name: Create Release and upload assets
+        if: success()
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.merge.outputs.tag }}
-          release_name: ${{ steps.merge.outputs.tag }}
           body_path: changelog.md
           draft: false
           prerelease: false
+#          files: |
+#            built-artifacts/${{ needs.deploy.outputs.artifact }}
+#            docs-site/docs-site.zip
+        continue-on-error: true
 
-      - name: Download binary
-        uses: actions/download-artifact@v2
-        with:
-          name: ${{ needs.deploy.outputs.artifact }}
-          path: built-artifacts
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: built-artifacts/${{ needs.deploy.outputs.artifact }}
-          asset_name: ${{ needs.deploy.outputs.artifact }}
-          asset_content_type: application/octet-stream
-
-      - name: Download docs
-        uses: actions/download-artifact@v2
-        with:
-          name: docs
-          path: docs-site
-
-      - name: Zip documentation
-        run: |
-          cd docs-site
-          zip -r docs-site.zip .
-        shell: bash
-
-      - name: Upload docs
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: docs-site/docs-site.zip
-          asset_name: docs-site.zip
-          asset_content_type: application/zip
-
-      - name: Deploy documentation
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.CI_GITHUB_TOKEN }}
-          repository: ${{ secrets.DOCS_REPO }}
-          event-type: ${{ secrets.DOCS_REPO_EVOLVE_WORKFLOW }}
-          client-payload: '{"product_key": "python-sdk", "download_url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.merge.outputs.tag }}/docs-site.zip"}'
+#      - name: Deploy documentation
+#        uses: peter-evans/repository-dispatch@v1
+#        with:
+#          token: ${{ secrets.CI_GITHUB_TOKEN }}
+#          repository: ${{ secrets.DOCS_REPO }}
+#          event-type: ${{ secrets.DOCS_REPO_EVOLVE_WORKFLOW }}
+#          client-payload: '{"product_key": "python-sdk", "download_url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.merge.outputs.tag }}/docs-site.zip"}'
 
   update-version:
     needs: create-release
     runs-on: ubuntu-latest
-    container: zepben/pipeline-basic
+    container: zepben/pipeline-basic:5.6.0
     env:
       ZEPBEN_PYPI_USERNAME: ${{ secrets.NEXUS_USERNAME }}
       ZEPBEN_PYPI_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
