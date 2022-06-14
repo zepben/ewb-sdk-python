@@ -22,9 +22,6 @@ jobs:
       - name: Release checks and update version for release
         id: check
         run: |
-          ls
-          echo hi
-          git status
           /scripts/release-checks.sh --python setup.py
           /scripts/finalize-version.sh --python setup.py
         shell: bash
@@ -65,7 +62,7 @@ jobs:
           git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
           git fetch --all
           git checkout release
-        shell: bash
+        shell: sh
 
       - name: Cache nodejs deps
         uses: actions/cache@v2
@@ -112,7 +109,7 @@ jobs:
         run: |
           dname=$(echo ${{github.repository}} | cut -d'/' -f2)
           git config --global --add safe.directory /__w/$dname/$dname
-        shell: bash
+        shell: sh
 
       - uses: actions/checkout@v2
 
