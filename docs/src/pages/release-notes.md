@@ -2,6 +2,7 @@
 
 | Version | Released |
 | --- | --- |
+|[$VERSION](#v$VERSION)| `15 June 2022` |
 |[0.29.0](#v0290)| `14 June 2022` |
 |[0.28.0](#v0280)| `07 June 2022` |
 |[0.27.0](#v0270)| `03 March 2022` |
@@ -32,6 +33,30 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+### v0.30.0
+
+##### Breaking Changes
+
+* None
+
+##### New Features
+
+* None
+
+##### Enhancements
+
+* None
+
+##### Fixes
+
+* None
+
+##### Notes
+
+* None.
 
 ---
 

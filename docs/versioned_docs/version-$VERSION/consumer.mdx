@@ -1,0 +1,183 @@
+---
+id: sdk-consumer
+title: Requesting Models
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+:::warning
+The API for consuming data from the Evolve data server is currently in alpha and very likely to experience breaking changes 
+in the future. Please provide any feedback about this API to [Zepben](http://www.zepben.com).
+:::
+
+The SDK provides a client to request models to a remote data server via [gRPC](https://grpc.io/). The service and proto 
+definitions for this API can be found [here](https://github.com/zepben/evolve-grpc). An implementation of the consumer 
+server is provided with the Evolve platform data services.
+
+When working with models, it is often impractical to load a whole model to a client due to the size of the data. This 
+is generally not a problem however, as most use cases only operate on a small subsection of the model at a time. So, the 
+consumer API provides the ability to request smaller portions of the model quickly and easily. The other benefit to this
+is you can set up many clients in parallel operating on different chunks of the model to reduce the amount of time to
+run any analytics you may wish to perform across the whole model.
+
+## Connecting to a server
+
+The library provides four functions, `connect_insecure()`, `connect_tls()`, `connect_with_password()` and `connect_with_secret()`.
+`connect_insecure` has arguments: host: str, rpc_port: int
+`connect_tls` has arguments: host: str, rpc_port: int, ca: BinaryIO
+`connect_with_secret` has arguments: host: str, rpc_port: int, client_id: str, client_secret: str, conf_path: str, ca: BinaryIO,
+                                    and **kwargs: could include 'port', "audience", "issuer_domain", "auth_method"
+`connect_with_password` has arguments: host: str, rpc_port: int, client_id: str, username: str, password: str, conf_path: str, ca: BinaryIO,
+                                    and **kwargs: could include 'port', "audience", "issuer_domain", "auth_method"
+
+The async version is to be used with Python asyncio.
+
+```python
+from zepben.evolve import connect_insecure, connect_tls, connect_with_password, connect_with_secret, Feeder, SyncNetworkConsumerClient, NetworkConsumerClient
+
+# Synchronous
+channel = connect_insecure(host="localhost", rpc_port=50051)
+client = SyncNetworkConsumerClient(channel)
+result = client.get_equipment_container("xxx", Feeder)
+# do stuff with service
+client.service.get('...')
+
+# Asyncio
+async with connect_insecure(host="localhost", rpc_port=50051) as channel:
+    client = NetworkConsumerClient(channel)
+    result = await client.get_equipment_container("xxx", Feeder)
+    # do stuff with service
+    client.service.get('...')
+```
+
+### Connecting with HTTPS
+
+To connect to a HTTPS server with no auth all that's needed is the CA for the server. If the CA is in your system certificates it should be picked up
+automatically and the following should suffice:
+
+```python
+with connect_tls(host="ewb.zepben.com", rpc_port=443) as channel:
+    client = SyncNetworkConsumerClient(channel)
+    result = client.get_equipment_container("xxx", Feeder)
+    client.service.get('...')
+```
+
+To specify a CA bundle pass the ca parameter:
+```python
+with open('path/to/ca/bundle', 'rb') as f:
+    ca = f.read()
+
+    with connect_tls(host="ewb.zepben.com", rpc_port=443, ca=ca) as channel:
+        client = SyncNetworkConsumerClient(channel)
+        result = client.get_equipment_container("xxx", Feeder)
+        client.service.get('...')
+```
+
+And if client authentication is required by the server, additionally pass a key and certificate signed by the servers trusted CA:
+```python
+with open(args.key, 'rb') as f:
+    key = f.read()
+with open(args.ca, 'rb') as f:
+    ca = f.read()
+with open(args.cert, 'rb') as f:
+    cert = f.read()
+
+with connect_with_secret(host="ewb.zepben.com", rpc_port=443, ca=ca, key=key, cert=cert) as channel:
+    client = SyncNetworkConsumerClient(channel)
+    result = client.get_equipment_container("xxx", Feeder)
+    client.service.get('...')
+```
+
+### Authentication
+
+Password Credentials and Client credentials OAuth2 flows are supported through the username/password and client_id/client_secret parameters:
+
+```python
+from zepben.evolve import connect_with_password, connect_with_secret, NetworkService, SyncNetworkConsumerClient
+
+# Password credentials configuration - client_secret optional.
+with connect_with_password(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
+             username="user@email.com", password="password1") as channel:
+    client = SyncNetworkConsumerClient(channel)
+    # ...
+
+# Client credentials configuration
+with connect_with_secret(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
+             client_secret="some_client_secret") as channel:
+    client = SyncNetworkConsumerClient(channel)
+    # ...
+```
+
+Custom OAuth2 authenticators can be created by passing an `authenticator` to `connect_with_secret` or `connect_with_password`.
+
+## Network Hierarchy
+
+The network can be built with a hierarchy as discussed earlier [here](datamodel.mdx#network-hierarchy). This allows you
+to easily identify and request smaller chunks of the network so you can focus on areas of concern. Here is an example
+of how to request the network hierarchy and print it out as a tree to the console.
+
+```python
+from zepben.evolve import NetworkConsumerClient
+
+def print_network_hierarchy(client: NetworkConsumerClient):
+    hierarchy = client.get_network_hierarchy().result
+    if not hierarchy:
+        return
+    for region in hierarchy.geographical_regions:
+        print(f"- {region.name} [{region.mrid}]")
+        for sub_region in region.sub_geographical_regions:
+            print(f"  |- {sub_region.name} [{sub_region.mrid}]")
+            for substation in sub_region.substations:
+                print(f"    |- {sub_region.name} [{sub_region.mrid}]")
+                for feeder in substation.feeders:
+                    print(f"      |- {feeder.name} [{feeder.mrid}]")
+```
+
+Each item from the hierarchy result contains an identified object mRID and it's name. This simplified data structure
+enables you to do things like easily build a suitable UI component allowing a user to select a portion of the network
+they wish to use, without needing to pull back large amounts of full object data.
+
+## Requesting Identified Objects
+
+:::warning
+The *ConsumerClient APIs will take care of this for you, and you typically only need these functions if you're
+developing the consumer client APIs themselves. Make sure what you want to achieve isn't already covered by the
+API before delving into this code.
+:::
+
+Identified objects can be requested to build a model client side. When identified objects are loaded, any referenced
+objects that have not been previously requested need to be requested explicitly.
+
+To find the references that need to be requested you can use the [deferred reference](services.mdx#deferred-references)
+functions on the service provided when requesting identified objects.
+
+```python
+from zepben.evolve import NetworkService, NetworkConsumerClient, resolver
+
+async def get_with_base_voltage(service: NetworkService, client: NetworkConsumerClient, mrid: String):
+    equipment = await client.get_identified_object(service, mrid).result
+    if not equipment:
+        return
+
+    # Get all base voltage relationships
+    mrids = service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(equipment))
+    if mrids:
+        await client.get_identified_object(service, mrids[0])
+```
+
+You can also query the services UnresolvedReferences in the following ways:
+
+```python
+# To get unresolved references pointing from `equipment` to other objects:
+for ref in service.get_unresolved_references_from(equipment.mrid):
+    await client.get_identified_object(service, ref.to_mrid)
+
+# To get unresolved references pointing to `equipment`:
+for ref in service.get_unresolved_references_to(equipment.mrid):
+    await client.get_identified_object(service, ref.from_ref.mrid)
+
+# Get all unresolved references. Note this will iterate over every unresolved reference and is likely undesirable. You should prefer to use the above two methods.
+for ref in service.unresolved_references():
+    await client.get_identified_object(service, ref.to_mrid)
+```
