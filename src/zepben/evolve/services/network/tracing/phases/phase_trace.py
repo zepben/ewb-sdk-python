@@ -7,15 +7,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Set, Iterable, Union, Optional
 
+from zepben.evolve import FeederDirection, connected_terminals, PhaseCode, PhaseStep, PriorityQueue, PhaseStepTracker, Traversal
 from zepben.evolve.exceptions import TracingException
-from zepben.evolve.services.network.network_service import connected_terminals
-from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
-from zepben.evolve.services.network.tracing.phases.phase_step_tracker import PhaseStepTracker
-from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
-from zepben.evolve.services.network.tracing.phases.phase_step import PhaseStep
-from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
+
 if TYPE_CHECKING:
-    from zepben.evolve import Terminal, SinglePhaseKind, ConnectivityResult, ConductingEquipment, PhaseCode
+    from zepben.evolve import Terminal, SinglePhaseKind, ConnectivityResult, ConductingEquipment
     from zepben.evolve.types import OpenTest, QueueNext, DirectionSelector
 
 __all__ = ["new_phase_trace", "new_downstream_phase_trace", "new_upstream_phase_trace"]

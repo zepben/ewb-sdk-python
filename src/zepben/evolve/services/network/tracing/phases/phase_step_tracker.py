@@ -38,7 +38,7 @@ class PhaseStepTracker(BaseTracker[PhaseStep]):
 
         changed = False
         for phase in item.phases:
-            changed = changed or phase not in item.phases
+            changed = changed or phase not in visited_phases
             visited_phases.add(phase)
 
         return changed
