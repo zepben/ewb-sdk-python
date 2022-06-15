@@ -170,8 +170,6 @@ jobs:
 
       - name: Merge and Tag
         id: merge
-        env:
-          VERSION: ${{ env.VERSION }}
         run: |
           git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
           git fetch --all
