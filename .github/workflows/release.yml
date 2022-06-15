@@ -159,6 +159,13 @@ jobs:
     container: zepben/pipeline-basic:5.6.0
     steps:
       - uses: actions/checkout@v2
+
+      - name: Work around git permission issue
+        run: |
+          dname=$(echo ${{github.repository}} | cut -d'/' -f2)
+          git config --global --add safe.directory /__w/$dname/$dname
+        shell: sh
+
       - name: Merge and Tag
         id: merge
         env:
