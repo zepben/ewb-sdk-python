@@ -48,8 +48,6 @@ jobs:
     outputs:
       artifact: docs
     container: node:12-alpine
-    env:
-      VERSION: ${{ needs.release-checks.outputs.version }}
     steps:
       - name: Install Git
         run: |
@@ -80,7 +78,7 @@ jobs:
         id: build
         uses: zepben/docusaurus-action@main
         with:
-          VERSION: ${{ env.VERSION }}
+          VERSION: ${{ needs.release-checks.outputs.version }}
           NPM_REPO: ${{ secrets.NPM_REPO }}
           NPM_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         continue-on-error: true
@@ -105,8 +103,6 @@ jobs:
     needs: build-docs
     outputs:
       artifact: ${{ steps.build.outputs.artifact }}
-    env:
-      VERSION: ${{ needs.release-checks.outputs.version }}
     steps:
       - name: Install dependencies
         run: |
@@ -125,6 +121,7 @@ jobs:
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          VERSION: ${{ needs.release-checks.outputs.version }}
         run: |
           tox
           #twine upload dist/*
@@ -157,8 +154,6 @@ jobs:
     needs: [deploy, build-docs]
     runs-on: ubuntu-latest
     container: zepben/pipeline-basic:5.6.0
-    env:
-      VERSION: ${{ needs.release-checks.outputs.version }}
     steps:
       - uses: actions/checkout@v2
 
@@ -170,6 +165,8 @@ jobs:
 
       - name: Merge and Tag
         id: merge
+        env:
+          VERSION: ${{ needs.release-checks.outputs.version }}
         run: |
           git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
           git fetch --all
