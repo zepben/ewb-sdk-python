@@ -10,6 +10,8 @@ jobs:
     env:
       SLACK_NOTIFICATION: YES
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    outputs:
+      version: ${{ steps.check.outputs.version }}
     steps:
       - uses: actions/checkout@v2
 
@@ -24,10 +26,12 @@ jobs:
         run: |
           /scripts/release-checks.sh --python setup.py
           /scripts/finalize-version.sh --python setup.py
+          version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
+          echo "::set-output name=version::$(echo $version)"
         shell: bash
 
       - name: Cache licence-check
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /lc
           key: lcc
@@ -44,6 +48,8 @@ jobs:
     outputs:
       artifact: docs
     container: node:12-alpine
+    env:
+      VERSION: ${{ needs.release-checks.outputs.version }}
     steps:
       - name: Install Git
         run: |
@@ -74,7 +80,7 @@ jobs:
         id: build
         uses: zepben/docusaurus-action@main
         with:
-          VERSION: ${{ needs.deploy.outputs.version }}
+          VERSION: $VERSION
           NPM_REPO: ${{ secrets.NPM_REPO }}
           NPM_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         continue-on-error: true
@@ -99,7 +105,8 @@ jobs:
     needs: build-docs
     outputs:
       artifact: ${{ steps.build.outputs.artifact }}
-      version: ${{ steps.build.outputs.version }}
+    env:
+      VERSION: ${{ needs.release-checks.outputs.version }}
     steps:
       - name: Install dependencies
         run: |
@@ -121,9 +128,7 @@ jobs:
         run: |
           tox
           #twine upload dist/*
-          version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
-          artifact="zepben.evolve-${version}-py3-none-any.whl"
-          echo "::set-output name=version::$(echo $version)"
+          artifact="zepben.evolve-$VERSION-py3-none-any.whl"
           echo "::set-output name=artifact::$(echo $artifact)"
           echo "::set-output name=artifact-path::$(echo dist/$artifact)"
         shell: bash
@@ -157,7 +162,7 @@ jobs:
       - name: Merge and Tag
         id: merge
         env:
-          VERSION: ${{ needs.deploy.outputs.version }}
+          VERSION: ${{ needs.release-checks.outputs.version }}
         run: |
           git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
           git fetch --all
