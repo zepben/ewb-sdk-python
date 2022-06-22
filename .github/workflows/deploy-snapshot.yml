@@ -13,7 +13,7 @@ jobs:
     container: python:3.7
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: |
@@ -53,10 +53,17 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Update snapshot version
-        run: |
-          git pull origin $GITHUB_REF
-          source /scripts/common.sh
-          /scripts/update-version.sh --python --snapshot setup.py
-        shell: bash
+      - uses: actions/checkout@v3
+
+    - name: Work around git permission issue
+      run: |
+        dname=$(echo ${{github.repository}} | cut -d'/' -f2)
+        git config --global --add safe.directory /__w/$dname/$dname
+      shell: sh
+
+    - name: Update snapshot version
+      run: |
+        git pull origin $GITHUB_REF
+        source /scripts/common.sh
+        /scripts/update-version.sh --python --snapshot setup.py
+      shell: bash
