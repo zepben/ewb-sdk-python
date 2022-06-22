@@ -118,15 +118,13 @@ jobs:
 
       - name: Build and publish
         id: build
-        with:
-          VERSION: ${{ needs.release-checks.outputs.version }}
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           tox
           #twine upload dist/*
-          artifact="zepben.evolve-$VERSION-py3-none-any.whl"
+          artifact="zepben.evolve-${{ needs.release-checks.outputs.version }}-py3-none-any.whl"
           echo "::set-output name=artifact::$(echo $artifact)"
           echo "::set-output name=artifact-path::$(echo dist/$artifact)"
         shell: bash
@@ -166,16 +164,14 @@ jobs:
 
       - name: Merge and Tag
         id: merge
-        with:
-          VERSION: ${{ needs.release-checks.outputs.version }}
         run: |
           git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
           git fetch --all
           git merge origin/release
           git push origin ${GITHUB_REF/refs\/heads\//}
-          git tag "v$VERSION"
+          git tag "v${{ needs.release-checks.outputs.version }}"
           git push --tags
-          echo "::set-output name=tag::$(echo v$VERSION)"
+          echo "::set-output name=tag::$(echo v${{ needs.release-checks.outputs.version }})"
         shell: bash
 
       - name: Fail
