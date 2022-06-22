@@ -100,7 +100,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     container: python:3.7
-    needs: build-docs
+    needs: [release-checks, build-docs]
     outputs:
       artifact: ${{ steps.build.outputs.artifact }}
     steps:
@@ -150,7 +150,7 @@ jobs:
         shell: bash
 
   create-release:
-    needs: [deploy, build-docs]
+    needs: [deploy, build-docs, release-checks]
     runs-on: ubuntu-latest
     container: zepben/pipeline-basic:5.6.0
     steps:
