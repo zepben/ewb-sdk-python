@@ -123,7 +123,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           tox
-          #twine upload dist/*
+          twine upload dist/*
           artifact="zepben.evolve-${{ needs.release-checks.outputs.version }}-py3-none-any.whl"
           echo "::set-output name=artifact::$(echo $artifact)"
           echo "::set-output name=artifact-path::$(echo dist/$artifact)"
