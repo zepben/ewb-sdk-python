@@ -10,17 +10,28 @@ jobs:
     env:
       SLACK_NOTIFICATION: YES
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    outputs:
+      version: ${{ steps.check.outputs.version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
+      - name: Work around git permission issue
+        run: |
+          dname=$(echo ${{github.repository}} | cut -d'/' -f2)
+          git config --global --add safe.directory /__w/$dname/$dname
+        shell: sh
+
       - name: Release checks and update version for release
         id: check
         run: |
           /scripts/release-checks.sh --python setup.py
           /scripts/finalize-version.sh --python setup.py
+          version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
+          echo "::set-output name=version::$(echo $version)"
         shell: bash
 
       - name: Cache licence-check
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /lc
           key: lcc
@@ -31,13 +42,67 @@ jobs:
           LC_URL: ${{ secrets.LC_URL }}
           PATH: src
 
+  build-docs:
+    needs: release-checks
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: docs
+    container: node:12-alpine
+    steps:
+      - name: Install Git
+        run: |
+          apk add git
+
+      - name: Work around git permission issue
+        run: |
+          dname=$(echo ${{github.repository}} | cut -d'/' -f2)
+          git config --global --add safe.directory /__w/$dname/$dname
+        shell: sh
+
+      - uses: actions/checkout@v3
+
+      - name: Checkout release branch
+        run: |
+          git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+          git fetch --all
+          git checkout release
+        shell: sh
+
+      - name: Cache nodejs deps
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: npm
+
+      - name: Build docusaurus
+        id: build
+        uses: zepben/docusaurus-action@main
+        with:
+          VERSION: ${{ needs.release-checks.outputs.version }}
+          NPM_REPO: ${{ secrets.NPM_REPO }}
+          NPM_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - uses: actions/upload-artifact@master
+        if: steps.build.outcome == 'success'
+        with:
+          name: docs
+          path: docs/build/
+
+      - name: Fail build
+        if: steps.build.outcome == 'failure'
+        run: | 
+          git push origin -d release
+          echo "There was an error in the docusaurus build above."
+          exit 1
+        shell: sh
+
   deploy:
     runs-on: ubuntu-latest
     container: python:3.7
-    needs: release-checks
+    needs: [release-checks, build-docs]
     outputs:
       artifact: ${{ steps.build.outputs.artifact }}
-      version: ${{ steps.build.outputs.version }}
     steps:
       - name: Install dependencies
         run: |
@@ -47,16 +112,9 @@ jobs:
         run: |
           dname=$(echo ${{github.repository}} | cut -d'/' -f2)
           git config --global --add safe.directory /__w/$dname/$dname
-        shell: bash
+        shell: sh
 
-      - uses: actions/checkout@v2
-
-      - name: Checkout release branch
-        run: |
-          git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
-          git fetch --all
-          git checkout release
-        shell: bash
+      - uses: actions/checkout@v3
 
       - name: Build and publish
         id: build
@@ -66,9 +124,7 @@ jobs:
         run: |
           tox
           twine upload dist/*
-          version=$(grep version setup.py | cut -d= -f2 | tr -d '",')
-          artifact="zepben.evolve-${version}-py3-none-any.whl"
-          echo "::set-output name=version::$(echo $version)"
+          artifact="zepben.evolve-${{ needs.release-checks.outputs.version }}-py3-none-any.whl"
           echo "::set-output name=artifact::$(echo $artifact)"
           echo "::set-output name=artifact-path::$(echo dist/$artifact)"
         shell: bash
@@ -93,16 +149,12 @@ jobs:
           exit 1
         shell: bash
 
-  build-docs:
-    needs: [deploy]
+  create-release:
+    needs: [deploy, build-docs, release-checks]
     runs-on: ubuntu-latest
-    outputs:
-      artifact: docs
-    container: node:12-alpine
+    container: zepben/pipeline-basic:5.6.0
     steps:
-      - name: Install Git
-        run: |
-          apk add git
+      - uses: actions/checkout@v3
 
       - name: Work around git permission issue
         run: |
@@ -110,55 +162,16 @@ jobs:
           git config --global --add safe.directory /__w/$dname/$dname
         shell: sh
 
-      - uses: actions/checkout@v2
-
-      - name: Cache nodejs deps
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: npm
-
-      - name: Build docusaurus
-        id: build
-        uses: zepben/docusaurus-action@main
-        with:
-          VERSION: ${{ needs.deploy.outputs.version }}
-          NPM_REPO: ${{ secrets.NPM_REPO }}
-          NPM_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - uses: actions/upload-artifact@master
-        if: steps.build.outcome == 'success'
-        with:
-          name: docs
-          path: docs/build/
-
-      - name: Fail build
-        if: steps.build.outcome == 'failure'
-        run: | 
-          git push origin -d release
-          echo "There was an error in the docusaurus build above."
-          exit 1
-        shell: sh
-
-  create-release:
-    needs: [deploy, build-docs]
-    runs-on: ubuntu-latest
-    container: zepben/pipeline-basic:5.0.0
-    steps:
-      - uses: actions/checkout@v2
       - name: Merge and Tag
         id: merge
-        env:
-          VERSION: ${{ needs.deploy.outputs.version }}
         run: |
           git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
           git fetch --all
           git merge origin/release
           git push origin ${GITHUB_REF/refs\/heads\//}
-          git tag "v$VERSION"
+          git tag "v${{ needs.release-checks.outputs.version }}"
           git push --tags
-          echo "::set-output name=tag::$(echo v$VERSION)"
+          echo "::set-output name=tag::$(echo v${{ needs.release-checks.outputs.version }})"
         shell: bash
 
       - name: Fail
@@ -169,34 +182,11 @@ jobs:
           exit 1
         shell: bash
 
-      - name: Create Release
-        if: steps.merge.outcome == 'success'
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.merge.outputs.tag }}
-          release_name: ${{ steps.merge.outputs.tag }}
-          body_path: changelog.md
-          draft: false
-          prerelease: false
-
       - name: Download binary
         uses: actions/download-artifact@v2
         with:
           name: ${{ needs.deploy.outputs.artifact }}
           path: built-artifacts
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: built-artifacts/${{ needs.deploy.outputs.artifact }}
-          asset_name: ${{ needs.deploy.outputs.artifact }}
-          asset_content_type: application/octet-stream
 
       - name: Download docs
         uses: actions/download-artifact@v2
@@ -210,15 +200,22 @@ jobs:
           zip -r docs-site.zip .
         shell: bash
 
-      - name: Upload docs
-        uses: actions/upload-release-asset@v1
+
+      - name: Create Release and upload assets
+        if: success()
+        id: create_release
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: docs-site/docs-site.zip
-          asset_name: docs-site.zip
-          asset_content_type: application/zip
+          tag_name: ${{ steps.merge.outputs.tag }}
+          body_path: changelog.md
+          draft: false
+          prerelease: false
+          files: |
+            built-artifacts/${{ needs.deploy.outputs.artifact }}
+            docs-site/docs-site.zip
+        continue-on-error: true
 
       - name: Deploy documentation
         uses: peter-evans/repository-dispatch@v1
@@ -231,7 +228,7 @@ jobs:
   update-version:
     needs: create-release
     runs-on: ubuntu-latest
-    container: zepben/pipeline-basic
+    container: zepben/pipeline-basic:5.6.0
     env:
       ZEPBEN_PYPI_USERNAME: ${{ secrets.NEXUS_USERNAME }}
       ZEPBEN_PYPI_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -239,7 +236,13 @@ jobs:
       SLACK_NOTIFICATION: YES
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
+      - name: Work around git permission issue
+        run: |
+          dname=$(echo ${{github.repository}} | cut -d'/' -f2)
+          git config --global --add safe.directory /__w/$dname/$dname
+        shell: sh
 
       - name: Update to next minor version
         run: |
