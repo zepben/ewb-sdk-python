@@ -83,11 +83,11 @@ jobs:
           NPM_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         continue-on-error: true
 
-#      - uses: actions/upload-artifact@master
-#        if: steps.build.outcome == 'success'
-#        with:
-#          name: docs
-#          path: docs/build/
+      - uses: actions/upload-artifact@master
+        if: steps.build.outcome == 'success'
+        with:
+          name: docs
+          path: docs/build/
 
       - name: Fail build
         if: steps.build.outcome == 'failure'
@@ -135,11 +135,11 @@ jobs:
         with:
           fail_ci_if_error: false
 
-#      - uses: actions/upload-artifact@master
-#        if: steps.build.outcome == 'success'
-#        with:
-#          name: ${{ steps.build.outputs.artifact }}
-#          path: ${{ steps.build.outputs.artifact-path }}
+      - uses: actions/upload-artifact@master
+        if: steps.build.outcome == 'success'
+        with:
+          name: ${{ steps.build.outputs.artifact }}
+          path: ${{ steps.build.outputs.artifact-path }}
 
       - name: Delete release branch if deploy failed and fail
         if: steps.build.outcome == 'failure'
@@ -182,23 +182,23 @@ jobs:
           exit 1
         shell: bash
 
-#      - name: Download binary
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: ${{ needs.deploy.outputs.artifact }}
-#          path: built-artifacts
-#
-#      - name: Download docs
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: docs
-#          path: docs-site
-#
-#      - name: Zip documentation
-#        run: |
-#          cd docs-site
-#          zip -r docs-site.zip .
-#        shell: bash
+      - name: Download binary
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.deploy.outputs.artifact }}
+          path: built-artifacts
+
+      - name: Download docs
+        uses: actions/download-artifact@v2
+        with:
+          name: docs
+          path: docs-site
+
+      - name: Zip documentation
+        run: |
+          cd docs-site
+          zip -r docs-site.zip .
+        shell: bash
 
 
       - name: Create Release and upload assets
@@ -212,18 +212,18 @@ jobs:
           body_path: changelog.md
           draft: false
           prerelease: false
-#          files: |
-#            built-artifacts/${{ needs.deploy.outputs.artifact }}
-#            docs-site/docs-site.zip
+          files: |
+            built-artifacts/${{ needs.deploy.outputs.artifact }}
+            docs-site/docs-site.zip
         continue-on-error: true
 
-#      - name: Deploy documentation
-#        uses: peter-evans/repository-dispatch@v1
-#        with:
-#          token: ${{ secrets.CI_GITHUB_TOKEN }}
-#          repository: ${{ secrets.DOCS_REPO }}
-#          event-type: ${{ secrets.DOCS_REPO_EVOLVE_WORKFLOW }}
-#          client-payload: '{"product_key": "python-sdk", "download_url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.merge.outputs.tag }}/docs-site.zip"}'
+      - name: Deploy documentation
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+          repository: ${{ secrets.DOCS_REPO }}
+          event-type: ${{ secrets.DOCS_REPO_EVOLVE_WORKFLOW }}
+          client-payload: '{"product_key": "python-sdk", "download_url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.merge.outputs.tag }}/docs-site.zip"}'
 
   update-version:
     needs: create-release
