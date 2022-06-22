@@ -13,13 +13,7 @@ jobs:
     outputs:
       version: ${{ steps.check.outputs.version }}
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Work around git permission issue
-        run: |
-          dname=$(echo ${{github.repository}} | cut -d'/' -f2)
-          git config --global --add safe.directory /__w/$dname/$dname
-        shell: sh
+      - uses: actions/checkout@v3
 
       - name: Release checks and update version for release
         id: check
@@ -53,13 +47,7 @@ jobs:
         run: |
           apk add git
 
-      - name: Work around git permission issue
-        run: |
-          dname=$(echo ${{github.repository}} | cut -d'/' -f2)
-          git config --global --add safe.directory /__w/$dname/$dname
-        shell: sh
-
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Checkout release branch
         run: |
@@ -108,13 +96,7 @@ jobs:
         run: |
           pip install tox twine
 
-      - name: Work around git permission issue
-        run: |
-          dname=$(echo ${{github.repository}} | cut -d'/' -f2)
-          git config --global --add safe.directory /__w/$dname/$dname
-        shell: sh
-
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Build and publish
         id: build
@@ -155,13 +137,7 @@ jobs:
     runs-on: ubuntu-latest
     container: zepben/pipeline-basic:5.6.0
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Work around git permission issue
-        run: |
-          dname=$(echo ${{github.repository}} | cut -d'/' -f2)
-          git config --global --add safe.directory /__w/$dname/$dname
-        shell: sh
+      - uses: actions/checkout@v3
 
       - name: Merge and Tag
         id: merge
@@ -239,13 +215,7 @@ jobs:
       SLACK_NOTIFICATION: YES
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Work around git permission issue
-        run: |
-          dname=$(echo ${{github.repository}} | cut -d'/' -f2)
-          git config --global --add safe.directory /__w/$dname/$dname
-        shell: sh
+      - uses: actions/checkout@v3
 
       - name: Update to next minor version
         run: |
