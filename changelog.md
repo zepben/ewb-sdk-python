@@ -14,7 +14,7 @@
 
 ##### Fixes
 
-* None
+* `PhaseStepTracker` now reports strict subsets of visited phases as visited.
 
 ##### Notes
 
