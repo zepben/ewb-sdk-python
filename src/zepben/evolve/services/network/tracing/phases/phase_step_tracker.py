@@ -31,7 +31,7 @@ class PhaseStepTracker(BaseTracker[PhaseStep]):
     visited: Dict[ConductingEquipment, Set[SinglePhaseKind]] = defaultdict(set)
 
     def has_visited(self, item: PhaseStep) -> bool:
-        return item.phases.issuperset(self.visited[item.conducting_equipment])
+        return item.phases.issubset(self.visited[item.conducting_equipment])
 
     def visit(self, item: PhaseStep) -> bool:
         visited_phases = self.visited[item.conducting_equipment]
