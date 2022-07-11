@@ -50,7 +50,7 @@ def test_strict_subset_of_visited_phases_is_reported_as_visited():
 
     tracker.visit(step1)
 
-    assert tracker.has_visited(step2), "has_visited returns False for strict subset of visited phases"
+    assert tracker.has_visited(step2), "has_visited returns True for strict subset of visited phases"
     assert not tracker.visit(step2), "Visiting strict subset of visited phases returns False"
 
 
