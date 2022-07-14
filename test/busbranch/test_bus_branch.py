@@ -9,6 +9,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import booleans, sampled_from
 
+from test.busbranch.data.open_switch_between_different_voltages import open_switch_between_different_voltages
 from test.busbranch.data.lv_equivalent_branch_network import lv_equivalent_branch_network
 from test.busbranch.data.end_of_branch_multiple_ec_pec import end_of_branch_multiple_ec_pec
 from test.busbranch.data.multi_branch_common_lines_network import multi_branch_common_lines_network
@@ -285,6 +286,22 @@ async def test_group_negligible_impedance_terminals_end_of_branch_multiple_ec_pe
         return False
 
     await _validate_term_grouping(has_neg_imp, nb_network, "a2_ec_pec1_pec2", set(), set(), get_terms({a2: 2, ec: 1, pec1: 1, pec2: 1}))
+
+
+@pytest.mark.asyncio
+async def test_switches_excluded_when_getting_voltage():
+    nb_network = open_switch_between_different_voltages()
+    creator = TestBusBranchCreator()
+    result = await creator.create(nb_network)
+
+    validator, mappings, bb_network = _get_validated_results(result)
+
+    assert len(bb_network.bus) == 4
+    assert len(bb_network.topological_branch) == 2
+
+    for branch_name, (branch_nodes, *_) in bb_network.topological_branch:
+        (node0_voltage, *_), (node1_voltage, *_) = branch_nodes
+        assert node0_voltage == node1_voltage
 
 
 def _get_expected(nb_network, line, pt, es, ec, pec, eb, ec_eb1, ec_eb2):
