@@ -326,7 +326,7 @@ async def feeder_network():
     return network_service
 
 
-@fixture()
+@pytest_asyncio.fixture()
 async def feeder_with_current():
     """
                 c1       c2      c3       c4
