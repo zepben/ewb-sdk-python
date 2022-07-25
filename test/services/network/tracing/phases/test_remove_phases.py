@@ -4,12 +4,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
+import pytest_asyncio
 
 from test.services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases_from_term_or_equip, get_t
 from zepben.evolve import TestNetworkBuilder, PhaseCode, EnergySource, RemovePhases, remove_all_traced_phases, SinglePhaseKind as SPK
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def simple_network():
     """
     s0 --c1-- --c2--
