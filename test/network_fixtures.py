@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Dict, List, Optional
 
+import pytest_asyncio
 from pytest import fixture
 
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
@@ -288,7 +289,7 @@ def add_location(network: NetworkService, psr: PowerSystemResource, *coords: flo
     network.add(loc)
 
 
-@fixture()
+@pytest_asyncio.fixture()
 async def feeder_network():
     """
                 c1       c2
