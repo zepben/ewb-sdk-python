@@ -10,7 +10,7 @@
 
 ##### Enhancements
 
-* None
+* Improved performance for bus branch creation.
 
 ##### Fixes
 

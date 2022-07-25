@@ -900,7 +900,7 @@ async def _group_negligible_impedance_terminals(
     # noinspection PyArgumentList
     trace = Traversal(
         start_item=terminal,
-        queue_next=_queue_terminals_across_negligible_impedance(tg, has_negligible_impedance),
+        queue_next=_queue_terminals_across_negligible_impedance(has_negligible_impedance),
         process_queue=LifoQueue(),
         step_actions=[_process_terminal(tg, has_negligible_impedance)]
     )
@@ -913,9 +913,6 @@ def _process_terminal(
     has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ):
     async def add_to_group(t: Terminal, _):
-        if t in tg.terminals():
-            return
-
         if has_negligible_impedance(t.conducting_equipment):
             tg.conducting_equipment_group.add(t.conducting_equipment)
             tg.inner_terminals.add(t)
@@ -926,17 +923,14 @@ def _process_terminal(
 
 
 def _queue_terminals_across_negligible_impedance(
-    tg: TerminalGrouping[ConductingEquipment],
     has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ):
     def queue_next(terminal: Terminal, traversal: Traversal[Terminal]):
         if terminal.connectivity_node is not None:
-            traversal.process_queue.extend({ot for ot in terminal.connectivity_node.terminals
-                                            if ot != terminal and ot not in tg.terminals()})
+            traversal.process_queue.extend(ot for ot in terminal.connectivity_node.terminals if ot != terminal)
 
         if has_negligible_impedance(terminal.conducting_equipment):
-            traversal.process_queue.extend({ot for ot in terminal.conducting_equipment.terminals
-                                            if ot != terminal and ot not in tg.terminals()})
+            traversal.process_queue.extend(ot for ot in terminal.conducting_equipment.terminals if ot != terminal)
 
     return queue_next
 
