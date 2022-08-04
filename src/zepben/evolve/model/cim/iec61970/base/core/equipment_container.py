@@ -20,6 +20,7 @@ __all__ = ['EquipmentContainer', 'Feeder', 'Site']
 class EquipmentContainer(ConnectivityNodeContainer):
     """
     A modeling construct to provide a root class for containing equipment.
+    Unless overridden, all functions operating on currentEquipment simply operate on the equipment collection. i.e. currentEquipment = equipment
     """
 
     _equipment: Optional[Dict[str, Equipment]] = None
@@ -90,6 +91,59 @@ class EquipmentContainer(ConnectivityNodeContainer):
         Returns A reference to this `EquipmentContainer` to allow fluent use.
         """
         self._equipment = None
+        return self
+
+    @property
+    def current_equipment(self) -> Generator[Equipment, None, None]:
+        """
+        Contained `Equipment` using the current state of the network.
+        """
+        return self.equipment
+
+    def num_current_equipment(self) -> int:
+        """
+        Returns The number of `Equipment` contained in this `EquipmentContainer` in the current state of the network.
+        """
+        return self.num_equipment()
+
+    def get_current_equipment(self, mrid: str) -> Equipment:
+        """
+        Get the `Equipment` contained in this `EquipmentContainer` in the current network state, identified by `mrid`
+
+        `mrid` The mRID of the required `Equipment`
+        Returns The `Equipment` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return self.get_equipment(mrid)
+
+    def add_current_equipment(self, equipment: Equipment) -> EquipmentContainer:
+        """
+        Associate `equipment` with this `EquipmentContainer` in the current state of the network.
+
+        `equipment` the `Equipment` to associate with this `EquipmentContainer` in the current network state.
+        Returns A reference to this `EquipmentContainer` to allow fluent use.
+        Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `EquipmentContainer`.
+        """
+        self.add_equipment(equipment)
+        return self
+
+    def remove_current_equipment(self, equipment: Equipment) -> EquipmentContainer:
+        """
+        Disassociate `equipment` from this `EquipmentContainer` in the current state of the network.
+
+        `equipment` The `Equipment` to disassociate from this `EquipmentContainer` in the current network state.
+        Returns A reference to this `EquipmentContainer` to allow fluent use.
+        Raises `KeyError` if `equipment` was not associated with this `EquipmentContainer`.
+        """
+        self.remove_equipment(equipment)
+        return self
+
+    def clear_current_equipment(self) -> EquipmentContainer:
+        """
+        Clear all `Equipment` from this `EquipmentContainer` in the current state of the network.
+        Returns A reference to this `EquipmentContainer` to allow fluent use.
+        """
+        self.clear_equipment()
         return self
 
     def current_feeders(self) -> Generator[Feeder, None, None]:
