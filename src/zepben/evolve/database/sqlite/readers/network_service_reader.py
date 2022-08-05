@@ -14,7 +14,7 @@ from zepben.evolve import BaseServiceReader, TableCableInfo, TableOverheadWireIn
     TableReclosers, TableTerminals, TableTransformerStarImpedance, TablePowerTransformerEnds, TableRatioTapChangers, TableFaultIndicators, TableFeeders, \
     TableLoops, TableCircuits, TablePositionPoints, TableLocationStreetAddresses, TableAssetOrganisationRolesAssets, TableUsagePointsEndDevices, \
     TableEquipmentUsagePoints, TableEquipmentOperationalRestrictions, TableEquipmentEquipmentContainers, TableCircuitsSubstations, TableCircuitsTerminals, \
-    TableLoopsSubstations, TableControls, TableRemoteControls, TableRemoteSources, TableAnalogs, TableAccumulators, TableDiscretes
+    TableLoopsSubstations, TableControls, TableRemoteControls, TableRemoteSources, TableAnalogs, TableAccumulators, TableDiscretes, TableLvFeeders
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 
 __all__ = ["NetworkServiceReader"]
@@ -85,6 +85,7 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableFeeders, "feeders", reader.load_feeder)
         status = status and self._load_each(TableLoops, "loops", reader.load_loop)
         status = status and self._load_each(TableCircuits, "circuits", reader.load_circuit)
+        status = status and self._load_each(TableLvFeeders, "lv feeders", reader.load_lv_feeder)
         status = status and self._load_each(TablePositionPoints, "position points", reader.load_position_point)
         status = status and self._load_each(TableLocationStreetAddresses, "location street addresses", reader.load_location_street_address)
         status = status and self._load_each(

@@ -6,10 +6,10 @@
 from typing import List
 
 from zepben.evolve.database.sqlite.tables.column import Nullable, Column
-from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects
+from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects, TableEquipmentContainers
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.container_tables import TableLines
 
-__all__ = ["TableCircuits", "TableLoops"]
+__all__ = ["TableCircuits", "TableLoops", "TableLvFeeders"]
 
 
 class TableCircuits(TableLines):
@@ -31,3 +31,14 @@ class TableCircuits(TableLines):
 class TableLoops(TableIdentifiedObjects):
     def name(self) -> str:
         return "loops"
+
+
+class TableLvFeeders(TableEquipmentContainers):
+    normal_head_terminal_mrid: Column = None
+
+    def __init__(self):
+        super(TableLvFeeders, self).__init__()
+        self.normal_head_terminal_mrid = self._create_column("normal_head_terminal_mrid", "TEXT", Nullable.NULL)
+
+    def name(self) -> str:
+        return "lv_feeders"

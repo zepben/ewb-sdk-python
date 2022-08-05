@@ -30,7 +30,7 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     OperationalRestriction, TableOperationalRestrictions, TableFaultIndicators, TableAuxiliaryEquipment, AuxiliaryEquipment, FaultIndicator, \
     TableMeasurements, Measurement, Analog, TableAnalogs, Accumulator, TableAccumulators, Discrete, TableDiscretes, Control, TableControls, TableIoPoints, \
     IoPoint, TableRemotePoints, RemotePoint, RemoteControl, TableRemoteControls, RemoteSource, TableRemoteSources, ShuntCompensatorInfo, \
-    TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, Recloser, TableReclosers, TableEquipmentOperationalRestrictions
+    TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -820,6 +820,14 @@ class NetworkCIMWriter(BaseCIMWriter):
         for sub in loop.substations:
             status = status and self._save_loop_to_substation_association(loop, sub, LoopSubstationRelationship.LOOP_ENERGIZES_SUBSTATION)
         return status and self.save_identified_object(table, insert, loop, "loop")
+
+    def save_lv_feeder(self, lv_feeder: LvFeeder) -> bool:
+        table = self.database_tables.get_table(TableLvFeeders)
+        insert = self.database_tables.get_insert(TableLvFeeders)
+
+        insert.add_value(table.normal_head_terminal_mrid.query_index, lv_feeder.normal_head_terminal)
+
+        return self._save_equipment_container(table, insert, lv_feeder, "lv_feeder")
 
     # ************ IEC61970 MEAS ************
 

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.evolve.util import nlen, ngen, safe_remove_by_id
 
-__all__ = ['EquipmentContainer', 'Feeder', 'Site']
+__all__ = ['EquipmentContainer', 'Feeder', 'Site', 'LvFeeder']
 
 
 class EquipmentContainer(ConnectivityNodeContainer):
@@ -351,6 +351,13 @@ class LvFeeder(EquipmentContainer):
         The normal head terminal or terminals of the feeder.
         """
         return self._normal_head_terminal
+
+    @normal_head_terminal.setter
+    def normal_head_terminal(self, term: Optional[Terminal]):
+        if self._normal_head_terminal is None or self._normal_head_terminal is term:
+            self._normal_head_terminal = term
+        else:
+            raise ValueError(f"normal_head_terminal for {str(self)} has already been set to {self._normal_head_terminal}, cannot reset this field to {term}")
 
     def normal_energizing_feeders(self) -> Generator[Feeder, None, None]:
         """
