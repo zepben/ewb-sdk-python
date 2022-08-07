@@ -11,20 +11,20 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     EnergySourcePhase, Feeder, GeographicalRegion, Measurement, OperationalRestriction, OrganisationRole, PowerSystemResource, PowerTransformerEnd, \
     PricingStructure, RatioTapChanger, RemoteControl, RemoteSource, SubGeographicalRegion, Substation, Terminal, TransformerEnd, UsagePoint, Circuit, Loop, \
     PowerElectronicsUnit, PowerElectronicsConnectionPhase, PowerElectronicsConnection, TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, \
-    TransformerStarImpedance, ShuntCompensator
+    TransformerStarImpedance, ShuntCompensator, LvFeeder
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
            "asset_info", "streetlights", "pole", "cn_terminals", "remote_control", "agreements", "customer",
            "pricing_structures", "power_transformer_info",
-           "diagram_objects", "diagram", "service_location", "ed_usage_points", "containers", "current_feeders",
+           "diagram_objects", "diagram", "service_location", "ed_usage_points", "containers", "current_containers",
            "operational_restrictions",
            "eq_usage_points", "ec_equipment", "ec_phases", "energy_consumer", "es_phases", "energy_source", "current_equipment",
            "normal_energizing_substation", "normal_head_terminal", "sub_geographical_regions", "remote_source",
            "or_equipment", "organisation",
            "psr_location", "ends", "power_transformer", "tariffs", "transformer_end", "control", "measurement",
            "geographical_region", "substations",
-           "normal_energizing_feeders", "sub_geographical_region", "conducting_equipment", "connectivity_node",
+           "normal_energized_feeders", "sub_geographical_region", "conducting_equipment", "connectivity_node",
            "te_base_voltage", "ratio_tap_changer",
            "te_terminal", "end_devices", "up_equipment", "usage_point_location", "shunt_compensator_info",
            "transformer_end_info", "power_transformer_info_transformer_tank_info", "transformer_star_impedance",
@@ -136,9 +136,9 @@ def containers(equipment: Equipment) -> BoundReferenceResolver:
     return BoundReferenceResolver(equipment, eq_to_ec_resolver, ec_to_eq_resolver)
 
 
-def current_feeders(equipment: Equipment) -> BoundReferenceResolver:
+def current_containers(equipment: Equipment) -> BoundReferenceResolver:
     # noinspection PyArgumentList
-    return BoundReferenceResolver(equipment, eq_to_curfeeder_resolver, curfeeder_to_eq_resolver)
+    return BoundReferenceResolver(equipment, eq_to_curcontainer_resolver, ec_to_curequipment_resolver)
 
 
 def operational_restrictions(equipment: Equipment) -> BoundReferenceResolver:
@@ -176,11 +176,6 @@ def energy_source(energy_source_phase: EnergySourcePhase) -> BoundReferenceResol
     return BoundReferenceResolver(energy_source_phase, esp_to_es_resolver, es_to_esp_resolver)
 
 
-def current_equipment(feeder: Feeder) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(feeder, curfeeder_to_eq_resolver, eq_to_curfeeder_resolver)
-
-
 def normal_energizing_substation(feeder: Feeder) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(feeder, feeder_to_nes_resolver, sub_to_feeder_resolver)
@@ -189,6 +184,11 @@ def normal_energizing_substation(feeder: Feeder) -> BoundReferenceResolver:
 def normal_head_terminal(feeder: Feeder) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(feeder, feeder_to_nht_resolver, None)
+
+
+def normal_energized_lv_feeders(feeder: Feeder) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(feeder, feeder_to_nelvf_resolver, lvfeeder_to_nef_resolver)
 
 
 def sub_geographical_regions(gr: GeographicalRegion) -> BoundReferenceResolver:
@@ -256,7 +256,7 @@ def substations(sgr: SubGeographicalRegion) -> BoundReferenceResolver:
     return BoundReferenceResolver(sgr, sgr_to_sub_resolver, sub_to_sgr_resolver)
 
 
-def normal_energizing_feeders(substation: Substation) -> BoundReferenceResolver:
+def normal_energized_feeders(substation: Substation) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(substation, sub_to_feeder_resolver, feeder_to_nes_resolver)
 
@@ -349,6 +349,16 @@ def loop_substations(l_: Loop) -> BoundReferenceResolver:
 def loop_energizing_substations(l_: Loop) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(l_, loop_to_esub_resolver, sub_to_eloop_resolver)
+
+
+def lv_feeder_normal_head_terminal(lv_feeder: LvFeeder) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(lv_feeder, lvfeeder_to_nht_resolver, None)
+
+
+def normal_energizing_feeders(lv_feeder: LvFeeder) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(lv_feeder, lvfeeder_to_nef_resolver, feeder_to_nelvf_resolver)
 
 
 def unit_power_electronics_connection(pec: PowerElectronicsUnit) -> BoundReferenceResolver:
