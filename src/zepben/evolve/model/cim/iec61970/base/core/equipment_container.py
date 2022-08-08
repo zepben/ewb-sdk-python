@@ -359,6 +359,7 @@ class LvFeeder(EquipmentContainer):
         else:
             raise ValueError(f"normal_head_terminal for {str(self)} has already been set to {self._normal_head_terminal}, cannot reset this field to {term}")
 
+    @property
     def normal_energizing_feeders(self) -> Generator[Feeder, None, None]:
         """
         The HV/MV feeders that energize this LV feeder.

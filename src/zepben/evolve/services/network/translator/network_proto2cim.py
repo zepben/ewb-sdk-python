@@ -101,6 +101,7 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
+from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 
 import zepben.evolve.services.common.resolver as resolver
 from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, OpenCircuitTest, ShortCircuitTest, TransformerTest, \
@@ -179,7 +180,7 @@ __all__ = [
     "per_length_line_parameter_to_cim", "per_length_impedance_to_cim", "per_length_sequence_impedance_to_cim", "power_electronics_connection_to_cim",
     "power_electronics_connection_phase_to_cim", "power_transformer_to_cim", "power_transformer_end_to_cim", "transformer_star_impedance_to_cim",
     "protected_switch_to_cim", "ratio_tap_changer_to_cim", "recloser_to_cim", "regulating_cond_eq_to_cim", "shunt_compensator_to_cim", "switch_to_cim",
-    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim",
+    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim"
 ]
 
 
@@ -587,8 +588,8 @@ def equipment_to_cim(pb: PBEquipment, cim: Equipment, network_service: NetworkSe
         network_service.resolve_or_defer_reference(resolver.eq_usage_points(cim), mrid)
     for mrid in pb.operationalRestrictionMRIDs:
         network_service.resolve_or_defer_reference(resolver.operational_restrictions(cim), mrid)
-    for mrid in pb.currentFeederMRIDs:
-        network_service.resolve_or_defer_reference(resolver.current_feeders(cim), mrid)
+    for mrid in pb.currentContainerMRIDs:
+        network_service.resolve_or_defer_reference(resolver.current_containers(cim), mrid)
 
     power_system_resource_to_cim(pb.psr, cim, network_service)
 
@@ -602,6 +603,8 @@ def feeder_to_cim(pb: PBFeeder, network_service: NetworkService) -> Optional[Fee
 
     network_service.resolve_or_defer_reference(resolver.normal_head_terminal(cim), pb.normalHeadTerminalMRID)
     network_service.resolve_or_defer_reference(resolver.normal_energizing_substation(cim), pb.normalEnergizingSubstationMRID)
+    for mrid in pb.normalEnergizedLvFeederMRIDs:
+        network_service.resolve_or_defer_reference(resolver.normal_energized_lv_feeders(cim), mrid)
 
     equipment_container_to_cim(pb.ec, cim, network_service)
     return cim if network_service.add(cim) else None
@@ -647,7 +650,7 @@ def substation_to_cim(pb: PBSubstation, network_service: NetworkService) -> Opti
 
     network_service.resolve_or_defer_reference(resolver.sub_geographical_region(cim), pb.subGeographicalRegionMRID)
     for mrid in pb.normalEnergizedFeederMRIDs:
-        network_service.resolve_or_defer_reference(resolver.normal_energizing_feeders(cim), mrid)
+        network_service.resolve_or_defer_reference(resolver.normal_energized_feeders(cim), mrid)
     for mrid in pb.loopMRIDs:
         network_service.resolve_or_defer_reference(resolver.loops(cim), mrid)
     for mrid in pb.normalEnergizedLoopMRIDs:
@@ -1298,5 +1301,17 @@ def loop_to_cim(pb: PBLoop, network_service: NetworkService) -> Optional[Loop]:
     return cim if network_service.add(cim) else None
 
 
+def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optional[LvFeeder]:
+    cim = LvFeeder(mrid=pb.mrid())
+
+    network_service.resolve_or_defer_reference(resolver.lvfeeder_to_nht_resolver(cim), pb.normalHeadTerminalMRID)
+    for mrid in pb.normalEnergizingFeederMRIDs:
+        network_service.resolve_or_defer_reference(resolver.normal_energizing_feeders(cim), mrid)
+
+    equipment_container_to_cim(pb.ec, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 PBCircuit.to_cim = circuit_to_cim
 PBLoop.to_cim = loop_to_cim
+PBCircuit.to_cim = lv_feeder_to_cim
