@@ -170,6 +170,30 @@ class EquipmentContainer(ConnectivityNodeContainer):
                     seen.add(f.mrid)
                     yield f
 
+    def current_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        Convenience function to find all of the normal LV feeders of the equipment associated with this equipment container.
+        Returns the normal LV feeders for all associated LV feeders
+        """
+        seen = set()
+        for equip in self._equipment.values():
+            for f in equip.current_lv_feeders:
+                if f not in seen:
+                    seen.add(f.mrid)
+                    yield f
+
+    def normal_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        Convenience function to find all of the normal LV feeders of the equipment associated with this equipment container.
+        Returns the normal LV feeders for all associated LV feeders
+        """
+        seen = set()
+        for equip in self._equipment.values():
+            for f in equip.normal_lv_feeders:
+                if f not in seen:
+                    seen.add(f.mrid)
+                    yield f
+
 
 class Feeder(EquipmentContainer):
     """

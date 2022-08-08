@@ -33,7 +33,7 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TableShuntCompensators, Switch, TableSwitches, TapChanger, TableTapChangers, TableTransformerEnds, TransformerStarImpedance, \
     TableTransformerStarImpedance, TableCircuits, Circuit, Loop, TableLoops, TableAssetOrganisationRolesAssets, TableEquipmentEquipmentContainers, \
     TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableUsagePointsEndDevices, TableCircuitsSubstations, TableCircuitsTerminals, \
-    TableLoopsSubstations, LoopSubstationRelationship, LvFeeder
+    TableLoopsSubstations, LoopSubstationRelationship, LvFeeder, TableLvFeeders
 
 __all__ = ["NetworkCIMReader"]
 

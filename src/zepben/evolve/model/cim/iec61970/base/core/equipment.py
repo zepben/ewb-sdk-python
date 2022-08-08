@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site, LvFeeder
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
@@ -80,6 +80,20 @@ class Equipment(PowerSystemResource):
         The normal `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder`s this equipment belongs to.
         """
         return ngen(self._equipment_containers_of_type(Feeder))
+
+    @property
+    def current_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The current `zepben.evolve.cim.iec61970.base.core.equipment_container.LvFeeder`s this equipment belongs to.
+        """
+        return ngen(self._current_containers_of_type(LvFeeder))
+
+    @property
+    def normal_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The normal `zepben.evolve.cim.iec61970.base.core.equipment_container.LvFeeder`s this equipment belongs to.
+        """
+        return ngen(self._equipment_containers_of_type(LvFeeder))
 
     @property
     def sites(self) -> Generator[Site, None, None]:
