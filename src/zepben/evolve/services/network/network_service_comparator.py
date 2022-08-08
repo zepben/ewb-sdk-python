@@ -14,7 +14,7 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, \
     PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
     Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
-    Switch, ShuntCompensatorInfo
+    Switch, ShuntCompensatorInfo, LvFeeder
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
@@ -304,7 +304,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_values(diff, Equipment.in_service, Equipment.normally_in_service)
 
         if self._options.compare_equipment_containers:
-            self._compare_id_reference_collections(diff, Equipment.containers, Equipment.current_feeders)
+            self._compare_id_reference_collections(diff, Equipment.containers, Equipment.current_containers)
 
         if self._options.compare_lv_simplification:
             self._compare_id_reference_collections(diff, Equipment.usage_points)
@@ -323,6 +323,7 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         self._compare_id_references(diff, Feeder.normal_head_terminal, Feeder.normal_energizing_substation)
         if self._options.compare_feeder_equipment:
+            self._compare_id_reference_collections(diff, Feeder.normal_energized_lv_feeders)
             self._compare_id_reference_collections(diff, Feeder.current_equipment)
 
         return self._compare_equipment_container(diff)
@@ -761,6 +762,15 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_id_reference_collections(diff, Loop.circuits, Loop.substations, Loop.energizing_substations)
 
         return self._compare_identified_object(diff)
+
+    def _compare_lv_feeder(self, source: LvFeeder, target: LvFeeder) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_id_references(diff, LvFeeder.normal_head_terminal)
+        if self._options.compare_feeder_equipment:
+            self._compare_id_reference_collections(diff, LvFeeder.normal_energizing_feeders)
+
+        return self._compare_equipment_container(diff)
 
     @staticmethod
     # NOTE: Should be Callable[[Switch, SinglePhaseKind], bool], but type inference does not work correctly.
