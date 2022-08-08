@@ -329,7 +329,7 @@ class Feeder(EquipmentContainer):
         @param lv_feeder: the LV feeder to associate with this feeder in the normal state of the network.
         @return: This `Feeder` for fluent use.
         """
-        if self._validate_reference(lv_feeder, self.get_normal_energized_lv_feeder, "A normal LvFeeder"):
+        if self._validate_reference(lv_feeder, self.get_normal_energized_lv_feeder, "An LvFeeder"):
             return self
         self._normal_energized_lv_feeders = dict() if self._normal_energized_lv_feeders is None else self._normal_energized_lv_feeders
         self._normal_energized_lv_feeders[lv_feeder.mrid] = lv_feeder

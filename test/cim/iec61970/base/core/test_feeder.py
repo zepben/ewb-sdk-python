@@ -9,7 +9,7 @@ from hypothesis.strategies import builds, lists
 from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
-from zepben.evolve import Feeder, Terminal, Substation, Equipment
+from zepben.evolve import Feeder, Terminal, Substation, Equipment, LvFeeder
 
 feeder_kwargs = {
     **equipment_container_kwargs,
@@ -61,4 +61,16 @@ def test_current_equipment_collection():
                                   Feeder.add_current_equipment,
                                   Feeder.remove_current_equipment,
                                   Feeder.clear_current_equipment,
+                                  KeyError)
+
+
+def test_normal_energized_lv_feeder_collection():
+    validate_collection_unordered(Feeder,
+                                  lambda mrid, _: LvFeeder(mrid),
+                                  Feeder.num_normal_energized_lv_feeders,
+                                  Feeder.get_normal_energized_lv_feeder,
+                                  Feeder.normal_energized_lv_feeders,
+                                  Feeder.add_normal_energized_lv_feeder,
+                                  Feeder.remove_normal_energized_lv_feeder,
+                                  Feeder.clear_normal_energized_lv_feeders,
                                   KeyError)
