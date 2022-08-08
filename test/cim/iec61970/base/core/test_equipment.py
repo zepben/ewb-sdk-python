@@ -90,12 +90,12 @@ def test_operational_restrictions_collection():
                                   Equipment.clear_operational_restrictions)
 
 
-def test_current_feeders_collection():
+def test_current_containers_collection():
     validate_collection_unordered(Equipment,
-                                  lambda mrid, _: Feeder(mrid),
-                                  Equipment.num_current_feeders,
-                                  Equipment.get_current_feeder,
-                                  Equipment.current_feeders,
-                                  Equipment.add_current_feeder,
-                                  Equipment.remove_current_feeder,
-                                  Equipment.clear_current_feeders)
+                                  lambda mrid, _: EquipmentContainer(mrid),
+                                  Equipment.num_current_containers,
+                                  Equipment.get_current_container,
+                                  Equipment.current_containers,
+                                  Equipment.add_current_container,
+                                  Equipment.remove_current_container,
+                                  Equipment.clear_current_containers)

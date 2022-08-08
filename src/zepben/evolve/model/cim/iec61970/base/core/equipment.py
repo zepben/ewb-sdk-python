@@ -226,7 +226,7 @@ class Equipment(PowerSystemResource):
         Returns A reference to this `Equipment` to allow fluent use.
         Raises `ValueError` if another `EquipmentContainer` with the same `mrid` already exists for this `Equipment`.
         """
-        if self._validate_reference(equipment_container, self.get_current_container, "A Feeder"):
+        if self._validate_reference(equipment_container, self.get_current_container, "A current EquipmentContainer"):
             return self
         self._current_containers = list() if self._current_containers is None else self._current_containers
         self._current_containers.append(equipment_container)
