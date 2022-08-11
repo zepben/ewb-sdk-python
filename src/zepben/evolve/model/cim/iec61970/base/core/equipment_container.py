@@ -369,6 +369,14 @@ class LvFeeder(EquipmentContainer):
     _current_equipment: Optional[Dict[str, Equipment]] = None
     """The equipment contained in this LvFeeder in the current state of the network."""
 
+    def __init__(self, normal_head_terminal: Terminal = None, current_equipment: List[Equipment] = None, **kwargs):
+        super(LvFeeder, self).__init__(**kwargs)
+        if normal_head_terminal:
+            self.normal_head_terminal = normal_head_terminal
+        if current_equipment:
+            for eq in current_equipment:
+                self.add_current_equipment(eq)
+
     @property
     def normal_head_terminal(self) -> Optional[Terminal]:
         """

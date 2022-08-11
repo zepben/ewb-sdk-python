@@ -101,7 +101,7 @@ class AssignToLvFeeders:
     async def _reached_hv(t: Terminal) -> bool:
         ce = t.conducting_equipment
         nominal_voltage = ce and ce.base_voltage and ce.base_voltage.nominal_voltage
-        return nominal_voltage is None and nominal_voltage >= 1000
+        return nominal_voltage is not None and nominal_voltage >= 1000
 
     async def _process_normal(self, terminal: Terminal, is_stopping: bool):
         self._process(terminal.conducting_equipment, terminal.conducting_equipment.add_container, self._active_lv_feeder.add_equipment, is_stopping)

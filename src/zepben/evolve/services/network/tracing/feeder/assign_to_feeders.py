@@ -103,7 +103,7 @@ class AssignToFeeders:
     async def _reached_lv(t: Terminal) -> bool:
         ce = t.conducting_equipment
         nominal_voltage = ce and ce.base_voltage and ce.base_voltage.nominal_voltage
-        return nominal_voltage and nominal_voltage < 1000
+        return nominal_voltage is not None and nominal_voltage < 1000
 
     async def _process_normal(self, terminal: Terminal, is_stopping: bool):
         if not is_stopping or not self._reached_lv(terminal):

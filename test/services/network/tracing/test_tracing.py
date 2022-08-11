@@ -17,6 +17,7 @@ T = TypeVar("T")
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize('phase_swap_loop_network', [(False,)], indirect=True)
 async def test_basic_asset_trace(phase_swap_loop_network):
     """
     Just trace all connected assets and make sure we actually visit every item.

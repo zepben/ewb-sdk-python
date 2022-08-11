@@ -11,14 +11,14 @@ from pytest import fixture
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, BaseVoltage, TestNetworkBuilder
+    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, BaseVoltage, TestNetworkBuilder, LvFeeder
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
            "create_geographical_region", "create_subgeographical_region", "create_asset_owner", "create_meter", "create_power_transformer_end",
            "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
-           "lv_equipment_below_feeder_head_network", "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals",
-           "single_connectivitynode_network", "create_terminal", "phase_swap_loop_network", "network_service"]
+           "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals",
+           "single_connectivitynode_network", "create_terminal", "phase_swap_loop_network", "loop_under_feeder_head_network", "network_service"]
 
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
 from zepben.evolve.util import CopyableUUID
@@ -377,10 +377,9 @@ async def feeder_with_current():
 
 
 @fixture()
-def feeder_start_point_between_conductors_network():
+def feeder_start_point_between_conductors_network(request):
+    make_feeder_lv = request.param[0]
     network_service = NetworkService()
-
-    sub = create_substation(network_service)
 
     c1 = create_acls_for_connecting(network_service, "c1", PhaseCode.A)
     fsp = create_junction_for_connecting(network_service, "fsp", 2)
@@ -389,7 +388,13 @@ def feeder_start_point_between_conductors_network():
     network_service.connect_terminals(c1.get_terminal_by_sn(2), fsp.get_terminal_by_sn(1))
     network_service.connect_terminals(c2.get_terminal_by_sn(1), fsp.get_terminal_by_sn(2))
 
-    create_feeder(network_service, "f", "f", sub, fsp.get_terminal_by_sn(2))
+    if make_feeder_lv:
+        lv_feeder = LvFeeder(mrid="f", normal_head_terminal=fsp.get_terminal_by_sn(2))
+        network_service.add(lv_feeder)
+    else:
+        sub = create_substation(network_service)
+        create_feeder(network_service, "f", "f", sub, fsp.get_terminal_by_sn(2))
+
     return network_service
 
 
@@ -423,10 +428,8 @@ def single_connectivitynode_network():
 
 @fixture()
 def feeder_start_point_to_open_point_network(request):
-    normally_open = request.param[0]
-    currently_open = request.param[1]
+    normally_open, currently_open, make_feeder_lv = request.param
     network_service = NetworkService()
-    sub = create_substation(network_service)
     fsp = create_junction_for_connecting(network_service, "fsp", 1)
     c1 = create_acls_for_connecting(network_service, "c1", PhaseCode.A)
     op = create_switch_for_connecting(network_service, "op", 2, PhaseCode.A)
@@ -439,12 +442,18 @@ def feeder_start_point_to_open_point_network(request):
     network_service.connect_terminals(c1.get_terminal_by_sn(2), op.get_terminal_by_sn(1))
     network_service.connect_terminals(c2.get_terminal_by_sn(1), op.get_terminal_by_sn(2))
 
-    create_feeder(network_service, "f", "f", sub, fsp.get_terminal_by_sn(1))
+    if make_feeder_lv:
+        lv_feeder = LvFeeder(mrid="f", normal_head_terminal=fsp.get_terminal_by_sn(1))
+        network_service.add(lv_feeder)
+    else:
+        sub = create_substation(network_service)
+        create_feeder(network_service, "f", "f", sub, fsp.get_terminal_by_sn(1))
+
     return network_service
 
 
 @fixture()
-def phase_swap_loop_network():
+def phase_swap_loop_network(request):
     """
     n0 ac0        ac1     n1   ac2        ac3   n2
     *==ABCN==+====ABCN====*====ABCN====+==ABCN==*
@@ -461,6 +470,8 @@ def phase_swap_loop_network():
              |            |
           n8 *            * n9
     """
+    make_feeder_lv = request.param[0]
+
     network_service = NetworkService()
     n0 = create_source_for_connecting(network_service, "n0", 1, PhaseCode.ABCN)
     n1 = create_junction_for_connecting(network_service, "n1", 2, PhaseCode.ABCN)
@@ -486,7 +497,11 @@ def phase_swap_loop_network():
     ac10 = create_acls_for_connecting(network_service, "ac10", PhaseCode.X)
     ac11 = create_acls_for_connecting(network_service, "ac11", PhaseCode.Y)
 
-    fdr = create_feeder(network_service, "fdr", head_terminal=n0.get_terminal_by_sn(1))
+    if make_feeder_lv:
+        lv_feeder = LvFeeder(mrid="f", normal_head_terminal=n0.get_terminal_by_sn(1))
+        network_service.add(lv_feeder)
+    else:
+        create_feeder(network_service, "f", "f", head_terminal=n0.get_terminal_by_sn(1))
 
     # Connect up a network so we can check connectivity
     network_service.connect_by_mrid(n0.get_terminal_by_sn(1), "cn_0")
@@ -536,31 +551,31 @@ def phase_swap_loop_network():
 
 
 @fixture()
-def lv_equipment_below_feeder_head_network():
+def loop_under_feeder_head_network(request):
     """
-    - or |: LV line
-    = or #: HV line
-
-         c1     c2
-    b0 ======+------
-
-    fdr3 head terminal is b0-t2
+    # s0 1 * 1--c1--2 * 1--c2--2 * 1--c4--2
+    #                 2----c3----1
     """
-    bv_hv = BaseVoltage(nominal_voltage=11000)
-    bv_lv = BaseVoltage(nominal_voltage=400)
+    make_feeder_lv = request.param[0]
+    network = (TestNetworkBuilder()
+               .from_source()  # s0
+               .to_acls()  # c1
+               .to_acls()  # c2
+               .to_acls()  # c3
+               .connect("c3", "c1", 2, 2)
+               .branch_from("c2")
+               .to_acls()  # c4
+               .network)
 
-    # noinspection PyArgumentList
-    network_service = (TestNetworkBuilder()
-                       .from_breaker(action=lambda ce: setattr(ce, "base_voltage", bv_hv))
-                       .to_acls(action=lambda ce: setattr(ce, "base_voltage", bv_hv))
-                       .to_acls(action=lambda ce: setattr(ce, "base_voltage", bv_lv))
-                       .add_feeder("b0")
-                       .network)
+    if make_feeder_lv:
+        lv_feeder = LvFeeder(mrid="f", normal_head_terminal=network["s0-t1"])
+        network.add(lv_feeder)
+    else:
+        feeder = Feeder(mrid="f")
+        feeder.normal_head_terminal = network["s0-t1"]
+        network.add(feeder)
 
-    network_service.add(bv_hv)
-    network_service.add(bv_lv)
-
-    return network_service
+    return network
 
 
 @fixture()
