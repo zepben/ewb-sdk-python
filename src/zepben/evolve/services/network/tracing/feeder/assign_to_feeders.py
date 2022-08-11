@@ -18,7 +18,7 @@ __all__ = ["AssignToFeeders"]
 
 class AssignToFeeders:
     """
-    Convenience class that provides methods for assigning feeders on a `NetworkService`.
+    Convenience class that provides methods for assigning HV/MV feeders on a `NetworkService`.
     Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
     This class is backed by a `BasicTraversal`.
     """
@@ -86,6 +86,7 @@ class AssignToFeeders:
         traversal.clear_stop_conditions()
         traversal.add_stop_condition(self._reached_equipment(feeder_start_points))
         traversal.add_stop_condition(self._reached_substation_transformer)
+        traversal.add_stop_condition(self._reached_lv)
 
     @staticmethod
     def _reached_equipment(ce: Set[ConductingEquipment]) -> Callable[[Terminal], Awaitable[bool]]:
@@ -98,22 +99,26 @@ class AssignToFeeders:
     async def _reached_substation_transformer(t: Terminal) -> bool:
         return isinstance(t.conducting_equipment, PowerTransformer) and t.conducting_equipment.num_substations()
 
+    @staticmethod
+    async def _reached_lv(t: Terminal) -> bool:
+        ce = t.conducting_equipment
+        nominal_voltage = ce and ce.base_voltage and ce.base_voltage.nominal_voltage
+        return nominal_voltage and nominal_voltage < 1000
+
     async def _process_normal(self, terminal: Terminal, is_stopping: bool):
-        self._process(terminal.conducting_equipment, terminal.conducting_equipment.add_container, self._active_feeder.add_equipment, is_stopping)
+        if not is_stopping or not self._reached_lv(terminal):
+            self._process(terminal.conducting_equipment, terminal.conducting_equipment.add_container, self._active_feeder.add_equipment)
 
     async def _process_current(self, terminal: Terminal, is_stopping: bool):
-        self._process(terminal.conducting_equipment, terminal.conducting_equipment.add_current_feeder, self._active_feeder.add_current_equipment, is_stopping)
+        if not is_stopping or not self._reached_lv(terminal):
+            self._process(terminal.conducting_equipment, terminal.conducting_equipment.add_current_container, self._active_feeder.add_current_equipment)
 
     def _process(
         self,
         ce: Optional[ConductingEquipment],
         assign_feeder_to_equip: Callable[[EquipmentContainer], Any],
-        assign_equip_to_feeder: Callable[[ConductingEquipment], Any],
-        is_stopping: bool
+        assign_equip_to_feeder: Callable[[ConductingEquipment], Any]
     ):
-        if is_stopping and isinstance(ce, PowerTransformer):
-            return
-
         if ce:
             assign_feeder_to_equip(self._active_feeder)
             assign_equip_to_feeder(ce)

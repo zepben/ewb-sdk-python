@@ -90,6 +90,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TableLocations: TableLocations(),
         TableLoops: TableLoops(),
         TableLoopsSubstations: TableLoopsSubstations(),
+        TableLvFeeders: TableLvFeeders(),
         TableMetadataDataSources: TableMetadataDataSources(),
         TableMeters: TableMeters(),
         TableNameTypes: TableNameTypes(),

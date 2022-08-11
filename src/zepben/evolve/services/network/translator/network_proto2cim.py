@@ -1304,7 +1304,7 @@ def loop_to_cim(pb: PBLoop, network_service: NetworkService) -> Optional[Loop]:
 def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optional[LvFeeder]:
     cim = LvFeeder(mrid=pb.mrid())
 
-    network_service.resolve_or_defer_reference(resolver.lvfeeder_to_nht_resolver(cim), pb.normalHeadTerminalMRID)
+    network_service.resolve_or_defer_reference(resolver.lv_feeder_normal_head_terminal(cim), pb.normalHeadTerminalMRID)
     for mrid in pb.normalEnergizingFeederMRIDs:
         network_service.resolve_or_defer_reference(resolver.normal_energizing_feeders(cim), mrid)
 
@@ -1314,4 +1314,4 @@ def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optiona
 
 PBCircuit.to_cim = circuit_to_cim
 PBLoop.to_cim = loop_to_cim
-PBCircuit.to_cim = lv_feeder_to_cim
+PBLvFeeder.to_cim = lv_feeder_to_cim

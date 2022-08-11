@@ -11,14 +11,14 @@ from pytest import fixture
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode
+    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, BaseVoltage, TestNetworkBuilder
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
            "create_geographical_region", "create_subgeographical_region", "create_asset_owner", "create_meter", "create_power_transformer_end",
            "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
-           "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals", "single_connectivitynode_network",
-           "create_terminal", "phase_swap_loop_network", "network_service"]
+           "lv_equipment_below_feeder_head_network", "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals",
+           "single_connectivitynode_network", "create_terminal", "phase_swap_loop_network", "network_service"]
 
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
 from zepben.evolve.util import CopyableUUID
@@ -531,6 +531,34 @@ def phase_swap_loop_network():
     network_service.connect_by_mrid(ac11.get_terminal_by_sn(1), "cn_18")
     network_service.connect_by_mrid(ac11.get_terminal_by_sn(2), "cn_19")
     network_service.connect_by_mrid(n9.get_terminal_by_sn(1), "cn_19")
+
+    return network_service
+
+
+@fixture()
+def lv_equipment_below_feeder_head_network():
+    """
+    - or |: LV line
+    = or #: HV line
+
+         c1     c2
+    b0 ======+------
+
+    fdr3 head terminal is b0-t2
+    """
+    bv_hv = BaseVoltage(nominal_voltage=11000)
+    bv_lv = BaseVoltage(nominal_voltage=400)
+
+    # noinspection PyArgumentList
+    network_service = (TestNetworkBuilder()
+                       .from_breaker(action=lambda ce: setattr(ce, "base_voltage", bv_hv))
+                       .to_acls(action=lambda ce: setattr(ce, "base_voltage", bv_hv))
+                       .to_acls(action=lambda ce: setattr(ce, "base_voltage", bv_lv))
+                       .add_feeder("b0")
+                       .network)
+
+    network_service.add(bv_hv)
+    network_service.add(bv_lv)
 
     return network_service
 

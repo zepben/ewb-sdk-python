@@ -342,8 +342,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: OperationalRestriction(mrid="o2")
         )
         self.validator.validate_collection(
-            Equipment.current_feeders,
-            Equipment.add_current_feeder,
+            Equipment.current_containers,
+            Equipment.add_current_container,
             creator,
             lambda _: Feeder(mrid="f1"),
             lambda _: Feeder(mrid="f2")

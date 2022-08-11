@@ -54,7 +54,7 @@ def test_suppliers():
     _validate_supplier(tracing.set_direction, SetDirection)
     _validate_supplier(tracing.remove_direction, RemoveDirection)
 
-    _validate_supplier(tracing.assign_equipment_containers_to_feeders, AssignToFeeders)
+    _validate_supplier(tracing.assign_equipment_to_feeders, AssignToFeeders)
     _validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
     _validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
 

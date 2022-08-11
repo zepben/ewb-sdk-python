@@ -127,6 +127,7 @@ class DatabaseWriter(object):
                 c.execute(version_table.prepared_insert_sql(), (version_table.SUPPORTED_VERSION,))
 
             conn.commit()
+            logger.info("Database saved.")
             return True
         except sqlite3.Error as e:
             logger.error(f"Failed to create database schema {e}")
