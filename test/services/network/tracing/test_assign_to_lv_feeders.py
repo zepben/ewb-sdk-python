@@ -83,3 +83,71 @@ class TestAssignToLvFeeders:
 
         await assign_equipment_to_lv_feeders().run(network_service)
         validate_equipment(lv_feeder.equipment, "b0", "c1", "tx2")
+
+    @pytest.mark.asyncio
+    async def test_only_powered_via_head_equipment(self):
+        bv_hv = BaseVoltage(nominal_voltage=11000)
+        bv_lv = BaseVoltage(nominal_voltage=400)
+
+        # noinspection PyArgumentList
+        network_service = (TestNetworkBuilder()
+                           .from_breaker(action=lambda ce: setattr(ce, "base_voltage", bv_hv))
+                           .to_acls(action=lambda ce: setattr(ce, "base_voltage", bv_hv))
+                           .from_breaker(action=lambda ce: setattr(ce, "base_voltage", bv_lv))
+                           .to_acls(action=lambda ce: setattr(ce, "base_voltage", bv_lv))
+                           .connect("c1", "c3", 2, 2)
+                           .add_feeder("b0")
+                           .add_lv_feeder("b2")
+                           .network)
+
+        network_service.add(bv_hv)
+        network_service.add(bv_lv)
+
+        feeder = network_service.get("fdr4", Feeder)
+        lv_feeder = network_service.get("lvf5", LvFeeder)
+
+        await assign_equipment_to_feeders().run(network_service)
+        await assign_equipment_to_lv_feeders().run(network_service)
+
+        assert set(feeder.normal_energized_lv_feeders) == set()
+        assert set(lv_feeder.normal_energizing_feeders) == set()
+
+    @pytest.mark.asyncio
+    async def test_single_feeder_powers_multiple_lv_feeders(self):
+        network_service = (TestNetworkBuilder()
+                           .from_breaker()
+                           .add_feeder("b0")
+                           .add_lv_feeder("b0")
+                           .add_lv_feeder("b0")
+                           .network)
+
+        feeder = network_service.get("fdr1", Feeder)
+        lv_feeder1 = network_service.get("lvf2", LvFeeder)
+        lv_feeder2 = network_service.get("lvf3", LvFeeder)
+
+        await assign_equipment_to_feeders().run(network_service)
+        await assign_equipment_to_lv_feeders().run(network_service)
+
+        assert set(feeder.normal_energized_lv_feeders) == {lv_feeder1, lv_feeder2}
+        assert set(lv_feeder1.normal_energizing_feeders) == {feeder}
+        assert set(lv_feeder2.normal_energizing_feeders) == {feeder}
+
+    @pytest.mark.asyncio
+    async def test_single_feeder_powers_multiple_lv_feeders(self):
+        network_service = (TestNetworkBuilder()
+                           .from_breaker()
+                           .add_feeder("b0")
+                           .add_feeder("b0")
+                           .add_lv_feeder("b0")
+                           .network)
+
+        feeder1 = network_service.get("fdr1", Feeder)
+        feeder2 = network_service.get("fdr2", Feeder)
+        lv_feeder = network_service.get("lvf3", LvFeeder)
+
+        await assign_equipment_to_feeders().run(network_service)
+        await assign_equipment_to_lv_feeders().run(network_service)
+
+        assert set(feeder1.normal_energized_lv_feeders) == {lv_feeder}
+        assert set(feeder2.normal_energized_lv_feeders) == {lv_feeder}
+        assert set(lv_feeder.normal_energizing_feeders) == {feeder1, feeder2}

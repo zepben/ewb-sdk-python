@@ -56,6 +56,7 @@ class AssignToLvFeeders:
                     lv_feeder_start_points.add(head_equipment)
                     for feeder in head_equipment.normal_feeders:
                         lv_feeder.add_normal_energizing_feeder(feeder)
+                        feeder.add_normal_energized_lv_feeder(lv_feeder)
         self._configure_stop_conditions(self._normal_traversal, lv_feeder_start_points)
         self._configure_stop_conditions(self._current_traversal, lv_feeder_start_points)
 
