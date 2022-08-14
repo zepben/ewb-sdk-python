@@ -454,6 +454,7 @@ def create_equipment_container(include_runtime: bool, add_equipment: bool = True
 
 def create_feeder(include_runtime: bool = True):
     runtime = {
+        "normal_energized_lv_feeders": lists(builds(LvFeeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2)
     } if include_runtime else {}
 
@@ -1105,6 +1106,20 @@ def create_loop(include_runtime: bool = True):
         circuits=lists(builds(Circuit, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         substations=lists(builds(Substation, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         energizing_substations=lists(builds(Substation, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+    )
+
+
+def create_lv_feeder(include_runtime: bool = True):
+    runtime = {
+        "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime))),
+        "current_equipment": lists(builds(Equipment, **create_identified_object(include_runtime)))
+    } if include_runtime else {}
+
+    return builds(
+        LvFeeder,
+        **create_equipment_container(include_runtime),
+        normal_head_terminal=builds(Terminal, **create_identified_object(include_runtime)),
+        **runtime
     )
 
 

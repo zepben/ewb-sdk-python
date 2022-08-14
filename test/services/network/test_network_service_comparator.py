@@ -17,7 +17,7 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     EnergyConsumer, PhaseShuntConnectionKind, EnergyConsumerPhase, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
     LinearShuntCompensator, PerLengthImpedance, PerLengthLineParameter, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, VectorGroup, \
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
-    Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind
+    Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
@@ -371,6 +371,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Feeder,
             lambda _: Junction(mrid="j1"),
             lambda _: Junction(mrid="j2")
+        )
+        self.validator.validate_collection(
+            Feeder.normal_energized_lv_feeders,
+            Feeder.add_normal_energized_lv_feeder,
+            Feeder,
+            lambda _: LvFeeder(mrid="lvf1"),
+            lambda _: LvFeeder(mrid="lvf2")
         )
 
     def test_compare_geographical_region(self):
@@ -922,4 +929,16 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             Loop,
             lambda _: Substation(mrid="s1"),
             lambda _: Substation(mrid="s2")
+        )
+
+    def test_compare_feeder(self):
+        self._compare_equipment_container(LvFeeder)
+
+        self.validator.validate_property(LvFeeder.normal_head_terminal, LvFeeder, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
+        self.validator.validate_collection(
+            LvFeeder.normal_energizing_feeders,
+            LvFeeder.add_normal_energizing_feeder,
+            LvFeeder,
+            lambda _: Feeder(mrid="f1"),
+            lambda _: Feeder(mrid="f2")
         )

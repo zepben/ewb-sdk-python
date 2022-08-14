@@ -213,13 +213,22 @@ class Feeder(EquipmentContainer):
     _normal_energized_lv_feeders: Optional[Dict[str, LvFeeder]] = None
     """The LV feeders that are energized by this feeder in the normal state of the network."""
 
-    def __init__(self, normal_head_terminal: Terminal = None, current_equipment: List[Equipment] = None, **kwargs):
+    def __init__(
+        self,
+        normal_head_terminal: Terminal = None,
+        current_equipment: List[Equipment] = None,
+        normal_energized_lv_feeders: List[LvFeeder] = None,
+        **kwargs
+    ):
         super(Feeder, self).__init__(**kwargs)
         if normal_head_terminal:
             self.normal_head_terminal = normal_head_terminal
         if current_equipment:
             for eq in current_equipment:
                 self.add_current_equipment(eq)
+        if normal_energized_lv_feeders:
+            for lv_feeder in normal_energized_lv_feeders:
+                self.add_normal_energized_lv_feeder(lv_feeder)
 
     @property
     def normal_head_terminal(self) -> Optional[Terminal]:
@@ -369,10 +378,19 @@ class LvFeeder(EquipmentContainer):
     _current_equipment: Optional[Dict[str, Equipment]] = None
     """The equipment contained in this LvFeeder in the current state of the network."""
 
-    def __init__(self, normal_head_terminal: Terminal = None, current_equipment: List[Equipment] = None, **kwargs):
+    def __init__(
+        self,
+        normal_head_terminal: Terminal = None,
+        normal_energizing_feeders: List[Feeder] = None,
+        current_equipment: List[Equipment] = None,
+        **kwargs
+    ):
         super(LvFeeder, self).__init__(**kwargs)
         if normal_head_terminal:
             self.normal_head_terminal = normal_head_terminal
+        if normal_energizing_feeders:
+            for feeder in normal_energizing_feeders:
+                self.add_normal_energizing_feeder(feeder)
         if current_equipment:
             for eq in current_equipment:
                 self.add_current_equipment(eq)
@@ -418,7 +436,7 @@ class LvFeeder(EquipmentContainer):
             return self._normal_energizing_feeders[mrid]
         except AttributeError:
             raise KeyError(mrid)
-    
+
     def add_normal_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
         """
         Associate this `LvFeeder` with a `Feeder` in the normal state of the network.
