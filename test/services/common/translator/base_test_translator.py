@@ -59,7 +59,7 @@ def _remove_unsent_references(cim: T):
         cim.clear_terminals()
 
     if isinstance(cim, LvFeeder):
-        cim.clear_equipment()
+        cim.clear_current_equipment()
 
 
 def _add_with_unresolved_references(service: BaseService, cim: T) -> T:
