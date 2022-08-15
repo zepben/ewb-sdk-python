@@ -289,7 +289,7 @@ def add_location(network: NetworkService, psr: PowerSystemResource, *coords: flo
     network.add(loc)
 
 
-@pytest_asyncio.fixture()
+@fixture()
 async def feeder_network():
     """
                 c1       c2
@@ -326,7 +326,7 @@ async def feeder_network():
     return network_service
 
 
-@pytest_asyncio.fixture()
+@fixture()
 async def feeder_with_current():
     """
                 c1       c2      c3       c4
