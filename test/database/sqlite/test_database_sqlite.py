@@ -67,63 +67,63 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_cable_info(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(CableInfo, data.draw(create_cable_info(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_no_load_test(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(NoLoadTest, data.draw(create_no_load_test(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_open_circuit_test(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(OpenCircuitTest, data.draw(create_open_circuit_test(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_overhead_wire_info(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(OverheadWireInfo, data.draw(create_overhead_wire_info(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_power_transformer_info(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerInfo, data.draw(create_power_transformer_info(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_short_circuit_test(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(ShortCircuitTest, data.draw(create_short_circuit_test(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_shunt_compensator_info(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(ShuntCompensatorInfo, data.draw(create_shunt_compensator_info(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_transformer_end_info(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(TransformerEndInfo, data.draw(create_transformer_end_info(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_transformer_tank_info(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(TransformerTankInfo, data.draw(create_transformer_tank_info(False))))
@@ -132,21 +132,21 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_asset_owner(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(AssetOwner, data.draw(create_asset_owner(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_pole(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Pole, data.draw(create_pole(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_streetlight(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Streetlight, data.draw(create_streetlight(False))))
@@ -155,28 +155,28 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_customer(self, caplog, data):
         self._validate_schema(SchemaNetworks().customer_services_of(Customer, data.draw(create_customer(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_customer_agreement(self, caplog, data):
         self._validate_schema(SchemaNetworks().customer_services_of(CustomerAgreement, data.draw(create_customer_agreement(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_pricing_structure(self, caplog, data):
         self._validate_schema(SchemaNetworks().customer_services_of(PricingStructure, data.draw(create_pricing_structure(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_tariffs(self, caplog, data):
         self._validate_schema(SchemaNetworks().customer_services_of(Tariff, data.draw(create_tariffs(False))))
@@ -185,14 +185,14 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_meter(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Meter, data.draw(create_meter(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_usage_point(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(UsagePoint, data.draw(create_usage_point(False))))
@@ -201,21 +201,21 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_location(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Location, data.draw(create_location(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_organisation(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Organisation, data.draw(create_organisation(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_organisation(self, caplog, data):
         self._validate_schema(SchemaNetworks().customer_services_of(Organisation, data.draw(create_organisation(False))))
@@ -224,7 +224,7 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_operational_restriction(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(OperationalRestriction, data.draw(create_operational_restriction(False))))
@@ -233,7 +233,7 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_fault_indicator(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(FaultIndicator, data.draw(create_fault_indicator(False))))
@@ -242,56 +242,56 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_base_voltage(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(BaseVoltage, data.draw(create_base_voltage(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_connectivity_node(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(ConnectivityNode, data.draw(create_connectivity_node(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_feeder(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Feeder, data.draw(create_feeder(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_geographical_region(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(GeographicalRegion, data.draw(create_geographical_region(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_site(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Site, data.draw(create_site(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_sub_geographical_region(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(SubGeographicalRegion, data.draw(create_sub_geographical_region(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_substation(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Substation, data.draw(create_substation(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_terminal(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Terminal, data.draw(create_terminal(False))))
@@ -300,14 +300,14 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_diagram(self, caplog, data):
         self._validate_schema(SchemaNetworks().diagram_services_of(Diagram, data.draw(create_diagram(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_diagram_object(self, caplog, data):
         self._validate_schema(SchemaNetworks().diagram_services_of(DiagramObject, data.draw(create_diagram_object(False))))
@@ -316,7 +316,7 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_equivalent_branch(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(EquivalentBranch, data.draw(create_equivalent_branch(False))))
@@ -325,7 +325,7 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_accumulator(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Accumulator, data.draw(create_accumulator(False))))
@@ -334,7 +334,7 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_analog(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Analog, data.draw(create_analog(False))))
@@ -343,14 +343,14 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_control(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Control, data.draw(create_control(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_discrete(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Discrete, data.draw(create_discrete(False))))
@@ -361,14 +361,14 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_remote_control(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(RemoteControl, data.draw(create_remote_control(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_remote_source(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(RemoteSource, data.draw(create_remote_source(False))))
@@ -377,21 +377,21 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_battery_unit(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(BatteryUnit, data.draw(create_battery_unit(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_photovoltaic_unit(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(PhotoVoltaicUnit, data.draw(create_photovoltaic_unit(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_power_electronics_connection(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnection, data.draw(create_power_electronics_connection(False))))
@@ -399,7 +399,7 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_power_electronics_connection_phase(self, caplog, data):
         self._validate_schema(
@@ -408,7 +408,7 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_power_electronics_wind_unit(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsWindUnit, data.draw(create_power_electronics_wind_unit(False))))
@@ -417,35 +417,35 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
-    @given(data())
-    def test_schema_ac_line_segment(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(AcLineSegment, data.draw(create_ac_line_segment(False))))
+    @settings(deadline=2000)
+    @given(acls=create_ac_line_segment(False))
+    def test_schema_ac_line_segment(self, caplog, acls):
+        self._validate_schema(SchemaNetworks().network_services_of(AcLineSegment, acls))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_breaker(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Breaker, data.draw(create_breaker(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_busbar_section(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(BusbarSection, data.draw(create_busbar_section(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_disconnector(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Disconnector, data.draw(create_disconnector(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_energy_consumer(self, caplog, data):
         consumer: EnergyConsumer = data.draw(create_energy_consumer(False))
@@ -454,14 +454,14 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_energy_consumer_phase(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(EnergyConsumerPhase, data.draw(create_energy_consumer_phase(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_energy_source(self, caplog, data):
         source: EnergySource = data.draw(create_energy_source(False))
@@ -471,84 +471,84 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_energy_source_phase(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(EnergySourcePhase, data.draw(create_energy_source_phase(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_fuse(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Fuse, data.draw(create_fuse(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_jumper(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Jumper, data.draw(create_jumper(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_junction(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Junction, data.draw(create_junction(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_linear_shunt_compensator(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(LinearShuntCompensator, data.draw(create_linear_shunt_compensator(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_load_break_switch(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(LoadBreakSwitch, data.draw(create_load_break_switch(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_per_length_sequence_impedance(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(PerLengthSequenceImpedance, data.draw(create_per_length_sequence_impedance(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_power_transformer(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(PowerTransformer, data.draw(create_power_transformer(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_power_transformer_end(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerEnd, data.draw(create_power_transformer_end(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_ratio_tap_changer(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(RatioTapChanger, data.draw(create_ratio_tap_changer(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_recloser(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Recloser, data.draw(create_recloser(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_transformer_star_impedance(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(TransformerStarImpedance, data.draw(create_transformer_star_impedance(False))))
@@ -557,14 +557,14 @@ class TestDatabaseSqlite(object):
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_circuit(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Circuit, data.draw(create_circuit(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000)
     @given(data())
     def test_schema_loop(self, caplog, data):
         self._validate_schema(SchemaNetworks().network_services_of(Loop, data.draw(create_loop(False))))
