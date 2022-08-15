@@ -7,6 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, booleans, text
 
+from test.cim.collection_validator import validate_collection_unordered
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
@@ -61,3 +62,25 @@ def test_usage_point_constructor_args():
     assert up.connection_category == usage_point_args[-3]
     assert list(up.equipment) == usage_point_args[-2]
     assert list(up.end_devices) == usage_point_args[-1]
+
+
+def test_equipment_collection():
+    validate_collection_unordered(UsagePoint,
+                                  lambda mrid, _: Equipment(mrid),
+                                  UsagePoint.num_equipment,
+                                  UsagePoint.get_equipment,
+                                  UsagePoint.equipment,
+                                  UsagePoint.add_equipment,
+                                  UsagePoint.remove_equipment,
+                                  UsagePoint.clear_equipment)
+
+
+def test_end_devices_collection():
+    validate_collection_unordered(UsagePoint,
+                                  lambda mrid, _: EndDevice(mrid),
+                                  UsagePoint.num_end_devices,
+                                  UsagePoint.get_end_device,
+                                  UsagePoint.end_devices,
+                                  UsagePoint.add_end_device,
+                                  UsagePoint.remove_end_device,
+                                  UsagePoint.clear_end_devices)
