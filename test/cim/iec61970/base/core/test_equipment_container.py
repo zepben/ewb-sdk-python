@@ -46,6 +46,18 @@ def test_equipment_collection():
                                   KeyError)
 
 
+def test_current_equipment_mirrors_normal_equipment():
+    ec = EquipmentContainer()
+    eq1 = Equipment(mrid="eq1")
+    eq2 = Equipment(mrid="eq2")
+
+    ec.add_equipment(eq1)
+    assert ec.get_current_equipment("eq1") == eq1
+
+    ec.add_current_equipment(eq2)
+    assert ec.get_equipment("eq2") == eq2
+
+
 def test_normal_feeders():
     fdr1, fdr2, fdr3 = Feeder(), Feeder(), Feeder()
     substation = Substation()
