@@ -105,22 +105,23 @@ class AssignToLvFeeders:
         return nominal_voltage is not None and nominal_voltage >= 1000
 
     async def _process_normal(self, terminal: Terminal, is_stopping: bool):
-        self._process(terminal.conducting_equipment, terminal.conducting_equipment.add_container, self._active_lv_feeder.add_equipment, is_stopping)
+        # noinspection PyTypeChecker
+        self._process(terminal, ConductingEquipment.add_container, LvFeeder.add_equipment, is_stopping)
 
     async def _process_current(self, terminal: Terminal, is_stopping: bool):
-        self._process(terminal.conducting_equipment, terminal.conducting_equipment.add_current_container, self._active_lv_feeder.add_current_equipment,
-                      is_stopping)
+        # noinspection PyTypeChecker
+        self._process(terminal, ConductingEquipment.add_current_container, LvFeeder.add_current_equipment, is_stopping)
 
     def _process(
         self,
-        ce: Optional[ConductingEquipment],
-        assign_lv_feeder_to_equip: Callable[[EquipmentContainer], Any],
-        assign_equip_to_lv_feeder: Callable[[ConductingEquipment], Any],
+        terminal: Optional[Terminal],
+        assign_lv_feeder_to_equip: Callable[[ConductingEquipment, EquipmentContainer], Any],
+        assign_equip_to_lv_feeder: Callable[[EquipmentContainer, ConductingEquipment], Any],
         is_stopping: bool
     ):
-        if is_stopping and isinstance(ce, PowerTransformer):
+        if is_stopping and self._reached_hv(terminal):
             return
 
-        if ce:
-            assign_lv_feeder_to_equip(self._active_lv_feeder)
-            assign_equip_to_lv_feeder(ce)
+        if terminal.conducting_equipment:
+            assign_lv_feeder_to_equip(terminal.conducting_equipment, self._active_lv_feeder)
+            assign_equip_to_lv_feeder(self._active_lv_feeder, terminal.conducting_equipment)

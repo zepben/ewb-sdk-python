@@ -106,19 +106,23 @@ class AssignToFeeders:
         return nominal_voltage is not None and nominal_voltage < 1000
 
     async def _process_normal(self, terminal: Terminal, is_stopping: bool):
-        if not is_stopping or not self._reached_lv(terminal):
-            self._process(terminal.conducting_equipment, terminal.conducting_equipment.add_container, self._active_feeder.add_equipment)
+        # noinspection PyTypeChecker
+        self._process(terminal, ConductingEquipment.add_container, Feeder.add_equipment, is_stopping)
 
     async def _process_current(self, terminal: Terminal, is_stopping: bool):
-        if not is_stopping or not self._reached_lv(terminal):
-            self._process(terminal.conducting_equipment, terminal.conducting_equipment.add_current_container, self._active_feeder.add_current_equipment)
+        # noinspection PyTypeChecker
+        self._process(terminal, ConductingEquipment.add_current_container, Feeder.add_current_equipment, is_stopping)
 
     def _process(
         self,
-        ce: Optional[ConductingEquipment],
-        assign_feeder_to_equip: Callable[[EquipmentContainer], Any],
-        assign_equip_to_feeder: Callable[[ConductingEquipment], Any]
+        terminal: Optional[Terminal],
+        assign_feeder_to_equip: Callable[[ConductingEquipment, EquipmentContainer], Any],
+        assign_equip_to_feeder: Callable[[EquipmentContainer, ConductingEquipment], Any],
+        is_stopping: bool
     ):
-        if ce:
-            assign_feeder_to_equip(self._active_feeder)
-            assign_equip_to_feeder(ce)
+        if is_stopping and (self._reached_lv(terminal) or self._reached_substation_transformer(terminal)):
+            return
+
+        if terminal.conducting_equipment:
+            assign_feeder_to_equip(terminal.conducting_equipment, self._active_feeder)
+            assign_equip_to_feeder(self._active_feeder, terminal.conducting_equipment)
