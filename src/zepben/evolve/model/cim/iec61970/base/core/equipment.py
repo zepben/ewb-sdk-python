@@ -38,7 +38,7 @@ class Equipment(PowerSystemResource):
     _current_containers: Optional[List[EquipmentContainer]] = None
 
     def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, **kwargs):
+                 operational_restrictions: List[OperationalRestriction] = None, current_containers: List[EquipmentContainer] = None, **kwargs):
         super(Equipment, self).__init__(**kwargs)
         if usage_points:
             for up in usage_points:
@@ -49,8 +49,8 @@ class Equipment(PowerSystemResource):
         if operational_restrictions:
             for restriction in operational_restrictions:
                 self.add_operational_restriction(restriction)
-        if current_feeders:
-            for cf in current_feeders:
+        if current_containers:
+            for cf in current_containers:
                 self.add_current_container(cf)
 
     @property

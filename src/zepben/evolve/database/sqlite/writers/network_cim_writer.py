@@ -825,7 +825,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         table = self.database_tables.get_table(TableLvFeeders)
         insert = self.database_tables.get_insert(TableLvFeeders)
 
-        insert.add_value(table.normal_head_terminal_mrid.query_index, lv_feeder.normal_head_terminal)
+        insert.add_value(table.normal_head_terminal_mrid.query_index, self._mrid_or_none(lv_feeder.normal_head_terminal))
 
         return self._save_equipment_container(table, insert, lv_feeder, "lv_feeder")
 

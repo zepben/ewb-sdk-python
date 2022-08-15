@@ -19,7 +19,7 @@ equipment_kwargs = {
     "usage_points": lists(builds(UsagePoint), max_size=2),
     "equipment_containers": lists(sampled_equipment_container(True), max_size=2),
     "operational_restrictions": lists(builds(OperationalRestriction), max_size=2),
-    "current_feeders": lists(builds(Feeder), max_size=2)
+    "current_containers": lists(builds(Feeder), max_size=2)
 }
 
 equipment_args = [*power_system_resource_args, False, False, [UsagePoint(), UsagePoint()], [EquipmentContainer(), EquipmentContainer()],
@@ -33,18 +33,18 @@ def verify_equipment_constructor_default(eq: Equipment):
     assert not list(eq.usage_points)
     assert not list(eq.containers)
     assert not list(eq.operational_restrictions)
-    assert not list(eq.current_feeders)
+    assert not list(eq.current_containers)
 
 
 def verify_equipment_constructor_kwargs(eq: Equipment, in_service, normally_in_service, usage_points, equipment_containers, operational_restrictions,
-                                        current_feeders, **kwargs):
+                                        current_containers, **kwargs):
     verify_power_system_resource_constructor_kwargs(eq, **kwargs)
     assert eq.in_service == in_service
     assert eq.normally_in_service == normally_in_service
     assert list(eq.usage_points) == usage_points
     assert list(eq.containers) == equipment_containers
     assert list(eq.operational_restrictions) == operational_restrictions
-    assert list(eq.current_feeders) == current_feeders
+    assert list(eq.current_containers) == current_containers
 
 
 def verify_equipment_constructor_args(eq: Equipment):
@@ -54,7 +54,7 @@ def verify_equipment_constructor_args(eq: Equipment):
     assert list(eq.usage_points) == equipment_args[-4]
     assert list(eq.containers) == equipment_args[-3]
     assert list(eq.operational_restrictions) == equipment_args[-2]
-    assert list(eq.current_feeders) == equipment_args[-1]
+    assert list(eq.current_containers) == equipment_args[-1]
 
 
 def test_usage_points_collection():

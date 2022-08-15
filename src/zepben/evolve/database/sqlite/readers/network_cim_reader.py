@@ -844,9 +844,9 @@ class NetworkCIMReader(BaseCIMReader):
     def load_lv_feeder(self, table: TableLvFeeders, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         lv_feeder = LvFeeder(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
 
-        lv_feeder.normal_head_terminal = self._ensure_get(rs.get_string(table.normal_head_terminal_mrid.query_index, None), LvFeeder)
+        lv_feeder.normal_head_terminal = self._ensure_get(rs.get_string(table.normal_head_terminal_mrid.query_index, None), Terminal)
 
-        return self._load_equipment_container(lv_feeder, table, rs)
+        return self._load_equipment_container(lv_feeder, table, rs) and self._add_or_throw(lv_feeder)
 
     # ************ ASSOCIATIONS ************
 
