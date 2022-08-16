@@ -14,6 +14,8 @@ from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
 class TestTable(SqliteTable):
 
+    __test__ = False
+
     test_column: Column = None
     test_column_2: Column = None
     _ignored_column: Column = None
@@ -35,6 +37,8 @@ class TestTable(SqliteTable):
 
 
 class TestTable2(SqliteTable):
+
+    __test__ = False
 
     test_column: Column = None
     test_column_2: Column = None
@@ -68,6 +72,8 @@ def test_create_column_set_raises_on_invalid_index():
 
 class TestTable3(SqliteTable):
 
+    __test__ = False
+
     test_column: Column = None
     test_column_2: Column = None
 
@@ -97,4 +103,3 @@ def test_ddl():
     assert x.prepared_update_sql() == "UPDATE test_table SET test_column = ?, test_column_2 = ?"
     assert x.create_indexes_sql() == [f"CREATE UNIQUE INDEX test_table_test_column ON test_table (test_column)",
                                       f"CREATE INDEX test_table_test_column_2 ON test_table (test_column_2)"]
-
