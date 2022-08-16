@@ -13,7 +13,6 @@ from traceback import print_exc
 from typing import TypeVar, Callable, Any
 
 from hypothesis import given, settings, assume
-from hypothesis.strategies import data
 
 from test.cim.cim_creators import create_cable_info, create_no_load_test, create_open_circuit_test, create_overhead_wire_info, create_power_transformer_info, \
     create_short_circuit_test, create_shunt_compensator_info, create_transformer_end_info, create_transformer_tank_info, create_asset_owner, create_pole, \
@@ -68,292 +67,292 @@ class TestDatabaseSqlite(object):
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_cable_info(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(CableInfo, data.draw(create_cable_info(False))))
+    @given(cable_info=create_cable_info(False))
+    def test_schema_cable_info(self, caplog, cable_info):
+        self._validate_schema(SchemaNetworks().network_services_of(CableInfo, cable_info))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_no_load_test(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(NoLoadTest, data.draw(create_no_load_test(False))))
+    @given(no_load_test=create_no_load_test(False))
+    def test_schema_no_load_test(self, caplog, no_load_test):
+        self._validate_schema(SchemaNetworks().network_services_of(NoLoadTest, no_load_test))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_open_circuit_test(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(OpenCircuitTest, data.draw(create_open_circuit_test(False))))
+    @given(open_circuit_test=create_open_circuit_test(False))
+    def test_schema_open_circuit_test(self, caplog, open_circuit_test):
+        self._validate_schema(SchemaNetworks().network_services_of(OpenCircuitTest, open_circuit_test))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_overhead_wire_info(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(OverheadWireInfo, data.draw(create_overhead_wire_info(False))))
+    @given(overhead_wire_info=create_overhead_wire_info(False))
+    def test_schema_overhead_wire_info(self, caplog, overhead_wire_info):
+        self._validate_schema(SchemaNetworks().network_services_of(OverheadWireInfo, overhead_wire_info))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_power_transformer_info(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerInfo, data.draw(create_power_transformer_info(False))))
+    @given(power_transformer_info=create_power_transformer_info(False))
+    def test_schema_power_transformer_info(self, caplog, power_transformer_info):
+        self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerInfo, power_transformer_info))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_short_circuit_test(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(ShortCircuitTest, data.draw(create_short_circuit_test(False))))
+    @given(short_circuit_test=create_short_circuit_test(False))
+    def test_schema_short_circuit_test(self, caplog, short_circuit_test):
+        self._validate_schema(SchemaNetworks().network_services_of(ShortCircuitTest, short_circuit_test))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_shunt_compensator_info(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(ShuntCompensatorInfo, data.draw(create_shunt_compensator_info(False))))
+    @given(shunt_compensator_info=create_shunt_compensator_info(False))
+    def test_schema_shunt_compensator_info(self, caplog, shunt_compensator_info):
+        self._validate_schema(SchemaNetworks().network_services_of(ShuntCompensatorInfo, shunt_compensator_info))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_transformer_end_info(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(TransformerEndInfo, data.draw(create_transformer_end_info(False))))
+    @given(transformer_end_info=create_transformer_end_info(False))
+    def test_schema_transformer_end_info(self, caplog, transformer_end_info):
+        self._validate_schema(SchemaNetworks().network_services_of(TransformerEndInfo, transformer_end_info))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_transformer_tank_info(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(TransformerTankInfo, data.draw(create_transformer_tank_info(False))))
+    @given(transformer_tank_info=create_transformer_tank_info(False))
+    def test_schema_transformer_tank_info(self, caplog, transformer_tank_info):
+        self._validate_schema(SchemaNetworks().network_services_of(TransformerTankInfo, transformer_tank_info))
 
     # ************ IEC61968 ASSETS ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_asset_owner(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(AssetOwner, data.draw(create_asset_owner(False))))
+    @given(asset_owner=create_asset_owner(False))
+    def test_schema_asset_owner(self, caplog, asset_owner):
+        self._validate_schema(SchemaNetworks().network_services_of(AssetOwner, asset_owner))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_pole(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Pole, data.draw(create_pole(False))))
+    @given(pole=create_pole(False))
+    def test_schema_pole(self, caplog, pole):
+        self._validate_schema(SchemaNetworks().network_services_of(Pole, pole))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_streetlight(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Streetlight, data.draw(create_streetlight(False))))
+    @given(streetlight=create_streetlight(False))
+    def test_schema_streetlight(self, caplog, streetlight):
+        self._validate_schema(SchemaNetworks().network_services_of(Streetlight, streetlight))
 
     # ************ IEC61968 CUSTOMERS ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_customer(self, caplog, data):
-        self._validate_schema(SchemaNetworks().customer_services_of(Customer, data.draw(create_customer(False))))
+    @given(customer=create_customer(False))
+    def test_schema_customer(self, caplog, customer):
+        self._validate_schema(SchemaNetworks().customer_services_of(Customer, customer))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_customer_agreement(self, caplog, data):
-        self._validate_schema(SchemaNetworks().customer_services_of(CustomerAgreement, data.draw(create_customer_agreement(False))))
+    @given(customer_agreement=create_customer_agreement(False))
+    def test_schema_customer_agreement(self, caplog, customer_agreement):
+        self._validate_schema(SchemaNetworks().customer_services_of(CustomerAgreement, customer_agreement))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_pricing_structure(self, caplog, data):
-        self._validate_schema(SchemaNetworks().customer_services_of(PricingStructure, data.draw(create_pricing_structure(False))))
+    @given(pricing_structure=create_pricing_structure(False))
+    def test_schema_pricing_structure(self, caplog, pricing_structure):
+        self._validate_schema(SchemaNetworks().customer_services_of(PricingStructure, pricing_structure))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_tariffs(self, caplog, data):
-        self._validate_schema(SchemaNetworks().customer_services_of(Tariff, data.draw(create_tariffs(False))))
+    @given(tariffs=create_tariffs(False))
+    def test_schema_tariffs(self, caplog, tariffs):
+        self._validate_schema(SchemaNetworks().customer_services_of(Tariff, tariffs))
 
     # ************ IEC61968 METERING ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_meter(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Meter, data.draw(create_meter(False))))
+    @given(meter=create_meter(False))
+    def test_schema_meter(self, caplog, meter):
+        self._validate_schema(SchemaNetworks().network_services_of(Meter, meter))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_usage_point(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(UsagePoint, data.draw(create_usage_point(False))))
+    @given(usage_point=create_usage_point(False))
+    def test_schema_usage_point(self, caplog, usage_point):
+        self._validate_schema(SchemaNetworks().network_services_of(UsagePoint, usage_point))
 
     # ************ IEC61968 COMMON ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_location(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Location, data.draw(create_location(False))))
+    @given(location=create_location(False))
+    def test_schema_location(self, caplog, location):
+        self._validate_schema(SchemaNetworks().network_services_of(Location, location))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_organisation(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Organisation, data.draw(create_organisation(False))))
+    @given(organisation=create_organisation(False))
+    def test_schema_organisation(self, caplog, organisation):
+        self._validate_schema(SchemaNetworks().network_services_of(Organisation, organisation))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_organisation(self, caplog, data):
-        self._validate_schema(SchemaNetworks().customer_services_of(Organisation, data.draw(create_organisation(False))))
+    @given(organisation=create_organisation(False))
+    def test_schema_organisation(self, caplog, organisation):
+        self._validate_schema(SchemaNetworks().customer_services_of(Organisation, organisation))
 
     # ************ IEC61968 OPERATIONS ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_operational_restriction(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(OperationalRestriction, data.draw(create_operational_restriction(False))))
+    @given(operational_restriction=create_operational_restriction(False))
+    def test_schema_operational_restriction(self, caplog, operational_restriction):
+        self._validate_schema(SchemaNetworks().network_services_of(OperationalRestriction, operational_restriction))
 
     # ************ IEC61970 BASE AUXILIARY EQUIPMENT ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_fault_indicator(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(FaultIndicator, data.draw(create_fault_indicator(False))))
+    @given(fault_indicator=create_fault_indicator(False))
+    def test_schema_fault_indicator(self, caplog, fault_indicator):
+        self._validate_schema(SchemaNetworks().network_services_of(FaultIndicator, fault_indicator))
 
     # ************ IEC61970 BASE CORE ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_base_voltage(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(BaseVoltage, data.draw(create_base_voltage(False))))
+    @given(base_voltage=create_base_voltage(False))
+    def test_schema_base_voltage(self, caplog, base_voltage):
+        self._validate_schema(SchemaNetworks().network_services_of(BaseVoltage, base_voltage))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_connectivity_node(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(ConnectivityNode, data.draw(create_connectivity_node(False))))
+    @given(connectivity_node=create_connectivity_node(False))
+    def test_schema_connectivity_node(self, caplog, connectivity_node):
+        self._validate_schema(SchemaNetworks().network_services_of(ConnectivityNode, connectivity_node))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_feeder(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Feeder, data.draw(create_feeder(False))))
+    @given(feeder=create_feeder(False))
+    def test_schema_feeder(self, caplog, feeder):
+        self._validate_schema(SchemaNetworks().network_services_of(Feeder, feeder))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_geographical_region(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(GeographicalRegion, data.draw(create_geographical_region(False))))
+    @given(geographical_region=create_geographical_region(False))
+    def test_schema_geographical_region(self, caplog, geographical_region):
+        self._validate_schema(SchemaNetworks().network_services_of(GeographicalRegion, geographical_region))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_site(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Site, data.draw(create_site(False))))
+    @given(site=create_site(False))
+    def test_schema_site(self, caplog, site):
+        self._validate_schema(SchemaNetworks().network_services_of(Site, site))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_sub_geographical_region(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(SubGeographicalRegion, data.draw(create_sub_geographical_region(False))))
+    @given(sub_geographical_region=create_sub_geographical_region(False))
+    def test_schema_sub_geographical_region(self, caplog, sub_geographical_region):
+        self._validate_schema(SchemaNetworks().network_services_of(SubGeographicalRegion, sub_geographical_region))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_substation(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Substation, data.draw(create_substation(False))))
+    @given(substation=create_substation(False))
+    def test_schema_substation(self, caplog, substation):
+        self._validate_schema(SchemaNetworks().network_services_of(Substation, substation))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_terminal(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Terminal, data.draw(create_terminal(False))))
+    @given(terminal=create_terminal(False))
+    def test_schema_terminal(self, caplog, terminal):
+        self._validate_schema(SchemaNetworks().network_services_of(Terminal, terminal))
 
     # ************ IEC61970 BASE DIAGRAM LAYOUT ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_diagram(self, caplog, data):
-        self._validate_schema(SchemaNetworks().diagram_services_of(Diagram, data.draw(create_diagram(False))))
+    @given(diagram=create_diagram(False))
+    def test_schema_diagram(self, caplog, diagram):
+        self._validate_schema(SchemaNetworks().diagram_services_of(Diagram, diagram))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_diagram_object(self, caplog, data):
-        self._validate_schema(SchemaNetworks().diagram_services_of(DiagramObject, data.draw(create_diagram_object(False))))
+    @given(diagram_object=create_diagram_object(False))
+    def test_schema_diagram_object(self, caplog, diagram_object):
+        self._validate_schema(SchemaNetworks().diagram_services_of(DiagramObject, diagram_object))
 
     # ************ IEC61970 BASE EQUIVALENTS ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_equivalent_branch(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(EquivalentBranch, data.draw(create_equivalent_branch(False))))
+    @given(equivalent_branch=create_equivalent_branch(False))
+    def test_schema_equivalent_branch(self, caplog, equivalent_branch):
+        self._validate_schema(SchemaNetworks().network_services_of(EquivalentBranch, equivalent_branch))
 
     # ************ IEC61970 BASE MEAS ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_accumulator(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Accumulator, data.draw(create_accumulator(False))))
+    @given(accumulator=create_accumulator(False))
+    def test_schema_accumulator(self, caplog, accumulator):
+        self._validate_schema(SchemaNetworks().network_services_of(Accumulator, accumulator))
 
         # self._validate_schema(SchemaNetworks().measurement_services_of(AccumulatorValue, data.draw(create_accumulator_value(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_analog(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Analog, data.draw(create_analog(False))))
+    @given(analog=create_analog(False))
+    def test_schema_analog(self, caplog, analog):
+        self._validate_schema(SchemaNetworks().network_services_of(Analog, analog))
 
         # self._validate_schema(SchemaNetworks().measurement_services_of(AnalogValue, data.draw(create_analog_value(False))))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_control(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Control, data.draw(create_control(False))))
+    @given(control=create_control(False))
+    def test_schema_control(self, caplog, control):
+        self._validate_schema(SchemaNetworks().network_services_of(Control, control))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_discrete(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Discrete, data.draw(create_discrete(False))))
+    @given(discrete=create_discrete(False))
+    def test_schema_discrete(self, caplog, discrete):
+        self._validate_schema(SchemaNetworks().network_services_of(Discrete, discrete))
 
         # self._validate_schema(SchemaNetworks().measurement_services_of(DiscreteValue, data.draw(create_discrete_value(False))))
 
@@ -362,212 +361,206 @@ class TestDatabaseSqlite(object):
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_remote_control(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(RemoteControl, data.draw(create_remote_control(False))))
+    @given(remote_control=create_remote_control(False))
+    def test_schema_remote_control(self, caplog, remote_control):
+        self._validate_schema(SchemaNetworks().network_services_of(RemoteControl, remote_control))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_remote_source(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(RemoteSource, data.draw(create_remote_source(False))))
+    @given(remote_source=create_remote_source(False))
+    def test_schema_remote_source(self, caplog, remote_source):
+        self._validate_schema(SchemaNetworks().network_services_of(RemoteSource, remote_source))
 
     # ************ IEC61970 BASE WIRES GENERATION PRODUCTION ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_battery_unit(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(BatteryUnit, data.draw(create_battery_unit(False))))
+    @given(battery_unit=create_battery_unit(False))
+    def test_schema_battery_unit(self, caplog, battery_unit):
+        self._validate_schema(SchemaNetworks().network_services_of(BatteryUnit, battery_unit))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_photovoltaic_unit(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(PhotoVoltaicUnit, data.draw(create_photovoltaic_unit(False))))
+    @given(photovoltaic_unit=create_photovoltaic_unit(False))
+    def test_schema_photovoltaic_unit(self, caplog, photovoltaic_unit):
+        self._validate_schema(SchemaNetworks().network_services_of(PhotoVoltaicUnit, photovoltaic_unit))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_power_electronics_connection(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnection, data.draw(create_power_electronics_connection(False))))
-        pass
+    @given(power_electronics_connection=create_power_electronics_connection(False))
+    def test_schema_power_electronics_connection(self, caplog, power_electronics_connection):
+        self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnection, power_electronics_connection))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_power_electronics_connection_phase(self, caplog, data):
-        self._validate_schema(
-            SchemaNetworks().network_services_of(PowerElectronicsConnectionPhase, data.draw(create_power_electronics_connection_phase(False)))
-        )
+    @given(power_electronics_connection_phase=create_power_electronics_connection_phase(False))
+    def test_schema_power_electronics_connection_phase(self, caplog, power_electronics_connection_phase):
+        self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnectionPhase, power_electronics_connection_phase))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_power_electronics_wind_unit(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsWindUnit, data.draw(create_power_electronics_wind_unit(False))))
+    @given(power_electronics_wind_unit=create_power_electronics_wind_unit(False))
+    def test_schema_power_electronics_wind_unit(self, caplog, power_electronics_wind_unit):
+        self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsWindUnit, power_electronics_wind_unit))
 
     # ************ IEC61970 BASE WIRES ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(acls=create_ac_line_segment(False))
-    def test_schema_ac_line_segment(self, caplog, acls):
-        self._validate_schema(SchemaNetworks().network_services_of(AcLineSegment, acls))
+    @given(ac_line_segment=create_ac_line_segment(False))
+    def test_schema_ac_line_segment(self, caplog, ac_line_segment):
+        self._validate_schema(SchemaNetworks().network_services_of(AcLineSegment, ac_line_segment))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_breaker(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Breaker, data.draw(create_breaker(False))))
+    @given(breaker=create_breaker(False))
+    def test_schema_breaker(self, caplog, breaker):
+        self._validate_schema(SchemaNetworks().network_services_of(Breaker, breaker))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_busbar_section(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(BusbarSection, data.draw(create_busbar_section(False))))
+    @given(busbar_section=create_busbar_section(False))
+    def test_schema_busbar_section(self, caplog, busbar_section):
+        self._validate_schema(SchemaNetworks().network_services_of(BusbarSection, busbar_section))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_disconnector(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Disconnector, data.draw(create_disconnector(False))))
+    @given(disconnector=create_disconnector(False))
+    def test_schema_disconnector(self, caplog, disconnector):
+        self._validate_schema(SchemaNetworks().network_services_of(Disconnector, disconnector))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_energy_consumer(self, caplog, data):
-        consumer: EnergyConsumer = data.draw(create_energy_consumer(False))
-        assume(len(Counter(map(lambda it: it.phase, consumer.phases))) == len(list(consumer.phases)))
-        self._validate_schema(SchemaNetworks().network_services_of(EnergyConsumer, consumer))
+    @given(energy_consumer=create_energy_consumer(False))
+    def test_schema_energy_consumer(self, caplog, energy_consumer):
+        assume(len(Counter(map(lambda it: it.phase, energy_consumer.phases))) == len(list(energy_consumer.phases)))
+        self._validate_schema(SchemaNetworks().network_services_of(EnergyConsumer, energy_consumer))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_energy_consumer_phase(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(EnergyConsumerPhase, data.draw(create_energy_consumer_phase(False))))
+    @given(energy_consumer_phase=create_energy_consumer_phase(False))
+    def test_schema_energy_consumer_phase(self, caplog, energy_consumer_phase):
+        self._validate_schema(SchemaNetworks().network_services_of(EnergyConsumerPhase, energy_consumer_phase))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_energy_source(self, caplog, data):
-        source: EnergySource = data.draw(create_energy_source(False))
-        assume(len(Counter(map(lambda it: it.phase, source.phases))) == len(list(source.phases)))
-        self._validate_schema(SchemaNetworks().network_services_of(EnergySource, source))
-        pass
+    @given(energy_source=create_energy_source(False))
+    def test_schema_energy_source(self, caplog, energy_source):
+        assume(len(Counter(map(lambda it: it.phase, energy_source.phases))) == len(list(energy_source.phases)))
+        self._validate_schema(SchemaNetworks().network_services_of(EnergySource, energy_source))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_energy_source_phase(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(EnergySourcePhase, data.draw(create_energy_source_phase(False))))
+    @given(energy_source_phase=create_energy_source_phase(False))
+    def test_schema_energy_source_phase(self, caplog, energy_source_phase):
+        self._validate_schema(SchemaNetworks().network_services_of(EnergySourcePhase, energy_source_phase))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_fuse(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Fuse, data.draw(create_fuse(False))))
+    @given(fuse=create_fuse(False))
+    def test_schema_fuse(self, caplog, fuse):
+        self._validate_schema(SchemaNetworks().network_services_of(Fuse, fuse))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_jumper(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Jumper, data.draw(create_jumper(False))))
+    @given(jumper=create_jumper(False))
+    def test_schema_jumper(self, caplog, jumper):
+        self._validate_schema(SchemaNetworks().network_services_of(Jumper, jumper))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_junction(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Junction, data.draw(create_junction(False))))
+    @given(junction=create_junction(False))
+    def test_schema_junction(self, caplog, junction):
+        self._validate_schema(SchemaNetworks().network_services_of(Junction, junction))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_linear_shunt_compensator(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(LinearShuntCompensator, data.draw(create_linear_shunt_compensator(False))))
+    @given(linear_shunt_compensator=create_linear_shunt_compensator(False))
+    def test_schema_linear_shunt_compensator(self, caplog, linear_shunt_compensator):
+        self._validate_schema(SchemaNetworks().network_services_of(LinearShuntCompensator, linear_shunt_compensator))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_load_break_switch(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(LoadBreakSwitch, data.draw(create_load_break_switch(False))))
+    @given(load_break_switch=create_load_break_switch(False))
+    def test_schema_load_break_switch(self, caplog, load_break_switch):
+        self._validate_schema(SchemaNetworks().network_services_of(LoadBreakSwitch, load_break_switch))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_per_length_sequence_impedance(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(PerLengthSequenceImpedance, data.draw(create_per_length_sequence_impedance(False))))
+    @given(per_length_sequence_impedance=create_per_length_sequence_impedance(False))
+    def test_schema_per_length_sequence_impedance(self, caplog, per_length_sequence_impedance):
+        self._validate_schema(SchemaNetworks().network_services_of(PerLengthSequenceImpedance, per_length_sequence_impedance))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_power_transformer(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(PowerTransformer, data.draw(create_power_transformer(False))))
+    @given(power_transformer=create_power_transformer(False))
+    def test_schema_power_transformer(self, caplog, power_transformer):
+        self._validate_schema(SchemaNetworks().network_services_of(PowerTransformer, power_transformer))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_power_transformer_end(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerEnd, data.draw(create_power_transformer_end(False))))
+    @given(power_transformer_end=create_power_transformer_end(False))
+    def test_schema_power_transformer_end(self, caplog, power_transformer_end):
+        self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerEnd, power_transformer_end))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_ratio_tap_changer(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(RatioTapChanger, data.draw(create_ratio_tap_changer(False))))
+    @given(ratio_tap_changer=create_ratio_tap_changer(False))
+    def test_schema_ratio_tap_changer(self, caplog, ratio_tap_changer):
+        self._validate_schema(SchemaNetworks().network_services_of(RatioTapChanger, ratio_tap_changer))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_recloser(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Recloser, data.draw(create_recloser(False))))
+    @given(recloser=create_recloser(False))
+    def test_schema_recloser(self, caplog, recloser):
+        self._validate_schema(SchemaNetworks().network_services_of(Recloser, recloser))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_transformer_star_impedance(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(TransformerStarImpedance, data.draw(create_transformer_star_impedance(False))))
+    @given(transformer_star_impedance=create_transformer_star_impedance(False))
+    def test_schema_transformer_star_impedance(self, caplog, transformer_star_impedance):
+        self._validate_schema(SchemaNetworks().network_services_of(TransformerStarImpedance, transformer_star_impedance))
 
     # ************ IEC61970 InfIEC61970 ************
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_circuit(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Circuit, data.draw(create_circuit(False))))
+    @given(circuit=create_circuit(False))
+    def test_schema_circuit(self, caplog, circuit):
+        self._validate_schema(SchemaNetworks().network_services_of(Circuit, circuit))
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
     @settings(deadline=2000)
-    @given(data())
-    def test_schema_loop(self, caplog, data):
-        self._validate_schema(SchemaNetworks().network_services_of(Loop, data.draw(create_loop(False))))
+    @given(loop=create_loop(False))
+    def test_schema_loop(self, caplog, loop):
+        self._validate_schema(SchemaNetworks().network_services_of(Loop, loop))
 
     # ************ Services ************
 
