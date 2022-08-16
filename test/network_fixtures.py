@@ -289,7 +289,7 @@ def add_location(network: NetworkService, psr: PowerSystemResource, *coords: flo
     network.add(loc)
 
 
-@fixture
+@fixture()
 async def feeder_network():
     """
                 c1       c2
