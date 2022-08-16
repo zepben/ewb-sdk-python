@@ -9,7 +9,8 @@ from setuptools import setup, find_namespace_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-test_deps = ["pytest", "pytest-cov", "pytest-asyncio", "pytest-timeout", "hypothesis<6", "grpcio-testing==1.46.3", "pylint"]
+test_deps = ["pytest==7.1.2", "pytest-cov==2.10.1", "pytest-asyncio==0.19.0", "pytest-timeout==1.4.2", "hypothesis<6", "grpcio-testing==1.46.3",
+             "pylint==2.14.5"]
 setup(
     name="zepben.evolve",
     version="0.30.0b6",
