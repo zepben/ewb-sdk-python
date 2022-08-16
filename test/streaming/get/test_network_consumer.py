@@ -9,7 +9,6 @@ from unittest.mock import MagicMock
 
 import grpc_testing
 import pytest
-
 # noinspection PyPackageRequirements
 from google.protobuf.any_pb2 import Any
 from grpc import StatusCode
