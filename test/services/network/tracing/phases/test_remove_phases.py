@@ -41,38 +41,35 @@ async def simple_network():
 
 @pytest.mark.asyncio
 async def test_removes_all_core_by_default(simple_network):
-    ns = await simple_network
-    await RemovePhases().run(get_t(ns, "c1", 2))
+    await RemovePhases().run(get_t(simple_network, "c1", 2))
 
-    validate_phases_from_term_or_equip(ns, "s0", PhaseCode.ABCN)
-    validate_phases_from_term_or_equip(ns, "c1", PhaseCode.ABCN, PhaseCode.NONE)
-    validate_phases_from_term_or_equip(ns, "c2", PhaseCode.NONE, PhaseCode.NONE)
-    validate_phases_from_term_or_equip(ns, "c3", PhaseCode.NONE, PhaseCode.NONE)
-    validate_phases_from_term_or_equip(ns, "s4", PhaseCode.ABCN)
-    validate_phases_from_term_or_equip(ns, "c5", PhaseCode.ABCN, PhaseCode.ABCN)
+    validate_phases_from_term_or_equip(simple_network, "s0", PhaseCode.ABCN)
+    validate_phases_from_term_or_equip(simple_network, "c1", PhaseCode.ABCN, PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "c2", PhaseCode.NONE, PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "c3", PhaseCode.NONE, PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "s4", PhaseCode.ABCN)
+    validate_phases_from_term_or_equip(simple_network, "c5", PhaseCode.ABCN, PhaseCode.ABCN)
 
 
 @pytest.mark.asyncio
 async def test_can_remove_specific_phases(simple_network):
-    ns = await simple_network
-    await RemovePhases().run(get_t(ns, "s0", 1), PhaseCode.AB)
+    await RemovePhases().run(get_t(simple_network, "s0", 1), PhaseCode.AB)
 
-    validate_phases_from_term_or_equip(ns, "s0", [SPK.NONE, SPK.NONE, SPK.C, SPK.N])
-    validate_phases_from_term_or_equip(ns, "c1", [SPK.NONE, SPK.NONE, SPK.C, SPK.N], [SPK.NONE, SPK.NONE, SPK.C, SPK.N])
-    validate_phases_from_term_or_equip(ns, "c2", [SPK.NONE, SPK.NONE, SPK.C, SPK.N], [SPK.NONE, SPK.NONE, SPK.C, SPK.N])
-    validate_phases_from_term_or_equip(ns, "c3", PhaseCode.NONE, PhaseCode.NONE)
-    validate_phases_from_term_or_equip(ns, "s4", PhaseCode.ABCN)
-    validate_phases_from_term_or_equip(ns, "c5", PhaseCode.ABCN, PhaseCode.ABCN)
+    validate_phases_from_term_or_equip(simple_network, "s0", [SPK.NONE, SPK.NONE, SPK.C, SPK.N])
+    validate_phases_from_term_or_equip(simple_network, "c1", [SPK.NONE, SPK.NONE, SPK.C, SPK.N], [SPK.NONE, SPK.NONE, SPK.C, SPK.N])
+    validate_phases_from_term_or_equip(simple_network, "c2", [SPK.NONE, SPK.NONE, SPK.C, SPK.N], [SPK.NONE, SPK.NONE, SPK.C, SPK.N])
+    validate_phases_from_term_or_equip(simple_network, "c3", PhaseCode.NONE, PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "s4", PhaseCode.ABCN)
+    validate_phases_from_term_or_equip(simple_network, "c5", PhaseCode.ABCN, PhaseCode.ABCN)
 
 
 @pytest.mark.asyncio
 async def test_can_remove_from_entire_network(simple_network):
-    ns = await simple_network
-    remove_all_traced_phases(ns)
+    remove_all_traced_phases(simple_network)
 
-    validate_phases_from_term_or_equip(ns, "s0", PhaseCode.NONE)
-    validate_phases_from_term_or_equip(ns, "c1", PhaseCode.NONE, PhaseCode.NONE)
-    validate_phases_from_term_or_equip(ns, "c2", PhaseCode.NONE, PhaseCode.NONE)
-    validate_phases_from_term_or_equip(ns, "c3", PhaseCode.NONE, PhaseCode.NONE)
-    validate_phases_from_term_or_equip(ns, "s4", PhaseCode.NONE)
-    validate_phases_from_term_or_equip(ns, "c5", PhaseCode.NONE, PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "s0", PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "c1", PhaseCode.NONE, PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "c2", PhaseCode.NONE, PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "c3", PhaseCode.NONE, PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "s4", PhaseCode.NONE)
+    validate_phases_from_term_or_equip(simple_network, "c5", PhaseCode.NONE, PhaseCode.NONE)
