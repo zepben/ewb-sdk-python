@@ -497,6 +497,13 @@ class TestDatabaseSqlite:
     def test_schema_loop(self, caplog, loop):
         self._validate_schema(SchemaNetworks().network_services_of(Loop, loop), caplog)
 
+    # noinspection PyShadowingNames
+    @log_on_failure_decorator
+    @settings(deadline=1000)
+    @given(lv_feeder=create_lv_feeder(False))
+    def test_schema_lv_feeder(self, caplog, lv_feeder):
+        self._validate_schema(SchemaNetworks().network_services_of(LvFeeder, lv_feeder), caplog)
+
     # ************ Services ************
 
     @log_on_failure_decorator
