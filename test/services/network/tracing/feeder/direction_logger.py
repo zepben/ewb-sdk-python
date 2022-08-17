@@ -9,7 +9,7 @@ from zepben.evolve import ConductingEquipment, connected_equipment_trace
 __all__ = ["log_directions"]
 
 
-def log_directions(*conducting_equipment: ConductingEquipment):
+async def log_directions(*conducting_equipment: ConductingEquipment):
     """
     Logs all the feeder directions of terminals. Useful for debugging.
     """
@@ -19,7 +19,7 @@ def log_directions(*conducting_equipment: ConductingEquipment):
         print(f"Tracing directions from: {cond_equip}")
         print()
 
-        connected_equipment_trace() \
+        await connected_equipment_trace() \
             .add_step_action(_step) \
             .trace(cond_equip)
 

@@ -34,7 +34,7 @@ class TestRemoveDirection:
 
         await RemoveDirection().run_terminal(self._get_t(n, "c1", 2))
 
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
         self._validate_directions(n, DOWNSTREAM, UPSTREAM, NONE, NONE, NONE, NONE)
 
     @pytest.mark.asyncio
@@ -46,7 +46,7 @@ class TestRemoveDirection:
 
         await RemoveDirection().run_terminal(self._get_t(n, "c2", 1))
 
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
         self._validate_directions(n, NONE, NONE, NONE, NONE, DOWNSTREAM, UPSTREAM)
 
     @pytest.mark.asyncio
@@ -60,7 +60,7 @@ class TestRemoveDirection:
 
         await RemoveDirection().run_terminal(self._get_t(n, "c1", 2))
 
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
         self._validate_directions(n, BOTH, BOTH, NONE, NONE, NONE, NONE)
 
     @pytest.mark.asyncio
@@ -74,7 +74,7 @@ class TestRemoveDirection:
 
         await RemoveDirection().run_terminal(self._get_t(n, "j0", 1), DOWNSTREAM)
 
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
         self._validate_directions(n, UPSTREAM, DOWNSTREAM, UPSTREAM, DOWNSTREAM, UPSTREAM, DOWNSTREAM)
 
     @pytest.mark.asyncio
@@ -88,7 +88,7 @@ class TestRemoveDirection:
 
         await RemoveDirection().run_terminal(self._get_t(n, "j0", 1), UPSTREAM)
 
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
         self._validate_directions(n, DOWNSTREAM, UPSTREAM, DOWNSTREAM, UPSTREAM, DOWNSTREAM, UPSTREAM)
 
     @pytest.mark.asyncio
@@ -115,7 +115,7 @@ class TestRemoveDirection:
         self._validate_terminal_directions(self._get_t(n, "c5", 2), DOWNSTREAM)
 
         await RemoveDirection().run_terminal(self._get_t(n, "c5", 1))
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
 
         self._validate_directions(n, BOTH, BOTH, BOTH, BOTH, BOTH, BOTH)
         self._validate_terminal_directions(self._get_t(n, "c4", 1), NONE)
@@ -147,7 +147,7 @@ class TestRemoveDirection:
         self._validate_terminal_directions(self._get_t(n, "c5", 2), DOWNSTREAM)
 
         await RemoveDirection().run_terminal(self._get_t(n, "j0", 1), DOWNSTREAM)
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
 
         self._validate_directions(n, UPSTREAM, DOWNSTREAM, UPSTREAM, DOWNSTREAM, UPSTREAM, DOWNSTREAM)
         self._validate_terminal_directions(self._get_t(n, "c4", 1), UPSTREAM)
@@ -187,7 +187,7 @@ class TestRemoveDirection:
         self._validate_terminal_directions(self._get_t(n, "c7", 2), DOWNSTREAM)
 
         await RemoveDirection().run_terminal(self._get_t(n, "j0", 1), BOTH)
-        log_directions(n["j0"], n["j6"])
+        await log_directions(n["j0"], n["j6"])
 
         self._validate_directions(n, NONE, NONE, NONE, NONE, NONE, NONE)
         self._validate_terminal_directions(self._get_t(n, "c4", 1), NONE)
@@ -233,7 +233,7 @@ class TestRemoveDirection:
         self._validate_terminal_directions(self._get_t(n, "j6", 1), BOTH)
 
         await RemoveDirection().run_terminal(self._get_t(n, "j0", 1), DOWNSTREAM)
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
 
         self._validate_terminal_directions(self._get_t(n, "j0", 1), UPSTREAM)
         self._validate_terminal_directions(self._get_t(n, "j2", 1), DOWNSTREAM)
@@ -263,7 +263,7 @@ class TestRemoveDirection:
         self._validate_terminal_directions(self._get_t(n, "c5", 2), DOWNSTREAM)
 
         RemoveDirection().run(n)
-        log_directions(n["j0"], n["j4"])
+        await log_directions(n["j0"], n["j4"])
 
         self._validate_directions(n, NONE, NONE, NONE, NONE, NONE, NONE)
         self._validate_terminal_directions(self._get_t(n, "j4", 1), NONE)
@@ -297,9 +297,9 @@ class TestRemoveDirection:
         ns = await tnb.build()
 
         if not log_from:
-            log_directions(ns["j0"])
+            await log_directions(ns["j0"])
         else:
-            log_directions(*map(lambda it: ns[it], log_from))
+            await log_directions(*map(lambda it: ns[it], log_from))
 
         return ns
 
