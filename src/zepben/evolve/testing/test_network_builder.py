@@ -23,6 +23,8 @@ class TestNetworkBuilder:
     A class for building simple test networks, often used for unit testing.
     """
 
+    __test__ = False
+
     def __init__(self):
         self.network: NetworkService = NetworkService()
         """

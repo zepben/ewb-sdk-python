@@ -33,6 +33,9 @@ class ArgsContainer:
 
 
 class TestValidator(BusBranchNetworkCreationValidator[ArgsContainer, TN, TB, EB, PT, ES, EC, PEC]):
+
+    __test__ = False
+
     network_data_count: int
     topological_node_data_count: int
     topological_branch_data_count: int
@@ -95,6 +98,8 @@ class TestValidator(BusBranchNetworkCreationValidator[ArgsContainer, TN, TB, EB,
 
 
 class TestBusBranchCreator(BusBranchNetworkCreator[ArgsContainer, TN, TB, EB, PT, ES, EC, PEC, TestValidator]):
+
+    __test__ = False
 
     def validator_creator(self) -> TestValidator:
         return TestValidator()

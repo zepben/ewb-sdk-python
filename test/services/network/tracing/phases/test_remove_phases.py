@@ -4,13 +4,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
-import pytest_asyncio
 
 from test.services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases_from_term_or_equip, get_t
 from zepben.evolve import TestNetworkBuilder, PhaseCode, EnergySource, RemovePhases, remove_all_traced_phases, SinglePhaseKind as SPK
 
 
-@pytest_asyncio.fixture
+@pytest.fixture()
 async def simple_network():
     """
     s0 --c1-- --c2--
@@ -64,7 +63,8 @@ async def test_can_remove_specific_phases(simple_network):
     validate_phases_from_term_or_equip(simple_network, "c5", PhaseCode.ABCN, PhaseCode.ABCN)
 
 
-def test_can_remove_from_entire_network(simple_network):
+@pytest.mark.asyncio
+async def test_can_remove_from_entire_network(simple_network):
     remove_all_traced_phases(simple_network)
 
     validate_phases_from_term_or_equip(simple_network, "s0", PhaseCode.NONE)
