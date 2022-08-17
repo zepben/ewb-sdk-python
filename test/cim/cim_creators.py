@@ -197,7 +197,7 @@ def create_streetlight(include_runtime: bool = True):
         Streetlight,
         **create_asset(include_runtime),
         pole=builds(Pole, **create_identified_object(include_runtime)),
-        light_rating=integers(min_value=0, max_value=MAX_32_BIT_INTEGER * 2),
+        light_rating=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),  # Capping unsigned int to 32-bit int range to avoid issues with Python 3.7 testing.
         lamp_kind=sampled_streetlight_lamp_kind()
     )
 

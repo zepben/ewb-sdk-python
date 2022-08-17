@@ -31,7 +31,8 @@ def int_or_none(value: int) -> Optional[int]:
 
 
 def uint_or_none(value: int) -> Optional[int]:
-    return value if value != _UNKNOWN_UINT else None
+    # The check against negative numbers is to handle issues with Python 3.7, which have been fixed in Python 3.9.
+    return value if value != _UNKNOWN_UINT and value >= 0 else None
 
 
 def float_or_none(value: float) -> Optional[float]:
