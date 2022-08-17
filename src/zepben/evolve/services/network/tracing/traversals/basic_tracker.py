@@ -4,45 +4,50 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from abc import abstractmethod
+__all__ = ["BasicTracker"]
 
-__all__ = ["Tracker"]
+from typing import TypeVar, Set
 
-from typing import TypeVar, Generic
-from dataclassy import dataclass
+from zepben.evolve import Tracker
 
 T = TypeVar("T")
 
 
-@dataclass(slots=True)
-class Tracker(Generic[T]):
+class BasicTracker(Tracker[T]):
     """
     An interface used by `Traversal`'s to 'track' items that have been visited.
-
-    A `Traversal` will utilise `has_visited`, `visit`, and `clear`.
     """
+    visited: Set = set()
 
-    @abstractmethod
     def has_visited(self, item: T) -> bool:
         """
         Check if the tracker has already seen an item.
         `item` The item to check if it has been visited.
         Returns true if the item has been visited, otherwise false.
         """
-        raise NotImplementedError()
+        return item in self.visited
 
-    @abstractmethod
     def visit(self, item: T) -> bool:
         """
         Visit an item. Item will not be visited if it has previously been visited.
         `item` The item to visit.
         Returns True if visit succeeds. False otherwise.
         """
-        raise NotImplementedError()
+        if item in self.visited:
+            return False
+        else:
+            self.visited.add(item)
+            return True
 
-    @abstractmethod
     def clear(self):
         """
         Clear the tracker, removing all visited items.
         """
-        raise NotImplementedError()
+        self.visited.clear()
+
+    def copy(self):
+        """
+        Create a new `BasicTracker` with the same visited items. Does not other class members. e.g. queue, step actions or stop conditions etc.
+        """
+        # noinspection PyArgumentList
+        return BasicTracker(visited=self.visited.copy())

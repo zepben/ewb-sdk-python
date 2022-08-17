@@ -5,17 +5,16 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+
 import logging
 from typing import Optional
 
-from zepben.evolve import Switch, ConductingEquipment, SinglePhaseKind
-from zepben.evolve.services.network.tracing.queuing_functions import tracing_logger
-from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
-from zepben.evolve.services.network.tracing.traversals.queue import LifoQueue
+from zepben.evolve import Switch, ConductingEquipment, SinglePhaseKind, BasicTraversal
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
 
 __all__ = ["normally_open", "currently_open", "ignore_open", "phase_log"]
 phase_logger = logging.getLogger("phase_logger")
+tracing_logger = logging.getLogger("queue_next")
 
 
 def normally_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] = None) -> bool:
@@ -82,7 +81,7 @@ async def _phase_log_trace(cond_equip):
             equip_msgs.append(e_msg)
         log_msg.append(equip_msgs)
 
-    trace = Traversal(queue_next=queue_next_equipment, start_item=cond_equip, process_queue=LifoQueue(), step_actions=[log])
+    trace = BasicTraversal(queue_next=queue_next_equipment, start_item=cond_equip, step_actions=[log])
     await trace.trace()
     return "\n".join([", ".join(x) for x in log_msg])
 

@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import List, Callable
 
-from zepben.evolve import BranchRecursiveTraversal, Terminal, FifoQueue, Tracker, NetworkService, Feeder, FeederDirection, normally_open, \
+from zepben.evolve import BranchRecursiveTraversal, Terminal, FifoQueue, BasicTracker, NetworkService, Feeder, FeederDirection, normally_open, \
     currently_open, current_direction, normal_direction
 from zepben.evolve.types import OpenTest, DirectionSelector
 
@@ -25,7 +25,7 @@ class SetDirection:
         self.normal_traversal: BranchRecursiveTraversal[Terminal] = BranchRecursiveTraversal(
             queue_next=lambda terminal, traversal: self._set_downstream_and_queue_next(traversal, terminal, normally_open, normal_direction),
             process_queue=FifoQueue(),
-            tracker=Tracker(),
+            tracker=BasicTracker(),
             branch_queue=FifoQueue()
         )
         """
@@ -38,7 +38,7 @@ class SetDirection:
         self.current_traversal: BranchRecursiveTraversal[Terminal] = BranchRecursiveTraversal(
             queue_next=lambda terminal, traversal: self._set_downstream_and_queue_next(traversal, terminal, currently_open, current_direction),
             process_queue=FifoQueue(),
-            tracker=Tracker(),
+            tracker=BasicTracker(),
             branch_queue=FifoQueue()
         )
         """

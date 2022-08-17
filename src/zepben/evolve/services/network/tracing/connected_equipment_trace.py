@@ -5,11 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Optional, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from zepben.evolve.services.network.network_service import connected_equipment
 if TYPE_CHECKING:
-    from zepben.evolve import ConductingEquipment, Traversal
+    from zepben.evolve import ConductingEquipment, BasicTraversal
     from zepben.evolve.types import OpenTest, QueueNext
     T = TypeVar("T")
 
@@ -18,7 +18,7 @@ __all__ = ["queue_next_connected_equipment_with_open_test"]
 
 # TODO: Rename this to something sane
 def queue_next_connected_equipment_with_open_test(open_test: OpenTest) -> QueueNext[ConductingEquipment]:
-    def queue_next(conducting_equipment: ConductingEquipment, traversal: Traversal[ConductingEquipment]):
+    def queue_next(conducting_equipment: ConductingEquipment, traversal: BasicTraversal[ConductingEquipment]):
         if open_test(conducting_equipment, None):
             return
         for cr in connected_equipment(conducting_equipment):

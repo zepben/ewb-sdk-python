@@ -5,18 +5,19 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+
+from zepben.evolve import BasicTracker, Tracker
 from zepben.evolve.services.network.tracing.traversals.queue import Queue
-from zepben.evolve.services.network.tracing.traversals.traversal import BaseTraversal
-from zepben.evolve.services.network.tracing.traversals.tracker import Tracker
+from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 from typing import Callable, TypeVar, Optional
 
 __all__ = ["BranchRecursiveTraversal"]
 T = TypeVar('T')
 
 
-class BranchRecursiveTraversal(BaseTraversal[T]):
+class BranchRecursiveTraversal(Traversal[T]):
 
-    queue_next: Callable[[T, BaseTraversal[T]], None]
+    queue_next: Callable[[T, Traversal[T]], None]
     """A callable for each item encountered during the trace, that should queue the next items found on the given traversal's `process_queue`. 
     The first argument will be the current item, the second this traversal, and the third a set of already visited items that can be used as an optional 
     optimisation to skip queuing."""
@@ -27,7 +28,7 @@ class BranchRecursiveTraversal(BaseTraversal[T]):
     process_queue: Queue[T]
     """Queue containing the items to process for this branch"""
 
-    tracker: Tracker = Tracker()
+    tracker: Tracker = BasicTracker()
     """Tracker for the items in this branch"""
 
     parent: Optional[BranchRecursiveTraversal[T]] = None

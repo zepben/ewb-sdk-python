@@ -9,7 +9,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, TypeVar, Dict, Set
 
 from zepben.evolve.services.network.tracing.phases.phase_step import PhaseStep
-from zepben.evolve.services.network.tracing.traversals.tracker import BaseTracker
+from zepben.evolve.services.network.tracing.traversals.tracker import Tracker
 if TYPE_CHECKING:
     from zepben.evolve import ConductingEquipment, SinglePhaseKind
 
@@ -18,7 +18,7 @@ T = TypeVar("T")
 __all__ = ["PhaseStepTracker"]
 
 
-class PhaseStepTracker(BaseTracker[PhaseStep]):
+class PhaseStepTracker(Tracker[PhaseStep]):
     """
     A specialised tracker that tracks the cores that have been visited on a piece of conducting equipment. When attempting to visit
     for the second time, this tracker will return false if the cores being tracked are a subset of those already visited.

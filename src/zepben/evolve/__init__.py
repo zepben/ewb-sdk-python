@@ -86,7 +86,9 @@ from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 
 from zepben.evolve.services.network.tracing.traversals.tracker import *
+from zepben.evolve.services.network.tracing.traversals.basic_tracker import *
 from zepben.evolve.services.network.tracing.traversals.traversal import *
+from zepben.evolve.services.network.tracing.traversals.basic_traversal import *
 from zepben.evolve.services.network.tracing.traversals.queue import *
 from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import *
 

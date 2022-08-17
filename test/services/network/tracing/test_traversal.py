@@ -5,11 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import pytest
-from zepben.evolve import BranchRecursiveTraversal, Traversal, FifoQueue, LifoQueue
+from zepben.evolve import BranchRecursiveTraversal, BasicTraversal, FifoQueue, LifoQueue
 from typing import List, Optional, Set
 
 
-async def validate_run(t: Traversal, visit_order: List[int], expected_order: List[int], can_stop_on_start=True, check_visited=True):
+async def validate_run(t: BasicTraversal, visit_order: List[int], expected_order: List[int], can_stop_on_start=True, check_visited=True):
     # clean slate each run
     t.reset()
     visit_order.clear()
@@ -20,7 +20,7 @@ async def validate_run(t: Traversal, visit_order: List[int], expected_order: Lis
             assert t.tracker.has_visited(x)
 
 
-async def _validate_can_stop(t: Traversal, visit_order: List[int], expected_order: List[int], stop_count=None, check_visited=True):
+async def _validate_can_stop(t: BasicTraversal, visit_order: List[int], expected_order: List[int], stop_count=None, check_visited=True):
     await validate_run(t, visit_order=visit_order, expected_order=expected_order, can_stop_on_start=False, check_visited=check_visited)
     if stop_count is not None:
         assert stop_count == len(visit_order)
@@ -29,7 +29,7 @@ async def _validate_can_stop(t: Traversal, visit_order: List[int], expected_orde
         assert stop_count == len(visit_order) - 1
 
 
-def queue_next(item: int, traversal: Traversal[int]):
+def queue_next(item: int, traversal: BasicTraversal[int]):
     traversal.process_queue.extend(filter(lambda x: x > 0, [item - 2, item - 1, item + 1, item + 2]))
 
 
@@ -46,7 +46,7 @@ class TestTraversal(object):
         async def action(i, s):
             visit_order.append(i)
 
-        t = Traversal(queue_next=queue_next, start_item=1, process_queue=FifoQueue(), stop_conditions=[cond], step_actions=[action])
+        t = BasicTraversal(queue_next=queue_next, start_item=1, process_queue=FifoQueue(), stop_conditions=[cond], step_actions=[action])
 
         await validate_run(t, can_stop_on_start=True, visit_order=visit_order, expected_order=expected_order)
 
@@ -61,7 +61,7 @@ class TestTraversal(object):
         async def action(i, s):
             visit_order.append(i)
 
-        t = Traversal(queue_next=queue_next, start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
+        t = BasicTraversal(queue_next=queue_next, start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
 
         await validate_run(t, can_stop_on_start=True, visit_order=visit_order, expected_order=expected_order)
 
@@ -78,9 +78,9 @@ class TestTraversal(object):
         async def action(i, s):
             visit_order.append(i)
 
-        t = Traversal(queue_next=queue_next, start_item=1, process_queue=FifoQueue(), stop_conditions=[cond1, cond2], step_actions=[action])
+        t = BasicTraversal(queue_next=queue_next, start_item=1, process_queue=FifoQueue(), stop_conditions=[cond1, cond2], step_actions=[action])
         await _validate_can_stop(t, visit_order=visit_order, expected_order=[1, 2, 3])
-        t = Traversal(queue_next=queue_next, start_item=1, process_queue=LifoQueue(), stop_conditions=[cond1, cond2], step_actions=[action])
+        t = BasicTraversal(queue_next=queue_next, start_item=1, process_queue=LifoQueue(), stop_conditions=[cond1, cond2], step_actions=[action])
         await _validate_can_stop(t, visit_order=visit_order, expected_order=[1, 3, 2])
 
     @pytest.mark.asyncio
@@ -96,7 +96,7 @@ class TestTraversal(object):
             if s:
                 stopping_on.add(i)
 
-        t = Traversal(queue_next=lambda i, traversal: traversal.process_queue.extend([i + 1, i + 2]),
+        t = BasicTraversal(queue_next=lambda i, traversal: traversal.process_queue.extend([i + 1, i + 2]),
                       start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
 
         await t.trace(can_stop_on_start_item=True)

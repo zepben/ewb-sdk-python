@@ -5,27 +5,26 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Callable, Optional, Set, List
 
-from zepben.evolve import LifoQueue
+from zepben.evolve import LifoQueue, BasicTraversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_tracker import AssociatedTerminalTracker
-from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 from zepben.evolve.services.network.tracing.util import ignore_open, normally_open, currently_open
 
 __all__ = ["new_normal_trace", "new_current_trace", "new_trace", "get_associated_terminals", "queue_next_terminal_if_closed"]
 
 
-def new_trace(open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool] = ignore_open):
+def new_trace(open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool] = ignore_open) -> BasicTraversal[Terminal]:
     # noinspection PyArgumentList
-    return Traversal(queue_next=queue_next_terminal_if_closed(open_test), process_queue=LifoQueue(), tracker=AssociatedTerminalTracker())
+    return BasicTraversal(queue_next=queue_next_terminal_if_closed(open_test), process_queue=LifoQueue(), tracker=AssociatedTerminalTracker())
 
 
-def new_normal_trace() -> Traversal:
+def new_normal_trace() -> BasicTraversal[Terminal]:
     return new_trace(normally_open)
 
 
-def new_current_trace() -> Traversal:
+def new_current_trace() -> BasicTraversal[Terminal]:
     return new_trace(currently_open)
 
 
@@ -49,7 +48,7 @@ def get_associated_terminals(terminal: Terminal, exclude: Set[Terminal] = None) 
 
 def queue_next_terminal_if_closed(
     open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool]
-) -> Callable[[Terminal, Traversal[Terminal]], None]:
+) -> Callable[[Terminal, BasicTraversal[Terminal]], None]:
     """
     Creates a queue next function based on the given `open_test` that given a `Terminal` where all its
     `phases` are closed, will return all its associated `Terminal`s for queuing as per `get_associated_terminals`.
@@ -58,7 +57,7 @@ def queue_next_terminal_if_closed(
     Returns the queuing function to be used to populate a `Traversal`s `process_queue`.
     """
 
-    def queue_next(terminal: Terminal, traversal: Traversal[Terminal]):
+    def queue_next(terminal: Terminal, traversal: BasicTraversal[Terminal]):
         if terminal is not None:
             if terminal.conducting_equipment is not None:
                 # Stop only if all phases are open.

@@ -18,7 +18,7 @@ from zepben.evolve.services.network.tracing.phases.phase_trace import new_phase_
 from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
 from zepben.evolve.services.network.tracing.traversals.queue import depth_first, breadth_first
-from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
+from zepben.evolve.services.network.tracing.traversals.basic_traversal import BasicTraversal
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
 from zepben.evolve.services.network.tracing.util import ignore_open, normally_open, currently_open
 if TYPE_CHECKING:
@@ -34,19 +34,19 @@ __all__ = ["create_basic_depth_trace", "create_basic_breadth_trace", "connected_
 
 # --- Helper functions that create depth-first/breadth-first traversals ---
 
-def create_basic_depth_trace(queue_next: QueueNext[T]) -> Traversal[T]:
+def create_basic_depth_trace(queue_next: QueueNext[T]) -> BasicTraversal[T]:
     # noinspection PyArgumentList
-    return Traversal(queue_next, depth_first())
+    return BasicTraversal(queue_next, depth_first())
 
 
-def create_basic_breadth_trace(queue_next: QueueNext[T]) -> Traversal[T]:
+def create_basic_breadth_trace(queue_next: QueueNext[T]) -> BasicTraversal[T]:
     # noinspection PyArgumentList
-    return Traversal(queue_next, breadth_first())
+    return BasicTraversal(queue_next, breadth_first())
 
 
 # --- Traversals for conducting equipment ---
 
-def connected_equipment_trace() -> Traversal[ConductingEquipment]:
+def connected_equipment_trace() -> BasicTraversal[ConductingEquipment]:
     """
     Creates a new traversal that traces equipment that are connected. This ignores phases, open status etc.
     It is purely to trace equipment that are connected in any way.
@@ -56,7 +56,7 @@ def connected_equipment_trace() -> Traversal[ConductingEquipment]:
     return create_basic_depth_trace(queue_next_connected_equipment_with_open_test(ignore_open))
 
 
-def connected_equipment_breadth_trace() -> Traversal[ConductingEquipment]:
+def connected_equipment_breadth_trace() -> BasicTraversal[ConductingEquipment]:
     """
     Creates a new traversal that traces equipment that are connected. This ignores phases, open status etc.
     It is purely to trace equipment that are connected in any way.
@@ -66,7 +66,7 @@ def connected_equipment_breadth_trace() -> Traversal[ConductingEquipment]:
     return create_basic_breadth_trace(queue_next_connected_equipment_with_open_test(ignore_open))
 
 
-def normal_connected_equipment_trace() -> Traversal[ConductingEquipment]:
+def normal_connected_equipment_trace() -> BasicTraversal[ConductingEquipment]:
     """
     Creates a new traversal that traces equipment that are connected at normally open points.
 
@@ -75,7 +75,7 @@ def normal_connected_equipment_trace() -> Traversal[ConductingEquipment]:
     return create_basic_depth_trace(queue_next_connected_equipment_with_open_test(normally_open))
 
 
-def current_connected_equipment_trace() -> Traversal[ConductingEquipment]:
+def current_connected_equipment_trace() -> BasicTraversal[ConductingEquipment]:
     """
     Creates a new traversal that traces equipment that are connected at currently open points.
 
@@ -86,7 +86,7 @@ def current_connected_equipment_trace() -> Traversal[ConductingEquipment]:
 
 # Traversals for connectivity results
 
-def connectivity_trace() -> Traversal[ConnectivityResult]:
+def connectivity_trace() -> BasicTraversal[ConnectivityResult]:
     """
     Creates a new traversal that traces equipment that are connected. This ignores phases, open status etc.
     It is purely to trace equipment that are connected in any way.
@@ -96,7 +96,7 @@ def connectivity_trace() -> Traversal[ConnectivityResult]:
     return create_basic_depth_trace(queue_next_connectivity_result_with_open_test(ignore_open))
 
 
-def connectivity_breadth_trace() -> Traversal[ConnectivityResult]:
+def connectivity_breadth_trace() -> BasicTraversal[ConnectivityResult]:
     """
     Creates a new traversal that traces equipment that are connected. This ignores phases, open status etc.
     It is purely to trace equipment that are connected in any way.
@@ -106,7 +106,7 @@ def connectivity_breadth_trace() -> Traversal[ConnectivityResult]:
     return create_basic_breadth_trace(queue_next_connectivity_result_with_open_test(ignore_open))
 
 
-def normal_connectivity_trace() -> Traversal[ConnectivityResult]:
+def normal_connectivity_trace() -> BasicTraversal[ConnectivityResult]:
     """
     Creates a new traversal that traces equipment that are normally connected.
 
@@ -115,7 +115,7 @@ def normal_connectivity_trace() -> Traversal[ConnectivityResult]:
     return create_basic_depth_trace(queue_next_connectivity_result_with_open_test(normally_open))
 
 
-def current_connectivity_trace() -> Traversal[ConnectivityResult]:
+def current_connectivity_trace() -> BasicTraversal[ConnectivityResult]:
     """
     Creates a new traversal that traces equipment that are currently connected.
 
@@ -126,7 +126,7 @@ def current_connectivity_trace() -> Traversal[ConnectivityResult]:
 
 # --- Traversals for phase steps ---
 
-def phase_trace() -> Traversal[PhaseStep]:
+def phase_trace() -> BasicTraversal[PhaseStep]:
     """
     Creates a new phase-based trace ignoring the state of open phases
 
@@ -135,7 +135,7 @@ def phase_trace() -> Traversal[PhaseStep]:
     return new_phase_trace(ignore_open)
 
 
-def normal_phase_trace() -> Traversal[PhaseStep]:
+def normal_phase_trace() -> BasicTraversal[PhaseStep]:
     """
     Creates a new phase-based trace stopping on normally open phases
 
@@ -144,7 +144,7 @@ def normal_phase_trace() -> Traversal[PhaseStep]:
     return new_phase_trace(normally_open)
 
 
-def current_phase_trace() -> Traversal[PhaseStep]:
+def current_phase_trace() -> BasicTraversal[PhaseStep]:
     """
     Creates a new phase-based trace stopping on currently open phases
 
@@ -153,7 +153,7 @@ def current_phase_trace() -> Traversal[PhaseStep]:
     return new_phase_trace(currently_open)
 
 
-def normal_downstream_trace() -> Traversal[PhaseStep]:
+def normal_downstream_trace() -> BasicTraversal[PhaseStep]:
     """
     Creates a new downstream trace based on phases and the normal state of the network. Note that the phases
     need to be set on the network before a concept of downstream is known.
@@ -163,7 +163,7 @@ def normal_downstream_trace() -> Traversal[PhaseStep]:
     return new_downstream_phase_trace(normally_open, normal_direction)
 
 
-def current_downstream_trace() -> Traversal[PhaseStep]:
+def current_downstream_trace() -> BasicTraversal[PhaseStep]:
     """
     Creates a new downstream trace based on phases and the current state of the network. Note that the phases
     need to be set on the network before a concept of downstream is known.
@@ -173,7 +173,7 @@ def current_downstream_trace() -> Traversal[PhaseStep]:
     return new_downstream_phase_trace(currently_open, current_direction)
 
 
-def normal_upstream_trace() -> Traversal[PhaseStep]:
+def normal_upstream_trace() -> BasicTraversal[PhaseStep]:
     """
     Creates a new upstream trace based on phases and the normal state of the network. Note that the phases
     need to be set on the network before a concept of upstream is known.
@@ -183,7 +183,7 @@ def normal_upstream_trace() -> Traversal[PhaseStep]:
     return new_upstream_phase_trace(normally_open, normal_direction)
 
 
-def current_upstream_trace() -> Traversal[PhaseStep]:
+def current_upstream_trace() -> BasicTraversal[PhaseStep]:
     """
     Creates a new upstream trace based on phases and the current state of the network. Note that the phases
     need to be set on the network before a concept of upstream is known.

@@ -11,7 +11,7 @@ from zepben.evolve.services.network.tracing.phases import phase_step
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
 
 from network_fixtures import phase_swap_loop_network  # noqa (fixture)
-from zepben.evolve import Traversal, SetPhases, RemovePhases, AssignToFeeders, Breaker, Terminal, PhaseCode, ConductingEquipment, \
+from zepben.evolve import BasicTraversal, SetPhases, RemovePhases, AssignToFeeders, Breaker, Terminal, PhaseCode, ConductingEquipment, \
     connected_equipment_trace, SetDirection, RemoveDirection
 from zepben.evolve.services.network.tracing import tracing
 
@@ -36,18 +36,18 @@ async def test_basic_asset_trace(phase_swap_loop_network):
 
 
 def test_suppliers():
-    validate_supplier(lambda: tracing.create_basic_depth_trace(lambda i, t: None), Traversal)
-    validate_supplier(lambda: tracing.create_basic_breadth_trace(lambda i, t: None), Traversal)
-    validate_supplier(tracing.connected_equipment_trace, Traversal)
-    validate_supplier(tracing.normal_connected_equipment_trace, Traversal)
-    validate_supplier(tracing.current_connected_equipment_trace, Traversal)
-    validate_supplier(tracing.phase_trace, Traversal)
-    validate_supplier(tracing.normal_phase_trace, Traversal)
-    validate_supplier(tracing.current_phase_trace, Traversal)
-    validate_supplier(tracing.normal_downstream_trace, Traversal)
-    validate_supplier(tracing.current_downstream_trace, Traversal)
-    validate_supplier(tracing.normal_upstream_trace, Traversal)
-    validate_supplier(tracing.current_upstream_trace, Traversal)
+    validate_supplier(lambda: tracing.create_basic_depth_trace(lambda i, t: None), BasicTraversal)
+    validate_supplier(lambda: tracing.create_basic_breadth_trace(lambda i, t: None), BasicTraversal)
+    validate_supplier(tracing.connected_equipment_trace, BasicTraversal)
+    validate_supplier(tracing.normal_connected_equipment_trace, BasicTraversal)
+    validate_supplier(tracing.current_connected_equipment_trace, BasicTraversal)
+    validate_supplier(tracing.phase_trace, BasicTraversal)
+    validate_supplier(tracing.normal_phase_trace, BasicTraversal)
+    validate_supplier(tracing.current_phase_trace, BasicTraversal)
+    validate_supplier(tracing.normal_downstream_trace, BasicTraversal)
+    validate_supplier(tracing.current_downstream_trace, BasicTraversal)
+    validate_supplier(tracing.normal_upstream_trace, BasicTraversal)
+    validate_supplier(tracing.current_upstream_trace, BasicTraversal)
     validate_supplier(tracing.set_phases, SetPhases)
     validate_supplier(tracing.remove_phases, RemovePhases)
 
