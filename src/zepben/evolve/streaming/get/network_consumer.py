@@ -13,7 +13,8 @@ from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callab
 from dataclassy import dataclass
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
-    GetCurrentEquipmentForFeederRequest, GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest
+    GetCurrentEquipmentForFeederRequest, GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, \
+    IncludedEnergizedContainers
 
 from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, OverheadWireInfo, AssetOwner, \
     Organisation, Location, Meter, UsagePoint, OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, GeographicalRegion, Site, \
@@ -76,14 +77,18 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         self.__service = NetworkService()
         self.__network_hierarchy = None
 
-    async def get_equipment_for_container(self, container: Union[str, EquipmentContainer]) -> GrpcResult[MultiObjectResult]:
+    async def get_equipment_for_container(
+        self,
+        container: Union[str, EquipmentContainer],
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+    ) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`EquipmentContainer` represented by `container`
 
         Exceptions that occur during retrieval will be caught and passed to all error handlers that have been registered against this client.
 
         Parameters
-            - `service` - The :class:`NetworkService` to store fetched objects in.
             - `container` - The :class:`EquipmentContainer` (or its mRID) to fetch equipment for.
 
         Returns a :class:`GrpcResult` with a result of one of the following:
@@ -94,7 +99,31 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
-        return await self._get_equipment_for_container(container)
+        return await self._get_equipment_for_container(container, include_energizing_containers, include_energized_containers)
+
+    async def get_equipment_for_containers(
+        self,
+        containers: Iterable[str],
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+    ):
+        """
+        Retrieve the :class:`Equipment` for the :class:`EquipmentContainer`'s represented in `containers`
+
+        Exceptions that occur during retrieval will be caught and passed to all error handlers that have been registered against this client.
+
+        Parameters
+            - `containers` - The mRIDs of :class:`EquipmentContainer`'s to fetch equipment for.
+
+        Returns a :class:`GrpcResult` with a result of one of the following:
+            - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
+              found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
+              `BaseService.add`).
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
+
+        Note the :class:`NetworkConsumerClient` warning in this case.
+        """
+        return await self._get_equipment_for_containers(containers, include_energizing_containers, include_energized_containers)
 
     async def get_current_equipment_for_feeder(self, feeder: [str, Feeder]) -> GrpcResult[MultiObjectResult]:
         """
@@ -255,11 +284,25 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._retrieve_network()
 
-    async def _get_equipment_for_container(self, container: Union[str, EquipmentContainer]) -> GrpcResult[MultiObjectResult]:
-        return await self._handle_multi_object_rpc(lambda: self._process_equipment_for_container(container))
+    async def _get_equipment_for_container(
+        self,
+        container: Union[str, EquipmentContainer],
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+    ) -> GrpcResult[MultiObjectResult]:
+        return await self._handle_multi_object_rpc(
+            lambda: self._process_equipment_for_container(container, include_energizing_containers, include_energized_containers)
+        )
 
-    async def _get_equipment_for_containers(self, containers: Iterable[str]) -> GrpcResult[MultiObjectResult]:
-        return await self._handle_multi_object_rpc(lambda: self._process_equipment_for_containers(containers))
+    async def _get_equipment_for_containers(
+        self,
+        containers: Iterable[str],
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+    ) -> GrpcResult[MultiObjectResult]:
+        return await self._handle_multi_object_rpc(
+            lambda: self._process_equipment_for_containers(containers, include_energizing_containers, include_energized_containers)
+        )
 
     async def _get_current_equipment_for_feeder(self, feeder: [str, Feeder]) -> GrpcResult[MultiObjectResult]:
         return await self._handle_multi_object_rpc(lambda: self._process_current_equipment_for_feeder(feeder))
@@ -356,15 +399,30 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         # noinspection PyArgumentList
         return GrpcResult(NetworkResult(self.service, failed))
 
-    async def _process_equipment_for_container(self, it: Union[str, EquipmentContainer]) -> AsyncGenerator[IdentifiedObject, None]:
+    async def _process_equipment_for_container(
+        self, it: Union[str, EquipmentContainer],
+        include_energizing_containers: IncludedEnergizingContainers,
+        include_energized_containers: IncludedEnergizedContainers
+    ) -> AsyncGenerator[IdentifiedObject, None]:
         mrid = it.mrid if isinstance(it, EquipmentContainer) else it
-        responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), [mrid]), timeout=self.timeout)
+        request = GetEquipmentForContainersRequest()
+        request.includeEnergizingContainers = include_energizing_containers
+        request.includeEnergizedContainers = include_energized_containers
+        responses = self._stub.getEquipmentForContainers(self._batch_send(request, [mrid]), timeout=self.timeout)
         async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
 
-    async def _process_equipment_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[IdentifiedObject, None]:
-        responses = self._stub.getEquipmentForContainers(self._batch_send(GetEquipmentForContainersRequest(), mrids), timeout=self.timeout)
+    async def _process_equipment_for_containers(
+        self,
+        mrids: Iterable[str],
+        include_energizing_containers: IncludedEnergizingContainers,
+        include_energized_containers: IncludedEnergizedContainers
+    ) -> AsyncGenerator[IdentifiedObject, None]:
+        request = GetEquipmentForContainersRequest()
+        request.includeEnergizingContainers = include_energizing_containers
+        request.includeEnergizedContainers = include_energized_containers
+        responses = self._stub.getEquipmentForContainers(self._batch_send(request, mrids), timeout=self.timeout)
         async for response in responses:
             for nio in response.identifiedObjects:
                 yield self._extract_identified_object("network", nio, _nio_type_to_cim)
@@ -510,8 +568,23 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
     def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super().get_identified_objects(mrids))
 
-    def get_equipment_for_container(self, mrid: str) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_equipment_for_container(mrid))
+    def get_equipment_for_container(
+        self,
+        container: Union[str, EquipmentContainer],
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+    ) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super().get_equipment_for_container(container, include_energizing_containers, include_energized_containers))
+
+    def get_equipment_for_containers(
+        self,
+        containers: Iterable[str],
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+    ) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(
+            super().get_equipment_for_containers(containers, include_energizing_containers, include_energized_containers)
+        )
 
     def get_current_equipment_for_feeder(self, mrid: str) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super().get_current_equipment_for_feeder(mrid))
