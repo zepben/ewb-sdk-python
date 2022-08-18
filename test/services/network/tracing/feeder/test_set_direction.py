@@ -5,8 +5,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
 
-from test.services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
-from test.services.network.tracing.feeder.direction_logger import log_directions
+from services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
+from services.network.tracing.feeder.direction_logger import log_directions
 from zepben.evolve import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment
 
 UPSTREAM = FeederDirection.UPSTREAM

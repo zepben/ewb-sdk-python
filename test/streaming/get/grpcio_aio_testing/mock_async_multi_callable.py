@@ -24,7 +24,7 @@ from grpc.aio import UnaryUnaryCall, StreamStreamCall, StreamUnaryCall, UnaryStr
 from grpc_testing import _common
 from grpc_testing._channel import _invocation
 
-from test.streaming.get.grpcio_aio_testing.mock_async_calls import UnaryResponse, ResponseIteratorCall
+from streaming.get.grpcio_aio_testing.mock_async_calls import UnaryResponse, ResponseIteratorCall
 
 MetadataType = TypeVar("MetadataType")
 RequestIterableType = TypeVar("RequestIterableType")

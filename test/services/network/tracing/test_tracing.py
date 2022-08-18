@@ -10,7 +10,7 @@ from zepben.evolve.services.network.tracing.phases import phase_step
 
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
 
-from test.network_fixtures import phase_swap_loop_network  # noqa (fixture)
+from network_fixtures import phase_swap_loop_network  # noqa (fixture)
 from zepben.evolve import Traversal, SetPhases, RemovePhases, AssignToFeeders, Breaker, Terminal, PhaseCode, ConductingEquipment, \
     connected_equipment_trace, SetDirection, RemoveDirection
 from zepben.evolve.services.network.tracing import tracing

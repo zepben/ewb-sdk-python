@@ -3,7 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from test.network_fixtures import create_source_for_connecting, create_junction_for_connecting, create_switch_for_connecting, create_acls_for_connecting
+from network_fixtures import create_source_for_connecting, create_junction_for_connecting, create_switch_for_connecting, create_acls_for_connecting
 from zepben.evolve import NetworkService, PhaseCode, Feeder
 
 

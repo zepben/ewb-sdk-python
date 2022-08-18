@@ -5,8 +5,8 @@
 #  file, You can obtain one at https: #mozilla.org/MPL/2.0/.
 import pytest
 
-from test.network_fixtures import phase_swap_loop_network  # noqa (Fixtures)
-from test.services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases, validate_phases_from_term_or_equip, get_t
+from network_fixtures import phase_swap_loop_network  # noqa (Fixtures)
+from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases, validate_phases_from_term_or_equip, get_t
 from zepben.evolve import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker
 from zepben.evolve.exceptions import TracingException, PhaseException
 

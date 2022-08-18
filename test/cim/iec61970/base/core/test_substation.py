@@ -6,8 +6,8 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from test.cim.collection_validator import validate_collection_unordered
-from test.cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
+from cim.collection_validator import validate_collection_unordered
+from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from zepben.evolve import Substation, Feeder, Loop, Circuit, SubGeographicalRegion
 

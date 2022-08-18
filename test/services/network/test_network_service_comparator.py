@@ -20,8 +20,8 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
-from test.services.common.service_comparator_validator import ServiceComparatorValidator
-from test.services.common.test_base_service_comparator import TestBaseServiceComparator
+from services.common.service_comparator_validator import ServiceComparatorValidator
+from services.common.test_base_service_comparator import TestBaseServiceComparator
 
 
 class TestNetworkServiceComparator(TestBaseServiceComparator):

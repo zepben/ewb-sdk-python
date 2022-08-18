@@ -5,10 +5,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import floats
 
-from test.cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
+from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
-from test.cim.property_validator import validate_property_accessor
-from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.property_validator import validate_property_accessor
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import Conductor, WireInfo
 
 conductor_kwargs = {

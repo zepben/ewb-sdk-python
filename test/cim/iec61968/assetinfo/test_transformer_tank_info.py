@@ -7,8 +7,8 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from test.cim.collection_validator import validate_collection_unordered
-from test.cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
+from cim.collection_validator import validate_collection_unordered
+from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
 from zepben.evolve import TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo
 

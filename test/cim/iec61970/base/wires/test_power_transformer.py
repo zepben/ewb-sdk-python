@@ -6,10 +6,10 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, lists, floats
 
-from test.cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
+from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
-from test.cim.property_validator import validate_property_accessor
-from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.property_validator import validate_property_accessor
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import PowerTransformer, VectorGroup, PowerTransformerEnd, PowerTransformerInfo, TransformerConstructionKind, TransformerFunctionKind
 
 power_transformer_kwargs = {
@@ -62,5 +62,3 @@ def test_power_transformer_constructor_args():
 
 def test_power_transformer_info_accessor():
     validate_property_accessor(PowerTransformer, PowerTransformerInfo, PowerTransformer.power_transformer_info)
-
-

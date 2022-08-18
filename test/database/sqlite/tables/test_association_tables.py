@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from test.database.sqlite.tables.table_test_utils import verify_column
+from database.sqlite.tables.table_test_utils import verify_column
 from zepben.evolve import Nullable, TableAssetOrganisationRolesAssets, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableCustomerAgreementsPricingStructures, TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, \
     TableLoopsSubstations, TablePricingStructuresTariffs, TableUsagePointsEndDevices

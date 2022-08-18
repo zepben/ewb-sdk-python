@@ -8,9 +8,9 @@ from unittest.mock import patch
 from hypothesis import given
 from hypothesis.strategies import integers, floats
 
-from test.cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
+from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args, asset_info_args
-from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection_kind, create_transformer_tank_info, \
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection_kind, create_transformer_tank_info, \
     create_transformer_star_impedance, create_no_load_test, create_short_circuit_test, create_open_circuit_test
 from zepben.evolve import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
     ShortCircuitTest, OpenCircuitTest

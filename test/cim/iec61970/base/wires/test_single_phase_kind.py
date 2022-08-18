@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind as PBSinglePhaseKind
 
-from test.cim.enum_validator import validate_enum
+from cim.enum_validator import validate_enum
 from zepben.evolve import SinglePhaseKind, single_phase_kind_by_id
 
 

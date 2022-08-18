@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from test.services.network.tracing.phases.util import validate_phases_from_term_or_equip
+from services.network.tracing.phases.util import validate_phases_from_term_or_equip
 from zepben.evolve import TestNetworkBuilder, PhaseCode, SinglePhaseKind, PhaseInferrer, Terminal, NetworkService
 
 A = SinglePhaseKind.A

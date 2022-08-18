@@ -6,9 +6,9 @@
 from hypothesis import given
 from hypothesis.strategies import floats, builds
 
-from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import TransformerStarImpedance, TransformerEndInfo
 
 transformer_star_impedance_kwargs = {

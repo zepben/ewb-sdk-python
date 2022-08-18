@@ -6,10 +6,10 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from test.cim.collection_validator import validate_collection_ordered
-from test.cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
+from cim.collection_validator import validate_collection_ordered
+from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from test.cim.cim_creators import create_position_point
+from cim.cim_creators import create_position_point
 from zepben.evolve import Location, PositionPoint, StreetAddress
 
 location_kwargs = {
