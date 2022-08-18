@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
 
-from test.services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases_from_term_or_equip, get_t
+from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases_from_term_or_equip, get_t
 from zepben.evolve import TestNetworkBuilder, PhaseCode, EnergySource, RemovePhases, remove_all_traced_phases, SinglePhaseKind as SPK
 
 

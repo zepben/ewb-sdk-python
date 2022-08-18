@@ -6,7 +6,7 @@
 
 from hypothesis import given
 
-from test.cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
+from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
 from zepben.evolve import Tariff
 

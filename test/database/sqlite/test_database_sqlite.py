@@ -14,7 +14,7 @@ from typing import TypeVar, Callable, Any
 
 from hypothesis import given, settings, assume, HealthCheck
 
-from test.cim.cim_creators import create_cable_info, create_no_load_test, create_open_circuit_test, create_overhead_wire_info, create_power_transformer_info, \
+from cim.cim_creators import create_cable_info, create_no_load_test, create_open_circuit_test, create_overhead_wire_info, create_power_transformer_info, \
     create_short_circuit_test, create_shunt_compensator_info, create_transformer_end_info, create_transformer_tank_info, create_asset_owner, create_pole, \
     create_streetlight, create_location, create_organisation, create_customer, create_customer_agreement, create_pricing_structure, create_tariffs, \
     create_meter, create_usage_point, create_operational_restriction, create_fault_indicator, create_base_voltage, create_connectivity_node, create_feeder, \
@@ -25,7 +25,7 @@ from test.cim.cim_creators import create_cable_info, create_no_load_test, create
     create_junction, create_linear_shunt_compensator, create_load_break_switch, create_per_length_sequence_impedance, create_power_electronics_connection, \
     create_power_electronics_connection_phase, create_power_transformer, create_power_transformer_end, create_ratio_tap_changer, create_recloser, \
     create_transformer_star_impedance, create_circuit, create_loop
-from test.database.sqlite.schema_utils import SchemaNetworks, Services, assume_non_blank_street_address_details
+from database.sqlite.schema_utils import SchemaNetworks, Services, assume_non_blank_street_address_details
 from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, \
     NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, \
     AssetOwner, Pole, Streetlight, Customer, CustomerAgreement, PricingStructure, Tariff, Meter, UsagePoint, Location, Organisation, OperationalRestriction, \

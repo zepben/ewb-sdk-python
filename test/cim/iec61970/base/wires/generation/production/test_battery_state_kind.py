@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryStateKind_pb2 import BatteryStateKind as PBBatteryStateKind
 
-from test.cim.enum_validator import validate_enum
+from cim.enum_validator import validate_enum
 from zepben.evolve import BatteryStateKind
 
 

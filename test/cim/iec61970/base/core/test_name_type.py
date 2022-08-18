@@ -8,7 +8,7 @@ from collections import Counter
 from hypothesis import given
 from hypothesis.strategies import text
 
-from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import Junction
 

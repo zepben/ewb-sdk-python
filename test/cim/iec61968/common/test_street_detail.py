@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import text
 
-from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import StreetDetail
 
 street_detail_kwargs = {
@@ -83,4 +83,3 @@ def test_all_fields_empty():
     assert not StreetDetail(suite_number="value").all_fields_empty()
     assert not StreetDetail(type="value").all_fields_empty()
     assert not StreetDetail(display_address="value").all_fields_empty()
-

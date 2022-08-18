@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 
-from test.cim.iec61968.assetinfo.test_wire_info import wire_info_kwargs, verify_wire_info_constructor_default, \
+from cim.iec61968.assetinfo.test_wire_info import wire_info_kwargs, verify_wire_info_constructor_default, \
     verify_wire_info_constructor_kwargs, verify_wire_info_constructor_args, wire_info_args
 from zepben.evolve import OverheadWireInfo
 

@@ -6,9 +6,9 @@
 from hypothesis import given
 from hypothesis.strategies import builds, integers, floats, sampled_from
 
-from test.cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
+from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
     verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
-from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import PowerTransformerEnd, PowerTransformer, WindingConnection
 
 power_transformer_end_kwargs = {

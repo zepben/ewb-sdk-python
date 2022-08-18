@@ -7,8 +7,8 @@ import re
 
 from hypothesis.strategies import uuids, text, lists, builds
 
-from test.cim.collection_validator import validate_collection
-from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
+from cim.collection_validator import validate_collection
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
 from zepben.evolve import IdentifiedObject, Junction
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:

@@ -3,8 +3,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from test.busbranch.data.creators import _create_per_length_sequence_impedance
-from test.network_fixtures import create_terminal, create_terminals
+from busbranch.data.creators import _create_per_length_sequence_impedance
+from network_fixtures import create_terminal, create_terminals
 from zepben.evolve import NetworkService, AcLineSegment
 
 

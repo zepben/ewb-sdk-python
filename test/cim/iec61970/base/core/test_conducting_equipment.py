@@ -6,7 +6,7 @@
 
 from hypothesis.strategies import lists, builds
 
-from test.cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
+from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
 from zepben.evolve import ConductingEquipment, BaseVoltage, Terminal
 

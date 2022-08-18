@@ -26,7 +26,7 @@ import six
 from grpc_testing._channel import _channel_rpc, _channel_state
 from grpc_testing._channel._channel_state import State
 
-from test.streaming.get.grpcio_aio_testing.mock_async_multi_callable import UnaryUnary, UnaryStream, StreamUnary, StreamStream
+from streaming.get.grpcio_aio_testing.mock_async_multi_callable import UnaryUnary, UnaryStream, StreamUnary, StreamStream
 
 __all__ = ["async_testing_channel"]
 

@@ -6,9 +6,9 @@
 from hypothesis import given
 from hypothesis.strategies import builds, text
 
-from test.cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_point_constructor_default, \
+from cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_point_constructor_default, \
     verify_io_point_constructor_kwargs, verify_io_point_constructor_args, io_point_args
-from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import Control, RemoteControl
 
 control_kwargs = {

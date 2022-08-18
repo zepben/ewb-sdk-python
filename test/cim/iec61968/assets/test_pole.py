@@ -6,10 +6,10 @@
 from hypothesis import given
 from hypothesis.strategies import text, lists, builds
 
-from test.cim.collection_validator import validate_collection_unordered
-from test.cim.iec61968.assets.test_structure import structure_kwargs, verify_structure_constructor_default, \
+from cim.collection_validator import validate_collection_unordered
+from cim.iec61968.assets.test_structure import structure_kwargs, verify_structure_constructor_default, \
     verify_structure_constructor_kwargs, verify_structure_constructor_args, structure_args
-from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import Pole, Streetlight
 
 pole_kwargs = {

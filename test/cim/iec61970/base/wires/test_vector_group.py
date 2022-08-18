@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup as PBVectorGroup
 
-from test.cim.enum_validator import validate_enum
+from cim.enum_validator import validate_enum
 from zepben.evolve import VectorGroup
 
 

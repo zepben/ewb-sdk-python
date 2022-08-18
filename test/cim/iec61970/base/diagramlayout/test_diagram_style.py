@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramStyle_pb2 import DiagramStyle as PBDiagramStyle
 
-from test.cim.enum_validator import validate_enum
+from cim.enum_validator import validate_enum
 from zepben.evolve import DiagramStyle
 
 

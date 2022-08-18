@@ -6,10 +6,10 @@
 
 from hypothesis.strategies import text, builds, lists
 
-from test.cim.collection_validator import validate_collection_unordered
-from test.cim.iec61968.assets.test_asset_container import asset_container_kwargs, verify_asset_container_constructor_default, \
+from cim.collection_validator import validate_collection_unordered
+from cim.iec61968.assets.test_asset_container import asset_container_kwargs, verify_asset_container_constructor_default, \
     verify_asset_container_constructor_kwargs, verify_asset_container_constructor_args, asset_container_args
-from test.cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve import EndDevice, Location, UsagePoint
 
 end_device_kwargs = {

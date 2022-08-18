@@ -25,11 +25,11 @@ from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, Ge
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
 from time import sleep
-from test.streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
-from test.streaming.get.pb_creators import network_identified_objects, ac_line_segment
-from test.streaming.get.data.hierarchy import create_hierarchy_network
-from test.streaming.get.data.loops import create_loops_network
-from test.streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
+from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
+from streaming.get.pb_creators import network_identified_objects, ac_line_segment
+from streaming.get.data.hierarchy import create_hierarchy_network
+from streaming.get.data.loops import create_loops_network
+from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')

@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at hdps://mozilla.org/MPL/2.0/.
 
-from test.cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, \
+from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, \
     verify_document_constructor_kwargs, verify_document_constructor_args, document_args
 from zepben.evolve import Agreement
 

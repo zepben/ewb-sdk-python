@@ -7,9 +7,9 @@
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from test.cim.iec61970.base.wires.test_shunt_compensator import verify_shunt_compensator_constructor_default, \
+from cim.iec61970.base.wires.test_shunt_compensator import verify_shunt_compensator_constructor_default, \
     verify_shunt_compensator_constructor_kwargs, verify_shunt_compensator_constructor_args, shunt_compensator_kwargs, shunt_compensator_args
-from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import LinearShuntCompensator
 
 linear_shunt_compensator_kwargs = {

@@ -7,7 +7,7 @@ from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from zepben.evolve import DiagramObjectPoint
 
 diagram_object_point_kwargs = {

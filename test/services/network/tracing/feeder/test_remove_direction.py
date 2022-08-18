@@ -7,7 +7,7 @@ from typing import Optional
 
 import pytest
 
-from test.services.network.tracing.feeder.direction_logger import log_directions
+from services.network.tracing.feeder.direction_logger import log_directions
 from zepben.evolve import TestNetworkBuilder, PhaseCode, NetworkService, Terminal, ConductingEquipment, FeederDirection, RemoveDirection
 
 DOWNSTREAM = FeederDirection.DOWNSTREAM

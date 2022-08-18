@@ -6,7 +6,7 @@
 from zepben.evolve import NetworkService, Terminal
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_tracker import AssociatedTerminalTracker
 
-from test.network_fixtures import create_acls_for_connecting
+from network_fixtures import create_acls_for_connecting
 
 
 def test_associated_terminal_tracker():
