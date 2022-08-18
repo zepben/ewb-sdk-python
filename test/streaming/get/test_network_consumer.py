@@ -20,7 +20,7 @@ from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObjec
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetCurrentEquipmentForFeederRequest, \
-    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest
+    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, IncludedEnergizedContainers
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, GetCurrentEquipmentForFeederResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
@@ -243,6 +243,48 @@ class TestNetworkConsumer:
     async def test_get_equipment_for_container(self, feeder_network: NetworkService):
         async def client_test():
             mor = (await self.client.get_equipment_for_container("f001")).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 3
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_for_container_supports_linked_containers(self, feeder_network: NetworkService):
+        async def client_test():
+            mor = (
+                await self.client.get_equipment_for_container(
+                    "f001",
+                    IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
+                    IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
+                )
+            ).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 3
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_for_containers(self, feeder_network: NetworkService):
+        async def client_test():
+            mor = (
+                await self.client.get_equipment_for_containers(
+                    ["f001"],
+                    IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
+                    IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
+                )
+            ).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 3
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_for_containers(self, feeder_network: NetworkService):
+        async def client_test():
+            mor = (await self.client.get_equipment_for_containers(["f001"])).throw_on_error().value
 
             assert len(mor.objects) == self.service.len_of(Equipment) == 3
             _assert_contains_mrids(self.service, "fsp", "c2", "tx")
