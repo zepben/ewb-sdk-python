@@ -21,7 +21,7 @@ async def log_directions(*conducting_equipment: ConductingEquipment):
 
         await connected_equipment_trace() \
             .add_step_action(_step) \
-            .trace(cond_equip)
+            .run(cond_equip)
 
 
 async def _step(conducting_equipment: ConductingEquipment, _: bool):

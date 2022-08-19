@@ -13,7 +13,7 @@ logger = logging.getLogger("phase_logger.py")
 
 async def connected_equipment_trace_with_logging(assets: Iterable[ConductingEquipment]):
     for asset in assets:
-        await connected_equipment_trace().add_step_action(log_equipment).trace(asset)
+        await connected_equipment_trace().add_step_action(log_equipment).run(asset)
 
 
 async def log_equipment(conducting_equipment: ConductingEquipment, _: bool):

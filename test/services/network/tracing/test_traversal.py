@@ -13,7 +13,7 @@ async def validate_run(t: BasicTraversal, visit_order: List[int], expected_order
     # clean slate each run
     t.reset()
     visit_order.clear()
-    await t.trace(can_stop_on_start_item=can_stop_on_start)
+    await t.run(can_stop_on_start_item=can_stop_on_start)
     for i, x in enumerate(expected_order):
         assert visit_order[i] == x
         if check_visited:
@@ -99,7 +99,7 @@ class TestTraversal(object):
         t = BasicTraversal(queue_next=lambda i, traversal: traversal.process_queue.extend([i + 1, i + 2]),
                       start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
 
-        await t.trace(can_stop_on_start_item=True)
+        await t.run(can_stop_on_start_item=True)
         for x in range(1, 4):
             assert x in visited
         for x in range(3, 4):

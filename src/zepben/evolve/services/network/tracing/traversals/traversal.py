@@ -131,7 +131,7 @@ class Traversal(Generic[T]):
         """
         raise NotImplementedError()
 
-    async def trace(self, start_item: T = None, can_stop_on_start_item: bool = True):
+    async def run(self, start_item: T = None, can_stop_on_start_item: bool = True):
         """
         Perform a trace across the network from `start_item`, applying actions to each piece of equipment encountered
         until all branches of the network are exhausted, or a stop condition succeeds and we cannot continue any further.

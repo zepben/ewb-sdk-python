@@ -31,7 +31,7 @@ async def test_basic_asset_trace(phase_swap_loop_network):
         visited.add(ce)
 
     trace = connected_equipment_trace().add_step_action(add_to_visited)
-    await trace.trace(start)
+    await trace.run(start)
     assert visited == set(expected)
 
 
@@ -70,7 +70,7 @@ async def test_downstream_trace_with_too_many_phases():
     b1 = Breaker()
     b1.add_terminal(t)
 
-    await tracing.normal_downstream_trace().trace(phase_step.start_at(b1, PhaseCode.ABCN))
+    await tracing.normal_downstream_trace().run(phase_step.start_at(b1, PhaseCode.ABCN))
 
 
 def validate_supplier(supplier: Callable[[], T], expected_class: Type):

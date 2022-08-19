@@ -82,7 +82,7 @@ async def _phase_log_trace(cond_equip):
         log_msg.append(equip_msgs)
 
     trace = BasicTraversal(queue_next=queue_next_equipment, start_item=cond_equip, step_actions=[log])
-    await trace.trace()
+    await trace.run()
     return "\n".join([", ".join(x) for x in log_msg])
 
 

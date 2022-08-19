@@ -80,7 +80,7 @@ class RemoveDirection:
 
     @staticmethod
     async def _run_from_terminal(traversal: BranchRecursiveTraversal[TerminalDirection], start: TerminalDirection):
-        await traversal.reset().trace(start)
+        await traversal.reset().run(start)
 
     def _ebb_and_queue(self, traversal: BranchRecursiveTraversal[TerminalDirection], current: TerminalDirection, direction_selector: DirectionSelector):
         if not direction_selector(current.terminal).remove(current.direction_to_ebb):

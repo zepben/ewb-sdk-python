@@ -89,7 +89,7 @@ class BranchRecursiveTraversal(Traversal[T]):
             if t is not None:
                 if self.on_branch_start is not None:
                     self.on_branch_start(t.start_item)
-                await t.trace()
+                await t.run()
 
     def reset(self) -> BranchRecursiveTraversal:
         """Reset the run state, queues and tracker for this traversal"""

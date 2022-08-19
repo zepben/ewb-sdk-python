@@ -2,7 +2,13 @@
 
 ##### Breaking Changes
 
-* None
+* Renamed the following classes to be consistent with the JVM implementation:
+  * `Traversal` to `BasicTraversal`
+  * `BaseTraversal` to `Traversal`
+  * `Tracker` to `BasicTracker`
+  * `BaseTracker` to `Tracker`
+* Renamed the following functions to be consistent with the JVM implementation:
+  * `Traversal.trace` to `Traversal.run`
 
 ##### New Features
 

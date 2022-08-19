@@ -68,8 +68,8 @@ class SetDirection:
         self.current_traversal.tracker.clear()
 
         for t in start_terminals:
-            await self.normal_traversal.reset().trace(t)
-            await self.current_traversal.reset().trace(t)
+            await self.normal_traversal.reset().run(t)
+            await self.current_traversal.reset().run(t)
 
     def _set_downstream_and_queue_next(
         self,

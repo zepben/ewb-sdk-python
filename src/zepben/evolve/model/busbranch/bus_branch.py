@@ -904,7 +904,7 @@ async def _group_negligible_impedance_terminals(
         process_queue=LifoQueue(),
         step_actions=[_process_terminal(tg, has_negligible_impedance)]
     )
-    await trace.trace()
+    await trace.run()
     return tg
 
 
@@ -949,7 +949,7 @@ async def _group_common_ac_line_segment_terminals(acls: AcLineSegment) -> Termin
         process_queue=LifoQueue(),
         step_actions=[_process_acls(common_acls, connectivity_node_counter)]
     )
-    await trace.trace()
+    await trace.run()
 
     for t in (t for line in common_acls.conducting_equipment_group for t in line.terminals):
         if t.connectivity_node is None:

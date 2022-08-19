@@ -157,7 +157,7 @@ class SetPhases:
         traversal.reset()
         traversal.tracker.visit(terminal)
         self._flow_to_connected_terminals_and_queue(traversal, terminal, phase_selector, phases_to_flow)
-        await traversal.trace()
+        await traversal.run()
 
     def _set_normal_phases_and_queue_next(self, terminal: Terminal, traversal: BranchRecursiveTraversal[Terminal]):
         self._set_phases_and_queue_next(terminal, traversal, normally_open, normal_phases)
