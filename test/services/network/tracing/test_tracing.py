@@ -8,7 +8,7 @@ from typing import Type, Callable, TypeVar
 import pytest
 
 from zepben.evolve import BasicTraversal, SetPhases, RemovePhases, AssignToFeeders, Breaker, Terminal, PhaseCode, ConductingEquipment, \
-    connected_equipment_trace, SetDirection, RemoveDirection, ConductingEquipmentStep
+    connected_equipment_trace, SetDirection, RemoveDirection, ConductingEquipmentStep, AssignToLvFeeders
 from zepben.evolve.services.network.tracing import tracing
 from zepben.evolve.services.network.tracing.phases import phase_step
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
@@ -56,6 +56,7 @@ def test_suppliers():
     _validate_supplier(tracing.remove_direction, RemoveDirection)
 
     _validate_supplier(tracing.assign_equipment_to_feeders, AssignToFeeders)
+    _validate_supplier(tracing.assign_equipment_to_lv_feeders, AssignToLvFeeders)
     _validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
     _validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
 

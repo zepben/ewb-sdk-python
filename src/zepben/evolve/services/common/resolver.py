@@ -29,7 +29,7 @@ __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location",
            "te_terminal", "end_devices", "up_equipment", "usage_point_location", "shunt_compensator_info",
            "transformer_end_info", "power_transformer_info_transformer_tank_info", "transformer_star_impedance",
            "star_impedance_transformer_end_info", "transformer_end_transformer_star_impedance", "normal_energized_lv_feeders",
-           "normal_energizing_feeders"]
+           "normal_energizing_feeders", "lv_feeder_normal_head_terminal", "normal_energizing_feeders"]
 
 
 def per_length_sequence_impedance(ac_line_segment: AcLineSegment):

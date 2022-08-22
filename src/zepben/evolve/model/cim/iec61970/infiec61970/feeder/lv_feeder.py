@@ -6,7 +6,10 @@ from typing import Generator, Optional, Dict, List
 if typing.TYPE_CHECKING:
     from zepben.evolve import Equipment, Terminal, Feeder
 
-from zepben.evolve import EquipmentContainer, safe_remove_by_id, nlen, ngen
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
+from zepben.evolve.util import safe_remove_by_id, nlen, ngen
+
+__all__ = ["LvFeeder"]
 
 
 class LvFeeder(EquipmentContainer):
@@ -88,7 +91,7 @@ class LvFeeder(EquipmentContainer):
         @param feeder: the HV/MV feeder to associate with this LV feeder in the normal state of the network.
         @return: This `LvFeeder` for fluent use.
         """
-        if self._validate_reference(feeder, self.get_normal_energizing_feeder, "A normal Feeder"):
+        if self._validate_reference(feeder, self.get_normal_energizing_feeder, "A Feeder"):
             return self
         self._normal_energizing_feeders = dict() if self._normal_energizing_feeders is None else self._normal_energizing_feeders
         self._normal_energizing_feeders[feeder.mrid] = feeder

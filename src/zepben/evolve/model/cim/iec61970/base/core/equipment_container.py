@@ -9,10 +9,9 @@ from __future__ import annotations
 from typing import Optional, Dict, Generator, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from zepben.evolve import Equipment, Terminal, Substation
+    from zepben.evolve import Equipment, Terminal, Substation, LvFeeder
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.util import nlen, ngen, safe_remove_by_id
 
 __all__ = ['EquipmentContainer', 'Feeder', 'Site']
@@ -217,6 +216,7 @@ class Feeder(EquipmentContainer):
     def __init__(
         self,
         normal_head_terminal: Terminal = None,
+        normal_energizing_substation: Substation = None,
         current_equipment: List[Equipment] = None,
         normal_energized_lv_feeders: List[LvFeeder] = None,
         **kwargs
@@ -224,12 +224,14 @@ class Feeder(EquipmentContainer):
         super(Feeder, self).__init__(**kwargs)
         if normal_head_terminal:
             self.normal_head_terminal = normal_head_terminal
-        if current_equipment:
-            for eq in current_equipment:
-                self.add_current_equipment(eq)
+        if normal_energizing_substation:
+            self.normal_energizing_substation = normal_energizing_substation
         if normal_energized_lv_feeders:
             for lv_feeder in normal_energized_lv_feeders:
                 self.add_normal_energized_lv_feeder(lv_feeder)
+        if current_equipment:
+            for eq in current_equipment:
+                self.add_current_equipment(eq)
 
     @property
     def normal_head_terminal(self) -> Optional[Terminal]:

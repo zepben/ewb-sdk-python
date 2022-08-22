@@ -114,6 +114,7 @@ from zepben.evolve.services.network.tracing.connectivity.xy_candidate_phase_path
 from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import *
 from zepben.evolve.services.network.tracing.feeder.direction_status import *
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import *
+from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import *
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_trace import *
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_tracker import *
 from zepben.evolve.services.network.tracing.feeder.set_direction import *

@@ -9,7 +9,7 @@ from hypothesis.strategies import booleans, lists, builds
 from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
-from cim.cim_creators import sampled_equipment_container
+from cim.cim_creators import sampled_equipment_container, sampled_hvlv_feeder
 from zepben.evolve import Equipment, UsagePoint, OperationalRestriction, Feeder, EquipmentContainer
 
 equipment_kwargs = {
@@ -19,7 +19,7 @@ equipment_kwargs = {
     "usage_points": lists(builds(UsagePoint), max_size=2),
     "equipment_containers": lists(sampled_equipment_container(True), max_size=2),
     "operational_restrictions": lists(builds(OperationalRestriction), max_size=2),
-    "current_containers": lists(builds(Feeder), max_size=2)
+    "current_containers": lists(sampled_hvlv_feeder(), max_size=2)
 }
 
 equipment_args = [*power_system_resource_args, False, False, [UsagePoint(), UsagePoint()], [EquipmentContainer(), EquipmentContainer()],

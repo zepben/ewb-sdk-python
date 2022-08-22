@@ -931,7 +931,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Substation(mrid="s2")
         )
 
-    def test_compare_feeder(self):
+    def test_compare_lv_feeder(self):
         self._compare_equipment_container(LvFeeder)
 
         self.validator.validate_property(LvFeeder.normal_head_terminal, LvFeeder, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))

@@ -341,7 +341,6 @@ class Equipment(PowerSystemResource):
 
 def _of_type(containers: Optional[List[EquipmentContainer]], ectype: Type[TEquipmentContainer]) -> List[TEquipmentContainer]:
     if containers:
-        return [ec for ec in ectype if isinstance(ec, ectype)]
+        return [ec for ec in containers if isinstance(ec, ectype)]
     else:
         return []
-

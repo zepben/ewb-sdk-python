@@ -11,7 +11,7 @@ except ImportError:
 from typing import Optional, Callable, List, Union, Type
 
 from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, \
-    PowerTransformerEnd, PowerTransformer, set_phases, set_direction, AssignToFeeders
+    PowerTransformerEnd, PowerTransformer, set_phases, set_direction, AssignToFeeders, AssignToLvFeeders
 
 
 def null_action(_):
@@ -343,6 +343,7 @@ class TestNetworkBuilder:
 
         if assign_feeders and len(list(self.network.objects(Feeder))) != 0:
             await AssignToFeeders().run(self.network)
+            await AssignToLvFeeders().run(self.network)
 
         return self.network
 

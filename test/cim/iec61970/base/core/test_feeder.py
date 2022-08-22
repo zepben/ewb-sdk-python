@@ -15,10 +15,11 @@ feeder_kwargs = {
     **equipment_container_kwargs,
     "normal_head_terminal": builds(Terminal),
     "normal_energizing_substation": builds(Substation),
+    "normal_energized_lv_feeders": lists(builds(LvFeeder), max_size=2),
     "current_equipment": lists(builds(Equipment), max_size=2)
 }
 
-feeder_args = [*equipment_container_args, Terminal(), Substation(), {"ce": Equipment()}]
+feeder_args = [*equipment_container_args, Terminal(), Substation(), {"lvf": LvFeeder()}, {"ce": Equipment()}]
 
 
 def test_feeder_constructor_default():
@@ -31,9 +32,10 @@ def test_feeder_constructor_default():
 
 
 @given(**feeder_kwargs)
-def test_feeder_constructor_kwargs(normal_head_terminal, normal_energizing_substation, current_equipment, **kwargs):
+def test_feeder_constructor_kwargs(normal_head_terminal, normal_energizing_substation, normal_energized_lv_feeders, current_equipment, **kwargs):
     f = Feeder(normal_head_terminal=normal_head_terminal,
                normal_energizing_substation=normal_energizing_substation,
+               normal_energized_lv_feeders=normal_energized_lv_feeders,
                current_equipment=current_equipment,
                **kwargs)
 
@@ -47,9 +49,10 @@ def test_feeder_constructor_args():
     f = Feeder(*feeder_args)
 
     verify_equipment_container_constructor_args(f)
-    assert f.normal_head_terminal == feeder_args[-3]
-    assert f.normal_energizing_substation == feeder_args[-2]
-    assert list(f.current_equipment) == list(feeder_args[-1].values())
+    assert f.normal_head_terminal == feeder_args[-4]
+    assert f.normal_energizing_substation == feeder_args[-3]
+    assert list(f.current_equipment) == list(feeder_args[-2].values())
+    assert list(f.normal_energized_lv_feeders) == list(feeder_args[-1].values())
 
 
 def test_current_equipment_collection():
