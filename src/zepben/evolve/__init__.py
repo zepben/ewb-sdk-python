@@ -82,6 +82,7 @@ from zepben.evolve.model.cim.iec61970.base.core.name import *
 from zepben.evolve.model.cim.iec61970.base.core.name_type import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
 from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 

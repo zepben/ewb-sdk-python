@@ -8,12 +8,14 @@ from __future__ import annotations
 
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
+
 if TYPE_CHECKING:
     from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction
 
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site, LvFeeder
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
@@ -72,42 +74,42 @@ class Equipment(PowerSystemResource):
         """
         The current `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder`s this equipment belongs to.
         """
-        return ngen(self._current_containers_of_type(Feeder))
+        return ngen(_of_type(self._current_containers, Feeder))
 
     @property
     def normal_feeders(self) -> Generator[Feeder, None, None]:
         """
         The normal `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder`s this equipment belongs to.
         """
-        return ngen(self._equipment_containers_of_type(Feeder))
+        return ngen(_of_type(self._equipment_containers, Feeder))
 
     @property
     def current_lv_feeders(self) -> Generator[LvFeeder, None, None]:
         """
         The current `zepben.evolve.cim.iec61970.base.core.equipment_container.LvFeeder`s this equipment belongs to.
         """
-        return ngen(self._current_containers_of_type(LvFeeder))
+        return ngen(_of_type(self._current_containers, LvFeeder))
 
     @property
     def normal_lv_feeders(self) -> Generator[LvFeeder, None, None]:
         """
         The normal `zepben.evolve.cim.iec61970.base.core.equipment_container.LvFeeder`s this equipment belongs to.
         """
-        return ngen(self._equipment_containers_of_type(LvFeeder))
+        return ngen(_of_type(self._equipment_containers, LvFeeder))
 
     @property
     def sites(self) -> Generator[Site, None, None]:
         """
         The `zepben.evolve.cim.iec61970.base.core.equipment_container.Site`s this equipment belongs to.
         """
-        return ngen(self._equipment_containers_of_type(Site))
+        return ngen(_of_type(self._equipment_containers, Site))
 
     @property
     def substations(self) -> Generator[Substation, None, None]:
         """
         The `zepben.evolve.cim.iec61970.base.core.substation.Substation`s this equipment belongs to.
         """
-        return ngen(self._equipment_containers_of_type(Substation))
+        return ngen(_of_type(self._equipment_containers, Substation))
 
     @property
     def usage_points(self) -> Generator[UsagePoint, None, None]:
@@ -133,19 +135,19 @@ class Equipment(PowerSystemResource):
         """
         Returns The number of `zepben.evolve.cim.iec61970.base.core.substation.Substation`s associated with this `Equipment`
         """
-        return len(self._equipment_containers_of_type(Substation))
+        return len(_of_type(self._equipment_containers, Substation))
 
     def num_sites(self) -> int:
         """
         Returns The number of `zepben.evolve.cim.iec61970.base.core.equipment_container.Site`s associated with this `Equipment`
         """
-        return len(self._equipment_containers_of_type(Site))
+        return len(_of_type(self._equipment_containers, Site))
 
     def num_normal_feeders(self) -> int:
         """
         Returns The number of normal `Feeder`s associated with this `Equipment`
         """
-        return len(self._equipment_containers_of_type(Feeder))
+        return len(_of_type(self._equipment_containers, Feeder))
 
     def num_usage_points(self) -> int:
         """
@@ -337,16 +339,10 @@ class Equipment(PowerSystemResource):
         self._operational_restrictions = None
         return self
 
-    def _equipment_containers_of_type(self, ectype: Type[TEquipmentContainer]) -> List[TEquipmentContainer]:
-        """Get the `EquipmentContainer`s for this `Equipment` of type `ectype`"""
-        if self._equipment_containers:
-            return [ec for ec in self._equipment_containers if isinstance(ec, ectype)]
-        else:
-            return []
-    
-    def _current_containers_of_type(self, ectype: Type[TEquipmentContainer]) -> List[TEquipmentContainer]:
-        """Get the `EquipmentContainer`s for this `Equipment` of type `ectype` in the current state of the network"""
-        if self._current_containers:
-            return [ec for ec in self._current_containers if isinstance(ec, ectype)]
-        else:
-            return []
+
+def _of_type(containers: Optional[List[EquipmentContainer]], ectype: Type[TEquipmentContainer]) -> List[TEquipmentContainer]:
+    if containers:
+        return [ec for ec in ectype if isinstance(ec, ectype)]
+    else:
+        return []
+
