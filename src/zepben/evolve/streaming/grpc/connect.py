@@ -13,7 +13,7 @@ from typing import Optional, BinaryIO
 from urllib.parse import urlparse
 
 import grpc
-from zepben.auth.client import ZepbenTokenFetcher, AuthMethod, create_token_fetcher
+from zepben.auth.client import ZepbenTokenFetcher, create_token_fetcher
 
 from zepben.evolve import GrpcChannelBuilder
 

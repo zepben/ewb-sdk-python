@@ -32,7 +32,7 @@ from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, EquipmentContainer, LvFeeder
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, EquipmentContainer
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.regions import GeographicalRegion, SubGeographicalRegion
@@ -53,6 +53,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection im
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 
 __all__ = [
     "acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_to_location_resolver", "pole_to_streetlight_resolver", "streetlight_to_pole_resolver",

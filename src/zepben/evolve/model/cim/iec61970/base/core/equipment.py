@@ -55,20 +55,6 @@ class Equipment(PowerSystemResource):
                 self.add_current_container(cf)
 
     @property
-    def containers(self) -> Generator[EquipmentContainer, None, None]:
-        """
-        The `EquipmentContainer`s this equipment belongs to.
-        """
-        return ngen(self._equipment_containers)
-
-    @property
-    def current_containers(self) -> Generator[EquipmentContainer, None, None]:
-        """
-        The `EquipmentContainer`s this equipment belongs to in the current state of the network.
-        """
-        return ngen(self._current_containers)
-
-    @property
     def current_feeders(self) -> Generator[Feeder, None, None]:
         """
         The current `Feeder`s this equipment belongs to.
@@ -111,18 +97,11 @@ class Equipment(PowerSystemResource):
         return ngen(_of_type(self._equipment_containers, Substation))
 
     @property
-    def usage_points(self) -> Generator[UsagePoint, None, None]:
+    def containers(self) -> Generator[EquipmentContainer, None, None]:
         """
-        The `UsagePoint`s for this equipment.
+        The `EquipmentContainer`s this equipment belongs to.
         """
-        return ngen(self._usage_points)
-
-    @property
-    def operational_restrictions(self) -> Generator[OperationalRestriction, None, None]:
-        """
-        The `OperationalRestriction`s that this equipment is associated with.
-        """
-        return ngen(self._operational_restrictions)
+        return ngen(self._equipment_containers)
 
     def num_containers(self) -> int:
         """
@@ -209,9 +188,16 @@ class Equipment(PowerSystemResource):
         self._equipment_containers = None
         return self
 
+    @property
+    def current_containers(self) -> Generator[EquipmentContainer, None, None]:
+        """
+        The `EquipmentContainer`s this equipment belongs to in the current state of the network.
+        """
+        return ngen(self._current_containers)
+
     def get_current_container(self, mrid: str) -> EquipmentContainer:
         """
-        Get the `EquipmentContainer` for this `Equipment` identified by `mrid`
+        Get the `EquipmentContainer` for this `Equipment` in the current state of the network, identified by `mrid`
 
         `mrid` The mRID of the required `EquipmentContainer`
         Returns The `EquipmentContainer` with the specified `mrid` if it exists
@@ -221,7 +207,7 @@ class Equipment(PowerSystemResource):
 
     def add_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
         """
-        Associate `equipment_container` with this `Equipment`.
+        Associate `equipment_container` with this `Equipment` in the current state of the network.
 
         `equipment_container` The `EquipmentContainer` to associate with this `Equipment`.
         Returns A reference to this `Equipment` to allow fluent use.
@@ -235,7 +221,7 @@ class Equipment(PowerSystemResource):
 
     def remove_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
         """
-        Disassociate `equipment_container` from this `Equipment` in the current state of the network
+        Disassociate `equipment_container` from this `Equipment` in the current state of the network.
 
         `equipment_container` The `EquipmentContainer` to disassociate from this `Equipment`.
         Returns A reference to this `Equipment` to allow fluent use.
@@ -246,11 +232,18 @@ class Equipment(PowerSystemResource):
 
     def clear_current_containers(self) -> Equipment:
         """
-        Clear all current `EquipmentContainer`s.
+        Clear all current `EquipmentContainer`s in the current state of the network.
         Returns A reference to this `Equipment` to allow fluent use.
         """
         self._current_containers = None
         return self
+
+    @property
+    def usage_points(self) -> Generator[UsagePoint, None, None]:
+        """
+        The `UsagePoint`s for this equipment.
+        """
+        return ngen(self._usage_points)
 
     def get_usage_point(self, mrid: str) -> UsagePoint:
         """
@@ -294,6 +287,13 @@ class Equipment(PowerSystemResource):
         """
         self._usage_points = None
         return self
+
+    @property
+    def operational_restrictions(self) -> Generator[OperationalRestriction, None, None]:
+        """
+        The `OperationalRestriction`s that this equipment is associated with.
+        """
+        return ngen(self._operational_restrictions)
 
     def get_operational_restriction(self, mrid: str) -> OperationalRestriction:
         """

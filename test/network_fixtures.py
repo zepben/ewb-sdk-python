@@ -5,13 +5,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Dict, List, Optional
 
-import pytest_asyncio
 from pytest import fixture
 
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, BaseVoltage, TestNetworkBuilder, LvFeeder
+    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, TestNetworkBuilder, LvFeeder
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",

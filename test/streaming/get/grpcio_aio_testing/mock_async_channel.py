@@ -21,7 +21,6 @@ import abc
 import asyncio
 
 import grpc
-import pytest
 import six
 from grpc_testing._channel import _channel_rpc, _channel_state
 from grpc_testing._channel._channel_state import State

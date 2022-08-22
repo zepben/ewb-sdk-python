@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from zepben.evolve import Equipment, Terminal, Substation
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.util import nlen, ngen, safe_remove_by_id
 
 __all__ = ['EquipmentContainer', 'Feeder', 'Site']

@@ -159,6 +159,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
 from zepben.evolve.services.common.translator.base_proto2cim import identified_object_to_cim, organisation_role_to_cim, document_to_cim
 from zepben.evolve.services.common.translator.util import int_or_none, float_or_none, long_or_none, str_or_none, uint_or_none
 from zepben.evolve.services.network.network_service import NetworkService
