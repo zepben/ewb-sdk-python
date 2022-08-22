@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
-
 if TYPE_CHECKING:
     from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction
 
@@ -18,6 +16,7 @@ if TYPE_CHECKING:
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
 
 __all__ = ['Equipment']
@@ -58,76 +57,76 @@ class Equipment(PowerSystemResource):
     @property
     def containers(self) -> Generator[EquipmentContainer, None, None]:
         """
-        The `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer`s this equipment belongs to.
+        The `EquipmentContainer`s this equipment belongs to.
         """
         return ngen(self._equipment_containers)
 
     @property
     def current_containers(self) -> Generator[EquipmentContainer, None, None]:
         """
-        The `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer`s this equipment belongs to in the current state of the network.
+        The `EquipmentContainer`s this equipment belongs to in the current state of the network.
         """
         return ngen(self._current_containers)
 
     @property
     def current_feeders(self) -> Generator[Feeder, None, None]:
         """
-        The current `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder`s this equipment belongs to.
+        The current `Feeder`s this equipment belongs to.
         """
         return ngen(_of_type(self._current_containers, Feeder))
 
     @property
     def normal_feeders(self) -> Generator[Feeder, None, None]:
         """
-        The normal `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder`s this equipment belongs to.
+        The normal `Feeder`s this equipment belongs to.
         """
         return ngen(_of_type(self._equipment_containers, Feeder))
 
     @property
     def current_lv_feeders(self) -> Generator[LvFeeder, None, None]:
         """
-        The current `zepben.evolve.cim.iec61970.base.core.equipment_container.LvFeeder`s this equipment belongs to.
+        The current `LvFeeder`s this equipment belongs to.
         """
         return ngen(_of_type(self._current_containers, LvFeeder))
 
     @property
     def normal_lv_feeders(self) -> Generator[LvFeeder, None, None]:
         """
-        The normal `zepben.evolve.cim.iec61970.base.core.equipment_container.LvFeeder`s this equipment belongs to.
+        The normal `LvFeeder`s this equipment belongs to.
         """
         return ngen(_of_type(self._equipment_containers, LvFeeder))
 
     @property
     def sites(self) -> Generator[Site, None, None]:
         """
-        The `zepben.evolve.cim.iec61970.base.core.equipment_container.Site`s this equipment belongs to.
+        The `Site`s this equipment belongs to.
         """
         return ngen(_of_type(self._equipment_containers, Site))
 
     @property
     def substations(self) -> Generator[Substation, None, None]:
         """
-        The `zepben.evolve.cim.iec61970.base.core.substation.Substation`s this equipment belongs to.
+        The `Substation`s this equipment belongs to.
         """
         return ngen(_of_type(self._equipment_containers, Substation))
 
     @property
     def usage_points(self) -> Generator[UsagePoint, None, None]:
         """
-        The `zepben.evolve.cim.iec61968.metering.metering.UsagePoint`s for this equipment.
+        The `UsagePoint`s for this equipment.
         """
         return ngen(self._usage_points)
 
     @property
     def operational_restrictions(self) -> Generator[OperationalRestriction, None, None]:
         """
-        The `zepben.evolve.cim.iec61968.operations.operational_restriction.OperationalRestriction`s that this equipment is associated with.
+        The `OperationalRestriction`s that this equipment is associated with.
         """
         return ngen(self._operational_restrictions)
 
     def num_containers(self) -> int:
         """
-        Returns The number of `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer`s associated with this `Equipment`
+        Returns The number of `EquipmentContainer`s associated with this `Equipment`
         """
         return nlen(self._equipment_containers)
 
@@ -139,7 +138,7 @@ class Equipment(PowerSystemResource):
 
     def num_sites(self) -> int:
         """
-        Returns The number of `zepben.evolve.cim.iec61970.base.core.equipment_container.Site`s associated with this `Equipment`
+        Returns The number of `Site`s associated with this `Equipment`
         """
         return len(_of_type(self._equipment_containers, Site))
 
@@ -151,13 +150,13 @@ class Equipment(PowerSystemResource):
 
     def num_usage_points(self) -> int:
         """
-        Returns The number of `zepben.evolve.cim.iec61968.metering.metering.UsagePoint`s associated with this `Equipment`
+        Returns The number of `UsagePoint`s associated with this `Equipment`
         """
         return nlen(self._usage_points)
 
     def num_current_containers(self) -> int:
         """
-        Returns The number of `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer`s associated with this `Equipment`
+        Returns The number of `EquipmentContainer`s associated with this `Equipment`
         """
         return nlen(self._current_containers)
 
@@ -212,10 +211,10 @@ class Equipment(PowerSystemResource):
 
     def get_current_container(self, mrid: str) -> EquipmentContainer:
         """
-        Get the `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer` for this `Equipment` identified by `mrid`
+        Get the `EquipmentContainer` for this `Equipment` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer`
-        Returns The `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `EquipmentContainer`
+        Returns The `EquipmentContainer` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._current_containers, mrid)
@@ -224,7 +223,7 @@ class Equipment(PowerSystemResource):
         """
         Associate `equipment_container` with this `Equipment`.
 
-        `equipment_container` The `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer` to associate with this `Equipment`.
+        `equipment_container` The `EquipmentContainer` to associate with this `Equipment`.
         Returns A reference to this `Equipment` to allow fluent use.
         Raises `ValueError` if another `EquipmentContainer` with the same `mrid` already exists for this `Equipment`.
         """
@@ -238,7 +237,7 @@ class Equipment(PowerSystemResource):
         """
         Disassociate `equipment_container` from this `Equipment` in the current state of the network
 
-        `equipment_container` The `zepben.evolve.cim.iec61970.base.core.equipment_container.EquipmentContainer` to disassociate from this `Equipment`.
+        `equipment_container` The `EquipmentContainer` to disassociate from this `Equipment`.
         Returns A reference to this `Equipment` to allow fluent use.
         Raises `ValueError` if `equipment_container` was not associated with this `Equipment`.
         """
@@ -255,10 +254,10 @@ class Equipment(PowerSystemResource):
 
     def get_usage_point(self, mrid: str) -> UsagePoint:
         """
-        Get the `zepben.evolve.cim.iec61968.metering.metering.UsagePoint` for this `Equipment` identified by `mrid`
+        Get the `UsagePoint` for this `Equipment` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.iec61968.metering.metering.UsagePoint`
-        Returns The `zepben.evolve.cim.iec61968.metering.metering.UsagePoint` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `UsagePoint`
+        Returns The `UsagePoint` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._usage_points, mrid)
@@ -267,7 +266,7 @@ class Equipment(PowerSystemResource):
         """
         Associate `up` with this `Equipment`.
 
-        `up` the `zepben.evolve.cim.iec61968.metering.metering.UsagePoint` to associate with this `Equipment`.
+        `up` the `UsagePoint` to associate with this `Equipment`.
         Returns A reference to this `Equipment` to allow fluent use.
         Raises `ValueError` if another `UsagePoint` with the same `mrid` already exists for this `Equipment`.
         """
@@ -281,7 +280,7 @@ class Equipment(PowerSystemResource):
         """
         Disassociate `up` from this `Equipment`.
 
-        `up` The `zepben.evolve.cim.iec61968.metering.metering.UsagePoint` to disassociate from this `Equipment`.
+        `up` The `UsagePoint` to disassociate from this `Equipment`.
         Returns A reference to this `Equipment` to allow fluent use.
         Raises `ValueError` if `up` was not associated with this `Equipment`.
         """
