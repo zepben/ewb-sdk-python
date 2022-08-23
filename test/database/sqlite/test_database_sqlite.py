@@ -34,7 +34,7 @@ from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, C
     PhotoVoltaicUnit, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, \
     EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, BaseService, \
-    DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail
+    DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail, LvFeeder
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
@@ -499,7 +499,7 @@ class TestDatabaseSqlite:
 
     # noinspection PyShadowingNames
     @log_on_failure_decorator
-    @settings(deadline=1000)
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(lv_feeder=create_lv_feeder(False))
     def test_schema_lv_feeder(self, caplog, lv_feeder):
         self._validate_schema(SchemaNetworks().network_services_of(LvFeeder, lv_feeder), caplog)
