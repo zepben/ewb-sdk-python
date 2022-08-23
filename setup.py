@@ -13,7 +13,7 @@ test_deps = ["pytest==7.1.2", "pytest-cov==2.10.1", "pytest-asyncio==0.19.0", "p
              "pylint==2.14.5"]
 setup(
     name="zepben.evolve",
-    version="0.30.0b8",
+    version="0.30.0b9",
     description="Python SDK for interacting with the Evolve platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
