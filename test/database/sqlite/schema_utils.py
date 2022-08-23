@@ -306,9 +306,6 @@ class SchemaNetworks:
             for it in filled.operational_restrictions:
                 it.add_equipment(filled)
                 service.add(it)
-            for it in filled.current_containers:
-                it.add_current_equipment(filled)
-                service.add(it)
 
         if isinstance(filled, EquipmentContainer):
             for it in filled.equipment:
@@ -319,12 +316,6 @@ class SchemaNetworks:
             service.add(filled.normal_head_terminal)
             filled.normal_energizing_substation.add_feeder(filled)
             service.add(filled.normal_energizing_substation)
-            for it in filled.normal_energized_lv_feeders:
-                it.add_normal_energizing_feeder(filled)
-                service.add(it)
-            for it in filled.current_equipment:
-                it.add_current_container(filled)
-                service.add(it)
 
         if isinstance(filled, GeographicalRegion):
             for it in filled.sub_geographical_regions:
@@ -508,12 +499,6 @@ class SchemaNetworks:
 
         if isinstance(filled, LvFeeder):
             service.add(filled.normal_head_terminal)
-            for it in filled.normal_energizing_feeders:
-                it.add_normal_energized_lv_feeder(filled)
-                service.add(it)
-            for it in filled.current_equipment:
-                it.add_current_container(filled)
-                service.add(it)
 
         for io in service.objects():
             for name in io.names:
