@@ -208,8 +208,8 @@ class NetworkBuilder(object):
         `conn_nodes` The connectivity nodes to use for the terminals. If count > len(conn_nodes) or conn_nodes == None,
                            new `ConnectivityNode`s will be created for each extra Terminal.
         `phases` The phase to use for the terminals. All generated terminals will get the provided phase.
-        `kwargs` Passed to `zepben.evolve.iec61970.base.core.terminal.Terminal` constructor
-        Returns List of `zepben.evolve.iec61970.base.core.terminal.Terminal`'s
+        `kwargs` Passed to `Terminal` constructor
+        Returns List of `Terminal`'s
         """
         if wiring_supplier is None:
             wiring_supplier = lambda cn: None

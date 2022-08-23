@@ -49,7 +49,7 @@ class EnergyConsumerPhase(PowerSystemResource):
 
     @property
     def energy_consumer(self):
-        """The `zepben.evolve.cim.iec61970.base.wires.EnergyConsumer` that has this phase."""
+        """The `EnergyConsumer` that has this phase."""
         return self._energy_consumer
 
     @energy_consumer.setter

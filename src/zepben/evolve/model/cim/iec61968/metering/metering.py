@@ -53,14 +53,14 @@ class EndDevice(AssetContainer):
 
     def num_usage_points(self):
         """
-        Returns The number of `zepben.evolve.cim.iec61968.metering.metering.UsagePoint`s associated with this `EndDevice`
+        Returns The number of `UsagePoint`s associated with this `EndDevice`
         """
         return nlen(self._usage_points)
 
     @property
     def usage_points(self) -> Generator[UsagePoint, None, None]:
         """
-        The `zepben.evolve.cim.iec61968.metering.metering.UsagePoint`s associated with this `EndDevice`
+        The `UsagePoint`s associated with this `EndDevice`
         """
         return ngen(self._usage_points)
 
@@ -68,17 +68,17 @@ class EndDevice(AssetContainer):
         """
         Get the `UsagePoint` for this `EndDevice` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61968.metering.metering.UsagePoint`
-        Returns The `zepben.evolve.cim.iec61968.metering.metering.UsagePoint` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `UsagePoint`
+        Returns The `UsagePoint` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._usage_points, mrid)
 
     def add_usage_point(self, up: UsagePoint) -> EndDevice:
         """
-        Associate `up` to this `zepben.evolve.cim.iec61968.metering.metering.EndDevice`.
+        Associate `up` to this `EndDevice`.
 
-        `up` the `zepben.evolve.cim.iec61968.metering.metering.UsagePoint` to associate with this `EndDevice`.
+        `up` the `UsagePoint` to associate with this `EndDevice`.
         Returns A reference to this `EndDevice` to allow fluent use.
         Raises `ValueError` if another `UsagePoint` with the same `mrid` already exists for this `EndDevice`.
         """
@@ -92,7 +92,7 @@ class EndDevice(AssetContainer):
         """
         Disassociate `up` from this `EndDevice`
 
-        `up` the `zepben.evolve.cim.iec61968.metering.metering.UsagePoint` to disassociate from this `EndDevice`.
+        `up` the `UsagePoint` to disassociate from this `EndDevice`.
         Returns A reference to this `EndDevice` to allow fluent use.
         Raises `ValueError` if `up` was not associated with this `EndDevice`.
         """
@@ -144,13 +144,13 @@ class UsagePoint(IdentifiedObject):
 
     def num_equipment(self):
         """
-        Returns The number of `zepben.evolve.cim.iec61970.base.core.equipment.Equipment`s associated with this `UsagePoint`
+        Returns The number of `Equipment`s associated with this `UsagePoint`
         """
         return nlen(self._equipment)
 
     def num_end_devices(self):
         """
-        Returns The number of `zepben.evolve.cim.iec61968.metering.metering.EndDevice`s associated with this `UsagePoint`
+        Returns The number of `EndDevice`s associated with this `UsagePoint`
         """
         return nlen(self._end_devices)
 
@@ -170,19 +170,19 @@ class UsagePoint(IdentifiedObject):
 
     def get_equipment(self, mrid: str) -> Equipment:
         """
-        Get the `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` for this `UsagePoint` identified by `mrid`
+        Get the `Equipment` for this `UsagePoint` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.iec61970.base.core.equipment.Equipment`
-        Returns The `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Equipment`
+        Returns The `Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._equipment, mrid)
 
     def add_equipment(self, equipment: Equipment) -> UsagePoint:
         """
-        Associate an `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` with this `UsagePoint`
+        Associate an `Equipment` with this `UsagePoint`
 
-        `equipment` The `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` to associate with this `UsagePoint`.
+        `equipment` The `Equipment` to associate with this `UsagePoint`.
         Returns A reference to this `UsagePoint` to allow fluent use.
         Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `UsagePoint`.
         """
@@ -195,9 +195,9 @@ class UsagePoint(IdentifiedObject):
 
     def remove_equipment(self, equipment: Equipment) -> UsagePoint:
         """
-        Disassociate an `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` from this `UsagePoint`
+        Disassociate an `Equipment` from this `UsagePoint`
 
-        `equipment` The `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` to disassociate with this `UsagePoint`.
+        `equipment` The `Equipment` to disassociate with this `UsagePoint`.
         Returns A reference to this `UsagePoint` to allow fluent use.
         Raises `ValueError` if `equipment` was not associated with this `UsagePoint`.
         """
@@ -216,8 +216,8 @@ class UsagePoint(IdentifiedObject):
         """
         Get the `EndDevice` for this `UsagePoint` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.iec61968.metering.metering.EndDevice`
-        Returns The `zepben.evolve.cim.iec61968.metering.metering.EndDevice` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `EndDevice`
+        Returns The `EndDevice` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._end_devices, mrid)
@@ -226,7 +226,7 @@ class UsagePoint(IdentifiedObject):
         """
         Associate an `EndDevice` with this `UsagePoint`
 
-        `end_device` The `zepben.evolve.cim.iec61968.metering.metering.EndDevice` to associate with this `UsagePoint`.
+        `end_device` The `EndDevice` to associate with this `UsagePoint`.
         Returns A reference to this `UsagePoint` to allow fluent use.
         Raises `ValueError` if another `EndDevice` with the same `mrid` already exists for this `UsagePoint`.
         """
@@ -240,7 +240,7 @@ class UsagePoint(IdentifiedObject):
         """
         Disassociate `end_device` from this `UsagePoint`.
 
-        `end_device` The `zepben.evolve.cim.iec61968.metering.metering.EndDevice` to disassociate from this `UsagePoint`.
+        `end_device` The `EndDevice` to disassociate from this `UsagePoint`.
         Returns A reference to this `UsagePoint` to allow fluent use.
         Raises `ValueError` if `end_device` was not associated with this `UsagePoint`.
         """
@@ -270,12 +270,12 @@ class Meter(EndDevice):
 
     @property
     def company_meter_id(self):
-        """ Returns this `Meter`s ID. Currently stored in `zepben.evolve.cim.iec61970.base.core.identified_object.IdentifiedObject.name` """
+        """ Returns this `Meter`s ID. Currently stored in `IdentifiedObject.name` """
         return self.name
 
     @company_meter_id.setter
     def company_meter_id(self, meter_id):
         """
-        `meter_id` The ID to set for this Meter. Will use `zepben.evolve.cim.iec61970.base.core.identified_object.IdentifiedObject.name` as a backing field.
+        `meter_id` The ID to set for this Meter. Will use `IdentifiedObject.name` as a backing field.
         """
         self.name = meter_id

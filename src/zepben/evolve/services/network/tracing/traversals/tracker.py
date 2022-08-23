@@ -17,7 +17,7 @@ T = TypeVar("T")
 @dataclass(slots=True)
 class BaseTracker(Generic[T]):
     """
-    An interface used by `zepben.evolve.tracing.Traversal`'s to 'track' items that have been visited.
+    An interface used by `Traversal`'s to 'track' items that have been visited.
 
     A `Traversal` will utilise `has_visited`, `visit`, and `clear`.
     """
@@ -50,7 +50,7 @@ class BaseTracker(Generic[T]):
 
 class Tracker(BaseTracker[T]):
     """
-    An interface used by `zepben.evolve.traversals.tracing.Traversal`'s to 'track' items that have been visited.
+    An interface used by `Traversal`'s to 'track' items that have been visited.
     """
     visited: Set = set()
 

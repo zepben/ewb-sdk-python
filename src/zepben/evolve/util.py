@@ -40,7 +40,7 @@ def iter_but_not_str(obj: Any):
 
 def get_by_mrid(collection: Optional[Iterable[TIdentifiedObject]], mrid: str) -> TIdentifiedObject:
     """
-    Get an `zepben.evolve.cim.iec61970.base.core.identified_object.IdentifiedObject` from `collection` based on
+    Get an `IdentifiedObject` from `collection` based on
     its mRID.
     `collection` The collection to operate on
     `mrid` The mRID of the `IdentifiedObject` to lookup in the collection
@@ -57,7 +57,7 @@ def get_by_mrid(collection: Optional[Iterable[TIdentifiedObject]], mrid: str) ->
 
 def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -> bool:
     """
-    Check if a collection of `zepben.evolve.cim.iec61970.base.core.identified_object.IdentifiedObject` contains an
+    Check if a collection of `IdentifiedObject` contains an
     object with a specified mRID.
     `collection` The collection to operate on
     `mrid` The mRID to look up.

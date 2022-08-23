@@ -88,7 +88,7 @@ class TreeNode(object):
 
     def __lt__(self, other: TreeNode):
         """
-        This definition should only be used for sorting within a `zepben.evolve.tracing.queue.PriorityQueue`
+        This definition should only be used for sorting within a `PriorityQueue`
 
         @param other: Another PhaseStep to compare against
         @return: True if this node's max phase count over its equipment's terminals is greater than the other's, False otherwise.

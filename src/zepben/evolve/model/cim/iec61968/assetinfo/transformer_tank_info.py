@@ -34,35 +34,35 @@ class TransformerTankInfo(AssetInfo):
 
     def num_transformer_end_infos(self):
         """
-        Get the number of `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo`s associated with this `TransformerTankInfo`.
+        Get the number of `TransformerEndInfo`s associated with this `TransformerTankInfo`.
         """
         return nlen(self._transformer_end_infos)
 
     @property
     def transformer_end_infos(self) -> Generator[TransformerEndInfo, None, None]:
         """
-        The `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo`s of this `TransformerTankInfo`.
+        The `TransformerEndInfo`s of this `TransformerTankInfo`.
         """
         return ngen(self._transformer_end_infos)
 
     def get_transformer_end_info(self, mrid: str) -> TransformerEndInfo:
         """
-        Get the `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo` for this `TransformerTankInfo` identified by `mrid`.
+        Get the `TransformerEndInfo` for this `TransformerTankInfo` identified by `mrid`.
 
-        `mrid` the mRID of the required `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo`
-        Returns The `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo` with the specified `mrid`.
+        `mrid` the mRID of the required `TransformerEndInfo`
+        Returns The `TransformerEndInfo` with the specified `mrid`.
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._transformer_end_infos, mrid)
 
     def add_transformer_end_info(self, tei: TransformerEndInfo) -> TransformerTankInfo:
         """
-        `tei` The `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo` to
+        `tei` The `TransformerEndInfo` to
         associate with this `TransformerTankInfo`.
 
         Returns A reference to this `TransformerTankInfo` to allow fluent use.
 
-        Raises `ValueError` if another `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo` with the same `mrid` already
+        Raises `ValueError` if another `TransformerEndInfo` with the same `mrid` already
         exists in this `TransformerTankInfo`
         """
         if self._validate_reference(tei, self.get_transformer_end_info, "A TransformerEndInfo"):
@@ -74,9 +74,9 @@ class TransformerTankInfo(AssetInfo):
 
     def remove_transformer_end_info(self, tei: TransformerEndInfo) -> TransformerTankInfo:
         """
-        Disassociate an `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo` from this `TransformerTankInfo`.
+        Disassociate an `TransformerEndInfo` from this `TransformerTankInfo`.
 
-        `tei` the `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo` to
+        `tei` the `TransformerEndInfo` to
         disassociate with this `TransformerTankInfo`.
         Raises `ValueError` if `tei` was not associated with this `TransformerTankInfo`.
         Returns A reference to this `TransformerTankInfo` to allow fluent use.
@@ -86,7 +86,7 @@ class TransformerTankInfo(AssetInfo):
 
     def clear_transformer_end_infos(self) -> TransformerTankInfo:
         """
-        Clears all `zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info.TransformerEndInfo`.
+        Clears all `TransformerEndInfo`.
         Returns self
         """
         self._transformer_end_infos = None

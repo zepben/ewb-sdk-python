@@ -39,23 +39,23 @@ class ConnectivityNode(IdentifiedObject):
 
     def num_terminals(self):
         """
-        Get the number of `zepben.evolve.cim.iec61970.base.core.terminal.Terminal`s for this `ConnectivityNode`.
+        Get the number of `Terminal`s for this `ConnectivityNode`.
         """
         return len(self._terminals)
 
     @property
     def terminals(self) -> Generator[Terminal, None, None]:
         """
-        The `zepben.evolve.cim.iec61970.base.core.terminal.Terminal`s attached to this `ConnectivityNode`
+        The `Terminal`s attached to this `ConnectivityNode`
         """
         return ngen(self._terminals)
 
     def get_terminal(self, mrid: str) -> Terminal:
         """
-        Get the `zepben.evolve.iec61970.base.core.terminal.Terminal` for this `ConnectivityNode` identified by `mrid`
+        Get the `Terminal` for this `ConnectivityNode` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.iec61970.base.core.terminal.Terminal`
-        Returns The `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Terminal`
+        Returns The `Terminal` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._terminals, mrid)
@@ -64,7 +64,7 @@ class ConnectivityNode(IdentifiedObject):
         """
         Associate a `terminal.Terminal` with this `ConnectivityNode`
 
-        `terminal` The `zepben.evolve.iec61970.base.core.terminal.Terminal` to add. Will only add to this object if it is not already associated.
+        `terminal` The `Terminal` to add. Will only add to this object if it is not already associated.
         Returns A reference to this `ConnectivityNode` to allow fluent use.
         Raises `ValueError` if another `Terminal` with the same `mrid` already exists for this `ConnectivityNode`.
         """
@@ -78,7 +78,7 @@ class ConnectivityNode(IdentifiedObject):
         """
         Disassociate `terminal` from this `ConnectivityNode`.
 
-        `terminal` The `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` to disassociate from this `ConnectivityNode`.
+        `terminal` The `Terminal` to disassociate from this `ConnectivityNode`.
         Returns A reference to this `ConnectivityNode` to allow fluent use.
         Raises `ValueError` if `terminal` was not associated with this `ConnectivityNode`.
         """

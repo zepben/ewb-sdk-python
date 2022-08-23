@@ -33,9 +33,9 @@ class ProcessStatus(Enum):
 
 def connect(terminal: Terminal, connectivity_node: ConnectivityNode):
     """
-    Connect a `zepben.evolve.iec61970.base.core.terminal.Terminal`` to a `ConnectivityNode`
-    `terminal` The `zepben.evolve.iec61970.base.core.terminal.Terminal` to connect.
-    `connectivity_node` The `ConnectivityNode` to connect ``zepben.evolve.iec61970.base.core.terminal.Terminal` to.
+    Connect a `Terminal`` to a `ConnectivityNode`
+    `terminal` The `Terminal` to connect.
+    `connectivity_node` The `ConnectivityNode` to connect ``Terminal` to.
     """
     terminal.connect(connectivity_node)
     connectivity_node.add_terminal(terminal)
@@ -74,7 +74,7 @@ def connected_equipment(conducting_equipment: ConductingEquipment,
 
 def _attempt_to_reuse_connection(terminal1: Terminal, terminal2: Terminal) -> ProcessStatus:
     """
-    Attempt to connect two `zepben.evolve.iec61970.base.core.terminal.Terminal`s.
+    Attempt to connect two `Terminal`s.
     Returns `ProcessStatus` reflecting whether the connection was reused. PROCESSED if a connection was
     established, INVALID if it couldn't be, and SKIPPED if neither terminal had an existing `ConnectivityNode`.
     """
@@ -115,8 +115,8 @@ class NetworkService(BaseService):
         """
         Get all measurements of type `t` associated with the given `mrid`.
                                                                                                               
-        The `mrid` should be either a `zepben.evolve.iec61970.base.core.power_system_resource.PowerSystemResource` or a
-        `zepben.evolve.iec61970.base.core.terminal.Terminal` MRID that is assigned to the corresponding fields on the measurements.
+        The `mrid` should be either a `PowerSystemResource` or a
+        `Terminal` MRID that is assigned to the corresponding fields on the measurements.
         Returns all `Measurement`s indexed by `mrid` in this service.
         Raises `KeyError` if `mrid` isn't present in this service.
         """
@@ -125,7 +125,7 @@ class NetworkService(BaseService):
 
     def add_measurement(self, measurement: Measurement) -> bool:
         """
-        Add a `zepben.evolve.cim.iec61970.base.meas.measurement.Measurement` to this `NetworkService`
+        Add a `Measurement` to this `NetworkService`
 
         `measurement` The `Measurement` to add.
         Returns `True` if `measurement` was added, `False` otherwise
@@ -134,7 +134,7 @@ class NetworkService(BaseService):
 
     def remove_measurement(self, measurement) -> bool:
         """
-        Remove a `zepben.evolve.cim.iec61970.base.meas.measurement.Measurement` from this `NetworkService`
+        Remove a `Measurement` from this `NetworkService`
 
         `measurement` The `Measurement` to remove.
         Returns `True` if `measurement` was removed, `False` otherwise
@@ -144,11 +144,11 @@ class NetworkService(BaseService):
 
     def connect_by_mrid(self, terminal: Terminal, connectivity_node_mrid: str) -> bool:
         """
-        Connect a `zepben.evolve.iec61970.base.core.terminal.Terminal` to the `ConnectivityNode` with mRID `connectivity_node_mrid`
-        `terminal` The `zepben.evolve.iec61970.base.core.terminal.Terminal` to connect.
+        Connect a `Terminal` to the `ConnectivityNode` with mRID `connectivity_node_mrid`
+        `terminal` The `Terminal` to connect.
         `connectivity_node_mrid` The mRID of the `ConnectivityNode`. Will be created in the `Network` if it
         doesn't already exist.
-        Returns True if the connection was made or already existed, False if `zepben.evolve.iec61970.base.core.terminal.Terminal` was already connected to a
+        Returns True if the connection was made or already existed, False if `Terminal` was already connected to a
         different `ConnectivityNode`
         """
         if not connectivity_node_mrid:
@@ -163,8 +163,8 @@ class NetworkService(BaseService):
 
     def connect_terminals(self, terminal1: Terminal, terminal2: Terminal) -> bool:
         """
-        Connect two `zepben.evolve.iec61970.base.core.terminal.Terminal`s
-        Returns True if the `zepben.evolve.iec61970.base.core.terminal.Terminal`s could be connected, False otherwise.
+        Connect two `Terminal`s
+        Returns True if the `Terminal`s could be connected, False otherwise.
         """
         status = _attempt_to_reuse_connection(terminal1, terminal2)
         if status == ProcessStatus.PROCESSED:
@@ -187,9 +187,9 @@ class NetworkService(BaseService):
 
     def disconnect(self, terminal: Terminal):
         """
-        Disconnect a `zepben.evolve.iec61970.base.core.terminal.Terminal`` from its `ConnectivityNode`. Will also remove the `ConnectivityNode` from this
+        Disconnect a `Terminal`` from its `ConnectivityNode`. Will also remove the `ConnectivityNode` from this
         `Network` if it no longer has any terminals.
-        `terminal` The `zepben.evolve.iec61970.base.core.terminal.Terminal` to disconnect.
+        `terminal` The `Terminal` to disconnect.
         """
         cn = terminal.connectivity_node
         if cn is None:
@@ -201,7 +201,7 @@ class NetworkService(BaseService):
 
     def disconnect_by_mrid(self, connectivity_node_mrid: str):
         """
-        Disconnect a `ConnectivityNode` from this `Network`. Will disconnect all ``zepben.evolve.iec61970.base.core.terminal.Terminal`s from the
+        Disconnect a `ConnectivityNode` from this `Network`. Will disconnect all ``Terminal`s from the
         `ConnectivityNode`
         `connectivity_node_mrid` The mRID of the `ConnectivityNode` to disconnect.
         Raises `KeyError` if there is no `ConnectivityNode` for `connectivity_node_mrid`

@@ -36,23 +36,23 @@ class Customer(OrganisationRole):
 
     def num_agreements(self) -> int:
         """
-        Get the number of `zepben.evolve.iec61968.customers.customer_agreement.CustomerAgreement`s associated with this `Customer`.
+        Get the number of `CustomerAgreement`s associated with this `Customer`.
         """
         return nlen(self._customer_agreements)
 
     @property
     def agreements(self) -> Generator[CustomerAgreement, None, None]:
         """
-        The `zepben.evolve.cim.iec61968.customers.customer_agreement.CustomerAgreement`s for this `Customer`.
+        The `CustomerAgreement`s for this `Customer`.
         """
         return ngen(self._customer_agreements)
 
     def get_agreement(self, mrid: str) -> CustomerAgreement:
         """
-        Get the `zepben.evolve.cim.iec61968.customers.customer_agreement.CustomerAgreement` for this `Customer` identified by `mrid`.
+        Get the `CustomerAgreement` for this `Customer` identified by `mrid`.
 
         `mrid` the mRID of the required `customer_agreement.CustomerAgreement`
-        Returns the `zepben.evolve.cim.iec61968.customers.customer_agreement.CustomerAgreement` with the specified `mrid`.
+        Returns the `CustomerAgreement` with the specified `mrid`.
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._customer_agreements, mrid)

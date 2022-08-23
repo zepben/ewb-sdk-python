@@ -103,7 +103,7 @@ class SubGeographicalRegion(IdentifiedObject):
 
     def num_substations(self) -> int:
         """
-        Returns The number of `zepben.evolve.iec61970.base.core.substation.Substation`s associated with this `SubGeographicalRegion`
+        Returns The number of `Substation`s associated with this `SubGeographicalRegion`
         """
         return nlen(self._substations)
 
@@ -116,10 +116,10 @@ class SubGeographicalRegion(IdentifiedObject):
 
     def get_substation(self, mrid: str) -> Substation:
         """
-        Get the `zepben.evolve.iec61970.base.core.substation.Substation` for this `SubGeographicalRegion` identified by `mrid`
+        Get the `Substation` for this `SubGeographicalRegion` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.iec61970.base.core.substation.Substation`
-        Returns The `zepben.evolve.iec61970.base.core.substation.Substation` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `Substation`
+        Returns The `Substation` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._substations, mrid)
@@ -128,11 +128,11 @@ class SubGeographicalRegion(IdentifiedObject):
         """
         Associate a `Substation` with this `GeographicalRegion`
 
-        `substation` the `zepben.evolve.iec61970.base.core.substation.Substation` to associate with this `SubGeographicalRegion`.
+        `substation` the `Substation` to associate with this `SubGeographicalRegion`.
 
         Returns A reference to this `SubGeographicalRegion` to allow fluent use.
 
-        Raises `ValueError` if another `zepben.evolve.iec61970.base.core.substation.Substation` with the same `mrid` already exists for this
+        Raises `ValueError` if another `Substation` with the same `mrid` already exists for this
         `GeographicalRegion`.
         """
         if self._validate_reference(substation, self.get_substation, "A Substation"):
@@ -145,7 +145,7 @@ class SubGeographicalRegion(IdentifiedObject):
         """
         Disassociate `substation` from this `GeographicalRegion`
 
-        `substation` The `zepben.evolve.iec61970.base.core.substation.Substation` to disassociate from this `SubGeographicalRegion`.
+        `substation` The `Substation` to disassociate from this `SubGeographicalRegion`.
         Returns A reference to this `SubGeographicalRegion` to allow fluent use.
         Raises `ValueError` if `substation` was not associated with this `SubGeographicalRegion`.
         """

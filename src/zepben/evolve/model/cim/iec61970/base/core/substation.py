@@ -54,21 +54,21 @@ class Substation(EquipmentContainer):
     @property
     def circuits(self) -> Generator[Circuit, None, None]:
         """
-        The `zepben.evolve.cim.infiec61970.feeder.circuit.Circuit`s originating from this substation.
+        The `Circuit`s originating from this substation.
         """
         return ngen(self._circuits)
 
     @property
     def loops(self) -> Generator[Loop, None, None]:
         """
-        The `zepben.evolve.cim.infiec61970.feeder.loop.Loop` originating from this substation.
+        The `Loop` originating from this substation.
         """
         return ngen(self._loops)
 
     @property
     def energized_loops(self) -> Generator[Loop, None, None]:
         """
-        The `zepben.evolve.cim.infiec61970.feeder.loop.Loop`s originating from this substation that are energised.
+        The `Loop`s originating from this substation that are energised.
         """
         return ngen(self._energized_loops)
 
@@ -81,25 +81,25 @@ class Substation(EquipmentContainer):
 
     def num_feeders(self):
         """
-        Returns The number of `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder`s associated with this `Substation`
+        Returns The number of `Feeder`s associated with this `Substation`
         """
         return nlen(self._normal_energized_feeders)
 
     def get_feeder(self, mrid: str) -> Feeder:
         """
-        Get the `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder` for this `Substation` identified by `mrid`
+        Get the `Feeder` for this `Substation` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder`
-        Returns The `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Feeder`
+        Returns The `Feeder` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._normal_energized_feeders, mrid)
 
     def add_feeder(self, feeder: Feeder) -> Substation:
         """
-        Associate a `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder` with this `Substation`
+        Associate a `Feeder` with this `Substation`
 
-        `feeder` The `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder` to associate with this `Substation`.
+        `feeder` The `Feeder` to associate with this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if another `Feeder` with the same `mrid` already exists for this `Substation`.
         """
@@ -113,7 +113,7 @@ class Substation(EquipmentContainer):
         """
         Disassociate `feeder` from this `Substation`
 
-        `feeder` The `zepben.evolve.cim.iec61970.base.core.equipment_container.Feeder` to disassociate from this `Substation`.
+        `feeder` The `Feeder` to disassociate from this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if `feeder` was not associated with this `Substation`.
         """
@@ -130,25 +130,25 @@ class Substation(EquipmentContainer):
 
     def num_loops(self):
         """
-        Returns The number of `zepben.evolve.cim.infiec61970.feeder.loop.Loop`s associated with this `Substation`
+        Returns The number of `Loop`s associated with this `Substation`
         """
         return nlen(self._loops)
 
     def get_loop(self, mrid: str) -> Loop:
         """
-        Get the `zepben.evolve.cim.infiec61970.feeder.loop.Loop` for this `Substation` identified by `mrid`
+        Get the `Loop` for this `Substation` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.infiec61970.feeder.loop.Loop`
-        Returns The `zepben.evolve.cim.infiec61970.feeder.loop.Loop` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Loop`
+        Returns The `Loop` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._loops, mrid)
 
     def add_loop(self, loop: Loop) -> Substation:
         """
-        Associate a `zepben.evolve.cim.infiec61970.feeder.loop.Loop` with this `Substation`
+        Associate a `Loop` with this `Substation`
 
-        `loop` The `zepben.evolve.cim.infiec61970.feeder.loop.Loop` to associate with this `Substation`.
+        `loop` The `Loop` to associate with this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if another `Loop` with the same `mrid` already exists for this `Substation`.
         """
@@ -162,7 +162,7 @@ class Substation(EquipmentContainer):
         """
         Disassociate `loop` from this `Substation`
 
-        `loop` The `zepben.evolve.cim.infiec61970.feeder.loop.Loop` to disassociate from this `Substation`.
+        `loop` The `Loop` to disassociate from this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if `loop` was not associated with this `Substation`.
         """
@@ -179,25 +179,25 @@ class Substation(EquipmentContainer):
 
     def num_energized_loops(self):
         """
-        Returns The number of `zepben.evolve.cim.infiec61970.feeder.loop.Loop`s associated with this `Substation`
+        Returns The number of `Loop`s associated with this `Substation`
         """
         return nlen(self._energized_loops)
 
     def get_energized_loop(self, mrid: str) -> Loop:
         """
-        Get the `zepben.evolve.cim.infiec61970.feeder.loop.Loop` for this `Substation` identified by `mrid`
+        Get the `Loop` for this `Substation` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.infiec61970.feeder.loop.Loop`
-        Returns The `zepben.evolve.cim.infiec61970.feeder.loop.Loop` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Loop`
+        Returns The `Loop` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._energized_loops, mrid)
 
     def add_energized_loop(self, loop: Loop) -> Substation:
         """
-        Associate a `zepben.evolve.cim.infiec61970.feeder.loop.Loop` with this `Substation`
+        Associate a `Loop` with this `Substation`
 
-        `loop` The `zepben.evolve.cim.infiec61970.feeder.loop.Loop` to associate with this `Substation`.
+        `loop` The `Loop` to associate with this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if another `Loop` with the same `mrid` already exists for this `Substation`.
         """
@@ -211,7 +211,7 @@ class Substation(EquipmentContainer):
         """
         Disassociate `loop` from this `Substation`
 
-        `loop` The `zepben.evolve.cim.infiec61970.feeder.loop.Loop` to disassociate from this `Substation`.
+        `loop` The `Loop` to disassociate from this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if `loop` was not associated with this `Substation`.
         """
@@ -228,25 +228,25 @@ class Substation(EquipmentContainer):
 
     def num_circuits(self):
         """
-        Returns The number of `zepben.evolve.cim.infiec61970.feeder.circuit.Circuit`s associated with this `Substation`
+        Returns The number of `Circuit`s associated with this `Substation`
         """
         return nlen(self._circuits)
 
     def get_circuit(self, mrid: str) -> Circuit:
         """
-        Get the `zepben.evolve.cim.infiec61970.feeder.circuit.Circuit` for this `Substation` identified by `mrid`
+        Get the `Circuit` for this `Substation` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.infiec61970.feeder.circuit.Circuit`
-        Returns The `zepben.evolve.cim.infiec61970.feeder.circuit.Circuit` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Circuit`
+        Returns The `Circuit` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._circuits, mrid)
 
     def add_circuit(self, circuit: Circuit) -> Substation:
         """
-        Associate a `zepben.evolve.cim.infiec61970.feeder.circuit.Circuit` with this `Substation`
+        Associate a `Circuit` with this `Substation`
 
-        `circuit` The `zepben.evolve.cim.infiec61970.feeder.circuit.Circuit` to associate with this `Substation`.
+        `circuit` The `Circuit` to associate with this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if another `Circuit` with the same `mrid` already exists for this `Substation`.
         """
@@ -260,7 +260,7 @@ class Substation(EquipmentContainer):
         """
         Disassociate `circuit` from this `Substation`
 
-        `circuit` The `zepben.evolve.cim.infiec61970.feeder.circuit.Circuit` to disassociate from this `Substation`.
+        `circuit` The `Circuit` to disassociate from this `Substation`.
         Returns A reference to this `Substation` to allow fluent use.
         Raises `ValueError` if `circuit` was not associated with this `Substation`.
         """

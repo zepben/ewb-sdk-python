@@ -251,7 +251,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def retrieve_network(self) -> GrpcResult[NetworkResult]:
         """
         Retrieve the entire network.
-        Returns a GrpcResult containing the complete `zepben.evolve.network.network.NetworkService` from the server.
+        Returns a GrpcResult containing the complete `NetworkService` from the server.
         """
         return await self._retrieve_network()
 

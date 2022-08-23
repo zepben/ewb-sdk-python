@@ -24,7 +24,7 @@ __all__ = ["ConnectivityResult", "terminal_compare"]
 
 def terminal_compare(terminal: Terminal, other: Terminal):
     """
-    This definition should only be used for sorting within a `zepben.evolve.traversals.queue.PriorityQueue`
+    This definition should only be used for sorting within a `PriorityQueue`
     `terminal` The terminal to compare
     `other` The terminal to compare against
     Returns True if `terminal` has more phases than `other`, False otherwise.

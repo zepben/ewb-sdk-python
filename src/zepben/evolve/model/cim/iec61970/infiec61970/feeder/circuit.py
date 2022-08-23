@@ -52,19 +52,19 @@ class Circuit(Line):
 
     def get_end_terminal(self, mrid: str) -> Terminal:
         """
-        Get the `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` for this `Circuit` identified by `mrid`
+        Get the `Terminal` for this `Circuit` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61970.base.core.terminal.Terminal`
-        Returns The `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `Terminal`
+        Returns The `Terminal` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._end_terminals, mrid)
 
     def add_end_terminal(self, terminal: Terminal) -> Circuit:
         """
-        Associate an `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` with this `Circuit`
+        Associate an `Terminal` with this `Circuit`
 
-        `terminal` the `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` to associate with this `Circuit`.
+        `terminal` the `Terminal` to associate with this `Circuit`.
         Returns A reference to this `Circuit` to allow fluent use.
         Raises `ValueError` if another `Terminal` with the same `mrid` already exists for this `Circuit`.
         """
@@ -78,7 +78,7 @@ class Circuit(Line):
         """
         Disassociate `terminal` from this `Circuit`
 
-        `terminal` the `zepben.evolve.cim.iec61970.base.core.terminal.Terminal` to disassociate from this `Circuit`.
+        `terminal` the `Terminal` to disassociate from this `Circuit`.
         Returns A reference to this `Circuit` to allow fluent use.
         Raises `ValueError` if `terminal` was not associated with this `Circuit`.
         """
@@ -99,19 +99,19 @@ class Circuit(Line):
 
     def get_end_substation(self, mrid: str) -> Substation:
         """
-        Get the `zepben.evolve.cim.iec61970.base.core.substation.Substation` for this `Circuit` identified by `mrid`
+        Get the `Substation` for this `Circuit` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61970.base.core.substation.Substation`
-        Returns The `zepben.evolve.cim.iec61970.base.core.substation.Substation` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `Substation`
+        Returns The `Substation` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._end_substations, mrid)
 
     def add_end_substation(self, substation: Substation) -> Circuit:
         """
-        Associate an `zepben.evolve.cim.iec61970.base.core.substation.Substation` with this `Circuit`
+        Associate an `Substation` with this `Circuit`
 
-        `substation` the `zepben.evolve.cim.iec61970.base.core.substation.Substation` to associate with this `Circuit`.
+        `substation` the `Substation` to associate with this `Circuit`.
         Returns A reference to this `Circuit` to allow fluent use.
         Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `Circuit`.
         """
@@ -125,7 +125,7 @@ class Circuit(Line):
         """
         Disassociate `substation` from this `Circuit`
 
-        `substation` the `zepben.evolve.cim.iec61970.base.core.substation.Substation` to disassociate from this `Circuit`.
+        `substation` the `Substation` to disassociate from this `Circuit`.
         Returns A reference to this `Circuit` to allow fluent use.
         Raises `ValueError` if `substation` was not associated with this `Circuit`.
         """

@@ -37,7 +37,7 @@ class EnergySourcePhase(PowerSystemResource):
 
     @property
     def energy_source(self):
-        """The `zepben.evolve.cim.iec61970.wires.energy_source.EnergySource` with this `EnergySourcePhase`"""
+        """The `EnergySource` with this `EnergySourcePhase`"""
         return self._energy_source
 
     @energy_source.setter
