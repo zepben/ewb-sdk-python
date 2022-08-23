@@ -109,11 +109,11 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
     def get_unit(self, mrid: str) -> PowerElectronicsUnit:
         """
-        Get the `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` for this
+        Get the `PowerElectronicsUnit` for this
         `PowerElectronicsConnection` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit`
-        Returns The `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` with the specified `mrid`
+        `mrid` the mRID of the required `PowerElectronicsUnit`
+        Returns The `PowerElectronicsUnit` with the specified `mrid`
         if it exists
 
         Raises `KeyError` if `mrid` wasn't present.
@@ -122,7 +122,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
     def add_unit(self, unit: PowerElectronicsUnit) -> PowerElectronicsConnection:
         """
-        Associate an `zepben.evolve.cim.iec61970.base.wires.generation.production.power_electronics_unit.PowerElectronicsUnit` with this
+        Associate an `PowerElectronicsUnit` with this
         `PowerElectronicsConnection`
 
         `unit` the `PowerElectronicsUnit` to associate with this `PowerElectronicsConnection`.

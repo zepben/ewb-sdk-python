@@ -45,13 +45,13 @@ class ShuntCompensator(RegulatingCondEq):
 
     @property
     def shunt_compensator_info(self) -> Optional[ShuntCompensatorInfo]:
-        """The `zepben.evolve.cim.iec61968.assetinfo.shunt_compensator_info.ShuntCompensatorInfo` for this `ShuntCompensator`"""
+        """The `ShuntCompensatorInfo` for this `ShuntCompensator`"""
         return self.asset_info
 
     @shunt_compensator_info.setter
     def shunt_compensator_info(self, sci: Optional[ShuntCompensatorInfo]):
         """
-        Set the `zepben.evolve.cim.iec61968.assetinfo.shunt_compensator_info.ShuntCompensatorInfo` for this `ShuntCompensator`
+        Set the `ShuntCompensatorInfo` for this `ShuntCompensator`
         `sci` The `ShuntCompensatorInfo` for this `ShuntCompensator`
         """
         self.asset_info = sci

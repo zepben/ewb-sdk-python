@@ -68,7 +68,7 @@ class Switch(ConductingEquipment):
         """
         Check if the switch is currently open on `phase`.
 
-        `phase` The `zepben.evolve.cim.iec61970.base.wires.single_phase_kind.SinglePhaseKind` to check the current status. A `phase` of `None` (default) checks
+        `phase` The `SinglePhaseKind` to check the current status. A `phase` of `None` (default) checks
         if any phase is open.
         Returns True if `phase` is open in its current state, False if it is closed
         """

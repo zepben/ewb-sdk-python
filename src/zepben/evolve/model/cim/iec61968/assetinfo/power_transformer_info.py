@@ -28,35 +28,35 @@ class PowerTransformerInfo(AssetInfo):
 
     def num_transformer_tank_infos(self):
         """
-        Get the number of `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo`s associated with this `PowerTransformerInfo`.
+        Get the number of `TransformerTankInfo`s associated with this `PowerTransformerInfo`.
         """
         return nlen(self._transformer_tank_infos)
 
     @property
     def transformer_tank_infos(self) -> Generator[TransformerTankInfo, None, None]:
         """
-        The `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo`s of this `PowerTransformerInfo`.
+        The `TransformerTankInfo`s of this `PowerTransformerInfo`.
         """
         return ngen(self._transformer_tank_infos)
 
     def get_transformer_tank_info(self, mrid: str) -> TransformerTankInfo:
         """
-        Get the `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo` for this `PowerTransformerInfo` identified by `mrid`.
+        Get the `TransformerTankInfo` for this `PowerTransformerInfo` identified by `mrid`.
 
-        `mrid` the mRID of the required `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo`
-        Returns The `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo` with the specified `mrid`.
+        `mrid` the mRID of the required `TransformerTankInfo`
+        Returns The `TransformerTankInfo` with the specified `mrid`.
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._transformer_tank_infos, mrid)
 
     def add_transformer_tank_info(self, tti: TransformerTankInfo) -> PowerTransformerInfo:
         """
-        `tti` The `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo` to
+        `tti` The `TransformerTankInfo` to
         associate with this `PowerTransformerInfo`.
 
         Returns A reference to this `PowerTransformerInfo` to allow fluent use.
 
-        Raises `ValueError` if another `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo` with the same `mrid` already
+        Raises `ValueError` if another `TransformerTankInfo` with the same `mrid` already
         exists in this `PowerTransformerInfo`
         """
         if self._validate_reference(tti, self.get_transformer_tank_info, "A TransformerTankInfo"):
@@ -68,9 +68,9 @@ class PowerTransformerInfo(AssetInfo):
 
     def remove_transformer_tank_info(self, tti: TransformerTankInfo) -> PowerTransformerInfo:
         """
-        Disassociate an `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo` from this `PowerTransformerInfo`.
+        Disassociate an `TransformerTankInfo` from this `PowerTransformerInfo`.
 
-        `tti` the `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo` to
+        `tti` the `TransformerTankInfo` to
         disassociate with this `PowerTransformerInfo`.
         Raises `ValueError` if `tti` was not associated with this `PowerTransformerInfo`.
         Returns A reference to this `Asset` to allow fluent use.
@@ -80,7 +80,7 @@ class PowerTransformerInfo(AssetInfo):
 
     def clear_transformer_tank_infos(self) -> PowerTransformerInfo:
         """
-        Clears all `zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info.TransformerTankInfo`.
+        Clears all `TransformerTankInfo`.
         Returns self
         """
         self._transformer_tank_infos = None

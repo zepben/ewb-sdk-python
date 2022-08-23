@@ -24,13 +24,13 @@ class Conductor(ConductingEquipment):
 
     @property
     def wire_info(self):
-        """The `zepben.evolve.cim.iec61968.assetinfo.wire_info.WireInfo` for this `Conductor`"""
+        """The `WireInfo` for this `Conductor`"""
         return self.asset_info
 
     @wire_info.setter
     def wire_info(self, wi: Optional[WireInfo]):
         """
-        Set the `zepben.evolve.cim.iec61968.assetinfo.wire_info.WireInfo` for this `Conductor`
+        Set the `WireInfo` for this `Conductor`
         `wi` The `WireInfo` for this `Conductor`
         """
         self.asset_info = wi

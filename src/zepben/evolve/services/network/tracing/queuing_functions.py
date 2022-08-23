@@ -39,9 +39,9 @@ def queue_next_terminal(item: Terminal, traversal: Traversal[Terminal]):
     """
     Wrapper tracing queue function for fetching the terminals that should be queued based on their connectivity
 
-    `item` The Terminal to fetch connected `zepben.evolve.iec61970.base.core.terminal.Terminal`s for.
+    `item` The Terminal to fetch connected `Terminal`s for.
     `exclude` set of `Terminal`s to be excluded from queuing.
-    Returns a list of `zepben.evolve.iec61970.base.core.terminal.Terminal`s to be queued
+    Returns a list of `Terminal`s to be queued
     """
     other_terms = item.get_other_terminals()
     if not other_terms:

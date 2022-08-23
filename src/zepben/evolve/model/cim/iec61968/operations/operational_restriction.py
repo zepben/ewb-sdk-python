@@ -38,32 +38,32 @@ class OperationalRestriction(Document):
 
     def num_equipment(self):
         """
-        Returns the number of `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` associated with this `OperationalRestriction`
+        Returns the number of `Equipment` associated with this `OperationalRestriction`
         """
         return nlen(self._equipment)
 
     @property
     def equipment(self) -> Generator[Equipment, None, None]:
         """
-        The `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` to which this `OperationalRestriction` applies.
+        The `Equipment` to which this `OperationalRestriction` applies.
         """
         return ngen(self._equipment)
 
     def get_equipment(self, mrid: str) -> Equipment:
         """
-        Get the `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` for this `OperationalRestriction` identified by `mrid`
+        Get the `Equipment` for this `OperationalRestriction` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.cim.iec61970.base.core.equipment.Equipment`
-        Returns The `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Equipment`
+        Returns The `Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._equipment, mrid)
 
     def add_equipment(self, equipment: Equipment) -> OperationalRestriction:
         """
-        Associate an `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` with this `OperationalRestriction`
+        Associate an `Equipment` with this `OperationalRestriction`
 
-        `equipment` The `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` to associate with this `OperationalRestriction`.
+        `equipment` The `Equipment` to associate with this `OperationalRestriction`.
         Returns A reference to this `OperationalRestriction` to allow fluent use.
         Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `OperationalRestriction`.
         """
@@ -77,7 +77,7 @@ class OperationalRestriction(Document):
         """
         Disassociate `equipment` from this `OperationalRestriction`.
 
-        `equipment` The `zepben.evolve.cim.iec61970.base.core.equipment.Equipment` to disassociate from this `OperationalRestriction`.
+        `equipment` The `Equipment` to disassociate from this `OperationalRestriction`.
         Returns A reference to this `OperationalRestriction` to allow fluent use.
         Raises `ValueError` if `equipment` was not associated with this `OperationalRestriction`.
         """

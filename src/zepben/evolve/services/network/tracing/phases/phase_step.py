@@ -44,7 +44,7 @@ class PhaseStep(object):
 
     def __lt__(self, other):
         """
-        This definition should only be used for sorting within a `zepben.evolve.tracing.queue.PriorityQueue`
+        This definition should only be used for sorting within a `PriorityQueue`
         `other` Another PhaseStep to compare against
         Returns True if self has more phases than other, False otherwise.
         """

@@ -31,10 +31,10 @@ def new_current_trace() -> Traversal:
 
 def get_associated_terminals(terminal: Terminal, exclude: Set[Terminal] = None) -> List[Terminal]:
     """
-    Gets all associated `zepben.evolve.model.cim.iec61970.base.core.terminal.Terminal`s for `terminal`.
+    Gets all associated `Terminal`s for `terminal`.
     Associated terminals include every other `Terminal` on `terminal`s `connectivity_node`.
 
-    `terminal` The `zepben.evolve.model.cim.iec61970.base.core.terminal.Terminal` to use for associations.
+    `terminal` The `Terminal` to use for associations.
     `exclude` A set of `Terminal`s to exclude from the result.
     Returns the list of `Terminal`s associated with `terminal`
     """
@@ -51,11 +51,11 @@ def queue_next_terminal_if_closed(
     open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool]
 ) -> Callable[[Terminal, Traversal[Terminal]], None]:
     """
-    Creates a queue next function based on the given `open_test` that given a `zepben.evolve.model.cim.iec61970.base.core.terminal.Terminal` where all its
+    Creates a queue next function based on the given `open_test` that given a `Terminal` where all its
     `phases` are closed, will return all its associated `Terminal`s for queuing as per `get_associated_terminals`.
 
     `open_test` Function that tests whether a given phase on an equipment is open.
-    Returns the queuing function to be used to populate a `zepben.evolve.services.network.tracing.traversals.tracing.Traversal`s `process_queue`.
+    Returns the queuing function to be used to populate a `Traversal`s `process_queue`.
     """
 
     def queue_next(terminal: Terminal, traversal: Traversal[Terminal]):

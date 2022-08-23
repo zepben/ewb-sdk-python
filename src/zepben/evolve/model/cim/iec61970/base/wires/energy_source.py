@@ -136,17 +136,17 @@ class EnergySource(EnergyConnection):
 
     def get_phase(self, mrid: str) -> EnergySourcePhase:
         """
-        Get the `zepben.evolve.cim.iec61970.base.wires.energy_source_phase.EnergySourcePhase` for this `EnergySource` identified by `mrid`
+        Get the `EnergySourcePhase` for this `EnergySource` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61970.base.wires.energy_source_phase.EnergySourcePhase`
-        Returns The `zepben.evolve.cim.iec61970.base.wires.energy_source_phase.EnergySourcePhase` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `EnergySourcePhase`
+        Returns The `EnergySourcePhase` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._energy_source_phases, mrid)
 
     def add_phase(self, phase: EnergySourcePhase) -> EnergySource:
         """
-        Associate an `zepben.evolve.cim.iec61970.base.wires.energy_source_phase.EnergySourcePhase` with this `EnergySource`
+        Associate an `EnergySourcePhase` with this `EnergySource`
 
         `phase` the `EnergySourcePhase` to associate with this `EnergySource`.
         Returns A reference to this `EnergySource` to allow fluent use.

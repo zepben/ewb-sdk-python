@@ -33,32 +33,32 @@ class Pole(Structure):
 
     def num_streetlights(self) -> int:
         """
-        Get the number of `zepben.evolve.cim.iec61968.assets.streetlight.Streetlight`s associated with this `Pole`.
+        Get the number of `Streetlight`s associated with this `Pole`.
         """
         return nlen(self._streetlights)
 
     @property
     def streetlights(self) -> Generator[Streetlight, None, None]:
         """
-        The `zepben.evolve.cim.iec61968.assets.streetlight.Streetlight`s of this `Pole`.
+        The `Streetlight`s of this `Pole`.
         """
         return ngen(self._streetlights)
 
     def get_streetlight(self, mrid: str) -> Streetlight:
         """
-        Get the `zepben.evolve.cim.iec61968.assets.streetlight.Streetlight` for this asset identified by `mrid`.
+        Get the `Streetlight` for this asset identified by `mrid`.
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61968.assets.streetlight.Streetlight`
-        Returns The `zepben.evolve.cim.iec61968.assets.streetlight.Streetlight` with the specified `mrid`.
+        `mrid` the mRID of the required `Streetlight`
+        Returns The `Streetlight` with the specified `mrid`.
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._streetlights, mrid)
 
     def add_streetlight(self, streetlight: Streetlight) -> Pole:
         """
-        Associate a `zepben.evolve.cim.iec61968.assets.streetlight.Streetlight` with this `Pole`
+        Associate a `Streetlight` with this `Pole`
 
-        `streetlight` the `zepben.evolve.cim.iec61968.assets.streetlight.Streetlight` to associate with this `Pole`.
+        `streetlight` the `Streetlight` to associate with this `Pole`.
         Returns A reference to this `Pole` to allow fluent use.
         Raises `ValueError` if another `Streetlight` with the same `mrid` already exists in this `Pole`
         """
@@ -72,7 +72,7 @@ class Pole(Structure):
     def remove_streetlight(self, streetlight: Streetlight) -> Pole:
         """
         Disassociate `streetlight` from this `Pole`
-        `streetlight` the `zepben.evolve.cim.iec61968.assets.streetlight.Streetlight` to disassociate from this `Pole`.
+        `streetlight` the `Streetlight` to disassociate from this `Pole`.
         Raises `ValueError` if `streetlight` was not associated with this `Pole`.
         Returns A reference to this `Pole` to allow fluent use.
         """

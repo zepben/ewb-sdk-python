@@ -41,43 +41,43 @@ class Loop(IdentifiedObject):
     @property
     def circuits(self) -> Generator[Circuit, None, None]:
         """
-        Sub-transmission `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit`s that form part of this loop.
+        Sub-transmission `Circuit`s that form part of this loop.
         """
         return ngen(self._circuits)
 
     @property
     def substations(self) -> Generator[Substation, None, None]:
         """
-        The `zepben.evolve.cim.iec61970.base.core.substation.Substation`s that are powered by this `Loop`.
+        The `Substation`s that are powered by this `Loop`.
         """
         return ngen(self._substations)
 
     @property
     def energizing_substations(self) -> Generator[Substation, None, None]:
         """
-        The `zepben.evolve.cim.iec61970.base.core.substation.Substation`s that normally energize this `Loop`.
+        The `Substation`s that normally energize this `Loop`.
         """
         return ngen(self._energizing_substations)
 
     def num_circuits(self):
-        """Return the number of end `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit`s associated with this `Loop`"""
+        """Return the number of end `Circuit`s associated with this `Loop`"""
         return nlen(self._circuits)
 
     def get_circuit(self, mrid: str) -> Circuit:
         """
-        Get the `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit` for this `Loop` identified by `mrid`
+        Get the `Circuit` for this `Loop` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit`
-        Returns The `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `Circuit`
+        Returns The `Circuit` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._circuits, mrid)
 
     def add_circuit(self, circuit: Circuit) -> Loop:
         """
-        Associate an `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit` with this `Loop`
+        Associate an `Circuit` with this `Loop`
 
-        `circuit` the `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit` to associate with this `Loop`.
+        `circuit` the `Circuit` to associate with this `Loop`.
         Returns A reference to this `Loop` to allow fluent use.
         Raises `ValueError` if another `Circuit` with the same `mrid` already exists for this `Loop`.
         """
@@ -91,7 +91,7 @@ class Loop(IdentifiedObject):
         """
         Disassociate `circuit` from this `Loop`
 
-        `circuit` the `zepben.evolve.cim.infiec61970.base.core.circuit.Circuit` to disassociate from this `Loop`.
+        `circuit` the `Circuit` to disassociate from this `Loop`.
         Returns A reference to this `Loop` to allow fluent use.
         Raises `ValueError` if `circuit` was not associated with this `Loop`.
         """
@@ -107,24 +107,24 @@ class Loop(IdentifiedObject):
         return self
 
     def num_substations(self):
-        """Return the number of end `zepben.evolve.cim.iec61970.base.core.substation.Substation`s associated with this `Loop`"""
+        """Return the number of end `Substation`s associated with this `Loop`"""
         return nlen(self._substations)
 
     def get_substation(self, mrid: str) -> Substation:
         """
-        Get the `zepben.evolve.cim.iec61970.base.core.substation.Substation` for this `Loop` identified by `mrid`
+        Get the `Substation` for this `Loop` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61970.base.core.substation.Substation`
-        Returns The `zepben.evolve.cim.iec61970.base.core.substation.Substation` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `Substation`
+        Returns The `Substation` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._substations, mrid)
 
     def add_substation(self, substation: Substation) -> Loop:
         """
-        Associate an `zepben.evolve.cim.iec61970.base.core.substation.Substation` with this `Loop`
+        Associate an `Substation` with this `Loop`
 
-        `substation` the `zepben.evolve.cim.iec61970.base.core.substation.Substation` to associate with this `Loop`.
+        `substation` the `Substation` to associate with this `Loop`.
         Returns A reference to this `Loop` to allow fluent use.
         Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `Loop`.
         """
@@ -138,7 +138,7 @@ class Loop(IdentifiedObject):
         """
         Disassociate `substation` from this `Loop`
 
-        `substation` the `zepben.evolve.cim.iec61970.base.core.substation.Substation` to disassociate from this `Loop`.
+        `substation` the `Substation` to disassociate from this `Loop`.
         Returns A reference to this `Loop` to allow fluent use.
         Raises `ValueError` if `substation` was not associated with this `Loop`.
         """
@@ -154,24 +154,24 @@ class Loop(IdentifiedObject):
         return self
 
     def num_energizing_substations(self):
-        """Return the number of end `zepben.evolve.cim.iec61970.base.core.substation.Substation`s associated with this `Loop`"""
+        """Return the number of end `Substation`s associated with this `Loop`"""
         return nlen(self._energizing_substations)
 
     def get_energizing_substation(self, mrid: str) -> Substation:
         """
-        Get the `zepben.evolve.cim.iec61970.base.core.substation.Substation` for this `Loop` identified by `mrid`
+        Get the `Substation` for this `Loop` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61970.base.core.substation.Substation`
-        Returns The `zepben.evolve.cim.iec61970.base.core.substation.Substation` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `Substation`
+        Returns The `Substation` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._energizing_substations, mrid)
 
     def add_energizing_substation(self, substation: Substation) -> Loop:
         """
-        Associate an `zepben.evolve.cim.iec61970.base.core.substation.Substation` with this `Loop`
+        Associate an `Substation` with this `Loop`
 
-        `substation` the `zepben.evolve.cim.iec61970.base.core.substation.Substation` to associate with this `Loop`.
+        `substation` the `Substation` to associate with this `Loop`.
         Returns A reference to this `Loop` to allow fluent use.
         Raises `ValueError` if another `Substation` with the same `mrid` already exists for this `Loop`.
         """
@@ -185,7 +185,7 @@ class Loop(IdentifiedObject):
         """
         Disassociate `substation` from this `Loop`
 
-        `substation` the `zepben.evolve.cim.iec61970.base.core.substation.Substation` to disassociate from this `Loop`.
+        `substation` the `Substation` to disassociate from this `Loop`.
         Returns A reference to this `Loop` to allow fluent use.
         Raises `ValueError` if `substation` was not associated with this `Loop`.
         """

@@ -49,9 +49,9 @@ class BaseTraversal(Generic[T]):
     have been applied.
 
     Step actions are functions to be called on each item visited in the trace. These are called after the stop conditions are evaluated, and each action is
-    passed the current `zepben.evolve.network.tracing.connectivity.ConnectivityResult` as well as the `stopping` state (True if the trace is stopping after
+    passed the current `ConnectivityResult` as well as the `stopping` state (True if the trace is stopping after
     the current `ConnectivityResult, False otherwise). Thus, the signature of each step action must be:
-    :func: action(cr: `zepben.evolve.tracing.ConnectivityResult`, is_stopping: bool) -> None
+    :func: action(cr: `ConnectivityResult`, is_stopping: bool) -> None
     """
     start_item: T = None
     """The starting item for this `BaseTraversal`"""
@@ -147,7 +147,7 @@ class BaseTraversal(Generic[T]):
         Perform a trace across the network from `start_item`, applying actions to each piece of equipment encountered
         until all branches of the network are exhausted, or a stop condition succeeds and we cannot continue any further.
         When a stop condition is reached, we will stop tracing that branch of the network and continue with other branches.
-        `start_item` The starting point. Must implement :func:`zepben.evolve.ConductingEquipment::get_connectivity`
+        `start_item` The starting point. Must implement :func:`ConductingEquipment::get_connectivity`
                            which allows tracing over the terminals in a network.
         `can_stop_on_start_item` If it's possible for stop conditions to apply to the start_item.
         """
@@ -167,7 +167,7 @@ class BaseTraversal(Generic[T]):
     async def _run_trace(self, can_stop_on_start_item: bool = True):
         """
         Extend and implement your tracing algorithm here.
-        `start_item` The starting object to commence tracing. Must implement :func:`zepben.evolve.ConductingEquipment.get_connectivity`
+        `start_item` The starting object to commence tracing. Must implement :func:`ConductingEquipment.get_connectivity`
         `can_stop_on_start_item` Whether to
         """
         raise NotImplementedError()
@@ -186,7 +186,7 @@ class Traversal(BaseTraversal[T]):
     will use a FIFO `Queue` breadth-first search. More complex searches can be achieved with `Priority`, which
     will use a PriorityQueue under the hood.
 
-    The traversal also requires a `zepben.evolve.traversals.tracker.Tracker` to be supplied. This gives flexibility
+    The traversal also requires a `Tracker` to be supplied. This gives flexibility
     to track items in unique ways, more than just "has this item been visited" e.g. visiting more than once,
     visiting under different conditions etc.
     """

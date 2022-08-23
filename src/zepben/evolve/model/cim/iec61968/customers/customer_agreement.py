@@ -39,7 +39,7 @@ class CustomerAgreement(Agreement):
 
     @property
     def customer(self):
-        """The `zepben.evolve.cim.iec61968.customers.customer.Customer` that has this `CustomerAgreement`."""
+        """The `Customer` that has this `CustomerAgreement`."""
         return self._customer
 
     @customer.setter
@@ -51,23 +51,23 @@ class CustomerAgreement(Agreement):
 
     def num_pricing_structures(self):
         """
-        The number of `zepben.evolve.cim.iec61968.customers.pricing_structure.PricingStructure`s associated with this `CustomerAgreement`
+        The number of `PricingStructure`s associated with this `CustomerAgreement`
         """
         return nlen(self._pricing_structures)
 
     @property
     def pricing_structures(self) -> Generator[PricingStructure, None, None]:
         """
-        The `zepben.evolve.cim.iec61968.customers.pricing_structure.PricingStructure`s of this `CustomerAgreement`.
+        The `PricingStructure`s of this `CustomerAgreement`.
         """
         return ngen(self._pricing_structures)
 
     def get_pricing_structure(self, mrid: str) -> PricingStructure:
         """
-        Get the `zepben.evolve.cim.iec61968.customers.pricing_structure.PricingStructure` for this `CustomerAgreement` identified by `mrid`
+        Get the `PricingStructure` for this `CustomerAgreement` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61968.customers.pricing_structure.PricingStructure`
-        Returns the `zepben.evolve.cim.iec61968.customers.pricing_structure.PricingStructure` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `PricingStructure`
+        Returns the `PricingStructure` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._pricing_structures, mrid)
@@ -76,7 +76,7 @@ class CustomerAgreement(Agreement):
         """
         Associate `ps` with this `CustomerAgreement`
 
-        `ps` the `zepben.evolve.cim.iec61968.customers.pricing_structure.PricingStructure` to associate with this `CustomerAgreement`.
+        `ps` the `PricingStructure` to associate with this `CustomerAgreement`.
         Returns A reference to this `CustomerAgreement` to allow fluent use.
         Raises `ValueError` if another `PricingStructure` with the same `mrid` already exists for this `CustomerAgreement`
         """
@@ -91,7 +91,7 @@ class CustomerAgreement(Agreement):
         """
         Disassociate `ps` from this `CustomerAgreement`
 
-        `ps` the `zepben.evolve.cim.iec61968.customers.pricing_structure.PricingStructure` to disassociate from this `CustomerAgreement`.
+        `ps` the `PricingStructure` to disassociate from this `CustomerAgreement`.
         Returns A reference to this `CustomerAgreement` to allow fluent use.
         Raises `ValueError` if `ps` was not associated with this `CustomerAgreement`.
         """

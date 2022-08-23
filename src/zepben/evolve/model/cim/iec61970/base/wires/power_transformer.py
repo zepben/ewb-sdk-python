@@ -363,13 +363,13 @@ class PowerTransformer(ConductingEquipment):
 
     @property
     def power_transformer_info(self) -> Optional[PowerTransformerInfo]:
-        """The `zepben.evolve.cim.iec61968.assetinfo.power_transformer_info.PowerTransformerInfo` for this `PowerTransformer`"""
+        """The `PowerTransformerInfo` for this `PowerTransformer`"""
         return self.asset_info
 
     @power_transformer_info.setter
     def power_transformer_info(self, pti: Optional[PowerTransformerInfo]):
         """
-        Set the `zepben.evolve.cim.iec61968.assetinfo.power_transformer_info.PowerTransformerInfo` for this `PowerTransformer`
+        Set the `PowerTransformerInfo` for this `PowerTransformer`
         `pti` The `PowerTransformerInfo` to associate with this `PowerTransformer`
         """
         self.asset_info = pti

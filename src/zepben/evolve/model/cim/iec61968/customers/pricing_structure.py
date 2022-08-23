@@ -36,32 +36,32 @@ class PricingStructure(Document):
 
     def num_tariffs(self):
         """
-        Returns The number of `zepben.evolve.cim.iec61968.customers.tariff.Tariff`s associated with this `PricingStructure`
+        Returns The number of `Tariff`s associated with this `PricingStructure`
         """
         return nlen(self._tariffs)
 
     @property
     def tariffs(self) -> Generator[Tariff, None, None]:
         """
-        The `zepben.evolve.cim.iec61968.customers.tariff.Tariff`s of this `PricingStructure`.
+        The `Tariff`s of this `PricingStructure`.
         """
         return ngen(self._tariffs)
 
     def get_tariff(self, mrid: str) -> Tariff:
         """
-        Get the `zepben.evolve.cim.iec61968.customers.tariff.Tariff` for this `PricingStructure` identified by `mrid`
+        Get the `Tariff` for this `PricingStructure` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61968.customers.tariff.Tariff`
-        Returns The `zepben.evolve.cim.iec61968.customers.tariff.Tariff` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `Tariff`
+        Returns The `Tariff` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._tariffs, mrid)
 
     def add_tariff(self, tariff: Tariff) -> PricingStructure:
         """
-        Associate a `zepben.evolve.cim.iec61968.customers.tariff.Tariff` with this `PricingStructure`.
+        Associate a `Tariff` with this `PricingStructure`.
 
-        `tariff` the `zepben.evolve.cim.iec61968.customers.tariff.Tariff` to associate with this `PricingStructure`.
+        `tariff` the `Tariff` to associate with this `PricingStructure`.
         Returns A reference to this `PricingStructure` to allow fluent use.
         Raises `ValueError` if another `Tariff` with the same `mrid` already exists for this `PricingStructure`.
         """
@@ -75,7 +75,7 @@ class PricingStructure(Document):
         """
         Disassociate `tariff` from this `PricingStructure`.
 
-        `tariff` the `zepben.evolve.cim.iec61968.customers.tariff.Tariff` to disassociate from this `PricingStructure`.
+        `tariff` the `Tariff` to disassociate from this `PricingStructure`.
         Returns A reference to this `PricingStructure` to allow fluent use.
         Raises `ValueError` if `tariff` was not associated with this `PricingStructure`.
         """

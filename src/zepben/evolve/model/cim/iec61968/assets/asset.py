@@ -39,14 +39,14 @@ class Asset(IdentifiedObject):
 
     def num_organisation_roles(self) -> int:
         """
-        Get the number of `zepben.evolve.cim.iec61968.assets.asset_organisation_role.AssetOrganisationRole`s associated with this `Asset`.
+        Get the number of `AssetOrganisationRole`s associated with this `Asset`.
         """
         return nlen(self._organisation_roles)
 
     @property
     def organisation_roles(self) -> Generator[AssetOrganisationRole, None, None]:
         """
-        The `zepben.evolve.cim.iec61968.assets.asset_organisation_role.AssetOrganisationRole`s of this `Asset`.
+        The `AssetOrganisationRole`s of this `Asset`.
         """
         return ngen(self._organisation_roles)
 
@@ -54,15 +54,15 @@ class Asset(IdentifiedObject):
         """
         Get the `AssetOrganisationRole` for this asset identified by `mrid`.
 
-        `mrid` the mRID of the required `zepben.evolve.cim.iec61968.assets.asset_organisation_role.AssetOrganisationRole`
-        Returns The `zepben.evolve.cim.iec61968.assets.asset_organisation_role.AssetOrganisationRole` with the specified `mrid`.
+        `mrid` the mRID of the required `AssetOrganisationRole`
+        Returns The `AssetOrganisationRole` with the specified `mrid`.
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._organisation_roles, mrid)
 
     def add_organisation_role(self, role: AssetOrganisationRole) -> Asset:
         """
-        `role` The `zepben.evolve.cim.iec61968.assets.asset_organisation_role.AssetOrganisationRole` to
+        `role` The `AssetOrganisationRole` to
         associate with this `Asset`.
         Returns A reference to this `Asset` to allow fluent use.
         Raises `ValueError` if another `AssetOrganisationRole` with the same `mrid` already exists in this `Asset`
@@ -78,7 +78,7 @@ class Asset(IdentifiedObject):
         """
         Disassociate an `AssetOrganisationRole` from this `Asset`.
 
-        `role` the `zepben.evolve.cim.iec61968.assets.asset_organisation_role.AssetOrganisationRole` to
+        `role` the `AssetOrganisationRole` to
         disassociate with this `Asset`.
         Raises `ValueError` if `role` was not associated with this `Asset`.
         Returns A reference to this `Asset` to allow fluent use.

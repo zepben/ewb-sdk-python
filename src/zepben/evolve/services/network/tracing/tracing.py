@@ -264,8 +264,10 @@ def phase_inferrer() -> PhaseInferrer:
 
 def assign_equipment_containers_to_feeders() -> AssignToFeeders:
     """
-    Returns an instance of `zepben.evolve.services.network.tracing.feeder.assign_to_feeders.AssignToFeeders convenience class for assigning equipment
+    Returns an instance of `AssignToFeeders` convenience class for assigning equipment
     containers to feeders on a network.
+
+    @return A new `AssignToFeeders` instance.
     """
     return AssignToFeeders()
 

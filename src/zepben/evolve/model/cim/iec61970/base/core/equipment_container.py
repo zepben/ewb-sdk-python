@@ -33,23 +33,23 @@ class EquipmentContainer(ConnectivityNodeContainer):
 
     def num_equipment(self):
         """
-        Returns The number of `zepben.evolve.iec61970.base.core.equipment.Equipment` associated with this `EquipmentContainer`
+        Returns The number of `Equipment` associated with this `EquipmentContainer`
         """
         return nlen(self._equipment)
 
     @property
     def equipment(self) -> Generator[Equipment, None, None]:
         """
-        The `zepben.evolve.iec61970.base.core.equipment.Equipment` contained in this `EquipmentContainer`
+        The `Equipment` contained in this `EquipmentContainer`
         """
         return ngen(self._equipment.values() if self._equipment is not None else None)
 
     def get_equipment(self, mrid: str) -> Equipment:
         """
-        Get the `zepben.evolve.iec61970.base.core.equipment.Equipment` for this `EquipmentContainer` identified by `mrid`
+        Get the `Equipment` for this `EquipmentContainer` identified by `mrid`
 
-        `mrid` the mRID of the required `zepben.evolve.iec61970.base.core.equipment.Equipment`
-        Returns The `zepben.evolve.iec61970.base.core.equipment.Equipment` with the specified `mrid` if it exists
+        `mrid` the mRID of the required `Equipment`
+        Returns The `Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         if not self._equipment:
@@ -63,7 +63,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         Associate `equipment` with this `EquipmentContainer`.
 
-        `equipment` The `zepben.evolve.iec61970.base.core.equipment.Equipment` to associate with this `EquipmentContainer`.
+        `equipment` The `Equipment` to associate with this `EquipmentContainer`.
         Returns A reference to this `EquipmentContainer` to allow fluent use.
         Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `EquipmentContainer`.
         """
@@ -77,7 +77,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         Disassociate `equipment` from this `EquipmentContainer`
 
-        `equipment` The `zepben.evolve.iec61970.base.core.equipment.Equipment` to disassociate with this `EquipmentContainer`.
+        `equipment` The `Equipment` to disassociate with this `EquipmentContainer`.
         Returns A reference to this `EquipmentContainer` to allow fluent use.
         Raises `KeyError` if `equipment` was not associated with this `EquipmentContainer`.
         """
@@ -154,22 +154,22 @@ class Feeder(EquipmentContainer):
     @property
     def current_equipment(self) -> Generator[Equipment, None, None]:
         """
-        Contained `zepben.evolve.iec61970.base.core.equipment.Equipment` using the current state of the network.
+        Contained `Equipment` using the current state of the network.
         """
         return ngen(self._current_equipment.values() if self._current_equipment is not None else None)
 
     def num_current_equipment(self):
         """
-        Returns The number of `zepben.evolve.iec61970.base.core.equipment.Equipment` associated with this `Feeder`
+        Returns The number of `Equipment` associated with this `Feeder`
         """
         return nlen(self._current_equipment)
 
     def get_current_equipment(self, mrid: str) -> Equipment:
         """
-        Get the `zepben.evolve.iec61970.base.core.equipment.Equipment` for this `Feeder` identified by `mrid`
+        Get the `Equipment` for this `Feeder` identified by `mrid`
 
-        `mrid` The mRID of the required `zepben.evolve.iec61970.base.core.equipment.Equipment`
-        Returns The `zepben.evolve.iec61970.base.core.equipment.Equipment` with the specified `mrid` if it exists
+        `mrid` The mRID of the required `Equipment`
+        Returns The `Equipment` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
         if not self._current_equipment:
@@ -183,7 +183,7 @@ class Feeder(EquipmentContainer):
         """
         Associate `equipment` with this `Feeder`.
 
-        `equipment` the `zepben.evolve.iec61970.base.core.equipment.Equipment` to associate with this `Feeder`.
+        `equipment` the `Equipment` to associate with this `Feeder`.
         Returns A reference to this `Feeder` to allow fluent use.
         Raises `ValueError` if another `Equipment` with the same `mrid` already exists for this `Feeder`.
         """
