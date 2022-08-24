@@ -6,14 +6,12 @@
 from typing import Type, Callable, TypeVar
 
 import pytest
-from zepben.evolve.services.network.tracing.phases import phase_step
 
-from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
-
-from network_fixtures import phase_swap_loop_network  # noqa (fixture)
 from zepben.evolve import BasicTraversal, SetPhases, RemovePhases, AssignToFeeders, Breaker, Terminal, PhaseCode, ConductingEquipment, \
-    connected_equipment_trace, SetDirection, RemoveDirection
+    connected_equipment_trace, SetDirection, RemoveDirection, ConductingEquipmentStep
 from zepben.evolve.services.network.tracing import tracing
+from zepben.evolve.services.network.tracing.phases import phase_step
+from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
 
 T = TypeVar("T")
 
@@ -27,39 +25,41 @@ async def test_basic_asset_trace(phase_swap_loop_network):
     visited = set()
     start = phase_swap_loop_network["n0"]
 
-    async def add_to_visited(ce, _):
-        visited.add(ce)
+    async def add_to_visited(step: ConductingEquipmentStep, _: bool):
+        visited.add(step.conducting_equipment)
 
-    trace = connected_equipment_trace().add_step_action(add_to_visited)
-    await trace.run(start)
+    trace = connected_equipment_trace()
+    trace.add_step_action(add_to_visited)
+
+    await trace.run_from(start)
     assert visited == set(expected)
 
 
 def test_suppliers():
-    validate_supplier(lambda: tracing.create_basic_depth_trace(lambda i, t: None), BasicTraversal)
-    validate_supplier(lambda: tracing.create_basic_breadth_trace(lambda i, t: None), BasicTraversal)
-    validate_supplier(tracing.connected_equipment_trace, BasicTraversal)
-    validate_supplier(tracing.normal_connected_equipment_trace, BasicTraversal)
-    validate_supplier(tracing.current_connected_equipment_trace, BasicTraversal)
-    validate_supplier(tracing.phase_trace, BasicTraversal)
-    validate_supplier(tracing.normal_phase_trace, BasicTraversal)
-    validate_supplier(tracing.current_phase_trace, BasicTraversal)
-    validate_supplier(tracing.normal_downstream_trace, BasicTraversal)
-    validate_supplier(tracing.current_downstream_trace, BasicTraversal)
-    validate_supplier(tracing.normal_upstream_trace, BasicTraversal)
-    validate_supplier(tracing.current_upstream_trace, BasicTraversal)
-    validate_supplier(tracing.set_phases, SetPhases)
-    validate_supplier(tracing.remove_phases, RemovePhases)
+    _validate_supplier(lambda: tracing.create_basic_depth_trace(lambda i, t: None), BasicTraversal)
+    _validate_supplier(lambda: tracing.create_basic_breadth_trace(lambda i, t: None), BasicTraversal)
+    _validate_supplier(tracing.connected_equipment_trace, BasicTraversal)
+    _validate_supplier(tracing.normal_connected_equipment_trace, BasicTraversal)
+    _validate_supplier(tracing.current_connected_equipment_trace, BasicTraversal)
+    _validate_supplier(tracing.phase_trace, BasicTraversal)
+    _validate_supplier(tracing.normal_phase_trace, BasicTraversal)
+    _validate_supplier(tracing.current_phase_trace, BasicTraversal)
+    _validate_supplier(tracing.normal_downstream_trace, BasicTraversal)
+    _validate_supplier(tracing.current_downstream_trace, BasicTraversal)
+    _validate_supplier(tracing.normal_upstream_trace, BasicTraversal)
+    _validate_supplier(tracing.current_upstream_trace, BasicTraversal)
+    _validate_supplier(tracing.set_phases, SetPhases)
+    _validate_supplier(tracing.remove_phases, RemovePhases)
 
-    validate_supplier(tracing.set_direction, SetDirection)
-    validate_supplier(tracing.remove_direction, RemoveDirection)
+    _validate_supplier(tracing.set_direction, SetDirection)
+    _validate_supplier(tracing.remove_direction, RemoveDirection)
 
-    validate_supplier(tracing.assign_equipment_containers_to_feeders, AssignToFeeders)
-    validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
-    validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
+    _validate_supplier(tracing.assign_equipment_containers_to_feeders, AssignToFeeders)
+    _validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
+    _validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
 
     # TODO
-    # validate_supplier(tracing.find_with_usage_points, FindWithUsagePoints)
+    # _validate_supplier(tracing.find_with_usage_points, FindWithUsagePoints)
 
 
 @pytest.mark.asyncio
@@ -73,6 +73,6 @@ async def test_downstream_trace_with_too_many_phases():
     await tracing.normal_downstream_trace().run(phase_step.start_at(b1, PhaseCode.ABCN))
 
 
-def validate_supplier(supplier: Callable[[], T], expected_class: Type):
+def _validate_supplier(supplier: Callable[[], T], expected_class: Type):
     assert isinstance(supplier(), expected_class)
     assert supplier() is not supplier()

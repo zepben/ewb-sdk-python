@@ -14,11 +14,14 @@ from zepben.evolve.services.network.tracing.connectivity.phase_paths import viab
 __all__ = ["TerminalConnectivityConnected"]
 
 
-class TerminalConnectivityConnected(object):
+class TerminalConnectivityConnected:
+    """
+    A class that can be used to find the phase connectivity between terminals.
+    """
 
     _create_candidate_phases: Callable[[], XyCandidatePhasePaths]
 
-    def __init__(self, create_candidate_phases: Callable[[], XyCandidatePhasePaths] = lambda: XyCandidatePhasePaths()):
+    def __init__(self, create_candidate_phases: Callable[[], XyCandidatePhasePaths] = XyCandidatePhasePaths):
         self._create_candidate_phases = create_candidate_phases
 
     def connected_terminals(
@@ -26,6 +29,13 @@ class TerminalConnectivityConnected(object):
         terminal: Terminal,
         phases: Optional[Iterable[SinglePhaseKind]] = None
     ) -> List[ConnectivityResult]:
+        """
+        Find the terminals that are connected to `terminal`, and the phase paths between them.
+
+        :param terminal: The `Terminal` to find connectivity for.
+        :param phases: An `Iterable` of `SinglePhaseKind` to limit the included phase paths to check. Defaults to None (all phases).
+        :return: A `List` of `ConnectivityResult` defining the connected terminals, or an empty list if there are no connected terminals.
+        """
         phases = set(phases or terminal.phases.single_phases)
         include_phases = phases.intersection(terminal.phases.single_phases)
         connectivity_node = terminal.connectivity_node
@@ -54,22 +64,18 @@ class TerminalConnectivityConnected(object):
                 path for path in (
                     self._find_straight_phase_paths(terminal, connected_terminal)
                     or self._find_xy_phase_paths(terminal, connected_terminal)
-                    or []) if (path.from_phase in include_phases) and (path.to_phase in connected_terminal.phases)
+                ) if (path.from_phase in include_phases) and (path.to_phase in connected_terminal.phases)
             ]
         )
 
     @staticmethod
     def _find_straight_phase_paths(terminal: Terminal, connected_terminal: Terminal) -> Optional[List[NominalPhasePath]]:
-        paths = straight_phase_connectivity[terminal.phases]
+        paths = straight_phase_connectivity.get(terminal.phases, None)
 
         return paths and paths.get(connected_terminal.phases)
 
-    def _find_xy_phase_paths(self, terminal: Terminal, connected_terminal: Terminal) -> Optional[List[NominalPhasePath]]:
+    def _find_xy_phase_paths(self, terminal: Terminal, connected_terminal: Terminal) -> List[NominalPhasePath]:
         xy_phases = _find_xy_phases(terminal)
-        connected_xy_phases = _find_xy_phases(connected_terminal)
-
-        if (_is_none(xy_phases) and _is_none(connected_xy_phases)) or (_is_not_none(xy_phases) and _is_not_none(connected_xy_phases)):
-            return None
 
         nominal_phase_paths = []
         if SinglePhaseKind.N in terminal.phases and SinglePhaseKind.N in connected_terminal.phases:
@@ -183,37 +189,35 @@ class TerminalConnectivityConnected(object):
 
 
 def _find_xy_phases(terminal: Terminal):
-    if (terminal.phases == PhaseCode.XY) or (terminal.phases == PhaseCode.XYN):
+    if terminal.phases in (PhaseCode.XY, PhaseCode.XYN):
         return PhaseCode.XY
-    elif (terminal.phases == PhaseCode.X) or (terminal.phases == PhaseCode.XN):
+    elif terminal.phases in (PhaseCode.X, PhaseCode.XN):
         return PhaseCode.X
-    elif (terminal.phases == PhaseCode.Y) or (terminal.phases == PhaseCode.YN):
+    elif terminal.phases in (PhaseCode.Y, PhaseCode.YN):
         return PhaseCode.Y
     else:
         return PhaseCode.NONE
 
 
 def _find_primary_phases(terminal: Terminal):
-    if (terminal.phases == PhaseCode.ABC) or (terminal.phases == PhaseCode.ABCN):
-        return PhaseCode.ABC
-    elif (terminal.phases == PhaseCode.AB) or (terminal.phases == PhaseCode.ABN):
-        return PhaseCode.AB
-    elif (terminal.phases == PhaseCode.AC) or (terminal.phases == PhaseCode.ACN):
-        return PhaseCode.AC
-    elif (terminal.phases == PhaseCode.BC) or (terminal.phases == PhaseCode.BCN):
-        return PhaseCode.BC
-    elif (terminal.phases == PhaseCode.A) or (terminal.phases == PhaseCode.AN):
-        return PhaseCode.A
-    elif (terminal.phases == PhaseCode.B) or (terminal.phases == PhaseCode.BN):
-        return PhaseCode.B
-    elif (terminal.phases == PhaseCode.C) or (terminal.phases == PhaseCode.CN):
-        return PhaseCode.C
+    if terminal.phases in (PhaseCode.ABC, PhaseCode.ABCN):
+        primary_phases = PhaseCode.ABC
+    elif terminal.phases in (PhaseCode.AB, PhaseCode.ABN):
+        primary_phases = PhaseCode.AB
+    elif terminal.phases in (PhaseCode.AC, PhaseCode.ACN):
+        primary_phases = PhaseCode.AC
+    elif terminal.phases in (PhaseCode.BC, PhaseCode.BCN):
+        primary_phases = PhaseCode.BC
+    elif terminal.phases in (PhaseCode.A, PhaseCode.AN):
+        primary_phases = PhaseCode.A
+    elif terminal.phases in (PhaseCode.B, PhaseCode.BN):
+        primary_phases = PhaseCode.B
+    elif terminal.phases in (PhaseCode.C, PhaseCode.CN):
+        primary_phases = PhaseCode.C
     else:
-        return PhaseCode.NONE
+        primary_phases = PhaseCode.NONE
 
-
-def _is_none(phase_code: PhaseCode) -> bool:
-    return phase_code == PhaseCode.NONE
+    return primary_phases
 
 
 def _is_not_none(phase_code: PhaseCode) -> bool:
