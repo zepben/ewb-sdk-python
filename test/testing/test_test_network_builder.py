@@ -8,11 +8,11 @@ from typing import Callable, List
 import pytest
 from pytest import raises
 
-from zepben.evolve import start_with_source, PhaseCode, start_with_acls, start_with_breaker, start_with_junction, start_with_power_transformer, \
-    PowerTransformerEnd, start_with_other, Junction, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, connected_terminals
+from zepben.evolve import PhaseCode, PowerTransformerEnd, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, \
+    connected_terminals, TestNetworkBuilder, Fuse
 
 
-class TestTestNetworkBuilder(object):
+class TestTestNetworkBuilder:
 
     @pytest.mark.asyncio
     async def test_sample_network_starting_with_source(self):
@@ -21,13 +21,14 @@ class TestTestNetworkBuilder(object):
         #
         # s4 11--c5--2
         #
-        n = await (start_with_source(PhaseCode.ABC)  # s0
-             .to_acls(PhaseCode.ABC)  # c1
-             .to_breaker(PhaseCode.ABC)  # b2
-             .to_source(PhaseCode.ABC)  # s3
-             .from_source(PhaseCode.AB)  # s4
-             .to_acls(PhaseCode.AB)  # c5
-             .build())
+        n = await (TestNetworkBuilder()
+                   .from_source(PhaseCode.ABC)  # s0
+                   .to_acls(PhaseCode.ABC)  # c1
+                   .to_breaker(PhaseCode.ABC)  # b2
+                   .to_source(PhaseCode.ABC)  # s3
+                   .from_source(PhaseCode.AB)  # s4
+                   .to_acls(PhaseCode.AB)  # c5
+                   .build())
         print(hex(id(n)))
 
         self._validate_connections(n, "s0", [["c1-t1"]])
@@ -45,16 +46,17 @@ class TestTestNetworkBuilder(object):
         #
         # 1--c5--21--c6--2
         #
-        n = await (start_with_acls(PhaseCode.ABC)  # c0
-             .to_breaker(PhaseCode.ABC, is_normally_open=True)  # b1
-             .to_acls(PhaseCode.AB)  # c2
-             .branch_from("c0")
-             .to_breaker(PhaseCode.ABC, is_open=True)  # b3
-             .to_acls(PhaseCode.AB)  # c4
-             .from_acls(PhaseCode.AB)  # c5
-             .to_acls(PhaseCode.AB)  # c6
-             .connect("c2", "c4", 2, 2)
-             .build())
+        n = await (TestNetworkBuilder()
+                   .from_acls(PhaseCode.ABC)  # c0
+                   .to_breaker(PhaseCode.ABC, is_normally_open=True)  # b1
+                   .to_acls(PhaseCode.AB)  # c2
+                   .branch_from("c0")
+                   .to_breaker(PhaseCode.ABC, is_open=True)  # b3
+                   .to_acls(PhaseCode.AB)  # c4
+                   .from_acls(PhaseCode.AB)  # c5
+                   .to_acls(PhaseCode.AB)  # c6
+                   .connect("c2", "c4", 2, 2)
+                   .build())
         print(hex(id(n)))
 
         self._validate_connections(n, "c0", [[], ["b1-t1", "b3-t1"]])
@@ -72,15 +74,16 @@ class TestTestNetworkBuilder(object):
         #
         # 1 b5*21--c6--2
         #
-        n = await (start_with_breaker(PhaseCode.ABC)  # b0
-             .to_acls(PhaseCode.ABC)  # c1
-             .to_acls(PhaseCode.ABC)  # c2
-             .add_feeder("b0")  # fdr3
-             .to_acls(PhaseCode.ABC)  # c4
-             .from_breaker(PhaseCode.AB)  # b5
-             .to_acls(PhaseCode.AB)  # c6
-             .add_feeder("b5", 1)  # fdr7
-             .build())
+        n = await (TestNetworkBuilder()
+                   .from_breaker(PhaseCode.ABC)  # b0
+                   .to_acls(PhaseCode.ABC)  # c1
+                   .to_acls(PhaseCode.ABC)  # c2
+                   .add_feeder("b0")  # fdr3
+                   .to_acls(PhaseCode.ABC)  # c4
+                   .from_breaker(PhaseCode.AB)  # b5
+                   .to_acls(PhaseCode.AB)  # c6
+                   .add_feeder("b5", 1)  # fdr7
+                   .build())
         print(hex(id(n)))
 
         self._validate_connections(n, "b0", [[], ["c1-t1"]])
@@ -100,12 +103,13 @@ class TestTestNetworkBuilder(object):
         # 1 j3 31--c4--2
         #   2
         #
-        n = await (start_with_junction(PhaseCode.ABC)  # j0
-             .to_acls(PhaseCode.ABC)  # c1
-             .to_junction(PhaseCode.ABC)  # j2
-             .from_junction(PhaseCode.AB, 3)  # j3
-             .to_acls(PhaseCode.AB)  # c4
-             .build())
+        n = await (TestNetworkBuilder()
+                   .from_junction(PhaseCode.ABC)  # j0
+                   .to_acls(PhaseCode.ABC)  # c1
+                   .to_junction(PhaseCode.ABC)  # j2
+                   .from_junction(PhaseCode.AB, 3)  # j3
+                   .to_acls(PhaseCode.AB)  # c4
+                   .build())
         print(hex(id(n)))
 
         self._validate_connections(n, "j0", [[], ["c1-t1"]])
@@ -122,12 +126,13 @@ class TestTestNetworkBuilder(object):
         # 1 tx3 31--c4--2
         #    2
         #
-        n = await (start_with_power_transformer()  # tx0
-             .to_acls(PhaseCode.ABC)  # c1
-             .to_power_transformer([PhaseCode.ABC])  # tx2
-             .from_power_transformer([PhaseCode.AB, PhaseCode.AB, PhaseCode.AN])  # tx3
-             .to_acls(PhaseCode.AN)  # c4
-             .build())
+        n = await (TestNetworkBuilder()
+                   .from_power_transformer()  # tx0
+                   .to_acls(PhaseCode.ABC)  # c1
+                   .to_power_transformer([PhaseCode.ABC])  # tx2
+                   .from_power_transformer([PhaseCode.AB, PhaseCode.AB, PhaseCode.AN])  # tx3
+                   .to_acls(PhaseCode.AN)  # c4
+                   .build())
         print(hex(id(n)))
 
         self._validate_connections(n, "tx0", [[], ["c1-t1"]])
@@ -148,11 +153,12 @@ class TestTestNetworkBuilder(object):
         # 1 b2 2
         # 1 b3 2
         #
-        n = await (start_with_breaker(PhaseCode.A, is_normally_open=True, is_open=False)  # b0
-             .from_breaker(PhaseCode.B, is_normally_open=True, is_open=False)  # b1
-             .from_breaker(PhaseCode.B)  # b2
-             .from_breaker(PhaseCode.B, is_normally_open=True)  # b3
-             .build())
+        n = await (TestNetworkBuilder()
+                   .from_breaker(PhaseCode.A, is_normally_open=True, is_open=False)  # b0
+                   .from_breaker(PhaseCode.B, is_normally_open=True, is_open=False)  # b1
+                   .from_breaker(PhaseCode.B)  # b2
+                   .from_breaker(PhaseCode.B, is_normally_open=True)  # b3
+                   .build())
         print(hex(id(n)))
 
         self._validate_open_states(n, "b0", expected_is_normally_open=True, expected_is_open=False)
@@ -177,16 +183,17 @@ class TestTestNetworkBuilder(object):
         #           |
         #           2
         #
-        n = await (start_with_junction(PhaseCode.A, 4)  # j0
-             .to_acls(PhaseCode.A)  # c1
-             .branch_from("j0", 1)
-             .to_acls(PhaseCode.A)  # c2
-             .branch_from("j0", 2)
-             .to_acls(PhaseCode.A)  # c3
-             .branch_from("j0", 3)
-             .to_acls(PhaseCode.A)  # c4
-             .to_acls(PhaseCode.A)  # c5
-             .build())
+        n = await (TestNetworkBuilder()
+                   .from_junction(PhaseCode.A, 4)  # j0
+                   .to_acls(PhaseCode.A)  # c1
+                   .branch_from("j0", 1)
+                   .to_acls(PhaseCode.A)  # c2
+                   .branch_from("j0", 2)
+                   .to_acls(PhaseCode.A)  # c3
+                   .branch_from("j0", 3)
+                   .to_acls(PhaseCode.A)  # c4
+                   .to_acls(PhaseCode.A)  # c5
+                   .build())
         print(hex(id(n)))
 
         self._validate_connections(n, "j0", [["c2-t1"], ["c3-t1"], ["c4-t1"], ["c1-t1"]])
@@ -198,10 +205,12 @@ class TestTestNetworkBuilder(object):
 
     def test_must_use_valid_source_phases(self):
         with raises(ValueError, match="EnergySource phases must be a subset of ABCN"):
-            start_with_source(PhaseCode.XYN)
+            TestNetworkBuilder() \
+                .from_source(PhaseCode.XYN)
 
         with raises(ValueError, match="EnergySource phases must be a subset of ABCN"):
-            (start_with_source(PhaseCode.ABC)
+            (TestNetworkBuilder()
+             .from_source(PhaseCode.ABC)
              .from_source(PhaseCode.XYN))
 
     @pytest.mark.asyncio
@@ -230,10 +239,11 @@ class TestTestNetworkBuilder(object):
 
             return set_b
 
-        n = await (start_with_power_transformer([PhaseCode.ABC, PhaseCode.ABC], [init_rated_u(1), init_rated_u(2)])  # tx0
-             .to_power_transformer([PhaseCode.ABC], [init_rated_s(3)])  # tx1
-             .from_power_transformer([PhaseCode.AB, PhaseCode.AB, PhaseCode.AN], [init_b(4.0), init_b(5.0), init_b(6.0)])  # tx2
-             .build())
+        n = await (TestNetworkBuilder()
+                   .from_power_transformer([PhaseCode.ABC, PhaseCode.ABC], [init_rated_u(1), init_rated_u(2)])  # tx0
+                   .to_power_transformer([PhaseCode.ABC], [init_rated_s(3)])  # tx1
+                   .from_power_transformer([PhaseCode.AB, PhaseCode.AB, PhaseCode.AN], [init_b(4.0), init_b(5.0), init_b(6.0)])  # tx2
+                   .build())
         print(hex(id(n)))
 
         assert n.get("tx0-e1", PowerTransformerEnd).rated_u == 1
@@ -246,26 +256,26 @@ class TestTestNetworkBuilder(object):
     @pytest.mark.asyncio
     async def test_sample_network_with_generics(self):
         #
-        # o1 11 o2
+        # o0 11 my-id[o1]
         #
-        # o3
+        # 1 o2 21 o3 2
         #
-        o0 = Junction(mrid="o0")
-        o1 = Junction(mrid="o1")
-        o2 = Junction(mrid="o2")
+        def replace_o1(mrid: str) -> ConductingEquipment:
+            assert mrid == "o1"
+            return Fuse(mrid="my-id")
 
-        o0.add_terminal(Terminal(mrid="o0-t1"))
-        o1.add_terminal(Terminal(mrid="o1-t1"))
-
-        n = await (start_with_other(o0)
-             .to_other(o1)
-             .from_other(o2)
-             .build())
+        n = await (TestNetworkBuilder()
+                   .from_other(Fuse, num_terminals=1)  # o0
+                   .to_other(replace_o1, num_terminals=1)  # my-id[o1]
+                   .from_other(Fuse, PhaseCode.AB)  # o2
+                   .to_other(Fuse, PhaseCode.AB)  # o3
+                   .build())
         print(hex(id(n)))
 
-        self._validate_connections(n, "o0", [["o1-t1"]])
-        self._validate_connections(n, "o1", [["o0-t1"]])
-        self._validate_connections(n, "o2", [])
+        self._validate_connections(n, "o0", [["my-id-t1"]])
+        self._validate_connections(n, "my-id", [["o0-t1"]])
+        self._validate_connections(n, "o2", [[], ["o3-t1"]])
+        self._validate_connections(n, "o3", [["o2-t2"], []])
 
     def _validate_connections(self, n: NetworkService, mrid: str, expected_terms: List[List[str]]):
         assert n.get(mrid, ConductingEquipment).num_terminals() == len(expected_terms)
@@ -275,7 +285,7 @@ class TestTestNetworkBuilder(object):
     @staticmethod
     def _validate_terminal_connections(terminal: Terminal, expected_terms: List[str]):
         if expected_terms:
-            diff = set([it.to_terminal.mrid for it in connected_terminals(terminal)]) ^ set(expected_terms)
+            diff = {it.to_terminal.mrid for it in connected_terminals(terminal)} ^ set(expected_terms)
             if diff:
                 assert not diff
             assert not diff

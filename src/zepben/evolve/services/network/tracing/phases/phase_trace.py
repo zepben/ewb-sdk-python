@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Set, Iterable, Union, Optional
 
-from zepben.evolve import FeederDirection, connected_terminals, PhaseCode, PhaseStep, PriorityQueue, PhaseStepTracker, Traversal
+from zepben.evolve import FeederDirection, connected_terminals, PhaseCode, PhaseStep, PriorityQueue, PhaseStepTracker, BasicTraversal
 from zepben.evolve.exceptions import TracingException
 
 if TYPE_CHECKING:
@@ -17,23 +17,23 @@ if TYPE_CHECKING:
 __all__ = ["new_phase_trace", "new_downstream_phase_trace", "new_upstream_phase_trace"]
 
 
-def new_phase_trace(open_test: OpenTest) -> Traversal[PhaseStep]:
+def new_phase_trace(open_test: OpenTest) -> BasicTraversal[PhaseStep]:
     # noinspection PyArgumentList
-    return Traversal(queue_next=_queue_next(open_test), process_queue=PriorityQueue(), tracker=PhaseStepTracker())
+    return BasicTraversal(queue_next=_queue_next(open_test), process_queue=PriorityQueue(), tracker=PhaseStepTracker())
 
 
-def new_downstream_phase_trace(open_test: OpenTest, active_direction: DirectionSelector) -> Traversal[PhaseStep]:
+def new_downstream_phase_trace(open_test: OpenTest, active_direction: DirectionSelector) -> BasicTraversal[PhaseStep]:
     # noinspection PyArgumentList
-    return Traversal(queue_next=_queue_next_downstream(open_test, active_direction), process_queue=PriorityQueue(), tracker=PhaseStepTracker())
+    return BasicTraversal(queue_next=_queue_next_downstream(open_test, active_direction), process_queue=PriorityQueue(), tracker=PhaseStepTracker())
 
 
-def new_upstream_phase_trace(open_test: OpenTest, active_direction: DirectionSelector) -> Traversal[PhaseStep]:
+def new_upstream_phase_trace(open_test: OpenTest, active_direction: DirectionSelector) -> BasicTraversal[PhaseStep]:
     # noinspection PyArgumentList
-    return Traversal(queue_next=_queue_next_upstream(open_test, active_direction), process_queue=PriorityQueue(), tracker=PhaseStepTracker())
+    return BasicTraversal(queue_next=_queue_next_upstream(open_test, active_direction), process_queue=PriorityQueue(), tracker=PhaseStepTracker())
 
 
 def _queue_next(open_test: OpenTest) -> QueueNext[PhaseStep]:
-    def queue_next(phase_step: PhaseStep, traversal: Traversal[PhaseStep]):
+    def queue_next(phase_step: PhaseStep, traversal: BasicTraversal[PhaseStep]):
         down_phases = set()
 
         for term in phase_step.conducting_equipment.terminals:
@@ -48,7 +48,7 @@ def _queue_next(open_test: OpenTest) -> QueueNext[PhaseStep]:
 
 
 def _queue_next_downstream(open_test: OpenTest, active_direction: DirectionSelector) -> QueueNext[PhaseStep]:
-    def queue_next(phase_step: PhaseStep, traversal: Traversal[PhaseStep]):
+    def queue_next(phase_step: PhaseStep, traversal: BasicTraversal[PhaseStep]):
         for term in phase_step.conducting_equipment.terminals:
             _queue_connected(traversal, term, _get_phases_with_direction(open_test, active_direction, term, phase_step.phases, FeederDirection.DOWNSTREAM))
 
@@ -56,7 +56,7 @@ def _queue_next_downstream(open_test: OpenTest, active_direction: DirectionSelec
 
 
 def _queue_next_upstream(open_test: OpenTest, active_direction: DirectionSelector) -> QueueNext[PhaseStep]:
-    def queue_next(phase_step: PhaseStep, traversal: Traversal[PhaseStep]):
+    def queue_next(phase_step: PhaseStep, traversal: BasicTraversal[PhaseStep]):
         for term in phase_step.conducting_equipment.terminals:
             up_phases = _get_phases_with_direction(open_test, active_direction, term, phase_step.phases, FeederDirection.UPSTREAM)
             if up_phases:
@@ -68,13 +68,13 @@ def _queue_next_upstream(open_test: OpenTest, active_direction: DirectionSelecto
     return queue_next
 
 
-def _queue_connected(traversal: Traversal[PhaseStep], terminal: Terminal, down_phases: Set[SinglePhaseKind]):
+def _queue_connected(traversal: BasicTraversal[PhaseStep], terminal: Terminal, down_phases: Set[SinglePhaseKind]):
     if down_phases:
         for cr in connected_terminals(terminal, down_phases):
             _try_queue(traversal, cr, cr.to_nominal_phases)
 
 
-def _try_queue(traversal: Traversal[PhaseStep], cr: ConnectivityResult, down_phases: Iterable[SinglePhaseKind]):
+def _try_queue(traversal: BasicTraversal[PhaseStep], cr: ConnectivityResult, down_phases: Iterable[SinglePhaseKind]):
     if cr.to_equip:
         traversal.process_queue.put(_continue_at(cr.to_equip, down_phases, cr.from_equip))
 

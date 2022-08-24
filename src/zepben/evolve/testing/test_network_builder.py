@@ -3,10 +3,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Optional, Callable, List
+try:
+    from typing import Protocol
+except ImportError:
+    Protocol = object
 
-from .. import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, PowerTransformerEnd, \
-    PowerTransformer, set_phases, set_direction, AssignToFeeders
+from typing import Optional, Callable, List, Union, Type
+
+from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, \
+    PowerTransformerEnd, PowerTransformer, set_phases, set_direction, AssignToFeeders
 
 
 def null_action(_):
@@ -15,7 +20,12 @@ def null_action(_):
 
     :param _: Any item that will be ignored
     """
-    pass
+
+
+class OtherCreator(Protocol):
+    """Type hint class"""
+
+    def __call__(self, mrid: str, *args, **kwargs) -> ConductingEquipment: ...
 
 
 class TestNetworkBuilder:
@@ -228,36 +238,52 @@ class TestNetworkBuilder:
         self._current = it
         return self
 
-    def from_other(self, start: ConductingEquipment) -> 'TestNetworkBuilder':
+    def from_other(
+        self,
+        creator: Union[OtherCreator, Type[ConductingEquipment]],
+        nominal_phases: PhaseCode = PhaseCode.ABC,
+        num_terminals: Optional[int] = None,
+        action: Callable[[ConductingEquipment], None] = null_action
+    ) -> 'TestNetworkBuilder':
         """
-        Start a new network island from `start`, updating the network pointer.
+        Start a new network island from a `ConductingEquipment` created by `creator`, updating the network pointer to the new `ConductingEquipment`.
 
-        :param start: The `ConductingEquipment` to start the new island with. To connect other objects to `start`, it must have terminals created.
+        :param creator: A callable function used to create the new `ConductingEquipment`. It will be passed the generated mRID for the new
+              `ConductingEquipment`.
+        :param nominal_phases: The nominal phases for the new `ConductingEquipment`.
+        :param num_terminals: The number of terminals to create on the new `ConductingEquipment`. Defaults to 2.
+        :param action: An action that accepts the new `ConductingEquipment` to allow for additional initialisation.
+
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
-        for it in start.terminals:
-            self.network.add(it)
-
-        self.network.add(start)
-        self._count += 1
-        self._current = start
+        it = self._create_other(creator, nominal_phases, num_terminals)
+        action(it)
+        self._current = it
         return self
 
-    def to_other(self, next_: ConductingEquipment) -> 'TestNetworkBuilder':
+    def to_other(
+        self,
+        creator: Union[OtherCreator, Type[ConductingEquipment]],
+        nominal_phases: PhaseCode = PhaseCode.ABC,
+        num_terminals: Optional[int] = None,
+        action: Callable[[ConductingEquipment], None] = null_action
+    ) -> 'TestNetworkBuilder':
         """
-        Add `next_` to the network and connect it to the current network pointer, updating the network pointer to `next_`.
+        Add a new `ConductingEquipment` to the network and connect it to the current network pointer, updating the network pointer to the new
+        `ConductingEquipment`.
 
-        :param next_: The `ConductingEquipment` to add to `network`. To connect other objects to `next_`, it must have terminals created.
+        :param creator: A callable function used to create the new `ConductingEquipment`. It will be passed the generated mRID for the new
+              `ConductingEquipment`.
+        :param nominal_phases: The nominal phases for the new `ConductingEquipment`.
+        :param num_terminals: The number of terminals to create on the new `ConductingEquipment`. Defaults to 2.
+        :param action: An action that accepts the new `ConductingEquipment` to allow for additional initialisation.
+
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
-        for it in next_.terminals:
-            self.network.add(it)
-
-        self._connect(self._current, next_)
-        self.network.add(next_)
-
-        self._count += 1
-        self._current = next_
+        it = self._create_other(creator, nominal_phases, num_terminals)
+        self._connect(self._current, it)
+        action(it)
+        self._current = it
         return self
 
     def branch_from(self, from_: str, terminal: Optional[int] = None) -> 'TestNetworkBuilder':
@@ -277,7 +303,7 @@ class TestNetworkBuilder:
         """
         Connect the specified `from` and `to` without moving the current network pointer.
 
-        :param from: The mRID of the first `ConductingEquipment` to be connected.
+        :param from_: The mRID of the first `ConductingEquipment` to be connected.
         :param to: The mRID of the second `ConductingEquipment` to be connected.
         :param from_terminal: The sequence number of the terminal on `from` which will be connected.
         :param to_terminal: The sequence number of the terminal on `to` which will be connected.
@@ -390,6 +416,19 @@ class TestNetworkBuilder:
         self.network.add(tx)
         return tx
 
+    def _create_other(
+        self,
+        creator: Union[OtherCreator, Type[ConductingEquipment]],
+        nominal_phases: PhaseCode,
+        num_terminals: Optional[int]
+    ) -> ConductingEquipment:
+        o = creator(mrid=self._next_id("o"))
+        for i in range(1, (num_terminals if num_terminals is not None else 2) + 1):
+            self._add_terminal(o, i, nominal_phases)
+
+        self.network.add(o)
+        return o
+
     def _create_feeder(self, head_equipment: ConductingEquipment, sequence_number: Optional[int] = None) -> Feeder:
         f = Feeder(
             mrid=self._next_id("fdr"),
@@ -406,111 +445,3 @@ class TestNetworkBuilder:
         terminal = Terminal(mrid=f"{ce.mrid}-t{sn}", phases=nominal_phases)
         ce.add_terminal(terminal)
         self.network.add(terminal)
-
-
-def start_with_source(nominal_phases: PhaseCode = PhaseCode.ABC, action: Callable[[EnergySource], None] = null_action) -> TestNetworkBuilder:
-    """
-    Create a `TestNetworkBuilder` that starts with an `EnergySource`.
-
-    :param nominal_phases: The nominal phases for the starting `Breaker`.
-    :param action: An action that accepts the new `EnergySource` to allow for additional initialisation.
-
-    :return: The `TestNetworkBuilder` with the current network pointer assigned to the created `EnergySource`.
-    """
-    builder = TestNetworkBuilder()
-    print(f"from_source - {hex(id(builder))} - {hex(id(builder.network))} - {len(list(builder.network.objects()))}")
-    builder.from_source(nominal_phases, action)
-    return builder
-
-
-def start_with_acls(nominal_phases: PhaseCode = PhaseCode.ABC, action: Callable[[AcLineSegment], None] = null_action) -> TestNetworkBuilder:
-    """
-    Create a `TestNetworkBuilder` that starts with an `AcLineSegment`.
-
-    :param nominal_phases: The nominal phases for the starting `AcLineSegment`.
-    :param action: An action that accepts the new `AcLineSegment` to allow for additional initialisation.
-
-    :return: The `TestNetworkBuilder` with the current network pointer assigned to the created `AcLineSegment`.
-    """
-    builder = TestNetworkBuilder()
-    builder1 = TestNetworkBuilder()
-    builder2 = TestNetworkBuilder()
-    print(f"from_acls 0- {hex(id(builder))} - {hex(id(builder.network))} - {len(list(builder.network.objects()))}")
-    print(f"from_acls 1- {hex(id(builder1))} - {hex(id(builder1.network))} - {len(list(builder1.network.objects()))}")
-    print(f"from_acls 2- {hex(id(builder2))} - {hex(id(builder2.network))} - {len(list(builder2.network.objects()))}")
-    builder.from_acls(nominal_phases, action)
-    return builder
-
-
-def start_with_breaker(
-    nominal_phases: PhaseCode = PhaseCode.ABC,
-    is_normally_open: bool = False,
-    is_open: Optional[bool] = None,
-    action: Callable[[Breaker], None] = null_action
-) -> TestNetworkBuilder:
-    """
-    Create a `TestNetworkBuilder` that starts with a `Breaker`.
-
-    :param nominal_phases: The nominal phases for the starting `Breaker`.
-    :param is_normally_open: The normal state of the switch. Defaults to False.
-    :param is_open: The current state of the switch. Defaults to `is_normally_open`.
-    :param action: An action that accepts the new `Breaker` to allow for additional initialisation.
-
-    :return: The `TestNetworkBuilder` with the current network pointer assigned to the created `Breaker`.
-    """
-    builder = TestNetworkBuilder()
-    print(f"from_breaker - {hex(id(builder))} - {hex(id(builder.network))} - {len(list(builder.network.objects()))}")
-    builder.from_breaker(nominal_phases, is_normally_open=is_normally_open, is_open=is_open, action=action)
-    return builder
-
-
-def start_with_junction(
-    nominal_phases: PhaseCode = PhaseCode.ABC,
-    num_terminals: Optional[int] = None,
-    action: Callable[[Junction], None] = null_action
-) -> TestNetworkBuilder:
-    """
-    Add a new `Junction` to the network and connect it to the current network pointer, updating the network pointer to the new `Junction`.
-
-    :param nominal_phases: The nominal phases for the new `Junction`.
-    :param num_terminals: The number of terminals to create on the new `Junction`. Defaults to 2.
-    :param action: An action that accepts the new `Junction` to allow for additional initialisation.
-
-    :return: This `TestNetworkBuilder` to allow for fluent use.
-    """
-    builder = TestNetworkBuilder()
-    print(f"from_junction - {hex(id(builder))} - {hex(id(builder.network))} - {len(list(builder.network.objects()))}")
-    builder.from_junction(nominal_phases, num_terminals, action)
-    return builder
-
-
-def start_with_power_transformer(
-    nominal_phases: Optional[List[PhaseCode]] = None,
-    end_actions: Optional[List[Callable[[PowerTransformerEnd], None]]] = None,
-    action: Callable[[PowerTransformer], None] = null_action
-) -> TestNetworkBuilder:
-    """
-     Create a `TestNetworkBuilder` that starts with a `PowerTransformer`.
-
-    :param nominal_phases: The nominal phases for each end of the new `PowerTransformer`. Defaults to two `PhaseCode.ABC` ends.
-    :param end_actions: Actions that accepts the new `PowerTransformerEnd` to allow for additional initialisation.
-    :param action: An action that accepts the new `PowerTransformer` to allow for additional initialisation.
-    :return: This `TestNetworkBuilder` to allow for fluent use.
-    """
-    builder = TestNetworkBuilder()
-    print(f"from_power_transformer - {hex(id(builder))} - {hex(id(builder.network))} - {len(list(builder.network.objects()))}")
-    builder.from_power_transformer(nominal_phases, end_actions, action)
-    return builder
-
-
-def start_with_other(start: ConductingEquipment) -> TestNetworkBuilder:
-    """
-    Create a `TestNetworkBuilder` that starts with the specified `start`.
-
-    :param start: The `ConductingEquipment` to start with. To connect other objects to `start`, it must have terminals created.
-    :return: This `TestNetworkBuilder` to allow for fluent use.
-    """
-    builder = TestNetworkBuilder()
-    print(f"from_other - {hex(id(builder))} - {hex(id(builder.network))} - {len(list(builder.network.objects()))}")
-    builder.from_other(start)
-    return builder

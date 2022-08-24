@@ -56,7 +56,7 @@ class RemovePhases(object):
 
         for traversal in (self.normal_traversal, self.current_traversal):
             traversal.reset()
-            await traversal.trace((terminal, nominal_phases_to_ebb))
+            await traversal.run((terminal, nominal_phases_to_ebb))
 
 
 def remove_all_traced_phases(network_service: NetworkService):

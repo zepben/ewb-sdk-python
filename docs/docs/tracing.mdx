@@ -93,7 +93,7 @@ if acls:
     trace = connected_equipment_trace()
     trace.add_stop_condition(lambda equip: isinstance(equip, Breaker))
     trace.add_step_action(lambda equipment, stopping: breakers.append(equipment) if isinstance(equipment, Breaker) elif not stopping equipment_between_breakers.append(equipment))
-    await trace.trace(acls)
+    await trace.run(acls)
 
 print(f"The closest circuit breakers are: {breakers}")
 print(f"The equipment between the above breakers: {equipment_between_breakers}")

@@ -7,12 +7,12 @@
 from typing import Optional
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.services.network.tracing.traversals.tracker import Tracker
+from zepben.evolve.services.network.tracing.traversals.basic_tracker import BasicTracker
 
 __all__ = ["AssociatedTerminalTracker"]
 
 
-class AssociatedTerminalTracker(Tracker[Optional[Terminal]]):
+class AssociatedTerminalTracker(BasicTracker[Optional[Terminal]]):
     """A tracker that tracks the `ConductingEquipment` that owns the `Terminal` regardless of how it is visited."""
 
     def has_visited(self, terminal: Optional[Terminal]) -> bool:

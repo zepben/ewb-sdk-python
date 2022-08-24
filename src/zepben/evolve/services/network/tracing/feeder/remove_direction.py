@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclassy import dataclass
 
-from zepben.evolve import FifoQueue, Tracker, normal_direction, BranchRecursiveTraversal, current_direction, NetworkService, Terminal, FeederDirection
+from zepben.evolve import FifoQueue, BasicTracker, normal_direction, BranchRecursiveTraversal, current_direction, NetworkService, Terminal, FeederDirection
 from zepben.evolve.types import DirectionSelector
 
 __all__ = ["RemoveDirection"]
@@ -34,7 +34,7 @@ class RemoveDirection:
         self.normal_traversal: BranchRecursiveTraversal[TerminalDirection] = BranchRecursiveTraversal(
             queue_next=lambda current, traversal: self._ebb_and_queue(traversal, current, normal_direction),
             process_queue=FifoQueue(),
-            tracker=Tracker(),
+            tracker=BasicTracker(),
             branch_queue=FifoQueue()
         )
         """
@@ -47,7 +47,7 @@ class RemoveDirection:
         self.current_traversal: BranchRecursiveTraversal[TerminalDirection] = BranchRecursiveTraversal(
             queue_next=lambda current, traversal: self._ebb_and_queue(traversal, current, current_direction),
             process_queue=FifoQueue(),
-            tracker=Tracker(),
+            tracker=BasicTracker(),
             branch_queue=FifoQueue()
         )
         """
@@ -80,7 +80,7 @@ class RemoveDirection:
 
     @staticmethod
     async def _run_from_terminal(traversal: BranchRecursiveTraversal[TerminalDirection], start: TerminalDirection):
-        await traversal.reset().trace(start)
+        await traversal.reset().run(start)
 
     def _ebb_and_queue(self, traversal: BranchRecursiveTraversal[TerminalDirection], current: TerminalDirection, direction_selector: DirectionSelector):
         if not direction_selector(current.terminal).remove(current.direction_to_ebb):

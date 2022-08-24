@@ -1,47 +1,32 @@
 #  Copyright 2020 Zeppelin Bend Pty Ltd
-# 
+#
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+
 from abc import abstractmethod
+from typing import List, Callable, Awaitable, TypeVar, Generic
 
 from dataclassy import dataclass
 
-
-from zepben.evolve.services.network.tracing.traversals.queue import FifoQueue, LifoQueue, PriorityQueue, Queue
 from zepben.evolve.exceptions import TracingException
-from zepben.evolve.services.network.tracing.traversals.tracker import Tracker, BaseTracker
-from typing import List, Callable, Awaitable, TypeVar, Generic
-from enum import Enum
 
-__all__ = ["SearchType", "create_queue", "BaseTraversal", "Traversal"]
+__all__ = ["Traversal"]
 T = TypeVar('T')
 
 
-class SearchType(Enum):
-    BREADTH = 1
-    DEPTH = 2
-    PRIORITY = 3
-
-
-def create_queue(search_type):
-    if search_type == SearchType.DEPTH:
-        return LifoQueue()
-    elif search_type == SearchType.BREADTH:
-        return FifoQueue()
-    elif search_type == SearchType.PRIORITY:
-        return PriorityQueue()
-
-
 @dataclass(slots=True)
-class BaseTraversal(Generic[T]):
+class Traversal(Generic[T]):
     """
-    A basic traversal implementation that can be used to traverse any type of item.
+    Base class that provides some common functionality for traversals. This includes things like registering callbacks
+    to be called at every step in the traversal as well as registering stop conditions that traversals can check for when
+    to stop following a path.
+
     This class is asyncio compatible. Stop condition and step action callbacks are called with await.
 
-    A stop condition is a callback function that must return a boolean indicating whether the Tracer should stop
+    A stop condition is a callback function that must return a boolean indicating whether the Traversal should stop
     processing the current branch. Tracing will only stop when either:
         - All branches have been exhausted, or
         - A stop condition has returned true on every possible branch.
@@ -49,12 +34,16 @@ class BaseTraversal(Generic[T]):
     have been applied.
 
     Step actions are functions to be called on each item visited in the trace. These are called after the stop conditions are evaluated, and each action is
-    passed the current `ConnectivityResult` as well as the `stopping` state (True if the trace is stopping after
-    the current `ConnectivityResult, False otherwise). Thus, the signature of each step action must be:
-    :func: action(cr: `ConnectivityResult`, is_stopping: bool) -> None
+    passed the current item, as well as the `stopping` state (True if the trace is stopping after the current item, False otherwise). Thus, the signature of
+    each step action must be:
+    :func: action(it: T, is_stopping: bool) -> None
+
+    This base class does not actually provide any way to traverse the items. It needs to be implemented in
+    subclasses. See `BasicTraversal` for an example.
     """
+
     start_item: T = None
-    """The starting item for this `BaseTraversal`"""
+    """The starting item for this `Traversal`"""
 
     stop_conditions: List[Callable[[T], Awaitable[bool]]] = []
     """A list of callback functions, to be called in order with the current item."""
@@ -88,28 +77,28 @@ class BaseTraversal(Generic[T]):
         Add a callback to check whether the current item in the traversal is a stop point.
         If any of the registered stop conditions return true, the traversal will not call the callback to queue more items.
         Note that a match on a stop condition doesn't necessarily stop the traversal, it just stops traversal of the current branch.
-                                                                                                                      
+
         `cond` A function that if returns true will cause the traversal to stop traversing the branch.
         Returns this traversal instance.
         """
         self.stop_conditions.append(cond)
 
-    def add_step_action(self, action: Callable[[T, bool], Awaitable[None]]) -> BaseTraversal[T]:
+    def add_step_action(self, action: Callable[[T, bool], Awaitable[None]]) -> Traversal[T]:
         """
         Add a callback which is called for every item in the traversal (including the starting item).
-                                                                                                             
+
         `action` Action to be called on each item in the traversal, passing if the trace will stop on this step.
         Returns this traversal instance.
         """
         self.step_actions.append(action)
         return self
 
-    def copy_stop_conditions(self, other: BaseTraversal[T]):
-        """Copy the stop conditions from `other` to this `BaseTraversal`."""
+    def copy_stop_conditions(self, other: Traversal[T]):
+        """Copy the stop conditions from `other` to this `Traversal`."""
         self.stop_conditions.extend(other.stop_conditions)
 
-    def copy_step_actions(self, other: BaseTraversal[T]):
-        """Copy the step actions from `other` to this `BaseTraversal`."""
+    def copy_step_actions(self, other: Traversal[T]):
+        """Copy the step actions from `other` to this `Traversal`."""
         self.step_actions.extend(other.step_actions)
 
     def clear_stop_conditions(self):
@@ -142,7 +131,7 @@ class BaseTraversal(Generic[T]):
         """
         raise NotImplementedError()
 
-    async def trace(self, start_item: T = None, can_stop_on_start_item: bool = True):
+    async def run(self, start_item: T = None, can_stop_on_start_item: bool = True):
         """
         Perform a trace across the network from `start_item`, applying actions to each piece of equipment encountered
         until all branches of the network are exhausted, or a stop condition succeeds and we cannot continue any further.
@@ -171,90 +160,3 @@ class BaseTraversal(Generic[T]):
         `can_stop_on_start_item` Whether to
         """
         raise NotImplementedError()
-
-
-class Traversal(BaseTraversal[T]):
-    """
-    A basic traversal implementation that can be used to traverse any type of item.
-
-    The traversal gets the next items to be traversed to by calling a user provided callback (next_), with the current
-    item of the traversal. This function should return a list of ConnectivityResult's, that will get added to the
-    process_queue for processing.
-
-    Different `SearchType`'s types can be used to provide different trace types via the `process_queue`.
-    The default `Depth` will utilise a `LifoQueue` to provide a depth-first search of the network, while a `Breadth`
-    will use a FIFO `Queue` breadth-first search. More complex searches can be achieved with `Priority`, which
-    will use a PriorityQueue under the hood.
-
-    The traversal also requires a `Tracker` to be supplied. This gives flexibility
-    to track items in unique ways, more than just "has this item been visited" e.g. visiting more than once,
-    visiting under different conditions etc.
-    """
-    queue_next: Callable[[T, Traversal[T]], None]
-    """A function that will return a list of `T` to add to the queue. The function must take the item to queue and optionally a set of already visited items."""
-
-    process_queue: Queue[T]
-    """Dictates the type of search to be performed on the network graph. Breadth-first, Depth-first, and Priority based searches are possible."""
-
-    tracker: BaseTracker = Tracker()
-    """A `zepben.evolve.traversals.tracker.Tracker` for tracking which items have been seen. If not provided a `Tracker` will be created for this trace."""
-
-    async def _run_trace(self, can_stop_on_start_item: bool = True):
-        """
-        Run's the trace. Stop conditions and step_actions are called with await, so you can utilise asyncio when
-        performing a trace if your step actions or conditions are IO intensive. Stop conditions and
-        step actions will always be called for each item in the order provided.
-        `can_stop_on_start_item` Whether the trace can stop on the start_item. Actions will still be applied to
-                                       the start_item.
-        """
-        can_stop = True
-
-        if self.start_item:
-            self.process_queue.put(self.start_item)
-            can_stop = can_stop_on_start_item
-
-        while not self.process_queue.empty():
-            current = self.process_queue.get()
-            if self.tracker.visit(current):
-                stopping = can_stop and await self.matches_any_stop_condition(current)
-
-                await self.apply_step_actions(current, stopping)
-                if not stopping:
-                    self.queue_next(current, self)
-
-                can_stop = True
-
-    def reset(self):
-        self._reset_run_flag()
-        self.process_queue.queue.clear()
-        self.tracker.clear()
-
-
-def _depth_trace(start_item, stop_on_start_item=True, stop_fn=None, equip_fn=None, term_fn=None):
-    equips_to_trace = []
-    traced = set()
-    for t in start_item.terminals:
-        traced.add(t.mrid)
-    if stop_on_start_item:
-        yield start_item
-    equips_to_trace.append(start_item)
-    while equips_to_trace:
-        try:
-            equip = equips_to_trace.pop()
-        except IndexError:  # No more equipment
-            break
-        # Explore all connectivity nodes for this equipments terminals,
-        # and set upstream on each terminal.
-        for terminal in equip.terminals:
-            conn_node = terminal.connectivity_node
-            for term in conn_node:
-                # keep this
-                if term.mrid in traced:
-                    continue
-                if term != terminal:
-                    if not term.conducting_equipment.connected():
-                        continue
-                    equips_to_trace.append(term.conducting_equipment)
-                    yield term.conducting_equipment
-                # Don't trace over a terminal twice to stop us from reversing direction
-                traced.add(term.mrid)

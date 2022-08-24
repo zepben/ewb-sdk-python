@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
@@ -127,8 +127,25 @@ class Terminal(AcDcTerminal):
     def base_voltage(self):
         return self.conducting_equipment.get_base_voltage(self)
 
-    def get_other_terminals(self):
-        return [t for t in self.conducting_equipment.terminals if t is not self]
+    def connected_terminals(self) -> Generator[Terminal]:
+        """
+        Get the terminals that are connected to this `Terminal`.
+
+        :return: A `Generator` of terminals that are connected to this `Terminal`.
+        """
+        for t in self.connectivity_node.terminals if self.connectivity_node else []:
+            if t is not self:
+                yield t
+
+    def other_terminals(self) -> Generator[Terminal]:
+        """
+        * Get the terminals that share the same `ConductingEquipment` as this `Terminal`.
+        *
+        :return: A `Generator` of terminals that share the same `ConductingEquipment` as this `Terminal`.
+        """
+        for t in self.conducting_equipment.terminals:
+            if t is not self:
+                yield t
 
     @property
     def normal_phases(self) -> PhaseStatus:

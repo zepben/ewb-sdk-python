@@ -5,13 +5,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Set, Callable, Optional, Awaitable, Any
 
+from zepben.evolve import BasicTraversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, EquipmentContainer
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_trace import new_normal_trace, new_current_trace, get_associated_terminals
-from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 
 __all__ = ["AssignToFeeders"]
 
@@ -23,13 +23,13 @@ class AssignToFeeders:
     This class is backed by a `BasicTraversal`.
     """
 
-    def __init__(self, _normal_traversal: Optional[Traversal[Terminal]] = None, _current_traversal: Optional[Traversal[Terminal]] = None):
-        self._normal_traversal: Traversal[Terminal] = _normal_traversal if _normal_traversal is not None else new_normal_trace()
+    def __init__(self, _normal_traversal: Optional[BasicTraversal[Terminal]] = None, _current_traversal: Optional[BasicTraversal[Terminal]] = None):
+        self._normal_traversal: BasicTraversal[Terminal] = _normal_traversal if _normal_traversal is not None else new_normal_trace()
         """
         The traversal used to trace the network in its normal state of the network.
         """
 
-        self._current_traversal: Traversal[Terminal] = _current_traversal if _current_traversal is not None else new_current_trace()
+        self._current_traversal: BasicTraversal[Terminal] = _current_traversal if _current_traversal is not None else new_current_trace()
         """
         The traversal used to trace the network in its current state of the network.
         """
@@ -73,16 +73,16 @@ class AssignToFeeders:
         await self._run_from_head_terminal(self._current_traversal, feeder.normal_head_terminal)
 
     @staticmethod
-    async def _run_from_head_terminal(traversal: Traversal, head_terminal: Terminal):
+    async def _run_from_head_terminal(traversal: BasicTraversal, head_terminal: Terminal):
         traversal.reset()
 
         traversal.tracker.visit(head_terminal)
         await traversal.apply_step_actions(head_terminal, False)
         traversal.process_queue.extend(get_associated_terminals(head_terminal))
 
-        await traversal.trace()
+        await traversal.run()
 
-    def _configure_stop_conditions(self, traversal: Traversal, feeder_start_points: Set[ConductingEquipment]):
+    def _configure_stop_conditions(self, traversal: BasicTraversal, feeder_start_points: Set[ConductingEquipment]):
         traversal.clear_stop_conditions()
         traversal.add_stop_condition(self._reached_equipment(feeder_start_points))
         traversal.add_stop_condition(self._reached_substation_transformer)

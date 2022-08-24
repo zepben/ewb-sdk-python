@@ -1,5 +1,5 @@
 [MASTER]
-init-hook='import sys; sys.path.append("./src/"); sys.path.append("./test"); print("\n".join(sys.path)); '
+init-hook='import sys; sys.path.append("./src/"); sys.path.append("./test"); '
 [ZEPBEN]
 max-line-length=160
 variable-rgx=[a-z_][a-z0-9_]{0,30}$

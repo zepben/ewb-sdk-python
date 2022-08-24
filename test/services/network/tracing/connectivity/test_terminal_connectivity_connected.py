@@ -4,13 +4,15 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
-from typing import List
+from typing import List, Tuple
 
-from zepben.evolve import NetworkService, PhaseCode, SinglePhaseKind as Phase, Terminal, ConnectivityNode, AcLineSegment, NominalPhasePath, connected_terminals
+from zepben.evolve import NetworkService, PhaseCode, SinglePhaseKind as Phase, Terminal, ConnectivityNode, AcLineSegment, NominalPhasePath, \
+    TerminalConnectivityConnected
 
 
 class TestTerminalConnectivityConnected:
     _network_service = NetworkService()
+    _connectivity = TerminalConnectivityConnected()
 
     def test_straight_connections(self):
         t1, t2 = self._create_connected_terminals(PhaseCode.ABCN, PhaseCode.ABCN)
@@ -53,14 +55,14 @@ class TestTerminalConnectivityConnected:
         self._validate_connection(t2, Phase.X, Phase.N)
 
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.XYN, PhaseCode.BCN, PhaseCode.ABCN)
-        self._validate_connection_multi(t1, [[Phase.B, Phase.C, Phase.N], [Phase.B, Phase.C, Phase.N]])
-        self._validate_connection_multi(t2, [[Phase.X, Phase.Y, Phase.N], [Phase.B, Phase.C, Phase.N]])
-        self._validate_connection_multi(t3, [[Phase.NONE, Phase.X, Phase.Y, Phase.N], [Phase.NONE, Phase.B, Phase.C, Phase.N]])
+        self._validate_connection_multi(t1, [(t2, [Phase.B, Phase.C, Phase.N]), (t3, [Phase.B, Phase.C, Phase.N])])
+        self._validate_connection_multi(t2, [(t1, [Phase.X, Phase.Y, Phase.N]), (t3, [Phase.B, Phase.C, Phase.N])])
+        self._validate_connection_multi(t3, [(t1, [Phase.NONE, Phase.X, Phase.Y, Phase.N]), (t2, [Phase.NONE, Phase.B, Phase.C, Phase.N])])
 
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.XYN, PhaseCode.YN, PhaseCode.ABCN)
-        self._validate_connection_multi(t1, [[Phase.NONE, Phase.Y, Phase.N], [Phase.A, Phase.C, Phase.N]])
-        self._validate_connection_multi(t2, [[Phase.Y, Phase.N], [Phase.C, Phase.N]])
-        self._validate_connection_multi(t3, [[Phase.X, Phase.NONE, Phase.Y, Phase.N], [Phase.NONE, Phase.NONE, Phase.Y, Phase.N]])
+        self._validate_connection_multi(t1, [(t2, [Phase.NONE, Phase.Y, Phase.N]), (t3, [Phase.A, Phase.C, Phase.N])])
+        self._validate_connection_multi(t2, [(t1, [Phase.Y, Phase.N]), (t3, [Phase.C, Phase.N])])
+        self._validate_connection_multi(t3, [(t1, [Phase.X, Phase.NONE, Phase.Y, Phase.N]), (t2, [Phase.NONE, Phase.NONE, Phase.Y, Phase.N])])
 
     def test_xn_connectivity(self):
         t1, t2 = self._create_connected_terminals(PhaseCode.XN, PhaseCode.ABCN)
@@ -83,9 +85,9 @@ class TestTerminalConnectivityConnected:
         self._validate_connection(t2, Phase.NONE, Phase.NONE, Phase.X, Phase.N)
 
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.XN, PhaseCode.BN, PhaseCode.ABCN)
-        self._validate_connection_multi(t1, [[Phase.B, Phase.N], [Phase.B, Phase.N]])
-        self._validate_connection_multi(t2, [[Phase.X, Phase.N], [Phase.B, Phase.N]])
-        self._validate_connection_multi(t3, [[Phase.NONE, Phase.X, Phase.NONE, Phase.N], [Phase.NONE, Phase.B, Phase.NONE, Phase.N]])
+        self._validate_connection_multi(t1, [(t2, [Phase.B, Phase.N]), (t3, [Phase.B, Phase.N])])
+        self._validate_connection_multi(t2, [(t1, [Phase.X, Phase.N]), (t3, [Phase.B, Phase.N])])
+        self._validate_connection_multi(t3, [(t1, [Phase.NONE, Phase.X, Phase.NONE, Phase.N]), (t2, [Phase.NONE, Phase.B, Phase.NONE, Phase.N])])
 
     def test_yn_connectivity(self):
         t1, t2 = self._create_connected_terminals(PhaseCode.YN, PhaseCode.ABCN)
@@ -104,31 +106,32 @@ class TestTerminalConnectivityConnected:
         self._validate_connection(t2, Phase.Y, Phase.NONE, Phase.NONE, Phase.N)
 
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.YN, PhaseCode.AN, PhaseCode.ABCN)
-        self._validate_connection_multi(t1, [[Phase.NONE, Phase.N], [Phase.C, Phase.N]])
-        self._validate_connection_multi(t2, [[Phase.NONE, Phase.N], [Phase.A, Phase.N]])
-        self._validate_connection_multi(t3, [[Phase.NONE, Phase.NONE, Phase.Y, Phase.N], [Phase.A, Phase.NONE, Phase.NONE, Phase.N]])
+        self._validate_connection_multi(t1, [(t2, [Phase.NONE, Phase.N]), (t3, [Phase.C, Phase.N])])
+        self._validate_connection_multi(t2, [(t1, [Phase.NONE, Phase.N]), (t3, [Phase.A, Phase.N])])
+        self._validate_connection_multi(t3, [(t1, [Phase.NONE, Phase.NONE, Phase.Y, Phase.N]), (t2, [Phase.A, Phase.NONE, Phase.NONE, Phase.N])])
 
     def test_single_phase_xy_priority_connectivity(self):
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.X, PhaseCode.Y, PhaseCode.A)
-        self._validate_connection_multi(t1, [[Phase.NONE], [Phase.A]])
-        self._validate_connection_multi(t2, [[Phase.NONE], [Phase.NONE]])
-        self._validate_connection_multi(t3, [[Phase.X], [Phase.NONE]])
+        self._validate_connection_multi(t1, [(t3, [Phase.A])])
+        self._validate_connection(t2)
+        self._validate_connection_multi(t3, [(t1, [Phase.X])])
 
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.X, PhaseCode.Y, PhaseCode.B)
-        self._validate_connection_multi(t1, [[Phase.NONE], [Phase.B]])
-        self._validate_connection_multi(t2, [[Phase.NONE], [Phase.NONE]])
-        self._validate_connection_multi(t3, [[Phase.X], [Phase.NONE]])
+        self._validate_connection_multi(t1, [(t3, [Phase.B])])
+        self._validate_connection(t2)
+        self._validate_connection_multi(t3, [(t1, [Phase.X])])
 
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.X, PhaseCode.Y, PhaseCode.C)
-        self._validate_connection_multi(t1, [[Phase.NONE], [Phase.C]])
-        self._validate_connection_multi(t2, [[Phase.NONE], [Phase.NONE]])
-        self._validate_connection_multi(t3, [[Phase.X], [Phase.NONE]])
+        self._validate_connection_multi(t1, [(t3, [Phase.C])])
+        self._validate_connection(t2)
+        self._validate_connection_multi(t3, [(t1, [Phase.X])])
 
     def test_straight_xyn_chain_connectivity(self):
         (t11, t12), (t21, t22) = self._create_xy_chained_terminals([PhaseCode.ABN], [PhaseCode.ABCN])
 
         self._validate_connection(t11, Phase.A, Phase.B, Phase.N)
         self._validate_connection(t12, Phase.X, Phase.Y, Phase.N)
+
         self._validate_connection(t21, Phase.A, Phase.B, Phase.N)
         self._validate_connection(t22, Phase.X, Phase.Y, Phase.NONE, Phase.N)
 
@@ -136,6 +139,7 @@ class TestTerminalConnectivityConnected:
 
         self._validate_connection(t11, Phase.A, Phase.C, Phase.N)
         self._validate_connection(t12, Phase.X, Phase.Y, Phase.N)
+
         self._validate_connection(t21, Phase.A, Phase.C, Phase.N)
         self._validate_connection(t22, Phase.X, Phase.NONE, Phase.Y, Phase.N)
 
@@ -143,6 +147,7 @@ class TestTerminalConnectivityConnected:
 
         self._validate_connection(t11, Phase.B, Phase.C, Phase.N)
         self._validate_connection(t12, Phase.X, Phase.Y, Phase.N)
+
         self._validate_connection(t21, Phase.B, Phase.C, Phase.N)
         self._validate_connection(t22, Phase.NONE, Phase.X, Phase.Y, Phase.N)
 
@@ -150,25 +155,31 @@ class TestTerminalConnectivityConnected:
 
         self._validate_connection(t11, Phase.B, Phase.C, Phase.N)
         self._validate_connection(t12, Phase.X, Phase.Y, Phase.N)
-        self._validate_connection_multi(t21, [[Phase.B, Phase.C, Phase.N], [Phase.B, Phase.NONE, Phase.N]])
-        self._validate_connection_multi(t22, [[Phase.NONE, Phase.X, Phase.Y, Phase.N], [Phase.A, Phase.B, Phase.NONE, Phase.N]])
-        self._validate_connection_multi(t23, [[Phase.NONE, Phase.X, Phase.N], [Phase.A, Phase.B, Phase.N]])
+
+        self._validate_connection_multi(t21, [(t22, [Phase.B, Phase.C, Phase.N]), (t23, [Phase.B, Phase.NONE, Phase.N])])
+        self._validate_connection_multi(t22, [(t21, [Phase.NONE, Phase.X, Phase.Y, Phase.N]), (t23, [Phase.A, Phase.B, Phase.NONE, Phase.N])])
+        self._validate_connection_multi(t23, [(t21, [Phase.NONE, Phase.X, Phase.N]), (t22, [Phase.A, Phase.B, Phase.N])])
 
     def test_xy_to_split_connectivity(self):
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.XY, PhaseCode.A, PhaseCode.B)
-        self._validate_connection_multi(t1, [[Phase.A, Phase.NONE], [Phase.NONE, Phase.B]])
-        self._validate_connection_multi(t2, [[Phase.X], [Phase.NONE]])
-        self._validate_connection_multi(t3, [[Phase.NONE], [Phase.Y]])
+        self._validate_connection_multi(t1, [(t2, [Phase.A, Phase.NONE]), (t3, [Phase.NONE, Phase.B])])
+        self._validate_connection_multi(t2, [(t1, [Phase.X])])
+        self._validate_connection_multi(t3, [(t1, [Phase.Y])])
 
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.XY, PhaseCode.A, PhaseCode.C)
-        self._validate_connection_multi(t1, [[Phase.A, Phase.NONE], [Phase.NONE, Phase.C]])
-        self._validate_connection_multi(t2, [[Phase.X], [Phase.NONE]])
-        self._validate_connection_multi(t3, [[Phase.NONE], [Phase.Y]])
+        self._validate_connection_multi(t1, [(t2, [Phase.A, Phase.NONE]), (t3, [Phase.NONE, Phase.C])])
+        self._validate_connection_multi(t2, [(t1, [Phase.X])])
+        self._validate_connection_multi(t3, [(t1, [Phase.Y])])
 
         t1, t2, t3 = self._create_connected_terminals(PhaseCode.XY, PhaseCode.B, PhaseCode.C)
-        self._validate_connection_multi(t1, [[Phase.B, Phase.NONE], [Phase.NONE, Phase.C]])
-        self._validate_connection_multi(t2, [[Phase.X], [Phase.NONE]])
-        self._validate_connection_multi(t3, [[Phase.NONE], [Phase.Y]])
+        self._validate_connection_multi(t1, [(t2, [Phase.B, Phase.NONE]), (t3, [Phase.NONE, Phase.C])])
+        self._validate_connection_multi(t2, [(t1, [Phase.X])])
+        self._validate_connection_multi(t3, [(t1, [Phase.Y])])
+
+    def test_secondary_phases_are_not_connected(self):
+        t1, t2 = self._create_connected_terminals(PhaseCode.s1, PhaseCode.s2)
+        self._validate_connection(t1)
+        self._validate_connection(t2)
 
     def _create_connected_terminals(self, *phase_codes: PhaseCode) -> List[Terminal]:
         cn = self._get_next_connectivity_node()
@@ -196,28 +207,24 @@ class TestTerminalConnectivityConnected:
 
         return [terminals1, terminals2]
 
-    @staticmethod
-    def _validate_connection(t: Terminal, *expected_phases: Phase):
+    def _validate_connection(self, t: Terminal, *expected_phases: Phase):
         # noinspection PyArgumentList
         expected = [NominalPhasePath(t.phases.single_phases[index], phases) for index, phases in enumerate(expected_phases) if phases != Phase.NONE]
 
         if expected:
-            assert Counter(connected_terminals(t)[0].nominal_phase_paths) == Counter(expected)
+            assert Counter(self._connectivity.connected_terminals(t)[0].nominal_phase_paths) == Counter(expected)
         else:
-            assert not connected_terminals(t)
+            assert not self._connectivity.connected_terminals(t)
 
-    @staticmethod
-    def _validate_connection_multi(t: Terminal, expected_phases: List[List[Phase]]):
-        # noinspection PyArgumentList
-        expected = [[NominalPhasePath(t.phases.single_phases[index], phases) for index, phases in enumerate(phases) if phases != Phase.NONE]
-                    for phases in expected_phases]
-        expected = [it for it in expected if it]
+    def _validate_connection_multi(self, t: Terminal, expected_phases: List[Tuple[Terminal, List[Phase]]]):
+        connected = {it.to_terminal: it for it in self._connectivity.connected_terminals(t)}
 
-        for cr_index, phases in enumerate(expected):
-            if phases:
-                assert Counter(connected_terminals(t)[cr_index].nominal_phase_paths) == Counter(phases)
-            else:
-                assert not connected_terminals(t)
+        assert len(connected) == len(expected_phases)
+        for to_terminal, phases in expected_phases:
+            # noinspection PyArgumentList
+            assert Counter(connected[to_terminal].nominal_phase_paths) == Counter(
+                [NominalPhasePath(t.phases.single_phases[index], phase) for index, phase in enumerate(phases) if phase != Phase.NONE]
+            )
 
     @staticmethod
     def _replace_normal_phases(terminal: Terminal, normal_phases: PhaseCode):

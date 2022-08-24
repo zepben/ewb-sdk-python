@@ -58,7 +58,7 @@ async def _trace(traversal_supplier: Callable[[], Traversal], from_: ConductingE
     traversal.add_step_action(step)
     traversal.reset()
     # noinspection PyArgumentList
-    await traversal.trace(PhaseStep(from_, frozenset(next(from_.terminals).phases.single_phases)), can_stop_on_start_item=False)
+    await traversal.run(PhaseStep(from_, frozenset(next(from_.terminals).phases.single_phases)), can_stop_on_start_item=False)
     # this works off a downstream trace, so if we didn't find a path try reverse from and to in case the "to" point was higher up in the network.
     if to is not None and not path_found[0]:
         if to.num_terminals() == 0:
@@ -66,7 +66,7 @@ async def _trace(traversal_supplier: Callable[[], Traversal], from_: ConductingE
         with_usage_points.clear()
         traversal.reset()
         # noinspection PyArgumentList
-        await traversal.trace(PhaseStep(to, frozenset(next(to.terminals).phases.single_phases)), can_stop_on_start_item=False)
+        await traversal.run(PhaseStep(to, frozenset(next(to.terminals).phases.single_phases)), can_stop_on_start_item=False)
 
     if path_found[0]:
         return Result(conducting_equipment=with_usage_points)
