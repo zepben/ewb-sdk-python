@@ -322,8 +322,8 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_id_references(diff, Feeder.normal_head_terminal, Feeder.normal_energizing_substation)
+        self._compare_id_reference_collections(diff, Feeder.normal_energized_lv_feeders)
         if self._options.compare_feeder_equipment:
-            self._compare_id_reference_collections(diff, Feeder.normal_energized_lv_feeders)
             self._compare_id_reference_collections(diff, Feeder.current_equipment)
 
         return self._compare_equipment_container(diff)
