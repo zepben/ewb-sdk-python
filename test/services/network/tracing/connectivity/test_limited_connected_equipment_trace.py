@@ -4,13 +4,24 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import inspect
-from unittest.mock import MagicMock, Mock, create_autospec
+import sys
 
 import pytest
 
 from zepben.evolve import TestNetworkBuilder, ConductingEquipmentStep, Junction, FeederDirection, Terminal, ConductingEquipment
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_traversal import ConnectedEquipmentTraversal
 from zepben.evolve.services.network.tracing.connectivity.limited_connected_equipment_trace import LimitedConnectedEquipmentTrace
+
+# AsyncMock was not included in the base module until 3.8, so use the backport instead if required
+v = sys.version_info
+if v.major == 3 and v.minor < 8:
+    # noinspection PyPackageRequirements
+    # noinspection PyUnresolvedReferences
+    # pylint: disable=import-error
+    from mock import MagicMock, Mock, create_autospec
+    # pylint: enable=import-error
+else:
+    from unittest.mock import MagicMock, Mock, create_autospec
 
 
 def with_mock_trace(func):
@@ -294,6 +305,7 @@ class TestLimitedConnectedEquipmentTrace:
             for step in steps:
                 print("stepping on" + str(step))
                 await step_action(step, False)
+
         # pylint: enable=unused-argument
 
         traversal.run_from.side_effect = perform_step_actions
