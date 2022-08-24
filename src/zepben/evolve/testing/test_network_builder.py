@@ -3,7 +3,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Optional, Callable, List, Protocol, Union, Type
+try:
+    from typing import Protocol
+except ImportError:
+    Protocol = object
+
+from typing import Optional, Callable, List, Union, Type
 
 from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, \
     PowerTransformerEnd, PowerTransformer, set_phases, set_direction, AssignToFeeders
