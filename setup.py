@@ -3,14 +3,36 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import sys
 
 from setuptools import setup, find_namespace_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-test_deps = ["pytest==7.1.2", "pytest-cov==2.10.1", "pytest-asyncio==0.19.0", "pytest-timeout==1.4.2", "hypothesis<6", "grpcio-testing==1.46.3",
-             "pylint==2.14.5"]
+deps = [
+    "requests<2.27.0,>=2.26.0",
+    "zepben.protobuf==0.21.0",
+    "zepben.auth==0.9.0",
+    "dataclassy==0.6.2",
+    "six==1.16.0"
+]
+
+# AsyncMock was not included in the base module until 3.8, so use the backport instead if required
+v = sys.version_info
+if v.major == 3 and v.minor < 8:
+    deps.append("mock==4.0.3")
+
+test_deps = [
+    "pytest==7.1.2",
+    "pytest-cov==2.10.1",
+    "pytest-asyncio==0.19.0",
+    "pytest-timeout==1.4.2",
+    "hypothesis<6",
+    "grpcio-testing==1.46.3",
+    "pylint==2.14.5"
+]
+
 setup(
     name="zepben.evolve",
     version="0.30.0b9",
@@ -33,13 +55,7 @@ setup(
     package_dir={"": "src"},
     packages=find_namespace_packages(where="src"),
     python_requires='>=3.7',
-    install_requires=[
-        "requests<2.27.0,>=2.26.0",
-        "zepben.protobuf==0.21.0",
-        "zepben.auth==0.9.0",
-        "dataclassy==0.6.2",
-        "six==1.16.0"
-    ],
+    install_requires=deps,
     extras_require={
         "test": test_deps,
     }
