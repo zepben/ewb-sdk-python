@@ -84,7 +84,7 @@ class AssignToLvFeeders:
         await traversal.apply_step_actions(head_terminal, False)
         traversal.process_queue.extend(get_associated_terminals(head_terminal))
 
-        await traversal.trace()
+        await traversal.run()
 
     def _configure_stop_conditions(self, traversal: Traversal, lv_feeder_start_points: Set[ConductingEquipment]):
         traversal.clear_stop_conditions()
