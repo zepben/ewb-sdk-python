@@ -1,0 +1,11 @@
+name: Python Lib Build
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  run:
+    uses: zepben/.github/.github/workflows/python-build.yml@main
+    secrets: inherit
+
