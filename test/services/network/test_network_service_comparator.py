@@ -942,3 +942,10 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Feeder(mrid="f1"),
             lambda _: Feeder(mrid="f2")
         )
+        self.validator.validate_collection(
+            LvFeeder.current_equipment,
+            LvFeeder.add_current_equipment,
+            LvFeeder,
+            lambda _: Junction(mrid="j1"),
+            lambda _: Junction(mrid="j2")
+        )

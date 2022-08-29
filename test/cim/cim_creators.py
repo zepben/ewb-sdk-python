@@ -427,7 +427,7 @@ def create_connectivity_node_container(include_runtime: bool):
 
 def create_equipment(include_runtime: bool):
     runtime = {
-        "current_containers": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+        "current_containers": lists(sampled_hvlv_feeder(), min_size=1, max_size=2)
     } if include_runtime else {}
 
     return {

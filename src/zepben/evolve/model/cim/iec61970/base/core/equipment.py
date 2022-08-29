@@ -55,11 +55,12 @@ class Equipment(PowerSystemResource):
                 self.add_current_container(cf)
 
     @property
-    def current_feeders(self) -> Generator[Feeder, None, None]:
+    def sites(self) -> Generator[Site, None, None]:
         """
-        The current `Feeder`s this equipment belongs to.
+        The `Site`s this equipment belongs to.
         """
-        return ngen(_of_type(self._current_containers, Feeder))
+        return ngen(_of_type(self._equipment_containers, Site))
+
 
     @property
     def normal_feeders(self) -> Generator[Feeder, None, None]:
@@ -69,13 +70,6 @@ class Equipment(PowerSystemResource):
         return ngen(_of_type(self._equipment_containers, Feeder))
 
     @property
-    def current_lv_feeders(self) -> Generator[LvFeeder, None, None]:
-        """
-        The current `LvFeeder`s this equipment belongs to.
-        """
-        return ngen(_of_type(self._current_containers, LvFeeder))
-
-    @property
     def normal_lv_feeders(self) -> Generator[LvFeeder, None, None]:
         """
         The normal `LvFeeder`s this equipment belongs to.
@@ -83,18 +77,25 @@ class Equipment(PowerSystemResource):
         return ngen(_of_type(self._equipment_containers, LvFeeder))
 
     @property
-    def sites(self) -> Generator[Site, None, None]:
-        """
-        The `Site`s this equipment belongs to.
-        """
-        return ngen(_of_type(self._equipment_containers, Site))
-
-    @property
     def substations(self) -> Generator[Substation, None, None]:
         """
         The `Substation`s this equipment belongs to.
         """
         return ngen(_of_type(self._equipment_containers, Substation))
+
+    @property
+    def current_feeders(self) -> Generator[Feeder, None, None]:
+        """
+        The current `Feeder`s this equipment belongs to.
+        """
+        return ngen(_of_type(self._current_containers, Feeder))
+
+    @property
+    def current_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The current `LvFeeder`s this equipment belongs to.
+        """
+        return ngen(_of_type(self._current_containers, LvFeeder))
 
     @property
     def containers(self) -> Generator[EquipmentContainer, None, None]:

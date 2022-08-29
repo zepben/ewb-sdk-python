@@ -35,8 +35,7 @@ __all__ = ["create_basic_depth_trace", "create_basic_breadth_trace", "connected_
            "normal_connected_equipment_trace", "current_connected_equipment_trace", "normal_limited_connected_equipment_trace",
            "current_limited_connected_equipment_trace", "phase_trace", "normal_phase_trace", "current_phase_trace", "connectivity_trace",
            "connectivity_breadth_trace", "normal_connectivity_trace", "current_connectivity_trace", "normal_downstream_trace", "current_downstream_trace",
-           "set_phases", "remove_phases", "set_direction", "remove_direction", "assign_equipment_to_feeders", "assign_equipment_to_lv_feeders",
-           "assign_equipment_to_lv_feeders"]
+           "set_phases", "remove_phases", "set_direction", "remove_direction", "assign_equipment_to_feeders", "assign_equipment_to_lv_feeders"]
 
 
 # --- Helper functions that create depth-first/breadth-first traversals ---
