@@ -10,6 +10,4 @@ on:
 jobs:
   run:
     uses: zepben/.github/.github/workflows/python-lib-snapshot.yml@main
-    with:
-      private: true
     secrets: inherit

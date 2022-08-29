@@ -6,7 +6,7 @@ jobs:
   run:
     uses: zepben/.github/.github/workflows/python-lib-release-with-docs.yml@main
     with:
-      private: true
-      product-key: "<some-product-key>"   # Must be unique
-      licencecheck: false   # Set to true if private = false (OSS)
+      private: false
+      product-key: "python-sdk"   # Must be unique
+      licencecheck: true  # Set to true if private = false (OSS)
     secrets: inherit
