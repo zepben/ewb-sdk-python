@@ -1,4 +1,4 @@
-### v0.30.0
+### v0.31.0
 
 ##### Breaking Changes
 
