@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.32.0](#v0320)| `29 August 2022` |
 | [0.32.0](#v0310) | `TBD`               |
 | [0.29.0](#v0290) | `14 June 2022`      |
 | [0.28.0](#v0280) | `07 June 2022`      |
@@ -33,6 +34,40 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+### v0.32.0
+
+##### Breaking Changes
+
+* Renamed the following classes to be consistent with the JVM implementation:
+  * `Traversal` to `BasicTraversal`
+  * `BaseTraversal` to `Traversal`
+  * `Tracker` to `BasicTracker`
+  * `BaseTracker` to `Tracker`
+* Renamed the following functions to be consistent with the JVM implementation:
+  * `Traversal.trace` to `Traversal.run`
+  * `Terminal.get_other_terminals` to `Terminal.other_terminals`
+
+##### New Features
+
+* None
+
+##### Enhancements
+
+* Improved performance for bus branch creation.
+* Added the following functions to be consistent with the JVM implementation:
+  * `Terminal.connected_terminals`
+
+##### Fixes
+
+* `PhaseStepTracker` now reports strict subsets of visited phases as visited.
+* Base voltages are no longer pulled from switches when creating nodes in `BusBranchNetworkCreator`
+
+##### Notes
+
+* None.
 
 ---
 
