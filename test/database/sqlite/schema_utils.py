@@ -14,7 +14,7 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, Name, \
     PowerSystemResource, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, \
     PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, \
-    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress
+    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -306,9 +306,6 @@ class SchemaNetworks:
             for it in filled.operational_restrictions:
                 it.add_equipment(filled)
                 service.add(it)
-            for it in filled.current_feeders:
-                it.add_current_equipment(filled)
-                service.add(it)
 
         if isinstance(filled, EquipmentContainer):
             for it in filled.equipment:
@@ -486,7 +483,7 @@ class SchemaNetworks:
             for it in filled.end_terminals:
                 service.add(it)
             for it in filled.end_substations:
-                it.add_loop(filled)  # could also be add_energized_loop
+                it.add_circuit(filled)  # could also be add_energized_loop
                 service.add(it)
 
         if isinstance(filled, Loop):
@@ -499,6 +496,9 @@ class SchemaNetworks:
             for it in filled.energizing_substations:
                 it.add_energized_loop(filled)
                 service.add(it)
+
+        if isinstance(filled, LvFeeder):
+            service.add(filled.normal_head_terminal)
 
         for io in service.objects():
             for name in io.names:

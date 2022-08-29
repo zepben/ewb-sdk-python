@@ -98,6 +98,8 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop
 
 __all__ = []
 
+from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder
+
 CableInfo.mrid = lambda self: self.wi.mrid()
 NoLoadTest.mrid = lambda self: self.tt.mrid()
 OpenCircuitTest.mrid = lambda self: self.tt.mrid()
@@ -189,6 +191,7 @@ TapChanger.mrid = lambda self: self.psr.mrid()
 TransformerEnd.mrid = lambda self: self.io.mrid()
 Loop.mrid = lambda self: self.io.mrid()
 Circuit.mrid = lambda self: self.l.mrid()
+LvFeeder.mrid = lambda self: self.ec.mrid()
 
 PowerSystemResource.name_and_mrid = lambda self: self.io.name_and_mrid()
 ConductingEquipment.name_and_mrid = lambda self: self.eq.name_and_mrid()

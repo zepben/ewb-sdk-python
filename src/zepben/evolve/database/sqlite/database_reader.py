@@ -121,8 +121,12 @@ class DatabaseReader:
         logger.info("Phasing applied to network.")
 
         logger.info("Assigning equipment to feeders...")
-        tracing.assign_equipment_containers_to_feeders().run(network_service)
+        tracing.assign_equipment_to_feeders().run(network_service)
         logger.info("Equipment assigned to feeders.")
+
+        logger.info("Assigning equipment to LV feeders...")
+        tracing.assign_equipment_to_lv_feeders().run(network_service)
+        logger.info("Equipment assigned to LV feeders.")
 
         logger.info("Validating primary sources vs feeders...")
         self._validate_sources(network_service)

@@ -24,7 +24,7 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_disconnector, create_energy_consumer, create_energy_consumer_phase, create_energy_source, create_energy_source_phase, create_fuse, create_jumper, \
     create_junction, create_linear_shunt_compensator, create_load_break_switch, create_per_length_sequence_impedance, create_power_electronics_connection, \
     create_power_electronics_connection_phase, create_power_transformer, create_power_transformer_end, create_ratio_tap_changer, create_recloser, \
-    create_transformer_star_impedance, create_circuit, create_loop
+    create_transformer_star_impedance, create_circuit, create_loop, create_lv_feeder
 from database.sqlite.schema_utils import SchemaNetworks, Services, assume_non_blank_street_address_details
 from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, \
     NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, \
@@ -34,7 +34,7 @@ from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, C
     PhotoVoltaicUnit, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, \
     EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, BaseService, \
-    DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail
+    DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail, LvFeeder
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
@@ -496,6 +496,13 @@ class TestDatabaseSqlite:
     @given(loop=create_loop(False))
     def test_schema_loop(self, caplog, loop):
         self._validate_schema(SchemaNetworks().network_services_of(Loop, loop), caplog)
+
+    # noinspection PyShadowingNames
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(lv_feeder=create_lv_feeder(False))
+    def test_schema_lv_feeder(self, caplog, lv_feeder):
+        self._validate_schema(SchemaNetworks().network_services_of(LvFeeder, lv_feeder), caplog)
 
     # ************ Services ************
 

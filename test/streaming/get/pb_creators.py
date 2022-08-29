@@ -113,6 +113,7 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
+from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 
 MIN_32_BIT_INTEGER = -2147483648
@@ -443,7 +444,7 @@ def equipment():
         equipmentContainerMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         usagePointMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         operationalRestrictionMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
-        currentFeederMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+        currentContainerMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
 
 
@@ -456,7 +457,8 @@ def feeder():
         PBFeeder,
         ec=equipment_container(),
         normalHeadTerminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        normalEnergizingSubstationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        normalEnergizingSubstationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        normalEnergizedLvFeederMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
 
 
@@ -938,6 +940,14 @@ def loop():
     )
 
 
+def lv_feeder():
+    return builds(
+        PBLvFeeder,
+        ec=equipment_container(),
+        normalHeadTerminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        normalEnergizingFeederMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
 #########
 # MODEL #
 #########
@@ -1037,5 +1047,6 @@ def network_identified_objects(draw):
         # IEC61970 INFIEC61970 FEEDER #
         draw(builds(NetworkIdentifiedObject, circuit=circuit())),
         draw(builds(NetworkIdentifiedObject, loop=loop())),
+        draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder()))
     ]
     return nios

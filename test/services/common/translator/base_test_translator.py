@@ -6,7 +6,7 @@
 from traceback import print_exc
 from typing import TypeVar, Type, Callable
 
-from zepben.evolve import IdentifiedObject, BaseService, BaseServiceComparator, EquipmentContainer, OperationalRestriction, Feeder, ConnectivityNode
+from zepben.evolve import IdentifiedObject, BaseService, BaseServiceComparator, EquipmentContainer, OperationalRestriction, Feeder, ConnectivityNode, LvFeeder
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -48,16 +48,13 @@ def validate_service_translations(service_type: Type[BaseService], comparator: B
 def _remove_unsent_references(cim: T):
     if isinstance(cim, EquipmentContainer):
         cim.clear_equipment()
+        cim.clear_current_equipment()
 
     if isinstance(cim, OperationalRestriction):
         cim.clear_equipment()
 
-    if isinstance(cim, Feeder):
-        cim.clear_current_equipment()
-
     if isinstance(cim, ConnectivityNode):
         cim.clear_terminals()
-
 
 def _add_with_unresolved_references(service: BaseService, cim: T) -> T:
     # We need to convert the populated item before we check the differences so we can complete the unresolved references.

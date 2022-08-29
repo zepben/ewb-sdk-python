@@ -9,7 +9,7 @@ import pytest
 from pytest import raises
 
 from zepben.evolve import PhaseCode, PowerTransformerEnd, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, \
-    connected_terminals, TestNetworkBuilder, Fuse
+    connected_terminals, TestNetworkBuilder, Fuse, LvFeeder
 
 
 class TestTestNetworkBuilder:
@@ -72,7 +72,7 @@ class TestTestNetworkBuilder:
         #
         # 1 b0*21--c1--21--c2--21--c4--2
         #
-        # 1 b5*21--c6--2
+        # 1 b5*21--c6--21 tx7+21--c8--2
         #
         n = await (TestNetworkBuilder()
                    .from_breaker(PhaseCode.ABC)  # b0
@@ -82,7 +82,10 @@ class TestTestNetworkBuilder:
                    .to_acls(PhaseCode.ABC)  # c4
                    .from_breaker(PhaseCode.AB)  # b5
                    .to_acls(PhaseCode.AB)  # c6
-                   .add_feeder("b5", 1)  # fdr7
+                   .to_power_transformer([PhaseCode.AB, PhaseCode.A])  # tx7
+                   .to_acls(PhaseCode.A)  # c8
+                   .add_feeder("b5", 1)  # fdr9
+                   .add_lv_feeder("tx7")  # lvf10
                    .build())
         print(hex(id(n)))
 
@@ -92,8 +95,11 @@ class TestTestNetworkBuilder:
         self._validate_feeder(n, "fdr3", "b0-t2")
         self._validate_connections(n, "c4", [["c2-t2"], []])
         self._validate_connections(n, "b5", [[], ["c6-t1"]])
-        self._validate_connections(n, "c6", [["b5-t2"], []])
-        self._validate_feeder(n, "fdr7", "b5-t1")
+        self._validate_connections(n, "c6", [["b5-t2"], ["tx7-t1"]])
+        self._validate_connections(n, "tx7", [["c6-t2"], ["c8-t1"]])
+        self._validate_connections(n, "c8", [["tx7-t2"], []])
+        self._validate_feeder(n, "fdr9", "b5-t1")
+        self._validate_lv_feeder(n, "lvf10", "tx7-t2")
 
     @pytest.mark.asyncio
     async def test_sample_network_starting_with_junction(self):
@@ -300,6 +306,10 @@ class TestTestNetworkBuilder:
     @staticmethod
     def _validate_feeder(n: NetworkService, mrid: str, head_terminal: str):
         assert n.get(mrid, Feeder).normal_head_terminal == n.get(head_terminal, Terminal)
+
+    @staticmethod
+    def _validate_lv_feeder(n: NetworkService, mrid: str, head_terminal: str):
+        assert n.get(mrid, LvFeeder).normal_head_terminal == n.get(head_terminal, Terminal)
 
     @staticmethod
     def _validate_ends(n: NetworkService, mrid: str, expected_ends: List[PhaseCode]):

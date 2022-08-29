@@ -427,7 +427,7 @@ def create_connectivity_node_container(include_runtime: bool):
 
 def create_equipment(include_runtime: bool):
     runtime = {
-        "current_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+        "current_containers": lists(sampled_hvlv_feeder(), min_size=1, max_size=2)
     } if include_runtime else {}
 
     return {
@@ -454,6 +454,7 @@ def create_equipment_container(include_runtime: bool, add_equipment: bool = True
 
 def create_feeder(include_runtime: bool = True):
     runtime = {
+        "normal_energized_lv_feeders": lists(builds(LvFeeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2)
     } if include_runtime else {}
 
@@ -1108,6 +1109,20 @@ def create_loop(include_runtime: bool = True):
     )
 
 
+def create_lv_feeder(include_runtime: bool = True):
+    runtime = {
+        "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
+        "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2)
+    } if include_runtime else {}
+
+    return builds(
+        LvFeeder,
+        **create_equipment_container(include_runtime),
+        normal_head_terminal=builds(Terminal, **create_identified_object(include_runtime)),
+        **runtime
+    )
+
+
 #########
 # MODEL #
 #########
@@ -1167,6 +1182,13 @@ def sampled_equipment_container(include_runtime: bool):
         available_containers.append(builds(Feeder, **create_identified_object(include_runtime)))
 
     return choice(available_containers)
+
+
+def sampled_hvlv_feeder():
+    return choice([
+        builds(Feeder, **create_identified_object(True)),
+        builds(LvFeeder, **create_identified_object(True))
+    ])
 
 
 def sampled_measurement():

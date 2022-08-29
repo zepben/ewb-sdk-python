@@ -12,6 +12,7 @@ from zepben.evolve.exceptions import TracingException, PhaseException
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize('phase_swap_loop_network', [(False,)], indirect=True)
 async def test_set_phases(phase_swap_loop_network):
     await SetPhases().run(phase_swap_loop_network)
     await connected_equipment_trace_with_logging(phase_swap_loop_network.objects(EnergySource))

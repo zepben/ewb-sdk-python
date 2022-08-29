@@ -15,6 +15,7 @@ from zepben.evolve.services.network.tracing.connectivity.connected_equipment_tra
 from zepben.evolve.services.network.tracing.connectivity.connectivity_trace import queue_next_connectivity_result_with_open_test
 from zepben.evolve.services.network.tracing.connectivity.limited_connected_equipment_trace import LimitedConnectedEquipmentTrace
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
+from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import AssignToLvFeeders
 from zepben.evolve.services.network.tracing.feeder.direction_status import normal_direction, current_direction
 from zepben.evolve.services.network.tracing.feeder.remove_direction import RemoveDirection
 from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
@@ -34,7 +35,7 @@ __all__ = ["create_basic_depth_trace", "create_basic_breadth_trace", "connected_
            "normal_connected_equipment_trace", "current_connected_equipment_trace", "normal_limited_connected_equipment_trace",
            "current_limited_connected_equipment_trace", "phase_trace", "normal_phase_trace", "current_phase_trace", "connectivity_trace",
            "connectivity_breadth_trace", "normal_connectivity_trace", "current_connectivity_trace", "normal_downstream_trace", "current_downstream_trace",
-           "set_phases", "remove_phases", "set_direction", "remove_direction", "assign_equipment_containers_to_feeders"]
+           "set_phases", "remove_phases", "set_direction", "remove_direction", "assign_equipment_to_feeders", "assign_equipment_to_lv_feeders"]
 
 
 # --- Helper functions that create depth-first/breadth-first traversals ---
@@ -309,7 +310,7 @@ def phase_inferrer() -> PhaseInferrer:
     return PhaseInferrer()
 
 
-def assign_equipment_containers_to_feeders() -> AssignToFeeders:
+def assign_equipment_to_feeders() -> AssignToFeeders:
     """
     Returns an instance of `AssignToFeeders` convenience class for assigning equipment
     containers to feeders on a network.
@@ -317,6 +318,15 @@ def assign_equipment_containers_to_feeders() -> AssignToFeeders:
     @return A new `AssignToFeeders` instance.
     """
     return AssignToFeeders()
+
+
+def assign_equipment_to_lv_feeders() -> AssignToLvFeeders:
+    """
+    Returns an instance of `zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders.AssignToLvFeeders` convenience class for assigning equipment
+    containers to feeders on a network.
+    """
+    return AssignToLvFeeders()
+
 
 # TODO
 # def find_with_usage_points() -> FindWithUsagePoints:

@@ -82,6 +82,7 @@ from zepben.evolve.model.cim.iec61970.base.core.name import *
 from zepben.evolve.model.cim.iec61970.base.core.name_type import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
 from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 
@@ -113,6 +114,7 @@ from zepben.evolve.services.network.tracing.connectivity.xy_candidate_phase_path
 from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import *
 from zepben.evolve.services.network.tracing.feeder.direction_status import *
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import *
+from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import *
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_trace import *
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_tracker import *
 from zepben.evolve.services.network.tracing.feeder.set_direction import *

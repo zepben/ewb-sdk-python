@@ -428,6 +428,8 @@ def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
         nio = NetworkIdentifiedObject(loop=obj.to_pb())
     elif isinstance(obj, Circuit):
         nio = NetworkIdentifiedObject(circuit=obj.to_pb())
+    elif isinstance(obj, LvFeeder):
+        nio = NetworkIdentifiedObject(lvfeeder=obj.to_pb())
     else:
         raise Exception(f"Missing class in create response - you should implement it: {str(obj)}")
     return nio

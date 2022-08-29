@@ -12,7 +12,7 @@ from zepben.evolve import BaseService, Document, TableDocuments, Organisation, T
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["BaseCIMReader"]
+__all__ = ["DuplicateMRIDException", "BaseCIMReader"]
 
 
 class DuplicateMRIDException(Exception):

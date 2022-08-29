@@ -108,6 +108,7 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit as PBPowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
+from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
 
 from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, OpenCircuitTest, ShortCircuitTest, TransformerTest, \
@@ -157,6 +158,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.switch import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
 from zepben.evolve.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb
 from zepben.evolve.services.common.translator.util import mrid_or_empty, from_nullable_int, from_nullable_float, from_nullable_long, from_nullable_uint
 
@@ -176,7 +178,7 @@ __all__ = [
     "linear_shunt_compensator_to_pb", "load_break_switch_to_pb", "per_length_line_parameter_to_pb", "per_length_impedance_to_pb",
     "per_length_sequence_impedance_to_pb", "power_electronics_connection_to_pb", "power_electronics_connection_phase_to_pb", "power_transformer_to_pb",
     "power_transformer_end_to_pb", "protected_switch_to_pb", "ratio_tap_changer_to_pb", "recloser_to_pb", "regulating_cond_eq_to_pb", "shunt_compensator_to_pb",
-    "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb", "circuit_to_pb", "loop_to_pb", "transformer_star_impedance_to_pb",
+    "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb", "circuit_to_pb", "loop_to_pb", "lv_feeder_to_pb", "transformer_star_impedance_to_pb",
 ]
 
 
@@ -523,7 +525,7 @@ def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquip
         equipmentContainerMRIDs=[str(io.mrid) for io in cim.containers],
         usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
         operationalRestrictionMRIDs=[str(io.mrid) for io in cim.operational_restrictions],
-        currentFeederMRIDs=[str(io.mrid) for io in cim.current_feeders]
+        currentContainerMRIDs=[str(io.mrid) for io in cim.current_containers]
     )
 
 
@@ -535,7 +537,8 @@ def feeder_to_pb(cim: Feeder) -> PBFeeder:
     return PBFeeder(
         ec=equipment_container_to_pb(cim),
         normalHeadTerminalMRID=mrid_or_empty(cim.normal_head_terminal),
-        normalEnergizingSubstationMRID=mrid_or_empty(cim.normal_energizing_substation)
+        normalEnergizingSubstationMRID=mrid_or_empty(cim.normal_energizing_substation),
+        normalEnergizedLvFeederMRIDs=[str(io.mrid) for io in cim.normal_energized_lv_feeders]
     )
 
 
@@ -1102,5 +1105,14 @@ def loop_to_pb(cim: Loop) -> PBLoop:
     )
 
 
+def lv_feeder_to_pb(cim: LvFeeder) -> PBLvFeeder:
+    return PBLvFeeder(
+        ec=equipment_container_to_pb(cim),
+        normalHeadTerminalMRID=mrid_or_empty(cim.normal_head_terminal),
+        normalEnergizingFeederMRIDs=[str(io.mrid) for io in cim.normal_energizing_feeders]
+    )
+
+
 Circuit.to_pb = circuit_to_pb
 Loop.to_pb = loop_to_pb
+LvFeeder.to_pb = lv_feeder_to_pb

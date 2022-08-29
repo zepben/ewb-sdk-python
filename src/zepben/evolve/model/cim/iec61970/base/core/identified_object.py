@@ -87,7 +87,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
         existing = self.get_name(name.type.name, name.name)
         if existing:
-            if existing is self:
+            if existing is name:
                 return self
             else:
                 raise ValueError(f"Failed to add duplicate name {str(name)} to {str(self)}.")

@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
 
 __all__ = ['Equipment']
@@ -35,10 +36,10 @@ class Equipment(PowerSystemResource):
     _usage_points: Optional[List[UsagePoint]] = None
     _equipment_containers: Optional[List[EquipmentContainer]] = None
     _operational_restrictions: Optional[List[OperationalRestriction]] = None
-    _current_feeders: Optional[List[Feeder]] = None
+    _current_containers: Optional[List[EquipmentContainer]] = None
 
     def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
-                 operational_restrictions: List[OperationalRestriction] = None, current_feeders: List[Feeder] = None, **kwargs):
+                 operational_restrictions: List[OperationalRestriction] = None, current_containers: List[EquipmentContainer] = None, **kwargs):
         super(Equipment, self).__init__(**kwargs)
         if usage_points:
             for up in usage_points:
@@ -49,9 +50,52 @@ class Equipment(PowerSystemResource):
         if operational_restrictions:
             for restriction in operational_restrictions:
                 self.add_operational_restriction(restriction)
-        if current_feeders:
-            for cf in current_feeders:
-                self.add_current_feeder(cf)
+        if current_containers:
+            for cf in current_containers:
+                self.add_current_container(cf)
+
+    @property
+    def sites(self) -> Generator[Site, None, None]:
+        """
+        The `Site`s this equipment belongs to.
+        """
+        return ngen(_of_type(self._equipment_containers, Site))
+
+
+    @property
+    def normal_feeders(self) -> Generator[Feeder, None, None]:
+        """
+        The normal `Feeder`s this equipment belongs to.
+        """
+        return ngen(_of_type(self._equipment_containers, Feeder))
+
+    @property
+    def normal_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The normal `LvFeeder`s this equipment belongs to.
+        """
+        return ngen(_of_type(self._equipment_containers, LvFeeder))
+
+    @property
+    def substations(self) -> Generator[Substation, None, None]:
+        """
+        The `Substation`s this equipment belongs to.
+        """
+        return ngen(_of_type(self._equipment_containers, Substation))
+
+    @property
+    def current_feeders(self) -> Generator[Feeder, None, None]:
+        """
+        The current `Feeder`s this equipment belongs to.
+        """
+        return ngen(_of_type(self._current_containers, Feeder))
+
+    @property
+    def current_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The current `LvFeeder`s this equipment belongs to.
+        """
+        return ngen(_of_type(self._current_containers, LvFeeder))
 
     @property
     def containers(self) -> Generator[EquipmentContainer, None, None]:
@@ -59,48 +103,6 @@ class Equipment(PowerSystemResource):
         The `EquipmentContainer`s this equipment belongs to.
         """
         return ngen(self._equipment_containers)
-
-    @property
-    def current_feeders(self) -> Generator[Feeder, None, None]:
-        """
-        The current `Feeder`s this equipment belongs to.
-        """
-        return ngen(self._current_feeders)
-
-    @property
-    def normal_feeders(self) -> Generator[Feeder, None, None]:
-        """
-        The normal `Feeder`s this equipment belongs to.
-        """
-        return ngen(self._equipment_containers_of_type(Feeder))
-
-    @property
-    def sites(self) -> Generator[Site, None, None]:
-        """
-        The `Site`s this equipment belongs to.
-        """
-        return ngen(self._equipment_containers_of_type(Site))
-
-    @property
-    def substations(self) -> Generator[Substation, None, None]:
-        """
-        The `Substation`s this equipment belongs to.
-        """
-        return ngen(self._equipment_containers_of_type(Substation))
-
-    @property
-    def usage_points(self) -> Generator[UsagePoint, None, None]:
-        """
-        The `UsagePoint`s for this equipment.
-        """
-        return ngen(self._usage_points)
-
-    @property
-    def operational_restrictions(self) -> Generator[OperationalRestriction, None, None]:
-        """
-        The `OperationalRestriction`s that this equipment is associated with.
-        """
-        return ngen(self._operational_restrictions)
 
     def num_containers(self) -> int:
         """
@@ -110,21 +112,21 @@ class Equipment(PowerSystemResource):
 
     def num_substations(self) -> int:
         """
-        Returns The number of `Substation`s associated with this `Equipment`
+        Returns The number of `zepben.evolve.cim.iec61970.base.core.substation.Substation`s associated with this `Equipment`
         """
-        return len(self._equipment_containers_of_type(Substation))
+        return len(_of_type(self._equipment_containers, Substation))
 
     def num_sites(self) -> int:
         """
         Returns The number of `Site`s associated with this `Equipment`
         """
-        return len(self._equipment_containers_of_type(Site))
+        return len(_of_type(self._equipment_containers, Site))
 
     def num_normal_feeders(self) -> int:
         """
         Returns The number of normal `Feeder`s associated with this `Equipment`
         """
-        return len(self._equipment_containers_of_type(Feeder))
+        return len(_of_type(self._equipment_containers, Feeder))
 
     def num_usage_points(self) -> int:
         """
@@ -132,11 +134,11 @@ class Equipment(PowerSystemResource):
         """
         return nlen(self._usage_points)
 
-    def num_current_feeders(self) -> int:
+    def num_current_containers(self) -> int:
         """
-        Returns The number of `Feeder`s associated with this `Equipment`
+        Returns The number of `EquipmentContainer`s associated with this `Equipment`
         """
-        return nlen(self._current_feeders)
+        return nlen(self._current_containers)
 
     def num_operational_restrictions(self) -> int:
         """
@@ -187,48 +189,62 @@ class Equipment(PowerSystemResource):
         self._equipment_containers = None
         return self
 
-    def get_current_feeder(self, mrid: str) -> Feeder:
+    @property
+    def current_containers(self) -> Generator[EquipmentContainer, None, None]:
         """
-        Get the `Feeder` for this `Equipment` identified by `mrid`
+        The `EquipmentContainer`s this equipment belongs to in the current state of the network.
+        """
+        return ngen(self._current_containers)
 
-        `mrid` The mRID of the required `Feeder`
-        Returns The `Feeder` with the specified `mrid` if it exists
+    def get_current_container(self, mrid: str) -> EquipmentContainer:
+        """
+        Get the `EquipmentContainer` for this `Equipment` in the current state of the network, identified by `mrid`
+
+        `mrid` The mRID of the required `EquipmentContainer`
+        Returns The `EquipmentContainer` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._current_feeders, mrid)
+        return get_by_mrid(self._current_containers, mrid)
 
-    def add_current_feeder(self, feeder: Feeder) -> Equipment:
+    def add_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
         """
-        Associate `feeder` with this `Equipment`.
+        Associate `equipment_container` with this `Equipment` in the current state of the network.
 
-        `feeder` The `Feeder` to associate with this `Equipment`.
+        `equipment_container` The `EquipmentContainer` to associate with this `Equipment`.
         Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if another `Feeder` with the same `mrid` already exists for this `Equipment`.
+        Raises `ValueError` if another `EquipmentContainer` with the same `mrid` already exists for this `Equipment`.
         """
-        if self._validate_reference(feeder, self.get_current_feeder, "A Feeder"):
+        if self._validate_reference(equipment_container, self.get_current_container, "A current EquipmentContainer"):
             return self
-        self._current_feeders = list() if self._current_feeders is None else self._current_feeders
-        self._current_feeders.append(feeder)
+        self._current_containers = list() if self._current_containers is None else self._current_containers
+        self._current_containers.append(equipment_container)
         return self
 
-    def remove_current_feeder(self, feeder: Feeder) -> Equipment:
+    def remove_current_container(self, equipment_container: EquipmentContainer) -> Equipment:
         """
-        Disassociate `feeder` from this `Equipment`
+        Disassociate `equipment_container` from this `Equipment` in the current state of the network.
 
-        `feeder` The `Feeder` to disassociate from this `Equipment`.
+        `equipment_container` The `EquipmentContainer` to disassociate from this `Equipment`.
         Returns A reference to this `Equipment` to allow fluent use.
-        Raises `ValueError` if `feeder` was not associated with this `Equipment`.
+        Raises `ValueError` if `equipment_container` was not associated with this `Equipment`.
         """
-        self._current_feeders = safe_remove(self._current_feeders, feeder)
+        self._current_containers = safe_remove(self._current_containers, equipment_container)
         return self
 
-    def clear_current_feeders(self) -> Equipment:
+    def clear_current_containers(self) -> Equipment:
         """
-        Clear all current `Feeder`s.
+        Clear all current `EquipmentContainer`s in the current state of the network.
         Returns A reference to this `Equipment` to allow fluent use.
         """
-        self._current_feeders = None
+        self._current_containers = None
         return self
+
+    @property
+    def usage_points(self) -> Generator[UsagePoint, None, None]:
+        """
+        The `UsagePoint`s for this equipment.
+        """
+        return ngen(self._usage_points)
 
     def get_usage_point(self, mrid: str) -> UsagePoint:
         """
@@ -273,6 +289,13 @@ class Equipment(PowerSystemResource):
         self._usage_points = None
         return self
 
+    @property
+    def operational_restrictions(self) -> Generator[OperationalRestriction, None, None]:
+        """
+        The `OperationalRestriction`s that this equipment is associated with.
+        """
+        return ngen(self._operational_restrictions)
+
     def get_operational_restriction(self, mrid: str) -> OperationalRestriction:
         """
         Get the `OperationalRestriction` for this `Equipment` identified by `mrid`
@@ -316,9 +339,9 @@ class Equipment(PowerSystemResource):
         self._operational_restrictions = None
         return self
 
-    def _equipment_containers_of_type(self, ectype: Type[TEquipmentContainer]) -> List[TEquipmentContainer]:
-        """Get the `EquipmentContainer`s for this `Equipment` of type `ectype`"""
-        if self._equipment_containers:
-            return [ec for ec in self._equipment_containers if isinstance(ec, ectype)]
-        else:
-            return []
+
+def _of_type(containers: Optional[List[EquipmentContainer]], ectype: Type[TEquipmentContainer]) -> List[TEquipmentContainer]:
+    if containers:
+        return [ec for ec in containers if isinstance(ec, ectype)]
+    else:
+        return []

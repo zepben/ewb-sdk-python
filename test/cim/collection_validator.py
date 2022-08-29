@@ -73,6 +73,10 @@ def validate_collection(create_it: Callable[[], T],
     add(it, other1)
     assert num(it) == 1
 
+    # Make sure adding an already-added item does not change the collection
+    add(it, other1)
+    assert num(it) == 1
+
     remove(it, other1)
     assert num(it) == 0
 

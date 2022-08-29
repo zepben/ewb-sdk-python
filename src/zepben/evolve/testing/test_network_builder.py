@@ -10,8 +10,8 @@ except ImportError:
 
 from typing import Optional, Callable, List, Union, Type
 
-from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, \
-    PowerTransformerEnd, PowerTransformer, set_phases, set_direction, AssignToFeeders
+from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
+    PowerTransformerEnd, PowerTransformer, set_phases, set_direction, assign_equipment_to_feeders, assign_equipment_to_lv_feeders
 
 
 def null_action(_):
@@ -325,6 +325,18 @@ class TestNetworkBuilder:
         self._create_feeder(self.network.get(head_mrid, ConductingEquipment), sequence_number)
         return self
 
+    def add_lv_feeder(self, head_mrid: str, sequence_number: Optional[int] = None) -> 'TestNetworkBuilder':
+        """
+        Create a new LV feeder with the specified terminal as the head terminal.
+
+        :param head_mrid: The mRID of the head `ConductingEquipment`.
+        :param sequence_number: The `Terminal` sequence number of the head terminal. Defaults to last terminal.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
+        self._create_lv_feeder(self.network.get(head_mrid, ConductingEquipment), sequence_number)
+        return self
+
     async def build(self, apply_directions_from_sources: bool = True, assign_feeders: bool = True) -> NetworkService:
         """
         Get the `NetworkService` after apply traced phasing and feeder directions.
@@ -342,7 +354,8 @@ class TestNetworkBuilder:
                     await set_direction().run_terminal(terminal)
 
         if assign_feeders and len(list(self.network.objects(Feeder))) != 0:
-            await AssignToFeeders().run(self.network)
+            await assign_equipment_to_feeders().run(self.network)
+            await assign_equipment_to_lv_feeders().run(self.network)
 
         return self.network
 
@@ -440,6 +453,18 @@ class TestNetworkBuilder:
 
         self.network.add(f)
         return f
+
+    def _create_lv_feeder(self, head_equipment: ConductingEquipment, sequence_number: Optional[int] = None) -> LvFeeder:
+        lvf = LvFeeder(
+            mrid=self._next_id("lvf"),
+            normal_head_terminal=head_equipment.get_terminal_by_sn(sequence_number if sequence_number else head_equipment.num_terminals())
+        )
+
+        lvf.add_equipment(head_equipment)
+        head_equipment.add_container(lvf)
+
+        self.network.add(lvf)
+        return lvf
 
     def _add_terminal(self, ce: ConductingEquipment, sn: int, nominal_phases: PhaseCode):
         terminal = Terminal(mrid=f"{ce.mrid}-t{sn}", phases=nominal_phases)
