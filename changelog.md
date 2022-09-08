@@ -37,7 +37,7 @@
 * None.
 
 ##### Fixes
-* None.
+* `PhaseCode.num_phases` now correctly returns the number of single phases in a phase code.
 
 ##### Notes
 * None.
