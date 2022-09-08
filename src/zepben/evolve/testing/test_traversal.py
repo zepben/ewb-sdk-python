@@ -12,7 +12,7 @@ T = TypeVar('T')
 __all__ = ["verify_stop_conditions", "step_on_when_run", "step_on_when_run_with_is_stopping"]
 
 
-async def verify_stop_conditions(traversal: Mock, *stop_condition_validation: Callable[[[T], Awaitable[bool]], Awaitable[None]]):
+async def verify_stop_conditions(traversal: Mock, *stop_condition_validation: Callable[[Callable[[T], Awaitable[bool]]], Awaitable[None]]):
     """
     Verify that stop conditions are registered, and they behave correctly.
 

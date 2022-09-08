@@ -64,7 +64,7 @@ class TestPhaseCode:
         assert SinglePhaseKind.A not in PhaseCode.XY, "XY should not contain A"
         assert SinglePhaseKind.B not in PhaseCode.XY, "XY should not contain B"
         assert SinglePhaseKind.C not in PhaseCode.XY, "XY should not contain C"
-        assert SinglePhaseKind.A not in PhaseCode.XY, "XY should not contain N"
+        assert SinglePhaseKind.N not in PhaseCode.XY, "XY should not contain N"
         assert SinglePhaseKind.X in PhaseCode.XY, "XY should contain X"
         assert SinglePhaseKind.Y in PhaseCode.XY, "XY should contain Y"
 
