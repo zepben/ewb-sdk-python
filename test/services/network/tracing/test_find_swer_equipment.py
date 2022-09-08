@@ -17,7 +17,7 @@ if v.major == 3 and v.minor < 8:
     # noinspection PyPackageRequirements
     # noinspection PyUnresolvedReferences
     # pylint: disable=import-error
-    from mock import create_autospec, patch, call
+    from mock import create_autospec, patch, call, Mock
     # pylint: enable=import-error
 else:
     from unittest.mock import create_autospec, patch, call, Mock
