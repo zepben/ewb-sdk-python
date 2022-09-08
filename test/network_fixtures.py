@@ -10,7 +10,7 @@ from pytest import fixture
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, TestNetworkBuilder, LvFeeder
+    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, TestNetworkBuilder, LvFeeder, AssignToLvFeeders
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
@@ -305,7 +305,10 @@ async def feeder_network():
     c2 = create_acls_for_connecting(network_service, "c2", PhaseCode.AB)
 
     sub = create_substation(network_service, "f", "f")
-    create_feeder(network_service, "f001", "f001", sub, fsp.get_terminal_by_sn(2))
+    fdr = create_feeder(network_service, "f001", "f001", sub, fsp.get_terminal_by_sn(2))
+    lvf = LvFeeder(mrid="lvf001", normal_head_terminal=tx.get_terminal_by_sn(2), normal_energizing_feeders=[fdr])
+    fdr.add_normal_energized_lv_feeder(lvf)
+    network_service.add(lvf)
 
     add_location(network_service, source, 1.0, 1.0)
     add_location(network_service, fcb, 1.0, 1.0)
@@ -322,6 +325,7 @@ async def feeder_network():
 
     await SetPhases().run(network_service)
     await AssignToFeeders().run(network_service)
+    await AssignToLvFeeders().run(network_service)
     return network_service
 
 
