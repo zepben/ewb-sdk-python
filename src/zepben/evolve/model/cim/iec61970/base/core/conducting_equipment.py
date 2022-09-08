@@ -8,15 +8,14 @@ from __future__ import annotations
 
 from typing import List, Optional, Generator, TYPE_CHECKING
 
+from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
+from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
+from zepben.evolve.util import get_by_mrid, require, ngen
+
 if TYPE_CHECKING:
     from zepben.evolve import Terminal
 
-from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
-from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
-
 __all__ = ['ConductingEquipment']
-
-from zepben.evolve.util import get_by_mrid, require, ngen
 
 
 class ConductingEquipment(Equipment):
@@ -31,8 +30,10 @@ class ConductingEquipment(Equipment):
     """
 
     base_voltage: Optional[BaseVoltage] = None
-    """`zepben.evolve.iec61970.base.core.base_voltage.BaseVoltage` of this `ConductingEquipment`. Use only when there is no voltage level container used and 
-    only one base voltage applies. For example, not used for transformers."""
+    """
+    `BaseVoltage` of this `ConductingEquipment`. Use only when there is no voltage level container used and only one base voltage applies. For example, not
+    used for transformers.
+    """
 
     _terminals: List[Terminal] = []
 
@@ -44,6 +45,7 @@ class ConductingEquipment(Equipment):
                     term.conducting_equipment = self
                 self.add_terminal(term)
 
+    # pylint: disable=unused-argument
     def get_base_voltage(self, terminal: Terminal = None):
         """
         Get the `BaseVoltage` of this `ConductingEquipment`.
@@ -53,6 +55,15 @@ class ConductingEquipment(Equipment):
         Returns thee BaseVoltage of this `ConductingEquipment` at `terminal`
         """
         return self.base_voltage
+
+    # pylint: enable=unused-argument
+
+    @property
+    def base_voltage_value(self) -> int:
+        """
+        :return: The value of the nominal voltage for the base voltage if there is one, otherwise 0.
+        """
+        return self.base_voltage.nominal_voltage if self.base_voltage and self.base_voltage.nominal_voltage else 0
 
     @property
     def terminals(self) -> Generator[Terminal, None, None]:

@@ -32,6 +32,7 @@
       are energizes by a HV/MV feeder listed in `mrids` or included via `INCLUDE_ENERGIZED_FEEDERS`.
 * Added the method `NetworkConsumerClient().get_equipment_for_containers`, which is similar to
   `NetworkConsumerClient().get_equipment_for_container` but acts on multiple containers.
+* Added `FindSwerEquipment` class which can be used for finding the SWER equipment in a `NetworkService` or `Feeder`.
 
 ##### Enhancements
 * None.

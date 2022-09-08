@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
-from zepben.evolve import PhaseInferrer
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_trace import new_connected_equipment_trace, \
     new_connected_equipment_breadth_trace, new_normal_connected_equipment_trace, new_current_connected_equipment_trace, \
     new_normal_limited_connected_equipment_trace, new_current_limited_connected_equipment_trace
@@ -19,6 +18,8 @@ from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import A
 from zepben.evolve.services.network.tracing.feeder.direction_status import normal_direction, current_direction
 from zepben.evolve.services.network.tracing.feeder.remove_direction import RemoveDirection
 from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
+from zepben.evolve.services.network.tracing.find_swer_equipment import FindSwerEquipment
+from zepben.evolve.services.network.tracing.phases.phase_inferrer import PhaseInferrer
 from zepben.evolve.services.network.tracing.phases.phase_trace import new_phase_trace, new_downstream_phase_trace, new_upstream_phase_trace
 from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
@@ -35,7 +36,8 @@ __all__ = ["create_basic_depth_trace", "create_basic_breadth_trace", "connected_
            "normal_connected_equipment_trace", "current_connected_equipment_trace", "normal_limited_connected_equipment_trace",
            "current_limited_connected_equipment_trace", "phase_trace", "normal_phase_trace", "current_phase_trace", "connectivity_trace",
            "connectivity_breadth_trace", "normal_connectivity_trace", "current_connectivity_trace", "normal_downstream_trace", "current_downstream_trace",
-           "set_phases", "remove_phases", "set_direction", "remove_direction", "assign_equipment_to_feeders", "assign_equipment_to_lv_feeders"]
+           "set_phases", "remove_phases", "set_direction", "remove_direction", "assign_equipment_to_feeders", "assign_equipment_to_lv_feeders",
+           "find_swer_equipment"]
 
 
 # --- Helper functions that create depth-first/breadth-first traversals ---
@@ -336,3 +338,10 @@ def assign_equipment_to_lv_feeders() -> AssignToLvFeeders:
 #     :return: A new `FindWithUsagePoints` instance.
 #     """
 #     return FindWithUsagePoints()
+
+
+def find_swer_equipment() -> FindSwerEquipment:
+    """
+    Returns an instance of `FindSwerEquipment` convenience class for finding swer equipment on a feeders or network.
+    """
+    return FindSwerEquipment()

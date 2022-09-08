@@ -127,6 +127,7 @@ from zepben.evolve.services.network.tracing.phases.set_phases import *
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import *
 from zepben.evolve.services.network.tracing.phases.remove_phases import *
 from zepben.evolve.services.network.tracing.find import *
+from zepben.evolve.services.network.tracing.find_swer_equipment import *
 from zepben.evolve.services.network.tracing.tracing import *
 from zepben.evolve.services.network.tracing import tracing
 
@@ -228,3 +229,4 @@ from zepben.evolve.database.sqlite.readers.network_service_reader import *
 from zepben.evolve.database.sqlite.database_reader import *
 
 from zepben.evolve.testing.test_network_builder import *
+from zepben.evolve.testing.test_traversal import *
