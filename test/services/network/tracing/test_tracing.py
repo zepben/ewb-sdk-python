@@ -8,7 +8,7 @@ from typing import Type, Callable, TypeVar
 import pytest
 
 from zepben.evolve import BasicTraversal, SetPhases, RemovePhases, AssignToFeeders, Breaker, Terminal, PhaseCode, ConductingEquipment, \
-    connected_equipment_trace, SetDirection, RemoveDirection, ConductingEquipmentStep, AssignToLvFeeders
+    connected_equipment_trace, SetDirection, RemoveDirection, ConductingEquipmentStep, AssignToLvFeeders, FindSwerEquipment, NetworkService
 from zepben.evolve.services.network.tracing import tracing
 from zepben.evolve.services.network.tracing.phases import phase_step
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
@@ -18,7 +18,7 @@ T = TypeVar("T")
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('phase_swap_loop_network', [(False,)], indirect=True)
-async def test_basic_asset_trace(phase_swap_loop_network):
+async def test_basic_asset_trace(phase_swap_loop_network: NetworkService):
     """
     Just trace all connected assets and make sure we actually visit every item.
     """
@@ -62,6 +62,7 @@ def test_suppliers():
 
     # TODO
     # _validate_supplier(tracing.find_with_usage_points, FindWithUsagePoints)
+    _validate_supplier(tracing.find_swer_equipment, FindSwerEquipment)
 
 
 @pytest.mark.asyncio

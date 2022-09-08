@@ -101,6 +101,7 @@ class PhaseCode(Enum):
     YN = (21, [SinglePhaseKind.Y, SinglePhaseKind.N])
     """Unknown non-neutral phase plus neutral"""
 
+    # pylint: disable=invalid-name
     s1 = (22, [SinglePhaseKind.s1])
     """Secondary phase 1"""
 
@@ -118,21 +119,29 @@ class PhaseCode(Enum):
 
     s2N = (27, [SinglePhaseKind.s2, SinglePhaseKind.N])
     """Secondary phase 2 plus neutral"""
+    # pylint: enable=invalid-name
 
     @property
     def short_name(self) -> str:
+        """Get the name of this `PhaseCode` without the class qualifier"""
         return str(self)[10:]
 
     @property
     def single_phases(self) -> List[SinglePhaseKind]:
+        """Get the list of `SinglePhaseKind` that make up this `PhaseCode`"""
         return self.value[1]
 
     @property
     def num_phases(self) -> int:
-        return len(self.value)
+        """
+        Get the number of `SinglePhaseKind` that make up this `PhaseCode`. This is the same as the length of the `single_phases` in all cases except for NONE,
+        where the number of phases will be 0.
+        """
+        return len(self.value[1]) if self != PhaseCode.NONE else 0
 
     @property
     def without_neutral(self) -> 'PhaseCode':
+        """Get the equivalent `PhaseCode` without the `N` phase."""
         if SinglePhaseKind.N not in self:
             return self
         else:
@@ -146,6 +155,9 @@ class PhaseCode(Enum):
 
 
 class PhaseCodeIter:
+    """
+    An iterator that can be used to iterator over the `SinglePhaseKind` of a `PhaseCode`
+    """
 
     def __init__(self, single_phases: List[SinglePhaseKind]):
         self._index = -1
@@ -162,8 +174,12 @@ class PhaseCodeIter:
 
 
 def phase_code_from_single_phases(single_phases: Set[SinglePhaseKind]) -> PhaseCode:
+    """Get the `PhaseCode` that is made up of the set of `SinglePhaseKind`, or `PhaseCode.NONE` if it is not valid."""
     return _PHASE_CODE_BY_PHASES.get(frozenset(single_phases), PhaseCode.NONE)
 
 
 _PHASE_CODE_VALUES = list(PhaseCode.__members__.values())
+
+# The IDE is detecting `it` as a `SinglePhaseKind` rather than a `PhaseCode`
+# noinspection PyUnresolvedReferences
 _PHASE_CODE_BY_PHASES = {frozenset(it.single_phases): it for it in PhaseCode}

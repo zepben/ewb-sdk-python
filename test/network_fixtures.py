@@ -452,7 +452,7 @@ def feeder_start_point_to_open_point_network(request):
 
 
 @fixture()
-def phase_swap_loop_network(request):
+def phase_swap_loop_network(request) -> NetworkService:
     """
     n0 ac0        ac1     n1   ac2        ac3   n2
     *==ABCN==+====ABCN====*====ABCN====+==ABCN==*
