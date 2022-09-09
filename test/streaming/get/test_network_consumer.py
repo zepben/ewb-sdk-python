@@ -206,8 +206,8 @@ class TestNetworkConsumer:
         async def client_test():
             mor = (await self.client.get_equipment_container(feeder_mrid, Feeder)).throw_on_error().value
 
-            assert self.service.len_of() == 22
-            assert len(mor.objects) == 21  # we do not include the substation in the results
+            assert self.service.len_of() == 21
+            assert len(mor.objects) == 20  # we do not include the substation in the results
             assert feeder_mrid in mor.objects
             for io in mor.objects.values():
                 assert self.service.get(io.mrid) == io
@@ -240,7 +240,7 @@ class TestNetworkConsumer:
         await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network)))])
 
     @pytest.mark.asyncio
-    async def test_get_equipment_container_with_linked_container_params(self, feeder_network: NetworkService):
+    async def test_get_equipment_container_sends_linked_container_params(self, feeder_network: NetworkService):
         feeder_mrid = "f001"
 
         async def client_test():
