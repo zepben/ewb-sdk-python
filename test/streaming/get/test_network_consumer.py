@@ -612,8 +612,8 @@ def _create_object_responses(ns: NetworkService, mrids: Optional[Iterable[str]] 
 def _create_container_responses(
     ns: NetworkService,
     mrids: Optional[Iterable[str]] = None,
-    expected_include_energizing_containers=None,
-    expected_include_energized_containers=None
+    expected_include_energizing_containers: Optional[int] = None,
+    expected_include_energized_containers: Optional[int] = None
 ) \
     -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
