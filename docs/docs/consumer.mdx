@@ -34,7 +34,7 @@ The library provides four functions, `connect_insecure()`, `connect_tls()`, `con
 The async version is to be used with Python asyncio.
 
 ```python
-from zepben.evolve import connect_insecure, connect_tls, connect_with_password, connect_with_secret, Feeder, SyncNetworkConsumerClient, NetworkConsumerClient
+from zepben.evolve import connect_insecure, Feeder, SyncNetworkConsumerClient, NetworkConsumerClient
 
 # Synchronous
 channel = connect_insecure(host="localhost", rpc_port=50051)
@@ -57,6 +57,8 @@ To connect to a HTTPS server with no auth all that's needed is the CA for the se
 automatically and the following should suffice:
 
 ```python
+from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
+
 with connect_tls(host="ewb.zepben.com", rpc_port=443) as channel:
     client = SyncNetworkConsumerClient(channel)
     result = client.get_equipment_container("xxx", Feeder)
@@ -65,17 +67,25 @@ with connect_tls(host="ewb.zepben.com", rpc_port=443) as channel:
 
 To specify a CA bundle pass the ca parameter:
 ```python
+from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
+
 with open('path/to/ca/bundle', 'rb') as f:
     ca = f.read()
 
     with connect_tls(host="ewb.zepben.com", rpc_port=443, ca=ca) as channel:
         client = SyncNetworkConsumerClient(channel)
+
         result = client.get_equipment_container("xxx", Feeder)
+        # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
+        # result = client.get_equipment_container("xxx", Feeder, include_energized_containers: INCLUDE_ENERGIZING_LV_FEEDERS)
+
         client.service.get('...')
 ```
 
 And if client authentication is required by the server, additionally pass a key and certificate signed by the servers trusted CA:
 ```python
+from zepben.evolve import connect_with_secret, SyncNetworkConsumerClient, Feeder
+
 with open(args.key, 'rb') as f:
     key = f.read()
 with open(args.ca, 'rb') as f:
@@ -85,7 +95,11 @@ with open(args.cert, 'rb') as f:
 
 with connect_with_secret(host="ewb.zepben.com", rpc_port=443, ca=ca, key=key, cert=cert) as channel:
     client = SyncNetworkConsumerClient(channel)
+
     result = client.get_equipment_container("xxx", Feeder)
+    # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
+    # result = client.get_equipment_container("xxx", Feeder, include_energized_containers: INCLUDE_ENERGIZING_LV_FEEDERS)
+
     client.service.get('...')
 ```
 
@@ -94,7 +108,7 @@ with connect_with_secret(host="ewb.zepben.com", rpc_port=443, ca=ca, key=key, ce
 Password Credentials and Client credentials OAuth2 flows are supported through the username/password and client_id/client_secret parameters:
 
 ```python
-from zepben.evolve import connect_with_password, connect_with_secret, NetworkService, SyncNetworkConsumerClient
+from zepben.evolve import connect_with_password, connect_with_secret, SyncNetworkConsumerClient
 
 # Password credentials configuration - client_secret optional.
 with connect_with_password(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
