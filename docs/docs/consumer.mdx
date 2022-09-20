@@ -68,6 +68,7 @@ with connect_tls(host="ewb.zepben.com", rpc_port=443) as channel:
 To specify a CA bundle pass the ca parameter:
 ```python
 from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
+from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
 
 with open('path/to/ca/bundle', 'rb') as f:
     ca = f.read()
@@ -77,7 +78,7 @@ with open('path/to/ca/bundle', 'rb') as f:
 
         result = client.get_equipment_container("xxx", Feeder)
         # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
-        # result = client.get_equipment_container("xxx", Feeder, include_energized_containers: INCLUDE_ENERGIZING_LV_FEEDERS)
+        # result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
 
         client.service.get('...')
 ```
@@ -85,6 +86,7 @@ with open('path/to/ca/bundle', 'rb') as f:
 And if client authentication is required by the server, additionally pass a key and certificate signed by the servers trusted CA:
 ```python
 from zepben.evolve import connect_with_secret, SyncNetworkConsumerClient, Feeder
+from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
 
 with open(args.key, 'rb') as f:
     key = f.read()
@@ -98,7 +100,7 @@ with connect_with_secret(host="ewb.zepben.com", rpc_port=443, ca=ca, key=key, ce
 
     result = client.get_equipment_container("xxx", Feeder)
     # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
-    # result = client.get_equipment_container("xxx", Feeder, include_energized_containers: INCLUDE_ENERGIZING_LV_FEEDERS)
+    # result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
 
     client.service.get('...')
 ```
