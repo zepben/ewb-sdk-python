@@ -614,8 +614,7 @@ def _create_container_responses(
     mrids: Optional[Iterable[str]] = None,
     expected_include_energizing_containers: Optional[int] = None,
     expected_include_energized_containers: Optional[int] = None
-) \
-    -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
+) -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForContainersRequest) -> Generator[GetEquipmentForContainersResponse, None, None]:
