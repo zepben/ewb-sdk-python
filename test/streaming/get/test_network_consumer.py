@@ -16,7 +16,7 @@ from hypothesis import given, settings, Phase
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
     Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
-    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException
+    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetCurrentEquipmentForFeederRequest, \
@@ -238,6 +238,34 @@ class TestNetworkConsumer:
             assert str(response.thrown) == f"Requested mrid {feeder_mrid} was not a Circuit, was Feeder"
 
         await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network)))])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_container_sends_linked_container_params(self, feeder_network: NetworkService):
+        feeder_mrid = "f001"
+
+        async def client_test():
+            await self.client.get_equipment_container(
+                feeder_mrid,
+                Feeder,
+                IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
+                IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
+            )
+
+        object_responses = _create_object_responses(feeder_network)
+
+        await self.mock_server.validate(client_test,
+                                        [
+                                            UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network))),
+                                            StreamGrpc('getEquipmentForContainers', [
+                                                _create_container_responses(
+                                                    feeder_network,
+                                                    expected_include_energizing_containers=IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
+                                                    expected_include_energized_containers=IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
+                                                )
+                                            ]),
+                                            StreamGrpc('getIdentifiedObjects', [object_responses, object_responses])
+                                        ])
+
 
     @pytest.mark.asyncio
     async def test_get_equipment_for_container(self, feeder_network: NetworkService):
@@ -471,7 +499,7 @@ def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
     elif isinstance(obj, Circuit):
         nio = NetworkIdentifiedObject(circuit=obj.to_pb())
     elif isinstance(obj, LvFeeder):
-        nio = NetworkIdentifiedObject(lvfeeder=obj.to_pb())
+        nio = NetworkIdentifiedObject(lvFeeder=obj.to_pb())
     else:
         raise Exception(f"Missing class in create response - you should implement it: {str(obj)}")
     return nio
@@ -581,11 +609,20 @@ def _create_object_responses(ns: NetworkService, mrids: Optional[Iterable[str]] 
     return responses
 
 
-def _create_container_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
-    -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
+def _create_container_responses(
+    ns: NetworkService,
+    mrids: Optional[Iterable[str]] = None,
+    expected_include_energizing_containers: Optional[int] = None,
+    expected_include_energized_containers: Optional[int] = None
+) -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForContainersRequest) -> Generator[GetEquipmentForContainersResponse, None, None]:
+        if expected_include_energizing_containers is not None:
+            assert request.includeEnergizingContainers == expected_include_energizing_containers
+        if expected_include_energized_containers is not None:
+            assert request.includeEnergizedContainers == expected_include_energized_containers
+
         for mrid in request.mrids:
             container = valid[mrid]
             if container:

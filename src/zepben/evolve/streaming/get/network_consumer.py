@@ -90,12 +90,14 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Parameters
             - `container` - The :class:`EquipmentContainer` (or its mRID) to fetch equipment for.
+            - `include_energizing_containers` - The level of energizing containers to include equipment from.
+            - `include_energized_containers` - The level of energized containers to include equipment from.
 
         Returns a :class:`GrpcResult` with a result of one of the following:
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
               found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
               `BaseService.add`).
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`.
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
@@ -114,12 +116,14 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Parameters
             - `containers` - The mRIDs of :class:`EquipmentContainer`'s to fetch equipment for.
+            - `include_energizing_containers` - The level of energizing containers to include equipment from.
+            - `include_energized_containers` - The level of energized containers to include equipment from.
 
         Returns a :class:`GrpcResult` with a result of one of the following:
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
               found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
               `BaseService.add`).
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`.
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
@@ -139,7 +143,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
               found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
               `BaseService.add`).
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`.
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
@@ -159,7 +163,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
               found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
               `BaseService.add`).
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`.
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
@@ -179,7 +183,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
               found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
               `BaseService.add`).
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`.
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
@@ -216,27 +220,33 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         warnings.warn('`get_feeder` is deprecated, prefer the more generic `get_equipment_container`', DeprecationWarning)
         return await self._get_equipment_container(mrid, Feeder)
 
-    async def get_equipment_container(self, mrid: str, expected_class: type = EquipmentContainer) -> GrpcResult[MultiObjectResult]:
+    async def get_equipment_container(
+        self,
+        mrid: str,
+        expected_class: type = EquipmentContainer,
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+    ) -> GrpcResult[MultiObjectResult]:
         """
-        /***
-         * Retrieve the equipment container network for the specified `mrid` and store the results in the `service`.
-         *
-         * This is a convenience method that will fetch the container object and all of the equipment contained, along with all subsequent
-         * references. This should entail a complete connectivity model for the container, however not the connectivity between multiple containers.
-         *
+        Retrieve the equipment container network for the specified `mrid` and store the results in the `service`.
+
+        This is a convenience method that will fetch the container object and all of the equipment contained, along with all subsequent
+        references. This should entail a complete connectivity model for the container, however not the connectivity between multiple containers.
+
         Parameters
-            - `service` - The :class:`NetworkService` to store fetched objects in.
             - `mrid` - The mRID of the :class:`EquipmentContainer` to fetch.
-         * @param expected_class The expected type of the fetched container.
-         *
-         * Returns a :class:`GrpcResult` of a :class:`MultiObjectResult`. If successful, containing a map keyed by mRID of all the objects retrieved. If an
-           item couldn't be added to `service`, its mRID will be present in `MultiObjectResult.failed`.
-         *
-         * In addition to normal gRPC errors, you may also receive an unsuccessful :class:`GrpcResult` with the following errors:
-         * - :class:`ValueError` if the requested object was not found or was of the wrong type.
-         */
+            - `expected_class` - The expected type of the fetched container.
+            - `include_energizing_containers` - The level of energizing containers to include equipment from.
+            - `include_energized_containers` - The level of energized containers to include equipment from.
+
+        Returns a :class:`GrpcResult` of a :class:`MultiObjectResult`. If successful, containing a map keyed by mRID of all the objects retrieved. If an
+        item couldn't be added to `service`, its mRID will be present in `MultiObjectResult.failed`.
+
+        In addition to normal gRPC errors, you may also receive an unsuccessful :class:`GrpcResult` with the following errors:
+            - :class:`ValueError` if the requested object was not found or was of the wrong type.
+
         """
-        return await self._get_equipment_container(mrid, expected_class)
+        return await self._get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers)
 
     async def get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
         """
@@ -252,7 +262,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
               found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
               `BaseService.add`).
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`.
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
@@ -271,7 +281,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
               found, or couldn't be added to `service`, it will be excluded from the map and its mRID will be present in `MultiObjectResult.failed` (see
               `BaseService.add`).
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`.
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`.
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
@@ -319,9 +329,15 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             return GrpcResult(self.__network_hierarchy)
         return await self.try_rpc(lambda: self._handle_network_hierarchy())
 
-    async def _get_equipment_container(self, mrid: str, expected_class: type = EquipmentContainer) -> GrpcResult[MultiObjectResult]:
+    async def _get_equipment_container(
+        self,
+        mrid: str,
+        expected_class: type = EquipmentContainer,
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+    ) -> GrpcResult[MultiObjectResult]:
         async def get_additional(it: EquipmentContainer, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
-            result = await self._get_equipment_for_container(it)
+            result = await self._get_equipment_for_container(it, include_energizing_containers, include_energized_containers)
 
             if result.was_failure:
                 # noinspection PyArgumentList
@@ -602,8 +618,16 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         warnings.warn('`get_feeder` is deprecated, prefer the more generic `get_equipment_container`', DeprecationWarning)
         return get_event_loop().run_until_complete(super().get_equipment_container(mrid, Feeder))
 
-    def get_equipment_container(self, mrid: str, expected_class: type = EquipmentContainer) -> GrpcResult[MultiObjectResult]:
-        return get_event_loop().run_until_complete(super().get_equipment_container(mrid, expected_class))
+    def get_equipment_container(
+        self,
+        mrid: str,
+        expected_class: type = EquipmentContainer,
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+    ) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(
+            super().get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers)
+        )
 
     def get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
         # noinspection PyArgumentList
