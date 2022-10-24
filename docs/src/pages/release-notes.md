@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.34.0](#v0340)| `24 October 2022` |
 |[0.33.0](#v0330)| `24 October 2022` |
 |[0.32.0](#v0320)| `29 August 2022` |
 | [0.29.0](#v0290) | `14 June 2022`      |
@@ -82,6 +83,13 @@ a 1.0.0 release.
 
 ### Notes
 * None.
+
+---
+
+## [0.34.0]
+
+This is a re-release to ensure we're using a released version of zepben.protobuf.
+There is no notable difference to 0.33.0.
 
 ---
 
