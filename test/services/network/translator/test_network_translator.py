@@ -185,3 +185,16 @@ def test_updates_existing_name_type():
 
     assert cim is nt
     assert cim.description == pb.description
+
+
+def test_power_transformer_end_order():
+    e1 = PowerTransformerEnd(mrid="e1", end_number=1)
+    e2 = PowerTransformerEnd(mrid="e2", end_number=2)
+    tx = PowerTransformer(mrid="tx", power_transformer_ends=[e1, e2])
+
+    ns = NetworkService()
+    ns.add_from_pb(tx.to_pb())
+    ns.add_from_pb(e2.to_pb())
+    ns.add_from_pb(e1.to_pb())
+
+    assert [end.mrid for end in ns["tx"].ends] == ["e1", "e2"]

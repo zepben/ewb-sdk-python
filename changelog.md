@@ -39,6 +39,7 @@
 
 ### Fixes
 * `PhaseCode.num_phases` now correctly returns the number of single phases in a phase code.
+* Fixed issue where `PowerTransformer().ends` was sometimes incorrectly ordered after Protobuf-to-CIM translation.
 
 ### Notes
 * None.
