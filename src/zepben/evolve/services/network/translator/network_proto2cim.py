@@ -1148,9 +1148,10 @@ def power_transformer_end_to_cim(pb: PBPowerTransformerEnd, network_service: Net
         phase_angle_clock=int_or_none(pb.phaseAngleClock)
     )
 
-    network_service.resolve_or_defer_reference(resolver.power_transformer(cim), pb.powerTransformerMRID)
-
+    # Set end number before associating with power transformer to prevent incorrectly sorted cim.power_transformer.ends
     transformer_end_to_cim(pb.te, cim, network_service)
+
+    network_service.resolve_or_defer_reference(resolver.power_transformer(cim), pb.powerTransformerMRID)
     return cim if network_service.add(cim) else None
 
 

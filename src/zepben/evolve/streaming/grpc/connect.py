@@ -103,7 +103,6 @@ def connect_with_secret(client_id: str, client_secret: str, host: str = "localho
     token_fetcher = None
     errors = None
     if conf_path:
-        # TODO EWB-1417 pass through CA (extract from kwargs) for auth conf verification
         token_fetcher = create_token_fetcher(host, port=kwargs.get("port", 443), path=conf_path)
     else:
         try:
