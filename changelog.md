@@ -1,6 +1,6 @@
-### v0.33.0
+## [0.33.0]
 
-##### Breaking Changes
+### Breaking Changes
 * Renamed the following classes to be consistent with the JVM implementation:
   * `Traversal` to `BasicTraversal`
   * `BaseTraversal` to `Traversal`
@@ -14,7 +14,7 @@
 * In the `services.network.tracing.tracing` module, renamed `assign_equipment_container_to_feeders` to `assign_equipment_to_feeders`.
 * Database versions prior to v43 are no longer supported.
 
-##### New Features
+### New Features
 
 * Added `LvFeeder`, a branch of LV network starting at a distribution substation and continuing until the end of the LV network.
 * Added the following optional arguments to `NetworkConsumerClient().get_equipment(_for)_container(s)`:
@@ -34,11 +34,11 @@
   `NetworkConsumerClient().get_equipment_for_container` but acts on multiple containers.
 * Added `FindSwerEquipment` class which can be used for finding the SWER equipment in a `NetworkService` or `Feeder`.
 
-##### Enhancements
+### Enhancements
 * None.
 
-##### Fixes
+### Fixes
 * `PhaseCode.num_phases` now correctly returns the number of single phases in a phase code.
 
-##### Notes
+### Notes
 * None.
