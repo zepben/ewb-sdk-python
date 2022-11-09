@@ -1,5 +1,3 @@
-
-
 #  Copyright 2022 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
@@ -12,6 +10,10 @@ __all__ = ["TransformerConstructionKind"]
 
 
 class TransformerConstructionKind(Enum):
+    """
+    Kind of transformer construction.
+    """
+
     unknown = 0
     """"""
 
@@ -63,5 +65,3 @@ class TransformerConstructionKind(Enum):
     @property
     def short_name(self):
         return str(self)[28:]
-
-print()
