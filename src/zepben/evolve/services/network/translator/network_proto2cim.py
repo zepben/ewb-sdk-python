@@ -205,7 +205,8 @@ __all__ = [
     "per_length_line_parameter_to_cim", "per_length_impedance_to_cim", "per_length_sequence_impedance_to_cim", "power_electronics_connection_to_cim",
     "power_electronics_connection_phase_to_cim", "power_transformer_to_cim", "power_transformer_end_to_cim", "transformer_star_impedance_to_cim",
     "protected_switch_to_cim", "ratio_tap_changer_to_cim", "recloser_to_cim", "regulating_cond_eq_to_cim", "shunt_compensator_to_cim", "switch_to_cim",
-    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim"
+    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim", "current_transformer_info_to_cim",
+    "potential_transformer_info_to_cim", "current_transformer_to_cim", "potential_transformer_to_cim"
 ]
 
 
@@ -487,8 +488,9 @@ def town_detail_to_cim(pb: PBTownDetail) -> Optional[TownDetail]:
 
 PBLocation.to_cim = location_to_cim
 PBPositionPoint.to_cim = position_point_to_cim
-PBTownDetail.to_cim = town_detail_to_cim
 PBStreetAddress.to_cim = street_address_to_cim
+PBStreetDetail.to_cim = street_detail_to_cim
+PBTownDetail.to_cim = town_detail_to_cim
 
 
 #####################################
@@ -540,6 +542,9 @@ PBPotentialTransformerInfo.to_cim = potential_transformer_info_to_cim
 
 def ratio_to_cim(pb: PBRatio) -> Ratio:
     return Ratio(pb.numerator, pb.denominator)
+
+
+PBRatio.to_cim = ratio_to_cim
 
 
 #####################
@@ -637,7 +642,10 @@ def sensor_to_cim(pb: PBSensor, cim: Sensor, network_service: NetworkService):
 
 
 PBAuxiliaryEquipment.to_cim = auxiliary_equipment_to_cim
+PBCurrentTransformer.to_cim = current_transformer_to_cim
 PBFaultIndicator.to_cim = fault_indicator_to_cim
+PBPotentialTransformer.to_cim = potential_transformer_to_cim
+PBSensor.to_cim = sensor_to_cim
 
 
 ######################

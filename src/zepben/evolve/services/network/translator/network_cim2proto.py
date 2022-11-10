@@ -199,6 +199,7 @@ __all__ = [
     "per_length_sequence_impedance_to_pb", "power_electronics_connection_to_pb", "power_electronics_connection_phase_to_pb", "power_transformer_to_pb",
     "power_transformer_end_to_pb", "protected_switch_to_pb", "ratio_tap_changer_to_pb", "recloser_to_pb", "regulating_cond_eq_to_pb", "shunt_compensator_to_pb",
     "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb", "circuit_to_pb", "loop_to_pb", "lv_feeder_to_pb", "transformer_star_impedance_to_pb",
+    "current_transformer_info_to_pb", "potential_transformer_info_to_pb", "current_transformer_to_pb", "potential_transformer_to_pb"
 ]
 
 
@@ -440,6 +441,7 @@ def town_detail_to_pb(cim: TownDetail) -> PBTownDetail:
 Location.to_pb = location_to_pb
 PositionPoint.to_pb = position_point_to_pb
 StreetAddress.to_pb = street_address_to_pb
+StreetDetail.to_pb = street_detail_to_pb
 TownDetail.to_pb = town_detail_to_pb
 
 
@@ -487,6 +489,9 @@ PotentialTransformerInfo.to_pb = potential_transformer_info_to_pb
 
 def ratio_to_pb(cim: Ratio) -> PBRatio:
     return PBRatio(denominator=cim.denominator, numerator=cim.numerator)
+
+
+Ratio.to_pb = ratio_to_pb
 
 
 #####################
