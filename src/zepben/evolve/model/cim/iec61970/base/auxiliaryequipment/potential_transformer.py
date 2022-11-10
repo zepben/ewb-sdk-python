@@ -5,11 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional, TYPE_CHECKING
 
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.potential_transformer_kind import PotentialTransformerKind
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
-    from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.potential_transformer_kind import PotentialTransformerKind
 
 __all__ = ["PotentialTransformer"]
 
@@ -21,7 +21,7 @@ class PotentialTransformer(Sensor):
     sometimes auxiliary substation supply. A typical secondary voltage rating would be 120V.
     """
 
-    type: Optional[PotentialTransformerKind] = None
+    type: PotentialTransformerKind = PotentialTransformerKind.UNKNOWN
     """Potential transformer construction type."""
 
     @property

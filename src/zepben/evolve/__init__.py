@@ -91,6 +91,7 @@ from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transform
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import *
+from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import *
 from zepben.evolve.model.cim.iec61968.metering.metering import *
 from zepben.evolve.model.cim.iec61968.operations.operational_restriction import *
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *

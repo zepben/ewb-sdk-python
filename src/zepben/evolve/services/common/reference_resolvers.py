@@ -25,9 +25,13 @@ from zepben.evolve.model.cim.iec61968.customers.customer import Customer
 from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure
 from zepben.evolve.model.cim.iec61968.customers.tariff import Tariff
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
 from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, UsagePoint
 from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.current_transformer import CurrentTransformer
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.potential_transformer import PotentialTransformer
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
@@ -71,7 +75,7 @@ __all__ = [
     "tti_to_tei_resolver", "tei_to_tsi_resolver", "tsi_to_tei_resolver", "te_to_tsi_resolver", "pti_to_tti_resolver", "peu_to_pec_resolver",
     "pec_to_peu_resolver", "pecphase_to_pec_resolver", "pec_to_pecphase_resolver", "tei_to_ee_nlt_resolver", "tei_to_ee_sct_resolver", "tei_to_ge_sct_resolver",
     "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver", "shunt_compensator_to_shunt_compensator_info_resolver", "lvfeeder_to_nht_resolver",
-    "lvfeeder_to_nef_resolver"
+    "lvfeeder_to_nef_resolver", "at_to_ati_resolver", "vt_to_vti_resolver"
 ]
 
 
@@ -284,3 +288,6 @@ tei_to_ee_sct_resolver = ReferenceResolver(TransformerEndInfo, ShortCircuitTest,
 tei_to_ge_sct_resolver = ReferenceResolver(TransformerEndInfo, ShortCircuitTest, lambda t, r: setattr(t, 'grounded_end_short_circuit_tests', r))
 tei_to_oe_oct_resolver = ReferenceResolver(TransformerEndInfo, OpenCircuitTest, lambda t, r: setattr(t, 'open_end_open_circuit_tests', r))
 tei_to_ee_oct_resolver = ReferenceResolver(TransformerEndInfo, OpenCircuitTest, lambda t, r: setattr(t, 'energised_end_open_circuit_tests', r))
+
+at_to_ati_resolver = ReferenceResolver(CurrentTransformer, CurrentTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
+vt_to_vti_resolver = ReferenceResolver(PotentialTransformer, PotentialTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
