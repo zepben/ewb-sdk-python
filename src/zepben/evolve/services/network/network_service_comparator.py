@@ -14,7 +14,7 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, \
     PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
     Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
-    Switch, ShuntCompensatorInfo, LvFeeder
+    Switch, ShuntCompensatorInfo, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
@@ -217,6 +217,46 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_identified_object(diff)
 
+    #####################################
+    # IEC61968 ineIEC61968 InfAssetInfo #
+    #####################################
+
+    def _compare_current_transformer_info(self, source: CurrentTransformerInfo, target: CurrentTransformerInfo) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(
+            diff,
+            CurrentTransformerInfo.accuracy_class,
+            CurrentTransformerInfo.accuracy_limit,
+            CurrentTransformerInfo.core_count,
+            CurrentTransformerInfo.ct_class,
+            CurrentTransformerInfo.knee_point_voltage,
+            CurrentTransformerInfo.max_ratio,
+            CurrentTransformerInfo.nominal_ratio,
+            CurrentTransformerInfo.primary_ratio,
+            CurrentTransformerInfo.rated_current,
+            CurrentTransformerInfo.secondary_fls_rating,
+            CurrentTransformerInfo.secondary_ratio,
+            CurrentTransformerInfo.usage
+        )
+
+        return self._compare_asset_info(diff)
+
+    def _compare_potential_transformer_info(self, source: PotentialTransformerInfo, target: PotentialTransformerInfo) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(
+            diff,
+            PotentialTransformerInfo.accuracy_class,
+            PotentialTransformerInfo.nominal_ratio,
+            PotentialTransformerInfo.primary_ratio,
+            PotentialTransformerInfo.pt_class,
+            PotentialTransformerInfo.rated_voltage,
+            PotentialTransformerInfo.secondary_ratio
+        )
+
+        return self._compare_asset_info(diff)
+
     #####################
     # IEC61968 METERING #
     #####################
@@ -265,8 +305,25 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_equipment(diff)
 
+    def _compare_current_transformer(self, source: CurrentTransformer, target: CurrentTransformer) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, CurrentTransformer.core_burden)
+
+        return self._compare_sensor(diff)
+
     def _compare_fault_indicator(self, source: FaultIndicator, target: FaultIndicator) -> ObjectDifference:
         return self._compare_auxiliary_equipment(ObjectDifference(source, target))
+
+    def _compare_potential_transformer(self, source: PotentialTransformer, target: PotentialTransformer) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, PotentialTransformer.type)
+
+        return self._compare_sensor(diff)
+
+    def _compare_sensor(self, diff: ObjectDifference) -> ObjectDifference:
+        return self._compare_auxiliary_equipment(diff)
 
     ######################
     # IEC61970 BASE CORE #

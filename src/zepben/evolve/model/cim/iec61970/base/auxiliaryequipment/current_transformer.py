@@ -10,7 +10,7 @@ from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sens
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 
-__all__ = ["CurrentTransformerInfo"]
+__all__ = ["CurrentTransformer"]
 
 
 class CurrentTransformer(Sensor):

@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
     from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.potential_transformer_kind import PotentialTransformerKind
 
-__all__ = ["PotentialTransformerInfo"]
+__all__ = ["PotentialTransformer"]
 
 
 class PotentialTransformer(Sensor):
