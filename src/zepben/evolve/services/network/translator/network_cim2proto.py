@@ -542,16 +542,16 @@ OperationalRestriction.to_pb = operational_restriction_to_pb
 # IEC61970 BASE AUXILIARY EQUIPMENT #
 #####################################
 
-def auxiliary_equipment_to_pb(cim: AuxiliaryEquipment) -> PBAuxiliaryEquipment:
+def auxiliary_equipment_to_pb(cim: AuxiliaryEquipment, include_asset_info: bool = False) -> PBAuxiliaryEquipment:
     return PBAuxiliaryEquipment(
-        eq=equipment_to_pb(cim),
+        eq=equipment_to_pb(cim, include_asset_info),
         terminalMRID=mrid_or_empty(cim.terminal)
     )
 
 
 def current_transformer_to_pb(cim: CurrentTransformer) -> PBCurrentTransformer:
-    return PBCurrentTransformerInfo(
-        sn=sensor_to_pb(cim),
+    return PBCurrentTransformer(
+        sn=sensor_to_pb(cim, True),
         coreBurden=from_nullable_int(cim.core_burden)
     )
 
@@ -562,13 +562,13 @@ def fault_indicator_to_pb(cim: FaultIndicator) -> PBFaultIndicator:
 
 def potential_transformer_to_pb(cim: PotentialTransformer) -> PBPotentialTransformer:
     return PBPotentialTransformer(
-        sn=sensor_to_pb(cim),
+        sn=sensor_to_pb(cim, True),
         type=PBPotentialTransformerKind.Value(cim.type.short_name)
     )
 
 
-def sensor_to_pb(cim: Sensor) -> PBSensor:
-    return PBSensor(ae=auxiliary_equipment_to_pb(cim))
+def sensor_to_pb(cim: Sensor, include_asset_info: bool = False) -> PBSensor:
+    return PBSensor(ae=auxiliary_equipment_to_pb(cim, include_asset_info))
 
 
 AuxiliaryEquipment.to_pb = auxiliary_equipment_to_pb

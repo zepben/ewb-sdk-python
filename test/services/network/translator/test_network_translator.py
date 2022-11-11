@@ -43,6 +43,13 @@ types_to_test = {
     # "create_location": create_location(),
     "create_organisation": create_organisation(),
 
+    #####################################
+    # IEC61968 infIEC61968 InfAssetInfo #
+    #####################################
+
+    "create_current_transformer": create_current_transformer(),
+    "create_potential_transformer": create_potential_transformer(),
+
     #####################
     # IEC61968 METERING #
     #####################
@@ -60,7 +67,9 @@ types_to_test = {
     # IEC61970 BASE AUXILIARY EQUIPMENT #
     #####################################
 
+    "create_current_transformer": create_current_transformer(),
     "create_fault_indicator": create_fault_indicator(),
+    "create_potential_transformer": create_potential_transformer(),
 
     ######################
     # IEC61970 BASE CORE #

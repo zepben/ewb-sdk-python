@@ -19,4 +19,4 @@ class PotentialTransformerKind(Enum):
 
     @property
     def short_name(self):
-        return str(self)[14:]
+        return str(self)[25:]

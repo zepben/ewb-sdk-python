@@ -617,7 +617,7 @@ def current_transformer_to_cim(pb: PBCurrentTransformer, network_service: Networ
 
     network_service.resolve_or_defer_reference(resolver.current_transformer_info(cim), pb.asset_info_mrid())
 
-    sensor_to_cim(pb, cim, network_service)
+    sensor_to_cim(pb.sn, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
@@ -633,12 +633,12 @@ def potential_transformer_to_cim(pb: PBPotentialTransformer, network_service: Ne
 
     network_service.resolve_or_defer_reference(resolver.potential_transformer_info(cim), pb.asset_info_mrid())
 
-    sensor_to_cim(pb, cim, network_service)
+    sensor_to_cim(pb.sn, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
 def sensor_to_cim(pb: PBSensor, cim: Sensor, network_service: NetworkService):
-    auxiliary_equipment_to_cim(pb, cim, network_service)
+    auxiliary_equipment_to_cim(pb.ae, cim, network_service)
 
 
 PBAuxiliaryEquipment.to_cim = auxiliary_equipment_to_cim
@@ -1360,7 +1360,7 @@ PBLinearShuntCompensator.to_cim = linear_shunt_compensator_to_cim
 PBLoadBreakSwitch.to_cim = load_break_switch_to_cim
 PBPerLengthSequenceImpedance.to_cim = per_length_sequence_impedance_to_cim
 PBPerLengthLineParameter.to_cim = per_length_line_parameter_to_cim
-PBPerLengthImpedance = per_length_impedance_to_cim
+PBPerLengthImpedance.to_cim = per_length_impedance_to_cim
 PBPowerElectronicsConnection.to_cim = power_electronics_connection_to_cim
 PBPowerElectronicsConnectionPhase.to_cim = power_electronics_connection_phase_to_cim
 PBPowerTransformer.to_cim = power_transformer_to_cim

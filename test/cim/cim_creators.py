@@ -384,8 +384,30 @@ def create_auxiliary_equipment(include_runtime: bool):
     }
 
 
+def create_current_transformer(include_runtime: bool = True):
+    return builds(
+        CurrentTransformer,
+        **create_sensor(include_runtime),
+        asset_info=builds(CurrentTransformerInfo, **create_identified_object(include_runtime)),
+        core_burden=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+    )
+
+
 def create_fault_indicator(include_runtime: bool = True):
     return builds(FaultIndicator, **create_auxiliary_equipment(include_runtime))
+
+
+def create_potential_transformer(include_runtime: bool = True):
+    return builds(
+        PotentialTransformer,
+        **create_sensor(include_runtime),
+        asset_info=builds(PotentialTransformerInfo, **create_identified_object(include_runtime)),
+        type=sampled_from(PotentialTransformerKind)
+    )
+
+
+def create_sensor(include_runtime: bool):
+    return create_auxiliary_equipment(include_runtime)
 
 
 ######################
