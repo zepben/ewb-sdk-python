@@ -380,7 +380,7 @@ def current_transformer_info():
         nominalRatio=ratio(),
         primaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         ratedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        secondaryFlsRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        secondaryFlsRating=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         secondaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         usage=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
     )
@@ -744,7 +744,7 @@ def energy_consumer():
         customerCount=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         grounded=booleans(), p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         pFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.values()),
+        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.Enum.values()),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         qFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )

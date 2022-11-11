@@ -227,17 +227,20 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_values(
             diff,
             CurrentTransformerInfo.accuracy_class,
-            CurrentTransformerInfo.accuracy_limit,
             CurrentTransformerInfo.core_count,
             CurrentTransformerInfo.ct_class,
             CurrentTransformerInfo.knee_point_voltage,
             CurrentTransformerInfo.max_ratio,
             CurrentTransformerInfo.nominal_ratio,
-            CurrentTransformerInfo.primary_ratio,
             CurrentTransformerInfo.rated_current,
             CurrentTransformerInfo.secondary_fls_rating,
-            CurrentTransformerInfo.secondary_ratio,
             CurrentTransformerInfo.usage
+        )
+        self._compare_floats(
+            diff,
+            CurrentTransformerInfo.accuracy_limit,
+            CurrentTransformerInfo.primary_ratio,
+            CurrentTransformerInfo.secondary_ratio
         )
 
         return self._compare_asset_info(diff)
@@ -249,9 +252,12 @@ class NetworkServiceComparator(BaseServiceComparator):
             diff,
             PotentialTransformerInfo.accuracy_class,
             PotentialTransformerInfo.nominal_ratio,
-            PotentialTransformerInfo.primary_ratio,
             PotentialTransformerInfo.pt_class,
             PotentialTransformerInfo.rated_voltage,
+        )
+        self._compare_floats(
+            diff,
+            PotentialTransformerInfo.primary_ratio,
             PotentialTransformerInfo.secondary_ratio
         )
 

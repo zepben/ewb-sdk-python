@@ -23,13 +23,13 @@ current_transformer_info_kwargs = {
     "nominal_ratio": builds(Ratio),
     "primary_ratio": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "rated_current": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    "secondary_fls_rating": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    "secondary_fls_rating": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "secondary_ratio": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "usage": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
 }
 
 # noinspection PyArgumentList
-current_transformer_info_args = [*asset_info_args, "a", 1.1, 2, "b", 3, Ratio(4.4, 5.5), Ratio(6.6, 7.7), 8.8, 9, 10.10, 11.11, "c"]
+current_transformer_info_args = [*asset_info_args, "a", 1.1, 2, "b", 3, Ratio(4.4, 5.5), Ratio(6.6, 7.7), 8.8, 9, 10, 11.11, "c"]
 
 
 def test_current_transformer_info_constructor_default():

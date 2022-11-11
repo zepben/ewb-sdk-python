@@ -17,7 +17,8 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     EnergyConsumer, PhaseShuntConnectionKind, EnergyConsumerPhase, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
     LinearShuntCompensator, PerLengthImpedance, PerLengthLineParameter, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, VectorGroup, \
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
-    Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder
+    Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
+    CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
@@ -201,6 +202,38 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: PositionPoint(3.0, 4.0)
         )
 
+    #####################################
+    # IEC61968 infIEC61968 InfAssetInfo #
+    #####################################
+
+    # noinspection PyArgumentList
+    def test_compare_current_transformer_info(self):
+        self._compare_asset_info(CurrentTransformerInfo)
+
+        self.validator.validate_property(CurrentTransformerInfo.accuracy_class, CurrentTransformerInfo, lambda _: "acc1", lambda _: "acc2")
+        self.validator.validate_property(CurrentTransformerInfo.accuracy_limit, CurrentTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(CurrentTransformerInfo.core_count, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(CurrentTransformerInfo.ct_class, CurrentTransformerInfo, lambda _: "ctc1", lambda _: "ctc2")
+        self.validator.validate_property(CurrentTransformerInfo.knee_point_voltage, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(CurrentTransformerInfo.max_ratio, CurrentTransformerInfo, lambda _: Ratio(1.1, 2.2), lambda _: Ratio(3.3, 4.4))
+        self.validator.validate_property(CurrentTransformerInfo.nominal_ratio, CurrentTransformerInfo, lambda _: Ratio(1.1, 2.2), lambda _: Ratio(3.3, 4.4))
+        self.validator.validate_property(CurrentTransformerInfo.primary_ratio, CurrentTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(CurrentTransformerInfo.rated_current, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(CurrentTransformerInfo.secondary_fls_rating, CurrentTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(CurrentTransformerInfo.secondary_ratio, CurrentTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(CurrentTransformerInfo.usage, CurrentTransformerInfo, lambda _: "usage1", lambda _: "usage2")
+
+    # noinspection PyArgumentList
+    def test_compare_potential_transformer_info(self):
+        self._compare_asset_info(PotentialTransformerInfo)
+
+        self.validator.validate_property(PotentialTransformerInfo.accuracy_class, PotentialTransformerInfo, lambda _: "acc1", lambda _: "acc2")
+        self.validator.validate_property(PotentialTransformerInfo.nominal_ratio, PotentialTransformerInfo, lambda _: Ratio(1.1, 2.2), lambda _: Ratio(3.3, 4.4))
+        self.validator.validate_property(PotentialTransformerInfo.primary_ratio, PotentialTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(PotentialTransformerInfo.pt_class, PotentialTransformerInfo, lambda _: "ptc1", lambda _: "ptc2")
+        self.validator.validate_property(PotentialTransformerInfo.rated_voltage, PotentialTransformerInfo, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(PotentialTransformerInfo.secondary_ratio, PotentialTransformerInfo, lambda _: 1.1, lambda _: 2.2)
+
     #####################
     # IEC61968 METERING #
     #####################
@@ -279,8 +312,38 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             options_stop_compare=True
         )
 
+    def test_compare_current_transformer(self):
+        self._compare_sensor(CurrentTransformer)
+
+        self.validator.validate_property(CurrentTransformer.core_burden, CurrentTransformer, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(
+            CurrentTransformer.asset_info,
+            CurrentTransformer,
+            lambda _: CurrentTransformerInfo(mrid="iti1"),
+            lambda _: CurrentTransformerInfo(mrid="iti2")
+        )
+
     def test_compare_fault_indicator(self):
         self._compare_auxiliary_equipment(FaultIndicator)
+
+    def test_compare_potential_transformer(self):
+        self._compare_sensor(PotentialTransformer)
+
+        self.validator.validate_property(
+            PotentialTransformer.type,
+            PotentialTransformer,
+            lambda _: PotentialTransformerKind.capacitiveCoupling,
+            lambda _: PotentialTransformerKind.inductive
+        )
+        self.validator.validate_property(
+            PotentialTransformer.asset_info,
+            PotentialTransformer,
+            lambda _: PotentialTransformerInfo(mrid="vti1"),
+            lambda _: PotentialTransformerInfo(mrid="vti2")
+        )
+
+    def _compare_sensor(self, creator: Type[Sensor]):
+        self._compare_auxiliary_equipment(creator)
 
     ######################
     # IEC61970 BASE CORE #
