@@ -218,7 +218,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_identified_object(diff)
 
     #####################################
-    # IEC61968 ineIEC61968 InfAssetInfo #
+    # IEC61968 infIEC61968 InfAssetInfo #
     #####################################
 
     def _compare_current_transformer_info(self, source: CurrentTransformerInfo, target: CurrentTransformerInfo) -> ObjectDifference:
