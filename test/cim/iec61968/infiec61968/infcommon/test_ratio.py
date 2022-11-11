@@ -50,3 +50,19 @@ def test_ratio_constructor_args():
     # non-alphabetic order is due to mathematical convention (numerator before denominator)
     assert ratio.numerator == ratio_args[-2]
     assert ratio.denominator == ratio_args[-1]
+
+
+def test_quotient_nonzero_denominator():
+    # noinspection PyArgumentList
+    ratio = Ratio(9.0, 6.0)
+
+    assert ratio.quotient == 1.5
+
+
+def test_quotient_zero_denominator():
+    # noinspection PyArgumentList
+    ratio = Ratio(9.0, 0)
+
+    with raises(AttributeError, match="Cannot calculate the quotient of a Ratio with a denominator of zero."):
+        # noinspection PyStatementEffect
+        ratio.quotient
