@@ -3,12 +3,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import TypeVar
+
 import pytest
 from hypothesis import given, HealthCheck, settings
 
 from database.sqlite.schema_utils import assume_non_blank_street_address_details
 from cim.cim_creators import *
 from services.common.translator.base_test_translator import validate_service_translations
+from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, Location, NetworkServiceComparator, NameType
 
 T = TypeVar("T", bound=IdentifiedObject)
 

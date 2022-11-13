@@ -3,11 +3,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import TypeVar
 
 from hypothesis import given
 
 from cim.cim_creators import *
 from services.common.translator.base_test_translator import validate_service_translations
+from zepben.evolve import IdentifiedObject, CustomerService, NameType
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 
 T = TypeVar("T", bound=IdentifiedObject)
