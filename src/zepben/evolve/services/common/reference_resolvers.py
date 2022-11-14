@@ -289,5 +289,7 @@ tei_to_ge_sct_resolver = ReferenceResolver(TransformerEndInfo, ShortCircuitTest,
 tei_to_oe_oct_resolver = ReferenceResolver(TransformerEndInfo, OpenCircuitTest, lambda t, r: setattr(t, 'open_end_open_circuit_tests', r))
 tei_to_ee_oct_resolver = ReferenceResolver(TransformerEndInfo, OpenCircuitTest, lambda t, r: setattr(t, 'energised_end_open_circuit_tests', r))
 
+# To avoid confusion with PowerTransformer shortened as "pt", PotentialTransformer is shortened to "vt" and CurrentTransformer is shortened to "it".
+# This corresponds with the convention used in electrical engineering (P for power, V for voltage, and I for current).
 it_to_iti_resolver = ReferenceResolver(CurrentTransformer, CurrentTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 vt_to_vti_resolver = ReferenceResolver(PotentialTransformer, PotentialTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
