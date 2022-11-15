@@ -59,7 +59,7 @@ automatically and the following should suffice:
 ```python
 from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
 
-with connect_tls(host="ewb.zepben.com", rpc_port=443) as channel:
+async with connect_tls(host="ewb.zepben.com", rpc_port=443) as channel:
     client = SyncNetworkConsumerClient(channel)
     result = client.get_equipment_container("xxx", Feeder)
     client.service.get('...')
@@ -73,7 +73,7 @@ from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
 with open('path/to/ca/bundle', 'rb') as f:
     ca = f.read()
 
-    with connect_tls(host="ewb.zepben.com", rpc_port=443, ca=ca) as channel:
+    async with connect_tls(host="ewb.zepben.com", rpc_port=443, ca=ca) as channel:
         client = SyncNetworkConsumerClient(channel)
 
         result = client.get_equipment_container("xxx", Feeder)
@@ -95,7 +95,7 @@ with open(args.ca, 'rb') as f:
 with open(args.cert, 'rb') as f:
     cert = f.read()
 
-with connect_with_secret(host="ewb.zepben.com", rpc_port=443, ca=ca, key=key, cert=cert) as channel:
+async with connect_with_secret(host="ewb.zepben.com", rpc_port=443, ca=ca, key=key, cert=cert) as channel:
     client = SyncNetworkConsumerClient(channel)
 
     result = client.get_equipment_container("xxx", Feeder)
@@ -113,13 +113,13 @@ Password Credentials and Client credentials OAuth2 flows are supported through t
 from zepben.evolve import connect_with_password, connect_with_secret, SyncNetworkConsumerClient
 
 # Password credentials configuration - client_secret optional.
-with connect_with_password(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
+async with connect_with_password(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
              username="user@email.com", password="password1") as channel:
     client = SyncNetworkConsumerClient(channel)
     # ...
 
 # Client credentials configuration
-with connect_with_secret(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
+async with connect_with_secret(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
              client_secret="some_client_secret") as channel:
     client = SyncNetworkConsumerClient(channel)
     # ...
