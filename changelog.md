@@ -1,7 +1,12 @@
 ## [0.35.0]
 
 ### Breaking Changes
-* None.
+* `GrpcChannelBuilder().make_secure` now takes filenames instead of bytestrings.
+  The order of the parameters has also been changed: `private_key` now comes after `certificate_chain`.
+  * This changes also applies to any TLS parameters in `connect_*` functions.
+* `GrpcChannelBuilder().socket_address` has been renamed to `for_address`.
+* `GrpcChannelBuilder().token_fetcher` has been renamed to `with_token_fetcher`.
+
 
 ### New Features
 * Added support for current transformers and power transformers with the following classes in `zepben.evolve.cim.*`:

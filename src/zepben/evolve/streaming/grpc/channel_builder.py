@@ -38,23 +38,57 @@ class GrpcChannelBuilder(ABC):
 
         return grpc.aio.insecure_channel(self._socket_address)
 
-    def socket_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
+    def for_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
         self._socket_address = f"{host}:{port}"
         return self
 
     def make_secure(
         self,
-        root_certificates: Optional[bytes] = None,
-        private_key: Optional[bytes] = None,
-        certificate_chain: Optional[bytes] = None
+        root_certificates: Optional[str] = None,
+        certificate_chain: Optional[str] = None,
+        private_key: Optional[str] = None
     ) -> 'GrpcChannelBuilder':
         """
         Secures channel with SSL credentials.
+
+        :param root_certificates: The filename of the truststore to use when verifying the RPC service's SSL/TLS certificate
+        :param certificate_chain: The filename of the certificate chain to use for client authentication
+        :param private_key: The filename of the private key to use for client authentication
         """
-        self._channel_credentials = grpc.ssl_channel_credentials(root_certificates, private_key, certificate_chain)
+        root_certificates_bytes = None
+        if root_certificates is not None:
+            with open(root_certificates, "rb") as f:
+                root_certificates_bytes = f.read()
+
+        certificate_chain_bytes = None
+        if certificate_chain is not None:
+            with open(certificate_chain, "rb") as f:
+                certificate_chain_bytes = f.read()
+
+        private_key_bytes = None
+        if private_key is not None:
+            with open(private_key, "rb") as f:
+                private_key_bytes = f.read()
+
+        return self.make_secure_with_bytes(root_certificates_bytes, certificate_chain_bytes, private_key_bytes)
+
+    def make_secure_with_bytes(
+        self,
+        root_certificates_bytes: Optional[bytes] = None,
+        certificate_chain_bytes: Optional[bytes] = None,
+        private_key_bytes: Optional[bytes] = None
+    ) -> 'GrpcChannelBuilder':
+        """
+        Secures channel with SSL credentials.
+
+        :param root_certificates_bytes: The bytestring truststore to use when verifying the RPC service's SSL/TLS certificate
+        :param certificate_chain_bytes: The bytestring certificate chain to use for client authentication
+        :param private_key_bytes: The bytestring private key to use for client authentication
+        """
+        self._channel_credentials = grpc.ssl_channel_credentials(root_certificates_bytes, private_key_bytes, certificate_chain_bytes)
         return self
 
-    def token_fetcher(self, token_fetcher: ZepbenTokenFetcher) -> 'GrpcChannelBuilder':
+    def with_token_fetcher(self, token_fetcher: ZepbenTokenFetcher) -> 'GrpcChannelBuilder':
         if self._channel_credentials is None:
             raise Exception("Attempted to set call credentials before channel credentials.")
         self._channel_credentials = grpc.composite_channel_credentials(

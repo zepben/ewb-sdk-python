@@ -24,145 +24,107 @@ from zepben.evolve.streaming.grpc.channel_builder import AuthTokenPlugin
 GRPC_READY_TIMEOUT = 20  # seconds
 
 
-def _secure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051, ca=None) -> GrpcChannelBuilder:
-    return GrpcChannelBuilder() \
-        .socket_address(host, rpc_port) \
-        .make_secure(root_certificates=ca)
+def connect_insecure(
+    host: str = "localhost",
+    rpc_port: int = 50051
+) -> grpc.aio.Channel:
+    return GrpcChannelBuilder().for_address(host, rpc_port).build()
 
 
-def _insecure_grpc_channel_builder(host: str = "localhost", rpc_port: int = 50051) -> GrpcChannelBuilder:
-    return GrpcChannelBuilder() \
-        .socket_address(host, rpc_port)
+def connect_tls(
+    host: str = "localhost",
+    rpc_port: int = 50051,
+    ca_filename: Optional[str] = None
+) -> grpc.aio.Channel:
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).build()
 
 
-def _grpc_channel_builder_from_secret(host: str, rpc_port: int, client_id: str, client_secret: str, token_fetcher: ZepbenTokenFetcher,
-                                      ca=None) -> GrpcChannelBuilder:
-    token_fetcher.token_request_data.update({
-        'client_id': client_id,
-        'client_secret': client_secret,
-        'grant_type': 'client_credentials'
-    })
-    return _secure_grpc_channel_builder(host, rpc_port, ca).token_fetcher(token_fetcher)
-
-
-def _grpc_channel_builder_from_password(client_id: str, username: str, password: str, host: str, rpc_port: int, token_fetcher: ZepbenTokenFetcher,
-                                        ca=None) -> GrpcChannelBuilder:
-    token_fetcher.token_request_data.update({
-        'client_id': client_id,
-        'username': username,
-        'password': password,
-        'grant_type': 'password',
-        'scope': 'offline_access'
-    })
-    return _secure_grpc_channel_builder(host, rpc_port, ca).token_fetcher(token_fetcher)
-
-
-def connect_tls(host: str = "localhost", rpc_port: int = 50051, ca: BinaryIO = None) -> grpc.aio.Channel:
-    """
-    Connect to a Zepben gRPC service using TLS.
-
-    `host` The host to connect to.
-    `rpc_port` The gRPC port for host.
-    `ca` The CA to use for certificate verification of the server.
-
-    Returns a gRPC channel
-    """
-    return _secure_grpc_channel_builder(host, rpc_port, ca).build()
-
-
-def connect_insecure(host: str = "localhost", rpc_port: int = 50051) -> grpc.aio.Channel:
-    """
-    Connect to a Zepben gRPC service without auth and without HTTPS.
-
-    `host` The host to connect to.
-    `rpc_port` The gRPC port for host.
-
-    Returns a gRPC channel
-    """
-    return _insecure_grpc_channel_builder(host, rpc_port).build()
-
-
-def connect_with_secret(client_id: str, client_secret: str, host: str = "localhost", rpc_port: int = 50051, conf_path: str = None,
-                        ca: BinaryIO = None, **kwargs) -> grpc.aio.Channel:
-    """
-    Connect to a Zepben gRPC service using a client id and secret.
-
-    `client_id` Your client id for your OAuth Auth provider.
-    `client_secret` Corresponding client secret if required.
-    `host` The host to connect to.
-    `rpc_port` The gRPC port for host.
-    `conf_path` The path for the auth configuration endpoint. This is used when a `token_fetcher` is not provided. Defaults to checking /auth and /ewb/auth
-    `ca` The CA to use for certificate verification of the server.
-    `**kwargs` Keyword Arguments to be passed to ZepbenTokenFetcher initialiser if `conf_path` is None, or can include `port` for the config server if
-        `conf_path` is set.
-
-    Raises ValueError if the token_fetcher could not be configured
-
-    Returns a gRPC channel
-    """
-    token_fetcher = None
-    errors = None
-    if conf_path:
-        token_fetcher = create_token_fetcher(host, port=kwargs.get("port", 443), path=conf_path)
-    else:
-        try:
-            token_fetcher = create_token_fetcher(host)
-        except Exception as e:
-            errors = e
-
-    if {"audience", "issuer_domain", "auth_method"} <= kwargs.keys():
+def connect_with_secret(
+    client_id: str,
+    client_secret: str,
+    host: str = "localhost",
+    rpc_port: int = 50051,
+    conf_address: Optional[str] = None,
+    conf_ca_filename: Optional[str] = None,
+    auth_ca_filename: Optional[str] = None,
+    ca_filename: Optional[str] = None,
+    **kwargs
+) -> grpc.aio.Channel:
+    if {"audience", "issuer_domain"} <= kwargs.keys():
         # noinspection PyArgumentList
         token_fetcher = ZepbenTokenFetcher(**kwargs)
-
-    if not token_fetcher:
-        if errors:
-            raise ValueError(f"Failed to connect to {host}:{rpc_port}, did you pass a correct conf_path?")
-        else:
-            raise ValueError("token_fetcher could not be created, this is likely a bug.")
-
-    return _grpc_channel_builder_from_secret(host, rpc_port, client_id, client_secret, token_fetcher, ca).build()
-
-
-def connect_with_password(client_id: str, username: str, password: str, host: str = "localhost", rpc_port: int = 50051, conf_path: Optional[str] = None,
-                          ca: BinaryIO = None, **kwargs) -> grpc.aio.Channel:
-    """
-    Connect to a Zepben gRPC service using credentials.
-
-    `client_id` Your client id for your OAuth Auth provider.
-    `username` The username to use for an OAuth password grant.
-    `password` Corresponding password.
-    `host` The host to connect to.
-    `rpc_port` The gRPC port for host.
-    `conf_path` The path for the auth configuration endpoint. This is used when a `token_fetcher` is not provided. Defaults to checking /auth and /ewb/auth
-    `ca` The CA to use for certificate verification of the server.
-    `**kwargs` Keyword Arguments to be passed to ZepbenTokenFetcher initialiser if `conf_path` is None, or can include `port` for the config server if
-        `conf_path` is set.
-
-    Raises ValueError if the token_fetcher could not be configured
-
-    Returns a gRPC channel
-    """
-    token_fetcher = None
-    errors = None
-    if conf_path:
-        # TODO EWB-1417 pass through CA (extract from kwargs) for auth conf verification
-        token_fetcher = create_token_fetcher(host, port=kwargs.get("port", 443), path=conf_path)
     else:
-        try:
-            token_fetcher = create_token_fetcher(host)
-        except Exception as e:
-            errors = e
+        token_fetcher = create_token_fetcher(
+            conf_address=conf_address or f"https://{host}/ewb/auth",
+            conf_ca_filename=conf_ca_filename,
+            auth_ca_filename=auth_ca_filename
+        )
 
-    if {"audience", "issuer_domain", "auth_method"} <= kwargs.keys():
+    if token_fetcher:
+        return _connect_with_secret_using_token_fetcher(token_fetcher, client_id, client_secret, host, rpc_port, ca_filename)
+    else:
+        return connect_tls(host, rpc_port, ca_filename)
+
+
+def connect_with_password(
+    client_id: str,
+    username: str,
+    password: str,
+    host: str = "localhost",
+    rpc_port: int = 50051,
+    conf_address: Optional[str] = None,
+    conf_ca_filename: Optional[str] = None,
+    auth_ca_filename: Optional[str] = None,
+    ca_filename: Optional[str] = None,
+    **kwargs
+) -> grpc.aio.Channel:
+    if {"audience", "issuer_domain"} <= kwargs.keys():
         # noinspection PyArgumentList
         token_fetcher = ZepbenTokenFetcher(**kwargs)
+    else:
+        token_fetcher = create_token_fetcher(
+            conf_address=conf_address or f"https://{host}/ewb/auth",
+            conf_ca_filename=conf_ca_filename,
+            auth_ca_filename=auth_ca_filename
+        )
 
-    if not token_fetcher:
-        if errors:
-            raise ValueError(f"Failed to connect to {host}:{rpc_port}, did you pass a correct conf_path?")
-        else:
-            raise ValueError("token_fetcher could not be created, this is likely a bug.")
-    return _grpc_channel_builder_from_password(client_id, username, password, host, rpc_port, token_fetcher, ca).build()
+    if token_fetcher:
+        return _connect_with_password_using_token_fetcher(token_fetcher, client_id, username, password, host, rpc_port, ca_filename)
+    else:
+        return connect_tls(host, rpc_port, ca_filename)
+
+
+def _connect_with_secret_using_token_fetcher(
+    token_fetcher: ZepbenTokenFetcher,
+    client_id: str,
+    client_secret: str,
+    host: str,
+    rpc_port: int,
+    ca_filename: Optional[str]
+) -> grpc.aio.Channel:
+    token_fetcher.token_request_data["client_id"] = client_id
+    token_fetcher.token_request_data["client_secret"] = client_secret
+    token_fetcher.token_request_data["grant_type"] = "client_credentials"
+
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build()
+
+
+def _connect_with_password_using_token_fetcher(
+    token_fetcher: ZepbenTokenFetcher,
+    client_id: str,
+    username: str,
+    password: str,
+    host: str,
+    rpc_port: int,
+    ca_filename: Optional[str]
+) -> grpc.aio.Channel:
+    token_fetcher.token_request_data["client_id"] = client_id
+    token_fetcher.token_request_data["username"] = username
+    token_fetcher.token_request_data["password"] = password
+    token_fetcher.token_request_data["grant_type"] = "password"
+    token_fetcher.token_request_data["scope"] = "offline_access"
+
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build()
 
 
 def _conn(host: str = "localhost", rpc_port: int = 50051, conf_address: str = None, client_id: Optional[str] = None,
