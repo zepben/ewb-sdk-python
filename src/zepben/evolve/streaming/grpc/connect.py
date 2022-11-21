@@ -19,7 +19,7 @@ from zepben.evolve import GrpcChannelBuilder
 
 __all__ = ["connect", "connect_async", "connect_tls", "connect_insecure", "connect_with_password", "connect_with_secret"]
 
-from zepben.evolve.streaming.grpc.channel_builder import AuthTokenPlugin
+from zepben.evolve.streaming.grpc.grpc_channel_builder import AuthTokenPlugin
 
 GRPC_READY_TIMEOUT = 20  # seconds
 

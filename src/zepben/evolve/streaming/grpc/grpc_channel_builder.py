@@ -90,7 +90,7 @@ class GrpcChannelBuilder(ABC):
 
     def with_token_fetcher(self, token_fetcher: ZepbenTokenFetcher) -> 'GrpcChannelBuilder':
         if self._channel_credentials is None:
-            raise Exception("Attempted to set call credentials before channel credentials.")
+            raise Exception("You must call make_secure before calling with_token_fetcher.")
         self._channel_credentials = grpc.composite_channel_credentials(
             self._channel_credentials,
             grpc.metadata_call_credentials(AuthTokenPlugin(token_fetcher=token_fetcher))
