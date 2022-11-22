@@ -6,7 +6,15 @@
   * This changes also applies to any TLS parameters in `connect_*` functions.
 * `GrpcChannelBuilder().socket_address` has been renamed to `for_address`.
 * `GrpcChannelBuilder().token_fetcher` has been renamed to `with_token_fetcher`.
-
+* Refactored `AuthTokenPlugin` to a separate module.
+* Removed deprecated `connect` and `connect_async` functions. They have been replaced with several simpler functions, e.g. `connect_with_password`.
+* Reordered and changed `connect_with_secret` and `connect_with_password` parameters:
+  * The address of the authentication config is now specified with a single parameter: `conf_address`.
+  * Added optional parameters `verify_conf` and `verify_auth`, which are passed through to `requests.get` and `requests.put`
+    when fetching the authentication config and requesting access tokens respectively.
+  * `ca` is replaced with `ca_filename`, which can be set to the filename of a CA to use when verifying the certificate
+    of the gRPC service.
+  * The `host` and `rpc_port` parameters is now positioned after the `conf_address`, `verify_conf`, and `verify_auth`.
 
 ### New Features
 * Added support for current transformers and power transformers with the following classes in `zepben.evolve.cim.*`:
@@ -30,6 +38,7 @@
 ### Fixes
 * `StreetDetail.to_cim` now references the protobuf -> CIM translation function for the `StreetDetail` protobuf type.
 * `PerLengthImpedance.to_cim` now references the protobuf -> CIM translation function for the `PerLengthImpedance` protobuf type.
+* `ZepbenTokenFetcher` now includes the refresh token in token refresh requests.
 
 ### Notes
 * None.
