@@ -103,8 +103,7 @@ with connect_with_password(host="ewb.zepben.com", rpc_port=443, conf_address="ht
     # ...
 
 # Client credentials configuration
-with connect_with_secret(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
-             client_secret="some_client_secret") as channel:
+with connect_with_secret(client_id="some_client_id",client_secret="some_client_secret",conf_address="https://ewb.zepben.com/ewb/auth",host="ewb.zepben.com",rpc_port=443,secure=True) as channel:
     client = SyncNetworkConsumerClient(channel)
     # ...
 ```

@@ -24,12 +24,23 @@ class GrpcChannelBuilder(ABC):
         self._channel_credentials: Optional[grpc.ChannelCredentials] = None
 
     def build(self) -> grpc.aio.Channel:
+        """
+        Get the resulting :class:`grpc.aio.Channel` from this builder.
+        :return: A gRPC channel resulting from this builder.
+        """
         if self._channel_credentials:
             return grpc.aio.secure_channel(self._socket_address, self._channel_credentials)
 
         return grpc.aio.insecure_channel(self._socket_address)
 
     def for_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
+        """
+        Specify the address for the gRPC channel.
+
+        :param host: The hostname hosting the gRPC service
+        :param port: The port of the gRPC service
+        :return: This builder
+        """
         self._socket_address = f"{host}:{port}"
         return self
 
@@ -45,6 +56,7 @@ class GrpcChannelBuilder(ABC):
         :param root_certificates: The filename of the truststore to use when verifying the RPC service's SSL/TLS certificate
         :param certificate_chain: The filename of the certificate chain to use for client authentication
         :param private_key: The filename of the private key to use for client authentication
+        :return: This builder
         """
         root_certificates_bytes = None
         if root_certificates is not None:
@@ -75,11 +87,18 @@ class GrpcChannelBuilder(ABC):
         :param root_certificates_bytes: The bytestring truststore to use when verifying the RPC service's SSL/TLS certificate
         :param certificate_chain_bytes: The bytestring certificate chain to use for client authentication
         :param private_key_bytes: The bytestring private key to use for client authentication
+        :return: This builder
         """
         self._channel_credentials = grpc.ssl_channel_credentials(root_certificates_bytes, private_key_bytes, certificate_chain_bytes)
         return self
 
     def with_token_fetcher(self, token_fetcher: ZepbenTokenFetcher) -> 'GrpcChannelBuilder':
+        """
+        Authenticates calls for the gRPC channel using a :class:`ZepbenTokenFetcher`.
+
+        :param token_fetcher: The :class:`ZepbenTokenFetcher` to use to fetch access tokens.
+        :return: This builder
+        """
         if self._channel_credentials is None:
             raise Exception("You must call make_secure before calling with_token_fetcher.")
         self._channel_credentials = grpc.composite_channel_credentials(

@@ -22,6 +22,13 @@ def connect_insecure(
     host: str = "localhost",
     rpc_port: int = 50051
 ) -> grpc.aio.Channel:
+    """
+    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service over plaintext.
+
+    :param host: The hostname where the gRPC service is hosted
+    :param rpc_port: The port of the gRPC service
+    :return: A plaintext connection to the gRPC service
+    """
     return GrpcChannelBuilder().for_address(host, rpc_port).build()
 
 
@@ -30,20 +37,47 @@ def connect_tls(
     rpc_port: int = 50051,
     ca_filename: Optional[str] = None
 ) -> grpc.aio.Channel:
+    """
+    Create a `GrpcChannel` that communicates with the gRPC service using SSL/TLS transport security.
+
+    :param host: The hostname where the gRPC service is hosted
+    :param rpc_port: The port of the gRPC service
+    :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
+                        and defaults to null, in which case only the system CAs are used to verify certificates.
+    :return:An encrypted connection to the gRPC service
+    """
     return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).build()
 
 
 def connect_with_secret(
     client_id: str,
     client_secret: str,
-    host: str = "localhost",
-    rpc_port: int = 50051,
     conf_address: Optional[str] = None,
     verify_conf: Union[bool, str] = True,
     verify_auth: Union[bool, str] = True,
+    host: str = "localhost",
+    rpc_port: int = 50051,
     ca_filename: Optional[str] = None,
     **kwargs
 ) -> grpc.aio.Channel:
+    """
+    Create a `grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and the OAuth client credentials flow.
+    The OAuth provider's domain and the "audience" parameter of the token request are fetched as JSON from a specified URL.
+
+    :param client_id: The client ID of the OAuth application to authenticate for
+    :param client_secret: The client secret of the OAuth application to authenticate for
+    :param conf_address: The address of the authentication configuration
+    :param verify_conf: Passed through to `requests.get()` when fetching the authentication configuration
+    :param verify_auth: Passed through to `requests.post()` when fetching access tokens
+    :param host: The hostname where the gRPC service is hosted
+    :param rpc_port: The port of the gRPC service
+    :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
+                        and defaults to null, in which case only the system CAs are used to verify certificates.
+    :param kwargs: If `audience: str` and `issuer_domain: str` are specified, `kwargs` will be used as parameters
+                   to construct the :class:`ZepbenTokenFetcher` directly.
+    :return: An Auth0-authenticated, encrypted connection to the gRPC service. If the authentication configuration specifies that no authentication is
+             required, a non-authenticated, encrypted connection is returned instead.
+    """
     if {"audience", "issuer_domain"} <= kwargs.keys():
         # noinspection PyArgumentList
         token_fetcher = ZepbenTokenFetcher(**kwargs)
@@ -72,6 +106,24 @@ def connect_with_password(
     ca_filename: Optional[str] = None,
     **kwargs
 ) -> grpc.aio.Channel:
+    """
+    Create a `grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and the OAuth password grant flow.
+    The OAuth provider's domain and the "audience" parameter of the token request are fetched as JSON from a specified URL.
+
+    :param client_id: The client ID of the OAuth application to authenticate for
+    :param client_secret: The client secret of the OAuth application to authenticate for
+    :param conf_address: The address of the authentication configuration
+    :param verify_conf: Passed through to `requests.get()` when fetching the authentication configuration
+    :param verify_auth: Passed through to `requests.post()` when fetching access tokens
+    :param host: The hostname where the gRPC service is hosted
+    :param rpc_port: The port of the gRPC service
+    :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
+                        and defaults to null, in which case only the system CAs are used to verify certificates.
+    :param kwargs: If `audience: str` and `issuer_domain: str` are specified, `kwargs` will be used as parameters
+                   to construct the :class:`ZepbenTokenFetcher` directly.
+    :return: An Auth0-authenticated, encrypted connection to the gRPC service. If the authentication configuration specifies that no authentication is
+             required, a non-authenticated, encrypted connection is returned instead.
+    """
     if {"audience", "issuer_domain"} <= kwargs.keys():
         # noinspection PyArgumentList
         token_fetcher = ZepbenTokenFetcher(**kwargs)

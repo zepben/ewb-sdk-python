@@ -55,7 +55,7 @@ def test_connect_tls(_):
 @mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
 @mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
 def test_connect_with_secret(mocked_create_token_fetcher, _):
-    assert connect_with_secret("client_id", "client_secret", "host", 1234, "conf_address", False, "auth_ca.cert", "ca.cert") is authenticated_channel
+    assert connect_with_secret("client_id", "client_secret", "conf_address", False, "auth_ca.cert", "host", 1234, "ca.cert") is authenticated_channel
     assert token_fetcher.token_request_data == {
         "client_id": "client_id",
         "client_secret": "client_secret",
@@ -68,7 +68,7 @@ def test_connect_with_secret(mocked_create_token_fetcher, _):
 @mock.patch("zepben.evolve.streaming.grpc.connect.connect_tls", return_value=secure_channel)
 @mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=None)
 def test_connect_with_secret_connects_with_tls_if_no_auth(mocked_create_token_fetcher, _):
-    assert connect_with_secret("client_id", "client_secret", "host", 1234, "conf_address", False, "auth_ca.cert", "ca.cert") is secure_channel
+    assert connect_with_secret("client_id", "client_secret", "conf_address", False, "auth_ca.cert", "host", 1234, "ca.cert") is secure_channel
 
     mocked_create_token_fetcher.assert_called_once_with(conf_address="conf_address", verify_conf=False, verify_auth="auth_ca.cert")
 
@@ -76,7 +76,7 @@ def test_connect_with_secret_connects_with_tls_if_no_auth(mocked_create_token_fe
 @mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
 @mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
 def test_connect_with_secret_defaults(mocked_create_token_fetcher, _):
-    assert connect_with_secret("client_id", "client_secret", "host", 1234) is authenticated_channel
+    assert connect_with_secret("client_id", "client_secret", host="host", rpc_port=1234) is authenticated_channel
     assert token_fetcher.token_request_data == {
         "client_id": "client_id",
         "client_secret": "client_secret",
@@ -89,7 +89,8 @@ def test_connect_with_secret_defaults(mocked_create_token_fetcher, _):
 @mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
 @mock.patch("zepben.evolve.streaming.grpc.connect.ZepbenTokenFetcher", return_value=token_fetcher)
 def test_connect_with_secret_with_known_token_fetcher_config(mocked_zepben_token_fetcher, _):
-    assert connect_with_secret("client_id", "client_secret", "host", 1234, audience="audience", issuer_domain="issuer_domain") is authenticated_channel
+    assert connect_with_secret("client_id", "client_secret", host="host", rpc_port=1234, audience="audience",
+                               issuer_domain="issuer_domain") is authenticated_channel
     assert token_fetcher.token_request_data == {
         "client_id": "client_id",
         "client_secret": "client_secret",
