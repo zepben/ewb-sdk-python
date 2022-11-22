@@ -25,11 +25,13 @@ run any analytics you may wish to perform across the whole model.
 
 The library provides four functions, `connect_insecure()`, `connect_tls()`, `connect_with_password()` and `connect_with_secret()`.
 `connect_insecure` has arguments: host: str, rpc_port: int
-`connect_tls` has arguments: host: str, rpc_port: int, ca: BinaryIO
-`connect_with_secret` has arguments: host: str, rpc_port: int, client_id: str, client_secret: str, conf_path: str, ca: BinaryIO,
-                                    and **kwargs: could include 'port', "audience", "issuer_domain", "auth_method"
-`connect_with_password` has arguments: host: str, rpc_port: int, client_id: str, username: str, password: str, conf_path: str, ca: BinaryIO,
-                                    and **kwargs: could include 'port', "audience", "issuer_domain", "auth_method"
+`connect_tls` has arguments: host: str, rpc_port: int, ca_filename: str
+`connect_with_secret` has arguments: client_id: str, client_secret: str, conf_address: str, verify_conf: bool/str, verify_auth: bool/str,
+                                     host: str, rpc_port: int, ca_filename: str,
+                                     and **kwargs: could include audience: str, issuer_domain: str to specify authentication config directly.
+`connect_with_password` has arguments: client_id: str, username: str, password: str, conf_address: str, verify_conf: bool/str, verify_auth: bool/str,
+                                       host: str, rpc_port: int, ca_filename: str,
+                                       and **kwargs: could include audience: str, issuer_domain: str to specify authentication config directly.
 
 The async version is to be used with Python asyncio.
 
