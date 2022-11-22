@@ -9,24 +9,15 @@ from typing import Optional
 import grpc
 from zepben.auth.client import ZepbenTokenFetcher
 
-__all__ = ["GrpcChannelBuilder", "AuthTokenPlugin"]
-_AUTH_HEADER_KEY = 'authorization'
+__all__ = ["GrpcChannelBuilder"]
 
-
-class AuthTokenPlugin(grpc.AuthMetadataPlugin):
-
-    def __init__(self, token_fetcher: ZepbenTokenFetcher):
-        self.token_fetcher = token_fetcher
-
-    def __call__(self, context, callback):
-        token = self.token_fetcher.fetch_token()
-        if token:
-            callback(((_AUTH_HEADER_KEY, token),), None)
-        else:
-            callback()
+from zepben.evolve.streaming.grpc.auth_token_plugin import AuthTokenPlugin
 
 
 class GrpcChannelBuilder(ABC):
+    """
+    Builder class for gRPC channels to connect to EWB's gRPC service.
+    """
 
     def __init__(self):
         self._socket_address: str = "localhost:50051"
