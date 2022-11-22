@@ -1,6 +1,7 @@
 ## [0.35.0]
 
 ### Breaking Changes
+* Renamed the module for `GrpcChannelBuilder` from `channel_builder` to `grpc_channel_builder`.
 * `GrpcChannelBuilder().make_secure` now takes filenames instead of bytestrings.
   The order of the parameters has also been changed: `private_key` now comes after `certificate_chain`.
   * This changes also applies to any TLS parameters in `connect_*` functions.
