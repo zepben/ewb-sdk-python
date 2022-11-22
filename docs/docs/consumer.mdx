@@ -59,7 +59,7 @@ automatically and the following should suffice:
 ```python
 from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
 
-with connect_tls(host="ewb.zepben.com", rpc_port=443) as channel:
+async with connect_tls(host="ewb.zepben.com", rpc_port=443) as channel:
     client = SyncNetworkConsumerClient(channel)
     result = client.get_equipment_container("xxx", Feeder)
     client.service.get('...')
@@ -70,32 +70,27 @@ To specify a CA bundle pass the ca parameter:
 from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
 from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
 
-with open('path/to/ca/bundle', 'rb') as f:
-    ca = f.read()
+async with connect_tls(host="ewb.zepben.com", rpc_port=443, ca_filename="path/to/ca/bundle") as channel:
+    client = SyncNetworkConsumerClient(channel)
 
-    with connect_tls(host="ewb.zepben.com", rpc_port=443, ca=ca) as channel:
-        client = SyncNetworkConsumerClient(channel)
+    result = client.get_equipment_container("xxx", Feeder)
+    # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
+    # result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
 
-        result = client.get_equipment_container("xxx", Feeder)
-        # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
-        # result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
-
-        client.service.get('...')
+    client.service.get('...')
 ```
 
-And if client authentication is required by the server, additionally pass a key and certificate signed by the servers trusted CA:
+If client authentication is required by the server, use the underlying `GrpcChannelBuilder` class instead:
 ```python
-from zepben.evolve import connect_with_secret, SyncNetworkConsumerClient, Feeder
+from zepben.evolve import GrpcChannelBuilder, SyncNetworkConsumerClient, Feeder
 from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
 
-with open(args.key, 'rb') as f:
-    key = f.read()
-with open(args.ca, 'rb') as f:
-    ca = f.read()
-with open(args.cert, 'rb') as f:
-    cert = f.read()
-
-with connect_with_secret(, as channel:
+async with (
+    GrpcChannelBuilder()
+    .for_address("ewb.zepben.com", 443)
+    .make_secure("path/to/ca/bundle", "path/to/cert/chain", "path/to/private/key")
+    .build()
+) as channel:
     client = SyncNetworkConsumerClient(channel)
 
     result = client.get_equipment_container("xxx", Feeder)
@@ -107,24 +102,26 @@ with connect_with_secret(, as channel:
 
 ### Authentication
 
-Password Credentials and Client credentials OAuth2 flows are supported through the username/password and client_id/client_secret parameters:
+Password Credentials and Client credentials OAuth2 flows are supported through the `connect_with_secret` and `connect_with_password` functions respectively:
 
 ```python
 from zepben.evolve import connect_with_password, connect_with_secret, SyncNetworkConsumerClient
 
-# Password credentials configuration - client_secret optional.
-with connect_with_password(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
-             username="user@email.com", password="password1") as channel:
+# Client credentials configuration
+async with connect_with_secret(client_id="some_client_id", client_secret="some_client_secret", conf_address="https://ewb.zepben.com/ewb/auth",
+                               host="ewb.zepben.com", rpc_port=443) as channel:
     client = SyncNetworkConsumerClient(channel)
     # ...
 
-# Client credentials configuration
-with connect_with_secret(client_id="some_client_id",client_secret="some_client_secret",conf_address="https://ewb.zepben.com/ewb/auth",host="ewb.zepben.com",rpc_port=443,secure=True) as channel:
+# Password credentials configuration - client_secret optional.
+async with connect_with_password(client_id="some_client_id", username="user@email.com", password="password1", conf_address="https://ewb.zepben.com/ewb/auth",
+                                 host="ewb.zepben.com", rpc_port=443) as channel:
     client = SyncNetworkConsumerClient(channel)
     # ...
 ```
 
-Custom OAuth2 authenticators can be created by passing an `authenticator` to `connect_with_secret` or `connect_with_password`.
+If `audience` and `issuer_domain` are provided as keyword arguments, they will be used to construct a `ZepbenTokenFetcher` directly without fetching them from
+`conf_address`.
 
 ## Network Hierarchy
 
@@ -133,9 +130,9 @@ to easily identify and request smaller chunks of the network so you can focus on
 of how to request the network hierarchy and print it out as a tree to the console.
 
 ```python
-from zepben.evolve import NetworkConsumerClient
+from zepben.evolve import SyncNetworkConsumerClient
 
-def print_network_hierarchy(client: NetworkConsumerClient):
+def print_network_hierarchy(client: SyncNetworkConsumerClient):
     hierarchy = client.get_network_hierarchy().result
     if not hierarchy:
         return
@@ -168,17 +165,17 @@ To find the references that need to be requested you can use the [deferred refer
 functions on the service provided when requesting identified objects.
 
 ```python
-from zepben.evolve import NetworkService, NetworkConsumerClient, resolver
+from zepben.evolve import NetworkService, SyncNetworkConsumerClient, resolver
 
-async def get_with_base_voltage(service: NetworkService, client: NetworkConsumerClient, mrid: String):
-    equipment = await client.get_identified_object(service, mrid).result
+def get_with_base_voltage(service: NetworkService, client: SyncNetworkConsumerClient, mrid: str):
+    equipment = client.get_identified_object(mrid).result
     if not equipment:
         return
 
     # Get all base voltage relationships
-    mrids = service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(equipment))
+    mrids = list(service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(equipment)))
     if mrids:
-        await client.get_identified_object(service, mrids[0])
+        client.get_identified_object(mrids[0])
 ```
 
 You can also query the services UnresolvedReferences in the following ways:
