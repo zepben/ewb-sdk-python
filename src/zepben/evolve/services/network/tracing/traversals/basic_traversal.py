@@ -57,7 +57,6 @@ class BasicTraversal(Traversal[T]):
 
         while not self.process_queue.empty():
             current = self.process_queue.get()
-            print(current)
             if self.tracker.visit(current):
                 stopping = can_stop and await self.matches_any_stop_condition(current)
 
