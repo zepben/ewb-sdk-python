@@ -111,6 +111,7 @@ from zepben.evolve.services.network.tracing.connectivity.conducting_equipment_st
 from zepben.evolve.services.network.tracing.connectivity.conducting_equipment_step_tracker import *
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_trace import *
 from zepben.evolve.services.network.tracing.connectivity.connectivity_result import *
+from zepben.evolve.services.network.tracing.connectivity.connectivity_tracker import *
 from zepben.evolve.services.network.tracing.connectivity.connectivity_trace import *
 from zepben.evolve.services.network.tracing.connectivity.limited_connected_equipment_trace import *
 from zepben.evolve.services.network.tracing.connectivity.phase_paths import *

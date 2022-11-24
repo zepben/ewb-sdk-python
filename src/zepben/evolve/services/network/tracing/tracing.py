@@ -11,7 +11,7 @@ from zepben.evolve.services.network.tracing.connectivity.connected_equipment_tra
     new_connected_equipment_breadth_trace, new_normal_connected_equipment_trace, new_current_connected_equipment_trace, \
     new_normal_limited_connected_equipment_trace, new_current_limited_connected_equipment_trace
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_traversal import ConnectedEquipmentTraversal
-from zepben.evolve.services.network.tracing.connectivity.connectivity_trace import queue_next_connectivity_result_with_open_test
+from zepben.evolve.services.network.tracing.connectivity.connectivity_trace import create_connectivity_traversal
 from zepben.evolve.services.network.tracing.connectivity.limited_connected_equipment_trace import LimitedConnectedEquipmentTrace
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
 from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import AssignToLvFeeders
@@ -50,7 +50,7 @@ def create_basic_depth_trace(queue_next: QueueNext[T]) -> BasicTraversal[T]:
     :return: The `BasicTraversal`
     """
     # noinspection PyArgumentList
-    return BasicTraversal(queue_next, depth_first())
+    return BasicTraversal(queue_next=queue_next, process_queue=depth_first())
 
 
 def create_basic_breadth_trace(queue_next: QueueNext[T]) -> BasicTraversal[T]:
@@ -61,7 +61,7 @@ def create_basic_breadth_trace(queue_next: QueueNext[T]) -> BasicTraversal[T]:
     :return: The `BasicTraversal`
     """
     # noinspection PyArgumentList
-    return BasicTraversal(queue_next, breadth_first())
+    return BasicTraversal(queue_next=queue_next, process_queue=breadth_first())
 
 
 # --- Traversals for conducting equipment ---
@@ -137,7 +137,7 @@ def connectivity_trace() -> BasicTraversal[ConnectivityResult]:
 
     :return: The new traversal instance.
     """
-    return create_basic_depth_trace(queue_next_connectivity_result_with_open_test(ignore_open))
+    return create_connectivity_traversal(ignore_open, depth_first())
 
 
 def connectivity_breadth_trace() -> BasicTraversal[ConnectivityResult]:
@@ -147,7 +147,7 @@ def connectivity_breadth_trace() -> BasicTraversal[ConnectivityResult]:
 
     :return: The new traversal instance.
     """
-    return create_basic_breadth_trace(queue_next_connectivity_result_with_open_test(ignore_open))
+    return create_connectivity_traversal(ignore_open, breadth_first())
 
 
 def normal_connectivity_trace() -> BasicTraversal[ConnectivityResult]:
@@ -156,7 +156,7 @@ def normal_connectivity_trace() -> BasicTraversal[ConnectivityResult]:
 
     :return: The new traversal instance.
     """
-    return create_basic_depth_trace(queue_next_connectivity_result_with_open_test(normally_open))
+    return create_connectivity_traversal(normally_open, depth_first())
 
 
 def current_connectivity_trace() -> BasicTraversal[ConnectivityResult]:
@@ -165,7 +165,7 @@ def current_connectivity_trace() -> BasicTraversal[ConnectivityResult]:
 
     :return: The new traversal instance.
     """
-    return create_basic_depth_trace(queue_next_connectivity_result_with_open_test(currently_open))
+    return create_connectivity_traversal(currently_open, depth_first())
 
 
 # --- Traversals for phase steps ---

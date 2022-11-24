@@ -57,7 +57,7 @@ class Traversal(Generic[T]):
     _running: bool = False
     """Whether this traversal is currently running"""
 
-    async def matches_any_stop_condition(self, item: T):
+    async def matches_any_stop_condition(self, item: T) -> bool:
         """
         Checks all the stop conditions for the passed in item and returns true if any match.
         This calls all registered stop conditions even if one has already returned true to make sure everything is
@@ -72,7 +72,7 @@ class Traversal(Generic[T]):
             stop = stop or await cond(item)
         return stop
 
-    def add_stop_condition(self, cond: Callable[[T], Awaitable[bool]]):
+    def add_stop_condition(self, cond: Callable[[T], Awaitable[bool]]) -> Traversal[T]:
         """
         Add a callback to check whether the current item in the traversal is a stop point.
         If any of the registered stop conditions return true, the traversal will not call the callback to queue more items.
@@ -82,6 +82,7 @@ class Traversal(Generic[T]):
         Returns this traversal instance.
         """
         self.stop_conditions.append(cond)
+        return self
 
     def add_step_action(self, action: Callable[[T, bool], Awaitable[None]]) -> Traversal[T]:
         """

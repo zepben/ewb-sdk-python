@@ -113,8 +113,7 @@ Password Credentials and Client credentials OAuth2 flows are supported through t
 from zepben.evolve import connect_with_password, connect_with_secret, SyncNetworkConsumerClient
 
 # Password credentials configuration - client_secret optional.
-with connect_with_password(host="ewb.zepben.com", rpc_port=443, conf_address="https://ewb.zepben.com/ewb/auth", secure=True, client_id="some_client_id",
-             username="user@email.com", password="password1") as channel:
+with connect_with_password(client_id="some_client_id",username="user@email.com",password="password1",conf_address="https://ewb.zepben.com/ewb/auth",host="ewb.zepben.com",rpc_port=443,secure=True) as channel:
     client = SyncNetworkConsumerClient(channel)
     # ...
 

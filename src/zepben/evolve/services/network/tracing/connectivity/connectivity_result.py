@@ -36,7 +36,7 @@ Terminal.__lt__ = terminal_compare
 
 
 @dataclass(slots=True, init=False)
-class ConnectivityResult(object):
+class ConnectivityResult:
     """
     Stores the connectivity between two terminals, including the mapping between the nominal phases.
     This class is intended to be used in an immutable way. You should avoid modifying it after it has been created.
@@ -59,9 +59,10 @@ class ConnectivityResult(object):
     def __eq__(self, other: ConnectivityResult):
         if self is other:
             return True
+
         # noinspection PyBroadException
         try:
-            return self.from_terminal is other.from_terminal and self.to_terminal is other.to_terminal and self.nominal_phase_paths != other.nominal_phase_paths
+            return self.from_terminal is other.from_terminal and self.to_terminal is other.to_terminal and self.nominal_phase_paths == other.nominal_phase_paths
         except Exception:
             return False
 

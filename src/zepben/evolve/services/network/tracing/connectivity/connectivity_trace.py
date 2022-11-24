@@ -5,32 +5,46 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-import itertools
 from typing import TYPE_CHECKING, TypeVar
+from zepben.evolve import BusbarSection, Queue,  BasicTraversal, ConnectivityTracker, connected_terminals
 
-from zepben.evolve.services.network.network_service import connected_terminals
 if TYPE_CHECKING:
-    from zepben.evolve import ConnectivityResult, BusbarSection, Traversal
+    from zepben.evolve import ConnectivityResult
     from zepben.evolve.types import OpenTest, QueueNext
     T = TypeVar("T")
 
-__all__ = ["queue_next_connectivity_result_with_open_test"]
+__all__ = ["create_connectivity_traversal"]
 
 
-# TODO rename this to something sane
-def queue_next_connectivity_result_with_open_test(open_test: OpenTest) -> QueueNext[ConnectivityResult]:
-    def queue_next(cr: ConnectivityResult, traversal: Traversal[ConnectivityResult]):
+def create_connectivity_traversal(open_test: OpenTest, queue: Queue[ConnectivityResult]):
+    # noinspection PyArgumentList
+    return BasicTraversal(
+        queue_next=_queue_next_connectivity_result_with_open_test(open_test),
+        process_queue=queue,
+        tracker=ConnectivityTracker()
+    )
+
+
+def _queue_next_connectivity_result_with_open_test(open_test: OpenTest) -> QueueNext[ConnectivityResult]:
+    def queue_next(cr: ConnectivityResult, traversal: BasicTraversal[ConnectivityResult]):
         if cr.to_equip is None or open_test(cr.to_equip, None):
             return
 
         if isinstance(cr.to_equip, BusbarSection):
-            connectivity = itertools.chain(*(connected_terminals(term) for term in cr.to_equip.terminals))
+            connectivity = (
+                conn
+                for term in cr.to_equip.terminals
+                for conn in connected_terminals(term) if conn.to_terminal is not cr.from_terminal
+            )
             for conn in connectivity:
-                if conn.to_terminal != cr.from_terminal:
-                    traversal.process_queue.put(conn)
+                traversal.process_queue.put(conn)
 
         else:
-            connectivity = itertools.chain(*(connected_terminals(term) for term in filter(lambda t: t != cr.to_terminal, cr.to_equip.terminals)))
+            connectivity = [
+                conn
+                for term in cr.to_equip.terminals if term is not cr.to_terminal
+                for conn in connected_terminals(term)
+            ]
 
             busbars = filter(lambda cn: isinstance(cn.to_equip, BusbarSection), connectivity)
             has_busbar = False
