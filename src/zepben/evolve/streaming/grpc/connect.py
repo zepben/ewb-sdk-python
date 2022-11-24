@@ -10,7 +10,7 @@
 from typing import Optional, Union
 
 import grpc
-from zepben.auth.client import ZepbenTokenFetcher, create_token_fetcher
+from zepben.auth import ZepbenTokenFetcher, create_token_fetcher
 from zepben.evolve import GrpcChannelBuilder
 
 __all__ = ["connect_tls", "connect_insecure", "connect_with_password", "connect_with_secret"]

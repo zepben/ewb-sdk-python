@@ -3,7 +3,7 @@ from unittest.mock import call
 
 import pytest
 from dataclassy import dataclass
-from zepben.auth.client import ZepbenTokenFetcher
+from zepben.auth import ZepbenTokenFetcher
 
 from zepben.evolve import GrpcChannelBuilder
 

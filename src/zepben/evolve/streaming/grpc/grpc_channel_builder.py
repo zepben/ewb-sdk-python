@@ -7,7 +7,7 @@ from abc import ABC
 from typing import Optional
 
 import grpc
-from zepben.auth.client import ZepbenTokenFetcher
+from zepben.auth import ZepbenTokenFetcher
 
 __all__ = ["GrpcChannelBuilder"]
 
