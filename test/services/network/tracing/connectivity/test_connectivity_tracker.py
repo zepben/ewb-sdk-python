@@ -1,0 +1,35 @@
+from zepben.evolve import ConnectivityResult, EnergySource, Terminal, AcLineSegment, EnergyConsumer, NetworkService, ConnectivityTracker
+
+
+class TestConnectivityTracker:
+    es_t = Terminal()
+    es = EnergySource(terminals=[es_t])
+
+    acls_t1, acls_t2 = Terminal(), Terminal()
+    acls = AcLineSegment(terminals=[acls_t1, acls_t2])
+
+    ec_t = Terminal()
+    ac = EnergyConsumer(terminals=[ec_t])
+
+    network = NetworkService()
+    network.connect_terminals(es_t, acls_t1)
+    network.connect_terminals(acls_t2, ec_t)
+
+    def test_single_equipment_and_clear(self):
+        tracker = ConnectivityTracker()
+        cr = ConnectivityResult(self.es_t, self.acls_t1, [])
+
+        assert not (tracker.has_visited(cr)), "has_visited returns false for unvisited equipment"
+        assert tracker.visit(cr), "Visiting unvisited equipment returns true"
+        assert tracker.has_visited(cr), "has_visited returns true for visited equipment"
+        assert not (tracker.visit(cr)), "Revisiting visited equipment returns false"
+        tracker.clear()
+        assert not tracker.has_visited(cr), "Clearing delists all equipment"
+
+    def test_tracking_connectivities_with_same_destination_equipment(self):
+        tracker = ConnectivityTracker()
+        cr1 = ConnectivityResult(self.es_t, self.acls_t1, [])
+        cr2 = ConnectivityResult(self.ec_t, self.acls_t2, [])
+
+        tracker.visit(cr1)
+        assert tracker.has_visited(cr2), "Tracker has_visited connectivities with visited destination equipment"
