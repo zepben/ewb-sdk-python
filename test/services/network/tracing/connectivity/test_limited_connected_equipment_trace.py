@@ -8,7 +8,8 @@ import sys
 
 import pytest
 
-from zepben.evolve import TestNetworkBuilder, ConductingEquipmentStep, Junction, FeederDirection, Terminal, ConductingEquipment
+from zepben.evolve import TestNetworkBuilder, ConductingEquipmentStep, Junction, FeederDirection, Terminal, ConductingEquipment, \
+    normal_connected_equipment_trace
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_traversal import ConnectedEquipmentTraversal
 from zepben.evolve.services.network.tracing.connectivity.limited_connected_equipment_trace import LimitedConnectedEquipmentTrace
 
@@ -157,7 +158,7 @@ class TestLimitedConnectedEquipmentTrace:
     async def test_with_direction_starts_from_connected_assets_down(self, traversal, trace, simple_ns):
         await trace.run([simple_ns["b2"]], 2, FeederDirection.DOWNSTREAM)
 
-        traversal.run_from.assert_called_once_with(simple_ns["c3"], False)
+        traversal.run_from.assert_called_once_with(simple_ns["c3"])
 
     @pytest.mark.asyncio
     @with_simple_ns
@@ -165,7 +166,7 @@ class TestLimitedConnectedEquipmentTrace:
     async def test_with_direction_starts_from_connected_assets_up(self, traversal, trace, simple_ns):
         await trace.run([simple_ns["b2"]], 2, FeederDirection.UPSTREAM)
 
-        traversal.run_from.assert_called_once_with(simple_ns["c1"], False)
+        traversal.run_from.assert_called_once_with(simple_ns["c1"])
 
     @pytest.mark.asyncio
     @with_mock_trace
@@ -186,8 +187,8 @@ class TestLimitedConnectedEquipmentTrace:
         await trace.run([ns["j2"]], 2, FeederDirection.BOTH)
 
         assert traversal.run_from.call_count == 2
-        traversal.run_from.assert_any_call(ns["c1"], False)
-        traversal.run_from.assert_called_with(ns["c5"], False)
+        traversal.run_from.assert_any_call(ns["c1"])
+        traversal.run_from.assert_called_with(ns["c5"])
 
     @pytest.mark.asyncio
     @with_mock_trace
@@ -205,7 +206,7 @@ class TestLimitedConnectedEquipmentTrace:
 
         await trace.run([ns["j2"]], 2, FeederDirection.NONE)
 
-        traversal.run_from.assert_called_once_with(ns["c5"], False)
+        traversal.run_from.assert_called_once_with(ns["c5"])
 
     @pytest.mark.asyncio
     @with_simple_ns
@@ -274,6 +275,22 @@ class TestLimitedConnectedEquipmentTrace:
         results = await trace.run([ns["j0"]], 2, FeederDirection.NONE)
 
         assert results == {ns["j0"]: 0}
+
+    @pytest.mark.asyncio
+    async def test_with_direction_can_stop_on_start_item(self):
+        ns = (await TestNetworkBuilder()
+              .from_junction(num_terminals=1)  # j0
+              .to_acls()  # c1
+              .to_junction(num_terminals=1)  # j2
+              .add_feeder("j0")
+              .build())
+
+        lcet = LimitedConnectedEquipmentTrace(normal_connected_equipment_trace, lambda it: it.normal_feeder_direction)
+        matching_equipment = await lcet.run([ns["j0"]], 1, FeederDirection.DOWNSTREAM)
+        assert matching_equipment == {
+            ns["j0"]: 0,
+            ns["c1"]: 1
+        }
 
     @pytest.mark.asyncio
     @with_mock_trace

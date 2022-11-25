@@ -20,14 +20,14 @@ class LimitedConnectedEquipmentTrace:
 
     create_traversal: Callable[[], ConnectedEquipmentTraversal]
     """
-    Get the `ConnectedEquipmentTraversal` used to traverse the network. Should be either `Tracing.normalConnectedEquipmentTrace` or
-    `Tracing.currentConnectedEquipmentTrace`, depending on the network state you want to trace.
+    Get the `ConnectedEquipmentTraversal` used to traverse the network. Should be either `tracing.normal_connected_equipment_trace` or
+    `tracing.current_connected_equipment_trace`, depending on the network state you want to trace.
     """
 
     get_terminal_direction: Callable[[Terminal], FeederDirection]
     """
-    Used to get the `FeederDirection` of a `Terminal`. Should be either `Terminal.normalFeederDirection` or
-    `Terminal.currentFeederDirection`, depending on the network state you want to trace.
+    Used to get the `FeederDirection` of a `Terminal`. Should be either `lambda it: it.normal_feeder_direction` or
+    `lambda it: it.current_feeder_direction`, depending on the network state you want to trace.
     """
 
     async def run(
@@ -89,7 +89,7 @@ class LimitedConnectedEquipmentTrace:
             traversal.add_stop_condition(has_no_valid_terminals)
             traversal.add_step_action(add_matching_equipment)
 
-            await traversal.run_from(start, False)
+            await traversal.run_from(start)
 
         if feeder_direction in (FeederDirection.BOTH, FeederDirection.NONE):
             return [it for it in matching_equipment if any(self.get_terminal_direction(t) == feeder_direction for t in it.conducting_equipment.terminals)]

@@ -40,6 +40,8 @@
 * `PerLengthImpedance.to_cim` now references the protobuf -> CIM translation function for the `PerLengthImpedance` protobuf type.
 * `ZepbenTokenFetcher` now includes the refresh token in token refresh requests.
 * Fixed connectivity traces.
+* Fixed bug where running a limited connected equipment trace with `maximum_steps=1`
+  included equipment two steps away from the starting equipment if `feeder_direction` is set.
 
 ### Notes
 * None.
