@@ -39,6 +39,7 @@
 * `StreetDetail.to_cim` now references the protobuf -> CIM translation function for the `StreetDetail` protobuf type.
 * `PerLengthImpedance.to_cim` now references the protobuf -> CIM translation function for the `PerLengthImpedance` protobuf type.
 * `ZepbenTokenFetcher` now includes the refresh token in token refresh requests.
+* Fixed connectivity traces.
 
 ### Notes
 * None.
