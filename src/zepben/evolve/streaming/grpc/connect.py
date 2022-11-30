@@ -52,11 +52,11 @@ def connect_tls(
 def connect_with_secret(
     client_id: str,
     client_secret: str,
+    host: str = "localhost",
+    rpc_port: int = 50051,
     conf_address: Optional[str] = None,
     verify_conf: Union[bool, str] = True,
     verify_auth: Union[bool, str] = True,
-    host: str = "localhost",
-    rpc_port: int = 50051,
     ca_filename: Optional[str] = None,
     **kwargs
 ) -> grpc.aio.Channel:
@@ -66,11 +66,11 @@ def connect_with_secret(
 
     :param client_id: The client ID of the OAuth application to authenticate for
     :param client_secret: The client secret of the OAuth application to authenticate for
+    :param host: The hostname where the gRPC service is hosted
+    :param rpc_port: The port of the gRPC service
     :param conf_address: The address of the authentication configuration
     :param verify_conf: Passed through to `requests.get()` when fetching the authentication configuration
     :param verify_auth: Passed through to `requests.post()` when fetching access tokens
-    :param host: The hostname where the gRPC service is hosted
-    :param rpc_port: The port of the gRPC service
     :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
                         and defaults to null, in which case only the system CAs are used to verify certificates.
     :param kwargs: If `audience: str` and `issuer_domain: str` are specified, `kwargs` will be used as parameters
@@ -111,7 +111,8 @@ def connect_with_password(
     The OAuth provider's domain and the "audience" parameter of the token request are fetched as JSON from a specified URL.
 
     :param client_id: The client ID of the OAuth application to authenticate for
-    :param client_secret: The client secret of the OAuth application to authenticate for
+    :param username: The username of the user to authenticate with
+    :param password: The password of the user to authenticate with
     :param conf_address: The address of the authentication configuration
     :param verify_conf: Passed through to `requests.get()` when fetching the authentication configuration
     :param verify_auth: Passed through to `requests.post()` when fetching access tokens
