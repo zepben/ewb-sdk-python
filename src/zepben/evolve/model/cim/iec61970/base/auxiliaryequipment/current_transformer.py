@@ -34,6 +34,6 @@ class CurrentTransformer(Sensor):
     def current_transformer_info(self, cti: Optional[CurrentTransformerInfo]):
         """
         Set the `CurrentTransformerInfo` for this `CurrentTransformer`
-        `sci` The `CurrentTransformerInfo` for this `CurrentTransformer`
+        `cti` The `CurrentTransformerInfo` for this `CurrentTransformer`
         """
         self.asset_info = cti

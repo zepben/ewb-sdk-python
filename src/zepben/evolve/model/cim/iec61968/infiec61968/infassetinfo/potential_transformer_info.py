@@ -20,13 +20,18 @@ class PotentialTransformerInfo(AssetInfo):
 
     accuracy_class: Optional[str] = None
     """PT accuracy classification."""
+
     nominal_ratio: Optional[Ratio] = None
     """Nominal ratio between the primary and secondary voltage."""
+
     primary_ratio: Optional[float] = None
     """Ratio for the primary winding tap changer (numerator)."""
+
     pt_class: Optional[str] = None
     """Potential transformer (PT) classification covering burden."""
+
     rated_voltage: Optional[int] = None
     """Rated voltage on the primary side in Volts."""
+
     secondary_ratio: Optional[float] = None
     """Ratio for the secondary winding tap changer (denominator)."""

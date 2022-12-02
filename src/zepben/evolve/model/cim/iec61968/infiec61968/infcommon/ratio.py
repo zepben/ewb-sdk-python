@@ -16,6 +16,7 @@ class Ratio:
 
     numerator: float
     """The part of a fraction that is below the line and that functions as the divisor of the numerator."""
+
     denominator: float
     """The part of a fraction that is above the line and signifies the number to be divided by the denominator."""
 

@@ -21,27 +21,27 @@ current_transformer_args = [*sensor_args, 1]
 
 
 def test_current_transformer_constructor_default():
-    it = CurrentTransformer()
+    ct = CurrentTransformer()
 
-    verify_sensor_constructor_default(it)
-    assert it.core_burden is None
+    verify_sensor_constructor_default(ct)
+    assert ct.core_burden is None
 
 
 @given(**current_transformer_kwargs)
 def test_current_transformer_constructor_kwargs(core_burden, **kwargs):
     # noinspection PyArgumentList
-    it = CurrentTransformer(core_burden=core_burden, **kwargs)
+    ct = CurrentTransformer(core_burden=core_burden, **kwargs)
 
-    verify_sensor_constructor_kwargs(it, **kwargs)
-    assert it.core_burden == core_burden
+    verify_sensor_constructor_kwargs(ct, **kwargs)
+    assert ct.core_burden == core_burden
 
 
 def test_current_transformer_constructor_args():
     # noinspection PyArgumentList
-    it = CurrentTransformer(*current_transformer_args)
+    ct = CurrentTransformer(*current_transformer_args)
 
-    verify_sensor_constructor_args(it)
-    assert it.core_burden == current_transformer_args[-1]
+    verify_sensor_constructor_args(ct)
+    assert ct.core_burden == current_transformer_args[-1]
 
 
 def test_current_transformer_info_accessor():

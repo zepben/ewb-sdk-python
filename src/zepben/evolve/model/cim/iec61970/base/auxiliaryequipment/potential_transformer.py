@@ -32,9 +32,9 @@ class PotentialTransformer(Sensor):
         return self.asset_info
 
     @potential_transformer_info.setter
-    def potential_transformer_info(self, pti: Optional[PotentialTransformerInfo]):
+    def potential_transformer_info(self, vti: Optional[PotentialTransformerInfo]):
         """
         Set the `PotentialTransformerInfo` for this `PotentialTransformer`
-        `sci` The `PotentialTransformerInfo` for this `PotentialTransformer`
+        `vti` The `PotentialTransformerInfo` for this `PotentialTransformer`
         """
-        self.asset_info = pti
+        self.asset_info = vti

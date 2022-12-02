@@ -319,8 +319,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(
             CurrentTransformer.asset_info,
             CurrentTransformer,
-            lambda _: CurrentTransformerInfo(mrid="iti1"),
-            lambda _: CurrentTransformerInfo(mrid="iti2")
+            lambda _: CurrentTransformerInfo(mrid="cti1"),
+            lambda _: CurrentTransformerInfo(mrid="cti2")
         )
 
     def test_compare_fault_indicator(self):

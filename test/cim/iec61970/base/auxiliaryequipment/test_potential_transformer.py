@@ -30,18 +30,18 @@ def test_potential_transformer_constructor_default():
 @given(**potential_transformer_kwargs)
 def test_potential_transformer_constructor_kwargs(type, **kwargs):
     # noinspection PyArgumentList
-    it = PotentialTransformer(type=type, **kwargs)
+    vt = PotentialTransformer(type=type, **kwargs)
 
-    verify_sensor_constructor_kwargs(it, **kwargs)
-    assert it.type == type
+    verify_sensor_constructor_kwargs(vt, **kwargs)
+    assert vt.type == type
 
 
 def test_potential_transformer_constructor_args():
     # noinspection PyArgumentList
-    it = PotentialTransformer(*potential_transformer_args)
+    vt = PotentialTransformer(*potential_transformer_args)
 
-    verify_sensor_constructor_args(it)
-    assert it.type == potential_transformer_args[-1]
+    verify_sensor_constructor_args(vt)
+    assert vt.type == potential_transformer_args[-1]
 
 
 def test_potential_transformer_info_accessor():
