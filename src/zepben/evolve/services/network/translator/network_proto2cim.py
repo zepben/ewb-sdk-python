@@ -497,13 +497,13 @@ PBTownDetail.to_cim = town_detail_to_cim
 # IEC61968 infIEC61968 InfAssetInfo #
 #####################################
 
-def current_transformer_info_to_cim(pb: PBCurrentTransformerInfo, network_service: NetworkService):
+def current_transformer_info_to_cim(pb: PBCurrentTransformerInfo, network_service: NetworkService) -> Optional[CurrentTransformerInfo]:
     cim = CurrentTransformerInfo(
         mrid=pb.mrid(),
-        accuracy_class=pb.accuracyClass,
+        accuracy_class=str_or_none(pb.accuracyClass),
         accuracy_limit=float_or_none(pb.accuracyLimit),
         core_count=int_or_none(pb.coreCount),
-        ct_class=pb.ctClass,
+        ct_class=str_or_none(pb.ctClass),
         knee_point_voltage=int_or_none(pb.kneePointVoltage),
         max_ratio=ratio_to_cim(pb.maxRatio) if pb.HasField('maxRatio') else None,
         nominal_ratio=ratio_to_cim(pb.nominalRatio) if pb.HasField('nominalRatio') else None,
@@ -511,24 +511,25 @@ def current_transformer_info_to_cim(pb: PBCurrentTransformerInfo, network_servic
         rated_current=int_or_none(pb.ratedCurrent),
         secondary_fls_rating=int_or_none(pb.secondaryFlsRating),
         secondary_ratio=float_or_none(pb.secondaryRatio),
-        usage=pb.usage
+        usage=str_or_none(pb.usage)
     )
 
-    asset_info_to_cim(pb, cim, network_service)
+    asset_info_to_cim(pb.ai, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def potential_transformer_info_to_cim(pb: PBPotentialTransformerInfo, network_service: NetworkService):
+def potential_transformer_info_to_cim(pb: PBPotentialTransformerInfo, network_service: NetworkService) -> Optional[PotentialTransformerInfo]:
     cim = PotentialTransformerInfo(
         mrid=pb.mrid(),
-        accuracy_class=pb.accuracyClass,
-        max_ratio=ratio_to_cim(pb.maxRatio) if pb.HasField('maxRatio') else None,
+        accuracy_class=str_or_none(pb.accuracyClass),
         nominal_ratio=ratio_to_cim(pb.nominalRatio) if pb.HasField('nominalRatio') else None,
-        pt_class=pb.ptClass,
+        primary_ratio=float_or_none(pb.primaryRatio),
+        pt_class=str_or_none(pb.ptClass),
+        rated_voltage=int_or_none(pb.ratedVoltage),
         secondary_ratio=float_or_none(pb.secondaryRatio)
     )
 
-    asset_info_to_cim(pb, cim, network_service)
+    asset_info_to_cim(pb.ai, cim, network_service)
     return cim if network_service.add(cim) else None
 
 

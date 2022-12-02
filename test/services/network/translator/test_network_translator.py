@@ -50,8 +50,8 @@ types_to_test = {
     # IEC61968 infIEC61968 InfAssetInfo #
     #####################################
 
-    "create_current_transformer": create_current_transformer(),
-    "create_potential_transformer": create_potential_transformer(),
+    "create_current_transformer_info": create_current_transformer_info(),
+    "create_potential_transformer_info": create_potential_transformer_info(),
 
     #####################
     # IEC61968 METERING #
