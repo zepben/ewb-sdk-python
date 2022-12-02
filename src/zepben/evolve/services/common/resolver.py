@@ -439,7 +439,7 @@ def energised_end_open_circuit_tests(tei: TransformerEndInfo) -> BoundReferenceR
 
 def current_transformer_info(current_transformer: CurrentTransformer) -> BoundReferenceResolver:
     # noinspection PyArgumentList
-    return BoundReferenceResolver(current_transformer, ct_to_iti_resolver, None)
+    return BoundReferenceResolver(current_transformer, ct_to_cti_resolver, None)
 
 
 def potential_transformer_info(potential_transformer: PotentialTransformer) -> BoundReferenceResolver:
