@@ -38,7 +38,7 @@ def connect_tls(
     ca_filename: Optional[str] = None
 ) -> grpc.aio.Channel:
     """
-    Create a `GrpcChannel` that communicates with the gRPC service using SSL/TLS transport security.
+    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security.
 
     :param host: The hostname where the gRPC service is hosted
     :param rpc_port: The port of the gRPC service
@@ -61,7 +61,7 @@ def connect_with_secret(
     **kwargs
 ) -> grpc.aio.Channel:
     """
-    Create a `grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and the OAuth client credentials flow.
+    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and the OAuth client credentials flow.
     The OAuth provider's domain and the "audience" parameter of the token request are fetched as JSON from a specified URL.
 
     :param client_id: The client ID of the OAuth application to authenticate for
@@ -107,17 +107,17 @@ def connect_with_password(
     **kwargs
 ) -> grpc.aio.Channel:
     """
-    Create a `grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and the OAuth password grant flow.
+    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and the OAuth password grant flow.
     The OAuth provider's domain and the "audience" parameter of the token request are fetched as JSON from a specified URL.
 
     :param client_id: The client ID of the OAuth application to authenticate for
     :param username: The username of the user to authenticate with
     :param password: The password of the user to authenticate with
+    :param host: The hostname where the gRPC service is hosted
+    :param rpc_port: The port of the gRPC service
     :param conf_address: The address of the authentication configuration
     :param verify_conf: Passed through to `requests.get()` when fetching the authentication configuration
     :param verify_auth: Passed through to `requests.post()` when fetching access tokens
-    :param host: The hostname where the gRPC service is hosted
-    :param rpc_port: The port of the gRPC service
     :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
                         and defaults to null, in which case only the system CAs are used to verify certificates.
     :param kwargs: If `audience: str` and `issuer_domain: str` are specified, `kwargs` will be used as parameters
