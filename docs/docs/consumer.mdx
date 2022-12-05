@@ -61,10 +61,10 @@ automatically and the following should suffice:
 ```python
 from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
 
-async with connect_tls(host="ewb.zepben.com", rpc_port=443) as channel:
-    client = SyncNetworkConsumerClient(channel)
-    result = client.get_equipment_container("xxx", Feeder)
-    client.service.get('...')
+channel = connect_tls(host="ewb.zepben.com", rpc_port=443)
+client = SyncNetworkConsumerClient(channel)
+result = client.get_equipment_container("xxx", Feeder)
+client.service.get('...')
 ```
 
 To specify a CA bundle pass the ca parameter:
@@ -72,14 +72,14 @@ To specify a CA bundle pass the ca parameter:
 from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
 from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
 
-async with connect_tls(host="ewb.zepben.com", rpc_port=443, ca_filename="path/to/ca/bundle") as channel:
-    client = SyncNetworkConsumerClient(channel)
+channel = connect_tls(host="ewb.zepben.com", rpc_port=443, ca_filename="path/to/ca/bundle")
+client = SyncNetworkConsumerClient(channel)
 
-    result = client.get_equipment_container("xxx", Feeder)
-    # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
-    # result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
+result = client.get_equipment_container("xxx", Feeder)
+# The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
+# result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
 
-    client.service.get('...')
+client.service.get('...')
 ```
 
 If client authentication is required by the server, use the underlying `GrpcChannelBuilder` class instead:
@@ -87,19 +87,19 @@ If client authentication is required by the server, use the underlying `GrpcChan
 from zepben.evolve import GrpcChannelBuilder, SyncNetworkConsumerClient, Feeder
 from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
 
-async with (
+channel = (
     GrpcChannelBuilder()
     .for_address("ewb.zepben.com", 443)
     .make_secure("path/to/ca/bundle", "path/to/cert/chain", "path/to/private/key")
     .build()
-) as channel:
-    client = SyncNetworkConsumerClient(channel)
+)
+client = SyncNetworkConsumerClient(channel)
 
-    result = client.get_equipment_container("xxx", Feeder)
-    # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
-    # result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
+result = client.get_equipment_container("xxx", Feeder)
+# The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
+# result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
 
-    client.service.get('...')
+client.service.get('...')
 ```
 
 ### Authentication
@@ -110,16 +110,16 @@ Password Credentials and Client credentials OAuth2 flows are supported through t
 from zepben.evolve import connect_with_password, connect_with_secret, SyncNetworkConsumerClient
 
 # Client credentials configuration
-async with connect_with_secret(client_id="some_client_id", client_secret="some_client_secret", conf_address="https://ewb.zepben.com/ewb/auth",
-                               host="ewb.zepben.com", rpc_port=443) as channel:
-    client = SyncNetworkConsumerClient(channel)
-    # ...
+channel = connect_with_secret(client_id="some_client_id", client_secret="some_client_secret", host="ewb.zepben.com", rpc_port=443,
+                              conf_address="https://ewb.zepben.com/ewb/auth")
+client = SyncNetworkConsumerClient(channel)
+# ...
 
-# Password credentials configuration - client_secret optional.
-async with connect_with_password(client_id="some_client_id", username="user@email.com", password="password1", conf_address="https://ewb.zepben.com/ewb/auth",
-                                 host="ewb.zepben.com", rpc_port=443) as channel:
-    client = SyncNetworkConsumerClient(channel)
-    # ...
+# Password credentials configuration
+channel = connect_with_password(client_id="some_client_id", username="user@email.com", password="password1", host="ewb.zepben.com", rpc_port=443,
+                                conf_address="https://ewb.zepben.com/ewb/auth")
+client = SyncNetworkConsumerClient(channel)
+# ...
 ```
 
 If `audience` and `issuer_domain` are provided as keyword arguments, they will be used to construct a `ZepbenTokenFetcher` directly without fetching them from
