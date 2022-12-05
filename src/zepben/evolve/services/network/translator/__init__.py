@@ -24,12 +24,17 @@ from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole
 from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight
 from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint
 from zepben.protobuf.cim.iec61968.operations.OperationalRestriction_pb2 import OperationalRestriction
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.AuxiliaryEquipment_pb2 import AuxiliaryEquipment
+from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.CurrentTransformer_pb2 import CurrentTransformer
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.FaultIndicator_pb2 import FaultIndicator
+from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.PotentialTransformer_pb2 import PotentialTransformer
+from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.Sensor_pb2 import Sensor
 from zepben.protobuf.cim.iec61970.base.core.AcDcTerminal_pb2 import AcDcTerminal
 from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
@@ -95,10 +100,10 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectronicsWindUnit_pb2 import PowerElectronicsWindUnit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop
+from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder
 
 __all__ = []
 
-from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder
 
 CableInfo.mrid = lambda self: self.wi.mrid()
 NoLoadTest.mrid = lambda self: self.tt.mrid()
@@ -121,12 +126,17 @@ Pole.mrid = lambda self: self.st.mrid()
 Streetlight.mrid = lambda self: self.at.mrid()
 Structure.mrid = lambda self: self.ac.mrid()
 Location.mrid = lambda self: self.io.mrid()
+CurrentTransformerInfo.mrid = lambda self: self.ai.mrid()
+PotentialTransformerInfo.mrid = lambda self: self.ai.mrid()
 EndDevice.mrid = lambda self: self.ac.mrid()
 Meter.mrid = lambda self: self.ed.mrid()
 UsagePoint.mrid = lambda self: self.io.mrid()
 OperationalRestriction.mrid = lambda self: self.doc.mrid()
 AuxiliaryEquipment.mrid = lambda self: self.eq.mrid()
+CurrentTransformer.mrid = lambda self: self.sn.mrid()
 FaultIndicator.mrid = lambda self: self.ae.mrid()
+PotentialTransformer.mrid = lambda self: self.sn.mrid()
+Sensor.mrid = lambda self: self.ae.mrid()
 AcDcTerminal.mrid = lambda self: self.io.mrid()
 BaseVoltage.mrid = lambda self: self.io.mrid()
 ConductingEquipment.mrid = lambda self: self.eq.mrid()
@@ -292,8 +302,11 @@ Feeder.normal_energizing_substation_mrid = lambda self: getattr(self, "normalEne
 AcLineSegment.per_length_sequence_impedance_mrid = lambda self: getattr(self, "perLengthSequenceImpedanceMRID", None)
 
 # asset_info_mrid
-ConductingEquipment.asset_info_mrid = lambda self: self.eq.psr.assetInfoMRID
+ConductingEquipment.asset_info_mrid = lambda self: self.eq.asset_info_mrid()
 Conductor.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
+CurrentTransformer.asset_info_mrid = lambda self: self.sn.ae.eq.asset_info_mrid()
+Equipment.asset_info_mrid = lambda self: self.psr.assetInfoMRID
+PotentialTransformer.asset_info_mrid = lambda self: self.sn.ae.eq.asset_info_mrid()
 PowerTransformer.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
 ShuntCompensator.asset_info_mrid = lambda self: self.rce.ec.ce.asset_info_mrid()
 

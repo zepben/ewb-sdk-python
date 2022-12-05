@@ -3,12 +3,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import TypeVar
+
 import pytest
 from hypothesis import given, HealthCheck, settings
 
 from database.sqlite.schema_utils import assume_non_blank_street_address_details
 from cim.cim_creators import *
 from services.common.translator.base_test_translator import validate_service_translations
+from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, Location, NetworkServiceComparator, NameType
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -43,6 +46,13 @@ types_to_test = {
     # "create_location": create_location(),
     "create_organisation": create_organisation(),
 
+    #####################################
+    # IEC61968 infIEC61968 InfAssetInfo #
+    #####################################
+
+    "create_current_transformer_info": create_current_transformer_info(),
+    "create_potential_transformer_info": create_potential_transformer_info(),
+
     #####################
     # IEC61968 METERING #
     #####################
@@ -60,7 +70,9 @@ types_to_test = {
     # IEC61970 BASE AUXILIARY EQUIPMENT #
     #####################################
 
+    "create_current_transformer": create_current_transformer(),
     "create_fault_indicator": create_fault_indicator(),
+    "create_potential_transformer": create_potential_transformer(),
 
     ######################
     # IEC61970 BASE CORE #

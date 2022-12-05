@@ -35,12 +35,19 @@ from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint 
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
 from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
 from zepben.protobuf.cim.iec61968.common.StreetDetail_pb2 import StreetDetail as PBStreetDetail
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo as PBCurrentTransformerInfo
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo as PBPotentialTransformerInfo
+from zepben.protobuf.cim.iec61968.infiec61968.infcommon.Ratio_pb2 import Ratio as PBRatio
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice as PBEndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter as PBMeter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint as PBUsagePoint
 from zepben.protobuf.cim.iec61968.operations.OperationalRestriction_pb2 import OperationalRestriction as PBOperationalRestriction
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.AuxiliaryEquipment_pb2 import AuxiliaryEquipment as PBAuxiliaryEquipment
+from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.CurrentTransformer_pb2 import CurrentTransformer as PBCurrentTransformer
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.FaultIndicator_pb2 import FaultIndicator as PBFaultIndicator
+from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.PotentialTransformer_pb2 import PotentialTransformer as PBPotentialTransformer
+from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.PotentialTransformerKind_pb2 import PotentialTransformerKind as PBPotentialTransformerKind
+from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.Sensor_pb2 import Sensor as PBSensor
 from zepben.protobuf.cim.iec61970.base.core.AcDcTerminal_pb2 import AcDcTerminal as PBAcDcTerminal
 from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage as PBBaseVoltage
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment as PBConductingEquipment
@@ -127,6 +134,21 @@ MAX_SEQUENCE_NUMBER = 40
 MIN_SEQUENCE_NUMBER = 1
 ALPHANUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
+__all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_info', 'power_transformer_info', 'short_circuit_test', 'shunt_compensator_info',
+           'transformer_end_info', 'transformer_tank_info', 'transformer_test', 'wire_info', 'asset', 'asset_container', 'asset_info',
+           'asset_organisation_role', 'asset_owner', 'structure', 'pole', 'streetlight', 'document', 'location', 'organisation', 'organisation_role',
+           'position_point', 'street_address', 'street_detail', 'town_detail', 'current_transformer_info', 'potential_transformer_info', 'ratio',
+           'end_device', 'meter', 'usage_point', 'operational_restriction', 'auxiliary_equipment', 'current_transformer', 'fault_indicator',
+           'potential_transformer', 'sensor', 'ac_dc_terminal', 'base_voltage', 'conducting_equipment', 'connectivity_node', 'connectivity_node_container',
+           'equipment', 'equipment_container', 'feeder', 'geographical_region', 'identified_object', 'power_system_resource', 'site', 'sub_geographical_region',
+           'substation', 'terminal', 'equivalent_branch', 'equivalent_equipment', 'accumulator', 'analog', 'control', 'discrete', 'io_point', 'measurement',
+           'remote_control', 'remote_point', 'remote_source', 'battery_unit', 'photo_voltaic_unit', 'power_electronics_unit', 'power_electronics_wind_unit',
+           'ac_line_segment', 'breaker', 'busbar_section', 'conductor', 'connector', 'disconnector', 'energy_connection', 'energy_consumer',
+           'energy_consumer_phase', 'energy_source', 'energy_source_phase', 'fuse', 'jumper', 'junction', 'line', 'linear_shunt_compensator',
+           'load_break_switch', 'per_length_impedance', 'per_length_line_parameter', 'per_length_sequence_impedance', 'power_electronics_connection',
+           'power_electronics_connection_phase', 'power_transformer', 'power_transformer_end', 'protected_switch', 'ratio_tap_changer', 'recloser',
+           'regulating_cond_eq', 'shunt_compensator', 'switch', 'tap_changer', 'transformer_end', 'transformer_star_impedance', 'circuit', 'loop', 'lv_feeder',
+           'timestamp', 'network_identified_objects']
 
 #######################
 # IEC61968 ASSET INFO #
@@ -356,6 +378,50 @@ def town_detail():
     return builds(PBTownDetail, name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), stateOrProvince=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
 
 
+#####################################
+# IEC61968 infIEC61968 InfAssetInfo #
+#####################################
+
+def current_transformer_info():
+    return builds(
+        PBCurrentTransformerInfo,
+        ai=asset_info(),
+        accuracyClass=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        accuracyLimit=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        coreCount=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        ctClass=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        kneePointVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        maxRatio=ratio(),
+        nominalRatio=ratio(),
+        primaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ratedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        secondaryFlsRating=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        secondaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        usage=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
+
+
+def potential_transformer_info():
+    return builds(
+        PBPotentialTransformerInfo,
+        ai=asset_info(),
+        accuracyClass=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        nominalRatio=ratio(),
+        primaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ptClass=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        ratedVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        secondaryRatio=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+##################################
+# IEC61968 infIEC61968 InfCommon #
+##################################
+
+def ratio():
+    return builds(PBRatio, denominator=floats(min_value=0.1, max_value=1000.0), numerator=floats(min_value=0.0, max_value=1000.0))
+
+
 #####################
 # IEC61968 METERING #
 #####################
@@ -402,8 +468,20 @@ def auxiliary_equipment():
     return builds(PBAuxiliaryEquipment, eq=equipment(), terminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
 
 
+def current_transformer():
+    return builds(PBCurrentTransformer, sn=sensor(), coreBurden=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER))
+
+
 def fault_indicator():
     return builds(PBFaultIndicator, ae=auxiliary_equipment())
+
+
+def potential_transformer():
+    return builds(PBPotentialTransformer, sn=sensor(), type=sampled_from(PBPotentialTransformerKind.values()))
+
+
+def sensor():
+    return builds(PBSensor, ae=auxiliary_equipment())
 
 
 ######################

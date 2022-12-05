@@ -11,7 +11,7 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     EnergySourcePhase, Feeder, GeographicalRegion, Measurement, OperationalRestriction, OrganisationRole, PowerSystemResource, PowerTransformerEnd, \
     PricingStructure, RatioTapChanger, RemoteControl, RemoteSource, SubGeographicalRegion, Substation, Terminal, TransformerEnd, UsagePoint, Circuit, Loop, \
     PowerElectronicsUnit, PowerElectronicsConnectionPhase, PowerElectronicsConnection, TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, \
-    TransformerStarImpedance, ShuntCompensator, LvFeeder
+    TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
@@ -435,3 +435,13 @@ def open_end_open_circuit_tests(tei: TransformerEndInfo) -> BoundReferenceResolv
 def energised_end_open_circuit_tests(tei: TransformerEndInfo) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(tei, tei_to_ee_oct_resolver, None)
+
+
+def current_transformer_info(current_transformer: CurrentTransformer) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(current_transformer, ct_to_cti_resolver, None)
+
+
+def potential_transformer_info(potential_transformer: PotentialTransformer) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(potential_transformer, vt_to_vti_resolver, None)
