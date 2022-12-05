@@ -1128,6 +1128,3 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder()))
     ]
     return nios
-
-
-print([f for f in globals()])
