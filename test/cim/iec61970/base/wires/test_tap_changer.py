@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 
-from _pytest.python_api import raises
+from pytest import raises
 from hypothesis import assume
 from hypothesis.strategies import floats, booleans, integers
 

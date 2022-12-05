@@ -393,7 +393,7 @@ class PowerTransformer(ConductingEquipment):
         """
         return get_by_mrid(self._power_transformer_ends, mrid)
 
-    def get_end_by_num(self, end_number: int):
+    def get_end_by_num(self, end_number: int) -> PowerTransformerEnd:
         """
         Get the `PowerTransformerEnd` on this `PowerTransformer` by its `end_number`.
 
@@ -406,6 +406,20 @@ class PowerTransformer(ConductingEquipment):
                 if end.end_number == end_number:
                     return end
         raise IndexError(f"No TransformerEnd with end_number {end_number} was found in PowerTransformer {str(self)}")
+
+    def get_end_by_terminal(self, terminal: Terminal) -> PowerTransformerEnd:
+        """
+        Get the `PowerTransformerEnd` on this `PowerTransformer` by its `terminal`.
+
+        `terminal` The `terminal` to find a `PowerTransformerEnd` for.
+        Returns The `PowerTransformerEnd` connected to the specified `terminal`
+        Raises IndexError if no `PowerTransformerEnd` connected to `terminal` was found on this `PowerTransformer`.
+        """
+        if self._power_transformer_ends:
+            for end in self._power_transformer_ends:
+                if end.terminal is terminal:
+                    return end
+        raise IndexError(f"No TransformerEnd with terminal {terminal} was found in PowerTransformer {str(self)}")
 
     def add_end(self, end: PowerTransformerEnd) -> PowerTransformer:
         """
