@@ -5,23 +5,22 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar
-from zepben.evolve import BusbarSection, Queue, BasicTraversal, ConnectivityTracker, connected_terminals
+from typing import TYPE_CHECKING, Optional
+from zepben.evolve import BusbarSection, Queue, BasicTraversal, ConnectivityTracker, connected_terminals, depth_first
 
 if TYPE_CHECKING:
     from zepben.evolve import ConnectivityResult
     from zepben.evolve.types import OpenTest, QueueNext
-    T = TypeVar("T")
 
 __all__ = ["create_connectivity_traversal"]
 
 
-def create_connectivity_traversal(open_test: OpenTest, queue: Queue[ConnectivityResult]):
+def create_connectivity_traversal(open_test: OpenTest, queue: Optional[Queue[ConnectivityResult]] = None) -> BasicTraversal[ConnectivityResult]:
     # noinspection PyArgumentList
     return BasicTraversal(
         queue_next=_queue_next_connectivity_result_with_open_test(open_test),
-        process_queue=queue,
-        tracker=ConnectivityTracker()
+        process_queue=queue if queue is not None else depth_first(),
+        tracker=ConnectivityTracker(),
     )
 
 

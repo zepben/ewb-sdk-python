@@ -6,19 +6,21 @@
 import pytest
 
 from zepben.evolve import ConnectivityResult, BasicTraversal, connected_equipment, TestNetworkBuilder, connectivity_trace, connectivity_breadth_trace, \
-    current_connectivity_trace, normal_connectivity_trace, AcLineSegment, Terminal, BusbarSection, NetworkService
+    current_connectivity_trace, normal_connectivity_trace, AcLineSegment, Terminal, BusbarSection, NetworkService, create_connectivity_traversal, ignore_open
 
 
 class TestConnectivityTrace:
-    network = (TestNetworkBuilder()
-               .from_junction()
-               .to_breaker(is_normally_open=True, is_open=True)
-               .to_breaker(is_normally_open=True, is_open=False)
-               .to_junction()
-               .to_breaker(is_normally_open=False, is_open=True)
-               .to_breaker(is_normally_open=True, is_open=True)
-               .to_junction()
-               .network)
+    network = (
+        TestNetworkBuilder()
+        .from_junction()
+        .to_breaker(is_normally_open=True, is_open=True)
+        .to_breaker(is_normally_open=True, is_open=False)
+        .to_junction()
+        .to_breaker(is_normally_open=False, is_open=True)
+        .to_breaker(is_normally_open=True, is_open=True)
+        .to_junction()
+        .network
+    )
     """
     j0--b1--b2--j3--b4--b5--j6
         bo  no      co  bo
@@ -135,6 +137,12 @@ class TestConnectivityTrace:
 
         await t.add_step_action(step_action).run()
         assert visited == {bb1.mrid, bb2.mrid, bb3.mrid, c2.mrid, c3.mrid, c4.mrid, c5.mrid}
+
+    def test_create_connectivity_traversal_does_not_reuse_default_queue(self):
+        a = create_connectivity_traversal(ignore_open)
+        b = create_connectivity_traversal(ignore_open)
+
+        assert a.process_queue is not b.process_queue
 
     async def _validate_run(self, t: BasicTraversal[ConnectivityResult], *expected: str):
         visited = set()

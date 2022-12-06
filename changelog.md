@@ -42,6 +42,7 @@
 * Fixed connectivity traces.
 * Fixed bug where running a limited connected equipment trace with `maximum_steps=1`
   included equipment two steps away from the starting equipment if `feeder_direction` is set.
+* Each stop condition of a traversal is now checked on each step, regardless if a previous one in the internal list has returned `True`.
 
 ### Notes
 * None.

@@ -69,7 +69,8 @@ class Traversal(Generic[T]):
         """
         stop = False
         for cond in self.stop_conditions:
-            stop = stop or await cond(item)
+            # Use non-short-circuiting | to ensure each condition is awaited.
+            stop = stop | await cond(item)
         return stop
 
     def add_stop_condition(self, cond: Callable[[T], Awaitable[bool]]) -> Traversal[T]:
