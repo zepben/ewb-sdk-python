@@ -24,7 +24,7 @@ from zepben.evolve.services.network.tracing.phases.phase_trace import new_phase_
 from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
 from zepben.evolve.services.network.tracing.traversals.basic_traversal import BasicTraversal
-from zepben.evolve.services.network.tracing.traversals.queue import depth_first, breadth_first
+from zepben.evolve.services.network.tracing.traversals.queue import breadth_first
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
 from zepben.evolve.services.network.tracing.util import ignore_open, normally_open, currently_open
 if TYPE_CHECKING:
@@ -50,7 +50,7 @@ def create_basic_depth_trace(queue_next: QueueNext[T]) -> BasicTraversal[T]:
     :return: The `BasicTraversal`
     """
     # noinspection PyArgumentList
-    return BasicTraversal(queue_next=queue_next, process_queue=depth_first())
+    return BasicTraversal(queue_next=queue_next)
 
 
 def create_basic_breadth_trace(queue_next: QueueNext[T]) -> BasicTraversal[T]:
