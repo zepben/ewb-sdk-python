@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
-from zepben.evolve import BusbarSection, Queue,  BasicTraversal, ConnectivityTracker, connected_terminals
+from zepben.evolve import BusbarSection, Queue, BasicTraversal, ConnectivityTracker, connected_terminals
 
 if TYPE_CHECKING:
     from zepben.evolve import ConnectivityResult
