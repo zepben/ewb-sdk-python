@@ -16,6 +16,14 @@ __all__ = ["create_connectivity_traversal"]
 
 
 def create_connectivity_traversal(open_test: OpenTest, queue: Optional[Queue[ConnectivityResult]] = None) -> BasicTraversal[ConnectivityResult]:
+    """
+    Creates a connectivity traversal with a given open test and queue.
+
+    :param open_test: Function that tests whether a given phase on an equipment is open.
+    :param queue: The `Queue` to use for the traversal. If set to `None`, a LIFO queue will be used, resulting in a depth-first traversal. Defaults to `None`.
+    :return: A connectivity traversal with the given `open_test` and `queue`.
+    """
+
     # noinspection PyArgumentList
     return BasicTraversal(
         queue_next=_queue_next_connectivity_result_with_open_test(open_test),

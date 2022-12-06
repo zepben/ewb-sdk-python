@@ -137,7 +137,7 @@ def connectivity_trace() -> BasicTraversal[ConnectivityResult]:
 
     :return: The new traversal instance.
     """
-    return create_connectivity_traversal(ignore_open, depth_first())
+    return create_connectivity_traversal(ignore_open)
 
 
 def connectivity_breadth_trace() -> BasicTraversal[ConnectivityResult]:
@@ -156,7 +156,7 @@ def normal_connectivity_trace() -> BasicTraversal[ConnectivityResult]:
 
     :return: The new traversal instance.
     """
-    return create_connectivity_traversal(normally_open, depth_first())
+    return create_connectivity_traversal(normally_open)
 
 
 def current_connectivity_trace() -> BasicTraversal[ConnectivityResult]:
@@ -165,7 +165,7 @@ def current_connectivity_trace() -> BasicTraversal[ConnectivityResult]:
 
     :return: The new traversal instance.
     """
-    return create_connectivity_traversal(currently_open, depth_first())
+    return create_connectivity_traversal(currently_open)
 
 
 # --- Traversals for phase steps ---
