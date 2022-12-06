@@ -34,6 +34,7 @@
 
 ### Enhancements
 * `tracker` is now a field in `Traversal`, rather than its subclasses.
+* The constructor for `BranchRecursiveTraversal` now defaults the `process_queue` field to `depth_first()`.
 
 ### Fixes
 * `StreetDetail.to_cim` now references the protobuf -> CIM translation function for the `StreetDetail` protobuf type.
