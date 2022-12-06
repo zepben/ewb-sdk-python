@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclassy import dataclass
 
-from zepben.evolve import FifoQueue, BasicTracker, normal_direction, BranchRecursiveTraversal, current_direction, NetworkService, Terminal, FeederDirection
+from zepben.evolve import FifoQueue, normal_direction, BranchRecursiveTraversal, current_direction, NetworkService, Terminal, FeederDirection
 from zepben.evolve.types import DirectionSelector
 
 __all__ = ["RemoveDirection"]
@@ -34,7 +34,6 @@ class RemoveDirection:
         self.normal_traversal: BranchRecursiveTraversal[TerminalDirection] = BranchRecursiveTraversal(
             queue_next=lambda current, traversal: self._ebb_and_queue(traversal, current, normal_direction),
             process_queue=FifoQueue(),
-            tracker=BasicTracker(),
             branch_queue=FifoQueue()
         )
         """
@@ -47,7 +46,6 @@ class RemoveDirection:
         self.current_traversal: BranchRecursiveTraversal[TerminalDirection] = BranchRecursiveTraversal(
             queue_next=lambda current, traversal: self._ebb_and_queue(traversal, current, current_direction),
             process_queue=FifoQueue(),
-            tracker=BasicTracker(),
             branch_queue=FifoQueue()
         )
         """

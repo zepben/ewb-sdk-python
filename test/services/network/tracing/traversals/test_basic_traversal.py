@@ -7,7 +7,7 @@ from typing import List, Callable, Awaitable
 
 import pytest
 
-from zepben.evolve import BasicTraversal, breadth_first, BasicTracker, depth_first
+from zepben.evolve import BasicTraversal, breadth_first, Traversal
 
 
 def _queue_next(i: int, t: BasicTraversal[int]):
@@ -36,7 +36,7 @@ async def test_breadth_first():
     visit_order = []
 
     # noinspection PyArgumentList
-    t = BasicTraversal(queue_next=_queue_next, process_queue=breadth_first(), tracker=BasicTracker(), stop_conditions=[_geq(6)],
+    t = BasicTraversal(queue_next=_queue_next, process_queue=breadth_first(), stop_conditions=[_geq(6)],
                        step_actions=[_append_to(visit_order)])
 
     await _validate_run(t, True, visit_order, expected_order)
@@ -48,8 +48,7 @@ async def test_depth_first():
     visit_order = []
 
     # noinspection PyArgumentList
-    t = BasicTraversal(queue_next=_queue_next, process_queue=depth_first(), tracker=BasicTracker(), stop_conditions=[_geq(6)],
-                       step_actions=[_append_to(visit_order)])
+    t = BasicTraversal(queue_next=_queue_next, stop_conditions=[_geq(6)], step_actions=[_append_to(visit_order)])
 
     await _validate_run(t, True, visit_order, expected_order)
 
@@ -57,8 +56,8 @@ async def test_depth_first():
 # noinspection PyArgumentList
 @pytest.mark.asyncio
 async def test_can_control_stopping_on_first_asset():
-    await _validate_stopping_on_first_asset(BasicTraversal(queue_next=_queue_next, process_queue=breadth_first(), tracker=BasicTracker()), [1, 2, 3])
-    await _validate_stopping_on_first_asset(BasicTraversal(queue_next=_queue_next, process_queue=depth_first(), tracker=BasicTracker()), [1, 3, 2])
+    await _validate_stopping_on_first_asset(BasicTraversal(queue_next=_queue_next, process_queue=breadth_first()), [1, 2, 3])
+    await _validate_stopping_on_first_asset(BasicTraversal(queue_next=_queue_next), [1, 3, 2])
 
 
 @pytest.mark.asyncio
@@ -76,7 +75,7 @@ async def test_passes_stopping_to_step():
             stopping_on.add(i)
 
     # noinspection PyArgumentList
-    t = BasicTraversal(queue_next=queue_next_greater, process_queue=depth_first(), tracker=BasicTracker(), stop_conditions=[_geq(3)],
+    t = BasicTraversal(queue_next=queue_next_greater, stop_conditions=[_geq(3)],
                        step_actions=[update_sets])
 
     await t.run(1, True)
@@ -99,11 +98,7 @@ async def test_runs_all_stop_checks():
         return stop_condition
 
     # noinspection PyArgumentList
-    await BasicTraversal(queue_next=queue_nothing, process_queue=depth_first(), tracker=BasicTracker()) \
-        .add_stop_condition(set_and_stop(0)) \
-        .add_stop_condition(set_and_stop(1)) \
-        .add_stop_condition(set_and_stop(2)) \
-        .run(1, True)
+    await BasicTraversal(queue_next=queue_nothing, stop_conditions=[set_and_stop(i) for i in range(3)]).run(1, True)
 
     assert stop_calls == [1, 1, 1]
 
@@ -122,11 +117,7 @@ async def test_runs_all_step_actions():
         return step_action
 
     # noinspection PyArgumentList
-    await BasicTraversal(queue_next=queue_nothing, process_queue=depth_first(), tracker=BasicTracker()) \
-        .add_step_action(set_step_call(0)) \
-        .add_step_action(set_step_call(1)) \
-        .add_step_action(set_step_call(2)) \
-        .run(1, True)
+    await BasicTraversal(queue_next=queue_nothing, step_actions=[set_step_call(i) for i in range(3)]).run(1, True)
 
     assert step_calls == [1, 1, 1]
 
@@ -163,7 +154,7 @@ async def _validate_stopping_on_first_asset(t: BasicTraversal[int], expected_ord
     await _validate_run(t, True, visit_order, [1])
 
 
-async def _validate_run(t: BasicTraversal[int], can_stop_on_start: bool, visit_order: List[int], expected_order: List[int]):
+async def _validate_run(t: Traversal[int], can_stop_on_start: bool, visit_order: List[int], expected_order: List[int]):
     await t.run(1, can_stop_on_start)
     assert visit_order == expected_order
     for n in expected_order:

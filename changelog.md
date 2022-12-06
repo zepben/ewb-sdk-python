@@ -33,7 +33,7 @@
 * Added `PowerTransformer().get_end_by_terminal`, which gets a `PowerTransformerEnd` by the `Terminal` it's connected to.
 
 ### Enhancements
-* None.
+* `tracker` is now a field in `Traversal`, rather than its subclasses.
 
 ### Fixes
 * `StreetDetail.to_cim` now references the protobuf -> CIM translation function for the `StreetDetail` protobuf type.

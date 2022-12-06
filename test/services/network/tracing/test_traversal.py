@@ -5,11 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import pytest
-from zepben.evolve import BranchRecursiveTraversal, BasicTraversal, FifoQueue, LifoQueue
-from typing import List, Optional, Set
+from zepben.evolve import BranchRecursiveTraversal, BasicTraversal, FifoQueue, Traversal
+from typing import List
 
 
-async def validate_run(t: BasicTraversal, visit_order: List[int], expected_order: List[int], can_stop_on_start=True, check_visited=True):
+async def validate_run(t: Traversal, visit_order: List[int], expected_order: List[int], can_stop_on_start=True, check_visited=True):
     # clean slate each run
     t.reset()
     visit_order.clear()
@@ -20,7 +20,7 @@ async def validate_run(t: BasicTraversal, visit_order: List[int], expected_order
             assert t.tracker.has_visited(x)
 
 
-async def _validate_can_stop(t: BasicTraversal, visit_order: List[int], expected_order: List[int], stop_count=None, check_visited=True):
+async def _validate_can_stop(t: Traversal, visit_order: List[int], expected_order: List[int], stop_count=None, check_visited=True):
     await validate_run(t, visit_order=visit_order, expected_order=expected_order, can_stop_on_start=False, check_visited=check_visited)
     if stop_count is not None:
         assert stop_count == len(visit_order)
@@ -43,9 +43,10 @@ class TestTraversal(object):
         async def cond(i):
             return i >= 6
 
-        async def action(i, s):
+        async def action(i, _):
             visit_order.append(i)
 
+        # noinspection PyArgumentList
         t = BasicTraversal(queue_next=queue_next, start_item=1, process_queue=FifoQueue(), stop_conditions=[cond], step_actions=[action])
 
         await validate_run(t, can_stop_on_start=True, visit_order=visit_order, expected_order=expected_order)
@@ -58,13 +59,15 @@ class TestTraversal(object):
         async def cond(i):
             return i >= 6
 
-        async def action(i, s):
+        async def action(i, _):
             visit_order.append(i)
 
-        t = BasicTraversal(queue_next=queue_next, start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
+        # noinspection PyArgumentList
+        t = BasicTraversal(queue_next=queue_next, start_item=1, stop_conditions=[cond], step_actions=[action])
 
         await validate_run(t, can_stop_on_start=True, visit_order=visit_order, expected_order=expected_order)
 
+    # noinspection PyArgumentList
     @pytest.mark.asyncio
     async def test_can_stop_on_start_item(self):
         async def cond1(i):
@@ -75,12 +78,13 @@ class TestTraversal(object):
 
         visit_order = []
 
-        async def action(i, s):
+        async def action(i, _):
             visit_order.append(i)
 
         t = BasicTraversal(queue_next=queue_next, start_item=1, process_queue=FifoQueue(), stop_conditions=[cond1, cond2], step_actions=[action])
         await _validate_can_stop(t, visit_order=visit_order, expected_order=[1, 2, 3])
-        t = BasicTraversal(queue_next=queue_next, start_item=1, process_queue=LifoQueue(), stop_conditions=[cond1, cond2], step_actions=[action])
+
+        t = BasicTraversal(queue_next=queue_next, start_item=1, stop_conditions=[cond1, cond2], step_actions=[action])
         await _validate_can_stop(t, visit_order=visit_order, expected_order=[1, 3, 2])
 
     @pytest.mark.asyncio
@@ -96,8 +100,9 @@ class TestTraversal(object):
             if s:
                 stopping_on.add(i)
 
-        t = BasicTraversal(queue_next=lambda i, traversal: traversal.process_queue.extend([i + 1, i + 2]),
-                      start_item=1, process_queue=LifoQueue(), stop_conditions=[cond], step_actions=[action])
+        # noinspection PyArgumentList
+        t = BasicTraversal(queue_next=lambda i, traversal: traversal.process_queue.extend([i + 1, i + 2]), start_item=1, stop_conditions=[cond],
+                           step_actions=[action])
 
         await t.run(can_stop_on_start_item=True)
         for x in range(1, 4):
@@ -106,7 +111,7 @@ class TestTraversal(object):
             assert x in stopping_on
 
 
-def queue_next_br(item: int, traversal: BranchRecursiveTraversal, exclude: Optional[Set[int]] = None):
+def queue_next_br(item: int, traversal: BranchRecursiveTraversal):
     if item == 0:
         branch = traversal.create_branch()
         branch.start_item = 1
@@ -132,17 +137,17 @@ class TestBranchRecursiveTraversal(object):
     async def test_simple(self):
         visited = list()
 
-        async def action(i, s):
+        async def action(i, _):
             visited.append(i)
 
         self.stop_count = 0
 
-        async def cond(i):
+        async def cond(_):
             self.stop_count += 1
             return False
 
-        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, process_queue=LifoQueue(), branch_queue=FifoQueue(), step_actions=[action],
-                                     stop_conditions=[cond])
+        # noinspection PyArgumentList
+        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, branch_queue=FifoQueue(), step_actions=[action], stop_conditions=[cond])
         await validate_run(t, visited, [0, 1, 2, 3, 3, 2, 1], check_visited=False)
         assert self.stop_count == len(visited)
 
@@ -150,18 +155,19 @@ class TestBranchRecursiveTraversal(object):
     async def test_stop_first_asset(self):
         visited = list()
 
-        async def action(i, s):
+        async def action(i, _):
             visited.append(i)
 
         self.stop_count = 0
 
-        async def cond1(i):
+        async def cond1(_):
+            self.stop_count += 1
             self.stop_count += 1
             return False
 
         async def cond2(i):
             return i == 0
 
-        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, process_queue=LifoQueue(), branch_queue=FifoQueue(), step_actions=[action],
-                                     stop_conditions=[cond1, cond2])
+        # noinspection PyArgumentList
+        t = BranchRecursiveTraversal(start_item=0, queue_next=queue_next_br, branch_queue=FifoQueue(), step_actions=[action], stop_conditions=[cond1, cond2])
         await _validate_can_stop(t, visited, [0, 1, 2, 3, 3, 2, 1], check_visited=False)

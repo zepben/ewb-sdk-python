@@ -11,6 +11,7 @@ from typing import List, Callable, Awaitable, TypeVar, Generic
 
 from dataclassy import dataclass
 
+from zepben.evolve import Tracker, BasicTracker
 from zepben.evolve.exceptions import TracingException
 
 __all__ = ["Traversal"]
@@ -50,6 +51,9 @@ class Traversal(Generic[T]):
 
     step_actions: List[Callable[[T, bool], Awaitable[None]]] = []
     """A list of callback functions, to be called on each item."""
+
+    tracker: Tracker = BasicTracker()
+    """A `zepben.evolve.traversals.tracker.Tracker` for tracking which items have been seen. If not provided a `Tracker` will be created for this trace."""
 
     _has_run: bool = False
     """Whether this traversal has run """

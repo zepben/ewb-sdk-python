@@ -38,9 +38,6 @@ class BasicTraversal(Traversal[T]):
     process_queue: Queue[T] = depth_first()
     """Dictates the type of search to be performed on the network graph. Breadth-first, Depth-first, and Priority based searches are possible."""
 
-    tracker: Tracker = BasicTracker()
-    """A `zepben.evolve.traversals.tracker.Tracker` for tracking which items have been seen. If not provided a `Tracker` will be created for this trace."""
-
     async def _run_trace(self, can_stop_on_start_item: bool = True):
         """
         Run's the trace. Stop conditions and step_actions are called with await, so you can utilise asyncio when
