@@ -24,10 +24,10 @@ class TestConnectivityTracker:
         tracker = ConnectivityTracker()
         cr = ConnectivityResult(self.es_t, self.acls_t1, [])
 
-        assert not (tracker.has_visited(cr)), "has_visited returns false for unvisited equipment"
+        assert not tracker.has_visited(cr), "has_visited returns false for unvisited equipment"
         assert tracker.visit(cr), "Visiting unvisited equipment returns true"
         assert tracker.has_visited(cr), "has_visited returns true for visited equipment"
-        assert not (tracker.visit(cr)), "Revisiting visited equipment returns false"
+        assert not tracker.visit(cr), "Revisiting visited equipment returns false"
         tracker.clear()
         assert not tracker.has_visited(cr), "Clearing delists all equipment"
 
