@@ -3,8 +3,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from collections import Counter
-
 import pytest
 
 from zepben.evolve import ConnectivityResult, BasicTraversal, connected_equipment, TestNetworkBuilder, connectivity_trace, connectivity_breadth_trace, \
@@ -68,7 +66,7 @@ class TestConnectivityTrace:
             visited.add(cr.to_equip.mrid)
 
         await t.add_step_action(step_action).run()
-        assert Counter(visited) == Counter([bb1.mrid, c2.mrid, c3.mrid])
+        assert visited == {bb1.mrid, c2.mrid, c3.mrid}
 
     @pytest.mark.asyncio
     async def test_can_stop_on_busbars(self):
@@ -98,7 +96,7 @@ class TestConnectivityTrace:
             return isinstance(cr.to_equip, BusbarSection)
 
         await t.add_step_action(step_action).add_stop_condition(should_stop).run()
-        assert Counter(visited) == Counter([c2.mrid, bb1.mrid])
+        assert visited == {c2.mrid, bb1.mrid}
 
     @pytest.mark.asyncio
     async def test_can_traverse_connected_busbars(self):
@@ -136,7 +134,7 @@ class TestConnectivityTrace:
             visited.add(cr.to_equip.mrid)
 
         await t.add_step_action(step_action).run()
-        assert Counter(visited) == Counter([bb1.mrid, bb2.mrid, bb3.mrid, c2.mrid, c3.mrid, c4.mrid, c5.mrid])
+        assert visited == {bb1.mrid, bb2.mrid, bb3.mrid, c2.mrid, c3.mrid, c4.mrid, c5.mrid}
 
     async def _validate_run(self, t: BasicTraversal[ConnectivityResult], *expected: str):
         visited = set()
@@ -148,4 +146,4 @@ class TestConnectivityTrace:
             visited.add(cr.to_equip.mrid)
 
         await t.add_step_action(step_action).run()
-        assert Counter(visited) == Counter(expected)
+        assert visited == set(expected)
