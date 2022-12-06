@@ -162,8 +162,9 @@ from zepben.evolve.streaming.get.consumer import *
 from zepben.evolve.streaming.get.customer_consumer import *
 from zepben.evolve.streaming.get.diagram_consumer import *
 from zepben.evolve.streaming.get.network_consumer import *
+from zepben.evolve.streaming.grpc.auth_token_plugin import *
 from zepben.evolve.streaming.grpc.grpc import *
-from zepben.evolve.streaming.grpc.channel_builder import *
+from zepben.evolve.streaming.grpc.grpc_channel_builder import *
 from zepben.evolve.streaming.grpc.connect import *
 
 
