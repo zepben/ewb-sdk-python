@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Callable, Optional, Set, List
 
-from zepben.evolve import LifoQueue, BasicTraversal
+from zepben.evolve import BasicTraversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -17,7 +17,7 @@ __all__ = ["new_normal_trace", "new_current_trace", "new_trace", "get_associated
 
 def new_trace(open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool] = ignore_open) -> BasicTraversal[Terminal]:
     # noinspection PyArgumentList
-    return BasicTraversal(queue_next=queue_next_terminal_if_closed(open_test), process_queue=LifoQueue(), tracker=AssociatedTerminalTracker())
+    return BasicTraversal(queue_next=queue_next_terminal_if_closed(open_test), tracker=AssociatedTerminalTracker())
 
 
 def new_normal_trace() -> BasicTraversal[Terminal]:

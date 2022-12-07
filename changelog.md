@@ -33,12 +33,17 @@
 * Added `PowerTransformer().get_end_by_terminal`, which gets a `PowerTransformerEnd` by the `Terminal` it's connected to.
 
 ### Enhancements
-* None.
+* `tracker` is now a field in `Traversal`, rather than its subclasses.
+* The constructor for `BranchRecursiveTraversal` now defaults the `process_queue` field to `depth_first()`.
 
 ### Fixes
 * `StreetDetail.to_cim` now references the protobuf -> CIM translation function for the `StreetDetail` protobuf type.
 * `PerLengthImpedance.to_cim` now references the protobuf -> CIM translation function for the `PerLengthImpedance` protobuf type.
 * `ZepbenTokenFetcher` now includes the refresh token in token refresh requests.
+* Fixed connectivity traces.
+* Fixed bug where running a limited connected equipment trace with `maximum_steps=1`
+  included equipment two steps away from the starting equipment if `feeder_direction` is set.
+* Each stop condition of a traversal is now checked on each step, regardless if a previous one in the internal list has returned `True`.
 
 ### Notes
 * None.

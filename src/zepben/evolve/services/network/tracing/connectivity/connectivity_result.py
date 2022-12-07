@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from operator import attrgetter
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING, Iterable
 
 from dataclassy import dataclass
 
@@ -36,7 +36,7 @@ Terminal.__lt__ = terminal_compare
 
 
 @dataclass(slots=True, init=False)
-class ConnectivityResult(object):
+class ConnectivityResult:
     """
     Stores the connectivity between two terminals, including the mapping between the nominal phases.
     This class is intended to be used in an immutable way. You should avoid modifying it after it has been created.
@@ -51,7 +51,7 @@ class ConnectivityResult(object):
     nominal_phase_paths: Tuple[NominalPhasePath]
     """The mapping of nominal phase paths between the from and to terminals."""
 
-    def __init__(self, from_terminal: Terminal, to_terminal: Terminal, nominal_phase_paths: List[NominalPhasePath]):
+    def __init__(self, from_terminal: Terminal, to_terminal: Terminal, nominal_phase_paths: Iterable[NominalPhasePath]):
         self.nominal_phase_paths = tuple(sorted(nominal_phase_paths, key=attrgetter('from_phase', 'to_phase')))
         self.from_terminal = from_terminal
         self.to_terminal = to_terminal
@@ -59,9 +59,10 @@ class ConnectivityResult(object):
     def __eq__(self, other: ConnectivityResult):
         if self is other:
             return True
+
         # noinspection PyBroadException
         try:
-            return self.from_terminal is other.from_terminal and self.to_terminal is other.to_terminal and self.nominal_phase_paths != other.nominal_phase_paths
+            return self.from_terminal is other.from_terminal and self.to_terminal is other.to_terminal and self.nominal_phase_paths == other.nominal_phase_paths
         except Exception:
             return False
 

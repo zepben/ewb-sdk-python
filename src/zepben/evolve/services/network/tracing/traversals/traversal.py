@@ -11,6 +11,7 @@ from typing import List, Callable, Awaitable, TypeVar, Generic
 
 from dataclassy import dataclass
 
+from zepben.evolve import Tracker, BasicTracker
 from zepben.evolve.exceptions import TracingException
 
 __all__ = ["Traversal"]
@@ -51,13 +52,16 @@ class Traversal(Generic[T]):
     step_actions: List[Callable[[T, bool], Awaitable[None]]] = []
     """A list of callback functions, to be called on each item."""
 
+    tracker: Tracker = BasicTracker()
+    """A `zepben.evolve.traversals.tracker.Tracker` for tracking which items have been seen. If not provided a `Tracker` will be created for this trace."""
+
     _has_run: bool = False
     """Whether this traversal has run """
 
     _running: bool = False
     """Whether this traversal is currently running"""
 
-    async def matches_any_stop_condition(self, item: T):
+    async def matches_any_stop_condition(self, item: T) -> bool:
         """
         Checks all the stop conditions for the passed in item and returns true if any match.
         This calls all registered stop conditions even if one has already returned true to make sure everything is
@@ -69,10 +73,11 @@ class Traversal(Generic[T]):
         """
         stop = False
         for cond in self.stop_conditions:
-            stop = stop or await cond(item)
+            # Use non-short-circuiting | to ensure each condition is awaited.
+            stop = stop | await cond(item)
         return stop
 
-    def add_stop_condition(self, cond: Callable[[T], Awaitable[bool]]):
+    def add_stop_condition(self, cond: Callable[[T], Awaitable[bool]]) -> Traversal[T]:
         """
         Add a callback to check whether the current item in the traversal is a stop point.
         If any of the registered stop conditions return true, the traversal will not call the callback to queue more items.
@@ -82,6 +87,7 @@ class Traversal(Generic[T]):
         Returns this traversal instance.
         """
         self.stop_conditions.append(cond)
+        return self
 
     def add_step_action(self, action: Callable[[T, bool], Awaitable[None]]) -> Traversal[T]:
         """

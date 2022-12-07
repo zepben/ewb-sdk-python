@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
-from zepben.evolve import BasicTraversal, depth_first, ConductingEquipmentStepTracker, breadth_first, ignore_open, normally_open, currently_open, \
+from zepben.evolve import BasicTraversal, ConductingEquipmentStepTracker, breadth_first, ignore_open, normally_open, currently_open, \
     ConductingEquipmentStep
 from zepben.evolve.services.network.network_service import connected_equipment
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_traversal import ConnectedEquipmentTraversal
@@ -47,7 +47,7 @@ def new_connected_equipment_trace() -> ConnectedEquipmentTraversal:
     :return: a traversal that traces equipment that are connected, ignoring open status.
     """
     # noinspection PyArgumentList
-    return ConnectedEquipmentTraversal(queue_next=_queue_next(ignore_open), process_queue=depth_first(), tracker=ConductingEquipmentStepTracker())
+    return ConnectedEquipmentTraversal(queue_next=_queue_next(ignore_open), tracker=ConductingEquipmentStepTracker())
 
 
 def new_connected_equipment_breadth_trace() -> ConnectedEquipmentTraversal:
@@ -63,7 +63,7 @@ def new_normal_connected_equipment_trace() -> ConnectedEquipmentTraversal:
     :return: a traversal that traces equipment that are connected stopping at normally open points.
     """
     # noinspection PyArgumentList
-    return ConnectedEquipmentTraversal(queue_next=_queue_next(normally_open), process_queue=depth_first(), tracker=ConductingEquipmentStepTracker())
+    return ConnectedEquipmentTraversal(queue_next=_queue_next(normally_open), tracker=ConductingEquipmentStepTracker())
 
 
 def new_current_connected_equipment_trace() -> ConnectedEquipmentTraversal:
@@ -71,7 +71,7 @@ def new_current_connected_equipment_trace() -> ConnectedEquipmentTraversal:
     :return: a traversal that traces equipment that are connected stopping at currently open points.
     """
     # noinspection PyArgumentList
-    return ConnectedEquipmentTraversal(queue_next=_queue_next(currently_open), process_queue=depth_first(), tracker=ConductingEquipmentStepTracker())
+    return ConnectedEquipmentTraversal(queue_next=_queue_next(currently_open), tracker=ConductingEquipmentStepTracker())
 
 
 def new_normal_limited_connected_equipment_trace() -> LimitedConnectedEquipmentTrace:

@@ -6,8 +6,7 @@
 
 from __future__ import annotations
 
-from zepben.evolve import BasicTracker, Tracker
-from zepben.evolve.services.network.tracing.traversals.queue import Queue
+from zepben.evolve.services.network.tracing.traversals.queue import Queue, depth_first
 from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
 from typing import Callable, TypeVar, Optional
 
@@ -25,11 +24,8 @@ class BranchRecursiveTraversal(Traversal[T]):
     branch_queue: Queue[BranchRecursiveTraversal[T]]
     """Queue containing branches to be processed"""
 
-    process_queue: Queue[T]
+    process_queue: Queue[T] = depth_first()
     """Queue containing the items to process for this branch"""
-
-    tracker: Tracker = BasicTracker()
-    """Tracker for the items in this branch"""
 
     parent: Optional[BranchRecursiveTraversal[T]] = None
     """The parent branch for this branch, None implies this branch has no parent"""
