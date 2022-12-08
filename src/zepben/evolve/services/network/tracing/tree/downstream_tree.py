@@ -55,6 +55,11 @@ class DownstreamTree(object):
                                                    process_queue=PriorityQueue(),
                                                    branch_queue=PriorityQueue())
 
+    def run(self, start: ConductingEquipment) -> TreeNode:
+        root = TreeNode(start, None)
+        self._traversal.run(root)
+        return root
+
     def _add_and_queue_next(self, current: Optional[TreeNode], traversal: BranchRecursiveTraversal[TreeNode]):
         # Loop through each of the terminals on the current conducting equipment
         if current is None:
