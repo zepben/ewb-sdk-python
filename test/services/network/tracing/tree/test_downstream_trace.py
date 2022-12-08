@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from collections import deque
 from typing import Optional, List
 
 import pytest
@@ -51,6 +52,17 @@ async def test_downstream_trace():
     test_node = next(iter(test_node.children))
     _verify_tree_asset(test_node, n["j4"], n["c3"], [n["c20"], n["c5"]])
 
+    assert len(_find_nodes(root, "j0")) == 0
+    assert len(_find_nodes(root, "c1")) == 0
+    assert len(_find_nodes(root, "j2")) == 1
+    assert len(_find_nodes(root, "c13")) == 1
+    assert len(_find_nodes(root, "j14")) == 1
+    assert len(_find_nodes(root, "c15")) == 1
+    assert len(_find_nodes(root, "j16")) == 1
+    assert len(_find_nodes(root, "c17")) == 1
+    assert len(_find_nodes(root, "b18")) == 1
+    assert len(_find_nodes(root, "c19")) == 1
+
 
 def _verify_tree_asset(
     tree_node: TreeNode,
@@ -71,3 +83,39 @@ def _verify_tree_asset(
     assert len(children_nodes) == len(expected_children)
     for child_node, expected_child in zip(children_nodes, expected_children):
         assert child_node.conducting_equipment is expected_child
+
+
+def _find_nodes(root: TreeNode, asset_id: str) -> List[TreeNode]:
+    matches: List[TreeNode] = []
+    process_nodes: deque[TreeNode] = deque()
+    process_nodes.append(root)
+
+    while process_nodes:
+        node = process_nodes.popleft()
+        if node.conducting_equipment.mrid == asset_id:
+            matches.append(node)
+
+        for child in node.children:
+            process_nodes.append(child)
+
+    return matches
+
+
+def _find_node_depths(root: TreeNode, asset_id: str) -> List[int]:
+    nodes = _find_nodes(root, asset_id)
+    depths = []
+
+    for node in nodes:
+        depths.append(_depth_in_tree(node))
+
+    return depths
+
+
+def _depth_in_tree(tree_node: TreeNode):
+    depth = -1
+    node = tree_node
+    while node is not None:
+        node = node.parent
+        depth += 1
+
+    return depth
