@@ -28,13 +28,13 @@ class PhaseStepTracker(Tracker[PhaseStep]):
     This tracker does not support null items.
     """
 
-    visited: Dict[ConductingEquipment, Set[SinglePhaseKind]] = defaultdict(set)
+    _visited: Dict[ConductingEquipment, Set[SinglePhaseKind]] = defaultdict(set)
 
     def has_visited(self, item: PhaseStep) -> bool:
-        return item.phases.issubset(self.visited[item.conducting_equipment])
+        return item.phases.issubset(self._visited[item.conducting_equipment])
 
     def visit(self, item: PhaseStep) -> bool:
-        visited_phases = self.visited[item.conducting_equipment]
+        visited_phases = self._visited[item.conducting_equipment]
 
         changed = False
         for phase in item.phases:
@@ -44,4 +44,4 @@ class PhaseStepTracker(Tracker[PhaseStep]):
         return changed
 
     def clear(self):
-        self.visited.clear()
+        self._visited.clear()

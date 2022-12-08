@@ -12,6 +12,7 @@ from zepben.evolve.exceptions import TracingException
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
 from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import BranchRecursiveTraversal
+from zepben.evolve.services.network.tracing.tree.tree_node_tracker import TreeNodeTracker
 if TYPE_CHECKING:
     from zepben.evolve import ConductingEquipment, Terminal, SinglePhaseKind
     from zepben.evolve.types import OpenTest, DirectionSelector
@@ -53,7 +54,8 @@ class DownstreamTree(object):
         # noinspection PyArgumentList
         self._traversal = BranchRecursiveTraversal(queue_next=self._add_and_queue_next,
                                                    process_queue=PriorityQueue(),
-                                                   branch_queue=PriorityQueue())
+                                                   branch_queue=PriorityQueue(),
+                                                   tracker=TreeNodeTracker())
 
     def run(self, start: ConductingEquipment) -> TreeNode:
         root = TreeNode(start, None)

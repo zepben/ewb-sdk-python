@@ -46,6 +46,7 @@
 * Each stop condition of a traversal is now checked on each step, regardless if a previous one in the internal list has returned `True`.
 * Add `normal_upstream_trace`, `current_upstream_trace`, and `phase_inferrer` to `__all__` in `zepben.evolve.services.network.tracing.tracing`.
 * Added missing `run` method for `DownstreamTree`.
+* Added missing `TreeNodeTracker`.
 
 ### Notes
 * None.
