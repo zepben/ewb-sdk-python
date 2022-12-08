@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from __future__ import annotations
 
 __all__ = ["BasicTracker"]
 
@@ -17,7 +18,7 @@ class BasicTracker(Tracker[T]):
     """
     An interface used by `Traversal`'s to 'track' items that have been visited.
     """
-    visited: Set = set()
+    _visited: Set = set()
 
     def has_visited(self, item: T) -> bool:
         """
@@ -25,7 +26,7 @@ class BasicTracker(Tracker[T]):
         `item` The item to check if it has been visited.
         Returns true if the item has been visited, otherwise false.
         """
-        return item in self.visited
+        return item in self._visited
 
     def visit(self, item: T) -> bool:
         """
@@ -33,21 +34,21 @@ class BasicTracker(Tracker[T]):
         `item` The item to visit.
         Returns True if visit succeeds. False otherwise.
         """
-        if item in self.visited:
+        if item in self._visited:
             return False
         else:
-            self.visited.add(item)
+            self._visited.add(item)
             return True
 
     def clear(self):
         """
         Clear the tracker, removing all visited items.
         """
-        self.visited.clear()
+        self._visited.clear()
 
-    def copy(self):
+    def copy(self) -> BasicTracker[T]:
         """
         Create a new `BasicTracker` with the same visited items. Does not other class members. e.g. queue, step actions or stop conditions etc.
         """
         # noinspection PyArgumentList
-        return BasicTracker(visited=self.visited.copy())
+        return BasicTracker(_visited=self._visited.copy())

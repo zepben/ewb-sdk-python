@@ -3,6 +3,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from __future__ import annotations
+
 from typing import Dict
 
 from zepben.evolve import Tracker, ConductingEquipmentStep, ConductingEquipment
@@ -49,3 +51,7 @@ class ConductingEquipmentStepTracker(Tracker[ConductingEquipmentStep]):
         Clear the tracker, removing all visited items.
         """
         self._minimum_steps = {}
+
+    def copy(self) -> ConductingEquipmentStepTracker:
+        # noinspection PyArgumentList
+        return ConductingEquipmentStepTracker(_minimum_steps=self._minimum_steps.copy())

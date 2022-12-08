@@ -58,9 +58,9 @@ class DownstreamTree(object):
                                                    branch_queue=PriorityQueue(),
                                                    tracker=TreeNodeTracker())
 
-    def run(self, start: ConductingEquipment) -> TreeNode:
+    async def run(self, start: ConductingEquipment) -> TreeNode:
         root = TreeNode(start, None)
-        self._traversal.run(root)
+        await self._traversal.run(root)
         return root
 
     def _add_and_queue_next(self, current: Optional[TreeNode], traversal: BranchRecursiveTraversal[TreeNode]):

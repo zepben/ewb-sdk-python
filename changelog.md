@@ -40,6 +40,7 @@
   * `TreeNode().parent` is now a read-only property.
   * `TreeNode().children` has been added as a read-only property that yields each child node.
   * `TreeNode().sort_weight` has been added as a read-only property that returns the sort weight of the node.
+* All `Tracker` classes can now be copied using the `copy` method.
 
 ### Fixes
 * `StreetDetail.to_cim` now references the protobuf -> CIM translation function for the `StreetDetail` protobuf type.

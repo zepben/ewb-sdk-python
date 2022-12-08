@@ -34,3 +34,7 @@ class ConnectivityTracker(Tracker[ConnectivityResult]):
 
     def clear(self):
         self._visited.clear()
+
+    def copy(self) -> ConnectivityTracker:
+        # noinspection PyArgumentList
+        return ConnectivityTracker(_visited=self._visited.copy())
