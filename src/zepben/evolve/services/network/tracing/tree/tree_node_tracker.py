@@ -6,7 +6,7 @@
 from typing import Set
 
 from zepben.evolve import Tracker, ConductingEquipment
-from zepben.evolve.services.network.tracing.tree.downstream_tree import TreeNode
+from zepben.evolve.services.network.tracing.tree.tree_node import TreeNode
 
 __all__ = ["TreeNodeTracker"]
 

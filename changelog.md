@@ -15,6 +15,7 @@
     when fetching the authentication config and requesting access tokens respectively.
   * `ca` is replaced with `ca_filename`, which can be set to the filename of a CA to use when verifying the certificate
     of the gRPC service.
+* Refactored `TreeNode` class to its own submodule: `zepben.evolve.services.network.tracing.tree.tree_node`.
 
 ### New Features
 * Added support for current transformers and power transformers with the following classes in `zepben.evolve.cim.*`:
