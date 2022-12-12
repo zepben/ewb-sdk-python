@@ -75,12 +75,12 @@ def create_looping_network():
         .to_acls(nominal_phases=PhaseCode.ABCN)  # c24
         .to_junction(nominal_phases=PhaseCode.ABCN)  # j25
         .connect("c19", "j25", 2, 2)
-        .branch_from("j8", 2)
+        .branch_from("j8", 3)
         .to_acls(nominal_phases=PhaseCode.ABCN)  # c26
         .to_junction(nominal_phases=PhaseCode.ABCN)  # j27
         .to_acls(nominal_phases=PhaseCode.ABCN)  # c28
-        .connect("c28", "j10", 2, 2)
-        .branch_from("j8", 3)
+        .connect("c28", "j10", 2, 1)
+        .branch_from("j8", 2)
         .to_acls(nominal_phases=PhaseCode.ABCN)  # c29
         .to_junction(nominal_phases=PhaseCode.ABCN)  # j30
         .to_acls(nominal_phases=PhaseCode.ABCN)  # c31

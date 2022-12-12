@@ -14,7 +14,7 @@ from zepben.evolve.services.network.tracing.tracing import normal_downstream_tre
 
 
 @pytest.mark.asyncio
-async def test_downstream_trace():
+async def test_downstream_tree():
     n = create_looping_network()
 
     await set_phases().run(n)
@@ -59,9 +59,64 @@ async def test_downstream_trace():
     assert len(_find_nodes(root, "j14")) == 1
     assert len(_find_nodes(root, "c15")) == 1
     assert len(_find_nodes(root, "j16")) == 1
+    assert len(_find_nodes(root, "c3")) == 1
+    assert len(_find_nodes(root, "j4")) == 1
     assert len(_find_nodes(root, "c17")) == 1
-    assert len(_find_nodes(root, "b18")) == 1
+    assert len(_find_nodes(root, "j21")) == 1
+    assert len(_find_nodes(root, "c20")) == 1
+    assert len(_find_nodes(root, "b18")) == 2
+    assert len(_find_nodes(root, "c5")) == 1
+    assert len(_find_nodes(root, "j6")) == 1
     assert len(_find_nodes(root, "c19")) == 1
+    assert len(_find_nodes(root, "j23")) == 1
+    assert len(_find_nodes(root, "c22")) == 1
+    assert len(_find_nodes(root, "j25")) == 1
+    assert len(_find_nodes(root, "c24")) == 1
+    assert len(_find_nodes(root, "j8")) == 1
+    assert len(_find_nodes(root, "c7")) == 1
+    assert len(_find_nodes(root, "j30")) == 1  # Would have been 3 if the intermediate loop was reprocessed.
+    assert len(_find_nodes(root, "c29")) == 1  # Would have been 3 if the intermediate loop was reprocessed.
+    assert len(_find_nodes(root, "j10")) == 3
+    assert len(_find_nodes(root, "c9")) == 4
+    assert len(_find_nodes(root, "j12")) == 3
+    assert len(_find_nodes(root, "c31")) == 1  # Would have been 3 if the intermediate loop was reprocessed.
+    assert len(_find_nodes(root, "j27")) == 4
+    assert len(_find_nodes(root, "c11")) == 3
+    assert len(_find_nodes(root, "c26")) == 4
+    assert len(_find_nodes(root, "c28")) == 4
+
+    assert _find_node_depths(root, "j0") == []
+    assert _find_node_depths(root, "c1") == []
+    assert _find_node_depths(root, "j2") == [0]
+    assert _find_node_depths(root, "c13") == [1]
+    assert _find_node_depths(root, "j14") == [2]
+    assert _find_node_depths(root, "c15") == [3]
+    assert _find_node_depths(root, "j16") == [4]
+    assert _find_node_depths(root, "c3") == [1]
+    assert _find_node_depths(root, "j4") == [2]
+    assert _find_node_depths(root, "c17") == [5]
+    assert _find_node_depths(root, "j21") == [4]
+    assert _find_node_depths(root, "c20") == [3]
+    assert _find_node_depths(root, "b18") == [6, 10]
+    assert _find_node_depths(root, "c5") == [3]
+    assert _find_node_depths(root, "j6") == [4]
+    assert _find_node_depths(root, "c19") == [9]
+    assert _find_node_depths(root, "j23") == [6]
+    assert _find_node_depths(root, "c22") == [5]
+    assert _find_node_depths(root, "j25") == [8]
+    assert _find_node_depths(root, "c24") == [7]
+    assert _find_node_depths(root, "j8") == [6]
+    assert _find_node_depths(root, "c7") == [5]
+    assert _find_node_depths(root, "j30") == [8]  # Would have been 8, 10, 12 if the intermediate loop was reprocessed.
+    assert _find_node_depths(root, "c29") == [7]  # Would have been 7, 11, 13 if the intermediate loop was reprocessed.
+    assert _find_node_depths(root, "j10") == [8, 10, 10]
+    assert _find_node_depths(root, "c9") == [7, 10, 11, 14]
+    assert _find_node_depths(root, "j12") == [10, 12, 12]
+    assert _find_node_depths(root, "c31") == [9]  # Would have been 9, 9, 11 if the intermediate loop was reprocessed.
+    assert _find_node_depths(root, "j27") == [8, 9, 12, 13]
+    assert _find_node_depths(root, "c11") == [9, 11, 11]
+    assert _find_node_depths(root, "c26") == [7, 10, 12, 13]
+    assert _find_node_depths(root, "c28") == [8, 9, 11, 14]
 
 
 def _verify_tree_asset(
