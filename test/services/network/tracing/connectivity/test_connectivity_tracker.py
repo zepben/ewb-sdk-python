@@ -38,3 +38,18 @@ class TestConnectivityTracker:
 
         tracker.visit(cr1)
         assert tracker.has_visited(cr2), "Tracker has_visited connectivities with visited destination equipment"
+
+    def test_copy(self):
+        cr1 = ConnectivityResult(self.es_t, self.acls_t1, [])
+        cr2 = ConnectivityResult(self.acls_t2, self.ec_t, [])
+
+        tracker = ConnectivityTracker()
+        tracker.visit(cr1)
+
+        tracker_copy = tracker.copy()
+        assert tracker is not tracker_copy, "Tracker copy is not a reference to the original tracker"
+        assert tracker_copy.has_visited(cr1), "Tracker copy reports has_visited as True for steps original tracker visited"
+
+        tracker_copy.visit(cr2)
+        assert not tracker.has_visited(cr2), "Tracker copy maintains separate tracking records"
+

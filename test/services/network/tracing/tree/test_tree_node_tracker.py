@@ -28,3 +28,18 @@ def test_tracking_tree_nodes_with_same_equipment():
 
     tracker.visit(tn1)
     assert tracker.has_visited(tn2), "Tracker has_visited tree nodes with visited equipment"
+
+
+def test_copy():
+    tn1 = TreeNode(Breaker(), None)
+    tn2 = TreeNode(Breaker(), tn1)
+
+    tracker = TreeNodeTracker()
+    tracker.visit(tn1)
+
+    tracker_copy = tracker.copy()
+    assert tracker is not tracker_copy, "Tracker copy is not a reference to the original tracker"
+    assert tracker_copy.has_visited(tn1), "Tracker copy reports has_visited as True for steps original tracker visited"
+
+    tracker_copy.visit(tn2)
+    assert not tracker.has_visited(tn2), "Tracker copy maintains separate tracking records"

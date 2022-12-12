@@ -48,4 +48,4 @@ class PhaseStepTracker(Tracker[PhaseStep]):
 
     def copy(self) -> PhaseStepTracker:
         # noinspection PyArgumentList
-        return PhaseStepTracker(_visited={ce: visited_phases.copy() for ce, visited_phases in self._visited.items()})
+        return PhaseStepTracker(_visited=defaultdict(set, {ce: visited_phases.copy() for ce, visited_phases in self._visited.items()}))

@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import List
 
-from zepben.evolve import Junction, TreeNode, PhaseCode, Terminal
+from zepben.evolve import Junction, TreeNode, PhaseCode, Terminal, AcLineSegment
 
 
 def test_accessors():
@@ -52,6 +52,15 @@ def test_sort_weight():
 
     # Nodes for equipment with more phases on their terminals come first when building equipment trees.
     assert tree_node_1 < tree_node_0
+
+
+def test_str():
+    tree_node_0 = TreeNode(Junction(mrid="junction"), None)
+    tree_node_1 = TreeNode(AcLineSegment(mrid="acls"), tree_node_0)
+    tree_node_0.add_child(tree_node_1)
+
+    assert str(tree_node_0) == "{conducting_equipment: junction, parent: None, num children: 1}"
+    assert str(tree_node_1) == "{conducting_equipment: acls, parent: junction, num children: 0}"
 
 
 def _assert_children(tree_nodes: List[TreeNode], child_counts: List[int]):
