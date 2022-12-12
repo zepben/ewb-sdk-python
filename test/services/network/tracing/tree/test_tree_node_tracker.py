@@ -3,9 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.evolve import Breaker
-from zepben.evolve.services.network.tracing.tree.tree_node import TreeNode
-from zepben.evolve.services.network.tracing.tree.tree_node_tracker import TreeNodeTracker
+from zepben.evolve import Breaker, TreeNode, TreeNodeTracker
 
 
 def test_single_tree_node_and_clear():
