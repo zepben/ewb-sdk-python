@@ -9,8 +9,7 @@ from typing import Optional, List
 import pytest
 
 from services.network.test_data.looping_network import create_looping_network
-from zepben.evolve import set_phases, ConductingEquipment, set_direction, TreeNode
-from zepben.evolve.services.network.tracing.tracing import normal_downstream_tree
+from zepben.evolve import set_phases, ConductingEquipment, set_direction, TreeNode, normal_downstream_tree
 
 
 @pytest.mark.asyncio
