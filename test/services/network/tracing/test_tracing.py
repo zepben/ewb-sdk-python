@@ -60,7 +60,7 @@ def test_suppliers():
     _validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
     _validate_supplier(tracing.normal_downstream_tree, DownstreamTree)
 
-    # TODO
+    # TODO: EWB-2596
     # _validate_supplier(tracing.find_with_usage_points, FindWithUsagePoints)
     _validate_supplier(tracing.find_swer_equipment, FindSwerEquipment)
 
