@@ -19,16 +19,16 @@ class AssociatedTerminalTracker(BasicTracker[Optional[Terminal]]):
         # Any terminal that does not have a valid conducting equipment reference is considered visited.
         if terminal is not None:
             if terminal.conducting_equipment is not None:
-                return terminal.conducting_equipment in self.visited
+                return terminal.conducting_equipment in self._visited
         return True
 
     def visit(self, terminal: Optional[Terminal]) -> bool:
         # We don't visit any terminal that does not have a valid conducting equipment reference.
         if terminal is not None:
             if terminal.conducting_equipment is not None:
-                if terminal.conducting_equipment in self.visited:
+                if terminal.conducting_equipment in self._visited:
                     return False
 
-                self.visited.add(terminal.conducting_equipment)
+                self._visited.add(terminal.conducting_equipment)
                 return True
         return False

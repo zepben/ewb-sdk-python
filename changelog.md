@@ -15,6 +15,7 @@
     when fetching the authentication config and requesting access tokens respectively.
   * `ca` is replaced with `ca_filename`, which can be set to the filename of a CA to use when verifying the certificate
     of the gRPC service.
+* Refactored `TreeNode` class to its own submodule: `zepben.evolve.services.network.tracing.tree.tree_node`.
 
 ### New Features
 * Added support for current transformers and power transformers with the following classes in `zepben.evolve.cim.*`:
@@ -35,6 +36,11 @@
 ### Enhancements
 * `tracker` is now a field in `Traversal`, rather than its subclasses.
 * The constructor for `BranchRecursiveTraversal` now defaults the `process_queue` field to `depth_first()`.
+* `TreeNode` is now more closely aligned with its Kotlin version:
+  * `TreeNode().parent` is now a read-only property.
+  * `TreeNode().children` has been added as a read-only property that yields each child node.
+  * `TreeNode().sort_weight` has been added as a read-only property that returns the sort weight of the node.
+* All `Tracker` classes can now be copied using the `copy` method.
 
 ### Fixes
 * `StreetDetail.to_cim` now references the protobuf -> CIM translation function for the `StreetDetail` protobuf type.
@@ -44,6 +50,10 @@
 * Fixed bug where running a limited connected equipment trace with `maximum_steps=1`
   included equipment two steps away from the starting equipment if `feeder_direction` is set.
 * Each stop condition of a traversal is now checked on each step, regardless if a previous one in the internal list has returned `True`.
+* Add `normal_upstream_trace`, `current_upstream_trace`, and `phase_inferrer` to `__all__` in `zepben.evolve.services.network.tracing.tracing`.
+* Added missing `run` method for `DownstreamTree`.
+* Added missing `TreeNodeTracker`.
+* Classes in the `zepben.evolve.services.network.tracing.tree.*` submodules may now be imported `from zepben.evolve`.
 
 ### Notes
 * None.

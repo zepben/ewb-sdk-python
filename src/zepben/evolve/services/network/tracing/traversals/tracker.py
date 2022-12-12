@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from __future__ import annotations
 
 from abc import abstractmethod
 
@@ -44,5 +45,14 @@ class Tracker(Generic[T]):
     def clear(self):
         """
         Clear the tracker, removing all visited items.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def copy(self) -> Tracker[T]:
+        """
+        Create a copy of this tracker. `has_visited` should report the same for the copied tracker for each item,
+        but visiting an item on one of either the copy or original should not make the other report it as visited.
+        Returns the copied tracker.
         """
         raise NotImplementedError()

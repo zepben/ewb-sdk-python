@@ -134,6 +134,9 @@ from zepben.evolve.services.network.tracing.phases.phase_trace import *
 from zepben.evolve.services.network.tracing.phases.set_phases import *
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import *
 from zepben.evolve.services.network.tracing.phases.remove_phases import *
+from zepben.evolve.services.network.tracing.tree.downstream_tree import *
+from zepben.evolve.services.network.tracing.tree.tree_node import *
+from zepben.evolve.services.network.tracing.tree.tree_node_tracker import *
 from zepben.evolve.services.network.tracing.find import *
 from zepben.evolve.services.network.tracing.find_swer_equipment import *
 from zepben.evolve.services.network.tracing.tracing import *
