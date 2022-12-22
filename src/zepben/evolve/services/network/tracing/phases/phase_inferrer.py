@@ -39,15 +39,19 @@ class PhaseInferrer:
         for (conducting_equipment, has_suspect_inferred) in self._tracking.items():
             if has_suspect_inferred:
                 logger.warning(
-                    f"*** Action Required *** Inferred missing phases for '{conducting_equipment.name}' [{conducting_equipment.mrid}] which may not be "
-                    "correct. The phases were inferred due to a disconnected nominal phase because of an upstream error in the source data. Phasing "
-                    "information for the upstream equipment should be fixed in the source system."
+                    "*** Action Required *** Inferred missing phases for '%s' [%s] which may not be correct. The phases were inferred due to a disconnected "
+                    "nominal phase because of an upstream error in the source data. Phasing information for the upstream equipment should be fixed in the "
+                    "source system.",
+                    conducting_equipment.name,
+                    conducting_equipment.mrid
                 )
             else:
                 logger.warning(
-                    f"*** Action Required *** Inferred missing phase for '{conducting_equipment.name}' [{conducting_equipment.mrid}] which should be "
-                    "correct. The phase was inferred due to a disconnected nominal phase because of an upstream error in the source data. Phasing "
-                    "information for the upstream equipment should be fixed in the source system."
+                    "*** Action Required *** Inferred missing phase for '%s' [%s] which should be correct. The phase was inferred due to a disconnected "
+                    "nominal phase because of an upstream error in the source data. Phasing information for the upstream equipment should be fixed in the "
+                    "source system.",
+                    conducting_equipment.name,
+                    conducting_equipment.mrid
                 )
 
     async def _infer_missing_phases(self, network: NetworkService, phase_selector: PhaseSelector, direction_selector: DirectionSelector):
@@ -102,10 +106,10 @@ class PhaseInferrer:
         return [
             terminal for terminal in terminals
             if (self._has_none_phase(terminal, phase_selector) and
-                direction_selector(terminal).value().has(FeederDirection.UPSTREAM) and
+                (FeederDirection.UPSTREAM in direction_selector(terminal).value()) and
                 terminal.connectivity_node and
                 any(not self._has_none_phase(t, phase_selector) for t in terminal.connectivity_node.terminals if
-                    (t != terminal) and direction_selector(t).value().has(FeederDirection.DOWNSTREAM)))
+                    (t != terminal) and (FeederDirection.DOWNSTREAM in direction_selector(t).value())))
         ]
 
     def _missing_from_down_to_any(self, terminals: List[Terminal], phase_selector: PhaseSelector, direction_selector: DirectionSelector) -> List[Terminal]:
@@ -114,7 +118,7 @@ class PhaseInferrer:
             if (self._has_none_phase(terminal, phase_selector) and
                 terminal.connectivity_node and
                 any(not self._has_none_phase(t, phase_selector) for t in terminal.connectivity_node.terminals if
-                    (t != terminal) and direction_selector(t).value().has(FeederDirection.DOWNSTREAM)))
+                    (t != terminal) and (FeederDirection.DOWNSTREAM in direction_selector(t).value())))
         ]
 
     def _missing_from_any(self, terminals: List[Terminal], phase_selector: PhaseSelector) -> List[Terminal]:

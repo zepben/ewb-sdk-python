@@ -8,26 +8,26 @@ from zepben.evolve import FeederDirection
 
 class TestFeederDirection:
 
-    def test_has(self):
-        assert FeederDirection.NONE.has(FeederDirection.NONE)
-        assert not FeederDirection.NONE.has(FeederDirection.UPSTREAM)
-        assert not FeederDirection.NONE.has(FeederDirection.DOWNSTREAM)
-        assert not FeederDirection.NONE.has(FeederDirection.BOTH)
+    def test_contains(self):
+        assert FeederDirection.NONE in FeederDirection.NONE
+        assert FeederDirection.UPSTREAM not in FeederDirection.NONE
+        assert FeederDirection.DOWNSTREAM not in FeederDirection.NONE
+        assert FeederDirection.BOTH not in FeederDirection.NONE
 
-        assert not FeederDirection.UPSTREAM.has(FeederDirection.NONE)
-        assert FeederDirection.UPSTREAM.has(FeederDirection.UPSTREAM)
-        assert not FeederDirection.UPSTREAM.has(FeederDirection.DOWNSTREAM)
-        assert not FeederDirection.UPSTREAM.has(FeederDirection.BOTH)
+        assert FeederDirection.NONE not in FeederDirection.UPSTREAM
+        assert FeederDirection.UPSTREAM in FeederDirection.UPSTREAM
+        assert FeederDirection.DOWNSTREAM not in FeederDirection.UPSTREAM
+        assert FeederDirection.BOTH not in FeederDirection.UPSTREAM
 
-        assert not FeederDirection.DOWNSTREAM.has(FeederDirection.NONE)
-        assert not FeederDirection.DOWNSTREAM.has(FeederDirection.UPSTREAM)
-        assert FeederDirection.DOWNSTREAM.has(FeederDirection.DOWNSTREAM)
-        assert not FeederDirection.DOWNSTREAM.has(FeederDirection.BOTH)
+        assert FeederDirection.NONE not in FeederDirection.DOWNSTREAM
+        assert FeederDirection.UPSTREAM not in FeederDirection.DOWNSTREAM
+        assert FeederDirection.DOWNSTREAM in FeederDirection.DOWNSTREAM
+        assert FeederDirection.BOTH not in FeederDirection.DOWNSTREAM
 
-        assert not FeederDirection.BOTH.has(FeederDirection.NONE)
-        assert FeederDirection.BOTH.has(FeederDirection.UPSTREAM)
-        assert FeederDirection.BOTH.has(FeederDirection.DOWNSTREAM)
-        assert FeederDirection.BOTH.has(FeederDirection.BOTH)
+        assert FeederDirection.NONE not in FeederDirection.BOTH
+        assert FeederDirection.UPSTREAM in FeederDirection.BOTH
+        assert FeederDirection.DOWNSTREAM in FeederDirection.BOTH
+        assert FeederDirection.BOTH in FeederDirection.BOTH
 
     def test_plus(self):
         assert FeederDirection.NONE + FeederDirection.NONE == FeederDirection.NONE
@@ -70,3 +70,9 @@ class TestFeederDirection:
         assert FeederDirection.BOTH - FeederDirection.UPSTREAM == FeederDirection.DOWNSTREAM
         assert FeederDirection.BOTH - FeederDirection.DOWNSTREAM == FeederDirection.UPSTREAM
         assert FeederDirection.BOTH - FeederDirection.BOTH == FeederDirection.NONE
+
+    def test_not(self):
+        assert ~FeederDirection.NONE == FeederDirection.BOTH
+        assert ~FeederDirection.UPSTREAM == FeederDirection.DOWNSTREAM
+        assert ~FeederDirection.DOWNSTREAM == FeederDirection.UPSTREAM
+        assert ~FeederDirection.BOTH == FeederDirection.NONE

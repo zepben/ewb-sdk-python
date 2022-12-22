@@ -6,25 +6,19 @@ title: Tracing
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-:::warning
-The tracing module is in an experimental state and bugs will be present.
-:::
-
 Once you have a connected network model you can start following the connectivity to do some interesting analyses, from
 simple tasks such as adding up cable lengths along a line to advanced functions like a full load flow analysis.
 
 The Evolve SDK provides an API to make following connectivity (what we will call tracing) less cumbersome and more
 productive. It provides a variety of use-case specific traces out of the box, but also a generic mechanism to write
 your own traces in an easy to use manner. The
-[Tracing](#)
+[Tracing](https://github.com/zepben/evolve-sdk-python/blob/main/src/zepben/evolve/services/network/tracing/tracing.py)
 package is a great place to get an overview of the kind of tools we provide as part of the SDK.
 
 ## Basic Connectivity 
 
 So, let's start at the absolute basic use case. "What is directly connected to this piece of equipment?".
 Obviously we provide a function to let you to find out. Let's see it in code:
-
-TODO: Take example from datamodel page and code then explain in context of that
 
 ```python
 from zepben.evolve import Junction
@@ -56,7 +50,23 @@ connectivity: List<ConnectivityResult> = connected_terminals(switch, PhaseCode.A
 This will produce a subset of the result above, with just the equipment connected to the given terminal. The 
 connectivity result instances in the subset will be exactly the same as the previous example.
 
+Sometimes you do not care about the phase connectivity at all, and are just interested in terminals that share a connectivity node:
+
+```python
+switch: Breaker = network.get("aSwitch")
+for it in switch.get_terminal_by_sn(1).connected_terminals():
+    print(it)
+```
+
+This will return a `Generator` of all the terminals that share the same `ConnectivityNode`, regardless of any phase connectivity.
+
 ## Tracing
+
+### Feeder Direction
+
+`UPSTREAM` and `DOWNSTREAM` are concepts that only apply to equipment on feeders (HV or LV). These directions are purely for finding the feeder head, and have
+not been calculated with any power flow analysis. There is also a concept of `BOTH` if the feeder head can be found in either direction. e.g. in a loop or dual
+feed situation
 
 ### Basic Traversal
 
@@ -109,35 +119,45 @@ Let's break down what is happening with the trace:
 
 As you can see this provides an extremely simple but powerful way to perform useful traces over your network. 
 
-### Useful traces
+### Useful Traces
 
 There are a number of traces that will be common between all networks. We have identified numerous of these and 
 provide an easy way to instantiate them.
 
-#### Set phases trace
+#### Set Phases Trace
 
 `traces.set_phases()` returns a `zepben.evolve.tracing.phasing.SetPhases` instance. This provides a way to dynamically set phases at runtime based
 on a network's energy sources and the nominal phase connectivity within the network.
 
-#### Phase traces 
+#### Phase Traces
 
-There are numerous traces to trace based on various types of phasing data:
+The following traces all use phase based connectivity. This means that equipment that share connectivity nodes, but not phases, will not be considered
+connected, and when a phase is dropped, it will no longer be considered for future connectivity. Each of these traces will use different aspects of the network
+to limit the scope of the trace:
 - `traces.phase_trace()` will trace based on nominal phase connectivity, ignoring open switches or in service flags.
 - `traces.normal_phase_trace()` will trace based on nominal phase connectivity, stopping at normally open switches or
   equipment flagged as not normally in service. 
 - `traces.current_phase_trace()` will trace based on nominal phase connectivity, stopping at currently open switches or
   equipment flagged as not currently in service. 
-
-#### Downstream / Upstream traces 
-
-There are traces configured to find all upstream or downstream equipment from any piece of equipment that is on a feeder:
 - `traces.normal_downstream_trace()` will trace downstream of the start equipment based on the normal state of the network.
 - `traces.current_downstream_trace()` will trace downstream of the start equipment based on the current state of the network.
 - `traces.normal_upstream_trace()` will trace upstream of the start equipment based on the normal state of the network.
 - `traces.current_upstream_trace()` will trace upstream of the start equipment based on the current state of the network.
 
-#### Other traces
+#### Equipment Connectivity Traces
+
+The following work on `ConductingEquipment`, and ignores phase connectivity, instead considering things to be connected if they share a `ConnectivityNode`:
+- `traces.normal_downstream_equipment_trace()` will trace in the downstream direction, stopping at normally open switches, or equipment flagged as not normally
+  in service.
+- `traces.current_downstream_equipment_trace()` will trace in the downstream direction, stopping at currently open switches, or equipment flagged as not
+  normally in service.
+- `traces.normal_upstream_equipment_trace()` will trace in the upstream direction, stopping at normally open switches, or equipment flagged as not normally in
+  service.
+- `traces.current_upstream_equipment_trace()` will trace in the upstream direction, stopping at currently open switches, or equipment flagged as not normally in
+  service.
+
+#### Other Traces
 
 There are other useful but less common traces available. See the 
-[code](#)
+[code](https://github.com/zepben/evolve-sdk-python/blob/main/src/zepben/evolve/services/network/tracing/tracing.py)
 for all the available traces.

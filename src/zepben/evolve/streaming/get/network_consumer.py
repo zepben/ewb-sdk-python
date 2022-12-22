@@ -200,26 +200,6 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_network_hierarchy()
 
-    async def get_feeder(self, mrid: str) -> GrpcResult[MultiObjectResult]:
-        """
-        Retrieve the feeder network for the specified `mrid` and store the results in the `service`.
-
-        This is a convenience method that will fetch the feeder object and all of the equipment referenced by the feeder (normal state), along with
-        all references. This should entail a complete connectivity model for the feeder, however not the connectivity between multiple feeders.
-
-        Parameters
-            - `service` - The :class:`NetworkService` to store fetched objects in.
-            - `mrid` - The mRID of the :class:`Feeder` to fetch equipment for.
-
-        Returns a :class:`GrpcResult` of a :class:`MultiObjectResult`. If successful, containing a map keyed by mRID of all the objects retrieved. If an item
-        couldn't be added to `service`, its mRID will be present in `MultiObjectResult.failed`.
-
-        In addition to normal gRPC errors, you may also receive an unsuccessful :class:`GrpcResult` with the following errors:
-         * - :class:`ValueError` if the requested object was not found or was not a :class:`Feeder`.
-        """
-        warnings.warn('`get_feeder` is deprecated, prefer the more generic `get_equipment_container`', DeprecationWarning)
-        return await self._get_equipment_container(mrid, Feeder)
-
     async def get_equipment_container(
         self,
         mrid: str,

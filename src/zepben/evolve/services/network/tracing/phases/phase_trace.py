@@ -18,16 +18,38 @@ __all__ = ["new_phase_trace", "new_downstream_phase_trace", "new_upstream_phase_
 
 
 def new_phase_trace(open_test: OpenTest) -> BasicTraversal[PhaseStep]:
+    """
+    Creates a new phase-based trace using the provided open state test.
+
+    :param open_test: The test to use when checking if an object should be considered open.
+    :return: The new traversal instance.
+    """
     # noinspection PyArgumentList
     return BasicTraversal(queue_next=_queue_next(open_test), process_queue=PriorityQueue(), tracker=PhaseStepTracker())
 
 
 def new_downstream_phase_trace(open_test: OpenTest, active_direction: DirectionSelector) -> BasicTraversal[PhaseStep]:
+    """
+    Creates a new downstream trace based on the specified phases and state of the network. Note that the phases
+    need to be set on the network before a concept of downstream is known.
+
+    :param open_test: The test to use when checking if an object should be considered open.
+    :param active_direction: The direction selector that will be used to determine which state of the network to use.
+    :return: The new traversal instance.
+    """
     # noinspection PyArgumentList
     return BasicTraversal(queue_next=_queue_next_downstream(open_test, active_direction), process_queue=PriorityQueue(), tracker=PhaseStepTracker())
 
 
 def new_upstream_phase_trace(open_test: OpenTest, active_direction: DirectionSelector) -> BasicTraversal[PhaseStep]:
+    """
+    Creates a new upstream trace based on the specified phases and state of the network. Note that the phases
+    need to be set on the network before a concept of downstream is known.
+
+    :param open_test: The test to use when checking if an object should be considered open.
+    :param active_direction: The direction selector that will be used to determine which state of the network to use.
+    :return: The new traversal instance.
+    """
     # noinspection PyArgumentList
     return BasicTraversal(queue_next=_queue_next_upstream(open_test, active_direction), process_queue=PriorityQueue(), tracker=PhaseStepTracker())
 
@@ -62,7 +84,7 @@ def _queue_next_upstream(open_test: OpenTest, active_direction: DirectionSelecto
             if up_phases:
                 for cr in connected_terminals(term, up_phases):
                     # When going upstream, we only want to traverse to connected terminals that have a DOWNSTREAM direction
-                    if active_direction(cr.to_terminal).value().has(FeederDirection.DOWNSTREAM):
+                    if FeederDirection.DOWNSTREAM in active_direction(cr.to_terminal).value():
                         _try_queue(traversal, cr, cr.to_nominal_phases)
 
     return queue_next
@@ -96,7 +118,7 @@ def _get_phases_with_direction(open_test: OpenTest,
                                direction: FeederDirection) -> Set[SinglePhaseKind]:
     matched_phases: Set[SinglePhaseKind] = set()
 
-    if not active_direction(terminal).value().has(direction):
+    if direction not in active_direction(terminal).value():
         return matched_phases
 
     conducting_equipment = terminal.conducting_equipment

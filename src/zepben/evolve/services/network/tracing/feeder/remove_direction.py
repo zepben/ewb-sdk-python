@@ -38,7 +38,7 @@ class RemoveDirection:
         )
         """
         The [BranchRecursiveTraversal] used when tracing the normal state of the network.
-        
+
         NOTE: If you add stop conditions to this traversal it may no longer work correctly, use at your own risk.
         """
 
@@ -50,7 +50,7 @@ class RemoveDirection:
         )
         """
         The [BranchRecursiveTraversal] used when tracing the current state of the network.
-    
+
         NOTE: If you add stop conditions to this traversal it may no longer work correctly, use at your own risk.
         """
 
@@ -73,8 +73,14 @@ class RemoveDirection:
         :param direction: The feeder direction to remove. Defaults to all present directions. Specifying [FeederDirection.BOTH] will cause all directions
                           to be cleared from all connected equipment.
         """
-        await self._run_from_terminal(self.normal_traversal, TerminalDirection(terminal, self._validate_direction(direction, terminal.normal_feeder_direction)))
-        await self._run_from_terminal(self.current_traversal, TerminalDirection(terminal, self._validate_direction(direction, terminal.current_feeder_direction)))
+        await self._run_from_terminal(
+            self.normal_traversal,
+            TerminalDirection(terminal, self._validate_direction(direction, terminal.normal_feeder_direction))
+        )
+        await self._run_from_terminal(
+            self.current_traversal,
+            TerminalDirection(terminal, self._validate_direction(direction, terminal.current_feeder_direction))
+        )
 
     @staticmethod
     async def _run_from_terminal(traversal: BranchRecursiveTraversal[TerminalDirection], start: TerminalDirection):
@@ -98,7 +104,7 @@ class RemoveDirection:
             #    2+: do not queue or remove anything else as everything is still valid.
             #
             opposite_direction = self._find_opposite(current.direction_to_ebb)
-            matching_terminals = [t for t in other_terminals if direction_selector(t).value().has(current.direction_to_ebb)]
+            matching_terminals = [t for t in other_terminals if current.direction_to_ebb in direction_selector(t).value()]
             if not matching_terminals:
                 for other in other_terminals:
                     if direction_selector(other).remove(opposite_direction):
@@ -134,7 +140,7 @@ class RemoveDirection:
             #    2+: do not queue or remove anything else as everything is still valid.
             #
             opposite_direction = self._find_opposite(direction_ebbed)
-            matching_terminals = [t for t in other_terminals if direction_selector(t).value().has(direction_ebbed)]
+            matching_terminals = [t for t in other_terminals if direction_ebbed in direction_selector(t).value()]
             if not matching_terminals:
                 for other in other_terminals:
                     traversal.process_queue.put(TerminalDirection(other, opposite_direction))

@@ -16,6 +16,8 @@ from zepben.evolve import BasicTraversal, SetPhases, RemovePhases, AssignToFeede
     remove_direction, set_direction, connectivity_trace, connectivity_breadth_trace, normal_connectivity_trace, current_connectivity_trace, phase_inferrer, \
     PhaseInferrer
 from zepben.evolve.services.network.tracing.phases import phase_step
+from zepben.evolve.services.network.tracing.tracing import normal_downstream_equipment_trace, current_downstream_equipment_trace, \
+    normal_upstream_equipment_trace, current_upstream_equipment_trace
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
 
 T = TypeVar("T")
@@ -52,6 +54,11 @@ def test_suppliers():
 
     _validate_supplier(normal_limited_connected_equipment_trace, LimitedConnectedEquipmentTrace)
     _validate_supplier(current_limited_connected_equipment_trace, LimitedConnectedEquipmentTrace)
+
+    _validate_supplier(normal_downstream_equipment_trace, BasicTraversal)
+    _validate_supplier(current_downstream_equipment_trace, BasicTraversal)
+    _validate_supplier(normal_upstream_equipment_trace, BasicTraversal)
+    _validate_supplier(current_upstream_equipment_trace, BasicTraversal)
 
     _validate_supplier(connectivity_trace, BasicTraversal)
     _validate_supplier(connectivity_breadth_trace, BasicTraversal)
