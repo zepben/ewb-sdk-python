@@ -46,7 +46,10 @@ def _queue_connected_terminals(traversal: BranchRecursiveTraversal[TreeNode],
                 traversal.process_queue.put(next_node)
 
 
-class DownstreamTree(object):
+class DownstreamTree:
+    """
+    A class for creating a tree based structure in a downstream direction. If there are multiple paths to an item, all paths will be in the tree.
+    """
 
     def __init__(self, open_test: OpenTest, direction_selector: DirectionSelector):
         self._open_test = open_test
@@ -59,6 +62,12 @@ class DownstreamTree(object):
                                                    tracker=TreeNodeTracker())
 
     async def run(self, start: ConductingEquipment) -> TreeNode:
+        """
+        Generate the downstream tree from the specified start item.
+
+        :param start: The item that should eb used as the root of the downstream tree.
+        :return: The root node of the downstream tree.
+        """
         root = TreeNode(start, None)
         await self._traversal.run(root)
         return root
@@ -76,7 +85,7 @@ class DownstreamTree(object):
 
     def _get_down_phases(self, terminal: Terminal) -> Set[SinglePhaseKind]:
         direction = self._direction_selector(terminal).value()
-        if not direction.has(FeederDirection.DOWNSTREAM):
+        if FeederDirection.DOWNSTREAM not in direction:
             return set()
 
         conducting_equipment = terminal.conducting_equipment

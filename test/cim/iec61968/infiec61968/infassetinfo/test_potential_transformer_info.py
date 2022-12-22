@@ -15,7 +15,7 @@ from zepben.evolve import PotentialTransformerInfo, PowerTransformerInfo, Ratio
 potential_transformer_info_kwargs = {
     **asset_info_kwargs,
     "accuracy_class": builds(PowerTransformerInfo),
-    "nominal_ratio": builds(Ratio),
+    "nominal_ratio": builds(Ratio, floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
     "primary_ratio": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "pt_class": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
     "rated_voltage": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),

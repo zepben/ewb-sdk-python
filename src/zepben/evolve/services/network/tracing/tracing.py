@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING, TypeVar
 
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_trace import new_connected_equipment_trace, \
     new_connected_equipment_breadth_trace, new_normal_connected_equipment_trace, new_current_connected_equipment_trace, \
-    new_normal_limited_connected_equipment_trace, new_current_limited_connected_equipment_trace
+    new_normal_limited_connected_equipment_trace, new_current_limited_connected_equipment_trace, new_normal_downstream_equipment_trace, \
+    new_current_downstream_equipment_trace, new_normal_upstream_equipment_trace, new_current_upstream_equipment_trace
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_traversal import ConnectedEquipmentTraversal
 from zepben.evolve.services.network.tracing.connectivity.connectivity_trace import create_connectivity_traversal
 from zepben.evolve.services.network.tracing.connectivity.limited_connected_equipment_trace import LimitedConnectedEquipmentTrace
@@ -24,20 +25,22 @@ from zepben.evolve.services.network.tracing.phases.phase_trace import new_phase_
 from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
 from zepben.evolve.services.network.tracing.traversals.basic_traversal import BasicTraversal
-from zepben.evolve.services.network.tracing.traversals.queue import breadth_first
+from zepben.evolve.services.network.tracing.traversals.queue import breadth_first, Queue, depth_first
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
 from zepben.evolve.services.network.tracing.util import ignore_open, normally_open, currently_open
 if TYPE_CHECKING:
-    from zepben.evolve import ConnectivityResult, PhaseStep
+    from zepben.evolve import ConnectivityResult, PhaseStep, ConductingEquipment
     from zepben.evolve.types import QueueNext
     T = TypeVar("T")
 
 __all__ = ["create_basic_depth_trace", "create_basic_breadth_trace", "connected_equipment_trace", "connected_equipment_breadth_trace",
            "normal_connected_equipment_trace", "current_connected_equipment_trace", "normal_limited_connected_equipment_trace",
-           "current_limited_connected_equipment_trace", "connectivity_trace", "connectivity_breadth_trace", "normal_connectivity_trace",
-           "current_connectivity_trace", "phase_trace", "normal_phase_trace", "current_phase_trace", "normal_downstream_trace", "current_downstream_trace",
-           "normal_upstream_trace", "current_upstream_trace", "normal_downstream_tree", "current_downstream_tree", "set_phases", "remove_phases",
-           "set_direction", "remove_direction", "phase_inferrer", "assign_equipment_to_feeders", "assign_equipment_to_lv_feeders", "find_swer_equipment"]
+           "current_limited_connected_equipment_trace", "normal_downstream_equipment_trace", "current_downstream_equipment_trace",
+           "normal_upstream_equipment_trace", "current_upstream_equipment_trace", "connectivity_trace", "connectivity_breadth_trace",
+           "normal_connectivity_trace", "current_connectivity_trace", "phase_trace", "normal_phase_trace", "current_phase_trace", "normal_downstream_trace",
+           "current_downstream_trace", "normal_upstream_trace", "current_upstream_trace", "normal_downstream_tree", "current_downstream_tree", "set_phases",
+           "remove_phases", "set_direction", "remove_direction", "phase_inferrer", "assign_equipment_to_feeders", "assign_equipment_to_lv_feeders",
+           "find_swer_equipment"]
 
 
 # --- Helper functions that create depth-first/breadth-first traversals ---
@@ -126,6 +129,50 @@ def current_limited_connected_equipment_trace() -> LimitedConnectedEquipmentTrac
     :return: The new `LimitedConnectedEquipmentTrace` instance.
     """
     return new_current_limited_connected_equipment_trace()
+
+
+def normal_downstream_equipment_trace(queue: Queue[ConductingEquipment] = depth_first()) -> BasicTraversal[ConductingEquipment]:
+    """
+    Create a new `BasicTraversal` that traverses in the downstream direction using the normal state of the network. The trace works on `ConductingEquipment`,
+    and ignores phase connectivity, instead considering things to be connected if they share a `ConnectivityNode`.
+
+    :param queue: An optional parameter to allow you to change the queue being used for the traversal. The default value is a LIFO queue.
+    :return: The `BasicTraversal`.
+    """
+    return new_normal_downstream_equipment_trace(queue)
+
+
+def current_downstream_equipment_trace(queue: Queue[ConductingEquipment] = depth_first()) -> BasicTraversal[ConductingEquipment]:
+    """
+    Create a new `BasicTraversal` that traverses in the downstream direction using the current state of the network. The trace works on `ConductingEquipment`,
+    and ignores phase connectivity, instead considering things to be connected if they share a `ConnectivityNode`.
+
+    :param queue: An optional parameter to allow you to change the queue being used for the traversal. The default value is a LIFO queue.
+    :return: The `BasicTraversal`.
+    """
+    return new_current_downstream_equipment_trace(queue)
+
+
+def normal_upstream_equipment_trace(queue: Queue[ConductingEquipment] = depth_first()) -> BasicTraversal[ConductingEquipment]:
+    """
+    Create a new `BasicTraversal` that traverses in the upstream direction using the normal state of the network. The trace works on `ConductingEquipment`,
+    and ignores phase connectivity, instead considering things to be connected if they share a `ConnectivityNode`.
+
+    :param queue: An optional parameter to allow you to change the queue being used for the traversal. The default value is a LIFO queue.
+    :return: The `BasicTraversal`.
+    """
+    return new_normal_upstream_equipment_trace(queue)
+
+
+def current_upstream_equipment_trace(queue: Queue[ConductingEquipment] = depth_first()) -> BasicTraversal[ConductingEquipment]:
+    """
+    Create a new `BasicTraversal` that traverses in the upstream direction using the current state of the network. The trace works on `ConductingEquipment`,
+    and ignores phase connectivity, instead considering things to be connected if they share a `ConnectivityNode`.
+
+    :param queue: An optional parameter to allow you to change the queue being used for the traversal. The default value is a LIFO queue.
+    :return: The `BasicTraversal`.
+    """
+    return new_current_upstream_equipment_trace(queue)
 
 
 # Traversals for connectivity results
