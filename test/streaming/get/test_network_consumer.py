@@ -192,14 +192,6 @@ class TestNetworkConsumer:
         await self.mock_server.validate(client_test, interactions)
 
     @pytest.mark.asyncio
-    async def test_get_feeder_deprecated(self):
-        client = NetworkConsumerClient(stub=MagicMock())
-        with pytest.warns(DeprecationWarning):
-            warnings.warn("`get_feeder` is deprecated, prefer the more generic `get_equipment_container`")
-            # noinspection PyDeprecation
-            await client.get_feeder("feeder")
-
-    @pytest.mark.asyncio
     async def test_get_feeder_as_equipment_container(self, feeder_network: NetworkService):
         feeder_mrid = "f001"
 
