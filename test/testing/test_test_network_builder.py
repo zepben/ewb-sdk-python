@@ -9,8 +9,7 @@ import pytest
 from pytest import raises
 
 from zepben.evolve import PhaseCode, PowerTransformerEnd, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, \
-    connected_terminals, TestNetworkBuilder, LvFeeder
-from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
+    connected_terminals, TestNetworkBuilder, Fuse, LvFeeder
 
 
 class TestTestNetworkBuilder:

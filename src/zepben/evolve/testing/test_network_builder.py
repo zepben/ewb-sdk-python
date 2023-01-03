@@ -10,9 +10,8 @@ except ImportError:
 
 from typing import Optional, Callable, List, Union, Type
 
-from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Junction, Terminal, Feeder, LvFeeder, \
+from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
     PowerTransformerEnd, PowerTransformer, set_phases, set_direction, assign_equipment_to_feeders, assign_equipment_to_lv_feeders
-from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 
 
 def null_action(_):

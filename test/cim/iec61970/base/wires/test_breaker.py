@@ -9,7 +9,7 @@ from hypothesis.strategies import floats
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
     verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_kwargs, protected_switch_args
-from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
+from zepben.evolve import Breaker
 
 breaker_kwargs = {
     **protected_switch_kwargs,

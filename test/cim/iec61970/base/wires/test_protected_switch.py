@@ -8,9 +8,7 @@ from hypothesis.strategies import integers, lists, builds
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.test_switch import switch_kwargs, verify_switch_constructor_default, verify_switch_constructor_kwargs, \
     verify_switch_constructor_args, switch_args
-from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import ProtectionEquipment
-from zepben.evolve.model.cim.iec61970.base.protection.reclose_sequence import RecloseSequence
-from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
+from zepben.evolve import ProtectionEquipment, RecloseSequence, ProtectedSwitch
 
 protected_switch_kwargs = {
     **switch_kwargs,
