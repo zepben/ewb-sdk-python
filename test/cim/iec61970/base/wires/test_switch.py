@@ -5,29 +5,33 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import integers
 
+from cim.cim_creators import MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
 from zepben.evolve import Switch, SinglePhaseKind
 
 switch_kwargs = {
     **conducting_equipment_kwargs,
+    "rated_current": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
     "_open": integers(min_value=0, max_value=15),
     "_normally_open": integers(min_value=0, max_value=15),
 }
 
-switch_args = [*conducting_equipment_args, 1, 2]
+switch_args = [*conducting_equipment_args, 1, 2, 3]
 
 
 # noinspection PyProtectedMember
 def verify_switch_constructor_default(s: Switch):
     verify_conducting_equipment_constructor_default(s)
+    assert s.rated_current is None
     assert s._open == 0
     assert s._normally_open == 0
 
 
 # noinspection PyProtectedMember
-def verify_switch_constructor_kwargs(s: Switch, _open, _normally_open, **kwargs):
+def verify_switch_constructor_kwargs(s: Switch, rated_current, _open, _normally_open, **kwargs):
     verify_conducting_equipment_constructor_kwargs(s, **kwargs)
+    assert s.rated_current == rated_current
     assert s._open == _open
     assert s._normally_open == _normally_open
 
@@ -35,6 +39,7 @@ def verify_switch_constructor_kwargs(s: Switch, _open, _normally_open, **kwargs)
 # noinspection PyProtectedMember
 def verify_switch_constructor_args(s: Switch):
     verify_conducting_equipment_constructor_args(s)
+    assert s.rated_current == switch_args[-3]
     assert s._open == switch_args[-2]
     assert s._normally_open == switch_args[-1]
 

@@ -7,10 +7,11 @@ from typing import Dict, List, Optional
 
 from pytest import fixture
 
-from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
+from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
     SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, TestNetworkBuilder, LvFeeder
+from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",

@@ -12,12 +12,17 @@ from pytest import fixture
 from zepben.evolve import Terminal, resolver, UnresolvedReference, NetworkService, IdentifiedObject, \
     BaseService, PowerTransformerInfo, CableInfo, OverheadWireInfo, Streetlight, Pole, Meter, Location, Organisation, AssetOwner, \
     Customer, CustomerAgreement, Tariff, PricingStructure, OperationalRestriction, UsagePoint, Junction, BusbarSection, PowerElectronicsConnection, \
-    LinearShuntCompensator, EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, Breaker, Recloser, \
-    LoadBreakSwitch, Disconnector, Fuse, Jumper, RegulatingCondEq, BatteryUnit, PowerElectronicsWindUnit, PhotoVoltaicUnit, \
+    LinearShuntCompensator, EnergySource, EnergyConsumer, PowerTransformer, AcLineSegment, RegulatingCondEq, BatteryUnit, PowerElectronicsWindUnit, PhotoVoltaicUnit, \
     FaultIndicator, Feeder, Site, Circuit, Substation, PowerElectronicsConnectionPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, \
     EnergyConsumerPhase, EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete, \
     Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo, \
     AssetContainer, OrganisationRole, Document, Agreement, LvFeeder
+from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
+from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
+from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
+from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
+from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
+from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 
 
 @fixture

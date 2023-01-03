@@ -7,7 +7,7 @@ from hypothesis import given
 
 from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \
     verify_protected_switch_constructor_kwargs, verify_protected_switch_constructor_args, protected_switch_kwargs, protected_switch_args
-from zepben.evolve import LoadBreakSwitch
+from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 
 load_break_switch_kwargs = protected_switch_kwargs
 load_break_switch_args = protected_switch_args

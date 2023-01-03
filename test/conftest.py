@@ -13,7 +13,8 @@ from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup
 
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve import EnergySource, EnergyConsumer, Terminal, ConnectivityNode, IdentifiedObject, AcLineSegment, \
-    PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Breaker, EnergySourcePhase, Junction
+    PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, EnergySourcePhase, Junction
+from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.evolve import PhaseCode
 from typing import Union, List, Callable
 from hypothesis import settings, Verbosity

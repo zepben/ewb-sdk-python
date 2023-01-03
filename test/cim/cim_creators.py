@@ -9,6 +9,12 @@ from random import choice
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes
 
 from zepben.evolve import *
+from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
+from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
+from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
+from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
+from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
+from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
 
 MIN_32_BIT_INTEGER = -2147483648

@@ -13,12 +13,17 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     ConnectivityNode, ConnectivityNodeContainer, Equipment, Site, EquipmentContainer, Feeder, Substation, GeographicalRegion, SubGeographicalRegion, \
     PowerSystemResource, EquivalentBranch, EquivalentEquipment, Accumulator, Analog, Discrete, Measurement, RemoteSource, PhaseCode, UnitSymbol, \
     RemoteControl, Control, RemotePoint, BatteryUnit, BatteryStateKind, PhotoVoltaicUnit, PowerElectronicsUnit, PowerElectronicsConnection, \
-    PowerElectronicsWindUnit, AcLineSegment, PerLengthSequenceImpedance, Breaker, BusbarSection, Conductor, Connector, Disconnector, EnergyConnection, \
-    EnergyConsumer, PhaseShuntConnectionKind, EnergyConsumerPhase, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
+    PowerElectronicsWindUnit, AcLineSegment, PerLengthSequenceImpedance, Breaker, BusbarSection, Conductor, Connector, EnergyConnection, \
+    EnergyConsumer, PhaseShuntConnectionKind, EnergyConsumerPhase, SinglePhaseKind, EnergySource, EnergySourcePhase, Line, \
     LinearShuntCompensator, PerLengthImpedance, PerLengthLineParameter, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, VectorGroup, \
-    ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
+    RatioTapChanger, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
     Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio
+from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
+from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
+from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
+from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
+from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from services.common.service_comparator_validator import ServiceComparatorValidator

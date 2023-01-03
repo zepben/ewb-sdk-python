@@ -5,7 +5,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from busbranch.data.creators import _create_per_length_sequence_impedance
 from network_fixtures import create_terminals
-from zepben.evolve import NetworkService, Breaker, AcLineSegment, BaseVoltage
+from zepben.evolve import NetworkService, AcLineSegment, BaseVoltage
+from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 
 
 def open_switch_between_different_voltages():
