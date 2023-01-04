@@ -14,7 +14,8 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, \
     PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
     Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
-    Switch, ShuntCompensatorInfo, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer
+    Switch, ShuntCompensatorInfo, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, \
+    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, RecloseSequence, ProtectedSwitch
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
@@ -119,6 +120,13 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_asset_info(diff)
 
+    def _compare_switch_info(self, source: SwitchInfo, target: SwitchInfo) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, SwitchInfo.rated_interrupting_time)
+
+        return self._compare_asset_info(diff)
+
     def _compare_transformer_end_info(self, source: TransformerEndInfo, target: TransformerEndInfo) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
@@ -220,6 +228,13 @@ class NetworkServiceComparator(BaseServiceComparator):
     #####################################
     # IEC61968 infIEC61968 InfAssetInfo #
     #####################################
+
+    def _compare_current_relay_info(self, source: CurrentRelayInfo, target: CurrentRelayInfo) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, CurrentRelayInfo.curve_setting)
+
+        return self._compare_asset_info(diff)
 
     def _compare_current_transformer_info(self, source: CurrentTransformerInfo, target: CurrentTransformerInfo) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -503,6 +518,30 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_identified_object(diff)
 
+    ############################
+    # IEC61970 Base Protection #
+    ############################
+
+    def _compare_current_relay(self, source: CurrentRelay, target: CurrentRelay) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, CurrentRelay.current_limit_1, CurrentRelay.inverse_time_flag, CurrentRelay.current_limit_1)
+
+        return self._compare_protection_equipment(diff)
+
+    def _compare_protection_equipment(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(diff, ProtectionEquipment.relay_delay_time, ProtectionEquipment.protection_kind)
+        self._compare_id_reference_collections(diff, ProtectionEquipment.protected_switches)
+
+        return self._compare_equipment(diff)
+
+    def _compare_reclose_sequence(self, source: RecloseSequence, target: RecloseSequence) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, RecloseSequence.reclose_delay, RecloseSequence.reclose_step)
+
+        return self._compare_identified_object(diff)
+
     #######################
     # IEC61970 BASE SCADA #
     #######################
@@ -559,7 +598,11 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_conductor(diff)
 
     def _compare_breaker(self, source: Breaker, target: Breaker) -> ObjectDifference:
-        return self._compare_protected_switch(ObjectDifference(source, target))
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, Breaker.in_transit_time)
+
+        return self._compare_protected_switch(diff)
 
     def _compare_busbar_section(self, source: BusbarSection, target: BusbarSection) -> ObjectDifference:
         return self._compare_connector(ObjectDifference(source, target))
@@ -715,7 +758,6 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_power_transformer(self, source: PowerTransformer, target: PowerTransformer) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_id_references(diff, PowerTransformer.asset_info)
         self._compare_indexed_id_reference_collections(diff, PowerTransformer.ends)
         self._compare_values(diff, PowerTransformer.vector_group, PowerTransformer.construction_kind, PowerTransformer.function)
         self._compare_floats(diff, PowerTransformer.transformer_utilisation)
@@ -748,6 +790,9 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_transformer_end(diff)
 
     def _compare_protected_switch(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(diff, ProtectedSwitch.breaking_capacity)
+        self._compare_id_reference_collections(diff, ProtectedSwitch.reclose_sequences, ProtectedSwitch.operated_by_protection_equipment)
+
         return self._compare_switch(diff)
 
     def _compare_ratio_tap_changer(self, source: RatioTapChanger, target: RatioTapChanger) -> ObjectDifference:
@@ -773,6 +818,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_regulating_cond_eq(diff)
 
     def _compare_switch(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(diff, Switch.rated_current)
         self._add_if_different(diff, "isNormallyOpen", self._compare_open_status(diff, Switch.is_normally_open))
         self._add_if_different(diff, "isOpen", self._compare_open_status(diff, Switch.is_open))
 

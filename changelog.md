@@ -20,7 +20,7 @@
 * Renamed `FeederDirection.has` to `FeederDirection.__contains__`, which can be used via its operator version `in`. e.g. `BOTH.has(DOWNSTREAM)` can be replaced
   with `BOTH.__contains__(DOWNSTREAM)` or `DOWNSTREAM in BOTH`
 * Removed deprecated function `NetworkConsumerClient.get_feeder`.
-* Refactored the following `Switch` descendant classes to their own submodule in `zepben.evolve.model.cim.iec61970.base.wires`:
+* Refactored the following `Switch` descendant classes to their own submodules in `zepben.evolve.model.cim.iec61970.base.wires`:
   * `Breaker` moved to `breaker`
   * `Disconnector` moved to `disconnector`
   * `Fuse` moved to `fuse`
