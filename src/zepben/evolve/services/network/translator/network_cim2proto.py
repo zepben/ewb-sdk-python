@@ -829,15 +829,15 @@ Measurement.to_pb = measurement_to_pb
 
 def current_relay_to_pb(cim: CurrentRelay) -> PBCurrentRelay:
     return PBCurrentRelay(
-        pe=protection_equipment_to_pb(cim),
+        pe=protection_equipment_to_pb(cim, True),
         currentLimit1=from_nullable_float(cim.current_limit_1),
         **nullable_bool_settings("inverseTimeFlag", cim.inverse_time_flag)
     )
 
 
-def protection_equipment_to_pb(cim: ProtectionEquipment) -> PBProtectionEquipment:
+def protection_equipment_to_pb(cim: ProtectionEquipment, include_asset_info: bool = False) -> PBProtectionEquipment:
     return PBProtectionEquipment(
-        eq=equipment_to_pb(cim),
+        eq=equipment_to_pb(cim, include_asset_info),
         relayDelayTime=from_nullable_float(cim.relay_delay_time),
         protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name)
     )
@@ -1173,7 +1173,7 @@ def shunt_compensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
 
 def switch_to_pb(cim: Switch) -> PBSwitch:
     return PBSwitch(
-        ce=conducting_equipment_to_pb(cim),
+        ce=conducting_equipment_to_pb(cim, True),
         ratedCurrent=from_nullable_uint(cim.rated_current),
         normalOpen=cim.get_normal_state(),
         open=cim.get_state()

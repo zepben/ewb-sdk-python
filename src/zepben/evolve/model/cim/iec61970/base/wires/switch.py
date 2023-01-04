@@ -61,6 +61,14 @@ class Switch(ConductingEquipment):
         """Datasheet information for this Switch."""
         return self.asset_info
 
+    @switch_info.setter
+    def switch_info(self, si: Optional[SwitchInfo]):
+        """
+        Set the :class:`SwitchInfo` for this :class:`Switch`
+        :param si: The SwitchInfo for this Switch
+        """
+        self.asset_info = si
+
     def is_normally_open(self, phase: SinglePhaseKind = None):
         """
         Check if the switch is normally open on `phase`.

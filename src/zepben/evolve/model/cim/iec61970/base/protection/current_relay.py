@@ -25,5 +25,13 @@ class CurrentRelay(ProtectionEquipment):
 
     @property
     def current_relay_info(self) -> Optional[CurrentRelayInfo]:
-        """Datasheet information for this CurrentRelay."""
+        """Datasheet information for this :class:`CurrentRelay`."""
         return self.asset_info
+
+    @current_relay_info.setter
+    def current_relay_info(self, cri: Optional[CurrentRelayInfo]):
+        """
+        Set the :class:`CurrentRelayInfo` for this :class:`CurrentRelay`
+        :param cri: The CurrentRelayInfo for this CurrentRelay
+        """
+        self.asset_info = cri

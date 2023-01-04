@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import Optional, List, Generator, TYPE_CHECKING
+from typing import Optional, List, Generator, TYPE_CHECKING, Iterable
 
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import ProtectionKind
@@ -31,6 +31,12 @@ class ProtectionEquipment(Equipment):
     """The kind of protection being provided by this protection equipment."""
 
     _protected_switches: Optional[List[ProtectedSwitch]] = None
+
+    def __init__(self, protected_switches: Iterable[ProtectedSwitch] = None, **kwargs):
+        super(ProtectionEquipment, self).__init__(**kwargs)
+        if protected_switches is not None:
+            for protected_switch in protected_switches:
+                self.add_protected_switch(protected_switch)
 
     @property
     def protected_switches(self) -> Generator[ProtectedSwitch, None, None]:
