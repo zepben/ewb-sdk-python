@@ -31,3 +31,7 @@ class ProtectionKind(Enum):
 
     REF = 6
     """Restricted Earth Fault"""
+
+    @property
+    def short_name(self):
+        return str(self)[14:]
