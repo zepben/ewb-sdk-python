@@ -12,6 +12,7 @@ __all__ = ["CurrentRelay"]
 
 
 class CurrentRelay(ProtectionEquipment):
+    """A device that checks current flow values in any direction or designated direction."""
 
     current_limit_1: Optional[float] = None
     """Current limit number 1 for inverse time pickup in amperes."""

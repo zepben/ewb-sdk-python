@@ -10,16 +10,11 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     TransformerTankInfo, TransformerTest, WireInfo, AssetOwner, Pole, Asset, Streetlight, Location, EndDevice, Meter, UsagePoint, OperationalRestriction, \
     AuxiliaryEquipment, FaultIndicator, BaseVoltage, ConductingEquipment, ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, \
     PowerSystemResource, Site, SubGeographicalRegion, Substation, Terminal, PowerElectronicsUnit, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, \
-    BusbarSection, Conductor, EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, \
-    PowerTransformerEnd, RatioTapChanger, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
+    Breaker, LoadBreakSwitch, BusbarSection, Conductor, Disconnector, EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, \
+    Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, \
+    PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
     Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
     Switch, ShuntCompensatorInfo, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer
-from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
-from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
-from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
-from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
-from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
-from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
