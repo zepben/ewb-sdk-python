@@ -958,6 +958,8 @@ def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) ->
         time_delay_1=float_or_none(pb.timeDelay1)
     )
 
+    network_service.resolve_or_defer_reference(resolver.current_relay_to_current_relay_info_resolver(cim), pb.asset_info_mrid())
+
     protection_equipment_to_cim(pb.pe, cim, network_service)
     return cim if network_service.add(cim) else None
 
@@ -1079,7 +1081,10 @@ def ac_line_segment_to_cim(pb: PBAcLineSegment, network_service: NetworkService)
 
 
 def breaker_to_cim(pb: PBBreaker, network_service: NetworkService) -> Optional[Breaker]:
-    cim = Breaker(mrid=pb.mrid())
+    cim = Breaker(
+        mrid=pb.mrid(),
+        in_transit_time=float_or_none(pb.inTransitTime)
+    )
 
     protected_switch_to_cim(pb.sw, cim, network_service)
     return cim if network_service.add(cim) else None
@@ -1355,6 +1360,14 @@ def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_se
 
 
 def protected_switch_to_cim(pb: PBProtectedSwitch, cim: ProtectedSwitch, network_service: NetworkService):
+    cim.breaking_capacity = int_or_none(pb.breakingCapacity)
+
+    for mrid in pb.recloseSequenceMRIDs:
+        network_service.resolve_or_defer_reference(resolver.reclose_sequences(cim), mrid)
+
+    for mrid in pb.operatedByProtectionEquipmentMRIDs:
+        network_service.resolve_or_defer_reference(resolver.operated_by_protection_equipment(cim), mrid)
+
     switch_to_cim(pb.sw, cim, network_service)
 
 
@@ -1394,6 +1407,8 @@ def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, netw
 
 
 def switch_to_cim(pb: PBSwitch, cim: Switch, network_service: NetworkService):
+    network_service.resolve_or_defer_reference(resolver.switch_info(cim), pb.asset_info_mrid())
+    cim.rated_current = uint_or_none(pb.ratedCurrent)
     cim.set_normally_open(pb.normalOpen)
     cim.set_open(pb.open)
 

@@ -15,6 +15,7 @@ from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCir
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.short_circuit_test import ShortCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import ShuntCompensatorInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.switch_info import SwitchInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
@@ -29,6 +30,7 @@ from zepben.evolve.model.cim.iec61968.customers.customer import Customer
 from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure
 from zepben.evolve.model.cim.iec61968.customers.tariff import Tariff
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_relay_info import CurrentRelayInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
 from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, UsagePoint
@@ -64,6 +66,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection im
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import ShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
@@ -85,7 +88,8 @@ __all__ = [
     "tti_to_tei_resolver", "tei_to_tsi_resolver", "tsi_to_tei_resolver", "te_to_tsi_resolver", "pti_to_tti_resolver", "peu_to_pec_resolver",
     "pec_to_peu_resolver", "pecphase_to_pec_resolver", "pec_to_pecphase_resolver", "tei_to_ee_nlt_resolver", "tei_to_ee_sct_resolver", "tei_to_ge_sct_resolver",
     "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver", "shunt_compensator_to_shunt_compensator_info_resolver", "lvfeeder_to_nht_resolver",
-    "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver"
+    "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "pe_to_ps_resolver", "ps_to_pe_resolver", "ps_to_rs_resolver",
+    "switch_to_switch_info_resolver", "current_relay_to_current_relay_info_resolver"
 ]
 
 
@@ -184,9 +188,13 @@ cond_equip_to_terminal_resolver = ReferenceResolver(ConductingEquipment, Termina
 
 conductor_to_wire_info_resolver = ReferenceResolver(Conductor, WireInfo, lambda t, r: setattr(t, 'asset_info', r))
 
+current_relay_to_current_relay_info_resolver = ReferenceResolver(CurrentRelay, CurrentRelayInfo, lambda t, r: setattr(t, 'asset_info', r))
+
 powertransformer_to_power_transformer_info_resolver = ReferenceResolver(PowerTransformer, PowerTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 
 shunt_compensator_to_shunt_compensator_info_resolver = ReferenceResolver(ShuntCompensator, ShuntCompensatorInfo, lambda t, r: setattr(t, 'asset_info', r))
+
+switch_to_switch_info_resolver = ReferenceResolver(Switch, SwitchInfo, lambda t, r: setattr(t, 'asset_info', r))
 
 tei_to_tti_resolver = ReferenceResolver(TransformerEndInfo, TransformerTankInfo, lambda t, r: setattr(t, 'transformer_tank_info', r))
 
@@ -304,3 +312,5 @@ ct_to_cti_resolver = ReferenceResolver(CurrentTransformer, CurrentTransformerInf
 vt_to_vti_resolver = ReferenceResolver(PotentialTransformer, PotentialTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 
 pe_to_ps_resolver = ReferenceResolver(ProtectionEquipment, ProtectedSwitch, lambda t, r: t.add_protected_switch(r))
+ps_to_pe_resolver = ReferenceResolver(ProtectedSwitch, ProtectionEquipment, lambda t, r: t.add_operated_by_protection_equipment(r))
+ps_to_rs_resolver = ReferenceResolver(ProtectedSwitch, RecloseSequence, lambda t, r: t.add_reclose_sequence(r))
