@@ -10,9 +10,13 @@ from typing import Callable, Optional
 
 from dataclassy import dataclass
 
-from zepben.evolve import TransformerTankInfo, TransformerEndInfo, TransformerStarImpedance, NoLoadTest, ShortCircuitTest, OpenCircuitTest, ShuntCompensator, \
-    ShuntCompensatorInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
+from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.short_circuit_test import ShortCircuitTest
+from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import ShuntCompensatorInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
 from zepben.evolve.model.cim.iec61968.assets.asset import Asset
 from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole
@@ -45,6 +49,9 @@ from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject
 from zepben.evolve.model.cim.iec61970.base.meas.control import Control
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import Measurement
+from zepben.evolve.model.cim.iec61970.base.protection.current_relay import CurrentRelay
+from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import ProtectionEquipment
+from zepben.evolve.model.cim.iec61970.base.protection.reclose_sequence import RecloseSequence
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
@@ -55,6 +62,9 @@ from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_ele
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnectionPhase, PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
+from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import ShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
@@ -292,3 +302,5 @@ tei_to_ee_oct_resolver = ReferenceResolver(TransformerEndInfo, OpenCircuitTest, 
 # To avoid confusion with PowerTransformer shortened as "pt", PotentialTransformer is shortened to "vt".
 ct_to_cti_resolver = ReferenceResolver(CurrentTransformer, CurrentTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 vt_to_vti_resolver = ReferenceResolver(PotentialTransformer, PotentialTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
+
+pe_to_ps_resolver = ReferenceResolver(ProtectionEquipment, ProtectedSwitch, lambda t, r: t.add_protected_switch(r))

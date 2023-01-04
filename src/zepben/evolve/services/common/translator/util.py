@@ -5,6 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional, Dict
 
+# noinspection PyPackageRequirements
+# noinspection PyUnresolvedReferences
+# pylint: disable=import-error
 from google.protobuf.struct_pb2 import NullValue
 
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
