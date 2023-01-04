@@ -208,23 +208,24 @@ from zepben.evolve.services.network.tracing.feeder.feeder_direction import Feede
 
 __all__ = [
     "cable_info_to_cim", "no_load_test_to_cim", "open_circuit_test_to_cim", "overhead_wire_info_to_cim", "power_transformer_info_to_cim",
-    "short_circuit_test_to_cim", "shunt_compensator_info_to_cim", "transformer_end_info_to_cim", "transformer_tank_info_to_cim", "transformer_test_to_cim",
-    "wire_info_to_cim", "asset_to_cim", "asset_container_to_cim", "asset_info_to_cim", "asset_organisation_role_to_cim", "asset_owner_to_cim", "pole_to_cim",
-    "streetlight_to_cim", "structure_to_cim", "location_to_cim", "position_point_to_cim", "street_address_to_cim", "town_detail_to_cim", "end_device_to_cim",
-    "meter_to_cim", "usage_point_to_cim", "operational_restriction_to_cim", "auxiliary_equipment_to_cim", "fault_indicator_to_cim", "ac_dc_terminal_to_cim",
-    "base_voltage_to_cim", "conducting_equipment_to_cim", "connectivity_node_to_cim", "connectivity_node_container_to_cim", "equipment_to_cim",
-    "equipment_container_to_cim", "feeder_to_cim", "geographical_region_to_cim", "power_system_resource_to_cim", "site_to_cim",
-    "sub_geographical_region_to_cim", "substation_to_cim", "terminal_to_cim", "equivalent_branch_to_cim", "equivalent_equipment_to_cim", "accumulator_to_cim",
-    "analog_to_cim", "control_to_cim", "discrete_to_cim", "io_point_to_cim", "measurement_to_cim", "remote_control_to_cim", "remote_point_to_cim",
-    "remote_source_to_cim", "battery_unit_to_cim", "photo_voltaic_unit_to_cim", "power_electronics_unit_to_cim", "power_electronics_wind_unit_to_cim",
-    "ac_line_segment_to_cim", "breaker_to_cim", "conductor_to_cim", "connector_to_cim", "disconnector_to_cim", "energy_connection_to_cim",
-    "energy_consumer_to_cim", "energy_consumer_phase_to_cim", "energy_source_to_cim", "energy_source_phase_to_cim", "fuse_to_cim", "jumper_to_cim",
-    "junction_to_cim", "busbar_section_to_cim", "line_to_cim", "linear_shunt_compensator_to_cim", "load_break_switch_to_cim",
+    "short_circuit_test_to_cim", "shunt_compensator_info_to_cim", "switch_info_to_cim", "transformer_end_info_to_cim", "transformer_tank_info_to_cim",
+    "transformer_test_to_cim", "wire_info_to_cim", "asset_to_cim", "asset_container_to_cim", "asset_info_to_cim", "asset_organisation_role_to_cim",
+    "asset_owner_to_cim", "pole_to_cim", "streetlight_to_cim", "structure_to_cim", "location_to_cim", "position_point_to_cim", "street_address_to_cim",
+    "street_detail_to_cim", "town_detail_to_cim", "current_relay_info_to_cim", "current_transformer_info_to_cim", "potential_transformer_info_to_cim",
+    "ratio_to_cim", "end_device_to_cim", "meter_to_cim", "usage_point_to_cim", "operational_restriction_to_cim", "auxiliary_equipment_to_cim",
+    "current_transformer_to_cim", "fault_indicator_to_cim", "potential_transformer_to_cim", "sensor_to_cim", "ac_dc_terminal_to_cim", "base_voltage_to_cim",
+    "conducting_equipment_to_cim", "connectivity_node_to_cim", "connectivity_node_container_to_cim", "equipment_to_cim", "equipment_container_to_cim",
+    "feeder_to_cim", "geographical_region_to_cim", "power_system_resource_to_cim", "site_to_cim", "sub_geographical_region_to_cim", "substation_to_cim",
+    "terminal_to_cim", "equivalent_branch_to_cim", "equivalent_equipment_to_cim", "accumulator_to_cim", "analog_to_cim", "control_to_cim", "discrete_to_cim",
+    "io_point_to_cim", "measurement_to_cim", "current_relay_to_cim", "protection_equipment_to_cim", "reclose_sequence_to_cim", "remote_control_to_cim",
+    "remote_point_to_cim", "remote_source_to_cim", "battery_unit_to_cim", "photo_voltaic_unit_to_cim", "power_electronics_unit_to_cim",
+    "power_electronics_wind_unit_to_cim", "ac_line_segment_to_cim", "breaker_to_cim", "conductor_to_cim", "connector_to_cim", "disconnector_to_cim",
+    "energy_connection_to_cim", "energy_consumer_to_cim", "energy_consumer_phase_to_cim", "energy_source_to_cim", "energy_source_phase_to_cim", "fuse_to_cim",
+    "jumper_to_cim", "junction_to_cim", "busbar_section_to_cim", "line_to_cim", "linear_shunt_compensator_to_cim", "load_break_switch_to_cim",
     "per_length_line_parameter_to_cim", "per_length_impedance_to_cim", "per_length_sequence_impedance_to_cim", "power_electronics_connection_to_cim",
     "power_electronics_connection_phase_to_cim", "power_transformer_to_cim", "power_transformer_end_to_cim", "transformer_star_impedance_to_cim",
     "protected_switch_to_cim", "ratio_tap_changer_to_cim", "recloser_to_cim", "regulating_cond_eq_to_cim", "shunt_compensator_to_cim", "switch_to_cim",
-    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim", "current_transformer_info_to_cim",
-    "potential_transformer_info_to_cim", "current_transformer_to_cim", "potential_transformer_to_cim"
+    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim"
 ]
 
 
@@ -420,7 +421,7 @@ def asset_info_to_cim(pb: PBAssetInfo, cim: AssetInfo, network_service: NetworkS
 
 def asset_organisation_role_to_cim(pb: PBAssetOrganisationRole, cim: AssetOrganisationRole,
                                    network_service: NetworkService):
-    organisation_role_to_cim(getattr(pb, 'or'), cim, network_service)
+    organisation_role_to_cim(getattr(pb, "or"), cim, network_service)
 
 
 def asset_owner_to_cim(pb: PBAssetOwner, network_service: NetworkService) -> Optional[AssetOwner]:
@@ -473,7 +474,7 @@ PBStructure.to_cim = structure_to_cim
 ###################
 
 def location_to_cim(pb: PBLocation, network_service: NetworkService) -> Optional[Location]:
-    cim = Location(mrid=pb.mrid(), main_address=street_address_to_cim(pb.mainAddress) if pb.HasField('mainAddress') else None)
+    cim = Location(mrid=pb.mrid(), main_address=street_address_to_cim(pb.mainAddress) if pb.HasField("mainAddress") else None)
 
     for point in pb.positionPoints:
         cim.add_point(position_point_to_cim(point))
@@ -491,9 +492,9 @@ def street_address_to_cim(pb: PBStreetAddress) -> Optional[StreetAddress]:
     # noinspection PyArgumentList
     return StreetAddress(
         postal_code=pb.postalCode,
-        town_detail=town_detail_to_cim(pb.townDetail) if pb.HasField('townDetail') else None,
+        town_detail=town_detail_to_cim(pb.townDetail) if pb.HasField("townDetail") else None,
         po_box=pb.poBox,
-        street_detail=street_detail_to_cim(pb.streetDetail) if pb.HasField('streetDetail') else None
+        street_detail=street_detail_to_cim(pb.streetDetail) if pb.HasField("streetDetail") else None
     )
 
 
@@ -544,8 +545,8 @@ def current_transformer_info_to_cim(pb: PBCurrentTransformerInfo, network_servic
         core_count=int_or_none(pb.coreCount),
         ct_class=str_or_none(pb.ctClass),
         knee_point_voltage=int_or_none(pb.kneePointVoltage),
-        max_ratio=ratio_to_cim(pb.maxRatio) if pb.HasField('maxRatio') else None,
-        nominal_ratio=ratio_to_cim(pb.nominalRatio) if pb.HasField('nominalRatio') else None,
+        max_ratio=ratio_to_cim(pb.maxRatio) if pb.HasField("maxRatio") else None,
+        nominal_ratio=ratio_to_cim(pb.nominalRatio) if pb.HasField("nominalRatio") else None,
         primary_ratio=float_or_none(pb.primaryRatio),
         rated_current=int_or_none(pb.ratedCurrent),
         secondary_fls_rating=int_or_none(pb.secondaryFlsRating),
@@ -561,7 +562,7 @@ def potential_transformer_info_to_cim(pb: PBPotentialTransformerInfo, network_se
     cim = PotentialTransformerInfo(
         mrid=pb.mrid(),
         accuracy_class=str_or_none(pb.accuracyClass),
-        nominal_ratio=ratio_to_cim(pb.nominalRatio) if pb.HasField('nominalRatio') else None,
+        nominal_ratio=ratio_to_cim(pb.nominalRatio) if pb.HasField("nominalRatio") else None,
         primary_ratio=float_or_none(pb.primaryRatio),
         pt_class=str_or_none(pb.ptClass),
         rated_voltage=int_or_none(pb.ratedVoltage),
