@@ -27,6 +27,7 @@ types_to_test = {
     "create_power_transformer_info": create_power_transformer_info(),
     "create_short_circuit_test": create_short_circuit_test(),
     "create_shunt_compensator_info": create_shunt_compensator_info(),
+    "create_switch_info": create_switch_info(),
     "create_transformer_end_info": create_transformer_end_info(),
     "create_transformer_tank_info": create_transformer_tank_info(),
 
@@ -50,6 +51,7 @@ types_to_test = {
     # IEC61968 infIEC61968 InfAssetInfo #
     #####################################
 
+    "create_current_relay_info": create_current_relay_info(),
     "create_current_transformer_info": create_current_transformer_info(),
     "create_potential_transformer_info": create_potential_transformer_info(),
 
@@ -101,6 +103,13 @@ types_to_test = {
     "create_analog": create_analog(),
     "create_control": create_control(),
     "create_discrete": create_discrete(),
+
+    ############################
+    # IEC61970 Base Protection #
+    ############################
+
+    "create_current_relay": create_current_relay(),
+    "create_reclose_sequence": create_reclose_sequence(),
 
     #######################
     # IEC61970 BASE SCADA #

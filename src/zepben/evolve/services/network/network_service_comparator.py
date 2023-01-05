@@ -600,7 +600,7 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_breaker(self, source: Breaker, target: Breaker) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_values(diff, Breaker.in_transit_time)
+        self._compare_floats(diff, Breaker.in_transit_time)
 
         return self._compare_protected_switch(diff)
 
@@ -818,7 +818,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_regulating_cond_eq(diff)
 
     def _compare_switch(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(diff, Switch.rated_current)
+        self._compare_floats(diff, Switch.rated_current)
         self._add_if_different(diff, "isNormallyOpen", self._compare_open_status(diff, Switch.is_normally_open))
         self._add_if_different(diff, "isOpen", self._compare_open_status(diff, Switch.is_open))
 

@@ -19,7 +19,7 @@ equipment_kwargs = {
     "usage_points": lists(builds(UsagePoint), max_size=2),
     "equipment_containers": lists(sampled_equipment_container(True), max_size=2),
     "operational_restrictions": lists(builds(OperationalRestriction), max_size=2),
-    "current_containers": lists(sampled_hvlv_feeder(), max_size=2)
+    "current_containers": lists(sampled_hvlv_feeder(True), max_size=2)
 }
 
 equipment_args = [*power_system_resource_args, False, False, [UsagePoint(), UsagePoint()], [EquipmentContainer(), EquipmentContainer()],
