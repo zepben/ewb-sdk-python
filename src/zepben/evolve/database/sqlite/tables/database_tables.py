@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from sqlite3 import Cursor
-from typing import Dict, TypeVar, Type, Any
+from typing import Dict, TypeVar, Type, Any, Optional
 
 from dataclassy import dataclass
 
@@ -20,6 +20,7 @@ from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.common_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.customer_tables import *
+from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.infassetinfo_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.metering_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.operations_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.auxiliaryequipment_tables import *
@@ -38,6 +39,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.switch_tables impo
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.transformer_tables import *
 from zepben.evolve.database.sqlite.tables.metadata_tables import *
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
+from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import Ratio
 
 __all__ = ["DatabaseTables", "PreparedStatement"]
 
@@ -62,6 +64,8 @@ def _create_tables() -> Dict[Type[T], T]:
         TableCircuitsTerminals: TableCircuitsTerminals(),
         TableConnectivityNodes: TableConnectivityNodes(),
         TableControls: TableControls(),
+        TableCurrentTransformerInfo: TableCurrentTransformerInfo(),
+        TableCurrentTransformers: TableCurrentTransformers(),
         TableCustomerAgreements: TableCustomerAgreements(),
         TableCustomerAgreementsPricingStructures: TableCustomerAgreementsPricingStructures(),
         TableCustomers: TableCustomers(),
@@ -104,6 +108,8 @@ def _create_tables() -> Dict[Type[T], T]:
         TablePhotoVoltaicUnit: TablePhotoVoltaicUnit(),
         TablePoles: TablePoles(),
         TablePositionPoints: TablePositionPoints(),
+        TablePotentialTransformerInfo: TablePotentialTransformerInfo(),
+        TablePotentialTransformers: TablePotentialTransformers(),
         TablePowerElectronicsConnection: TablePowerElectronicsConnection(),
         TablePowerElectronicsConnectionPhases: TablePowerElectronicsConnectionPhases(),
         TablePowerElectronicsWindUnit: TablePowerElectronicsWindUnit(),
@@ -187,6 +193,14 @@ class PreparedStatement(object):
             self._values[index] = value
         else:
             raise SqlException(f"index must be between 1 and {self.num_columns} for this statement, got {index}")
+
+    def add_ratio(self, numerator_index: int, denominator_index: int, value: Optional[Ratio]):
+        if value is None:
+            self.add_value(numerator_index, None)
+            self.add_value(denominator_index, None)
+        else:
+            self.add_value(numerator_index, value.numerator)
+            self.add_value(denominator_index, value.denominator)
 
 
 @dataclass(slots=True)

@@ -6,6 +6,8 @@
 from datetime import datetime
 from typing import Any, Optional, Union, Type, TypeVar, List
 
+from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import Ratio
+
 __all__ = ["ResultSet"]
 
 T = TypeVar("T")
@@ -123,6 +125,24 @@ class ResultSet:
         else:
             # TODO: JVM seems to use Z as TZ offset (for UTC+0?) while python uses +HH:mm format. Need to investigate here
             return datetime.fromisoformat(value.rstrip('Z'))
+
+    def get_ratio(self, numerator_column_index: int, denominator_column_index: int, on_none: Union[Optional[bool], Type[Exception]] = ValueError):
+        """
+        Get a :class:`Ratio` using two columns: a numerator column and denominator column.
+
+        :param numerator_column_index: The column to read the numerator from. This uses 1 based indexes.
+        :param denominator_column_index: The column to read the denominator from. This uses 1 based indexes.
+        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not be supported.
+        :return: The Ratio read from the column, or the `on_none` value if there was no value.
+        """
+        numerator = self.get_double(numerator_column_index, None)
+        denominator = self.get_double(denominator_column_index, None)
+
+        if numerator is None or denominator is None:
+            return self._value_or_raise(on_none)
+        else:
+            # noinspection PyArgumentList
+            return Ratio(numerator, denominator)
 
     @staticmethod
     def _value_or_raise(on_none: Union[Optional[T], Type[Exception]]) -> T:

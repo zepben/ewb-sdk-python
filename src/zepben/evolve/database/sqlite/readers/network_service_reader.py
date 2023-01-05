@@ -14,7 +14,8 @@ from zepben.evolve import BaseServiceReader, TableCableInfo, TableOverheadWireIn
     TableReclosers, TableTerminals, TableTransformerStarImpedance, TablePowerTransformerEnds, TableRatioTapChangers, TableFaultIndicators, TableFeeders, \
     TableLoops, TableCircuits, TablePositionPoints, TableLocationStreetAddresses, TableAssetOrganisationRolesAssets, TableUsagePointsEndDevices, \
     TableEquipmentUsagePoints, TableEquipmentOperationalRestrictions, TableEquipmentEquipmentContainers, TableCircuitsSubstations, TableCircuitsTerminals, \
-    TableLoopsSubstations, TableControls, TableRemoteControls, TableRemoteSources, TableAnalogs, TableAccumulators, TableDiscretes, TableLvFeeders
+    TableLoopsSubstations, TableControls, TableRemoteControls, TableRemoteSources, TableAnalogs, TableAccumulators, TableDiscretes, TableLvFeeders, \
+    TableCurrentTransformers, TablePotentialTransformers, TableCurrentTransformerInfo, TablePotentialTransformerInfo
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 
 __all__ = ["NetworkServiceReader"]
@@ -37,6 +38,8 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableShortCircuitTests, "short circuit tests", reader.load_short_circuit_test)
         status = status and self._load_each(TableShuntCompensatorInfo, "shunt compensator info", reader.load_shunt_compensator_info)
         status = status and self._load_each(TableTransformerEndInfo, "transformer end info", reader.load_transformer_end_info)
+        status = status and self._load_each(TableCurrentTransformerInfo, "current transformer info", reader.load_current_transformer_info)
+        status = status and self._load_each(TablePotentialTransformerInfo, "potential transformer info", reader.load_potential_transformer_info)
         status = status and self._load_each(TableLocations, "locations", reader.load_location)
         status = status and self._load_each(TableOrganisations, "organisations", reader.load_organisation)
         status = status and self._load_each(TableAssetOwners, "asset owners", reader.load_asset_owner)
@@ -81,7 +84,9 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableTransformerStarImpedance, "transformer star impedance", reader.load_transformer_star_impedance)
         status = status and self._load_each(TablePowerTransformerEnds, "power transformer ends", reader.load_power_transformer_end)
         status = status and self._load_each(TableRatioTapChangers, "ratio tap changers", reader.load_ratio_tap_changer)
+        status = status and self._load_each(TableCurrentTransformers, "ratio tap changers", reader.load_current_transformer)
         status = status and self._load_each(TableFaultIndicators, "fault indicators", reader.load_fault_indicator)
+        status = status and self._load_each(TablePotentialTransformers, "ratio tap changers", reader.load_potential_transformer)
         status = status and self._load_each(TableFeeders, "feeders", reader.load_feeder)
         status = status and self._load_each(TableLoops, "loops", reader.load_loop)
         status = status and self._load_each(TableCircuits, "circuits", reader.load_circuit)

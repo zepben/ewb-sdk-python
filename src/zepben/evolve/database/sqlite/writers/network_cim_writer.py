@@ -30,7 +30,9 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     OperationalRestriction, TableOperationalRestrictions, TableFaultIndicators, TableAuxiliaryEquipment, AuxiliaryEquipment, FaultIndicator, \
     TableMeasurements, Measurement, Analog, TableAnalogs, Accumulator, TableAccumulators, Discrete, TableDiscretes, Control, TableControls, TableIoPoints, \
     IoPoint, TableRemotePoints, RemotePoint, RemoteControl, TableRemoteControls, RemoteSource, TableRemoteSources, ShuntCompensatorInfo, \
-    TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder
+    TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, \
+    CurrentTransformer, TableSensors, Sensor, TableCurrentTransformers, PotentialTransformer, TablePotentialTransformers, CurrentTransformerInfo, \
+    TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -267,6 +269,41 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         return self.try_execute_single_update(insert, street_id, description)
 
+    # ************ IEC61968 infIEC61968 InfAssetInfo ************
+
+    def save_current_transformer_info(self, current_transformer_info: CurrentTransformerInfo):
+        table = self.database_tables.get_table(TableCurrentTransformerInfo)
+        insert = self.database_tables.get_insert(TableCurrentTransformerInfo)
+
+        insert.add_value(table.accuracy_class.query_index, current_transformer_info.accuracy_class)
+        insert.add_value(table.accuracy_limit.query_index, current_transformer_info.accuracy_limit)
+        insert.add_value(table.core_count.query_index, current_transformer_info.core_count)
+        insert.add_value(table.ct_class.query_index, current_transformer_info.ct_class)
+        insert.add_value(table.knee_point_voltage.query_index, current_transformer_info.knee_point_voltage)
+        insert.add_ratio(table.max_ratio_numerator.query_index, table.max_ratio_denominator.query_index, current_transformer_info.max_ratio)
+        insert.add_ratio(table.nominal_ratio_numerator.query_index, table.nominal_ratio_denominator.query_index, current_transformer_info.nominal_ratio)
+        insert.add_value(table.primary_ratio.query_index, current_transformer_info.primary_ratio)
+        insert.add_value(table.rated_current.query_index, current_transformer_info.rated_current)
+        insert.add_value(table.secondary_fls_rating.query_index, current_transformer_info.secondary_fls_rating)
+        insert.add_value(table.secondary_ratio.query_index, current_transformer_info.secondary_ratio)
+        insert.add_value(table.usage.query_index, current_transformer_info.usage)
+
+        return self.save_asset_info(table, insert, current_transformer_info, "current transformer info")
+
+    def save_potential_transformer_info(self, potential_transformer_info: PotentialTransformerInfo):
+        table = self.database_tables.get_table(TablePotentialTransformerInfo)
+        insert = self.database_tables.get_insert(TablePotentialTransformerInfo)
+
+        insert.add_value(table.accuracy_class.query_index, potential_transformer_info.accuracy_class)
+        insert.add_ratio(table.nominal_ratio_numerator.query_index, table.nominal_ratio_denominator.query_index, potential_transformer_info.nominal_ratio)
+        insert.add_value(table.primary_ratio.query_index, potential_transformer_info.primary_ratio)
+        insert.add_value(table.pt_class.query_index, potential_transformer_info.pt_class)
+        insert.add_value(table.rated_voltage.query_index, potential_transformer_info.rated_voltage)
+        insert.add_value(table.secondary_ratio.query_index, potential_transformer_info.secondary_ratio)
+
+        return self.save_asset_info(table, insert, potential_transformer_info, "potential transformer info")
+
+
     # ************ IEC61968 METERING ************
 
     def save_end_device(self, table: TableEndDevices, insert: PreparedStatement, end_device: EndDevice, description: str) -> bool:
@@ -319,11 +356,32 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         return self.save_equipment(table, insert, auxiliary_equipment, description)
 
+    def save_current_transformer(self, current_transformer: CurrentTransformer) -> bool:
+        table = self.database_tables.get_table(TableCurrentTransformers)
+        insert = self.database_tables.get_insert(TableCurrentTransformers)
+
+        insert.add_value(table.current_transformer_info_mrid.query_index, self._mrid_or_none(current_transformer.current_transformer_info))
+        insert.add_value(table.core_burden.query_index, current_transformer.core_burden)
+
+        return self.save_sensor(table, insert, current_transformer, "current transformer")
+
     def save_fault_indicator(self, fault_indicator: FaultIndicator) -> bool:
         table = self.database_tables.get_table(TableFaultIndicators)
         insert = self.database_tables.get_insert(TableFaultIndicators)
 
         return self.save_auxiliary_equipment(table, insert, fault_indicator, "fault indicator")
+
+    def save_potential_transformer(self, potential_transformer: PotentialTransformer) -> bool:
+        table = self.database_tables.get_table(TablePotentialTransformers)
+        insert = self.database_tables.get_insert(TablePotentialTransformers)
+
+        insert.add_value(table.potential_transformer_info_mrid.query_index, self._mrid_or_none(potential_transformer.potential_transformer_info))
+        insert.add_value(table.type.query_index, potential_transformer.type.short_name)
+
+        return self.save_sensor(table, insert, potential_transformer, "potential transformer")
+
+    def save_sensor(self, table: TableSensors, insert: PreparedStatement, sensor: Sensor, description: str) -> bool:
+        return self.save_auxiliary_equipment(table, insert, sensor, description)
 
     # ************ IEC6190 CORE ************
 
@@ -519,7 +577,7 @@ class NetworkCIMWriter(BaseCIMWriter):
                         conductor: Conductor,
                         description: str) -> bool:
         insert.add_value(table.length.query_index, conductor.length)
-        insert.add_value(table.wire_info_mrid.query_index, self._mrid_or_none(conductor.asset_info))
+        insert.add_value(table.wire_info_mrid.query_index, self._mrid_or_none(conductor.wire_info))
 
         return self._save_conducting_equipment(table, insert, conductor, description)
 
@@ -697,7 +755,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.transformer_utilisation.query_index, power_transformer.transformer_utilisation)
         insert.add_value(table.construction_kind.query_index, power_transformer.construction_kind.short_name)
         insert.add_value(table.function.query_index, power_transformer.function.short_name)
-        insert.add_value(table.power_transformer_info_mrid.query_index, self._mrid_or_none(power_transformer.asset_info))
+        insert.add_value(table.power_transformer_info_mrid.query_index, self._mrid_or_none(power_transformer.power_transformer_info))
 
         return self._save_conducting_equipment(table, insert, power_transformer, "power transformer")
 
