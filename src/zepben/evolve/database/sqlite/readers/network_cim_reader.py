@@ -34,11 +34,10 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TableTransformerStarImpedance, TableCircuits, Circuit, Loop, TableLoops, TableAssetOrganisationRolesAssets, TableEquipmentEquipmentContainers, \
     TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableUsagePointsEndDevices, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableLoopsSubstations, LoopSubstationRelationship, LvFeeder, TableLvFeeders, TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, \
-    PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, CurrentTransformer, CurrentTransformerInfo
+    PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, \
+    TablePotentialTransformerInfo
 
 __all__ = ["NetworkCIMReader"]
-
-from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.infassetinfo_tables import TableCurrentTransformerInfo, TablePotentialTransformerInfo
 
 
 class NetworkCIMReader(BaseCIMReader):

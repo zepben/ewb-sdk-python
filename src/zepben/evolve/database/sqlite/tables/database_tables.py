@@ -20,7 +20,7 @@ from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.common_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.customer_tables import *
-from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.infassetinfo_tables import *
+from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.metering_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.operations_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.auxiliaryequipment_tables import *
