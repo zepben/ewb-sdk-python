@@ -66,7 +66,7 @@ to prevent the test from timing out while you step through the code:
 1. Update [```__init__.py```](src/zepben/evolve/__init__.py) to import every new public name (classes, functions, constants, extension methods):
    * ```from zepben.evolve...<new_module_name> import *```
 1. Testing:
-   * Import public names via ```from zepben.evolve...<module_name> import <name>/*``` when writing/updating tests. This ensures that
+   * Import public names via ```from zepben.evolve import <name>``` when writing/updating tests. This ensures that
      [```__init__.py```](src/zepben/evolve/__init__.py) was updated correctly.
    * Test for model classes.
    * Added new classes to corresponding service translator test. [```test/services/...```](test/services)
