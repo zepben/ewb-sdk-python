@@ -8,6 +8,7 @@ from typing import Dict, TypeVar, Type, Any, Optional
 
 from dataclassy import dataclass
 
+from zepben.evolve import TableProtectionEquipmentProtectedSwitches
 from zepben.evolve.database.sqlite.tables.associations.assetorganisationroles_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.circuit_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.customeragreements_association_tables import *
@@ -121,6 +122,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TablePowerTransformers: TablePowerTransformers(),
         TablePricingStructures: TablePricingStructures(),
         TablePricingStructuresTariffs: TablePricingStructuresTariffs(),
+        TableProtectionEquipmentProtectedSwitches: TableProtectionEquipmentProtectedSwitches(),
         TableRatioTapChangers: TableRatioTapChangers(),
         TableReclosers: TableReclosers(),
         TableRecloseSequences: TableRecloseSequences(),

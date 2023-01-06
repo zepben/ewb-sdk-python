@@ -34,7 +34,8 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     LvFeeder, CurrentTransformer, TableSensors, Sensor, TableCurrentTransformers, PotentialTransformer, TablePotentialTransformers, CurrentTransformerInfo, \
     TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo, TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, \
     Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableCurrentRelayInfo, \
-    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, RecloseSequence, TableCurrentRelays, TableRecloseSequences
+    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, RecloseSequence, TableCurrentRelays, TableRecloseSequences, \
+    TableProtectionEquipmentProtectedSwitches
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -836,6 +837,8 @@ class NetworkCIMWriter(BaseCIMWriter):
         status = True
         for rs in protected_switch.reclose_sequences:
             status = status and self._save_reclose_sequence(protected_switch, rs)
+        for pe in protected_switch.operated_by_protection_equipment:
+            status = status and self._save_protection_equipment_protected_switch(pe, protected_switch)
 
         return status and self._save_switch(table, insert, protected_switch, description)
 
@@ -1084,3 +1087,13 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.relationship.query_index, relationship.short_name)
 
         return self._try_execute_single_update(insert, f"{loop.mrid}-to-{substation.mrid}", f"loop to substation association")
+
+    def _save_protection_equipment_protected_switch(self, protection_equipment: ProtectionEquipment, protected_switch: ProtectedSwitch) -> bool:
+        table = self.database_tables.get_table(TableProtectionEquipmentProtectedSwitches)
+        insert = self.database_tables.get_insert(TableProtectionEquipmentProtectedSwitches)
+
+        insert.add_value(table.protection_equipment_mrid.query_index, protection_equipment.mrid)
+        insert.add_value(table.protected_switch_mrid.query_index, protected_switch.mrid)
+
+        return self._try_execute_single_update(insert, f"{protection_equipment.mrid}-to-{protected_switch.mrid}",
+                                               "protection equipment to protected switch association")

@@ -123,7 +123,7 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_switch_info(self, source: SwitchInfo, target: SwitchInfo) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_values(diff, SwitchInfo.rated_interrupting_time)
+        self._compare_floats(diff, SwitchInfo.rated_interrupting_time)
 
         return self._compare_asset_info(diff)
 

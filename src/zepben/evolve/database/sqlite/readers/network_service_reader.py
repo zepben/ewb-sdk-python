@@ -16,7 +16,7 @@ from zepben.evolve import BaseServiceReader, TableCableInfo, TableOverheadWireIn
     TableEquipmentUsagePoints, TableEquipmentOperationalRestrictions, TableEquipmentEquipmentContainers, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableLoopsSubstations, TableControls, TableRemoteControls, TableRemoteSources, TableAnalogs, TableAccumulators, TableDiscretes, TableLvFeeders, \
     TableCurrentTransformers, TablePotentialTransformers, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableCurrentRelayInfo, \
-    TableCurrentRelays, TableRecloseSequences, TableSwitchInfo
+    TableCurrentRelays, TableRecloseSequences, TableSwitchInfo, TableProtectionEquipmentProtectedSwitches
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 
 __all__ = ["NetworkServiceReader"]
@@ -113,6 +113,11 @@ class NetworkServiceReader(BaseServiceReader):
             TableEquipmentEquipmentContainers,
             "equipment to equipment container associations",
             reader.load_equipment_equipment_container
+        )
+        status = status and self._load_each(
+            TableProtectionEquipmentProtectedSwitches,
+            "protection equipment to protected switch associations",
+            reader.load_protection_equipment_protected_switch
         )
         status = status and self._load_each(TableCircuitsSubstations, "circuit to substation associations", reader.load_circuit_substation)
         status = status and self._load_each(TableCircuitsTerminals, "circuit to terminal associations", reader.load_circuit_terminal)

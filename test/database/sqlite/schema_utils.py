@@ -14,8 +14,8 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, Name, \
     PowerSystemResource, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, \
     PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, \
-    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, CurrentTransformer, \
-    PotentialTransformer
+    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, ProtectionEquipment, \
+    CurrentTransformer, PotentialTransformer, RecloseSequence, Breaker
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -391,6 +391,20 @@ class SchemaNetworks:
         if isinstance(filled, Measurement):
             filled.remote_source.measurement = filled
             service.add(filled.remote_source)
+
+        ############################
+        # IEC61970 Base Protection #
+        ############################
+
+        if isinstance(filled, ProtectionEquipment):
+            for it in filled.protected_switches:
+                it.add_operated_by_protection_equipment(filled)
+                service.add(it)
+
+        # Reclose sequences are not saved unless a protected switch references it.
+        if isinstance(filled, RecloseSequence):
+            breaker = Breaker(reclose_sequences=[filled])
+            service.add(breaker)
 
         #######################
         # IEC61970 BASE SCADA #

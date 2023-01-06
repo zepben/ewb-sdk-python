@@ -37,7 +37,7 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, \
     TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, \
     SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, TableRecloseSequences, RecloseSequence, ProtectionKind, TableCurrentRelays, \
-    CurrentRelay
+    CurrentRelay, TableProtectionEquipmentProtectedSwitches
 
 __all__ = ["NetworkCIMReader"]
 
@@ -1082,5 +1082,21 @@ class NetworkCIMReader(BaseCIMReader):
         elif relationship == LoopSubstationRelationship.SUBSTATION_ENERGIZES_LOOP:
             substation.add_energized_loop(loop)
             loop.add_energizing_substation(substation)
+
+        return True
+
+    def load_protection_equipment_protected_switch(self, table: TableProtectionEquipmentProtectedSwitches, rs: ResultSet,
+                                                   set_last_mrid: Callable[[str], str]) -> bool:
+        protection_equipment_mrid = set_last_mrid(rs.get_string(table.protection_equipment_mrid.query_index))
+        set_last_mrid(f"{protection_equipment_mrid}-to-UNKNOWN")
+
+        protected_switch_mrid = rs.get_string(table.protected_switch_mrid.query_index)
+        set_last_mrid(f"{protection_equipment_mrid}-to-{protected_switch_mrid}")
+
+        protection_equipment = self._base_service.get(protection_equipment_mrid, ProtectionEquipment)
+        protected_switch = self._base_service.get(protected_switch_mrid, ProtectedSwitch)
+
+        protection_equipment.add_protected_switch(protected_switch)
+        protected_switch.add_operated_by_protection_equipment(protection_equipment)
 
         return True

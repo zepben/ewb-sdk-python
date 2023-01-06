@@ -206,6 +206,7 @@ from zepben.evolve.database.sqlite.tables.associations.equipment_association_tab
 from zepben.evolve.database.sqlite.tables.associations.usagepoints_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.assetorganisationroles_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.pricingstructure_association_tables import *
+from zepben.evolve.database.sqlite.tables.associations.protection_equipment_protected_switches import *
 from zepben.evolve.database.sqlite.tables.iec61968.common_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.customer_tables import *

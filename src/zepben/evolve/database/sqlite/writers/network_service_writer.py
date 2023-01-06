@@ -31,7 +31,7 @@ class NetworkServiceWriter(BaseServiceWriter):
         status = status and self._save_all(service, OpenCircuitTest, writer.save_open_circuit_test)
         status = status and self._save_all(service, ShortCircuitTest, writer.save_short_circuit_test)
         status = status and self._save_all(service, ShuntCompensatorInfo, writer.save_shunt_compensator_info)
-        status = status and self._save_all(service, SwitchInfo, writer.save_shunt_compensator_info)
+        status = status and self._save_all(service, SwitchInfo, writer.save_switch_info)
         status = status and self._save_all(service, TransformerEndInfo, writer.save_transformer_end_info)
         status = status and self._save_all(service, AssetOwner, writer.save_asset_owner)
         status = status and self._save_all(service, Pole, writer.save_pole)

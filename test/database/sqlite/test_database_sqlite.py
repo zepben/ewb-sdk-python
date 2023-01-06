@@ -25,7 +25,7 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_junction, create_linear_shunt_compensator, create_load_break_switch, create_per_length_sequence_impedance, create_power_electronics_connection, \
     create_power_electronics_connection_phase, create_power_transformer, create_power_transformer_end, create_ratio_tap_changer, create_recloser, \
     create_transformer_star_impedance, create_circuit, create_loop, create_lv_feeder, create_current_transformer_info, create_current_transformer, \
-    create_potential_transformer
+    create_potential_transformer, create_current_relay, create_current_relay_info, create_reclose_sequence
 from database.sqlite.schema_utils import SchemaNetworks, Services, assume_non_blank_street_address_details
 from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, \
     NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, \
@@ -36,7 +36,7 @@ from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, C
     EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, BaseService, \
     DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail, LvFeeder, \
-    CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer
+    CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, CurrentRelayInfo, CurrentRelay, RecloseSequence
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
@@ -111,6 +111,12 @@ class TestDatabaseSqlite:
 
     @log_on_failure_decorator
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(switch_info=create_switch_info(False))
+    def test_switch_info(self, caplog, switch_info):
+        self._validate_schema(SchemaNetworks().network_services_of(SwitchInfo, switch_info), caplog)
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(transformer_end_info=create_transformer_end_info(False))
     def test_schema_transformer_end_info(self, caplog, transformer_end_info):
         self._validate_schema(SchemaNetworks().network_services_of(TransformerEndInfo, transformer_end_info), caplog)
@@ -168,6 +174,12 @@ class TestDatabaseSqlite:
         self._validate_schema(SchemaNetworks().customer_services_of(Tariff, tariffs), caplog)
 
     # ************ IEC61968 infIEC61968 InfAssetInfo ************
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(current_relay_info=create_current_relay_info(False))
+    def test_current_relay_info(self, caplog, current_relay_info):
+        self._validate_schema(SchemaNetworks().network_services_of(CurrentRelayInfo, current_relay_info), caplog)
 
     @log_on_failure_decorator
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -346,6 +358,20 @@ class TestDatabaseSqlite:
         self._validate_schema(SchemaNetworks().network_services_of(Discrete, discrete), caplog)
 
         # self._validate_schema(SchemaNetworks().measurement_services_of(DiscreteValue, data.draw(create_discrete_value(False))), caplog)
+
+    # ************ IEC61970 Base Protection ************
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(current_relay=create_current_relay(False))
+    def test_current_relay(self, caplog, current_relay):
+        self._validate_schema(SchemaNetworks().network_services_of(CurrentRelay, current_relay), caplog)
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(reclose_sequence=create_reclose_sequence(False))
+    def test_reclose_sequence(self, caplog, reclose_sequence):
+        self._validate_schema(SchemaNetworks().network_services_of(RecloseSequence, reclose_sequence), caplog)
 
     # ************ IEC61970 BASE SCADA ************
 
