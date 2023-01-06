@@ -31,7 +31,7 @@ class CustomerCIMWriter(BaseCIMWriter):
         insert.add_value(table.kind.query_index, customer.kind.name)
         insert.add_value(table.num_end_devices.query_index, 0)  # Currently unused
 
-        return self.save_organisation_role(table, insert, customer, "Customer")
+        return self._save_organisation_role(table, insert, customer, "Customer")
 
     def save_customer_agreement(self, customer_agreement: CustomerAgreement) -> bool:
         table = self.database_tables.get_table(TableCustomerAgreements)
@@ -69,8 +69,8 @@ class CustomerCIMWriter(BaseCIMWriter):
         insert.add_value(table.customer_agreement_mrid.query_index, customer_agreement.mrid)
         insert.add_value(table.pricing_structure_mrid.query_index, pricing_structure.mrid)
 
-        return self.try_execute_single_update(insert, f"{customer_agreement.mrid}-to-{pricing_structure.mrid}",
-                                              "CustomerAgreement to PricingStructure association")
+        return self._try_execute_single_update(insert, f"{customer_agreement.mrid}-to-{pricing_structure.mrid}",
+                                               "CustomerAgreement to PricingStructure association")
 
     def save_pricing_structure_to_tariff_association(self, pricing_structure: PricingStructure, tariff: Tariff) -> bool:
         table = self.database_tables.get_table(TablePricingStructuresTariffs)
@@ -79,4 +79,4 @@ class CustomerCIMWriter(BaseCIMWriter):
         insert.add_value(table.pricing_structure_mrid.query_index, pricing_structure.mrid)
         insert.add_value(table.tariff_mrid.query_index, tariff.mrid)
 
-        return self.try_execute_single_update(insert, f"{pricing_structure.mrid}-to-{tariff.mrid}", "PricingStructure to Tariff association")
+        return self._try_execute_single_update(insert, f"{pricing_structure.mrid}-to-{tariff.mrid}", "PricingStructure to Tariff association")

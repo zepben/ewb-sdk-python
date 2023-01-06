@@ -215,6 +215,7 @@ from zepben.evolve.database.sqlite.tables.iec61968.assetinfo_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.operations_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.meas_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.protection_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.scada_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.auxiliaryequipment_tables import *

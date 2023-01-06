@@ -21,7 +21,7 @@ class DiagramCIMWriter(BaseCIMWriter):
         insert.add_value(table.diagram_style.query_index, diagram.diagram_style.name)
         insert.add_value(table.orientation_kind.query_index, diagram.orientation_kind.name)
 
-        return self.save_identified_object(table, insert, diagram, "diagram")
+        return self._save_identified_object(table, insert, diagram, "diagram")
 
     def save_diagram_object(self, diagram_object: DiagramObject) -> bool:
         table = self.database_tables.get_table(TableDiagramObjects)
@@ -35,7 +35,7 @@ class DiagramCIMWriter(BaseCIMWriter):
         insert.add_value(table.style.query_index, diagram_object.style)
         insert.add_value(table.rotation.query_index, diagram_object.rotation)
 
-        return status and self.save_identified_object(table, insert, diagram_object, "diagram object")
+        return status and self._save_identified_object(table, insert, diagram_object, "diagram object")
 
     def save_diagram_object_point(self, diagram_object: DiagramObject, diagram_object_point: DiagramObjectPoint, sequence_number: int) -> bool:
         table = self.database_tables.get_table(TableDiagramObjectPoints)
@@ -46,4 +46,4 @@ class DiagramCIMWriter(BaseCIMWriter):
         insert.add_value(table.x_position.query_index, diagram_object_point.x_position)
         insert.add_value(table.y_position.query_index, diagram_object_point.y_position)
 
-        return self.try_execute_single_update(insert, "{}-point{}".format(diagram_object.mrid, sequence_number), "diagram object point")
+        return self._try_execute_single_update(insert, "{}-point{}".format(diagram_object.mrid, sequence_number), "diagram object point")

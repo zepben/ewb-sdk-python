@@ -13,23 +13,37 @@ __all__ = ["TableSwitches", "TableProtectedSwitches", "TableFuses", "TableLoadBr
 
 # noinspection PyAbstractClass
 class TableSwitches(TableConductingEquipment):
+    rated_current: Column = None
     normal_open: Column = None
     open: Column = None
+    switch_info_mrid: Column = None
 
     def __init__(self):
         super(TableSwitches, self).__init__()
+        self.rated_current = self._create_column("rated_current", "INTEGER", Nullable.NULL)
         self.normal_open = self._create_column("normal_open", "INTEGER", Nullable.NOT_NULL)
         self.open = self._create_column("open", "INTEGER", Nullable.NOT_NULL)
+        self.switch_info_mrid = self._create_column("switch_info_mrid", "TEXT", Nullable.NULL)
 
 
 # noinspection PyAbstractClass
 class TableProtectedSwitches(TableSwitches):
-    pass
+    breaking_capacity: Column = None
+
+    def __init__(self):
+        super(TableProtectedSwitches, self).__init__()
+        self.breaking_capacity = self._create_column("breaking_capacity", "INTEGER", Nullable.NULL)
 
 
 class TableBreakers(TableProtectedSwitches):
+    in_transit_time: Column = None
+
     def name(self) -> str:
         return "breakers"
+
+    def __init__(self):
+        super(TableBreakers, self).__init__()
+        self.in_transit_time = self._create_column("in_transit_time", "NUMBER", Nullable.NULL)
 
 
 class TableDisconnectors(TableSwitches):
