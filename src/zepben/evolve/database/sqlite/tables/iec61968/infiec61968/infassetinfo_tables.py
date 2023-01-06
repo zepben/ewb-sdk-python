@@ -12,12 +12,12 @@ __all__ = ["TableCurrentRelayInfo", "TableCurrentTransformerInfo", "TablePotenti
 class TableCurrentRelayInfo(TableAssetInfo):
     curve_setting: Column = None
 
-    def name(self) -> str:
-        return "current_relay_info"
-
     def __init__(self):
         super(TableCurrentRelayInfo, self).__init__()
         self.curve_setting = self._create_column("curve_setting", "TEXT", Nullable.NULL)
+
+    def name(self) -> str:
+        return "current_relay_info"
 
 
 class TableCurrentTransformerInfo(TableAssetInfo):
