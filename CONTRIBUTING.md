@@ -76,7 +76,7 @@ to prevent the test from timing out while you step through the code:
    * Add test for each new comparison to  [test/services/...](test/services) package.
    * Add test for each new class to  [test/cim/...](test/cim) package.
    * Test database schema:
-     - Add cases for all new associations in `_add_with_references()`: [schema_utils.py](test/database/sqlite/schema_utils.py)
+     - Add cases for each new direct association in `_add_with_references()`: [schema_utils.py](test/database/sqlite/schema_utils.py)
      - Update [```test_database_sqlite.py```](test/database/sqlite/test_database_sqlite.py) for new concrete CIM classes.
    * Verify that all the tests are passing. 
 1. Update release notes in [```changelog.md```](changelog.md).
