@@ -15,10 +15,10 @@ __all__ = ["TablePowerSystemResources", "TableSites", "TableNames", "TableTermin
 
 # noinspection PyAbstractClass
 class TableIdentifiedObjects(SqliteTable):
-    mrid: Column = None
-    name_: Column = None
-    description: Column = None
-    num_diagram_objects: Column = None
+    mrid: Column
+    name_: Column
+    description: Column
+    num_diagram_objects: Column
 
     def __init__(self):
         self.mrid = self._create_column("mrid", "TEXT", Nullable.NOT_NULL)
@@ -39,7 +39,7 @@ class TableAcDcTerminals(TableIdentifiedObjects):
 
 
 class TableBaseVoltages(TableIdentifiedObjects):
-    nominal_voltage: Column = None
+    nominal_voltage: Column
 
     def __init__(self):
         super(TableBaseVoltages, self).__init__()
@@ -51,8 +51,8 @@ class TableBaseVoltages(TableIdentifiedObjects):
 
 # noinspection PyAbstractClass
 class TablePowerSystemResources(TableIdentifiedObjects):
-    location_mrid: Column = None
-    num_controls: Column = None
+    location_mrid: Column
+    num_controls: Column
 
     def __init__(self):
         super(TablePowerSystemResources, self).__init__()
@@ -73,8 +73,8 @@ class TableConnectivityNodes(TableIdentifiedObjects):
 
 # noinspection PyAbstractClass
 class TableEquipment(TablePowerSystemResources):
-    normally_in_service: Column = None
-    in_service: Column = None
+    normally_in_service: Column
+    in_service: Column
 
     def __init__(self):
         super(TableEquipment, self).__init__()
@@ -84,7 +84,7 @@ class TableEquipment(TablePowerSystemResources):
 
 # noinspection PyAbstractClass
 class TableConductingEquipment(TableEquipment):
-    base_voltage_mrid: Column = None
+    base_voltage_mrid: Column
 
     def __init__(self):
         super(TableConductingEquipment, self).__init__()
@@ -97,8 +97,8 @@ class TableEquipmentContainers(TableConnectivityNodeContainers):
 
 
 class TableFeeders(TableEquipmentContainers):
-    normal_head_terminal_mrid: Column = None
-    normal_energizing_substation_mrid: Column = None
+    normal_head_terminal_mrid: Column
+    normal_energizing_substation_mrid: Column
 
     def __init__(self):
         super(TableFeeders, self).__init__()
@@ -121,9 +121,9 @@ class TableGeographicalRegions(TableIdentifiedObjects):
 
 
 class TableNames(SqliteTable):
-    name_: Column = None
-    identified_object_mrid: Column = None
-    name_type_name: Column = None
+    name_: Column
+    identified_object_mrid: Column
+    name_type_name: Column
 
     def __init__(self):
         super(TableNames, self).__init__()
@@ -148,8 +148,8 @@ class TableNames(SqliteTable):
 
 
 class TableNameTypes(SqliteTable):
-    name_: Column = None
-    description: Column = None
+    name_: Column
+    description: Column
 
     def __init__(self):
         super(TableNameTypes, self).__init__()
@@ -172,7 +172,7 @@ class TableSites(TableEquipmentContainers):
 
 
 class TableSubGeographicalRegions(TableIdentifiedObjects):
-    geographical_region_mrid: Column = None
+    geographical_region_mrid: Column
 
     def __init__(self):
         super(TableSubGeographicalRegions, self).__init__()
@@ -188,7 +188,7 @@ class TableSubGeographicalRegions(TableIdentifiedObjects):
 
 
 class TableSubstations(TableEquipmentContainers):
-    sub_geographical_region_mrid: Column = None
+    sub_geographical_region_mrid: Column
 
     def __init__(self):
         super(TableSubstations, self).__init__()
@@ -204,10 +204,10 @@ class TableSubstations(TableEquipmentContainers):
 
 
 class TableTerminals(TableAcDcTerminals):
-    conducting_equipment_mrid: Column = None
-    sequence_number: Column = None
-    connectivity_node_mrid: Column = None
-    phases: Column = None
+    conducting_equipment_mrid: Column
+    sequence_number: Column
+    connectivity_node_mrid: Column
+    phases: Column
 
     def __init__(self):
         super(TableTerminals, self).__init__()

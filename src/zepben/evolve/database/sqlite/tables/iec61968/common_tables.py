@@ -16,12 +16,12 @@ __all__ = ["TableDocuments", "TableAgreements", "TableLocations", "TableTownDeta
 
 # noinspection PyAbstractClass
 class TableDocuments(TableIdentifiedObjects):
-    title: Column = None
-    created_date_time: Column = None
-    author_name: Column = None
-    type: Column = None
-    status: Column = None
-    comment: Column = None
+    title: Column
+    created_date_time: Column
+    author_name: Column
+    type: Column
+    status: Column
+    comment: Column
 
     def __init__(self):
         super(TableDocuments, self).__init__()
@@ -46,8 +46,8 @@ class TableLocations(TableIdentifiedObjects):
 
 # noinspection PyAbstractClass
 class TableTownDetails(SqliteTable):
-    town_name: Column = None
-    state_or_province: Column = None
+    town_name: Column
+    state_or_province: Column
 
     def __init__(self):
         super(TableTownDetails, self).__init__()
@@ -57,15 +57,15 @@ class TableTownDetails(SqliteTable):
 
 # noinspection PyAbstractClass
 class TableStreetAddresses(TableTownDetails):
-    postal_code: Column = None
-    po_box: Column = None
-    building_name: Column = None
-    floor_identification: Column = None
-    street_name: Column = None
-    number: Column = None
-    suite_number: Column = None
-    type: Column = None
-    display_address: Column = None
+    postal_code: Column
+    po_box: Column
+    building_name: Column
+    floor_identification: Column
+    street_name: Column
+    number: Column
+    suite_number: Column
+    type: Column
+    display_address: Column
 
     def __init__(self):
         super(TableStreetAddresses, self).__init__()
@@ -81,8 +81,8 @@ class TableStreetAddresses(TableTownDetails):
 
 
 class TableLocationStreetAddresses(TableStreetAddresses):
-    location_mrid: Column = None
-    address_field: Column = None
+    location_mrid: Column
+    address_field: Column
 
     def __init__(self):
         super(TableLocationStreetAddresses, self).__init__()
@@ -110,7 +110,7 @@ class TableLocationStreetAddressField(Enum):
 
 # noinspection PyAbstractClass
 class TableOrganisationRoles(TableIdentifiedObjects):
-    organisation_mrid: Column = None
+    organisation_mrid: Column
 
     def __init__(self):
         super(TableOrganisationRoles, self).__init__()
@@ -124,10 +124,10 @@ class TableOrganisations(TableIdentifiedObjects):
 
 
 class TablePositionPoints(SqliteTable):
-    location_mrid: Column = None
-    sequence_number: Column = None
-    x_position: Column = None
-    y_position: Column = None
+    location_mrid: Column
+    sequence_number: Column
+    x_position: Column
+    y_position: Column
 
     def __init__(self):
         super(TablePositionPoints, self).__init__()

@@ -14,7 +14,7 @@ __all__ = ["TableAssets", "TableAssetContainers", "TableAssetInfo", "TableAssetO
 
 # noinspection PyAbstractClass
 class TableAssets(TableIdentifiedObjects):
-    location_mrid: Column = None
+    location_mrid: Column
 
     def __init__(self):
         super(TableAssets, self).__init__()
@@ -48,7 +48,7 @@ class TableStructures(TableAssetContainers):
 
 
 class TablePoles(TableStructures):
-    classification: Column = None
+    classification: Column
 
     def __init__(self):
         super(TablePoles, self).__init__()
@@ -59,9 +59,9 @@ class TablePoles(TableStructures):
 
 
 class TableStreetlights(TableAssets):
-    pole_mrid: Column = None
-    lamp_kind: Column = None
-    light_rating: Column = None
+    pole_mrid: Column
+    lamp_kind: Column
+    light_rating: Column
 
     def __init__(self):
         super(TableStreetlights, self).__init__()

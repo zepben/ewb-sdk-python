@@ -22,9 +22,9 @@ class LoopSubstationRelationship(Enum):
 
 
 class TableLoopsSubstations(SqliteTable):
-    loop_mrid: Column = None
-    substation_mrid: Column = None
-    relationship: Column = None
+    loop_mrid: Column
+    substation_mrid: Column
+    relationship: Column
 
     def __init__(self):
         super(TableLoopsSubstations, self).__init__()

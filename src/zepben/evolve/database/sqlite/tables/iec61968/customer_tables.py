@@ -13,7 +13,7 @@ __all__ = ["TableCustomerAgreements", "TableCustomers", "TablePricingStructures"
 
 
 class TableCustomerAgreements(TableAgreements):
-    customer_mrid: Column = None
+    customer_mrid: Column
 
     def __init__(self):
         super(TableCustomerAgreements, self).__init__()
@@ -29,8 +29,8 @@ class TableCustomerAgreements(TableAgreements):
 
 
 class TableCustomers(TableOrganisationRoles):
-    kind: Column = None
-    num_end_devices: Column = None
+    kind: Column
+    num_end_devices: Column
 
     def __init__(self):
         super(TableCustomers, self).__init__()

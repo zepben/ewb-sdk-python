@@ -12,8 +12,8 @@ __all__ = ["TableAssetOrganisationRolesAssets"]
 
 
 class TableAssetOrganisationRolesAssets(SqliteTable):
-    asset_organisation_role_mrid: Column = None
-    asset_mrid: Column = None
+    asset_organisation_role_mrid: Column
+    asset_mrid: Column
 
     def __init__(self):
         super(TableAssetOrganisationRolesAssets, self).__init__()

@@ -13,8 +13,8 @@ __all__ = ["TableUsagePointsEndDevices"]
 
 
 class TableUsagePointsEndDevices(SqliteTable):
-    usage_point_mrid: Column = None
-    end_device_mrid: Column = None
+    usage_point_mrid: Column
+    end_device_mrid: Column
 
     def __init__(self):
         super(TableUsagePointsEndDevices, self).__init__()

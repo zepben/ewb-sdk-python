@@ -14,8 +14,8 @@ __all__ = ["TablePowerTransformerInfo", "TableTransformerEndInfo", "TableTransfo
 
 # noinspection PyAbstractClass
 class TableTransformerTest(TableAssetInfo):
-    base_power: Column = None
-    temperature: Column = None
+    base_power: Column
+    temperature: Column
 
     def __init__(self):
         super(TableTransformerTest, self).__init__()
@@ -24,11 +24,11 @@ class TableTransformerTest(TableAssetInfo):
 
 
 class TableNoLoadTests(TableTransformerTest):
-    energised_end_voltage: Column = None
-    exciting_current: Column = None
-    exciting_current_zero: Column = None
-    loss: Column = None
-    loss_zero: Column = None
+    energised_end_voltage: Column
+    exciting_current: Column
+    exciting_current_zero: Column
+    loss: Column
+    loss_zero: Column
 
     def name(self) -> str:
         return "no_load_tests"
@@ -43,11 +43,11 @@ class TableNoLoadTests(TableTransformerTest):
 
 
 class TableOpenCircuitTests(TableTransformerTest):
-    energised_end_step: Column = None
-    energised_end_voltage: Column = None
-    open_end_step: Column = None
-    open_end_voltage: Column = None
-    phase_shift: Column = None
+    energised_end_step: Column
+    energised_end_voltage: Column
+    open_end_step: Column
+    open_end_voltage: Column
+    phase_shift: Column
 
     def name(self) -> str:
         return "open_circuit_tests"
@@ -68,16 +68,16 @@ class TablePowerTransformerInfo(TableAssetInfo):
 
 
 class TableShortCircuitTests(TableTransformerTest):
-    current: Column = None
-    energised_end_step: Column = None
-    grounded_end_step: Column = None
-    leakage_impedance: Column = None
-    leakage_impedance_zero: Column = None
-    loss: Column = None
-    loss_zero: Column = None
-    power: Column = None
-    voltage: Column = None
-    voltage_ohmic_part: Column = None
+    current: Column
+    energised_end_step: Column
+    grounded_end_step: Column
+    leakage_impedance: Column
+    leakage_impedance_zero: Column
+    loss: Column
+    loss_zero: Column
+    power: Column
+    voltage: Column
+    voltage_ohmic_part: Column
 
     def name(self) -> str:
         return "short_circuit_tests"
@@ -97,10 +97,10 @@ class TableShortCircuitTests(TableTransformerTest):
 
 
 class TableShuntCompensatorInfo(TableAssetInfo):
-    max_power_loss: Column = None
-    rated_current: Column = None
-    rated_reactive_power: Column = None
-    rated_voltage: Column = None
+    max_power_loss: Column
+    rated_current: Column
+    rated_reactive_power: Column
+    rated_voltage: Column
 
     def __init__(self):
         super(TableShuntCompensatorInfo, self).__init__()
@@ -114,21 +114,21 @@ class TableShuntCompensatorInfo(TableAssetInfo):
 
 
 class TableTransformerEndInfo(TableAssetInfo):
-    connection_kind: Column = None
-    emergency_s: Column = None
-    end_number: Column = None
-    insulation_u: Column = None
-    phase_angle_clock: Column = None
-    r: Column = None
-    rated_s: Column = None
-    rated_u: Column = None
-    short_term_s: Column = None
-    transformer_tank_info_mrid: Column = None
-    energised_end_no_load_tests: Column = None
-    energised_end_short_circuit_tests: Column = None
-    grounded_end_short_circuit_tests: Column = None
-    open_end_open_circuit_tests: Column = None
-    energised_end_open_circuit_tests: Column = None
+    connection_kind: Column
+    emergency_s: Column
+    end_number: Column
+    insulation_u: Column
+    phase_angle_clock: Column
+    r: Column
+    rated_s: Column
+    rated_u: Column
+    short_term_s: Column
+    transformer_tank_info_mrid: Column
+    energised_end_no_load_tests: Column
+    energised_end_short_circuit_tests: Column
+    grounded_end_short_circuit_tests: Column
+    open_end_open_circuit_tests: Column
+    energised_end_open_circuit_tests: Column
 
     def __init__(self):
         super(TableTransformerEndInfo, self).__init__()
@@ -158,7 +158,7 @@ class TableTransformerEndInfo(TableAssetInfo):
 
 
 class TableTransformerTankInfo(TableAssetInfo):
-    power_transformer_info_mrid: Column = None
+    power_transformer_info_mrid: Column
 
     def __init__(self):
         super(TableTransformerTankInfo, self).__init__()
@@ -175,8 +175,8 @@ class TableTransformerTankInfo(TableAssetInfo):
 
 # noinspection PyAbstractClass
 class TableWireInfo(TableAssetInfo):
-    rated_current: Column = None
-    material: Column = None
+    rated_current: Column
+    material: Column
 
     def __init__(self):
         super(TableWireInfo, self).__init__()

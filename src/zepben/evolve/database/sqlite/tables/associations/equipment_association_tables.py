@@ -12,8 +12,8 @@ __all__ = ["TableEquipmentEquipmentContainers", "TableEquipmentUsagePoints", "Ta
 
 
 class TableEquipmentEquipmentContainers(SqliteTable):
-    equipment_mrid: Column = None
-    equipment_container_mrid: Column = None
+    equipment_mrid: Column
+    equipment_container_mrid: Column
 
     def __init__(self):
         super(TableEquipmentEquipmentContainers, self).__init__()
@@ -36,8 +36,8 @@ class TableEquipmentEquipmentContainers(SqliteTable):
 
 
 class TableEquipmentOperationalRestrictions(SqliteTable):
-    equipment_mrid: Column = None
-    operational_restriction_mrid: Column = None
+    equipment_mrid: Column
+    operational_restriction_mrid: Column
 
     def __init__(self):
         super(TableEquipmentOperationalRestrictions, self).__init__()
@@ -60,8 +60,8 @@ class TableEquipmentOperationalRestrictions(SqliteTable):
 
 
 class TableEquipmentUsagePoints(SqliteTable):
-    equipment_mrid: Column = None
-    usage_point_mrid: Column = None
+    equipment_mrid: Column
+    usage_point_mrid: Column
 
     def __init__(self):
         super(TableEquipmentUsagePoints, self).__init__()

@@ -13,9 +13,9 @@ __all__ = ["TablePowerElectronicsUnit", "TablePowerElectronicsWindUnit", "TableP
 
 # noinspection PyAbstractClass
 class TablePowerElectronicsUnit(TableEquipment):
-    power_electronics_connection_mrid: Column = None
-    max_p: Column = None
-    min_p: Column = None
+    power_electronics_connection_mrid: Column
+    max_p: Column
+    min_p: Column
 
     def __init__(self):
         super(TablePowerElectronicsUnit, self).__init__()
@@ -30,9 +30,9 @@ class TablePowerElectronicsUnit(TableEquipment):
 
 
 class TableBatteryUnit(TablePowerElectronicsUnit):
-    battery_state: Column = None
-    rated_e: Column = None
-    stored_e: Column = None
+    battery_state: Column
+    rated_e: Column
+    stored_e: Column
 
     def __init__(self):
         super(TableBatteryUnit, self).__init__()

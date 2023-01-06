@@ -12,8 +12,8 @@ __all__ = ["TableCustomerAgreementsPricingStructures"]
 
 
 class TableCustomerAgreementsPricingStructures(SqliteTable):
-    customer_agreement_mrid: Column = None
-    pricing_structure_mrid: Column = None
+    customer_agreement_mrid: Column
+    pricing_structure_mrid: Column
 
     def __init__(self):
         super(TableCustomerAgreementsPricingStructures, self).__init__()

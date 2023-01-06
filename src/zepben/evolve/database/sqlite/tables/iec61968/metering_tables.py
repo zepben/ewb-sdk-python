@@ -13,8 +13,8 @@ __all__ = ["TableEndDevices", "TableMeters", "TableUsagePoints"]
 
 # noinspection PyAbstractClass
 class TableEndDevices(TableAssetContainers):
-    customer_mrid: Column = None
-    service_location_mrid: Column = None
+    customer_mrid: Column
+    service_location_mrid: Column
 
     def __init__(self):
         super(TableEndDevices, self).__init__()
@@ -29,9 +29,9 @@ class TableMeters(TableEndDevices):
 
 
 class TableUsagePoints(TableIdentifiedObjects):
-    location_mrid: Column = None
-    is_virtual: Column = None
-    connection_category: Column = None
+    location_mrid: Column
+    is_virtual: Column
+    connection_category: Column
 
     def __init__(self):
         super(TableUsagePoints, self).__init__()

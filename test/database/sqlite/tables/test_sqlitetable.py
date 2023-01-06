@@ -16,9 +16,9 @@ class TestTable(SqliteTable):
 
     __test__ = False
 
-    test_column: Column = None
-    test_column_2: Column = None
-    _ignored_column: Column = None
+    test_column: Column
+    test_column_2: Column
+    _ignored_column: Column
     _ignored_field: str = "field"
 
     def __init__(self):
@@ -40,8 +40,8 @@ class TestTable2(SqliteTable):
 
     __test__ = False
 
-    test_column: Column = None
-    test_column_2: Column = None
+    test_column: Column
+    test_column_2: Column
 
     def __init__(self):
         self.column_index += 1
@@ -74,8 +74,8 @@ class TestTable3(SqliteTable):
 
     __test__ = False
 
-    test_column: Column = None
-    test_column_2: Column = None
+    test_column: Column
+    test_column_2: Column
 
     def __init__(self):
         self.test_column = self._create_column("test_column", "TEXT", Nullable.NOT_NULL)

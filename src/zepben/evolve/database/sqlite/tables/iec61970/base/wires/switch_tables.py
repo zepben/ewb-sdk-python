@@ -13,8 +13,8 @@ __all__ = ["TableSwitches", "TableProtectedSwitches", "TableFuses", "TableLoadBr
 
 # noinspection PyAbstractClass
 class TableSwitches(TableConductingEquipment):
-    normal_open: Column = None
-    open: Column = None
+    normal_open: Column
+    open: Column
 
     def __init__(self):
         super(TableSwitches, self).__init__()

@@ -12,7 +12,7 @@ __all__ = ["TableAuxiliaryEquipment", "TableSensors", "TableCurrentTransformers"
 
 # noinspection PyAbstractClass
 class TableAuxiliaryEquipment(TableEquipment):
-    terminal_mrid: Column = None
+    terminal_mrid: Column
 
     def __init__(self):
         super(TableAuxiliaryEquipment, self).__init__()
@@ -25,8 +25,8 @@ class TableSensors(TableAuxiliaryEquipment):
 
 
 class TableCurrentTransformers(TableSensors):
-    current_transformer_info_mrid: Column = None
-    core_burden: Column = None
+    current_transformer_info_mrid: Column
+    core_burden: Column
 
     def name(self) -> str:
         return "current_transformers"
@@ -44,8 +44,8 @@ class TableFaultIndicators(TableAuxiliaryEquipment):
 
 
 class TablePotentialTransformers(TableSensors):
-    potential_transformer_info_mrid: Column = None
-    type: Column = None
+    potential_transformer_info_mrid: Column
+    type: Column
 
     def name(self) -> str:
         return "potential_transformers"
