@@ -26,9 +26,10 @@ from zepben.evolve.database.sqlite.tables.iec61968.operations_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.auxiliaryequipment_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout_tables import *
-from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches
+from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.feeder_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.meas_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.protection_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.scada_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.conductor_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.connector_tables import *
@@ -64,6 +65,8 @@ def _create_tables() -> Dict[Type[T], T]:
         TableCircuitsTerminals: TableCircuitsTerminals(),
         TableConnectivityNodes: TableConnectivityNodes(),
         TableControls: TableControls(),
+        TableCurrentRelayInfo: TableCurrentRelayInfo(),
+        TableCurrentRelays: TableCurrentRelays(),
         TableCurrentTransformerInfo: TableCurrentTransformerInfo(),
         TableCurrentTransformers: TableCurrentTransformers(),
         TableCustomerAgreements: TableCustomerAgreements(),
@@ -120,6 +123,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TablePricingStructuresTariffs: TablePricingStructuresTariffs(),
         TableRatioTapChangers: TableRatioTapChangers(),
         TableReclosers: TableReclosers(),
+        TableRecloseSequences: TableRecloseSequences(),
         TableRemoteControls: TableRemoteControls(),
         TableRemoteSources: TableRemoteSources(),
         TableShortCircuitTests: TableShortCircuitTests(),
@@ -128,6 +132,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TableStreetlights: TableStreetlights(),
         TableSubGeographicalRegions: TableSubGeographicalRegions(),
         TableSubstations: TableSubstations(),
+        TableSwitchInfo: TableSwitchInfo(),
         TableTariffs: TableTariffs(),
         TableTerminals: TableTerminals(),
         TableTransformerEndInfo: TableTransformerEndInfo(),

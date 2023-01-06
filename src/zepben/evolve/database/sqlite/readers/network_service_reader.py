@@ -16,7 +16,7 @@ from zepben.evolve import BaseServiceReader, TableCableInfo, TableOverheadWireIn
     TableEquipmentUsagePoints, TableEquipmentOperationalRestrictions, TableEquipmentEquipmentContainers, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableLoopsSubstations, TableControls, TableRemoteControls, TableRemoteSources, TableAnalogs, TableAccumulators, TableDiscretes, TableLvFeeders, \
     TableCurrentTransformers, TablePotentialTransformers, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableCurrentRelayInfo, \
-    TableCurrentRelays, TableRecloseSequences
+    TableCurrentRelays, TableRecloseSequences, TableSwitchInfo
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 
 __all__ = ["NetworkServiceReader"]
@@ -38,7 +38,7 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableOpenCircuitTests, "open circuit tests", reader.load_open_circuit_test)
         status = status and self._load_each(TableShortCircuitTests, "short circuit tests", reader.load_short_circuit_test)
         status = status and self._load_each(TableShuntCompensatorInfo, "shunt compensator info", reader.load_shunt_compensator_info)
-        status = status and self._load_each(TableShuntCompensatorInfo, "switch info", reader.load_switch_info)
+        status = status and self._load_each(TableSwitchInfo, "switch info", reader.load_switch_info)
         status = status and self._load_each(TableTransformerEndInfo, "transformer end info", reader.load_transformer_end_info)
         status = status and self._load_each(TableCurrentRelayInfo, "current relay info", reader.load_current_relay_info)
         status = status and self._load_each(TableCurrentTransformerInfo, "current transformer info", reader.load_current_transformer_info)
