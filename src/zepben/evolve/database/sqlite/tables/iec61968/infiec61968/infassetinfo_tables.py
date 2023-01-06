@@ -55,9 +55,6 @@ class TablePotentialTransformerInfo(TableAssetInfo):
     rated_voltage: Column = None
     secondary_ratio: Column = None
 
-    def name(self) -> str:
-        return "potential_transformer_info"
-
     def __init__(self):
         super(TablePotentialTransformerInfo, self).__init__()
         self.accuracy_class = self._create_column("accuracy_class", "TEXT", Nullable.NULL)
@@ -67,3 +64,6 @@ class TablePotentialTransformerInfo(TableAssetInfo):
         self.pt_class = self._create_column("pt_class", "TEXT", Nullable.NULL)
         self.rated_voltage = self._create_column("rated_voltage", "INTEGER", Nullable.NULL)
         self.secondary_ratio = self._create_column("secondary_ratio", "NUMBER", Nullable.NULL)
+
+    def name(self) -> str:
+        return "potential_transformer_info"
