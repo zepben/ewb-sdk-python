@@ -25,9 +25,6 @@ class TableCurrentTransformerInfo(TableAssetInfo):
     secondary_ratio: Column = None
     usage: Column = None
 
-    def name(self) -> str:
-        return "current_transformer_info"
-
     def __init__(self):
         super(TableCurrentTransformerInfo, self).__init__()
         self.accuracy_class = self._create_column("accuracy_class", "TEXT", Nullable.NULL)
@@ -44,6 +41,9 @@ class TableCurrentTransformerInfo(TableAssetInfo):
         self.secondary_fls_rating = self._create_column("secondary_fls_rating", "INTEGER", Nullable.NULL)
         self.secondary_ratio = self._create_column("secondary_ratio", "NUMBER", Nullable.NULL)
         self.usage = self._create_column("usage", "TEXT", Nullable.NULL)
+
+    def name(self) -> str:
+        return "current_transformer_info"
 
 
 class TablePotentialTransformerInfo(TableAssetInfo):

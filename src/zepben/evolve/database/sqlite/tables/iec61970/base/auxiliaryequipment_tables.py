@@ -28,13 +28,13 @@ class TableCurrentTransformers(TableSensors):
     current_transformer_info_mrid: Column = None
     core_burden: Column = None
 
-    def name(self) -> str:
-        return "current_transformers"
-
     def __init__(self):
         super(TableCurrentTransformers, self).__init__()
         self.current_transformer_info_mrid = self._create_column("current_transformer_info_mrid", "TEXT", Nullable.NULL)
         self.core_burden = self._create_column("core_burden", "INTEGER", Nullable.NULL)
+
+    def name(self) -> str:
+        return "current_transformers"
 
 
 class TableFaultIndicators(TableAuxiliaryEquipment):
@@ -47,10 +47,10 @@ class TablePotentialTransformers(TableSensors):
     potential_transformer_info_mrid: Column = None
     type: Column = None
 
-    def name(self) -> str:
-        return "potential_transformers"
-
     def __init__(self):
         super(TablePotentialTransformers, self).__init__()
         self.potential_transformer_info_mrid = self._create_column("potential_transformer_info_mrid", "TEXT", Nullable.NULL)
         self.type = self._create_column("type", "TEXT", Nullable.NOT_NULL)
+
+    def name(self) -> str:
+        return "potential_transformers"
