@@ -831,7 +831,8 @@ def current_relay_to_pb(cim: CurrentRelay) -> PBCurrentRelay:
     return PBCurrentRelay(
         pe=protection_equipment_to_pb(cim, True),
         currentLimit1=from_nullable_float(cim.current_limit_1),
-        **nullable_bool_settings("inverseTimeFlag", cim.inverse_time_flag)
+        **nullable_bool_settings("inverseTimeFlag", cim.inverse_time_flag),
+        timeDelay1=from_nullable_float(cim.time_delay_1),
     )
 
 
@@ -839,7 +840,8 @@ def protection_equipment_to_pb(cim: ProtectionEquipment, include_asset_info: boo
     return PBProtectionEquipment(
         eq=equipment_to_pb(cim, include_asset_info),
         relayDelayTime=from_nullable_float(cim.relay_delay_time),
-        protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name)
+        protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name),
+        protectedSwitchMRIDs=[str(io.mrid) for io in cim.protected_switches]
     )
 
 

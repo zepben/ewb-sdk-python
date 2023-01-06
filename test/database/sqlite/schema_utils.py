@@ -170,6 +170,9 @@ class SchemaNetworks:
             es.add_phase(io)
             service.add(es)
             io.energy_source = es
+        elif isinstance(io, RecloseSequence):
+            breaker = Breaker(reclose_sequences=[io])
+            service.add(breaker)
 
         return io
 

@@ -958,7 +958,7 @@ def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) ->
         time_delay_1=float_or_none(pb.timeDelay1)
     )
 
-    network_service.resolve_or_defer_reference(resolver.current_relay_to_current_relay_info_resolver(cim), pb.asset_info_mrid())
+    network_service.resolve_or_defer_reference(resolver.current_relay_info(cim), pb.asset_info_mrid())
 
     protection_equipment_to_cim(pb.pe, cim, network_service)
     return cim if network_service.add(cim) else None

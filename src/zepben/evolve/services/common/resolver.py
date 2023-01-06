@@ -31,8 +31,6 @@ __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location",
            "star_impedance_transformer_end_info", "transformer_end_transformer_star_impedance", "normal_energized_lv_feeders",
            "normal_energizing_feeders", "lv_feeder_normal_head_terminal", "normal_energizing_feeders", "protected_switches"]
 
-from zepben.evolve.services.common.reference_resolvers import ps_to_pe_resolver, switch_to_switch_info_resolver, current_relay_to_current_relay_info_resolver
-
 
 def per_length_sequence_impedance(ac_line_segment: AcLineSegment):
     # noinspection PyArgumentList

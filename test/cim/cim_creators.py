@@ -369,7 +369,7 @@ def create_current_relay_info(include_runtime: bool = True):
     return builds(
         CurrentRelayInfo,
         **create_asset_info(include_runtime),
-        curve_setting=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        curve_setting=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE)
     )
 
 

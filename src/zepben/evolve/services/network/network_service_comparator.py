@@ -525,12 +525,14 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_current_relay(self, source: CurrentRelay, target: CurrentRelay) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_values(diff, CurrentRelay.current_limit_1, CurrentRelay.inverse_time_flag, CurrentRelay.current_limit_1)
+        self._compare_values(diff, CurrentRelay.inverse_time_flag)
+        self._compare_floats(diff, CurrentRelay.current_limit_1, CurrentRelay.time_delay_1)
 
         return self._compare_protection_equipment(diff)
 
     def _compare_protection_equipment(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(diff, ProtectionEquipment.relay_delay_time, ProtectionEquipment.protection_kind)
+        self._compare_values(diff, ProtectionEquipment.protection_kind)
+        self._compare_floats(diff, ProtectionEquipment.relay_delay_time)
         self._compare_id_reference_collections(diff, ProtectionEquipment.protected_switches)
 
         return self._compare_equipment(diff)
@@ -538,7 +540,8 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_reclose_sequence(self, source: RecloseSequence, target: RecloseSequence) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_values(diff, RecloseSequence.reclose_delay, RecloseSequence.reclose_step)
+        self._compare_values(diff, RecloseSequence.reclose_step)
+        self._compare_floats(diff, RecloseSequence.reclose_delay)
 
         return self._compare_identified_object(diff)
 

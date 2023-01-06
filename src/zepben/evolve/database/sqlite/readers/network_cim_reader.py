@@ -553,11 +553,11 @@ class NetworkCIMReader(BaseCIMReader):
         current_relay = CurrentRelay(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
 
         current_relay.current_limit_1 = rs.get_double(table.current_limit_1.query_index, None)
-        current_relay.inverse_time_flag = rs.get_boolean(table.current_limit_1.query_index, None)
+        current_relay.inverse_time_flag = rs.get_boolean(table.inverse_time_flag.query_index, None)
         current_relay.time_delay_1 = rs.get_double(table.time_delay_1.query_index, None)
         current_relay.asset_info = self._ensure_get(rs.get_string(table.current_relay_info_mrid.query_index, None), WireInfo)
 
-        return self._load_protection_equipment(current_relay, table, rs)
+        return self._load_protection_equipment(current_relay, table, rs) and self._add_or_throw(current_relay)
 
     def _load_protection_equipment(self, protection_equipment: ProtectionEquipment, table: TableProtectionEquipment, rs: ResultSet) -> bool:
         protection_equipment.relay_delay_time = rs.get_double(table.relay_delay_time.query_index, None)
@@ -575,7 +575,7 @@ class NetworkCIMReader(BaseCIMReader):
         protected_switch = self._base_service.get(protected_switch_id, ProtectedSwitch)
         protected_switch.add_reclose_sequence(reclose_sequence)
 
-        return self._load_identified_object(reclose_sequence, table, rs)
+        return self._load_identified_object(reclose_sequence, table, rs) and self._add_or_throw(reclose_sequence)
 
     # ************ IEC61970 BASE SCADA ************
 
