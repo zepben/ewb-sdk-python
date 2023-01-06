@@ -14,22 +14,22 @@ class TableEquivalentEquipment(TableConductingEquipment):
 
 
 class TableEquivalentBranches(TableEquivalentEquipment):
-    negative_r12: Column
-    negative_r21: Column
-    negative_x12: Column
-    negative_x21: Column
-    positive_r12: Column
-    positive_r21: Column
-    positive_x12: Column
-    positive_x21: Column
-    r: Column
-    r21: Column
-    x: Column
-    x21: Column
-    zero_r12: Column
-    zero_r21: Column
-    zero_x12: Column
-    zero_x21: Column
+    negative_r12: Column = None
+    negative_r21: Column = None
+    negative_x12: Column = None
+    negative_x21: Column = None
+    positive_r12: Column = None
+    positive_r21: Column = None
+    positive_x12: Column = None
+    positive_x21: Column = None
+    r: Column = None
+    r21: Column = None
+    x: Column = None
+    x21: Column = None
+    zero_r12: Column = None
+    zero_r21: Column = None
+    zero_x12: Column = None
+    zero_x21: Column = None
 
     def __init__(self):
         super(TableEquivalentBranches, self).__init__()

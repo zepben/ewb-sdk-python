@@ -12,8 +12,8 @@ __all__ = ["TableCircuitsSubstations", "TableCircuitsTerminals"]
 
 
 class TableCircuitsSubstations(SqliteTable):
-    circuit_mrid: Column
-    substation_mrid: Column
+    circuit_mrid: Column = None
+    substation_mrid: Column = None
 
     def __init__(self):
         super(TableCircuitsSubstations, self).__init__()
@@ -36,8 +36,8 @@ class TableCircuitsSubstations(SqliteTable):
 
 
 class TableCircuitsTerminals(SqliteTable):
-    circuit_mrid: Column
-    terminal_mrid: Column
+    circuit_mrid: Column = None
+    terminal_mrid: Column = None
 
     def __init__(self):
         super(TableCircuitsTerminals, self).__init__()

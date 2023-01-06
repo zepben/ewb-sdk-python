@@ -13,7 +13,7 @@ __all__ = ["TableCircuits", "TableLoops", "TableLvFeeders"]
 
 
 class TableCircuits(TableLines):
-    loop_mrid: Column
+    loop_mrid: Column = None
 
     def __init__(self):
         super(TableCircuits, self).__init__()
@@ -34,7 +34,7 @@ class TableLoops(TableIdentifiedObjects):
 
 
 class TableLvFeeders(TableEquipmentContainers):
-    normal_head_terminal_mrid: Column
+    normal_head_terminal_mrid: Column = None
 
     def __init__(self):
         super(TableLvFeeders, self).__init__()

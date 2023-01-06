@@ -14,11 +14,11 @@ __all__ = ["TableMeasurements", "TableAnalogs", "TableControls", "TableAccumulat
 
 # noinspection PyAbstractClass
 class TableMeasurements(TableIdentifiedObjects):
-    power_system_resource_mrid: Column
-    remote_source_mrid: Column
-    terminal_mrid: Column
-    phases: Column
-    unit_symbol: Column
+    power_system_resource_mrid: Column = None
+    remote_source_mrid: Column = None
+    terminal_mrid: Column = None
+    phases: Column = None
+    unit_symbol: Column = None
 
     def __init__(self):
         super(TableMeasurements, self).__init__()
@@ -43,7 +43,7 @@ class TableAccumulators(TableMeasurements):
 
 
 class TableAnalogs(TableMeasurements):
-    positive_flow_in: Column
+    positive_flow_in: Column = None
 
     def __init__(self):
         super(TableAnalogs, self).__init__()
@@ -59,7 +59,7 @@ class TableIoPoints(TableIdentifiedObjects):
 
 
 class TableControls(TableIoPoints):
-    power_system_resource_mrid: Column
+    power_system_resource_mrid: Column = None
 
     def __init__(self):
         super(TableControls, self).__init__()

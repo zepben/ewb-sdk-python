@@ -16,7 +16,7 @@ class TableRemotePoints(TableIdentifiedObjects):
 
 
 class TableRemoteControls(TableRemotePoints):
-    control_mrid: Column
+    control_mrid: Column = None
 
     def __init__(self):
         super(TableRemoteControls, self).__init__()
@@ -27,7 +27,7 @@ class TableRemoteControls(TableRemotePoints):
 
 
 class TableRemoteSources(TableRemotePoints):
-    measurement_mrid: Column
+    measurement_mrid: Column = None
 
     def __init__(self):
         super(TableRemoteSources, self).__init__()

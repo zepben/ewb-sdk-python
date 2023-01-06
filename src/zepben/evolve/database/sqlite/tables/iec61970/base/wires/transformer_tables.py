@@ -15,13 +15,13 @@ __all__ = ["TableTransformerEnds", "TablePowerTransformerEnds", "TablePowerTrans
 
 # noinspection PyAbstractClass
 class TableTransformerEnds(TableIdentifiedObjects):
-    end_number: Column
-    terminal_mrid: Column
-    base_voltage_mrid: Column
-    grounded: Column
-    r_ground: Column
-    x_ground: Column
-    star_impedance_mrid: Column
+    end_number: Column = None
+    terminal_mrid: Column = None
+    base_voltage_mrid: Column = None
+    grounded: Column = None
+    r_ground: Column = None
+    x_ground: Column = None
+    star_impedance_mrid: Column = None
 
     def __init__(self):
         super(TableTransformerEnds, self).__init__()
@@ -40,19 +40,19 @@ class TableTransformerEnds(TableIdentifiedObjects):
 
 
 class TablePowerTransformerEnds(TableTransformerEnds):
-    power_transformer_mrid: Column
-    connection_kind: Column
-    phase_angle_clock: Column
-    b: Column
-    b0: Column
-    g: Column
-    g0: Column
-    r: Column
-    r0: Column
-    rated_s: Column
-    rated_u: Column
-    x: Column
-    x0: Column
+    power_transformer_mrid: Column = None
+    connection_kind: Column = None
+    phase_angle_clock: Column = None
+    b: Column = None
+    b0: Column = None
+    g: Column = None
+    g0: Column = None
+    r: Column = None
+    r0: Column = None
+    rated_s: Column = None
+    rated_u: Column = None
+    x: Column = None
+    x0: Column = None
 
     def __init__(self):
         super(TablePowerTransformerEnds, self).__init__()
@@ -85,11 +85,11 @@ class TablePowerTransformerEnds(TableTransformerEnds):
 
 
 class TablePowerTransformers(TableConductingEquipment):
-    vector_group: Column
-    transformer_utilisation: Column
-    construction_kind: Column
-    function: Column
-    power_transformer_info_mrid: Column
+    vector_group: Column = None
+    transformer_utilisation: Column = None
+    construction_kind: Column = None
+    function: Column = None
+    power_transformer_info_mrid: Column = None
 
     def __init__(self):
         super(TablePowerTransformers, self).__init__()
@@ -105,13 +105,13 @@ class TablePowerTransformers(TableConductingEquipment):
 
 # noinspection PyAbstractClass
 class TableTapChangers(TablePowerSystemResources):
-    control_enabled: Column
-    high_step: Column
-    low_step: Column
-    neutral_step: Column
-    neutral_u: Column
-    normal_step: Column
-    step: Column
+    control_enabled: Column = None
+    high_step: Column = None
+    low_step: Column = None
+    neutral_step: Column = None
+    neutral_u: Column = None
+    normal_step: Column = None
+    step: Column = None
 
     def __init__(self):
         super(TableTapChangers, self).__init__()
@@ -125,8 +125,8 @@ class TableTapChangers(TablePowerSystemResources):
 
 
 class TableRatioTapChangers(TableTapChangers):
-    transformer_end_mrid: Column
-    step_voltage_increment: Column
+    transformer_end_mrid: Column = None
+    step_voltage_increment: Column = None
 
     def __init__(self):
         super(TableRatioTapChangers, self).__init__()
@@ -143,11 +143,11 @@ class TableRatioTapChangers(TableTapChangers):
 
 
 class TableTransformerStarImpedance(TableIdentifiedObjects):
-    r: Column
-    r0: Column
-    x: Column
-    x0: Column
-    transformer_end_info_mrid: Column
+    r: Column = None
+    r0: Column = None
+    x: Column = None
+    x0: Column = None
+    transformer_end_info_mrid: Column = None
 
     def __init__(self):
         super(TableTransformerStarImpedance, self).__init__()

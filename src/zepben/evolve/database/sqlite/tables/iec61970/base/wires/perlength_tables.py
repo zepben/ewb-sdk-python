@@ -26,14 +26,14 @@ class TablePerLengthImpedances(TablePerLengthLineParameters):
 
 
 class TablePerLengthSequenceImpedances(TablePerLengthImpedances):
-    r: Column
-    x: Column
-    r0: Column
-    x0: Column
-    bch: Column
-    gch: Column
-    b0ch: Column
-    g0ch: Column
+    r: Column = None
+    x: Column = None
+    r0: Column = None
+    x0: Column = None
+    bch: Column = None
+    gch: Column = None
+    b0ch: Column = None
+    g0ch: Column = None
 
     def __init__(self):
         super(TablePerLengthSequenceImpedances, self).__init__()

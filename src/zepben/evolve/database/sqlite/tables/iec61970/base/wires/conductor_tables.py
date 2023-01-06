@@ -12,8 +12,8 @@ __all__ = ["TableConductors", "TableAcLineSegments"]
 
 # noinspection PyAbstractClass
 class TableConductors(TableConductingEquipment):
-    length: Column
-    wire_info_mrid: Column
+    length: Column = None
+    wire_info_mrid: Column = None
 
     def __init__(self):
         super(TableConductors, self).__init__()
@@ -22,7 +22,7 @@ class TableConductors(TableConductingEquipment):
 
 
 class TableAcLineSegments(TableConductors):
-    per_length_sequence_impedance_mrid: Column
+    per_length_sequence_impedance_mrid: Column = None
 
     def __init__(self):
         super(TableAcLineSegments, self).__init__()

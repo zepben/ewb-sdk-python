@@ -13,8 +13,8 @@ __all__ = ["TablePricingStructuresTariffs"]
 
 
 class TablePricingStructuresTariffs(SqliteTable):
-    pricing_structure_mrid: Column
-    tariff_mrid: Column
+    pricing_structure_mrid: Column = None
+    tariff_mrid: Column = None
 
     def __init__(self):
         super(TablePricingStructuresTariffs, self).__init__()

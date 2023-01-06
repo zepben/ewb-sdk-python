@@ -14,10 +14,10 @@ __all__ = ["TableDiagrams", "TableDiagramObjects", "TableDiagramObjects", "Table
 
 
 class TableDiagramObjectPoints(SqliteTable):
-    diagram_object_mrid: Column
-    sequence_number: Column
-    x_position: Column
-    y_position: Column
+    diagram_object_mrid: Column = None
+    sequence_number: Column = None
+    x_position: Column = None
+    y_position: Column = None
 
     def __init__(self):
         super(TableDiagramObjectPoints, self).__init__()
@@ -41,10 +41,10 @@ class TableDiagramObjectPoints(SqliteTable):
 
 
 class TableDiagramObjects(TableIdentifiedObjects):
-    identified_object_mrid: Column
-    diagram_mrid: Column
-    style: Column
-    rotation: Column
+    identified_object_mrid: Column = None
+    diagram_mrid: Column = None
+    style: Column = None
+    rotation: Column = None
 
     def __init__(self):
         super(TableDiagramObjects, self).__init__()
@@ -64,8 +64,8 @@ class TableDiagramObjects(TableIdentifiedObjects):
 
 
 class TableDiagrams(TableIdentifiedObjects):
-    diagram_style: Column
-    orientation_kind: Column
+    diagram_style: Column = None
+    orientation_kind: Column = None
 
     def __init__(self):
         super(TableDiagrams, self).__init__()

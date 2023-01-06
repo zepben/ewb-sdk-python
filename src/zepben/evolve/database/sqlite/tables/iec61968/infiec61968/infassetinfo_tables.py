@@ -7,10 +7,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-#
-#  This Source Code Form is subject to the terms of the Mozilla Public
-#  License, v. 2.0. If a copy of the MPL was not distributed with this
-#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import TableAssetInfo
 
@@ -18,20 +14,20 @@ __all__ = ["TableCurrentTransformerInfo", "TablePotentialTransformerInfo"]
 
 
 class TableCurrentTransformerInfo(TableAssetInfo):
-    accuracy_class: Column
-    accuracy_limit: Column
-    core_count: Column
-    ct_class: Column
-    knee_point_voltage: Column
-    max_ratio_denominator: Column
-    max_ratio_numerator: Column
-    nominal_ratio_denominator: Column
-    nominal_ratio_numerator: Column
-    primary_ratio: Column
-    rated_current: Column
-    secondary_fls_rating: Column
-    secondary_ratio: Column
-    usage: Column
+    accuracy_class: Column = None
+    accuracy_limit: Column = None
+    core_count: Column = None
+    ct_class: Column = None
+    knee_point_voltage: Column = None
+    max_ratio_denominator: Column = None
+    max_ratio_numerator: Column = None
+    nominal_ratio_denominator: Column = None
+    nominal_ratio_numerator: Column = None
+    primary_ratio: Column = None
+    rated_current: Column = None
+    secondary_fls_rating: Column = None
+    secondary_ratio: Column = None
+    usage: Column = None
 
     def name(self) -> str:
         return "current_transformer_info"
@@ -55,13 +51,13 @@ class TableCurrentTransformerInfo(TableAssetInfo):
 
 
 class TablePotentialTransformerInfo(TableAssetInfo):
-    accuracy_class: Column
-    nominal_ratio_denominator: Column
-    nominal_ratio_numerator: Column
-    primary_ratio: Column
-    pt_class: Column
-    rated_voltage: Column
-    secondary_ratio: Column
+    accuracy_class: Column = None
+    nominal_ratio_denominator: Column = None
+    nominal_ratio_numerator: Column = None
+    primary_ratio: Column = None
+    pt_class: Column = None
+    rated_voltage: Column = None
+    secondary_ratio: Column = None
 
     def name(self) -> str:
         return "potential_transformer_info"

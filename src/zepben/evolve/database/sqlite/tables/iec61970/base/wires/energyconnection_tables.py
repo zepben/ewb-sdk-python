@@ -20,12 +20,12 @@ class TableEnergyConnections(TableConductingEquipment):
 
 
 class TableEnergyConsumerPhases(TablePowerSystemResources):
-    energy_consumer_mrid: Column
-    phase: Column
-    p: Column
-    q: Column
-    p_fixed: Column
-    q_fixed: Column
+    energy_consumer_mrid: Column = None
+    phase: Column = None
+    p: Column = None
+    q: Column = None
+    p_fixed: Column = None
+    q_fixed: Column = None
 
     def __init__(self):
         super(TableEnergyConsumerPhases, self).__init__()
@@ -51,13 +51,13 @@ class TableEnergyConsumerPhases(TablePowerSystemResources):
 
 
 class TableEnergyConsumers(TableEnergyConnections):
-    customer_count: Column
-    grounded: Column
-    p: Column
-    q: Column
-    p_fixed: Column
-    q_fixed: Column
-    phase_connection: Column
+    customer_count: Column = None
+    grounded: Column = None
+    p: Column = None
+    q: Column = None
+    p_fixed: Column = None
+    q_fixed: Column = None
+    phase_connection: Column = None
 
     def __init__(self):
         super(TableEnergyConsumers, self).__init__()
@@ -74,8 +74,8 @@ class TableEnergyConsumers(TableEnergyConnections):
 
 
 class TableEnergySourcePhases(TablePowerSystemResources):
-    energy_source_mrid: Column
-    phase: Column
+    energy_source_mrid: Column = None
+    phase: Column = None
 
     def __init__(self):
         super(TableEnergySourcePhases, self).__init__()
@@ -97,31 +97,31 @@ class TableEnergySourcePhases(TablePowerSystemResources):
 
 
 class TableEnergySources(TableEnergyConnections):
-    active_power: Column
-    reactive_power: Column
-    voltage_angle: Column
-    voltage_magnitude: Column
-    p_max: Column
-    p_min: Column
-    r: Column
-    r0: Column
-    rn: Column
-    x: Column
-    x0: Column
-    xn: Column
-    is_external_grid: Column
-    r_min: Column
-    rn_min: Column
-    r0_min: Column
-    x_min: Column
-    xn_min: Column
-    x0_min: Column
-    r_max: Column
-    rn_max: Column
-    r0_max: Column
-    x_max: Column
-    xn_max: Column
-    x0_max: Column
+    active_power: Column = None
+    reactive_power: Column = None
+    voltage_angle: Column = None
+    voltage_magnitude: Column = None
+    p_max: Column = None
+    p_min: Column = None
+    r: Column = None
+    r0: Column = None
+    rn: Column = None
+    x: Column = None
+    x0: Column = None
+    xn: Column = None
+    is_external_grid: Column = None
+    r_min: Column = None
+    rn_min: Column = None
+    r0_min: Column = None
+    x_min: Column = None
+    xn_min: Column = None
+    x0_min: Column = None
+    r_max: Column = None
+    rn_max: Column = None
+    r0_max: Column = None
+    x_max: Column = None
+    xn_max: Column = None
+    x0_max: Column = None
 
     def __init__(self):
         super(TableEnergySources, self).__init__()
@@ -157,7 +157,7 @@ class TableEnergySources(TableEnergyConnections):
 
 # noinspection PyAbstractClass
 class TableRegulatingCondEq(TableEnergyConnections):
-    control_enabled: Column
+    control_enabled: Column = None
 
     def __init__(self):
         super(TableRegulatingCondEq, self).__init__()
@@ -166,11 +166,11 @@ class TableRegulatingCondEq(TableEnergyConnections):
 
 # noinspection PyAbstractClass
 class TableShuntCompensators(TableRegulatingCondEq):
-    shunt_compensator_info_mrid: Column
-    grounded: Column
-    nom_u: Column
-    phase_connection: Column
-    sections: Column
+    shunt_compensator_info_mrid: Column = None
+    grounded: Column = None
+    nom_u: Column = None
+    phase_connection: Column = None
+    sections: Column = None
 
     def __init__(self):
         super(TableShuntCompensators, self).__init__()
@@ -182,10 +182,10 @@ class TableShuntCompensators(TableRegulatingCondEq):
 
 
 class TableLinearShuntCompensators(TableShuntCompensators):
-    b0_per_section: Column
-    b_per_section: Column
-    g0_per_section: Column
-    g_per_section: Column
+    b0_per_section: Column = None
+    b_per_section: Column = None
+    g0_per_section: Column = None
+    g_per_section: Column = None
 
     def __init__(self):
         super(TableLinearShuntCompensators, self).__init__()
@@ -199,13 +199,13 @@ class TableLinearShuntCompensators(TableShuntCompensators):
 
 
 class TablePowerElectronicsConnection(TableRegulatingCondEq):
-    max_i_fault: Column
-    max_q: Column
-    min_q: Column
-    p: Column
-    q: Column
-    rated_s: Column
-    rated_u: Column
+    max_i_fault: Column = None
+    max_q: Column = None
+    min_q: Column = None
+    p: Column = None
+    q: Column = None
+    rated_s: Column = None
+    rated_u: Column = None
 
     def __init__(self):
         super(TablePowerElectronicsConnection, self).__init__()
@@ -222,10 +222,10 @@ class TablePowerElectronicsConnection(TableRegulatingCondEq):
 
 
 class TablePowerElectronicsConnectionPhases(TablePowerSystemResources):
-    power_electronics_connection_mrid: Column
-    p: Column
-    phase: Column
-    q: Column
+    power_electronics_connection_mrid: Column = None
+    p: Column = None
+    phase: Column = None
+    q: Column = None
 
     def __init__(self):
         super(TablePowerElectronicsConnectionPhases, self).__init__()

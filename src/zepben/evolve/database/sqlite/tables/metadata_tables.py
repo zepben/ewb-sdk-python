@@ -11,7 +11,7 @@ __all__ = ["TableVersion", "TableMetadataDataSources"]
 
 
 class TableVersion(SqliteTable):
-    version: Column
+    version: Column = None
 
     SUPPORTED_VERSION = 43
 
@@ -23,9 +23,9 @@ class TableVersion(SqliteTable):
 
 
 class TableMetadataDataSources(SqliteTable):
-    source: Column
-    version: Column
-    timestamp: Column
+    source: Column = None
+    version: Column = None
+    timestamp: Column = None
 
     def __init__(self):
         self.source = self._create_column("source", "TEXT", Nullable.NOT_NULL)
