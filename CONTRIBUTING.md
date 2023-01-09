@@ -56,6 +56,7 @@ to prevent the test from timing out while you step through the code:
       * Add ```<new_class_name>_to_cim = <new_class_name>_to_cim```
 1. Add reference resolver(s) to resolvers in [common package](src/zepben/evolve/services/common)  (if new associations).
 1. Update database schema:
+   1. Increment `TablesVersion.SUPPORTED_VERSION` by 1 in [metadata_tables.py](src/zepben/evolve/database/sqlite/tables/metadata_tables.py)
    1. In the [tables package](src/zepben/evolve/database/sqlite/tables), add a table class for each new CIM class and many-to-many association.
       Update any previously-existing table classes whose CIM classes have field changes.
    1. Register new tables into `_create_tables()` in [database_tables.py](src/zepben/evolve/database/sqlite/tables/database_tables.py)
