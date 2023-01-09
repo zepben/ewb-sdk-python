@@ -23,10 +23,12 @@ class Breaker(ProtectedSwitch):
     in_transit_time: Optional[float] = None
     """The transition time from open to close in seconds."""
 
+    @property
     def is_substation_breaker(self) -> bool:
         """Convenience function for detecting if this breaker is part of a substation. Returns true if this Breaker is associated with a Substation."""
         return self.num_substations() > 0
 
+    @property
     def is_feeder_head_breaker(self) -> bool:
         """Convenience function for detecting if this breaker is at the head of a feeder."""
         terminals = list(self.terminals)

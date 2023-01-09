@@ -8,7 +8,8 @@ from hypothesis.strategies import integers
 from cim.cim_creators import MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
-from zepben.evolve import Switch, SinglePhaseKind
+from cim.property_validator import validate_property_accessor
+from zepben.evolve import Switch, SinglePhaseKind, SwitchInfo
 
 switch_kwargs = {
     **conducting_equipment_kwargs,
@@ -42,6 +43,10 @@ def verify_switch_constructor_args(s: Switch):
     assert s.rated_current == switch_args[-3]
     assert s._open == switch_args[-2]
     assert s._normally_open == switch_args[-1]
+
+
+def test_switch_info_accessor():
+    validate_property_accessor(Switch, SwitchInfo, Switch.switch_info)
 
 
 def test_open_states():
