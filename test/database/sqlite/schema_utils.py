@@ -479,6 +479,13 @@ class SchemaNetworks:
             filled.power_transformer.add_end(filled)
             service.add(filled.power_transformer)
 
+        if isinstance(filled, ProtectedSwitch):
+            for it in filled.reclose_sequences:
+                service.add(it)
+            for it in filled.operated_by_protection_equipment:
+                it.add_protected_switch(filled)
+                service.add(it)
+
         if isinstance(filled, RatioTapChanger):
             filled.transformer_end.ratio_tap_changer = filled
             service.add(filled.transformer_end)

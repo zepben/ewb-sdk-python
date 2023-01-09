@@ -30,8 +30,7 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     OperationalRestriction, TableOperationalRestrictions, TableFaultIndicators, TableAuxiliaryEquipment, AuxiliaryEquipment, FaultIndicator, \
     TableMeasurements, Measurement, Analog, TableAnalogs, Accumulator, TableAccumulators, Discrete, TableDiscretes, Control, TableControls, TableIoPoints, \
     IoPoint, TableRemotePoints, RemotePoint, RemoteControl, TableRemoteControls, RemoteSource, TableRemoteSources, ShuntCompensatorInfo, \
-    TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, \
-    LvFeeder, CurrentTransformer, TableSensors, Sensor, TableCurrentTransformers, PotentialTransformer, TablePotentialTransformers, CurrentTransformerInfo, \
+    CurrentTransformer, TableSensors, Sensor, TableCurrentTransformers, PotentialTransformer, TablePotentialTransformers, CurrentTransformerInfo, \
     TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo, TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, \
     Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableCurrentRelayInfo, \
     CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, RecloseSequence, TableCurrentRelays, TableRecloseSequences, \
@@ -306,7 +305,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.secondary_ratio.query_index, current_transformer_info.secondary_ratio)
         insert.add_value(table.usage.query_index, current_transformer_info.usage)
 
-        return self.save_asset_info(table, insert, current_transformer_info, "current transformer info")
+        return self._save_asset_info(table, insert, current_transformer_info, "current transformer info")
 
     def save_potential_transformer_info(self, potential_transformer_info: PotentialTransformerInfo):
         table = self.database_tables.get_table(TablePotentialTransformerInfo)
@@ -319,8 +318,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.rated_voltage.query_index, potential_transformer_info.rated_voltage)
         insert.add_value(table.secondary_ratio.query_index, potential_transformer_info.secondary_ratio)
 
-        return self.save_asset_info(table, insert, potential_transformer_info, "potential transformer info")
-
+        return self._save_asset_info(table, insert, potential_transformer_info, "potential transformer info")
 
     # ************ IEC61968 METERING ************
 

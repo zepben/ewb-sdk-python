@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from functools import reduce
 from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable
 
-from zepben.evolve import BasicTraversal, LifoQueue, Junction, BusbarSection, EquivalentBranch
+from zepben.evolve import BasicTraversal, Junction, BusbarSection, EquivalentBranch
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment

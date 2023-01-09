@@ -33,11 +33,10 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TableShuntCompensators, Switch, TableSwitches, TapChanger, TableTapChangers, TableTransformerEnds, TransformerStarImpedance, \
     TableTransformerStarImpedance, TableCircuits, Circuit, Loop, TableLoops, TableAssetOrganisationRolesAssets, TableEquipmentEquipmentContainers, \
     TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableUsagePointsEndDevices, TableCircuitsSubstations, TableCircuitsTerminals, \
-    TableLoopsSubstations, LoopSubstationRelationship, LvFeeder, TableLvFeeders, TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, \
-    PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, \
-    TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, \
-    SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, TableRecloseSequences, RecloseSequence, ProtectionKind, TableCurrentRelays, \
-    CurrentRelay, TableProtectionEquipmentProtectedSwitches
+    TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, \
+    CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
+    LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, \
+    TableRecloseSequences, RecloseSequence, ProtectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches
 
 __all__ = ["NetworkCIMReader"]
 
