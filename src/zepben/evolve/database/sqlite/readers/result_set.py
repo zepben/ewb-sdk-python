@@ -46,7 +46,7 @@ class ResultSet:
         """
         Get the value in the specified `column_index` as a string.
         :param column_index: The column to read the value from. This uses 1 based indexes.
-        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not be supported.
+        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not supported.
         :return: The string read from the column, or the `on_none` value if there was no value.
         """
         if (column_index <= 0) or (column_index > len(self._current_row)):
@@ -64,7 +64,7 @@ class ResultSet:
         """
         Get the value in the specified `column_index` as an integer.
         :param column_index: The column to read the value from. This uses 1 based indexes.
-        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not be supported.
+        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not supported.
         :return: The integer read from the column, or the `on_none` value if there was no value.
         """
         if (column_index <= 0) or (column_index > len(self._current_row)):
@@ -82,7 +82,7 @@ class ResultSet:
         """
         Get the value in the specified `column_index` as a float.
         :param column_index: The column to read the value from. This uses 1 based indexes.
-        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not be supported.
+        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not supported.
         :return: The float read from the column, or the `on_none` value if there was no value.
         """
         if (column_index <= 0) or (column_index > len(self._current_row)):
@@ -100,7 +100,7 @@ class ResultSet:
         """
         Get the value in the specified `column_index` as a bool.
         :param column_index: The column to read the value from. This uses 1 based indexes.
-        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not be supported.
+        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not supported.
         :return: The bool read from the column, or the `on_none` value if there was no value.
         """
         if (column_index <= 0) or (column_index > len(self._current_row)):
@@ -116,7 +116,7 @@ class ResultSet:
         """
         Get the value in the specified `column_index` as a datetime.
         :param column_index: The column to read the value from. This uses 1 based indexes.
-        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not be supported.
+        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not supported.
         :return: The datetime read from the column, or the `on_none` value if there was no value.
         """
         value = self.get_string(column_index, None)
@@ -132,7 +132,7 @@ class ResultSet:
 
         :param numerator_column_index: The column to read the numerator from. This uses 1 based indexes.
         :param denominator_column_index: The column to read the denominator from. This uses 1 based indexes.
-        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not be supported.
+        :param on_none: The value to use if a null is read from the database, or an exception to raise if a null value is not supported.
         :return: The Ratio read from the column, or the `on_none` value if there was no value.
         """
         numerator = self.get_double(numerator_column_index, None)
