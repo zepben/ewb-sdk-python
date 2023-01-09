@@ -14,7 +14,8 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, Name, \
     PowerSystemResource, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, \
     PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, \
-    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder
+    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, CurrentTransformer, \
+    PotentialTransformer
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -281,6 +282,12 @@ class SchemaNetworks:
 
         if isinstance(filled, AuxiliaryEquipment):
             service.add(filled.terminal)
+
+        if isinstance(filled, CurrentTransformer):
+            service.add(filled.asset_info)
+
+        if isinstance(filled, PotentialTransformer):
+            service.add(filled.asset_info)
 
         ######################
         # IEC61970 BASE CORE #

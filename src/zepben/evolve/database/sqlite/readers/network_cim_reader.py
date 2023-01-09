@@ -33,7 +33,9 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TableShuntCompensators, Switch, TableSwitches, TapChanger, TableTapChangers, TableTransformerEnds, TransformerStarImpedance, \
     TableTransformerStarImpedance, TableCircuits, Circuit, Loop, TableLoops, TableAssetOrganisationRolesAssets, TableEquipmentEquipmentContainers, \
     TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableUsagePointsEndDevices, TableCircuitsSubstations, TableCircuitsTerminals, \
-    TableLoopsSubstations, LoopSubstationRelationship, LvFeeder, TableLvFeeders
+    TableLoopsSubstations, LoopSubstationRelationship, LvFeeder, TableLvFeeders, TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, \
+    PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, \
+    TablePotentialTransformerInfo
 
 __all__ = ["NetworkCIMReader"]
 
@@ -267,6 +269,38 @@ class NetworkCIMReader(BaseCIMReader):
 
         return None if town_detail.all_fields_null_or_empty() else town_detail
 
+    # ************ IEC61968 infIEC61968 InfAssetInfo ************
+
+    def load_current_transformer_info(self, table: TableCurrentTransformerInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        current_transformer_info = CurrentTransformerInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        current_transformer_info.accuracy_class = rs.get_string(table.accuracy_class.query_index, None)
+        current_transformer_info.accuracy_limit = rs.get_double(table.accuracy_limit.query_index, None)
+        current_transformer_info.core_count = rs.get_int(table.core_count.query_index, None)
+        current_transformer_info.ct_class = rs.get_string(table.ct_class.query_index, None)
+        current_transformer_info.knee_point_voltage = rs.get_int(table.knee_point_voltage.query_index, None)
+        current_transformer_info.max_ratio = rs.get_ratio(table.max_ratio_numerator.query_index, table.max_ratio_denominator.query_index, None)
+        current_transformer_info.nominal_ratio = rs.get_ratio(table.nominal_ratio_numerator.query_index, table.nominal_ratio_denominator.query_index, None)
+        current_transformer_info.primary_ratio = rs.get_double(table.primary_ratio.query_index, None)
+        current_transformer_info.rated_current = rs.get_int(table.rated_current.query_index, None)
+        current_transformer_info.secondary_fls_rating = rs.get_int(table.secondary_fls_rating.query_index, None)
+        current_transformer_info.secondary_ratio = rs.get_double(table.secondary_ratio.query_index, None)
+        current_transformer_info.usage = rs.get_string(table.usage.query_index, None)
+
+        return self._load_asset_info(current_transformer_info, table, rs) and self._add_or_throw(current_transformer_info)
+
+    def load_potential_transformer_info(self, table: TablePotentialTransformerInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        potential_transformer_info = PotentialTransformerInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        potential_transformer_info.accuracy_class = rs.get_string(table.accuracy_class.query_index, None)
+        potential_transformer_info.nominal_ratio = rs.get_ratio(table.nominal_ratio_numerator.query_index, table.nominal_ratio_denominator.query_index, None)
+        potential_transformer_info.primary_ratio = rs.get_double(table.primary_ratio.query_index, None)
+        potential_transformer_info.pt_class = rs.get_string(table.pt_class.query_index, None)
+        potential_transformer_info.rated_voltage = rs.get_int(table.rated_voltage.query_index, None)
+        potential_transformer_info.secondary_ratio = rs.get_double(table.secondary_ratio.query_index, None)
+
+        return self._load_asset_info(potential_transformer_info, table, rs) and self._add_or_throw(potential_transformer_info)
+
     # ************ IEC61968 METERING ************
 
     def _load_end_device(self, end_device: EndDevice, table: TableEndDevices, rs: ResultSet) -> bool:
@@ -303,10 +337,35 @@ class NetworkCIMReader(BaseCIMReader):
 
         return self._load_equipment(auxiliary_equipment, table, rs)
 
+    def load_current_transformer(self, table: TableCurrentTransformers, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        current_transformer = CurrentTransformer(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        current_transformer.current_transformer_info = self._ensure_get(
+            rs.get_string(table.current_transformer_info_mrid.query_index, None),
+            CurrentTransformerInfo
+        )
+        current_transformer.core_burden = rs.get_int(table.core_burden.query_index, None)
+
+        return self._load_sensor(current_transformer, table, rs) and self._add_or_throw(current_transformer)
+
     def load_fault_indicator(self, table: TableFaultIndicators, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         fault_indicator = FaultIndicator(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
 
         return self._load_auxiliary_equipment(fault_indicator, table, rs) and self._add_or_throw(fault_indicator)
+
+    def load_potential_transformer(self, table: TablePotentialTransformers, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        potential_transformer = PotentialTransformer(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        potential_transformer.potential_transformer_info = self._ensure_get(
+            rs.get_string(table.potential_transformer_info_mrid.query_index, None),
+            PotentialTransformerInfo
+        )
+        potential_transformer.type = PotentialTransformerKind[rs.get_string(table.type.query_index)]
+
+        return self._load_sensor(potential_transformer, table, rs) and self._add_or_throw(potential_transformer)
+
+    def _load_sensor(self, sensor: Sensor, table: TableSensors, rs: ResultSet) -> bool:
+        return self._load_auxiliary_equipment(sensor, table, rs)
 
     # ************ IEC61970 BASE CORE ************
 

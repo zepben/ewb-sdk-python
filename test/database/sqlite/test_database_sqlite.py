@@ -24,7 +24,8 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_disconnector, create_energy_consumer, create_energy_consumer_phase, create_energy_source, create_energy_source_phase, create_fuse, create_jumper, \
     create_junction, create_linear_shunt_compensator, create_load_break_switch, create_per_length_sequence_impedance, create_power_electronics_connection, \
     create_power_electronics_connection_phase, create_power_transformer, create_power_transformer_end, create_ratio_tap_changer, create_recloser, \
-    create_transformer_star_impedance, create_circuit, create_loop, create_lv_feeder
+    create_transformer_star_impedance, create_circuit, create_loop, create_lv_feeder, create_current_transformer_info, create_current_transformer, \
+    create_potential_transformer
 from database.sqlite.schema_utils import SchemaNetworks, Services, assume_non_blank_street_address_details
 from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, \
     NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, \
@@ -34,7 +35,8 @@ from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, C
     PhotoVoltaicUnit, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, \
     EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, BaseService, \
-    DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail, LvFeeder
+    DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail, LvFeeder, \
+    CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
@@ -165,6 +167,20 @@ class TestDatabaseSqlite:
     def test_schema_tariffs(self, caplog, tariffs):
         self._validate_schema(SchemaNetworks().customer_services_of(Tariff, tariffs), caplog)
 
+    # ************ IEC61968 infIEC61968 InfAssetInfo ************
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(current_transformer_info=create_current_transformer_info(False))
+    def test_schema_current_transformer_info(self, caplog, current_transformer_info):
+        self._validate_schema(SchemaNetworks().network_services_of(CurrentTransformerInfo, current_transformer_info), caplog)
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(potential_transformer_info=create_current_transformer_info(False))
+    def test_schema_potential_transformer_info(self, caplog, potential_transformer_info):
+        self._validate_schema(SchemaNetworks().network_services_of(PotentialTransformerInfo, potential_transformer_info), caplog)
+
     # ************ IEC61968 METERING ************
 
     @log_on_failure_decorator
@@ -211,9 +227,21 @@ class TestDatabaseSqlite:
 
     @log_on_failure_decorator
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(current_transformer=create_current_transformer(False))
+    def test_schema_current_transformer(self, caplog, current_transformer):
+        self._validate_schema(SchemaNetworks().network_services_of(CurrentTransformer, current_transformer), caplog)
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(fault_indicator=create_fault_indicator(False))
     def test_schema_fault_indicator(self, caplog, fault_indicator):
         self._validate_schema(SchemaNetworks().network_services_of(FaultIndicator, fault_indicator), caplog)
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(potential_transformer=create_potential_transformer(False))
+    def test_schema_potential_transformer(self, caplog, potential_transformer):
+        self._validate_schema(SchemaNetworks().network_services_of(PotentialTransformer, potential_transformer), caplog)
 
     # ************ IEC61970 BASE CORE ************
 

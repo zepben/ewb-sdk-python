@@ -55,13 +55,29 @@ to prevent the test from timing out while you step through the code:
       * Add ```"<new_class_name>_to_cim"``` to ```__all__```
       * Add ```<new_class_name>_to_cim = <new_class_name>_to_cim```
 1. Add reference resolver(s) to resolvers in [common package](src/zepben/evolve/services/common)  (if new associations).
+1. Update database schema:
+   1. Increment `TablesVersion.SUPPORTED_VERSION` by 1 in [metadata_tables.py](src/zepben/evolve/database/sqlite/tables/metadata_tables.py)
+   1. In the [tables package](src/zepben/evolve/database/sqlite/tables), add a table class for each new CIM class and many-to-many association.
+      Update any previously-existing table classes whose CIM classes have field changes.
+   1. Register new tables into `_create_tables()` in [database_tables.py](src/zepben/evolve/database/sqlite/tables/database_tables.py)
+   1. In the [table readers package](src/zepben/evolve/database/sqlite/readers), update `*CIMReader` for new CIM classes/associations and field updates.
+      Then, update `*ServiceReader` to load from each new tables.
+   1. In the [table writers package](src/zepben/evolve/database/sqlite/writers), update `*CIMWriter` for new CIM classes/associations and field updates.
+      Then, update `*ServiceWriter` to write to each new table.
+1. Update [```__init__.py```](src/zepben/evolve/__init__.py) to import every new public name (classes, functions, constants, extension methods):
+   * ```from zepben.evolve...<new_module_name> import *```
 1. Testing:
+   * Import public names via ```from zepben.evolve import <name>``` when writing/updating tests. This ensures that
+     [```__init__.py```](src/zepben/evolve/__init__.py) was updated correctly.
    * Test for model classes.
-   * Added new classes to corresponding service translator test. [```test/services/...```](test/services)
+   * Add new classes to corresponding service translator test. [```test/services/...```](test/services)
    * Add the required creators to:
      - [```pb_creators.py```](test/pb_creators.py)
      - [```cim_creators.py```](test/cim_creators.py)
    * Add test for each new comparison to  [test/services/...](test/services) package.
    * Add test for each new class to  [test/cim/...](test/cim) package.
-   * Verify that all the test are passing. 
+   * Test database schema:
+     - Handle each new direct association in `_add_with_references()`: [schema_utils.py](test/database/sqlite/schema_utils.py)
+     - Include new concrete CIM classes in [```test_database_sqlite.py```](test/database/sqlite/test_database_sqlite.py).
+   * Verify that all the tests are passing. 
 1. Update release notes in [```changelog.md```](changelog.md).
