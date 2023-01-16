@@ -30,6 +30,7 @@
   * `Recloser` moved to `recloser`
   
   Note that `from zepben.evolve import <ClassName>` will still work as usual for all of the above classes.
+* `DatabaseReader().load` is now an asynchronous function. 
 
 ### New Features
 

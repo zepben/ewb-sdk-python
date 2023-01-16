@@ -58,7 +58,7 @@ class TestSetDirection:
             .network
 
         await SetDirection().run_terminal(self._get_t(n, "c0", 2))
-        log_directions(n["c0"])
+        await log_directions(n["c0"])
 
         self._check_expected_direction(self._get_t(n, "c0", 1), NONE)
         self._check_expected_direction(self._get_t(n, "c0", 2), DOWNSTREAM)
@@ -88,7 +88,7 @@ class TestSetDirection:
             .add_feeder("j3", 1) \
             .build()
 
-        log_directions(n["c0"])
+        await log_directions(n["c0"])
 
         self._check_expected_direction(self._get_t(n, "c0", 1), NONE)
         self._check_expected_direction(self._get_t(n, "c0", 2), NONE)
@@ -185,7 +185,7 @@ class TestSetDirection:
             .network
 
         await SetDirection().run_terminal(self._get_t(n, "j0", 1))
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
 
         # To avoid reprocessing all BOTH loops in larger networks we do not process anything with a direction already set. This means this test will apply
         # a standard UP/DOWN path through j2-t2 through to j6-t2 and then a BOTH loop around the c9/j4 loop which will stop the reverse UP/DOWN path
@@ -257,7 +257,7 @@ class TestSetDirection:
             .network
 
         await SetDirection().run_terminal(self._get_t(n, "j0", 1))
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
 
         # To avoid reprocessing all BOTH loops in larger networks we do not process anything with a direction already set. This means this test will apply
         # a UP/DOWN path through j2-t2 directly into a BOTH loop around the c9/j11 loop which will stop the reverse UP/DOWN path
@@ -302,7 +302,7 @@ class TestSetDirection:
             .network
 
         await SetDirection().run_terminal(self._get_t(n, "j0", 1))
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
 
         self._check_expected_direction(self._get_t(n, "j0", 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
@@ -323,7 +323,7 @@ class TestSetDirection:
             .network
 
         await SetDirection().run_terminal(self._get_t(n, "j0", 1))
-        log_directions(n["j0"])
+        await log_directions(n["j0"])
 
         self._check_expected_direction(self._get_t(n, "j0", 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
@@ -376,7 +376,7 @@ class TestSetDirection:
     async def _do_set_direction_trace(n: NetworkService):
         await SetDirection().run(n)
         for it in n.objects(Feeder):
-            log_directions(it.normal_head_terminal.conducting_equipment)
+            await log_directions(it.normal_head_terminal.conducting_equipment)
 
     @staticmethod
     def _get_t(network: NetworkService, mrid: str, sequence_number: int) -> Terminal:

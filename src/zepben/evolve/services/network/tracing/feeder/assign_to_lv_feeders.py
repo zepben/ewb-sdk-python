@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Set, Callable, Optional, Awaitable, Any
 
+from zepben.evolve import BasicTraversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
@@ -23,13 +24,13 @@ class AssignToLvFeeders:
     This class is backed by a `BasicTraversal`.
     """
 
-    def __init__(self, _normal_traversal: Optional[Traversal[Terminal]] = None, _current_traversal: Optional[Traversal[Terminal]] = None):
-        self._normal_traversal: Traversal[Terminal] = _normal_traversal if _normal_traversal is not None else new_normal_trace()
+    def __init__(self, _normal_traversal: Optional[BasicTraversal[Terminal]] = None, _current_traversal: Optional[BasicTraversal[Terminal]] = None):
+        self._normal_traversal: BasicTraversal[Terminal] = _normal_traversal if _normal_traversal is not None else new_normal_trace()
         """
         The traversal used to trace the network in its normal state of the network.
         """
 
-        self._current_traversal: Traversal[Terminal] = _current_traversal if _current_traversal is not None else new_current_trace()
+        self._current_traversal: BasicTraversal[Terminal] = _current_traversal if _current_traversal is not None else new_current_trace()
         """
         The traversal used to trace the network in its current state of the network.
         """
@@ -77,7 +78,7 @@ class AssignToLvFeeders:
         await self._run_from_head_terminal(self._current_traversal, lv_feeder.normal_head_terminal)
 
     @staticmethod
-    async def _run_from_head_terminal(traversal: Traversal, head_terminal: Terminal):
+    async def _run_from_head_terminal(traversal: BasicTraversal[Terminal], head_terminal: Terminal):
         traversal.reset()
 
         traversal.tracker.visit(head_terminal)
@@ -106,20 +107,20 @@ class AssignToLvFeeders:
 
     async def _process_normal(self, terminal: Terminal, is_stopping: bool):
         # noinspection PyTypeChecker
-        self._process(terminal, ConductingEquipment.add_container, LvFeeder.add_equipment, is_stopping)
+        await self._process(terminal, ConductingEquipment.add_container, LvFeeder.add_equipment, is_stopping)
 
     async def _process_current(self, terminal: Terminal, is_stopping: bool):
         # noinspection PyTypeChecker
-        self._process(terminal, ConductingEquipment.add_current_container, LvFeeder.add_current_equipment, is_stopping)
+        await self._process(terminal, ConductingEquipment.add_current_container, LvFeeder.add_current_equipment, is_stopping)
 
-    def _process(
+    async def _process(
         self,
         terminal: Optional[Terminal],
         assign_lv_feeder_to_equip: Callable[[ConductingEquipment, EquipmentContainer], Any],
         assign_equip_to_lv_feeder: Callable[[EquipmentContainer, ConductingEquipment], Any],
         is_stopping: bool
     ):
-        if is_stopping and self._reached_hv(terminal):
+        if is_stopping and await self._reached_hv(terminal):
             return
 
         if terminal.conducting_equipment:
