@@ -115,7 +115,7 @@ class AssignToLvFeeders:
 
     async def _process(
         self,
-        terminal: Optional[Terminal],
+        terminal: Terminal,
         assign_lv_feeder_to_equip: Callable[[ConductingEquipment, EquipmentContainer], Any],
         assign_equip_to_lv_feeder: Callable[[EquipmentContainer, ConductingEquipment], Any],
         is_stopping: bool
