@@ -11,7 +11,7 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     EnergySourcePhase, Feeder, GeographicalRegion, Measurement, OperationalRestriction, OrganisationRole, PowerSystemResource, PowerTransformerEnd, \
     PricingStructure, RatioTapChanger, RemoteControl, RemoteSource, SubGeographicalRegion, Substation, Terminal, TransformerEnd, UsagePoint, Circuit, Loop, \
     PowerElectronicsUnit, PowerElectronicsConnectionPhase, PowerElectronicsConnection, TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, \
-    TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer
+    TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectionEquipment, ProtectedSwitch, Switch, CurrentRelay
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
@@ -29,7 +29,7 @@ __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location",
            "te_terminal", "end_devices", "up_equipment", "usage_point_location", "shunt_compensator_info",
            "transformer_end_info", "power_transformer_info_transformer_tank_info", "transformer_star_impedance",
            "star_impedance_transformer_end_info", "transformer_end_transformer_star_impedance", "normal_energized_lv_feeders",
-           "normal_energizing_feeders", "lv_feeder_normal_head_terminal", "normal_energizing_feeders"]
+           "normal_energizing_feeders", "lv_feeder_normal_head_terminal", "normal_energizing_feeders", "protected_switches"]
 
 
 def per_length_sequence_impedance(ac_line_segment: AcLineSegment):
@@ -67,6 +67,11 @@ def asset_info(conductor: Conductor) -> BoundReferenceResolver:
     return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)
 
 
+def current_relay_info(cr: CurrentRelay) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(cr, current_relay_to_current_relay_info_resolver, None)
+
+
 def power_transformer_info(pt: PowerTransformer) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(pt, powertransformer_to_power_transformer_info_resolver, None)
@@ -75,6 +80,11 @@ def power_transformer_info(pt: PowerTransformer) -> BoundReferenceResolver:
 def shunt_compensator_info(sc: ShuntCompensator) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(sc, shunt_compensator_to_shunt_compensator_info_resolver, None)
+
+
+def switch_info(switch: Switch) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(switch, switch_to_switch_info_resolver, None)
 
 
 def streetlights(p: Pole) -> BoundReferenceResolver:
@@ -445,3 +455,18 @@ def current_transformer_info(current_transformer: CurrentTransformer) -> BoundRe
 def potential_transformer_info(potential_transformer: PotentialTransformer) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(potential_transformer, vt_to_vti_resolver, None)
+
+
+def protected_switches(protection_equipment: ProtectionEquipment) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(protection_equipment, pe_to_ps_resolver, ps_to_pe_resolver)
+
+
+def operated_by_protection_equipment(protected_switch: ProtectedSwitch) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(protected_switch, ps_to_pe_resolver, pe_to_ps_resolver)
+
+
+def reclose_sequences(protected_switch: ProtectedSwitch) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(protected_switch, ps_to_rs_resolver, None)

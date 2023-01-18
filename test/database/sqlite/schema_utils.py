@@ -14,8 +14,8 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, Name, \
     PowerSystemResource, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, \
     PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, \
-    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, CurrentTransformer, \
-    PotentialTransformer
+    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, ProtectionEquipment, \
+    CurrentTransformer, PotentialTransformer, RecloseSequence, Breaker
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -170,6 +170,9 @@ class SchemaNetworks:
             es.add_phase(io)
             service.add(es)
             io.energy_source = es
+        elif isinstance(io, RecloseSequence):
+            breaker = Breaker(reclose_sequences=[io])
+            service.add(breaker)
 
         return io
 
@@ -323,6 +326,9 @@ class SchemaNetworks:
             service.add(filled.normal_head_terminal)
             filled.normal_energizing_substation.add_feeder(filled)
             service.add(filled.normal_energizing_substation)
+            for it in filled.normal_energized_lv_feeders:
+                it.add_normal_energizing_feeder(filled)
+                service.add(it)
 
         if isinstance(filled, GeographicalRegion):
             for it in filled.sub_geographical_regions:
@@ -391,6 +397,20 @@ class SchemaNetworks:
         if isinstance(filled, Measurement):
             filled.remote_source.measurement = filled
             service.add(filled.remote_source)
+
+        ############################
+        # IEC61970 Base Protection #
+        ############################
+
+        if isinstance(filled, ProtectionEquipment):
+            for it in filled.protected_switches:
+                it.add_operated_by_protection_equipment(filled)
+                service.add(it)
+
+        # Reclose sequences are not saved unless a protected switch references it.
+        if isinstance(filled, RecloseSequence):
+            breaker = Breaker(reclose_sequences=[filled])
+            service.add(breaker)
 
         #######################
         # IEC61970 BASE SCADA #
@@ -462,6 +482,13 @@ class SchemaNetworks:
             filled.power_transformer.add_end(filled)
             service.add(filled.power_transformer)
 
+        if isinstance(filled, ProtectedSwitch):
+            for it in filled.reclose_sequences:
+                service.add(it)
+            for it in filled.operated_by_protection_equipment:
+                it.add_protected_switch(filled)
+                service.add(it)
+
         if isinstance(filled, RatioTapChanger):
             filled.transformer_end.ratio_tap_changer = filled
             service.add(filled.transformer_end)
@@ -506,6 +533,9 @@ class SchemaNetworks:
 
         if isinstance(filled, LvFeeder):
             service.add(filled.normal_head_terminal)
+            for it in filled.normal_energizing_feeders:
+                it.add_normal_energized_lv_feeder(filled)
+                service.add(it)
 
         for io in service.objects():
             for name in io.names:

@@ -11,7 +11,7 @@ from zepben.evolve import NetworkService, CableInfo, OverheadWireInfo, PowerTran
     EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, Analog, \
     Accumulator, Discrete, Control, RemoteControl, RemoteSource, BatteryUnit, PowerElectronicsWindUnit, LvFeeder, CurrentTransformerInfo, \
-    PotentialTransformerInfo, CurrentTransformer, PotentialTransformer
+    PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, CurrentRelayInfo, CurrentRelay, SwitchInfo
 from zepben.evolve.database.sqlite.writers.base_service_writer import BaseServiceWriter
 from zepben.evolve.database.sqlite.writers.network_cim_writer import NetworkCIMWriter
 
@@ -31,6 +31,7 @@ class NetworkServiceWriter(BaseServiceWriter):
         status = status and self._save_all(service, OpenCircuitTest, writer.save_open_circuit_test)
         status = status and self._save_all(service, ShortCircuitTest, writer.save_short_circuit_test)
         status = status and self._save_all(service, ShuntCompensatorInfo, writer.save_shunt_compensator_info)
+        status = status and self._save_all(service, SwitchInfo, writer.save_switch_info)
         status = status and self._save_all(service, TransformerEndInfo, writer.save_transformer_end_info)
         status = status and self._save_all(service, AssetOwner, writer.save_asset_owner)
         status = status and self._save_all(service, Pole, writer.save_pole)
@@ -87,5 +88,10 @@ class NetworkServiceWriter(BaseServiceWriter):
         status = status and self._save_all(service, PotentialTransformerInfo, writer.save_potential_transformer_info)
         status = status and self._save_all(service, CurrentTransformer, writer.save_current_transformer)
         status = status and self._save_all(service, PotentialTransformer, writer.save_potential_transformer)
+        status = status and self._save_all(service, CurrentRelayInfo, writer.save_current_relay_info)
+        status = status and self._save_all(service, CurrentRelay, writer.save_current_relay)
+
+        # Excluded:
+        #  - RecloseSequence: Saved via _save_protected_switch
 
         return status

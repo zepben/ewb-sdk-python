@@ -38,7 +38,7 @@ class DatabaseReader:
     _connection: Optional[Connection] = None
     _has_been_used = False
 
-    def load(
+    async def load(
         self,
         metadata_collection: MetadataCollection,
         network_service: NetworkService,
@@ -67,7 +67,7 @@ class DatabaseReader:
             self._close_connection()
             return False
 
-        return status and self._post_load(network_service)
+        return status and await self._post_load(network_service)
 
     def _connect_database(self) -> bool:
         if self._has_been_used:
@@ -106,26 +106,26 @@ class DatabaseReader:
         finally:
             self._connection = None
 
-    def _post_load(self, network_service: NetworkService) -> bool:
+    async def _post_load(self, network_service: NetworkService) -> bool:
         #
         # NOTE: phase and direction tracing is not yet supported
         #
 
         logger.info("Applying feeder direction to network...")
-        tracing.set_direction().run(network_service)
+        await tracing.set_direction().run(network_service)
         logger.info("Feeder direction applied to network.")
 
         logger.info("Applying phases to network...")
-        tracing.set_phases().run(network_service)
-        tracing.phase_inferrer().run(network_service)
+        await tracing.set_phases().run(network_service)
+        await tracing.phase_inferrer().run(network_service)
         logger.info("Phasing applied to network.")
 
         logger.info("Assigning equipment to feeders...")
-        tracing.assign_equipment_to_feeders().run(network_service)
+        await tracing.assign_equipment_to_feeders().run(network_service)
         logger.info("Equipment assigned to feeders.")
 
         logger.info("Assigning equipment to LV feeders...")
-        tracing.assign_equipment_to_lv_feeders().run(network_service)
+        await tracing.assign_equipment_to_lv_feeders().run(network_service)
         logger.info("Equipment assigned to LV feeders.")
 
         logger.info("Validating primary sources vs feeders...")

@@ -9,7 +9,8 @@ from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import TableAssetInfo
 
 __all__ = ["TablePowerTransformerInfo", "TableTransformerEndInfo", "TableTransformerTankInfo", "TableWireInfo", "TableCableInfo", "TableAssetInfo",
-           "TableOverheadWireInfo", "TableNoLoadTests", "TableOpenCircuitTests", "TableShortCircuitTests", "TableTransformerTest", "TableShuntCompensatorInfo"]
+           "TableOverheadWireInfo", "TableNoLoadTests", "TableOpenCircuitTests", "TableShortCircuitTests", "TableTransformerTest", "TableShuntCompensatorInfo",
+           "TableSwitchInfo"]
 
 
 # noinspection PyAbstractClass
@@ -111,6 +112,17 @@ class TableShuntCompensatorInfo(TableAssetInfo):
 
     def name(self) -> str:
         return "shunt_compensator_info"
+
+
+class TableSwitchInfo(TableAssetInfo):
+    rated_interrupting_time: Column = None
+
+    def __init__(self):
+        super(TableSwitchInfo, self).__init__()
+        self.rated_interrupting_time = self._create_column("rated_interrupting_time", "NUMBER", Nullable.NULL)
+
+    def name(self) -> str:
+        return "switch_info"
 
 
 class TableTransformerEndInfo(TableAssetInfo):

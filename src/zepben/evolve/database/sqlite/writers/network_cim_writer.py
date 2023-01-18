@@ -30,9 +30,11 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     OperationalRestriction, TableOperationalRestrictions, TableFaultIndicators, TableAuxiliaryEquipment, AuxiliaryEquipment, FaultIndicator, \
     TableMeasurements, Measurement, Analog, TableAnalogs, Accumulator, TableAccumulators, Discrete, TableDiscretes, Control, TableControls, TableIoPoints, \
     IoPoint, TableRemotePoints, RemotePoint, RemoteControl, TableRemoteControls, RemoteSource, TableRemoteSources, ShuntCompensatorInfo, \
-    TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, \
     CurrentTransformer, TableSensors, Sensor, TableCurrentTransformers, PotentialTransformer, TablePotentialTransformers, CurrentTransformerInfo, \
-    TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo
+    TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo, TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, \
+    Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableCurrentRelayInfo, \
+    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, RecloseSequence, TableCurrentRelays, TableRecloseSequences, \
+    TableProtectionEquipmentProtectedSwitches
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -65,7 +67,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.base_power.query_index, transformer_test.base_power)
         insert.add_value(table.temperature.query_index, transformer_test.temperature)
 
-        return self.save_identified_object(table, insert, transformer_test, description)
+        return self._save_identified_object(table, insert, transformer_test, description)
 
     def save_short_circuit_test(self, short_circuit_test: ShortCircuitTest) -> bool:
         table = self.database_tables.get_table(TableShortCircuitTests)
@@ -94,6 +96,14 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.rated_voltage.query_index, shunt_compensator_info.rated_voltage)
 
         return self._save_asset_info(table, insert, shunt_compensator_info, "shunt compensator info")
+
+    def save_switch_info(self, switch_info: SwitchInfo) -> bool:
+        table = self.database_tables.get_table(TableSwitchInfo)
+        insert = self.database_tables.get_insert(TableSwitchInfo)
+
+        insert.add_value(table.rated_interrupting_time.query_index, switch_info.rated_interrupting_time)
+
+        return self._save_asset_info(table, insert, switch_info, "switch info")
 
     def save_open_circuit_test(self, open_circuit_test: OpenCircuitTest) -> bool:
         table = self.database_tables.get_table(TableOpenCircuitTests)
@@ -156,7 +166,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         return self._save_asset_info(table, insert, wire_info, description)
 
     def _save_asset_info(self, table: TableAssetInfo, insert: PreparedStatement, asset_info: AssetInfo, description: str) -> bool:
-        return self.save_identified_object(table, insert, asset_info, description)
+        return self._save_identified_object(table, insert, asset_info, description)
 
     # ************ IEC61968 ASSETS ************
 
@@ -166,30 +176,27 @@ class NetworkCIMWriter(BaseCIMWriter):
         for e in asset.organisation_roles:
             status = status and self._save_asset_organisation_role_to_asset_association(e, asset)
 
-        return status and self.save_identified_object(table, insert, asset, description)
+        return status and self._save_identified_object(table, insert, asset, description)
 
-    def save_asset_container(self, table: TableAssetContainers, insert: PreparedStatement, asset_container: AssetContainer, description: str) -> bool:
+    def _save_asset_container(self, table: TableAssetContainers, insert: PreparedStatement, asset_container: AssetContainer, description: str) -> bool:
         return self._save_asset(table, insert, asset_container, description)
 
-    def save_asset_info(self, table: TableAssetInfo, insert: PreparedStatement, asset_info: AssetInfo, description: str) -> bool:
-        return self.save_identified_object(table, insert, asset_info, description)
-
-    def save_asset_organisation_role(self,
-                                     table: TableAssetOrganisationRoles,
-                                     insert: PreparedStatement,
-                                     asset_organisation_role: AssetOrganisationRole,
-                                     description: str
-                                     ) -> bool:
-        return self.save_organisation_role(table, insert, asset_organisation_role, description)
+    def _save_asset_organisation_role(self,
+                                      table: TableAssetOrganisationRoles,
+                                      insert: PreparedStatement,
+                                      asset_organisation_role: AssetOrganisationRole,
+                                      description: str
+                                      ) -> bool:
+        return self._save_organisation_role(table, insert, asset_organisation_role, description)
 
     def save_asset_owner(self, asset_owner: AssetOwner) -> bool:
         table = self.database_tables.get_table(TableAssetOwners)
         insert = self.database_tables.get_insert(TableAssetOwners)
 
-        return self.save_asset_organisation_role(table, insert, asset_owner, "asset owner")
+        return self._save_asset_organisation_role(table, insert, asset_owner, "asset owner")
 
-    def save_structure(self, table: TableStructures, insert: PreparedStatement, structure: Structure, description: str) -> bool:
-        return self.save_asset_container(table, insert, structure, description)
+    def _save_structure(self, table: TableStructures, insert: PreparedStatement, structure: Structure, description: str) -> bool:
+        return self._save_asset_container(table, insert, structure, description)
 
     def save_pole(self, pole: Pole) -> bool:
         table = self.database_tables.get_table(TablePoles)
@@ -197,7 +204,7 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         insert.add_value(table.classification.query_index, pole.classification)
 
-        return self.save_structure(table, insert, pole, "pole")
+        return self._save_structure(table, insert, pole, "pole")
 
     def save_streetlight(self, streetlight: Streetlight) -> bool:
         table = self.database_tables.get_table(TableStreetlights)
@@ -234,7 +241,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         for sequence_number, point in enumerate(location.points):
             status = status and self.save_position_point(location, sequence_number, point)
 
-        return status and self.save_identified_object(table, insert, location, "location")
+        return status and self._save_identified_object(table, insert, location, "location")
 
     def save_location_street_address(self, location: Location, field: TableLocationStreetAddressField, street_address: StreetAddress, description: str) -> bool:
         if street_address is None:
@@ -246,7 +253,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.location_mrid.query_index, location.mrid)
         insert.add_value(table.address_field.query_index, field.name)
 
-        return self.save_street_address(table, insert, street_address, "{}-{}".format(location.mrid, field), description)
+        return self._save_street_address(table, insert, street_address, "{}-{}".format(location.mrid, field), description)
 
     def save_position_point(self, location: Location, sequence_number: int, position_point: PositionPoint) -> bool:
         table = self.database_tables.get_table(TablePositionPoints)
@@ -257,17 +264,27 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.x_position.query_index, position_point.x_position)
         insert.add_value(table.y_position.query_index, position_point.y_position)
 
-        return self.try_execute_single_update(insert, "{}-point{}".format(location.mrid, sequence_number), "position point")
+        return self._try_execute_single_update(insert, "{}-point{}".format(location.mrid, sequence_number), "position point")
 
-    def save_street_address(self, table: TableStreetAddresses, insert: PreparedStatement, street_address: StreetAddress, street_id: str,
-                            description: str) -> bool:
+    def _save_street_address(self, table: TableStreetAddresses, insert: PreparedStatement, street_address: StreetAddress, street_id: str,
+                             description: str) -> bool:
         insert.add_value(table.postal_code.query_index, street_address.postal_code)
         insert.add_value(table.po_box.query_index, street_address.po_box)
 
         self.insert_street_detail(table, insert, street_address.street_detail)
         self.insert_town_detail(table, insert, street_address.town_detail)
 
-        return self.try_execute_single_update(insert, street_id, description)
+        return self._try_execute_single_update(insert, street_id, description)
+
+    # ************ IEC61968 infIEC61968 InfAssetInfo ************
+
+    def save_current_relay_info(self, current_relay_info: CurrentRelayInfo) -> bool:
+        table = self.database_tables.get_table(TableCurrentRelayInfo)
+        insert = self.database_tables.get_insert(TableCurrentRelayInfo)
+
+        insert.add_value(table.curve_setting.query_index, current_relay_info.curve_setting)
+
+        return self._save_asset_info(table, insert, current_relay_info, "current relay info")
 
     # ************ IEC61968 infIEC61968 InfAssetInfo ************
 
@@ -288,7 +305,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.secondary_ratio.query_index, current_transformer_info.secondary_ratio)
         insert.add_value(table.usage.query_index, current_transformer_info.usage)
 
-        return self.save_asset_info(table, insert, current_transformer_info, "current transformer info")
+        return self._save_asset_info(table, insert, current_transformer_info, "current transformer info")
 
     def save_potential_transformer_info(self, potential_transformer_info: PotentialTransformerInfo):
         table = self.database_tables.get_table(TablePotentialTransformerInfo)
@@ -301,12 +318,11 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.rated_voltage.query_index, potential_transformer_info.rated_voltage)
         insert.add_value(table.secondary_ratio.query_index, potential_transformer_info.secondary_ratio)
 
-        return self.save_asset_info(table, insert, potential_transformer_info, "potential transformer info")
-
+        return self._save_asset_info(table, insert, potential_transformer_info, "potential transformer info")
 
     # ************ IEC61968 METERING ************
 
-    def save_end_device(self, table: TableEndDevices, insert: PreparedStatement, end_device: EndDevice, description: str) -> bool:
+    def _save_end_device(self, table: TableEndDevices, insert: PreparedStatement, end_device: EndDevice, description: str) -> bool:
         insert.add_value(table.customer_mrid.query_index, end_device.customer_mrid)
         insert.add_value(table.service_location_mrid.query_index, self._mrid_or_none(end_device.service_location))
 
@@ -314,13 +330,13 @@ class NetworkCIMWriter(BaseCIMWriter):
         for e in end_device.usage_points:
             status = status and self._save_usage_point_to_end_device_association(e, end_device)
 
-        return status and self.save_asset_container(table, insert, end_device, description)
+        return status and self._save_asset_container(table, insert, end_device, description)
 
     def save_meter(self, meter: Meter) -> bool:
         table = self.database_tables.get_table(TableMeters)
         insert = self.database_tables.get_insert(TableMeters)
 
-        return self.save_end_device(table, insert, meter, "meter")
+        return self._save_end_device(table, insert, meter, "meter")
 
     def save_usage_point(self, usage_point: UsagePoint) -> bool:
         table = self.database_tables.get_table(TableUsagePoints)
@@ -334,7 +350,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         for e in usage_point.equipment:
             status = status and self._save_equipment_to_usage_point_association(e, usage_point)
 
-        return status and self.save_identified_object(table, insert, usage_point, "usage point")
+        return status and self._save_identified_object(table, insert, usage_point, "usage point")
 
     # ************ IEC61968 OPERATIONS ************
 
@@ -354,7 +370,7 @@ class NetworkCIMWriter(BaseCIMWriter):
                                  description: str) -> bool:
         insert.add_value(table.terminal_mrid.query_index, self._mrid_or_none(auxiliary_equipment.terminal))
 
-        return self.save_equipment(table, insert, auxiliary_equipment, description)
+        return self._save_equipment(table, insert, auxiliary_equipment, description)
 
     def save_current_transformer(self, current_transformer: CurrentTransformer) -> bool:
         table = self.database_tables.get_table(TableCurrentTransformers)
@@ -383,11 +399,11 @@ class NetworkCIMWriter(BaseCIMWriter):
     def save_sensor(self, table: TableSensors, insert: PreparedStatement, sensor: Sensor, description: str) -> bool:
         return self.save_auxiliary_equipment(table, insert, sensor, description)
 
-    # ************ IEC6190 CORE ************
+    # ************ IEC6190 BASE CORE ************
 
     def _save_ac_dc_terminal(self, table: TableAcDcTerminals, insert: PreparedStatement,
                              ac_dc_terminal: AcDcTerminal, description: str) -> bool:
-        return self.save_identified_object(table, insert, ac_dc_terminal, description)
+        return self._save_identified_object(table, insert, ac_dc_terminal, description)
 
     def save_base_voltage(self, base_voltage: BaseVoltage) -> bool:
         table = self.database_tables.get_table(TableBaseVoltages)
@@ -395,25 +411,25 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         insert.add_value(table.nominal_voltage.query_index, base_voltage.nominal_voltage)
 
-        return self.save_identified_object(table, insert, base_voltage, "base voltage")
+        return self._save_identified_object(table, insert, base_voltage, "base voltage")
 
     def _save_conducting_equipment(self, table: TableConductingEquipment, insert: PreparedStatement, conducting_equipment: ConductingEquipment,
                                    description: str) -> bool:
         insert.add_value(table.base_voltage_mrid.query_index, self._mrid_or_none(conducting_equipment.base_voltage))
 
-        return self.save_equipment(table, insert, conducting_equipment, description)
+        return self._save_equipment(table, insert, conducting_equipment, description)
 
     def save_connectivity_node(self, connectivity_node: ConnectivityNode) -> bool:
         table = self.database_tables.get_table(TableConnectivityNodes)
         insert = self.database_tables.get_insert(TableConnectivityNodes)
 
-        return self.save_identified_object(table, insert, connectivity_node, "connectivity node")
+        return self._save_identified_object(table, insert, connectivity_node, "connectivity node")
 
     def _save_connectivity_node_container(self, table: TableConnectivityNodeContainers, insert: PreparedStatement,
                                           connectivity_node_container: ConnectivityNodeContainer, description: str) -> bool:
         return self._save_power_system_resource(table, insert, connectivity_node_container, description)
 
-    def save_equipment(self, table: TableEquipment, insert: PreparedStatement, equipment: Equipment, description: str) -> bool:
+    def _save_equipment(self, table: TableEquipment, insert: PreparedStatement, equipment: Equipment, description: str) -> bool:
         insert.add_value(table.normally_in_service.query_index, int(equipment.normally_in_service))
         insert.add_value(table.in_service.query_index, int(equipment.in_service))
         status = True
@@ -442,7 +458,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         table = self.database_tables.get_table(TableGeographicalRegions)
         insert = self.database_tables.get_insert(TableGeographicalRegions)
 
-        return self.save_identified_object(table, insert, geographical_region, "geographical region")
+        return self._save_identified_object(table, insert, geographical_region, "geographical region")
 
     def _save_power_system_resource(self,
                                     table: TablePowerSystemResources,
@@ -452,7 +468,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.location_mrid.query_index, self._mrid_or_none(power_system_resource.location))
         insert.add_value(table.num_controls.query_index, 0)  # Currently unused
 
-        return self.save_identified_object(table, insert, power_system_resource, description)
+        return self._save_identified_object(table, insert, power_system_resource, description)
 
     def save_site(self, site: Site) -> bool:
         table = self.database_tables.get_table(TableSites)
@@ -466,7 +482,7 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         insert.add_value(table.geographical_region_mrid.query_index, self._mrid_or_none(sub_geographical_region.geographical_region))
 
-        return self.save_identified_object(table, insert, sub_geographical_region, "sub-geographical region")
+        return self._save_identified_object(table, insert, sub_geographical_region, "sub-geographical region")
 
     def save_substation(self, substation: Substation) -> bool:
         table = self.database_tables.get_table(TableSubstations)
@@ -487,7 +503,7 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         return self._save_ac_dc_terminal(table, insert, terminal, "terminal")
 
-    # ************ IEC61970 WIRES ************
+    # ************ IEC61970 BASE EQUIVALENTS ************
 
     def save_equivalent_branch(self, equivalent_branch: EquivalentBranch) -> bool:
         table = self.database_tables.get_table(TableEquivalentBranches)
@@ -516,13 +532,45 @@ class NetworkCIMWriter(BaseCIMWriter):
                                    description: str) -> bool:
         return self._save_conducting_equipment(table, insert, equivalent_equipment, description)
 
-    def save_power_electronics_unit(self, table: TablePowerElectronicsUnit, insert: PreparedStatement, power_electronics_unit: PowerElectronicsUnit,
-                                    description: str) -> bool:
+    # ************ IEC61970 Base Protection ************
+
+    def save_current_relay(self, current_relay: CurrentRelay) -> bool:
+        table = self.database_tables.get_table(TableCurrentRelays)
+        insert = self.database_tables.get_insert(TableCurrentRelays)
+
+        insert.add_value(table.current_limit_1.query_index, current_relay.current_limit_1)
+        insert.add_value(table.inverse_time_flag.query_index, current_relay.inverse_time_flag)
+        insert.add_value(table.time_delay_1.query_index, current_relay.time_delay_1)
+        insert.add_value(table.current_relay_info_mrid.query_index, self._mrid_or_none(current_relay.current_relay_info))
+
+        return self._save_protection_equipment(table, insert, current_relay, "current relay")
+
+    def _save_protection_equipment(self, table: TableProtectionEquipment, insert: PreparedStatement, protection_equipment: ProtectionEquipment,
+                                   description: str) -> bool:
+        insert.add_value(table.relay_delay_time.query_index, protection_equipment.relay_delay_time)
+        insert.add_value(table.protection_kind.query_index, protection_equipment.protection_kind.short_name)
+
+        return self._save_equipment(table, insert, protection_equipment, description)
+
+    def _save_reclose_sequence(self, protected_switch: ProtectedSwitch, reclose_sequence: RecloseSequence) -> bool:
+        table = self.database_tables.get_table(TableRecloseSequences)
+        insert = self.database_tables.get_insert(TableRecloseSequences)
+
+        insert.add_value(table.protected_switch_mrid.query_index, protected_switch.mrid)
+        insert.add_value(table.reclose_delay.query_index, reclose_sequence.reclose_delay)
+        insert.add_value(table.reclose_step.query_index, reclose_sequence.reclose_step)
+
+        return self._save_identified_object(table, insert, reclose_sequence, "reclose sequence")
+
+    # ************ IEC61970 BASE WIRES ************
+
+    def _save_power_electronics_unit(self, table: TablePowerElectronicsUnit, insert: PreparedStatement, power_electronics_unit: PowerElectronicsUnit,
+                                     description: str) -> bool:
         insert.add_value(table.power_electronics_connection_mrid.query_index, self._mrid_or_none(power_electronics_unit.power_electronics_connection))
         insert.add_value(table.max_p.query_index, power_electronics_unit.max_p)
         insert.add_value(table.min_p.query_index, power_electronics_unit.min_p)
 
-        return self.save_equipment(table, insert, power_electronics_unit, description)
+        return self._save_equipment(table, insert, power_electronics_unit, description)
 
     def save_battery_unit(self, battery_unit: BatteryUnit) -> bool:
         table = self.database_tables.get_table(TableBatteryUnit)
@@ -532,19 +580,19 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.rated_e.query_index, battery_unit.rated_e)
         insert.add_value(table.stored_e.query_index, battery_unit.stored_e)
 
-        return self.save_power_electronics_unit(table, insert, battery_unit, "battery unit")
+        return self._save_power_electronics_unit(table, insert, battery_unit, "battery unit")
 
     def save_photovoltaic_unit(self, photovoltaic_unit: PhotoVoltaicUnit) -> bool:
         table = self.database_tables.get_table(TablePhotoVoltaicUnit)
         insert = self.database_tables.get_insert(TablePhotoVoltaicUnit)
 
-        return self.save_power_electronics_unit(table, insert, photovoltaic_unit, "photo voltaic unit")
+        return self._save_power_electronics_unit(table, insert, photovoltaic_unit, "photo voltaic unit")
 
     def save_power_electronics_wind_unit(self, power_electronics_wind_unit: PowerElectronicsWindUnit) -> bool:
         table = self.database_tables.get_table(TablePowerElectronicsWindUnit)
         insert = self.database_tables.get_insert(TablePowerElectronicsWindUnit)
 
-        return self.save_power_electronics_unit(table, insert, power_electronics_wind_unit, "power electronics wind unit")
+        return self._save_power_electronics_unit(table, insert, power_electronics_wind_unit, "power electronics wind unit")
 
     def save_ac_line_segment(self, ac_line_segment: AcLineSegment) -> bool:
         table = self.database_tables.get_table(TableAcLineSegments)
@@ -557,6 +605,8 @@ class NetworkCIMWriter(BaseCIMWriter):
     def save_breaker(self, breaker: Breaker) -> bool:
         table = self.database_tables.get_table(TableBreakers)
         insert = self.database_tables.get_insert(TableBreakers)
+
+        insert.add_value(table.in_transit_time.query_index, breaker.in_transit_time)
 
         return self._save_protected_switch(table, insert, breaker, "breaker")
 
@@ -703,7 +753,7 @@ class NetworkCIMWriter(BaseCIMWriter):
                                         insert: PreparedStatement,
                                         per_length_line_parameter: PerLengthLineParameter,
                                         description: str) -> bool:
-        return self.save_identified_object(table, insert, per_length_line_parameter, description)
+        return self._save_identified_object(table, insert, per_length_line_parameter, description)
 
     def save_per_length_sequence_impedance(self, per_length_sequence_impedance: PerLengthSequenceImpedance) -> bool:
         table = self.database_tables.get_table(TablePerLengthSequenceImpedances)
@@ -780,7 +830,15 @@ class NetworkCIMWriter(BaseCIMWriter):
         return self._save_transformer_end(table, insert, power_transformer_end, "power transformer end")
 
     def _save_protected_switch(self, table: TableProtectedSwitches, insert: PreparedStatement, protected_switch: ProtectedSwitch, description: str) -> bool:
-        return self._save_switch(table, insert, protected_switch, description)
+        insert.add_value(table.breaking_capacity.query_index, protected_switch.breaking_capacity)
+
+        status = True
+        for rs in protected_switch.reclose_sequences:
+            status = status and self._save_reclose_sequence(protected_switch, rs)
+        for pe in protected_switch.operated_by_protection_equipment:
+            status = status and self._save_protection_equipment_protected_switch(pe, protected_switch)
+
+        return status and self._save_switch(table, insert, protected_switch, description)
 
     def save_ratio_tap_changer(self, ratio_tap_changer: RatioTapChanger) -> bool:
         table = self.database_tables.get_table(TableRatioTapChangers)
@@ -813,8 +871,10 @@ class NetworkCIMWriter(BaseCIMWriter):
 
     def _save_switch(self, table: TableSwitches,
                      insert: PreparedStatement, switch: Switch, description: str) -> bool:
+        insert.add_value(table.rated_current.query_index, switch.rated_current)
         insert.add_value(table.normal_open.query_index, int(switch.is_normally_open()))
         insert.add_value(table.open.query_index, int(switch.is_open()))
+        insert.add_value(table.switch_info_mrid.query_index, self._mrid_or_none(switch.switch_info))
 
         return self._save_conducting_equipment(table, insert, switch, description)
 
@@ -838,7 +898,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.x_ground.query_index, transformer_end.x_ground)
         insert.add_value(table.star_impedance_mrid.query_index, self._mrid_or_none(transformer_end.star_impedance))
 
-        return self.save_identified_object(table, insert, transformer_end, description)
+        return self._save_identified_object(table, insert, transformer_end, description)
 
     def save_transformer_star_impedance(self, transformer_star_impedance: TransformerStarImpedance) -> bool:
         table = self.database_tables.get_table(TableTransformerStarImpedance)
@@ -850,7 +910,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.x0.query_index, transformer_star_impedance.x0)
         insert.add_value(table.transformer_end_info_mrid.query_index, self._mrid_or_none(transformer_star_impedance.transformer_end_info))
 
-        return self.save_identified_object(table, insert, transformer_star_impedance, "transformer star impedance")
+        return self._save_identified_object(table, insert, transformer_star_impedance, "transformer star impedance")
 
     # ************ IEC61970 InfIEC61970 ************
 
@@ -877,7 +937,7 @@ class NetworkCIMWriter(BaseCIMWriter):
             status = status and self._save_loop_to_substation_association(loop, sub, LoopSubstationRelationship.SUBSTATION_ENERGIZES_LOOP)
         for sub in loop.substations:
             status = status and self._save_loop_to_substation_association(loop, sub, LoopSubstationRelationship.LOOP_ENERGIZES_SUBSTATION)
-        return status and self.save_identified_object(table, insert, loop, "loop")
+        return status and self._save_identified_object(table, insert, loop, "loop")
 
     def save_lv_feeder(self, lv_feeder: LvFeeder) -> bool:
         table = self.database_tables.get_table(TableLvFeeders)
@@ -889,14 +949,14 @@ class NetworkCIMWriter(BaseCIMWriter):
 
     # ************ IEC61970 MEAS ************
 
-    def save_measurement(self, table: TableMeasurements, insert: PreparedStatement, measurement: Measurement, description: str) -> bool:
+    def _save_measurement(self, table: TableMeasurements, insert: PreparedStatement, measurement: Measurement, description: str) -> bool:
         insert.add_value(table.power_system_resource_mrid.query_index, measurement.power_system_resource_mrid)
         insert.add_value(table.remote_source_mrid.query_index, self._mrid_or_none(measurement.remote_source))
         insert.add_value(table.terminal_mrid.query_index, measurement.terminal_mrid)
         insert.add_value(table.phases.query_index, measurement.phases.short_name)
         insert.add_value(table.unit_symbol.query_index, measurement.unit_symbol.short_name)
 
-        return self.save_identified_object(table, insert, measurement, description)
+        return self._save_identified_object(table, insert, measurement, description)
 
     def save_analog(self, analog: Analog) -> bool:
         table = self.database_tables.get_table(TableAnalogs)
@@ -904,19 +964,19 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         insert.add_value(table.positive_flow_in.query_index, analog.positive_flow_in)
 
-        return self.save_measurement(table, insert, analog, "analog")
+        return self._save_measurement(table, insert, analog, "analog")
 
     def save_accumulator(self, accumulator: Accumulator) -> bool:
         table = self.database_tables.get_table(TableAccumulators)
         insert = self.database_tables.get_insert(TableAccumulators)
 
-        return self.save_measurement(table, insert, accumulator, "accumulator")
+        return self._save_measurement(table, insert, accumulator, "accumulator")
 
     def save_discrete(self, discrete: Discrete) -> bool:
         table = self.database_tables.get_table(TableDiscretes)
         insert = self.database_tables.get_insert(TableDiscretes)
 
-        return self.save_measurement(table, insert, discrete, "discrete")
+        return self._save_measurement(table, insert, discrete, "discrete")
 
     def save_control(self, control: Control) -> bool:
         table = self.database_tables.get_table(TableControls)
@@ -924,10 +984,10 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         insert.add_value(table.power_system_resource_mrid.query_index, control.power_system_resource_mrid)
 
-        return self.save_io_point(table, insert, control, "control")
+        return self._save_io_point(table, insert, control, "control")
 
-    def save_io_point(self, table: TableIoPoints, insert: PreparedStatement, io_point: IoPoint, description: str) -> bool:
-        return self.save_identified_object(table, insert, io_point, description)
+    def _save_io_point(self, table: TableIoPoints, insert: PreparedStatement, io_point: IoPoint, description: str) -> bool:
+        return self._save_identified_object(table, insert, io_point, description)
 
     # ************ IEC61970 SCADA ************
 
@@ -937,10 +997,10 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         insert.add_value(table.control_mrid.query_index, self._mrid_or_none(remote_control.control))
 
-        return self.save_remote_point(table, insert, remote_control, "remote control")
+        return self._save_remote_point(table, insert, remote_control, "remote control")
 
-    def save_remote_point(self, table: TableRemotePoints, insert: PreparedStatement, remote_point: RemotePoint, description: str) -> bool:
-        return self.save_identified_object(table, insert, remote_point, description)
+    def _save_remote_point(self, table: TableRemotePoints, insert: PreparedStatement, remote_point: RemotePoint, description: str) -> bool:
+        return self._save_identified_object(table, insert, remote_point, description)
 
     def save_remote_source(self, remote_source: RemoteSource) -> bool:
         table = self.database_tables.get_table(TableRemoteSources)
@@ -948,7 +1008,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert = self.database_tables.get_insert(TableRemoteSources)
         insert.add_value(table.measurement_mrid.query_index, self._mrid_or_none(remote_source.measurement))
 
-        return self.save_remote_point(table, insert, remote_source, "remote source")
+        return self._save_remote_point(table, insert, remote_source, "remote source")
 
     # ************ ASSOCIATIONS ************
 
@@ -959,7 +1019,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.asset_organisation_role_mrid.query_index, asset_organisation_role.mrid)
         insert.add_value(table.asset_mrid.query_index, asset.mrid)
 
-        return self.try_execute_single_update(insert, f"{asset_organisation_role.mrid}-to-{asset.mrid}", "asset organisation role to asset association")
+        return self._try_execute_single_update(insert, f"{asset_organisation_role.mrid}-to-{asset.mrid}", "asset organisation role to asset association")
 
     def _save_usage_point_to_end_device_association(self, usage_point: UsagePoint, end_device: EndDevice) -> bool:
         table = self.database_tables.get_table(TableUsagePointsEndDevices)
@@ -968,7 +1028,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.usage_point_mrid.query_index, usage_point.mrid)
         insert.add_value(table.end_device_mrid.query_index, end_device.mrid)
 
-        return self.try_execute_single_update(insert, f"{usage_point.mrid}-to-{end_device.mrid}", "usage point to end device association")
+        return self._try_execute_single_update(insert, f"{usage_point.mrid}-to-{end_device.mrid}", "usage point to end device association")
 
     def _save_equipment_to_usage_point_association(self, equipment: Equipment, usage_point: UsagePoint) -> bool:
         table = self.database_tables.get_table(TableEquipmentUsagePoints)
@@ -977,7 +1037,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.equipment_mrid.query_index, equipment.mrid)
         insert.add_value(table.usage_point_mrid.query_index, usage_point.mrid)
 
-        return self.try_execute_single_update(insert, f"{equipment.mrid}-to-{usage_point.mrid}", "Equipment to UsagePoint association ")
+        return self._try_execute_single_update(insert, f"{equipment.mrid}-to-{usage_point.mrid}", "Equipment to UsagePoint association ")
 
     def _save_equipment_to_operational_restriction_association(self, equipment: Equipment, operational_restriction: OperationalRestriction) -> bool:
         table = self.database_tables.get_table(TableEquipmentOperationalRestrictions)
@@ -986,7 +1046,8 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.equipment_mrid.query_index, equipment.mrid)
         insert.add_value(table.operational_restriction_mrid.query_index, operational_restriction.mrid)
 
-        return self.try_execute_single_update(insert, f"{equipment.mrid}-to-{operational_restriction.mrid}", "equipment to operational restriction association")
+        return self._try_execute_single_update(insert, f"{equipment.mrid}-to-{operational_restriction.mrid}",
+                                               "equipment to operational restriction association")
 
     def _save_equipment_to_equipment_container_association(self, equipment: Equipment, equipment_container: EquipmentContainer) -> bool:
         table = self.database_tables.get_table(TableEquipmentEquipmentContainers)
@@ -995,7 +1056,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.equipment_mrid.query_index, equipment.mrid)
         insert.add_value(table.equipment_container_mrid.query_index, equipment_container.mrid)
 
-        return self.try_execute_single_update(insert, f"{equipment.mrid}-to-{equipment_container.mrid}", "equipment to equipment container association")
+        return self._try_execute_single_update(insert, f"{equipment.mrid}-to-{equipment_container.mrid}", "equipment to equipment container association")
 
     def _save_circuit_to_substation_association(self, circuit: Circuit, substation: Substation) -> bool:
         table = self.database_tables.get_table(TableCircuitsSubstations)
@@ -1004,7 +1065,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.circuit_mrid.query_index, circuit.mrid)
         insert.add_value(table.substation_mrid.query_index, substation.mrid)
 
-        return self.try_execute_single_update(insert, f"{circuit.mrid}-to-{substation.mrid}", "circuit to substation association")
+        return self._try_execute_single_update(insert, f"{circuit.mrid}-to-{substation.mrid}", "circuit to substation association")
 
     def _save_circuit_to_terminal_association(self, circuit: Circuit, terminal: Terminal) -> bool:
         table = self.database_tables.get_table(TableCircuitsTerminals)
@@ -1013,7 +1074,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.circuit_mrid.query_index, circuit.mrid)
         insert.add_value(table.terminal_mrid.query_index, terminal.mrid)
 
-        return self.try_execute_single_update(insert, f"{circuit.mrid}-to-{terminal.mrid}", "circuit to terminal association")
+        return self._try_execute_single_update(insert, f"{circuit.mrid}-to-{terminal.mrid}", "circuit to terminal association")
 
     def _save_loop_to_substation_association(self, loop: Loop, substation: Substation, relationship: LoopSubstationRelationship) -> bool:
         table = self.database_tables.get_table(TableLoopsSubstations)
@@ -1023,4 +1084,14 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.substation_mrid.query_index, substation.mrid)
         insert.add_value(table.relationship.query_index, relationship.short_name)
 
-        return self.try_execute_single_update(insert, f"{loop.mrid}-to-{substation.mrid}", f"loop to substation association")
+        return self._try_execute_single_update(insert, f"{loop.mrid}-to-{substation.mrid}", f"loop to substation association")
+
+    def _save_protection_equipment_protected_switch(self, protection_equipment: ProtectionEquipment, protected_switch: ProtectedSwitch) -> bool:
+        table = self.database_tables.get_table(TableProtectionEquipmentProtectedSwitches)
+        insert = self.database_tables.get_insert(TableProtectionEquipmentProtectedSwitches)
+
+        insert.add_value(table.protection_equipment_mrid.query_index, protection_equipment.mrid)
+        insert.add_value(table.protected_switch_mrid.query_index, protected_switch.mrid)
+
+        return self._try_execute_single_update(insert, f"{protection_equipment.mrid}-to-{protected_switch.mrid}",
+                                               "protection equipment to protected switch association")

@@ -15,6 +15,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.NoLoadTest_pb2 import NoLoadTest as 
 from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircuitTest as PBOpenCircuitTest
 from zepben.protobuf.cim.iec61968.assetinfo.ShortCircuitTest_pb2 import ShortCircuitTest as PBShortCircuitTest
 from zepben.protobuf.cim.iec61968.assetinfo.ShuntCompensatorInfo_pb2 import ShuntCompensatorInfo as PBShuntCompensatorInfo
+from zepben.protobuf.cim.iec61968.assetinfo.SwitchInfo_pb2 import SwitchInfo as PBSwitchInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest as PBTransformerTest
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind_pb2 import WireMaterialKind as PBWireMaterialKind
@@ -35,6 +36,7 @@ from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint 
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
 from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
 from zepben.protobuf.cim.iec61968.common.StreetDetail_pb2 import StreetDetail as PBStreetDetail
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentRelayInfo_pb2 import CurrentRelayInfo as PBCurrentRelayInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo as PBCurrentTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo as PBPotentialTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infcommon.Ratio_pb2 import Ratio as PBRatio
@@ -73,6 +75,9 @@ from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control as PBCont
 from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete as PBDiscrete
 from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPoint
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
+from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import CurrentRelay as PBCurrentRelay
+from zepben.protobuf.cim.iec61970.base.protection.ProtectionEquipment_pb2 import ProtectionEquipment as PBProtectionEquipment
+from zepben.protobuf.cim.iec61970.base.protection.RecloseSequence_pb2 import RecloseSequence as PBRecloseSequence
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
@@ -121,6 +126,7 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
+from zepben.protobuf.cim.iec61970.infiec61970.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 
 MIN_32_BIT_INTEGER = -2147483648
@@ -219,6 +225,14 @@ def shunt_compensator_info():
         ratedCurrent=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         ratedReactivePower=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         ratedVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+    )
+
+
+def switch_info():
+    return builds(
+        PBSwitchInfo,
+        ai=asset_info(),
+        ratedInterruptingTime=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 
@@ -381,6 +395,14 @@ def town_detail():
 #####################################
 # IEC61968 infIEC61968 InfAssetInfo #
 #####################################
+
+def current_relay_info():
+    return builds(
+        PBCurrentRelayInfo,
+        ai=asset_info(),
+        curveSetting=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
+
 
 def current_transformer_info():
     return builds(
@@ -671,6 +693,39 @@ def measurement():
     )
 
 
+############################
+# IEC61970 Base Protection #
+############################
+
+def current_relay():
+    return builds(
+        PBCurrentRelay,
+        pe=protection_equipment(),
+        currentLimit1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        inverseTimeFlag=booleans(),
+        timeDelay1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def protection_equipment():
+    return builds(
+        PBProtectionEquipment,
+        eq=equipment(),
+        relayDelayTime=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        protectionKind=sampled_from(PBProtectionKind.values()),
+        protectedSwitchMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
+
+def reclose_sequence():
+    return builds(
+        PBRecloseSequence,
+        io=identified_object(),
+        recloseDelay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        recloseStep=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+    )
+
+
 #######################
 # IEC61970 BASE SCADA #
 #######################
@@ -728,7 +783,11 @@ def ac_line_segment():
 
 
 def breaker():
-    return builds(PBBreaker, sw=protected_switch())
+    return builds(
+        PBBreaker,
+        sw=protected_switch(),
+        inTransitTime=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
 
 
 def busbar_section():
@@ -918,7 +977,13 @@ def power_transformer_end():
 
 
 def protected_switch():
-    return builds(PBProtectedSwitch, sw=switch())
+    return builds(
+        PBProtectedSwitch,
+        sw=switch(),
+        breakingCapacity=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        recloseSequenceMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        operatedByProtectionEquipmentMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
 
 
 def ratio_tap_changer():
@@ -950,7 +1015,13 @@ def shunt_compensator():
 
 
 def switch():
-    return builds(PBSwitch, ce=conducting_equipment(), normalOpen=booleans(), open=booleans())
+    return builds(
+        PBSwitch,
+        ce=conducting_equipment(),
+        ratedCurrent=integers(min_value=1, max_value=MAX_32_BIT_INTEGER),
+        normalOpen=booleans(),
+        open=booleans()
+    )
 
 
 def tap_changer():

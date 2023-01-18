@@ -8,9 +8,8 @@ from __future__ import annotations
 
 from typing import Callable, TypeVar
 
-from zepben.evolve import Traversal, BasicTracker
+from zepben.evolve import Traversal
 from zepben.evolve.services.network.tracing.traversals.queue import Queue, depth_first
-from zepben.evolve.services.network.tracing.traversals.tracker import Tracker
 
 __all__ = ["BasicTraversal"]
 T = TypeVar('T')

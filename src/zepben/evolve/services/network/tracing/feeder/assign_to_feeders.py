@@ -107,20 +107,20 @@ class AssignToFeeders:
 
     async def _process_normal(self, terminal: Terminal, is_stopping: bool):
         # noinspection PyTypeChecker
-        self._process(terminal, ConductingEquipment.add_container, Feeder.add_equipment, is_stopping)
+        await self._process(terminal, ConductingEquipment.add_container, Feeder.add_equipment, is_stopping)
 
     async def _process_current(self, terminal: Terminal, is_stopping: bool):
         # noinspection PyTypeChecker
-        self._process(terminal, ConductingEquipment.add_current_container, Feeder.add_current_equipment, is_stopping)
+        await self._process(terminal, ConductingEquipment.add_current_container, Feeder.add_current_equipment, is_stopping)
 
-    def _process(
+    async def _process(
         self,
-        terminal: Optional[Terminal],
+        terminal: Terminal,
         assign_feeder_to_equip: Callable[[ConductingEquipment, EquipmentContainer], Any],
         assign_equip_to_feeder: Callable[[EquipmentContainer, ConductingEquipment], Any],
         is_stopping: bool
     ):
-        if is_stopping and (self._reached_lv(terminal) or self._reached_substation_transformer(terminal)):
+        if is_stopping and (await self._reached_lv(terminal) or await self._reached_substation_transformer(terminal)):
             return
 
         if terminal.conducting_equipment:

@@ -10,6 +10,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import Overhead
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.ShortCircuitTest_pb2 import ShortCircuitTest as PBShortCircuitTest
 from zepben.protobuf.cim.iec61968.assetinfo.ShuntCompensatorInfo_pb2 import ShuntCompensatorInfo as PBShuntCompensatorInfo
+from zepben.protobuf.cim.iec61968.assetinfo.SwitchInfo_pb2 import SwitchInfo as PBSwitchInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerEndInfo_pb2 import TransformerEndInfo as PBTransformerEndInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import TransformerTankInfo as PBTransformerTankInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest as PBTransformerTest
@@ -29,6 +30,7 @@ from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint 
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
 from zepben.protobuf.cim.iec61968.common.StreetDetail_pb2 import StreetDetail as PBStreetDetail
 from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentRelayInfo_pb2 import CurrentRelayInfo as PBCurrentRelayInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo as PBCurrentTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo as PBPotentialTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.TransformerConstructionKind_pb2 import TransformerConstructionKind as PBTransformerConstructionKind
@@ -41,8 +43,8 @@ from zepben.protobuf.cim.iec61968.operations.OperationalRestriction_pb2 import O
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.AuxiliaryEquipment_pb2 import AuxiliaryEquipment as PBAuxiliaryEquipment
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.CurrentTransformer_pb2 import CurrentTransformer as PBCurrentTransformer
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.FaultIndicator_pb2 import FaultIndicator as PBFaultIndicator
-from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.PotentialTransformer_pb2 import PotentialTransformer as PBPotentialTransformer
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.PotentialTransformerKind_pb2 import PotentialTransformerKind as PBPotentialTransformerKind
+from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.PotentialTransformer_pb2 import PotentialTransformer as PBPotentialTransformer
 from zepben.protobuf.cim.iec61970.base.auxiliaryequipment.Sensor_pb2 import Sensor as PBSensor
 from zepben.protobuf.cim.iec61970.base.core.AcDcTerminal_pb2 import AcDcTerminal as PBAcDcTerminal
 from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage as PBBaseVoltage
@@ -68,6 +70,9 @@ from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control as PBCont
 from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete as PBDiscrete
 from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPoint
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
+from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import CurrentRelay as PBCurrentRelay
+from zepben.protobuf.cim.iec61970.base.protection.ProtectionEquipment_pb2 import ProtectionEquipment as PBProtectionEquipment
+from zepben.protobuf.cim.iec61970.base.protection.RecloseSequence_pb2 import RecloseSequence as PBRecloseSequence
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
@@ -116,6 +121,7 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
+from zepben.protobuf.cim.iec61970.infiec61970.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
 from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
 
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
@@ -123,6 +129,7 @@ from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.short_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.switch_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_test import *
@@ -134,6 +141,7 @@ from zepben.evolve.model.cim.iec61968.assets.pole import *
 from zepben.evolve.model.cim.iec61968.assets.streetlight import *
 from zepben.evolve.model.cim.iec61968.assets.structure import *
 from zepben.evolve.model.cim.iec61968.common.location import *
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_relay_info import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import *
@@ -158,48 +166,60 @@ from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_equipment impo
 from zepben.evolve.model.cim.iec61970.base.meas.control import *
 from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
+from zepben.evolve.model.cim.iec61970.base.protection.current_relay import *
+from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import *
+from zepben.evolve.model.cim.iec61970.base.protection.reclose_sequence import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
+from zepben.evolve.model.cim.iec61970.base.wires.breaker import *
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
+from zepben.evolve.model.cim.iec61970.base.wires.disconnector import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
+from zepben.evolve.model.cim.iec61970.base.wires.fuse import *
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
+from zepben.evolve.model.cim.iec61970.base.wires.jumper import *
 from zepben.evolve.model.cim.iec61970.base.wires.line import *
+from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
+from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import *
+from zepben.evolve.model.cim.iec61970.base.wires.recloser import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
-
 from zepben.evolve.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb
-from zepben.evolve.services.common.translator.util import mrid_or_empty, from_nullable_int, from_nullable_float, from_nullable_long, from_nullable_uint
+from zepben.evolve.services.common.translator.util import mrid_or_empty, from_nullable_int, from_nullable_float, from_nullable_long, from_nullable_uint, \
+    nullable_bool_settings
 
 __all__ = [
     "CimTranslationException", "cable_info_to_pb", "no_load_test_to_pb", "open_circuit_test_to_pb", "overhead_wire_info_to_pb", "power_transformer_info_to_pb",
-    "short_circuit_test_to_pb", "shunt_compensator_info_to_pb", "transformer_end_info_to_pb", "transformer_tank_info_to_pb", "transformer_test_to_pb",
-    "wire_info_to_pb", "asset_to_pb", "asset_container_to_pb", "asset_info_to_pb", "asset_organisation_role_to_pb", "asset_owner_to_pb", "pole_to_pb",
-    "streetlight_to_pb", "structure_to_pb", "location_to_pb", "position_point_to_pb", "street_address_to_pb", "town_detail_to_pb", "end_device_to_pb",
-    "meter_to_pb", "usage_point_to_pb", "operational_restriction_to_pb", "auxiliary_equipment_to_pb", "fault_indicator_to_pb", "ac_dc_terminal_to_pb",
-    "base_voltage_to_pb", "conducting_equipment_to_pb", "connectivity_node_to_pb", "connectivity_node_container_to_pb", "equipment_to_pb",
-    "equipment_container_to_pb", "feeder_to_pb", "geographical_region_to_pb", "power_system_resource_to_pb", "site_to_pb", "sub_geographical_region_to_pb",
-    "substation_to_pb", "terminal_to_pb", "equivalent_branch_to_pb", "equivalent_equipment_to_pb", "control_to_pb", "io_point_to_pb", "accumulator_to_pb",
-    "analog_to_pb", "discrete_to_pb", "measurement_to_pb", "remote_control_to_pb", "remote_point_to_pb", "remote_source_to_pb", "battery_unit_to_pb",
-    "photo_voltaic_unit_to_pb", "power_electronics_unit_to_pb", "power_electronics_wind_unit_to_pb", "ac_line_segment_to_pb", "breaker_to_pb",
-    "conductor_to_pb", "connector_to_pb", "disconnector_to_pb", "energy_connection_to_pb", "energy_consumer_to_pb", "energy_consumer_phase_to_pb",
-    "energy_source_to_pb", "energy_source_phase_to_pb", "fuse_to_pb", "jumper_to_pb", "junction_to_pb", "busbar_section_to_pb", "line_to_pb",
-    "linear_shunt_compensator_to_pb", "load_break_switch_to_pb", "per_length_line_parameter_to_pb", "per_length_impedance_to_pb",
-    "per_length_sequence_impedance_to_pb", "power_electronics_connection_to_pb", "power_electronics_connection_phase_to_pb", "power_transformer_to_pb",
-    "power_transformer_end_to_pb", "protected_switch_to_pb", "ratio_tap_changer_to_pb", "recloser_to_pb", "regulating_cond_eq_to_pb", "shunt_compensator_to_pb",
-    "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb", "circuit_to_pb", "loop_to_pb", "lv_feeder_to_pb", "transformer_star_impedance_to_pb",
-    "current_transformer_info_to_pb", "potential_transformer_info_to_pb", "current_transformer_to_pb", "potential_transformer_to_pb"
+    "short_circuit_test_to_pb", "shunt_compensator_info_to_pb", "switch_info_to_pb", "transformer_end_info_to_pb", "transformer_tank_info_to_pb",
+    "transformer_test_to_pb", "wire_info_to_pb", "asset_to_pb", "asset_container_to_pb", "asset_info_to_pb", "asset_organisation_role_to_pb",
+    "asset_owner_to_pb", "pole_to_pb", "streetlight_to_pb", "structure_to_pb", "location_to_pb", "position_point_to_pb", "street_address_to_pb",
+    "street_detail_to_pb", "town_detail_to_pb", "current_relay_info_to_pb", "current_transformer_info_to_pb", "potential_transformer_info_to_pb",
+    "ratio_to_pb", "end_device_to_pb", "meter_to_pb", "usage_point_to_pb", "operational_restriction_to_pb", "auxiliary_equipment_to_pb",
+    "current_transformer_to_pb", "fault_indicator_to_pb", "potential_transformer_to_pb", "sensor_to_pb", "ac_dc_terminal_to_pb", "base_voltage_to_pb",
+    "conducting_equipment_to_pb", "connectivity_node_to_pb", "connectivity_node_container_to_pb", "equipment_to_pb", "equipment_container_to_pb",
+    "feeder_to_pb", "geographical_region_to_pb", "power_system_resource_to_pb", "site_to_pb", "sub_geographical_region_to_pb", "substation_to_pb",
+    "terminal_to_pb", "equivalent_branch_to_pb", "equivalent_equipment_to_pb", "accumulator_to_pb", "analog_to_pb", "control_to_pb", "discrete_to_pb",
+    "io_point_to_pb", "measurement_to_pb", "current_relay_to_pb", "protection_equipment_to_pb", "reclose_sequence_to_pb", "remote_control_to_pb",
+    "remote_point_to_pb", "remote_source_to_pb", "battery_unit_to_pb", "photo_voltaic_unit_to_pb", "power_electronics_unit_to_pb",
+    "power_electronics_wind_unit_to_pb", "ac_line_segment_to_pb", "breaker_to_pb", "conductor_to_pb", "connector_to_pb", "disconnector_to_pb",
+    "energy_connection_to_pb", "energy_consumer_to_pb", "energy_consumer_phase_to_pb", "energy_source_to_pb", "energy_source_phase_to_pb", "fuse_to_pb",
+    "jumper_to_pb", "junction_to_pb", "busbar_section_to_pb", "line_to_pb", "linear_shunt_compensator_to_pb", "load_break_switch_to_pb",
+    "per_length_line_parameter_to_pb", "per_length_impedance_to_pb", "per_length_sequence_impedance_to_pb", "power_electronics_connection_to_pb",
+    "power_electronics_connection_phase_to_pb", "power_transformer_to_pb", "power_transformer_end_to_pb", "protected_switch_to_pb", "ratio_tap_changer_to_pb",
+    "recloser_to_pb", "regulating_cond_eq_to_pb", "shunt_compensator_to_pb", "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb",
+    "transformer_star_impedance_to_pb", "circuit_to_pb", "loop_to_pb", "lv_feeder_to_pb"
 ]
 
 
@@ -278,6 +298,13 @@ def shunt_compensator_info_to_pb(cim: ShuntCompensatorInfo) -> PBShuntCompensato
     )
 
 
+def switch_info_to_pb(cim: SwitchInfo) -> PBSwitchInfo:
+    return PBSwitchInfo(
+        ai=asset_info_to_pb(cim),
+        ratedInterruptingTime=from_nullable_float(cim.rated_interrupting_time)
+    )
+
+
 def transformer_end_info_to_pb(cim: TransformerEndInfo) -> PBTransformerEndInfo:
     return PBTransformerEndInfo(
         ai=asset_info_to_pb(cim),
@@ -330,6 +357,7 @@ OverheadWireInfo.to_pb = overhead_wire_info_to_pb
 PowerTransformerInfo.to_pb = power_transformer_info_to_pb
 ShortCircuitTest.to_pb = short_circuit_test_to_pb
 ShuntCompensatorInfo.to_pb = shunt_compensator_info_to_pb
+SwitchInfo.to_pb = switch_info_to_pb
 TransformerEndInfo.to_pb = transformer_end_info_to_pb
 TransformerTankInfo.to_pb = transformer_tank_info_to_pb
 TransformerTest.to_pb = transformer_test_to_pb
@@ -449,6 +477,13 @@ TownDetail.to_pb = town_detail_to_pb
 # IEC61968 infIEC61968 InfAssetInfo #
 #####################################
 
+def current_relay_info_to_pb(cim: CurrentRelayInfo) -> PBCurrentRelayInfo:
+    return PBCurrentRelayInfo(
+        ai=asset_info_to_pb(cim),
+        curveSetting=cim.curve_setting
+    )
+
+
 def current_transformer_info_to_pb(cim: CurrentTransformerInfo) -> PBCurrentTransformerInfo:
     return PBCurrentTransformerInfo(
         ai=asset_info_to_pb(cim),
@@ -479,6 +514,7 @@ def potential_transformer_info_to_pb(cim: PotentialTransformerInfo) -> PBPotenti
     )
 
 
+CurrentRelayInfo.to_pb = current_relay_info_to_pb
 CurrentTransformerInfo.to_pb = current_transformer_info_to_pb
 PotentialTransformerInfo.to_pb = potential_transformer_info_to_pb
 
@@ -786,6 +822,41 @@ IoPoint.to_pb = io_point_to_pb
 Measurement.to_pb = measurement_to_pb
 
 
+############################
+# IEC61970 Base Protection #
+############################
+
+def current_relay_to_pb(cim: CurrentRelay) -> PBCurrentRelay:
+    return PBCurrentRelay(
+        pe=protection_equipment_to_pb(cim, True),
+        currentLimit1=from_nullable_float(cim.current_limit_1),
+        **nullable_bool_settings("inverseTimeFlag", cim.inverse_time_flag),
+        timeDelay1=from_nullable_float(cim.time_delay_1),
+    )
+
+
+def protection_equipment_to_pb(cim: ProtectionEquipment, include_asset_info: bool = False) -> PBProtectionEquipment:
+    return PBProtectionEquipment(
+        eq=equipment_to_pb(cim, include_asset_info),
+        relayDelayTime=from_nullable_float(cim.relay_delay_time),
+        protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name),
+        protectedSwitchMRIDs=[str(io.mrid) for io in cim.protected_switches]
+    )
+
+
+def reclose_sequence_to_pb(cim: RecloseSequence) -> PBRecloseSequence:
+    return PBRecloseSequence(
+        io=identified_object_to_pb(cim),
+        recloseDelay=from_nullable_float(cim.reclose_delay),
+        recloseStep=from_nullable_int(cim.reclose_step)
+    )
+
+
+CurrentRelay.to_pb = current_relay_to_pb
+ProtectionEquipment.to_pb = protection_equipment_to_pb
+RecloseSequence.to_pb = reclose_sequence_to_pb
+
+
 #######################
 # IEC61970 BASE SCADA #
 #######################
@@ -861,7 +932,10 @@ def ac_line_segment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
 
 
 def breaker_to_pb(cim: Breaker) -> PBBreaker:
-    return PBBreaker(sw=protected_switch_to_pb(cim))
+    return PBBreaker(
+        sw=protected_switch_to_pb(cim),
+        inTransitTime=from_nullable_float(cim.in_transit_time)
+    )
 
 
 def conductor_to_pb(cim: Conductor) -> PBConductor:
@@ -1061,7 +1135,12 @@ def power_transformer_end_to_pb(cim: PowerTransformerEnd) -> PBPowerTransformerE
 
 
 def protected_switch_to_pb(cim: ProtectedSwitch) -> PBProtectedSwitch:
-    return PBProtectedSwitch(sw=switch_to_pb(cim))
+    return PBProtectedSwitch(
+        sw=switch_to_pb(cim),
+        breakingCapacity=from_nullable_int(cim.breaking_capacity),
+        recloseSequenceMRIDs=[str(io.mrid) for io in cim.reclose_sequences],
+        operatedByProtectionEquipmentMRIDs=[str(io.mrid) for io in cim.operated_by_protection_equipment]
+    )
 
 
 def ratio_tap_changer_to_pb(cim: RatioTapChanger) -> PBRatioTapChanger:
@@ -1095,7 +1174,8 @@ def shunt_compensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
 
 def switch_to_pb(cim: Switch) -> PBSwitch:
     return PBSwitch(
-        ce=conducting_equipment_to_pb(cim),
+        ce=conducting_equipment_to_pb(cim, True),
+        ratedCurrent=from_nullable_uint(cim.rated_current),
         normalOpen=cim.get_normal_state(),
         open=cim.get_state()
     )

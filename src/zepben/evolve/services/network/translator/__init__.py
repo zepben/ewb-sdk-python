@@ -11,6 +11,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import Overhead
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo
 from zepben.protobuf.cim.iec61968.assetinfo.ShortCircuitTest_pb2 import ShortCircuitTest
 from zepben.protobuf.cim.iec61968.assetinfo.ShuntCompensatorInfo_pb2 import ShuntCompensatorInfo
+from zepben.protobuf.cim.iec61968.assetinfo.SwitchInfo_pb2 import SwitchInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerEndInfo_pb2 import TransformerEndInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import TransformerTankInfo
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest
@@ -24,6 +25,7 @@ from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole
 from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight
 from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentRelayInfo_pb2 import CurrentRelayInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice
@@ -58,6 +60,9 @@ from zepben.protobuf.cim.iec61970.base.meas.Control_pb2 import Control
 from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete
 from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement
+from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import CurrentRelay
+from zepben.protobuf.cim.iec61970.base.protection.ProtectionEquipment_pb2 import ProtectionEquipment
+from zepben.protobuf.cim.iec61970.base.protection.RecloseSequence_pb2 import RecloseSequence
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource
@@ -112,6 +117,7 @@ OverheadWireInfo.mrid = lambda self: self.wi.mrid()
 PowerTransformerInfo.mrid = lambda self: self.ai.mrid()
 ShortCircuitTest.mrid = lambda self: self.tt.mrid()
 ShuntCompensatorInfo.mrid = lambda self: self.ai.mrid()
+SwitchInfo.mrid = lambda self: self.ai.mrid()
 TransformerEndInfo.mrid = lambda self: self.ai.mrid()
 TransformerTankInfo.mrid = lambda self: self.ai.mrid()
 TransformerTest.mrid = lambda self: self.io.mrid()
@@ -126,6 +132,7 @@ Pole.mrid = lambda self: self.st.mrid()
 Streetlight.mrid = lambda self: self.at.mrid()
 Structure.mrid = lambda self: self.ac.mrid()
 Location.mrid = lambda self: self.io.mrid()
+CurrentRelayInfo.mrid = lambda self: self.ai.mrid()
 CurrentTransformerInfo.mrid = lambda self: self.ai.mrid()
 PotentialTransformerInfo.mrid = lambda self: self.ai.mrid()
 EndDevice.mrid = lambda self: self.ac.mrid()
@@ -160,6 +167,9 @@ Discrete.mrid = lambda self: self.measurement.mrid()
 Control.mrid = lambda self: self.ip.mrid()
 IoPoint.mrid = lambda self: self.io.mrid()
 Measurement.mrid = lambda self: self.io.mrid()
+CurrentRelay.mrid = lambda self: self.pe.mrid()
+ProtectionEquipment.mrid = lambda self: self.eq.mrid()
+RecloseSequence.mrid = lambda self: self.io.mrid()
 RemoteControl.mrid = lambda self: self.rp.mrid()
 RemotePoint.mrid = lambda self: self.io.mrid()
 RemoteSource.mrid = lambda self: self.rp.mrid()
@@ -305,10 +315,12 @@ AcLineSegment.per_length_sequence_impedance_mrid = lambda self: getattr(self, "p
 ConductingEquipment.asset_info_mrid = lambda self: self.eq.asset_info_mrid()
 Conductor.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
 CurrentTransformer.asset_info_mrid = lambda self: self.sn.ae.eq.asset_info_mrid()
+CurrentRelay.asset_info_mrid = lambda self: self.pe.eq.asset_info_mrid()
 Equipment.asset_info_mrid = lambda self: self.psr.assetInfoMRID
 PotentialTransformer.asset_info_mrid = lambda self: self.sn.ae.eq.asset_info_mrid()
 PowerTransformer.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
 ShuntCompensator.asset_info_mrid = lambda self: self.rce.ec.ce.asset_info_mrid()
+Switch.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
 
 # ratio_tap_changer_mrid
 TransformerEnd.ratio_tap_changer_mrid = lambda self: getattr(self, "ratioTapChangerMRID", None)

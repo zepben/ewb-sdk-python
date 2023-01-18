@@ -17,7 +17,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySour
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
-from zepben.evolve.model.cim.iec61970.base.wires.switch import Breaker
+from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.evolve.util import CopyableUUID
 

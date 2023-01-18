@@ -6,12 +6,16 @@
 
 from __future__ import annotations
 
+from typing import Optional, TYPE_CHECKING
+
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-
-__all__ = ["Switch", "Breaker", "Disconnector", "Jumper", "Fuse", "ProtectedSwitch", "Recloser", "LoadBreakSwitch"]
-
 from zepben.evolve.util import require
+
+if TYPE_CHECKING:
+    from zepben.evolve import SwitchInfo
+
+__all__ = ["Switch"]
 
 
 def _calculate_open_state(current_state: int, is_open: bool, phase: SinglePhaseKind = None) -> int:
@@ -42,12 +46,28 @@ class Switch(ConductingEquipment):
       value for each phase of the switch.
     """
 
+    rated_current: Optional[int] = None
+    """The maximum continuous current carrying capacity in amps governed by the device material and construction. The attribute shall be a positive value."""
+
     _open: int = 0
     """Tells if the switch is considered open when used as input to topology processing."""
 
     _normally_open: int = 0
     """The attribute is used in cases when no Measurement for the status value is present. If the Switch has a status measurement the Discrete.normalValue 
     is expected to match with the Switch.normalOpen."""
+
+    @property
+    def switch_info(self) -> Optional[SwitchInfo]:
+        """Datasheet information for this Switch."""
+        return self.asset_info
+
+    @switch_info.setter
+    def switch_info(self, si: Optional[SwitchInfo]):
+        """
+        Set the :class:`SwitchInfo` for this :class:`Switch`
+        :param si: The SwitchInfo for this Switch
+        """
+        self.asset_info = si
 
     def is_normally_open(self, phase: SinglePhaseKind = None):
         """
@@ -98,60 +118,3 @@ class Switch(ConductingEquipment):
         """
         self._open = _calculate_open_state(self._open, is_open, phase)
         return self
-
-
-class ProtectedSwitch(Switch):
-    """
-    A ProtectedSwitch is a switching device that can be operated by ProtectionEquipment.
-    """
-    pass
-
-
-class Breaker(ProtectedSwitch):
-    """
-    A mechanical switching device capable of making, carrying, and breaking currents under normal circuit conditions
-    and also making, carrying for a specified time, and breaking currents under specified abnormal circuit conditions
-    e.g. those of short circuit.
-    """
-
-    def is_substation_breaker(self):
-        """Convenience function for detecting if this breaker is part of a substation. Returns true if this Breaker is associated with a Substation."""
-        return self.num_substations() > 0
-
-
-class Disconnector(Switch):
-    """
-    A manually operated or motor operated mechanical switching device used for changing the connections in a circuit,
-    or for isolating a circuit or equipment from a source of power. It is required to open or close circuits when
-    negligible current is broken or made.
-    """
-    pass
-
-
-class Fuse(Switch):
-    """
-    An overcurrent protective device with a circuit opening fusible part that is heated and severed by the passage of
-    overcurrent through it. A fuse is considered a switching device because it breaks current.
-    """
-    pass
-
-
-class Jumper(Switch):
-    """
-    A short section of conductor with negligible impedance which can be manually removed and replaced if the circuit is de-energized.
-    Note that zero-impedance branches can potentially be modeled by other equipment types.
-    """
-    pass
-
-
-class Recloser(ProtectedSwitch):
-    """
-    Pole-mounted fault interrupter with built-in phase and ground relays, current transformer (CT), and supplemental controls.
-    """
-    pass
-
-
-class LoadBreakSwitch(ProtectedSwitch):
-    """A mechanical switching device capable of making, carrying, and breaking currents under normal operating
-    conditions. """
-    pass

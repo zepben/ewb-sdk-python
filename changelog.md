@@ -20,6 +20,17 @@
 * Renamed `FeederDirection.has` to `FeederDirection.__contains__`, which can be used via its operator version `in`. e.g. `BOTH.has(DOWNSTREAM)` can be replaced
   with `BOTH.__contains__(DOWNSTREAM)` or `DOWNSTREAM in BOTH`
 * Removed deprecated function `NetworkConsumerClient.get_feeder`.
+* Refactored the following `Switch` descendant classes to their own submodules in `zepben.evolve.model.cim.iec61970.base.wires`:
+  * `Breaker` moved to `breaker`
+  * `Disconnector` moved to `disconnector`
+  * `Fuse` moved to `fuse`
+  * `Jumper` moved to `jumper`
+  * `LoadBreakSwitch` moved to `load_break_switch`
+  * `ProtectedSwitch` moved to `protected_switch`
+  * `Recloser` moved to `recloser`
+  
+  Note that `from zepben.evolve import <ClassName>` will still work as usual for all of the above classes.
+* `DatabaseReader().load` is now an asynchronous function. 
 
 ### New Features
 
@@ -39,10 +50,25 @@
 * Added `PowerTransformer().get_end_by_terminal`, which gets a `PowerTransformerEnd` by the `Terminal` it's connected to.
 * Added the following functions to `connected_equipment_trace.py` for creating traces that work on `ConductingEquipment`, and ignore phase connectivity, instead
   considering things to be connected if they share a `ConnectivityNode`:
-    * `new_normal_downstream_equipmen_trace`: Creates a trace that traverses in the downstream direction using the normal state of the network.
-    * `new_normal_upstream_equipmen_trace`: Creates a trace that traverses in the upstream direction using the normal state of the network.
-    * `new_current_downstream_equipmen_trace`: Creates a trace that traverses in the downstream direction using the current state of the network.
-    * `new_current_upstream_equipmen_trace`: Creates a trace that traverses in the upstream direction using the current state of the network.
+    * `new_normal_downstream_equipment_trace`: Creates a trace that traverses in the downstream direction using the normal state of the network.
+    * `new_normal_upstream_equipment_trace`: Creates a trace that traverses in the upstream direction using the normal state of the network.
+    * `new_current_downstream_equipment_trace`: Creates a trace that traverses in the downstream direction using the current state of the network.
+    * `new_current_upstream_equipment_trace`: Creates a trace that traverses in the upstream direction using the current state of the network.
+* Added support for protection equipment with the following classes, enums, and fields:
+  * `SwitchInfo`: Switch datasheet information.
+  * `ProtectionEquipment`: An electrical device designed to respond to input conditions in a prescribed manner and after specified conditions are met to cause
+                           contact operation or similar abrupt change in associated electric control circuits, or simply to display the detected condition.
+  * `CurrentRelay`: A device that checks current flow values in any direction or designated direction.
+  * `CurrentRelayInfo`: Current relay datasheet information.
+  * `RecloseSequence`: A reclose sequence (open and close) is defined for each possible reclosure of a breaker.
+  * `ProtectionKind`: The kind of protection being provided by this protection equipment.
+  * `ProtectedSwitch().breaking_capacity`: The maximum fault current in amps a breaking device can break safely under prescribed conditions of use.
+  * `ProtectedSwitch().reclose_sequences`: The collection of `RecloseSequence`s attached to the `ProtectedSwitch`.
+  * `ProtectedSwitch().operated_by_protection_equipment`: The collection of `ProtectionEquipment` operating the `ProtectedSwitch`.
+  * `Switch().rated_current`: The maximum continuous current carrying capacity in amps governed by the device material and construction.
+                            The attribute shall be a positive value.
+  * `Breaker().in_transit_time`: The transition time from open to close in seconds.
+
 
 ### Enhancements
 

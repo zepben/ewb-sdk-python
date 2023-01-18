@@ -33,9 +33,10 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TableShuntCompensators, Switch, TableSwitches, TapChanger, TableTapChangers, TableTransformerEnds, TransformerStarImpedance, \
     TableTransformerStarImpedance, TableCircuits, Circuit, Loop, TableLoops, TableAssetOrganisationRolesAssets, TableEquipmentEquipmentContainers, \
     TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableUsagePointsEndDevices, TableCircuitsSubstations, TableCircuitsTerminals, \
-    TableLoopsSubstations, LoopSubstationRelationship, LvFeeder, TableLvFeeders, TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, \
-    PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, \
-    TablePotentialTransformerInfo
+    TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, \
+    CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
+    LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, \
+    TableRecloseSequences, RecloseSequence, ProtectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches
 
 __all__ = ["NetworkCIMReader"]
 
@@ -106,6 +107,13 @@ class NetworkCIMReader(BaseCIMReader):
         shunt_compensator_info.rated_voltage = rs.get_int(table.rated_voltage.query_index, None)
 
         return self._load_asset_info(shunt_compensator_info, table, rs) and self._add_or_throw(shunt_compensator_info)
+
+    def load_switch_info(self, table: TableSwitchInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        switch_info = SwitchInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        switch_info.rated_interrupting_time = rs.get_double(table.rated_interrupting_time.query_index, None)
+
+        return self._load_asset_info(switch_info, table, rs) and self._add_or_throw(switch_info)
 
     def load_transformer_end_info(self, table: TableTransformerEndInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         transformer_end_info = TransformerEndInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
@@ -270,6 +278,13 @@ class NetworkCIMReader(BaseCIMReader):
         return None if town_detail.all_fields_null_or_empty() else town_detail
 
     # ************ IEC61968 infIEC61968 InfAssetInfo ************
+
+    def load_current_relay_info(self, table: TableCurrentRelayInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        current_relay_info = CurrentRelayInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        current_relay_info.curve_setting = rs.get_string(table.curve_setting.query_index, None)
+
+        return self._load_asset_info(current_relay_info, table, rs) and self._add_or_throw(current_relay_info)
 
     def load_current_transformer_info(self, table: TableCurrentTransformerInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         current_transformer_info = CurrentTransformerInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
@@ -531,6 +546,36 @@ class NetworkCIMReader(BaseCIMReader):
 
         return self._load_identified_object(measurement, table, rs)
 
+    # ************ IEC61970 Base Protection ************
+
+    def load_current_relay(self, table: TableCurrentRelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        current_relay = CurrentRelay(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        current_relay.current_limit_1 = rs.get_double(table.current_limit_1.query_index, None)
+        current_relay.inverse_time_flag = rs.get_boolean(table.inverse_time_flag.query_index, None)
+        current_relay.time_delay_1 = rs.get_double(table.time_delay_1.query_index, None)
+        current_relay.asset_info = self._ensure_get(rs.get_string(table.current_relay_info_mrid.query_index, None), WireInfo)
+
+        return self._load_protection_equipment(current_relay, table, rs) and self._add_or_throw(current_relay)
+
+    def _load_protection_equipment(self, protection_equipment: ProtectionEquipment, table: TableProtectionEquipment, rs: ResultSet) -> bool:
+        protection_equipment.relay_delay_time = rs.get_double(table.relay_delay_time.query_index, None)
+        protection_equipment.protection_kind = ProtectionKind[rs.get_string(table.protection_kind.query_index)]
+
+        return self._load_equipment(protection_equipment, table, rs)
+
+    def load_reclose_sequence(self, table: TableRecloseSequences, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        reclose_sequence = RecloseSequence(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        reclose_sequence.reclose_delay = rs.get_double(table.reclose_delay.query_index, None)
+        reclose_sequence.reclose_step = rs.get_int(table.reclose_step.query_index, None)
+
+        protected_switch_id = rs.get_string(table.protected_switch_mrid.query_index)
+        protected_switch = self._base_service.get(protected_switch_id, ProtectedSwitch)
+        protected_switch.add_reclose_sequence(reclose_sequence)
+
+        return self._load_identified_object(reclose_sequence, table, rs) and self._add_or_throw(reclose_sequence)
+
     # ************ IEC61970 BASE SCADA ************
 
     def load_remote_control(self, table: TableRemoteControls, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
@@ -598,6 +643,8 @@ class NetworkCIMReader(BaseCIMReader):
 
     def load_breaker(self, table: TableBreakers, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         breaker = Breaker(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        breaker.in_transit_time = rs.get_double(table.in_transit_time.query_index, None)
 
         return self._load_protected_switch(breaker, table, rs) and self._add_or_throw(breaker)
 
@@ -810,6 +857,8 @@ class NetworkCIMReader(BaseCIMReader):
         return self._load_transformer_end(power_transformer_end, table, rs) and self._add_or_throw(power_transformer_end)
 
     def _load_protected_switch(self, protected_switch: ProtectedSwitch, table: TableProtectedSwitches, rs: ResultSet) -> bool:
+        protected_switch.breaking_capacity = rs.get_int(table.breaking_capacity.query_index, None)
+
         return self._load_switch(protected_switch, table, rs)
 
     def load_ratio_tap_changer(self, table: TableRatioTapChangers, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
@@ -844,6 +893,9 @@ class NetworkCIMReader(BaseCIMReader):
         return self._load_regulating_cond_eq(shunt_compensator, table, rs)
 
     def _load_switch(self, switch: Switch, table: TableSwitches, rs: ResultSet) -> bool:
+        switch.asset_info = self._ensure_get(rs.get_string(table.switch_info_mrid.query_index, None), SwitchInfo)
+
+        switch.rated_current = rs.get_int(table.rated_current.query_index, None)
         switch.set_normally_open(bool(rs.get_int(table.normal_open.query_index)))
         switch.set_open(bool(rs.get_int(table.open.query_index)))
 
@@ -1029,5 +1081,21 @@ class NetworkCIMReader(BaseCIMReader):
         elif relationship == LoopSubstationRelationship.SUBSTATION_ENERGIZES_LOOP:
             substation.add_energized_loop(loop)
             loop.add_energizing_substation(substation)
+
+        return True
+
+    def load_protection_equipment_protected_switch(self, table: TableProtectionEquipmentProtectedSwitches, rs: ResultSet,
+                                                   set_last_mrid: Callable[[str], str]) -> bool:
+        protection_equipment_mrid = set_last_mrid(rs.get_string(table.protection_equipment_mrid.query_index))
+        set_last_mrid(f"{protection_equipment_mrid}-to-UNKNOWN")
+
+        protected_switch_mrid = rs.get_string(table.protected_switch_mrid.query_index)
+        set_last_mrid(f"{protection_equipment_mrid}-to-{protected_switch_mrid}")
+
+        protection_equipment = self._base_service.get(protection_equipment_mrid, ProtectionEquipment)
+        protected_switch = self._base_service.get(protected_switch_mrid, ProtectedSwitch)
+
+        protection_equipment.add_protected_switch(protected_switch)
+        protected_switch.add_operated_by_protection_equipment(protection_equipment)
 
         return True

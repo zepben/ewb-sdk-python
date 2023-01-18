@@ -11,7 +11,6 @@ import grpc_testing
 import pytest
 # noinspection PyPackageRequirements
 from google.protobuf.any_pb2 import Any
-from grpc import StatusCode
 from hypothesis import given, settings, Phase
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \

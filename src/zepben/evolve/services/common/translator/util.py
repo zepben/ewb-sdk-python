@@ -3,13 +3,18 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Optional
+from typing import Optional, Dict
+
+# noinspection PyPackageRequirements
+# noinspection PyUnresolvedReferences
+# pylint: disable=import-error
+from google.protobuf.struct_pb2 import NullValue
 
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 
 __all__ = [
     "mrid_or_empty", "int_or_none", "uint_or_none", "float_or_none", "long_or_none", "str_or_none", "from_nullable_int", "from_nullable_uint",
-    "from_nullable_float", "from_nullable_long"
+    "from_nullable_float", "from_nullable_long", "nullable_bool_settings"
 ]
 
 #
@@ -61,3 +66,13 @@ def from_nullable_float(value: Optional[float]) -> float:
 
 def from_nullable_long(value: Optional[int]) -> int:
     return value if value is not None else _UNKNOWN_LONG
+
+
+def nullable_bool_settings(flag_name: str, value: Optional[bool]) -> Dict:
+    settings = {}
+    if value is None:
+        settings[f"{flag_name}Null"] = NullValue.NULL_VALUE
+    else:
+        settings[f"{flag_name}Set"] = value
+
+    return settings

@@ -23,7 +23,7 @@ power_transformer_kwargs = {
     "function": sampled_from(TransformerFunctionKind)
 }
 
-power_transformer_args = [*conducting_equipment_args, VectorGroup.DD6, [PowerTransformerEnd], 1.1, TransformerConstructionKind.padmountFeedThrough,
+power_transformer_args = [*conducting_equipment_args, VectorGroup.DD6, [PowerTransformerEnd()], 1.1, TransformerConstructionKind.padmountFeedThrough,
                           TransformerFunctionKind.secondaryTransformer]
 
 

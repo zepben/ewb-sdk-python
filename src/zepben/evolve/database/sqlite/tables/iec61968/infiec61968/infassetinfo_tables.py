@@ -6,7 +6,18 @@
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import TableAssetInfo
 
-__all__ = ["TableCurrentTransformerInfo", "TablePotentialTransformerInfo"]
+__all__ = ["TableCurrentRelayInfo", "TableCurrentTransformerInfo", "TablePotentialTransformerInfo"]
+
+
+class TableCurrentRelayInfo(TableAssetInfo):
+    curve_setting: Column = None
+
+    def __init__(self):
+        super(TableCurrentRelayInfo, self).__init__()
+        self.curve_setting = self._create_column("curve_setting", "TEXT", Nullable.NULL)
+
+    def name(self) -> str:
+        return "current_relay_info"
 
 
 class TableCurrentTransformerInfo(TableAssetInfo):
