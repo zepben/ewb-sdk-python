@@ -63,6 +63,8 @@
   * `RecloseSequence`: A reclose sequence (open and close) is defined for each possible reclosure of a breaker.
   * `ProtectionKind`: The kind of protection being provided by this protection equipment.
   * `ProtectedSwitch().breaking_capacity`: The maximum fault current in amps a breaking device can break safely under prescribed conditions of use.
+  * `ProtectedSwitch().reclose_sequences`: The collection of `RecloseSequence`s attached to the `ProtectedSwitch`.
+  * `ProtectedSwitch().operated_by_protection_equipment`: The collection of `ProtectionEquipment` operating the `ProtectedSwitch`.
   * `Switch().rated_current`: The maximum continuous current carrying capacity in amps governed by the device material and construction.
                             The attribute shall be a positive value.
   * `Breaker().in_transit_time`: The transition time from open to close in seconds.
