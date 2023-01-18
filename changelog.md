@@ -50,10 +50,23 @@
 * Added `PowerTransformer().get_end_by_terminal`, which gets a `PowerTransformerEnd` by the `Terminal` it's connected to.
 * Added the following functions to `connected_equipment_trace.py` for creating traces that work on `ConductingEquipment`, and ignore phase connectivity, instead
   considering things to be connected if they share a `ConnectivityNode`:
-    * `new_normal_downstream_equipmen_trace`: Creates a trace that traverses in the downstream direction using the normal state of the network.
-    * `new_normal_upstream_equipmen_trace`: Creates a trace that traverses in the upstream direction using the normal state of the network.
-    * `new_current_downstream_equipmen_trace`: Creates a trace that traverses in the downstream direction using the current state of the network.
-    * `new_current_upstream_equipmen_trace`: Creates a trace that traverses in the upstream direction using the current state of the network.
+    * `new_normal_downstream_equipment_trace`: Creates a trace that traverses in the downstream direction using the normal state of the network.
+    * `new_normal_upstream_equipment_trace`: Creates a trace that traverses in the upstream direction using the normal state of the network.
+    * `new_current_downstream_equipment_trace`: Creates a trace that traverses in the downstream direction using the current state of the network.
+    * `new_current_upstream_equipment_trace`: Creates a trace that traverses in the upstream direction using the current state of the network.
+* Added support for protection equipment with the following classes, enums, and fields:
+  * `SwitchInfo`: Switch datasheet information.
+  * `ProtectionEquipment`: An electrical device designed to respond to input conditions in a prescribed manner and after specified conditions are met to cause
+                           contact operation or similar abrupt change in associated electric control circuits, or simply to display the detected condition.
+  * `CurrentRelay`: A device that checks current flow values in any direction or designated direction.
+  * `CurrentRelayInfo`: Current relay datasheet information.
+  * `RecloseSequence`: A reclose sequence (open and close) is defined for each possible reclosure of a breaker.
+  * `ProtectionKind`: The kind of protection being provided by this protection equipment.
+  * `ProtectedSwitch().breaking_capacity`: The maximum fault current in amps a breaking device can break safely under prescribed conditions of use.
+  * `Switch().rated_current`: The maximum continuous current carrying capacity in amps governed by the device material and construction.
+                            The attribute shall be a positive value.
+  * `Breaker().in_transit_time`: The transition time from open to close in seconds.
+
 
 ### Enhancements
 
