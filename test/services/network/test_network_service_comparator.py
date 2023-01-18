@@ -18,7 +18,8 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     LinearShuntCompensator, PerLengthImpedance, PerLengthLineParameter, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, VectorGroup, \
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
     Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
-    CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio
+    CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, CurrentRelayInfo, \
+    ProtectionEquipment, CurrentRelay, RecloseSequence
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
@@ -87,6 +88,10 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(ShuntCompensatorInfo.rated_current, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
         self.validator.validate_property(ShuntCompensatorInfo.rated_reactive_power, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
         self.validator.validate_property(ShuntCompensatorInfo.rated_voltage, ShuntCompensatorInfo, lambda _: 1, lambda _: 2)
+
+    def test_compare_switch_info(self):
+        self._compare_asset_info(SwitchInfo)
+        self.validator.validate_property(SwitchInfo.rated_interrupting_time, SwitchInfo, lambda _: 1.1, lambda _: 2.2)
 
     def test_compare_transformer_end_info(self):
         self._compare_asset_info(TransformerEndInfo)
@@ -205,6 +210,11 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     #####################################
     # IEC61968 infIEC61968 InfAssetInfo #
     #####################################
+
+    def test_compare_current_relay_info(self):
+        self._compare_asset_info(CurrentRelayInfo)
+
+        self.validator.validate_property(CurrentRelayInfo.curve_setting, CurrentRelayInfo, lambda _: "cs1", lambda _: "cs2")
 
     # noinspection PyArgumentList
     def test_compare_current_transformer_info(self):
@@ -572,6 +582,40 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(Measurement.phases, creator, lambda _: PhaseCode.ABCN, lambda _: PhaseCode.ABC)
         self.validator.validate_property(Measurement.unit_symbol, creator, lambda _: UnitSymbol.HENRYS, lambda _: UnitSymbol.HOURS)
 
+    ############################
+    # IEC61970 Base Protection #
+    ############################
+
+    def test_compare_current_relay(self):
+        self._compare_protection_equipment(CurrentRelay)
+
+        self.validator.validate_property(CurrentRelay.current_limit_1, CurrentRelay, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(CurrentRelay.inverse_time_flag, CurrentRelay, lambda _: False, lambda _: True)
+        self.validator.validate_property(CurrentRelay.time_delay_1, CurrentRelay, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(
+            CurrentRelay.asset_info,
+            CurrentRelay,
+            lambda _: CurrentRelayInfo(mrid="cri1"),
+            lambda _: CurrentRelayInfo(mrid="cri2")
+        )
+
+    def _compare_protection_equipment(self, creator: Type[ProtectionEquipment]):
+        self._compare_equipment(creator)
+
+        self.validator.validate_collection(
+            ProtectionEquipment.protected_switches,
+            ProtectionEquipment.add_protected_switch,
+            creator,
+            lambda _: Breaker(mrid="b1"),
+            lambda _: Breaker(mrid="b2")
+        )
+
+    def test_compare_reclose_sequence(self):
+        self._compare_identified_object(RecloseSequence)
+
+        self.validator.validate_property(RecloseSequence.reclose_delay, RecloseSequence, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(RecloseSequence.reclose_step, RecloseSequence, lambda _: 1, lambda _: 2)
+
     #######################
     # IEC61970 BASE SCADA #
     #######################
@@ -639,6 +683,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
     def test_compare_breaker(self):
         self._compare_protected_switch(Breaker)
+
+        self.validator.validate_property(Breaker.in_transit_time, Breaker, lambda _: 1.1, lambda _: 2.2)
 
     def test_compare_busbar_section(self):
         self._compare_connector(BusbarSection)
@@ -868,6 +914,22 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_protected_switch(self, creator: Type[ProtectedSwitch]):
         self._compare_switch(creator)
 
+        self.validator.validate_property(ProtectedSwitch.breaking_capacity, creator, lambda _: 1, lambda _: 2)
+        self.validator.validate_collection(
+            ProtectedSwitch.reclose_sequences,
+            ProtectedSwitch.add_reclose_sequence,
+            creator,
+            lambda _: RecloseSequence(mrid="rs1"),
+            lambda _: RecloseSequence(mrid="rs2")
+        )
+        self.validator.validate_collection(
+            ProtectedSwitch.operated_by_protection_equipment,
+            ProtectedSwitch.add_operated_by_protection_equipment,
+            creator,
+            lambda _: CurrentRelay(mrid="cr1"),
+            lambda _: CurrentRelay(mrid="cr2")
+        )
+
     def test_compare_ratio_tap_changer(self):
         self._compare_tap_changer(RatioTapChanger)
 
@@ -904,6 +966,9 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
     def _compare_switch(self, creator: Type[Switch]):
         self._compare_conducting_equipment(creator)
+
+        self.validator.validate_property(Switch.rated_current, creator, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(Switch.asset_info, creator, lambda _: SwitchInfo(mrid="si1"), lambda _: SwitchInfo(mrid="si2"))
 
         closed_switch = Jumper(mrid="mRID")
         closed_switch.set_normally_open(False)
