@@ -8,7 +8,7 @@ from zepben.auth import ZepbenTokenFetcher
 
 __all__ = ["AuthTokenPlugin"]
 
-_AUTH_HEADER_KEY = 'Authorization'
+_AUTH_HEADER_KEY = 'authorization'
 
 
 class AuthTokenPlugin(grpc.AuthMetadataPlugin):

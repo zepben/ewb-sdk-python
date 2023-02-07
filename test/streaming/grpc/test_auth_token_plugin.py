@@ -16,4 +16,4 @@ def test_auth_token_plugin():
     plugin = AuthTokenPlugin(token_fetcher)
     plugin(Mock(), callback)
 
-    callback.assert_called_once_with((("Authorization", "fake token"),), None)
+    callback.assert_called_once_with((("authorization", "fake token"),), None)
