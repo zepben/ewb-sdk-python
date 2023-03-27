@@ -22,6 +22,12 @@ GrpcResponse = TypeVar('GrpcResponse')
 class StreamGrpc:
     function: str
     processors: List[Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]]
+    """
+    The processors to run in order for this function StreamGrpc.
+    For example if you expect getIdentifiedObjects to be called twice in a row, you could provide two processors for getIdentifiedObjects here, rather
+    than two separate StreamGrpcs
+    """
+
     force_timeout: bool = False
 
 
@@ -60,6 +66,12 @@ class MockServer:
         self.grpc_service: ServiceDescriptor = grpc_service
 
     async def validate(self, client_test: Callable[[], Awaitable[None]], interactions: List[Union[StreamGrpc, UnaryGrpc]]):
+        """
+        Run a server that mocks RPC requests by invoking the provided `interactions` in order.
+
+        :param client_test: The test code to call.
+        :param interactions: An ordered list of interactions expected for this server.
+        """
         server = CatchingThread(target=self._run_server_logic, args=[interactions])
         server.start()
 

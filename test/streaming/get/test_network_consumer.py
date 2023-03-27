@@ -218,6 +218,32 @@ class TestNetworkConsumer:
                                         ])
 
     @pytest.mark.asyncio
+    async def test_resolve_references_skips_resolvers_referencing_equipment_containers(self, lv_feeder_with_open_point: NetworkService):
+        feeder_mrid = "lvf001"
+
+        async def client_test():
+            mor = (await self.client.get_equipment_container(feeder_mrid, LvFeeder)).throw_on_error().value
+
+            assert self.service.len_of() == 18
+            assert len(mor.objects) == 18
+            assert "tx2" not in mor.objects
+            with pytest.raises(KeyError):
+                self.service.get("tx2")
+            assert "tx1" in mor.objects
+            assert self.service.get("tx1") == mor.objects["tx1"]
+
+        object_responses = _create_object_responses(lv_feeder_with_open_point)
+
+        await self.mock_server.validate(client_test,
+                                        [
+                                            UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeder_with_open_point))),
+                                            StreamGrpc('getIdentifiedObjects', [object_responses]),
+                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeder_with_open_point)]),
+                                            StreamGrpc('getIdentifiedObjects', [object_responses, object_responses])
+                                        ])
+
+
+    @pytest.mark.asyncio
     async def test_get_equipment_container_validates_type(self, feeder_network: NetworkService):
         feeder_mrid = "f001"
 
