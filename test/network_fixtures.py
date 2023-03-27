@@ -10,12 +10,12 @@ from pytest import fixture
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, TestNetworkBuilder, LvFeeder
+    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, TestNetworkBuilder, LvFeeder, AssignToLvFeeders
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
            "create_geographical_region", "create_subgeographical_region", "create_asset_owner", "create_meter", "create_power_transformer_end",
-           "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
+           "feeder_network", "lv_feeder_with_open_point", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
            "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals",
            "single_connectivitynode_network", "create_terminal", "phase_swap_loop_network", "loop_under_feeder_head_network", "network_service"]
 
@@ -260,6 +260,26 @@ def create_feeder(network: NetworkService, mrid: str = "", name: str = "", sub: 
     return feeder
 
 
+def create_lv_feeder(network: NetworkService, mrid: str = "", name: str = "", feeder: Feeder = None, head_terminal: Terminal = None,
+                     *equipment_mrids: str) -> Feeder:
+    """
+    `equipment_mrids` Equipment to fetch from the network and add to this feeder.
+    """
+    if not mrid:
+        mrid = str(CopyableUUID())
+    lv_feeder = LvFeeder(mrid=mrid, name=name, normal_head_terminal=head_terminal, normal_energizing_feeders=[feeder] if feeder is not None else None)
+    if feeder:
+        feeder.add_normal_energized_lv_feeder(lv_feeder)
+    network.add(lv_feeder)
+
+    for mrid in equipment_mrids:
+        ce = network.get(mrid, ConductingEquipment)
+        ce.add_container(feeder)
+        feeder.add_equipment(ce)
+
+    return feeder
+
+
 def create_operational_restriction(network: NetworkService, mrid: str = "", name: str = "", *equipment_mrids: str, **document_kwargs):
     if not mrid:
         mrid = str(CopyableUUID())
@@ -322,6 +342,36 @@ async def feeder_network():
 
     await SetPhases().run(network_service)
     await AssignToFeeders().run(network_service)
+    return network_service
+
+
+@fixture()
+async def lv_feeder_with_open_point():
+    """
+    lv1:[     c1  {  ]  c2     }:lv2
+    lv1:[tx1------{sw]------tx2}:lv2
+    """
+    network_service = NetworkService()
+
+    sw = create_switch_for_connecting(network_service, "sw", 2, PhaseCode.AB)
+    sw.set_open(True)
+    sw.set_normally_open(True)
+    tx1 = create_power_transformer_for_connecting(network_service, "tx1", 2, PhaseCode.AB, end_args=[{"rated_u": 22000}, {"rated_u": 415}])
+    tx2 = create_power_transformer_for_connecting(network_service, "tx2", 2, PhaseCode.AB, end_args=[{"rated_u": 22000}, {"rated_u": 415}])
+
+    c1 = create_acls_for_connecting(network_service, "c1", PhaseCode.AB)
+    c2 = create_acls_for_connecting(network_service, "c2", PhaseCode.AB)
+
+    create_lv_feeder(network_service, "lvf001", "lvf001", head_terminal=tx1.get_terminal_by_sn(2))
+    create_lv_feeder(network_service, "lvf002", "lvf002", head_terminal=tx2.get_terminal_by_sn(2))
+
+    network_service.connect_terminals(c1.get_terminal_by_sn(1), tx1.get_terminal_by_sn(2))
+    network_service.connect_terminals(c2.get_terminal_by_sn(1), tx2.get_terminal_by_sn(2))
+    network_service.connect_terminals(c1.get_terminal_by_sn(2), sw.get_terminal_by_sn(2))
+    network_service.connect_terminals(c2.get_terminal_by_sn(2), sw.get_terminal_by_sn(1))
+
+    await SetPhases().run(network_service)
+    await AssignToLvFeeders().run(network_service)
     return network_service
 
 
