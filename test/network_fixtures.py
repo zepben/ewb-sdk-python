@@ -261,7 +261,7 @@ def create_feeder(network: NetworkService, mrid: str = "", name: str = "", sub: 
 
 
 def create_lv_feeder(network: NetworkService, mrid: str = "", name: str = "", feeder: Feeder = None, head_terminal: Terminal = None,
-                     *equipment_mrids: str) -> Feeder:
+                     *equipment_mrids: str) -> LvFeeder:
     """
     `equipment_mrids` Equipment to fetch from the network and add to this feeder.
     """
@@ -274,10 +274,10 @@ def create_lv_feeder(network: NetworkService, mrid: str = "", name: str = "", fe
 
     for mrid in equipment_mrids:
         ce = network.get(mrid, ConductingEquipment)
-        ce.add_container(feeder)
-        feeder.add_equipment(ce)
+        ce.add_container(lv_feeder)
+        lv_feeder.add_equipment(ce)
 
-    return feeder
+    return lv_feeder
 
 
 def create_operational_restriction(network: NetworkService, mrid: str = "", name: str = "", *equipment_mrids: str, **document_kwargs):
