@@ -525,13 +525,14 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _resolve_references(self, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
         res = mor
         keep_processing = True
+        subsequent = False
         while keep_processing:
             to_resolve = set()
             for obj in res.objects:
                 for ref in self.service.get_unresolved_references_from(obj):
-                    # Skip any reference trying to resolve from an EquipmentContainer - e.g a PowerTransformer trying to pull in its LvFeeder.
+                    # Skip any reference trying to resolve from an EquipmentContainer on subsequent passes - e.g a PowerTransformer trying to pull in its LvFeeder.
                     # EquipmentContainers should be retrieved explicitly or via a hierarchy call.
-                    if EquipmentContainer in ref.resolver.from_class.__bases__:
+                    if subsequent and EquipmentContainer in ref.resolver.from_class.__bases__:
                         continue
                     to_resolve.add(ref.to_mrid)
 
@@ -545,6 +546,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             mor.objects.update(res.objects)
             mor.failed.update(res.failed)
             keep_processing = bool(res.objects)
+            subsequent = True
 
         return None
 

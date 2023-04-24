@@ -15,7 +15,7 @@ from hypothesis import given, settings, Phase
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
     Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
-    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder
+    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder, TestNetworkBuilder
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetCurrentEquipmentForFeederRequest, \
@@ -218,30 +218,44 @@ class TestNetworkConsumer:
                                         ])
 
     @pytest.mark.asyncio
-    async def test_resolve_references_skips_resolvers_referencing_equipment_containers(self, lv_feeder_with_open_point: NetworkService):
-        feeder_mrid = "lvf001"
+    async def test_resolve_references_skips_resolvers_referencing_equipment_containers(self):
+        """
+        lvf5:[     c1  {  ]  c3     }:lvf6
+        lvf5:[tx0------{b2]------tx4}:lvf6
+        """
+        lv_feeders_with_open_point = (await TestNetworkBuilder()
+                                      .from_power_transformer()  # tx0
+                                      .to_acls()  # c1
+                                      .to_breaker(action=lambda it: it.set_normally_open(True))  # b2
+                                      .to_acls()  # c3
+                                      .to_power_transformer()  # tx4
+                                      .add_lv_feeder("tx0", 2)
+                                      .add_lv_feeder("tx4", 1)
+                                      .build())
+
+        feeder_mrid = "lvf5"
 
         async def client_test():
             mor = (await self.client.get_equipment_container(feeder_mrid, LvFeeder)).throw_on_error().value
 
-            assert self.service.len_of() == 18
-            assert len(mor.objects) == 18
-            assert "tx2" not in mor.objects
+            assert self.service.len_of() == 16
+            assert len(mor.objects) == 16
+            assert len({"lvf5", "tx0", "c1", "b2", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "b2-t1",
+                "b2-t2", "lvf6", "generated_cn_0", "generated_cn_1", "generated_cn_2"}.difference(mor.objects.keys())) == 0
+            assert "tx4" not in mor.objects
             with pytest.raises(KeyError):
-                self.service.get("tx2")
-            assert "tx1" in mor.objects
-            assert self.service.get("tx1") == mor.objects["tx1"]
+                self.service.get("tx4")
+            assert self.service.get("tx0") == mor.objects["tx0"]
 
-        object_responses = _create_object_responses(lv_feeder_with_open_point)
+        object_responses = _create_object_responses(lv_feeders_with_open_point)
 
         await self.mock_server.validate(client_test,
                                         [
-                                            UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeder_with_open_point))),
+                                            UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeders_with_open_point))),
                                             StreamGrpc('getIdentifiedObjects', [object_responses]),
-                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeder_with_open_point)]),
+                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeders_with_open_point)]),
                                             StreamGrpc('getIdentifiedObjects', [object_responses, object_responses])
                                         ])
-
 
     @pytest.mark.asyncio
     async def test_get_equipment_container_validates_type(self, feeder_network: NetworkService):
@@ -282,7 +296,6 @@ class TestNetworkConsumer:
                                             ]),
                                             StreamGrpc('getIdentifiedObjects', [object_responses, object_responses])
                                         ])
-
 
     @pytest.mark.asyncio
     async def test_get_equipment_for_container(self, feeder_network: NetworkService):
@@ -453,17 +466,17 @@ class TestNetworkConsumer:
         # and that the client times out the request.
         # It seems that the client never times out the request (???) and passes the timeout to the server. This means we'll
         # need to create a real server that times out or mock the behaviour (in which case what's the point?)
-        #ns = create_loops_network()
-        #client = NetworkConsumerClient(channel=self.channel, timeout=1)
+        # ns = create_loops_network()
+        # client = NetworkConsumerClient(channel=self.channel, timeout=1)
 
-        #async def client_test():
+        # async def client_test():
         #    res = await self.client.get_network_hierarchy()
         #    assert res.was_failure
         #    res.thrown.args[0]._code == StatusCode.DEADLINE_EXCEEDED
 
-        #await self.mock_server.validate(client_test, [
+        # await self.mock_server.validate(client_test, [
         #    UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response_with_sleep(ns, 3))),
-        #])
+        # ])
 
 
 def _assert_contains_mrids(service: BaseService, *mrids):
