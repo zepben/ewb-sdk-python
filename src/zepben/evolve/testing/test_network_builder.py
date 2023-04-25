@@ -353,7 +353,7 @@ class TestNetworkBuilder:
                 for terminal in es.terminals:
                     await set_direction().run_terminal(terminal)
 
-        if assign_feeders and len(list(self.network.objects(Feeder))) != 0:
+        if assign_feeders and (self.network.len_of(Feeder) != 0 or self.network.len_of(LvFeeder) != 0):
             await assign_equipment_to_feeders().run(self.network)
             await assign_equipment_to_lv_feeders().run(self.network)
 
