@@ -3,25 +3,22 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import warnings
-from typing import Dict, Iterable, TypeVar, Generator, Callable, Optional
+from typing import TypeVar
 from unittest.mock import MagicMock
 
 import grpc_testing
 import pytest
 # noinspection PyPackageRequirements
-from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
 from zepben.protobuf.cc import cc_pb2
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
 from zepben.protobuf.cc.cc_responses_pb2 import GetIdentifiedObjectsResponse, GetCustomersForContainerResponse
 
 from streaming.get.pb_creators import customer_identified_objects, customer
-from zepben.evolve import CustomerConsumerClient, BaseService, IdentifiedObject, CustomerService, Customer, Customer
+from zepben.evolve import CustomerConsumerClient, BaseService, IdentifiedObject, Customer
 
-from time import sleep
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
-from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
+from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')
@@ -94,7 +91,8 @@ class TestCustomerConsumer:
         response2 = GetIdentifiedObjectsResponse(identifiedObjects=[CustomerIdentifiedObject(customer=Customer(mrid="customer2").to_pb())])
 
         await self.mock_server.validate(client_test,
-                                        [StreamGrpc('getIdentifiedObjects', stream_from_fixed(["customer1", "customer2", "customer3"], [response1, response2]))])
+                                        [StreamGrpc('getIdentifiedObjects',
+                                                    stream_from_fixed(["customer1", "customer2", "customer3"], [response1, response2]))])
 
     @pytest.mark.asyncio
     @given(customer())
@@ -167,4 +165,3 @@ def _to_customer_identified_object(obj) -> CustomerIdentifiedObject:
     else:
         raise Exception(f"Missing class in create response - you should implement it: {str(obj)}")
     return cio
-

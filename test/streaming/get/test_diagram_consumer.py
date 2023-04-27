@@ -3,25 +3,22 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import warnings
-from typing import Dict, Iterable, TypeVar, Generator, Callable, Optional
+from typing import TypeVar
 from unittest.mock import MagicMock
 
 import grpc_testing
 import pytest
 # noinspection PyPackageRequirements
-from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
 from zepben.protobuf.dc import dc_pb2
 from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
 from zepben.protobuf.dc.dc_responses_pb2 import GetIdentifiedObjectsResponse, GetDiagramObjectsResponse
 
 from streaming.get.pb_creators import diagram_identified_objects, diagram, diagram_object
-from zepben.evolve import DiagramConsumerClient, BaseService, IdentifiedObject, DiagramService, DiagramObject, Diagram
+from zepben.evolve import DiagramConsumerClient, BaseService, IdentifiedObject, DiagramObject, Diagram
 
-from time import sleep
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
-from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
+from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')

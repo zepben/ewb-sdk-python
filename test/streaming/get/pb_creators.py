@@ -169,7 +169,7 @@ __all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_inf
            'load_break_switch', 'per_length_impedance', 'per_length_line_parameter', 'per_length_sequence_impedance', 'power_electronics_connection',
            'power_electronics_connection_phase', 'power_transformer', 'power_transformer_end', 'protected_switch', 'ratio_tap_changer', 'recloser',
            'regulating_cond_eq', 'shunt_compensator', 'switch', 'tap_changer', 'transformer_end', 'transformer_star_impedance', 'circuit', 'loop', 'lv_feeder',
-           'timestamp', 'network_identified_objects', 'customer_identified_objects']
+           'timestamp', 'network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects']
 
 #######################
 # IEC61968 ASSET INFO #
