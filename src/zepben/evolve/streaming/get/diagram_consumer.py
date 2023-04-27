@@ -6,13 +6,13 @@
 from __future__ import annotations
 
 from asyncio import get_event_loop
-from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
+from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, Union
 
 from zepben.evolve import DiagramService, IdentifiedObject, Diagram, DiagramObject
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
-from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest
+from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest, GetDiagramObjectsRequest
 
 __all__ = ["DiagramConsumerClient", "SyncDiagramConsumerClient"]
 
@@ -47,12 +47,33 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
 
         self.__service = DiagramService()
 
+    async def get_diagram_objects(self, mrids: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
+        return await self._get_diagram_objects(mrids)
+
+    async def _get_diagram_objects(self, mrids: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
+        async def rpc():
+            if isinstance(mrids, str):
+                return await self._process_extract_results(None, self._process_diagram_objects({mrids}))
+            else:
+                return await self._process_extract_results(None, self._process_diagram_objects(mrids))
+
+        return await self.try_rpc(rpc)
+
+    async def _process_diagram_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+        if not mrids:
+            return
+
+        responses = self._stub.getDiagramObjects(self._batch_send(GetDiagramObjectsRequest(), mrids), timeout=self.timeout)
+        async for response in responses:
+            for dio in response.identifiedObjects:
+                yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
+
     async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
         if not mrids:
             return
 
         responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
-        for response in responses:
+        async for response in responses:
             for dio in response.identifiedObjects:
                 yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
 
@@ -64,6 +85,9 @@ class SyncDiagramConsumerClient(DiagramConsumerClient):
 
     def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_identified_objects(mrids))
+
+    def get_diagram_objects(self, mrid: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super()._get_diagram_objects(mrid))
 
 
 _dio_type_to_cim = {
