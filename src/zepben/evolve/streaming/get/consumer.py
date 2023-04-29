@@ -132,9 +132,12 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
 
             pb = getattr(pb_io, io_type)
             if check_presence:
-                cim = self.service.get(pb.mrid(), cim_type, default=None)
-                if cim is not None:
-                    return cim, cim.mrid
+                try:
+                    cim = self.service.get(pb.mrid(), cim_type, default=None)
+                    if cim is not None:
+                        return cim, cim.mrid
+                except KeyError:
+                    raise KeyError(f"Invalid Protobuf message received with an empty mRID - message was: {pb_io}")
 
             # noinspection PyUnresolvedReferences
             return self.service.add_from_pb(pb), pb.mrid()
@@ -142,14 +145,22 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
             raise UnsupportedOperationException(f"Received a {desc} identified object where no field was set")
 
     @staticmethod
-    async def _process_extract_results(mrids: Iterable[str], extracted: AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]) -> MultiObjectResult:
+    async def _process_extract_results(mrids: Optional[Iterable[str]], extracted: AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]) -> MultiObjectResult:
         results = {}
-        failed = set(mrids)
+        if mrids is None:
+            failed = set()
+        else:
+            failed = set(mrids)
 
         async for result in extracted:
             if result[0] is not None:
                 results[result[0].mrid] = result[0]
-                failed.remove(result[0].mrid)
+                try:
+                    failed.remove(result[0].mrid)
+                except KeyError:
+                    pass
+            else:
+                failed.add(result[1])
 
         return MultiObjectResult(results, failed)
 

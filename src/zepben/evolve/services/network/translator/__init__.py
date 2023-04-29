@@ -24,7 +24,12 @@ from zepben.protobuf.cim.iec61968.assets.Asset_pb2 import Asset
 from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole
 from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight
 from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure
+from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location
+from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import CustomerAgreement
+from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer
+from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure
+from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentRelayInfo_pb2 import CurrentRelayInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo
@@ -52,6 +57,8 @@ from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram
+from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentBranch_pb2 import EquivalentBranch
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentEquipment_pb2 import EquivalentEquipment
 from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator
@@ -128,10 +135,15 @@ AssetContainer.mrid = lambda self: self.at.mrid()
 AssetInfo.mrid = lambda self: self.io.mrid()
 AssetOrganisationRole.mrid = lambda self: getattr(self, "or").mrid()
 AssetOwner.mrid = lambda self: self.aor.mrid()
+Document.mrid = lambda self: self.io.mrid()
 Pole.mrid = lambda self: self.st.mrid()
 Streetlight.mrid = lambda self: self.at.mrid()
 Structure.mrid = lambda self: self.ac.mrid()
 Location.mrid = lambda self: self.io.mrid()
+Customer.mrid = lambda self: getattr(self, "or").mrid()
+CustomerAgreement.mrid = lambda self: self.agr.mrid()
+PricingStructure.mrid = lambda self: self.doc.mrid()
+Tariff.mrid = lambda self: self.doc.mrid()
 CurrentRelayInfo.mrid = lambda self: self.ai.mrid()
 CurrentTransformerInfo.mrid = lambda self: self.ai.mrid()
 PotentialTransformerInfo.mrid = lambda self: self.ai.mrid()
@@ -159,6 +171,8 @@ Site.mrid = lambda self: self.ec.mrid()
 SubGeographicalRegion.mrid = lambda self: self.io.mrid()
 Substation.mrid = lambda self: self.ec.mrid()
 Terminal.mrid = lambda self: self.ad.mrid()
+Diagram.mrid = lambda self: self.io.mrid()
+DiagramObject.mrid = lambda self: self.io.mrid()
 EquivalentBranch.mrid = lambda self: self.ee.mrid()
 EquivalentEquipment.mrid = lambda self: self.ce.mrid()
 Accumulator.mrid = lambda self: self.measurement.mrid()

@@ -6,6 +6,7 @@
 # noinspection PyPackageRequirements
 from google.protobuf.timestamp_pb2 import Timestamp
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, composite, uuids
+from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.OverheadWireInfo_pb2 import OverheadWireInfo as PBOverheadWireInfo
 from zepben.protobuf.cim.iec61968.assetinfo.PowerTransformerInfo_pb2 import PowerTransformerInfo as PBPowerTransformerInfo
@@ -28,6 +29,7 @@ from zepben.protobuf.cim.iec61968.assets.Pole_pb2 import Pole as PBPole
 from zepben.protobuf.cim.iec61968.assets.StreetlightLampKind_pb2 import StreetlightLampKind as PBStreetlightLampKind
 from zepben.protobuf.cim.iec61968.assets.Streetlight_pb2 import Streetlight as PBStreetlight
 from zepben.protobuf.cim.iec61968.assets.Structure_pb2 import Structure as PBStructure
+from zepben.protobuf.cim.iec61968.common.Agreement_pb2 import Agreement as PBAgreement
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
 from zepben.protobuf.cim.iec61968.common.Location_pb2 import Location as PBLocation
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
@@ -36,6 +38,11 @@ from zepben.protobuf.cim.iec61968.common.PositionPoint_pb2 import PositionPoint 
 from zepben.protobuf.cim.iec61968.common.StreetAddress_pb2 import StreetAddress as PBStreetAddress
 from zepben.protobuf.cim.iec61968.common.TownDetail_pb2 import TownDetail as PBTownDetail
 from zepben.protobuf.cim.iec61968.common.StreetDetail_pb2 import StreetDetail as PBStreetDetail
+from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer as PBCustomer
+from zepben.protobuf.cim.iec61968.customers.CustomerKind_pb2 import CustomerKind as PBCustomerKind
+from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import CustomerAgreement as PBCustomerAgreement
+from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure as PBPricingStructure
+from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentRelayInfo_pb2 import CurrentRelayInfo as PBCurrentRelayInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo as PBCurrentTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo as PBPotentialTransformerInfo
@@ -66,6 +73,11 @@ from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site as PBSite
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion as PBSubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation as PBSubstation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
+from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
+from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject as PBDiagramObject
+from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectPoint_pb2  import DiagramObjectPoint as PBDiagramObjectPoint
+from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramStyle_pb2 import DiagramStyle as PBDiagramStyle
+from zepben.protobuf.cim.iec61970.base.diagramlayout.OrientationKind_pb2 import OrientationKind as PBOrientationKind
 from zepben.protobuf.cim.iec61970.base.domain.UnitSymbol_pb2 import UnitSymbol as PBUnitSymbol
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentBranch_pb2 import EquivalentBranch as PBEquivalentBranch
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentEquipment_pb2 import EquivalentEquipment as PBEquivalentEquipment
@@ -127,6 +139,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit 
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.cim.iec61970.infiec61970.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
+from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 
 MIN_32_BIT_INTEGER = -2147483648
@@ -143,18 +156,20 @@ ALPHANUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 __all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_info', 'power_transformer_info', 'short_circuit_test', 'shunt_compensator_info',
            'transformer_end_info', 'transformer_tank_info', 'transformer_test', 'wire_info', 'asset', 'asset_container', 'asset_info',
            'asset_organisation_role', 'asset_owner', 'structure', 'pole', 'streetlight', 'document', 'location', 'organisation', 'organisation_role',
-           'position_point', 'street_address', 'street_detail', 'town_detail', 'current_transformer_info', 'potential_transformer_info', 'ratio',
+           'position_point', 'street_address', 'street_detail', 'town_detail', 'customer', 'customer_agreement', 'pricing_structure', 'tariff',
+           'current_transformer_info', 'potential_transformer_info', 'ratio',
            'end_device', 'meter', 'usage_point', 'operational_restriction', 'auxiliary_equipment', 'current_transformer', 'fault_indicator',
            'potential_transformer', 'sensor', 'ac_dc_terminal', 'base_voltage', 'conducting_equipment', 'connectivity_node', 'connectivity_node_container',
            'equipment', 'equipment_container', 'feeder', 'geographical_region', 'identified_object', 'power_system_resource', 'site', 'sub_geographical_region',
-           'substation', 'terminal', 'equivalent_branch', 'equivalent_equipment', 'accumulator', 'analog', 'control', 'discrete', 'io_point', 'measurement',
+           'substation', 'terminal', 'diagram', 'diagram_object', 'equivalent_branch', 'equivalent_equipment', 'accumulator', 'analog', 'control', 'discrete',
+           'io_point', 'measurement',
            'remote_control', 'remote_point', 'remote_source', 'battery_unit', 'photo_voltaic_unit', 'power_electronics_unit', 'power_electronics_wind_unit',
            'ac_line_segment', 'breaker', 'busbar_section', 'conductor', 'connector', 'disconnector', 'energy_connection', 'energy_consumer',
            'energy_consumer_phase', 'energy_source', 'energy_source_phase', 'fuse', 'jumper', 'junction', 'line', 'linear_shunt_compensator',
            'load_break_switch', 'per_length_impedance', 'per_length_line_parameter', 'per_length_sequence_impedance', 'power_electronics_connection',
            'power_electronics_connection_phase', 'power_transformer', 'power_transformer_end', 'protected_switch', 'ratio_tap_changer', 'recloser',
            'regulating_cond_eq', 'shunt_compensator', 'switch', 'tap_changer', 'transformer_end', 'transformer_star_impedance', 'circuit', 'loop', 'lv_feeder',
-           'timestamp', 'network_identified_objects']
+           'timestamp', 'network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects']
 
 #######################
 # IEC61968 ASSET INFO #
@@ -349,6 +364,10 @@ def document():
     )
 
 
+def agreement():
+    return builds(PBAgreement, doc=document())
+
+
 def location():
     return builds(PBLocation, io=identified_object(), mainAddress=street_address(), positionPoints=lists(position_point(), max_size=2))
 
@@ -392,9 +411,49 @@ def town_detail():
     return builds(PBTownDetail, name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), stateOrProvince=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
 
 
+######################
+# IEC61968 CUSTOMERS #
+######################
+
+
+def customer():
+    d = {"or": organisation_role()}  # To set field `or` that's a reserved word
+    return builds(
+        PBCustomer,
+        kind=sampled_from(PBCustomerKind.values()),
+        customerAgreementMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        **d
+    )
+
+
+def customer_agreement():
+    return builds(
+        PBCustomerAgreement,
+        agr=agreement(),
+        customerMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        pricingStructureMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+    )
+
+
+def pricing_structure():
+    return builds(
+        PBPricingStructure,
+        doc=document(),
+        tariffMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+    )
+
+
+def tariff():
+    return builds(
+        PBTariff,
+        doc=document(),
+    )
+
+
 #####################################
 # IEC61968 infIEC61968 InfAssetInfo #
 #####################################
+
 
 def current_relay_info():
     return builds(
@@ -618,6 +677,40 @@ def terminal():
         tracedPhases=integers(min_value=0, max_value=65535),
         phases=sampled_from(PBPhaseCode.values()),
         sequenceNumber=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER)
+    )
+
+###############################
+# IEC61970 BASE DIAGRAMLAYOUT #
+###############################
+
+
+def diagram():
+    return builds(
+        PBDiagram,
+        io=identified_object(),
+        diagramStyle=sampled_from(PBDiagramStyle.values()),
+        orientationKind=sampled_from(PBOrientationKind.values()),
+        diagramObjectMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
+
+def diagram_object():
+    return builds(
+        PBDiagramObject,
+        io=identified_object(),
+        diagramMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        diagramObjectStyle=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        rotation=floats(min_value=0.0, max_value=360.0),
+        identifiedObjectMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        diagramObjectPoints=lists(diagram_object_point(), max_size=2)
+    )
+
+
+def diagram_object_point():
+    return builds(
+        PBDiagramObjectPoint,
+        xPosition=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        yPosition=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     )
 
 
@@ -1199,3 +1292,33 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder()))
     ]
     return nios
+
+##############################
+# Diagram Identified Objects #
+##############################
+
+
+@composite
+def diagram_identified_objects(draw):
+    dios = [
+        draw(builds(DiagramIdentifiedObject, diagram=diagram())),
+        draw(builds(DiagramIdentifiedObject, diagramObject=diagram_object()))
+    ]
+    return dios
+
+
+##############################
+# Customer Identified Objects #
+##############################
+
+
+@composite
+def customer_identified_objects(draw):
+    dios = [
+        draw(builds(CustomerIdentifiedObject, customer=customer())),
+        draw(builds(CustomerIdentifiedObject, organisation=organisation())),
+        draw(builds(CustomerIdentifiedObject, customerAgreement=customer_agreement())),
+        draw(builds(CustomerIdentifiedObject, pricingStructure=pricing_structure())),
+        draw(builds(CustomerIdentifiedObject, tariff=tariff())),
+    ]
+    return dios

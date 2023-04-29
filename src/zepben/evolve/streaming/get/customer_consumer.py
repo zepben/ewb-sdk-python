@@ -13,7 +13,7 @@ from zepben.evolve import CustomerService, IdentifiedObject, Organisation, Custo
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
-from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest
+from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest, GetCustomersForContainerRequest
 
 __all__ = ["CustomerConsumerClient", "SyncCustomerConsumerClient"]
 
@@ -48,12 +48,33 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
 
         self.__service = CustomerService()
 
+    async def get_customers_for_container(self, mrid: str) -> GrpcResult[MultiObjectResult]:
+        return await self._get_customers_for_containers({mrid})
+
+    async def get_customers_for_containers(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        return await self._get_customers_for_containers(mrids)
+
+    async def _get_customers_for_containers(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        async def rpc():
+            return await self._process_extract_results(None, self._process_customers_for_containers(mrids))
+
+        return await self.try_rpc(rpc)
+
+    async def _process_customers_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+        if not mrids:
+            return
+
+        responses = self._stub.getCustomersForContainer(self._batch_send(GetCustomersForContainerRequest(), mrids), timeout=self.timeout)
+        async for response in responses:
+            for cio in response.identifiedObjects:
+                yield self._extract_identified_object("customer", cio, _cio_type_to_cim)
+
     async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
         if not mrids:
             return
 
         responses = self._stub.getIdentifiedObjects(self._batch_send(GetIdentifiedObjectsRequest(), mrids), timeout=self.timeout)
-        for response in responses:
+        async for response in responses:
             for cio in response.identifiedObjects:
                 yield self._extract_identified_object("customer", cio, _cio_type_to_cim)
 
@@ -65,6 +86,12 @@ class SyncCustomerConsumerClient(CustomerConsumerClient):
 
     def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_identified_objects(mrids))
+
+    def get_customers_for_container(self, mrid: str) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super()._get_customers_for_containers({mrid}))
+
+    def get_customers_for_containers(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
+        return get_event_loop().run_until_complete(super()._get_customers_for_containers(mrids))
 
 
 _cio_type_to_cim = {

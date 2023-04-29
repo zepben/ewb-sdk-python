@@ -68,7 +68,8 @@
   * `Switch().rated_current`: The maximum continuous current carrying capacity in amps governed by the device material and construction.
                             The attribute shall be a positive value.
   * `Breaker().in_transit_time`: The transition time from open to close in seconds.
-
+* Added `getCustomersForContainer` to `CustomerConsumerClient` which allows fetching all the `Customer`s for a given `EquipmentContainer`
+* Added `getDiagramObjects` to `DiagramConsumerClient` which allows fetching all the `DiagramObject`s matching a given mRID.
 
 ### Enhancements
 

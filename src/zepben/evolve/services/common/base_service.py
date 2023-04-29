@@ -146,8 +146,8 @@ class BaseService(object, metaclass=ABCMeta):
         `generate_error` Function to call for an error message. Will be passed the mrid and _type (if set).
         Returns The `iec61970.base.core.identified_object.IdentifiedObject` associated with `mrid`, or default
                  if it is set.
-        Raises `KeyError` if `mrid` was not found in the service with `_type` or if no objects of `_type` are
-                 stored by the service and default was not set.
+        Raises `KeyError` if `mrid` was not found in the service with `type_`, if no objects of `type_` are
+                 stored by the service and default was not set, or if an empty mRID is provided.
         """
         if not mrid:
             raise KeyError("You must specify an mRID to get. Empty/None is invalid.")
