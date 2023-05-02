@@ -34,7 +34,7 @@ __all__ = ["new_connected_equipment_trace", "new_connected_equipment_breadth_tra
 
 def _queue_next(open_test: OpenTest) -> QueueNext[ConductingEquipmentStep]:
     def queue_next(step: ConductingEquipmentStep, traversal: BasicTraversal[ConductingEquipmentStep]):
-        if (step.step != 0) and open_test(step.conducting_equipment, None):
+        if (step.step != 0) and ((step.conducting_equipment.num_terminals() == 1) or open_test(step.conducting_equipment, None)):
             return
         for cr in connected_equipment(step.conducting_equipment):
             if cr.to_equip:

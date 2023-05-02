@@ -81,6 +81,7 @@
     * `TreeNode().sort_weight` has been added as a read-only property that returns the sort weight of the node.
 * All `Tracker` classes can now be copied using the `copy` method.
 * Added `FeederDirection.__not__` operator function.
+* Performance enhancement for `connected_equipment_trace.py` when traversing elements with single terminals.
 
 ### Fixes
 
