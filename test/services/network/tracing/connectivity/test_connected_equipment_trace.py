@@ -9,9 +9,9 @@ import pytest
 
 from zepben.evolve import connected_equipment_trace, BasicTraversal, ConductingEquipmentStep, normal_connected_equipment_trace, \
     current_connected_equipment_trace, normal_limited_connected_equipment_trace, current_limited_connected_equipment_trace, TestNetworkBuilder, \
-    ConductingEquipment, PhaseCode, NetworkService
+    ConductingEquipment, PhaseCode, NetworkService, Junction
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_trace import new_normal_downstream_equipment_trace, \
-    new_current_downstream_equipment_trace, new_normal_upstream_equipment_trace, new_current_upstream_equipment_trace
+    new_current_downstream_equipment_trace, new_normal_upstream_equipment_trace, new_current_upstream_equipment_trace, new_connected_equipment_trace
 from zepben.evolve.services.network.tracing.connectivity.limited_connected_equipment_trace import LimitedConnectedEquipmentTrace
 
 
@@ -96,6 +96,38 @@ class TestConnectedEquipmentTrace:
             it.phases = PhaseCode.B
 
         await self._validate_trace(branched_network, new_normal_downstream_equipment_trace(), "b4", "c5")
+
+    @pytest.mark.asyncio
+    async def test_does_not_queue_from_single_terminals_after_the_first(self):
+        # We need to keep a reference to the network to prevent the weak references to the connectivity nodes being cleaned up (expectedly).
+        network = (
+            TestNetworkBuilder()
+            .from_junction(nominal_phases=PhaseCode.C, num_terminals=1)
+            .to_junction(num_terminals=1)
+            .to_junction(num_terminals=1)
+            .to_junction(num_terminals=1)
+            .network
+        )
+
+        junctions = list(network.objects(Junction))
+
+        async def step_action(it: ConductingEquipmentStep, _: bool):
+            # We clear the tracker on every step to allow it to queue things multiple times to ensure it does even try.
+            trace.tracker.clear()
+            stepped_on.append(it)
+            if len(stepped_on) > 4:
+                assert False, "should not have stepped on more than 4 things"
+
+        for start in junctions:
+            stepped_on = []
+
+            trace = new_connected_equipment_trace()
+            trace.add_step_action(step_action)
+
+            await trace.run_from(start)
+
+            # noinspection PyArgumentList
+            assert Counter(stepped_on) == Counter([ConductingEquipmentStep(it, 0 if (it == start) else 1) for it in junctions])
 
     async def _validate_run(self, traversal: BasicTraversal[ConductingEquipmentStep], start: str, *expected: str):
         visited = set()
