@@ -63,6 +63,9 @@ class PhaseStatus(ABC):
 
         Returns The `PhaseCode` if the combination of phases makes sense, otherwise `None`.
         """
+        if self.terminal.phases == PhaseCode.NONE:
+            return PhaseCode.NONE
+
         traced_phases = [self[it] for it in self.terminal.phases]
         phases = set(traced_phases)
 
