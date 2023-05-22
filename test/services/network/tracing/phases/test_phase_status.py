@@ -91,3 +91,19 @@ def test_normal_and_current_phase_codes_single():
 
     assert normal_phases.as_phase_code() == PhaseCode.BC
     assert current_phases.as_phase_code() == PhaseCode.BC
+
+
+def test_normal_and_current_phase_codes_none():
+    terminal = Terminal(phases=PhaseCode.NONE)
+    normal_phases = NormalPhases(terminal)
+    current_phases = CurrentPhases(terminal)
+
+    assert normal_phases.as_phase_code() == PhaseCode.NONE
+    assert current_phases.as_phase_code() == PhaseCode.NONE
+
+    for spk in PhaseCode.ABCN.single_phases:
+        normal_phases[spk] = spk
+        current_phases[spk] = spk
+
+    assert normal_phases.as_phase_code() == PhaseCode.NONE
+    assert current_phases.as_phase_code() == PhaseCode.NONE
