@@ -75,6 +75,7 @@ class DatabaseWriter(object):
                 status = MetadataCollectionWriter().save(metadata_collection, MetadataEntryWriter(self._database_tables, c))
 
                 for service in services:
+                    logger.info(f"Saving {service.name} objects...")
                     try:
                         if isinstance(service, NetworkService):
                             # noinspection PyArgumentList
@@ -92,6 +93,8 @@ class DatabaseWriter(object):
                     except Exception as e:
                         logger.error(f"Unable to save database: {e}")
                         status = False
+
+                    logger.info(f"{service.name} objects saved.")
 
             return status and self._post_save(conn)
         # connection closed here
@@ -118,7 +121,7 @@ class DatabaseWriter(object):
     def _create(self, conn: sqlite3.Connection) -> bool:
         try:
             version_table = self._database_tables.get_table(TableVersion)
-            logger.info(f"Creating database schema v{version_table.SUPPORTED_VERSION}")
+            logger.info(f"Creating database schema v{version_table.SUPPORTED_VERSION}...")
 
             with cursor(conn) as c:
                 for table in self._database_tables.tables:
@@ -127,7 +130,7 @@ class DatabaseWriter(object):
                 c.execute(version_table.prepared_insert_sql(), (version_table.SUPPORTED_VERSION,))
 
             conn.commit()
-            logger.info("Database saved.")
+            logger.info("Schema created.")
             return True
         except sqlite3.Error as e:
             logger.error(f"Failed to create database schema {e}")
@@ -135,11 +138,20 @@ class DatabaseWriter(object):
 
     def _post_save(self, conn) -> bool:
         try:
+            logger.info("Adding indexes...")
+
             with cursor(conn) as c:
                 for table in self._database_tables.tables:
                     for index_sql in table.create_indexes_sql():
                         c.execute(index_sql)
+
+            logger.info("Indexes added.")
+            logger.info("Committing...")
+
             conn.commit()
+
+            logger.info("Done.")
+
             return True
         except sqlite3.Error as e:
             logger.error(f"Failed to create indexes and finalise the database: {e}")

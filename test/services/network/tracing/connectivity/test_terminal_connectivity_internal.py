@@ -30,6 +30,27 @@ class TestTerminalConnectivityInternal:
         self._validate_tx_paths(PhaseCode.XY, PhaseCode.AC)
         self._validate_tx_paths(PhaseCode.XY, PhaseCode.XY)
 
+    def test_paths_through_hv1_lv2_tx(self):
+        self._validate_tx_paths(PhaseCode.AB, PhaseCode.ABN)
+        self._validate_tx_paths(PhaseCode.AB, PhaseCode.BCN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.AB, PhaseCode.ACN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.AB, PhaseCode.XYN)
+
+        self._validate_tx_paths(PhaseCode.BC, PhaseCode.ABN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.BC, PhaseCode.BCN)
+        self._validate_tx_paths(PhaseCode.BC, PhaseCode.ACN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.BC, PhaseCode.XYN)
+
+        self._validate_tx_paths(PhaseCode.AC, PhaseCode.ABN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.AC, PhaseCode.BCN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.AC, PhaseCode.ACN)
+        self._validate_tx_paths(PhaseCode.AC, PhaseCode.XYN)
+
+        self._validate_tx_paths(PhaseCode.XY, PhaseCode.ABN)
+        self._validate_tx_paths(PhaseCode.XY, PhaseCode.ACN)
+        self._validate_tx_paths(PhaseCode.XY, PhaseCode.BCN)
+        self._validate_tx_paths(PhaseCode.XY, PhaseCode.XYN)
+
     def test_paths_through_hv1_lv1_tx(self):
         self._validate_tx_paths(PhaseCode.AB, PhaseCode.AN)
         self._validate_tx_paths(PhaseCode.AB, PhaseCode.BN, PhaseCode.NONE)
@@ -50,6 +71,41 @@ class TestTerminalConnectivityInternal:
         self._validate_tx_paths(PhaseCode.XY, PhaseCode.BN)
         self._validate_tx_paths(PhaseCode.XY, PhaseCode.CN)
         self._validate_tx_paths(PhaseCode.XY, PhaseCode.XN)
+
+    def test_paths_through_lv2_lv2_tx(self):
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.ABN)
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.BCN)
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.ACN)
+
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.XYN)
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.XYN)
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.XYN)
+
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.ABN)
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.BCN)
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.ACN)
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.XYN)
+
+    def test_paths_through_lv2_hv1_tx(self):
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.AB)
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.BC, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.AC, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.XY)
+
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.AB, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.BC)
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.AC, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.XY)
+
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.AB, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.BC, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.AC)
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.XY)
+
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.AB)
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.BC)
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.AC)
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.XY)
 
     def test_paths_through_lv1_hv1_tx(self):
         self._validate_tx_paths(PhaseCode.AN, PhaseCode.AB)
@@ -155,6 +211,48 @@ class TestTerminalConnectivityInternal:
         self._validate_tx_paths(PhaseCode.XN, PhaseCode.B)
         self._validate_tx_paths(PhaseCode.XN, PhaseCode.C)
         self._validate_tx_paths(PhaseCode.XN, PhaseCode.X)
+
+    def test_paths_through_swer_lv2_tx(self):
+        self._validate_tx_paths(PhaseCode.A, PhaseCode.ABN)
+        self._validate_tx_paths(PhaseCode.A, PhaseCode.BCN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.A, PhaseCode.ACN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.A, PhaseCode.XYN)
+
+        self._validate_tx_paths(PhaseCode.B, PhaseCode.ABN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.B, PhaseCode.BCN)
+        self._validate_tx_paths(PhaseCode.B, PhaseCode.ACN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.B, PhaseCode.XYN)
+
+        self._validate_tx_paths(PhaseCode.C, PhaseCode.ABN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.C, PhaseCode.BCN, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.C, PhaseCode.ACN)
+        self._validate_tx_paths(PhaseCode.C, PhaseCode.XYN)
+
+        self._validate_tx_paths(PhaseCode.X, PhaseCode.ABN)
+        self._validate_tx_paths(PhaseCode.X, PhaseCode.BCN)
+        self._validate_tx_paths(PhaseCode.X, PhaseCode.ACN)
+        self._validate_tx_paths(PhaseCode.X, PhaseCode.XYN)
+
+    def test_paths_through_lv2_swer_tx(self):
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.A)
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.B, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.C, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.ABN, PhaseCode.X)
+
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.A, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.B)
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.C, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.BCN, PhaseCode.X)
+
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.A, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.B, PhaseCode.NONE)
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.C)
+        self._validate_tx_paths(PhaseCode.ACN, PhaseCode.X)
+
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.A)
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.B)
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.C)
+        self._validate_tx_paths(PhaseCode.XYN, PhaseCode.X)
 
     def _validate_tx_paths(self, primary: PhaseCode, secondary: PhaseCode, traced: PhaseCode = None):
         traced = traced or secondary

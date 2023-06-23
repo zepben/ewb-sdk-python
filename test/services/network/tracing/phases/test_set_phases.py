@@ -47,13 +47,13 @@ async def test_applies_phases_from_sources():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_source(PhaseCode.ABCN)  # s0
-            .to_acls(PhaseCode.ABCN)  # c1
-            .to_acls(PhaseCode.ABCN)  # c2
-            .branch_from("c1")
-            .to_acls(PhaseCode.AB)  # c3
-            .from_acls(PhaseCode.ABCN)  # c4
-            .build()
+        .from_source(PhaseCode.ABCN)  # s0
+        .to_acls(PhaseCode.ABCN)  # c1
+        .to_acls(PhaseCode.ABCN)  # c2
+        .branch_from("c1")
+        .to_acls(PhaseCode.AB)  # c3
+        .from_acls(PhaseCode.ABCN)  # c4
+        .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
@@ -73,13 +73,13 @@ async def test_stops_at_open_points():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_source(PhaseCode.ABCN)  # s0
-            .to_breaker(PhaseCode.ABCN, is_normally_open=True, is_open=False)  # b1
-            .to_acls(PhaseCode.ABCN)  # c2
-            .from_source(PhaseCode.ABCN)  # s3
-            .to_breaker(PhaseCode.ABCN, is_open=True)  # b4
-            .to_acls(PhaseCode.ABCN)  # c5
-            .build()
+        .from_source(PhaseCode.ABCN)  # s0
+        .to_breaker(PhaseCode.ABCN, is_normally_open=True, is_open=False)  # b1
+        .to_acls(PhaseCode.ABCN)  # c2
+        .from_source(PhaseCode.ABCN)  # s3
+        .to_breaker(PhaseCode.ABCN, is_open=True)  # b4
+        .to_acls(PhaseCode.ABCN)  # c5
+        .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
@@ -107,10 +107,10 @@ async def test_traces_unganged():
 
     network_service = await (
         TestNetworkBuilder()
-            .from_source(PhaseCode.ABCN)  # s0
-            .to_breaker(PhaseCode.ABCN, action=set_open_status)  # b1
-            .to_acls(PhaseCode.ABCN)
-            .build()
+        .from_source(PhaseCode.ABCN)  # s0
+        .to_breaker(PhaseCode.ABCN, action=set_open_status)  # b1
+        .to_acls(PhaseCode.ABCN)
+        .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
@@ -128,10 +128,10 @@ async def test_can_run_from_terminal():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_acls(PhaseCode.ABCN)  # c0
-            .to_acls(PhaseCode.ABCN)  # c1
-            .to_acls(PhaseCode.ABCN)  # c2
-            .build()
+        .from_acls(PhaseCode.ABCN)  # c0
+        .to_acls(PhaseCode.ABCN)  # c1
+        .to_acls(PhaseCode.ABCN)  # c2
+        .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
@@ -149,9 +149,9 @@ async def test_must_provide_the_correct_number_of_phases():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_acls(PhaseCode.A)  # c0
-            .to_acls(PhaseCode.A)  # c1
-            .build()
+        .from_acls(PhaseCode.A)  # c0
+        .to_acls(PhaseCode.A)  # c1
+        .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
@@ -169,9 +169,9 @@ async def test_detects_cross_phasing_flow():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_acls(PhaseCode.A, _set_normal_phase(1, SPK.A, SPK.A))
-            .to_acls(PhaseCode.A, _set_normal_phase(1, SPK.A, SPK.B))
-            .build()
+        .from_acls(PhaseCode.A, action=_set_normal_phase(1, SPK.A, SPK.A))
+        .to_acls(PhaseCode.A, action=_set_normal_phase(1, SPK.A, SPK.B))
+        .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
@@ -192,10 +192,10 @@ async def test_detects_cross_phasing_connected():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_acls(PhaseCode.A, _set_normal_phase(1, SPK.A, SPK.A))
-            .to_acls(PhaseCode.A)
-            .to_acls(PhaseCode.A, _set_normal_phase(0, SPK.A, SPK.B))
-            .build()
+        .from_acls(PhaseCode.A, action=_set_normal_phase(1, SPK.A, SPK.A))
+        .to_acls(PhaseCode.A)
+        .to_acls(PhaseCode.A, action=_set_normal_phase(0, SPK.A, SPK.B))
+        .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
@@ -219,12 +219,12 @@ async def test_can_back_trace_through_xn_xy_transformer_loop():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_source(PhaseCode.ABC)  # s0
-            .to_power_transformer([PhaseCode.XY, PhaseCode.XN])  # tx1
-            .to_acls(PhaseCode.XN)  # c2
-            .to_power_transformer([PhaseCode.XN, PhaseCode.XY])  # tx3
-            .connect("tx3", "s0", 2, 1)
-            .build()
+        .from_source(PhaseCode.ABC)  # s0
+        .to_power_transformer([PhaseCode.XY, PhaseCode.XN])  # tx1
+        .to_acls(PhaseCode.XN)  # c2
+        .to_power_transformer([PhaseCode.XN, PhaseCode.XY])  # tx3
+        .connect("tx3", "s0", 2, 1)
+        .build()
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
@@ -241,11 +241,11 @@ async def test_can_back_trace_through_xn_xy_transformer_spur():
     """
     network_service = await (
         TestNetworkBuilder()
-            .from_source(PhaseCode.ABC)  # s0
-            .to_power_transformer([PhaseCode.XY, PhaseCode.XN])  # tx1
-            .to_acls(PhaseCode.XN)  # c2
-            .to_power_transformer([PhaseCode.XN, PhaseCode.XY])  # tx3
-            .build()
+        .from_source(PhaseCode.ABC)  # s0
+        .to_power_transformer([PhaseCode.XY, PhaseCode.XN])  # tx1
+        .to_acls(PhaseCode.XN)  # c2
+        .to_power_transformer([PhaseCode.XN, PhaseCode.XY])  # tx3
+        .build()
     )
 
     validate_phases_from_term_or_equip(network_service, "s0", PhaseCode.ABC)

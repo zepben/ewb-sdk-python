@@ -152,6 +152,38 @@ class TestTestNetworkBuilder:
         self._validate_ends(n, "tx3", [PhaseCode.AB, PhaseCode.AB, PhaseCode.AN])
 
     @pytest.mark.asyncio
+    async def test_can_override_ids(self):
+        ns = await (TestNetworkBuilder()
+                    .from_source(mrid="my source 1")
+                    .to_source(mrid="my source 2")
+                    .from_acls(mrid="my acls 1")
+                    .to_acls(mrid="my acls 2")
+                    .from_breaker(mrid="my breaker 1")
+                    .to_breaker(mrid="my breaker 2")
+                    .from_junction(mrid="my junction 1")
+                    .to_junction(mrid="my junction 2")
+                    .from_power_transformer(mrid="my tx 1")
+                    .to_power_transformer(mrid="my tx 2")
+                    .from_other(Fuse, mrid="my other 1")
+                    .to_other(Fuse, mrid="my other 2")
+                    .build())
+
+        assert {it.mrid for it in ns.objects(ConductingEquipment)} == {
+            "my source 1",
+            "my source 2",
+            "my acls 1",
+            "my acls 2",
+            "my breaker 1",
+            "my breaker 2",
+            "my junction 1",
+            "my junction 2",
+            "my tx 1",
+            "my tx 2",
+            "my other 1",
+            "my other 2"
+        }
+
+    @pytest.mark.asyncio
     async def test_can_start_with_open_points(self):
         #
         # 1 b0 2
