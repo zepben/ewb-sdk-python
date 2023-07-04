@@ -122,6 +122,45 @@ async def test_runs_all_step_actions():
     assert step_calls == [1, 1, 1]
 
 
+@pytest.mark.asyncio
+async def test_stop_checking_actions_are_triggered_correctly():
+    # We do not bother with the queue next as we will just prime the queue with what we want to test.
+    async def queue_nothing(_: int, _2: bool):
+        pass
+
+    stepped_on = set()
+    not_stopping_on = set()
+    stopping_on = set()
+
+    # noinspection PyArgumentList
+    t = BasicTraversal(queue_next=queue_nothing)
+
+    async def stop_on(item: int) -> bool:
+        return item >= 3
+
+    async def on_step(item: int, _: bool):
+        stepped_on.add(item)
+
+    async def on_not_stopping(item: int):
+        not_stopping_on.add(item)
+
+    async def on_stopping(item: int):
+        stopping_on.add(item)
+
+    t.add_stop_condition(stop_on)
+    t.add_step_action(on_step)
+    t.if_not_stopping(on_not_stopping)
+    t.if_stopping(on_stopping)
+
+    t.process_queue.extend([1, 2, 3, 4])
+
+    await t.run()
+
+    assert stepped_on == {1, 2, 3, 4}
+    assert not_stopping_on == {1, 2}
+    assert stopping_on == {3, 4}
+
+
 # noinspection PyArgumentList
 def test_default_fields_are_not_shared():
     async def queue_nothing(_: int, _2: bool):

@@ -99,6 +99,36 @@ class Traversal(Generic[T]):
         self.step_actions.append(action)
         return self
 
+    def if_not_stopping(self, action: Callable[[T], Awaitable[None]]) -> Traversal[T]:
+        """
+        Add a callback which is called for every item in the traversal that does not match a stop condition (including the starting item).
+    
+        :param action: Action to be called on each item in the traversal that is not being stopped on.
+        :return: This traversal instance.
+        """
+
+        async def wrapper(item: T, is_stopping: bool) -> None:
+            if not is_stopping:
+                await action(item)
+
+        self.step_actions.append(wrapper)
+        return self
+
+    def if_stopping(self, action: Callable[[T], Awaitable[None]]) -> Traversal[T]:
+        """
+        Add a callback which is called for every item in the traversal that matches a stop condition (including the starting item).
+    
+        :param action: Action to be called on each item in the traversal that is being stopped on.
+        :return: This traversal instance.
+        """
+
+        async def wrapper(item: T, is_stopping: bool) -> None:
+            if is_stopping:
+                await action(item)
+
+        self.step_actions.append(wrapper)
+        return self
+
     def copy_stop_conditions(self, other: Traversal[T]):
         """Copy the stop conditions from `other` to this `Traversal`."""
         self.stop_conditions.extend(other.stop_conditions)
