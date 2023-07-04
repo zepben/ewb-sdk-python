@@ -95,6 +95,7 @@
     * You can now set the ID's without having to create a customer 'other' creator.
     * Added Kotlin wrappers for `.fromOther` and `.toOther` that allow you to pass a class type rather than a creator. e.g. `.toOther<Fuse>()` instead
       of `.toOther(::Fuse)` or `.toOther( { Fuse(it) } )`.
+    * Added inbuilt support for `PowerElectronicsConnection` and `EnergyConsumer`
 * Added `+` and `-` operators to `PhaseCode` and `SinglePhaseKind`.
 
 ### Fixes

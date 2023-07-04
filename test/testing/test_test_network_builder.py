@@ -162,8 +162,10 @@ class TestTestNetworkBuilder:
                     .to_breaker(mrid="my breaker 2")
                     .from_junction(mrid="my junction 1")
                     .to_junction(mrid="my junction 2")
+                    .to_power_electronics_connection(mrid="my pec 1")
                     .from_power_transformer(mrid="my tx 1")
                     .to_power_transformer(mrid="my tx 2")
+                    .to_energy_consumer(mrid="my ec 1")
                     .from_other(Fuse, mrid="my other 1")
                     .to_other(Fuse, mrid="my other 2")
                     .build())
@@ -177,8 +179,10 @@ class TestTestNetworkBuilder:
             "my breaker 2",
             "my junction 1",
             "my junction 2",
+            "my pec 1",
             "my tx 1",
             "my tx 2",
+            "my ec 1",
             "my other 1",
             "my other 2"
         }

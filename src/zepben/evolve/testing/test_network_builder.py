@@ -11,7 +11,8 @@ except ImportError:
 from typing import Optional, Callable, List, Union, Type
 
 from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
-    PowerTransformerEnd, PowerTransformer, set_phases, set_direction, assign_equipment_to_feeders, assign_equipment_to_lv_feeders
+    PowerTransformerEnd, PowerTransformer, set_phases, set_direction, assign_equipment_to_feeders, assign_equipment_to_lv_feeders, EnergyConsumer, \
+    PowerElectronicsConnection
 
 
 def null_action(_):
@@ -222,6 +223,30 @@ class TestNetworkBuilder:
         self._current = it
         return self
 
+    def to_power_electronics_connection(
+        self,
+        nominal_phases: PhaseCode = PhaseCode.ABC,
+        num_terminals: Optional[int] = None,
+        mrid: Optional[str] = None,
+        action: Callable[[PowerElectronicsConnection], None] = null_action
+    ) -> 'TestNetworkBuilder':
+        """
+        Add a new `PowerElectronicsConnection` to the network and connect it to the current network pointer, updating the network pointer to the new
+        `PowerElectronicsConnection`.
+
+        :param nominal_phases: The nominal phases for the new `PowerElectronicsConnection`.
+        :param num_terminals: The number of terminals to create on the new `PowerElectronicsConnection`. Defaults to 2.
+        :param mrid: Optional mRID for the new `PowerElectronicsConnection`.
+        :param action: An action that accepts the new `PowerElectronicsConnection` to allow for additional initialisation.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
+        it = self._create_power_electronics_connection(mrid, nominal_phases, num_terminals)
+
+        action(it)
+        self._current = it
+        return self
+
     def from_power_transformer(
         self,
         nominal_phases: Optional[List[PhaseCode]] = None,
@@ -249,7 +274,7 @@ class TestNetworkBuilder:
 
     def to_power_transformer(
         self,
-        nominal_phases: List[PhaseCode] = None,
+        nominal_phases: Optional[List[PhaseCode]] = None,
         end_actions: Optional[List[Callable[[PowerTransformerEnd], None]]] = None,
         mrid: Optional[str] = None,
         action: Callable[[PowerTransformer], None] = null_action
@@ -269,6 +294,28 @@ class TestNetworkBuilder:
         if end_actions:
             for i in range(0, it.num_ends()):
                 end_actions[i](it.get_end_by_num(i + 1))
+
+        action(it)
+        self._current = it
+        return self
+
+    def to_energy_consumer(
+        self,
+        nominal_phases: PhaseCode = PhaseCode.ABC,
+        mrid: Optional[str] = None,
+        action: Callable[[EnergyConsumer], None] = null_action
+    ) -> 'TestNetworkBuilder':
+        """
+        Add a new `EnergyConsumer` to the network and connect it to the current network pointer, updating the network pointer to the new
+        `EnergyConsumer`.
+
+        :param nominal_phases: The nominal phases for the new `EnergyConsumer`.
+        :param mrid: Optional mRID for the new `EnergyConsumer`.
+        :param action: An action that accepts the new `EnergyConsumer` to allow for additional initialisation.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
+        it = self._create_energy_consumer(mrid, nominal_phases)
 
         action(it)
         self._current = it
@@ -453,6 +500,14 @@ class TestNetworkBuilder:
         self.network.add(j)
         return j
 
+    def _create_power_electronics_connection(self, mrid: Optional[str], nominal_phases: PhaseCode, num_terminals: Optional[int]) -> PowerElectronicsConnection:
+        pec = PowerElectronicsConnection(mrid=self._next_id(mrid, "pec"))
+        for i in range(1, (num_terminals if num_terminals is not None else 2) + 1):
+            self._add_terminal(pec, i, nominal_phases)
+
+        self.network.add(pec)
+        return pec
+
     def _create_power_transformer(self, mrid: Optional[str], nominal_phases: List[PhaseCode]):
         tx = PowerTransformer(mrid=self._next_id(mrid, "tx"))
 
@@ -473,6 +528,13 @@ class TestNetworkBuilder:
 
         self.network.add(tx)
         return tx
+
+    def _create_energy_consumer(self, mrid: Optional[str], nominal_phases: PhaseCode) -> EnergyConsumer:
+        ec = EnergyConsumer(mrid=self._next_id(mrid, "ec"))
+        self._add_terminal(ec, 1, nominal_phases)
+
+        self.network.add(ec)
+        return ec
 
     def _create_other(
         self,
