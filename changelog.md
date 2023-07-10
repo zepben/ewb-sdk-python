@@ -31,8 +31,8 @@
 
   Note that `from zepben.evolve import <ClassName>` will still work as usual for all of the above classes.
 * `DatabaseReader().load` is now an asynchronous function.
-* The addition of the `mrid` arguments to the `TestNetworkBuilder` functions has changed the position of the `action` argument. If you are using positional
-  arguments you will need to add `action=` before your actions if you do not specify your own mRID.
+* The addition of the `mrid` and `connectivity_node_mrid` arguments to the `TestNetworkBuilder` functions has changed the position of the `action` argument. If
+  you are using positional arguments you will need to add `action=` before your actions if you do not specify your own mRIDs.
 * `SetDirection.run(NetworkService)` will no longer set directions for feeders with a head terminal on an open switch. It is expected these feeders are either
   placeholder feeders with no meaningful equipment, or are energised from another feeder which will set the directions from the other end.
 
@@ -96,6 +96,7 @@
     * Added Kotlin wrappers for `.fromOther` and `.toOther` that allow you to pass a class type rather than a creator. e.g. `.toOther<Fuse>()` instead
       of `.toOther(::Fuse)` or `.toOther( { Fuse(it) } )`.
     * Added inbuilt support for `PowerElectronicsConnection` and `EnergyConsumer`
+    * The `to*` and `connect` functions can specify the connectivity node mRID to use. This will only be used if the terminals are not already connected.
 * Added `+` and `-` operators to `PhaseCode` and `SinglePhaseKind`.
 
 ### Fixes

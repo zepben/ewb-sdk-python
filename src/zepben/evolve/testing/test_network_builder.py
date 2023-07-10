@@ -71,6 +71,7 @@ class TestNetworkBuilder:
         self,
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: Optional[str] = None,
+        connectivity_node_mrid: Optional[str] = None,
         action: Callable[[EnergySource], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -78,12 +79,14 @@ class TestNetworkBuilder:
 
         :param nominal_phases: The `PhaseCode` for the new `EnergySource`, used as both the nominal and energising phases. Must be a subset of `PhaseCode.ABCN`.
         :param mrid: Optional mRID for the new source.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `EnergySource` to the previous item. Will only be used if the
+         previous item is not already connected.
         :param action: An action that accepts the new `EnergySource` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         it = self._create_external_source(mrid, nominal_phases)
-        self._connect(self._current, it)
+        self._connect(self._current, it, connectivity_node_mrid)
         action(it)
         self._current = it
         return self
@@ -112,6 +115,7 @@ class TestNetworkBuilder:
         self,
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: Optional[str] = None,
+        connectivity_node_mrid: Optional[str] = None,
         action: Callable[[AcLineSegment], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -119,12 +123,14 @@ class TestNetworkBuilder:
 
         :param nominal_phases: The nominal phases for the new `AcLineSegment`.
         :param mrid: Optional mRID for the new `AcLineSegment`.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `AcLineSegment` to the previous item. Will only be used if the
+         previous item is not already connected.
         :param action: An action that accepts the new `AcLineSegment` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         acls = self._create_acls(mrid, nominal_phases)
-        self._connect(self._current, acls)
+        self._connect(self._current, acls, connectivity_node_mrid)
         action(acls)
         self._current = acls
         return self
@@ -159,6 +165,7 @@ class TestNetworkBuilder:
         is_normally_open: bool = False,
         is_open: Optional[bool] = None,
         mrid: Optional[str] = None,
+        connectivity_node_mrid: Optional[str] = None,
         action: Callable[[Breaker], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -168,12 +175,14 @@ class TestNetworkBuilder:
         :param is_normally_open: The normal state of the switch. Defaults to False.
         :param is_open: The current state of the switch. Defaults to `is_normally_open`.
         :param mrid: Optional mRID for the new `Breaker`.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `Breaker` to the previous item. Will only be used if the
+         previous item is not already connected.
         :param action: An action that accepts the new `Breaker` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         it = self._create_breaker(mrid, nominal_phases, is_normally_open=is_normally_open, is_open=is_open if is_open is not None else is_normally_open)
-        self._connect(self._current, it)
+        self._connect(self._current, it, connectivity_node_mrid)
         action(it)
         self._current = it
         return self
@@ -205,6 +214,7 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
+        connectivity_node_mrid: Optional[str] = None,
         action: Callable[[Junction], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -213,12 +223,14 @@ class TestNetworkBuilder:
         :param nominal_phases: The nominal phases for the new `Junction`.
         :param num_terminals: The number of terminals to create on the new `Junction`. Defaults to 2.
         :param mrid: Optional mRID for the new `Junction`.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `Junction` to the previous item. Will only be used if the
+         previous item is not already connected.
         :param action: An action that accepts the new `Junction` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         it = self._create_junction(mrid, nominal_phases, num_terminals)
-        self._connect(self._current, it)
+        self._connect(self._current, it, connectivity_node_mrid)
         action(it)
         self._current = it
         return self
@@ -228,6 +240,7 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
+        connectivity_node_mrid: Optional[str] = None,
         action: Callable[[PowerElectronicsConnection], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -237,12 +250,14 @@ class TestNetworkBuilder:
         :param nominal_phases: The nominal phases for the new `PowerElectronicsConnection`.
         :param num_terminals: The number of terminals to create on the new `PowerElectronicsConnection`. Defaults to 2.
         :param mrid: Optional mRID for the new `PowerElectronicsConnection`.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `PowerElectronicsConnection` to the previous item. Will only be
+         used if the previous item is not already connected.
         :param action: An action that accepts the new `PowerElectronicsConnection` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         it = self._create_power_electronics_connection(mrid, nominal_phases, num_terminals)
-
+        self._connect(self._current, it, connectivity_node_mrid)
         action(it)
         self._current = it
         return self
@@ -277,6 +292,7 @@ class TestNetworkBuilder:
         nominal_phases: Optional[List[PhaseCode]] = None,
         end_actions: Optional[List[Callable[[PowerTransformerEnd], None]]] = None,
         mrid: Optional[str] = None,
+        connectivity_node_mrid: Optional[str] = None,
         action: Callable[[PowerTransformer], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -286,10 +302,12 @@ class TestNetworkBuilder:
         :param end_actions: Actions that accepts the new `PowerTransformerEnd` to allow for additional initialisation.
         :param action: An action that accepts the new `PowerTransformer` to allow for additional initialisation.
         :param mrid: Optional mRID for the new `PowerTransformer`.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `PowerTransformer` to the previous item. Will only be used if
+         the previous item is not already connected.
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         it = self._create_power_transformer(mrid, nominal_phases or [PhaseCode.ABC, PhaseCode.ABC])
-        self._connect(self._current, it)
+        self._connect(self._current, it, connectivity_node_mrid)
 
         if end_actions:
             for i in range(0, it.num_ends()):
@@ -303,6 +321,7 @@ class TestNetworkBuilder:
         self,
         nominal_phases: PhaseCode = PhaseCode.ABC,
         mrid: Optional[str] = None,
+        connectivity_node_mrid: Optional[str] = None,
         action: Callable[[EnergyConsumer], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -311,12 +330,14 @@ class TestNetworkBuilder:
 
         :param nominal_phases: The nominal phases for the new `EnergyConsumer`.
         :param mrid: Optional mRID for the new `EnergyConsumer`.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `EnergyConsumer` to the previous item. Will only be used if the
+         previous item is not already connected.
         :param action: An action that accepts the new `EnergyConsumer` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         it = self._create_energy_consumer(mrid, nominal_phases)
-
+        self._connect(self._current, it, connectivity_node_mrid)
         action(it)
         self._current = it
         return self
@@ -352,6 +373,7 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
+        connectivity_node_mrid: Optional[str] = None,
         action: Callable[[ConductingEquipment], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -363,12 +385,14 @@ class TestNetworkBuilder:
         :param nominal_phases: The nominal phases for the new `ConductingEquipment`.
         :param num_terminals: The number of terminals to create on the new `ConductingEquipment`. Defaults to 2.
         :param mrid: Optional mRID for the new `ConductingEquipment`.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `ConductingEquipment` to the previous item. Will only be used
+         if the previous item is not already connected.
         :param action: An action that accepts the new `ConductingEquipment` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         it = self._create_other(mrid, creator, nominal_phases, num_terminals)
-        self._connect(self._current, it)
+        self._connect(self._current, it, connectivity_node_mrid)
         action(it)
         self._current = it
         return self
@@ -386,7 +410,14 @@ class TestNetworkBuilder:
         self._current_terminal = terminal
         return self
 
-    def connect(self, from_: str, to: str, from_terminal: int, to_terminal: int) -> 'TestNetworkBuilder':
+    def connect(
+        self,
+        from_: str,
+        to: str,
+        from_terminal: int,
+        to_terminal: int,
+        connectivity_node_mrid: Optional[str] = None
+    ) -> 'TestNetworkBuilder':
         """
         Connect the specified `from` and `to` without moving the current network pointer.
 
@@ -394,10 +425,18 @@ class TestNetworkBuilder:
         :param to: The mRID of the second `ConductingEquipment` to be connected.
         :param from_terminal: The sequence number of the terminal on `from` which will be connected.
         :param to_terminal: The sequence number of the terminal on `to` which will be connected.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect the terminals. Will only be used if both terminals are not already
+         connected.
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
-        self._connect(self.network.get(from_, ConductingEquipment), self.network.get(to, ConductingEquipment), from_terminal, to_terminal)
+        self._connect(
+            self.network.get(from_, ConductingEquipment),
+            self.network.get(to, ConductingEquipment),
+            connectivity_node_mrid,
+            from_terminal,
+            to_terminal
+        )
         return self
 
     def add_feeder(self, head_mrid: str, sequence_number: Optional[int] = None, mrid: Optional[str] = None) -> 'TestNetworkBuilder':
@@ -456,11 +495,21 @@ class TestNetworkBuilder:
         self._count += 1
         return id_
 
-    def _connect(self, from_: ConductingEquipment, to: ConductingEquipment, from_terminal: Optional[int] = None, to_terminal: Optional[int] = None):
-        self.network.connect_terminals(
-            from_.get_terminal_by_sn(from_terminal if from_terminal else self._current_terminal if self._current_terminal else from_.num_terminals()),
-            to.get_terminal_by_sn(to_terminal if to_terminal else 1)
-        )
+    def _connect(
+        self,
+        from_: ConductingEquipment,
+        to: ConductingEquipment,
+        connectivity_node_mrid: Optional[str] = None,
+        from_terminal: Optional[int] = None,
+        to_terminal: Optional[int] = None
+    ):
+        from_term = from_.get_terminal_by_sn(from_terminal if from_terminal else self._current_terminal if self._current_terminal else from_.num_terminals())
+        to_term = to.get_terminal_by_sn(to_terminal if to_terminal else 1)
+        if (connectivity_node_mrid is None) or from_term.connected or to_term.connected:
+            self.network.connect_terminals(from_term, to_term)
+        else:
+            self.network.connect_by_mrid(from_term, connectivity_node_mrid)
+            self.network.connect_by_mrid(to_term, connectivity_node_mrid)
         self._current_terminal = None
 
     def _create_external_source(self, mrid: Optional[str], nominal_phases: PhaseCode) -> EnergySource:
