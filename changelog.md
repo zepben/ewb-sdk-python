@@ -99,6 +99,7 @@
 * Add `normal_upstream_trace`, `current_upstream_trace`, and `phase_inferrer` to `__all__` in `zepben.evolve.services.network.tracing.tracing`.
 * Stopped the NetworkConsumerClient from resolving the equipment of an EquipmentContainer when resolving references. Equipment for containers must always be explicitly requested by the client.
 * Asking for the traced phases as a phase code when there are no nominal phases no longer throws.
+* Added missing nio type to nio_typ_to_cim in network_consumer.py
 
 ### Notes
 
