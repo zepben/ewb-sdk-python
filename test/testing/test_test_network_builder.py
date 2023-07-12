@@ -3,13 +3,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https:#mozilla.org/MPL/2.0/.
+from collections import Counter
 from typing import Callable, List
 
 import pytest
 from pytest import raises
 
 from zepben.evolve import PhaseCode, PowerTransformerEnd, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, \
-    connected_terminals, TestNetworkBuilder, Fuse, LvFeeder
+    connected_terminals, TestNetworkBuilder, Fuse, LvFeeder, ConnectivityNode
 
 
 class TestTestNetworkBuilder:
@@ -152,6 +153,42 @@ class TestTestNetworkBuilder:
         self._validate_ends(n, "tx3", [PhaseCode.AB, PhaseCode.AB, PhaseCode.AN])
 
     @pytest.mark.asyncio
+    async def test_can_override_ids(self):
+        ns = await (TestNetworkBuilder()
+                    .from_source(mrid="my source 1")
+                    .to_source(mrid="my source 2")
+                    .from_acls(mrid="my acls 1")
+                    .to_acls(mrid="my acls 2")
+                    .from_breaker(mrid="my breaker 1")
+                    .to_breaker(mrid="my breaker 2")
+                    .from_junction(mrid="my junction 1")
+                    .to_junction(mrid="my junction 2")
+                    .to_power_electronics_connection(mrid="my pec 1")
+                    .from_power_transformer(mrid="my tx 1")
+                    .to_power_transformer(mrid="my tx 2")
+                    .to_energy_consumer(mrid="my ec 1")
+                    .from_other(Fuse, mrid="my other 1")
+                    .to_other(Fuse, mrid="my other 2")
+                    .build())
+
+        assert {it.mrid for it in ns.objects(ConductingEquipment)} == {
+            "my source 1",
+            "my source 2",
+            "my acls 1",
+            "my acls 2",
+            "my breaker 1",
+            "my breaker 2",
+            "my junction 1",
+            "my junction 2",
+            "my pec 1",
+            "my tx 1",
+            "my tx 2",
+            "my ec 1",
+            "my other 1",
+            "my other 2"
+        }
+
+    @pytest.mark.asyncio
     async def test_can_start_with_open_points(self):
         #
         # 1 b0 2
@@ -270,6 +307,7 @@ class TestTestNetworkBuilder:
             assert mrid == "o1"
             return Fuse(mrid="my-id")
 
+        # noinspection PyTypeChecker
         n = await (TestNetworkBuilder()
                    .from_other(Fuse, num_terminals=1)  # o0
                    .to_other(replace_o1, num_terminals=1)  # my-id[o1]
@@ -282,6 +320,16 @@ class TestTestNetworkBuilder:
         self._validate_connections(n, "my-id", [["o0-t1"]])
         self._validate_connections(n, "o2", [[], ["o3-t1"]])
         self._validate_connections(n, "o3", [["o2-t2"], []])
+
+    def test_can_choose_the_connectivity_node_id(self):
+        self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_breaker(mrid=mrid, connectivity_node_mrid=cn_mrid))
+        self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_junction(mrid=mrid, connectivity_node_mrid=cn_mrid))
+        self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_acls(mrid=mrid, connectivity_node_mrid=cn_mrid))
+        self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_power_transformer(mrid=mrid, connectivity_node_mrid=cn_mrid))
+        self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_power_electronics_connection(mrid=mrid, connectivity_node_mrid=cn_mrid))
+        self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_energy_consumer(mrid=mrid, connectivity_node_mrid=cn_mrid))
+        self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_source(mrid=mrid, connectivity_node_mrid=cn_mrid))
+        self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_other(Fuse, mrid=mrid, connectivity_node_mrid=cn_mrid))
 
     def _validate_connections(self, n: NetworkService, mrid: str, expected_terms: List[List[str]]):
         assert n.get(mrid, ConductingEquipment).num_terminals() == len(expected_terms)
@@ -319,3 +367,31 @@ class TestTestNetworkBuilder:
 
         for end, terminal in zip(tx.ends, tx.terminals):
             assert end.terminal == terminal
+
+    @staticmethod
+    def _validate_connectivity_node_override(add_with_connectivity_node: Callable[[TestNetworkBuilder, str, str], None]):
+        builder = TestNetworkBuilder()
+        ns = builder.network
+
+        builder.from_source()  # s0
+        # Connect using a specific connectivity node
+        add_with_connectivity_node(builder, "my1", "specified-cn")
+        builder.from_acls()  # c1
+        # Reuse the specific connectivity node, which should connect all 4 items.
+        add_with_connectivity_node(builder, "my2", "specified-cn")
+        builder.from_acls()  # c2
+        builder.from_acls()  # c3
+        # Force connect to the specific connectivity node, which should connect the additional 2 items.
+        builder.connect("c2", "c3", 2, 1, "specified-cn")
+        builder.from_acls()  # c4
+        # Force connect using a different connectivity node, which should be overridden due to the `to` terminal being connected.
+        builder.connect("c2", "c4", 2, 1, "different-cn")
+        builder.from_acls()  # c5
+        # Force connect using a different connectivity node, which should be overridden due to the `from` terminal being connected.
+        builder.connect("c5", "c4", 2, 1, "different-cn")
+
+        assert Counter([it.mrid for it in ns.get("specified-cn", ConnectivityNode).terminals]) == \
+               Counter(["s0-t1", "my1-t1", "c1-t2", "my2-t1", "c2-t2", "c3-t1", "c4-t1", "c5-t2"])
+
+        # Make sure our overridden connectivity node was not created.
+        assert ns.get("different-cn", ConnectivityNode, default=None) is None

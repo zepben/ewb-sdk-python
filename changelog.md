@@ -21,16 +21,20 @@
   with `BOTH.__contains__(DOWNSTREAM)` or `DOWNSTREAM in BOTH`
 * Removed deprecated function `NetworkConsumerClient.get_feeder`.
 * Refactored the following `Switch` descendant classes to their own submodules in `zepben.evolve.model.cim.iec61970.base.wires`:
-  * `Breaker` moved to `breaker`
-  * `Disconnector` moved to `disconnector`
-  * `Fuse` moved to `fuse`
-  * `Jumper` moved to `jumper`
-  * `LoadBreakSwitch` moved to `load_break_switch`
-  * `ProtectedSwitch` moved to `protected_switch`
-  * `Recloser` moved to `recloser`
-  
+    * `Breaker` moved to `breaker`
+    * `Disconnector` moved to `disconnector`
+    * `Fuse` moved to `fuse`
+    * `Jumper` moved to `jumper`
+    * `LoadBreakSwitch` moved to `load_break_switch`
+    * `ProtectedSwitch` moved to `protected_switch`
+    * `Recloser` moved to `recloser`
+
   Note that `from zepben.evolve import <ClassName>` will still work as usual for all of the above classes.
-* `DatabaseReader().load` is now an asynchronous function. 
+* `DatabaseReader().load` is now an asynchronous function.
+* The addition of the `mrid` and `connectivity_node_mrid` arguments to the `TestNetworkBuilder` functions has changed the position of the `action` argument. If
+  you are using positional arguments you will need to add `action=` before your actions if you do not specify your own mRIDs.
+* `SetDirection.run(NetworkService)` will no longer set directions for feeders with a head terminal on an open switch. It is expected these feeders are either
+  placeholder feeders with no meaningful equipment, or are energised from another feeder which will set the directions from the other end.
 
 ### New Features
 
@@ -55,21 +59,24 @@
     * `new_current_downstream_equipment_trace`: Creates a trace that traverses in the downstream direction using the current state of the network.
     * `new_current_upstream_equipment_trace`: Creates a trace that traverses in the upstream direction using the current state of the network.
 * Added support for protection equipment with the following classes, enums, and fields:
-  * `SwitchInfo`: Switch datasheet information.
-  * `ProtectionEquipment`: An electrical device designed to respond to input conditions in a prescribed manner and after specified conditions are met to cause
-                           contact operation or similar abrupt change in associated electric control circuits, or simply to display the detected condition.
-  * `CurrentRelay`: A device that checks current flow values in any direction or designated direction.
-  * `CurrentRelayInfo`: Current relay datasheet information.
-  * `RecloseSequence`: A reclose sequence (open and close) is defined for each possible reclosure of a breaker.
-  * `ProtectionKind`: The kind of protection being provided by this protection equipment.
-  * `ProtectedSwitch().breaking_capacity`: The maximum fault current in amps a breaking device can break safely under prescribed conditions of use.
-  * `ProtectedSwitch().reclose_sequences`: The collection of `RecloseSequence`s attached to the `ProtectedSwitch`.
-  * `ProtectedSwitch().operated_by_protection_equipment`: The collection of `ProtectionEquipment` operating the `ProtectedSwitch`.
-  * `Switch().rated_current`: The maximum continuous current carrying capacity in amps governed by the device material and construction.
-                            The attribute shall be a positive value.
-  * `Breaker().in_transit_time`: The transition time from open to close in seconds.
+    * `SwitchInfo`: Switch datasheet information.
+    * `ProtectionEquipment`: An electrical device designed to respond to input conditions in a prescribed manner and after specified conditions are met to cause
+      contact operation or similar abrupt change in associated electric control circuits, or simply to display the detected condition.
+    * `CurrentRelay`: A device that checks current flow values in any direction or designated direction.
+    * `CurrentRelayInfo`: Current relay datasheet information.
+    * `RecloseSequence`: A reclose sequence (open and close) is defined for each possible reclosure of a breaker.
+    * `ProtectionKind`: The kind of protection being provided by this protection equipment.
+    * `ProtectedSwitch().breaking_capacity`: The maximum fault current in amps a breaking device can break safely under prescribed conditions of use.
+    * `ProtectedSwitch().reclose_sequences`: The collection of `RecloseSequence`s attached to the `ProtectedSwitch`.
+    * `ProtectedSwitch().operated_by_protection_equipment`: The collection of `ProtectionEquipment` operating the `ProtectedSwitch`.
+    * `Switch().rated_current`: The maximum continuous current carrying capacity in amps governed by the device material and construction.
+      The attribute shall be a positive value.
+    * `Breaker().in_transit_time`: The transition time from open to close in seconds.
 * Added `getCustomersForContainer` to `CustomerConsumerClient` which allows fetching all the `Customer`s for a given `EquipmentContainer`
 * Added `getDiagramObjects` to `DiagramConsumerClient` which allows fetching all the `DiagramObject`s matching a given mRID.
+* `Traversal` has two new helper methods:
+    * `if_not_stopping`: Adds a step action that is only called if the traversal is not stopping on the item.
+    * `if_stopping`: Adds a step action that is only called if the traversal is stopping on the item.
 
 ### Enhancements
 
@@ -82,6 +89,15 @@
 * All `Tracker` classes can now be copied using the `copy` method.
 * Added `FeederDirection.__not__` operator function.
 * Performance enhancement for `connected_equipment_trace.py` when traversing elements with single terminals.
+* Added support for LV2 transformers.
+* Improved logging when saving a database.
+* The `TestNetworkBuilder` has been enhanced with the following features:
+    * You can now set the ID's without having to create a customer 'other' creator.
+    * Added Kotlin wrappers for `.fromOther` and `.toOther` that allow you to pass a class type rather than a creator. e.g. `.toOther<Fuse>()` instead
+      of `.toOther(::Fuse)` or `.toOther( { Fuse(it) } )`.
+    * Added inbuilt support for `PowerElectronicsConnection` and `EnergyConsumer`
+    * The `to*` and `connect` functions can specify the connectivity node mRID to use. This will only be used if the terminals are not already connected.
+* Added `+` and `-` operators to `PhaseCode` and `SinglePhaseKind`.
 
 ### Fixes
 
@@ -97,9 +113,11 @@
 * Added missing `TreeNodeTracker`.
 * Classes in the `zepben.evolve.services.network.tracing.tree.*` submodules may now be imported `from zepben.evolve`.
 * Add `normal_upstream_trace`, `current_upstream_trace`, and `phase_inferrer` to `__all__` in `zepben.evolve.services.network.tracing.tracing`.
-* Stopped the NetworkConsumerClient from resolving the equipment of an EquipmentContainer when resolving references. Equipment for containers must always be explicitly requested by the client.
+* Stopped the NetworkConsumerClient from resolving the equipment of an EquipmentContainer when resolving references. Equipment for containers must always be
+  explicitly requested by the client.
 * Asking for the traced phases as a phase code when there are no nominal phases no longer throws.
-* Added missing nio type to nio_typ_to_cim in network_consumer.py
+* Feeder directions are now stopped at substation transformers in the same way as assigning equipment incase the feeder has no breaker, or the start point is
+  not inline.
 
 ### Notes
 

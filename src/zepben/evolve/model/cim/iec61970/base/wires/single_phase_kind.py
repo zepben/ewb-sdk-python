@@ -5,6 +5,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from enum import Enum
+from typing import Union
+
+#
+# NOTE: The following import is actually at the bottom of this file to avoid cyclic imports.
+#
+# from zepben.evolve.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode
 
 __all__ = ["SinglePhaseKind", "single_phase_kind_by_id", "SINGLE_PHASE_KIND_VALUES"]
 
@@ -71,5 +77,26 @@ class SinglePhaseKind(Enum):
     def __lt__(self, other):
         return self.id < other.id
 
+    def __add__(self, other: Union['SinglePhaseKind', 'PhaseCode']) -> 'PhaseCode':
+        if isinstance(other, SinglePhaseKind):
+            return phase_code_from_single_phases({self, other})
+        elif isinstance(other, PhaseCode):
+            return phase_code_from_single_phases(set(other.single_phases + [self]))
+        else:
+            return PhaseCode.NONE
+
+    def __sub__(self, other: Union['SinglePhaseKind', 'PhaseCode']) -> 'PhaseCode':
+        if isinstance(other, SinglePhaseKind):
+            return phase_code_from_single_phases({} if (self == other) else {self})
+        elif isinstance(other, PhaseCode):
+            return phase_code_from_single_phases({} if (self in other) else {self})
+        else:
+            return PhaseCode.NONE
+
 
 SINGLE_PHASE_KIND_VALUES = list(SinglePhaseKind.__members__.values())
+
+#
+# NOTE: The following import is deliberately at the bottom of this file to avoid cyclic imports.
+#
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode  # noqa: E402

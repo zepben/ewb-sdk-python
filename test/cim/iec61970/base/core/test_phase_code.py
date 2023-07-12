@@ -70,3 +70,29 @@ class TestPhaseCode:
 
     def test_for_each(self):
         assert list(PhaseCode.ABCN) == [SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N]
+
+    def test_plus(self):
+        assert PhaseCode.A + SinglePhaseKind.B == PhaseCode.AB
+        assert PhaseCode.BC + PhaseCode.AN == PhaseCode.ABCN
+        assert PhaseCode.X + SinglePhaseKind.Y == PhaseCode.XY
+        assert PhaseCode.N + PhaseCode.XY == PhaseCode.XYN
+
+        # Can add existing phases.
+        assert PhaseCode.ABCN + SinglePhaseKind.A == PhaseCode.ABCN
+        assert PhaseCode.ABCN + SinglePhaseKind.B == PhaseCode.ABCN
+        assert PhaseCode.A + PhaseCode.ABCN == PhaseCode.ABCN
+
+        # Returns NONE for invalid additions.
+        assert PhaseCode.ABCN + SinglePhaseKind.X == PhaseCode.NONE
+        assert PhaseCode.ABCN + PhaseCode.X == PhaseCode.NONE
+
+    def test_minus(self):
+        assert PhaseCode.ABCN - SinglePhaseKind.B == PhaseCode.ACN
+        assert PhaseCode.ABCN - PhaseCode.AN == PhaseCode.BC
+        assert PhaseCode.BC - SinglePhaseKind.C == PhaseCode.B
+        assert PhaseCode.XY - PhaseCode.X == PhaseCode.Y
+
+        assert PhaseCode.X - SinglePhaseKind.Y == PhaseCode.X
+        assert PhaseCode.AB - PhaseCode.C == PhaseCode.AB
+
+        assert PhaseCode.ABCN - PhaseCode.ABCN == PhaseCode.NONE

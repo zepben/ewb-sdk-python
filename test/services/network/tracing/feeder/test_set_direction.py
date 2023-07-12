@@ -7,7 +7,7 @@ import pytest
 
 from services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
 from services.network.tracing.feeder.direction_logger import log_directions
-from zepben.evolve import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment
+from zepben.evolve import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment, Substation
 
 UPSTREAM = FeederDirection.UPSTREAM
 DOWNSTREAM = FeederDirection.DOWNSTREAM
@@ -100,6 +100,58 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "j3", 2), NONE)
         self._check_expected_direction(self._get_t(n, "c4", 1), NONE)
         self._check_expected_direction(self._get_t(n, "c4", 2), NONE)
+
+    @pytest.mark.asyncio
+    async def test_doesnt_trace_from_open_feeder_heads(self):
+        #
+        # 1 b0 21--c1--21--c2--21 b3 2
+        #
+        n = (TestNetworkBuilder()
+             .from_breaker()  # b0
+             .to_acls()  # c1
+             .to_acls()  # c2
+             .to_breaker(is_normally_open=True)  # b3
+             .add_feeder("b0", 2)
+             .add_feeder("b3", 1)
+             .network)
+
+        await SetDirection().run(n)
+        await log_directions(n["b0"])
+
+        self._check_expected_direction(self._get_t(n, "b0", 1), NONE)
+        self._check_expected_direction(self._get_t(n, "b0", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "c1", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "c2", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "c2", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "b3", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "b3", 2), NONE)
+
+    @pytest.mark.asyncio
+    async def test_stops_at_zone_transformers_incase_feeder_heads_are_missing(self):
+        #
+        # 1 b0*21--c1--21 tx2 21--c3--2
+        #
+        # * = feeder start
+        #
+        n = await TestNetworkBuilder() \
+            .from_breaker() \
+            .to_acls() \
+            .to_power_transformer(action=lambda tx: tx.add_container(Substation())) \
+            .to_acls() \
+            .add_feeder("b0", 2) \
+            .build()
+
+        await log_directions(n["b0"])
+
+        self._check_expected_direction(self._get_t(n, "b0", 1), NONE)
+        self._check_expected_direction(self._get_t(n, "b0", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "c1", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "tx2", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "tx2", 2), NONE)
+        self._check_expected_direction(self._get_t(n, "c3", 1), NONE)
+        self._check_expected_direction(self._get_t(n, "c3", 2), NONE)
 
     @pytest.mark.asyncio
     async def test_set_direction_in_closed_loop(self):

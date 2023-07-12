@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from enum import Enum, unique
-from typing import List, Set
+from typing import List, Set, Union
 
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
@@ -119,6 +119,7 @@ class PhaseCode(Enum):
 
     s2N = (27, [SinglePhaseKind.s2, SinglePhaseKind.N])
     """Secondary phase 2 plus neutral"""
+
     # pylint: enable=invalid-name
 
     @property
@@ -152,6 +153,22 @@ class PhaseCode(Enum):
 
     def __contains__(self, item):
         return item in self.single_phases
+
+    def __add__(self, other: Union[SinglePhaseKind, 'PhaseCode']) -> 'PhaseCode':
+        if isinstance(other, SinglePhaseKind):
+            return phase_code_from_single_phases(set(self.single_phases + [other]))
+        elif isinstance(other, PhaseCode):
+            return phase_code_from_single_phases(set(self.single_phases + other.single_phases))
+        else:
+            return PhaseCode.NONE
+
+    def __sub__(self, other: Union[SinglePhaseKind, 'PhaseCode']) -> 'PhaseCode':
+        if isinstance(other, SinglePhaseKind):
+            return phase_code_from_single_phases({it for it in self.single_phases if it != other})
+        elif isinstance(other, PhaseCode):
+            return phase_code_from_single_phases({it for it in self.single_phases if it not in other.single_phases})
+        else:
+            return PhaseCode.NONE
 
 
 class PhaseCodeIter:

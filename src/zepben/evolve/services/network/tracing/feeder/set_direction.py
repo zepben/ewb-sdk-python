@@ -3,10 +3,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import List, Callable
+from typing import List, Callable, Optional
 
 from zepben.evolve import BranchRecursiveTraversal, Terminal, FifoQueue, NetworkService, Feeder, FeederDirection, normally_open, \
-    currently_open, current_direction, normal_direction
+    currently_open, current_direction, normal_direction, PowerTransformer, Switch, ConductingEquipment
 from zepben.evolve.types import OpenTest, DirectionSelector
 
 __all__ = ["SetDirection"]
@@ -51,7 +51,9 @@ class SetDirection:
 
          :param network: The network in which to apply feeder directions.
          """
-        await self._run_terminals([f.normal_head_terminal for f in network.objects(Feeder) if f.normal_head_terminal])
+        await self._run_terminals(
+            [f.normal_head_terminal for f in network.objects(Feeder) if
+             f.normal_head_terminal and not self._is_normally_open_switch(f.normal_head_terminal.conducting_equipment)])
 
     async def run_terminal(self, terminal: Terminal):
         """
@@ -95,6 +97,14 @@ class SetDirection:
 
         return any(f.normal_head_terminal == terminal for f in ce.containers if isinstance(f, Feeder))
 
+    @staticmethod
+    def _reached_substation_transformer(terminal: Terminal) -> bool:
+        ce = terminal.conducting_equipment
+        if not ce:
+            return False
+
+        return isinstance(ce, PowerTransformer) and ce.substations
+
     def _flow_upstream_and_queue_next_straight(
         self,
         traversal: BranchRecursiveTraversal[Terminal],
@@ -135,7 +145,7 @@ class SetDirection:
         if not direction.add(FeederDirection.UPSTREAM):
             return
 
-        if self._is_feeder_head_terminal(terminal):
+        if self._is_feeder_head_terminal(terminal) or self._reached_substation_transformer(terminal):
             return
 
         ce = terminal.conducting_equipment
@@ -147,6 +157,10 @@ class SetDirection:
         for t in ce.terminals:
             if t != terminal:
                 queue(t)
+
+    @staticmethod
+    def _is_normally_open_switch(conducting_equipment: Optional[ConductingEquipment]):
+        return isinstance(conducting_equipment, Switch) and conducting_equipment.is_normally_open()
 
     @staticmethod
     def _start_new_branch(traversal: BranchRecursiveTraversal[Terminal], terminal: Terminal):
