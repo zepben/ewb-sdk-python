@@ -111,7 +111,8 @@ from zepben.evolve import connect_with_password, connect_with_secret, SyncNetwor
 
 # Client credentials configuration
 channel = connect_with_secret(client_id="some_client_id", client_secret="some_client_secret", host="ewb.zepben.com", rpc_port=443,
-                              conf_address="https://ewb.zepben.com/ewb/auth")
+                              conf_address="https://ewb.zepben.com/ewb/auth", verify_conf="path to certificate chain for auth params", 
+                              ca_filename="path to certificate for grpc queries")
 client = SyncNetworkConsumerClient(channel)
 # ...
 
