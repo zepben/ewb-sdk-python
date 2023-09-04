@@ -69,7 +69,6 @@ from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPo
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
 from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import CurrentRelay as PBCurrentRelay
 from zepben.protobuf.cim.iec61970.base.protection.ProtectionEquipment_pb2 import ProtectionEquipment as PBProtectionEquipment
-from zepben.protobuf.cim.iec61970.base.protection.RecloseSequence_pb2 import RecloseSequence as PBRecloseSequence
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
@@ -164,7 +163,6 @@ from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
 from zepben.evolve.model.cim.iec61970.base.protection.current_relay import *
 from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import *
-from zepben.evolve.model.cim.iec61970.base.protection.reclose_sequence import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
@@ -217,11 +215,11 @@ __all__ = [
     "conducting_equipment_to_cim", "connectivity_node_to_cim", "connectivity_node_container_to_cim", "equipment_to_cim", "equipment_container_to_cim",
     "feeder_to_cim", "geographical_region_to_cim", "power_system_resource_to_cim", "site_to_cim", "sub_geographical_region_to_cim", "substation_to_cim",
     "terminal_to_cim", "equivalent_branch_to_cim", "equivalent_equipment_to_cim", "accumulator_to_cim", "analog_to_cim", "control_to_cim", "discrete_to_cim",
-    "io_point_to_cim", "measurement_to_cim", "current_relay_to_cim", "protection_equipment_to_cim", "reclose_sequence_to_cim", "remote_control_to_cim",
-    "remote_point_to_cim", "remote_source_to_cim", "battery_unit_to_cim", "photo_voltaic_unit_to_cim", "power_electronics_unit_to_cim",
-    "power_electronics_wind_unit_to_cim", "ac_line_segment_to_cim", "breaker_to_cim", "conductor_to_cim", "connector_to_cim", "disconnector_to_cim",
-    "energy_connection_to_cim", "energy_consumer_to_cim", "energy_consumer_phase_to_cim", "energy_source_to_cim", "energy_source_phase_to_cim", "fuse_to_cim",
-    "jumper_to_cim", "junction_to_cim", "busbar_section_to_cim", "line_to_cim", "linear_shunt_compensator_to_cim", "load_break_switch_to_cim",
+    "io_point_to_cim", "measurement_to_cim", "current_relay_to_cim", "protection_equipment_to_cim", "remote_control_to_cim", "remote_point_to_cim",
+    "remote_source_to_cim", "battery_unit_to_cim", "photo_voltaic_unit_to_cim", "power_electronics_unit_to_cim", "power_electronics_wind_unit_to_cim",
+    "ac_line_segment_to_cim", "breaker_to_cim", "conductor_to_cim", "connector_to_cim", "disconnector_to_cim", "energy_connection_to_cim",
+    "energy_consumer_to_cim", "energy_consumer_phase_to_cim", "energy_source_to_cim", "energy_source_phase_to_cim", "fuse_to_cim", "jumper_to_cim",
+    "junction_to_cim", "busbar_section_to_cim", "line_to_cim", "linear_shunt_compensator_to_cim", "load_break_switch_to_cim",
     "per_length_line_parameter_to_cim", "per_length_impedance_to_cim", "per_length_sequence_impedance_to_cim", "power_electronics_connection_to_cim",
     "power_electronics_connection_phase_to_cim", "power_transformer_to_cim", "power_transformer_end_to_cim", "transformer_star_impedance_to_cim",
     "protected_switch_to_cim", "ratio_tap_changer_to_cim", "recloser_to_cim", "regulating_cond_eq_to_cim", "shunt_compensator_to_cim", "switch_to_cim",
@@ -974,19 +972,7 @@ def protection_equipment_to_cim(pb: PBProtectionEquipment, cim: ProtectionEquipm
     equipment_to_cim(pb.eq, cim, network_service)
 
 
-def reclose_sequence_to_cim(pb: PBRecloseSequence, network_service: NetworkService):
-    cim = RecloseSequence(
-        mrid=pb.mrid(),
-        reclose_delay=float_or_none(pb.recloseDelay),
-        reclose_step=int_or_none(pb.recloseStep)
-    )
-
-    identified_object_to_cim(pb.io, cim, network_service)
-    return cim if network_service.add(cim) else None
-
-
 PBCurrentRelay.to_cim = current_relay_to_cim
-PBRecloseSequence.to_cim = reclose_sequence_to_cim
 
 
 #######################
@@ -1361,9 +1347,6 @@ def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_se
 
 def protected_switch_to_cim(pb: PBProtectedSwitch, cim: ProtectedSwitch, network_service: NetworkService):
     cim.breaking_capacity = int_or_none(pb.breakingCapacity)
-
-    for mrid in pb.recloseSequenceMRIDs:
-        network_service.resolve_or_defer_reference(resolver.reclose_sequences(cim), mrid)
 
     for mrid in pb.operatedByProtectionEquipmentMRIDs:
         network_service.resolve_or_defer_reference(resolver.operated_by_protection_equipment(cim), mrid)

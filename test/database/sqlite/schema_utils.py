@@ -15,7 +15,7 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     PowerSystemResource, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, \
     PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, \
     RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, ProtectionEquipment, \
-    CurrentTransformer, PotentialTransformer, RecloseSequence, Breaker
+    CurrentTransformer, PotentialTransformer, Breaker
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -170,9 +170,6 @@ class SchemaNetworks:
             es.add_phase(io)
             service.add(es)
             io.energy_source = es
-        elif isinstance(io, RecloseSequence):
-            breaker = Breaker(reclose_sequences=[io])
-            service.add(breaker)
 
         return io
 
@@ -407,11 +404,6 @@ class SchemaNetworks:
                 it.add_operated_by_protection_equipment(filled)
                 service.add(it)
 
-        # Reclose sequences are not saved unless a protected switch references it.
-        if isinstance(filled, RecloseSequence):
-            breaker = Breaker(reclose_sequences=[filled])
-            service.add(breaker)
-
         #######################
         # IEC61970 BASE SCADA #
         #######################
@@ -483,8 +475,6 @@ class SchemaNetworks:
             service.add(filled.power_transformer)
 
         if isinstance(filled, ProtectedSwitch):
-            for it in filled.reclose_sequences:
-                service.add(it)
             for it in filled.operated_by_protection_equipment:
                 it.add_protected_switch(filled)
                 service.add(it)

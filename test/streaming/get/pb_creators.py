@@ -89,7 +89,6 @@ from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPo
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
 from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import CurrentRelay as PBCurrentRelay
 from zepben.protobuf.cim.iec61970.base.protection.ProtectionEquipment_pb2 import ProtectionEquipment as PBProtectionEquipment
-from zepben.protobuf.cim.iec61970.base.protection.RecloseSequence_pb2 import RecloseSequence as PBRecloseSequence
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
@@ -810,15 +809,6 @@ def protection_equipment():
     )
 
 
-def reclose_sequence():
-    return builds(
-        PBRecloseSequence,
-        io=identified_object(),
-        recloseDelay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        recloseStep=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-    )
-
-
 #######################
 # IEC61970 BASE SCADA #
 #######################
@@ -1074,7 +1064,6 @@ def protected_switch():
         PBProtectedSwitch,
         sw=switch(),
         breakingCapacity=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        recloseSequenceMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         operatedByProtectionEquipmentMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
 

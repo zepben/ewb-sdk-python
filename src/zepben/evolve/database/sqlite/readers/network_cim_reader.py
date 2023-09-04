@@ -36,7 +36,7 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, \
     CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
     LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, \
-    TableRecloseSequences, RecloseSequence, ProtectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches
+    ProtectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches
 
 __all__ = ["NetworkCIMReader"]
 
@@ -563,18 +563,6 @@ class NetworkCIMReader(BaseCIMReader):
         protection_equipment.protection_kind = ProtectionKind[rs.get_string(table.protection_kind.query_index)]
 
         return self._load_equipment(protection_equipment, table, rs)
-
-    def load_reclose_sequence(self, table: TableRecloseSequences, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
-        reclose_sequence = RecloseSequence(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
-
-        reclose_sequence.reclose_delay = rs.get_double(table.reclose_delay.query_index, None)
-        reclose_sequence.reclose_step = rs.get_int(table.reclose_step.query_index, None)
-
-        protected_switch_id = rs.get_string(table.protected_switch_mrid.query_index)
-        protected_switch = self._base_service.get(protected_switch_id, ProtectedSwitch)
-        protected_switch.add_reclose_sequence(reclose_sequence)
-
-        return self._load_identified_object(reclose_sequence, table, rs) and self._add_or_throw(reclose_sequence)
 
     # ************ IEC61970 BASE SCADA ************
 

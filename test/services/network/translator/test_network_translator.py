@@ -109,7 +109,6 @@ types_to_test = {
     ############################
 
     "create_current_relay": create_current_relay(),
-    "create_reclose_sequence": create_reclose_sequence(),
 
     #######################
     # IEC61970 BASE SCADA #

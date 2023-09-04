@@ -38,18 +38,17 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'create_equivalent_branch', 'create_equivalent_equipment', 'create_diagram', 'create_diagram_object', 'create_diagram_object_point',
            'create_accumulator', 'create_accumulator_value', 'create_analog', 'create_analog_value', 'create_control', 'create_discrete',
            'create_discrete_value', 'create_io_point', 'create_measurement', 'sampled_unit_symbol', 'create_current_relay', 'create_protection_equipment',
-           'create_reclose_sequence', 'create_remote_control', 'create_remote_point', 'create_remote_source', 'sampled_battery_state_kind',
-           'create_battery_unit', 'create_photovoltaic_unit', 'create_power_electronics_unit', 'create_power_electronics_wind_unit', 'create_ac_line_segment',
-           'create_breaker', 'create_busbar_section', 'create_conductor', 'create_connector', 'create_disconnector', 'create_energy_consumer',
-           'create_energy_connection', 'create_energy_consumer_phase', 'create_energy_source', 'create_energy_source_phase', 'create_fuse', 'create_jumper',
-           'create_junction', 'create_line', 'create_linear_shunt_compensator', 'create_load_break_switch', 'create_per_length_impedance',
-           'create_per_length_line_parameter', 'create_per_length_sequence_impedance', 'sampled_phase_shunt_connection_kind',
-           'create_power_electronics_connection', 'create_power_electronics_connection_phase', 'create_power_transformer', 'create_power_transformer_end',
-           'create_protected_switch', 'create_ratio_tap_changer', 'create_recloser', 'create_regulating_cond_eq', 'create_shunt_compensator',
-           'sampled_single_phase_kind', 'create_switch', 'create_tap_changer', 'create_transformer_end', 'create_transformer_star_impedance',
-           'sampled_vector_group', 'sampled_winding_connection_kind', 'create_circuit', 'create_loop', 'create_lv_feeder', 'traced_phases', 'sampled_wire_info',
-           'sampled_conducting_equipment', 'sampled_equipment', 'sampled_equipment_container', 'sampled_hvlv_feeder', 'sampled_measurement',
-           'sampled_protected_switches']
+           'create_remote_control', 'create_remote_point', 'create_remote_source', 'sampled_battery_state_kind', 'create_battery_unit',
+           'create_photovoltaic_unit', 'create_power_electronics_unit', 'create_power_electronics_wind_unit', 'create_ac_line_segment', 'create_breaker',
+           'create_busbar_section', 'create_conductor', 'create_connector', 'create_disconnector', 'create_energy_consumer', 'create_energy_connection',
+           'create_energy_consumer_phase', 'create_energy_source', 'create_energy_source_phase', 'create_fuse', 'create_jumper', 'create_junction',
+           'create_line', 'create_linear_shunt_compensator', 'create_load_break_switch', 'create_per_length_impedance', 'create_per_length_line_parameter',
+           'create_per_length_sequence_impedance', 'sampled_phase_shunt_connection_kind', 'create_power_electronics_connection',
+           'create_power_electronics_connection_phase', 'create_power_transformer', 'create_power_transformer_end', 'create_protected_switch',
+           'create_ratio_tap_changer', 'create_recloser', 'create_regulating_cond_eq', 'create_shunt_compensator', 'sampled_single_phase_kind', 'create_switch',
+           'create_tap_changer', 'create_transformer_end', 'create_transformer_star_impedance', 'sampled_vector_group', 'sampled_winding_connection_kind',
+           'create_circuit', 'create_loop', 'create_lv_feeder', 'traced_phases', 'sampled_wire_info', 'sampled_conducting_equipment', 'sampled_equipment',
+           'sampled_equipment_container', 'sampled_hvlv_feeder', 'sampled_measurement', 'sampled_protected_switches']
 
 
 #######################
@@ -820,15 +819,6 @@ def create_protection_equipment(include_runtime: bool = True):
     }
 
 
-def create_reclose_sequence(include_runtime: bool = True):
-    return builds(
-        RecloseSequence,
-        **create_identified_object(include_runtime),
-        reclose_delay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        reclose_step=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
-    )
-
-
 #######################
 # IEC61970 BASE SCADA #
 #######################
@@ -1139,7 +1129,6 @@ def create_protected_switch(include_runtime: bool):
     return {
         **create_switch(include_runtime),
         "breaking_capacity": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        "reclose_sequences": lists(builds(RecloseSequence, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         "operated_by_protection_equipment": lists(builds(CurrentRelay, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     }
 

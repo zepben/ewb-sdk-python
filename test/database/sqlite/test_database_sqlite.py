@@ -26,7 +26,7 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_junction, create_linear_shunt_compensator, create_load_break_switch, create_per_length_sequence_impedance, create_power_electronics_connection, \
     create_power_electronics_connection_phase, create_power_transformer, create_power_transformer_end, create_ratio_tap_changer, create_recloser, \
     create_transformer_star_impedance, create_circuit, create_loop, create_lv_feeder, create_current_transformer_info, create_current_transformer, \
-    create_potential_transformer, create_current_relay, create_current_relay_info, create_reclose_sequence, create_switch_info
+    create_potential_transformer, create_current_relay, create_current_relay_info, create_switch_info
 from database.sqlite.schema_utils import SchemaNetworks, Services, assume_non_blank_street_address_details
 from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, \
     NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, \
@@ -37,7 +37,7 @@ from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, C
     EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, BaseService, \
     DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail, LvFeeder, \
-    CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, CurrentRelayInfo, CurrentRelay, RecloseSequence
+    CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, CurrentRelayInfo, CurrentRelay
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 from zepben.evolve.services.network.tracing import tracing
@@ -412,12 +412,6 @@ class TestDatabaseSqlite:
     @given(current_relay=create_current_relay(False))
     async def test_schema_current_relay(self, caplog, current_relay):
         await self._validate_schema(SchemaNetworks().network_services_of(CurrentRelay, current_relay), caplog)
-
-    @log_on_failure_decorator
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(reclose_sequence=create_reclose_sequence(False))
-    async def test_schema_reclose_sequence(self, caplog, reclose_sequence):
-        await self._validate_schema(SchemaNetworks().network_services_of(RecloseSequence, reclose_sequence), caplog)
 
     # ************ IEC61970 BASE SCADA ************
 

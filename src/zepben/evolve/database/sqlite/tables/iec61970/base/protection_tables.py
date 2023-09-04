@@ -6,7 +6,7 @@
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableEquipment, TableIdentifiedObjects
 
-__all__ = ["TableProtectionEquipment", "TableCurrentRelays", "TableRecloseSequences"]
+__all__ = ["TableProtectionEquipment", "TableCurrentRelays"]
 
 
 # noinspection PyAbstractClass
@@ -35,18 +35,3 @@ class TableCurrentRelays(TableProtectionEquipment):
 
     def name(self) -> str:
         return "current_relays"
-
-
-class TableRecloseSequences(TableIdentifiedObjects):
-    protected_switch_mrid: Column = None
-    reclose_delay: Column = None
-    reclose_step: Column = None
-
-    def __init__(self):
-        super(TableRecloseSequences, self).__init__()
-        self.protected_switch_mrid = self._create_column("protected_switch_mrid", "TEXT", Nullable.NOT_NULL)
-        self.reclose_delay = self._create_column("reclose_delay", "NUMBER", Nullable.NULL)
-        self.reclose_step = self._create_column("reclose_step", "INTEGER", Nullable.NULL)
-
-    def name(self) -> str:
-        return "reclose_sequences"
