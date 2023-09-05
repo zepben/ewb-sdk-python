@@ -1293,12 +1293,12 @@ def sampled_wire_info(include_runtime: bool):
 
 def sampled_conducting_equipment(include_runtime: bool):
     return choice([
+        # Don't add EnergySource to this list as it's used in SetPhases to start tracing, which will cause test_schema_terminal to fail.
         builds(AcLineSegment, **create_identified_object(include_runtime)),
         builds(PowerTransformer, **create_identified_object(include_runtime)),
         builds(Breaker, **create_identified_object(include_runtime)),
         builds(Disconnector, **create_identified_object(include_runtime)),
         builds(EnergyConsumer, **create_identified_object(include_runtime)),
-        builds(EnergySource, **create_identified_object(include_runtime)),
     ])
 
 
