@@ -33,7 +33,8 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     CurrentTransformer, TableSensors, Sensor, TableCurrentTransformers, PotentialTransformer, TablePotentialTransformers, CurrentTransformerInfo, \
     TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo, TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, \
     Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableCurrentRelayInfo, \
-    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, TableCurrentRelays, TableProtectionEquipmentProtectedSwitches
+    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, TableCurrentRelays, TableProtectionEquipmentProtectedSwitches, \
+    TableRecloseDelays
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -282,6 +283,15 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert = self.database_tables.get_insert(TableCurrentRelayInfo)
 
         insert.add_value(table.curve_setting.query_index, current_relay_info.curve_setting)
+
+        delay_table = self.database_tables.get_table(TableRecloseDelays)
+        for sequence_number, delay in enumerate(current_relay_info.reclose_delays):
+            delay_insert = self.database_tables.get_insert(TableRecloseDelays)
+            delay_insert.add_value(delay_table.sequence_number.query_index, sequence_number)
+            delay_insert.add_value(delay_table.reclose_delay.query_index, delay)
+            delay_insert.add_value(delay_table.current_relay_info_mrid.query_index, current_relay_info.mrid)
+            self._try_execute_single_update(delay_insert, f"{current_relay_info.mrid}-delay_sequence-{sequence_number}",
+                                            "reclose delays")
 
         return self._save_asset_info(table, insert, current_relay_info, "current relay info")
 

@@ -36,7 +36,7 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, \
     CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
     LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, \
-    ProtectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches
+    ProtectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays
 
 __all__ = ["NetworkCIMReader"]
 
@@ -285,6 +285,19 @@ class NetworkCIMReader(BaseCIMReader):
         current_relay_info.curve_setting = rs.get_string(table.curve_setting.query_index, None)
 
         return self._load_asset_info(current_relay_info, table, rs) and self._add_or_throw(current_relay_info)
+
+    def load_reclose_delays(self, table: TableRecloseDelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        current_relay_info_mrid = rs.get_string(table.current_relay_info_mrid.query_index)
+        sequence_number = int(rs.get_string(table.sequence_number.query_index))
+        reclose_delay = rs.get_double(table.reclose_delay.query_index)
+        set_last_mrid(f"{current_relay_info_mrid}.s{sequence_number}")
+        cri = self._base_service.get(current_relay_info_mrid, CurrentRelayInfo)
+        if cri.reclose_delays:
+            cri.reclose_delays.insert(sequence_number, reclose_delay)
+        else:
+            cri.reclose_delays = [reclose_delay]
+
+        return True
 
     def load_current_transformer_info(self, table: TableCurrentTransformerInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         current_transformer_info = CurrentTransformerInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))

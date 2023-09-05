@@ -124,6 +124,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TablePricingStructuresTariffs: TablePricingStructuresTariffs(),
         TableProtectionEquipmentProtectedSwitches: TableProtectionEquipmentProtectedSwitches(),
         TableRatioTapChangers: TableRatioTapChangers(),
+        TableRecloseDelays: TableRecloseDelays(),
         TableReclosers: TableReclosers(),
         TableRemoteControls: TableRemoteControls(),
         TableRemoteSources: TableRemoteSources(),
