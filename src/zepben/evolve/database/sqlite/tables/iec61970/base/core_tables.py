@@ -75,11 +75,13 @@ class TableConnectivityNodes(TableIdentifiedObjects):
 class TableEquipment(TablePowerSystemResources):
     normally_in_service: Column = None
     in_service: Column = None
+    commissioned_date: Column = None
 
     def __init__(self):
         super(TableEquipment, self).__init__()
         self.normally_in_service = self._create_column("normally_in_service", "BOOLEAN")
         self.in_service = self._create_column("in_service", "BOOLEAN")
+        self.commissioned_date = self._create_column("commissioned_date", "TEXT")
 
 
 # noinspection PyAbstractClass

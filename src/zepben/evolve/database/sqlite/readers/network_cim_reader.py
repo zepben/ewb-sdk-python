@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from datetime import datetime
 from typing import Callable, Optional
 
 from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, TableNoLoadTests, NoLoadTest, TableOpenCircuitTests, \
@@ -428,6 +429,9 @@ class NetworkCIMReader(BaseCIMReader):
     def _load_equipment(self, equipment: Equipment, table: TableEquipment, rs: ResultSet) -> bool:
         equipment.normally_in_service = rs.get_boolean(table.normally_in_service.query_index)
         equipment.in_service = rs.get_boolean(table.in_service.query_index)
+        instant_string = rs.get_string(table.commissioned_date.query_index, None)
+        if instant_string:
+            equipment.commissioned_date = datetime.fromisoformat(instant_string)
 
         return self._load_power_system_resource(equipment, table, rs)
 

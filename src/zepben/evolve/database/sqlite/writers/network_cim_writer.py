@@ -441,6 +441,7 @@ class NetworkCIMWriter(BaseCIMWriter):
     def _save_equipment(self, table: TableEquipment, insert: PreparedStatement, equipment: Equipment, description: str) -> bool:
         insert.add_value(table.normally_in_service.query_index, int(equipment.normally_in_service))
         insert.add_value(table.in_service.query_index, int(equipment.in_service))
+        insert.add_value(table.commissioned_date.query_index, equipment.commissioned_date.isoformat() if equipment.commissioned_date else None)
         status = True
         for e in equipment.containers:
             if not isinstance(e, Feeder):
