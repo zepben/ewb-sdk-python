@@ -206,6 +206,30 @@ class TablePowerElectronicsConnection(TableRegulatingCondEq):
     q: Column = None
     rated_s: Column = None
     rated_u: Column = None
+    inverter_standard: Column = None
+    sustain_op_overvolt_limit: Column = None
+    stop_at_over_freq: Column = None
+    stop_at_under_freq: Column = None
+    inv_volt_watt_resp_mode: Column = None
+    inv_watt_resp_v1: Column = None
+    inv_watt_resp_v2: Column = None
+    inv_watt_resp_v3: Column = None
+    inv_watt_resp_v4: Column = None
+    inv_watt_resp_p_at_v1: Column = None
+    inv_watt_resp_p_at_v2: Column = None
+    inv_watt_resp_p_at_v3: Column = None
+    inv_watt_resp_p_at_v4: Column = None
+    inv_volt_var_resp_mode: Column = None
+    inv_var_resp_v1: Column = None
+    inv_var_resp_v2: Column = None
+    inv_var_resp_v3: Column = None
+    inv_var_resp_v4: Column = None
+    inv_var_resp_q_at_v1: Column = None
+    inv_var_resp_q_at_v2: Column = None
+    inv_var_resp_q_at_v3: Column = None
+    inv_var_resp_q_at_v4: Column = None
+    inv_reactive_power_mode: Column = None
+    inv_fix_reactive_power: Column = None
 
     def __init__(self):
         super(TablePowerElectronicsConnection, self).__init__()
@@ -216,6 +240,30 @@ class TablePowerElectronicsConnection(TableRegulatingCondEq):
         self.q = self._create_column("q", "NUMBER", Nullable.NULL)
         self.rated_s = self._create_column("rated_s", "INTEGER", Nullable.NULL)
         self.rated_u = self._create_column("rated_u", "INTEGER", Nullable.NULL)
+        self.inverter_standard = self._create_column("inverter_standard", "TEXT", Nullable.NULL)
+        self.sustain_op_overvolt_limit = self._create_column("sustain_op_overvolt_limit", "INTEGER", Nullable.NULL)
+        self.stop_at_over_freq = self._create_column("stop_at_over_freq", "NUMBER", Nullable.NULL)
+        self.stop_at_under_freq = self._create_column("stop_at_under_freq", "NUMBER", Nullable.NULL)
+        self.inv_volt_watt_resp_mode = self._create_column("inv_volt_watt_resp_mode", "BOOLEAN", Nullable.NULL)
+        self.inv_watt_resp_v1 = self._create_column("inv_watt_resp_v1", "INTEGER", Nullable.NULL)
+        self.inv_watt_resp_v2 = self._create_column("inv_watt_resp_v2", "INTEGER", Nullable.NULL)
+        self.inv_watt_resp_v3 = self._create_column("inv_watt_resp_v3", "INTEGER", Nullable.NULL)
+        self.inv_watt_resp_v4 = self._create_column("inv_watt_resp_v4", "INTEGER", Nullable.NULL)
+        self.inv_watt_resp_p_at_v1 = self._create_column("inv_watt_resp_p_at_v1", "NUMBER", Nullable.NULL)
+        self.inv_watt_resp_p_at_v2 = self._create_column("inv_watt_resp_p_at_v2", "NUMBER", Nullable.NULL)
+        self.inv_watt_resp_p_at_v3 = self._create_column("inv_watt_resp_p_at_v3", "NUMBER", Nullable.NULL)
+        self.inv_watt_resp_p_at_v4 = self._create_column("inv_watt_resp_p_at_v4", "NUMBER", Nullable.NULL)
+        self.inv_volt_var_resp_mode = self._create_column("inv_volt_var_resp_mode", "BOOLEAN", Nullable.NULL)
+        self.inv_var_resp_v1 = self._create_column("inv_var_resp_v1", "INTEGER", Nullable.NULL)
+        self.inv_var_resp_v2 = self._create_column("inv_var_resp_v2", "INTEGER", Nullable.NULL)
+        self.inv_var_resp_v3 = self._create_column("inv_var_resp_v3", "INTEGER", Nullable.NULL)
+        self.inv_var_resp_v4 = self._create_column("inv_var_resp_v4", "INTEGER", Nullable.NULL)
+        self.inv_var_resp_q_at_v1 = self._create_column("inv_var_resp_q_at_v1", "NUMBER", Nullable.NULL)
+        self.inv_var_resp_q_at_v2 = self._create_column("inv_var_resp_q_at_v2", "NUMBER", Nullable.NULL)
+        self.inv_var_resp_q_at_v3 = self._create_column("inv_var_resp_q_at_v3", "NUMBER", Nullable.NULL)
+        self.inv_var_resp_q_at_v4 = self._create_column("inv_var_resp_q_at_v4", "NUMBER", Nullable.NULL)
+        self.inv_reactive_power_mode = self._create_column("inv_reactive_power_mode", "BOOLEAN", Nullable.NULL)
+        self.inv_fix_reactive_power = self._create_column("inv_fix_reactive_power", "NUMBER", Nullable.NULL)
 
     def name(self) -> str:
         return "power_electronics_connection"

@@ -735,9 +735,43 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_id_reference_collections(diff, PowerElectronicsConnection.units, PowerElectronicsConnection.phases)
-        self._compare_values(diff, PowerElectronicsConnection.max_i_fault, PowerElectronicsConnection.rated_s, PowerElectronicsConnection.rated_u)
-        self._compare_floats(diff, PowerElectronicsConnection.max_q, PowerElectronicsConnection.min_q, PowerElectronicsConnection.p,
-                             PowerElectronicsConnection.q)
+        self._compare_values(
+            diff,
+            PowerElectronicsConnection.max_i_fault,
+            PowerElectronicsConnection.rated_s,
+            PowerElectronicsConnection.rated_u,
+            PowerElectronicsConnection.inverter_standard,
+            PowerElectronicsConnection.sustain_op_overvolt_limit,
+            PowerElectronicsConnection.inv_volt_watt_resp_mode,
+            PowerElectronicsConnection.inv_watt_resp_v1,
+            PowerElectronicsConnection.inv_watt_resp_v2,
+            PowerElectronicsConnection.inv_watt_resp_v3,
+            PowerElectronicsConnection.inv_watt_resp_v4,
+            PowerElectronicsConnection.inv_volt_var_resp_mode,
+            PowerElectronicsConnection.inv_var_resp_v1,
+            PowerElectronicsConnection.inv_var_resp_v2,
+            PowerElectronicsConnection.inv_var_resp_v3,
+            PowerElectronicsConnection.inv_var_resp_v4,
+            PowerElectronicsConnection.inv_reactive_power_mode
+        )
+        self._compare_floats(
+            diff,
+            PowerElectronicsConnection.max_q,
+            PowerElectronicsConnection.min_q,
+            PowerElectronicsConnection.p,
+            PowerElectronicsConnection.q,
+            PowerElectronicsConnection.stop_at_over_freq,
+            PowerElectronicsConnection.stop_at_under_freq,
+            PowerElectronicsConnection.inv_watt_resp_p_at_v1,
+            PowerElectronicsConnection.inv_watt_resp_p_at_v2,
+            PowerElectronicsConnection.inv_watt_resp_p_at_v3,
+            PowerElectronicsConnection.inv_watt_resp_p_at_v4,
+            PowerElectronicsConnection.inv_var_resp_q_at_v1,
+            PowerElectronicsConnection.inv_var_resp_q_at_v2,
+            PowerElectronicsConnection.inv_var_resp_q_at_v3,
+            PowerElectronicsConnection.inv_var_resp_q_at_v4,
+            PowerElectronicsConnection.inv_fix_reactive_power
+        )
 
         return self._compare_regulating_cond_eq(diff)
 

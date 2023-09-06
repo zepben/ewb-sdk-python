@@ -1086,7 +1086,31 @@ def power_electronics_connection_to_pb(cim: PowerElectronicsConnection) -> PBPow
         p=from_nullable_float(cim.p),
         q=from_nullable_float(cim.q),
         ratedS=from_nullable_int(cim.rated_s),
-        ratedU=from_nullable_int(cim.rated_u)
+        ratedU=from_nullable_int(cim.rated_u),
+        inverterStandard=cim.inverter_standard,
+        sustainOpOvervoltLimit=from_nullable_int(cim.sustain_op_overvolt_limit),
+        stopAtOverFreq=from_nullable_float(cim.stop_at_over_freq),
+        stopAtUnderFreq=from_nullable_float(cim.stop_at_under_freq),
+        **nullable_bool_settings("invVoltWattRespMode", cim.inv_volt_watt_resp_mode),
+        invWattRespV1=from_nullable_int(cim.inv_watt_resp_v1),
+        invWattRespV2=from_nullable_int(cim.inv_watt_resp_v2),
+        invWattRespV3=from_nullable_int(cim.inv_watt_resp_v3),
+        invWattRespV4=from_nullable_int(cim.inv_watt_resp_v4),
+        invWattRespPAtV1=from_nullable_float(cim.inv_watt_resp_p_at_v1),
+        invWattRespPAtV2=from_nullable_float(cim.inv_watt_resp_p_at_v2),
+        invWattRespPAtV3=from_nullable_float(cim.inv_watt_resp_p_at_v3),
+        invWattRespPAtV4=from_nullable_float(cim.inv_watt_resp_p_at_v4),
+        **nullable_bool_settings("invVoltVarRespMode", cim.inv_volt_var_resp_mode),
+        invVarRespV1=from_nullable_int(cim.inv_var_resp_v1),
+        invVarRespV2=from_nullable_int(cim.inv_var_resp_v2),
+        invVarRespV3=from_nullable_int(cim.inv_var_resp_v3),
+        invVarRespV4=from_nullable_int(cim.inv_var_resp_v4),
+        invVarRespQAtV1=from_nullable_float(cim.inv_var_resp_q_at_v1),
+        invVarRespQAtV2=from_nullable_float(cim.inv_var_resp_q_at_v2),
+        invVarRespQAtV3=from_nullable_float(cim.inv_var_resp_q_at_v3),
+        invVarRespQAtV4=from_nullable_float(cim.inv_var_resp_q_at_v4),
+        **nullable_bool_settings("invReactivePowerMode", cim.inv_reactive_power_mode),
+        invFixReactivePower=from_nullable_float(cim.inv_fix_reactive_power)
     )
 
 

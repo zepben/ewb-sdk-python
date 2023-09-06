@@ -970,8 +970,8 @@ def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) ->
 def protection_equipment_to_cim(pb: PBProtectionEquipment, cim: ProtectionEquipment, network_service: NetworkService):
     cim.relay_delay_time = float_or_none(pb.relayDelayTime)
     cim.protection_kind = ProtectionKind(pb.protectionKind)
-    cim.directable = None if pb.HasField("directableNull") else pb.directable
-    cim.power_direction = PowerDirectionKind(pb.powerDirectionKind)
+    cim.directable = None if pb.HasField("directableNull") else pb.directableSet
+    cim.power_direction = PowerDirectionKind(pb.powerDirection)
 
     for mrid in pb.protectedSwitchMRIDs:
         network_service.resolve_or_defer_reference(resolver.protected_switches(cim), mrid)
@@ -1274,7 +1274,31 @@ def power_electronics_connection_to_cim(pb: PBPowerElectronicsConnection, networ
         max_q=float_or_none(pb.maxQ),
         min_q=float_or_none(pb.minQ),
         rated_s=int_or_none(pb.ratedS),
-        rated_u=int_or_none(pb.ratedU)
+        rated_u=int_or_none(pb.ratedU),
+        inverter_standard=pb.inverterStandard,
+        sustain_op_overvolt_limit=int_or_none(pb.sustainOpOvervoltLimit),
+        stop_at_over_freq=float_or_none(pb.stopAtOverFreq),
+        stop_at_under_freq=float_or_none(pb.stopAtUnderFreq),
+        inv_volt_watt_resp_mode=None if pb.HasField("invVoltWattRespModeNull") else pb.invVoltWattRespModeSet,
+        inv_watt_resp_v1=int_or_none(pb.invWattRespV1),
+        inv_watt_resp_v2=int_or_none(pb.invWattRespV2),
+        inv_watt_resp_v3=int_or_none(pb.invWattRespV3),
+        inv_watt_resp_v4=int_or_none(pb.invWattRespV4),
+        inv_watt_resp_p_at_v1=float_or_none(pb.invWattRespPAtV1),
+        inv_watt_resp_p_at_v2=float_or_none(pb.invWattRespPAtV2),
+        inv_watt_resp_p_at_v3=float_or_none(pb.invWattRespPAtV3),
+        inv_watt_resp_p_at_v4=float_or_none(pb.invWattRespPAtV4),
+        inv_volt_var_resp_mode=None if pb.HasField("invVoltVarRespModeNull") else pb.invVoltVarRespModeSet,
+        inv_var_resp_v1=int_or_none(pb.invVarRespV1),
+        inv_var_resp_v2=int_or_none(pb.invVarRespV2),
+        inv_var_resp_v3=int_or_none(pb.invVarRespV3),
+        inv_var_resp_v4=int_or_none(pb.invVarRespV4),
+        inv_var_resp_q_at_v1=float_or_none(pb.invVarRespQAtV1),
+        inv_var_resp_q_at_v2=float_or_none(pb.invVarRespQAtV2),
+        inv_var_resp_q_at_v3=float_or_none(pb.invVarRespQAtV3),
+        inv_var_resp_q_at_v4=float_or_none(pb.invVarRespQAtV4),
+        inv_reactive_power_mode=None if pb.HasField("invReactivePowerModeNull") else pb.invReactivePowerModeSet,
+        inv_fix_reactive_power=float_or_none(pb.invFixReactivePower)
     )
 
     for mrid in pb.powerElectronicsUnitMRIDs:
