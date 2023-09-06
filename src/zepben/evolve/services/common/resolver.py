@@ -466,7 +466,3 @@ def operated_by_protection_equipment(protected_switch: ProtectedSwitch) -> Bound
     # noinspection PyArgumentList
     return BoundReferenceResolver(protected_switch, ps_to_pe_resolver, pe_to_ps_resolver)
 
-
-def reclose_sequences(protected_switch: ProtectedSwitch) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(protected_switch, ps_to_rs_resolver, None)

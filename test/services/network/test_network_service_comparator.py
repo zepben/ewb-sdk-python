@@ -19,7 +19,7 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
     Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, CurrentRelayInfo, \
-    ProtectionEquipment, CurrentRelay, RecloseSequence
+    ProtectionEquipment, CurrentRelay
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
@@ -610,12 +610,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Breaker(mrid="b2")
         )
 
-    def test_compare_reclose_sequence(self):
-        self._compare_identified_object(RecloseSequence)
-
-        self.validator.validate_property(RecloseSequence.reclose_delay, RecloseSequence, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(RecloseSequence.reclose_step, RecloseSequence, lambda _: 1, lambda _: 2)
-
     #######################
     # IEC61970 BASE SCADA #
     #######################
@@ -915,13 +909,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_switch(creator)
 
         self.validator.validate_property(ProtectedSwitch.breaking_capacity, creator, lambda _: 1, lambda _: 2)
-        self.validator.validate_collection(
-            ProtectedSwitch.reclose_sequences,
-            ProtectedSwitch.add_reclose_sequence,
-            creator,
-            lambda _: RecloseSequence(mrid="rs1"),
-            lambda _: RecloseSequence(mrid="rs2")
-        )
         self.validator.validate_collection(
             ProtectedSwitch.operated_by_protection_equipment,
             ProtectedSwitch.add_operated_by_protection_equipment,

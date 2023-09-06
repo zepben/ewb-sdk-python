@@ -15,7 +15,7 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
     Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
     Switch, ShuntCompensatorInfo, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, \
-    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, RecloseSequence, ProtectedSwitch
+    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, ProtectedSwitch
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
@@ -537,14 +537,6 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_equipment(diff)
 
-    def _compare_reclose_sequence(self, source: RecloseSequence, target: RecloseSequence) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_values(diff, RecloseSequence.reclose_step)
-        self._compare_floats(diff, RecloseSequence.reclose_delay)
-
-        return self._compare_identified_object(diff)
-
     #######################
     # IEC61970 BASE SCADA #
     #######################
@@ -794,7 +786,7 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_protected_switch(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, ProtectedSwitch.breaking_capacity)
-        self._compare_id_reference_collections(diff, ProtectedSwitch.reclose_sequences, ProtectedSwitch.operated_by_protection_equipment)
+        self._compare_id_reference_collections(diff, ProtectedSwitch.operated_by_protection_equipment)
 
         return self._compare_switch(diff)
 

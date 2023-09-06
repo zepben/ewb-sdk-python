@@ -61,7 +61,6 @@ from zepben.evolve.model.cim.iec61970.base.domain.unit_symbol import *
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *
 from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import *
 from zepben.evolve.model.cim.iec61970.base.protection.current_relay import *
-from zepben.evolve.model.cim.iec61970.base.protection.reclose_sequence import *
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_state_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.line import *

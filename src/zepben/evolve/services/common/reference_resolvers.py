@@ -53,7 +53,6 @@ from zepben.evolve.model.cim.iec61970.base.meas.control import Control
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import Measurement
 from zepben.evolve.model.cim.iec61970.base.protection.current_relay import CurrentRelay
 from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import ProtectionEquipment
-from zepben.evolve.model.cim.iec61970.base.protection.reclose_sequence import RecloseSequence
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
@@ -88,8 +87,8 @@ __all__ = [
     "tti_to_tei_resolver", "tei_to_tsi_resolver", "tsi_to_tei_resolver", "te_to_tsi_resolver", "pti_to_tti_resolver", "peu_to_pec_resolver",
     "pec_to_peu_resolver", "pecphase_to_pec_resolver", "pec_to_pecphase_resolver", "tei_to_ee_nlt_resolver", "tei_to_ee_sct_resolver", "tei_to_ge_sct_resolver",
     "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver", "shunt_compensator_to_shunt_compensator_info_resolver", "lvfeeder_to_nht_resolver",
-    "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "pe_to_ps_resolver", "ps_to_pe_resolver", "ps_to_rs_resolver",
-    "switch_to_switch_info_resolver", "current_relay_to_current_relay_info_resolver"
+    "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "pe_to_ps_resolver", "ps_to_pe_resolver", "switch_to_switch_info_resolver",
+    "current_relay_to_current_relay_info_resolver"
 ]
 
 
@@ -313,4 +312,3 @@ vt_to_vti_resolver = ReferenceResolver(PotentialTransformer, PotentialTransforme
 
 pe_to_ps_resolver = ReferenceResolver(ProtectionEquipment, ProtectedSwitch, lambda t, r: t.add_protected_switch(r))
 ps_to_pe_resolver = ReferenceResolver(ProtectedSwitch, ProtectionEquipment, lambda t, r: t.add_operated_by_protection_equipment(r))
-ps_to_rs_resolver = ReferenceResolver(ProtectedSwitch, RecloseSequence, lambda t, r: t.add_reclose_sequence(r))

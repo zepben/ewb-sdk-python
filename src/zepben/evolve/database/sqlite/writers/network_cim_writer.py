@@ -33,8 +33,7 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     CurrentTransformer, TableSensors, Sensor, TableCurrentTransformers, PotentialTransformer, TablePotentialTransformers, CurrentTransformerInfo, \
     TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo, TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, \
     Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableCurrentRelayInfo, \
-    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, RecloseSequence, TableCurrentRelays, TableRecloseSequences, \
-    TableProtectionEquipmentProtectedSwitches
+    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, TableCurrentRelays, TableProtectionEquipmentProtectedSwitches
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -552,16 +551,6 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         return self._save_equipment(table, insert, protection_equipment, description)
 
-    def _save_reclose_sequence(self, protected_switch: ProtectedSwitch, reclose_sequence: RecloseSequence) -> bool:
-        table = self.database_tables.get_table(TableRecloseSequences)
-        insert = self.database_tables.get_insert(TableRecloseSequences)
-
-        insert.add_value(table.protected_switch_mrid.query_index, protected_switch.mrid)
-        insert.add_value(table.reclose_delay.query_index, reclose_sequence.reclose_delay)
-        insert.add_value(table.reclose_step.query_index, reclose_sequence.reclose_step)
-
-        return self._save_identified_object(table, insert, reclose_sequence, "reclose sequence")
-
     # ************ IEC61970 BASE WIRES ************
 
     def _save_power_electronics_unit(self, table: TablePowerElectronicsUnit, insert: PreparedStatement, power_electronics_unit: PowerElectronicsUnit,
@@ -833,8 +822,6 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.breaking_capacity.query_index, protected_switch.breaking_capacity)
 
         status = True
-        for rs in protected_switch.reclose_sequences:
-            status = status and self._save_reclose_sequence(protected_switch, rs)
         for pe in protected_switch.operated_by_protection_equipment:
             status = status and self._save_protection_equipment_protected_switch(pe, protected_switch)
 

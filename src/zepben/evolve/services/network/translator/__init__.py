@@ -69,7 +69,6 @@ from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement
 from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import CurrentRelay
 from zepben.protobuf.cim.iec61970.base.protection.ProtectionEquipment_pb2 import ProtectionEquipment
-from zepben.protobuf.cim.iec61970.base.protection.RecloseSequence_pb2 import RecloseSequence
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource
@@ -183,7 +182,6 @@ IoPoint.mrid = lambda self: self.io.mrid()
 Measurement.mrid = lambda self: self.io.mrid()
 CurrentRelay.mrid = lambda self: self.pe.mrid()
 ProtectionEquipment.mrid = lambda self: self.eq.mrid()
-RecloseSequence.mrid = lambda self: self.io.mrid()
 RemoteControl.mrid = lambda self: self.rp.mrid()
 RemotePoint.mrid = lambda self: self.io.mrid()
 RemoteSource.mrid = lambda self: self.rp.mrid()

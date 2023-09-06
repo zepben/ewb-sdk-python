@@ -12,7 +12,7 @@ with open("README.md", "r") as fh:
 
 deps = [
     "requests<2.27.0,>=2.26.0",
-    "zepben.protobuf==0.24.0b2",
+    "zepben.protobuf==0.24.1",
     "zepben.auth==0.10.0",
     "dataclassy==0.6.2",
     "six==1.16.0"
@@ -30,7 +30,8 @@ test_deps = [
     "pytest-timeout==1.4.2",
     "hypothesis==6.56.3",
     "grpcio-testing==1.46.3",
-    "pylint==2.14.5"
+    "pylint==2.14.5",
+    "tox"
 ]
 
 setup(
@@ -50,6 +51,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Operating System :: OS Independent"
     ],
     package_dir={"": "src"},

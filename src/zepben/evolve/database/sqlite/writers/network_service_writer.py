@@ -91,7 +91,4 @@ class NetworkServiceWriter(BaseServiceWriter):
         status = status and self._save_all(service, CurrentRelayInfo, writer.save_current_relay_info)
         status = status and self._save_all(service, CurrentRelay, writer.save_current_relay)
 
-        # Excluded:
-        #  - RecloseSequence: Saved via _save_protected_switch
-
         return status

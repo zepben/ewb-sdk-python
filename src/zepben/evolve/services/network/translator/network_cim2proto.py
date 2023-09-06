@@ -72,7 +72,6 @@ from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint as PBIoPo
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement as PBMeasurement
 from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import CurrentRelay as PBCurrentRelay
 from zepben.protobuf.cim.iec61970.base.protection.ProtectionEquipment_pb2 import ProtectionEquipment as PBProtectionEquipment
-from zepben.protobuf.cim.iec61970.base.protection.RecloseSequence_pb2 import RecloseSequence as PBRecloseSequence
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl as PBRemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint as PBRemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource as PBRemoteSource
@@ -168,7 +167,6 @@ from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
 from zepben.evolve.model.cim.iec61970.base.protection.current_relay import *
 from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import *
-from zepben.evolve.model.cim.iec61970.base.protection.reclose_sequence import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
@@ -211,15 +209,14 @@ __all__ = [
     "conducting_equipment_to_pb", "connectivity_node_to_pb", "connectivity_node_container_to_pb", "equipment_to_pb", "equipment_container_to_pb",
     "feeder_to_pb", "geographical_region_to_pb", "power_system_resource_to_pb", "site_to_pb", "sub_geographical_region_to_pb", "substation_to_pb",
     "terminal_to_pb", "equivalent_branch_to_pb", "equivalent_equipment_to_pb", "accumulator_to_pb", "analog_to_pb", "control_to_pb", "discrete_to_pb",
-    "io_point_to_pb", "measurement_to_pb", "current_relay_to_pb", "protection_equipment_to_pb", "reclose_sequence_to_pb", "remote_control_to_pb",
-    "remote_point_to_pb", "remote_source_to_pb", "battery_unit_to_pb", "photo_voltaic_unit_to_pb", "power_electronics_unit_to_pb",
-    "power_electronics_wind_unit_to_pb", "ac_line_segment_to_pb", "breaker_to_pb", "conductor_to_pb", "connector_to_pb", "disconnector_to_pb",
-    "energy_connection_to_pb", "energy_consumer_to_pb", "energy_consumer_phase_to_pb", "energy_source_to_pb", "energy_source_phase_to_pb", "fuse_to_pb",
-    "jumper_to_pb", "junction_to_pb", "busbar_section_to_pb", "line_to_pb", "linear_shunt_compensator_to_pb", "load_break_switch_to_pb",
-    "per_length_line_parameter_to_pb", "per_length_impedance_to_pb", "per_length_sequence_impedance_to_pb", "power_electronics_connection_to_pb",
-    "power_electronics_connection_phase_to_pb", "power_transformer_to_pb", "power_transformer_end_to_pb", "protected_switch_to_pb", "ratio_tap_changer_to_pb",
-    "recloser_to_pb", "regulating_cond_eq_to_pb", "shunt_compensator_to_pb", "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb",
-    "transformer_star_impedance_to_pb", "circuit_to_pb", "loop_to_pb", "lv_feeder_to_pb"
+    "io_point_to_pb", "measurement_to_pb", "current_relay_to_pb", "protection_equipment_to_pb", "remote_control_to_pb", "remote_point_to_pb",
+    "remote_source_to_pb", "battery_unit_to_pb", "photo_voltaic_unit_to_pb", "power_electronics_unit_to_pb", "power_electronics_wind_unit_to_pb",
+    "ac_line_segment_to_pb", "breaker_to_pb", "conductor_to_pb", "connector_to_pb", "disconnector_to_pb", "energy_connection_to_pb", "energy_consumer_to_pb",
+    "energy_consumer_phase_to_pb", "energy_source_to_pb", "energy_source_phase_to_pb", "fuse_to_pb", "jumper_to_pb", "junction_to_pb", "busbar_section_to_pb",
+    "line_to_pb", "linear_shunt_compensator_to_pb", "load_break_switch_to_pb", "per_length_line_parameter_to_pb", "per_length_impedance_to_pb",
+    "per_length_sequence_impedance_to_pb", "power_electronics_connection_to_pb", "power_electronics_connection_phase_to_pb", "power_transformer_to_pb",
+    "power_transformer_end_to_pb", "protected_switch_to_pb", "ratio_tap_changer_to_pb", "recloser_to_pb", "regulating_cond_eq_to_pb", "shunt_compensator_to_pb",
+    "switch_to_pb", "tap_changer_to_pb", "transformer_end_to_pb", "transformer_star_impedance_to_pb", "circuit_to_pb", "loop_to_pb", "lv_feeder_to_pb"
 ]
 
 
@@ -844,17 +841,8 @@ def protection_equipment_to_pb(cim: ProtectionEquipment, include_asset_info: boo
     )
 
 
-def reclose_sequence_to_pb(cim: RecloseSequence) -> PBRecloseSequence:
-    return PBRecloseSequence(
-        io=identified_object_to_pb(cim),
-        recloseDelay=from_nullable_float(cim.reclose_delay),
-        recloseStep=from_nullable_int(cim.reclose_step)
-    )
-
-
 CurrentRelay.to_pb = current_relay_to_pb
 ProtectionEquipment.to_pb = protection_equipment_to_pb
-RecloseSequence.to_pb = reclose_sequence_to_pb
 
 
 #######################
@@ -1138,7 +1126,6 @@ def protected_switch_to_pb(cim: ProtectedSwitch) -> PBProtectedSwitch:
     return PBProtectedSwitch(
         sw=switch_to_pb(cim),
         breakingCapacity=from_nullable_int(cim.breaking_capacity),
-        recloseSequenceMRIDs=[str(io.mrid) for io in cim.reclose_sequences],
         operatedByProtectionEquipmentMRIDs=[str(io.mrid) for io in cim.operated_by_protection_equipment]
     )
 
