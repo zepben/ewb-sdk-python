@@ -1,0 +1,62 @@
+---
+id: intellij-setup
+title: Intellij Setup
+---
+
+### Prerequisites
+This document assumes you have your virtual environment setup as explained in [Virtual Environment Setup Guide](./venv_setup.mdx).
+
+### Setup
+
+#### Project Configuration
+
+1. Open the evolve-sdk-python project in Intellij. Intellij should recognise this as a python project and it should prompt you to configure it. You only need to confirm and the python framework will be configured automatically by the IDE.
+![](./assets/intellij_prompt.png)
+
+1. If this doesn't happen go to **File -> Settings -> Plugins** and install the python plugin and try again.
+![](./assets/intellij_plugins.png)
+
+1. Once the python framework is configured we must configure the project to make use of the python SDK present within the virtual environment we setup previously. Go to **File -> Project Structure -> SDKs** and create a new SDK for this project by clicking the **'+'** button at the top of the list of SDKs.
+![](./assets/python_sdks.png)
+
+1. In the dropdown that pops up after cliking the **'+'** button select the option **Add Python SDK...**
+![](./assets/python_sdks_dropdown.png)
+
+1. Within the modal that pops up select **Virtual Environment** in the list, and out of the two available radio buttons select the option **Existing Environment**. In the **Interpreter** selector browse and find the directory for the virtual environment we created in the previous section and select the **python** executable within the **bin** directory. Finally click *OK*.
+![](./assets/existing_python_sdk_environment.png)
+
+1. Within **Project Structure**, go to the *Project Settings* section to your right and select **Project**. Here we need to select the Python SDK we just created and assign it to our project. Once this is done hit **Apply**.
+![](./assets/select_new_python_sdk.png)
+
+1. Finally restart the IDE and open the project again to make sure the changes have taken effect. If everything is setup correctly when you open the inbuilt terminal for this project you should see the environment already activated within it (the directory for the virtual environment should be inside a parenthesis at the start of the prompt).
+![](./assets/ide_terminal.png)
+
+1. You can confirm all the packages needed are already present in the environment by running the following command again
+```bash
+python -m pip list
+```
+![](./assets/ide_list_packages.png)
+
+#### Setting up PyTest within Intellij
+As a final step we will create a run configuration to run PyTest within Intellij.
+
+1. Go to the top left menu bar in the IDE window and select the **Add Configuration** box.
+![](./assets/run_configuration_ide.png)
+
+1. The **Run/Debug Configuration** modal will pop up and we will select the **'+'** botton to create a new run configuration.
+![](./assets/run_config_modal.png)
+
+1. Select *pytest* from the list of available run configuration types.
+![](./assets/run_config_list.png)
+
+1. You will now have an empty **pytest** run configuration.
+![](./assets/run_config_pytest.png)
+
+1. For the **Target** configuration select **Script path** and insert the path to the test directory in the evolve-sdk-python. Confirm the **Use specified interpreter** option is enabled and it has the correct SDK selected (the one we created). Hit **Apply** and **Ok**.
+![](./assets/pytest_config_complete.png)
+
+1. You should now have a working run configuration for pytest.
+![](./assets/run_button_pytest.png)
+
+1. As a final step run it to confirm everything works as expected.
+![](./assets/run_pytest.png)
