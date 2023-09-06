@@ -354,6 +354,8 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.location_mrid.query_index, self._mrid_or_none(usage_point.usage_point_location))
         insert.add_value(table.is_virtual.query_index, int(usage_point.is_virtual))
         insert.add_value(table.connection_category.query_index, usage_point.connection_category)
+        insert.add_value(table.rated_power.query_index, usage_point.rated_power)
+        insert.add_value(table.approved_inverter_capacity.query_index, usage_point.approved_inverter_capacity)
 
         status = True
         for e in usage_point.equipment:

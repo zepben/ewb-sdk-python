@@ -130,6 +130,12 @@ class UsagePoint(IdentifiedObject):
     A code used to specify the connection category, e.g., low voltage or low pressure, where the usage point is defined.
     """
 
+    rated_power: Optional[int] = None
+    """Active power that this usage point is configured to deliver in watts."""
+
+    approved_inverter_capacity: Optional[int] = None
+    """The approved inverter capacity at this UsagePoint in volt-amperes."""
+
     _equipment: Optional[List[Equipment]] = None
     _end_devices: Optional[List[EndDevice]] = None
 

@@ -350,6 +350,8 @@ class NetworkCIMReader(BaseCIMReader):
         usage_point.usage_point_location = self._ensure_get(rs.get_string(table.location_mrid.query_index, None), Location)
         usage_point.is_virtual = rs.get_boolean(table.is_virtual.query_index)
         usage_point.connection_category = rs.get_string(table.connection_category.query_index, None)
+        usage_point.rated_power = rs.get_int(table.rated_power.query_index, None)
+        usage_point.approved_inverter_capacity = rs.get_int(table.approved_inverter_capacity.query_index, None)
 
         return self._load_identified_object(usage_point, table, rs) and self._add_or_throw(usage_point)
 

@@ -298,7 +298,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_id_references(diff, UsagePoint.usage_point_location)
-        self._compare_values(diff, UsagePoint.is_virtual, UsagePoint.connection_category)
+        self._compare_values(diff, UsagePoint.is_virtual, UsagePoint.connection_category, UsagePoint.rated_power, UsagePoint.approved_inverter_capacity)
         if self._options.compare_lv_simplification:
             self._compare_id_reference_collections(diff, UsagePoint.equipment)
             self._compare_id_reference_collections(diff, UsagePoint.end_devices)

@@ -552,7 +552,9 @@ def usage_point_to_pb(cim: UsagePoint) -> PBUsagePoint:
         equipmentMRIDs=[str(io.mrid) for io in cim.equipment],
         endDeviceMRIDs=[str(io.mrid) for io in cim.end_devices],
         isVirtual=cim.is_virtual,
-        connectionCategory=cim.connection_category
+        connectionCategory=cim.connection_category,
+        ratedPower=from_nullable_uint(cim.rated_power),
+        approvedInverterCapacity=from_nullable_uint(cim.approved_inverter_capacity)
     )
 
 
