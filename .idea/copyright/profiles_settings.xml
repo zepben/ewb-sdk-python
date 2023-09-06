@@ -1,0 +1,11 @@
+<component name="CopyrightManager">
+  <settings default="Zepben-MPL-2.0">
+    <module2copyright>
+      <element module="Project Files" copyright="Zepben-MPL-2.0" />
+    </module2copyright>
+    <LanguageOptions name="Python">
+      <option name="fileTypeOverride" value="3" />
+      <option name="block" value="false" />
+    </LanguageOptions>
+  </settings>
+</component>

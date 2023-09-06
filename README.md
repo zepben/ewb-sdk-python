@@ -1,4 +1,4 @@
-![Build Status](https://img.shields.io/github/workflow/status/zepben/evolve-sdk-python/Deploy%20snapshot%20to%20Pypi)
+![Build Status](https://img.shields.io/github/actions/workflow/status/zepben/evolve-sdk-python/python-lib-snapshot.yml)
 [![codecov](https://codecov.io/gh/zepben/evolve-sdk-python/branch/main/graph/badge.svg?token=B0WNRMMR77)](https://codecov.io/gh/zepben/evolve-sdk-python)
 
 # Zepben Evolve Python SDK #
