@@ -122,6 +122,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBL
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.cim.iec61970.infiec61970.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
 from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
+from google.protobuf.timestamp_pb2 import Timestamp
 
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
@@ -643,6 +644,8 @@ def connectivity_node_container_to_pb(cim: ConnectivityNodeContainer) -> PBConne
 
 
 def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquipment:
+    ts = Timestamp()
+    ts.FromDatetime(cim.commissioned_date)
     return PBEquipment(
         psr=power_system_resource_to_pb(cim, include_asset_info),
         inService=cim.in_service,
@@ -650,7 +653,8 @@ def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquip
         equipmentContainerMRIDs=[str(io.mrid) for io in cim.containers],
         usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
         operationalRestrictionMRIDs=[str(io.mrid) for io in cim.operational_restrictions],
-        currentContainerMRIDs=[str(io.mrid) for io in cim.current_containers]
+        currentContainerMRIDs=[str(io.mrid) for io in cim.current_containers],
+        commissioned_date=ts
     )
 
 
@@ -837,7 +841,9 @@ def protection_equipment_to_pb(cim: ProtectionEquipment, include_asset_info: boo
         eq=equipment_to_pb(cim, include_asset_info),
         relayDelayTime=from_nullable_float(cim.relay_delay_time),
         protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name),
-        protectedSwitchMRIDs=[str(io.mrid) for io in cim.protected_switches]
+        protectedSwitchMRIDs=[str(io.mrid) for io in cim.protected_switches],
+        **nullable_bool_settings("directable", cim.directable),
+        powerDirection=cim.power_direction
     )
 
 

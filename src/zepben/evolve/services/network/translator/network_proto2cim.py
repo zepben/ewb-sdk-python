@@ -195,6 +195,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
+from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import *
 from zepben.evolve.model.phases import TracedPhases
 
@@ -727,6 +728,7 @@ def connectivity_node_container_to_cim(pb: PBConnectivityNodeContainer, cim: Con
 def equipment_to_cim(pb: PBEquipment, cim: Equipment, network_service: NetworkService):
     cim.in_service = pb.inService
     cim.normally_in_service = pb.normallyInService
+    cim.commissioned_date = pb.commissionedDate.toDateTime()
 
     for mrid in pb.equipmentContainerMRIDs:
         network_service.resolve_or_defer_reference(resolver.containers(cim), mrid)
@@ -965,6 +967,8 @@ def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) ->
 def protection_equipment_to_cim(pb: PBProtectionEquipment, cim: ProtectionEquipment, network_service: NetworkService):
     cim.relay_delay_time = float_or_none(pb.relayDelayTime)
     cim.protection_kind = ProtectionKind(pb.protectionKind)
+    cim.directable = None if pb.HasField("directableNull") else pb.directable
+    cim.power_direction = PowerDirectionKind(pb.powerDirectionKind)
 
     for mrid in pb.protectedSwitchMRIDs:
         network_service.resolve_or_defer_reference(resolver.protected_switches(cim), mrid)

@@ -37,9 +37,10 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, \
     CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
     LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, \
-    ProtectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays
+    ProtectionKind, PowerDirectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays
 
 __all__ = ["NetworkCIMReader"]
+
 
 
 class NetworkCIMReader(BaseCIMReader):
@@ -578,6 +579,8 @@ class NetworkCIMReader(BaseCIMReader):
     def _load_protection_equipment(self, protection_equipment: ProtectionEquipment, table: TableProtectionEquipment, rs: ResultSet) -> bool:
         protection_equipment.relay_delay_time = rs.get_double(table.relay_delay_time.query_index, None)
         protection_equipment.protection_kind = ProtectionKind[rs.get_string(table.protection_kind.query_index)]
+        protection_equipment.directable = rs.get_boolean(table.directable.query_index, None)
+        protection_equipment.power_direction = PowerDirectionKind[rs.get_string(table.power_direction.query_index)]
 
         return self._load_equipment(protection_equipment, table, rs)
 

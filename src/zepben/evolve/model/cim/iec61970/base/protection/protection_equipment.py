@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import Optional, List, Generator, TYPE_CHECKING, Iterable
 
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
+from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import PowerDirectionKind
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import ProtectionKind
 from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove
 
@@ -29,6 +30,12 @@ class ProtectionEquipment(Equipment):
 
     protection_kind: ProtectionKind = ProtectionKind.UNKNOWN
     """The kind of protection being provided by this protection equipment."""
+
+    directable: Optional[bool] = None
+    """Whether this ProtectionEquipment responds to power flow in a given direction."""
+
+    power_direction: PowerDirectionKind = PowerDirectionKind.UNKNOWN_DIRECTION
+    """The flow of power direction used by this ProtectionEquipment."""
 
     _protected_switches: Optional[List[ProtectedSwitch]] = None
 

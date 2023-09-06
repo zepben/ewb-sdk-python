@@ -559,6 +559,8 @@ class NetworkCIMWriter(BaseCIMWriter):
                                    description: str) -> bool:
         insert.add_value(table.relay_delay_time.query_index, protection_equipment.relay_delay_time)
         insert.add_value(table.protection_kind.query_index, protection_equipment.protection_kind.short_name)
+        insert.add_value(table.directable.query_index, protection_equipment.directable)
+        insert.add_value(table.power_direction.query_index, protection_equipment.power_direction.short_name)
 
         return self._save_equipment(table, insert, protection_equipment, description)
 

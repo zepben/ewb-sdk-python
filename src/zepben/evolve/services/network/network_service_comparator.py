@@ -379,7 +379,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_power_system_resource(diff)
 
     def _compare_equipment(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(diff, Equipment.in_service, Equipment.normally_in_service)
+        self._compare_values(diff, Equipment.in_service, Equipment.normally_in_service, Equipment.commissioned_date)
 
         if self._options.compare_equipment_containers:
             self._compare_id_reference_collections(diff, Equipment.containers, Equipment.current_containers)
@@ -531,7 +531,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_protection_equipment(diff)
 
     def _compare_protection_equipment(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(diff, ProtectionEquipment.protection_kind)
+        self._compare_values(diff, ProtectionEquipment.protection_kind, ProtectionEquipment.directable, ProtectionEquipment.power_direction)
         self._compare_floats(diff, ProtectionEquipment.relay_delay_time)
         self._compare_id_reference_collections(diff, ProtectionEquipment.protected_switches)
 
