@@ -33,7 +33,7 @@ class Equipment(PowerSystemResource):
     """If True, the equipment is in service."""
     normally_in_service: bool = True
     """If True, the equipment is _normally_ in service."""
-    commissioned_date: datetime.datetime = None
+    commissioned_date: Optional[datetime.datetime] = None
     """The date this equipment was commissioned into service."""
 
     _usage_points: Optional[List[UsagePoint]] = None

@@ -18,6 +18,7 @@ def validate_service_translations(service_type: Type[BaseService], comparator: B
     try:
         for desc, cim in kwargs.items():
             processing = f"blank {desc}"
+            print(processing)
             blank = create_blank(cim) if create_blank else type(cim)()
             # noinspection PyUnresolvedReferences
             result = comparator.compare_objects(blank, service_type().add_from_pb(blank.to_pb()))

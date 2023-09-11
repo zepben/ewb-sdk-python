@@ -3,8 +3,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import datetime
 
-from hypothesis.strategies import booleans, lists, builds
+from hypothesis.strategies import booleans, lists, builds, datetimes
 
 from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
@@ -16,13 +17,15 @@ equipment_kwargs = {
     **power_system_resource_kwargs,
     "in_service": booleans(),
     "normally_in_service": booleans(),
+    "commissioned_date": datetimes(),
     "usage_points": lists(builds(UsagePoint), max_size=2),
     "equipment_containers": lists(sampled_equipment_container(True), max_size=2),
     "operational_restrictions": lists(builds(OperationalRestriction), max_size=2),
-    "current_containers": lists(sampled_hvlv_feeder(True), max_size=2)
+    "current_containers": lists(sampled_hvlv_feeder(True), max_size=2),
 }
 
-equipment_args = [*power_system_resource_args, False, False, [UsagePoint(), UsagePoint()], [EquipmentContainer(), EquipmentContainer()],
+equipment_args = [*power_system_resource_args, False, False, datetime.datetime(2023, 1, 2), [UsagePoint(), UsagePoint()],
+                  [EquipmentContainer(), EquipmentContainer()],
                   [OperationalRestriction(), OperationalRestriction()], [Feeder(), Feeder()]]
 
 
@@ -30,17 +33,19 @@ def verify_equipment_constructor_default(eq: Equipment):
     verify_power_system_resource_constructor_default(eq)
     assert eq.in_service
     assert eq.normally_in_service
+    assert not eq.commissioned_date
     assert not list(eq.usage_points)
     assert not list(eq.containers)
     assert not list(eq.operational_restrictions)
     assert not list(eq.current_containers)
 
 
-def verify_equipment_constructor_kwargs(eq: Equipment, in_service, normally_in_service, usage_points, equipment_containers, operational_restrictions,
+def verify_equipment_constructor_kwargs(eq: Equipment, in_service, normally_in_service, commissioned_date, usage_points, equipment_containers, operational_restrictions,
                                         current_containers, **kwargs):
     verify_power_system_resource_constructor_kwargs(eq, **kwargs)
     assert eq.in_service == in_service
     assert eq.normally_in_service == normally_in_service
+    assert eq.commissioned_date == commissioned_date
     assert list(eq.usage_points) == usage_points
     assert list(eq.containers) == equipment_containers
     assert list(eq.operational_restrictions) == operational_restrictions
@@ -49,8 +54,9 @@ def verify_equipment_constructor_kwargs(eq: Equipment, in_service, normally_in_s
 
 def verify_equipment_constructor_args(eq: Equipment):
     verify_power_system_resource_constructor_args(eq)
-    assert eq.in_service == equipment_args[-6]
-    assert eq.normally_in_service == equipment_args[-5]
+    assert eq.in_service == equipment_args[-7]
+    assert eq.normally_in_service == equipment_args[-6]
+    assert eq.commissioned_date == equipment_args[-5]
     assert list(eq.usage_points) == equipment_args[-4]
     assert list(eq.containers) == equipment_args[-3]
     assert list(eq.operational_restrictions) == equipment_args[-2]

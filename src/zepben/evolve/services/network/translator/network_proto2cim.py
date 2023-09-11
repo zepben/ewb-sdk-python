@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.NoLoadTest_pb2 import NoLoadTest as PBNoLoadTest
 from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircuitTest as PBOpenCircuitTest
@@ -617,8 +618,8 @@ def usage_point_to_cim(pb: PBUsagePoint, network_service: NetworkService) -> Opt
     network_service.resolve_or_defer_reference(resolver.usage_point_location(cim), pb.usagePointLocationMRID)
     cim.is_virtual = pb.isVirtual
     cim.connection_category = pb.connectionCategory if pb.connectionCategory else None
-    cim.rated_power = uint_or_none(pb.ratedPower)
-    cim.approved_inverter_capacity = uint_or_none(pb.approvedInverterCapacity)
+    cim.rated_power = int_or_none(pb.ratedPower)
+    cim.approved_inverter_capacity = int_or_none(pb.approvedInverterCapacity)
 
     for mrid in pb.equipmentMRIDs:
         network_service.resolve_or_defer_reference(resolver.up_equipment(cim), mrid)
@@ -731,7 +732,7 @@ def connectivity_node_container_to_cim(pb: PBConnectivityNodeContainer, cim: Con
 def equipment_to_cim(pb: PBEquipment, cim: Equipment, network_service: NetworkService):
     cim.in_service = pb.inService
     cim.normally_in_service = pb.normallyInService
-    cim.commissioned_date = pb.commissionedDate.toDateTime()
+    cim.commissioned_date = pb.commissionedDate.ToDatetime() if pb.commissionedDate != PBTimestamp() else None
 
     for mrid in pb.equipmentContainerMRIDs:
         network_service.resolve_or_defer_reference(resolver.containers(cim), mrid)
@@ -1275,7 +1276,7 @@ def power_electronics_connection_to_cim(pb: PBPowerElectronicsConnection, networ
         min_q=float_or_none(pb.minQ),
         rated_s=int_or_none(pb.ratedS),
         rated_u=int_or_none(pb.ratedU),
-        inverter_standard=pb.inverterStandard,
+        inverter_standard=pb.inverterStandard if pb.inverterStandard else None,
         sustain_op_overvolt_limit=int_or_none(pb.sustainOpOvervoltLimit),
         stop_at_over_freq=float_or_none(pb.stopAtOverFreq),
         stop_at_under_freq=float_or_none(pb.stopAtUnderFreq),

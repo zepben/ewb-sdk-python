@@ -442,6 +442,8 @@ def create_usage_point(include_runtime: bool = True):
         usage_point_location=builds(Location, **create_identified_object(include_runtime)),
         is_virtual=booleans(),
         connection_category=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        rated_power=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        approved_inverter_capacity=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         equipment=lists(builds(EnergyConsumer, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         end_devices=lists(builds(Meter, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     )

@@ -121,9 +121,11 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit 
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.cim.iec61970.infiec61970.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
+from zepben.protobuf.cim.iec61970.infiec61970.protection.PowerDirectionKind_pb2 import PowerDirectionKind as PBPowerDirectionKind
 from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
-from google.protobuf.timestamp_pb2 import Timestamp
+from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
+from zepben.evolve import PowerDirectionKind
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
@@ -553,8 +555,8 @@ def usage_point_to_pb(cim: UsagePoint) -> PBUsagePoint:
         endDeviceMRIDs=[str(io.mrid) for io in cim.end_devices],
         isVirtual=cim.is_virtual,
         connectionCategory=cim.connection_category,
-        ratedPower=from_nullable_uint(cim.rated_power),
-        approvedInverterCapacity=from_nullable_uint(cim.approved_inverter_capacity)
+        ratedPower=from_nullable_int(cim.rated_power),
+        approvedInverterCapacity=from_nullable_int(cim.approved_inverter_capacity)
     )
 
 
@@ -646,8 +648,9 @@ def connectivity_node_container_to_pb(cim: ConnectivityNodeContainer) -> PBConne
 
 
 def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquipment:
-    ts = Timestamp()
-    ts.FromDatetime(cim.commissioned_date)
+    ts = PBTimestamp()
+    if cim.commissioned_date:
+        ts.FromDatetime(cim.commissioned_date)
     return PBEquipment(
         psr=power_system_resource_to_pb(cim, include_asset_info),
         inService=cim.in_service,
@@ -656,7 +659,7 @@ def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquip
         usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
         operationalRestrictionMRIDs=[str(io.mrid) for io in cim.operational_restrictions],
         currentContainerMRIDs=[str(io.mrid) for io in cim.current_containers],
-        commissioned_date=ts
+        commissionedDate=ts
     )
 
 
@@ -845,7 +848,7 @@ def protection_equipment_to_pb(cim: ProtectionEquipment, include_asset_info: boo
         protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name),
         protectedSwitchMRIDs=[str(io.mrid) for io in cim.protected_switches],
         **nullable_bool_settings("directable", cim.directable),
-        powerDirection=cim.power_direction
+        powerDirection=PBPowerDirectionKind.Value(cim.power_direction.short_name)
     )
 
 
