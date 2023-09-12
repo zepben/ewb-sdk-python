@@ -113,6 +113,7 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
+from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
@@ -198,6 +199,7 @@ from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import *
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_changing_unit import EvChargingUnit
 from zepben.evolve.model.phases import TracedPhases
 
 import zepben.evolve.services.common.resolver as resolver
@@ -225,7 +227,7 @@ __all__ = [
     "per_length_line_parameter_to_cim", "per_length_impedance_to_cim", "per_length_sequence_impedance_to_cim", "power_electronics_connection_to_cim",
     "power_electronics_connection_phase_to_cim", "power_transformer_to_cim", "power_transformer_end_to_cim", "transformer_star_impedance_to_cim",
     "protected_switch_to_cim", "ratio_tap_changer_to_cim", "recloser_to_cim", "regulating_cond_eq_to_cim", "shunt_compensator_to_cim", "switch_to_cim",
-    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim"
+    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim", "ev_charging_unit_to_cim"
 ]
 
 
@@ -1533,6 +1535,13 @@ def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optiona
     return cim if network_service.add(cim) else None
 
 
+def ev_charging_unit_to_cim(pb: PBEvChargingUnit, network_service: NetworkService) -> Optional[EvChargingUnit]:
+    cim = EvChargingUnit(mrid=pb.mrid())
+    power_electronics_unit_to_cim(pb.peu, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 PBCircuit.to_cim = circuit_to_cim
 PBLoop.to_cim = loop_to_cim
 PBLvFeeder.to_cim = lv_feeder_to_cim
+PBEvChargingUnit.to_cim = ev_charging_unit_to_cim

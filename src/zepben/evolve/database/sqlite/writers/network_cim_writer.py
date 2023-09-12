@@ -34,7 +34,7 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo, TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, \
     Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableCurrentRelayInfo, \
     CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, TableCurrentRelays, TableProtectionEquipmentProtectedSwitches, \
-    TableRecloseDelays
+    TableRecloseDelays, EvChargingUnit, TableEvChargingUnits
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -973,6 +973,12 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.normal_head_terminal_mrid.query_index, self._mrid_or_none(lv_feeder.normal_head_terminal))
 
         return self._save_equipment_container(table, insert, lv_feeder, "lv_feeder")
+
+    def save_ev_charging_unit(self, ev_charging_unit: EvChargingUnit) -> bool:
+        table = self.database_tables.get_table(TableEvChargingUnits)
+        insert = self.database_tables.get_insert(TableEvChargingUnits)
+
+        return self._save_power_electronics_unit(table, insert, ev_charging_unit, "ev charging unit")
 
     # ************ IEC61970 MEAS ************
 

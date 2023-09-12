@@ -138,6 +138,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit 
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.cim.iec61970.infiec61970.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
+from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 
@@ -168,7 +169,7 @@ __all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_inf
            'load_break_switch', 'per_length_impedance', 'per_length_line_parameter', 'per_length_sequence_impedance', 'power_electronics_connection',
            'power_electronics_connection_phase', 'power_transformer', 'power_transformer_end', 'protected_switch', 'ratio_tap_changer', 'recloser',
            'regulating_cond_eq', 'shunt_compensator', 'switch', 'tap_changer', 'transformer_end', 'transformer_star_impedance', 'circuit', 'loop', 'lv_feeder',
-           'timestamp', 'network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects']
+           'ev_charging_unit', 'timestamp', 'network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects']
 
 #######################
 # IEC61968 ASSET INFO #
@@ -1179,6 +1180,11 @@ def lv_feeder():
         normalEnergizingFeederMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
 
+
+def ev_charging_unit():
+    return builds(PBEvChargingUnit, peu=power_electronics_unit())
+
+
 #########
 # MODEL #
 #########
@@ -1278,7 +1284,9 @@ def network_identified_objects(draw):
         # IEC61970 INFIEC61970 FEEDER #
         draw(builds(NetworkIdentifiedObject, circuit=circuit())),
         draw(builds(NetworkIdentifiedObject, loop=loop())),
-        draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder()))
+        draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder())),
+
+        draw(builds(NetworkIdentifiedObject, evChargingUnit=ev_charging_unit()))
     ]
     return nios
 

@@ -158,7 +158,8 @@ types_to_test = {
 
     "create_circuit": create_circuit(),
     "create_loop": create_loop(),
-    "create_lv_feeder": create_lv_feeder()
+    "create_lv_feeder": create_lv_feeder(),
+    "ev_charging_unit": create_ev_charging_unit(),
 }
 
 

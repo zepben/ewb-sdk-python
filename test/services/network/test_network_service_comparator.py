@@ -19,7 +19,7 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
     Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, CurrentRelayInfo, \
-    ProtectionEquipment, CurrentRelay
+    ProtectionEquipment, CurrentRelay, EvChargingUnit
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
@@ -1032,6 +1032,9 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Substation(mrid="s1"),
             lambda _: Substation(mrid="s2")
         )
+
+    def test_compare_ev_charging_unit(self):
+        self._compare_power_electronics_unit(EvChargingUnit)
 
     def test_compare_loop(self):
         self._compare_identified_object(Loop)

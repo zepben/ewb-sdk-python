@@ -37,7 +37,8 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, \
     CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
     LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, \
-    ProtectionKind, PowerDirectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays
+    ProtectionKind, PowerDirectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, \
+    EvChargingUnit
 
 __all__ = ["NetworkCIMReader"]
 
@@ -992,6 +993,13 @@ class NetworkCIMReader(BaseCIMReader):
         lv_feeder.normal_head_terminal = self._ensure_get(rs.get_string(table.normal_head_terminal_mrid.query_index, None), Terminal)
 
         return self._load_equipment_container(lv_feeder, table, rs) and self._add_or_throw(lv_feeder)
+
+
+    def load_ev_charging_unit(self, table: TableEvChargingUnits, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        ev_charging_unit = EvChargingUnit(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        return self._load_power_electronics_unit(ev_charging_unit, table, rs) and self._add_or_throw(ev_charging_unit)
+
 
     # ************ ASSOCIATIONS ************
 

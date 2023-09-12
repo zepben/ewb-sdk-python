@@ -39,6 +39,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.product
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.perlength_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.switch_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.transformer_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.wires.generation.production_tables import *
 from zepben.evolve.database.sqlite.tables.metadata_tables import *
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import Ratio
@@ -86,6 +87,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TableEquipmentOperationalRestrictions: TableEquipmentOperationalRestrictions(),
         TableEquipmentUsagePoints: TableEquipmentUsagePoints(),
         TableEquivalentBranches: TableEquivalentBranches(),
+        TableEvChargingUnits: TableEvChargingUnits(),
         TableFaultIndicators: TableFaultIndicators(),
         TableFeeders: TableFeeders(),
         TableFuses: TableFuses(),

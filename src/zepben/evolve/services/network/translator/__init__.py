@@ -115,6 +115,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeede
 
 __all__ = []
 
+from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit
 
 CableInfo.mrid = lambda self: self.wi.mrid()
 NoLoadTest.mrid = lambda self: self.tt.mrid()
@@ -224,6 +225,7 @@ TransformerEnd.mrid = lambda self: self.io.mrid()
 Loop.mrid = lambda self: self.io.mrid()
 Circuit.mrid = lambda self: self.l.mrid()
 LvFeeder.mrid = lambda self: self.ec.mrid()
+EvChargingUnit.mrid = lambda self: self.peu.mrid()
 
 PowerSystemResource.name_and_mrid = lambda self: self.io.name_and_mrid()
 ConductingEquipment.name_and_mrid = lambda self: self.eq.name_and_mrid()

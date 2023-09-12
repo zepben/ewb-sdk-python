@@ -15,7 +15,7 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
     Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
     Switch, ShuntCompensatorInfo, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, \
-    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, ProtectedSwitch
+    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, ProtectedSwitch, EvChargingUnit
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
@@ -910,6 +910,10 @@ class NetworkServiceComparator(BaseServiceComparator):
             self._compare_id_reference_collections(diff, LvFeeder.current_equipment)
 
         return self._compare_equipment_container(diff)
+
+    def _compare_ev_charging_unit(self, source: EvChargingUnit, target: EvChargingUnit) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        return self._compare_power_electronics_unit(diff)
 
     @staticmethod
     # NOTE: Should be Callable[[Switch, SinglePhaseKind], bool], but type inference does not work correctly.

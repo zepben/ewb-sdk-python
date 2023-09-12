@@ -105,6 +105,7 @@ from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import *
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_changing_unit import *
 from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 
@@ -232,6 +233,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.connector_tables i
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.perlength_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.feeder_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.wires.generation.production_tables import *
 from zepben.evolve.database.sqlite.tables.database_tables import *
 from zepben.evolve.database.sqlite.tables.exceptions import *
 from zepben.evolve.database.sqlite.writers.base_cim_writer import *

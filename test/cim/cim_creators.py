@@ -47,7 +47,7 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'create_power_electronics_connection_phase', 'create_power_transformer', 'create_power_transformer_end', 'create_protected_switch',
            'create_ratio_tap_changer', 'create_recloser', 'create_regulating_cond_eq', 'create_shunt_compensator', 'sampled_single_phase_kind', 'create_switch',
            'create_tap_changer', 'create_transformer_end', 'create_transformer_star_impedance', 'sampled_vector_group', 'sampled_winding_connection_kind',
-           'create_circuit', 'create_loop', 'create_lv_feeder', 'traced_phases', 'sampled_wire_info', 'sampled_conducting_equipment', 'sampled_equipment',
+           'create_circuit', 'create_loop', 'create_lv_feeder', "create_ev_charging_unit", 'traced_phases', 'sampled_wire_info', 'sampled_conducting_equipment', 'sampled_equipment',
            'sampled_equipment_container', 'sampled_hvlv_feeder', 'sampled_measurement', 'sampled_protected_switches']
 
 
@@ -1266,6 +1266,10 @@ def create_lv_feeder(include_runtime: bool = True):
         normal_head_terminal=builds(Terminal, **create_identified_object(include_runtime)),
         **runtime
     )
+
+
+def create_ev_charging_unit(include_runtime: bool = True):
+    return builds(EvChargingUnit, **create_power_electronics_unit(include_runtime))
 
 
 #########
