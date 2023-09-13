@@ -11,7 +11,8 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     EnergySourcePhase, Feeder, GeographicalRegion, Measurement, OperationalRestriction, OrganisationRole, PowerSystemResource, PowerTransformerEnd, \
     PricingStructure, RatioTapChanger, RemoteControl, RemoteSource, SubGeographicalRegion, Substation, Terminal, TransformerEnd, UsagePoint, Circuit, Loop, \
     PowerElectronicsUnit, PowerElectronicsConnectionPhase, PowerElectronicsConnection, TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, \
-    TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectionEquipment, ProtectedSwitch, Switch, CurrentRelay
+    TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectionEquipment, ProtectedSwitch, Switch, CurrentRelay, \
+    RegulatingControl, RegulatingCondEq
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
@@ -40,6 +41,16 @@ def per_length_sequence_impedance(ac_line_segment: AcLineSegment):
 def organisation_roles(asset: Asset) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(asset, asset_to_asset_org_role_resolver, None)
+
+
+def rc_regulating_cond_eq(regulating_control: RegulatingControl) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(regulating_control, rc_to_rce_resolver, rec_to_rc_resolver)
+
+
+def rce_regulating_controls(regulating_cond_eq: RegulatingCondEq) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(regulating_cond_eq, rec_to_rc_resolver, rc_to_rce_resolver)
 
 
 def at_location(asset: Asset) -> BoundReferenceResolver:
@@ -315,6 +326,10 @@ def ratio_tap_changer(te: TransformerEnd) -> BoundReferenceResolver:
 def te_terminal(te: TransformerEnd) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(te, te_to_term_resolver, None)
+
+def rc_terminal(rc: RegulatingControl) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(rc, rc_to_term_resolver, None)
 
 
 def end_devices(usage_point: UsagePoint) -> BoundReferenceResolver:

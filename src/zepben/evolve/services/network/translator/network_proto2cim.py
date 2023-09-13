@@ -101,8 +101,10 @@ from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import Protecte
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger as PBRatioTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser as PBRecloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq as PBRegulatingCondEq
+from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl as PBRegulatingControl
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator as PBShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
+from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl as PBTapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger as PBTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
@@ -115,6 +117,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBL
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 
+from zepben.evolve import RegulatingControl, RegulatingControlModeKind, TapChangerControl
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
@@ -199,7 +202,7 @@ from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import *
-from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_changing_unit import EvChargingUnit
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import EvChargingUnit
 from zepben.evolve.model.phases import TracedPhases
 
 import zepben.evolve.services.common.resolver as resolver
@@ -734,7 +737,7 @@ def connectivity_node_container_to_cim(pb: PBConnectivityNodeContainer, cim: Con
 def equipment_to_cim(pb: PBEquipment, cim: Equipment, network_service: NetworkService):
     cim.in_service = pb.inService
     cim.normally_in_service = pb.normallyInService
-    cim.commissioned_date = pb.commissionedDate.ToDatetime() if pb.commissionedDate != PBTimestamp() else None
+    cim.commissioned_date = pb.commissionedDate.ToDatetime() if pb.HasField("commissionedDate") else None
 
     for mrid in pb.equipmentContainerMRIDs:
         network_service.resolve_or_defer_reference(resolver.containers(cim), mrid)
@@ -1409,6 +1412,7 @@ def recloser_to_cim(pb: PBRecloser, network_service: NetworkService) -> Optional
 
 def regulating_cond_eq_to_cim(pb: PBRegulatingCondEq, cim: RegulatingCondEq, network_service: NetworkService):
     cim.control_enabled = pb.controlEnabled
+    network_service.resolve_or_defer_reference(resolver.rce_regulating_controls(cim), pb.regulatingControlMRID)
 
     energy_connection_to_cim(pb.ec, cim, network_service)
 
@@ -1458,6 +1462,40 @@ def transformer_end_to_cim(pb: PBTransformerEnd, cim: TransformerEnd, network_se
     identified_object_to_cim(pb.io, cim, network_service)
 
 
+def regulating_control_to_cim(pb: PBRegulatingControl, cim: RegulatingControl, network_service: NetworkService):
+    cim.discrete = None if pb.HasField("discreteNull") else pb.discreteSet
+    cim.mode = RegulatingControlModeKind(pb.mode)
+    cim.monitored_phase = phase_code_by_id(pb.monitoredPhase)
+    cim.target_deadband = float_or_none(pb.targetDeadband)
+    cim.target_value = float_or_none(pb.targetValue)
+    cim.enabled = None if pb.HasField("enabledNull") else pb.enabledSet
+    cim.max_allowed_target_value = float_or_none(pb.maxAllowedTargetValue)
+    cim.min_allowed_target_value = float_or_none(pb.minAllowedTargetValue)
+    cim.terminal = network_service.resolve_or_defer_reference(resolver.rc_terminal(cim), pb.terminalMRID)
+    for mrid in pb.regulatingCondEqMRIDs:
+        network_service.resolve_or_defer_reference(resolver.rc_regulating_cond_eq(cim), mrid)
+
+    power_system_resource_to_cim(pb.psr, cim, network_service)
+
+
+def tap_changer_control_to_cim(pb: PBTapChangerControl, network_service: NetworkService) -> Optional[TapChangerControl]:
+    cim = TapChangerControl(
+        mrid=pb.mrid(),
+        limit_voltage=int_or_none(pb.limitVoltage),
+        line_drop_compensation=None if pb.HasField("lineDropCompensationNull") else pb.lineDropCompensationSet,
+        line_drop_r=float_or_none(pb.lineDropR),
+        line_drop_x=float_or_none(pb.lineDropX),
+        reverse_line_drop_r=float_or_none(pb.reverseLineDropR),
+        reverse_line_drop_x=float_or_none(pb.reverseLineDropX),
+        forward_ldc_blocking=None if pb.HasField("forwardLDCBlockingNull") else pb.forwardLDCBlockingSet,
+        time_delay=float_or_none(pb.timeDelay),
+        co_generation_enabled=None if pb.HasField("coGenerationEnabledNull") else pb.coGenerationEnabledSet
+    )
+
+    regulating_control_to_cim(pb.rc, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 PBAcLineSegment.to_cim = ac_line_segment_to_cim
 PBBreaker.to_cim = breaker_to_cim
 PBConductor.to_cim = conductor_to_cim
@@ -1491,6 +1529,8 @@ PBShuntCompensator.to_cim = shunt_compensator_to_cim
 PBSwitch.to_cim = switch_to_cim
 PBTapChanger.to_cim = tap_changer_to_cim
 PBTransformerEnd.to_cim = transformer_end_to_cim
+PBRegulatingControl.to_cim = regulating_control_to_cim
+PBTapChangerControl.to_cim = tap_changer_control_to_cim
 
 
 ###############################

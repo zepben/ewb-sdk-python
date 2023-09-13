@@ -104,10 +104,13 @@ from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import Protecte
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger as PBRatioTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser as PBRecloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq as PBRegulatingCondEq
+from zepben.protobuf.cim.iec61970.base.wires.RegulatingControlModeKind_pb2 import RegulatingControlModeKind as PBRegulatingControlModeKind
+from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl as PBRegulatingControl
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator as PBShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind as PBSinglePhaseKind
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger as PBTapChanger
+from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl as PBTapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
 from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup as PBVectorGroup
@@ -126,6 +129,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChar
 from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
+from zepben.evolve import RegulatingControl, TapChangerControl
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
@@ -197,7 +201,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance impo
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
-from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_changing_unit import EvChargingUnit
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import EvChargingUnit
 from zepben.evolve.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb
 from zepben.evolve.services.common.translator.util import mrid_or_empty, from_nullable_int, from_nullable_float, from_nullable_long, from_nullable_uint, \
     nullable_bool_settings
@@ -650,8 +654,9 @@ def connectivity_node_container_to_pb(cim: ConnectivityNodeContainer) -> PBConne
 
 
 def equipment_to_pb(cim: Equipment, include_asset_info: bool = False) -> PBEquipment:
-    ts = PBTimestamp()
+    ts = None
     if cim.commissioned_date:
+        ts = PBTimestamp()
         ts.FromDatetime(cim.commissioned_date)
     return PBEquipment(
         psr=power_system_resource_to_pb(cim, include_asset_info),
@@ -1182,7 +1187,8 @@ def recloser_to_pb(cim: Recloser) -> PBRecloser:
 def regulating_cond_eq_to_pb(cim: RegulatingCondEq, include_asset_info=False) -> PBRegulatingCondEq:
     return PBRegulatingCondEq(
         ec=energy_connection_to_pb(cim, include_asset_info),
-        controlEnabled=cim.control_enabled
+        controlEnabled=cim.control_enabled,
+        regulatingControlMRID=mrid_or_empty(cim.regulating_control)
     )
 
 
@@ -1243,6 +1249,37 @@ def transformer_star_impedance_to_pb(cim: TransformerStarImpedance) -> PBTransfo
     )
 
 
+def regulating_control_to_pb(cim: RegulatingControl) -> PBRegulatingControl:
+    return PBRegulatingControl(
+        psr=power_system_resource_to_pb(cim),
+        **nullable_bool_settings("discrete", cim.discrete),
+        mode=PBRegulatingControlModeKind.Value(cim.mode.short_name),
+        monitoredPhase=PBPhaseCode.Value(cim.monitored_phase.short_name),
+        targetDeadband=from_nullable_float(cim.target_deadband),
+        targetValue=from_nullable_float(cim.target_value),
+        **nullable_bool_settings("enabled", cim.enabled),
+        maxAllowedTargetValue=from_nullable_float(cim.max_allowed_target_value),
+        minAllowedTargetValue=from_nullable_float(cim.min_allowed_target_value),
+        terminalMRID=mrid_or_empty(cim.terminal),
+        regulatingCondEqMRIDs=[str(io.mrid) for io in cim.regulating_condition_equipment]
+    )
+
+
+def tap_changer_control_to_pb(cim: TapChangerControl) -> PBTapChangerControl:
+    return PBTapChangerControl(
+        rc=regulating_control_to_pb(cim),
+        limitVoltage=from_nullable_int(cim.limit_voltage),
+        **nullable_bool_settings("lineDropCompensation", cim.line_drop_compensation),
+        lineDropR=from_nullable_float(cim.line_drop_r),
+        lineDropX=from_nullable_float(cim.line_drop_x),
+        reverseLineDropR=from_nullable_float(cim.reverse_line_drop_r),
+        reverseLineDropX=from_nullable_float(cim.reverse_line_drop_x),
+        **nullable_bool_settings("forwardLDCBlocking", cim.forward_ldc_blocking),
+        timeDelay=from_nullable_float(cim.time_delay),
+        **nullable_bool_settings("coGenerationEnabled", cim.co_generation_enabled)
+    )
+
+
 AcLineSegment.to_pb = ac_line_segment_to_pb
 Breaker.to_pb = breaker_to_pb
 BusbarSection.to_pb = busbar_section_to_pb
@@ -1271,6 +1308,7 @@ ProtectedSwitch.to_pb = protected_switch_to_pb
 RatioTapChanger.to_pb = ratio_tap_changer_to_pb
 Recloser.to_pb = recloser_to_pb
 RegulatingCondEq.to_pb = regulating_cond_eq_to_pb
+TapChangerControl.to_pb = tap_changer_control_to_pb
 ShuntCompensator.to_pb = shunt_compensator_to_pb
 Switch.to_pb = switch_to_pb
 TapChanger.to_pb = tap_changer_to_pb

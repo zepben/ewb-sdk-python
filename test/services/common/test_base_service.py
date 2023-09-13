@@ -18,7 +18,7 @@ from zepben.evolve import Terminal, resolver, UnresolvedReference, NetworkServic
     EnergyConsumerPhase, EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete, \
     Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo, \
     AssetContainer, OrganisationRole, Document, Agreement, LvFeeder
-from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_changing_unit import EvChargingUnit
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import EvChargingUnit
 
 
 @fixture

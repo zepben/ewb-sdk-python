@@ -28,7 +28,6 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.auxiliaryequipment_table
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import *
-from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.feeder_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.meas_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.protection_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.scada_tables import *
@@ -39,10 +38,11 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.product
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.perlength_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.switch_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.transformer_tables import *
-from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.wires.generation.production_tables import *
 from zepben.evolve.database.sqlite.tables.metadata_tables import *
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import Ratio
+from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.wires.generation.production_tables import *
 
 __all__ = ["DatabaseTables", "PreparedStatement"]
 
@@ -137,6 +137,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TableSubGeographicalRegions: TableSubGeographicalRegions(),
         TableSubstations: TableSubstations(),
         TableSwitchInfo: TableSwitchInfo(),
+        TableTapChangerControls: TableTapChangerControls(),
         TableTariffs: TableTariffs(),
         TableTerminals: TableTerminals(),
         TableTransformerEndInfo: TableTransformerEndInfo(),

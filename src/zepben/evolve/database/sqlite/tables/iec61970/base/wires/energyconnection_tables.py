@@ -11,7 +11,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import Table
 
 __all__ = ["TableEnergyConnections", "TableEnergyConsumerPhases", "TableEnergyConsumers", "TableEnergySources", "TableEnergySourcePhases",
            "TableRegulatingCondEq", "TableShuntCompensators", "TableLinearShuntCompensators", "TablePowerElectronicsConnection",
-           "TablePowerElectronicsConnectionPhases"]
+           "TablePowerElectronicsConnectionPhases", "TableRegulatingControls", "TableTapChangerControls"]
 
 
 # noinspection PyAbstractClass
@@ -158,10 +158,12 @@ class TableEnergySources(TableEnergyConnections):
 # noinspection PyAbstractClass
 class TableRegulatingCondEq(TableEnergyConnections):
     control_enabled: Column = None
+    regulating_control_mrid: Column = None
 
     def __init__(self):
         super(TableRegulatingCondEq, self).__init__()
         self.control_enabled = self._create_column("control_enabled", "BOOLEAN", Nullable.NOT_NULL)
+        self.regulating_control_mrid = self._create_column("regulating_control_mrid", "TEXT", Nullable.NULL)
 
 
 # noinspection PyAbstractClass
@@ -289,3 +291,55 @@ class TablePowerElectronicsConnectionPhases(TablePowerSystemResources):
         cols = super(TablePowerElectronicsConnectionPhases, self).non_unique_index_columns()
         cols.append([self.power_electronics_connection_mrid])
         return cols
+
+
+# noinspection PyAbstractClass
+class TableRegulatingControls(TablePowerSystemResources):
+    discrete: Column = None
+    mode: Column = None
+    monitored_phase: Column = None
+    target_deadband: Column = None
+    target_value: Column = None
+    enabled: Column = None
+    max_allowed_target_value: Column = None
+    min_allowed_target_value: Column = None
+    terminal_mrid: Column = None
+
+    def __init__(self):
+        super(TableRegulatingControls, self).__init__()
+        self.discrete = self._create_column("discrete", "BOOLEAN", Nullable.NULL)
+        self.mode = self._create_column("mode", "TEXT")
+        self.monitored_phase = self._create_column("monitored_phase", "TEXT")
+        self.target_deadband = self._create_column("target_deadband", "NUMBER", Nullable.NULL)
+        self.target_value = self._create_column("target_value", "NUMBER", Nullable.NULL)
+        self.enabled = self._create_column("enabled", "BOOLEAN", Nullable.NULL)
+        self.max_allowed_target_value = self._create_column("max_allowed_target_value", "NUMBER", Nullable.NULL)
+        self.min_allowed_target_value = self._create_column("min_allowed_target_value", "NUMBER", Nullable.NULL)
+        self.terminal_mrid = self._create_column("terminal_mrid", "TEXT", Nullable.NULL)
+
+
+class TableTapChangerControls(TableRegulatingControls):
+    limit_voltage: Column = None
+    line_drop_compensation: Column = None
+    line_drop_r: Column = None
+    line_drop_x: Column = None
+    reverse_line_drop_r: Column = None
+    reverse_line_drop_x: Column = None
+    forward_ldc_blocking: Column = None
+    time_delay: Column = None
+    co_generation_enabled: Column = None
+
+    def __init__(self):
+        super(TableTapChangerControls, self).__init__()
+        self.limit_voltage = self._create_column("limit_voltage", "INTEGER", Nullable.NULL)
+        self.line_drop_compensation = self._create_column("line_drop_compensation", "BOOLEAN", Nullable.NULL)
+        self.line_drop_r = self._create_column("line_drop_r", "NUMBER", Nullable.NULL)
+        self.line_drop_x = self._create_column("line_drop_x", "NUMBER", Nullable.NULL)
+        self.reverse_line_drop_r = self._create_column("reverse_line_drop_r", "NUMBER", Nullable.NULL)
+        self.reverse_line_drop_x = self._create_column("reverse_line_drop_x", "NUMBER", Nullable.NULL)
+        self.forward_ldc_blocking = self._create_column("forward_ldc_blocking", "BOOLEAN", Nullable.NULL)
+        self.time_delay = self._create_column("time_delay", "NUMBER", Nullable.NULL)
+        self.co_generation_enabled = self._create_column("co_generation_enabled", "BOOLEAN", Nullable.NULL)
+
+    def name(self) -> str:
+        return "tap_changer_controls"

@@ -100,6 +100,8 @@ from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import Protecte
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq
+from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl
+from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
@@ -226,6 +228,8 @@ Loop.mrid = lambda self: self.io.mrid()
 Circuit.mrid = lambda self: self.l.mrid()
 LvFeeder.mrid = lambda self: self.ec.mrid()
 EvChargingUnit.mrid = lambda self: self.peu.mrid()
+RegulatingControl.mrid = lambda self: self.psr.mrid()
+TapChangerControl.mrid = lambda self: self.rc.mrid()
 
 PowerSystemResource.name_and_mrid = lambda self: self.io.name_and_mrid()
 ConductingEquipment.name_and_mrid = lambda self: self.eq.name_and_mrid()

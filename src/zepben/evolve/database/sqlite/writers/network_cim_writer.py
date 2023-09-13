@@ -34,7 +34,7 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo, TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, \
     Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableCurrentRelayInfo, \
     CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, TableCurrentRelays, TableProtectionEquipmentProtectedSwitches, \
-    TableRecloseDelays, EvChargingUnit, TableEvChargingUnits
+    TableRecloseDelays, EvChargingUnit, TableEvChargingUnits, TableRegulatingControls, RegulatingControl, TapChangerControl, TableTapChangerControls
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -884,6 +884,7 @@ class NetworkCIMWriter(BaseCIMWriter):
 
     def _save_regulating_cond_eq(self, table: TableRegulatingCondEq, insert: PreparedStatement, regulating_cond_eq: RegulatingCondEq, description: str) -> bool:
         insert.add_value(table.control_enabled.query_index, regulating_cond_eq.control_enabled)
+        insert.add_value(table.regulating_control_mrid.query_index, self._mrid_or_none(regulating_cond_eq.regulating_control))
 
         return self._save_energy_connection(table, insert, regulating_cond_eq, description)
 
@@ -938,6 +939,37 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.transformer_end_info_mrid.query_index, self._mrid_or_none(transformer_star_impedance.transformer_end_info))
 
         return self._save_identified_object(table, insert, transformer_star_impedance, "transformer star impedance")
+
+    def _save_regulating_control(self, table: TableRegulatingControls,
+                                 insert: PreparedStatement, regulating_control: RegulatingControl, description: str) -> bool:
+        insert.add_value(table.discrete.query_index, regulating_control.discrete)
+        insert.add_value(table.mode.query_index, regulating_control.mode.short_name)
+        insert.add_value(table.monitored_phase.query_index, regulating_control.monitored_phase.short_name)
+        insert.add_value(table.target_deadband.query_index, regulating_control.target_deadband)
+        insert.add_value(table.target_value.query_index, regulating_control.target_value)
+        insert.add_value(table.enabled.query_index, regulating_control.enabled)
+        insert.add_value(table.max_allowed_target_value.query_index, regulating_control.max_allowed_target_value)
+        insert.add_value(table.min_allowed_target_value.query_index, regulating_control.min_allowed_target_value)
+        insert.add_value(table.terminal_mrid.query_index, self._mrid_or_none(regulating_control.terminal))
+        #_save_regulating_cond_eq()? they live on their own and will be saved with their table
+
+        return self._save_power_system_resource(table, insert, regulating_control, description)
+
+    def save_tap_changer_control(self, tap_changer_control: TapChangerControl) -> bool:
+        table = self.database_tables.get_table(TableTapChangerControls)
+        insert = self.database_tables.get_insert(TableTapChangerControls)
+
+        insert.add_value(table.limit_voltage.query_index, tap_changer_control.limit_voltage)
+        insert.add_value(table.line_drop_compensation.query_index, tap_changer_control.line_drop_compensation)
+        insert.add_value(table.line_drop_r.query_index, tap_changer_control.line_drop_r)
+        insert.add_value(table.line_drop_x.query_index, tap_changer_control.line_drop_x)
+        insert.add_value(table.reverse_line_drop_r.query_index, tap_changer_control.reverse_line_drop_r)
+        insert.add_value(table.reverse_line_drop_x.query_index, tap_changer_control.reverse_line_drop_x)
+        insert.add_value(table.forward_ldc_blocking.query_index, tap_changer_control.forward_ldc_blocking)
+        insert.add_value(table.time_delay.query_index, tap_changer_control.time_delay)
+        insert.add_value(table.co_generation_enabled.query_index, tap_changer_control.co_generation_enabled)
+
+        return self._save_regulating_control(table, insert, tap_changer_control, "tap changer control")
 
     # ************ IEC61970 InfIEC61970 ************
 

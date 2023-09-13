@@ -7,7 +7,7 @@ from hypothesis import given
 
 from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import verify_power_electronics_unit_constructor_default, \
     verify_power_electronics_unit_constructor_args, verify_power_electronics_unit_constructor_kwargs, power_electronics_unit_kwargs, power_electronics_unit_args
-from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_changing_unit import EvChargingUnit
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import EvChargingUnit
 
 ev_charging_unit_kwargs = power_electronics_unit_kwargs
 ev_charging_unit_args = power_electronics_unit_args

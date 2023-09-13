@@ -16,7 +16,7 @@ from zepben.evolve import BaseServiceReader, TableCableInfo, TableOverheadWireIn
     TableEquipmentUsagePoints, TableEquipmentOperationalRestrictions, TableEquipmentEquipmentContainers, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableLoopsSubstations, TableControls, TableRemoteControls, TableRemoteSources, TableAnalogs, TableAccumulators, TableDiscretes, TableLvFeeders, \
     TableCurrentTransformers, TablePotentialTransformers, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableCurrentRelayInfo, \
-    TableCurrentRelays, TableSwitchInfo, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits
+    TableCurrentRelays, TableSwitchInfo, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, TableTapChangerControls
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 
 __all__ = ["NetworkServiceReader"]
@@ -60,7 +60,6 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableSites, "sites", reader.load_site)
         status = status and self._load_each(TablePerLengthSequenceImpedances, "per length sequence impedances", reader.load_per_length_sequence_impedance)
         status = status and self._load_each(TableEquivalentBranches, "equivalent branches", reader.load_equivalent_branch)
-        status = status and self._load_each(TablePowerElectronicsConnection, "power electronics connection", reader.load_power_electronics_connection)
         status = status and self._load_each(
             TablePowerElectronicsConnectionPhases,
             "power electronics connection phases",
@@ -89,6 +88,8 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableTransformerStarImpedance, "transformer star impedance", reader.load_transformer_star_impedance)
         status = status and self._load_each(TablePowerTransformerEnds, "power transformer ends", reader.load_power_transformer_end)
         status = status and self._load_each(TableRatioTapChangers, "ratio tap changers", reader.load_ratio_tap_changer)
+        status = status and self._load_each(TableTapChangerControls, "tap changer controls", reader.load_tap_changer_control)
+        status = status and self._load_each(TablePowerElectronicsConnection, "power electronics connection", reader.load_power_electronics_connection)
         status = status and self._load_each(TableCurrentTransformers, "ratio tap changers", reader.load_current_transformer)
         status = status and self._load_each(TableFaultIndicators, "fault indicators", reader.load_fault_indicator)
         status = status and self._load_each(TablePotentialTransformers, "ratio tap changers", reader.load_potential_transformer)
