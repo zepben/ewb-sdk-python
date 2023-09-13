@@ -294,10 +294,7 @@ class NetworkCIMReader(BaseCIMReader):
         reclose_delay = rs.get_double(table.reclose_delay.query_index)
         set_last_mrid(f"{current_relay_info_mrid}.s{sequence_number}")
         cri = self._base_service.get(current_relay_info_mrid, CurrentRelayInfo)
-        if cri.reclose_delays:
-            cri.reclose_delays.insert(sequence_number, reclose_delay)
-        else:
-            cri.reclose_delays = [reclose_delay]
+        cri.add_delay(reclose_delay, sequence_number)
 
         return True
 
