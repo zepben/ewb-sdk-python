@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from zepben.evolve import RegulatingControl
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
 
 __all__ = ["TapChangerControl"]
 

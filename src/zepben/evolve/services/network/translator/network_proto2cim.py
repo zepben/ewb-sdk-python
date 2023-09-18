@@ -535,7 +535,8 @@ PBTownDetail.to_cim = town_detail_to_cim
 def current_relay_info_to_cim(pb: PBCurrentRelayInfo, network_service: NetworkService) -> Optional[CurrentRelayInfo]:
     cim = CurrentRelayInfo(
         mrid=pb.mrid(),
-        curve_setting=str_or_none(pb.curveSetting)
+        curve_setting=str_or_none(pb.curveSetting),
+        reclose_delays=list(pb.recloseDelays)
     )
 
     asset_info_to_cim(pb.ai, cim, network_service)
@@ -1281,7 +1282,7 @@ def power_electronics_connection_to_cim(pb: PBPowerElectronicsConnection, networ
         min_q=float_or_none(pb.minQ),
         rated_s=int_or_none(pb.ratedS),
         rated_u=int_or_none(pb.ratedU),
-        inverter_standard=pb.inverterStandard if pb.inverterStandard else None,
+        inverter_standard=str_or_none(pb.inverterStandard),
         sustain_op_overvolt_limit=int_or_none(pb.sustainOpOvervoltLimit),
         stop_at_over_freq=float_or_none(pb.stopAtOverFreq),
         stop_at_under_freq=float_or_none(pb.stopAtUnderFreq),
@@ -1412,7 +1413,7 @@ def recloser_to_cim(pb: PBRecloser, network_service: NetworkService) -> Optional
 
 def regulating_cond_eq_to_cim(pb: PBRegulatingCondEq, cim: RegulatingCondEq, network_service: NetworkService):
     cim.control_enabled = pb.controlEnabled
-    network_service.resolve_or_defer_reference(resolver.rce_regulating_controls(cim), pb.regulatingControlMRID)
+    network_service.resolve_or_defer_reference(resolver.rce_regulating_control(cim), pb.regulatingControlMRID)
 
     energy_connection_to_cim(pb.ec, cim, network_service)
 
@@ -1444,6 +1445,7 @@ def tap_changer_to_cim(pb: PBTapChanger, cim: TapChanger, network_service: Netwo
     cim.low_step = int_or_none(pb.lowStep)
     cim.neutral_u = int_or_none(pb.neutralU)
     cim.control_enabled = pb.controlEnabled
+    cim.tap_changer_control = network_service.resolve_or_defer_reference(resolver.tc_tap_changer_control(cim), pb.tapChangerControlMRID)
 
     power_system_resource_to_cim(pb.psr, cim, network_service)
 

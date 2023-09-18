@@ -38,9 +38,12 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
     LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, \
     ProtectionKind, PowerDirectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, \
-    EvChargingUnit, RegulatingControl, TableRegulatingControls, RegulatingControlModeKind, TapChangerControl, TableTapChangerControls
+    EvChargingUnit, RegulatingControl, TableRegulatingControls, RegulatingControlModeKind, TapChangerControl, TableTapChangerControls, \
+    TablePowerTransformerEndRatings, TransformerCoolingType, TransformerEndRatedS
 
 __all__ = ["NetworkCIMReader"]
+
+from zepben.evolve.services.common.resolver import rce_regulating_control
 
 
 class NetworkCIMReader(BaseCIMReader):
@@ -880,12 +883,23 @@ class NetworkCIMReader(BaseCIMReader):
         power_transformer_end.g0 = rs.get_double(table.g0.query_index, None)
         power_transformer_end.r = rs.get_double(table.r.query_index, None)
         power_transformer_end.r0 = rs.get_double(table.r0.query_index, None)
-        power_transformer_end.rated_s = rs.get_int(table.rated_s.query_index, None)
         power_transformer_end.rated_u = rs.get_int(table.rated_u.query_index, None)
         power_transformer_end.x = rs.get_double(table.x.query_index, None)
         power_transformer_end.x0 = rs.get_double(table.x0.query_index, None)
 
         return self._load_transformer_end(power_transformer_end, table, rs) and self._add_or_throw(power_transformer_end)
+
+    def load_power_transformer_end_ratings(self, table: TablePowerTransformerEndRatings, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        power_transformer_end_mrid = set_last_mrid(rs.get_string(table.power_transformer_end_mrid.query_index, None))
+        set_last_mrid(f"{power_transformer_end_mrid}-to-UNKNOWN")
+        pte = self._ensure_get(power_transformer_end_mrid, PowerTransformerEnd)
+
+        cooling_type = TransformerCoolingType[rs.get_string(table.cooling_type.query_index)]
+        set_last_mrid(f"{power_transformer_end_mrid}-to-{cooling_type.short_name}")
+        s_rating = rs.get_int(table.rated_s.query_index)
+
+        pte.add_rating(TransformerEndRatedS(cooling_type, s_rating))
+        return True
 
     def _load_protected_switch(self, protected_switch: ProtectedSwitch, table: TableProtectedSwitches, rs: ResultSet) -> bool:
         protected_switch.breaking_capacity = rs.get_int(table.breaking_capacity.query_index, None)
@@ -910,9 +924,8 @@ class NetworkCIMReader(BaseCIMReader):
 
     def _load_regulating_cond_eq(self, regulating_cond_eq: RegulatingCondEq, table: TableRegulatingCondEq, rs: ResultSet) -> bool:
         regulating_cond_eq.control_enabled = rs.get_boolean(table.control_enabled.query_index)
-        regulating_cond_eq.regulating_control = self._ensure_get(rs.get_string(table.regulating_control_mrid.query_index, None), RegulatingControl)
-        if regulating_cond_eq.regulating_control is not None:
-            regulating_cond_eq.regulating_control.add_regulating_cond_eq(regulating_cond_eq)
+        self._base_service.resolve_or_defer_reference(rce_regulating_control(regulating_cond_eq),
+                                                      rs.get_string(table.regulating_control_mrid.query_index, None))
         return self._load_energy_connection(regulating_cond_eq, table, rs)
 
     def _load_shunt_compensator(self, shunt_compensator: ShuntCompensator, table: TableShuntCompensators, rs: ResultSet) -> bool:
@@ -942,6 +955,7 @@ class NetworkCIMReader(BaseCIMReader):
         tap_changer.neutral_u = rs.get_int(table.neutral_u.query_index, None)
         tap_changer.normal_step = rs.get_int(table.normal_step.query_index, None)
         tap_changer.step = rs.get_double(table.step.query_index, None)
+        tap_changer.tap_changer_control = self._ensure_get(rs.get_string(table.tap_changer_control_mrid.query_index, None), TapChangerControl)
 
         return self._load_power_system_resource(tap_changer, table, rs)
 

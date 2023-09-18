@@ -120,6 +120,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TablePowerElectronicsConnectionPhases: TablePowerElectronicsConnectionPhases(),
         TablePowerElectronicsWindUnit: TablePowerElectronicsWindUnit(),
         TablePowerTransformerEnds: TablePowerTransformerEnds(),
+        TablePowerTransformerEndRatings: TablePowerTransformerEndRatings(),
         TablePowerTransformerInfo: TablePowerTransformerInfo(),
         TablePowerTransformers: TablePowerTransformers(),
         TablePricingStructures: TablePricingStructures(),

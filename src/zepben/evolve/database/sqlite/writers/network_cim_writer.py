@@ -34,7 +34,8 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo, TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, \
     Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableCurrentRelayInfo, \
     CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, TableCurrentRelays, TableProtectionEquipmentProtectedSwitches, \
-    TableRecloseDelays, EvChargingUnit, TableEvChargingUnits, TableRegulatingControls, RegulatingControl, TapChangerControl, TableTapChangerControls
+    TableRecloseDelays, EvChargingUnit, TableEvChargingUnits, TableRegulatingControls, RegulatingControl, TapChangerControl, TableTapChangerControls, \
+    TransformerEndRatedS, TablePowerTransformerEndRatings
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -851,7 +852,8 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.g0.query_index, power_transformer_end.g0)
         insert.add_value(table.r.query_index, power_transformer_end.r)
         insert.add_value(table.r0.query_index, power_transformer_end.r0)
-        insert.add_value(table.rated_s.query_index, power_transformer_end.rated_s)
+        for rating in power_transformer_end.s_ratings:
+            self._save_transformer_end_ratings(self._mrid_or_none(power_transformer_end), rating)
         insert.add_value(table.rated_u.query_index, power_transformer_end.rated_u)
         insert.add_value(table.x.query_index, power_transformer_end.x)
         insert.add_value(table.x0.query_index, power_transformer_end.x0)
@@ -914,6 +916,7 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.neutral_u.query_index, tap_changer.neutral_u)
         insert.add_value(table.normal_step.query_index, tap_changer.normal_step)
         insert.add_value(table.step.query_index, tap_changer.step)
+        insert.add_value(table.tap_changer_control_mrid.query_index, self._mrid_or_none(tap_changer.tap_changer_control))
 
         return self._save_power_system_resource(table, insert, tap_changer, description)
 
@@ -927,6 +930,15 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.star_impedance_mrid.query_index, self._mrid_or_none(transformer_end.star_impedance))
 
         return self._save_identified_object(table, insert, transformer_end, description)
+
+    def _save_transformer_end_ratings(self, power_transformer_end_mrid: str, transformer_end_rated_s: TransformerEndRatedS) -> bool:
+        table = self.database_tables.get_table(TablePowerTransformerEndRatings)
+        insert = self.database_tables.get_insert(TablePowerTransformerEndRatings)
+
+        insert.add_value(table.power_transformer_end_mrid.query_index, power_transformer_end_mrid)
+        insert.add_value(table.cooling_type.query_index, transformer_end_rated_s.cooling_type.short_name)
+        insert.add_value(table.rated_s.query_index, transformer_end_rated_s.rated_s)
+        return self._try_execute_single_update(insert, power_transformer_end_mrid, "transformer end rated s")
 
     def save_transformer_star_impedance(self, transformer_star_impedance: TransformerStarImpedance) -> bool:
         table = self.database_tables.get_table(TableTransformerStarImpedance)

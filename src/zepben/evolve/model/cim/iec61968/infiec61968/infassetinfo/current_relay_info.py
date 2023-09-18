@@ -20,6 +20,12 @@ class CurrentRelayInfo(AssetInfo):
 
     _reclose_delays: Optional[List[float]] = None
 
+    def __init__(self, reclose_delays: Optional[List[float]] = None, **kwargs):
+        super(CurrentRelayInfo, self).__init__(**kwargs)
+        if reclose_delays:
+            for index, delay in enumerate(reclose_delays):
+                self.add_delay(delay, index)
+
     @property
     def reclose_delays(self) -> Generator[float, None, None]:
         """

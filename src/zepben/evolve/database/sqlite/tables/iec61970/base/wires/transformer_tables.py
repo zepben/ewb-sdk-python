@@ -6,11 +6,12 @@
 
 from typing import List
 
+from zepben.evolve import SqliteTable
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableIdentifiedObjects, TableConductingEquipment, TablePowerSystemResources
 
 __all__ = ["TableTransformerEnds", "TablePowerTransformerEnds", "TablePowerTransformers", "TableTapChangers", "TableRatioTapChangers",
-           "TableTransformerStarImpedance"]
+           "TableTransformerStarImpedance", "TablePowerTransformerEndRatings"]
 
 
 # noinspection PyAbstractClass
@@ -49,7 +50,6 @@ class TablePowerTransformerEnds(TableTransformerEnds):
     g0: Column = None
     r: Column = None
     r0: Column = None
-    rated_s: Column = None
     rated_u: Column = None
     x: Column = None
     x0: Column = None
@@ -65,7 +65,6 @@ class TablePowerTransformerEnds(TableTransformerEnds):
         self.g0 = self._create_column("g0", "NUMBER", Nullable.NULL)
         self.r = self._create_column("r", "NUMBER", Nullable.NULL)
         self.r0 = self._create_column("r0", "NUMBER", Nullable.NULL)
-        self.rated_s = self._create_column("rated_s", "INTEGER", Nullable.NULL)
         self.rated_u = self._create_column("rated_u", "INTEGER", Nullable.NULL)
         self.x = self._create_column("x", "NUMBER", Nullable.NULL)
         self.x0 = self._create_column("x0", "NUMBER", Nullable.NULL)
@@ -112,6 +111,7 @@ class TableTapChangers(TablePowerSystemResources):
     neutral_u: Column = None
     normal_step: Column = None
     step: Column = None
+    tap_changer_control_mrid: Column = None
 
     def __init__(self):
         super(TableTapChangers, self).__init__()
@@ -122,6 +122,7 @@ class TableTapChangers(TablePowerSystemResources):
         self.neutral_u = self._create_column("neutral_u", "INTEGER", Nullable.NULL)
         self.normal_step = self._create_column("normal_step", "INTEGER", Nullable.NULL)
         self.step = self._create_column("step", "NUMBER", Nullable.NULL)
+        self.tap_changer_control_mrid = self._create_column("tap_changer_control_mrid", "TEXT", Nullable.NULL)
 
 
 class TableRatioTapChangers(TableTapChangers):
@@ -165,3 +166,28 @@ class TableTransformerStarImpedance(TableIdentifiedObjects):
 
     def name(self) -> str:
         return "transformer_star_impedance"
+
+
+class TablePowerTransformerEndRatings(SqliteTable):
+    power_transformer_end_mrid: Column = None
+    cooling_type: Column = None
+    rated_s: Column = None
+
+    def __init__(self):
+        super(TablePowerTransformerEndRatings, self).__init__()
+        self.power_transformer_end_mrid = self._create_column("power_transformer_end_mrid", "TEXT", Nullable.NULL)
+        self.cooling_type = self._create_column("cooling_type", "TEXT")
+        self.rated_s = self._create_column("rated_s", "INTEGER")
+
+    def non_unique_index_columns(self) -> List[List[Column]]:
+        cols = super(TablePowerTransformerEndRatings, self).non_unique_index_columns()
+        cols.append([self.power_transformer_end_mrid])
+        return cols
+
+    def unique_index_columns(self) -> List[List[Column]]:
+        cols = super(TablePowerTransformerEndRatings, self).unique_index_columns()
+        cols.append([self.power_transformer_end_mrid, self.cooling_type])
+        return cols
+
+    def name(self) -> str:
+        return "power_transformer_end_ratings"

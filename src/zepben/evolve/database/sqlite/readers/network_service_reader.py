@@ -16,7 +16,8 @@ from zepben.evolve import BaseServiceReader, TableCableInfo, TableOverheadWireIn
     TableEquipmentUsagePoints, TableEquipmentOperationalRestrictions, TableEquipmentEquipmentContainers, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableLoopsSubstations, TableControls, TableRemoteControls, TableRemoteSources, TableAnalogs, TableAccumulators, TableDiscretes, TableLvFeeders, \
     TableCurrentTransformers, TablePotentialTransformers, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableCurrentRelayInfo, \
-    TableCurrentRelays, TableSwitchInfo, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, TableTapChangerControls
+    TableCurrentRelays, TableSwitchInfo, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, TableTapChangerControls, \
+    TablePowerTransformerEndRatings
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 
 __all__ = ["NetworkServiceReader"]
@@ -86,10 +87,11 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TablePowerTransformers, "power transformers", reader.load_power_transformer)
         status = status and self._load_each(TableReclosers, "reclosers", reader.load_recloser)
         status = status and self._load_each(TableTerminals, "terminals", reader.load_terminal)
+        status = status and self._load_each(TableTapChangerControls, "tap changer controls", reader.load_tap_changer_control)
         status = status and self._load_each(TableTransformerStarImpedance, "transformer star impedance", reader.load_transformer_star_impedance)
         status = status and self._load_each(TablePowerTransformerEnds, "power transformer ends", reader.load_power_transformer_end)
+        status = status and self._load_each(TablePowerTransformerEndRatings, "power transformer end ratings", reader.load_power_transformer_end_ratings)
         status = status and self._load_each(TableRatioTapChangers, "ratio tap changers", reader.load_ratio_tap_changer)
-        status = status and self._load_each(TableTapChangerControls, "tap changer controls", reader.load_tap_changer_control)
         status = status and self._load_each(TableCurrentTransformers, "ratio tap changers", reader.load_current_transformer)
         status = status and self._load_each(TableFaultIndicators, "fault indicators", reader.load_fault_indicator)
         status = status and self._load_each(TablePotentialTransformers, "ratio tap changers", reader.load_potential_transformer)

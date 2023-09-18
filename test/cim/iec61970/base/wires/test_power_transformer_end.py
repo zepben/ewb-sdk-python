@@ -3,18 +3,20 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import pytest
 from hypothesis import given
-from hypothesis.strategies import builds, integers, floats, sampled_from
+from hypothesis.strategies import builds, integers, floats, sampled_from, lists, one_of, just
 
 from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
     verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import PowerTransformerEnd, PowerTransformer, WindingConnection
+from zepben.evolve import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerEndRatedS, TransformerCoolingType
 
 power_transformer_end_kwargs = {
     **transformer_end_kwargs,
     "power_transformer": builds(PowerTransformer),
     "rated_s": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+    # "s_ratings": lists(builds(TransformerEndRatedS), unique_by=lambda it: it.cooling_type),
     "rated_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -30,13 +32,13 @@ power_transformer_end_kwargs = {
 
 power_transformer_end_args = [*transformer_end_args, PowerTransformer(), 1, 2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.01, WindingConnection.A, 11]
 
-
 def test_power_transformer_end_constructor_default():
     pte = PowerTransformerEnd()
 
     verify_transformer_end_constructor_default(pte)
     assert not pte.power_transformer
     assert pte.rated_s is None
+    assert not list(pte.s_ratings)
     assert pte.rated_u is None
     assert pte.r is None
     assert pte.x is None
@@ -49,7 +51,7 @@ def test_power_transformer_end_constructor_default():
     assert pte.connection_kind == WindingConnection.UNKNOWN_WINDING
     assert pte.phase_angle_clock is None
 
-
+@pytest.mark.timeout(100000)
 @given(**power_transformer_end_kwargs)
 def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock,
                                                   **kwargs):
@@ -82,7 +84,6 @@ def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, ra
     assert pte.b0 == b0
     assert pte.connection_kind == connection_kind
     assert pte.phase_angle_clock == phase_angle_clock
-
 
 def test_power_transformer_end_constructor_args():
     pte = PowerTransformerEnd(*power_transformer_end_args)

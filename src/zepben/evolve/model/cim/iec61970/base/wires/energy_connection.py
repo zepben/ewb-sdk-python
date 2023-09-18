@@ -32,6 +32,10 @@ class RegulatingCondEq(EnergyConnection):
 
     _regulating_control: Optional[RegulatingControl] = None
 
+    def __init__(self, regulating_control: Optional[RegulatingControl] = None, **kwargs):
+        super(RegulatingCondEq, self).__init__(**kwargs)
+        self.regulating_control = regulating_control
+
     @property
     def regulating_control(self):
         """
@@ -45,7 +49,3 @@ class RegulatingCondEq(EnergyConnection):
             self._regulating_control = rc
         else:
             raise ValueError(f"regulating_control for {str(self)} has already been set to {self._regulating_control}, cannot reset this field to {rc}")
-
-
-
-

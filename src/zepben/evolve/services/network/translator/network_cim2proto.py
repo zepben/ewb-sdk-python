@@ -486,7 +486,8 @@ TownDetail.to_pb = town_detail_to_pb
 def current_relay_info_to_pb(cim: CurrentRelayInfo) -> PBCurrentRelayInfo:
     return PBCurrentRelayInfo(
         ai=asset_info_to_pb(cim),
-        curveSetting=cim.curve_setting
+        curveSetting=cim.curve_setting,
+        recloseDelays=cim.reclose_delays
     )
 
 
@@ -1220,7 +1221,8 @@ def tap_changer_to_pb(cim: TapChanger) -> PBTapChanger:
         neutralStep=from_nullable_int(cim.neutral_step),
         neutralU=from_nullable_int(cim.neutral_u),
         normalStep=from_nullable_int(cim.normal_step),
-        controlEnabled=cim.control_enabled
+        controlEnabled=cim.control_enabled,
+        tapChangerControlMRID=mrid_or_empty(cim.tap_changer_control)
     )
 
 

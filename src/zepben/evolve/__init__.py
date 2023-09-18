@@ -86,6 +86,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.recloser import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_cooling_type import *
 
 from zepben.evolve.model.cim.iec61970.base.core.substation import *
 from zepben.evolve.model.cim.iec61970.base.core.terminal import *

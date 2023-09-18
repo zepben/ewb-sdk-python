@@ -233,6 +233,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_values(diff, CurrentRelayInfo.curve_setting)
+        self._compare_indexed_value_collections(diff, CurrentRelayInfo.reclose_delays)
 
         return self._compare_asset_info(diff)
 

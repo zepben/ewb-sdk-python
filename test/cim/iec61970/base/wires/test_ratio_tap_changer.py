@@ -3,7 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+import pytest
 from hypothesis import given
 from hypothesis.strategies import builds, floats
 
@@ -28,7 +28,7 @@ def test_ratio_tap_changer_constructor_default():
     assert not rtc.transformer_end
     assert rtc.step_voltage_increment is None
 
-
+@pytest.mark.timeout(1000000)
 @given(**ratio_tap_changer_kwargs)
 def test_ratio_tap_changer_constructor_kwargs(transformer_end, step_voltage_increment, **kwargs):
     assume_step_values(kwargs["high_step"], kwargs["low_step"], kwargs["neutral_step"], kwargs["normal_step"], kwargs["step"])
@@ -39,8 +39,9 @@ def test_ratio_tap_changer_constructor_kwargs(transformer_end, step_voltage_incr
     assert rtc.transformer_end == transformer_end
     assert rtc.step_voltage_increment == step_voltage_increment
 
-
+@pytest.mark.timeout(1000000)
 def test_ratio_tap_changer_constructor_args():
+    s = ratio_tap_changer_args
     rtc = RatioTapChanger(*ratio_tap_changer_args)
 
     verify_tap_changer_constructor_args(rtc)

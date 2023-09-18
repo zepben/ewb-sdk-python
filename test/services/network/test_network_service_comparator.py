@@ -3,7 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+import datetime
 from typing import Type
 
 from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
@@ -19,7 +19,7 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
     Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, CurrentRelayInfo, \
-    ProtectionEquipment, CurrentRelay, EvChargingUnit
+    ProtectionEquipment, CurrentRelay, EvChargingUnit, PowerDirectionKind
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
@@ -215,6 +215,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_asset_info(CurrentRelayInfo)
 
         self.validator.validate_property(CurrentRelayInfo.curve_setting, CurrentRelayInfo, lambda _: "cs1", lambda _: "cs2")
+        self.validator.validate_indexed_collection(
+            CurrentRelayInfo.reclose_delays,
+            CurrentRelayInfo.add_delay,
+            CurrentRelayInfo,
+            lambda _: [0.1, 0.2],
+            lambda _: [0.1, 0.3]
+        )
 
     # noinspection PyArgumentList
     def test_compare_current_transformer_info(self):
@@ -272,6 +279,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(UsagePoint.usage_point_location, UsagePoint, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
         self.validator.validate_property(UsagePoint.is_virtual, UsagePoint, lambda _: False, lambda _: True)
         self.validator.validate_property(UsagePoint.connection_category, UsagePoint, lambda _: "first", lambda _: "second")
+        self.validator.validate_property(UsagePoint.rated_power, UsagePoint, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(UsagePoint.approved_inverter_capacity, UsagePoint, lambda _: 1, lambda _: 2)
         self.validator.validate_collection(
             UsagePoint.end_devices,
             UsagePoint.add_end_device,
@@ -400,6 +409,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
         self.validator.validate_property(Equipment.in_service, creator, lambda _: True, lambda _: False)
         self.validator.validate_property(Equipment.normally_in_service, creator, lambda _: True, lambda _: False)
+        self.validator.validate_property(
+            Equipment.commissioned_date,
+            creator,
+            lambda _: datetime.datetime.fromtimestamp(0),
+            lambda _: datetime.datetime.fromtimestamp(1)
+        )
         self.validator.validate_collection(Equipment.containers, Equipment.add_container, creator, lambda _: Site(mrid="s1"), lambda _: Site(mrid="s2"))
         self.validator.validate_collection(
             Equipment.usage_points,
@@ -601,6 +616,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
     def _compare_protection_equipment(self, creator: Type[ProtectionEquipment]):
         self._compare_equipment(creator)
+        self.validator.validate_property(ProtectionEquipment.directable, creator, lambda _: False, lambda _: True)
+        self.validator.validate_property(
+            ProtectionEquipment.power_direction,
+            creator,
+            lambda _: PowerDirectionKind.FORWARD,
+            lambda _: PowerDirectionKind.REVERSE
+        )
 
         self.validator.validate_collection(
             ProtectionEquipment.protected_switches,
@@ -845,6 +867,30 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(PowerElectronicsConnection.q, PowerElectronicsConnection, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(PowerElectronicsConnection.rated_s, PowerElectronicsConnection, lambda _: 1, lambda _: 2)
         self.validator.validate_property(PowerElectronicsConnection.rated_u, PowerElectronicsConnection, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(PowerElectronicsConnection.inverter_standard, PowerElectronicsConnection, lambda _: "first", lambda _: "second")
+        self.validator.validate_property(PowerElectronicsConnection.sustain_op_overvolt_limit, PowerElectronicsConnection, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(PowerElectronicsConnection.stop_at_over_freq, PowerElectronicsConnection, lambda _: 51.1, lambda _: 51.2)
+        self.validator.validate_property(PowerElectronicsConnection.stop_at_under_freq, PowerElectronicsConnection, lambda _: 47.1, lambda _: 47.2)
+        self.validator.validate_property(PowerElectronicsConnection.inv_volt_watt_resp_mode, PowerElectronicsConnection, lambda _: False, lambda _: True)
+        self.validator.validate_property(PowerElectronicsConnection.inv_watt_resp_v1, PowerElectronicsConnection, lambda _: 201, lambda _: 202)
+        self.validator.validate_property(PowerElectronicsConnection.inv_watt_resp_v2, PowerElectronicsConnection, lambda _: 217, lambda _: 218)
+        self.validator.validate_property(PowerElectronicsConnection.inv_watt_resp_v3, PowerElectronicsConnection, lambda _: 236, lambda _: 237)
+        self.validator.validate_property(PowerElectronicsConnection.inv_watt_resp_v4, PowerElectronicsConnection, lambda _: 245, lambda _: 246)
+        self.validator.validate_property(PowerElectronicsConnection.inv_watt_resp_p_at_v1, PowerElectronicsConnection, lambda _: 0.1, lambda _: 0.2)
+        self.validator.validate_property(PowerElectronicsConnection.inv_watt_resp_p_at_v2, PowerElectronicsConnection, lambda _: 0.1, lambda _: 0.2)
+        self.validator.validate_property(PowerElectronicsConnection.inv_watt_resp_p_at_v3, PowerElectronicsConnection, lambda _: 0.1, lambda _: 0.2)
+        self.validator.validate_property(PowerElectronicsConnection.inv_watt_resp_p_at_v4, PowerElectronicsConnection, lambda _: 0.1, lambda _: 0.2)
+        self.validator.validate_property(PowerElectronicsConnection.inv_volt_var_resp_mode, PowerElectronicsConnection, lambda _: False, lambda _: True)
+        self.validator.validate_property(PowerElectronicsConnection.inv_var_resp_v1, PowerElectronicsConnection, lambda _: 201, lambda _: 202)
+        self.validator.validate_property(PowerElectronicsConnection.inv_var_resp_v2, PowerElectronicsConnection, lambda _: 201, lambda _: 202)
+        self.validator.validate_property(PowerElectronicsConnection.inv_var_resp_v3, PowerElectronicsConnection, lambda _: 201, lambda _: 202)
+        self.validator.validate_property(PowerElectronicsConnection.inv_var_resp_v4, PowerElectronicsConnection, lambda _: 201, lambda _: 202)
+        self.validator.validate_property(PowerElectronicsConnection.inv_var_resp_q_at_v1, PowerElectronicsConnection, lambda _: 0.1, lambda _: 0.2)
+        self.validator.validate_property(PowerElectronicsConnection.inv_var_resp_q_at_v2, PowerElectronicsConnection, lambda _: 0.1, lambda _: 0.2)
+        self.validator.validate_property(PowerElectronicsConnection.inv_var_resp_q_at_v3, PowerElectronicsConnection, lambda _: 0.1, lambda _: 0.2)
+        self.validator.validate_property(PowerElectronicsConnection.inv_var_resp_q_at_v4, PowerElectronicsConnection, lambda _: -0.5, lambda _: -0.4)
+        self.validator.validate_property(PowerElectronicsConnection.inv_reactive_power_mode, PowerElectronicsConnection, lambda _: False, lambda _: True)
+        self.validator.validate_property(PowerElectronicsConnection.inv_fix_reactive_power, PowerElectronicsConnection, lambda _: 0.1, lambda _: 0.2)
 
     def test_compare_power_electronics_connection_phase(self):
         self._compare_power_system_resource(PowerElectronicsConnectionPhase)

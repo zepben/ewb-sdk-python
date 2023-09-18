@@ -368,7 +368,8 @@ def create_current_relay_info(include_runtime: bool = True):
     return builds(
         CurrentRelayInfo,
         **create_asset_info(include_runtime),
-        curve_setting=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE)
+        curve_setting=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        reclose_delays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
     )
 
 
@@ -1081,7 +1082,31 @@ def create_power_electronics_connection(include_runtime: bool = True):
         p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         rated_s=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-        rated_u=integers(min_value=0, max_value=MAX_32_BIT_INTEGER)
+        rated_u=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        inverter_standard=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        sustain_op_overvolt_limit=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        stop_at_over_freq=floats(min_value=51.0, max_value=52.0),
+        stop_at_under_freq=floats(min_value=47.0, max_value=49.0),
+        inv_volt_watt_resp_mode=booleans(),
+        inv_watt_resp_v1=integers(min_value=200, max_value=300),
+        inv_watt_resp_v2=integers(min_value=216, max_value=230),
+        inv_watt_resp_v3=integers(min_value=235, max_value=255),
+        inv_watt_resp_v4=integers(min_value=244, max_value=265),
+        inv_watt_resp_p_at_v1=floats(min_value=0.0, max_value=1.0),
+        inv_watt_resp_p_at_v2=floats(min_value=0.0, max_value=1.0),
+        inv_watt_resp_p_at_v3=floats(min_value=0.0, max_value=1.0),
+        inv_watt_resp_p_at_v4=floats(min_value=0.0, max_value=0.2),
+        inv_volt_var_resp_mode=booleans(),
+        inv_var_resp_v1=integers(min_value=200, max_value=300),
+        inv_var_resp_v2=integers(min_value=200, max_value=300),
+        inv_var_resp_v3=integers(min_value=200, max_value=300),
+        inv_var_resp_v4=integers(min_value=200, max_value=300),
+        inv_var_resp_q_at_v1=floats(min_value=0.0, max_value=0.6),
+        inv_var_resp_q_at_v2=floats(min_value=-1.0, max_value=1.0),
+        inv_var_resp_q_at_v3=floats(min_value=-1.0, max_value=1.0),
+        inv_var_resp_q_at_v4=floats(min_value=-0.6, max_value=0.0),
+        inv_reactive_power_mode=booleans(),
+        inv_fix_reactive_power=floats(min_value=-1.0, max_value=1.0),
     )
 
 
