@@ -451,7 +451,7 @@ class NetworkServiceComparator(BaseServiceComparator):
             RegulatingControl.min_allowed_target_value
         )
         self._compare_id_references(diff, RegulatingControl.terminal)
-        self._compare_id_reference_collections(diff, RegulatingControl.regulating_condition_equipment)
+        self._compare_id_reference_collections(diff, RegulatingControl.regulating_conducting_equipment)
 
         return self._compare_power_system_resource(diff)
     def _compare_power_system_resource(self, diff: ObjectDifference) -> ObjectDifference:

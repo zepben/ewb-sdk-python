@@ -922,7 +922,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(RegulatingControl.min_allowed_target_value, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(RegulatingControl.terminal, creator, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
         self.validator.validate_collection(
-            RegulatingControl.regulating_condition_equipment,
+            RegulatingControl.regulating_conducting_equipment,
             RegulatingControl.add_regulating_cond_eq,
             creator,
             lambda _: RegulatingCondEq(mrid="rce1"),

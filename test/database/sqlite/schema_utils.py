@@ -466,7 +466,7 @@ class SchemaNetworks:
 
         if isinstance(filled, RegulatingControl):
             service.add(filled.terminal)
-            for it in filled.regulating_condition_equipment:
+            for it in filled.regulating_conducting_equipment:
                 it.regulating_control = filled
                 service.add(it)
 

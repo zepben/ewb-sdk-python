@@ -1205,13 +1205,13 @@ def create_regulating_control(include_runtime: bool):
         "discrete": booleans(),
         "mode": sampled_from(RegulatingControlModeKind),
         "monitored_phase": sampled_phase_code(),
-        "target_deadband": floats(min_value=0, max_value=FLOAT_MAX),
+        "target_deadband": floats(min_value=0.0, max_value=FLOAT_MAX),
         "target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "enabled": booleans(),
         "max_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "min_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "terminal": builds(Terminal, **create_identified_object(include_runtime)),
-        "regulating_cond_eq": lists(builds(PowerElectronicsConnection, **create_identified_object(include_runtime)))
+        "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection, **create_identified_object(include_runtime)))
 
     }
 

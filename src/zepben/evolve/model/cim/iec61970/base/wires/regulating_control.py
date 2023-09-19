@@ -85,14 +85,14 @@ class RegulatingControl(PowerSystemResource):
     _regulating_cond_eq: Optional[List[RegulatingCondEq]] = None
     """The [RegulatingCondEq] that are controlled by this regulating control scheme."""
 
-    def __init__(self, regulating_cond_eq: Optional[Iterable[RegulatingCondEq]] = None, **kwargs):
+    def __init__(self, regulating_conducting_equipment: Optional[Iterable[RegulatingCondEq]] = None, **kwargs):
         super(PowerSystemResource, self).__init__(**kwargs)
-        if regulating_cond_eq is not None:
-            for eq in regulating_cond_eq:
+        if regulating_conducting_equipment is not None:
+            for eq in regulating_conducting_equipment:
                 self.add_regulating_cond_eq(eq)
 
     @property
-    def regulating_condition_equipment(self) -> Generator[RegulatingCondEq, None, None]:
+    def regulating_conducting_equipment(self) -> Generator[RegulatingCondEq, None, None]:
         """
         Yields all the :class:`RegulatingCondEq` that are controlled by this :class:`RegulatingControl`.
 

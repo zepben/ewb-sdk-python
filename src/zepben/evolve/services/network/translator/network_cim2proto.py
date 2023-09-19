@@ -1263,7 +1263,7 @@ def regulating_control_to_pb(cim: RegulatingControl) -> PBRegulatingControl:
         maxAllowedTargetValue=from_nullable_float(cim.max_allowed_target_value),
         minAllowedTargetValue=from_nullable_float(cim.min_allowed_target_value),
         terminalMRID=mrid_or_empty(cim.terminal),
-        regulatingCondEqMRIDs=[str(io.mrid) for io in cim.regulating_condition_equipment]
+        regulatingCondEqMRIDs=[str(io.mrid) for io in cim.regulating_conducting_equipment]
     )
 
 

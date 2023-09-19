@@ -14,7 +14,6 @@ regulating_cond_eq_kwargs = {
     **energy_connection_kwargs,
     "control_enabled": booleans(),
     "regulating_control": builds(RegulatingControl)
-
 }
 
 regulating_cond_eq_args = [*energy_connection_args, False, None]
@@ -36,3 +35,4 @@ def verify_regulating_cond_eq_constructor_args(rce: RegulatingCondEq):
     verify_energy_connection_constructor_args(rce)
     assert rce.control_enabled == regulating_cond_eq_args[-2]
     assert rce.regulating_control == regulating_cond_eq_args[-1]
+
