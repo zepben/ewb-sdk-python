@@ -7,6 +7,7 @@ from hypothesis import given
 from hypothesis.strategies import text, lists, floats
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, FLOAT_MIN, FLOAT_MAX
+from cim.collection_validator import validate_collection_ordered
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args
 from zepben.evolve import CurrentRelayInfo
@@ -48,3 +49,16 @@ def test_current_relay_info_constructor_args():
     verify_asset_info_constructor_args(cri)
     assert cri.curve_setting == current_relay_info_args[-2]
     assert list(cri.reclose_delays) == current_relay_info_args[-1]
+
+
+def _test_current_relay_info_reclose_delays():
+    validate_collection_ordered(CurrentRelayInfo,
+                                lambda i, _: float(i),
+                                CurrentRelayInfo.num_delays,
+                                CurrentRelayInfo.get_delay,
+                                CurrentRelayInfo.reclose_delays,
+                                CurrentRelayInfo.add_delay,
+                                CurrentRelayInfo.add_delay,
+                                CurrentRelayInfo.remove_delay_by_delay,
+                                CurrentRelayInfo.clear_delays
+                                )

@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Optional, List, Generator
 
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
-from zepben.evolve.util import ngen, nlen
+from zepben.evolve.util import ngen, nlen, safe_remove
 
 __all__ = ["CurrentRelayInfo"]
 
@@ -39,6 +39,12 @@ class CurrentRelayInfo(AssetInfo):
         """
         return nlen(self._reclose_delays)
 
+    def get_delay(self, index: int) -> Optional[float]:
+        if self._reclose_delays:
+            return self._reclose_delays[index] if index in range(len(self._reclose_delays)) else None
+        else:
+            return None
+
     def add_delay(self, delay: float, index: int = None) -> CurrentRelayInfo:
         """
         Add a reclose delay
@@ -51,6 +57,15 @@ class CurrentRelayInfo(AssetInfo):
         if index is None:
             index = self.num_delays()
         self._reclose_delays.insert(index, delay)
+        return self
+
+    def remove_delay_by_delay(self, delay: float) -> CurrentRelayInfo:
+        """
+        Remove a delay from the list.
+        `index` The index of the delay to remove.
+        Returns The delay that was removed, or `None` if no delay was present at `index`.
+        """
+        self._reclose_delays = safe_remove(self._reclose_delays, delay)
         return self
 
     def remove_delay(self, index: int) -> Optional[float]:

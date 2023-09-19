@@ -6,9 +6,10 @@
 from hypothesis.strategies import booleans, sampled_from, floats, builds, lists
 
 from cim.cim_creators import sampled_phase_code, create_identified_object, FLOAT_MAX, FLOAT_MIN
+from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_args, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, power_system_resource_kwargs, verify_power_system_resource_constructor_args
-from zepben.evolve import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl
+from zepben.evolve import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq
 
 regulating_control_kwargs = {
     **power_system_resource_kwargs,
@@ -81,3 +82,16 @@ def verify_regulating_control_constructor_args(rc):
     assert rc.min_allowed_target_value == regulating_control_args[-3]
     assert rc.terminal == regulating_control_args[-2]
     assert list(rc.regulating_conducting_equipment) == regulating_control_args[-1]
+
+
+def test_regulating_control_regulating_conducting_equipment():
+    # noinspection PyArgumentList
+    validate_collection_unordered(RegulatingControl,
+                                  lambda mrid, _: RegulatingCondEq(mrid),
+                                  RegulatingControl.num_regulating_cond_eq,
+                                  RegulatingControl.get_regulating_cond_eq,
+                                  RegulatingControl.regulating_conducting_equipment,
+                                  RegulatingControl.add_regulating_cond_eq,
+                                  RegulatingControl.remove_regulating_cond_eq,
+                                  RegulatingControl.clear_regulating_cond_eq)
+

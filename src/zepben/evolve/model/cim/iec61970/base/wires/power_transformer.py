@@ -272,7 +272,6 @@ class PowerTransformerEnd(TransformerEnd):
     secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the 
     clock as 11. The clock value of the transformer end number specified as 1, is assumed to be zero."""
 
-
     _s_ratings: List[TransformerEndRatedS] = None
     """
     Backing list for storing transformer ratings. Placed here to not mess with __init__ param order. Must always be placed at the end.
@@ -324,12 +323,16 @@ class PowerTransformerEnd(TransformerEnd):
 
     @rated_s.setter
     def rated_s(self, rated_s: Optional[int]):
+        # TODO: deprecated
         self.clear_ratings()
         if rated_s is not None:
             self.add_rating(TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, rated_s))
 
     @property
     def s_ratings(self) -> Generator[TransformerEndRatedS, None, None]:
+        # wonder how expensive adding this is
+        if self._s_ratings:
+            self._s_ratings.sort(key=lambda t: t.rated_s, reverse=True)
         return ngen(self._s_ratings)
 
     def num_ratings(self) -> int:

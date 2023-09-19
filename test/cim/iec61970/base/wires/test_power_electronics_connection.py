@@ -3,6 +3,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import re
+
+from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import integers, builds, lists, floats, text, booleans
 
@@ -241,3 +244,73 @@ def test_power_electronics_connection_phases_collection():
                                   PowerElectronicsConnection.add_phase,
                                   PowerElectronicsConnection.remove_phase,
                                   PowerElectronicsConnection.clear_phases)
+
+
+def test_power_electronics_connection_property_bounds():
+    with raises(ValueError, match=re.escape("inv_watt_resp_v1 [199] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v1=199)
+    with raises(ValueError, match=re.escape("inv_watt_resp_v1 [301] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v1=301)
+    with raises(ValueError, match=re.escape("inv_watt_resp_v2 [215] must be between 216 and 230.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v2=215)
+    with raises(ValueError, match=re.escape("inv_watt_resp_v2 [231] must be between 216 and 230.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v2=231)
+    with raises(ValueError, match=re.escape("inv_watt_resp_v3 [234] must be between 235 and 255.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v3=234)
+    with raises(ValueError, match=re.escape("inv_watt_resp_v3 [256] must be between 235 and 255.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v3=256)
+    with raises(ValueError, match=re.escape("inv_watt_resp_v4 [243] must be between 244 and 265.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v4=243)
+    with raises(ValueError, match=re.escape("inv_watt_resp_v4 [266] must be between 244 and 265.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_v4=266)
+
+    with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v1 [-0.01] must be between 0.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v1=-0.01)
+    with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v1 [1.01] must be between 0.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v1=1.01)
+    with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v2 [-0.01] must be between 0.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v2=-0.01)
+    with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v2 [1.01] must be between 0.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v2=1.01)
+    with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v3 [-0.01] must be between 0.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v3=-0.01)
+    with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v3 [1.01] must be between 0.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v3=1.01)
+    with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v4 [-0.01] must be between 0.0 and 0.2.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v4=-0.01)
+    with raises(ValueError, match=re.escape("inv_watt_resp_p_at_v4 [0.21] must be between 0.0 and 0.2.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_watt_resp_p_at_v4=0.21)
+
+    with raises(ValueError, match=re.escape("inv_var_resp_v1 [199] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v1=199)
+    with raises(ValueError, match=re.escape("inv_var_resp_v1 [301] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v1=301)
+    with raises(ValueError, match=re.escape("inv_var_resp_v2 [199] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v2=199)
+    with raises(ValueError, match=re.escape("inv_var_resp_v2 [301] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v2=301)
+    with raises(ValueError, match=re.escape("inv_var_resp_v3 [199] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v3=199)
+    with raises(ValueError, match=re.escape("inv_var_resp_v3 [301] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v3=301)
+    with raises(ValueError, match=re.escape("inv_var_resp_v4 [199] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v4=199)
+    with raises(ValueError, match=re.escape("inv_var_resp_v4 [301] must be between 200 and 300.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_v4=301)
+
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v1 [-0.01] must be between 0.0 and 0.6.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v1=-0.01)
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v1 [0.61] must be between 0.0 and 0.6.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v1=0.61)
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v2 [-1.01] must be between -1.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v2=-1.01)
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v2 [1.01] must be between -1.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v2=1.01)
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v3 [-1.01] must be between -1.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v3=-1.01)
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v3 [1.01] must be between -1.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v3=1.01)
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v4 [-1.01] must be between -1.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v4=-1.01)
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v4 [1.01] must be between -1.0 and 1.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v4=1.01)
