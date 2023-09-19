@@ -15,7 +15,7 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
     Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
     Switch, ShuntCompensatorInfo, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, \
-    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, ProtectedSwitch, EvChargingUnit
+    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, ProtectedSwitch, EvChargingUnit, RegulatingControl, TapChangerControl
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
@@ -414,6 +414,46 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_identified_object(diff)
 
+    def _compare_tap_changer_control(self, source: TapChangerControl, target: TapChangerControl) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(
+            diff,
+            TapChangerControl.limit_voltage,
+            TapChangerControl.line_drop_compensation,
+            TapChangerControl.forward_ldc_blocking,
+            TapChangerControl.co_generation_enabled
+        )
+        self._compare_floats(
+            diff,
+            TapChangerControl.line_drop_r,
+            TapChangerControl.line_drop_x,
+            TapChangerControl.reverse_line_drop_r,
+            TapChangerControl.reverse_line_drop_x,
+            TapChangerControl.time_delay,
+        )
+
+        return self._compare_regulating_control(diff)
+
+    def _compare_regulating_control(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(
+            diff,
+            RegulatingControl.discrete,
+            RegulatingControl.mode,
+            RegulatingControl.monitored_phase,
+            RegulatingControl.enabled
+        )
+        self._compare_floats(
+            diff,
+            RegulatingControl.target_deadband,
+            RegulatingControl.target_value,
+            RegulatingControl.max_allowed_target_value,
+            RegulatingControl.min_allowed_target_value
+        )
+        self._compare_id_references(diff, RegulatingControl.terminal)
+        self._compare_id_reference_collections(diff, RegulatingControl.regulating_condition_equipment)
+
+        return self._compare_power_system_resource(diff)
     def _compare_power_system_resource(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_id_references(diff, PowerSystemResource.asset_info, PowerSystemResource.location)
 
@@ -838,6 +878,7 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_regulating_cond_eq(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, RegulatingCondEq.control_enabled)
+        self._compare_id_references(diff, RegulatingCondEq.regulating_control)
 
         return self._compare_energy_connection(diff)
 

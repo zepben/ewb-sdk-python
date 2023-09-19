@@ -1002,12 +1002,12 @@ class NetworkCIMReader(BaseCIMReader):
 
         tap_changer_control.limit_voltage = rs.get_int(table.limit_voltage.query_index, None)
         tap_changer_control.line_drop_compensation = rs.get_boolean(table.line_drop_compensation.query_index, None)
-        tap_changer_control.line_drop_r = rs.get_int(table.line_drop_r.query_index, None)
-        tap_changer_control.line_drop_x = rs.get_int(table.line_drop_x.query_index, None)
-        tap_changer_control.reverse_line_drop_r = rs.get_int(table.reverse_line_drop_r.query_index, None)
-        tap_changer_control.reverse_line_drop_x = rs.get_int(table.reverse_line_drop_x.query_index, None)
+        tap_changer_control.line_drop_r = rs.get_double(table.line_drop_r.query_index, None)
+        tap_changer_control.line_drop_x = rs.get_double(table.line_drop_x.query_index, None)
+        tap_changer_control.reverse_line_drop_r = rs.get_double(table.reverse_line_drop_r.query_index, None)
+        tap_changer_control.reverse_line_drop_x = rs.get_double(table.reverse_line_drop_x.query_index, None)
         tap_changer_control.forward_ldc_blocking = rs.get_boolean(table.forward_ldc_blocking.query_index, None)
-        tap_changer_control.time_delay = rs.get_int(table.time_delay.query_index, None)
+        tap_changer_control.time_delay = rs.get_double(table.time_delay.query_index, None)
         tap_changer_control.co_generation_enabled = rs.get_boolean(table.co_generation_enabled.query_index, None)
         return self._load_regulating_control(tap_changer_control, table, rs) and self._add_or_throw(tap_changer_control)
 

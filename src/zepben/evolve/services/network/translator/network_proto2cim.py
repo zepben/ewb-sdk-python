@@ -1473,7 +1473,7 @@ def regulating_control_to_cim(pb: PBRegulatingControl, cim: RegulatingControl, n
     cim.enabled = None if pb.HasField("enabledNull") else pb.enabledSet
     cim.max_allowed_target_value = float_or_none(pb.maxAllowedTargetValue)
     cim.min_allowed_target_value = float_or_none(pb.minAllowedTargetValue)
-    cim.terminal = network_service.resolve_or_defer_reference(resolver.rc_terminal(cim), pb.terminalMRID)
+    network_service.resolve_or_defer_reference(resolver.rc_terminal(cim), pb.terminalMRID)
     for mrid in pb.regulatingCondEqMRIDs:
         network_service.resolve_or_defer_reference(resolver.rc_regulating_cond_eq(cim), mrid)
 

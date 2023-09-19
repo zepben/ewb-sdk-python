@@ -85,7 +85,7 @@ class RegulatingControl(PowerSystemResource):
     _regulating_cond_eq: Optional[List[RegulatingCondEq]] = None
     """The [RegulatingCondEq] that are controlled by this regulating control scheme."""
 
-    def __init__(self, regulating_cond_eq: Iterable[RegulatingCondEq] = None, **kwargs):
+    def __init__(self, regulating_cond_eq: Optional[Iterable[RegulatingCondEq]] = None, **kwargs):
         super(PowerSystemResource, self).__init__(**kwargs)
         if regulating_cond_eq is not None:
             for eq in regulating_cond_eq:

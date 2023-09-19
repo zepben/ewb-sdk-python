@@ -47,8 +47,9 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'create_power_electronics_connection_phase', 'create_power_transformer', 'create_power_transformer_end', 'create_protected_switch',
            'create_ratio_tap_changer', 'create_recloser', 'create_regulating_cond_eq', 'create_shunt_compensator', 'sampled_single_phase_kind', 'create_switch',
            'create_tap_changer', 'create_transformer_end', 'create_transformer_star_impedance', 'sampled_vector_group', 'sampled_winding_connection_kind',
-           'create_circuit', 'create_loop', 'create_lv_feeder', "create_ev_charging_unit", 'traced_phases', 'sampled_wire_info', 'sampled_conducting_equipment', 'sampled_equipment',
-           'sampled_equipment_container', 'sampled_hvlv_feeder', 'sampled_measurement', 'sampled_protected_switches']
+           'create_circuit', 'create_loop', 'create_lv_feeder', "create_ev_charging_unit", 'traced_phases', 'sampled_wire_info', 'sampled_conducting_equipment',
+           'sampled_equipment', 'sampled_equipment_container', 'sampled_hvlv_feeder', 'sampled_measurement', 'sampled_protected_switches',
+           'create_tap_changer_control']
 
 
 #######################
@@ -1176,7 +1177,42 @@ def create_recloser(include_runtime: bool = True):
 def create_regulating_cond_eq(include_runtime: bool):
     return {
         **create_energy_connection(include_runtime),
-        "control_enabled": booleans()
+        "control_enabled": booleans(),
+        "regulating_control": builds(TapChangerControl, **create_identified_object(include_runtime)),
+
+    }
+
+
+def create_tap_changer_control(include_runtime: bool = True):
+    return builds(
+        TapChangerControl,
+        **create_regulating_control(include_runtime),
+        limit_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        line_drop_compensation=booleans(),
+        line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverse_line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverse_line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forward_ldc_blocking=booleans(),
+        time_delay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        co_generation_enabled=booleans()
+    )
+
+
+def create_regulating_control(include_runtime: bool):
+    return {
+        **create_power_system_resource(include_runtime),
+        "discrete": booleans(),
+        "mode": sampled_from(RegulatingControlModeKind),
+        "monitored_phase": sampled_phase_code(),
+        "target_deadband": floats(min_value=0, max_value=FLOAT_MAX),
+        "target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "enabled": booleans(),
+        "max_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "min_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "terminal": builds(Terminal, **create_identified_object(include_runtime)),
+        "regulating_cond_eq": lists(builds(PowerElectronicsConnection, **create_identified_object(include_runtime)))
+
     }
 
 

@@ -15,7 +15,7 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     PowerSystemResource, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, \
     PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, \
     RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, ProtectionEquipment, \
-    CurrentTransformer, PotentialTransformer, Breaker
+    CurrentTransformer, PotentialTransformer, Breaker, RegulatingCondEq, RegulatingControl
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -458,6 +458,16 @@ class SchemaNetworks:
                 service.add(it)
             for it in filled.phases:
                 it.power_electronics_connection = filled
+                service.add(it)
+
+        if isinstance(filled, RegulatingCondEq):
+            filled.regulating_control.add_regulating_cond_eq(filled)
+            service.add(filled.regulating_control)
+
+        if isinstance(filled, RegulatingControl):
+            service.add(filled.terminal)
+            for it in filled.regulating_condition_equipment:
+                it.regulating_control = filled
                 service.add(it)
 
         if isinstance(filled, PowerElectronicsConnectionPhase):

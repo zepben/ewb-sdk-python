@@ -19,7 +19,7 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
     Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, CurrentRelayInfo, \
-    ProtectionEquipment, CurrentRelay, EvChargingUnit, PowerDirectionKind
+    ProtectionEquipment, CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
@@ -892,6 +892,43 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(PowerElectronicsConnection.inv_reactive_power_mode, PowerElectronicsConnection, lambda _: False, lambda _: True)
         self.validator.validate_property(PowerElectronicsConnection.inv_fix_reactive_power, PowerElectronicsConnection, lambda _: 0.1, lambda _: 0.2)
 
+    def test_compare_tap_changer_control(self):
+        self._compare_regulating_control(TapChangerControl)
+
+        self.validator.validate_property(TapChangerControl.limit_voltage, TapChangerControl, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(TapChangerControl.line_drop_compensation, TapChangerControl, lambda _: False, lambda _: True)
+        self.validator.validate_property(TapChangerControl.line_drop_r, TapChangerControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TapChangerControl.line_drop_x, TapChangerControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TapChangerControl.reverse_line_drop_r, TapChangerControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TapChangerControl.reverse_line_drop_x, TapChangerControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TapChangerControl.forward_ldc_blocking, TapChangerControl, lambda _: False, lambda _: True)
+        self.validator.validate_property(TapChangerControl.time_delay, TapChangerControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(TapChangerControl.co_generation_enabled, TapChangerControl, lambda _: False, lambda _: True)
+
+    def _compare_regulating_control(self, creator: Type[RegulatingControl]):
+        self._compare_power_system_resource(creator)
+
+        self.validator.validate_property(RegulatingControl.discrete, creator, lambda _: False, lambda _: True)
+        self.validator.validate_property(
+            RegulatingControl.mode, creator,
+            lambda _: RegulatingControlModeKind.voltage,
+            lambda _: RegulatingControlModeKind.currentFlow
+        )
+        self.validator.validate_property(RegulatingControl.monitored_phase, creator, lambda _: PhaseCode.ABC, lambda _: PhaseCode.ABCN)
+        self.validator.validate_property(RegulatingControl.target_deadband, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(RegulatingControl.target_value, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(RegulatingControl.enabled, creator, lambda _: False, lambda _: True)
+        self.validator.validate_property(RegulatingControl.max_allowed_target_value, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(RegulatingControl.min_allowed_target_value, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(RegulatingControl.terminal, creator, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
+        self.validator.validate_collection(
+            RegulatingControl.regulating_condition_equipment,
+            RegulatingControl.add_regulating_cond_eq,
+            creator,
+            lambda _: RegulatingCondEq(mrid="rce1"),
+            lambda _: RegulatingCondEq(mrid="rce2")
+        )
+
     def test_compare_power_electronics_connection_phase(self):
         self._compare_power_system_resource(PowerElectronicsConnectionPhase)
 
@@ -981,6 +1018,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_energy_connection(creator)
 
         self.validator.validate_property(RegulatingCondEq.control_enabled, creator, lambda _: False, lambda _: True)
+        self.validator.validate_property(
+            RegulatingCondEq.regulating_control,
+            creator,
+            lambda _: RegulatingControl(mrid="rc1"),
+            lambda _: RegulatingControl(mrid="rc2")
+        )
 
     def _compare_shunt_compensator(self, creator: Type[ShuntCompensator]):
         self._compare_regulating_cond_eq(creator)

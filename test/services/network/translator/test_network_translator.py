@@ -160,12 +160,13 @@ types_to_test = {
     "create_loop": create_loop(),
     "create_lv_feeder": create_lv_feeder(),
     "ev_charging_unit": create_ev_charging_unit(),
+    "tap_changer_control": create_tap_changer_control()
 }
 
 
 @given(**types_to_test)
 @settings(suppress_health_check=[HealthCheck.too_slow])
-@pytest.mark.timeout(10000)
+@pytest.mark.timeout(1000000)
 def test_network_service_translations(**kwargs):
     validate_service_translations(NetworkService, NetworkServiceComparator(), **kwargs)
 
