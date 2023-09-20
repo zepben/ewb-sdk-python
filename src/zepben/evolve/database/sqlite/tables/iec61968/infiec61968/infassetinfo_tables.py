@@ -36,6 +36,9 @@ class TableRecloseDelays(SqliteTable):
         cols.append([self.current_relay_info_mrid])
         return cols
 
+    def select_sql(self):
+        return super(TableRecloseDelays, self).select_sql() + " ORDER BY current_relay_info_mrid, sequence_number ASC;"
+
 
 class TableCurrentRelayInfo(TableAssetInfo):
     curve_setting: Column = None

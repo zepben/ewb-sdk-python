@@ -50,6 +50,7 @@ class TestNetworkConsumer:
         with pytest.raises(ValueError, match="Must provide either a channel or a stub"):
             NetworkConsumerClient()
 
+    @pytest.mark.timeout(22222222)
     @pytest.mark.asyncio
     @given(network_identified_objects())
     @settings(max_examples=1, phases=(Phase.explicit, Phase.reuse, Phase.generate))

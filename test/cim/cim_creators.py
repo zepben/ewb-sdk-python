@@ -809,9 +809,13 @@ def create_current_relay(include_runtime: bool = True):
         CurrentRelay,
         **create_protection_equipment(include_runtime),
         current_limit_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        inverse_time_flag=booleans(),
+        inverse_time_flag=boolean_or_none(),
         time_delay_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
+
+
+def boolean_or_none():
+    return sampled_from([False, True, None])
 
 
 def create_protection_equipment(include_runtime: bool = True):
@@ -819,6 +823,8 @@ def create_protection_equipment(include_runtime: bool = True):
         **create_equipment(include_runtime),
         "relay_delay_time": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "protection_kind": sampled_from(ProtectionKind),
+        "directable": boolean_or_none(),
+        "power_direction": sampled_from(PowerDirectionKind),
         "protected_switches": lists(sampled_protected_switches(include_runtime), min_size=1, max_size=2)
     }
 
@@ -1179,7 +1185,6 @@ def create_regulating_cond_eq(include_runtime: bool):
         **create_energy_connection(include_runtime),
         "control_enabled": booleans(),
         "regulating_control": builds(TapChangerControl, **create_identified_object(include_runtime)),
-
     }
 
 
@@ -1188,31 +1193,30 @@ def create_tap_changer_control(include_runtime: bool = True):
         TapChangerControl,
         **create_regulating_control(include_runtime),
         limit_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        line_drop_compensation=booleans(),
+        line_drop_compensation=boolean_or_none(),
         line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         reverse_line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         reverse_line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forward_ldc_blocking=booleans(),
+        forward_ldc_blocking=boolean_or_none(),
         time_delay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        co_generation_enabled=booleans()
+        co_generation_enabled=boolean_or_none()
     )
 
 
 def create_regulating_control(include_runtime: bool):
     return {
         **create_power_system_resource(include_runtime),
-        "discrete": booleans(),
+        "discrete": boolean_or_none(),
         "mode": sampled_from(RegulatingControlModeKind),
         "monitored_phase": sampled_phase_code(),
         "target_deadband": floats(min_value=0.0, max_value=FLOAT_MAX),
         "target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        "enabled": booleans(),
+        "enabled": boolean_or_none(),
         "max_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "min_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "terminal": builds(Terminal, **create_identified_object(include_runtime)),
         "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection, **create_identified_object(include_runtime)))
-
     }
 
 

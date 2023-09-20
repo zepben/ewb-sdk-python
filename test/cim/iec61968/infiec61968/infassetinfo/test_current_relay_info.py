@@ -51,7 +51,7 @@ def test_current_relay_info_constructor_args():
     assert list(cri.reclose_delays) == current_relay_info_args[-1]
 
 
-def _test_current_relay_info_reclose_delays():
+def test_current_relay_info_reclose_delays():
     validate_collection_ordered(CurrentRelayInfo,
                                 lambda i, _: float(i),
                                 CurrentRelayInfo.num_delays,

@@ -10,7 +10,7 @@ from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import builds, integers, floats, sampled_from, lists, one_of, just
 
-from cim.collection_validator import validate_collection_unordered
+from cim.collection_validator import validate_collection_unordered, validate_collection
 from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
     verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
@@ -114,7 +114,20 @@ def test_power_transformer_end_constructor_args():
 
 
 def test_power_transformer_end_s_ratings():
-    x = 1
+    validate_collection(
+        PowerTransformerEnd,
+        lambda i, _: TransformerEndRatedS(cooling_type=TransformerCoolingType(int(i)), rated_s=int(i)), # how python?
+        PowerTransformerEnd.num_ratings,
+        lambda pte, rs: pte.get_rating_by_rated_s(rs.rated_s), # how python?
+        PowerTransformerEnd.s_ratings,
+        PowerTransformerEnd.add_rating,
+        PowerTransformerEnd.remove_rating,
+        PowerTransformerEnd.clear_ratings,
+        lambda _, dup: rf"A rating for coolingType {dup.cooling_type.name} already exists, please remove it first.",
+        support_duplicates=False
+    )
+
+
 
 
 def test_power_transformer_cant_add_rating_with_same_cooling_type():

@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Optional, List, Generator
 
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
-from zepben.evolve.util import ngen, nlen, safe_remove
+from zepben.evolve.util import ngen, nlen, safe_remove, require
 
 __all__ = ["CurrentRelayInfo"]
 
@@ -52,10 +52,13 @@ class CurrentRelayInfo(AssetInfo):
         `index` The index into the list to add the delay at. Defaults to the end of the list.
         Returns A reference to this `CurrentRelayInfo` to allow fluent use.
         """
-        if self._reclose_delays is None:
-            self._reclose_delays = list()
         if index is None:
             index = self.num_delays()
+        require(0 <= index <= self.num_delays(),
+                lambda: f"Unable to add float to {str(self)}. Index number {index} "
+                        f"is invalid. Expected a value between 0 and {self.num_delays()}. Make sure you are "
+                        f"adding the reclose_delays in the correct order and there are no gaps in the numbering.")
+        self._reclose_delays = list() if self._reclose_delays is None else self._reclose_delays
         self._reclose_delays.insert(index, delay)
         return self
 

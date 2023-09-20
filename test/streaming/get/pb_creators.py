@@ -3,6 +3,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import Optional, Dict
+from google.protobuf.struct_pb2 import NullValue
+
 # noinspection PyPackageRequirements
 from google.protobuf.timestamp_pb2 import Timestamp
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, composite, uuids
@@ -75,7 +78,7 @@ from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation as 
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal as PBTerminal
 from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject as PBDiagramObject
-from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectPoint_pb2  import DiagramObjectPoint as PBDiagramObjectPoint
+from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectPoint_pb2 import DiagramObjectPoint as PBDiagramObjectPoint
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramStyle_pb2 import DiagramStyle as PBDiagramStyle
 from zepben.protobuf.cim.iec61970.base.diagramlayout.OrientationKind_pb2 import OrientationKind as PBOrientationKind
 from zepben.protobuf.cim.iec61970.base.domain.UnitSymbol_pb2 import UnitSymbol as PBUnitSymbol
@@ -121,9 +124,12 @@ from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import Protecte
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger as PBRatioTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser as PBRecloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq as PBRegulatingCondEq
+from zepben.protobuf.cim.iec61970.base.wires.RegulatingControlModeKind_pb2 import RegulatingControlModeKind as PBRegulatingControlModeKind
+from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl as PBRegulatingControl
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator as PBShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind as PBSinglePhaseKind
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
+from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl as PBTapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger as PBTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
@@ -137,6 +143,7 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
+from zepben.protobuf.cim.iec61970.infiec61970.protection.PowerDirectionKind_pb2 import PowerDirectionKind as PBPowerDirectionKind
 from zepben.protobuf.cim.iec61970.infiec61970.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
 from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
@@ -169,7 +176,9 @@ __all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_inf
            'load_break_switch', 'per_length_impedance', 'per_length_line_parameter', 'per_length_sequence_impedance', 'power_electronics_connection',
            'power_electronics_connection_phase', 'power_transformer', 'power_transformer_end', 'protected_switch', 'ratio_tap_changer', 'recloser',
            'regulating_cond_eq', 'shunt_compensator', 'switch', 'tap_changer', 'transformer_end', 'transformer_star_impedance', 'circuit', 'loop', 'lv_feeder',
-           'ev_charging_unit', 'timestamp', 'network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects']
+           'ev_charging_unit', 'timestamp', 'network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects', 'tap_changer_control',
+           'regulating_control']
+
 
 #######################
 # IEC61968 ASSET INFO #
@@ -459,7 +468,8 @@ def current_relay_info():
     return builds(
         PBCurrentRelayInfo,
         ai=asset_info(),
-        curveSetting=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        curveSetting=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        recloseDelays = lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
     )
 
 
@@ -529,7 +539,9 @@ def usage_point():
         equipmentMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         endDeviceMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         isVirtual=booleans(),
-        connectionCategory=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        connectionCategory=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        ratedPower=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        approvedInverterCapacity=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
 
 
@@ -600,6 +612,7 @@ def equipment():
         psr=power_system_resource(),
         inService=booleans(),
         normallyInService=booleans(),
+        commissionedDate=timestamp(),
         equipmentContainerMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         usagePointMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
         operationalRestrictionMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
@@ -678,6 +691,7 @@ def terminal():
         phases=sampled_from(PBPhaseCode.values()),
         sequenceNumber=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER)
     )
+
 
 ###############################
 # IEC61970 BASE DIAGRAMLAYOUT #
@@ -795,7 +809,7 @@ def current_relay():
         PBCurrentRelay,
         pe=protection_equipment(),
         currentLimit1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        inverseTimeFlag=booleans(),
+        **nullable_bool_settings("inverseTimeFlag"),
         timeDelay1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
@@ -806,6 +820,8 @@ def protection_equipment():
         eq=equipment(),
         relayDelayTime=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         protectionKind=sampled_from(PBProtectionKind.values()),
+        **nullable_bool_settings("directable"),
+        powerDirection=sampled_from(PBPowerDirectionKind.values()),
         protectedSwitchMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
 
@@ -1016,7 +1032,31 @@ def power_electronics_connection():
         p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         ratedS=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-        ratedU=integers(min_value=0, max_value=MAX_32_BIT_INTEGER)
+        ratedU=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        inverterStandard=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        sustainOpOvervoltLimit=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        stopAtOverFreq=floats(min_value=51.0, max_value=52.0),
+        stopAtUnderFreq=floats(min_value=47.0, max_value=49.0),
+        **nullable_bool_settings("invVoltWattRespMode"),
+        invWattRespV1=integers(min_value=200, max_value=300),
+        invWattRespV2=integers(min_value=216, max_value=230),
+        invWattRespV3=integers(min_value=235, max_value=255),
+        invWattRespV4=integers(min_value=244, max_value=265),
+        invWattRespPAtV1=floats(min_value=0.0, max_value=1.0),
+        invWattRespPAtV2=floats(min_value=0.0, max_value=1.0),
+        invWattRespPAtV3=floats(min_value=0.0, max_value=1.0),
+        invWattRespPAtV4=floats(min_value=0.0, max_value=0.2),
+        **nullable_bool_settings("invVoltVarRespMode"),
+        invVarRespV1=integers(min_value=200, max_value=300),
+        invVarRespV2=integers(min_value=200, max_value=300),
+        invVarRespV3=integers(min_value=200, max_value=300),
+        invVarRespV4=integers(min_value=200, max_value=300),
+        invVarRespQAtV1=floats(min_value=0.0, max_value=0.6),
+        invVarRespQAtV2=floats(min_value=-1.0, max_value=1.0),
+        invVarRespQAtV3=floats(min_value=-1.0, max_value=1.0),
+        invVarRespQAtV4=floats(min_value=-0.6, max_value=0.0),
+        **nullable_bool_settings("invReactivePowerMode"),
+        invFixReactivePower=floats(min_value=-1.0, max_value=1.0),
     )
 
 
@@ -1083,7 +1123,12 @@ def recloser():
 
 
 def regulating_cond_eq():
-    return builds(PBRegulatingCondEq, ec=energy_connection(), controlEnabled=booleans())
+    return builds(
+        PBRegulatingCondEq,
+        ec=energy_connection(),
+        controlEnabled=booleans(),
+        regulatingControlMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+    )
 
 
 def shunt_compensator():
@@ -1183,6 +1228,49 @@ def lv_feeder():
 
 def ev_charging_unit():
     return builds(PBEvChargingUnit, peu=power_electronics_unit())
+
+
+def regulating_control():
+    return builds(
+        PBRegulatingControl,
+        psr=power_system_resource(),
+        discreteSet=booleans(),
+        mode=sampled_from(PBRegulatingControlModeKind.values()),
+        monitoredPhase=sampled_from(PBPhaseCode.values()),
+        targetDeadband=floats(min_value=0.0, max_value=FLOAT_MAX),
+        targetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        enabledSet=booleans(),
+        maxAllowedTargetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        minAllowedTargetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        terminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        regulatingCondEqMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
+
+def tap_changer_control():
+    return builds(
+        PBTapChangerControl,
+        rc=regulating_control(),
+        limitVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        **nullable_bool_settings("lineDropCompensation"),
+        lineDropR=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        lineDropX=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverseLineDropR=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverseLineDropX=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        **nullable_bool_settings("forwardLDCBlocking"),
+        timeDelay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        **nullable_bool_settings("coGenerationEnabled")
+    )
+
+
+def nullable_bool_settings(flag_name: str, value: Optional[bool] = sampled_from([False, True, None])) -> Dict:
+    settings = {}
+    if value is None:
+        settings[f"{flag_name}Null"] = NullValue.NULL_VALUE
+    else:
+        settings[f"{flag_name}Set"] = value
+
+    return settings
 
 
 #########
@@ -1286,9 +1374,13 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, loop=loop())),
         draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder())),
 
-        draw(builds(NetworkIdentifiedObject, evChargingUnit=ev_charging_unit()))
+        draw(builds(NetworkIdentifiedObject, evChargingUnit=ev_charging_unit())),
+        draw(builds(NetworkIdentifiedObject, currentRelay=current_relay())),
+        draw(builds(NetworkIdentifiedObject, currentRelayInfo=current_relay_info())),
+        draw(builds(NetworkIdentifiedObject, tapChangerControl=tap_changer_control()))
     ]
     return nios
+
 
 ##############################
 # Diagram Identified Objects #
