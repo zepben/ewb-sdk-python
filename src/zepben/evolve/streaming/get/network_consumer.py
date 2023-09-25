@@ -709,6 +709,7 @@ _nio_type_to_cim = {
     "powerTransformerEnd": PowerTransformerEnd,
     "ratioTapChanger": RatioTapChanger,
     "recloser": Recloser,
+    "tapChangerControl": TapChangerControl,
     "transformerStarImpedance": TransformerStarImpedance,
 
     # IEC61970 InfIEC61970 FEEDER #
@@ -720,6 +721,7 @@ _nio_type_to_cim = {
     "switchInfo": SwitchInfo,
     "currentTransformer": CurrentTransformer,
     "currentTransformerInfo": CurrentTransformerInfo,
-    "evChargingUnit": EvChargingUnit,
-    "tapChangerControl": TapChangerControl
+
+    # IEC61970 InfIEC61970 WIRES GENERATION PRODUCTION #
+    "evChargingUnit": EvChargingUnit
 }

@@ -10,7 +10,7 @@ from typing import Callable, Optional
 
 from dataclassy import dataclass
 
-from zepben.evolve import RegulatingControl, RegulatingCondEq, TapChangerControl
+
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
@@ -57,6 +57,7 @@ from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment impor
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
+from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
@@ -65,8 +66,10 @@ from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequ
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnectionPhase, PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd, TapChanger
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import ShuntCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop

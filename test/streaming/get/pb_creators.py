@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional, Dict
-from google.protobuf.struct_pb2 import NullValue
 
 # noinspection PyPackageRequirements
+from google.protobuf.struct_pb2 import NullValue
 from google.protobuf.timestamp_pb2 import Timestamp
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, composite, uuids
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
@@ -1131,6 +1131,23 @@ def regulating_cond_eq():
     )
 
 
+def regulating_control():
+    return builds(
+        PBRegulatingControl,
+        psr=power_system_resource(),
+        discreteSet=booleans(),
+        mode=sampled_from(PBRegulatingControlModeKind.values()),
+        monitoredPhase=sampled_from(PBPhaseCode.values()),
+        targetDeadband=floats(min_value=0.0, max_value=FLOAT_MAX),
+        targetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        enabledSet=booleans(),
+        maxAllowedTargetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        minAllowedTargetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        terminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        regulatingCondEqMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+    )
+
+
 def shunt_compensator():
     return builds(
         PBShuntCompensator,
@@ -1163,6 +1180,22 @@ def tap_changer():
         neutralU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         normalStep=integers(min_value=2, max_value=10),
         controlEnabled=booleans()
+    )
+
+
+def tap_changer_control():
+    return builds(
+        PBTapChangerControl,
+        rc=regulating_control(),
+        limitVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        **nullable_bool_settings("lineDropCompensation"),
+        lineDropR=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        lineDropX=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverseLineDropR=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverseLineDropX=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        **nullable_bool_settings("forwardLDCBlocking"),
+        timeDelay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        **nullable_bool_settings("coGenerationEnabled")
     )
 
 
@@ -1226,41 +1259,12 @@ def lv_feeder():
     )
 
 
+####################################################
+# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
+####################################################
+
 def ev_charging_unit():
     return builds(PBEvChargingUnit, peu=power_electronics_unit())
-
-
-def regulating_control():
-    return builds(
-        PBRegulatingControl,
-        psr=power_system_resource(),
-        discreteSet=booleans(),
-        mode=sampled_from(PBRegulatingControlModeKind.values()),
-        monitoredPhase=sampled_from(PBPhaseCode.values()),
-        targetDeadband=floats(min_value=0.0, max_value=FLOAT_MAX),
-        targetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        enabledSet=booleans(),
-        maxAllowedTargetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        minAllowedTargetValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        terminalMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        regulatingCondEqMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
-    )
-
-
-def tap_changer_control():
-    return builds(
-        PBTapChangerControl,
-        rc=regulating_control(),
-        limitVoltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        **nullable_bool_settings("lineDropCompensation"),
-        lineDropR=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        lineDropX=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        reverseLineDropR=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        reverseLineDropX=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        **nullable_bool_settings("forwardLDCBlocking"),
-        timeDelay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        **nullable_bool_settings("coGenerationEnabled")
-    )
 
 
 def nullable_bool_settings(flag_name: str, value: Optional[bool] = sampled_from([False, True, None])) -> Dict:
@@ -1337,6 +1341,10 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, control=control())),
         draw(builds(NetworkIdentifiedObject, discrete=discrete())),
 
+        # IEC61970 BASE PROTECTION #
+        draw(builds(NetworkIdentifiedObject, currentRelay=current_relay())),
+        draw(builds(NetworkIdentifiedObject, currentRelayInfo=current_relay_info())),
+
         # IEC61970 BASE SCADA #
         draw(builds(NetworkIdentifiedObject, remoteControl=remote_control())),
         draw(builds(NetworkIdentifiedObject, remoteSource=remote_source())),
@@ -1367,6 +1375,7 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, powerTransformerEnd=power_transformer_end())),
         draw(builds(NetworkIdentifiedObject, ratioTapChanger=ratio_tap_changer())),
         draw(builds(NetworkIdentifiedObject, recloser=recloser())),
+        draw(builds(NetworkIdentifiedObject, tapChangerControl=tap_changer_control())),
         draw(builds(NetworkIdentifiedObject, transformerStarImpedance=transformer_star_impedance())),
 
         # IEC61970 INFIEC61970 FEEDER #
@@ -1374,10 +1383,8 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, loop=loop())),
         draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder())),
 
-        draw(builds(NetworkIdentifiedObject, evChargingUnit=ev_charging_unit())),
-        draw(builds(NetworkIdentifiedObject, currentRelay=current_relay())),
-        draw(builds(NetworkIdentifiedObject, currentRelayInfo=current_relay_info())),
-        draw(builds(NetworkIdentifiedObject, tapChangerControl=tap_changer_control()))
+        # IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
+        draw(builds(NetworkIdentifiedObject, evChargingUnit=ev_charging_unit()))
     ]
     return nios
 
@@ -1396,9 +1403,9 @@ def diagram_identified_objects(draw):
     return dios
 
 
-##############################
+###############################
 # Customer Identified Objects #
-##############################
+###############################
 
 
 @composite

@@ -151,6 +151,7 @@ types_to_test = {
     "create_ratio_tap_changer": create_ratio_tap_changer(),
     "create_recloser": create_recloser(),
     "create_transformer_star_impedance": create_transformer_star_impedance(),
+    "create_tap_changer_control": create_tap_changer_control(),
 
     #########################
     # IEC61970 INF IEC61970 #
@@ -159,8 +160,12 @@ types_to_test = {
     "create_circuit": create_circuit(),
     "create_loop": create_loop(),
     "create_lv_feeder": create_lv_feeder(),
-    "ev_charging_unit": create_ev_charging_unit(),
-    "tap_changer_control": create_tap_changer_control()
+
+    ##########################################################
+    # IEC61970 INF IEC61970 BASE WIRES GENERATION PRODUCTION #
+    ##########################################################
+
+    "create_ev_charging_unit": create_ev_charging_unit(),
 }
 
 

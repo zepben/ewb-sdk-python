@@ -104,8 +104,8 @@ from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import Regulat
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl as PBRegulatingControl
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator as PBShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
-from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl as PBTapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger as PBTapChanger
+from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl as PBTapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
@@ -117,7 +117,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBL
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 
-from zepben.evolve import RegulatingControl, RegulatingControlModeKind, TapChangerControl
+
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
@@ -191,9 +191,12 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection im
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import *
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control_mode_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.switch import *
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
@@ -202,7 +205,7 @@ from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import *
-from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import EvChargingUnit
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import *
 from zepben.evolve.model.phases import TracedPhases
 
 import zepben.evolve.services.common.resolver as resolver
@@ -1577,13 +1580,19 @@ def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optiona
     return cim if network_service.add(cim) else None
 
 
+PBCircuit.to_cim = circuit_to_cim
+PBLoop.to_cim = loop_to_cim
+PBLvFeeder.to_cim = lv_feeder_to_cim
+
+
+####################################################
+# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
+####################################################
+
 def ev_charging_unit_to_cim(pb: PBEvChargingUnit, network_service: NetworkService) -> Optional[EvChargingUnit]:
     cim = EvChargingUnit(mrid=pb.mrid())
     power_electronics_unit_to_cim(pb.peu, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-PBCircuit.to_cim = circuit_to_cim
-PBLoop.to_cim = loop_to_cim
-PBLvFeeder.to_cim = lv_feeder_to_cim
 PBEvChargingUnit.to_cim = ev_charging_unit_to_cim

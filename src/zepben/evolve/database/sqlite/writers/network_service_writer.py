@@ -68,7 +68,6 @@ class NetworkServiceWriter(BaseServiceWriter):
         status = status and self._save_all(service, Junction, writer.save_junction)
         status = status and self._save_all(service, LinearShuntCompensator, writer.save_linear_shunt_compensator)
         status = status and self._save_all(service, PerLengthSequenceImpedance, writer.save_per_length_sequence_impedance)
-        status = status and self._save_all(service, TapChangerControl, writer.save_tap_changer_control)
         status = status and self._save_all(service, PowerElectronicsConnection, writer.save_power_electronics_connection)
         status = status and self._save_all(service, PowerElectronicsConnectionPhase, writer.save_power_electronics_connection_phase)
         status = status and self._save_all(service, PowerTransformer, writer.save_power_transformer)
@@ -79,7 +78,6 @@ class NetworkServiceWriter(BaseServiceWriter):
         status = status and self._save_all(service, Circuit, writer.save_circuit)
         status = status and self._save_all(service, Loop, writer.save_loop)
         status = status and self._save_all(service, LvFeeder, writer.save_lv_feeder)
-        status = status and self._save_all(service, EvChargingUnit, writer.save_ev_charging_unit)
         status = status and self._save_all(service, Analog, writer.save_analog)
         status = status and self._save_all(service, Accumulator, writer.save_accumulator)
         status = status and self._save_all(service, Discrete, writer.save_discrete)
@@ -92,5 +90,7 @@ class NetworkServiceWriter(BaseServiceWriter):
         status = status and self._save_all(service, PotentialTransformer, writer.save_potential_transformer)
         status = status and self._save_all(service, CurrentRelayInfo, writer.save_current_relay_info)
         status = status and self._save_all(service, CurrentRelay, writer.save_current_relay)
+        status = status and self._save_all(service, TapChangerControl, writer.save_tap_changer_control)
+        status = status and self._save_all(service, EvChargingUnit, writer.save_ev_charging_unit)
 
         return status

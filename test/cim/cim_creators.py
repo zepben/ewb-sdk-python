@@ -6,7 +6,7 @@
 from datetime import datetime
 from random import choice
 
-from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes
+from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, just
 
 from zepben.evolve import *
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
@@ -1141,10 +1141,10 @@ def create_power_transformer(include_runtime: bool = True):
 
 def create_power_transformer_end(include_runtime: bool = True):
     return builds(
-        PowerTransformerEnd,
+        create_power_transformer_end_with_ratings,
         **create_transformer_end(include_runtime),
         power_transformer=builds(PowerTransformer, **create_identified_object(include_runtime)),
-        rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        # rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         rated_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -1155,8 +1155,21 @@ def create_power_transformer_end(include_runtime: bool = True):
         b0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        phase_angle_clock=integers(min_value=0, max_value=11)
+        phase_angle_clock=integers(min_value=0, max_value=11),
+        ratings=lists(builds(
+            TransformerEndRatedS,
+            cooling_type=sampled_from(TransformerCoolingType),
+            rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+        ), min_size=0, max_size=11, unique_by=lambda it: it.cooling_type)
     )
+
+
+def create_power_transformer_end_with_ratings(ratings: List[TransformerEndRatedS], **kwargs):
+    pte = PowerTransformerEnd(**kwargs)
+    if ratings:
+        for rating in ratings:
+            pte.add_rating(rating)
+    return pte
 
 
 def create_protected_switch(include_runtime: bool):
@@ -1188,22 +1201,6 @@ def create_regulating_cond_eq(include_runtime: bool):
     }
 
 
-def create_tap_changer_control(include_runtime: bool = True):
-    return builds(
-        TapChangerControl,
-        **create_regulating_control(include_runtime),
-        limit_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        line_drop_compensation=boolean_or_none(),
-        line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        reverse_line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        reverse_line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        forward_ldc_blocking=boolean_or_none(),
-        time_delay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        co_generation_enabled=boolean_or_none()
-    )
-
-
 def create_regulating_control(include_runtime: bool):
     return {
         **create_power_system_resource(include_runtime),
@@ -1218,6 +1215,22 @@ def create_regulating_control(include_runtime: bool):
         "terminal": builds(Terminal, **create_identified_object(include_runtime)),
         "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection, **create_identified_object(include_runtime)))
     }
+
+
+def create_tap_changer_control(include_runtime: bool = True):
+    return builds(
+        TapChangerControl,
+        **create_regulating_control(include_runtime),
+        limit_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        line_drop_compensation=boolean_or_none(),
+        line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverse_line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverse_line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forward_ldc_blocking=boolean_or_none(),
+        time_delay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        co_generation_enabled=boolean_or_none()
+    )
 
 
 def create_shunt_compensator(include_runtime: bool):
@@ -1332,6 +1345,10 @@ def create_lv_feeder(include_runtime: bool = True):
         **runtime
     )
 
+
+#####################################################
+# IEC61970 INF IEC61970 WIRES GENERATION PRODUCTION #
+#####################################################
 
 def create_ev_charging_unit(include_runtime: bool = True):
     return builds(EvChargingUnit, **create_power_electronics_unit(include_runtime))

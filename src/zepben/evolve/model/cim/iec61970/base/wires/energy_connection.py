@@ -5,10 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 
-if TYPE_CHECKING:
-    from zepben.evolve import RegulatingControl
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 __all__ = ["EnergyConnection", "RegulatingCondEq"]

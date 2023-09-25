@@ -111,7 +111,7 @@ class DatabaseReader:
         # NOTE: phase and direction tracing is not yet supported
         #
         for resolver in network_service.unresolved_references():
-            raise ValueError(f"Network still had unresolved references after load - this should not occur. Failing reference was from\ "
+            raise ValueError(f"Network still had unresolved references after load - this should not occur. Failing reference was from "
                              f"{resolver.from_ref.mrid} resolving {resolver.resolver.to_class.__name__} {resolver.to_mrid}")
         logger.info("Unresolved references were all resolved during load.")
 

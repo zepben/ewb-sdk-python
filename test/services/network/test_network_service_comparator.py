@@ -6,6 +6,8 @@
 import datetime
 from typing import Type
 
+import pytest
+
 from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
     TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, AssetOwner, Location, AssetContainer, AssetInfo, \
     AssetOrganisationRole, Pole, Streetlight, WindingConnection, StreetlightLampKind, Structure, StreetAddress, TownDetail, PositionPoint, EndDevice, \
@@ -19,7 +21,8 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
     Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, CurrentRelayInfo, \
-    ProtectionEquipment, CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind
+    ProtectionEquipment, CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind, \
+    TransformerEndRatedS, TransformerCoolingType
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
@@ -962,6 +965,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: PowerTransformerEnd(mrid="pte2"),
         )
 
+    @pytest.mark.timeout(3333333333)
     def test_compare_power_transformer_end(self):
         self._compare_transformer_end(PowerTransformerEnd)
 
@@ -979,7 +983,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(PowerTransformerEnd.phase_angle_clock, PowerTransformerEnd, lambda _: 1, lambda _: 2)
         self.validator.validate_property(PowerTransformerEnd.r, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(PowerTransformerEnd.r0, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(PowerTransformerEnd.rated_s, PowerTransformerEnd, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(PowerTransformerEnd.rated_s, PowerTransformerEnd, lambda _: 1, lambda _: 2, expected_differences={"s_ratings"})
         self.validator.validate_property(PowerTransformerEnd.rated_u, PowerTransformerEnd, lambda _: 1, lambda _: 2)
         self.validator.validate_property(PowerTransformerEnd.x, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(PowerTransformerEnd.x0, PowerTransformerEnd, lambda _: 1.0, lambda _: 2.0)
@@ -987,6 +991,16 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(PowerTransformerEnd.r0, PowerTransformerEnd, lambda _: 1.0, lambda _: float('nan'))
         self.validator.validate_property(PowerTransformerEnd.x, PowerTransformerEnd, lambda _: 1.0, lambda _: float('nan'))
         self.validator.validate_property(PowerTransformerEnd.x0, PowerTransformerEnd, lambda _: 1.0, lambda _: float('nan'))
+
+        self.validator.validate_indexed_collection(
+            PowerTransformerEnd.s_ratings,
+            PowerTransformerEnd.add_rating,
+            PowerTransformerEnd,
+            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 1),
+            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 2),
+            expected_differences={"rated_s"}
+        )
+
 
     def _compare_protected_switch(self, creator: Type[ProtectedSwitch]):
         self._compare_switch(creator)

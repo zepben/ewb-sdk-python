@@ -293,7 +293,7 @@ class NetworkCIMWriter(BaseCIMWriter):
                 delay_insert.add_value(delay_table.reclose_delay.query_index, delay)
                 delay_insert.add_value(delay_table.current_relay_info_mrid.query_index, current_relay_info.mrid)
                 self._try_execute_single_update(delay_insert, f"{current_relay_info.mrid}-delay_sequence-{sequence_number}",
-                                            "reclose delays")
+                                                "reclose delays")
 
         return self._save_asset_info(table, insert, current_relay_info, "current relay info")
 
@@ -890,6 +890,20 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         return self._save_energy_connection(table, insert, regulating_cond_eq, description)
 
+    def _save_regulating_control(self, table: TableRegulatingControls,
+                                 insert: PreparedStatement, regulating_control: RegulatingControl, description: str) -> bool:
+        insert.add_value(table.discrete.query_index, regulating_control.discrete)
+        insert.add_value(table.mode.query_index, regulating_control.mode.short_name)
+        insert.add_value(table.monitored_phase.query_index, regulating_control.monitored_phase.short_name)
+        insert.add_value(table.target_deadband.query_index, regulating_control.target_deadband)
+        insert.add_value(table.target_value.query_index, regulating_control.target_value)
+        insert.add_value(table.enabled.query_index, regulating_control.enabled)
+        insert.add_value(table.max_allowed_target_value.query_index, regulating_control.max_allowed_target_value)
+        insert.add_value(table.min_allowed_target_value.query_index, regulating_control.min_allowed_target_value)
+        insert.add_value(table.terminal_mrid.query_index, self._mrid_or_none(regulating_control.terminal))
+
+        return self._save_power_system_resource(table, insert, regulating_control, description)
+
     def _save_shunt_compensator(self, table: TableShuntCompensators, insert: PreparedStatement, shunt_compensator: ShuntCompensator, description: str) -> bool:
         insert.add_value(table.shunt_compensator_info_mrid.query_index, self._mrid_or_none(shunt_compensator.shunt_compensator_info))
         insert.add_value(table.grounded.query_index, shunt_compensator.grounded)
@@ -919,6 +933,22 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.tap_changer_control_mrid.query_index, self._mrid_or_none(tap_changer.tap_changer_control))
 
         return self._save_power_system_resource(table, insert, tap_changer, description)
+
+    def save_tap_changer_control(self, tap_changer_control: TapChangerControl) -> bool:
+        table = self.database_tables.get_table(TableTapChangerControls)
+        insert = self.database_tables.get_insert(TableTapChangerControls)
+
+        insert.add_value(table.limit_voltage.query_index, tap_changer_control.limit_voltage)
+        insert.add_value(table.line_drop_compensation.query_index, tap_changer_control.line_drop_compensation)
+        insert.add_value(table.line_drop_r.query_index, tap_changer_control.line_drop_r)
+        insert.add_value(table.line_drop_x.query_index, tap_changer_control.line_drop_x)
+        insert.add_value(table.reverse_line_drop_r.query_index, tap_changer_control.reverse_line_drop_r)
+        insert.add_value(table.reverse_line_drop_x.query_index, tap_changer_control.reverse_line_drop_x)
+        insert.add_value(table.forward_ldc_blocking.query_index, tap_changer_control.forward_ldc_blocking)
+        insert.add_value(table.time_delay.query_index, tap_changer_control.time_delay)
+        insert.add_value(table.co_generation_enabled.query_index, tap_changer_control.co_generation_enabled)
+
+        return self._save_regulating_control(table, insert, tap_changer_control, "tap changer control")
 
     def _save_transformer_end(self, table: TableTransformerEnds, insert: PreparedStatement, transformer_end: TransformerEnd, description: str) -> bool:
         insert.add_value(table.end_number.query_index, transformer_end.end_number)
@@ -951,37 +981,6 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.transformer_end_info_mrid.query_index, self._mrid_or_none(transformer_star_impedance.transformer_end_info))
 
         return self._save_identified_object(table, insert, transformer_star_impedance, "transformer star impedance")
-
-    def _save_regulating_control(self, table: TableRegulatingControls,
-                                 insert: PreparedStatement, regulating_control: RegulatingControl, description: str) -> bool:
-        insert.add_value(table.discrete.query_index, regulating_control.discrete)
-        insert.add_value(table.mode.query_index, regulating_control.mode.short_name)
-        insert.add_value(table.monitored_phase.query_index, regulating_control.monitored_phase.short_name)
-        insert.add_value(table.target_deadband.query_index, regulating_control.target_deadband)
-        insert.add_value(table.target_value.query_index, regulating_control.target_value)
-        insert.add_value(table.enabled.query_index, regulating_control.enabled)
-        insert.add_value(table.max_allowed_target_value.query_index, regulating_control.max_allowed_target_value)
-        insert.add_value(table.min_allowed_target_value.query_index, regulating_control.min_allowed_target_value)
-        insert.add_value(table.terminal_mrid.query_index, self._mrid_or_none(regulating_control.terminal))
-        #_save_regulating_cond_eq()? they live on their own and will be saved with their table
-
-        return self._save_power_system_resource(table, insert, regulating_control, description)
-
-    def save_tap_changer_control(self, tap_changer_control: TapChangerControl) -> bool:
-        table = self.database_tables.get_table(TableTapChangerControls)
-        insert = self.database_tables.get_insert(TableTapChangerControls)
-
-        insert.add_value(table.limit_voltage.query_index, tap_changer_control.limit_voltage)
-        insert.add_value(table.line_drop_compensation.query_index, tap_changer_control.line_drop_compensation)
-        insert.add_value(table.line_drop_r.query_index, tap_changer_control.line_drop_r)
-        insert.add_value(table.line_drop_x.query_index, tap_changer_control.line_drop_x)
-        insert.add_value(table.reverse_line_drop_r.query_index, tap_changer_control.reverse_line_drop_r)
-        insert.add_value(table.reverse_line_drop_x.query_index, tap_changer_control.reverse_line_drop_x)
-        insert.add_value(table.forward_ldc_blocking.query_index, tap_changer_control.forward_ldc_blocking)
-        insert.add_value(table.time_delay.query_index, tap_changer_control.time_delay)
-        insert.add_value(table.co_generation_enabled.query_index, tap_changer_control.co_generation_enabled)
-
-        return self._save_regulating_control(table, insert, tap_changer_control, "tap changer control")
 
     # ************ IEC61970 InfIEC61970 ************
 
@@ -1017,6 +1016,8 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.normal_head_terminal_mrid.query_index, self._mrid_or_none(lv_feeder.normal_head_terminal))
 
         return self._save_equipment_container(table, insert, lv_feeder, "lv_feeder")
+
+    # ************ IEC61970 InfIEC61970 WIRES GENERATION PRODUCTION ************
 
     def save_ev_charging_unit(self, ev_charging_unit: EvChargingUnit) -> bool:
         table = self.database_tables.get_table(TableEvChargingUnits)

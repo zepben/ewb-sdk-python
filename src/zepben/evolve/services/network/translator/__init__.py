@@ -101,10 +101,10 @@ from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTap
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl
-from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
+from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit
@@ -114,10 +114,11 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder
+from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit
+
 
 __all__ = []
 
-from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit
 
 CableInfo.mrid = lambda self: self.wi.mrid()
 NoLoadTest.mrid = lambda self: self.tt.mrid()

@@ -129,7 +129,7 @@ from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChar
 from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
-from zepben.evolve import RegulatingControl, TapChangerControl
+
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
@@ -195,13 +195,15 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection im
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import *
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.switch import *
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
-from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import EvChargingUnit
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import *
 from zepben.evolve.services.common.translator.base_cim2proto import identified_object_to_pb, organisation_role_to_pb, document_to_pb
 from zepben.evolve.services.common.translator.util import mrid_or_empty, from_nullable_int, from_nullable_float, from_nullable_long, from_nullable_uint, \
     nullable_bool_settings

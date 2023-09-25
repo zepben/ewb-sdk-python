@@ -6,11 +6,11 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import List, Optional, Generator
 
 from dataclassy import dataclass, Internal
 
-from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
@@ -19,6 +19,7 @@ from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import Cond
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.vector_group import VectorGroup
@@ -287,12 +288,15 @@ class PowerTransformerEnd(TransformerEnd):
         if rated_s and self._rated_s:
             raise ValueError(f"Cannot specify both rated_s and _rated_s properties when constructing {self}. Check your constructor parameters.")
         if rated_s is not None:
+            warnings.warn(
+                "`rated_s` has been replaced by `s_ratings`. Please use `add_rating()` to add one of more ratings and their related [TransformerCoolingType].",
+                DeprecationWarning,
+                stacklevel=3
+            )
             self.rated_s = rated_s
         if self._rated_s is not None:
             self.rated_s = self._rated_s
             self._rated_s = None
-
-
 
     @property
     def power_transformer(self):
@@ -316,14 +320,22 @@ class PowerTransformerEnd(TransformerEnd):
         Normal apparent power rating. The attribute shall be a positive value. For a two-winding transformer the values for the high and low voltage sides
         shall be identical.
         """
-        # TODO: deprecated
+        warnings.warn(
+            "`rated_s` has been replaced by `s_ratings` and is only for backward compatibility. Setting `rated_s`, will clear any other ratings.",
+            DeprecationWarning,
+            stacklevel=2  # not sure this one actually has to be returned to the user, gets picked up by the ide regardless
+        )
         if self._s_ratings:
             return self._s_ratings[0].rated_s if len(self._s_ratings) > 0 else None
         return None
 
     @rated_s.setter
     def rated_s(self, rated_s: Optional[int]):
-        # TODO: deprecated
+        warnings.warn(
+            "`rated_s` has been replaced by `s_ratings` and is only for backward compatibility. Setting `rated_s`, will clear any other ratings.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self.clear_ratings()
         if rated_s is not None:
             self.add_rating(TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, rated_s))
@@ -374,6 +386,14 @@ class PowerTransformerEnd(TransformerEnd):
         if self._s_ratings:
             for transformer_end_rated_s in self._s_ratings:
                 if transformer_end_rated_s.cooling_type == cooling_type:
+                    self._s_ratings.remove(transformer_end_rated_s)
+                    return transformer_end_rated_s
+        return None
+
+    def remove_rating_by_rated_s(self, rated_s: int) -> Optional[TransformerEndRatedS]:
+        if self._s_ratings:
+            for transformer_end_rated_s in self._s_ratings:
+                if transformer_end_rated_s.rated_s == rated_s:
                     self._s_ratings.remove(transformer_end_rated_s)
                     return transformer_end_rated_s
         return None

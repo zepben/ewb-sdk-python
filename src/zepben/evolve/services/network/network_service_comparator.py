@@ -414,46 +414,6 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_identified_object(diff)
 
-    def _compare_tap_changer_control(self, source: TapChangerControl, target: TapChangerControl) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_values(
-            diff,
-            TapChangerControl.limit_voltage,
-            TapChangerControl.line_drop_compensation,
-            TapChangerControl.forward_ldc_blocking,
-            TapChangerControl.co_generation_enabled
-        )
-        self._compare_floats(
-            diff,
-            TapChangerControl.line_drop_r,
-            TapChangerControl.line_drop_x,
-            TapChangerControl.reverse_line_drop_r,
-            TapChangerControl.reverse_line_drop_x,
-            TapChangerControl.time_delay,
-        )
-
-        return self._compare_regulating_control(diff)
-
-    def _compare_regulating_control(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(
-            diff,
-            RegulatingControl.discrete,
-            RegulatingControl.mode,
-            RegulatingControl.monitored_phase,
-            RegulatingControl.enabled
-        )
-        self._compare_floats(
-            diff,
-            RegulatingControl.target_deadband,
-            RegulatingControl.target_value,
-            RegulatingControl.max_allowed_target_value,
-            RegulatingControl.min_allowed_target_value
-        )
-        self._compare_id_references(diff, RegulatingControl.terminal)
-        self._compare_id_reference_collections(diff, RegulatingControl.regulating_conducting_equipment)
-
-        return self._compare_power_system_resource(diff)
     def _compare_power_system_resource(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_id_references(diff, PowerSystemResource.asset_info, PowerSystemResource.location)
 
@@ -856,6 +816,7 @@ class NetworkServiceComparator(BaseServiceComparator):
             PowerTransformerEnd.x,
             PowerTransformerEnd.x0
         )
+        self._compare_indexed_value_collections(diff, PowerTransformerEnd.s_ratings)
 
         return self._compare_transformer_end(diff)
 
@@ -881,6 +842,26 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_id_references(diff, RegulatingCondEq.regulating_control)
 
         return self._compare_energy_connection(diff)
+
+    def _compare_regulating_control(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(
+            diff,
+            RegulatingControl.discrete,
+            RegulatingControl.mode,
+            RegulatingControl.monitored_phase,
+            RegulatingControl.enabled
+        )
+        self._compare_floats(
+            diff,
+            RegulatingControl.target_deadband,
+            RegulatingControl.target_value,
+            RegulatingControl.max_allowed_target_value,
+            RegulatingControl.min_allowed_target_value
+        )
+        self._compare_id_references(diff, RegulatingControl.terminal)
+        self._compare_id_reference_collections(diff, RegulatingControl.regulating_conducting_equipment)
+
+        return self._compare_power_system_resource(diff)
 
     def _compare_shunt_compensator(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, ShuntCompensator.grounded, ShuntCompensator.nom_u, ShuntCompensator.phase_connection)
@@ -908,6 +889,27 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_floats(diff, TapChanger.step)
 
         return self._compare_power_system_resource(diff)
+
+    def _compare_tap_changer_control(self, source: TapChangerControl, target: TapChangerControl) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(
+            diff,
+            TapChangerControl.limit_voltage,
+            TapChangerControl.line_drop_compensation,
+            TapChangerControl.forward_ldc_blocking,
+            TapChangerControl.co_generation_enabled
+        )
+        self._compare_floats(
+            diff,
+            TapChangerControl.line_drop_r,
+            TapChangerControl.line_drop_x,
+            TapChangerControl.reverse_line_drop_r,
+            TapChangerControl.reverse_line_drop_x,
+            TapChangerControl.time_delay,
+        )
+
+        return self._compare_regulating_control(diff)
 
     def _compare_transformer_end(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, TransformerEnd.grounded, TransformerEnd.end_number)
@@ -952,6 +954,10 @@ class NetworkServiceComparator(BaseServiceComparator):
             self._compare_id_reference_collections(diff, LvFeeder.current_equipment)
 
         return self._compare_equipment_container(diff)
+
+    #####################################################
+    # IEC61970 INF IEC61970 WIRES GENERATION PRODUCTION #
+    #####################################################
 
     def _compare_ev_charging_unit(self, source: EvChargingUnit, target: EvChargingUnit) -> ObjectDifference:
         diff = ObjectDifference(source, target)

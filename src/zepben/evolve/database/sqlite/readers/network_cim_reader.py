@@ -40,10 +40,9 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     ProtectionKind, PowerDirectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, \
     EvChargingUnit, RegulatingControl, TableRegulatingControls, RegulatingControlModeKind, TapChangerControl, TableTapChangerControls, \
     TablePowerTransformerEndRatings, TransformerCoolingType, TransformerEndRatedS
+from zepben.evolve.services.common.resolver import rce_regulating_control
 
 __all__ = ["NetworkCIMReader"]
-
-from zepben.evolve.services.common.resolver import rce_regulating_control
 
 
 class NetworkCIMReader(BaseCIMReader):
@@ -291,16 +290,6 @@ class NetworkCIMReader(BaseCIMReader):
 
         return self._load_asset_info(current_relay_info, table, rs) and self._add_or_throw(current_relay_info)
 
-    def load_reclose_delays(self, table: TableRecloseDelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
-        current_relay_info_mrid = rs.get_string(table.current_relay_info_mrid.query_index)
-        sequence_number = int(rs.get_string(table.sequence_number.query_index))
-        reclose_delay = rs.get_double(table.reclose_delay.query_index)
-        set_last_mrid(f"{current_relay_info_mrid}.s{sequence_number}")
-        cri = self._base_service.get(current_relay_info_mrid, CurrentRelayInfo)
-        cri.add_delay(reclose_delay, sequence_number)
-
-        return True
-
     def load_current_transformer_info(self, table: TableCurrentTransformerInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         current_transformer_info = CurrentTransformerInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
 
@@ -330,6 +319,16 @@ class NetworkCIMReader(BaseCIMReader):
         potential_transformer_info.secondary_ratio = rs.get_double(table.secondary_ratio.query_index, None)
 
         return self._load_asset_info(potential_transformer_info, table, rs) and self._add_or_throw(potential_transformer_info)
+
+    def load_reclose_delays(self, table: TableRecloseDelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        current_relay_info_mrid = rs.get_string(table.current_relay_info_mrid.query_index)
+        sequence_number = int(rs.get_string(table.sequence_number.query_index))
+        reclose_delay = rs.get_double(table.reclose_delay.query_index)
+        set_last_mrid(f"{current_relay_info_mrid}.s{sequence_number}")
+        cri = self._base_service.get(current_relay_info_mrid, CurrentRelayInfo)
+        cri.add_delay(reclose_delay, sequence_number)
+
+        return True
 
     # ************ IEC61968 METERING ************
 
@@ -928,6 +927,19 @@ class NetworkCIMReader(BaseCIMReader):
                                                       rs.get_string(table.regulating_control_mrid.query_index, None))
         return self._load_energy_connection(regulating_cond_eq, table, rs)
 
+    def _load_regulating_control(self, regulating_control: RegulatingControl, table: TableRegulatingControls, rs: ResultSet) -> bool:
+        regulating_control.discrete = rs.get_boolean(table.discrete.query_index, None)
+        regulating_control.mode = RegulatingControlModeKind[rs.get_string(table.mode.query_index)]
+        regulating_control.monitored_phase = PhaseCode[rs.get_string(table.monitored_phase.query_index)]
+        regulating_control.target_deadband = rs.get_double(table.target_deadband.query_index, None)
+        regulating_control.target_value = rs.get_double(table.target_value.query_index, None)
+        regulating_control.enabled = rs.get_boolean(table.enabled.query_index, None)
+        regulating_control.max_allowed_target_value = rs.get_double(table.max_allowed_target_value.query_index, None)
+        regulating_control.min_allowed_target_value = rs.get_double(table.min_allowed_target_value.query_index, None)
+        regulating_control.terminal = self._ensure_get(rs.get_string(table.terminal_mrid.query_index, None), Terminal)
+        regulating_control.clear_regulating_cond_eq()
+        return self._load_power_system_resource(regulating_control, table, rs)
+
     def _load_shunt_compensator(self, shunt_compensator: ShuntCompensator, table: TableShuntCompensators, rs: ResultSet) -> bool:
         shunt_compensator.asset_info = self._ensure_get(rs.get_string(table.shunt_compensator_info_mrid.query_index, None), ShuntCompensatorInfo)
 
@@ -959,6 +971,20 @@ class NetworkCIMReader(BaseCIMReader):
 
         return self._load_power_system_resource(tap_changer, table, rs)
 
+    def load_tap_changer_control(self, table: TableTapChangerControls, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        tap_changer_control = TapChangerControl(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        tap_changer_control.limit_voltage = rs.get_int(table.limit_voltage.query_index, None)
+        tap_changer_control.line_drop_compensation = rs.get_boolean(table.line_drop_compensation.query_index, None)
+        tap_changer_control.line_drop_r = rs.get_double(table.line_drop_r.query_index, None)
+        tap_changer_control.line_drop_x = rs.get_double(table.line_drop_x.query_index, None)
+        tap_changer_control.reverse_line_drop_r = rs.get_double(table.reverse_line_drop_r.query_index, None)
+        tap_changer_control.reverse_line_drop_x = rs.get_double(table.reverse_line_drop_x.query_index, None)
+        tap_changer_control.forward_ldc_blocking = rs.get_boolean(table.forward_ldc_blocking.query_index, None)
+        tap_changer_control.time_delay = rs.get_double(table.time_delay.query_index, None)
+        tap_changer_control.co_generation_enabled = rs.get_boolean(table.co_generation_enabled.query_index, None)
+        return self._load_regulating_control(tap_changer_control, table, rs) and self._add_or_throw(tap_changer_control)
+
     def _load_transformer_end(self, transformer_end: TransformerEnd, table: TableTransformerEnds, rs: ResultSet) -> bool:
         transformer_end.terminal = self._ensure_get(rs.get_string(table.terminal_mrid.query_index, None), Terminal)
         transformer_end.base_voltage = self._ensure_get(rs.get_string(table.base_voltage_mrid.query_index, None), BaseVoltage)
@@ -983,34 +1009,6 @@ class NetworkCIMReader(BaseCIMReader):
 
         return self._load_identified_object(transformer_star_impedance, table, rs) and self._add_or_throw(transformer_star_impedance)
 
-    def _load_regulating_control(self, regulating_control: RegulatingControl, table: TableRegulatingControls, rs: ResultSet) -> bool:
-        regulating_control.discrete = rs.get_boolean(table.discrete.query_index, None)
-        regulating_control.mode = RegulatingControlModeKind[rs.get_string(table.mode.query_index)]
-        regulating_control.monitored_phase = PhaseCode[rs.get_string(table.monitored_phase.query_index)]
-        regulating_control.target_deadband = rs.get_double(table.target_deadband.query_index, None)
-        regulating_control.target_value = rs.get_double(table.target_value.query_index, None)
-        regulating_control.enabled = rs.get_boolean(table.enabled.query_index, None)
-        regulating_control.max_allowed_target_value = rs.get_double(table.max_allowed_target_value.query_index, None)
-        regulating_control.min_allowed_target_value = rs.get_double(table.min_allowed_target_value.query_index, None)
-        regulating_control.terminal = self._ensure_get(rs.get_string(table.terminal_mrid.query_index, None), Terminal)
-        # _load_regulating_cond_eq()
-        regulating_control.clear_regulating_cond_eq()
-        return self._load_power_system_resource(regulating_control, table, rs)
-
-    def load_tap_changer_control(self, table: TableTapChangerControls, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
-        tap_changer_control = TapChangerControl(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
-
-        tap_changer_control.limit_voltage = rs.get_int(table.limit_voltage.query_index, None)
-        tap_changer_control.line_drop_compensation = rs.get_boolean(table.line_drop_compensation.query_index, None)
-        tap_changer_control.line_drop_r = rs.get_double(table.line_drop_r.query_index, None)
-        tap_changer_control.line_drop_x = rs.get_double(table.line_drop_x.query_index, None)
-        tap_changer_control.reverse_line_drop_r = rs.get_double(table.reverse_line_drop_r.query_index, None)
-        tap_changer_control.reverse_line_drop_x = rs.get_double(table.reverse_line_drop_x.query_index, None)
-        tap_changer_control.forward_ldc_blocking = rs.get_boolean(table.forward_ldc_blocking.query_index, None)
-        tap_changer_control.time_delay = rs.get_double(table.time_delay.query_index, None)
-        tap_changer_control.co_generation_enabled = rs.get_boolean(table.co_generation_enabled.query_index, None)
-        return self._load_regulating_control(tap_changer_control, table, rs) and self._add_or_throw(tap_changer_control)
-
     # ************ IEC61970 InfIEC61970 ************
 
     def load_circuit(self, table: TableCircuits, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
@@ -1033,6 +1031,8 @@ class NetworkCIMReader(BaseCIMReader):
         lv_feeder.normal_head_terminal = self._ensure_get(rs.get_string(table.normal_head_terminal_mrid.query_index, None), Terminal)
 
         return self._load_equipment_container(lv_feeder, table, rs) and self._add_or_throw(lv_feeder)
+
+    # ************ IEC61970 InfIEC61970 WIRES GENERATION PRODUCTION ************
 
     def load_ev_charging_unit(self, table: TableEvChargingUnits, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         ev_charging_unit = EvChargingUnit(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))

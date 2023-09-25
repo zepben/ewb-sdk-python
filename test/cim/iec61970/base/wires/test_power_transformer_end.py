@@ -8,9 +8,9 @@ import re
 import pytest
 from _pytest.python_api import raises
 from hypothesis import given
-from hypothesis.strategies import builds, integers, floats, sampled_from, lists, one_of, just
+from hypothesis.strategies import builds, integers, floats, sampled_from
 
-from cim.collection_validator import validate_collection_unordered, validate_collection
+from cim.collection_validator import validate_collection
 from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
     verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
@@ -20,7 +20,6 @@ power_transformer_end_kwargs = {
     **transformer_end_kwargs,
     "power_transformer": builds(PowerTransformer),
     "rated_s": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-    # "s_ratings": lists(builds(TransformerEndRatedS), unique_by=lambda it: it.cooling_type),
     "rated_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "r": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "x": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -116,9 +115,9 @@ def test_power_transformer_end_constructor_args():
 def test_power_transformer_end_s_ratings():
     validate_collection(
         PowerTransformerEnd,
-        lambda i, _: TransformerEndRatedS(cooling_type=TransformerCoolingType(int(i)), rated_s=int(i)), # how python?
+        lambda i, _: TransformerEndRatedS(cooling_type=TransformerCoolingType(int(i)), rated_s=int(i)),  # how python?
         PowerTransformerEnd.num_ratings,
-        lambda pte, rs: pte.get_rating_by_rated_s(rs.rated_s), # how python?
+        lambda pte, rs: pte.get_rating_by_rated_s(rs.rated_s),  # how python?
         PowerTransformerEnd.s_ratings,
         PowerTransformerEnd.add_rating,
         PowerTransformerEnd.remove_rating,
@@ -126,8 +125,6 @@ def test_power_transformer_end_s_ratings():
         lambda _, dup: rf"A rating for coolingType {dup.cooling_type.name} already exists, please remove it first.",
         support_duplicates=False
     )
-
-
 
 
 def test_power_transformer_cant_add_rating_with_same_cooling_type():
@@ -173,3 +170,8 @@ def test_power_transformer_rated_s_backwards_compatibility():
     assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 4)]
     assert pte.num_ratings() == 1
     assert pte.rated_s == 4
+
+
+def test_power_transformer_s_ratings_backing_field_cant_through_the_constructor():
+    with raises(ValueError, match="Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected."):
+        PowerTransformerEnd(_s_ratings=[TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 4)])
