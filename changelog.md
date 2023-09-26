@@ -1,10 +1,10 @@
-## [0.36.0]
-
+# Zepben Python SDK
+## [0.36.0] - UNRELEASED
 ### Breaking Changes
 * None.
 
 ### New Features
-* None.
+* Support using Azure Entra ID as an auth provider 
 
 ### Enhancements
 * None.
