@@ -126,6 +126,17 @@ client = SyncNetworkConsumerClient(channel)
 If `audience` and `issuer_domain` are provided as keyword arguments, they will be used to construct a `ZepbenTokenFetcher` directly without fetching them from
 `conf_address`.
 
+If running in Azure we also support auth via Azure managed identities using `connect_with_identity`:
+
+```python
+from zepben.evolve import connect_with_identity, SyncNetworkConsumerClient
+
+# Client credentials configuration
+channel = connect_with_identity(host="ewb.zepben.com", rpc_port=443, identity_url="http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=<SOME_IDENTIFIER>")
+client = SyncNetworkConsumerClient(channel)
+# ...
+```
+
 ## Network Hierarchy
 
 The network can be built with a hierarchy as discussed earlier [here](datamodel.mdx#network-hierarchy). This allows you
