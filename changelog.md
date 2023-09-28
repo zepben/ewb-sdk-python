@@ -5,6 +5,7 @@
 
 ### New Features
 * Support using Azure Entra ID as an auth provider 
+* Added support for connecting to EWB utilising Azure managed identities. Use the new function `connect_with_identity()`
 
 ### Enhancements
 * None.

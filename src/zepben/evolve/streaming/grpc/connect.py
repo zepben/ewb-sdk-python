@@ -10,10 +10,10 @@
 from typing import Optional, Union
 
 import grpc
-from zepben.auth import ZepbenTokenFetcher, create_token_fetcher
+from zepben.auth import ZepbenTokenFetcher, create_token_fetcher, create_token_fetcher_managed_identity
 from zepben.evolve import GrpcChannelBuilder
 
-__all__ = ["connect_tls", "connect_insecure", "connect_with_password", "connect_with_secret"]
+__all__ = ["connect_tls", "connect_insecure", "connect_with_password", "connect_with_secret", "connect_with_identity"]
 
 GRPC_READY_TIMEOUT = 20  # seconds
 
@@ -49,6 +49,29 @@ def connect_tls(
     return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).build()
 
 
+def connect_with_identity(host: str,
+                          rpc_port: int,
+                          identity_url: str,
+                          ca_filename: Optional[str] = None,
+                          verify_auth: bool = True) -> grpc.aio.Channel:
+    """
+    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and the OAuth client credentials flow,
+    utilising an Azure managed identity for fetching access tokens.
+
+    :param host: The hostname where the gRPC service is hosted
+    :param rpc_port: The port of the gRPC service
+    :param identity_url: The URL including resource identifier (API) to fetch token from. Typically something like:
+                         http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=<SOME_IDENTIFIER>
+    :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
+                        and defaults to null, in which case only the system CAs are used to verify certificates.
+    :param verify_auth: Passed through to `requests.post()` when fetching access tokens to verify certificates of the auth service.
+    :return: An authenticated, encrypted connection to the gRPC service based on OAuth2 flows. If the authentication configuration specifies that no
+             authentication is required, a non-authenticated, encrypted connection is returned instead.
+    """
+    token_fetcher = create_token_fetcher_managed_identity(identity_url, verify_auth)
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build()
+
+
 def connect_with_secret(
     client_id: str,
     client_secret: str,
@@ -70,13 +93,13 @@ def connect_with_secret(
     :param rpc_port: The port of the gRPC service
     :param conf_address: The address of the authentication configuration
     :param verify_conf: Passed through to `requests.get()` when fetching the authentication configuration
-    :param verify_auth: Passed through to `requests.post()` when fetching access tokens
+    :param verify_auth: Passed through to `requests.post()` when fetching access tokens to verify certificates of the auth service.
     :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
                         and defaults to null, in which case only the system CAs are used to verify certificates.
     :param kwargs: If `audience: str` and `issuer_domain: str` are specified, `kwargs` will be used as parameters
                    to construct the :class:`ZepbenTokenFetcher` directly.
-    :return: An Auth0-authenticated, encrypted connection to the gRPC service. If the authentication configuration specifies that no authentication is
-             required, a non-authenticated, encrypted connection is returned instead.
+    :return: An authenticated, encrypted connection to the gRPC service based on OAuth2 flows. If the authentication configuration specifies that no
+             authentication is required, a non-authenticated, encrypted connection is returned instead.
     """
     if {"audience", "issuer_domain"} <= kwargs.keys():
         # noinspection PyArgumentList
@@ -117,13 +140,13 @@ def connect_with_password(
     :param rpc_port: The port of the gRPC service
     :param conf_address: The address of the authentication configuration
     :param verify_conf: Passed through to `requests.get()` when fetching the authentication configuration
-    :param verify_auth: Passed through to `requests.post()` when fetching access tokens
+    :param verify_auth: Passed through to `requests.post()` when fetching access tokens to verify certificates of the auth service.
     :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
                         and defaults to null, in which case only the system CAs are used to verify certificates.
     :param kwargs: If `audience: str` and `issuer_domain: str` are specified, `kwargs` will be used as parameters
                    to construct the :class:`ZepbenTokenFetcher` directly.
-    :return: An Auth0-authenticated, encrypted connection to the gRPC service. If the authentication configuration specifies that no authentication is
-             required, a non-authenticated, encrypted connection is returned instead.
+    :return: An authenticated, encrypted connection to the gRPC service based on OAuth2 flows. If the authentication configuration specifies that no
+             authentication is required, a non-authenticated, encrypted connection is returned instead.
     """
     if {"audience", "issuer_domain"} <= kwargs.keys():
         # noinspection PyArgumentList
