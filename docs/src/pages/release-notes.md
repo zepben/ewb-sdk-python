@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.36.0](#v0360)| `29 September 2023` |
 |[0.35.0](#v0350)| `06 September 2023` |
 |[0.34.0](#v0340)| `24 October 2022` |
 |[0.33.0](#v0330)| `24 October 2022` |
@@ -36,6 +37,26 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.36.0]
+
+### Breaking Changes
+* None.
+
+### New Features
+* Support using Azure Entra ID as an auth provider 
+* Added support for connecting to EWB utilising Azure managed identities. Use the new function `connect_with_identity()`
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
 
 ---
 
