@@ -308,8 +308,8 @@ class TableRegulatingControls(TablePowerSystemResources):
     def __init__(self):
         super(TableRegulatingControls, self).__init__()
         self.discrete = self._create_column("discrete", "BOOLEAN", Nullable.NULL)
-        self.mode = self._create_column("mode", "TEXT")
-        self.monitored_phase = self._create_column("monitored_phase", "TEXT")
+        self.mode = self._create_column("mode", "TEXT", Nullable.NOT_NULL)
+        self.monitored_phase = self._create_column("monitored_phase", "TEXT", Nullable.NOT_NULL)
         self.target_deadband = self._create_column("target_deadband", "NUMBER", Nullable.NULL)
         self.target_value = self._create_column("target_value", "NUMBER", Nullable.NULL)
         self.enabled = self._create_column("enabled", "BOOLEAN", Nullable.NULL)

@@ -20,7 +20,7 @@ class TableProtectionEquipment(TableEquipment):
         super(TableProtectionEquipment, self).__init__()
         self.relay_delay_time = self._create_column("relay_delay_time", "NUMBER", Nullable.NULL)
         self.protection_kind = self._create_column("protection_kind", "TEXT", Nullable.NOT_NULL)
-        self.directable = self._create_column("directable", "BOOLEAN")
+        self.directable = self._create_column("directable", "BOOLEAN", Nullable.NULL)
         self.power_direction = self._create_column("power_direction", "TEXT", Nullable.NOT_NULL)
 
 

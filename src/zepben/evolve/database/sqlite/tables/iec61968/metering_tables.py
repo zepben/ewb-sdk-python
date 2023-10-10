@@ -38,7 +38,7 @@ class TableUsagePoints(TableIdentifiedObjects):
     def __init__(self):
         super(TableUsagePoints, self).__init__()
         self.location_mrid = self._create_column("location_mrid", "TEXT", Nullable.NULL)
-        self.is_virtual = self._create_column("is_virtual", "BOOLEAN")
+        self.is_virtual = self._create_column("is_virtual", "BOOLEAN", Nullable.NULL)
         self.connection_category = self._create_column("connection_category", "TEXT", Nullable.NULL)
         self.rated_power = self._create_column("rated_power", "INTEGER", Nullable.NULL)
         self.approved_inverter_capacity = self._create_column("approved_inverter_capacity", "INTEGER", Nullable.NULL)

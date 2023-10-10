@@ -176,8 +176,8 @@ class TablePowerTransformerEndRatings(SqliteTable):
     def __init__(self):
         super(TablePowerTransformerEndRatings, self).__init__()
         self.power_transformer_end_mrid = self._create_column("power_transformer_end_mrid", "TEXT", Nullable.NULL)
-        self.cooling_type = self._create_column("cooling_type", "TEXT")
-        self.rated_s = self._create_column("rated_s", "INTEGER")
+        self.cooling_type = self._create_column("cooling_type", "TEXT", Nullable.NOT_NULL)
+        self.rated_s = self._create_column("rated_s", "INTEGER", Nullable.NOT_NULL)
 
     def non_unique_index_columns(self) -> List[List[Column]]:
         cols = super(TablePowerTransformerEndRatings, self).non_unique_index_columns()
