@@ -56,7 +56,6 @@ def test_power_transformer_end_constructor_default():
     assert pte.phase_angle_clock is None
 
 
-@pytest.mark.timeout(100000)
 @given(**power_transformer_end_kwargs)
 def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock,
                                                   **kwargs):
@@ -139,7 +138,6 @@ def test_power_transformer_cant_add_rating_with_same_cooling_type():
         pte.add_new_rating(TransformerCoolingType.KNAF, 3)
 
 
-@pytest.mark.timeout(1222222)
 def test_power_transformer_remove_rating_by_cooling_type():
     pte = PowerTransformerEnd()
     for index, cooling_type in enumerate(TransformerCoolingType):

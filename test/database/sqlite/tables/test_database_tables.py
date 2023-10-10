@@ -60,7 +60,6 @@ def import_submodules(package: str, recursive=True):
             results.update(import_submodules(full_name))
     return results
 
-@pytest.mark.timeout(3000000)
 def test_has_all_tables():
     """
     This test detects if a Table class has been added under zepben.evolve.database.sqlite.tables however hasn't been added to

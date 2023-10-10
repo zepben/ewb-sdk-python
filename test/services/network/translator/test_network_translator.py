@@ -171,7 +171,7 @@ types_to_test = {
 
 @given(**types_to_test)
 @settings(suppress_health_check=[HealthCheck.too_slow])
-@pytest.mark.timeout(1000000)
+@pytest.mark.timeout(10000)
 def test_network_service_translations(**kwargs):
     validate_service_translations(NetworkService, NetworkServiceComparator(), **kwargs)
 

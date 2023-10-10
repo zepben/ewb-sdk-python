@@ -965,7 +965,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: PowerTransformerEnd(mrid="pte2"),
         )
 
-    @pytest.mark.timeout(3333333333)
     def test_compare_power_transformer_end(self):
         self._compare_transformer_end(PowerTransformerEnd)
 

@@ -27,7 +27,8 @@ def validate_service_translations(service_type: Type[BaseService], comparator: B
             processing = f"populated {desc}"
             _remove_unsent_references(cim)
             # noinspection PyUnresolvedReferences
-            result = comparator.compare_objects(cim, _add_with_unresolved_references(service_type(), cim))
+            service = service_type()  # outside _add_with_unresolved_references so weak references on `cim` cant be garbage collected before being compared.
+            result = comparator.compare_objects(cim, _add_with_unresolved_references(service, cim))
             if result.differences:
                 diffs[f"populated {desc}"] = result
     except BaseException as e:

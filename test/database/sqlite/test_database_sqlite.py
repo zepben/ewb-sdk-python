@@ -126,7 +126,6 @@ class TestDatabaseSqlite:
     async def test_schema_switch_info(self, caplog, switch_info):
         await self._validate_schema(SchemaNetworks().network_services_of(SwitchInfo, switch_info), caplog)
 
-    @pytest.mark.timeout(100000)
     @log_on_failure_decorator
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(transformer_end_info=create_transformer_end_info(False))
