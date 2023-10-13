@@ -993,7 +993,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
         self.validator.validate_indexed_collection(
             PowerTransformerEnd.s_ratings,
-            PowerTransformerEnd.add_rating,
+            PowerTransformerEnd.add_transformer_end_rated_s,
             PowerTransformerEnd,
             lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 1),
             lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 2),

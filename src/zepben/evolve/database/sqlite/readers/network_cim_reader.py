@@ -321,12 +321,12 @@ class NetworkCIMReader(BaseCIMReader):
         return self._load_asset_info(potential_transformer_info, table, rs) and self._add_or_throw(potential_transformer_info)
 
     def load_reclose_delays(self, table: TableRecloseDelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        # Note TableRecloseDelays.selectSql ensures we process ratings in the correct order.
         current_relay_info_mrid = rs.get_string(table.current_relay_info_mrid.query_index)
-        sequence_number = int(rs.get_string(table.sequence_number.query_index))
         reclose_delay = rs.get_double(table.reclose_delay.query_index)
-        set_last_mrid(f"{current_relay_info_mrid}.s{sequence_number}")
-        cri = self._base_service.get(current_relay_info_mrid, CurrentRelayInfo)
-        cri.add_delay(reclose_delay, sequence_number)
+        set_last_mrid(f"{current_relay_info_mrid}.s{reclose_delay}")
+        cri = self._ensure_get(current_relay_info_mrid, CurrentRelayInfo)
+        cri.add_delay(reclose_delay)
 
         return True
 
@@ -431,9 +431,7 @@ class NetworkCIMReader(BaseCIMReader):
     def _load_equipment(self, equipment: Equipment, table: TableEquipment, rs: ResultSet) -> bool:
         equipment.normally_in_service = rs.get_boolean(table.normally_in_service.query_index)
         equipment.in_service = rs.get_boolean(table.in_service.query_index)
-        instant_string = rs.get_string(table.commissioned_date.query_index, None)
-        if instant_string:
-            equipment.commissioned_date = datetime.fromisoformat(instant_string)
+        equipment.commissioned_date = rs.get_instant(table.commissioned_date.query_index, None)
 
         return self._load_power_system_resource(equipment, table, rs)
 
@@ -810,8 +808,8 @@ class NetworkCIMReader(BaseCIMReader):
         power_electronics_connection.min_q = rs.get_double(table.min_q.query_index, None)
         power_electronics_connection.p = rs.get_double(table.p.query_index, None)
         power_electronics_connection.q = rs.get_double(table.q.query_index, None)
-        power_electronics_connection.rated_s = rs.get_int(table.rated_s.query_index, None)
         power_electronics_connection.rated_u = rs.get_int(table.rated_u.query_index, None)
+        power_electronics_connection.rated_s = rs.get_int(table.rated_s.query_index, None)
         power_electronics_connection.inverter_standard = rs.get_string(table.inverter_standard.query_index, None)
         power_electronics_connection.sustain_op_overvolt_limit = rs.get_int(table.sustain_op_overvolt_limit.query_index, None)
         power_electronics_connection.stop_at_over_freq = rs.get_double(table.stop_at_over_freq.query_index, None)
@@ -889,15 +887,14 @@ class NetworkCIMReader(BaseCIMReader):
         return self._load_transformer_end(power_transformer_end, table, rs) and self._add_or_throw(power_transformer_end)
 
     def load_power_transformer_end_ratings(self, table: TablePowerTransformerEndRatings, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
-        power_transformer_end_mrid = set_last_mrid(rs.get_string(table.power_transformer_end_mrid.query_index, None))
-        set_last_mrid(f"{power_transformer_end_mrid}-to-UNKNOWN")
+        power_transformer_end_mrid = rs.get_string(table.power_transformer_end_mrid.query_index)
+        rated_s = rs.get_int(table.rated_s.query_index)
+        set_last_mrid(f"{power_transformer_end_mrid}.s{rated_s}")
+
         pte = self._ensure_get(power_transformer_end_mrid, PowerTransformerEnd)
-
         cooling_type = TransformerCoolingType[rs.get_string(table.cooling_type.query_index)]
-        set_last_mrid(f"{power_transformer_end_mrid}-to-{cooling_type.short_name}")
-        s_rating = rs.get_int(table.rated_s.query_index)
+        pte.add_rating(cooling_type, rated_s)
 
-        pte.add_rating(TransformerEndRatedS(cooling_type, s_rating))
         return True
 
     def _load_protected_switch(self, protected_switch: ProtectedSwitch, table: TableProtectedSwitches, rs: ResultSet) -> bool:
@@ -923,6 +920,8 @@ class NetworkCIMReader(BaseCIMReader):
 
     def _load_regulating_cond_eq(self, regulating_cond_eq: RegulatingCondEq, table: TableRegulatingCondEq, rs: ResultSet) -> bool:
         regulating_cond_eq.control_enabled = rs.get_boolean(table.control_enabled.query_index)
+        # We use a resolver here because there is an ordering conflict between terminals, RegulatingCondEq, and RegulatingControls
+        # We check this resolver has actually been resolved in the postLoad of the database read and throw there if it hasn't.
         self._base_service.resolve_or_defer_reference(rce_regulating_control(regulating_cond_eq),
                                                       rs.get_string(table.regulating_control_mrid.query_index, None))
         return self._load_energy_connection(regulating_cond_eq, table, rs)
@@ -937,7 +936,7 @@ class NetworkCIMReader(BaseCIMReader):
         regulating_control.max_allowed_target_value = rs.get_double(table.max_allowed_target_value.query_index, None)
         regulating_control.min_allowed_target_value = rs.get_double(table.min_allowed_target_value.query_index, None)
         regulating_control.terminal = self._ensure_get(rs.get_string(table.terminal_mrid.query_index, None), Terminal)
-        regulating_control.clear_regulating_cond_eq()
+
         return self._load_power_system_resource(regulating_control, table, rs)
 
     def _load_shunt_compensator(self, shunt_compensator: ShuntCompensator, table: TableShuntCompensators, rs: ResultSet) -> bool:

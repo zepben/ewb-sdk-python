@@ -278,7 +278,7 @@ class TestTestNetworkBuilder:
 
         def init_s_rating(cooling_type: TransformerCoolingType,  rated_s: int) -> Callable[[PowerTransformerEnd], None]:
             def add_s_rating(end: PowerTransformerEnd):
-                end.add_rating(TransformerEndRatedS(cooling_type, rated_s))
+                end.add_transformer_end_rated_s(TransformerEndRatedS(cooling_type, rated_s))
 
             return add_s_rating
 

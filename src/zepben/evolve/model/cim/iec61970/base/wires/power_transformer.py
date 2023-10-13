@@ -338,7 +338,7 @@ class PowerTransformerEnd(TransformerEnd):
         )
         self.clear_ratings()
         if rated_s is not None:
-            self.add_rating(TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, rated_s))
+            self.add_transformer_end_rated_s(TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, rated_s))
 
     @property
     def s_ratings(self) -> Generator[TransformerEndRatedS, None, None]:
@@ -364,10 +364,10 @@ class PowerTransformerEnd(TransformerEnd):
                     return s_rating
         return None
 
-    def add_new_rating(self, cooling_type: TransformerCoolingType, rated_s: int) -> PowerTransformerEnd:
-        return self.add_rating(TransformerEndRatedS(cooling_type, rated_s))
+    def add_rating(self, cooling_type: TransformerCoolingType, rated_s: int) -> PowerTransformerEnd:
+        return self.add_transformer_end_rated_s(TransformerEndRatedS(cooling_type, rated_s))
 
-    def add_rating(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
+    def add_transformer_end_rated_s(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
         self._s_ratings = self._s_ratings if self._s_ratings else list()
 
         for s_rating in self._s_ratings:

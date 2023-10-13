@@ -1168,7 +1168,7 @@ def create_power_transformer_end_with_ratings(ratings: List[TransformerEndRatedS
     pte = PowerTransformerEnd(**kwargs)
     if ratings:
         for rating in ratings:
-            pte.add_rating(rating)
+            pte.add_transformer_end_rated_s(rating)
     return pte
 
 
