@@ -20,7 +20,8 @@ GRPC_READY_TIMEOUT = 20  # seconds
 
 def connect_insecure(
     host: str = "localhost",
-    rpc_port: int = 50051
+    rpc_port: int = 50051,
+    **kwargs
 ) -> grpc.aio.Channel:
     """
     Create a :class:`grpc.aio.Channel` that communicates with the gRPC service over plaintext.
@@ -29,13 +30,14 @@ def connect_insecure(
     :param rpc_port: The port of the gRPC service
     :return: A plaintext connection to the gRPC service
     """
-    return GrpcChannelBuilder().for_address(host, rpc_port).build()
+    return GrpcChannelBuilder().for_address(host, rpc_port).build(**kwargs)
 
 
 def connect_tls(
     host: str = "localhost",
     rpc_port: int = 50051,
-    ca_filename: Optional[str] = None
+    ca_filename: Optional[str] = None,
+    **kwargs
 ) -> grpc.aio.Channel:
     """
     Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security.
@@ -46,14 +48,15 @@ def connect_tls(
                         and defaults to null, in which case only the system CAs are used to verify certificates.
     :return:An encrypted connection to the gRPC service
     """
-    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).build()
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).build(**kwargs)
 
 
 def connect_with_identity(host: str,
                           rpc_port: int,
                           identity_url: str,
                           ca_filename: Optional[str] = None,
-                          verify_auth: bool = True) -> grpc.aio.Channel:
+                          verify_auth: bool = True,
+                          **kwargs) -> grpc.aio.Channel:
     """
     Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and the OAuth client credentials flow,
     utilising an Azure managed identity for fetching access tokens.
@@ -69,7 +72,7 @@ def connect_with_identity(host: str,
              authentication is required, a non-authenticated, encrypted connection is returned instead.
     """
     token_fetcher = create_token_fetcher_managed_identity(identity_url, verify_auth)
-    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build()
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build(**kwargs)
 
 
 def connect_with_secret(
@@ -96,25 +99,19 @@ def connect_with_secret(
     :param verify_auth: Passed through to `requests.post()` when fetching access tokens to verify certificates of the auth service.
     :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
                         and defaults to null, in which case only the system CAs are used to verify certificates.
-    :param kwargs: If `audience: str` and `issuer_domain: str` are specified, `kwargs` will be used as parameters
-                   to construct the :class:`ZepbenTokenFetcher` directly.
     :return: An authenticated, encrypted connection to the gRPC service based on OAuth2 flows. If the authentication configuration specifies that no
              authentication is required, a non-authenticated, encrypted connection is returned instead.
     """
-    if {"audience", "issuer_domain"} <= kwargs.keys():
-        # noinspection PyArgumentList
-        token_fetcher = ZepbenTokenFetcher(**kwargs)
-    else:
-        token_fetcher = create_token_fetcher(
-            conf_address=conf_address or f"https://{host}/ewb/auth",
-            verify_conf=verify_conf,
-            verify_auth=verify_auth
-        )
+    token_fetcher = create_token_fetcher(
+        conf_address=conf_address or f"https://{host}/ewb/auth",
+        verify_conf=verify_conf,
+        verify_auth=verify_auth
+    )
 
     if token_fetcher:
-        return _connect_with_secret_using_token_fetcher(token_fetcher, client_id, client_secret, host, rpc_port, ca_filename)
+        return _connect_with_secret_using_token_fetcher(token_fetcher, client_id, client_secret, host, rpc_port, ca_filename, **kwargs)
     else:
-        return connect_tls(host, rpc_port, ca_filename)
+        return connect_tls(host, rpc_port, ca_filename, **kwargs)
 
 
 def connect_with_password(
@@ -143,25 +140,19 @@ def connect_with_password(
     :param verify_auth: Passed through to `requests.post()` when fetching access tokens to verify certificates of the auth service.
     :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
                         and defaults to null, in which case only the system CAs are used to verify certificates.
-    :param kwargs: If `audience: str` and `issuer_domain: str` are specified, `kwargs` will be used as parameters
-                   to construct the :class:`ZepbenTokenFetcher` directly.
     :return: An authenticated, encrypted connection to the gRPC service based on OAuth2 flows. If the authentication configuration specifies that no
              authentication is required, a non-authenticated, encrypted connection is returned instead.
     """
-    if {"audience", "issuer_domain"} <= kwargs.keys():
-        # noinspection PyArgumentList
-        token_fetcher = ZepbenTokenFetcher(**kwargs)
-    else:
-        token_fetcher = create_token_fetcher(
-            conf_address=conf_address or f"https://{host}/ewb/auth",
-            verify_conf=verify_conf,
-            verify_auth=verify_auth
-        )
+    token_fetcher = create_token_fetcher(
+        conf_address=conf_address or f"https://{host}/ewb/auth",
+        verify_conf=verify_conf,
+        verify_auth=verify_auth
+    )
 
     if token_fetcher:
-        return _connect_with_password_using_token_fetcher(token_fetcher, client_id, username, password, host, rpc_port, ca_filename)
+        return _connect_with_password_using_token_fetcher(token_fetcher, client_id, username, password, host, rpc_port, ca_filename, **kwargs)
     else:
-        return connect_tls(host, rpc_port, ca_filename)
+        return connect_tls(host, rpc_port, ca_filename, **kwargs)
 
 
 def _connect_with_secret_using_token_fetcher(
@@ -170,13 +161,14 @@ def _connect_with_secret_using_token_fetcher(
     client_secret: str,
     host: str,
     rpc_port: int,
-    ca_filename: Optional[str]
+    ca_filename: Optional[str],
+    **kwargs
 ) -> grpc.aio.Channel:
     token_fetcher.token_request_data["client_id"] = client_id
     token_fetcher.token_request_data["client_secret"] = client_secret
     token_fetcher.token_request_data["grant_type"] = "client_credentials"
 
-    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build()
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build(**kwargs)
 
 
 def _connect_with_password_using_token_fetcher(
@@ -186,7 +178,8 @@ def _connect_with_password_using_token_fetcher(
     password: str,
     host: str,
     rpc_port: int,
-    ca_filename: Optional[str]
+    ca_filename: Optional[str],
+    **kwargs
 ) -> grpc.aio.Channel:
     token_fetcher.token_request_data["client_id"] = client_id
     token_fetcher.token_request_data["username"] = username
@@ -194,4 +187,4 @@ def _connect_with_password_using_token_fetcher(
     token_fetcher.token_request_data["grant_type"] = "password"
     token_fetcher.token_request_data["scope"] = "offline_access"
 
-    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build()
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build(**kwargs)

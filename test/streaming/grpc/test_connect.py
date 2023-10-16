@@ -87,20 +87,6 @@ def test_connect_with_secret_defaults(mocked_create_token_fetcher, _):
 
 
 @mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
-@mock.patch("zepben.evolve.streaming.grpc.connect.ZepbenTokenFetcher", return_value=token_fetcher)
-def test_connect_with_secret_with_known_token_fetcher_config(mocked_zepben_token_fetcher, _):
-    assert connect_with_secret("client_id", "client_secret", host="host", rpc_port=1234, audience="audience",
-                               issuer_domain="issuer_domain") is authenticated_channel
-    assert token_fetcher.token_request_data == {
-        "client_id": "client_id",
-        "client_secret": "client_secret",
-        "grant_type": "client_credentials"
-    }
-
-    mocked_zepben_token_fetcher.assert_called_once_with(audience="audience", issuer_domain="issuer_domain")
-
-
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
 @mock.patch("zepben.evolve.streaming.grpc.connect.create_token_fetcher", return_value=token_fetcher)
 def test_connect_with_password(mocked_create_token_fetcher, _):
     assert connect_with_password("client_id", "username", "password", "host", 1234, "conf_address", False, "auth_ca.cert", "ca.cert") is authenticated_channel
@@ -136,18 +122,3 @@ def test_connect_with_password_defaults(mocked_create_token_fetcher, _):
     }
 
     mocked_create_token_fetcher.assert_called_once_with(conf_address="https://host/ewb/auth", verify_conf=True, verify_auth=True)
-
-
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
-@mock.patch("zepben.evolve.streaming.grpc.connect.ZepbenTokenFetcher", return_value=token_fetcher)
-def test_connect_with_password_with_known_token_fetcher_config(mocked_zepben_token_fetcher, _):
-    assert connect_with_password("client_id", "username", "password", "host", 1234, audience="audience", issuer_domain="issuer_domain") is authenticated_channel
-    assert token_fetcher.token_request_data == {
-        "client_id": "client_id",
-        "username": "username",
-        "password": "password",
-        "grant_type": "password",
-        "scope": "offline_access"
-    }
-
-    mocked_zepben_token_fetcher.assert_called_once_with(audience="audience", issuer_domain="issuer_domain")
