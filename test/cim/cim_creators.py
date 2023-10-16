@@ -551,6 +551,7 @@ def create_equipment(include_runtime: bool):
         "equipment_containers": lists(sampled_equipment_container(include_runtime), min_size=1, max_size=2),
         "usage_points": lists(builds(UsagePoint, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         "operational_restrictions": lists(builds(OperationalRestriction, **create_identified_object(include_runtime)), min_size=1, max_size=2),
+        "commissioned_date": datetimes(min_value=datetime(1970, 1, 2)),
         **runtime
     }
 
@@ -1094,7 +1095,7 @@ def create_power_electronics_connection(include_runtime: bool = True):
         sustain_op_overvolt_limit=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         stop_at_over_freq=floats(min_value=51.0, max_value=52.0),
         stop_at_under_freq=floats(min_value=47.0, max_value=49.0),
-        inv_volt_watt_resp_mode=booleans(),
+        inv_volt_watt_resp_mode=boolean_or_none(),
         inv_watt_resp_v1=integers(min_value=200, max_value=300),
         inv_watt_resp_v2=integers(min_value=216, max_value=230),
         inv_watt_resp_v3=integers(min_value=235, max_value=255),
@@ -1103,7 +1104,7 @@ def create_power_electronics_connection(include_runtime: bool = True):
         inv_watt_resp_p_at_v2=floats(min_value=0.0, max_value=1.0),
         inv_watt_resp_p_at_v3=floats(min_value=0.0, max_value=1.0),
         inv_watt_resp_p_at_v4=floats(min_value=0.0, max_value=0.2),
-        inv_volt_var_resp_mode=booleans(),
+        inv_volt_var_resp_mode=boolean_or_none(),
         inv_var_resp_v1=integers(min_value=200, max_value=300),
         inv_var_resp_v2=integers(min_value=200, max_value=300),
         inv_var_resp_v3=integers(min_value=200, max_value=300),
@@ -1112,7 +1113,7 @@ def create_power_electronics_connection(include_runtime: bool = True):
         inv_var_resp_q_at_v2=floats(min_value=-1.0, max_value=1.0),
         inv_var_resp_q_at_v3=floats(min_value=-1.0, max_value=1.0),
         inv_var_resp_q_at_v4=floats(min_value=-0.6, max_value=0.0),
-        inv_reactive_power_mode=booleans(),
+        inv_reactive_power_mode=boolean_or_none(),
         inv_fix_reactive_power=floats(min_value=-1.0, max_value=1.0),
     )
 
@@ -1165,6 +1166,7 @@ def create_power_transformer_end(include_runtime: bool = True):
 
 
 def create_power_transformer_end_with_ratings(ratings: List[TransformerEndRatedS], **kwargs):
+    # This is needed as we purposely made it so you can't build a transformer end with multiple ratings through constructor
     pte = PowerTransformerEnd(**kwargs)
     if ratings:
         for rating in ratings:
@@ -1347,7 +1349,7 @@ def create_lv_feeder(include_runtime: bool = True):
 
 
 #####################################################
-# IEC61970 INF IEC61970 WIRES GENERATION PRODUCTION #
+# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
 #####################################################
 
 def create_ev_charging_unit(include_runtime: bool = True):

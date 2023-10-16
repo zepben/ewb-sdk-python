@@ -310,7 +310,7 @@ def test_power_electronics_connection_property_bounds():
         PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v3=-1.01)
     with raises(ValueError, match=re.escape("inv_var_resp_q_at_v3 [1.01] must be between -1.0 and 1.0.")):
         PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v3=1.01)
-    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v4 [-1.01] must be between -1.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v4=-1.01)
-    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v4 [1.01] must be between -1.0 and 1.0.")):
-        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v4=1.01)
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v4 [-0.61] must be between -0.6 and 0.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v4=-0.61)
+    with raises(ValueError, match=re.escape("inv_var_resp_q_at_v4 [0.01] must be between -0.6 and 0.0.")):
+        PowerElectronicsConnection(*power_electronics_connection_args, inv_var_resp_q_at_v4=0.01)

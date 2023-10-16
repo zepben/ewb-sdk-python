@@ -10,5 +10,5 @@ from cim.enum_validator import validate_enum
 from zepben.evolve import TransformerCoolingType
 
 
-def test_power_direction_kind_enum():
+def test_transformer_cooling_type_enum():
     validate_enum(TransformerCoolingType, PBTransformerCoolingType)

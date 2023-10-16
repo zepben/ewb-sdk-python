@@ -888,6 +888,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         )
         self._compare_floats(diff, TapChanger.step)
 
+        self._compare_id_references(diff, TapChanger.tap_changer_control)
         return self._compare_power_system_resource(diff)
 
     def _compare_tap_changer_control(self, source: TapChangerControl, target: TapChangerControl) -> ObjectDifference:

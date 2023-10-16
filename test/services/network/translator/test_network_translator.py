@@ -162,7 +162,7 @@ types_to_test = {
     "create_lv_feeder": create_lv_feeder(),
 
     ##########################################################
-    # IEC61970 INF IEC61970 BASE WIRES GENERATION PRODUCTION #
+    # INFIEC61970 IEC61970 WIRES GENERATION PRODUCTION #
     ##########################################################
 
     "create_ev_charging_unit": create_ev_charging_unit(),

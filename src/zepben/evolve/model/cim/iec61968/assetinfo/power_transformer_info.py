@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Generator
 
-from zepben.evolve import ResistanceReactance
+from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove

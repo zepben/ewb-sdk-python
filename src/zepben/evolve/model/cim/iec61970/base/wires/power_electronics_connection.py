@@ -189,52 +189,52 @@ class PowerElectronicsConnection(RegulatingCondEq):
             for phase in power_electronics_connection_phases:
                 self.add_phase(phase)
 
-        if inv_watt_resp_v1:
+        if inv_watt_resp_v1 is not None:
             self.inv_watt_resp_v1 = inv_watt_resp_v1
 
-        if inv_watt_resp_v2:
+        if inv_watt_resp_v2 is not None:
             self.inv_watt_resp_v2 = inv_watt_resp_v2
 
-        if inv_watt_resp_v3:
+        if inv_watt_resp_v3 is not None:
             self.inv_watt_resp_v3 = inv_watt_resp_v3
 
-        if inv_watt_resp_v4:
+        if inv_watt_resp_v4 is not None:
             self.inv_watt_resp_v4 = inv_watt_resp_v4
 
-        if inv_watt_resp_p_at_v1:
+        if inv_watt_resp_p_at_v1 is not None:
             self.inv_watt_resp_p_at_v1 = inv_watt_resp_p_at_v1
 
-        if inv_watt_resp_p_at_v2:
+        if inv_watt_resp_p_at_v2 is not None:
             self.inv_watt_resp_p_at_v2 = inv_watt_resp_p_at_v2
 
-        if inv_watt_resp_p_at_v3:
+        if inv_watt_resp_p_at_v3 is not None:
             self.inv_watt_resp_p_at_v3 = inv_watt_resp_p_at_v3
 
-        if inv_watt_resp_p_at_v4:
+        if inv_watt_resp_p_at_v4 is not None:
             self.inv_watt_resp_p_at_v4 = inv_watt_resp_p_at_v4
 
-        if inv_var_resp_v1:
+        if inv_var_resp_v1 is not None:
             self.inv_var_resp_v1 = inv_var_resp_v1
 
-        if inv_var_resp_v2:
+        if inv_var_resp_v2 is not None:
             self.inv_var_resp_v2 = inv_var_resp_v2
 
-        if inv_var_resp_v3:
+        if inv_var_resp_v3 is not None:
             self.inv_var_resp_v3 = inv_var_resp_v3
 
-        if inv_var_resp_v4:
+        if inv_var_resp_v4 is not None:
             self.inv_var_resp_v4 = inv_var_resp_v4
 
-        if inv_var_resp_q_at_v1:
+        if inv_var_resp_q_at_v1 is not None:
             self.inv_var_resp_q_at_v1 = inv_var_resp_q_at_v1
 
-        if inv_var_resp_q_at_v2:
+        if inv_var_resp_q_at_v2 is not None:
             self.inv_var_resp_q_at_v2 = inv_var_resp_q_at_v2
 
-        if inv_var_resp_q_at_v3:
+        if inv_var_resp_q_at_v3 is not None:
             self.inv_var_resp_q_at_v3 = inv_var_resp_q_at_v3
 
-        if inv_var_resp_q_at_v4:
+        if inv_var_resp_q_at_v4 is not None:
             self.inv_var_resp_q_at_v4 = inv_var_resp_q_at_v4
 
     @property

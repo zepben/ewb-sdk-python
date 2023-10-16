@@ -131,7 +131,9 @@ from zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePh
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
 from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl as PBTapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger as PBTapChanger
+from zepben.protobuf.cim.iec61970.base.wires.TransformerCoolingType_pb2 import TransformerCoolingType as PBTransformerCoolingType
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
+from zepben.protobuf.cim.iec61970.base.wires.TransformerEndRatedS_pb2 import TransformerEndRatedS as PBTransformerEndRatedS
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
 from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup as PBVectorGroup
 from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection as PBWindingConnection
@@ -469,7 +471,7 @@ def current_relay_info():
         PBCurrentRelayInfo,
         ai=asset_info(),
         curveSetting=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        recloseDelays = lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+        recloseDelays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), max_size=3)
     )
 
 
@@ -1085,7 +1087,6 @@ def power_transformer_end():
         PBPowerTransformerEnd,
         te=transformer_end(),
         powerTransformerMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        ratedS=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         ratedU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -1096,7 +1097,16 @@ def power_transformer_end():
         b0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        phaseAngleClock=integers(min_value=0, max_value=11)
+        phaseAngleClock=integers(min_value=0, max_value=11),
+        ratings=lists(transformer_end_rated_s(), max_size=3)
+    )
+
+
+def transformer_end_rated_s():
+    return builds(
+        PBTransformerEndRatedS,
+        coolingType=sampled_from(PBTransformerCoolingType.values()),
+        ratedS = integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     )
 
 
@@ -1179,7 +1189,8 @@ def tap_changer():
         neutralStep=integers(min_value=2, max_value=10),
         neutralU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         normalStep=integers(min_value=2, max_value=10),
-        controlEnabled=booleans()
+        controlEnabled=booleans(),
+        tapChangerControlMRID=text(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)),
     )
 
 
