@@ -32,8 +32,9 @@ __all__ = ["identified_object_to_pb", "document_to_pb", "organisation_role_to_pb
 ###################
 
 def document_to_pb(cim: Document) -> PBDocument:
-    timestamp = PBTimestamp()
+    timestamp = None
     if cim.created_date_time:
+        timestamp = PBTimestamp()
         timestamp.FromDatetime(cim.created_date_time)
 
     return PBDocument(

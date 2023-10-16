@@ -28,7 +28,6 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.auxiliaryequipment_table
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import *
-from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.feeder_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.meas_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.protection_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.scada_tables import *
@@ -42,6 +41,8 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.transformer_tables
 from zepben.evolve.database.sqlite.tables.metadata_tables import *
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import Ratio
+from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.wires.generation.production_tables import *
 
 __all__ = ["DatabaseTables", "PreparedStatement"]
 
@@ -86,6 +87,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TableEquipmentOperationalRestrictions: TableEquipmentOperationalRestrictions(),
         TableEquipmentUsagePoints: TableEquipmentUsagePoints(),
         TableEquivalentBranches: TableEquivalentBranches(),
+        TableEvChargingUnits: TableEvChargingUnits(),
         TableFaultIndicators: TableFaultIndicators(),
         TableFeeders: TableFeeders(),
         TableFuses: TableFuses(),
@@ -118,6 +120,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TablePowerElectronicsConnectionPhases: TablePowerElectronicsConnectionPhases(),
         TablePowerElectronicsWindUnit: TablePowerElectronicsWindUnit(),
         TablePowerTransformerEnds: TablePowerTransformerEnds(),
+        TablePowerTransformerEndRatings: TablePowerTransformerEndRatings(),
         TablePowerTransformerInfo: TablePowerTransformerInfo(),
         TablePowerTransformers: TablePowerTransformers(),
         TablePricingStructures: TablePricingStructures(),
@@ -125,6 +128,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TableProtectionEquipmentProtectedSwitches: TableProtectionEquipmentProtectedSwitches(),
         TableRatioTapChangers: TableRatioTapChangers(),
         TableReclosers: TableReclosers(),
+        TableRecloseDelays: TableRecloseDelays(),
         TableRemoteControls: TableRemoteControls(),
         TableRemoteSources: TableRemoteSources(),
         TableShortCircuitTests: TableShortCircuitTests(),
@@ -134,6 +138,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TableSubGeographicalRegions: TableSubGeographicalRegions(),
         TableSubstations: TableSubstations(),
         TableSwitchInfo: TableSwitchInfo(),
+        TableTapChangerControls: TableTapChangerControls(),
         TableTariffs: TableTariffs(),
         TableTerminals: TableTerminals(),
         TableTransformerEndInfo: TableTransformerEndInfo(),

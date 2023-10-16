@@ -85,7 +85,11 @@ from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control_mode_kind import *
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import *
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_cooling_type import *
 from zepben.evolve.model.cim.iec61970.base.core.substation import *
 from zepben.evolve.model.cim.iec61970.base.core.terminal import *
 from zepben.evolve.model.cim.iec61970.base.core.equipment import *
@@ -104,6 +108,8 @@ from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import *
+from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import *
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import *
 from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 
@@ -230,7 +236,8 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.conductor_tables i
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.connector_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.perlength_tables import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production_tables import *
-from zepben.evolve.database.sqlite.tables.iec61970.base.infiec61970.feeder_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder_tables import *
+from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.wires.generation.production_tables import *
 from zepben.evolve.database.sqlite.tables.database_tables import *
 from zepben.evolve.database.sqlite.tables.exceptions import *
 from zepben.evolve.database.sqlite.writers.base_cim_writer import *

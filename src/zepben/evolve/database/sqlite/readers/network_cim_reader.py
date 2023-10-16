@@ -3,6 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from datetime import datetime
 from typing import Callable, Optional
 
 from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, TableNoLoadTests, NoLoadTest, TableOpenCircuitTests, \
@@ -36,7 +37,10 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, \
     CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
     LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, \
-    ProtectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches
+    ProtectionKind, PowerDirectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, \
+    EvChargingUnit, RegulatingControl, TableRegulatingControls, RegulatingControlModeKind, TapChangerControl, TableTapChangerControls, \
+    TablePowerTransformerEndRatings, TransformerCoolingType, TransformerEndRatedS
+from zepben.evolve.services.common.resolver import rce_regulating_control
 
 __all__ = ["NetworkCIMReader"]
 
@@ -316,6 +320,16 @@ class NetworkCIMReader(BaseCIMReader):
 
         return self._load_asset_info(potential_transformer_info, table, rs) and self._add_or_throw(potential_transformer_info)
 
+    def load_reclose_delays(self, table: TableRecloseDelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        # Note TableRecloseDelays.selectSql ensures we process ratings in the correct order.
+        current_relay_info_mrid = rs.get_string(table.current_relay_info_mrid.query_index)
+        reclose_delay = rs.get_double(table.reclose_delay.query_index)
+        set_last_mrid(f"{current_relay_info_mrid}.s{reclose_delay}")
+        cri = self._ensure_get(current_relay_info_mrid, CurrentRelayInfo)
+        cri.add_delay(reclose_delay)
+
+        return True
+
     # ************ IEC61968 METERING ************
 
     def _load_end_device(self, end_device: EndDevice, table: TableEndDevices, rs: ResultSet) -> bool:
@@ -335,6 +349,8 @@ class NetworkCIMReader(BaseCIMReader):
         usage_point.usage_point_location = self._ensure_get(rs.get_string(table.location_mrid.query_index, None), Location)
         usage_point.is_virtual = rs.get_boolean(table.is_virtual.query_index)
         usage_point.connection_category = rs.get_string(table.connection_category.query_index, None)
+        usage_point.rated_power = rs.get_int(table.rated_power.query_index, None)
+        usage_point.approved_inverter_capacity = rs.get_int(table.approved_inverter_capacity.query_index, None)
 
         return self._load_identified_object(usage_point, table, rs) and self._add_or_throw(usage_point)
 
@@ -415,6 +431,7 @@ class NetworkCIMReader(BaseCIMReader):
     def _load_equipment(self, equipment: Equipment, table: TableEquipment, rs: ResultSet) -> bool:
         equipment.normally_in_service = rs.get_boolean(table.normally_in_service.query_index)
         equipment.in_service = rs.get_boolean(table.in_service.query_index)
+        equipment.commissioned_date = rs.get_instant(table.commissioned_date.query_index, None)
 
         return self._load_power_system_resource(equipment, table, rs)
 
@@ -561,6 +578,8 @@ class NetworkCIMReader(BaseCIMReader):
     def _load_protection_equipment(self, protection_equipment: ProtectionEquipment, table: TableProtectionEquipment, rs: ResultSet) -> bool:
         protection_equipment.relay_delay_time = rs.get_double(table.relay_delay_time.query_index, None)
         protection_equipment.protection_kind = ProtectionKind[rs.get_string(table.protection_kind.query_index)]
+        protection_equipment.directable = rs.get_boolean(table.directable.query_index, None)
+        protection_equipment.power_direction = PowerDirectionKind[rs.get_string(table.power_direction.query_index)]
 
         return self._load_equipment(protection_equipment, table, rs)
 
@@ -789,8 +808,32 @@ class NetworkCIMReader(BaseCIMReader):
         power_electronics_connection.min_q = rs.get_double(table.min_q.query_index, None)
         power_electronics_connection.p = rs.get_double(table.p.query_index, None)
         power_electronics_connection.q = rs.get_double(table.q.query_index, None)
-        power_electronics_connection.rated_s = rs.get_int(table.rated_s.query_index, None)
         power_electronics_connection.rated_u = rs.get_int(table.rated_u.query_index, None)
+        power_electronics_connection.rated_s = rs.get_int(table.rated_s.query_index, None)
+        power_electronics_connection.inverter_standard = rs.get_string(table.inverter_standard.query_index, None)
+        power_electronics_connection.sustain_op_overvolt_limit = rs.get_int(table.sustain_op_overvolt_limit.query_index, None)
+        power_electronics_connection.stop_at_over_freq = rs.get_double(table.stop_at_over_freq.query_index, None)
+        power_electronics_connection.stop_at_under_freq = rs.get_double(table.stop_at_under_freq.query_index, None)
+        power_electronics_connection.inv_volt_watt_resp_mode = rs.get_boolean(table.inv_volt_watt_resp_mode.query_index, None)
+        power_electronics_connection.inv_watt_resp_v1 = rs.get_int(table.inv_watt_resp_v1.query_index, None)
+        power_electronics_connection.inv_watt_resp_v2 = rs.get_int(table.inv_watt_resp_v2.query_index, None)
+        power_electronics_connection.inv_watt_resp_v3 = rs.get_int(table.inv_watt_resp_v3.query_index, None)
+        power_electronics_connection.inv_watt_resp_v4 = rs.get_int(table.inv_watt_resp_v4.query_index, None)
+        power_electronics_connection.inv_watt_resp_p_at_v1 = rs.get_double(table.inv_watt_resp_p_at_v1.query_index, None)
+        power_electronics_connection.inv_watt_resp_p_at_v2 = rs.get_double(table.inv_watt_resp_p_at_v2.query_index, None)
+        power_electronics_connection.inv_watt_resp_p_at_v3 = rs.get_double(table.inv_watt_resp_p_at_v3.query_index, None)
+        power_electronics_connection.inv_watt_resp_p_at_v4 = rs.get_double(table.inv_watt_resp_p_at_v4.query_index, None)
+        power_electronics_connection.inv_volt_var_resp_mode = rs.get_boolean(table.inv_volt_var_resp_mode.query_index, None)
+        power_electronics_connection.inv_var_resp_v1 = rs.get_int(table.inv_var_resp_v1.query_index, None)
+        power_electronics_connection.inv_var_resp_v2 = rs.get_int(table.inv_var_resp_v2.query_index, None)
+        power_electronics_connection.inv_var_resp_v3 = rs.get_int(table.inv_var_resp_v3.query_index, None)
+        power_electronics_connection.inv_var_resp_v4 = rs.get_int(table.inv_var_resp_v4.query_index, None)
+        power_electronics_connection.inv_var_resp_q_at_v1 = rs.get_double(table.inv_var_resp_q_at_v1.query_index, None)
+        power_electronics_connection.inv_var_resp_q_at_v2 = rs.get_double(table.inv_var_resp_q_at_v2.query_index, None)
+        power_electronics_connection.inv_var_resp_q_at_v3 = rs.get_double(table.inv_var_resp_q_at_v3.query_index, None)
+        power_electronics_connection.inv_var_resp_q_at_v4 = rs.get_double(table.inv_var_resp_q_at_v4.query_index, None)
+        power_electronics_connection.inv_reactive_power_mode = rs.get_boolean(table.inv_reactive_power_mode.query_index, None)
+        power_electronics_connection.inv_fix_reactive_power = rs.get_double(table.inv_fix_reactive_power.query_index, None)
 
         return self._load_regulating_cond_eq(power_electronics_connection, table, rs) and self._add_or_throw(power_electronics_connection)
 
@@ -837,12 +880,22 @@ class NetworkCIMReader(BaseCIMReader):
         power_transformer_end.g0 = rs.get_double(table.g0.query_index, None)
         power_transformer_end.r = rs.get_double(table.r.query_index, None)
         power_transformer_end.r0 = rs.get_double(table.r0.query_index, None)
-        power_transformer_end.rated_s = rs.get_int(table.rated_s.query_index, None)
         power_transformer_end.rated_u = rs.get_int(table.rated_u.query_index, None)
         power_transformer_end.x = rs.get_double(table.x.query_index, None)
         power_transformer_end.x0 = rs.get_double(table.x0.query_index, None)
 
         return self._load_transformer_end(power_transformer_end, table, rs) and self._add_or_throw(power_transformer_end)
+
+    def load_power_transformer_end_ratings(self, table: TablePowerTransformerEndRatings, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        power_transformer_end_mrid = rs.get_string(table.power_transformer_end_mrid.query_index)
+        rated_s = rs.get_int(table.rated_s.query_index)
+        set_last_mrid(f"{power_transformer_end_mrid}.s{rated_s}")
+
+        pte = self._ensure_get(power_transformer_end_mrid, PowerTransformerEnd)
+        cooling_type = TransformerCoolingType[rs.get_string(table.cooling_type.query_index)]
+        pte.add_rating(cooling_type, rated_s)
+
+        return True
 
     def _load_protected_switch(self, protected_switch: ProtectedSwitch, table: TableProtectedSwitches, rs: ResultSet) -> bool:
         protected_switch.breaking_capacity = rs.get_int(table.breaking_capacity.query_index, None)
@@ -867,8 +920,24 @@ class NetworkCIMReader(BaseCIMReader):
 
     def _load_regulating_cond_eq(self, regulating_cond_eq: RegulatingCondEq, table: TableRegulatingCondEq, rs: ResultSet) -> bool:
         regulating_cond_eq.control_enabled = rs.get_boolean(table.control_enabled.query_index)
-
+        # We use a resolver here because there is an ordering conflict between terminals, RegulatingCondEq, and RegulatingControls
+        # We check this resolver has actually been resolved in the postLoad of the database read and throw there if it hasn't.
+        self._base_service.resolve_or_defer_reference(rce_regulating_control(regulating_cond_eq),
+                                                      rs.get_string(table.regulating_control_mrid.query_index, None))
         return self._load_energy_connection(regulating_cond_eq, table, rs)
+
+    def _load_regulating_control(self, regulating_control: RegulatingControl, table: TableRegulatingControls, rs: ResultSet) -> bool:
+        regulating_control.discrete = rs.get_boolean(table.discrete.query_index, None)
+        regulating_control.mode = RegulatingControlModeKind[rs.get_string(table.mode.query_index)]
+        regulating_control.monitored_phase = PhaseCode[rs.get_string(table.monitored_phase.query_index)]
+        regulating_control.target_deadband = rs.get_double(table.target_deadband.query_index, None)
+        regulating_control.target_value = rs.get_double(table.target_value.query_index, None)
+        regulating_control.enabled = rs.get_boolean(table.enabled.query_index, None)
+        regulating_control.max_allowed_target_value = rs.get_double(table.max_allowed_target_value.query_index, None)
+        regulating_control.min_allowed_target_value = rs.get_double(table.min_allowed_target_value.query_index, None)
+        regulating_control.terminal = self._ensure_get(rs.get_string(table.terminal_mrid.query_index, None), Terminal)
+
+        return self._load_power_system_resource(regulating_control, table, rs)
 
     def _load_shunt_compensator(self, shunt_compensator: ShuntCompensator, table: TableShuntCompensators, rs: ResultSet) -> bool:
         shunt_compensator.asset_info = self._ensure_get(rs.get_string(table.shunt_compensator_info_mrid.query_index, None), ShuntCompensatorInfo)
@@ -897,8 +966,23 @@ class NetworkCIMReader(BaseCIMReader):
         tap_changer.neutral_u = rs.get_int(table.neutral_u.query_index, None)
         tap_changer.normal_step = rs.get_int(table.normal_step.query_index, None)
         tap_changer.step = rs.get_double(table.step.query_index, None)
+        tap_changer.tap_changer_control = self._ensure_get(rs.get_string(table.tap_changer_control_mrid.query_index, None), TapChangerControl)
 
         return self._load_power_system_resource(tap_changer, table, rs)
+
+    def load_tap_changer_control(self, table: TableTapChangerControls, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        tap_changer_control = TapChangerControl(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        tap_changer_control.limit_voltage = rs.get_int(table.limit_voltage.query_index, None)
+        tap_changer_control.line_drop_compensation = rs.get_boolean(table.line_drop_compensation.query_index, None)
+        tap_changer_control.line_drop_r = rs.get_double(table.line_drop_r.query_index, None)
+        tap_changer_control.line_drop_x = rs.get_double(table.line_drop_x.query_index, None)
+        tap_changer_control.reverse_line_drop_r = rs.get_double(table.reverse_line_drop_r.query_index, None)
+        tap_changer_control.reverse_line_drop_x = rs.get_double(table.reverse_line_drop_x.query_index, None)
+        tap_changer_control.forward_ldc_blocking = rs.get_boolean(table.forward_ldc_blocking.query_index, None)
+        tap_changer_control.time_delay = rs.get_double(table.time_delay.query_index, None)
+        tap_changer_control.co_generation_enabled = rs.get_boolean(table.co_generation_enabled.query_index, None)
+        return self._load_regulating_control(tap_changer_control, table, rs) and self._add_or_throw(tap_changer_control)
 
     def _load_transformer_end(self, transformer_end: TransformerEnd, table: TableTransformerEnds, rs: ResultSet) -> bool:
         transformer_end.terminal = self._ensure_get(rs.get_string(table.terminal_mrid.query_index, None), Terminal)
@@ -946,6 +1030,13 @@ class NetworkCIMReader(BaseCIMReader):
         lv_feeder.normal_head_terminal = self._ensure_get(rs.get_string(table.normal_head_terminal_mrid.query_index, None), Terminal)
 
         return self._load_equipment_container(lv_feeder, table, rs) and self._add_or_throw(lv_feeder)
+
+    # ************ IEC61970 InfIEC61970 WIRES GENERATION PRODUCTION ************
+
+    def load_ev_charging_unit(self, table: TableEvChargingUnits, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        ev_charging_unit = EvChargingUnit(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        return self._load_power_electronics_unit(ev_charging_unit, table, rs) and self._add_or_throw(ev_charging_unit)
 
     # ************ ASSOCIATIONS ************
 

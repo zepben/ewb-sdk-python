@@ -30,7 +30,7 @@ __all__ = ["identified_object_to_cim", "document_to_cim", "organisation_to_cim",
 
 def document_to_cim(pb: PBDocument, cim: Document, service: BaseService):
     cim.title = pb.title
-    cim.created_date_time = pb.createdDateTime.ToDatetime() if pb.createdDateTime != PBTimestamp() else None
+    cim.created_date_time = pb.createdDateTime.ToDatetime() if pb.HasField("createdDateTime") else None
     cim.author_name = pb.authorName
     cim.type = pb.type
     cim.status = pb.status

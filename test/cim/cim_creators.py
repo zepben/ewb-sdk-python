@@ -6,7 +6,7 @@
 from datetime import datetime
 from random import choice
 
-from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes
+from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, just
 
 from zepben.evolve import *
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
@@ -47,8 +47,9 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'create_power_electronics_connection_phase', 'create_power_transformer', 'create_power_transformer_end', 'create_protected_switch',
            'create_ratio_tap_changer', 'create_recloser', 'create_regulating_cond_eq', 'create_shunt_compensator', 'sampled_single_phase_kind', 'create_switch',
            'create_tap_changer', 'create_transformer_end', 'create_transformer_star_impedance', 'sampled_vector_group', 'sampled_winding_connection_kind',
-           'create_circuit', 'create_loop', 'create_lv_feeder', 'traced_phases', 'sampled_wire_info', 'sampled_conducting_equipment', 'sampled_equipment',
-           'sampled_equipment_container', 'sampled_hvlv_feeder', 'sampled_measurement', 'sampled_protected_switches']
+           'create_circuit', 'create_loop', 'create_lv_feeder', "create_ev_charging_unit", 'traced_phases', 'sampled_wire_info', 'sampled_conducting_equipment',
+           'sampled_equipment', 'sampled_equipment_container', 'sampled_hvlv_feeder', 'sampled_measurement', 'sampled_protected_switches',
+           'create_tap_changer_control']
 
 
 #######################
@@ -368,7 +369,8 @@ def create_current_relay_info(include_runtime: bool = True):
     return builds(
         CurrentRelayInfo,
         **create_asset_info(include_runtime),
-        curve_setting=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE)
+        curve_setting=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        reclose_delays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
     )
 
 
@@ -442,6 +444,8 @@ def create_usage_point(include_runtime: bool = True):
         usage_point_location=builds(Location, **create_identified_object(include_runtime)),
         is_virtual=booleans(),
         connection_category=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        rated_power=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        approved_inverter_capacity=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         equipment=lists(builds(EnergyConsumer, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         end_devices=lists(builds(Meter, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     )
@@ -547,6 +551,7 @@ def create_equipment(include_runtime: bool):
         "equipment_containers": lists(sampled_equipment_container(include_runtime), min_size=1, max_size=2),
         "usage_points": lists(builds(UsagePoint, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         "operational_restrictions": lists(builds(OperationalRestriction, **create_identified_object(include_runtime)), min_size=1, max_size=2),
+        "commissioned_date": datetimes(min_value=datetime(1970, 1, 2)),
         **runtime
     }
 
@@ -805,9 +810,13 @@ def create_current_relay(include_runtime: bool = True):
         CurrentRelay,
         **create_protection_equipment(include_runtime),
         current_limit_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        inverse_time_flag=booleans(),
+        inverse_time_flag=boolean_or_none(),
         time_delay_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
+
+
+def boolean_or_none():
+    return sampled_from([False, True, None])
 
 
 def create_protection_equipment(include_runtime: bool = True):
@@ -815,6 +824,8 @@ def create_protection_equipment(include_runtime: bool = True):
         **create_equipment(include_runtime),
         "relay_delay_time": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "protection_kind": sampled_from(ProtectionKind),
+        "directable": boolean_or_none(),
+        "power_direction": sampled_from(PowerDirectionKind),
         "protected_switches": lists(sampled_protected_switches(include_runtime), min_size=1, max_size=2)
     }
 
@@ -1079,7 +1090,31 @@ def create_power_electronics_connection(include_runtime: bool = True):
         p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         rated_s=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
-        rated_u=integers(min_value=0, max_value=MAX_32_BIT_INTEGER)
+        rated_u=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        inverter_standard=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        sustain_op_overvolt_limit=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+        stop_at_over_freq=floats(min_value=51.0, max_value=52.0),
+        stop_at_under_freq=floats(min_value=47.0, max_value=49.0),
+        inv_volt_watt_resp_mode=boolean_or_none(),
+        inv_watt_resp_v1=integers(min_value=200, max_value=300),
+        inv_watt_resp_v2=integers(min_value=216, max_value=230),
+        inv_watt_resp_v3=integers(min_value=235, max_value=255),
+        inv_watt_resp_v4=integers(min_value=244, max_value=265),
+        inv_watt_resp_p_at_v1=floats(min_value=0.0, max_value=1.0),
+        inv_watt_resp_p_at_v2=floats(min_value=0.0, max_value=1.0),
+        inv_watt_resp_p_at_v3=floats(min_value=0.0, max_value=1.0),
+        inv_watt_resp_p_at_v4=floats(min_value=0.0, max_value=0.2),
+        inv_volt_var_resp_mode=boolean_or_none(),
+        inv_var_resp_v1=integers(min_value=200, max_value=300),
+        inv_var_resp_v2=integers(min_value=200, max_value=300),
+        inv_var_resp_v3=integers(min_value=200, max_value=300),
+        inv_var_resp_v4=integers(min_value=200, max_value=300),
+        inv_var_resp_q_at_v1=floats(min_value=0.0, max_value=0.6),
+        inv_var_resp_q_at_v2=floats(min_value=-1.0, max_value=1.0),
+        inv_var_resp_q_at_v3=floats(min_value=-1.0, max_value=1.0),
+        inv_var_resp_q_at_v4=floats(min_value=-0.6, max_value=0.0),
+        inv_reactive_power_mode=boolean_or_none(),
+        inv_fix_reactive_power=floats(min_value=-1.0, max_value=1.0),
     )
 
 
@@ -1107,10 +1142,10 @@ def create_power_transformer(include_runtime: bool = True):
 
 def create_power_transformer_end(include_runtime: bool = True):
     return builds(
-        PowerTransformerEnd,
+        create_power_transformer_end_with_ratings,
         **create_transformer_end(include_runtime),
         power_transformer=builds(PowerTransformer, **create_identified_object(include_runtime)),
-        rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        # rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         rated_u=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -1121,8 +1156,22 @@ def create_power_transformer_end(include_runtime: bool = True):
         b0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        phase_angle_clock=integers(min_value=0, max_value=11)
+        phase_angle_clock=integers(min_value=0, max_value=11),
+        ratings=lists(builds(
+            TransformerEndRatedS,
+            cooling_type=sampled_from(TransformerCoolingType),
+            rated_s=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
+        ), min_size=0, max_size=11, unique_by=lambda it: it.cooling_type)
     )
+
+
+def create_power_transformer_end_with_ratings(ratings: List[TransformerEndRatedS], **kwargs):
+    # This is needed as we purposely made it so you can't build a transformer end with multiple ratings through constructor
+    pte = PowerTransformerEnd(**kwargs)
+    if ratings:
+        for rating in ratings:
+            pte.add_transformer_end_rated_s(rating)
+    return pte
 
 
 def create_protected_switch(include_runtime: bool):
@@ -1149,8 +1198,41 @@ def create_recloser(include_runtime: bool = True):
 def create_regulating_cond_eq(include_runtime: bool):
     return {
         **create_energy_connection(include_runtime),
-        "control_enabled": booleans()
+        "control_enabled": booleans(),
+        "regulating_control": builds(TapChangerControl, **create_identified_object(include_runtime)),
     }
+
+
+def create_regulating_control(include_runtime: bool):
+    return {
+        **create_power_system_resource(include_runtime),
+        "discrete": boolean_or_none(),
+        "mode": sampled_from(RegulatingControlModeKind),
+        "monitored_phase": sampled_phase_code(),
+        "target_deadband": floats(min_value=0.0, max_value=FLOAT_MAX),
+        "target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "enabled": boolean_or_none(),
+        "max_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "min_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "terminal": builds(Terminal, **create_identified_object(include_runtime)),
+        "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection, **create_identified_object(include_runtime)))
+    }
+
+
+def create_tap_changer_control(include_runtime: bool = True):
+    return builds(
+        TapChangerControl,
+        **create_regulating_control(include_runtime),
+        limit_voltage=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        line_drop_compensation=boolean_or_none(),
+        line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverse_line_drop_r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        reverse_line_drop_x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forward_ldc_blocking=boolean_or_none(),
+        time_delay=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        co_generation_enabled=boolean_or_none()
+    )
 
 
 def create_shunt_compensator(include_runtime: bool):
@@ -1189,7 +1271,8 @@ def create_tap_changer(include_runtime: bool):
         "neutral_step": integers(min_value=2, max_value=10),
         "neutral_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         "normal_step": integers(min_value=2, max_value=10),
-        "control_enabled": booleans()
+        "control_enabled": booleans(),
+        "tap_changer_control": builds(TapChangerControl, **create_identified_object(include_runtime))
     }
 
 
@@ -1264,6 +1347,14 @@ def create_lv_feeder(include_runtime: bool = True):
         normal_head_terminal=builds(Terminal, **create_identified_object(include_runtime)),
         **runtime
     )
+
+
+#####################################################
+# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
+#####################################################
+
+def create_ev_charging_unit(include_runtime: bool = True):
+    return builds(EvChargingUnit, **create_power_electronics_unit(include_runtime))
 
 
 #########

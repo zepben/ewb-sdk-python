@@ -13,6 +13,7 @@ from traceback import print_exc
 from typing import TypeVar, Callable
 
 import pytest
+from _pytest.python_api import raises
 from hypothesis import given, settings, assume, HealthCheck
 
 from cim.cim_creators import create_cable_info, create_no_load_test, create_open_circuit_test, create_overhead_wire_info, create_power_transformer_info, \
@@ -26,7 +27,7 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_junction, create_linear_shunt_compensator, create_load_break_switch, create_per_length_sequence_impedance, create_power_electronics_connection, \
     create_power_electronics_connection_phase, create_power_transformer, create_power_transformer_end, create_ratio_tap_changer, create_recloser, \
     create_transformer_star_impedance, create_circuit, create_loop, create_lv_feeder, create_current_transformer_info, create_current_transformer, \
-    create_potential_transformer, create_current_relay, create_current_relay_info, create_switch_info
+    create_potential_transformer, create_current_relay, create_current_relay_info, create_switch_info, create_ev_charging_unit, create_tap_changer_control
 from database.sqlite.schema_utils import SchemaNetworks, Services, assume_non_blank_street_address_details
 from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, \
     NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, \
@@ -37,7 +38,8 @@ from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, C
     EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, BaseService, \
     DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail, LvFeeder, \
-    CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, CurrentRelayInfo, CurrentRelay
+    CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, CurrentRelayInfo, CurrentRelay, EvChargingUnit, \
+    TapChangerControl, RegulatingControl
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 from zepben.evolve.services.network.tracing import tracing
@@ -593,6 +595,13 @@ class TestDatabaseSqlite:
 
     @log_on_failure_decorator
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(tap_changer_control=create_tap_changer_control(False))
+    @pytest.mark.asyncio
+    async def test_schema_tap_changer_control(self, caplog, tap_changer_control):
+        await self._validate_schema(SchemaNetworks().network_services_of(TapChangerControl, tap_changer_control), caplog)
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(recloser=create_recloser(False))
     @pytest.mark.asyncio
     async def test_schema_recloser(self, caplog, recloser):
@@ -629,6 +638,15 @@ class TestDatabaseSqlite:
     async def test_schema_lv_feeder(self, caplog, lv_feeder):
         await self._validate_schema(SchemaNetworks().network_services_of(LvFeeder, lv_feeder), caplog)
 
+    # ************ IEC61970 InfIEC61970 WIRES GENERATION PRODUCTION ************
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(ev_charging_unit=create_ev_charging_unit(False))
+    @pytest.mark.asyncio
+    async def test_schema_ev_charging_unit(self, caplog, ev_charging_unit):
+        await self._validate_schema(SchemaNetworks().network_services_of(EvChargingUnit, ev_charging_unit), caplog)
+
     # ************ Services ************
 
     @log_on_failure_decorator
@@ -638,6 +656,55 @@ class TestDatabaseSqlite:
     @log_on_failure_decorator
     async def test_name_and_name_type_schema(self, caplog):
         await self._validate_schema(SchemaNetworks().create_name_test_services(), caplog)
+
+    @log_on_failure_decorator
+    async def test_post_process_fails_with_unresolved_regulating_control_references(self, caplog):
+        write = Services()
+        read = Services()
+        pec = PowerElectronicsConnection()
+        pec._regulating_control = RegulatingControl()
+        write.network_service.add(pec)
+        await self._test_unresolved_references_after_load(write,
+                                                          read,
+                                                          pec.mrid,
+                                                          pec.regulating_control.__class__.__name__,
+                                                          pec.regulating_control.mrid,
+                                                          caplog)
+
+    @staticmethod
+    async def _test_unresolved_references_after_load(write: Services,
+                                                     read: Services,
+                                                     from_mrid: str,
+                                                     to_clazz_name: str,
+                                                     to_mrid,
+                                                     caplog):
+        expected_error = (f"Network still had unresolved references after load - this should not occur. Failing reference was from "
+                          f"{from_mrid} resolving {to_clazz_name} {to_mrid}")
+        caplog.clear()
+        std_err = io.StringIO()
+        with contextlib.redirect_stderr(std_err):
+            with tempfile.NamedTemporaryFile() as schema_test_file_temp:
+                schema_test_file = schema_test_file_temp.name
+                # noinspection PyArgumentList
+                assert DatabaseWriter(schema_test_file).save(
+                    write.metadata_collection,
+                    [
+                        write.network_service,
+                        write.diagram_service,
+                        write.customer_service
+                    ]
+                )
+
+                assert f"Creating database schema v{TableVersion.SUPPORTED_VERSION}" in caplog.text
+                assert os.path.isfile(schema_test_file)
+
+                with raises(ValueError, match=expected_error):
+                    await DatabaseReader(schema_test_file).load(
+                        read.metadata_collection,
+                        read.network_service,
+                        read.diagram_service,
+                        read.customer_service
+                    )
 
     @log_on_failure_decorator
     @pytest.mark.asyncio

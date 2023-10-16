@@ -11,7 +11,8 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     EnergySourcePhase, Feeder, GeographicalRegion, Measurement, OperationalRestriction, OrganisationRole, PowerSystemResource, PowerTransformerEnd, \
     PricingStructure, RatioTapChanger, RemoteControl, RemoteSource, SubGeographicalRegion, Substation, Terminal, TransformerEnd, UsagePoint, Circuit, Loop, \
     PowerElectronicsUnit, PowerElectronicsConnectionPhase, PowerElectronicsConnection, TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, \
-    TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectionEquipment, ProtectedSwitch, Switch, CurrentRelay
+    TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectionEquipment, ProtectedSwitch, Switch, CurrentRelay, \
+    RegulatingControl, RegulatingCondEq, TapChanger
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
@@ -29,7 +30,8 @@ __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location",
            "te_terminal", "end_devices", "up_equipment", "usage_point_location", "shunt_compensator_info",
            "transformer_end_info", "power_transformer_info_transformer_tank_info", "transformer_star_impedance",
            "star_impedance_transformer_end_info", "transformer_end_transformer_star_impedance", "normal_energized_lv_feeders",
-           "normal_energizing_feeders", "lv_feeder_normal_head_terminal", "normal_energizing_feeders", "protected_switches"]
+           "normal_energizing_feeders", "lv_feeder_normal_head_terminal", "normal_energizing_feeders", "protected_switches", "tc_tap_changer_control",
+           "rce_regulating_control", "rc_regulating_cond_eq"]
 
 
 def per_length_sequence_impedance(ac_line_segment: AcLineSegment):
@@ -466,3 +468,21 @@ def operated_by_protection_equipment(protected_switch: ProtectedSwitch) -> Bound
     # noinspection PyArgumentList
     return BoundReferenceResolver(protected_switch, ps_to_pe_resolver, pe_to_ps_resolver)
 
+def rc_regulating_cond_eq(regulating_control: RegulatingControl) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(regulating_control, rc_to_rce_resolver, rce_to_rc_resolver)
+
+
+def rce_regulating_control(regulating_cond_eq: RegulatingCondEq) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(regulating_cond_eq, rce_to_rc_resolver, rc_to_rce_resolver)
+
+
+def tc_tap_changer_control(tap_changer: TapChanger) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(tap_changer, tc_to_tcc_resolver, None)
+
+
+def rc_terminal(rc: RegulatingControl) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(rc, rc_to_term_resolver, None)

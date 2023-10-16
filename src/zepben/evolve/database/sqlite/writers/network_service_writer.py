@@ -11,7 +11,7 @@ from zepben.evolve import NetworkService, CableInfo, OverheadWireInfo, PowerTran
     EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, Analog, \
     Accumulator, Discrete, Control, RemoteControl, RemoteSource, BatteryUnit, PowerElectronicsWindUnit, LvFeeder, CurrentTransformerInfo, \
-    PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, CurrentRelayInfo, CurrentRelay, SwitchInfo
+    PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, CurrentRelayInfo, CurrentRelay, SwitchInfo, EvChargingUnit, TapChangerControl
 from zepben.evolve.database.sqlite.writers.base_service_writer import BaseServiceWriter
 from zepben.evolve.database.sqlite.writers.network_cim_writer import NetworkCIMWriter
 
@@ -90,5 +90,7 @@ class NetworkServiceWriter(BaseServiceWriter):
         status = status and self._save_all(service, PotentialTransformer, writer.save_potential_transformer)
         status = status and self._save_all(service, CurrentRelayInfo, writer.save_current_relay_info)
         status = status and self._save_all(service, CurrentRelay, writer.save_current_relay)
+        status = status and self._save_all(service, TapChangerControl, writer.save_tap_changer_control)
+        status = status and self._save_all(service, EvChargingUnit, writer.save_ev_charging_unit)
 
         return status

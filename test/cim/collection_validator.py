@@ -29,7 +29,8 @@ def validate_collection(create_it: Callable[[], T],
                         remove: Callable[..., T],
                         clear: Callable[[T], T],
                         expected_error_message: Callable[[T, U], str],
-                        expected_remove_error: Type[E] = ValueError):
+                        expected_remove_error: Type[E] = ValueError,
+                        support_duplicates: bool = True):
     it = create_it()
     other1 = create_other("1", it)
     other2 = create_other("2", it)
@@ -73,9 +74,10 @@ def validate_collection(create_it: Callable[[], T],
     add(it, other1)
     assert num(it) == 1
 
-    # Make sure adding an already-added item does not change the collection
-    add(it, other1)
-    assert num(it) == 1
+    if support_duplicates:
+        # Make sure adding an already-added item does not change the collection
+        add(it, other1)
+        assert num(it) == 1
 
     remove(it, other1)
     assert num(it) == 0

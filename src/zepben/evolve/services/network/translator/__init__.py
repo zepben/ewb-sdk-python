@@ -100,9 +100,11 @@ from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import Protecte
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq
+from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
+from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit
@@ -112,6 +114,8 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder
+from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit
+
 
 __all__ = []
 
@@ -217,13 +221,16 @@ ProtectedSwitch.mrid = lambda self: self.sw.mrid()
 RatioTapChanger.mrid = lambda self: self.tc.mrid()
 Recloser.mrid = lambda self: self.sw.mrid()
 RegulatingCondEq.mrid = lambda self: self.ec.mrid()
+RegulatingControl.mrid = lambda self: self.psr.mrid()
 ShuntCompensator.mrid = lambda self: self.rce.mrid()
 Switch.mrid = lambda self: self.ce.mrid()
 TapChanger.mrid = lambda self: self.psr.mrid()
+TapChangerControl.mrid = lambda self: self.rc.mrid()
 TransformerEnd.mrid = lambda self: self.io.mrid()
 Loop.mrid = lambda self: self.io.mrid()
 Circuit.mrid = lambda self: self.l.mrid()
 LvFeeder.mrid = lambda self: self.ec.mrid()
+EvChargingUnit.mrid = lambda self: self.peu.mrid()
 
 PowerSystemResource.name_and_mrid = lambda self: self.io.name_and_mrid()
 ConductingEquipment.name_and_mrid = lambda self: self.eq.name_and_mrid()

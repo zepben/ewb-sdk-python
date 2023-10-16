@@ -10,7 +10,7 @@ import pytest
 from pytest import raises
 
 from zepben.evolve import PhaseCode, PowerTransformerEnd, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, \
-    connected_terminals, TestNetworkBuilder, Fuse, LvFeeder, ConnectivityNode
+    connected_terminals, TestNetworkBuilder, Fuse, LvFeeder, ConnectivityNode, TransformerEndRatedS, TransformerCoolingType
 
 
 class TestTestNetworkBuilder:
@@ -276,6 +276,12 @@ class TestTestNetworkBuilder:
 
             return set_rated_s
 
+        def init_s_rating(cooling_type: TransformerCoolingType,  rated_s: int) -> Callable[[PowerTransformerEnd], None]:
+            def add_s_rating(end: PowerTransformerEnd):
+                end.add_transformer_end_rated_s(TransformerEndRatedS(cooling_type, rated_s))
+
+            return add_s_rating
+
         def init_b(val: float) -> Callable[[PowerTransformerEnd], None]:
             def set_b(end: PowerTransformerEnd):
                 end.b = val
@@ -284,7 +290,7 @@ class TestTestNetworkBuilder:
 
         n = await (TestNetworkBuilder()
                    .from_power_transformer([PhaseCode.ABC, PhaseCode.ABC], [init_rated_u(1), init_rated_u(2)])  # tx0
-                   .to_power_transformer([PhaseCode.ABC], [init_rated_s(3)])  # tx1
+                   .to_power_transformer([PhaseCode.ABC], [init_s_rating(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 3)])  # tx1
                    .from_power_transformer([PhaseCode.AB, PhaseCode.AB, PhaseCode.AN], [init_b(4.0), init_b(5.0), init_b(6.0)])  # tx2
                    .build())
         print(hex(id(n)))

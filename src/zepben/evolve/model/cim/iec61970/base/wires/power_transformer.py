@@ -6,8 +6,12 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import List, Optional, Generator
 
+from dataclassy import dataclass, Internal
+
+from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
@@ -16,12 +20,14 @@ from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import Cond
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.vector_group import VectorGroup
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import WindingConnection
 from zepben.evolve.util import require, nlen, get_by_mrid, ngen, safe_remove
 
-__all__ = ["TapChanger", "RatioTapChanger", "PowerTransformer", "PowerTransformerEnd", "TransformerEnd"]
+__all__ = ["TapChanger", "RatioTapChanger", "PowerTransformer", "PowerTransformerEnd", "TransformerEnd", "TransformerEndRatedS"]
 
 
 class TapChanger(PowerSystemResource):
@@ -34,6 +40,9 @@ class TapChanger(PowerSystemResource):
 
     neutral_u: Optional[int] = None
     """Voltage at which the winding operates at the neutral tap setting."""
+
+    tap_changer_control: Optional[TapChangerControl] = None
+    """The regulating control scheme in which this tap changer participates."""
 
     _high_step: Optional[int] = None
     _low_step: Optional[int] = None
@@ -203,6 +212,12 @@ class TransformerEnd(IdentifiedObject):
      values of the transformer should be entered on the high voltage end (endNumber=1)."""
 
 
+@dataclass(slots=True)
+class TransformerEndRatedS:
+    cooling_type: TransformerCoolingType
+    rated_s: int
+
+
 class PowerTransformerEnd(TransformerEnd):
     """
     A PowerTransformerEnd is associated with each Terminal of a PowerTransformer.
@@ -222,10 +237,7 @@ class PowerTransformerEnd(TransformerEnd):
 
     _power_transformer: Optional[PowerTransformer] = None
     """The power transformer of this power transformer end."""
-
-    rated_s: Optional[int] = None
-    """Normal apparent power rating. The attribute shall be a positive value. For a two-winding transformer the values for the high and low voltage sides 
-    shall be identical."""
+    _rated_s: Optional[int] = None
 
     rated_u: Optional[int] = None
     """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings. A high voltage side, as given by 
@@ -263,10 +275,30 @@ class PowerTransformerEnd(TransformerEnd):
     secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the 
     clock as 11. The clock value of the transformer end number specified as 1, is assumed to be zero."""
 
-    def __init__(self, power_transformer: PowerTransformer = None, **kwargs):
+    _s_ratings: Optional[List[TransformerEndRatedS]] = None
+    """
+    Backing list for storing transformer ratings. Placed here to not mess with __init__ param order. Must always be placed at the end.
+    Should not be used directly, instead use add_rating and get_rating functions. 
+    """
+
+    def __init__(self, power_transformer: PowerTransformer = None, rated_s: int = None, **kwargs):
         super(PowerTransformerEnd, self).__init__(**kwargs)
         if power_transformer:
             self.power_transformer = power_transformer
+        if self._s_ratings:
+            raise ValueError("Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected.")
+        if rated_s and self._rated_s:
+            raise ValueError(f"Cannot specify both rated_s and _rated_s properties when constructing {self}. Check your constructor parameters.")
+        if rated_s is not None:
+            warnings.warn(
+                "`rated_s` has been replaced by `s_ratings`. Please use `add_rating()` to add one of more ratings and their related [TransformerCoolingType].",
+                DeprecationWarning,
+                stacklevel=3
+            )
+            self.rated_s = rated_s
+        if self._rated_s is not None:
+            self.rated_s = self._rated_s
+            self._rated_s = None
 
     @property
     def power_transformer(self):
@@ -283,6 +315,105 @@ class PowerTransformerEnd(TransformerEnd):
     @property
     def nominal_voltage(self):
         return self.base_voltage.nominal_voltage if self.base_voltage else self.rated_u
+
+    @property
+    def rated_s(self) -> Optional[int]:
+        """
+        Normal apparent power rating. The attribute shall be a positive value. For a two-winding transformer the values for the high and low voltage sides
+        shall be identical.
+        """
+        if self._s_ratings:
+            return self._s_ratings[0].rated_s if len(self._s_ratings) > 0 else None
+        return None
+
+    @rated_s.setter
+    def rated_s(self, rated_s: Optional[int]):
+        warnings.warn(
+            "`rated_s` has been replaced by `s_ratings` and is only for backward compatibility. Setting `rated_s`, will clear any other ratings.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        self.clear_ratings()
+        if rated_s is not None:
+            self.add_transformer_end_rated_s(TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, rated_s))
+
+    @property
+    def s_ratings(self) -> Generator[TransformerEndRatedS, None, None]:
+        return ngen(self._s_ratings)
+
+    def num_ratings(self) -> int:
+        return nlen(self._s_ratings)
+
+    def get_rating_by_rated_s(self, rated_s: int) -> Optional[TransformerEndRatedS]:
+        if self._s_ratings:
+            for s_rating in self._s_ratings:
+                if s_rating.rated_s == rated_s:
+                    return s_rating
+        return None
+
+    def get_rating_by_cooling_type(self, cooling_type: TransformerCoolingType) -> Optional[TransformerEndRatedS]:
+        if self._s_ratings:
+            for s_rating in self._s_ratings:
+                if s_rating.cooling_type == cooling_type:
+                    return s_rating
+        return None
+
+    def add_rating(self, cooling_type: TransformerCoolingType, rated_s: int) -> PowerTransformerEnd:
+        return self.add_transformer_end_rated_s(TransformerEndRatedS(cooling_type, rated_s))
+
+    def add_transformer_end_rated_s(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
+        self._s_ratings = self._s_ratings if self._s_ratings else list()
+
+        for s_rating in self._s_ratings:
+            if s_rating.cooling_type == transformer_end_rated_s.cooling_type:
+                raise ValueError(f"A rating for coolingType {transformer_end_rated_s.cooling_type.name} already exists, please remove it first.")
+
+        self._s_ratings.append(transformer_end_rated_s)
+        self._s_ratings.sort(key=lambda t: t.rated_s, reverse=True)
+        return self
+
+    def remove_rating(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
+        self._s_ratings = safe_remove(self._s_ratings, transformer_end_rated_s)
+        return self
+
+    def remove_rating_by_cooling_type(self, cooling_type: TransformerCoolingType) -> Optional[TransformerEndRatedS]:
+        if self._s_ratings:
+            for transformer_end_rated_s in self._s_ratings:
+                if transformer_end_rated_s.cooling_type == cooling_type:
+                    self._s_ratings.remove(transformer_end_rated_s)
+                    return transformer_end_rated_s
+        return None
+
+    def remove_rating_by_rated_s(self, rated_s: int) -> Optional[TransformerEndRatedS]:
+        if self._s_ratings:
+            for transformer_end_rated_s in self._s_ratings:
+                if transformer_end_rated_s.rated_s == rated_s:
+                    self._s_ratings.remove(transformer_end_rated_s)
+                    return transformer_end_rated_s
+        return None
+
+    def clear_ratings(self) -> PowerTransformerEnd:
+        self._s_ratings = None
+        return self
+
+    # noinspection PyUnusedLocal
+    # pylint: disable=unused-argument
+    def resistance_reactance(self):
+        """
+        Get the `ResistanceReactance` for this `PowerTransformerEnd` from either:
+        1. directly assigned values or
+        2. the pre-calculated `starImpedance` or
+        3. from the datasheet information of the associated `powerTransformer`
+
+        If the data is not complete in any of the above it will merge in the missing values from the subsequent sources.
+        :return:
+        """
+        ResistanceReactance(self.r, self.x, self.r0, self.x0).merge_if_incomplete(
+            lambda: self.star_impedance.resistance_reactance() if self.star_impedance is not None else None
+        ).merge_if_incomplete(
+            lambda: self.power_transformer.asset_info.resistance_reactance(self.end_number) if self.power_transformer.asset_info is not None else None
+        )
+    # pylint: enable=unused-argument
 
 
 class PowerTransformer(ConductingEquipment):

@@ -9,6 +9,7 @@ import importlib.util
 import importlib.util
 import pkgutil
 
+import pytest
 from pytest import raises
 
 from zepben.evolve.database.sqlite.tables.database_tables import DatabaseTables
@@ -58,7 +59,6 @@ def import_submodules(package: str, recursive=True):
         if recursive and is_pkg:
             results.update(import_submodules(full_name))
     return results
-
 
 def test_has_all_tables():
     """

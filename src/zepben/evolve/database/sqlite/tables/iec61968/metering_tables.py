@@ -32,12 +32,16 @@ class TableUsagePoints(TableIdentifiedObjects):
     location_mrid: Column = None
     is_virtual: Column = None
     connection_category: Column = None
+    rated_power: Column = None
+    approved_inverter_capacity: Column = None
 
     def __init__(self):
         super(TableUsagePoints, self).__init__()
         self.location_mrid = self._create_column("location_mrid", "TEXT", Nullable.NULL)
         self.is_virtual = self._create_column("is_virtual", "BOOLEAN")
-        self.connection_category = self._create_column("connection_category", "text", Nullable.NULL)
+        self.connection_category = self._create_column("connection_category", "TEXT", Nullable.NULL)
+        self.rated_power = self._create_column("rated_power", "INTEGER", Nullable.NULL)
+        self.approved_inverter_capacity = self._create_column("approved_inverter_capacity", "INTEGER", Nullable.NULL)
 
     def name(self) -> str:
         return "usage_points"

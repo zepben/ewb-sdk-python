@@ -23,7 +23,8 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     Loop, Pole, Streetlight, Accumulator, Analog, Discrete, Control, RemoteControl, RemoteSource, PowerTransformerInfo, PowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
-    ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, CurrentRelayInfo, SwitchInfo, CurrentTransformerInfo
+    ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, CurrentRelayInfo, SwitchInfo, \
+    CurrentTransformerInfo, EvChargingUnit, RegulatingControl, TapChangerControl
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -708,6 +709,7 @@ _nio_type_to_cim = {
     "powerTransformerEnd": PowerTransformerEnd,
     "ratioTapChanger": RatioTapChanger,
     "recloser": Recloser,
+    "tapChangerControl": TapChangerControl,
     "transformerStarImpedance": TransformerStarImpedance,
 
     # IEC61970 InfIEC61970 FEEDER #
@@ -718,5 +720,8 @@ _nio_type_to_cim = {
     "currentRelayInfo": CurrentRelayInfo,
     "switchInfo": SwitchInfo,
     "currentTransformer": CurrentTransformer,
-    "currentTransformerInfo": CurrentTransformerInfo
+    "currentTransformerInfo": CurrentTransformerInfo,
+
+    # IEC61970 InfIEC61970 WIRES GENERATION PRODUCTION #
+    "evChargingUnit": EvChargingUnit
 }

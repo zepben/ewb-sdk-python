@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.NoLoadTest_pb2 import NoLoadTest as PBNoLoadTest
 from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircuitTest as PBOpenCircuitTest
@@ -100,10 +101,13 @@ from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import Protecte
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger as PBRatioTapChanger
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser as PBRecloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq as PBRegulatingCondEq
+from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl as PBRegulatingControl
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator as PBShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger as PBTapChanger
+from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl as PBTapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd as PBTransformerEnd
+from zepben.protobuf.cim.iec61970.base.wires.TransformerEndRatedS_pb2 import TransformerEndRatedS as PBTransformerEndRatedS
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance as PBTransformerStarImpedance
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit as PBBatteryUnit
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.PhotoVoltaicUnit_pb2 import PhotoVoltaicUnit as PBPhotoVoltaicUnit
@@ -112,7 +116,9 @@ from zepben.protobuf.cim.iec61970.base.wires.generation.production.PowerElectron
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Circuit_pb2 import Circuit as PBCircuit
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBLoop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
+from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 
+from zepben.evolve import TransformerCoolingType
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
@@ -186,16 +192,21 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection im
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import *
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control_mode_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.switch import *
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
+from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import *
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import *
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import *
 from zepben.evolve.model.phases import TracedPhases
 
 import zepben.evolve.services.common.resolver as resolver
@@ -223,7 +234,8 @@ __all__ = [
     "per_length_line_parameter_to_cim", "per_length_impedance_to_cim", "per_length_sequence_impedance_to_cim", "power_electronics_connection_to_cim",
     "power_electronics_connection_phase_to_cim", "power_transformer_to_cim", "power_transformer_end_to_cim", "transformer_star_impedance_to_cim",
     "protected_switch_to_cim", "ratio_tap_changer_to_cim", "recloser_to_cim", "regulating_cond_eq_to_cim", "shunt_compensator_to_cim", "switch_to_cim",
-    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim"
+    "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim", "ev_charging_unit_to_cim",
+    "transformer_end_rated_s_to_cim", "tap_changer_control_to_cim", "regulating_control_to_cim"
 ]
 
 
@@ -528,7 +540,8 @@ PBTownDetail.to_cim = town_detail_to_cim
 def current_relay_info_to_cim(pb: PBCurrentRelayInfo, network_service: NetworkService) -> Optional[CurrentRelayInfo]:
     cim = CurrentRelayInfo(
         mrid=pb.mrid(),
-        curve_setting=str_or_none(pb.curveSetting)
+        curve_setting=str_or_none(pb.curveSetting),
+        reclose_delays=list(pb.recloseDelays)
     )
 
     asset_info_to_cim(pb.ai, cim, network_service)
@@ -616,6 +629,9 @@ def usage_point_to_cim(pb: PBUsagePoint, network_service: NetworkService) -> Opt
     network_service.resolve_or_defer_reference(resolver.usage_point_location(cim), pb.usagePointLocationMRID)
     cim.is_virtual = pb.isVirtual
     cim.connection_category = pb.connectionCategory if pb.connectionCategory else None
+    cim.rated_power = int_or_none(pb.ratedPower)
+    cim.approved_inverter_capacity = int_or_none(pb.approvedInverterCapacity)
+
     for mrid in pb.equipmentMRIDs:
         network_service.resolve_or_defer_reference(resolver.up_equipment(cim), mrid)
     for mrid in pb.endDeviceMRIDs:
@@ -727,6 +743,7 @@ def connectivity_node_container_to_cim(pb: PBConnectivityNodeContainer, cim: Con
 def equipment_to_cim(pb: PBEquipment, cim: Equipment, network_service: NetworkService):
     cim.in_service = pb.inService
     cim.normally_in_service = pb.normallyInService
+    cim.commissioned_date = pb.commissionedDate.ToDatetime() if pb.HasField("commissionedDate") else None
 
     for mrid in pb.equipmentContainerMRIDs:
         network_service.resolve_or_defer_reference(resolver.containers(cim), mrid)
@@ -965,6 +982,8 @@ def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) ->
 def protection_equipment_to_cim(pb: PBProtectionEquipment, cim: ProtectionEquipment, network_service: NetworkService):
     cim.relay_delay_time = float_or_none(pb.relayDelayTime)
     cim.protection_kind = ProtectionKind(pb.protectionKind)
+    cim.directable = None if pb.HasField("directableNull") else pb.directableSet
+    cim.power_direction = PowerDirectionKind(pb.powerDirection)
 
     for mrid in pb.protectedSwitchMRIDs:
         network_service.resolve_or_defer_reference(resolver.protected_switches(cim), mrid)
@@ -1267,7 +1286,31 @@ def power_electronics_connection_to_cim(pb: PBPowerElectronicsConnection, networ
         max_q=float_or_none(pb.maxQ),
         min_q=float_or_none(pb.minQ),
         rated_s=int_or_none(pb.ratedS),
-        rated_u=int_or_none(pb.ratedU)
+        rated_u=int_or_none(pb.ratedU),
+        inverter_standard=str_or_none(pb.inverterStandard),
+        sustain_op_overvolt_limit=int_or_none(pb.sustainOpOvervoltLimit),
+        stop_at_over_freq=float_or_none(pb.stopAtOverFreq),
+        stop_at_under_freq=float_or_none(pb.stopAtUnderFreq),
+        inv_volt_watt_resp_mode=None if pb.HasField("invVoltWattRespModeNull") else pb.invVoltWattRespModeSet,
+        inv_watt_resp_v1=int_or_none(pb.invWattRespV1),
+        inv_watt_resp_v2=int_or_none(pb.invWattRespV2),
+        inv_watt_resp_v3=int_or_none(pb.invWattRespV3),
+        inv_watt_resp_v4=int_or_none(pb.invWattRespV4),
+        inv_watt_resp_p_at_v1=float_or_none(pb.invWattRespPAtV1),
+        inv_watt_resp_p_at_v2=float_or_none(pb.invWattRespPAtV2),
+        inv_watt_resp_p_at_v3=float_or_none(pb.invWattRespPAtV3),
+        inv_watt_resp_p_at_v4=float_or_none(pb.invWattRespPAtV4),
+        inv_volt_var_resp_mode=None if pb.HasField("invVoltVarRespModeNull") else pb.invVoltVarRespModeSet,
+        inv_var_resp_v1=int_or_none(pb.invVarRespV1),
+        inv_var_resp_v2=int_or_none(pb.invVarRespV2),
+        inv_var_resp_v3=int_or_none(pb.invVarRespV3),
+        inv_var_resp_v4=int_or_none(pb.invVarRespV4),
+        inv_var_resp_q_at_v1=float_or_none(pb.invVarRespQAtV1),
+        inv_var_resp_q_at_v2=float_or_none(pb.invVarRespQAtV2),
+        inv_var_resp_q_at_v3=float_or_none(pb.invVarRespQAtV3),
+        inv_var_resp_q_at_v4=float_or_none(pb.invVarRespQAtV4),
+        inv_reactive_power_mode=None if pb.HasField("invReactivePowerModeNull") else pb.invReactivePowerModeSet,
+        inv_fix_reactive_power=float_or_none(pb.invFixReactivePower)
     )
 
     for mrid in pb.powerElectronicsUnitMRIDs:
@@ -1328,11 +1371,19 @@ def power_transformer_end_to_cim(pb: PBPowerTransformerEnd, network_service: Net
         phase_angle_clock=int_or_none(pb.phaseAngleClock)
     )
 
+    for rating in pb.ratings:
+        cim.add_transformer_end_rated_s(transformer_end_rated_s_to_cim(rating))
+
     # Set end number before associating with power transformer to prevent incorrectly sorted cim.power_transformer.ends
     transformer_end_to_cim(pb.te, cim, network_service)
 
     network_service.resolve_or_defer_reference(resolver.power_transformer(cim), pb.powerTransformerMRID)
     return cim if network_service.add(cim) else None
+
+
+def transformer_end_rated_s_to_cim(pb: PBTransformerEndRatedS) -> Optional[TransformerEndRatedS]:
+    # noinspection PyArgumentList
+    return TransformerEndRatedS(cooling_type=TransformerCoolingType(pb.coolingType), rated_s=pb.ratedS)
 
 
 def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_service: NetworkService) -> Optional[TransformerStarImpedance]:
@@ -1375,8 +1426,25 @@ def recloser_to_cim(pb: PBRecloser, network_service: NetworkService) -> Optional
 
 def regulating_cond_eq_to_cim(pb: PBRegulatingCondEq, cim: RegulatingCondEq, network_service: NetworkService):
     cim.control_enabled = pb.controlEnabled
+    network_service.resolve_or_defer_reference(resolver.rce_regulating_control(cim), pb.regulatingControlMRID)
 
     energy_connection_to_cim(pb.ec, cim, network_service)
+
+
+def regulating_control_to_cim(pb: PBRegulatingControl, cim: RegulatingControl, network_service: NetworkService):
+    cim.discrete = None if pb.HasField("discreteNull") else pb.discreteSet
+    cim.mode = RegulatingControlModeKind(pb.mode)
+    cim.monitored_phase = phase_code_by_id(pb.monitoredPhase)
+    cim.target_deadband = float_or_none(pb.targetDeadband)
+    cim.target_value = float_or_none(pb.targetValue)
+    cim.enabled = None if pb.HasField("enabledNull") else pb.enabledSet
+    cim.max_allowed_target_value = float_or_none(pb.maxAllowedTargetValue)
+    cim.min_allowed_target_value = float_or_none(pb.minAllowedTargetValue)
+    network_service.resolve_or_defer_reference(resolver.rc_terminal(cim), pb.terminalMRID)
+    for mrid in pb.regulatingCondEqMRIDs:
+        network_service.resolve_or_defer_reference(resolver.rc_regulating_cond_eq(cim), mrid)
+
+    power_system_resource_to_cim(pb.psr, cim, network_service)
 
 
 def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, network_service: NetworkService):
@@ -1406,6 +1474,7 @@ def tap_changer_to_cim(pb: PBTapChanger, cim: TapChanger, network_service: Netwo
     cim.low_step = int_or_none(pb.lowStep)
     cim.neutral_u = int_or_none(pb.neutralU)
     cim.control_enabled = pb.controlEnabled
+    network_service.resolve_or_defer_reference(resolver.tc_tap_changer_control(cim), pb.tapChangerControlMRID)
 
     power_system_resource_to_cim(pb.psr, cim, network_service)
 
@@ -1422,6 +1491,24 @@ def transformer_end_to_cim(pb: PBTransformerEnd, cim: TransformerEnd, network_se
     network_service.resolve_or_defer_reference(resolver.transformer_end_transformer_star_impedance(cim), pb.starImpedanceMRID)
 
     identified_object_to_cim(pb.io, cim, network_service)
+
+
+def tap_changer_control_to_cim(pb: PBTapChangerControl, network_service: NetworkService) -> Optional[TapChangerControl]:
+    cim = TapChangerControl(
+        mrid=pb.mrid(),
+        limit_voltage=int_or_none(pb.limitVoltage),
+        line_drop_compensation=None if pb.HasField("lineDropCompensationNull") else pb.lineDropCompensationSet,
+        line_drop_r=float_or_none(pb.lineDropR),
+        line_drop_x=float_or_none(pb.lineDropX),
+        reverse_line_drop_r=float_or_none(pb.reverseLineDropR),
+        reverse_line_drop_x=float_or_none(pb.reverseLineDropX),
+        forward_ldc_blocking=None if pb.HasField("forwardLDCBlockingNull") else pb.forwardLDCBlockingSet,
+        time_delay=float_or_none(pb.timeDelay),
+        co_generation_enabled=None if pb.HasField("coGenerationEnabledNull") else pb.coGenerationEnabledSet
+    )
+
+    regulating_control_to_cim(pb.rc, cim, network_service)
+    return cim if network_service.add(cim) else None
 
 
 PBAcLineSegment.to_cim = ac_line_segment_to_cim
@@ -1448,6 +1535,7 @@ PBPowerElectronicsConnection.to_cim = power_electronics_connection_to_cim
 PBPowerElectronicsConnectionPhase.to_cim = power_electronics_connection_phase_to_cim
 PBPowerTransformer.to_cim = power_transformer_to_cim
 PBPowerTransformerEnd.to_cim = power_transformer_end_to_cim
+PBTransformerEndRatedS.to_cim = transformer_end_rated_s_to_cim
 PBTransformerStarImpedance.to_cim = transformer_star_impedance_to_cim
 PBProtectedSwitch.to_cim = protected_switch_to_cim
 PBRatioTapChanger.to_cim = ratio_tap_changer_to_cim
@@ -1457,6 +1545,7 @@ PBShuntCompensator.to_cim = shunt_compensator_to_cim
 PBSwitch.to_cim = switch_to_cim
 PBTapChanger.to_cim = tap_changer_to_cim
 PBTransformerEnd.to_cim = transformer_end_to_cim
+PBTapChangerControl.to_cim = tap_changer_control_to_cim
 
 
 ###############################
@@ -1504,3 +1593,16 @@ def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optiona
 PBCircuit.to_cim = circuit_to_cim
 PBLoop.to_cim = loop_to_cim
 PBLvFeeder.to_cim = lv_feeder_to_cim
+
+
+####################################################
+# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
+####################################################
+
+def ev_charging_unit_to_cim(pb: PBEvChargingUnit, network_service: NetworkService) -> Optional[EvChargingUnit]:
+    cim = EvChargingUnit(mrid=pb.mrid())
+    power_electronics_unit_to_cim(pb.peu, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
+PBEvChargingUnit.to_cim = ev_charging_unit_to_cim

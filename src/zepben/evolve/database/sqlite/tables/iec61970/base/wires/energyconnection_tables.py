@@ -11,7 +11,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import Table
 
 __all__ = ["TableEnergyConnections", "TableEnergyConsumerPhases", "TableEnergyConsumers", "TableEnergySources", "TableEnergySourcePhases",
            "TableRegulatingCondEq", "TableShuntCompensators", "TableLinearShuntCompensators", "TablePowerElectronicsConnection",
-           "TablePowerElectronicsConnectionPhases"]
+           "TablePowerElectronicsConnectionPhases", "TableRegulatingControls", "TableTapChangerControls"]
 
 
 # noinspection PyAbstractClass
@@ -158,10 +158,12 @@ class TableEnergySources(TableEnergyConnections):
 # noinspection PyAbstractClass
 class TableRegulatingCondEq(TableEnergyConnections):
     control_enabled: Column = None
+    regulating_control_mrid: Column = None
 
     def __init__(self):
         super(TableRegulatingCondEq, self).__init__()
         self.control_enabled = self._create_column("control_enabled", "BOOLEAN", Nullable.NOT_NULL)
+        self.regulating_control_mrid = self._create_column("regulating_control_mrid", "TEXT", Nullable.NULL)
 
 
 # noinspection PyAbstractClass
@@ -206,6 +208,30 @@ class TablePowerElectronicsConnection(TableRegulatingCondEq):
     q: Column = None
     rated_s: Column = None
     rated_u: Column = None
+    inverter_standard: Column = None
+    sustain_op_overvolt_limit: Column = None
+    stop_at_over_freq: Column = None
+    stop_at_under_freq: Column = None
+    inv_volt_watt_resp_mode: Column = None
+    inv_watt_resp_v1: Column = None
+    inv_watt_resp_v2: Column = None
+    inv_watt_resp_v3: Column = None
+    inv_watt_resp_v4: Column = None
+    inv_watt_resp_p_at_v1: Column = None
+    inv_watt_resp_p_at_v2: Column = None
+    inv_watt_resp_p_at_v3: Column = None
+    inv_watt_resp_p_at_v4: Column = None
+    inv_volt_var_resp_mode: Column = None
+    inv_var_resp_v1: Column = None
+    inv_var_resp_v2: Column = None
+    inv_var_resp_v3: Column = None
+    inv_var_resp_v4: Column = None
+    inv_var_resp_q_at_v1: Column = None
+    inv_var_resp_q_at_v2: Column = None
+    inv_var_resp_q_at_v3: Column = None
+    inv_var_resp_q_at_v4: Column = None
+    inv_reactive_power_mode: Column = None
+    inv_fix_reactive_power: Column = None
 
     def __init__(self):
         super(TablePowerElectronicsConnection, self).__init__()
@@ -216,6 +242,30 @@ class TablePowerElectronicsConnection(TableRegulatingCondEq):
         self.q = self._create_column("q", "NUMBER", Nullable.NULL)
         self.rated_s = self._create_column("rated_s", "INTEGER", Nullable.NULL)
         self.rated_u = self._create_column("rated_u", "INTEGER", Nullable.NULL)
+        self.inverter_standard = self._create_column("inverter_standard", "TEXT", Nullable.NULL)
+        self.sustain_op_overvolt_limit = self._create_column("sustain_op_overvolt_limit", "INTEGER", Nullable.NULL)
+        self.stop_at_over_freq = self._create_column("stop_at_over_freq", "NUMBER", Nullable.NULL)
+        self.stop_at_under_freq = self._create_column("stop_at_under_freq", "NUMBER", Nullable.NULL)
+        self.inv_volt_watt_resp_mode = self._create_column("inv_volt_watt_resp_mode", "BOOLEAN", Nullable.NULL)
+        self.inv_watt_resp_v1 = self._create_column("inv_watt_resp_v1", "INTEGER", Nullable.NULL)
+        self.inv_watt_resp_v2 = self._create_column("inv_watt_resp_v2", "INTEGER", Nullable.NULL)
+        self.inv_watt_resp_v3 = self._create_column("inv_watt_resp_v3", "INTEGER", Nullable.NULL)
+        self.inv_watt_resp_v4 = self._create_column("inv_watt_resp_v4", "INTEGER", Nullable.NULL)
+        self.inv_watt_resp_p_at_v1 = self._create_column("inv_watt_resp_p_at_v1", "NUMBER", Nullable.NULL)
+        self.inv_watt_resp_p_at_v2 = self._create_column("inv_watt_resp_p_at_v2", "NUMBER", Nullable.NULL)
+        self.inv_watt_resp_p_at_v3 = self._create_column("inv_watt_resp_p_at_v3", "NUMBER", Nullable.NULL)
+        self.inv_watt_resp_p_at_v4 = self._create_column("inv_watt_resp_p_at_v4", "NUMBER", Nullable.NULL)
+        self.inv_volt_var_resp_mode = self._create_column("inv_volt_var_resp_mode", "BOOLEAN", Nullable.NULL)
+        self.inv_var_resp_v1 = self._create_column("inv_var_resp_v1", "INTEGER", Nullable.NULL)
+        self.inv_var_resp_v2 = self._create_column("inv_var_resp_v2", "INTEGER", Nullable.NULL)
+        self.inv_var_resp_v3 = self._create_column("inv_var_resp_v3", "INTEGER", Nullable.NULL)
+        self.inv_var_resp_v4 = self._create_column("inv_var_resp_v4", "INTEGER", Nullable.NULL)
+        self.inv_var_resp_q_at_v1 = self._create_column("inv_var_resp_q_at_v1", "NUMBER", Nullable.NULL)
+        self.inv_var_resp_q_at_v2 = self._create_column("inv_var_resp_q_at_v2", "NUMBER", Nullable.NULL)
+        self.inv_var_resp_q_at_v3 = self._create_column("inv_var_resp_q_at_v3", "NUMBER", Nullable.NULL)
+        self.inv_var_resp_q_at_v4 = self._create_column("inv_var_resp_q_at_v4", "NUMBER", Nullable.NULL)
+        self.inv_reactive_power_mode = self._create_column("inv_reactive_power_mode", "BOOLEAN", Nullable.NULL)
+        self.inv_fix_reactive_power = self._create_column("inv_fix_reactive_power", "NUMBER", Nullable.NULL)
 
     def name(self) -> str:
         return "power_electronics_connection"
@@ -241,3 +291,55 @@ class TablePowerElectronicsConnectionPhases(TablePowerSystemResources):
         cols = super(TablePowerElectronicsConnectionPhases, self).non_unique_index_columns()
         cols.append([self.power_electronics_connection_mrid])
         return cols
+
+
+# noinspection PyAbstractClass
+class TableRegulatingControls(TablePowerSystemResources):
+    discrete: Column = None
+    mode: Column = None
+    monitored_phase: Column = None
+    target_deadband: Column = None
+    target_value: Column = None
+    enabled: Column = None
+    max_allowed_target_value: Column = None
+    min_allowed_target_value: Column = None
+    terminal_mrid: Column = None
+
+    def __init__(self):
+        super(TableRegulatingControls, self).__init__()
+        self.discrete = self._create_column("discrete", "BOOLEAN", Nullable.NULL)
+        self.mode = self._create_column("mode", "TEXT", Nullable.NOT_NULL)
+        self.monitored_phase = self._create_column("monitored_phase", "TEXT", Nullable.NOT_NULL)
+        self.target_deadband = self._create_column("target_deadband", "NUMBER", Nullable.NULL)
+        self.target_value = self._create_column("target_value", "NUMBER", Nullable.NULL)
+        self.enabled = self._create_column("enabled", "BOOLEAN", Nullable.NULL)
+        self.max_allowed_target_value = self._create_column("max_allowed_target_value", "NUMBER", Nullable.NULL)
+        self.min_allowed_target_value = self._create_column("min_allowed_target_value", "NUMBER", Nullable.NULL)
+        self.terminal_mrid = self._create_column("terminal_mrid", "TEXT", Nullable.NULL)
+
+
+class TableTapChangerControls(TableRegulatingControls):
+    limit_voltage: Column = None
+    line_drop_compensation: Column = None
+    line_drop_r: Column = None
+    line_drop_x: Column = None
+    reverse_line_drop_r: Column = None
+    reverse_line_drop_x: Column = None
+    forward_ldc_blocking: Column = None
+    time_delay: Column = None
+    co_generation_enabled: Column = None
+
+    def __init__(self):
+        super(TableTapChangerControls, self).__init__()
+        self.limit_voltage = self._create_column("limit_voltage", "INTEGER", Nullable.NULL)
+        self.line_drop_compensation = self._create_column("line_drop_compensation", "BOOLEAN", Nullable.NULL)
+        self.line_drop_r = self._create_column("line_drop_r", "NUMBER", Nullable.NULL)
+        self.line_drop_x = self._create_column("line_drop_x", "NUMBER", Nullable.NULL)
+        self.reverse_line_drop_r = self._create_column("reverse_line_drop_r", "NUMBER", Nullable.NULL)
+        self.reverse_line_drop_x = self._create_column("reverse_line_drop_x", "NUMBER", Nullable.NULL)
+        self.forward_ldc_blocking = self._create_column("forward_ldc_blocking", "BOOLEAN", Nullable.NULL)
+        self.time_delay = self._create_column("time_delay", "NUMBER", Nullable.NULL)
+        self.co_generation_enabled = self._create_column("co_generation_enabled", "BOOLEAN", Nullable.NULL)
+
+    def name(self) -> str:
+        return "tap_changer_controls"

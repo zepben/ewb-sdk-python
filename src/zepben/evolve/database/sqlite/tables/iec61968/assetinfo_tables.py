@@ -154,11 +154,11 @@ class TableTransformerEndInfo(TableAssetInfo):
         self.rated_u = self._create_column("rated_u", "INTEGER", Nullable.NULL)
         self.short_term_s = self._create_column("short_term_s", "INTEGER", Nullable.NULL)
         self.transformer_tank_info_mrid = self._create_column("transformer_tank_info_mrid", "TEXT", Nullable.NULL)
-        self.energised_end_no_load_tests = self._create_column("energised_end_no_load_tests", "TEST", Nullable.NULL)
-        self.energised_end_short_circuit_tests = self._create_column("energised_end_short_circuit_tests", "TEST", Nullable.NULL)
-        self.grounded_end_short_circuit_tests = self._create_column("grounded_end_short_circuit_tests", "TEST", Nullable.NULL)
-        self.open_end_open_circuit_tests = self._create_column("open_end_open_circuit_tests", "TEST", Nullable.NULL)
-        self.energised_end_open_circuit_tests = self._create_column("energised_end_open_circuit_tests", "TEST", Nullable.NULL)
+        self.energised_end_no_load_tests = self._create_column("energised_end_no_load_tests", "TEXT", Nullable.NULL)
+        self.energised_end_short_circuit_tests = self._create_column("energised_end_short_circuit_tests", "TEXT", Nullable.NULL)
+        self.grounded_end_short_circuit_tests = self._create_column("grounded_end_short_circuit_tests", "TEXT", Nullable.NULL)
+        self.open_end_open_circuit_tests = self._create_column("open_end_open_circuit_tests", "TEXT", Nullable.NULL)
+        self.energised_end_open_circuit_tests = self._create_column("energised_end_open_circuit_tests", "TEXT", Nullable.NULL)
 
     def name(self) -> str:
         return "transformer_end_info"

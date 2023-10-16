@@ -10,6 +10,7 @@ from typing import Callable, Optional
 
 from dataclassy import dataclass
 
+
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
@@ -56,16 +57,19 @@ from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment impor
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
+from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import PowerElectronicsUnit
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnectionPhase, PowerElectronicsConnection
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd, TapChanger
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import ShuntCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
@@ -88,7 +92,7 @@ __all__ = [
     "pec_to_peu_resolver", "pecphase_to_pec_resolver", "pec_to_pecphase_resolver", "tei_to_ee_nlt_resolver", "tei_to_ee_sct_resolver", "tei_to_ge_sct_resolver",
     "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver", "shunt_compensator_to_shunt_compensator_info_resolver", "lvfeeder_to_nht_resolver",
     "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "pe_to_ps_resolver", "ps_to_pe_resolver", "switch_to_switch_info_resolver",
-    "current_relay_to_current_relay_info_resolver"
+    "current_relay_to_current_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver"
 ]
 
 
@@ -312,3 +316,10 @@ vt_to_vti_resolver = ReferenceResolver(PotentialTransformer, PotentialTransforme
 
 pe_to_ps_resolver = ReferenceResolver(ProtectionEquipment, ProtectedSwitch, lambda t, r: t.add_protected_switch(r))
 ps_to_pe_resolver = ReferenceResolver(ProtectedSwitch, ProtectionEquipment, lambda t, r: t.add_operated_by_protection_equipment(r))
+
+rce_to_rc_resolver = ReferenceResolver(RegulatingCondEq, RegulatingControl, lambda t, r: setattr(t, 'regulating_control', r))
+rc_to_rce_resolver = ReferenceResolver(RegulatingControl, RegulatingCondEq, lambda t, r: t.add_regulating_cond_eq(r))
+
+rc_to_term_resolver = ReferenceResolver(RegulatingControl, Terminal, lambda t, r: setattr(t, 'terminal', r))
+
+tc_to_tcc_resolver = ReferenceResolver(TapChanger, TapChangerControl, lambda t, r: setattr(t, 'tap_changer_control', r))

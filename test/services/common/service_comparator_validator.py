@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from types import MemberDescriptorType
-from typing import Optional, Any, Callable, TypeVar, Union, Type
+from typing import Optional, Any, Callable, TypeVar, Union, Type, Set
 
 from zepben.evolve import IdentifiedObject, ObjectDifference, BaseService, CollectionDifference, Difference, ReferenceDifference, ValueDifference, \
     IndexedDifference
@@ -70,12 +70,16 @@ class ServiceComparatorValidator(object):
         target: Any,
         expect_modification: Optional[ObjectDifference] = None,
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
-        options_stop_compare: bool = False
+        options_stop_compare: bool = False,
+        expected_differences: Set[str] = None
     ):
         if not expect_modification:
             expect_modification = ObjectDifference(source, target)
 
         diff = self.create_comparator(NetworkServiceComparatorOptions()).compare_objects(source, target)
+        if expected_differences:
+            diff.differences = {k: v for (k, v) in diff.differences.items() if k not in expected_differences}
+
         assert diff == expect_modification, f"Actual:\n{diff}\n    vs\nExpected:\n{expect_modification}"
 
         if options_stop_compare:
@@ -89,7 +93,8 @@ class ServiceComparatorValidator(object):
         create_value: Callable[[TIdentifiedObject], R],
         create_other_value: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
-        options_stop_compare: bool = False
+        options_stop_compare: bool = False,
+        expected_differences: Set[str] = None
     ):
         subject = creator("mRID")
         matching = creator("mRID")
@@ -105,7 +110,7 @@ class ServiceComparatorValidator(object):
             _prop_name(prop): self._get_value_or_reference_difference(_get_prop(subject, prop), _get_prop(modified, prop))
         })
 
-        self._validate_expected(diff, options, options_stop_compare)
+        self._validate_expected(diff, options, options_stop_compare, expected_differences)
 
     def validate_val_property(
         self,
@@ -114,7 +119,8 @@ class ServiceComparatorValidator(object):
         change_state: Callable[[TIdentifiedObject, R], None],
         other_change_state: Callable[[TIdentifiedObject, R], None],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
-        options_stop_compare: bool = False
+        options_stop_compare: bool = False,
+        expected_differences: Set[str] = None
     ):
         subject = creator("mRID")
         matching = creator("mRID")
@@ -129,7 +135,7 @@ class ServiceComparatorValidator(object):
         diff = ObjectDifference(subject, modified, {
             _prop_name(prop): self._get_value_or_reference_difference(_get_prop(subject, prop), _get_prop(modified, prop))
         })
-        self._validate_expected(diff, options, options_stop_compare)
+        self._validate_expected(diff, options, options_stop_compare, expected_differences)
 
     def validate_collection(
         self,
@@ -139,7 +145,8 @@ class ServiceComparatorValidator(object):
         create_item: Callable[[TIdentifiedObject], R],
         create_other_item: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
-        options_stop_compare: bool = False
+        options_stop_compare: bool = False,
+        expected_differences: Set[str] = None
     ):
         source_empty = creator("mRID")
         target_empty = creator("mRID")
@@ -157,12 +164,12 @@ class ServiceComparatorValidator(object):
         diff = ObjectDifference(in_source, target_empty, {
             _prop_name(prop): CollectionDifference(missing_from_target=[next(_get_prop(in_source, prop))])
         })
-        self._validate_expected(diff, options, options_stop_compare)
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
         diff = ObjectDifference(source_empty, in_target, {
             _prop_name(prop): CollectionDifference(missing_from_source=[next(_get_prop(in_target, prop))])
         })
-        self._validate_expected(diff, options, options_stop_compare)
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
         diff = ObjectDifference(in_source, in_target_difference, {
             _prop_name(prop): CollectionDifference(
@@ -170,7 +177,7 @@ class ServiceComparatorValidator(object):
                 missing_from_target=[next(_get_prop(in_source, prop))]
             )
         })
-        self._validate_expected(diff, options, options_stop_compare)
+        self._validate_expected(diff, options, options_stop_compare, expected_differences)
 
     def validate_indexed_collection(
         self,
@@ -180,7 +187,8 @@ class ServiceComparatorValidator(object):
         create_item: Callable[[TIdentifiedObject], R],
         create_other_item: Callable[[TIdentifiedObject], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
-        options_stop_compare: bool = False
+        options_stop_compare: bool = False,
+        expected_differences: Set[str] = None
     ):
         source_empty = creator("mRID")
         target_empty = creator("mRID")
@@ -203,21 +211,21 @@ class ServiceComparatorValidator(object):
                 IndexedDifference(0, self._get_value_or_reference_difference(get_item(in_source), None))
             ])
         })
-        self._validate_expected(diff, options, options_stop_compare)
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
         diff = ObjectDifference(source_empty, in_target, {
             _prop_name(prop): CollectionDifference(missing_from_source=[
                 IndexedDifference(0, self._get_value_or_reference_difference(None, get_item(in_target)))
             ])
         })
-        self._validate_expected(diff, options, options_stop_compare)
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
         diff = ObjectDifference(in_source, target_different, {
             _prop_name(prop): CollectionDifference(modifications=[
                 IndexedDifference(0, self._get_value_or_reference_difference(get_item(in_source), get_item(target_different)))
             ])
         })
-        self._validate_expected(diff, options, options_stop_compare)
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
     @staticmethod
     def _get_value_or_reference_difference(source: Optional[R], target: Optional[R]) -> Difference:
@@ -226,8 +234,8 @@ class ServiceComparatorValidator(object):
         else:
             return ValueDifference(source, target)
 
-    def _validate_expected(self, diff: ObjectDifference, options: NetworkServiceComparatorOptions, options_stop_compare: bool = False):
-        self.validate_compare(diff.source, diff.target, expect_modification=diff, options=options, options_stop_compare=options_stop_compare)
+    def _validate_expected(self, diff: ObjectDifference, options: NetworkServiceComparatorOptions, options_stop_compare: bool = False, expected_differences: Set[str] = None):
+        self.validate_compare(diff.source, diff.target, expect_modification=diff, options=options, options_stop_compare=options_stop_compare, expected_differences=expected_differences)
 
 
 def _prop_name(prop: Property) -> str:
