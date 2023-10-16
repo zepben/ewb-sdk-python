@@ -15,6 +15,7 @@ from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
     GetCurrentEquipmentForFeederRequest, GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, \
     IncludedEnergizedContainers
+from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
 from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, OverheadWireInfo, AssetOwner, \
     Organisation, Location, Meter, UsagePoint, OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, GeographicalRegion, Site, \
@@ -24,7 +25,7 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, CurrentRelayInfo, SwitchInfo, \
-    CurrentTransformerInfo, EvChargingUnit, RegulatingControl, TapChangerControl
+    CurrentTransformerInfo, EvChargingUnit, TapChangerControl, DataSource
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -202,6 +203,25 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_network_hierarchy()
 
+    @dataclass(slots=True)
+    class MetaData(object):
+        """Container for `NetworkService` metadata"""
+        title: str
+        version: str
+        data_sources: Dict[str, DataSource]
+
+
+    async def get_metadata(self) -> GrpcResult[MetaData]:
+        """
+        Retrieve metadata related to this `NetworkService`
+
+        Parameters
+            - `service` - The :class:`NetworkService` to store fetched objects in.
+
+        Returns application metadata.
+        """
+        return await self._get_metadata()
+
     async def get_equipment_container(
         self,
         mrid: str,
@@ -310,6 +330,10 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             # noinspection PyArgumentList
             return GrpcResult(self.__network_hierarchy)
         return await self.try_rpc(lambda: self._handle_network_hierarchy())
+
+    async def _get_metadata(self) -> GrpcResult[MetaData]:
+        response = await self.try_rpc(lambda: self._stub.getMetadata(GetMetadataRequest(), timeout=self.timeout))
+        return response
 
     async def _get_equipment_container(
         self,
@@ -627,6 +651,9 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
 
     def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         return get_event_loop().run_until_complete(super().retrieve_network())
+
+    def get_metadata(self) -> GrpcResult[super().MetaData]:
+        return get_event_loop().run_until_complete(super().get_metadata())
 
 
 _nio_type_to_cim = {
