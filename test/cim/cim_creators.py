@@ -1271,7 +1271,8 @@ def create_tap_changer(include_runtime: bool):
         "neutral_step": integers(min_value=2, max_value=10),
         "neutral_u": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
         "normal_step": integers(min_value=2, max_value=10),
-        "control_enabled": booleans()
+        "control_enabled": booleans(),
+        "tap_changer_control": builds(TapChangerControl, **create_identified_object(include_runtime))
     }
 
 
