@@ -35,7 +35,7 @@ class CurrentRelayInfo(AssetInfo):
 
     def num_delays(self) -> int:
         """
-        Get the numder of `Delays` for this `CurrentRelayInfo`
+        Get the numder of reclose delays for this `CurrentRelayInfo`
         """
         return nlen(self._reclose_delays)
 
@@ -62,11 +62,21 @@ class CurrentRelayInfo(AssetInfo):
         self._reclose_delays.insert(index, delay)
         return self
 
+    def set_delays(self, delays: List[float]) -> CurrentRelayInfo:
+        """
+        Set the reclose delays for this CurrentRelayInfo
+
+        `delays` The delays to set. The provided list will be copied.
+        Returns A reference to this `CurrentRelayInfo` to allow fluent use.
+        """
+        self._reclose_delays = delays.copy()
+        return self
+
     def remove_delay_by_delay(self, delay: float) -> CurrentRelayInfo:
         """
         Remove a delay from the list.
-        `index` The index of the delay to remove.
-        Returns The delay that was removed, or `None` if no delay was present at `index`.
+        `delay` The delay to remove.
+        Returns A reference to this `CurrentRelayInfo` to allow fluent use.
         """
         self._reclose_delays = safe_remove(self._reclose_delays, delay)
         return self
@@ -82,7 +92,12 @@ class CurrentRelayInfo(AssetInfo):
                 return self._reclose_delays.pop(index)
             except IndexError:
                 return None
+        return None
 
     def clear_delays(self) -> CurrentRelayInfo:
+        """
+        Clear all reclose delays.
+        Returns A reference to this `CurrentRelayInfo` to allow fluent use.
+        """
         self._reclose_delays = None
         return self

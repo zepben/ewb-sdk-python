@@ -44,21 +44,6 @@ def organisation_roles(asset: Asset) -> BoundReferenceResolver:
     return BoundReferenceResolver(asset, asset_to_asset_org_role_resolver, None)
 
 
-def rc_regulating_cond_eq(regulating_control: RegulatingControl) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(regulating_control, rc_to_rce_resolver, rec_to_rc_resolver)
-
-
-def rce_regulating_control(regulating_cond_eq: RegulatingCondEq) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(regulating_cond_eq, rec_to_rc_resolver, rc_to_rce_resolver)
-
-
-def tc_tap_changer_control(tap_changer: TapChanger) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(tap_changer, tc_to_tcc_resolver, None)
-
-
 def at_location(asset: Asset) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(asset, asset_to_location_resolver, None)
@@ -334,11 +319,6 @@ def te_terminal(te: TransformerEnd) -> BoundReferenceResolver:
     return BoundReferenceResolver(te, te_to_term_resolver, None)
 
 
-def rc_terminal(rc: RegulatingControl) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(rc, rc_to_term_resolver, None)
-
-
 def end_devices(usage_point: UsagePoint) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(usage_point, up_to_ed_resolver, ed_to_up_resolver)
@@ -487,3 +467,22 @@ def protected_switches(protection_equipment: ProtectionEquipment) -> BoundRefere
 def operated_by_protection_equipment(protected_switch: ProtectedSwitch) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(protected_switch, ps_to_pe_resolver, pe_to_ps_resolver)
+
+def rc_regulating_cond_eq(regulating_control: RegulatingControl) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(regulating_control, rc_to_rce_resolver, rce_to_rc_resolver)
+
+
+def rce_regulating_control(regulating_cond_eq: RegulatingCondEq) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(regulating_cond_eq, rce_to_rc_resolver, rc_to_rce_resolver)
+
+
+def tc_tap_changer_control(tap_changer: TapChanger) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(tap_changer, tc_to_tcc_resolver, None)
+
+
+def rc_terminal(rc: RegulatingControl) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(rc, rc_to_term_resolver, None)

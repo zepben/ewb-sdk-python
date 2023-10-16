@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Optional, List, Generator, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from zepben.evolve import PowerTransformerInfo
+    from zepben.evolve import PowerTransformerInfo, ResistanceReactance
 
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
@@ -91,3 +91,17 @@ class TransformerTankInfo(AssetInfo):
         """
         self._transformer_end_infos = None
         return self
+
+    def resistance_reactance(self, end_number: int) -> Optional[ResistanceReactance]:
+        """
+        Get the `ResistanceReactance` for the specified `end_number` from the datasheet information.
+        `end_number` The number of the end to fetch the ResistanceReactance for.
+        Returns a `ResistanceReactance` for the specified end, or None if one couldn't be calculated.
+        """
+        for tei in self.transformer_end_infos:
+            if tei.end_number == end_number:
+                rr = tei.resistance_reactance()
+                if rr is not None:
+                    return rr
+        else:
+            return None

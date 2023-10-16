@@ -4,4 +4,5 @@ __all__ = ["EvChargingUnit"]
 
 
 class EvChargingUnit(PowerElectronicsUnit):
+    """An electric vehicle charging station."""
     pass

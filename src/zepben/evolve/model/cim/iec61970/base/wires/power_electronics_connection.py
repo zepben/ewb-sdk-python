@@ -79,7 +79,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
     inv_volt_watt_resp_mode: Optional[bool] = None
     """
-    Volt-Watt response mode allows an inverter to reduce is real power output depending on the measured voltage. \
+    Volt-Watt response mode allows an inverter to reduce is real power output depending on the measured voltage.
     This mode is further described in AS4777.2:2015, section 6.3.2.2. True implies the mode is enabled.
     """
 
@@ -109,7 +109,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
     inv_volt_var_resp_mode: Optional[bool] = None
     """
-    Volt-VAr response mode allows an inverter to consume (sink) or produce (source) reactive power depending on the measured voltage. \
+    Volt-VAr response mode allows an inverter to consume (sink) or produce (source) reactive power depending on the measured voltage.
     This mode is further described in AS4777.2:2015, section 6.3.2.3. True implies the mode is enabled.
     """
 
@@ -130,19 +130,19 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
     _inv_var_resp_q_at_v2: Optional[float] = None
     """
-    Power output set point 2 as a percentage of rated output for inverter Volt-VAr response mode. \
+    Power output set point 2 as a percentage of rated output for inverter Volt-VAr response mode.
     Permitted range is between -1 and 1 (inclusive) with a negative number referring to a sink.
     """
 
     _inv_var_resp_q_at_v3: Optional[float] = None
     """
-    Power output set point 3 as a percentage of rated output for inverter Volt-VAr response mode. \
+    Power output set point 3 as a percentage of rated output for inverter Volt-VAr response mode.
     Permitted range is between -1 and 1 (inclusive) with a negative number referring to a sink.
     """
 
     _inv_var_resp_q_at_v4: Optional[float] = None
     """
-    Power output set point 4 as a percentage of rated output for inverter Volt-VAr response mode. \
+    Power output set point 4 as a percentage of rated output for inverter Volt-VAr response mode.
     Permitted range is between -0.6 and 0 (inclusive) with a negative number referring to a sink.
     """
 
@@ -151,7 +151,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
     inv_fix_reactive_power: Optional[float] = None
     """
-    Static Reactive Power, specified in a percentage output of the system. \
+    Static Reactive Power, specified in a percentage output of the system.
     Permitted range is between -1.0 and 1.0 (inclusive), with a negative sign referring to “sink”.
     """
 
@@ -201,16 +201,16 @@ class PowerElectronicsConnection(RegulatingCondEq):
         if inv_watt_resp_v4:
             self.inv_watt_resp_v4 = inv_watt_resp_v4
 
-        if inv_watt_resp_p_at_v1 is not None:
+        if inv_watt_resp_p_at_v1:
             self.inv_watt_resp_p_at_v1 = inv_watt_resp_p_at_v1
 
-        if inv_watt_resp_p_at_v2 is not None:
+        if inv_watt_resp_p_at_v2:
             self.inv_watt_resp_p_at_v2 = inv_watt_resp_p_at_v2
 
-        if inv_watt_resp_p_at_v3 is not None:
+        if inv_watt_resp_p_at_v3:
             self.inv_watt_resp_p_at_v3 = inv_watt_resp_p_at_v3
 
-        if inv_watt_resp_p_at_v4 is not None:
+        if inv_watt_resp_p_at_v4:
             self.inv_watt_resp_p_at_v4 = inv_watt_resp_p_at_v4
 
         if inv_var_resp_v1:
@@ -225,16 +225,16 @@ class PowerElectronicsConnection(RegulatingCondEq):
         if inv_var_resp_v4:
             self.inv_var_resp_v4 = inv_var_resp_v4
 
-        if inv_var_resp_q_at_v1 is not None:
+        if inv_var_resp_q_at_v1:
             self.inv_var_resp_q_at_v1 = inv_var_resp_q_at_v1
 
-        if inv_var_resp_q_at_v2 is not None:
+        if inv_var_resp_q_at_v2:
             self.inv_var_resp_q_at_v2 = inv_var_resp_q_at_v2
 
-        if inv_var_resp_q_at_v3 is not None:
+        if inv_var_resp_q_at_v3:
             self.inv_var_resp_q_at_v3 = inv_var_resp_q_at_v3
 
-        if inv_var_resp_q_at_v4 is not None:
+        if inv_var_resp_q_at_v4:
             self.inv_var_resp_q_at_v4 = inv_var_resp_q_at_v4
 
     @property
@@ -429,7 +429,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
 
     @inv_var_resp_q_at_v4.setter
     def inv_var_resp_q_at_v4(self, value):
-        require(value is None or -1.0 <= value <= 1.0, lambda: f"inv_var_resp_q_at_v4 [{value}] must be between -1.0 and 1.0.")
+        require(value is None or -0.6 <= value <= 0.0, lambda: f"inv_var_resp_q_at_v4 [{value}] must be between -0.6 and 0.0.")
         self._inv_var_resp_q_at_v4 = value
 
     @property

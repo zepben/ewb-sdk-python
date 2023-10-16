@@ -22,9 +22,9 @@ __all__ = ["RegulatingControl"]
 
 class RegulatingControl(PowerSystemResource):
     """
-    Specifies a set of equipment that works together to control a power system quantity such as voltage or flow. Remote bus voltage control is possible by \
-    specifying the controlled terminal located at some place remote from the controlling equipment. The specified terminal shall be associated with the \
-    connectivity node of the controlled point. The most specific subtype of RegulatingControl shall be used in case such equipment participate in the \
+    Specifies a set of equipment that works together to control a power system quantity such as voltage or flow. Remote bus voltage control is possible by
+    specifying the controlled terminal located at some place remote from the controlling equipment. The specified terminal shall be associated with the
+    connectivity node of the controlled point. The most specific subtype of RegulatingControl shall be used in case such equipment participate in the
     control, e.g. TapChangerControl for tap changers.
 
     For flow control, load sign convention is used, i.e. positive sign means flow out from a TopologicalNode (bus) into the conducting equipment.
@@ -34,7 +34,7 @@ class RegulatingControl(PowerSystemResource):
     regulator. For instance, due to long cables to off shore wind farms and the  need to have a simpler setup at the off shore transformer platform,
     the voltage is controlled from the land at the connection point for the off shore wind farm.
 
-    Since there usually is a voltage rise along the cable, there is typically an overvoltage of up 3-4 kV compared to the on shore station. Thus in normal \
+    Since there usually is a voltage rise along the cable, there is typically an overvoltage of up 3-4 kV compared to the on shore station. Thus in normal
     operation the tap changer on the on shore station is operated with a target set point, which is in the lower parts of the dead band.
 
     The attributes minAllowedTargetValue and maxAllowedTargetValue are not related to the attribute targetDeadband and thus they are not treated as an
@@ -49,7 +49,7 @@ class RegulatingControl(PowerSystemResource):
 
     mode: [RegulatingControlModeKind] = RegulatingControlModeKind.UNKNOWN_CONTROL_MODE
     """
-    The regulating control mode presently available. This specification allows for determining the kind of regulation without need for obtaining the \
+    The regulating control mode presently available. This specification allows for determining the kind of regulation without need for obtaining the 
     units from a schedule.
     """
 
@@ -58,15 +58,15 @@ class RegulatingControl(PowerSystemResource):
 
     target_deadband: Optional[float] = None
     """
-    This is a deadband used with discrete control to avoid excessive update of controls like tap changers and shunt compensator banks while regulating. \
-    The units are the base units appropriate for the mode. The attribute shall be a positive value or zero. If RegulatingControl.discrete is set to "false", \
-    the RegulatingControl.target_deadband is to be ignored. Note that for instance, if the targetValue is 100 kV and the targetDeadband is 2 kV the range is \
+    This is a deadband used with discrete control to avoid excessive update of controls like tap changers and shunt compensator banks while regulating. 
+    The units are the base units appropriate for the mode. The attribute shall be a positive value or zero. If RegulatingControl.discrete is set to "false",
+    the RegulatingControl.target_deadband is to be ignored. Note that for instance, if the targetValue is 100 kV and the targetDeadband is 2 kV the range is 
     from 99 to 101 kV.
     """
 
     target_value: Optional[float] = None
     """
-    The target value specified for case input. This value can be used for the target value without the use of schedules. The value has the units appropriate \
+    The target value specified for case input. This value can be used for the target value without the use of schedules. The value has the units appropriate 
     to the mode attribute.
     """
 
@@ -81,7 +81,7 @@ class RegulatingControl(PowerSystemResource):
 
     terminal: Optional[Terminal] = None
     """
-    The terminal associated with this regulating control. The terminal is associated instead of a node, since the terminal could connect into either a \
+    The terminal associated with this regulating control. The terminal is associated instead of a node, since the terminal could connect into either a 
     topological node or a connectivity node. Sometimes it is useful to model regulation at a terminal of a bus bar object.
     """
 
@@ -127,7 +127,7 @@ class RegulatingControl(PowerSystemResource):
         :param regulating_cond_eq: The RegulatingCondEq to associate with this RegulatingControl.
         :return: A reference to this RegulatingControl for fluent use.
         """
-        if self._validate_reference(regulating_cond_eq, self. get_regulating_cond_eq, "A RegulatingCondEq"):
+        if self._validate_reference(regulating_cond_eq, self.get_regulating_cond_eq, "A RegulatingCondEq"):
             return self
 
         self._regulating_cond_eq = list() if self._regulating_cond_eq is None else self._regulating_cond_eq

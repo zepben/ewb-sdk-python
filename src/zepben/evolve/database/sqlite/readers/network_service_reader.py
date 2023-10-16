@@ -42,8 +42,8 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableSwitchInfo, "switch info", reader.load_switch_info)
         status = status and self._load_each(TableTransformerEndInfo, "transformer end info", reader.load_transformer_end_info)
         status = status and self._load_each(TableCurrentTransformerInfo, "current transformer info", reader.load_current_transformer_info)
-        status = status and self._load_each(TableCurrentRelayInfo, "current relay info", reader.load_current_relay_info)
         status = status and self._load_each(TablePotentialTransformerInfo, "potential transformer info", reader.load_potential_transformer_info)
+        status = status and self._load_each(TableCurrentRelayInfo, "current relay info", reader.load_current_relay_info)
         status = status and self._load_each(TableRecloseDelays, "reclose delays", reader.load_reclose_delays)
         status = status and self._load_each(TableLocations, "locations", reader.load_location)
         status = status and self._load_each(TableOrganisations, "organisations", reader.load_organisation)
@@ -80,15 +80,11 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TablePowerElectronicsConnection, "power electronics connection", reader.load_power_electronics_connection)
         status = status and self._load_each(TableTerminals, "terminals", reader.load_terminal)
         status = status and self._load_each(TableTapChangerControls, "tap changer controls", reader.load_tap_changer_control)
-        status = status and self._load_each(
-            TablePowerElectronicsConnectionPhases,
-            "power electronics connection phases",
-            reader.load_power_electronics_connection_phase
-        )
+        status = status and self._load_each(TablePowerElectronicsConnectionPhases, "power electronics connection phases", reader.load_power_electronics_connection_phase)
         status = status and self._load_each(TableBatteryUnit, "battery unit", reader.load_battery_unit)
         status = status and self._load_each(TablePhotoVoltaicUnit, "photo voltaic unit", reader.load_photo_voltaic_unit)
         status = status and self._load_each(TablePowerElectronicsWindUnit, "power electronics wind unit", reader.load_power_electronics_wind_unit)
-        status = status and self._load_each(TableEvChargingUnits, "Ev charging units", reader.load_ev_charging_unit)
+        status = status and self._load_each(TableEvChargingUnits, "ev charging units", reader.load_ev_charging_unit)
         status = status and self._load_each(TableTransformerStarImpedance, "transformer star impedance", reader.load_transformer_star_impedance)
         status = status and self._load_each(TablePowerTransformerEnds, "power transformer ends", reader.load_power_transformer_end)
         status = status and self._load_each(TablePowerTransformerEndRatings, "power transformer end ratings", reader.load_power_transformer_end_ratings)

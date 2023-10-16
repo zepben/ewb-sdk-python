@@ -11,6 +11,7 @@ from typing import List, Optional, Generator
 
 from dataclassy import dataclass, Internal
 
+from zepben.evolve import ResistanceReactance
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
@@ -41,6 +42,7 @@ class TapChanger(PowerSystemResource):
     """Voltage at which the winding operates at the neutral tap setting."""
 
     tap_changer_control: Optional[TapChangerControl] = None
+    """The regulating control scheme in which this tap changer participates."""
 
     _high_step: Optional[int] = None
     _low_step: Optional[int] = None
@@ -273,7 +275,7 @@ class PowerTransformerEnd(TransformerEnd):
     secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the 
     clock as 11. The clock value of the transformer end number specified as 1, is assumed to be zero."""
 
-    _s_ratings: List[TransformerEndRatedS] = None
+    _s_ratings: Optional[List[TransformerEndRatedS]] = None
     """
     Backing list for storing transformer ratings. Placed here to not mess with __init__ param order. Must always be placed at the end.
     Should not be used directly, instead use add_rating and get_rating functions. 
@@ -320,11 +322,6 @@ class PowerTransformerEnd(TransformerEnd):
         Normal apparent power rating. The attribute shall be a positive value. For a two-winding transformer the values for the high and low voltage sides
         shall be identical.
         """
-        warnings.warn(
-            "`rated_s` has been replaced by `s_ratings` and is only for backward compatibility. Setting `rated_s`, will clear any other ratings.",
-            DeprecationWarning,
-            stacklevel=2  # not sure this one actually has to be returned to the user, gets picked up by the ide regardless
-        )
         if self._s_ratings:
             return self._s_ratings[0].rated_s if len(self._s_ratings) > 0 else None
         return None
@@ -342,9 +339,6 @@ class PowerTransformerEnd(TransformerEnd):
 
     @property
     def s_ratings(self) -> Generator[TransformerEndRatedS, None, None]:
-        # wonder how expensive adding this is
-        if self._s_ratings:
-            self._s_ratings.sort(key=lambda t: t.rated_s, reverse=True)
         return ngen(self._s_ratings)
 
     def num_ratings(self) -> int:
@@ -401,6 +395,25 @@ class PowerTransformerEnd(TransformerEnd):
     def clear_ratings(self) -> PowerTransformerEnd:
         self._s_ratings = None
         return self
+
+    # noinspection PyUnusedLocal
+    # pylint: disable=unused-argument
+    def resistance_reactance(self):
+        """
+        Get the `ResistanceReactance` for this `PowerTransformerEnd` from either:
+        1. directly assigned values or
+        2. the pre-calculated `starImpedance` or
+        3. from the datasheet information of the associated `powerTransformer`
+
+        If the data is not complete in any of the above it will merge in the missing values from the subsequent sources.
+        :return:
+        """
+        ResistanceReactance(self.r, self.x, self.r0, self.x0).merge_if_incomplete(
+            lambda: self.star_impedance.resistance_reactance() if self.star_impedance is not None else None
+        ).merge_if_incomplete(
+            lambda: self.power_transformer.asset_info.resistance_reactance(self.end_number) if self.power_transformer.asset_info is not None else None
+        )
+    # pylint: enable=unused-argument
 
 
 class PowerTransformer(ConductingEquipment):

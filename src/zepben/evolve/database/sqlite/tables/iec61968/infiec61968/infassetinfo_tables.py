@@ -21,7 +21,7 @@ class TableRecloseDelays(SqliteTable):
         super(TableRecloseDelays, self).__init__()
         self.current_relay_info_mrid = self._create_column("current_relay_info_mrid", "TEXT", Nullable.NOT_NULL)
         self.reclose_delay = self._create_column("reclose_delay", "NUMBER", Nullable.NOT_NULL)
-        self.sequence_number = self._create_column("sequence_number", "TEXT", Nullable.NOT_NULL)
+        self.sequence_number = self._create_column("sequence_number", "INTEGER", Nullable.NOT_NULL)
 
     def name(self) -> str:
         return "reclose_delays"

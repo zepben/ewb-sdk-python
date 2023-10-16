@@ -92,7 +92,7 @@ __all__ = [
     "pec_to_peu_resolver", "pecphase_to_pec_resolver", "pec_to_pecphase_resolver", "tei_to_ee_nlt_resolver", "tei_to_ee_sct_resolver", "tei_to_ge_sct_resolver",
     "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver", "shunt_compensator_to_shunt_compensator_info_resolver", "lvfeeder_to_nht_resolver",
     "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "pe_to_ps_resolver", "ps_to_pe_resolver", "switch_to_switch_info_resolver",
-    "current_relay_to_current_relay_info_resolver", "rc_to_rce_resolver", "rec_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver"
+    "current_relay_to_current_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver"
 ]
 
 
@@ -317,9 +317,9 @@ vt_to_vti_resolver = ReferenceResolver(PotentialTransformer, PotentialTransforme
 pe_to_ps_resolver = ReferenceResolver(ProtectionEquipment, ProtectedSwitch, lambda t, r: t.add_protected_switch(r))
 ps_to_pe_resolver = ReferenceResolver(ProtectedSwitch, ProtectionEquipment, lambda t, r: t.add_operated_by_protection_equipment(r))
 
+rce_to_rc_resolver = ReferenceResolver(RegulatingCondEq, RegulatingControl, lambda t, r: setattr(t, 'regulating_control', r))
 rc_to_rce_resolver = ReferenceResolver(RegulatingControl, RegulatingCondEq, lambda t, r: t.add_regulating_cond_eq(r))
-rec_to_rc_resolver = ReferenceResolver(RegulatingCondEq, RegulatingControl, lambda t, r: setattr(t, 'regulating_control', r))
 
 rc_to_term_resolver = ReferenceResolver(RegulatingControl, Terminal, lambda t, r: setattr(t, 'terminal', r))
 
-tc_to_tcc_resolver = ReferenceResolver(TapChanger, TapChangerControl, lambda t, r: setattr(t, 'TapChangerControl', r))
+tc_to_tcc_resolver = ReferenceResolver(TapChanger, TapChangerControl, lambda t, r: setattr(t, 'tap_changer_control', r))

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Generator
 
+from zepben.evolve import ResistanceReactance
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove
@@ -85,3 +86,16 @@ class PowerTransformerInfo(AssetInfo):
         """
         self._transformer_tank_infos = None
         return self
+
+    def resistance_reactance(self, end_number: int) -> Optional[ResistanceReactance]:
+        """
+        Get the `ResistanceReactance` for the specified `end_number` from the datasheet information.
+        `end_number` The number of the end to fetch the ResistanceReactance for.
+        Returns a `ResistanceReactance` for the specified end, or None if one couldn't be calculated.
+        """
+        for tti in self.transformer_tank_infos:
+            rr = tti.resistance_reactance(end_number)
+            if rr is not None:
+                return rr
+        else:
+            return None

@@ -38,13 +38,13 @@ class RegulatingCondEq(EnergyConnection):
     @property
     def regulating_control(self):
         """
-        RegulatingControl associated with this RegulatingCondEq TODO: words
+        The `RegulatingControl` associated with this `RegulatingCondEq`
         """
         return self._regulating_control
 
     @regulating_control.setter
     def regulating_control(self, rc):
-        if self._regulating_control is None or rc == self._regulating_control:
+        if self._regulating_control is None or rc is self._regulating_control:
             self._regulating_control = rc
         else:
-            raise ValueError(f"regulating_control for {str(self)} has already been set to {self._regulating_control}, cannot reset this field to {rc}")
+            raise ValueError(f"regulating_control for {str(self)} has already been set to {self._regulating_control}, cannot set this field again")
