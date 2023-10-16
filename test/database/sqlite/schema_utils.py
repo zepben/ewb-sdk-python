@@ -492,6 +492,7 @@ class SchemaNetworks:
         if isinstance(filled, RatioTapChanger):
             filled.transformer_end.ratio_tap_changer = filled
             service.add(filled.transformer_end)
+            service.add(filled.tap_changer_control)
 
         if isinstance(filled, ShuntCompensator):
             service.add(filled.asset_info)
