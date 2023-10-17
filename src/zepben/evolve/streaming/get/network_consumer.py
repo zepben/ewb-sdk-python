@@ -11,6 +11,7 @@ from itertools import chain
 from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable
 
 from dataclassy import dataclass
+
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
     GetCurrentEquipmentForFeederRequest, GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, \
@@ -26,6 +27,7 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, CurrentRelayInfo, SwitchInfo, \
     CurrentTransformerInfo, EvChargingUnit, TapChangerControl, DataSource
+from zepben.evolve.streaming.get.metadata import MetaData
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -203,14 +205,6 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_network_hierarchy()
 
-    @dataclass(slots=True)
-    class MetaData(object):
-        """Container for `NetworkService` metadata"""
-        title: str
-        version: str
-        data_sources: Dict[str, DataSource]
-
-
     async def get_metadata(self) -> GrpcResult[MetaData]:
         """
         Retrieve metadata related to this `NetworkService`
@@ -221,6 +215,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         Returns application metadata.
         """
         return await self._get_metadata()
+
+    async def _run_getMetadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
+        return await self._stub.getMetadata(request, timeout=self.timeout)
 
     async def get_equipment_container(
         self,
@@ -331,9 +328,6 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             return GrpcResult(self.__network_hierarchy)
         return await self.try_rpc(lambda: self._handle_network_hierarchy())
 
-    async def _get_metadata(self) -> GrpcResult[MetaData]:
-        response = await self.try_rpc(lambda: self._stub.getMetadata(GetMetadataRequest(), timeout=self.timeout))
-        return response
 
     async def _get_equipment_container(
         self,
@@ -652,7 +646,7 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
     def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         return get_event_loop().run_until_complete(super().retrieve_network())
 
-    def get_metadata(self) -> GrpcResult[super().MetaData]:
+    def get_metadata(self) -> GrpcResult[MetaData]:
         return get_event_loop().run_until_complete(super().get_metadata())
 
 

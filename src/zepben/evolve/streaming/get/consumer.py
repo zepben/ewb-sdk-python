@@ -13,6 +13,13 @@ from abc import abstractmethod
 from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, Optional, AsyncGenerator, Type, Generator
 
 from dataclassy import dataclass
+from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
+from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
+
+from zepben.evolve.services.common.meta.data_source import DataSource
+from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
+
+from zepben.evolve.streaming.get.metadata import MetaData
 
 from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException
 from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
@@ -176,3 +183,23 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
 
         if request.mrids:
             yield request
+
+    @abstractmethod
+    async def _run_getMetadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
+        raise NotImplementedError()
+
+    async def _handle_metadata(self):
+        response: GetMetadataResponse = await self._run_getMetadata(GetMetadataRequest())
+
+        data_sources = {}
+        for pb in response.dataSources:
+            data_sources[pb.source] = DataSource(
+                source=pb.source,
+                version=pb.version,
+                timestamp=pb.timestamp.ToDatetime() if pb.timestamp != PBTimestamp() else None
+            )
+
+        return MetaData(response.title, response.version, data_sources)
+
+    async def _get_metadata(self) -> GrpcResult[MetaData]:
+        return await self.try_rpc(lambda: self._handle_metadata())
