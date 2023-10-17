@@ -14,11 +14,12 @@ from zepben.protobuf.cc import cc_pb2
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
 from zepben.protobuf.cc.cc_responses_pb2 import GetIdentifiedObjectsResponse, GetCustomersForContainerResponse
 
+from streaming.get.data.metadata import create_metadata, _create_metadata_response
 from streaming.get.pb_creators import customer_identified_objects, customer
 from zepben.evolve import CustomerConsumerClient, BaseService, IdentifiedObject, Customer
 
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
-from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed
+from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed, UnaryGrpc, unary_from_fixed
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')
@@ -139,6 +140,16 @@ class TestCustomerConsumer:
 
         response = GetCustomersForContainerResponse(identifiedObjects=[CustomerIdentifiedObject(customer=c)])
         await self.mock_server.validate(client_test, [StreamGrpc('getCustomersForContainer', stream_from_fixed([mrid], [response]))])
+
+    @pytest.mark.asyncio
+    async def test_get_metadata(self):
+        expected_metadata = create_metadata()
+        async def client_test():
+            metadata = (await self.client.get_metadata()).throw_on_error().value
+            assert metadata == expected_metadata
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, _create_metadata_response(expected_metadata)))])
+
 
 
 def _assert_contains_mrids(service: BaseService, *mrids):

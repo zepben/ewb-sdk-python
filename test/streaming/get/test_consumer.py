@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import pytest
+from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
 from zepben.evolve import CimConsumerClient
 
@@ -21,3 +22,6 @@ async def test_abstract_coverage():
 
     with pytest.raises(NotImplementedError):
         (await client.get_identified_objects(["id"])).throw_on_error()
+
+    with pytest.raises(NotImplementedError):
+        (await client.get_metadata()).throw_on_error()

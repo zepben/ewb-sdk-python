@@ -19,7 +19,7 @@ from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.evolve.services.common.meta.data_source import DataSource
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
-from zepben.evolve.streaming.get.metadata import MetaData
+from zepben.evolve.streaming.get.metadata import Metadata
 
 from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException
 from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
@@ -199,7 +199,18 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
                 timestamp=pb.timestamp.ToDatetime() if pb.timestamp != PBTimestamp() else None
             )
 
-        return MetaData(response.title, response.version, data_sources)
+        return Metadata(response.title, response.version, data_sources)
 
-    async def _get_metadata(self) -> GrpcResult[MetaData]:
+    async def _get_metadata(self) -> GrpcResult[Metadata]:
         return await self.try_rpc(lambda: self._handle_metadata())
+
+    async def get_metadata(self) -> GrpcResult[Metadata]:
+        """
+        Retrieve metadata related to this `Service`
+
+        Parameters
+            - `service` - The :class:`CustomerService` to store fetched objects in.
+
+        Returns application metadata.
+        """
+        return await self._get_metadata()

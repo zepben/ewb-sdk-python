@@ -11,6 +11,7 @@ from itertools import chain
 from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable
 
 from dataclassy import dataclass
+from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
@@ -27,7 +28,7 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, CurrentRelayInfo, SwitchInfo, \
     CurrentTransformerInfo, EvChargingUnit, TapChangerControl, DataSource
-from zepben.evolve.streaming.get.metadata import MetaData
+
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -204,17 +205,6 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         Returns a simplified version of the network hierarchy that can be used to make further in-depth requests.
         """
         return await self._get_network_hierarchy()
-
-    async def get_metadata(self) -> GrpcResult[MetaData]:
-        """
-        Retrieve metadata related to this `NetworkService`
-
-        Parameters
-            - `service` - The :class:`NetworkService` to store fetched objects in.
-
-        Returns application metadata.
-        """
-        return await self._get_metadata()
 
     async def _run_getMetadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
         return await self._stub.getMetadata(request, timeout=self.timeout)
@@ -646,7 +636,7 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
     def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         return get_event_loop().run_until_complete(super().retrieve_network())
 
-    def get_metadata(self) -> GrpcResult[MetaData]:
+    def get_metadata(self) -> GrpcResult[Metadata]:
         return get_event_loop().run_until_complete(super().get_metadata())
 
 

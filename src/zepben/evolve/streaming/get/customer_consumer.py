@@ -11,7 +11,7 @@ from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, TY
 
 from zepben.evolve.services.common.meta.data_source import DataSource
 
-from zepben.evolve.streaming.get.metadata import MetaData
+from zepben.evolve.streaming.get.metadata import Metadata
 
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
@@ -62,17 +62,6 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
     async def get_customers_for_containers(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return await self._get_customers_for_containers(mrids)
 
-    async def get_metadata(self) -> GrpcResult[MetaData]:
-        """
-        Retrieve metadata related to this `CustomerService`
-
-        Parameters
-            - `service` - The :class:`CustomerService` to store fetched objects in.
-
-        Returns application metadata.
-        """
-        return await self._get_metadata()
-
     async def _run_getMetadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
         return await self._stub.getMetadata(request, timeout=self.timeout)
 
@@ -115,7 +104,7 @@ class SyncCustomerConsumerClient(CustomerConsumerClient):
     def get_customers_for_containers(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_customers_for_containers(mrids))
 
-    def get_metadata(self) -> GrpcResult[MetaData]:
+    def get_metadata(self) -> GrpcResult[Metadata]:
         return get_event_loop().run_until_complete(super().get_metadata())
 
 

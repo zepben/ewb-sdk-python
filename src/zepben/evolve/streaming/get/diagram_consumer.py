@@ -16,7 +16,7 @@ from zepben.evolve import DataSource
 
 from zepben.evolve import DiagramService, IdentifiedObject, Diagram, DiagramObject
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
-from zepben.evolve.streaming.get.metadata import MetaData
+from zepben.evolve.streaming.get.metadata import Metadata
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
 from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest, GetDiagramObjectsRequest
@@ -57,17 +57,6 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
 
     async def get_diagram_objects(self, mrids: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
         return await self._get_diagram_objects(mrids)
-
-    async def get_metadata(self) -> GrpcResult[MetaData]:
-        """
-        Retrieve metadata related to this `DiagramService`
-
-        Parameters
-            - `service` - The :class:`DiagramService` to store fetched objects in.
-
-        Returns application metadata.
-        """
-        return await self._get_metadata()
 
     async def _run_getMetadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
         return await self._stub.getMetadata(request, timeout=self.timeout)
@@ -111,7 +100,7 @@ class SyncDiagramConsumerClient(DiagramConsumerClient):
     def get_diagram_objects(self, mrid: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_diagram_objects(mrid))
 
-    def get_metadata(self) -> GrpcResult[MetaData]:
+    def get_metadata(self) -> GrpcResult[Metadata]:
         return get_event_loop().run_until_complete(super().get_metadata())
 
 
