@@ -144,8 +144,8 @@ class TableNames(SqliteTable):
     def non_unique_index_columns(self) -> List[List[Column]]:
         cols = super(TableNames, self).non_unique_index_columns()
         cols.append([self.identified_object_mrid])
-        cols.append([self.name_type_name])
         cols.append([self.name_])
+        cols.append([self.name_type_name])
         return cols
 
 

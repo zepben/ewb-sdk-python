@@ -13,16 +13,16 @@ __all__ = ["TableSwitches", "TableProtectedSwitches", "TableFuses", "TableLoadBr
 
 # noinspection PyAbstractClass
 class TableSwitches(TableConductingEquipment):
-    rated_current: Column = None
     normal_open: Column = None
     open: Column = None
+    rated_current: Column = None
     switch_info_mrid: Column = None
 
     def __init__(self):
         super(TableSwitches, self).__init__()
-        self.rated_current = self._create_column("rated_current", "INTEGER", Nullable.NULL)
         self.normal_open = self._create_column("normal_open", "INTEGER", Nullable.NOT_NULL)
         self.open = self._create_column("open", "INTEGER", Nullable.NOT_NULL)
+        self.rated_current = self._create_column("rated_current", "INTEGER", Nullable.NULL)
         self.switch_info_mrid = self._create_column("switch_info_mrid", "TEXT", Nullable.NULL)
 
 

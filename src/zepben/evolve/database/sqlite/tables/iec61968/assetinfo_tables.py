@@ -39,7 +39,7 @@ class TableNoLoadTests(TableTransformerTest):
         self.energised_end_voltage = self._create_column("energised_end_voltage", "INTEGER", Nullable.NULL)
         self.exciting_current = self._create_column("exciting_current", "NUMBER", Nullable.NULL)
         self.exciting_current_zero = self._create_column("exciting_current_zero", "NUMBER", Nullable.NULL)
-        self.loss = self._create_column("loss", "NUMBER", Nullable.NULL)
+        self.loss = self._create_column("loss", "INTEGER", Nullable.NULL)
         self.loss_zero = self._create_column("loss_zero", "INTEGER", Nullable.NULL)
 
 
@@ -166,6 +166,11 @@ class TableTransformerEndInfo(TableAssetInfo):
     def non_unique_index_columns(self) -> List[List[Column]]:
         cols = super(TableTransformerEndInfo, self).non_unique_index_columns()
         cols.append([self.transformer_tank_info_mrid])
+        cols.append([self.energised_end_no_load_tests])
+        cols.append([self.energised_end_short_circuit_tests])
+        cols.append([self.grounded_end_short_circuit_tests])
+        cols.append([self.open_end_open_circuit_tests])
+        cols.append([self.energised_end_open_circuit_tests])
         return cols
 
 
