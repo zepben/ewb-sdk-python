@@ -7,13 +7,10 @@
 from __future__ import annotations
 
 from asyncio import get_event_loop
-from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, TYPE_CHECKING
+from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
 
-from zepben.evolve.services.common.meta.data_source import DataSource
+from zepben.evolve.services.common.meta.service_info import service_info
 
-from zepben.evolve.streaming.get.metadata import Metadata
-
-from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
 from zepben.evolve import CustomerService, IdentifiedObject, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff
@@ -62,7 +59,7 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
     async def get_customers_for_containers(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return await self._get_customers_for_containers(mrids)
 
-    async def _run_getMetadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
+    async def _run_get_metadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
         return await self._stub.getMetadata(request, timeout=self.timeout)
 
     async def _get_customers_for_containers(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
@@ -104,7 +101,7 @@ class SyncCustomerConsumerClient(CustomerConsumerClient):
     def get_customers_for_containers(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_customers_for_containers(mrids))
 
-    def get_metadata(self) -> GrpcResult[Metadata]:
+    def get_metadata(self) -> GrpcResult[service_info]:
         return get_event_loop().run_until_complete(super().get_metadata())
 
 

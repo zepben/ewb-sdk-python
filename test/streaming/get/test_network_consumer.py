@@ -23,7 +23,7 @@ from streaming.get.data.metadata import create_metadata, _create_metadata_respon
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
     Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
-    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder, TestNetworkBuilder, Metadata
+    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder, TestNetworkBuilder, service_info
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetCurrentEquipmentForFeederRequest, \
@@ -138,9 +138,21 @@ class TestNetworkConsumer:
     @pytest.mark.asyncio
     async def test_get_metadata(self):
         expected_metadata = create_metadata()
+
         async def client_test():
             metadata = (await self.client.get_metadata()).throw_on_error().value
             assert metadata == expected_metadata
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, _create_metadata_response(expected_metadata)))])
+
+    @pytest.mark.asyncio
+    async def test_get_metadata_is_cached(self):
+        expected_metadata = create_metadata()
+
+        async def client_test():
+            metadata1 = (await self.client.get_metadata()).throw_on_error().value
+            metadata2 = (await self.client.get_metadata()).throw_on_error().value
+            assert metadata1 is metadata2
 
         await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, _create_metadata_response(expected_metadata)))])
 
@@ -259,7 +271,7 @@ class TestNetworkConsumer:
             assert self.service.len_of() == 16
             assert len(mor.objects) == 16
             assert len({"lvf5", "tx0", "c1", "b2", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "b2-t1",
-                "b2-t2", "lvf6", "generated_cn_0", "generated_cn_1", "generated_cn_2"}.difference(mor.objects.keys())) == 0
+                        "b2-t2", "lvf6", "generated_cn_0", "generated_cn_1", "generated_cn_2"}.difference(mor.objects.keys())) == 0
             assert "tx4" not in mor.objects
             with pytest.raises(KeyError):
                 self.service.get("tx4")

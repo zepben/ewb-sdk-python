@@ -186,7 +186,7 @@ from zepben.evolve.streaming.get.consumer import *
 from zepben.evolve.streaming.get.customer_consumer import *
 from zepben.evolve.streaming.get.diagram_consumer import *
 from zepben.evolve.streaming.get.network_consumer import *
-from zepben.evolve.streaming.get.metadata import *
+from zepben.evolve.services.common.meta.service_info import *
 from zepben.evolve.streaming.grpc.auth_token_plugin import *
 from zepben.evolve.streaming.grpc.grpc import *
 from zepben.evolve.streaming.grpc.grpc_channel_builder import *

@@ -6,44 +6,39 @@
 import datetime
 
 import zepben.protobuf.metadata.metadata_data_pb2
+from zepben.evolve.services.common.meta.metadata_translations import data_source_to_pb
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
-from zepben.evolve import Metadata, DataSource
+from zepben.evolve import service_info, DataSource
 
 
-def create_metadata() -> Metadata:
-    return Metadata(
+def create_metadata() -> service_info:
+    # noinspection PyArgumentList
+    return service_info(
         "title",
         "version",
-        {
-            "source one": DataSource(
+        [
+            DataSource(
                 "source one",
                 "source version one",
                 datetime.datetime.now()
             ),
-            "source two": DataSource(
+            DataSource(
                 "source two",
                 "source version two",
                 datetime.datetime.now()
             )
-        }
+        ]
     )
 
 
-def _create_metadata_response(expected_metadata: Metadata) -> GetMetadataResponse:
+def _create_metadata_response(expected_metadata: service_info) -> GetMetadataResponse:
     return GetMetadataResponse(
         title=expected_metadata.title,
         version=expected_metadata.version,
-        dataSources=[data_source_to_pb(it) for it in expected_metadata.data_sources.values()]
+        dataSources=[data_source_to_pb(it) for it in expected_metadata.data_sources]
     )
 
 
-def data_source_to_pb(data_source: DataSource) -> zepben.protobuf.metadata.metadata_data_pb2.DataSource:
-    ts = PBTimestamp()
-    ts.FromDatetime(data_source.timestamp)
-    return zepben.protobuf.metadata.metadata_data_pb2.DataSource(
-        source=data_source.source,
-        version=data_source.version,
-        timestamp=ts
-    )
+

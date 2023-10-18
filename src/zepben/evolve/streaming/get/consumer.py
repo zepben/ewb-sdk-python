@@ -19,7 +19,8 @@ from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.evolve.services.common.meta.data_source import DataSource
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
-from zepben.evolve.streaming.get.metadata import Metadata
+from zepben.evolve.services.common.meta.metadata_translations import data_source_from_pb, service_info_from_pb
+from zepben.evolve.services.common.meta.service_info import service_info
 
 from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException
 from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
@@ -51,6 +52,12 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
     Parameters
         T: The base service to send objects from.
     """
+
+    __service_info: Optional[service_info]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.__service_info = None
 
     @property
     @abstractmethod
@@ -185,32 +192,24 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
             yield request
 
     @abstractmethod
-    async def _run_getMetadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
+    async def _run_get_metadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
         raise NotImplementedError()
 
     async def _handle_metadata(self):
-        response: GetMetadataResponse = await self._run_getMetadata(GetMetadataRequest())
+        response: GetMetadataResponse = await self._run_get_metadata(GetMetadataRequest())
+        self.__service_info = service_info_from_pb(response)
+        return self.__service_info
 
-        data_sources = {}
-        for pb in response.dataSources:
-            data_sources[pb.source] = DataSource(
-                source=pb.source,
-                version=pb.version,
-                timestamp=pb.timestamp.ToDatetime() if pb.timestamp != PBTimestamp() else None
-            )
-
-        return Metadata(response.title, response.version, data_sources)
-
-    async def _get_metadata(self) -> GrpcResult[Metadata]:
+    async def _get_metadata(self) -> GrpcResult[service_info]:
+        if self.__service_info:
+            # noinspection PyArgumentList
+            return GrpcResult(self.__service_info)
         return await self.try_rpc(lambda: self._handle_metadata())
 
-    async def get_metadata(self) -> GrpcResult[Metadata]:
+    async def get_metadata(self) -> GrpcResult[service_info]:
         """
         Retrieve metadata related to this `Service`
 
-        Parameters
-            - `service` - The :class:`CustomerService` to store fetched objects in.
-
-        Returns application metadata.
+        Returns service metadata.
         """
         return await self._get_metadata()

@@ -27,8 +27,8 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, CurrentRelayInfo, SwitchInfo, \
-    CurrentTransformerInfo, EvChargingUnit, TapChangerControl, DataSource
-
+    CurrentTransformerInfo, EvChargingUnit, TapChangerControl
+from zepben.evolve.services.common.meta.service_info import service_info
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -206,7 +206,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_network_hierarchy()
 
-    async def _run_getMetadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
+    async def _run_get_metadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
         return await self._stub.getMetadata(request, timeout=self.timeout)
 
     async def get_equipment_container(
@@ -636,7 +636,7 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
     def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         return get_event_loop().run_until_complete(super().retrieve_network())
 
-    def get_metadata(self) -> GrpcResult[Metadata]:
+    def get_metadata(self) -> GrpcResult[service_info]:
         return get_event_loop().run_until_complete(super().get_metadata())
 
 

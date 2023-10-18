@@ -144,12 +144,12 @@ class TestCustomerConsumer:
     @pytest.mark.asyncio
     async def test_get_metadata(self):
         expected_metadata = create_metadata()
+
         async def client_test():
             metadata = (await self.client.get_metadata()).throw_on_error().value
             assert metadata == expected_metadata
 
         await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, _create_metadata_response(expected_metadata)))])
-
 
 
 def _assert_contains_mrids(service: BaseService, *mrids):

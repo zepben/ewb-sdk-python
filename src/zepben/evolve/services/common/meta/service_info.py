@@ -5,16 +5,17 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 from dataclassy import dataclass
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from zepben.evolve import DataSource
 
-__all__ = ["Metadata"]
+__all__ = ["service_info"]
 
 
 @dataclass(slots=True)
-class Metadata(object):
-    """Container for `NetworkService` metadata"""
+class service_info(object):
+    """Container for `Service` metadata"""
     title: str
     version: str
-    data_sources: Dict[str, DataSource]  # y u no list?
+    data_sources: List[DataSource]
+
