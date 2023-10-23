@@ -164,6 +164,7 @@ from zepben.evolve.services.network.tracing import tracing
 
 from zepben.evolve.services.common.meta.data_source import *
 from zepben.evolve.services.common.meta.metadata_collection import *
+from zepben.evolve.services.common.meta.service_info import *
 from zepben.evolve.services.common.translator.base_proto2cim import *
 from zepben.evolve.services.common.base_service import *
 from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, ReferenceResolver, UnresolvedReference
@@ -186,7 +187,6 @@ from zepben.evolve.streaming.get.consumer import *
 from zepben.evolve.streaming.get.customer_consumer import *
 from zepben.evolve.streaming.get.diagram_consumer import *
 from zepben.evolve.streaming.get.network_consumer import *
-from zepben.evolve.services.common.meta.service_info import *
 from zepben.evolve.streaming.grpc.auth_token_plugin import *
 from zepben.evolve.streaming.grpc.grpc import *
 from zepben.evolve.streaming.grpc.grpc_channel_builder import *

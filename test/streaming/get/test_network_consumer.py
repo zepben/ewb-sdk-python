@@ -42,7 +42,6 @@ PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')
 
 
-@pytest.mark.timeout(2342333)
 class TestNetworkConsumer:
 
     @pytest.fixture(autouse=True)

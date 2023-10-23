@@ -40,6 +40,7 @@
     * PowerDirectionKind
     * RegulatingControlModeKind
     * TransformerCoolingType
+* Added support for `getMetadata()` gRPC calls on `CustomerConsumerClient`, `DiagramConsumerClient`, and `NetworkConsumerClient`.
 
 ### Enhancements
 * Update docusaurus and its configuration.
