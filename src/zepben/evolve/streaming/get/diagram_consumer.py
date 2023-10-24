@@ -8,15 +8,13 @@ from __future__ import annotations
 from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, Union
 
-from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
-
-from zepben.evolve import DiagramService, IdentifiedObject, Diagram, DiagramObject
+from zepben.evolve import DiagramService, IdentifiedObject, Diagram, DiagramObject, service_info
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
-from zepben.evolve.services.common.meta.service_info import service_info
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
 from zepben.protobuf.dc.dc_requests_pb2 import GetIdentifiedObjectsRequest, GetDiagramObjectsRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
+from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
 __all__ = ["DiagramConsumerClient", "SyncDiagramConsumerClient"]
 

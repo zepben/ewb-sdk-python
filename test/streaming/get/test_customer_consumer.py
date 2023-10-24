@@ -14,7 +14,7 @@ from zepben.protobuf.cc import cc_pb2
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject
 from zepben.protobuf.cc.cc_responses_pb2 import GetIdentifiedObjectsResponse, GetCustomersForContainerResponse
 
-from streaming.get.data.metadata import create_metadata, _create_metadata_response
+from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.pb_creators import customer_identified_objects, customer
 from zepben.evolve import CustomerConsumerClient, BaseService, IdentifiedObject, Customer
 
@@ -149,8 +149,18 @@ class TestCustomerConsumer:
             metadata = (await self.client.get_metadata()).throw_on_error().value
             assert metadata == expected_metadata
 
-        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, _create_metadata_response(expected_metadata)))])
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, create_metadata_response(expected_metadata)))])
 
+    @pytest.mark.asyncio
+    async def test_get_metadata_is_cached(self):
+        expected_metadata = create_metadata()
+
+        async def client_test():
+            metadata1 = (await self.client.get_metadata()).throw_on_error().value
+            metadata2 = (await self.client.get_metadata()).throw_on_error().value
+            assert metadata1 is metadata2
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, create_metadata_response(expected_metadata)))])
 
 def _assert_contains_mrids(service: BaseService, *mrids):
     for mrid in mrids:

@@ -13,17 +13,12 @@ import pytest
 # noinspection PyPackageRequirements
 from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
-from zepben.protobuf.metadata.metadata_data_pb2 import DataSource
-from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
-from zepben.protobuf.metadata.metadata_data_pb2 import DataSource as PBDataSource
-from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
-import zepben.evolve
-from streaming.get.data.metadata import create_metadata, _create_metadata_response
+from streaming.get.data.metadata import create_metadata, create_metadata_response
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
     Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
-    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder, TestNetworkBuilder, service_info
+    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder, TestNetworkBuilder
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetCurrentEquipmentForFeederRequest, \
@@ -33,7 +28,7 @@ from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, Ge
 
 from time import sleep
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
-from streaming.get.pb_creators import network_identified_objects, ac_line_segment, timestamp
+from streaming.get.pb_creators import network_identified_objects, ac_line_segment
 from streaming.get.data.hierarchy import create_hierarchy_network
 from streaming.get.data.loops import create_loops_network
 from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
@@ -142,7 +137,7 @@ class TestNetworkConsumer:
             metadata = (await self.client.get_metadata()).throw_on_error().value
             assert metadata == expected_metadata
 
-        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, _create_metadata_response(expected_metadata)))])
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, create_metadata_response(expected_metadata)))])
 
     @pytest.mark.asyncio
     async def test_get_metadata_is_cached(self):
@@ -153,7 +148,7 @@ class TestNetworkConsumer:
             metadata2 = (await self.client.get_metadata()).throw_on_error().value
             assert metadata1 is metadata2
 
-        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, _create_metadata_response(expected_metadata)))])
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, create_metadata_response(expected_metadata)))])
 
     @pytest.mark.asyncio
     async def test_get_network_hierarchy(self):

@@ -5,10 +5,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import datetime
 
-import zepben.protobuf.metadata.metadata_data_pb2
 from zepben.evolve.services.common.meta.metadata_translations import data_source_to_pb
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
-from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
 from zepben.evolve import service_info, DataSource
 
@@ -33,7 +31,7 @@ def create_metadata() -> service_info:
     )
 
 
-def _create_metadata_response(expected_metadata: service_info) -> GetMetadataResponse:
+def create_metadata_response(expected_metadata: service_info) -> GetMetadataResponse:
     return GetMetadataResponse(
         title=expected_metadata.title,
         version=expected_metadata.version,

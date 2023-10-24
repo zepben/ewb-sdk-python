@@ -13,13 +13,10 @@ from abc import abstractmethod
 from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, Optional, AsyncGenerator, Type, Generator
 
 from dataclassy import dataclass
-from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
-
-from zepben.evolve.services.common.meta.data_source import DataSource
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
-from zepben.evolve.services.common.meta.metadata_translations import data_source_from_pb, service_info_from_pb
+from zepben.evolve.services.common.meta.metadata_translations import service_info_from_pb
 from zepben.evolve.services.common.meta.service_info import service_info
 
 from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException

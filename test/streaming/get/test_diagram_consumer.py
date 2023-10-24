@@ -14,7 +14,7 @@ from zepben.protobuf.dc import dc_pb2
 from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
 from zepben.protobuf.dc.dc_responses_pb2 import GetIdentifiedObjectsResponse, GetDiagramObjectsResponse
 
-from streaming.get.data.metadata import create_metadata, _create_metadata_response
+from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.pb_creators import diagram_identified_objects, diagram, diagram_object
 from zepben.evolve import DiagramConsumerClient, BaseService, IdentifiedObject, DiagramObject, Diagram
 
@@ -143,11 +143,23 @@ class TestDiagramConsumer:
     @pytest.mark.asyncio
     async def test_get_metadata(self):
         expected_metadata = create_metadata()
+
         async def client_test():
             metadata = (await self.client.get_metadata()).throw_on_error().value
             assert metadata == expected_metadata
 
-        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, _create_metadata_response(expected_metadata)))])
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, create_metadata_response(expected_metadata)))])
+
+    @pytest.mark.asyncio
+    async def test_get_metadata_is_cached(self):
+        expected_metadata = create_metadata()
+
+        async def client_test():
+            metadata1 = (await self.client.get_metadata()).throw_on_error().value
+            metadata2 = (await self.client.get_metadata()).throw_on_error().value
+            assert metadata1 is metadata2
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, create_metadata_response(expected_metadata)))])
 
 
 def _assert_contains_mrids(service: BaseService, *mrids):
@@ -168,4 +180,3 @@ def _to_diagram_identified_object(obj) -> DiagramIdentifiedObject:
     else:
         raise Exception(f"Missing class in create response - you should implement it: {str(obj)}")
     return dio
-
