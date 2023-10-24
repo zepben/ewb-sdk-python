@@ -1357,7 +1357,6 @@ def power_transformer_to_cim(pb: PBPowerTransformer, network_service: NetworkSer
 def power_transformer_end_to_cim(pb: PBPowerTransformerEnd, network_service: NetworkService) -> Optional[PowerTransformerEnd]:
     cim = PowerTransformerEnd(
         mrid=pb.mrid(),
-        rated_s=int_or_none(pb.ratedS),
         rated_u=int_or_none(pb.ratedU),
         r=float_or_none(pb.r),
         r0=float_or_none(pb.r0),
