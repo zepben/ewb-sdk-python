@@ -194,7 +194,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
 
     async def _handle_metadata(self):
         response: GetMetadataResponse = await self._run_get_metadata(GetMetadataRequest())
-        self.__service_info = service_info_from_pb(response)
+        self.__service_info = service_info_from_pb(response.serviceInfo)
         return self.__service_info
 
     async def _get_metadata(self) -> GrpcResult[service_info]:

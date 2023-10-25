@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.evolve.services.common.meta.service_info import service_info
-from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse as PBGetMetadataResponse, GetMetadataResponse
+from zepben.protobuf.metadata.metadata_data_pb2 import ServiceInfo as PBServiceInfo
 
 from zepben.evolve import DataSource
 
@@ -31,15 +31,15 @@ def data_source_from_pb(pb: PBDataSource) -> DataSource:
     )
 
 
-def service_info_to_pb(si: service_info) -> GetMetadataResponse:
-    return GetMetadataResponse(
+def service_info_to_pb(si: service_info) -> PBServiceInfo:
+    return PBServiceInfo(
         title=si.title,
         version=si.version,
         dataSources=[data_source_to_pb(it) for it in si.data_sources]
     )
 
 
-def service_info_from_pb(pb: PBGetMetadataResponse) -> service_info:
+def service_info_from_pb(pb: PBServiceInfo) -> service_info:
     data_sources = list()
     for ds in pb.dataSources:
         # noinspection PyArgumentList

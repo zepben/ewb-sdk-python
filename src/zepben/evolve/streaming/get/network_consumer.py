@@ -317,7 +317,6 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             return GrpcResult(self.__network_hierarchy)
         return await self.try_rpc(lambda: self._handle_network_hierarchy())
 
-
     async def _get_equipment_container(
         self,
         mrid: str,
