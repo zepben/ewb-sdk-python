@@ -55,7 +55,7 @@ module.exports = {
           position: "right",
         },
         {
-          href: "https://github.com/zepben/python-sdk/",
+          href: "https://github.com/zepben/evolve-sdk-python",
           position: 'right',
           className: 'header-github-link',
           'aria-label': 'GitHub repository',
