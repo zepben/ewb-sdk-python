@@ -5,7 +5,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import pytest
-from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
 from zepben.evolve import CimConsumerClient
 

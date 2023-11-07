@@ -3,13 +3,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.evolve.services.common.meta.service_info import service_info
-from zepben.protobuf.metadata.metadata_data_pb2 import ServiceInfo as PBServiceInfo
-
-from zepben.evolve import DataSource
-
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.metadata.metadata_data_pb2 import DataSource as PBDataSource
+from zepben.protobuf.metadata.metadata_data_pb2 import ServiceInfo as PBServiceInfo
+
+from zepben.evolve import DataSource, service_info
 
 
 def data_source_to_pb(ds: DataSource) -> PBDataSource:

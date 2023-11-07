@@ -9,16 +9,13 @@ from __future__ import annotations
 from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
 
-from zepben.evolve.services.common.meta.service_info import service_info
-
-from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
-
-from zepben.evolve import CustomerService, IdentifiedObject, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff
+from zepben.evolve import CustomerService, IdentifiedObject, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff, service_info
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
 from zepben.protobuf.cc.cc_requests_pb2 import GetIdentifiedObjectsRequest, GetCustomersForContainerRequest
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
+from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 
 __all__ = ["CustomerConsumerClient", "SyncCustomerConsumerClient"]
 

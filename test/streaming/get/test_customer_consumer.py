@@ -162,6 +162,7 @@ class TestCustomerConsumer:
 
         await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, create_metadata_response(expected_metadata)))])
 
+
 def _assert_contains_mrids(service: BaseService, *mrids):
     for mrid in mrids:
         assert service.get(mrid)

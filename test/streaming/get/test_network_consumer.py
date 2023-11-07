@@ -3,8 +3,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import datetime
-import warnings
 from typing import Dict, Iterable, TypeVar, Generator, Callable, Optional
 from unittest.mock import MagicMock
 
@@ -14,7 +12,6 @@ import pytest
 from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
 
-from streaming.get.data.metadata import create_metadata, create_metadata_response
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
     Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
@@ -27,6 +24,7 @@ from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, Ge
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
 from time import sleep
+from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.pb_creators import network_identified_objects, ac_line_segment
 from streaming.get.data.hierarchy import create_hierarchy_network

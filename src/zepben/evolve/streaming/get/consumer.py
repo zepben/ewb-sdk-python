@@ -16,10 +16,8 @@ from dataclassy import dataclass
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
+from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException, service_info
 from zepben.evolve.services.common.meta.metadata_translations import service_info_from_pb
-from zepben.evolve.services.common.meta.service_info import service_info
-
-from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException
 from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
 
 __all__ = ["CimConsumerClient", "MultiObjectResult"]

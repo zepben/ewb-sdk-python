@@ -5,11 +5,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import datetime
 
-from zepben.evolve.services.common.meta.metadata_translations import data_source_to_pb
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.metadata.metadata_data_pb2 import ServiceInfo as PBServiceInfo
 
 from zepben.evolve import service_info, DataSource
+from zepben.evolve.services.common.meta.metadata_translations import data_source_to_pb
 
 
 def create_metadata() -> service_info:
