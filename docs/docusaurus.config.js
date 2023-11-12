@@ -14,7 +14,7 @@ module.exports = {
   tagline: "",
   url: "https://zepben.github.io/evolve/docs/python-sdk",
   baseUrl: "/evolve/docs/python-sdk/",
-  onBrokenLinks: "warn",
+  onBrokenLinks: "throw",
   favicon: "img/favicon.ico",
   organizationName: "zepben",
   projectName: "evolve-sdk-python",
@@ -40,7 +40,7 @@ module.exports = {
         },
         {
           to: "/",
-          activeBasePath: "docs",
+          activeBasePath: "/",
           label: "Docs",
           position: "left",
         },
@@ -55,7 +55,7 @@ module.exports = {
           position: "right",
         },
         {
-          href: "https://github.com/zepben/evolve-sdk-jvm/",
+          href: "https://github.com/zepben/evolve-sdk-python",
           position: 'right',
           className: 'header-github-link',
           'aria-label': 'GitHub repository',
@@ -79,6 +79,7 @@ module.exports = {
     [
       "@zepben/docusaurus-preset",
       {
+        gtag: { ...zepbenDocusaurusPreset.defaultThemeConfig.gtag },
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve("./sidebars.js"),

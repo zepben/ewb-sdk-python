@@ -26,7 +26,7 @@
     * TransformerCoolingType
 
 ### Enhancements
-* None.
+* Update docusaurus and its configuration.
 
 ### Fixes
 * None.
