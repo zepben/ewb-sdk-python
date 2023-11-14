@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.37.0](#v0370)| `14 November 2023` |
 |[0.36.0](#v0360)| `29 September 2023` |
 |[0.35.0](#v0350)| `06 September 2023` |
 |[0.34.0](#v0340)| `24 October 2022` |
@@ -37,6 +38,45 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.37.0]
+
+### Breaking Changes
+* * Updated to evolve-grpc 0.26.0.
+
+### New Features
+* PowerTransformerEnd now supports multiple ratings based on cooling types attached to the transformer. Use new `add_rating` and `get_rating` methods.
+    * See notes section for deprecation information of `rated_s`.
+* Added new classes:
+    * TapChangerControl
+    * EvChargingUnit
+    * RegulatingControl
+* Added new fields:
+    * Equipment.commissioned_date
+    * UsagePoint
+        * rated_power
+        * approved_inverter_capacity
+    * ProtectionEquipment
+        * directable
+        * power_direction
+    * CurrentRelayInfo.reclose_delays
+    * DER register fields on PowerElectronicsConnection
+* Added new enums
+    * PowerDirectionKind
+    * RegulatingControlModeKind
+    * TransformerCoolingType
+
+### Enhancements
+* Update docusaurus and its configuration.
+
+### Fixes
+* None.
+
+### Notes
+* Setting PowerTransformerEnd.rated_s directly has been deprecated. You should now use `add_rating` and `get_rating` to set a `rated_s` alongside a defined 
+  `TransformerCoolingType` if one is known. By default the `coolingType` will be `UNKNOWN`.
 
 ---
 
