@@ -12,14 +12,13 @@ const versions = require("./versions.json");
 module.exports = {
   title: "Evolve SDK (Python)",
   tagline: "",
-  url: "https://zepben.github.io/evolve/docs/python-sdk",
+  url: "https://zepben.github.io",
   baseUrl: "/evolve/docs/python-sdk/",
   onBrokenLinks: "throw",
   favicon: "img/favicon.ico",
   organizationName: "zepben",
   projectName: "evolve-sdk-python",
   themeConfig: {
-    ...zepbenDocusaurusPreset.defaultThemeConfig,
     colorMode: {
       defaultMode: "light",
       disableSwitch: false,
@@ -73,7 +72,7 @@ module.exports = {
         facetFilters: ["project:python-sdk"]
       }
     },
-    metadatas: [{name: 'docsearch:project', content: 'python-sdk'}],
+    metadata: [{name: 'docsearch:project', content: 'python-sdk'}],
   },
   presets: [
     [
