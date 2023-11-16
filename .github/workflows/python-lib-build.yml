@@ -6,7 +6,7 @@ on:
 
 jobs:
   run:
-    uses: zepben/.github/.github/workflows/python-build.yml@main
+    uses: zepben/.github/.github/workflows/python-build.yml@EWB-4089-run-docs
     with:
       private: false
       licencecheck: true
