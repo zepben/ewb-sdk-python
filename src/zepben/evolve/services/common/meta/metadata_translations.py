@@ -32,18 +32,14 @@ def service_info_to_pb(si: ServiceInfo) -> PBServiceInfo:
     return PBServiceInfo(
         title=si.title,
         version=si.version,
-        dataSources=[data_source_to_pb(it) for it in si.data_sources]
+        dataSources=[data_source_to_pb(ds) for ds in si.data_sources]
     )
 
 
 def service_info_from_pb(pb: PBServiceInfo) -> ServiceInfo:
-    data_sources = list()
-    for ds in pb.dataSources:
-        # noinspection PyArgumentList
-        data_sources.append(data_source_from_pb(ds))
     # noinspection PyArgumentList
     return ServiceInfo(
         title=pb.title,
         version=pb.version,
-        data_sources=data_sources
+        data_sources=[data_source_from_pb(ds_pb) for ds_pb in pb.dataSources]
     )
