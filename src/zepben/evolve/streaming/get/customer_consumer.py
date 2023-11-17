@@ -9,7 +9,7 @@ from __future__ import annotations
 from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple
 
-from zepben.evolve import CustomerService, IdentifiedObject, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff, service_info
+from zepben.evolve import CustomerService, IdentifiedObject, Organisation, Customer, CustomerAgreement, PricingStructure, Tariff, ServiceInfo
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
@@ -98,7 +98,7 @@ class SyncCustomerConsumerClient(CustomerConsumerClient):
     def get_customers_for_containers(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_customers_for_containers(mrids))
 
-    def get_metadata(self) -> GrpcResult[service_info]:
+    def get_metadata(self) -> GrpcResult[ServiceInfo]:
         return get_event_loop().run_until_complete(super().get_metadata())
 
 

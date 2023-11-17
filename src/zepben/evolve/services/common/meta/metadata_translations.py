@@ -7,8 +7,7 @@ from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.metadata.metadata_data_pb2 import DataSource as PBDataSource
 from zepben.protobuf.metadata.metadata_data_pb2 import ServiceInfo as PBServiceInfo
 
-from zepben.evolve import DataSource, service_info
-
+from zepben.evolve import DataSource, ServiceInfo
 
 def data_source_to_pb(ds: DataSource) -> PBDataSource:
     ts = PBTimestamp()
@@ -29,7 +28,7 @@ def data_source_from_pb(pb: PBDataSource) -> DataSource:
     )
 
 
-def service_info_to_pb(si: service_info) -> PBServiceInfo:
+def service_info_to_pb(si: ServiceInfo) -> PBServiceInfo:
     return PBServiceInfo(
         title=si.title,
         version=si.version,
@@ -37,13 +36,13 @@ def service_info_to_pb(si: service_info) -> PBServiceInfo:
     )
 
 
-def service_info_from_pb(pb: PBServiceInfo) -> service_info:
+def service_info_from_pb(pb: PBServiceInfo) -> ServiceInfo:
     data_sources = list()
     for ds in pb.dataSources:
         # noinspection PyArgumentList
         data_sources.append(data_source_from_pb(ds))
     # noinspection PyArgumentList
-    return service_info(
+    return ServiceInfo(
         title=pb.title,
         version=pb.version,
         data_sources=data_sources

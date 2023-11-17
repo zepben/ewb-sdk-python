@@ -164,8 +164,8 @@ from zepben.evolve.services.network.tracing import tracing
 
 from zepben.evolve.services.common.meta.data_source import *
 from zepben.evolve.services.common.meta.metadata_collection import *
-from zepben.evolve.services.common.meta.metadata_translations import *
 from zepben.evolve.services.common.meta.service_info import *
+from zepben.evolve.services.common.meta.metadata_translations import *
 from zepben.evolve.services.common.translator.base_proto2cim import *
 from zepben.evolve.services.common.base_service import *
 from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, ReferenceResolver, UnresolvedReference

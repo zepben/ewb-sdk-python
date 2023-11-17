@@ -9,11 +9,11 @@ from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from zepben.evolve import DataSource
 
-__all__ = ["service_info"]
+__all__ = ["ServiceInfo"]
 
 
 @dataclass(slots=True)
-class service_info(object):
+class ServiceInfo(object):
     """Container for `Service` metadata"""
     title: str
     version: str

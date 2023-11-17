@@ -8,7 +8,7 @@ from __future__ import annotations
 from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, Union
 
-from zepben.evolve import DiagramService, IdentifiedObject, Diagram, DiagramObject, service_info
+from zepben.evolve import DiagramService, IdentifiedObject, Diagram, DiagramObject, ServiceInfo
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
@@ -94,7 +94,7 @@ class SyncDiagramConsumerClient(DiagramConsumerClient):
     def get_diagram_objects(self, mrid: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_diagram_objects(mrid))
 
-    def get_metadata(self) -> GrpcResult[service_info]:
+    def get_metadata(self) -> GrpcResult[ServiceInfo]:
         return get_event_loop().run_until_complete(super().get_metadata())
 
 

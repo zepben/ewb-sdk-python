@@ -16,7 +16,7 @@ from dataclassy import dataclass
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
-from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException, service_info
+from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException, ServiceInfo
 from zepben.evolve.services.common.meta.metadata_translations import service_info_from_pb
 from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
 
@@ -48,7 +48,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
         T: The base service to send objects from.
     """
 
-    __service_info: Optional[service_info]
+    __service_info: Optional[ServiceInfo]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -195,13 +195,13 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
         self.__service_info = service_info_from_pb(response.serviceInfo)
         return self.__service_info
 
-    async def _get_metadata(self) -> GrpcResult[service_info]:
+    async def _get_metadata(self) -> GrpcResult[ServiceInfo]:
         if self.__service_info:
             # noinspection PyArgumentList
             return GrpcResult(self.__service_info)
         return await self.try_rpc(lambda: self._handle_metadata())
 
-    async def get_metadata(self) -> GrpcResult[service_info]:
+    async def get_metadata(self) -> GrpcResult[ServiceInfo]:
         """
         Retrieve metadata related to this `Service`
 

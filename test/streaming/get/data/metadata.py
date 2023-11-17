@@ -8,13 +8,13 @@ import datetime
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.metadata.metadata_data_pb2 import ServiceInfo as PBServiceInfo
 
-from zepben.evolve import service_info, DataSource
+from zepben.evolve import ServiceInfo, DataSource
 from zepben.evolve.services.common.meta.metadata_translations import data_source_to_pb
 
 
-def create_metadata() -> service_info:
+def create_metadata() -> ServiceInfo:
     # noinspection PyArgumentList
-    return service_info(
+    return ServiceInfo(
         "title",
         "version",
         [
@@ -32,7 +32,7 @@ def create_metadata() -> service_info:
     )
 
 
-def create_metadata_response(expected_metadata: service_info) -> GetMetadataResponse:
+def create_metadata_response(expected_metadata: ServiceInfo) -> GetMetadataResponse:
     return GetMetadataResponse(
         serviceInfo=PBServiceInfo(
             title=expected_metadata.title,
