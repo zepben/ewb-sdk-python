@@ -266,3 +266,5 @@ from zepben.evolve.database.sqlite.database_reader import *
 
 from zepben.evolve.testing.test_network_builder import *
 from zepben.evolve.testing.test_traversal import *
+
+from zepben.evolve.processors.simplification import *

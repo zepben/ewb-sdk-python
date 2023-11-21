@@ -316,7 +316,7 @@ class BaseService(object, metaclass=ABCMeta):
         """
         Disassociate an object from this service.
 
-        `identified_object` THe object to disassociate from the service.
+        `identified_object` The object to disassociate from the service.
         Raises `KeyError` if `identified_object` or its type was not present in the service.
         """
         del self._objects_by_type[identified_object.__class__][identified_object.mrid]
