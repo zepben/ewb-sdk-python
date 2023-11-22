@@ -4,9 +4,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.evolve import NetworkService, Switch, Junction, Terminal
-from zepben.evolve.processors.simplification.ConductingEquipmentRemover import removeEquipment
-from zepben.evolve.processors.simplification.Reshape import Reshape
-from zepben.evolve.processors.simplification.Reshaper import Reshaper
+from zepben.evolve.processors.simplification.conducting_equipment_remover import removeEquipment
+from zepben.evolve.processors.simplification.reshape import Reshape
+from zepben.evolve.processors.simplification.reshaper import Reshaper
 
 __all__ = ["SwitchRemover"]
 
@@ -18,7 +18,7 @@ class SwitchRemover(Reshaper):
     def process(self, service: NetworkService, cumulativeReshapes: [Reshape] = NOOP) -> Reshape:
         originalToSimplified = dict()
         simplifiedToOriginal = dict()
-        original_switches = list(service.objects(Switch)) #think this is safe since removeEquipment will only remove the switch/terminals/conductivity nodes, not other conducting equipment/ other switches
+        original_switches = list(service.objects(Switch)) # ...think this is safe since removeEquipment will only remove the switch/terminals/conductivity nodes, not other conducting equipment/ other switches
         for switch in original_switches:
             if not switch.is_open():
                 newJuction = Junction()

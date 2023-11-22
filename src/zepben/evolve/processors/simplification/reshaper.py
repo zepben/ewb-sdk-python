@@ -6,7 +6,7 @@
 from abc import abstractmethod
 
 from zepben.evolve import NetworkService
-from zepben.evolve.processors.simplification import Reshape
+from zepben.evolve.processors.simplification.reshape import Reshape
 
 
 class Reshaper:
