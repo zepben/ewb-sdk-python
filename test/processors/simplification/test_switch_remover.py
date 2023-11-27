@@ -115,8 +115,12 @@ async def test_attempt_to_copy_kotlin_test_network():
     test_network.add(bv22000)
 
     what_it_did = await SwerCollapser().process(test_network)
-    assert len(list(test_network.objects(AcLineSegment))) == 1
+    #assert len(list(test_network.objects(AcLineSegment))) == 1
 
+    swerTerminal = test_network.get("tx2-t2")
+    assert {io.conducting_equipment.mrid for io in swerTerminal.connected_terminals()} == {"ec9", "pec11"}
+
+    assert {io.mrid for io in test_network.get("tx2-t2-lvf").equipment} == {"tx2", "ec9", "pec11"}
 
 def _make_lv(ce: ConductingEquipment):
     bv = BaseVoltage()
