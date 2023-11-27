@@ -128,6 +128,32 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "b3", 2), NONE)
 
     @pytest.mark.asyncio
+    async def test_traces_through_non_substation_power_transformers(self):
+        #
+        # 1 b0*21--c1--21-tx2-21--c3--2
+        #
+        # * = feeder start
+        #
+        n = await TestNetworkBuilder() \
+            .from_breaker() \
+            .to_acls() \
+            .to_power_transformer() \
+            .to_acls() \
+            .add_feeder("b0", 2) \
+            .build()
+
+        await log_directions(n["b0"])
+
+        self._check_expected_direction(self._get_t(n, "b0", 1), NONE)
+        self._check_expected_direction(self._get_t(n, "b0", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "c1", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "tx2", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "tx2", 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, "c3", 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, "c3", 2), DOWNSTREAM)
+
+    @pytest.mark.asyncio
     async def test_stops_at_zone_transformers_incase_feeder_heads_are_missing(self):
         #
         # 1 b0*21--c1--21 tx2 21--c3--2
