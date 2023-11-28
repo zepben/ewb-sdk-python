@@ -15,11 +15,13 @@ from zepben.evolve.services.network.tracing import tracing
 
 __all__ = ["CommonImpedanceCombiner"]
 
+
 @dataclass(slots=True)
 class LineChain(object):
     lines: List[AcLineSegment]
     startTerminal: Terminal
     endTerminal: Terminal
+
 
 class CommonImpedanceCombiner(Reshaper):
     in_service_test = lambda c: c.normally_in_service
@@ -35,8 +37,15 @@ class CommonImpedanceCombiner(Reshaper):
         importantNodes = set()
         for feeder in service.objects(Feeder):
             if feeder.normal_head_terminal is not None:
-                if cumulativeReshapes.originalToNew[feeder.normal_head_terminal.mrid] is not None:
-                    importantNodes.add(cumulativeReshapes.originalToNew[feeder.normal_head_terminal.mrid])
+                if feeder.normal_head_terminal.mrid in cumulativeReshapes.originalToNew and cumulativeReshapes.originalToNew[feeder.normal_head_terminal.mrid] is not None:
+                    tmp = list(cumulativeReshapes.originalToNew[feeder.normal_head_terminal.mrid])
+                    if len(tmp) > 0:
+                        if isinstance(tmp[0], ConnectivityNode):
+                            importantNodes.add(tmp[0])
+                        else:
+                            importantNodes.add(feeder.normal_head_terminal.connectivity_node)
+                    else:
+                        importantNodes.add(feeder.normal_head_terminal.connectivity_node)
                 else:
                     importantNodes.add(feeder.normal_head_terminal.connectivity_node)
 
@@ -83,6 +92,7 @@ class CommonImpedanceCombiner(Reshaper):
                 sumAcls.add_terminal(newEndTerminal)
                 sumAcls.length = sum([line.length for line in chain.lines if line.length is not None], 0.0)
                 sumAcls.asset_info = chainRep.asset_info
+                sumAcls.per_length_sequence_impedance = chainRep.per_length_sequence_impedance
 
                 service.add(sumAcls)
 
@@ -161,9 +171,6 @@ async def commonImpedanceChain(acls: AcLineSegment, inServiceTest: Callable[[AcL
     await traceTerminalsToList(forwardTerminals).run(acls.get_terminal_by_sn(2))
 
     backwardLines = [term.conducting_equipment for term in backwardTerminals if isinstance(term.conducting_equipment, AcLineSegment)]
-    forwardLines = [term.conducting_equipment for term in forwardTerminals if isinstance(term.conducting_equipment,AcLineSegment)]
+    forwardLines = [term.conducting_equipment for term in forwardTerminals if isinstance(term.conducting_equipment, AcLineSegment)]
     backwardLines.reverse()
     return LineChain(lines=backwardLines + forwardLines[1:], startTerminal=backwardTerminals[-1], endTerminal=forwardTerminals[-1])
-
-
-
