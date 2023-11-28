@@ -27,16 +27,17 @@ class NegligibleImpedanceCollapser(Reshaper):
 
         original_list = list(service.objects(ConnectivityNode))
         NetworkService.collapseGroupStartingFromNode = collapseGroupStartingFromNode
-        for node in filter(lambda ce: ce in service.objects(ConnectivityNode), original_list):  # ...does this actually work...
+        for node in filter(lambda ce: ce.mrid in service, original_list):  # ...does this actually work...
             await service.collapseGroupStartingFromNode(node, self.canCollapse, originalToSimplified, simplifiedToOriginal)
         return Reshape(originalToSimplified, simplifiedToOriginal)
 
     def canCollapse(self, equipment: ConductingEquipment) -> bool:
         if issubclass(equipment.__class__, (EnergySource, EnergyConsumer, PowerTransformer, Switch, RegulatingCondEq)):
             return False
+        elif issubclass(equipment.__class__, AcLineSegment):
+            return self.hasNegligibleImpedance(equipment) and not self.connectedToShuntCompensator(equipment)
         else:
-            if issubclass(equipment.__class__, AcLineSegment):
-                return self.hasNegligibleImpedance(equipment) and not self.connectedToShuntCompensator(equipment)
+            return True
 
     def hasNegligibleImpedance(self, acls: AcLineSegment) -> bool:
         length = 0.0 if acls.length is None else acls.length
@@ -53,7 +54,6 @@ class NegligibleImpedanceCollapser(Reshaper):
 
     def connectedToShuntCompensator(self, equipment: ConductingEquipment) -> bool:
         for connected in connected_equipment(equipment):
-            if issubclass(connected.__class__, ShuntCompensator):
+            if issubclass(connected.to_equip.__class__, ShuntCompensator):
                 return True
         return False
-
