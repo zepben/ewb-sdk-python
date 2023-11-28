@@ -14,7 +14,7 @@ from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve.processors.simplification.reshaper import Reshaper
 from zepben.evolve.services.network.tracing import tracing
 
-
+__all__ = ["CommonImpedanceCombiner"]
 class CommonImpedanceCombiner(Reshaper):
     in_service_test = lambda c: c.normally_in_service
     setPhases = tracing.set_phases()
