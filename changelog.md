@@ -10,7 +10,7 @@
 * None.
 
 ### Fixes
-* None.
+* `SetDirection` now traces through non-substation transformers.
 
 ### Notes
 * None.

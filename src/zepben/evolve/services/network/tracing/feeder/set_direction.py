@@ -103,7 +103,7 @@ class SetDirection:
         if not ce:
             return False
 
-        return isinstance(ce, PowerTransformer) and ce.substations
+        return isinstance(ce, PowerTransformer) and ce.num_substations() > 0
 
     def _flow_upstream_and_queue_next_straight(
         self,
