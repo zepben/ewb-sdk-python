@@ -22,6 +22,6 @@ async def test_combine_common_impedance_lines():
                     .build())
     test_network.add(plsi)
 
-    what_it_did = CommonImpedanceCombiner().process(test_network)
+    what_it_did = await CommonImpedanceCombiner().process(test_network)
 
     test = list(test_network.objects(AcLineSegment))

@@ -15,6 +15,8 @@ from zepben.evolve.processors.simplification.reshaper import Reshaper
 from zepben.evolve.services.network.tracing import tracing
 
 __all__ = ["CommonImpedanceCombiner"]
+
+
 class CommonImpedanceCombiner(Reshaper):
     in_service_test = lambda c: c.normally_in_service
     setPhases = tracing.set_phases()
@@ -22,7 +24,7 @@ class CommonImpedanceCombiner(Reshaper):
     def __init__(self, in_service_test=lambda c: c.normally_in_service):
         self.in_service_test = in_service_test
 
-    def process(self, service: [NetworkService], cumulativeReshapes: [Reshape] = None) -> Reshape:
+    async def process(self, service: [NetworkService], cumulativeReshapes: [Reshape] = None) -> Reshape:
         originalToSimplified = dict()
         simplifiedToOriginal = dict()
 
@@ -37,7 +39,7 @@ class CommonImpedanceCombiner(Reshaper):
         original_list = list(service.objects(AcLineSegment))
 
         for acls in filter(lambda ce: ce.mrid in service, original_list):
-            chain = commonImpedanceChain(acls, self.in_service_test, importantNodes)
+            chain = await commonImpedanceChain(acls, self.in_service_test, importantNodes)
             if len(chain.lines) > 1:
                 chainRep = chain.lines[0]
 
@@ -120,7 +122,8 @@ class CommonImpedanceCombiner(Reshaper):
 
         return Reshape(originalToSimplified, simplifiedToOriginal)
 
-def commonImpedanceChain(acls: AcLineSegment, inServiceTest: Callable[[AcLineSegment], bool], nodesToKeep: Set[ConnectivityNode]) -> LineChain:
+
+async def commonImpedanceChain(acls: AcLineSegment, inServiceTest: Callable[[AcLineSegment], bool], nodesToKeep: Set[ConnectivityNode]) -> LineChain:
     backwardTerminals = []
     forwardTerminals = []
 
@@ -150,8 +153,8 @@ def commonImpedanceChain(acls: AcLineSegment, inServiceTest: Callable[[AcLineSeg
                  .add_step_action(step_action_one))
         return trace
 
-    traceTerminalsToList(backwardTerminals).run(acls.get_terminal_by_sn(1))
-    traceTerminalsToList(forwardTerminals).run(acls.get_terminal_by_sn(2))
+    await traceTerminalsToList(backwardTerminals).run(acls.get_terminal_by_sn(1))
+    await traceTerminalsToList(forwardTerminals).run(acls.get_terminal_by_sn(2))
 
     backwardLines = [term.conducting_equipment for term in backwardTerminals if term.conducting_equipment is AcLineSegment]
     forwardLines = [term.conducting_equipment for term in forwardTerminals if term.conducting_equipment is AcLineSegment]
