@@ -6,7 +6,6 @@
 from typing import List, Callable, Set
 
 from dataclassy import dataclass
-from zepben.evolve.processors.simplification.common_impedance_combiner import LineChain
 
 from zepben.evolve import Equipment, NetworkService, Feeder, AcLineSegment, Terminal, ConnectivityNode, create_basic_depth_trace, BasicTraversal, \
     connected_terminals, PhaseCode, Location, CurrentPhases, NormalPhases
@@ -16,6 +15,11 @@ from zepben.evolve.services.network.tracing import tracing
 
 __all__ = ["CommonImpedanceCombiner"]
 
+@dataclass(slots=True)
+class LineChain(object):
+    lines: List[AcLineSegment]
+    startTerminal: Terminal
+    endTerminal: Terminal
 
 class CommonImpedanceCombiner(Reshaper):
     in_service_test = lambda c: c.normally_in_service
@@ -101,12 +105,12 @@ class CommonImpedanceCombiner(Reshaper):
                 for line in chain.lines:
                     for terminal in line.terminals:
                         if terminal.connectivity_node is not None:
-                            service.remove(terminal.connectivity_node)
                             mapsToLine.append(terminal.connectivity_node.mrid)
-                        service.remove(terminal)
+                            service.remove(terminal.connectivity_node)
                         mapsToLine.append(terminal.mrid)
-                    service.remove(line)
+                        service.remove(terminal)
                     mapsToLine.append(line.mrid)
+                    service.remove(line)
 
                 mapsToLine = set(mapsToLine) - {chain.startTerminal.mrid, chain.endTerminal.mrid}
 
@@ -131,7 +135,7 @@ async def commonImpedanceChain(acls: AcLineSegment, inServiceTest: Callable[[AcL
         def queue_next(t: Terminal, traversal: BasicTraversal[Terminal]):
             for to_terminal in [term.to_terminal for term in connected_terminals(t)]:
                 if to_terminal.phases == t.phases:
-                    if to_terminal.conducting_equipment is AcLineSegment:
+                    if isinstance(to_terminal.conducting_equipment, AcLineSegment):
                         if to_terminal.conducting_equipment.per_length_sequence_impedance == acls.per_length_sequence_impedance:
                             if to_terminal.conducting_equipment.asset_info == acls.asset_info:
                                 if inServiceTest(to_terminal.conducting_equipment) == inServiceTest(acls):
@@ -156,14 +160,10 @@ async def commonImpedanceChain(acls: AcLineSegment, inServiceTest: Callable[[AcL
     await traceTerminalsToList(backwardTerminals).run(acls.get_terminal_by_sn(1))
     await traceTerminalsToList(forwardTerminals).run(acls.get_terminal_by_sn(2))
 
-    backwardLines = [term.conducting_equipment for term in backwardTerminals if term.conducting_equipment is AcLineSegment]
-    forwardLines = [term.conducting_equipment for term in forwardTerminals if term.conducting_equipment is AcLineSegment]
+    backwardLines = [term.conducting_equipment for term in backwardTerminals if isinstance(term.conducting_equipment, AcLineSegment)]
+    forwardLines = [term.conducting_equipment for term in forwardTerminals if isinstance(term.conducting_equipment,AcLineSegment)]
     backwardLines.reverse()
     return LineChain(lines=backwardLines + forwardLines[1:], startTerminal=backwardTerminals[-1], endTerminal=forwardTerminals[-1])
 
 
-@dataclass(slots=True)
-class LineChain(object):
-    lines: List[AcLineSegment]
-    startTerminal: Terminal
-    endTerminal: Terminal
+
