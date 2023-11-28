@@ -8,7 +8,7 @@ from asyncio import get_event_loop
 import pytest
 
 from zepben.evolve import TestNetworkBuilder, Switch, AcLineSegment, PerLengthSequenceImpedance, ConductingEquipment, PhaseCode, BaseVoltage, \
-    TransformerFunctionKind, PowerTransformerEnd, FeederDirection
+    TransformerFunctionKind, PowerTransformerEnd, FeederDirection, Terminal, NetworkService
 from zepben.evolve.processors.simplification.negligible_impedance_collapser import NegligibleImpedanceCollapser
 from zepben.evolve.processors.simplification.swer_collapser import SwerCollapser
 from zepben.evolve.processors.simplification.switch_remover import SwitchRemover
@@ -117,10 +117,37 @@ async def test_attempt_to_copy_kotlin_test_network():
     what_it_did = await SwerCollapser().process(test_network)
     #assert len(list(test_network.objects(AcLineSegment))) == 1
 
-    swerTerminal = test_network.get("tx2-t2")
+    swerTerminal: Terminal = test_network.get("tx2-t2")
     assert {io.conducting_equipment.mrid for io in swerTerminal.connected_terminals()} == {"ec9", "pec11"}
 
     assert {io.mrid for io in test_network.get("tx2-t2-lvf").equipment} == {"tx2", "ec9", "pec11"}
+    assert {io.mrid for io in test_network.get("tx2-t2-lvf").normal_energizing_feeders} == {"fdr12"}
+    assert {io.mrid for io in test_network.get("fdr12").normal_energized_lv_feeders} >= {"tx2-t2-lvf", "lvf13"}
+    assert "ec9" not in {io.mrid for io in test_network.get("lvf14").equipment}
+    assert "pec11" not in {io.mrid for io in test_network.get("lvf14").equipment}
+    assert test_network.get("tx2-e2").base_voltage.nominal_voltage == 250
+    assert test_network.get("ec9").base_voltage.nominal_voltage == 250
+    assert test_network.get("pec11").base_voltage.nominal_voltage == 250
+    assert test_network.get("tx2-e3").base_voltage == bv430
+
+    assert what_it_did.originalToNew.keys() >= {"c4", "tx5", "c6", "j7", "c8", "c10"}
+    assert what_it_did.newToOriginal[swerTerminal.connectivity_node] >= {"c4", "tx5", "c6", "j7", "c8", "c10"}
+
+
+async def test_removes_completely_open_switches():
+
+    test_network = (await TestNetworkBuilder()
+                    .from_acls()
+                    .to_breaker(is_normally_open=True)
+                    .to_acls()
+                    .build())
+
+    what_it_did = SwitchRemover().process(test_network)
+    assert len(list(test_network.objects(Switch))) == 0
+    assert NetworkService
+
+
+
 
 def _make_lv(ce: ConductingEquipment):
     bv = BaseVoltage()
