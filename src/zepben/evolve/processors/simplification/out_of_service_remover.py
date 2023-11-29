@@ -10,15 +10,19 @@ from zepben.evolve.processors.simplification.reshaper import Reshaper
 
 
 class OutOfServiceRemover(Reshaper):
+    inServiceTest = lambda ce: ce.normally_in_service
+
+    def __init__(self, inServiceTest=lambda ce: ce.normally_in_service):
+        self.inServiceTest = inServiceTest
 
     def process(self, service: [NetworkService], cumulativeReshapes: [Reshape] = None) -> Reshape:
         originalToSimplified = dict()
 
-        # using normally in service
-        out_of_service = filter(lambda it: it.normally_in_service is False, service.objects(ConductingEquipment))
+        original_list = list(service.objects(ConductingEquipment))
+        out_of_service = filter(lambda ce: not self.inServiceTest(ce), original_list)
 
         for ce in out_of_service:
-            removeEquipment(ce, service)
-            originalToSimplified[ce.mrid] = {}
+            for removedIO in removeEquipment(ce, service):
+                originalToSimplified[removedIO.mrid] = set()
 
         return Reshape(originalToSimplified, dict())
