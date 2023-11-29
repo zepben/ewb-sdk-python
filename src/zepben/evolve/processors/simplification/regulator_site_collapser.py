@@ -9,7 +9,7 @@ from typing import List, Dict, Optional, Set
 from dataclassy import dataclass
 
 from zepben.evolve import normally_open, set_phases, NetworkService, Terminal, ConductingEquipment, PriorityQueue, PowerTransformer, TransformerFunctionKind, \
-    connected_equipment, AcLineSegment, Switch, ConnectivityNode
+    connected_equipment, AcLineSegment, Switch, ConnectivityNode, phase_code_from_single_phases
 from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve.processors.simplification.reshaper import Reshaper
 
@@ -47,18 +47,12 @@ class RegulatorSiteCollapser(Reshaper):
 
     def sortAssetsBySite(self,
                          service: NetworkService,
-                         regulatorSites: Set,
-                         candidateTerminalsBySite: Dict[str, List[Terminal]],
+                         regulatorSites: Set[Regulator],
+                         candidateTerminalsBySite: Dict[str, Set[Terminal]],
                          assetsBySite: Dict[str, List[ConductingEquipment]]):
         regulatorSites.clear()
         candidateTerminalsBySite.clear()
         assetsBySite.clear()
-
-        # no tapChangerControl on any end | mrid
-
-        x = PowerTransformer()
-
-        list(x.ends)[0].ratio_tap_changer.tap_changer_control
 
         orphanedRegulators = RegulatorQueue()
 
@@ -91,9 +85,20 @@ class RegulatorSiteCollapser(Reshaper):
                     assetsBySite[regulator.mrid].append(asset)
                 self.findCandidateTerminals(regulator.mrid, asset, assetsToProcess, candidateTerminals, regulatorSites, assetsBySite)
 
-            if (len(candidateTerminals) > 2 and not pruneCandidateTerminalsGIS(regulator.mrid, candidateTerminals, assetsBySite)) or len(
-                candidateTerminals) > 2:
-                pass
+            if (len(candidateTerminals) > 2 and not self.pruneCandidateTerminalsGIS(regulator.mrid, candidateTerminals, assetsBySite)) or \
+                len(candidateTerminals) < 2:
+                regulatorSites = {rs for rs in regulatorSites if rs.siteId != regulator.mrid}
+                removeAdditionalRegulators = False
+                self.logger.warning(f'Unable to collapse site for regulator {regulator.name_and_mrid()}. Regulator site will be as per original EWB data.')
+
+            for additionalRegulator in additionalRegulators:
+                if removeAdditionalRegulators:
+                    additionalPhases = additionalRegulator.get_terminal_by_sn(1).phases
+                    for t in regulator.terminals:
+                        t.phases = phase_code_from_single_phases(t.phases.single_phases + additionalPhases.single_phases)
+                regulatorSites = {rs for rs in regulatorSites if rs.siteId != additionalRegulator.mrid}
+                orphanedRegulators.remove_regulator(additionalRegulator)
+            candidateTerminalsBySite[regulator.mrid] = candidateTerminals
 
     def pruneCandidateTerminalsGIS(self, regulatorId: str, terminals: Set[Terminal], assetsBySite: Dict[str, List[ConductingEquipment]]) -> bool:
         if len(terminals) == 2:
@@ -107,13 +112,13 @@ class RegulatorSiteCollapser(Reshaper):
 
         if len(connectivityNodes) != len(terminals):
             self.logger.warning(f'Could not find connectivity node for all externally connecting terminals for regulator {regulatorId}. '
-                             f'Please contact your administrator to ensure the incoming and outgoing lines at the regulator site are correct.')
+                                f'Please contact your administrator to ensure the incoming and outgoing lines at the regulator site are correct.')
 
         repeatedIndex = -1
         newCandidate: Optional[Terminal] = None
 
         for i in range(1, len(terminals)):
-            if connectivityNodes[i] == connectivityNodes[i-1]:
+            if connectivityNodes[i] == connectivityNodes[i - 1]:
                 tmp = next((t for t in connectivityNodes[i].terminals if t not in terminals), None)
                 if tmp is not None:
                     newCandidate = next(tmp.other_terminals())
@@ -121,11 +126,11 @@ class RegulatorSiteCollapser(Reshaper):
                     break
                 else:
                     self.logger.warning(f'Could not prune extra connections for regulator {regulatorId}. '
-                                     f'Please contact your administrator to ensure the incoming and outgoing lines at the regulator site are correct.')
+                                        f'Please contact your administrator to ensure the incoming and outgoing lines at the regulator site are correct.')
                     return False
 
         if repeatedIndex == -1:
-            self.logger.warning(f'Could not prune extra connections for regulator {regulatorId}. ' 
+            self.logger.warning(f'Could not prune extra connections for regulator {regulatorId}. '
                                 f'Please contact your administrator to ensure the incoming and outgoing lines at the regulator site are correct.')
             return False
 
@@ -216,3 +221,12 @@ class RegulatorQueue:
 
     def isNotEmpty(self):
         return not self.queue.empty()
+
+    def remove_regulator(self, regulator):
+        theAbsoluteWorst = PriorityQueue()
+        while self.isNotEmpty():
+            tmp = self.get_regulator()
+            if tmp is not regulator:
+                theAbsoluteWorst.put(tmp)
+        self.queue = theAbsoluteWorst
+
