@@ -23,17 +23,19 @@ run any analytics you may wish to perform across the whole model.
 
 ## Connecting to a server
 
-The library provides four functions, `connect_insecure()`, `connect_tls()`, `connect_with_password()` and `connect_with_secret()`.
-`connect_insecure` has arguments: host: str, rpc_port: int
-`connect_tls` has arguments: host: str, rpc_port: int, ca_filename: str
-`connect_with_secret` has arguments: client_id: str, client_secret: str, conf_address: str, verify_conf: bool/str, verify_auth: bool/str,
-                                     host: str, rpc_port: int, ca_filename: str,
-                                     and **kwargs: could include audience: str, issuer_domain: str to specify authentication config directly.
-`connect_with_password` has arguments: client_id: str, username: str, password: str, conf_address: str, verify_conf: bool/str, verify_auth: bool/str,
-                                       host: str, rpc_port: int, ca_filename: str,
-                                       and **kwargs: could include audience: str, issuer_domain: str to specify authentication config directly.
+There are many helper functions to connect to a Energy Workbench server (EWB). All authenticated connections are based on OAuth2 flows, and
+you will need to use the correct function for the configuration of the server, and for which credentials you plan to use.
+This will typically be one of the following:
 
-The async version is to be used with Python asyncio.
+1. `connect_insecure()`, for unauthenticated, insecure connections. Cannot be used against a secured (HTTPS) EWB.
+1. `connect_tls()`, for unauthenticated, but https connections. Can only be used if EWB is configured without auth.
+1. `connect_with_password()`, for authenticating with a username, password, and client ID.
+1. `connect_with_secret()`, for authenticating with a client ID and secret, typically used for machine-to-machine services.1
+1. `connect_with_identity()`, for authenticating with an Azure managed identity.
+
+All connection functions return a channel that can be used for synchronous or asynchronous (asyncio) consumer clients.
+
+### Connecting Insecurely
 
 ```python
 from zepben.evolve import connect_insecure, Feeder, SyncNetworkConsumerClient, NetworkConsumerClient
@@ -77,7 +79,7 @@ client = SyncNetworkConsumerClient(channel)
 
 result = client.get_equipment_container("xxx", Feeder)
 # The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
-# result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
+result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
 
 client.service.get('...')
 ```
@@ -96,8 +98,6 @@ channel = (
 client = SyncNetworkConsumerClient(channel)
 
 result = client.get_equipment_container("xxx", Feeder)
-# The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
-# result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
 
 client.service.get('...')
 ```
@@ -110,23 +110,17 @@ Password Credentials and Client credentials OAuth2 flows are supported through t
 from zepben.evolve import connect_with_password, connect_with_secret, SyncNetworkConsumerClient
 
 # Client credentials configuration
-channel = connect_with_secret(client_id="some_client_id", client_secret="some_client_secret", host="ewb.zepben.com", rpc_port=443,
-                              conf_address="https://ewb.zepben.com/ewb/auth", verify_conf="path to certificate chain for auth params", 
-                              ca_filename="path to certificate for grpc queries")
+channel = connect_with_secret(client_id="some_client_id", client_secret="some_client_secret", host="ewb.zepben.com", rpc_port=443)
 client = SyncNetworkConsumerClient(channel)
 # ...
 
 # Password credentials configuration
-channel = connect_with_password(client_id="some_client_id", username="user@email.com", password="password1", host="ewb.zepben.com", rpc_port=443,
-                                conf_address="https://ewb.zepben.com/ewb/auth")
+channel = connect_with_password(client_id="some_client_id", username="user@email.com", password="password1", host="ewb.zepben.com", rpc_port=443)
 client = SyncNetworkConsumerClient(channel)
 # ...
 ```
 
-If `audience` and `issuer_domain` are provided as keyword arguments, they will be used to construct a `ZepbenTokenFetcher` directly without fetching them from
-`conf_address`.
-
-If running in Azure we also support auth via Azure managed identities using `connect_with_identity`:
+If EWB is running in Azure with Entra ID set up for auth on the EWB server, we support Azure managed identities using `connect_with_identity`:
 
 ```python
 from zepben.evolve import connect_with_identity, SyncNetworkConsumerClient
@@ -206,4 +200,19 @@ for ref in service.get_unresolved_references_to(equipment.mrid):
 # Get all unresolved references. Note this will iterate over every unresolved reference and is likely undesirable. You should prefer to use the above two methods.
 for ref in service.unresolved_references():
     await client.get_identified_object(service, ref.to_mrid)
+```
+
+## Service metadata
+
+Metadata about the servers title, version, and data sources can be retrieved via the `getMetadata()` call.
+
+```python
+service_info = client.get_metadata()
+print(service_info.title)
+
+print("Data sources:")
+for ds in service_info.data_sources:
+    print(f"  {ds.title}")
+    print(f"  {ds.version}")
+    print(f"  {ds.timestamp}")
 ```
