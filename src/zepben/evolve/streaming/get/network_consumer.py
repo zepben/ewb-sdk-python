@@ -11,6 +11,9 @@ from itertools import chain
 from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable
 
 from dataclassy import dataclass
+
+from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
+from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
     GetCurrentEquipmentForFeederRequest, GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, \
@@ -24,7 +27,7 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, CurrentRelayInfo, SwitchInfo, \
-    CurrentTransformerInfo, EvChargingUnit, RegulatingControl, TapChangerControl
+    CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -201,6 +204,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         Returns a simplified version of the network hierarchy that can be used to make further in-depth requests.
         """
         return await self._get_network_hierarchy()
+
+    async def _run_get_metadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
+        return await self._stub.getMetadata(request, timeout=self.timeout)
 
     async def get_equipment_container(
         self,
@@ -627,6 +633,9 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
 
     def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         return get_event_loop().run_until_complete(super().retrieve_network())
+
+    def get_metadata(self) -> GrpcResult[ServiceInfo]:
+        return get_event_loop().run_until_complete(super().get_metadata())
 
 
 _nio_type_to_cim = {

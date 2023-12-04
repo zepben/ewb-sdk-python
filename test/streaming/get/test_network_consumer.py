@@ -3,7 +3,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import warnings
 from typing import Dict, Iterable, TypeVar, Generator, Callable, Optional
 from unittest.mock import MagicMock
 
@@ -12,6 +11,7 @@ import pytest
 # noinspection PyPackageRequirements
 from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
+
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
     Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
@@ -24,6 +24,7 @@ from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, Ge
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
 from time import sleep
+from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.pb_creators import network_identified_objects, ac_line_segment
 from streaming.get.data.hierarchy import create_hierarchy_network
@@ -125,6 +126,27 @@ class TestNetworkConsumer:
             assert str(result.thrown) == f"No object with mRID {mrid} could be found."
 
         await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], []))])
+
+    @pytest.mark.asyncio
+    async def test_get_metadata(self):
+        expected_metadata = create_metadata()
+
+        async def client_test():
+            metadata = (await self.client.get_metadata()).throw_on_error().value
+            assert metadata == expected_metadata
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, create_metadata_response(expected_metadata)))])
+
+    @pytest.mark.asyncio
+    async def test_get_metadata_is_cached(self):
+        expected_metadata = create_metadata()
+
+        async def client_test():
+            metadata1 = (await self.client.get_metadata()).throw_on_error().value
+            metadata2 = (await self.client.get_metadata()).throw_on_error().value
+            assert metadata1 is metadata2
+
+        await self.mock_server.validate(client_test, [UnaryGrpc('getMetadata', unary_from_fixed(None, create_metadata_response(expected_metadata)))])
 
     @pytest.mark.asyncio
     async def test_get_network_hierarchy(self):
@@ -241,7 +263,7 @@ class TestNetworkConsumer:
             assert self.service.len_of() == 16
             assert len(mor.objects) == 16
             assert len({"lvf5", "tx0", "c1", "b2", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "b2-t1",
-                "b2-t2", "lvf6", "generated_cn_0", "generated_cn_1", "generated_cn_2"}.difference(mor.objects.keys())) == 0
+                        "b2-t2", "lvf6", "generated_cn_0", "generated_cn_1", "generated_cn_2"}.difference(mor.objects.keys())) == 0
             assert "tx4" not in mor.objects
             with pytest.raises(KeyError):
                 self.service.get("tx4")

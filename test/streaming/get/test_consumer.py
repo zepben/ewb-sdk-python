@@ -21,3 +21,6 @@ async def test_abstract_coverage():
 
     with pytest.raises(NotImplementedError):
         (await client.get_identified_objects(["id"])).throw_on_error()
+
+    with pytest.raises(NotImplementedError):
+        (await client.get_metadata()).throw_on_error()

@@ -13,8 +13,11 @@ from abc import abstractmethod
 from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, Optional, AsyncGenerator, Type, Generator
 
 from dataclassy import dataclass
+from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
+from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
-from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException
+from zepben.evolve import BaseService, IdentifiedObject, UnsupportedOperationException, ServiceInfo
+from zepben.evolve.services.common.meta.metadata_translations import service_info_from_pb
 from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
 
 __all__ = ["CimConsumerClient", "MultiObjectResult"]
@@ -44,6 +47,12 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
     Parameters
         T: The base service to send objects from.
     """
+
+    __service_info: Optional[ServiceInfo]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.__service_info = None
 
     @property
     @abstractmethod
@@ -176,3 +185,26 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
 
         if request.mrids:
             yield request
+
+    @abstractmethod
+    async def _run_get_metadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
+        raise NotImplementedError()
+
+    async def _handle_metadata(self):
+        response: GetMetadataResponse = await self._run_get_metadata(GetMetadataRequest())
+        self.__service_info = service_info_from_pb(response.serviceInfo)
+        return self.__service_info
+
+    async def _get_metadata(self) -> GrpcResult[ServiceInfo]:
+        if self.__service_info:
+            # noinspection PyArgumentList
+            return GrpcResult(self.__service_info)
+        return await self.try_rpc(lambda: self._handle_metadata())
+
+    async def get_metadata(self) -> GrpcResult[ServiceInfo]:
+        """
+        Retrieve metadata related to this `Service`
+
+        Returns service metadata.
+        """
+        return await self._get_metadata()
