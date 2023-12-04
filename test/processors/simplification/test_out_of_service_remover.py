@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
 
-from zepben.evolve import TestNetworkBuilder, IdentifiedObject, AcLineSegment, connected_equipment
+from zepben.evolve import TestNetworkBuilder, AcLineSegment, connected_equipment
 from zepben.evolve.processors.simplification.out_of_service_remover import OutOfServiceRemover
 
 

@@ -9,8 +9,8 @@ from zepben.evolve import NetworkService
 from zepben.evolve.processors.simplification.reshape import Reshape
 
 
-class Reshaper:
+class ReshapePostProcessor:
 
     @abstractmethod
-    def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
+    def process(self, service: NetworkService, cumulativeReshapes: Reshape):
         raise NotImplementedError()

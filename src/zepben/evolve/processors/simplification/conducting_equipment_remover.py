@@ -7,11 +7,13 @@ from typing import List
 
 from zepben.evolve import ConductingEquipment, NetworkService, IdentifiedObject
 
-#TODO: docs
+# TODO: docs
 """
 Removes conducting equipment along with its terminals. Also removes any connectivity nodes left without terminals.
 return List of removed objects.
 """
+
+
 def removeEquipment(ce: ConductingEquipment, service: NetworkService) -> List[IdentifiedObject]:
     removedObjects: List[IdentifiedObject] = []
 

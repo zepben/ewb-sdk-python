@@ -3,14 +3,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from abc import abstractmethod
+import pytest
 
 from zepben.evolve import NetworkService
-from zepben.evolve.processors.simplification.reshape import Reshape
+from zepben.evolve.processors.simplification.network_simplifier import NetworkSimplifier
 
 
-class Reshaper:
-
-    @abstractmethod
-    def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
-        raise NotImplementedError()
+@pytest.mark.timeout(324234)
+@pytest.mark.asyncio
+async def test_network_simplifier_one():
+    service = NetworkService()
+    ns = NetworkSimplifier()
+    await ns.process(service)

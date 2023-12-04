@@ -240,10 +240,11 @@ class Feeder(EquipmentContainer):
 
     @normal_head_terminal.setter
     def normal_head_terminal(self, term: Optional[Terminal]):
-        if self._normal_head_terminal is None or self._normal_head_terminal is term:
+        if self._normal_head_terminal is None or self._normal_head_terminal is term or (self.num_equipment() == 0 and self.num_current_equipment() == 0):
             self._normal_head_terminal = term
         else:
-            raise ValueError(f"normal_head_terminal for {str(self)} has already been set to {self._normal_head_terminal}, cannot reset this field to {term}")
+            raise ValueError(f"Feeder {self.mrid} has equipment assigned to it. Cannot update normalHeadTerminal on a feeder with equipment assigned.")
+
 
     @property
     def current_equipment(self) -> Generator[Equipment, None, None]:
