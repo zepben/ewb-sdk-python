@@ -4,14 +4,20 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import ABC
-from typing import Optional
+from typing import Optional, List
 
 import grpc
+from grpc._channel import _InactiveRpcError
 from zepben.auth import ZepbenTokenFetcher
+from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
+from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
+from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
+from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
+
+from zepben.evolve.streaming.exceptions import GrpcConnectionException
+from zepben.evolve.streaming.grpc.auth_token_plugin import AuthTokenPlugin
 
 __all__ = ["GrpcChannelBuilder"]
-
-from zepben.evolve.streaming.grpc.auth_token_plugin import AuthTokenPlugin
 
 
 class GrpcChannelBuilder(ABC):
@@ -23,15 +29,50 @@ class GrpcChannelBuilder(ABC):
         self._socket_address: str = "localhost:50051"
         self._channel_credentials: Optional[grpc.ChannelCredentials] = None
 
-    def build(self) -> grpc.aio.Channel:
+    def build(self, skip_connection_test: bool = False, debug: bool = False) -> grpc.aio.Channel:
         """
         Get the resulting :class:`grpc.aio.Channel` from this builder.
+
+        :param skip_connection_test: Skip confirming a connection can be established to the server. This is not recommended, but provided as a safety
+        mechanism if for any reason the connection test fails unexpectedly even though the connection is fine.
+        :param debug: Collect and append unhandled RPC errors to the `ConnectionException` raised on an unsuccessful connection test.
+
         :return: A gRPC channel resulting from this builder.
         """
+
+        # Synchronous channel is used purely for confirming channel connection works as we can't do async requests here,
+        # but an aio channel is always returned to the user.
+        if not skip_connection_test:
+            if self._channel_credentials:
+                channel = grpc.secure_channel(self._socket_address, self._channel_credentials)
+            else:
+                channel = grpc.insecure_channel(self._socket_address)
+            self._test_connection(channel, debug=debug)
+            channel.close()
+
         if self._channel_credentials:
             return grpc.aio.secure_channel(self._socket_address, self._channel_credentials)
 
         return grpc.aio.insecure_channel(self._socket_address)
+
+    def _test_connection(self, channel: grpc.Channel, debug: bool):
+        stubs: List = [
+            NetworkConsumerStub(channel),
+            DiagramConsumerStub(channel),
+            CustomerConsumerStub(channel)
+        ]
+        debug_errors = []
+        for client in stubs:
+            try:
+                result = client.getMetadata(GetMetadataRequest(), wait_for_ready=False)
+                if result:
+                    return
+            except _InactiveRpcError as rpc_error:
+                if rpc_error.code() in {grpc.StatusCode.UNKNOWN, grpc.StatusCode.UNAUTHENTICATED, grpc.StatusCode.UNAVAILABLE}:
+                    raise rpc_error
+                if debug:
+                    debug_errors.append(f"Received the following exception with {type(client).__name__}:\n{rpc_error}\n")
+        raise GrpcConnectionException(f"Couldn't establish gRPC connection to any service on {self._socket_address}.\n{''.join(debug_errors) if debug else ''}")
 
     def for_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
         """

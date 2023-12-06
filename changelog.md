@@ -1,13 +1,15 @@
 # Zepben Python SDK
 ## [0.38.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* `connect_with_secret()` and `connect_with_password()` will no longer create a `ZepbenTokenFetcher` directly from kwargs.
 
 ### New Features
-* None.
+* Added support for `getMetadata()` gRPC calls on `CustomerConsumerClient`, `DiagramConsumerClient`, and `NetworkConsumerClient`.
 
 ### Enhancements
-* None.
+* `GrpcChannelBuilder` tests the connectivity of newly created channels before returning them to the user. This is done by calling `getMetadata()` against all
+known services, the channel is returned after the first successful response. Any connectivity errors will be propagated to the user. If no connectivity errors
+are encountered but no successful response is received from the known services, a `GrpcConnectionException` is thrown.
 
 ### Fixes
 * `SetDirection` now traces through non-substation transformers.
@@ -15,9 +17,9 @@
 ### Notes
 * None.
 
-## [0.37.0] - UNRELEASED
+## [0.37.0] - 2023-11-14
 ### Breaking Changes
-* * Updated to evolve-grpc 0.26.0.
+* Updated to evolve-grpc 0.26.0.
 
 ### New Features
 * PowerTransformerEnd now supports multiple ratings based on cooling types attached to the transformer. Use new `add_rating` and `get_rating` methods.
