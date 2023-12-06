@@ -28,7 +28,7 @@ from zepben.evolve.processors.simplification.topology_fixer import TopologyFixer
 class ProcessorsController:
 
     @abstractmethod
-    def process(self, service: NetworkService):
+    async def process(self, service: NetworkService):
         raise NotImplementedError
 
 
@@ -79,7 +79,7 @@ class NetworkSimplifier(ProcessorsController):
         } if rpp is not None}
 
         for reshaper in reshapers:
-            cumulativeReshape += await reshaper.process(service, cumulativeReshape)
+            cumulativeReshape += (await reshaper.process(service, cumulativeReshape))
 
         for reshapePostProcessor in reshapePostProcessors:
             await reshapePostProcessor.process(service, cumulativeReshape)

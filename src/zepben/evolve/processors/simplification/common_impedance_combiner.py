@@ -30,7 +30,7 @@ class CommonImpedanceCombiner(Reshaper):
     def __init__(self, in_service_test=lambda c: c.normally_in_service):
         self.in_service_test = in_service_test
 
-    async def process(self, service: [NetworkService], cumulativeReshapes: [Reshape] = None) -> Reshape:
+    async def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
         originalToSimplified = dict()
         simplifiedToOriginal = dict()
 

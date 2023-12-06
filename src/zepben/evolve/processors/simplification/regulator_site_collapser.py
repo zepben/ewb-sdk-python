@@ -45,7 +45,7 @@ class RegulatorSiteCollapser(Reshaper):
         self.setFeederDirectionProperty = lambda t, v: self.feederDirectionProperty.__set__(t, v)
 
 
-    def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
+    async def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
         regulatorSites: Set[Regulator] = set()
         candidateTerminalsBySite: Dict[str, Set[Terminal]] = {}
         assetsBySite: Dict[str, List[ConductingEquipment]] = {}

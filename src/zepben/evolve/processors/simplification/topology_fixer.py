@@ -13,7 +13,7 @@ from zepben.evolve.processors.simplification.reshaper import Reshaper
 
 class TopologyFixer(Reshaper):
 
-    def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
+    async def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
         removedMRIDs: Set[str] = set()
         addedNodes: Set[ConnectivityNode] = set()
 

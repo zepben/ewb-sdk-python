@@ -24,7 +24,7 @@ class SwerCollapser(Reshaper):
     def __init__(self, baseLV: int = 250):
         self.baseLV = baseLV
 
-    async def process(self, service: [NetworkService], cumulativeReshapes: [Reshape] = None) -> Reshape:
+    async def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
         originalToSimplified = dict()
         simplifiedToOriginal = dict()
 

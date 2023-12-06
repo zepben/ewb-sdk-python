@@ -19,7 +19,7 @@ class SwitchRemover(Reshaper):
     def __init__(self, open_test=normally_open):
         self.open_test = open_test
 
-    def process(self, service: NetworkService, cumulativeReshapes: [Reshape] = NOOP) -> Reshape:
+    async def process(self, service: NetworkService, cumulativeReshapes: Reshape = NOOP) -> Reshape:
         originalToSimplified = dict()
         simplifiedToOriginal = dict()
         original_switches = list(service.objects(

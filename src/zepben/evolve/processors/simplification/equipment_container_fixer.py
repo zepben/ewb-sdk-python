@@ -11,7 +11,7 @@ from zepben.evolve.processors.simplification.reshape_post_processor import Resha
 
 class EquipmentContainerFixer(ReshapePostProcessor):
 
-    def process(self, service: NetworkService, cumulativeReshapes: Reshape):
+    async def process(self, service: NetworkService, cumulativeReshapes: Reshape):
         original_container_list = service.objects(EquipmentContainer)
         for container in original_container_list:
             original_equipment_list = list(container.equipment)

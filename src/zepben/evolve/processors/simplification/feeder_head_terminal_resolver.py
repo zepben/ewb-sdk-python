@@ -48,7 +48,7 @@ class FeederHeadTerminalResolver(ReshapePostProcessor):
         if feederDirectionPropertyName is not None:
             self.feederDirectionPropertyName = feederDirectionPropertyName
 
-    def process(self, service: NetworkService, cumulativeReshapes: Reshape):
+    async def process(self, service: NetworkService, cumulativeReshapes: Reshape):
         original_list = list(service.objects(Feeder))
 
         for feeder in original_list:

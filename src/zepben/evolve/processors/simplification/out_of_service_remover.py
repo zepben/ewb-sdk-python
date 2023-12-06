@@ -15,7 +15,7 @@ class OutOfServiceRemover(Reshaper):
     def __init__(self, inServiceTest=lambda ce: ce.normally_in_service):
         self.inServiceTest = inServiceTest
 
-    def process(self, service: [NetworkService], cumulativeReshapes: [Reshape] = None) -> Reshape:
+    async def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
         originalToSimplified = dict()
 
         original_list = list(service.objects(ConductingEquipment))

@@ -12,5 +12,5 @@ from zepben.evolve.processors.simplification.reshape import Reshape
 class Reshaper:
 
     @abstractmethod
-    def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
+    async def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
         raise NotImplementedError()

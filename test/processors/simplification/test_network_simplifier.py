@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
 
-from zepben.evolve import NetworkService
+from zepben.evolve import NetworkService, ConnectivityNode
 from zepben.evolve.processors.simplification.network_simplifier import NetworkSimplifier
 
 
@@ -13,5 +13,7 @@ from zepben.evolve.processors.simplification.network_simplifier import NetworkSi
 @pytest.mark.asyncio
 async def test_network_simplifier_one():
     service = NetworkService()
+    service.add(ConnectivityNode())
     ns = NetworkSimplifier()
-    await ns.process(service)
+    result = (await ns.process(service))
+    x = 3
