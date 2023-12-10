@@ -18,7 +18,7 @@ class TestTopologyFixer:
         terminal = Terminal(mrid="t")
         service.add(terminal)
         service.connect_by_mrid(terminal, "cn")
-        result = TopologyFixer().process(service)
+        result = await TopologyFixer().process(service)
 
         assert len(list(service.objects(Terminal))) == 0
         assert result.originalToNew == {"t": set()}
@@ -34,7 +34,7 @@ class TestTopologyFixer:
         energy_source.add_terminal(terminal)
         service.add(energy_source)
 
-        result = TopologyFixer().process(service)
+        result = await TopologyFixer().process(service)
 
         assert len(list(service.objects(ConnectivityNode))) == 1
         cn = next(service.objects(ConnectivityNode))
@@ -49,7 +49,7 @@ class TestTopologyFixer:
         connectivity_node = ConnectivityNode(mrid="cn")
         service.add(connectivity_node)
 
-        result = TopologyFixer().process(service)
+        result = await TopologyFixer().process(service)
 
         assert len(list(service.objects(ConnectivityNode))) == 0
         assert result.originalToNew == {"cn": set()}

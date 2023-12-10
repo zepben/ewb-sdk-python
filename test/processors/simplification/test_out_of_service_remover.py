@@ -25,7 +25,7 @@ async def test_removes_out_of_service_equipment():
     c2 = test_network.get("c2")
     c3 = test_network.get("c3")
 
-    what_it_did = OutOfServiceRemover().process(test_network)
+    what_it_did = await OutOfServiceRemover().process(test_network)
 
     assert list(test_network.objects(AcLineSegment)) == [c0, c2, c3]
     assert connected_equipment(c0) == []
@@ -50,7 +50,7 @@ async def test_uses_provided_network_state():
     c2 = test_network.get("c2")
     c3 = test_network.get("c3")
 
-    what_it_did = OutOfServiceRemover(inServiceTest=lambda c: c.in_service).process(test_network)
+    what_it_did = await OutOfServiceRemover(inServiceTest=lambda c: c.in_service).process(test_network)
 
     assert list(test_network.objects(AcLineSegment)) == [c0, c2, c3]
     assert connected_equipment(c0) == []

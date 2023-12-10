@@ -3,7 +3,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import logging
 from typing import List
 
 import pytest
@@ -24,7 +23,7 @@ class TestRegulatorSiteCollapser:
     @pytest.mark.asyncio
     async def test_populate(self):
         await self.populateRegulatorsNetwork()
-        reshape = RegulatorSiteCollapser().process(self.network)
+        reshape = await RegulatorSiteCollapser().process(self.network)
         x = 3
 
         assert len(list(self.network.objects(AcLineSegment))) == 36

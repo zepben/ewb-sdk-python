@@ -39,9 +39,9 @@ class TestFeederHeadTerminalResolver:
     @pytest.mark.asyncio
     async def test_head_terminal_replaced_by_single_terminal(self):
         self.before_test()
-        FeederHeadTerminalResolver(self.issues).process(self.service,
-                                                        Reshape({"oldHeadTerminal": {self.newHeadTerminal}},
-                                                                {self.newHeadTerminal: {"oldHeadTerminal"}}))
+        await FeederHeadTerminalResolver(self.issues).process(self.service,
+                                                              Reshape({"oldHeadTerminal": {self.newHeadTerminal}},
+                                                                      {self.newHeadTerminal: {"oldHeadTerminal"}}))
         assert self.feeder.normal_head_terminal is self.newHeadTerminal
         self.verifyContainedEquipmentAndIssues()
 
@@ -49,9 +49,9 @@ class TestFeederHeadTerminalResolver:
     @pytest.mark.asyncio
     async def test_head_terminal_replaced_by_single_connectivity_node(self):
         self.before_test()
-        FeederHeadTerminalResolver(self.issues).process(self.service,
-                                                        Reshape({"oldHeadTerminal": {self.cn}},
-                                                                {self.cn: {"oldHeadTerminal"}}))
+        await FeederHeadTerminalResolver(self.issues).process(self.service,
+                                                              Reshape({"oldHeadTerminal": {self.cn}},
+                                                                      {self.cn: {"oldHeadTerminal"}}))
         assert self.feeder.normal_head_terminal is self.newHeadTerminal
         self.verifyContainedEquipmentAndIssues()
 
@@ -59,9 +59,9 @@ class TestFeederHeadTerminalResolver:
     @pytest.mark.asyncio
     async def test_head_terminal_replaced_by_nothing(self):
         self.before_test()
-        FeederHeadTerminalResolver(self.issues).process(self.service,
-                                                        Reshape({"oldHeadTerminal": set()},
-                                                                {}))
+        await FeederHeadTerminalResolver(self.issues).process(self.service,
+                                                              Reshape({"oldHeadTerminal": set()},
+                                                                      {}))
 
         assert self.feeder.normal_head_terminal is None
         self.issues.headTerminalMappedToNothing.track.assert_called_once_with("Feeder fdr's head terminal oldHeadTerminal was replaced by nothing. The head "
@@ -72,9 +72,9 @@ class TestFeederHeadTerminalResolver:
     @pytest.mark.asyncio
     async def test_head_terminal_replaced_by_multiple_Objects(self):
         self.before_test()
-        FeederHeadTerminalResolver(self.issues).process(self.service,
-                                                        Reshape({"oldHeadTerminal": {self.newHeadTerminal, self.cn}},
-                                                                {self.cn: {"oldHeadTerminal"}, self.newHeadTerminal: {"oldHeadTerminal"}}))
+        await FeederHeadTerminalResolver(self.issues).process(self.service,
+                                                              Reshape({"oldHeadTerminal": {self.newHeadTerminal, self.cn}},
+                                                                      {self.cn: {"oldHeadTerminal"}, self.newHeadTerminal: {"oldHeadTerminal"}}))
 
         assert self.feeder.normal_head_terminal is None
         self.issues.headTerminalMappedToMultipleObjects.track.assert_called_once_with("Feeder fdr's head terminal oldHeadTerminal was replaced by multiple "
@@ -85,9 +85,9 @@ class TestFeederHeadTerminalResolver:
     @pytest.mark.asyncio
     async def test_head_terminal_replaced_by_invalid_Objects(self):
         self.before_test()
-        FeederHeadTerminalResolver(self.issues).process(self.service,
-                                                        Reshape({"oldHeadTerminal": {self.breaker}},
-                                                                {self.breaker: {"oldHeadTerminal"}}))
+        await FeederHeadTerminalResolver(self.issues).process(self.service,
+                                                              Reshape({"oldHeadTerminal": {self.breaker}},
+                                                                      {self.breaker: {"oldHeadTerminal"}}))
 
         assert self.feeder.normal_head_terminal is None
         self.issues.headTerminalMappedToInvalidObject.track.assert_called_once_with("Feeder fdr's head terminal oldHeadTerminal was replaced by something "
@@ -100,9 +100,9 @@ class TestFeederHeadTerminalResolver:
     async def test_head_terminal_replaced_by_node_without_non_upstream_terminal(self):
         self.before_test()
         self.newHeadTerminal.normal_feeder_direction = FeederDirection.UPSTREAM
-        FeederHeadTerminalResolver(self.issues).process(self.service,
-                                                        Reshape({"oldHeadTerminal": {self.cn}},
-                                                                {self.cn: {"oldHeadTerminal"}}))
+        await FeederHeadTerminalResolver(self.issues).process(self.service,
+                                                              Reshape({"oldHeadTerminal": {self.cn}},
+                                                                      {self.cn: {"oldHeadTerminal"}}))
 
         assert self.feeder.normal_head_terminal is None
         self.issues.noValidTerminalFoundForTargetNode.track.assert_called_once_with("Feeder fdr's head terminal oldHeadTerminal was replaced by connectivity "
@@ -115,9 +115,9 @@ class TestFeederHeadTerminalResolver:
     async def test_uses_provided_feeder_direction_property_to_find_non_upstream_terminal(self):
         self.before_test()
         self.newHeadTerminal.normal_feeder_direction = FeederDirection.UPSTREAM
-        FeederHeadTerminalResolver(self.issues, "current_feeder_direction").process(self.service,
-                                                                                    Reshape({"oldHeadTerminal": {self.cn}},
-                                                                                            {self.cn: {"oldHeadTerminal"}}))
+        await FeederHeadTerminalResolver(self.issues, "current_feeder_direction").process(self.service,
+                                                                                          Reshape({"oldHeadTerminal": {self.cn}},
+                                                                                                  {self.cn: {"oldHeadTerminal"}}))
 
         assert self.feeder.normal_head_terminal is self.newHeadTerminal
         self.verifyContainedEquipmentAndIssues()

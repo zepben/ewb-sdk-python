@@ -16,10 +16,13 @@ from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve.processors.simplification.reshaper import Reshaper
 
 
-@dataclass(slots=True)
 class Regulator:
-    siteId: str
-    isDistributed: bool
+    siteId: str = None
+    isDistributed: bool = None
+
+    def __init__(self, siteId, isDistributed):
+        self.siteId = siteId
+        self.isDistributed = isDistributed
 
 
 def isLong(acls: AcLineSegment) -> bool:
@@ -37,13 +40,12 @@ class RegulatorSiteCollapser(Reshaper):
     setFeederDirectionProperty: Callable = None
     setPhases = set_phases()
 
-    def __init__(self, logger=logging.getLogger(__name__), openTest=normally_open, feederDirectionProperty:str = "normal_feeder_direction"):
+    def __init__(self, logger=logging.getLogger(__name__), openTest=normally_open, feederDirectionProperty: str = "normal_feeder_direction"):
         self.logger = logger
         self.openTest = openTest
         self.feederDirectionProperty = getattr(Terminal, feederDirectionProperty)
         self.getFeederDirectionProperty = lambda t: self.feederDirectionProperty.__get__(t)
         self.setFeederDirectionProperty = lambda t, v: self.feederDirectionProperty.__set__(t, v)
-
 
     async def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:
         regulatorSites: Set[Regulator] = set()
@@ -472,10 +474,7 @@ class RegulatorSiteCollapser(Reshaper):
 
             if (len(candidateTerminals) > 2 and not self.pruneCandidateTerminalsGIS(regulator.mrid, candidateTerminals, assetsBySite)) or \
                 len(candidateTerminals) < 2:
-                tmp = regulatorSites.copy()
-                regulatorSites.clear()
-                regulatorSites.update({rs for rs in tmp if rs.siteId != regulator.mrid})
-                #regulatorSites &= {rs for rs in regulatorSites if rs.siteId != regulator.mrid}
+                regulatorSites &= {rs for rs in regulatorSites if rs.siteId != regulator.mrid}
                 removeAdditionalRegulators = False
                 self.logger.warning(f'Unable to collapse site for regulator {regulator.mrid}. Regulator site will be as per original EWB data.')
 
@@ -484,10 +483,7 @@ class RegulatorSiteCollapser(Reshaper):
                     additionalPhases = additionalRegulator.get_terminal_by_sn(1).phases
                     for t in regulator.terminals:
                         t.phases = phase_code_from_single_phases(t.phases.single_phases + additionalPhases.single_phases)
-                tmp = regulatorSites.copy()
-                regulatorSites.clear()
-                regulatorSites.update({rs for rs in tmp if rs.siteId != additionalRegulator.mrid})
-                #regulatorSites &= {rs for rs in regulatorSites if rs.siteId != additionalRegulator.mrid}
+                regulatorSites &= {rs for rs in regulatorSites if rs.siteId != additionalRegulator.mrid}
                 orphanedRegulators.remove_regulator(additionalRegulator)
             candidateTerminalsBySite[regulator.mrid] = candidateTerminals
 
@@ -610,7 +606,7 @@ class RegulatorQueue:
     def get_list(self) -> List[PowerTransformer]:
         return [r.regulator for r in list(self.queue.queue)]
 
-    def put_regulator(self, regulator):
+    def put_regulator(self, regulator: PowerTransformer):
         self.queue.put(WrappedRegulator(regulator))
 
     def get_regulator(self) -> PowerTransformer:

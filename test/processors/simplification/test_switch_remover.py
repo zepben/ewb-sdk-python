@@ -15,13 +15,14 @@ from zepben.evolve.processors.simplification.switch_remover import SwitchRemover
 
 
 @pytest.mark.timeout(323434)
-def test_uno():
-    test_network = get_event_loop().run_until_complete(TestNetworkBuilder()
-                                                       .from_acls()
-                                                       .to_breaker()
-                                                       .to_acls()
-                                                       .build())
-    what_it_did = SwitchRemover().process(test_network)
+@pytest.mark.asyncio
+async def test_uno():
+    test_network = (await TestNetworkBuilder()
+                    .from_acls()
+                    .to_breaker()
+                    .to_acls()
+                    .build())
+    what_it_did = await SwitchRemover().process(test_network)
     assert len(list(test_network.objects(Switch))) == 0
 
 
@@ -79,7 +80,7 @@ async def test_removes_completely_open_switches():
                     .to_acls()
                     .build())
 
-    what_it_did = SwitchRemover().process(test_network)
+    what_it_did = await SwitchRemover().process(test_network)
     assert list(test_network.objects(Switch)) == []
     assert connected_equipment(test_network.get("c0")) == []
     assert connected_equipment(test_network.get("c2")) == []
@@ -95,7 +96,7 @@ async def test_removes_partially_open_switches():
                     .to_acls()
                     .build())
 
-    what_it_did = SwitchRemover().process(test_network)
+    what_it_did = await SwitchRemover().process(test_network)
 
     assert list(test_network.objects(Switch)) == []
     assert connected_equipment(test_network.get("c0")) == []
@@ -113,7 +114,7 @@ async def test_replaces_closed_switch_with_junctions():
                     .to_acls()
                     .build())
 
-    what_it_did = SwitchRemover().process(test_network)
+    what_it_did = await SwitchRemover().process(test_network)
 
     junction = list(what_it_did.originalToNew["b1"])[0]
 
@@ -137,16 +138,13 @@ async def test_uses_provided_network_state():
                     .to_acls()
                     .build())
 
-    what_it_did = SwitchRemover(currently_open).process(test_network)
+    what_it_did = await SwitchRemover(currently_open).process(test_network)
 
     assert list(test_network.objects(Switch)) == []
     assert connected_equipment(test_network.get("c0")) == []
     assert connected_equipment(test_network.get("c2")) == []
     assert what_it_did.originalToNew == {"b1": set(), "b1-t1": set(), "b1-t2": set()}
     assert what_it_did.newToOriginal == {}
-
-
-
 
 
 def _make_lv(ce: ConductingEquipment):

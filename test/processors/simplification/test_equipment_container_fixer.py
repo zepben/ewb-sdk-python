@@ -35,7 +35,7 @@ class TestEquipmentContainerFixer:
             originalToNew={"og1": {new1, new2}, "og2": set()},
             newToOriginal={new1: {"og1"}, new2: {"og1"}}
         )
-        EquipmentContainerFixer().process(service, reshape)
+        await EquipmentContainerFixer().process(service, reshape)
 
         assert len(set(container.equipment)) == container.num_equipment()
         assert set(container.equipment) == {new1, new2, og3}
@@ -62,7 +62,7 @@ class TestEquipmentContainerFixer:
             originalToNew={"og1": {new1, new2}, "og2": set()},
             newToOriginal={new1: {"og1"}, new2: {"og1"}}
         )
-        EquipmentContainerFixer().process(service, reshape)
+        await EquipmentContainerFixer().process(service, reshape)
 
         assert len(set(container.current_equipment)) == container.num_current_equipment()
         assert set(container.current_equipment) == {new1, new2, og3}
