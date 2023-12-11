@@ -8,10 +8,8 @@ from zepben.evolve.processors.simplification.conducting_equipment_remover import
 from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve.processors.simplification.reshaper import Reshaper
 
-
+__all__ = ["OutOfServiceRemover"]
 class OutOfServiceRemover(Reshaper):
-    inServiceTest = lambda ce: ce.normally_in_service
-
     def __init__(self, inServiceTest=lambda ce: ce.normally_in_service):
         self.inServiceTest = inServiceTest
 

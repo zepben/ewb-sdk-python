@@ -10,13 +10,14 @@ from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve import Terminal, NetworkService, Feeder, ConnectivityNode, IdentifiedObject, FeederDirection
 from zepben.evolve.processors.simplification.reshape_post_processor import ReshapePostProcessor
 
+__all__ = ["FeederHeadTerminalResolver"]
 
 class IssueTracker:
     logger: logging.Logger = logging.getLogger(__name__)
     description: str = None
     count: int = 0
 
-    def __init__(self, logger=None, description: str = None):
+    def __init__(self, description: str, logger=None, ):
         if logger is not None:
             self.logger = logger
         if description is not None:
@@ -61,7 +62,7 @@ class FeederHeadTerminalResolver(ReshapePostProcessor):
                     feeder.clear_current_equipment()
                     feeder.normal_head_terminal = None
 
-                    newIOs = cumulativeReshapes.originalToNew[headTerminal.mrid]
+                    newIOs = cumulativeReshapes.originalToNew[headTerminal.mrid].copy()
 
                     if len(newIOs) == 1:
                         io: IdentifiedObject = newIOs.pop()

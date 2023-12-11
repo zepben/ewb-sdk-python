@@ -1,6 +1,5 @@
-from typing import Dict, Set, TYPE_CHECKING
+from typing import Dict, Set
 
-from dataclassy import dataclass
 
 from zepben.evolve import IdentifiedObject
 

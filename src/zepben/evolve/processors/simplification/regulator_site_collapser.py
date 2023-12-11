@@ -6,8 +6,6 @@
 import logging
 from typing import List, Dict, Optional, Set, Callable
 
-from dataclassy import dataclass
-
 from zepben.evolve import normally_open, set_phases, NetworkService, Terminal, ConductingEquipment, PriorityQueue, PowerTransformer, TransformerFunctionKind, \
     connected_equipment, AcLineSegment, Switch, ConnectivityNode, phase_code_from_single_phases, IdentifiedObject, SinglePhaseKind, FeederDirection, PhaseCode, \
     normal_phases, current_phases, PowerTransformerEnd
@@ -15,7 +13,7 @@ from zepben.evolve.processors.simplification.conducting_equipment_remover import
 from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve.processors.simplification.reshaper import Reshaper
 
-
+__all__ = ["RegulatorSiteCollapser"]
 class Regulator:
     siteId: str = None
     isDistributed: bool = None
@@ -36,8 +34,8 @@ class RegulatorSiteCollapser(Reshaper):
     logger = logging.getLogger(__name__)
     openTest = normally_open
     feederDirectionProperty = None
-    getFeederDirectionProperty: Callable = None
-    setFeederDirectionProperty: Callable = None
+    getFeederDirectionProperty: Callable[[Terminal], FeederDirection] = lambda t: t.normal_feeder_direction
+    setFeederDirectionProperty: Callable[[Terminal, FeederDirection], None] = lambda t, d: setattr(t, "normal_feeder_direction", d)
     setPhases = set_phases()
 
     def __init__(self, logger=logging.getLogger(__name__), openTest=normally_open, feederDirectionProperty: str = "normal_feeder_direction"):

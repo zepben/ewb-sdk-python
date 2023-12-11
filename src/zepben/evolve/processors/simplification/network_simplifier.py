@@ -24,6 +24,8 @@ from zepben.evolve.processors.simplification.out_of_service_remover import OutOf
 from zepben.evolve.processors.simplification.regulator_site_collapser import RegulatorSiteCollapser
 from zepben.evolve.processors.simplification.topology_fixer import TopologyFixer
 
+__all__ = ["NetworkSimplifier", "temp_constructor_builder_thing"]
+
 
 class ProcessorsController:
 
@@ -63,7 +65,7 @@ class NetworkSimplifier(ProcessorsController):
     async def process(self, service: NetworkService):
         cumulativeReshape = Reshape({}, {})
 
-        reshapers = {rs for rs in {
+        reshapers = [rs for rs in [
             self._regulatorSiteCollapser,
             self._outOfServiceRemover,
             self._switchRemover,
@@ -71,12 +73,12 @@ class NetworkSimplifier(ProcessorsController):
             self._swerCollapser,
             self._commonImpedanceCombiner,
             self._topologyFixer
-        } if rs is not None}
+        ] if rs is not None]
 
-        reshapePostProcessors = { rpp for rpp in {
+        reshapePostProcessors = [rpp for rpp in [
             self._equipmentContainerFixer,
             self._feederHeadTerminalResolver
-        } if rpp is not None}
+        ] if rpp is not None]
 
         for reshaper in reshapers:
             cumulativeReshape += (await reshaper.process(service, cumulativeReshape))
@@ -85,6 +87,8 @@ class NetworkSimplifier(ProcessorsController):
             await reshapePostProcessor.process(service, cumulativeReshape)
 
         return cumulativeReshape
+
+
 def temp_constructor_builder_thing(
     networkState: NetworkState = NetworkState.Normal,
     keepSplitRegulators: bool = False,

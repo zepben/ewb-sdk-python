@@ -10,7 +10,7 @@ from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve import NetworkService, ConnectivityNode, Terminal
 from zepben.evolve.processors.simplification.reshaper import Reshaper
 
-
+__all__ = ["TopologyFixer"]
 class TopologyFixer(Reshaper):
 
     async def process(self, service: NetworkService, cumulativeReshapes: Reshape = None) -> Reshape:

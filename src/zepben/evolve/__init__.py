@@ -191,7 +191,6 @@ from zepben.evolve.streaming.grpc.grpc import *
 from zepben.evolve.streaming.grpc.grpc_channel_builder import *
 from zepben.evolve.streaming.grpc.connect import *
 
-
 from zepben.evolve.util import *
 
 from zepben.evolve.services.network.network_extensions import *
@@ -267,4 +266,14 @@ from zepben.evolve.database.sqlite.database_reader import *
 from zepben.evolve.testing.test_network_builder import *
 from zepben.evolve.testing.test_traversal import *
 
-from zepben.evolve.processors.simplification import *
+from zepben.evolve.processors.simplification.common_impedance_combiner import *
+from zepben.evolve.processors.simplification.conducting_equipment_remover import *
+from zepben.evolve.processors.simplification.equipment_container_fixer import *
+from zepben.evolve.processors.simplification.feeder_head_terminal_resolver import *
+from zepben.evolve.processors.simplification.negligible_impedance_collapser import *
+from zepben.evolve.processors.simplification.out_of_service_remover import *
+from zepben.evolve.processors.simplification.regulator_site_collapser import *
+from zepben.evolve.processors.simplification.swer_collapser import *
+from zepben.evolve.processors.simplification.switch_remover import *
+from zepben.evolve.processors.simplification.topology_fixer import *
+from zepben.evolve.processors.simplification.network_simplifier import *

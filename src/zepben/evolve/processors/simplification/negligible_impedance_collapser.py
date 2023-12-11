@@ -3,7 +3,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Optional, List, Callable, Set, Iterable, Collection
 
 from zepben.evolve.processors.simplification.reshape import Reshape
 
@@ -12,7 +11,7 @@ from zepben.evolve import NetworkService, ConnectivityNode, ConductingEquipment,
 from zepben.evolve.processors.simplification.reshaper import Reshaper
 from zepben.evolve.processors.simplification.utils import collapseGroupStartingFromNode
 
-
+__all__ = ["NegligibleImpedanceCollapser"]
 class NegligibleImpedanceCollapser(Reshaper):
     minLineResistance0hms: float
     minLineReactance0hms: float

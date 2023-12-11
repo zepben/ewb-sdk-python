@@ -5,9 +5,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Dict, Optional
 
-from services.network import tracing
-from zepben.evolve.types import PhaseSelector
-
 from zepben.evolve.processors.simplification.reshape import Reshape
 
 from zepben.evolve import NetworkService, BaseVoltage, PowerTransformer, TransformerFunctionKind, PowerTransformerEnd, PhaseCode, FeederDirection, LvFeeder, \

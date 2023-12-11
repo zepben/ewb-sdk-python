@@ -8,7 +8,7 @@ from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve import NetworkService, EquipmentContainer, Equipment
 from zepben.evolve.processors.simplification.reshape_post_processor import ReshapePostProcessor
 
-
+__all__ = ["EquipmentContainerFixer"]
 class EquipmentContainerFixer(ReshapePostProcessor):
 
     async def process(self, service: NetworkService, cumulativeReshapes: Reshape):

@@ -7,7 +7,7 @@ from typing import List, Callable, Set
 
 from dataclassy import dataclass
 
-from zepben.evolve import Equipment, NetworkService, Feeder, AcLineSegment, Terminal, ConnectivityNode, create_basic_depth_trace, BasicTraversal, \
+from zepben.evolve import NetworkService, Feeder, AcLineSegment, Terminal, ConnectivityNode, create_basic_depth_trace, BasicTraversal, \
     connected_terminals, PhaseCode, Location, CurrentPhases, NormalPhases
 from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve.processors.simplification.reshaper import Reshaper
@@ -97,10 +97,10 @@ class CommonImpedanceCombiner(Reshaper):
                 service.add(sumAcls)
 
                 if chain.startTerminal.connectivity_node is not None:
-                    service.connect(newStartTerminal, chain.startTerminal.connectivity_node)
+                    service.connect_by_mrid(newStartTerminal, chain.startTerminal.connectivity_node.mrid)
 
                 if chain.endTerminal.connectivity_node is not None:
-                    service.connect(newEndTerminal, chain.endTerminal.connectivity_node)
+                    service.connect_by_mrid(newEndTerminal, chain.endTerminal.connectivity_node.mrid)
 
                 self.setPhases.spread_phases(chain.startTerminal, newStartTerminal, NormalPhases)  # is that actually anything close to want I want?
                 self.setPhases.spread_phases(chain.startTerminal, newStartTerminal, CurrentPhases)
