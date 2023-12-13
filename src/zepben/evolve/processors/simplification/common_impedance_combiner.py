@@ -3,12 +3,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import List, Callable, Set
+from itertools import islice
+from typing import List, Callable, Set, Tuple
 
 from dataclassy import dataclass
 
 from zepben.evolve import NetworkService, Feeder, AcLineSegment, Terminal, ConnectivityNode, create_basic_depth_trace, BasicTraversal, \
-    connected_terminals, PhaseCode, Location, CurrentPhases, NormalPhases
+    connected_terminals, PhaseCode, Location, CurrentPhases, NormalPhases, PositionPoint
 from zepben.evolve.processors.simplification.utils import terminal_name_factory, ac_name_factory
 from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve.processors.simplification.reshaper import Reshaper
@@ -75,11 +76,11 @@ class CommonImpedanceCombiner(Reshaper):
                 service.add(newEndTerminal)
 
                 sumAcls = AcLineSegment("ac-"+str(ac_name_factory.get_name()))
-                sumLocations = Location()
-                for line in chain.lines:
-                    if line.location is not None:
-                        for point in line.location.points:
-                            sumLocations.add_point(point)
+                sumLocations = locationCombiner(chain)
+                #for line in chain.lines:
+                #    if line.location is not None:
+                #        for point in line.location.points:
+                #            sumLocations.add_point(point)
                 service.add(sumLocations)
                 sumAcls.location = sumLocations
 
@@ -179,3 +180,52 @@ async def commonImpedanceChain(acls: AcLineSegment, inServiceTest: Callable[[AcL
     forwardLines = [term.conducting_equipment for term in forwardTerminals if isinstance(term.conducting_equipment, AcLineSegment)]
     backwardLines.reverse()
     return LineChain(lines=backwardLines + forwardLines[1:], startTerminal=backwardTerminals[-1], endTerminal=forwardTerminals[-1])
+
+
+def locationCombiner(chain: LineChain) -> Location:
+    newLocation = Location()
+
+    class StartEnd:
+        def __init__(self, start: PositionPoint, end: PositionPoint):
+            self.start = start
+            self.end = end
+
+    locations2: List[Tuple[StartEnd, List[PositionPoint]]] = []
+
+    for line in chain.lines:
+        if line.location is not None:
+            if line.location.num_points() > 0:
+                points = list(line.location.points)
+                locations2.append((StartEnd(start=points[0], end=points[-1]), points))
+
+    if len(locations2) < 2:
+        for location in locations2:
+            for p in location[1]:
+                newLocation.add_point(p)
+        return newLocation
+
+    if locations2[0][0].end in [locations2[1][0].start, locations2[1][0].end]:
+        for point in reversed(locations2[0][1]):
+            newLocation.add_point(point)
+    else:
+        for point in locations2[0][1]:
+            newLocation.add_point(point)
+
+    for location in locations2[1:]:
+        last = list(newLocation.points)[-1]
+        if location[0].end == last:
+            for p in islice(reversed(location[1]), 1, None):
+                newLocation.add_point(p)
+        else:
+            if location[0].start == last:
+                for p in islice(location[1], 1, None):
+                    newLocation.add_point(p)
+            else:
+                for p in islice(location[1], 0, None):
+                    newLocation.add_point(p)
+
+    return newLocation
+
+
+
+
