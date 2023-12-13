@@ -267,6 +267,8 @@ class RegulatorSiteCollapser(Reshaper):
             end.ratio_tap_changer = oldEnd.ratio_tap_changer
             if oldEnd.ratio_tap_changer is not None:
                 oldEnd.ratio_tap_changer.transformer_end = end
+                if oldEnd.ratio_tap_changer.tap_changer_control is not None:
+                    oldEnd.ratio_tap_changer.tap_changer_control.terminal = end.terminal
             end.star_impedance = oldEnd.star_impedance
             end.b = oldEnd.b
             end.b0 = oldEnd.b0
@@ -276,11 +278,12 @@ class RegulatorSiteCollapser(Reshaper):
             end.phase_angle_clock = oldEnd.phase_angle_clock
             end.r = oldEnd.r
             end.r0 = oldEnd.r0
-            end.rated_u = oldEnd
+            end.rated_u = oldEnd.rated_u
             end.x = oldEnd.x
             end.x0 = oldEnd.x0
             for rating in oldEnd.s_ratings:
                 end.add_transformer_end_rated_s(rating)
+            service.remove(oldEnd)
 
 
 
@@ -334,7 +337,13 @@ class RegulatorSiteCollapser(Reshaper):
                 removedMRIDs.add(terminal.connectivity_node.mrid)
             service.disconnect(terminal)
             service.connect_by_mrid(terminal, connectingNode.mrid)
-
+        for end in removedRegulator.ends:
+            end.clear_ratings()
+            if end.ratio_tap_changer is not None:
+                if end.ratio_tap_changer.tap_changer_control is not None:
+                    service.remove(end.ratio_tap_changer.tap_changer_control)
+                service.remove(end.ratio_tap_changer)
+            service.remove(end)
         return connectingNode
 
     def pruneCandidateTerminals(self, service: NetworkService, siteId: str, terminals: Set[Terminal]):
@@ -423,6 +432,17 @@ class RegulatorSiteCollapser(Reshaper):
         if regulator is not None:
             for terminal in regulator.terminals:
                 terminal.phases = phase_code_from_single_phases(regulatorPhases)
+
+        for asset in childAssets:
+            if isinstance(asset, PowerTransformer) and asset is not regulator:
+                for end in asset.ends:
+                    end.clear_ratings()
+                    if end.ratio_tap_changer is not None:
+                        if end.ratio_tap_changer.tap_changer_control is not None:
+                            service.remove(end.ratio_tap_changer.tap_changer_control)
+                        service.remove(end.ratio_tap_changer)
+                    service.remove(end)
+
 
         return regulator
 

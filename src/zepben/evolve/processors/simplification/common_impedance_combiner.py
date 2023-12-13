@@ -9,6 +9,7 @@ from dataclassy import dataclass
 
 from zepben.evolve import NetworkService, Feeder, AcLineSegment, Terminal, ConnectivityNode, create_basic_depth_trace, BasicTraversal, \
     connected_terminals, PhaseCode, Location, CurrentPhases, NormalPhases
+from zepben.evolve.processors.simplification.utils import terminal_name_factory, ac_name_factory
 from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve.processors.simplification.reshaper import Reshaper
 from zepben.evolve.services.network.tracing import tracing
@@ -37,7 +38,8 @@ class CommonImpedanceCombiner(Reshaper):
         importantNodes = set()
         for feeder in service.objects(Feeder):
             if feeder.normal_head_terminal is not None:
-                if feeder.normal_head_terminal.mrid in cumulativeReshapes.originalToNew and cumulativeReshapes.originalToNew[feeder.normal_head_terminal.mrid] is not None:
+                if feeder.normal_head_terminal.mrid in cumulativeReshapes.originalToNew and cumulativeReshapes.originalToNew[
+                    feeder.normal_head_terminal.mrid] is not None:
                     tmp = list(cumulativeReshapes.originalToNew[feeder.normal_head_terminal.mrid])
                     if len(tmp) > 0:
                         if isinstance(tmp[0], ConnectivityNode):
@@ -56,13 +58,13 @@ class CommonImpedanceCombiner(Reshaper):
             if len(chain.lines) > 1:
                 chainRep = chain.lines[0]
 
-                newStartTerminal = Terminal()
+                newStartTerminal = Terminal("t-"+str(terminal_name_factory.get_name()))
                 newStartTerminal.phases = chain.startTerminal.phases
                 newStartTerminal.current_feeder_direction = chain.startTerminal.current_feeder_direction
                 newStartTerminal.normal_feeder_direction = chain.startTerminal.normal_feeder_direction
                 service.add(newStartTerminal)
 
-                newEndTerminal = Terminal()
+                newEndTerminal = Terminal("t-"+str(terminal_name_factory.get_name()))
                 newEndTerminal.phases = chain.endTerminal.phases
                 newEndTerminal.current_feeder_direction = chain.endTerminal.current_feeder_direction
                 newEndTerminal.normal_feeder_direction = chain.endTerminal.normal_feeder_direction
@@ -72,7 +74,7 @@ class CommonImpedanceCombiner(Reshaper):
 
                 service.add(newEndTerminal)
 
-                sumAcls = AcLineSegment()
+                sumAcls = AcLineSegment("ac-"+str(ac_name_factory.get_name()))
                 sumLocations = Location()
                 for line in chain.lines:
                     if line.location is not None:
@@ -116,7 +118,10 @@ class CommonImpedanceCombiner(Reshaper):
                     for terminal in line.terminals:
                         if terminal.connectivity_node is not None:
                             mapsToLine.append(terminal.connectivity_node.mrid)
-                            service.remove(terminal.connectivity_node)
+                            try:
+                                service.remove(terminal.connectivity_node)
+                            except KeyError:
+                                pass  # it's expected we may try to remove the same connectivity node multiple times
                         mapsToLine.append(terminal.mrid)
                         service.remove(terminal)
                     mapsToLine.append(line.mrid)

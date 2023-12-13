@@ -1387,7 +1387,13 @@ def transformer_end_rated_s_to_cim(pb: PBTransformerEndRatedS) -> Optional[Trans
 
 def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_service: NetworkService) -> Optional[TransformerStarImpedance]:
     # noinspection PyArgumentList
-    cim = TransformerStarImpedance(mrid=pb.mrid(), r=pb.r, r0=pb.r0, x=pb.x, x0=pb.x0)
+    cim = TransformerStarImpedance(
+        mrid=pb.mrid(),
+        r=float_or_none(pb.r),
+        r0=float_or_none(pb.r0),
+        x=float_or_none(pb.x),
+        x0=float_or_none(pb.x0)
+    )
 
     network_service.resolve_or_defer_reference(resolver.star_impedance_transformer_end_info(cim), pb.transformerEndInfoMRID)
 

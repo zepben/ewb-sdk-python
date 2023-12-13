@@ -7,6 +7,28 @@ from typing import Optional, Collection, List, Set, Callable
 
 from zepben.evolve import NetworkService, ConnectivityNode, IdentifiedObject, Terminal, Traversal, BasicTraversal, create_basic_depth_trace
 
+class Counter:
+    def __init__(self, start=0):
+        self.count = start
+
+    def next(self):
+        old = self.count
+        self.count += 1
+        return old
+
+
+class NameFactory():
+
+    def __init__(self):
+        self.counter = Counter()
+
+    def get_name(self):
+        return self.counter.next()
+
+
+terminal_name_factory = NameFactory()
+cn_name_factory = NameFactory()
+ac_name_factory = NameFactory()
 
 def collapseIntoConnectivityNode(service: NetworkService,
                                  outerTerminals: Collection[Terminal],
@@ -16,7 +38,7 @@ def collapseIntoConnectivityNode(service: NetworkService,
     if len(innerObjects) <= 1:
         return None
 
-    collapsedNode = ConnectivityNode()
+    collapsedNode = ConnectivityNode("cn-"+str(cn_name_factory.get_name()))
     service.add(collapsedNode)
     simplifiedObjects = {collapsedNode}
 

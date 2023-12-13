@@ -250,8 +250,10 @@ class BaseService(object, metaclass=ABCMeta):
                 if from_.mrid in self._unresolved_references_to:
                     # noinspection PyArgumentList
                     to_remove = UnresolvedReference(from_ref=to, to_mrid=from_.mrid, resolver=reverse_resolver)
-                    self._unresolved_references_to[from_.mrid].remove(to_remove)
-                    self._unresolved_references_from[to_remove.from_ref.mrid].remove(to_remove)
+                    if to_remove in self._unresolved_references_to[from_.mrid]:
+                        self._unresolved_references_to[from_.mrid].remove(to_remove)
+                    if to_remove in self._unresolved_references_from[to_remove.from_ref.mrid]:
+                        self._unresolved_references_from[to_remove.from_ref.mrid].remove(to_remove)
                     if not self._unresolved_references_from[to_remove.from_ref.mrid]:
                         del self._unresolved_references_from[to_remove.from_ref.mrid]
                     if not self._unresolved_references_to[from_.mrid]:

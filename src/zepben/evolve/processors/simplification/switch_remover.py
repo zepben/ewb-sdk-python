@@ -5,6 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from zepben.evolve import NetworkService, Switch, Junction, Terminal, normally_open
 from zepben.evolve.processors.simplification.conducting_equipment_remover import removeEquipment
+from zepben.evolve.processors.simplification.utils import terminal_name_factory
 from zepben.evolve.processors.simplification.reshape import Reshape
 from zepben.evolve.processors.simplification.reshaper import Reshaper
 
@@ -29,7 +30,7 @@ class SwitchRemover(Reshaper):
                 newJuction = Junction()
                 service.add(newJuction)
                 for terminal in switch.terminals:
-                    newTerminal = Terminal()
+                    newTerminal = Terminal("t-"+str(terminal_name_factory.get_name()))
                     service.add(newTerminal)
                     newJuction.add_terminal(newTerminal)
                     if terminal.connectivity_node is not None:

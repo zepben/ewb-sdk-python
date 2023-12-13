@@ -56,7 +56,7 @@ class FeederHeadTerminalResolver(ReshapePostProcessor):
             if feeder.normal_head_terminal is not None:
                 headTerminal = feeder.normal_head_terminal
                 if headTerminal.mrid in cumulativeReshapes.originalToNew and cumulativeReshapes.originalToNew[headTerminal.mrid] is not None:
-                    equipment = list(feeder.equipment)  # not sure if this is needed
+                    equipment = list(feeder.equipment)
                     current_equipment = list(feeder.current_equipment)
                     feeder.clear_equipment()
                     feeder.clear_current_equipment()

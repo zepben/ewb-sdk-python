@@ -27,6 +27,7 @@ from zepben.evolve.processors.simplification.topology_fixer import TopologyFixer
 __all__ = ["NetworkSimplifier", "temp_constructor_builder_thing"]
 
 
+
 class ProcessorsController:
 
     @abstractmethod
@@ -101,11 +102,11 @@ def temp_constructor_builder_thing(
             openTest=currently_open if networkState == NetworkState.Current else normally_open,
             feederDirectionProperty="current_feeder_direction" if networkState == NetworkState.Current else "normal_feeder_direction"
         ) if not keepSplitRegulators else None,
-        OutOfServiceRemover(lambda ce: ce.in_service if networkState == NetworkState.Current else lambda ce: ce.normally_in_service),
-        SwitchRemover(currently_open if networkState == NetworkState.Current else normally_open) if keepSwitches else None,
+        OutOfServiceRemover((lambda ce: ce.in_service) if networkState == NetworkState.Current else (lambda ce: ce.normally_in_service)),
+        SwitchRemover(currently_open if networkState == NetworkState.Current else normally_open) if not keepSwitches else None,
         NegligibleImpedanceCollapser(minLineResistance0hms, minLineReactance0hms),
         SwerCollapser(collapsedSwerVoltage) if collapsedSwerVoltage is not None else None,
-        CommonImpedanceCombiner(lambda ce: ce.in_service if networkState == NetworkState.Current else lambda ce: ce.normally_in_service),
+        CommonImpedanceCombiner((lambda ce: ce.in_service) if networkState == NetworkState.Current else (lambda ce: ce.normally_in_service)),
         TopologyFixer(),
         EquipmentContainerFixer(),
         FeederHeadTerminalResolver(
