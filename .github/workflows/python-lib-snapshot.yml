@@ -10,4 +10,7 @@ on:
 jobs:
   run:
     uses: zepben/.github/.github/workflows/python-lib-snapshot.yml@main
+    with:
+      product-key: "python-sdk"   # Must be unique
+      product-repo: "zepben/evolve-sdk-python"   # Must be unique
     secrets: inherit
