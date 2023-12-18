@@ -116,7 +116,7 @@ async def test_replaces_closed_switch_with_junctions():
 
     what_it_did = await SwitchRemover().process(test_network)
 
-    junction = list(what_it_did.originalToNew["b1"])[0]
+    junction: Junction = list(what_it_did.originalToNew["b1"])[0]
 
     assert list(test_network.objects(Switch)) == []
     assert list(test_network.objects(Junction)) == [junction]
@@ -125,9 +125,9 @@ async def test_replaces_closed_switch_with_junctions():
     assert what_it_did.originalToNew == {"b1": {junction},
                                          "b1-t1": {junction.get_terminal_by_sn(1)},
                                          "b1-t2": {junction.get_terminal_by_sn(2)}}
-    assert what_it_did.newToOriginal == {junction: {"b1"},
-                                         junction.get_terminal_by_sn(1): {"b1-t1"},
-                                         junction.get_terminal_by_sn(2): {"b1-t2"}}
+    assert what_it_did.newToOriginal == {junction.mrid: {"b1"},
+                                         junction.get_terminal_by_sn(1).mrid: {"b1-t1"},
+                                         junction.get_terminal_by_sn(2).mrid: {"b1-t2"}}
 
 
 @pytest.mark.asyncio

@@ -41,7 +41,7 @@ class TestFeederHeadTerminalResolver:
         self.before_test()
         await FeederHeadTerminalResolver(self.issues).process(self.service,
                                                               Reshape({"oldHeadTerminal": {self.newHeadTerminal}},
-                                                                      {self.newHeadTerminal: {"oldHeadTerminal"}}))
+                                                                      {self.newHeadTerminal.mrid: {"oldHeadTerminal"}}))
         assert self.feeder.normal_head_terminal is self.newHeadTerminal
         self.verifyContainedEquipmentAndIssues()
 
@@ -51,7 +51,7 @@ class TestFeederHeadTerminalResolver:
         self.before_test()
         await FeederHeadTerminalResolver(self.issues).process(self.service,
                                                               Reshape({"oldHeadTerminal": {self.cn}},
-                                                                      {self.cn: {"oldHeadTerminal"}}))
+                                                                      {self.cn.mrid: {"oldHeadTerminal"}}))
         assert self.feeder.normal_head_terminal is self.newHeadTerminal
         self.verifyContainedEquipmentAndIssues()
 
@@ -74,7 +74,7 @@ class TestFeederHeadTerminalResolver:
         self.before_test()
         await FeederHeadTerminalResolver(self.issues).process(self.service,
                                                               Reshape({"oldHeadTerminal": {self.newHeadTerminal, self.cn}},
-                                                                      {self.cn: {"oldHeadTerminal"}, self.newHeadTerminal: {"oldHeadTerminal"}}))
+                                                                      {self.cn.mrid: {"oldHeadTerminal"}, self.newHeadTerminal: {"oldHeadTerminal"}}))
 
         assert self.feeder.normal_head_terminal is None
         self.issues.headTerminalMappedToMultipleObjects.track.assert_called_once_with("Feeder fdr's head terminal oldHeadTerminal was replaced by multiple "
@@ -87,7 +87,7 @@ class TestFeederHeadTerminalResolver:
         self.before_test()
         await FeederHeadTerminalResolver(self.issues).process(self.service,
                                                               Reshape({"oldHeadTerminal": {self.breaker}},
-                                                                      {self.breaker: {"oldHeadTerminal"}}))
+                                                                      {self.breaker.mrid: {"oldHeadTerminal"}}))
 
         assert self.feeder.normal_head_terminal is None
         self.issues.headTerminalMappedToInvalidObject.track.assert_called_once_with("Feeder fdr's head terminal oldHeadTerminal was replaced by something "
@@ -102,7 +102,7 @@ class TestFeederHeadTerminalResolver:
         self.newHeadTerminal.normal_feeder_direction = FeederDirection.UPSTREAM
         await FeederHeadTerminalResolver(self.issues).process(self.service,
                                                               Reshape({"oldHeadTerminal": {self.cn}},
-                                                                      {self.cn: {"oldHeadTerminal"}}))
+                                                                      {self.cn.mrid: {"oldHeadTerminal"}}))
 
         assert self.feeder.normal_head_terminal is None
         self.issues.noValidTerminalFoundForTargetNode.track.assert_called_once_with("Feeder fdr's head terminal oldHeadTerminal was replaced by connectivity "
@@ -117,7 +117,7 @@ class TestFeederHeadTerminalResolver:
         self.newHeadTerminal.normal_feeder_direction = FeederDirection.UPSTREAM
         await FeederHeadTerminalResolver(self.issues, "current_feeder_direction").process(self.service,
                                                                                           Reshape({"oldHeadTerminal": {self.cn}},
-                                                                                                  {self.cn: {"oldHeadTerminal"}}))
+                                                                                                  {self.cn.mrid: {"oldHeadTerminal"}}))
 
         assert self.feeder.normal_head_terminal is self.newHeadTerminal
         self.verifyContainedEquipmentAndIssues()

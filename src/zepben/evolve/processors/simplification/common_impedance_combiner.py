@@ -136,9 +136,9 @@ class CommonImpedanceCombiner(Reshaper):
                 for mrid in mapsToLine:
                     originalToSimplified[mrid] = {sumAcls}
 
-                simplifiedToOriginal[newStartTerminal] = {chain.startTerminal.mrid}
-                simplifiedToOriginal[newEndTerminal] = {chain.endTerminal.mrid}
-                simplifiedToOriginal[sumAcls] = mapsToLine
+                simplifiedToOriginal[newStartTerminal.mrid] = {chain.startTerminal.mrid}
+                simplifiedToOriginal[newEndTerminal.mrid] = {chain.endTerminal.mrid}
+                simplifiedToOriginal[sumAcls.mrid] = mapsToLine
 
         return Reshape(originalToSimplified, simplifiedToOriginal)
 

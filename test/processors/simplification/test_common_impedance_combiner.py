@@ -39,9 +39,9 @@ async def test_combine_common_impedance_lines():
     assert what_it_did.originalToNew["c0-t1"] != what_it_did.originalToNew["c1-t2"]
     for thing in {"c0", "c0-t2", "generated_cn_0", "c1-t1", "c1"}:
         assert what_it_did.originalToNew[thing] == {combinedLine}
-    assert what_it_did.newToOriginal[combinedLineT1] == {"c0-t1"}
-    assert what_it_did.newToOriginal[combinedLineT2] == {"c1-t2"}
-    assert what_it_did.newToOriginal[combinedLine] == {"c0", "c0-t2", "generated_cn_0", "c1-t1", "c1"}
+    assert what_it_did.newToOriginal[combinedLineT1.mrid] == {"c0-t1"}
+    assert what_it_did.newToOriginal[combinedLineT2.mrid] == {"c1-t2"}
+    assert what_it_did.newToOriginal[combinedLine.mrid] == {"c0", "c0-t2", "generated_cn_0", "c1-t1", "c1"}
 
 
 @pytest.mark.timeout(324234)

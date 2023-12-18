@@ -69,4 +69,4 @@ async def test_attempt_to_copy_kotlin_test_network():
     assert test_network.get("tx2-e3").base_voltage == bv430
 
     assert what_it_did.originalToNew.keys() >= {"c4", "tx5", "c6", "j7", "c8", "c10"}
-    assert what_it_did.newToOriginal[swerTerminal.connectivity_node] >= {"c4", "tx5", "c6", "j7", "c8", "c10"}
+    assert what_it_did.newToOriginal[swerTerminal.connectivity_node.mrid] >= {"c4", "tx5", "c6", "j7", "c8", "c10"}

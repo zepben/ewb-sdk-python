@@ -20,7 +20,7 @@ class NegligibleImpedanceCollapser(Reshaper):
         self.minLineResistance0hms = minLineResistance0hms
         self.minLineReactance0hms = minLineReactance0hms
 
-    async def process(self, service: [NetworkService], cumulativeReshapes: [Reshape] = None) -> Reshape:
+    async def process(self, service: NetworkService, cumulativeReshapes: [Reshape] = None) -> Reshape:
         originalToSimplified = dict()
         simplifiedToOriginal = dict()
 

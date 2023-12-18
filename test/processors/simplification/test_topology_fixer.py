@@ -40,7 +40,7 @@ class TestTopologyFixer:
         cn = next(service.objects(ConnectivityNode))
         assert terminal.connectivity_node is cn
         assert result.originalToNew == {}
-        assert result.newToOriginal == {cn: set()}
+        assert result.newToOriginal == {cn.mrid: set()}
 
     @pytest.mark.timeout(324234)
     @pytest.mark.asyncio

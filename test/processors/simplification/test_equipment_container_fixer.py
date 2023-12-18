@@ -33,7 +33,7 @@ class TestEquipmentContainerFixer:
 
         reshape = Reshape(
             originalToNew={"og1": {new1, new2}, "og2": set()},
-            newToOriginal={new1: {"og1"}, new2: {"og1"}}
+            newToOriginal={new1.mrid: {"og1"}, new2.mrid: {"og1"}}
         )
         await EquipmentContainerFixer().process(service, reshape)
 
@@ -60,7 +60,7 @@ class TestEquipmentContainerFixer:
 
         reshape = Reshape(
             originalToNew={"og1": {new1, new2}, "og2": set()},
-            newToOriginal={new1: {"og1"}, new2: {"og1"}}
+            newToOriginal={new1.mrid: {"og1"}, new2.mrid: {"og1"}}
         )
         await EquipmentContainerFixer().process(service, reshape)
 

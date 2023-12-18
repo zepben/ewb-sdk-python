@@ -47,4 +47,4 @@ class TopologyFixer(Reshaper):
                 removedMRIDs.add(cn.mrid)
                 service.remove(cn)
 
-        return Reshape({mrid: set() for mrid in removedMRIDs}, {node: set() for node in addedNodes})
+        return Reshape({mrid: set() for mrid in removedMRIDs}, {node.mrid: set() for node in addedNodes})

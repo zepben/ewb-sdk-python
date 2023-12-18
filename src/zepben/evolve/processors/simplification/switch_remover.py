@@ -36,9 +36,9 @@ class SwitchRemover(Reshaper):
                     if terminal.connectivity_node is not None:
                         service.connect_by_mrid(newTerminal, terminal.connectivity_node.mrid)
                         originalToSimplified[terminal.mrid] = {newTerminal}
-                        simplifiedToOriginal[newTerminal] = {terminal.mrid}
+                        simplifiedToOriginal[newTerminal.mrid] = {terminal.mrid}
                 originalToSimplified[switch.mrid] = {newJuction}
-                simplifiedToOriginal[newJuction] = {switch.mrid}
+                simplifiedToOriginal[newJuction.mrid] = {switch.mrid}
                 removeEquipment(switch, service)
             else:
                 for removedIO in removeEquipment(switch, service):

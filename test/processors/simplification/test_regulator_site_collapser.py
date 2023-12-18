@@ -105,7 +105,7 @@ class TestRegulatorSiteCollapser:
         for mRID in originalMRIDs:
             newObjects = reshape.originalToNew[mRID]
             assert newObject in newObjects
-        assert set(reshape.newToOriginal[newObject]) >= set(originalMRIDs)
+        assert set(reshape.newToOriginal[newObject.mrid]) >= set(originalMRIDs)
 
     def verifyEnds(self, regulatorMRID: str, t1ConnectedMRID: str, t2ConnectedMRID: str, rPrimary: float, rSecondary: float):
         reg: PowerTransformer = self.network.get(regulatorMRID)

@@ -45,7 +45,7 @@ async def test_collapses_simple_group():
     assert what_it_did.newToOriginal[node] == expected_removed_mrids
     assert set(what_it_did.originalToNew.keys()) == expected_removed_mrids
     for value in what_it_did.originalToNew.values():
-        assert value == {node}
+        assert value == {test_network.get(node)}
 
 
 @pytest.mark.timeout(324234)
@@ -71,7 +71,7 @@ async def test_collapses_group_at_edge():
     assert what_it_did.newToOriginal[node] == expected_removed_mrids
     assert set(what_it_did.originalToNew.keys()) == expected_removed_mrids
     for value in what_it_did.originalToNew.values():
-        assert value == {node}
+        assert value == {test_network.get(node)}
 
 
 @pytest.mark.timeout(324234)
@@ -107,7 +107,7 @@ async def test_preserves_lines_connected_to_shunt_compensator():
     assert what_it_did.newToOriginal[node] == expected_removed_mrids
     assert set(what_it_did.originalToNew.keys()) == expected_removed_mrids
     for value in what_it_did.originalToNew.values():
-        assert value == {node}
+        assert value == {test_network.get(node)}
 
 
 def _acls_setup(acls: AcLineSegment, plsi: PerLengthSequenceImpedance = None, length: float = None):

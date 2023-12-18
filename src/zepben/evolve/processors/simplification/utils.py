@@ -50,7 +50,7 @@ def collapseIntoConnectivityNode(service: NetworkService,
         service.remove(io)
         originalToSimplified[io.mrid] = simplifiedObjects
 
-    simplifiedToOriginal[collapsedNode] = {io.mrid for io in innerObjects}
+    simplifiedToOriginal[collapsedNode.mrid] = {io.mrid for io in innerObjects}
     return collapsedNode
 
 

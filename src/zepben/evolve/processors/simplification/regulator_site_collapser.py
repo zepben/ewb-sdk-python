@@ -53,7 +53,7 @@ class RegulatorSiteCollapser(Reshaper):
         self.sortAssetsBySite(service, regulatorSites, candidateTerminalsBySite, assetsBySite)
 
         originalToSimplified: Dict[str, Set[IdentifiedObject]] = {}
-        simplifiedToOriginal: Dict[IdentifiedObject, Set[str]] = {}
+        simplifiedToOriginal: Dict[str, Set[str]] = {}
 
         for regulator in regulatorSites:
             candidateTerminals: Set[Terminal] = set()
@@ -69,7 +69,7 @@ class RegulatorSiteCollapser(Reshaper):
                 for mRIDS in removedMRIDs:
                     originalToSimplified[mRIDS] = addedObjects
                 for io in addedObjects:
-                    simplifiedToOriginal[io] = removedMRIDs
+                    simplifiedToOriginal[io.mrid] = removedMRIDs
 
         return Reshape(originalToSimplified, simplifiedToOriginal)
 
