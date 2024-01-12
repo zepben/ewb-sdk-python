@@ -12,13 +12,13 @@ build your own solutions from scratch that will be compatible with other things 
 
 ## CIM Model
 
-The Evolve platform is composed around a domain model based on the 'Common Information Model' (CIM). The CIM is a very
-large standard that covers a huge amount of use cases. To make things more digestible, Evolve publishes its own CIM
-profile. CIM profiles are subsets of the whole CIM standard that dictates which parts of the model are in use. Evolve
+The EWB platform is composed around a domain model based on the 'Common Information Model' (CIM). The CIM is a very
+large standard that covers a huge amount of use cases. To make things more digestible, Zepben publishes its own CIM
+profile. CIM profiles are subsets of the whole CIM standard that dictates which parts of the model are in use. EWB
 publishes its model at [https://zepben.github.io/evolve/docs/cim/evolve/](https://zepben.github.io/evolve/docs/cim/evolve/).
 
-If the Evolve profile doesn't contain a part of CIM that you require for your use case, you can request or propose a change to the model
-by starting a discussion at the [Evolve GitHub discussions](https://github.com/zepben/evolve/discussions) or by contacting Zepben directly at <https://www.zepben.com/contact>.
+If the EWB profile doesn't contain a part of CIM that you require for your use case, you can request or propose a change to the model
+by starting a discussion at the [GitHub discussions](https://github.com/zepben/evolve/discussions) or by contacting Zepben directly at <https://www.zepben.com/contact>.
 
 ## Getting Started With The Model
 
@@ -154,12 +154,15 @@ In electricity distribution networks, a model is typically made up of groups of 
 sections of the network. For example things like: feeder, zone (substation), transmission line etc. The terminology 
 differs within the industry, however CIM provides types of 
 [EquipmentContainer](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/EquipmentContainer) to allow you to
-group equipment into the above types of categories. You can refer to the Evolve profile CIM profile for all supported equipment 
+group equipment into the above types of categories. You can refer to the EWB CIM profile for all supported equipment
 container types in the model, however the most common ones are:
 
 - [Line](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Wires/Line/)
 - [Substation](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/Substation/)
 - [Feeder](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/Feeder/)
+
+We also extend CIM to provide an extension of the hierarchy to an `LvFeeder`, representing LV equipment underneath
+a distribution transformer.
 
 ### Network Hierarchy
 
@@ -168,7 +171,7 @@ When creating a `Substation` you will see that it can belong to a
 `SubGeogrpahicalRegion` can belong to a 
 [GeographicalRegion](https://zepben.github.io/evolve/docs/cim/evolve/IEC61970/Base/Core/GeographicalRegion).
 
-When using various parts of the Evolve platform, it will refer to the concept of a network hierarchy. This is the 
+When using various parts of the EWB platform, it will refer to the concept of a network hierarchy. This is the
 mechanism used to chunk up the network and provides an overview of what makes up the model. The network hierarchy looks
 as follows:
 
@@ -176,9 +179,27 @@ as follows:
   * SubGeographicalRegion
     * Substation
       * Feeder
+        * LvFeeder
 
-When working with the Evolve Platform, it is important to make sure equipment and equipment containers are correctly
+When working with the EWB Platform, it is important to make sure equipment and equipment containers are correctly
 populated as there are assumptions built around the network being structured in this pattern.
+
+### Names and IDs
+
+ As everything in our model is ultimately an IdentifiedObject, it can have one or many "names" associated with it.
+ The `IdentifiedObject.name` property is typically treated as a user-friendly name for a particular object. It is not a required field, and will
+ default to an empty string if left unset. If set, it should be considered a presentation field for displaying in UI's or for providing context
+ for an object. It should be avoided for storing any sort of information or metadata about an object beyond a human readable name.
+
+ Sometimes a need will arise to store extra IDs or metadata about a specific object alongside it's existing `mRID` and `name`. For example these could be IDs
+ for separate systems (e.g GIS, DMS), or NMI's associated with the object.
+ To store this information we recommend storing additional "names" via the `IdentifiedObject.names` field utilising `NameType`s. Extra names are not
+ considered presentation fields, and thus can have more structured string data within them.
+
+ To add extra names to an IdentifiedObject, utilise the `addName` function:
+
+ IdentifiedObject.add_name([str], [NameType])
+ The [str] represents the etra name given to the [IdentifiedObject] and [NameType] is the [NameType] object representing the type of this name.
 
 ### Feeders
 

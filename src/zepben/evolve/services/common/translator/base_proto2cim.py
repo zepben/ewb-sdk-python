@@ -8,7 +8,6 @@ from typing import Optional
 
 from dataclassy import dataclass
 # noinspection PyPackageRequirements
-from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole
 from zepben.protobuf.cim.iec61968.common.Organisation_pb2 import Organisation as PBOrganisation
@@ -65,7 +64,7 @@ def identified_object_to_cim(pb: PBIdentifiedObject, cim: IdentifiedObject, serv
     cim.mrid = pb.mRID
     cim.name = pb.name
     cim.description = pb.description
-    [cim.add_name(name_to_cim(name, cim, service)) for name in pb.names]
+    [cim.add_name(name.name, name_to_cim(name, cim, service).type) for name in pb.names]
 
 
 def name_to_cim(pb: PBName, io: IdentifiedObject, service: BaseService):

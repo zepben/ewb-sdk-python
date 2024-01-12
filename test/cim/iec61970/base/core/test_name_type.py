@@ -5,10 +5,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
 
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from hypothesis import given
 from hypothesis.strategies import text
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import Junction
 
@@ -98,6 +98,7 @@ def test_get_names():
     n2 = nt.get_or_add_name("n2", j2)
 
     assert Counter(list(nt.get_names("n1"))) == Counter({n1a, n1b})
+    assert Counter([entry for entries in list(nt.get_names(j2)) for entry in entries]) == Counter({n1b, n2})
     assert list(nt.get_names("n2")) == [n2]
     assert not list(nt.get_names("n3"))
 

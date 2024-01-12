@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta
-from typing import Callable, Any, List, Generator, Optional
+from typing import Callable, Any, List, Generator, Optional, overload
 
 from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
+from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.util import require, CopyableUUID, nlen, ngen, safe_remove
 
 __all__ = ["IdentifiedObject"]
@@ -47,7 +48,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         super(IdentifiedObject, self).__init__(**kwargs)
         if names:
             for name in names:
-                self.add_name(name)
+                self.add_name(name.name, name.type)
 
     def __str__(self):
         return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), str(self.name)) if a)}}}"
@@ -61,7 +62,15 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         """Get the number of entries in the `Name` collection."""
         return nlen(self._names)
 
+    @overload
+    def get_name(self, name_type: NameType, name: str) -> Optional[Name]:
+        ...
+
+    @overload
     def get_name(self, name_type: str, name: str) -> Optional[Name]:
+        ...
+
+    def get_name(self, name_type, name):
         """
         Find the `Name` with the matching `name_type` and `name`
 
@@ -69,42 +78,73 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         """
         if self._names:
             for name_ in self._names:
-                if name_.type.name == name_type and name_.name == name:
-                    return name_
+                if isinstance(name_type, str):
+                    if name_.type.name == name_type and name_.name == name:
+                        return name_
+                elif isinstance(name_type, NameType):
+                    if name_.type == name_type and name_.name == name:
+                        return name_
         return None
 
-    def add_name(self, name: Name) -> IdentifiedObject:
+    @overload
+    def get_names(self, name_type: NameType) -> Optional[Name]:
+        ...
+
+    @overload
+    def get_names(self, name_type: str) -> Optional[Name]:
+        ...
+
+    def get_names(self, name_type):
+        """
+        Find all `Name` with the matching `name_type`
+
+        :return: A list of matching Name or None
+        """
+        if self._names:
+            if isinstance(name_type, str):
+                return [name for name in self._names if name.type.name == name_type]
+            elif isinstance(name_type, NameType):
+                return [name for name in self._names if name.type == name_type]
+        return None
+
+    def add_name(self, name: str, name_type: NameType) -> IdentifiedObject:
         """
         Associate a `Name` with this `IdentifiedObject`
 
-        :param name: The `Name` to associate with this `IdentifiedObject`.
+        :param name: A free string to associate with this `IdentifiedObject`.
+        :param name_type: A `NameType` this `Name` belongs to.
         :return: A reference to this `IdentifiedObject` to allow fluent use.
         :raise ValueError: If `name` references another `IdentifiedObject`, or another `Name` already exists with the matching `type` and `name`.
         """
-        if not name.identified_object:
-            name.identified_object = self
-        require(name.identified_object is self, lambda: f"Attempting to add a Name to {str(self)} that does not reference this identified object")
 
-        existing = self.get_name(name.type.name, name.name)
+        name_obj = name_type.get_or_add_name(name, self)
+
+        if not name_obj.identified_object:
+            name_obj.identified_object = self
+        require(name_obj.identified_object is self, lambda: f"Attempting to add a Name to {str(self)} that does not reference this identified object")
+
+        existing = self.get_name(name_obj.type, name_obj.name)
         if existing:
-            if existing is name:
+            if existing is name_obj:
                 return self
             else:
                 raise ValueError(f"Failed to add duplicate name {str(name)} to {str(self)}.")
 
         self._names = list() if not self._names else self._names
-        self._names.append(name)
+        self._names.append(name_obj)
         return self
 
     def remove_name(self, name: Name) -> IdentifiedObject:
         """
-        Disassociate a `Name` from this `IdentifiedObject`.
+        Disassociate a `Name` from this `IdentifiedObject` and remove the `name` from its `nameType`
 
         :param name: The `Name` to disassociate from this `IdentifiedObject`.
         :return: A reference to this `IdentifiedObject` to allow fluent use.
         :raises ValueError: Iif `name` was not associated with this `IdentifiedObject`.
         """
         self._names = safe_remove(self._names, name)
+        if name.type.has_name(name):
+            name.type.remove_name(name)
         return self
 
     def clear_names(self) -> IdentifiedObject:
@@ -113,7 +153,9 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
         :return: A reference to this `IdentifiedObject` to allow fluent use.
         """
-        self._names = None
+        for name in list(self._names):
+            if not name.type.remove_name(name):
+                name.type.remove_names(name.name)
         return self
 
     def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject], type_descr: str) -> bool:

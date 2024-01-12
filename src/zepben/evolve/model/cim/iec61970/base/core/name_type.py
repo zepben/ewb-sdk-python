@@ -6,12 +6,11 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Generator
+from typing import Dict, List, Generator, overload
 
 from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
-
 
 __all__ = ["NameType"]
 
@@ -49,56 +48,90 @@ class NameType:
         for name_ in self._names_index.values():
             yield name_
 
+    @overload
     def has_name(self, name: str):
-        """Indicates if this :class:`NameType` contains `name`."""
-        return name in self._names_index or name in self._names_multi_index
+        """Indicates if this :class:`NameType` contains `Name` with `name`."""
 
-    def get_names(self, name) -> Generator[Name, None, None]:
-        """Get all the :class:`Name` instances for the provided `name`.
+    @overload
+    def has_name(self, name: Name):
+        """Indicates if this :class:`NameType` contains specific `name`."""
+
+    def has_name(self, name):
+        if isinstance(name, str):
+            return name in self._names_index or name in self._names_multi_index
+        if isinstance(name, Name):
+            return name in self._names_index.values() or name in self._names_multi_index.values()
+
+    @overload
+    def get_names(self, name: str) -> Generator[Name, None, None]:
+        ...
+
+    @overload
+    def get_names(self, io) -> Generator[Name, None, None]:
+        ...
+
+    def get_names(self, name_or_io) -> Generator[Name, None, None]:
+        """Get all the :class:`Name` instances for the provided `name` or `IdentifiedObject`.
 
         :return: A `Generator` of `Name`
         """
-        try:
-            yield self._names_index[name]
-        except KeyError:
+        if isinstance(name_or_io, str):
             try:
-                for name_ in self._names_multi_index[name]:
-                    yield name_
+                yield self._names_index[name_or_io]
+            except KeyError:
+                try:
+                    for name_ in self._names_multi_index[name_or_io]:
+                        yield name_
+                except KeyError:
+                    pass
+        else:
+            try:
+                yield [entry for entry in self._names_index.values() if entry.identified_object == name_or_io] + [entry for entries in
+                                                                                                                  self._names_multi_index.values() for entry in
+                                                                                                                  entries if
+                                                                                                                  entry.identified_object == name_or_io]
             except KeyError:
                 pass
 
-    def get_or_add_name(self, name, identified_object):
+    def get_or_add_name(self, name: str, identified_object):
         """
         Gets a :class:`Name` for the given `name` and `identifiedObject` combination or adds a new :class:`Name`
         to this :class:`NameType` with the combination and returns the new instance.
         """
         if name in self._names_index:
             existing = self._names_index[name]
-            if existing.identified_object == identified_object:
+            if existing.identified_object is identified_object:
                 return existing
             else:
                 # noinspection PyArgumentList
                 name_obj = Name(name, self, identified_object)
                 self._names_multi_index[name] = [existing, name_obj]
                 del self._names_index[name]
+                if not identified_object.get_name(self, name):
+                    identified_object.add_name(name, self)
                 return name_obj
         elif name in self._names_multi_index:
             for n in self._names_multi_index[name]:
-                if n.identified_object == identified_object:
+                if n.identified_object is identified_object:
                     return n
             # noinspection PyArgumentList
             name_obj = Name(name, self, identified_object)
             self._names_multi_index[name].append(name_obj)
+            if not identified_object.get_name(self, name):
+                identified_object.add_name(name, self)
             return name_obj
         else:
             # noinspection PyArgumentList
             name_obj = Name(name, self, identified_object)
             self._names_index[name] = name_obj
+            if not identified_object.get_name(self, name):
+                identified_object.add_name(name, self)
             return name_obj
 
     def remove_name(self, name: Name):
         """
         Removes the `name` from this name type.
+        Removes the `name` from associated `IdentifiedObject`
 
         :return: True if the name instance was successfully removed
         """
@@ -107,6 +140,8 @@ class NameType:
 
         try:
             del self._names_index[name.name]
+            if name.identified_object.get_name(name.type, name.name):
+                name.identified_object.remove_name(name)
             return True
         except KeyError:
             try:
@@ -114,6 +149,7 @@ class NameType:
                 names.remove(name)
                 if not names:
                     del self._names_multi_index[name.name]
+                name.identified_object.remove_name(name)
                 return True
             except KeyError:
                 return False
@@ -125,16 +161,26 @@ class NameType:
         :return: True if a matching name was removed.
         """
         try:
+            name_obj = self._names_index[name]
             del self._names_index[name]
+            name_obj.identified_object.remove_name(name_obj)
             return True
         except KeyError:
             try:
+                name_list = list(self._names_multi_index[name])
                 del self._names_multi_index[name]
+                for name_obj in name_list:
+                    name_obj.identified_object.remove_name(name_obj)
                 return True
             except KeyError:
                 return False
 
     def clear_names(self) -> NameType:
+        for name in list(self._names_index.values()):
+            name.identified_object.remove_name(name)
+        for names in list(self._names_multi_index.values()):
+            for name in names:
+                name.identified_object.remove_name(name)
         self._names_index = dict()
         self._names_multi_index = dict()
         return self
