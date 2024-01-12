@@ -5,6 +5,7 @@ __pycache__/
 .idea/
 docs/.docusaurus
 docs/node_modules
+docs/build
 
 # C extensions
 *.so
