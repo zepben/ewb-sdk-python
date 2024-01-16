@@ -4,7 +4,7 @@
 * None.
 
 ### New Features
-* None.
+* Added support for passing the grpc channel configuration options to the `GrpcChannelBuilder`.
 
 ### Enhancements
 * None.
@@ -13,7 +13,7 @@
 * None.
 
 ### Notes
-* None.
+* Default grpc channel message size is now 20MB.
 
 ## [0.37.1] - 2024-01-16
 ### Fixes
