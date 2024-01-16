@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.37.2](#v0372)| `16 January 2024` |
 |[0.37.1](#v0371)| `16 January 2024` |
 |[0.37.0](#v0370)| `14 November 2023` |
 |[0.36.0](#v0360)| `29 September 2023` |
@@ -39,6 +40,25 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.37.2]
+
+### Breaking Changes
+* None.
+
+### New Features
+* Added support for passing the grpc channel configuration options to the `GrpcChannelBuilder`.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* Default grpc channel message size is now 20MB.
 
 ---
 
