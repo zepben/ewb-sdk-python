@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.37.1](#v0371)| `16 January 2024` |
 |[0.37.0](#v0370)| `14 November 2023` |
 |[0.36.0](#v0360)| `29 September 2023` |
 |[0.35.0](#v0350)| `06 September 2023` |
@@ -38,6 +39,13 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.37.1]
+
+### Fixes
+* Use zepben.auth 0.11.1.
 
 ---
 
