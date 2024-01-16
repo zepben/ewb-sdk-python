@@ -4,7 +4,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import ABC
-from typing import Optional
+from typing import Optional, List, Tuple, Any
 
 import grpc
 from zepben.auth import ZepbenTokenFetcher
@@ -12,6 +12,8 @@ from zepben.auth import ZepbenTokenFetcher
 __all__ = ["GrpcChannelBuilder"]
 
 from zepben.evolve.streaming.grpc.auth_token_plugin import AuthTokenPlugin
+
+_TWENTY_MEGABYTES = 1024 * 1024 * 20
 
 
 class GrpcChannelBuilder(ABC):
@@ -23,15 +25,33 @@ class GrpcChannelBuilder(ABC):
         self._socket_address: str = "localhost:50051"
         self._channel_credentials: Optional[grpc.ChannelCredentials] = None
 
-    def build(self) -> grpc.aio.Channel:
+    def build(self, options: Optional[List[Tuple[str, Any]]] = None) -> grpc.aio.Channel:
         """
         Get the resulting :class:`grpc.aio.Channel` from this builder.
+
+        :param options: An optional list of key-value pairs (channel_arguments in gRPC Core runtime) to configure the channel.
+
         :return: A gRPC channel resulting from this builder.
         """
-        if self._channel_credentials:
-            return grpc.aio.secure_channel(self._socket_address, self._channel_credentials)
+        if options is None:
+            options = [("grpc.max_receive_message_length", _TWENTY_MEGABYTES), ("grpc.max_send_message_length", _TWENTY_MEGABYTES)]
+        else:
+            has_max_receive_msg_length = False
+            has_max_send_msg_length = False
+            for key, _ in options:
+                if key == "grpc.max_receive_message_length":
+                    has_max_receive_msg_length = True
+                if key == "grpc.max_send_message_length":
+                    has_max_send_msg_length = True
+            if not has_max_send_msg_length:
+                options.append(("grpc.max_send_message_length", _TWENTY_MEGABYTES))
+            if not has_max_receive_msg_length:
+                options.append(("grpc.max_receive_message_length", _TWENTY_MEGABYTES))
 
-        return grpc.aio.insecure_channel(self._socket_address)
+        if self._channel_credentials:
+            return grpc.aio.secure_channel(self._socket_address, self._channel_credentials, options=options)
+
+        return grpc.aio.insecure_channel(self._socket_address, options=options)
 
     def for_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
         """
