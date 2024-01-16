@@ -4,20 +4,22 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import ABC
-from typing import Optional, List
+from typing import Optional, List, Tuple, Any
 
 import grpc
 from grpc._channel import _InactiveRpcError
 from zepben.auth import ZepbenTokenFetcher
-from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
+from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 
 from zepben.evolve.streaming.exceptions import GrpcConnectionException
 from zepben.evolve.streaming.grpc.auth_token_plugin import AuthTokenPlugin
 
 __all__ = ["GrpcChannelBuilder"]
+
+_TWENTY_MEGABYTES = 1024 * 1024 * 20
 
 
 class GrpcChannelBuilder(ABC):
@@ -29,13 +31,14 @@ class GrpcChannelBuilder(ABC):
         self._socket_address: str = "localhost:50051"
         self._channel_credentials: Optional[grpc.ChannelCredentials] = None
 
-    def build(self, skip_connection_test: bool = False, debug: bool = False) -> grpc.aio.Channel:
+    def build(self, skip_connection_test: bool = False, debug: bool = False, options: Optional[List[Tuple[str, Any]]] = None) -> grpc.aio.Channel:
         """
         Get the resulting :class:`grpc.aio.Channel` from this builder.
 
         :param skip_connection_test: Skip confirming a connection can be established to the server. This is not recommended, but provided as a safety
         mechanism if for any reason the connection test fails unexpectedly even though the connection is fine.
         :param debug: Collect and append unhandled RPC errors to the `ConnectionException` raised on an unsuccessful connection test.
+        :param options: An optional list of key-value pairs (channel_arguments in gRPC Core runtime) to configure the channel.
 
         :return: A gRPC channel resulting from this builder.
         """
@@ -50,10 +53,25 @@ class GrpcChannelBuilder(ABC):
             self._test_connection(channel, debug=debug)
             channel.close()
 
-        if self._channel_credentials:
-            return grpc.aio.secure_channel(self._socket_address, self._channel_credentials)
+        if options is None:
+            options = [("grpc.max_receive_message_length", _TWENTY_MEGABYTES), ("grpc.max_send_message_length", _TWENTY_MEGABYTES)]
+        else:
+            has_max_receive_msg_length = False
+            has_max_send_msg_length = False
+            for key, _ in options:
+                if key == "grpc.max_receive_message_length":
+                    has_max_receive_msg_length = True
+                if key == "grpc.max_send_message_length":
+                    has_max_send_msg_length = True
+            if not has_max_send_msg_length:
+                options.append(("grpc.max_send_message_length", _TWENTY_MEGABYTES))
+            if not has_max_receive_msg_length:
+                options.append(("grpc.max_receive_message_length", _TWENTY_MEGABYTES))
 
-        return grpc.aio.insecure_channel(self._socket_address)
+        if self._channel_credentials:
+            return grpc.aio.secure_channel(self._socket_address, self._channel_credentials, options=options)
+
+        return grpc.aio.insecure_channel(self._socket_address, options=options)
 
     def _test_connection(self, channel: grpc.Channel, debug: bool):
         stubs: List = [

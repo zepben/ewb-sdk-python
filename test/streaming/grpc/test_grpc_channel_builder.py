@@ -3,13 +3,18 @@ from unittest.mock import call
 
 import pytest
 from dataclassy import dataclass
+from grpc import StatusCode, insecure_channel
 from grpc._channel import _InactiveRpcError, _RPCState
 from grpc._cython.cygrpc import OperationType
-from grpc import StatusCode, insecure_channel
 from zepben.auth import ZepbenTokenFetcher
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
 from zepben.evolve import GrpcChannelBuilder, GrpcConnectionException
+
+_TWENTY_MEGABYTES = 1024 * 1024 * 20
+DEFAULT_GRPC_CHANNEL_MAX_RECEIVE_MESSAGE_LENGTH = ("grpc.max_receive_message_length", _TWENTY_MEGABYTES)
+DEFAULT_GRPC_CHANNEL_MAX_SEND_MESSAGE_LENGTH = ("grpc.max_send_message_length", _TWENTY_MEGABYTES)
+DEFAULT_GRPC_CHANNEL_OPTIONS = [DEFAULT_GRPC_CHANNEL_MAX_RECEIVE_MESSAGE_LENGTH, DEFAULT_GRPC_CHANNEL_MAX_SEND_MESSAGE_LENGTH]
 
 
 @dataclass
@@ -43,7 +48,7 @@ class MockedChannel:
 def test_skip_connection_test(mock_insecure_channel, mock_test_connection):
     assert GrpcChannelBuilder().build(skip_connection_test=True) == "insecure channel"
 
-    mock_insecure_channel.assert_called_once_with('localhost:50051')
+    mock_insecure_channel.assert_called_once_with('localhost:50051', options=DEFAULT_GRPC_CHANNEL_OPTIONS)
     mock_test_connection.assert_not_called()
 
 
@@ -55,7 +60,7 @@ def test_debug_connection_test(mock_insecure_channel, mock_test_connection, mock
 
     mock_insecure_sync_channel.assert_called_once_with("localhost:50051")
     mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=True)
-    mock_insecure_channel.assert_called_once_with('localhost:50051')
+    mock_insecure_channel.assert_called_once_with('localhost:50051', options=DEFAULT_GRPC_CHANNEL_OPTIONS)
 
 
 @mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
@@ -66,7 +71,42 @@ def test_for_address(mock_insecure_channel, mock_test_connection, mock_insecure_
 
     mock_insecure_sync_channel.assert_called_once_with("hostname:1234")
     mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=False)
-    mock_insecure_channel.assert_called_once_with("hostname:1234")
+    mock_insecure_channel.assert_called_once_with("hostname:1234", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
+
+
+@mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
+@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
+def test_options_passed_to_insecure_channel(mock_insecure_channel, *_):
+    options = [("grpc.max_receive_message_length", 1), ("other_option", 1)]
+    assert GrpcChannelBuilder().for_address("hostname", 1234).build(options=options) == "insecure channel"
+    mock_insecure_channel.assert_called_once_with("hostname:1234", options=options)
+
+
+@mock.patch("grpc.secure_channel", return_value=MockedChannel("secure sync test channel"))
+@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("grpc.ssl_channel_credentials", return_value="channel creds")
+@mock.patch("grpc.aio.secure_channel", return_value="secure channel")
+def test_options_passed_to_secure_channel(mocked_secure_channel, *_):
+    options = [("grpc.max_receive_message_length", 1), ("other_option", 0)]
+    assert GrpcChannelBuilder().for_address("hostname", 1234).make_secure_with_bytes().build(options=options) == "secure channel"
+    mocked_secure_channel.assert_called_with("hostname:1234", "channel creds", options=options)
+
+
+@mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
+@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
+def test_passed_options_override_defaults(mock_insecure_channel, *_):
+    options = [("grpc.max_receive_message_length", 1), ("other_option", 0)]
+    assert GrpcChannelBuilder().for_address("hostname", 1234).build(options=options) == "insecure channel"
+    mock_insecure_channel.assert_called_once_with("hostname:1234", options=options)
+    for option_key, option_value in mock_insecure_channel.call_args_list[0][1]["options"]:
+        if option_key == "grpc.max_receive_message_length":
+            assert option_value == 1
+        if option_key == "grpc.max_send_message_length":
+            assert option_value == _TWENTY_MEGABYTES
+        if option_key == "other_option":
+            assert option_value == 0
 
 
 @mock.patch("grpc.secure_channel", return_value=MockedChannel("secure sync test channel"))
@@ -78,7 +118,7 @@ def test_make_secure(mocked_secure_channel, mocked_ssl_channel_creds, mock_test_
     assert GrpcChannelBuilder().for_address("hostname", 1234).make_secure_with_bytes().build() == "secure channel"
 
     mocked_ssl_channel_creds.assert_has_calls([call(b"ca", b"pk", b"cc"), call(None, None, None)])
-    mocked_secure_channel.assert_called_with("hostname:1234", "channel creds")
+    mocked_secure_channel.assert_called_with("hostname:1234", "channel creds", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
     mock_secure_sync_channel.assert_called_with("hostname:1234", "channel creds")
     mock_test_connection.assert_has_calls(
         [call(MockedChannel("secure sync test channel"), debug=False), call(MockedChannel("secure sync test channel"), debug=False)])
@@ -108,7 +148,7 @@ def test_with_token_fetcher(mocked_ssl_channel_creds, mocked_md_call_creds, mock
     mocked_ssl_channel_creds.assert_called_once()
     mocked_md_call_creds.assert_called_once()
     mocked_comp_channel_creds.assert_called_once_with("ssl creds", "call creds")
-    mocked_secure_channel.assert_called_once_with("hostname:1234", "composite creds")
+    mocked_secure_channel.assert_called_once_with("hostname:1234", "composite creds", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
     mock_secure_sync_channel.assert_called_once_with("hostname:1234", "composite creds")
     mock_test_connection.assert_called_once_with(MockedChannel('secure sync test channel'), debug=False)
 
