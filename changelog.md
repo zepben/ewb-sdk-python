@@ -5,6 +5,7 @@
 
 ### New Features
 * Added support for `getMetadata()` gRPC calls on `CustomerConsumerClient`, `DiagramConsumerClient`, and `NetworkConsumerClient`.
+* Added support for passing the grpc channel configuration options to the `GrpcChannelBuilder`.
 
 ### Enhancements
 * `GrpcChannelBuilder` tests the connectivity of newly created channels before returning them to the user. This is done by calling `getMetadata()` against all
@@ -16,7 +17,7 @@ are encountered but no successful response is received from the known services, 
 * `Feeder.normal_head_terminal` can now be freely updated when the `Feeder` has no equipment assigned to it.
 
 ### Notes
-* None.
+* Default grpc channel message size is now 20MB.
 
 ## [0.37.0] - 2023-11-14
 ### Breaking Changes
