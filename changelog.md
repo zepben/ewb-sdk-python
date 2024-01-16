@@ -1,19 +1,7 @@
 # Zepben Python SDK
 ## [0.37.1] - UNRELEASED
-### Breaking Changes
-* None.
-
-### New Features
-* None.
-
-### Enhancements
-* None.
-
 ### Fixes
-* None.
-
-### Notes
-* None.
+* Use zepben.auth 0.11.1.
 
 ## [0.37.0] - 2024-01-16
 ### Breaking Changes
