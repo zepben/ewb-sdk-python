@@ -11,7 +11,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import Table
 
 __all__ = ["TableEnergyConnections", "TableEnergyConsumerPhases", "TableEnergyConsumers", "TableEnergySources", "TableEnergySourcePhases",
            "TableRegulatingCondEq", "TableShuntCompensators", "TableLinearShuntCompensators", "TablePowerElectronicsConnection",
-           "TablePowerElectronicsConnectionPhases", "TableRegulatingControls", "TableTapChangerControls"]
+           "TablePowerElectronicsConnectionPhases", "TableRegulatingControls", "TableTapChangerControls", "TableSeriesCompensators"]
 
 
 # noinspection PyAbstractClass
@@ -303,6 +303,7 @@ class TableRegulatingControls(TablePowerSystemResources):
     enabled: Column = None
     max_allowed_target_value: Column = None
     min_allowed_target_value: Column = None
+    rated_current: Column = None
     terminal_mrid: Column = None
 
     def __init__(self):
@@ -315,6 +316,7 @@ class TableRegulatingControls(TablePowerSystemResources):
         self.enabled = self._create_column("enabled", "BOOLEAN", Nullable.NULL)
         self.max_allowed_target_value = self._create_column("max_allowed_target_value", "NUMBER", Nullable.NULL)
         self.min_allowed_target_value = self._create_column("min_allowed_target_value", "NUMBER", Nullable.NULL)
+        self.rated_current = self._create_column("rated_current", "NUMBER", Nullable.NULL)
         self.terminal_mrid = self._create_column("terminal_mrid", "TEXT", Nullable.NULL)
 
 
@@ -343,3 +345,23 @@ class TableTapChangerControls(TableRegulatingControls):
 
     def name(self) -> str:
         return "tap_changer_controls"
+
+class TableSeriesCompensators(TableConductingEquipment):
+    r: Column = None
+    r0: Column = None
+    x: Column = None
+    x0: Column = None
+    varistor_rated_current: Column = None
+    varistor_voltage_threshold: Column = None
+
+    def __init__(self):
+        super(TableSeriesCompensators, self).__init__()
+        self.r = self._create_column("r", "NUMBER", Nullable.NULL)
+        self.r0 = self._create_column("r0", "NUMBER", Nullable.NULL)
+        self.x = self._create_column("x", "NUMBER", Nullable.NULL)
+        self.x0 = self._create_column("x0", "NUMBER", Nullable.NULL)
+        self.varistor_rated_current = self._create_column("varistor_rated_current", "INTEGER", Nullable.NULL)
+        self.varistor_voltage_threshold = self._create_column("varistor_voltage_threshold", "INTEGER", Nullable.NULL)
+
+    def name(self) -> str:
+        return "series_compensators"

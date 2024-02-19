@@ -6,15 +6,16 @@
 from datetime import datetime
 from random import choice
 
-from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, just
+from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes
 
 from zepben.evolve import *
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
 
-MIN_32_BIT_INTEGER = -2147483648
+MIN_32_BIT_INTEGER = -2147483647  # _UNKNOWN_INT = -2147483648
 MAX_32_BIT_INTEGER = 2147483647
+MAX_32_BIT_UNSIGNED_INTEGER = 4294967294  # _UNKNOWN_UINT = 4294967295
 MAX_64_BIT_INTEGER = 9223372036854775807
-MIN_64_BIT_INTEGER = -9223372036854775808
+MIN_64_BIT_INTEGER = -9223372036854775807  # _UNKNOWN_LONG = -9223372036854775808
 TEXT_MAX_SIZE = 6
 FLOAT_MIN = -100.0
 FLOAT_MAX = 1000.0
@@ -24,12 +25,13 @@ MIN_SEQUENCE_NUMBER = 1
 ALPHANUM = "abcdefghijbklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
 __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test', 'create_overhead_wire_info', 'create_power_transformer_info',
-           'create_short_circuit_test', 'create_shunt_compensator_info', 'create_switch_info', 'create_transformer_end_info', 'create_transformer_tank_info',
+           'create_short_circuit_test', 'create_series_compensator', 'create_shunt_compensator_info', 'create_switch_info', 'create_transformer_end_info',
+           'create_transformer_tank_info',
            'create_transformer_test', 'create_wire_info', 'sampled_wire_material_kind', 'create_asset', 'create_asset_info', 'create_asset_container',
            'create_asset_organisation_role', 'create_asset_owner', 'create_pole', 'create_streetlight', 'sampled_streetlight_lamp_kind', 'create_structure',
            'create_agreement', 'create_document', 'create_location', 'create_organisation', 'create_organisation_role', 'create_position_point',
            'create_street_address', 'create_street_detail', 'create_town_detail', 'create_customer', 'create_customer_agreement', 'sampled_customer_kind',
-           'create_pricing_structure', 'create_tariffs', 'create_current_relay_info', 'create_current_transformer_info', 'create_potential_transformer_info',
+           'create_pricing_structure', 'create_tariffs', 'create_relay_info', 'create_current_transformer_info', 'create_potential_transformer_info',
            'create_ratio', 'create_end_device', 'create_meter', 'create_usage_point', 'create_operational_restriction', 'create_auxiliary_equipment',
            'create_current_transformer', 'create_fault_indicator', 'create_potential_transformer', 'create_sensor', 'create_ac_dc_terminal',
            'create_base_voltage', 'create_conducting_equipment', 'create_connectivity_node', 'create_connectivity_node_container', 'create_equipment',
@@ -37,11 +39,13 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'sampled_phase_code', 'create_power_system_resource', 'create_site', 'create_sub_geographical_region', 'create_substation', 'create_terminal',
            'create_equivalent_branch', 'create_equivalent_equipment', 'create_diagram', 'create_diagram_object', 'create_diagram_object_point',
            'create_accumulator', 'create_accumulator_value', 'create_analog', 'create_analog_value', 'create_control', 'create_discrete',
-           'create_discrete_value', 'create_io_point', 'create_measurement', 'sampled_unit_symbol', 'create_current_relay', 'create_protection_equipment',
+           'create_discrete_value', 'create_io_point', 'create_measurement', 'sampled_unit_symbol', 'create_current_relay', 'create_distance_relay',
+           'create_protection_relay_function', 'create_protection_relay_scheme', 'create_voltage_relay', 'create_protection_relay_system',
            'create_remote_control', 'create_remote_point', 'create_remote_source', 'sampled_battery_state_kind', 'create_battery_unit',
            'create_photovoltaic_unit', 'create_power_electronics_unit', 'create_power_electronics_wind_unit', 'create_ac_line_segment', 'create_breaker',
            'create_busbar_section', 'create_conductor', 'create_connector', 'create_disconnector', 'create_energy_consumer', 'create_energy_connection',
-           'create_energy_consumer_phase', 'create_energy_source', 'create_energy_source_phase', 'create_fuse', 'create_jumper', 'create_junction',
+           'create_energy_consumer_phase', 'create_energy_source', 'create_energy_source_phase', 'create_fuse', 'create_ground', 'create_ground_disconnector',
+           'create_jumper', 'create_junction',
            'create_line', 'create_linear_shunt_compensator', 'create_load_break_switch', 'create_per_length_impedance', 'create_per_length_line_parameter',
            'create_per_length_sequence_impedance', 'sampled_phase_shunt_connection_kind', 'create_power_electronics_connection',
            'create_power_electronics_connection_phase', 'create_power_transformer', 'create_power_transformer_end', 'create_protected_switch',
@@ -365,12 +369,13 @@ def create_tariffs(include_runtime: bool = True):
 #####################################
 
 
-def create_current_relay_info(include_runtime: bool = True):
+def create_relay_info(include_runtime: bool = True):
     return builds(
-        CurrentRelayInfo,
+        RelayInfo,
         **create_asset_info(include_runtime),
         curve_setting=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
-        reclose_delays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+        reclose_delays=lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        reclose_fast=boolean_or_none()
     )
 
 
@@ -498,8 +503,11 @@ def create_potential_transformer(include_runtime: bool = True):
     )
 
 
-def create_sensor(include_runtime: bool):
-    return create_auxiliary_equipment(include_runtime)
+def create_sensor(include_runtime: bool = True):
+    return {
+        **create_auxiliary_equipment(include_runtime),
+        "relay_functions": lists(builds(CurrentRelay), max_size=10)
+    }
 
 
 ######################
@@ -808,10 +816,33 @@ def sampled_unit_symbol():
 def create_current_relay(include_runtime: bool = True):
     return builds(
         CurrentRelay,
-        **create_protection_equipment(include_runtime),
+        **create_protection_relay_function(include_runtime),
         current_limit_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         inverse_time_flag=boolean_or_none(),
         time_delay_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_distance_relay(include_runtime: bool = True):
+    return builds(
+        DistanceRelay,
+        **create_protection_relay_function(include_runtime),
+        backward_blind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        backward_reach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        backward_reactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forward_blind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forward_reach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        forward_reactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operation_phase_angle1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operation_phase_angle2=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operation_phase_angle3=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_voltage_relay(include_runtime: bool = True):
+    return builds(
+        VoltageRelay,
+        **create_protection_relay_function(include_runtime),
     )
 
 
@@ -819,15 +850,43 @@ def boolean_or_none():
     return sampled_from([False, True, None])
 
 
-def create_protection_equipment(include_runtime: bool = True):
+def create_protection_relay_function(include_runtime: bool = True):
     return {
-        **create_equipment(include_runtime),
+        **create_power_system_resource(include_runtime),
+        "model": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
+        "reclosing": boolean_or_none(),
         "relay_delay_time": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "protection_kind": sampled_from(ProtectionKind),
         "directable": boolean_or_none(),
         "power_direction": sampled_from(PowerDirectionKind),
-        "protected_switches": lists(sampled_protected_switches(include_runtime), min_size=1, max_size=2)
+        "sensors": lists(builds(CurrentTransformer), max_size=2),
+        "protected_switches": lists(builds(Breaker), max_size=2),
+        "schemes": lists(builds(ProtectionRelayScheme), max_size=2),
+        "time_limits": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), min_size=4, max_size=4),
+        "thresholds": lists(builds(RelaySetting, unit_symbol=sampled_unit_symbol(), value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+                                   name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)), min_size=4, max_size=4),
     }
+
+
+def create_protection_relay_scheme(include_runtime: bool = True):
+    return builds(
+        ProtectionRelayScheme,
+        **create_identified_object(include_runtime),
+        system=builds(ProtectionRelaySystem),
+        functions=lists(builds(CurrentRelay))
+    )
+
+
+def create_protection_relay_system(include_runtime: bool = True):
+    return builds(
+        ProtectionRelaySystem,
+        **create_equipment(include_runtime),
+        protection_kind=sampled_from(ProtectionKind),
+        schemes=lists(builds(ProtectionRelayScheme))
+    )
+
+
+# TODO: saving nan vs None ... I swear I added this for interop with the jvm sdk...
 
 
 #######################
@@ -1021,7 +1080,25 @@ def create_energy_source_phase(include_runtime: bool = True):
 
 
 def create_fuse(include_runtime: bool = True):
-    return builds(Fuse, **create_switch(include_runtime))
+    return builds(
+        Fuse,
+        **create_switch(include_runtime),
+        function=builds(DistanceRelay)
+    )
+
+
+def create_ground(include_runtime: bool = True):
+    return builds(
+        Ground,
+        **create_equipment(include_runtime)
+    )
+
+
+def create_ground_disconnector(include_runtime: bool = True):
+    return builds(
+        GroundDisconnector,
+        **create_switch(include_runtime)
+    )
 
 
 def create_jumper(include_runtime: bool = True):
@@ -1044,6 +1121,19 @@ def create_linear_shunt_compensator(include_runtime: bool = True):
         b_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g0_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_series_compensator(include_runtime: bool = True):
+    return builds(
+        SeriesCompensator,
+        **create_conducting_equipment(include_runtime),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        varistor_rated_current=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        varistor_voltage_threshold=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     )
 
 
@@ -1178,7 +1268,7 @@ def create_protected_switch(include_runtime: bool):
     return {
         **create_switch(include_runtime),
         "breaking_capacity": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        "operated_by_protection_equipment": lists(builds(CurrentRelay, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+        "relay_functions": lists(builds(CurrentRelay), min_size=1, max_size=2)
     }
 
 
@@ -1214,6 +1304,7 @@ def create_regulating_control(include_runtime: bool):
         "enabled": boolean_or_none(),
         "max_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "min_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "rated_current": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         "terminal": builds(Terminal, **create_identified_object(include_runtime)),
         "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection, **create_identified_object(include_runtime)))
     }

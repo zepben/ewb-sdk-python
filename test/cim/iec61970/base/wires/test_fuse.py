@@ -7,20 +7,31 @@ from hypothesis import given
 
 from cim.iec61970.base.wires.test_switch import verify_switch_constructor_default, verify_switch_constructor_kwargs, verify_switch_constructor_args, \
     switch_kwargs, switch_args
-from zepben.evolve import Fuse
+from hypothesis.strategies import builds
 
-fuse_kwargs = switch_kwargs
-fuse_args = switch_args
+from zepben.evolve import Fuse, ProtectionRelayFunction
+
+fuse_kwargs = {
+    **switch_kwargs,
+    "function": builds(ProtectionRelayFunction)
+}
+fuse_args = [*switch_args, ProtectionRelayFunction()]
 
 
 def test_fuse_constructor_default():
-    verify_switch_constructor_default(Fuse())
+    f = Fuse()
+    verify_switch_constructor_default(f)
+    assert f.function is None
 
 
 @given(**fuse_kwargs)
-def test_fuse_constructor_kwargs(**kwargs):
-    verify_switch_constructor_kwargs(Fuse(**kwargs), **kwargs)
+def test_fuse_constructor_kwargs(function, **kwargs):
+    f = Fuse(function=function, **kwargs)
+    verify_switch_constructor_kwargs(f, **kwargs)
+    assert f.function == function
 
 
 def test_fuse_constructor_args():
-    verify_switch_constructor_args(Fuse(*fuse_args))
+    f = Fuse(*fuse_args)
+    verify_switch_constructor_args(f)
+    assert f.function == fuse_args[-1]

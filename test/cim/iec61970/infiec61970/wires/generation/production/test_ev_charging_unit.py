@@ -18,7 +18,7 @@ def test_ev_charging_unit_constructor_default():
 
 
 @given(**ev_charging_unit_kwargs)
-def test_power_electronics_wind_unit_constructor_kwargs(**kwargs):
+def test_ev_charging_unit_constructor_kwargs(**kwargs):
     verify_power_electronics_unit_constructor_kwargs(EvChargingUnit(**kwargs), **kwargs)
 
 

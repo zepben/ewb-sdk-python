@@ -3,12 +3,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from _pytest.python_api import raises
 from hypothesis.strategies import floats, booleans, builds, integers
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from zepben.evolve import TransformerEnd, RatioTapChanger, Terminal, BaseVoltage, TransformerStarImpedance
+from zepben.evolve import TransformerEnd, RatioTapChanger, Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse
 
 transformer_end_kwargs = {
     **identified_object_kwargs,
@@ -16,7 +17,7 @@ transformer_end_kwargs = {
     "r_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "x_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "ratio_tap_changer": builds(RatioTapChanger),
-    "terminal": builds(Terminal),
+    "terminal": builds(Terminal, conducting_equipment=builds(PowerTransformer)),
     "base_voltage": builds(BaseVoltage),
     "end_number": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "star_impedance": builds(TransformerStarImpedance)
@@ -60,3 +61,28 @@ def verify_transformer_end_constructor_args(te: TransformerEnd):
     assert te.base_voltage == transformer_end_args[-3]
     assert te.end_number == transformer_end_args[-2]
     assert te.star_impedance == transformer_end_args[-1]
+
+
+def test_allow_terminal_with_no_conducting_equipment():
+    te = TransformerEnd()
+
+    terminal = Terminal()
+    te.terminal = terminal
+    assert te.terminal == terminal
+
+
+def test_terminal_must_belong_to_power_transformer():
+    te = TransformerEnd(mrid="transformer_end_mrid")
+
+    t1 = Terminal(mrid="terminal_mrid")
+    t1.conducting_equipment = Fuse(mrid="fuse_mrid")
+
+    with raises(ValueError, match=r"Cannot assign transformer_end_mrid to terminal_mrid, which is connected to a Fuse\[fuse_mrid\] rather than a "
+                                  "PowerTransformer."):
+        te.terminal = t1
+
+    t2 = Terminal()
+    t2.conducting_equipment = PowerTransformer()
+
+    te.terminal = t2
+    assert te.terminal == t2

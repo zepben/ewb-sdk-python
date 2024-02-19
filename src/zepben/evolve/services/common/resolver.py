@@ -11,8 +11,8 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     EnergySourcePhase, Feeder, GeographicalRegion, Measurement, OperationalRestriction, OrganisationRole, PowerSystemResource, PowerTransformerEnd, \
     PricingStructure, RatioTapChanger, RemoteControl, RemoteSource, SubGeographicalRegion, Substation, Terminal, TransformerEnd, UsagePoint, Circuit, Loop, \
     PowerElectronicsUnit, PowerElectronicsConnectionPhase, PowerElectronicsConnection, TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, \
-    TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectionEquipment, ProtectedSwitch, Switch, CurrentRelay, \
-    RegulatingControl, RegulatingCondEq, TapChanger
+    TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectedSwitch, Switch, CurrentRelay, \
+    RegulatingControl, RegulatingCondEq, TapChanger, ProtectionRelayFunction, ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Fuse
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["per_length_sequence_impedance", "organisation_roles", "at_location", "ae_terminal", "ce_base_voltage", "ce_terminals",
@@ -67,11 +67,6 @@ def ce_terminals(ce: ConductingEquipment) -> BoundReferenceResolver:
 def asset_info(conductor: Conductor) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)
-
-
-def current_relay_info(cr: CurrentRelay) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(cr, current_relay_to_current_relay_info_resolver, None)
 
 
 def power_transformer_info(pt: PowerTransformer) -> BoundReferenceResolver:
@@ -459,15 +454,6 @@ def potential_transformer_info(potential_transformer: PotentialTransformer) -> B
     return BoundReferenceResolver(potential_transformer, vt_to_vti_resolver, None)
 
 
-def protected_switches(protection_equipment: ProtectionEquipment) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(protection_equipment, pe_to_ps_resolver, ps_to_pe_resolver)
-
-
-def operated_by_protection_equipment(protected_switch: ProtectedSwitch) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(protected_switch, ps_to_pe_resolver, pe_to_ps_resolver)
-
 def rc_regulating_cond_eq(regulating_control: RegulatingControl) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(regulating_control, rc_to_rce_resolver, rce_to_rc_resolver)
@@ -486,3 +472,54 @@ def tc_tap_changer_control(tap_changer: TapChanger) -> BoundReferenceResolver:
 def rc_terminal(rc: RegulatingControl) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(rc, rc_to_term_resolver, None)
+
+
+def prf_protected_switch(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(prf, prf_to_ps_resolver, ps_to_prf_resolver)
+
+
+def prf_sensor(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(prf, prf_to_sen_resolver, sen_to_prf_resolver)
+
+
+def prf_scheme(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(prf, prf_to_prscheme_resolver, prscheme_to_prf_resolver)
+
+
+def prscheme_system(prscheme: ProtectionRelayScheme) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(prscheme, prscheme_to_prsystem_resolver, prsystem_to_prscheme_resolver)
+
+
+def prscheme_function(prscheme: ProtectionRelayScheme) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(prscheme, prscheme_to_prf_resolver, prf_to_prscheme_resolver)
+
+
+def prsystem_scheme(prsystem: ProtectionRelaySystem) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(prsystem, prsystem_to_prscheme_resolver, prscheme_to_prsystem_resolver)
+
+
+def sen_relay_function(sen: Sensor) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(sen, sen_to_prf_resolver, prf_to_sen_resolver)
+
+
+def ps_relay_function(ps: ProtectedSwitch) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(ps, ps_to_prf_resolver, prf_to_ps_resolver)
+
+
+def fuse_function(fuse: Fuse) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(fuse, fuse_to_prf_resolver, None)
+
+
+def prf_asset_info(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(prf, prf_to_relay_info_resolver, None)
+

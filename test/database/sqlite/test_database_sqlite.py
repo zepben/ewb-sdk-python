@@ -27,8 +27,11 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_junction, create_linear_shunt_compensator, create_load_break_switch, create_per_length_sequence_impedance, create_power_electronics_connection, \
     create_power_electronics_connection_phase, create_power_transformer, create_power_transformer_end, create_ratio_tap_changer, create_recloser, \
     create_transformer_star_impedance, create_circuit, create_loop, create_lv_feeder, create_current_transformer_info, create_current_transformer, \
-    create_potential_transformer, create_current_relay, create_current_relay_info, create_switch_info, create_ev_charging_unit, create_tap_changer_control
+    create_potential_transformer, create_current_relay, create_relay_info, create_switch_info, create_ev_charging_unit, create_tap_changer_control, \
+    create_distance_relay, create_voltage_relay, create_protection_relay_scheme, create_protection_relay_system, create_ground, create_ground_disconnector, \
+    create_series_compensator
 from database.sqlite.schema_utils import SchemaNetworks, Services, assume_non_blank_street_address_details
+
 from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, \
     NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, \
     AssetOwner, Pole, Streetlight, Customer, CustomerAgreement, PricingStructure, Tariff, Meter, UsagePoint, Location, Organisation, OperationalRestriction, \
@@ -38,8 +41,9 @@ from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, C
     EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, \
     PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, BaseService, \
     DatabaseWriter, TableVersion, DatabaseReader, NetworkServiceComparator, BaseServiceComparator, StreetAddress, TownDetail, StreetDetail, LvFeeder, \
-    CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, CurrentRelayInfo, CurrentRelay, EvChargingUnit, \
-    TapChangerControl, RegulatingControl
+    CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, \
+    TapChangerControl, RegulatingControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, ProtectionRelaySystem, Ground, GroundDisconnector, \
+    SeriesCompensator
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 from zepben.evolve.services.network.tracing import tracing
@@ -197,9 +201,9 @@ class TestDatabaseSqlite:
 
     @log_on_failure_decorator
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(current_relay_info=create_current_relay_info(False))
-    async def test_schema_current_relay_info(self, caplog, current_relay_info):
-        await self._validate_schema(SchemaNetworks().network_services_of(CurrentRelayInfo, current_relay_info), caplog)
+    @given(relay_info=create_relay_info(False))
+    async def test_schema_relay_info(self, caplog, relay_info):
+        await self._validate_schema(SchemaNetworks().network_services_of(RelayInfo, relay_info), caplog)
 
     @log_on_failure_decorator
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -410,10 +414,39 @@ class TestDatabaseSqlite:
     # ************ IEC61970 Base Protection ************
 
     @log_on_failure_decorator
+    @pytest.mark.timeout(2222222)
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(current_relay=create_current_relay(False))
     async def test_schema_current_relay(self, caplog, current_relay):
         await self._validate_schema(SchemaNetworks().network_services_of(CurrentRelay, current_relay), caplog)
+
+    @log_on_failure_decorator
+    @pytest.mark.timeout(2222222)
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(distance_relay=create_distance_relay(False))
+    async def test_schema_distance_relay(self, caplog, distance_relay):
+        await self._validate_schema(SchemaNetworks().network_services_of(DistanceRelay, distance_relay), caplog)
+
+    @log_on_failure_decorator
+    @pytest.mark.timeout(2222222)
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(voltage_relay=create_voltage_relay(False))
+    async def test_schema_voltage_relay(self, caplog, voltage_relay):
+        await self._validate_schema(SchemaNetworks().network_services_of(VoltageRelay, voltage_relay), caplog)
+
+    @log_on_failure_decorator
+    @pytest.mark.timeout(2222222)
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(protection_relay_scheme=create_protection_relay_scheme(False))
+    async def test_schema_protection_relay_scheme(self, caplog, protection_relay_scheme):
+        await self._validate_schema(SchemaNetworks().network_services_of(ProtectionRelayScheme, protection_relay_scheme), caplog)
+
+    @log_on_failure_decorator
+    @pytest.mark.timeout(2222222)
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(protection_relay_system=create_protection_relay_system(False))
+    async def test_schema_protection_relay_system(self, caplog, protection_relay_system):
+        await self._validate_schema(SchemaNetworks().network_services_of(ProtectionRelaySystem, protection_relay_system), caplog)
 
     # ************ IEC61970 BASE SCADA ************
 
@@ -539,6 +572,20 @@ class TestDatabaseSqlite:
 
     @log_on_failure_decorator
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(ground=create_ground(False))
+    @pytest.mark.asyncio
+    async def test_schema_ground(self, caplog, ground):
+        await self._validate_schema(SchemaNetworks().network_services_of(Ground, ground), caplog)
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(ground_disconnector=create_ground_disconnector(False))
+    @pytest.mark.asyncio
+    async def test_schema_ground(self, caplog, ground_disconnector):
+        await self._validate_schema(SchemaNetworks().network_services_of(GroundDisconnector, ground_disconnector), caplog)
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(jumper=create_jumper(False))
     @pytest.mark.asyncio
     async def test_schema_jumper(self, caplog, jumper):
@@ -557,6 +604,13 @@ class TestDatabaseSqlite:
     @pytest.mark.asyncio
     async def test_schema_linear_shunt_compensator(self, caplog, linear_shunt_compensator):
         await self._validate_schema(SchemaNetworks().network_services_of(LinearShuntCompensator, linear_shunt_compensator), caplog)
+
+    @log_on_failure_decorator
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(series_compensator=create_series_compensator(False))
+    @pytest.mark.asyncio
+    async def test_schema_series_compensator(self, caplog, series_compensator):
+        await self._validate_schema(SchemaNetworks().network_services_of(SeriesCompensator, series_compensator), caplog)
 
     @log_on_failure_decorator
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -583,6 +637,7 @@ class TestDatabaseSqlite:
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(power_transformer_end=create_power_transformer_end(False))
     @pytest.mark.asyncio
+    @pytest.mark.timeout(2333333)
     async def test_schema_power_transformer_end(self, caplog, power_transformer_end):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerEnd, power_transformer_end), caplog)
 

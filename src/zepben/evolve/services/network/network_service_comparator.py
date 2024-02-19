@@ -15,7 +15,8 @@ from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest,
     PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
     Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
     Switch, ShuntCompensatorInfo, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, \
-    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, ProtectedSwitch, EvChargingUnit, RegulatingControl, TapChangerControl
+    RelayInfo, CurrentRelay, ProtectedSwitch, EvChargingUnit, RegulatingControl, TapChangerControl, ProtectionRelayFunction, DistanceRelay, VoltageRelay, \
+    ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Ground, GroundDisconnector, SeriesCompensator
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
@@ -229,11 +230,11 @@ class NetworkServiceComparator(BaseServiceComparator):
     # IEC61968 infIEC61968 InfAssetInfo #
     #####################################
 
-    def _compare_current_relay_info(self, source: CurrentRelayInfo, target: CurrentRelayInfo) -> ObjectDifference:
+    def _compare_relay_info(self, source: RelayInfo, target: RelayInfo) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_values(diff, CurrentRelayInfo.curve_setting)
-        self._compare_indexed_value_collections(diff, CurrentRelayInfo.reclose_delays)
+        self._compare_values(diff, RelayInfo.curve_setting, RelayInfo.reclose_fast)
+        self._compare_indexed_value_collections(diff, RelayInfo.reclose_delays)
 
         return self._compare_asset_info(diff)
 
@@ -331,6 +332,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_values(diff, CurrentTransformer.core_burden)
+        self._compare_id_references(diff, CurrentTransformer.current_transformer_info)
 
         return self._compare_sensor(diff)
 
@@ -341,10 +343,13 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_values(diff, PotentialTransformer.type)
+        self._compare_id_references(diff, PotentialTransformer.potential_transformer_info)
 
         return self._compare_sensor(diff)
 
     def _compare_sensor(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_id_reference_collections(diff, Sensor.relay_functions)
+
         return self._compare_auxiliary_equipment(diff)
 
     ######################
@@ -529,12 +534,62 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_values(diff, CurrentRelay.inverse_time_flag)
         self._compare_floats(diff, CurrentRelay.current_limit_1, CurrentRelay.time_delay_1)
 
-        return self._compare_protection_equipment(diff)
+        return self._compare_protection_relay_function(diff)
 
-    def _compare_protection_equipment(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(diff, ProtectionEquipment.protection_kind, ProtectionEquipment.directable, ProtectionEquipment.power_direction)
-        self._compare_floats(diff, ProtectionEquipment.relay_delay_time)
-        self._compare_id_reference_collections(diff, ProtectionEquipment.protected_switches)
+    def _compare_distance_relay(self, source: DistanceRelay, target: DistanceRelay) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_floats(diff, DistanceRelay.backward_blind,
+                             DistanceRelay.backward_reach,
+                             DistanceRelay.backward_reactance,
+                             DistanceRelay.forward_blind,
+                             DistanceRelay.forward_reach,
+                             DistanceRelay.forward_reactance,
+                             DistanceRelay.operation_phase_angle1,
+                             DistanceRelay.operation_phase_angle2,
+                             DistanceRelay.operation_phase_angle3, )
+
+        return self._compare_protection_relay_function(diff)
+
+    def _compare_voltage_relay(self, source: VoltageRelay, target: VoltageRelay) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        return self._compare_protection_relay_function(diff)
+
+    def _compare_protection_relay_function(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(diff,
+                             ProtectionRelayFunction.model,
+                             ProtectionRelayFunction.reclosing,
+                             ProtectionRelayFunction.protection_kind,
+                             ProtectionRelayFunction.directable,
+                             ProtectionRelayFunction.power_direction
+                             )
+        self._compare_floats(diff, ProtectionRelayFunction.relay_delay_time)
+        self._compare_indexed_value_collections(diff,
+                                                ProtectionRelayFunction.time_limits,
+                                                ProtectionRelayFunction.thresholds
+                                                )
+        self._compare_id_reference_collections(diff,
+                                               ProtectionRelayFunction.protected_switches,
+                                               ProtectionRelayFunction.sensors,
+                                               ProtectionRelayFunction.schemes,
+                                               )
+        self._compare_id_references(diff, ProtectionRelayFunction.relay_info)
+
+        return self._compare_power_system_resource(diff)
+
+    def _compare_protection_relay_scheme(self, source: ProtectionRelayScheme, target: ProtectionRelayScheme) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        self._compare_id_references(diff, ProtectionRelayScheme.system)
+        self._compare_id_reference_collections(diff, ProtectionRelayScheme.functions)
+
+        return self._compare_identified_object(diff)
+
+    def _compare_protection_relay_system(self, source: ProtectionRelaySystem, target: ProtectionRelaySystem) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, ProtectionRelaySystem.protection_kind)
+        self._compare_id_reference_collections(diff, ProtectionRelaySystem.schemes)
 
         return self._compare_equipment(diff)
 
@@ -605,6 +660,7 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_conductor(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_floats(diff, Conductor.length)
+        self._compare_id_references(diff, Conductor.wire_info)
 
         return self._compare_conducting_equipment(diff)
 
@@ -682,6 +738,14 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_power_system_resource(diff)
 
     def _compare_fuse(self, source: Fuse, target: Fuse) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        self._compare_id_references(diff, Fuse.function)
+        return self._compare_switch(diff)
+
+    def _compare_ground(self, source: Ground, target: Ground) -> ObjectDifference:
+        return self._compare_conducting_equipment(ObjectDifference(source, target))
+
+    def _compare_compare_ground_disconnector(self, source: GroundDisconnector, target: GroundDisconnector) -> ObjectDifference:
         return self._compare_switch(ObjectDifference(source, target))
 
     def _compare_jumper(self, source: Jumper, target: Jumper) -> ObjectDifference:
@@ -791,6 +855,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_indexed_id_reference_collections(diff, PowerTransformer.ends)
         self._compare_values(diff, PowerTransformer.vector_group, PowerTransformer.construction_kind, PowerTransformer.function)
         self._compare_floats(diff, PowerTransformer.transformer_utilisation)
+        self._compare_id_references(diff, PowerTransformer.power_transformer_info)
 
         return self._compare_conducting_equipment(diff)
 
@@ -822,7 +887,7 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_protected_switch(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, ProtectedSwitch.breaking_capacity)
-        self._compare_id_reference_collections(diff, ProtectedSwitch.operated_by_protection_equipment)
+        self._compare_id_reference_collections(diff, ProtectedSwitch.relay_functions)
 
         return self._compare_switch(diff)
 
@@ -856,16 +921,25 @@ class NetworkServiceComparator(BaseServiceComparator):
             RegulatingControl.target_deadband,
             RegulatingControl.target_value,
             RegulatingControl.max_allowed_target_value,
-            RegulatingControl.min_allowed_target_value
+            RegulatingControl.min_allowed_target_value,
+            RegulatingControl.rated_current
         )
         self._compare_id_references(diff, RegulatingControl.terminal)
         self._compare_id_reference_collections(diff, RegulatingControl.regulating_conducting_equipment)
 
         return self._compare_power_system_resource(diff)
 
+    def _compare_series_compensator(self, source: SeriesCompensator, target: SeriesCompensator) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        self._compare_values(diff, SeriesCompensator.varistor_rated_current, SeriesCompensator.varistor_voltage_threshold)
+        self._compare_floats(diff, SeriesCompensator.r, SeriesCompensator.r0, SeriesCompensator.x, SeriesCompensator.x0)
+
+        return self._compare_conducting_equipment(diff)
+
     def _compare_shunt_compensator(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, ShuntCompensator.grounded, ShuntCompensator.nom_u, ShuntCompensator.phase_connection)
         self._compare_floats(diff, ShuntCompensator.sections)
+        self._compare_id_references(diff, ShuntCompensator.shunt_compensator_info)
 
         return self._compare_regulating_cond_eq(diff)
 
@@ -873,6 +947,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_floats(diff, Switch.rated_current)
         self._add_if_different(diff, "isNormallyOpen", self._compare_open_status(diff, Switch.is_normally_open))
         self._add_if_different(diff, "isOpen", self._compare_open_status(diff, Switch.is_open))
+        self._compare_id_references(diff, Switch.switch_info)
 
         return self._compare_conducting_equipment(diff)
 

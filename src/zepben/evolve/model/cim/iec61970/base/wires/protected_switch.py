@@ -12,87 +12,87 @@ from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.util import get_by_mrid, ngen, nlen, safe_remove
 
 if TYPE_CHECKING:
-    from zepben.evolve import ProtectionEquipment
-
+    from zepben.evolve import ProtectionRelayFunction
 
 __all__ = ["ProtectedSwitch"]
 
 
 class ProtectedSwitch(Switch):
+    # TODO: how to doc string
     """
-    A ProtectedSwitch is a switching device that can be operated by ProtectionEquipment.
+    A ProtectedSwitch is a switching device that can be operated by :class:`ProtectionRelayFunction`.
     """
 
     breaking_capacity: Optional[int] = None
     """The maximum fault current in amps a breaking device can break safely under prescribed conditions of use."""
 
-    _operated_by_protection_equipment: Optional[List[ProtectionEquipment]] = None
+    _relay_functions: Optional[List[ProtectionRelayFunction]] = None
 
     def __init__(
         self,
-        operated_by_protection_equipment: Iterable[ProtectionEquipment] = None,
+        relay_functions: Iterable[ProtectionRelayFunction] = None,
         **kwargs
     ):
         super(ProtectedSwitch, self).__init__(**kwargs)
 
         # breaking_capacity is handled via dataclassy.
-        if operated_by_protection_equipment is not None:
-            for protection_equipment in operated_by_protection_equipment:
-                self.add_operated_by_protection_equipment(protection_equipment)
+        if relay_functions is not None:
+            for relay_function in relay_functions:
+                self.add_relay_function(relay_function)
 
     @property
-    def operated_by_protection_equipment(self) -> Generator[ProtectionEquipment, None, None]:
+    def relay_functions(self) -> Generator[ProtectionRelayFunction, None, None]:
         """
-        Yields all :class:`ProtectionEquipment` operating this :class:`ProtectedSwitch`.
+        Yields all :class:`ProtectionRelayFunction`'s operating this :class:`ProtectedSwitch`.
 
-        :return: A generator that iterates over all ProtectionEquipment operating this ProtectedSwitch.
+        :return: A generator that iterates over all :class:`ProtectionRelayFunction` operating this :class:`ProtectedSwitch`.
         """
-        return ngen(self._operated_by_protection_equipment)
+        return ngen(self._relay_functions)
 
-    def num_operated_by_protection_equipment(self) -> int:
+    def num_relay_functions(self) -> int:
         """
-        Get the number of :class:`ProtectionEquipment` operating this :class:`ProtectedSwitch`.
+        Get the number of :class:`ProtectionRelayFunction`'s operating this :class:`ProtectedSwitch`.
 
-        :return: The number of ProtectionEquipment operating this ProtectedSwitch.
+        :return: The number of :class:`ProtectionRelayFunction`'s operating this :class:`ProtectedSwitch`.
         """
-        return nlen(self._operated_by_protection_equipment)
+        return nlen(self._relay_functions)
 
-    def get_operated_by_protection_equipment(self, mrid: str) -> Optional[ProtectionEquipment]:
+    def get_relay_function(self, mrid: str) -> Optional[ProtectionRelayFunction]:
         """
-        Get a :class:`ProtectionEquipment` operating this :class:`ProtectedSwitch` with the specified `mrid`.
+        Get a :class:`ProtectionRelayFunction` operating this :class:`ProtectedSwitch` with the specified `mrid`.
 
-        :param mrid: The mRID of the desired ProtectionEquipment
-        :return: The ProtectionEquipment with the specified mRID if it exists, otherwise None.
+        :param mrid: The mRID of the desired :class:`ProtectionRelayFunction`
+        :return: The :class:`ProtectionRelayFunction` with the specified mRID if it exists, otherwise None.
         """
-        return get_by_mrid(self._operated_by_protection_equipment, mrid)
+        return get_by_mrid(self._relay_functions, mrid)
 
-    def add_operated_by_protection_equipment(self, operated_by_protection_equipment: ProtectionEquipment) -> ProtectedSwitch:
+    def add_relay_function(self, relay_function: ProtectionRelayFunction) -> ProtectedSwitch:
+        # TODO relay_function vs protection_relay_function in sensor
         """
-        Associate this :class:`ProtectedSwitch` with a :class:`ProtectionEquipment` operating it.
-        :param operated_by_protection_equipment: The ProtectionEquipment to associate with this ProtectedSwitch.
-        :return: A reference to this ProtectedSwitch for fluent use.
+        Associate this :class:`ProtectedSwitch` with a :class:`ProtectionRelayFunction` operating it.
+        :param relay_function: The :class:`ProtectionRelayFunction` to associate with this :class:`ProtectedSwitch`.
+        :return: A reference to this :class:`ProtectedSwitch` for fluent use.
         """
-        if self._validate_reference(operated_by_protection_equipment, self.get_operated_by_protection_equipment, "A ProtectionEquipment"):
+        if self._validate_reference(relay_function, self.get_relay_function, "A ProtectionRelayFunction"):
             return self
 
-        self._operated_by_protection_equipment = list() if self._operated_by_protection_equipment is None else self._operated_by_protection_equipment
-        self._operated_by_protection_equipment.append(operated_by_protection_equipment)
-
+        self._relay_functions = list() if self._relay_functions is None else self._relay_functions
+        self._relay_functions.append(relay_function)
         return self
 
-    def remove_operated_by_protection_equipment(self, operated_by_protection_equipment: Optional[ProtectionEquipment]) -> ProtectedSwitch:
+    def remove_relay_function(self, relay_function: Optional[ProtectionRelayFunction]) -> ProtectedSwitch:
         """
-        Disassociate this :class:`ProtectedSwitch` from a :class:`ProtectionEquipment`.
-        :param operated_by_protection_equipment: The ProtectionEquipment to disassociate from this ProtectedSwitch.
-        :return: A reference to this ProtectedSwitch for fluent use.
+        Disassociate this :class:`ProtectedSwitch` from a :class:`ProtectionRelayFunction`.
+        :param relay_function: The :class:`ProtectionRelayFunction` to disassociate from this :class:`ProtectedSwitch`.
+        :return: A reference to this :class:`ProtectedSwitch` for fluent use.
         """
-        self._operated_by_protection_equipment = safe_remove(self._operated_by_protection_equipment, operated_by_protection_equipment)
+        self._relay_functions = safe_remove(self._relay_functions, relay_function)
         return self
 
-    def clear_operated_by_protection_equipment(self) -> ProtectedSwitch:
+    def clear_relay_functions(self) -> ProtectedSwitch:
         """
-        Disassociate all :class:`ProtectionEquipment` from this :class:`ProtectedSwitch`.
-        :return: A reference to this ProtectedSwitch for fluent use.
+        Disassociate all :class:`ProtectionRelayFunction` from this :class:`ProtectedSwitch`.
+        :return: A reference to this :class:`ProtectedSwitch` for fluent use.
         """
-        self._operated_by_protection_equipment = None
+        self._relay_functions = None
         return self

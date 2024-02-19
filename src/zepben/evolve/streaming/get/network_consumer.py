@@ -26,8 +26,9 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     Loop, Pole, Streetlight, Accumulator, Analog, Discrete, Control, RemoteControl, RemoteSource, PowerTransformerInfo, PowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
-    ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, CurrentRelayInfo, SwitchInfo, \
-    CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, PotentialTransformerInfo
+    ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, RelayInfo, SwitchInfo, \
+    CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, PotentialTransformerInfo, DistanceRelay, VoltageRelay, ProtectionRelayScheme, ProtectionRelaySystem, \
+    GroundDisconnector, Ground, SeriesCompensator
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -694,6 +695,13 @@ _nio_type_to_cim = {
     "control": Control,
     "discrete": Discrete,
 
+    # IEC61970 InfIEC61970 PROTECTION #
+    "currentRelay": CurrentRelay,
+    "distanceRelay": DistanceRelay,
+    "protectionRelayScheme": ProtectionRelayScheme,
+    "protectionRelaySystem": ProtectionRelaySystem,
+    "voltageRelay": VoltageRelay,
+
     # IEC61970 BASE SCADA #
     "remoteControl": RemoteControl,
     "remoteSource": RemoteSource,
@@ -713,6 +721,8 @@ _nio_type_to_cim = {
     "energySource": EnergySource,
     "energySourcePhase": EnergySourcePhase,
     "fuse": Fuse,
+    "ground": Ground,
+    "groundDisconnector": GroundDisconnector,
     "jumper": Jumper,
     "junction": Junction,
     "linearShuntCompensator": LinearShuntCompensator,
@@ -724,6 +734,7 @@ _nio_type_to_cim = {
     "powerTransformerEnd": PowerTransformerEnd,
     "ratioTapChanger": RatioTapChanger,
     "recloser": Recloser,
+    "seriesCompensator": SeriesCompensator,
     "tapChangerControl": TapChangerControl,
     "transformerStarImpedance": TransformerStarImpedance,
 
@@ -731,8 +742,7 @@ _nio_type_to_cim = {
     "circuit": Circuit,
     "loop": Loop,
     "lvFeeder": LvFeeder,
-    "currentRelay": CurrentRelay,
-    "currentRelayInfo": CurrentRelayInfo,
+    "relayInfo": RelayInfo,
     "switchInfo": SwitchInfo,
 
     # IEC61970 InfIEC61970 WIRES GENERATION PRODUCTION #

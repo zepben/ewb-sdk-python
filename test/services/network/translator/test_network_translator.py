@@ -51,7 +51,7 @@ types_to_test = {
     # IEC61968 infIEC61968 InfAssetInfo #
     #####################################
 
-    "create_current_relay_info": create_current_relay_info(),
+    "create_relay_info": create_relay_info(),
     "create_current_transformer_info": create_current_transformer_info(),
     "create_potential_transformer_info": create_potential_transformer_info(),
 
@@ -109,6 +109,10 @@ types_to_test = {
     ############################
 
     "create_current_relay": create_current_relay(),
+    "create_distance_relay": create_distance_relay(),
+    "create_voltage_relay": create_voltage_relay(),
+    "create_protection_relay_scheme": create_protection_relay_scheme(),
+    "create_protection_relay_system": create_protection_relay_system(),
 
     #######################
     # IEC61970 BASE SCADA #
@@ -138,9 +142,12 @@ types_to_test = {
     "create_energy_source": create_energy_source(),
     "create_energy_source_phase": create_energy_source_phase(),
     "create_fuse": create_fuse(),
+    "create_ground": create_ground(),
+    "create_ground_disconnector": create_ground_disconnector(),
     "create_jumper": create_jumper(),
     "create_junction": create_junction(),
 
+    "create_series_compensator": create_series_compensator(),
     "create_linear_shunt_compensator": create_linear_shunt_compensator(),
     "create_load_break_switch": create_load_break_switch(),
     "create_per_length_sequence_impedance": create_per_length_sequence_impedance(),
@@ -168,9 +175,8 @@ types_to_test = {
     "create_ev_charging_unit": create_ev_charging_unit(),
 }
 
-
 @given(**types_to_test)
-@settings(suppress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.large_base_example])
 @pytest.mark.timeout(10000)
 def test_network_service_translations(**kwargs):
     validate_service_translations(NetworkService, NetworkServiceComparator(), **kwargs)

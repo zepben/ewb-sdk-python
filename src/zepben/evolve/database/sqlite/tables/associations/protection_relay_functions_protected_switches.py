@@ -8,28 +8,28 @@ from typing import List
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
-__all__ = ["TableProtectionEquipmentProtectedSwitches"]
+__all__ = ["TableProtectionRelayFunctionsProtectedSwitches"]
 
 
-class TableProtectionEquipmentProtectedSwitches(SqliteTable):
-    protection_equipment_mrid: Column = None
+class TableProtectionRelayFunctionsProtectedSwitches(SqliteTable):
+    protection_relay_function_mrid: Column = None
     protected_switch_mrid: Column = None
 
     def __init__(self):
-        super(TableProtectionEquipmentProtectedSwitches, self).__init__()
-        self.protection_equipment_mrid = self._create_column("protection_equipment_mrid", "TEXT", Nullable.NOT_NULL)
+        super(TableProtectionRelayFunctionsProtectedSwitches, self).__init__()
+        self.protection_relay_function_mrid = self._create_column("protection_relay_function_mrid", "TEXT", Nullable.NOT_NULL)
         self.protected_switch_mrid = self._create_column("protected_switch_mrid", "TEXT", Nullable.NOT_NULL)
 
     def name(self) -> str:
-        return "protection_equipment_protected_switches"
+        return "protection_relay_functions_protected_switches"
 
     def unique_index_columns(self) -> List[List[Column]]:
-        cols = super(TableProtectionEquipmentProtectedSwitches, self).unique_index_columns()
-        cols.append([self.protection_equipment_mrid, self.protected_switch_mrid])
+        cols = super(TableProtectionRelayFunctionsProtectedSwitches, self).unique_index_columns()
+        cols.append([self.protection_relay_function_mrid, self.protected_switch_mrid])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
-        cols = super(TableProtectionEquipmentProtectedSwitches, self).non_unique_index_columns()
-        cols.append([self.protection_equipment_mrid])
+        cols = super(TableProtectionRelayFunctionsProtectedSwitches, self).non_unique_index_columns()
+        cols.append([self.protection_relay_function_mrid])
         cols.append([self.protected_switch_mrid])
         return cols

@@ -8,7 +8,7 @@ from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.core_tables import TableConductingEquipment
 
 __all__ = ["TableSwitches", "TableProtectedSwitches", "TableFuses", "TableLoadBreakSwitches", "TableBreakers", "TableReclosers", "TableJumpers",
-           "TableDisconnectors"]
+           "TableDisconnectors", "TableGrounds", "TableGroundDisconnectors"]
 
 
 # noinspection PyAbstractClass
@@ -52,6 +52,12 @@ class TableDisconnectors(TableSwitches):
 
 
 class TableFuses(TableSwitches):
+    function_mrid: Column = None
+
+    def __init__(self):
+        super(TableFuses, self).__init__()
+        self.function_mrid = self._create_column("function_mrid", "TEXT", Nullable.NULL)
+
     def name(self) -> str:
         return "fuses"
 
@@ -70,3 +76,13 @@ class TableReclosers(TableProtectedSwitches):
     def name(self) -> str:
         return "reclosers"
 
+
+class TableGroundDisconnectors(TableSwitches):
+
+    def name(self) -> str:
+        return "ground_disconnectors"
+
+class TableGrounds(TableConductingEquipment):
+
+    def name(self) -> str:
+        return "grounds"

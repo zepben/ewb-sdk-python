@@ -10,7 +10,6 @@ from typing import Callable, Optional
 
 from dataclassy import dataclass
 
-
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
@@ -31,7 +30,7 @@ from zepben.evolve.model.cim.iec61968.customers.customer import Customer
 from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure
 from zepben.evolve.model.cim.iec61968.customers.tariff import Tariff
-from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_relay_info import CurrentRelayInfo
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
 from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, UsagePoint
@@ -39,6 +38,7 @@ from zepben.evolve.model.cim.iec61968.operations.operational_restriction import 
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.current_transformer import CurrentTransformer
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.potential_transformer import PotentialTransformer
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
@@ -52,8 +52,9 @@ from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject
 from zepben.evolve.model.cim.iec61970.base.meas.control import Control
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import Measurement
-from zepben.evolve.model.cim.iec61970.base.protection.current_relay import CurrentRelay
-from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import ProtectionEquipment
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
@@ -61,6 +62,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import Regula
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
+from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import PowerElectronicsUnit
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnectionPhase, PowerElectronicsConnection
@@ -91,9 +93,10 @@ __all__ = [
     "tti_to_tei_resolver", "tei_to_tsi_resolver", "tsi_to_tei_resolver", "te_to_tsi_resolver", "pti_to_tti_resolver", "peu_to_pec_resolver",
     "pec_to_peu_resolver", "pecphase_to_pec_resolver", "pec_to_pecphase_resolver", "tei_to_ee_nlt_resolver", "tei_to_ee_sct_resolver", "tei_to_ge_sct_resolver",
     "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver", "shunt_compensator_to_shunt_compensator_info_resolver", "lvfeeder_to_nht_resolver",
-    "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "pe_to_ps_resolver", "ps_to_pe_resolver", "switch_to_switch_info_resolver",
-    "current_relay_to_current_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver"
-]
+    "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "prf_to_ps_resolver", "ps_to_prf_resolver", "switch_to_switch_info_resolver",
+    "prf_to_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver", "prf_to_ps_resolver",
+    "ps_to_prf_resolver", "prf_to_sen_resolver", "sen_to_prf_resolver", "prf_to_prscheme_resolver", "prscheme_to_prf_resolver", "prscheme_to_prsystem_resolver",
+    "prsystem_to_prscheme_resolver", "fuse_to_prf_resolver"]
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -191,7 +194,7 @@ cond_equip_to_terminal_resolver = ReferenceResolver(ConductingEquipment, Termina
 
 conductor_to_wire_info_resolver = ReferenceResolver(Conductor, WireInfo, lambda t, r: setattr(t, 'asset_info', r))
 
-current_relay_to_current_relay_info_resolver = ReferenceResolver(CurrentRelay, CurrentRelayInfo, lambda t, r: setattr(t, 'asset_info', r))
+prf_to_relay_info_resolver = ReferenceResolver(ProtectionRelayFunction, RelayInfo, lambda t, r: setattr(t, 'asset_info', r))
 
 powertransformer_to_power_transformer_info_resolver = ReferenceResolver(PowerTransformer, PowerTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 
@@ -314,8 +317,20 @@ tei_to_ee_oct_resolver = ReferenceResolver(TransformerEndInfo, OpenCircuitTest, 
 ct_to_cti_resolver = ReferenceResolver(CurrentTransformer, CurrentTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 vt_to_vti_resolver = ReferenceResolver(PotentialTransformer, PotentialTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 
-pe_to_ps_resolver = ReferenceResolver(ProtectionEquipment, ProtectedSwitch, lambda t, r: t.add_protected_switch(r))
-ps_to_pe_resolver = ReferenceResolver(ProtectedSwitch, ProtectionEquipment, lambda t, r: t.add_operated_by_protection_equipment(r))
+# TODO: ps already in use
+prf_to_ps_resolver = ReferenceResolver(ProtectionRelayFunction, ProtectedSwitch, lambda t, r: t.add_protected_switch(r))
+ps_to_prf_resolver = ReferenceResolver(ProtectedSwitch, ProtectionRelayFunction, lambda t, r: t.add_relay_function(r))
+
+prf_to_sen_resolver = ReferenceResolver(ProtectionRelayFunction, Sensor, lambda t, r: t.add_sensor(r))
+sen_to_prf_resolver = ReferenceResolver(Sensor, ProtectionRelayFunction, lambda t, r: t.add_relay_function(r))
+
+prf_to_prscheme_resolver = ReferenceResolver(ProtectionRelayFunction, ProtectionRelayScheme, lambda t, r: t.add_scheme(r))
+prscheme_to_prf_resolver = ReferenceResolver(ProtectionRelayScheme, ProtectionRelayFunction, lambda t, r: t.add_function(r))
+
+prscheme_to_prsystem_resolver = ReferenceResolver(ProtectionRelayScheme, ProtectionRelaySystem, lambda t, r: setattr(t, 'system', r))
+prsystem_to_prscheme_resolver = ReferenceResolver(ProtectionRelaySystem, ProtectionRelayScheme, lambda t, r: t.add_scheme(r))
+
+fuse_to_prf_resolver = ReferenceResolver(Fuse, ProtectionRelayFunction, lambda t, r: setattr(t, 'function', r))
 
 rce_to_rc_resolver = ReferenceResolver(RegulatingCondEq, RegulatingControl, lambda t, r: setattr(t, 'regulating_control', r))
 rc_to_rce_resolver = ReferenceResolver(RegulatingControl, RegulatingCondEq, lambda t, r: t.add_regulating_cond_eq(r))

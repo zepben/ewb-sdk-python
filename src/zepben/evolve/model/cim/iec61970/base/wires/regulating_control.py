@@ -79,6 +79,10 @@ class RegulatingControl(PowerSystemResource):
     min_allowed_target_value: Optional[float] = None
     """Minimum allowed target value (RegulatingControl.targetValue)."""
 
+    rated_current: Optional[float] = None
+    """The rated current of associated CT in amps for this RegulatingControl. Forms the base used to convert Line Drop Compensation settings from ohms to 
+    voltage."""
+
     terminal: Optional[Terminal] = None
     """
     The terminal associated with this regulating control. The terminal is associated instead of a node, since the terminal could connect into either a 
@@ -132,12 +136,13 @@ class RegulatingControl(PowerSystemResource):
 
         self._regulating_cond_eq = list() if self._regulating_cond_eq is None else self._regulating_cond_eq
         self._regulating_cond_eq.append(regulating_cond_eq)
+        return self
 
     def remove_regulating_cond_eq(self, regulating_cond_eq: Optional[RegulatingCondEq]) -> RegulatingControl:
         """
         Disassociate this :class:`RegulatingControl` from a :class:`RegulatingCondEq`.
 
-        :param regulating_cond_eq: The RegulatingCondEq to disassociate from this RegulatingControl
+        :param regulating_cond_eq: The RegulatingCondEq to disassociate from this RegulatingControl.
         :return: A reference to this RegulatingControl for fluent use.
         """
         self._regulating_cond_eq = safe_remove(self._regulating_cond_eq, regulating_cond_eq)

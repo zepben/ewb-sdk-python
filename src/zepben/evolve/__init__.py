@@ -30,7 +30,7 @@ from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.switch_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import *
-from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_relay_info import *
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import *
@@ -59,8 +59,15 @@ from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
 from zepben.evolve.model.cim.iec61970.base.domain.unit_symbol import *
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *
-from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import *
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import *
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import *
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system import *
 from zepben.evolve.model.cim.iec61970.base.protection.current_relay import *
+from zepben.evolve.model.cim.iec61970.base.protection.distance_relay import *
+from zepben.evolve.model.cim.iec61970.base.protection.voltage_relay import *
+from zepben.evolve.model.cim.iec61970.base.protection.relay_setting import *
+from zepben.evolve.model.cim.iec61970.base.wires.ground import *
+from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import *
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_state_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.line import *
@@ -69,6 +76,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
 from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
+from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
@@ -215,7 +223,7 @@ from zepben.evolve.database.sqlite.tables.associations.equipment_association_tab
 from zepben.evolve.database.sqlite.tables.associations.usagepoints_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.assetorganisationroles_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.pricingstructure_association_tables import *
-from zepben.evolve.database.sqlite.tables.associations.protection_equipment_protected_switches import *
+from zepben.evolve.database.sqlite.tables.associations.protection_relay_functions_protected_switches import *
 from zepben.evolve.database.sqlite.tables.iec61968.common_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.customer_tables import *
