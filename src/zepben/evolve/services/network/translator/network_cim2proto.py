@@ -139,8 +139,6 @@ from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChar
 from zepben.protobuf.network.model.FeederDirection_pb2 import FeederDirection as PBFeederDirection
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
-from zepben.evolve import DistanceRelay, ProtectionRelayFunction, ProtectionRelayScheme, ProtectionRelaySystem, RelaySetting, VoltageRelay, Ground, \
-    GroundDisconnector, SeriesCompensator
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
@@ -184,6 +182,12 @@ from zepben.evolve.model.cim.iec61970.base.meas.control import *
 from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
 from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
 from zepben.evolve.model.cim.iec61970.base.protection.current_relay import *
+from zepben.evolve.model.cim.iec61970.base.protection.distance_relay import *
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import *
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import *
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system import *
+from zepben.evolve.model.cim.iec61970.base.protection.relay_setting import *
+from zepben.evolve.model.cim.iec61970.base.protection.voltage_relay import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
@@ -197,6 +201,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
 from zepben.evolve.model.cim.iec61970.base.wires.fuse import *
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
+from zepben.evolve.model.cim.iec61970.base.wires.ground import *
+from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import *
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import *
 from zepben.evolve.model.cim.iec61970.base.wires.line import *
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import *
@@ -206,6 +212,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import *
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import *
+from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import *

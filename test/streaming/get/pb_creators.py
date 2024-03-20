@@ -155,7 +155,6 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop as PBL
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder as PBLvFeeder
 from zepben.protobuf.cim.iec61970.infiec61970.protection.PowerDirectionKind_pb2 import PowerDirectionKind as PBPowerDirectionKind
 from zepben.protobuf.cim.iec61970.infiec61970.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
-
 from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 from zepben.protobuf.dc.dc_data_pb2 import DiagramIdentifiedObject
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
@@ -1423,6 +1422,7 @@ def network_identified_objects(draw):
         # IEC61968 InfIEC61968 ASSET INFO #
         draw(builds(NetworkIdentifiedObject, currentTransformerInfo=current_transformer_info())),
         draw(builds(NetworkIdentifiedObject, potentialTransformerInfo=potential_transformer_info())),
+        draw(builds(NetworkIdentifiedObject, relayInfo=relay_info())),
 
         # IEC61970 BASE AUXILIARY EQUIPMENT #
         draw(builds(NetworkIdentifiedObject, currentTransformer=current_transformer())),
@@ -1450,11 +1450,10 @@ def network_identified_objects(draw):
 
         # IEC61970 BASE PROTECTION #
         draw(builds(NetworkIdentifiedObject, currentRelay=current_relay())),
+        draw(builds(NetworkIdentifiedObject, distanceRelay=distance_relay())),
         draw(builds(NetworkIdentifiedObject, protectionRelayScheme=protection_relay_scheme())),
         draw(builds(NetworkIdentifiedObject, protectionRelaySystem=protection_relay_system())),
-        draw(builds(NetworkIdentifiedObject, distanceRelay=distance_relay())),
         draw(builds(NetworkIdentifiedObject, voltageRelay=voltage_relay())),
-        draw(builds(NetworkIdentifiedObject, relayInfo=relay_info())),
 
         # IEC61970 BASE SCADA #
         draw(builds(NetworkIdentifiedObject, remoteControl=remote_control())),
@@ -1480,7 +1479,6 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, jumper=jumper())),
         draw(builds(NetworkIdentifiedObject, junction=junction())),
         draw(builds(NetworkIdentifiedObject, linearShuntCompensator=linear_shunt_compensator())),
-        draw(builds(NetworkIdentifiedObject, seriesCompensator=series_compensator())),
         draw(builds(NetworkIdentifiedObject, loadBreakSwitch=load_break_switch())),
         draw(builds(NetworkIdentifiedObject, perLengthSequenceImpedance=per_length_sequence_impedance())),
         draw(builds(NetworkIdentifiedObject, powerElectronicsConnection=power_electronics_connection())),
@@ -1489,6 +1487,7 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, powerTransformerEnd=power_transformer_end())),
         draw(builds(NetworkIdentifiedObject, ratioTapChanger=ratio_tap_changer())),
         draw(builds(NetworkIdentifiedObject, recloser=recloser())),
+        draw(builds(NetworkIdentifiedObject, seriesCompensator=series_compensator())),
         draw(builds(NetworkIdentifiedObject, tapChangerControl=tap_changer_control())),
         draw(builds(NetworkIdentifiedObject, transformerStarImpedance=transformer_star_impedance())),
 

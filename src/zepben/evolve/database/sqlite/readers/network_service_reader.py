@@ -18,14 +18,11 @@ from zepben.evolve import BaseServiceReader, TableCableInfo, TableOverheadWireIn
     TableCurrentTransformers, TablePotentialTransformers, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableRelayInfo, \
     TableCurrentRelays, TableSwitchInfo, TableProtectionRelayFunctionsProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, TableTapChangerControls, \
     TablePowerTransformerEndRatings, TableProtectionRelayFunctionThresholds, TableDistanceRelays, TableVoltageRelays, TableProtectionRelayFunctionTimeLimits, \
-    TableProtectionRelaySystems, TableProtectionRelaySchemes, TableGrounds, TableGroundDisconnectors, TableSeriesCompensators
+    TableProtectionRelaySystems, TableProtectionRelaySchemes, TableGrounds, TableGroundDisconnectors, TableSeriesCompensators, \
+    TableProtectionRelayFunctionsSensors, TableProtectionRelaySchemesProtectionRelayFunctions
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 
 __all__ = ["NetworkServiceReader"]
-
-from zepben.evolve.database.sqlite.tables.associations.protection_relay_functions_sensors import TableProtectionRelayFunctionsSensors
-from zepben.evolve.database.sqlite.tables.associations.protection_relay_schemes_protection_relay_functions import \
-    TableProtectionRelaySchemesProtectionRelayFunctions
 
 
 class NetworkServiceReader(BaseServiceReader):

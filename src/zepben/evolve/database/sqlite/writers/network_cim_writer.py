@@ -35,25 +35,15 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableRelayInfo, \
     RelayInfo, CurrentRelay, TableProtectionRelayFunctions, TableCurrentRelays, TableProtectionRelayFunctionsProtectedSwitches, \
     TableRecloseDelays, EvChargingUnit, TableEvChargingUnits, TableRegulatingControls, RegulatingControl, TapChangerControl, TableTapChangerControls, \
-    TransformerEndRatedS, TablePowerTransformerEndRatings, TableGrounds, TableGroundDisconnectors, SeriesCompensator, TableSeriesCompensators, \
+    TablePowerTransformerEndRatings, TableGrounds, TableGroundDisconnectors, SeriesCompensator, TableSeriesCompensators, \
     ProtectionRelayFunction, RelaySetting, TableProtectionRelayFunctionThresholds, TableProtectionRelayFunctionTimeLimits, TableVoltageRelays, \
-    TableDistanceRelays, TableProtectionRelaySchemes, TableProtectionRelaySystems
-from zepben.evolve.database.sqlite.tables.associations.protection_relay_functions_sensors import TableProtectionRelayFunctionsSensors
-from zepben.evolve.database.sqlite.tables.associations.protection_relay_schemes_protection_relay_functions import \
-    TableProtectionRelaySchemesProtectionRelayFunctions
+    TableDistanceRelays, TableProtectionRelaySchemes, TableProtectionRelaySystems, TableProtectionRelayFunctionsSensors, \
+    TableProtectionRelaySchemesProtectionRelayFunctions, DistanceRelay, ProtectionRelayScheme, ProtectionRelaySystem, VoltageRelay, Ground, GroundDisconnector
+
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
 __all__ = ["NetworkCIMWriter"]
-
-from zepben.evolve.model.cim.iec61970.base.protection.distance_relay import DistanceRelay
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
-
-from zepben.evolve.model.cim.iec61970.base.protection.voltage_relay import VoltageRelay
-
-from zepben.evolve.model.cim.iec61970.base.wires.ground import Ground
-from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import GroundDisconnector
 
 
 class NetworkCIMWriter(BaseCIMWriter):
@@ -1304,4 +1294,3 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         return self._try_execute_single_update(insert, f"{protection_relay_scheme.mrid}-to-{protection_relay_function.mrid}",
                                                "protection relay function to protection relay function association")
-

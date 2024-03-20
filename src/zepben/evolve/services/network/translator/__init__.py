@@ -246,7 +246,6 @@ Circuit.mrid = lambda self: self.l.mrid()
 LvFeeder.mrid = lambda self: self.ec.mrid()
 EvChargingUnit.mrid = lambda self: self.peu.mrid()
 
-
 PowerSystemResource.name_and_mrid = lambda self: self.io.name_and_mrid()
 ConductingEquipment.name_and_mrid = lambda self: self.eq.name_and_mrid()
 Equipment.name_and_mrid = lambda self: self.psr.name_and_mrid()

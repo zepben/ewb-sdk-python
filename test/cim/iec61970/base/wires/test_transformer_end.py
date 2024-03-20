@@ -17,7 +17,7 @@ transformer_end_kwargs = {
     "r_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "x_ground": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "ratio_tap_changer": builds(RatioTapChanger),
-    "terminal": builds(Terminal, conducting_equipment=builds(PowerTransformer)),
+    "terminal": builds(Terminal),
     "base_voltage": builds(BaseVoltage),
     "end_number": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "star_impedance": builds(TransformerStarImpedance)

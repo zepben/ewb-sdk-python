@@ -38,23 +38,13 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
     LvFeeder, TableLvFeeders, RelayInfo, TableRelayInfo, SwitchInfo, TableSwitchInfo, TableProtectionRelayFunctions, \
     ProtectionKind, PowerDirectionKind, TableCurrentRelays, CurrentRelay, TableProtectionRelayFunctionsProtectedSwitches, TableRecloseDelays, \
-    TableEvChargingUnits, \
-    EvChargingUnit, RegulatingControl, TableRegulatingControls, RegulatingControlModeKind, TapChangerControl, TableTapChangerControls, \
-    TablePowerTransformerEndRatings, TransformerCoolingType, TransformerEndRatedS, TableProtectionRelayFunctionThresholds, TableDistanceRelays, \
+    TableEvChargingUnits, EvChargingUnit, RegulatingControl, TableRegulatingControls, RegulatingControlModeKind, TapChangerControl, TableTapChangerControls, \
+    TablePowerTransformerEndRatings, TransformerCoolingType, TableProtectionRelayFunctionThresholds, TableDistanceRelays, \
     TableVoltageRelays, TableProtectionRelayFunctionTimeLimits, TableProtectionRelaySystems, TableProtectionRelaySchemes, TableGrounds, \
-    TableGroundDisconnectors, TableSeriesCompensators
-from zepben.evolve.database.sqlite.tables.associations.protection_relay_functions_sensors import TableProtectionRelayFunctionsSensors
-from zepben.evolve.database.sqlite.tables.associations.protection_relay_schemes_protection_relay_functions import \
-    TableProtectionRelaySchemesProtectionRelayFunctions
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
-from zepben.evolve.model.cim.iec61970.base.protection.relay_setting import RelaySetting
-from zepben.evolve.model.cim.iec61970.base.protection.distance_relay import DistanceRelay
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
-from zepben.evolve.model.cim.iec61970.base.protection.voltage_relay import VoltageRelay
-from zepben.evolve.model.cim.iec61970.base.wires.ground import Ground
-from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import GroundDisconnector
-from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import SeriesCompensator
+    TableGroundDisconnectors, TableSeriesCompensators, TableProtectionRelayFunctionsSensors, TableProtectionRelaySchemesProtectionRelayFunctions, \
+    ProtectionRelayScheme, ProtectionRelaySystem, RelaySetting, DistanceRelay, ProtectionRelayFunction, VoltageRelay, Ground, GroundDisconnector, \
+    SeriesCompensator
+
 from zepben.evolve.services.common.resolver import rce_regulating_control
 
 __all__ = ["NetworkCIMReader"]

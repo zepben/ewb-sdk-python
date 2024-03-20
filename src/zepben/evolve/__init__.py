@@ -224,6 +224,8 @@ from zepben.evolve.database.sqlite.tables.associations.usagepoints_association_t
 from zepben.evolve.database.sqlite.tables.associations.assetorganisationroles_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.pricingstructure_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.protection_relay_functions_protected_switches import *
+from zepben.evolve.database.sqlite.tables.associations.protection_relay_functions_sensors import *
+from zepben.evolve.database.sqlite.tables.associations.protection_relay_schemes_protection_relay_functions import *
 from zepben.evolve.database.sqlite.tables.iec61968.common_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import *
 from zepben.evolve.database.sqlite.tables.iec61968.customer_tables import *
