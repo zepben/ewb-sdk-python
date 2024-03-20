@@ -7,7 +7,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, booleans, text, integers
 
-from test.cim.collection_validator import validate_collection_unordered
+from cim.collection_validator import validate_collection_unordered
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args

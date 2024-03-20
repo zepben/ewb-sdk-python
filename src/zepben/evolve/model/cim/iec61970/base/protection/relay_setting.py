@@ -24,5 +24,3 @@ class RelaySetting:
 
     name: Optional[str] = None
     """The name of the setting."""
-
-    # TODO: check what is going to be passed here

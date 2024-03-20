@@ -628,7 +628,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     ############################
     # IEC61970 Base Protection #
     ############################
-    @pytest.mark.timeout(2333333)
     def test_compare_current_relay(self):
         self._compare_protection_relay_function(CurrentRelay)
 
@@ -636,7 +635,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(CurrentRelay.inverse_time_flag, CurrentRelay, lambda _: False, lambda _: True)
         self.validator.validate_property(CurrentRelay.time_delay_1, CurrentRelay, lambda _: 1.1, lambda _: 2.2)
 
-    @pytest.mark.timeout(2333333)
     def test_compare_distance_relay(self):
         self._compare_protection_relay_function(DistanceRelay)
 
@@ -650,7 +648,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(DistanceRelay.operation_phase_angle2, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
         self.validator.validate_property(DistanceRelay.operation_phase_angle3, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
 
-    @pytest.mark.timeout(2333333)
     def test_compare_voltage_relay(self):
         self._compare_protection_relay_function(VoltageRelay)
 

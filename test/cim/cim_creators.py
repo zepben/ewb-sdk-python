@@ -865,6 +865,7 @@ def create_protection_relay_function(include_runtime: bool = True):
         "time_limits": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), min_size=4, max_size=4),
         "thresholds": lists(builds(RelaySetting, unit_symbol=sampled_unit_symbol(), value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
                                    name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)), min_size=4, max_size=4),
+        "relay_info": builds(RelayInfo)
     }
 
 

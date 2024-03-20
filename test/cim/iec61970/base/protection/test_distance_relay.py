@@ -11,8 +11,7 @@ from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_kwargs, protection_relay_function_args, \
     verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_kwargs, verify_protection_relay_function_constructor_args
 
-from test.cim.property_validator import validate_property_accessor
-from zepben.evolve import RelayInfo, DistanceRelay
+from zepben.evolve import DistanceRelay
 
 distance_relay_kwargs = {
     **protection_relay_function_kwargs,

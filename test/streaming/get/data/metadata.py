@@ -8,8 +8,7 @@ import datetime
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.metadata.metadata_data_pb2 import ServiceInfo as PBServiceInfo
 
-from zepben.evolve import ServiceInfo, DataSource
-from zepben.evolve.services.common.meta.metadata_translations import data_source_to_pb
+from zepben.evolve import ServiceInfo, DataSource, data_source_to_pb
 
 
 def create_metadata() -> ServiceInfo:

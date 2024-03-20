@@ -27,8 +27,9 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, RelayInfo, SwitchInfo, \
-    CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, PotentialTransformerInfo, DistanceRelay, VoltageRelay, ProtectionRelayScheme, ProtectionRelaySystem, \
-    GroundDisconnector, Ground, SeriesCompensator
+    CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
+    ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo
+
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -670,6 +671,7 @@ _nio_type_to_cim = {
     # IEC61968 InfIEC61968 ASSET INFO #
     "currentTransformerInfo": CurrentTransformerInfo,
     "potentialTransformerInfo": PotentialTransformerInfo,
+    "relayInfo": RelayInfo,
 
     # IEC61970 BASE AUXILIARY EQUIPMENT #
     "currentTransformer": CurrentTransformer,
@@ -695,7 +697,7 @@ _nio_type_to_cim = {
     "control": Control,
     "discrete": Discrete,
 
-    # IEC61970 InfIEC61970 PROTECTION #
+    # IEC61970 BASE PROTECTION #
     "currentRelay": CurrentRelay,
     "distanceRelay": DistanceRelay,
     "protectionRelayScheme": ProtectionRelayScheme,
@@ -742,7 +744,6 @@ _nio_type_to_cim = {
     "circuit": Circuit,
     "loop": Loop,
     "lvFeeder": LvFeeder,
-    "relayInfo": RelayInfo,
     "switchInfo": SwitchInfo,
 
     # IEC61970 InfIEC61970 WIRES GENERATION PRODUCTION #

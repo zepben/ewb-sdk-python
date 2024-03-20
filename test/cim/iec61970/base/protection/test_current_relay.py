@@ -47,7 +47,6 @@ def test_current_relay_constructor_kwargs(current_limit_1, inverse_time_flag, ti
     assert cr.time_delay_1 == time_delay_1
 
 
-@pytest.mark.timeout(233333)
 def test_current_relay_constructor_args():
     cr = CurrentRelay(*current_relay_args)
 

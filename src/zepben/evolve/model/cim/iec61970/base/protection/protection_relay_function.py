@@ -43,11 +43,11 @@ class ProtectionRelayFunction(PowerSystemResource):
     """The flow of the power direction used by this ProtectionRelayFunction."""
 
     _sensors: Optional[List[Sensor]] = None
-    
+
     _protected_switches: Optional[List[ProtectedSwitch]] = None
 
     _schemes: Optional[List[ProtectionRelayScheme]] = None
-    
+
     _time_limits: Optional[List[float]] = None
 
     _thresholds: Optional[List[RelaySetting]] = None
@@ -57,7 +57,8 @@ class ProtectionRelayFunction(PowerSystemResource):
                  protected_switches: Iterable[ProtectedSwitch] = None,
                  schemes: Iterable[ProtectionRelayScheme] = None,
                  time_limits: Iterable[float] = None,
-                 thresholds: Iterable[RelaySetting] = None, **kwargs):
+                 thresholds: Iterable[RelaySetting] = None,
+                 relay_info: RelayInfo = None, **kwargs):
         super(ProtectionRelayFunction, self).__init__(**kwargs)
 
         if sensors is not None:
@@ -70,26 +71,26 @@ class ProtectionRelayFunction(PowerSystemResource):
             for scheme in schemes:
                 self.add_scheme(scheme)
 
-        # TODO: threshold/time_limits validation, same num
-        # TODO: valueerror... surely there is a better exception we are already using
-        # TODO: get mrid for this prf is it was passed one?
         if (time_limits is not None) != (thresholds is not None):
-            raise ValueError("plox initialize time_limits and thresholds together")
+            raise ValueError(f"Error initializing {self.__class__.__name__}[{self.mrid}]. time_limits and thresholds must be initialized together.")
 
         if time_limits is not None and (thresholds is not None):
             thresholds_iter = iter(thresholds)
             for time_limit in time_limits:
                 threshold = next(thresholds_iter, None)
                 if threshold is None:
-                    raise ValueError(f"Error initializing ProtectionRelayFunction {self.mrid}. Thresholds exhausted before time_limits. No matching threshold "
-                                     f"for time_limit: {time_limit}")
+                    raise ValueError(
+                        f"Error initializing {self.__class__.__name__}[{self.mrid}]. Thresholds exhausted before time_limits. No matching threshold "
+                        f"for time_limit: {time_limit}")
                 self.add_time_limit(time_limit)
                 self.add_threshold(threshold)
 
             confirm_none = next(thresholds_iter, None)
             if confirm_none is not None:
-                raise ValueError(f"Error initializing ProtectionRelayFunction {self.mrid}. time_limits exhausted before thresholds. No matching time_limit "
+                raise ValueError(f"Error initializing {self.__class__.__name__}[{self.mrid}]. time_limits exhausted before thresholds. No matching time_limit "
                                  f"for threshold: {confirm_none}")
+        if relay_info is not None:
+            self.relay_info = relay_info
 
     @property
     def relay_info(self):

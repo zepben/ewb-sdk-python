@@ -399,7 +399,6 @@ class SchemaNetworks:
         ############################
         # IEC61970 Base Protection #
         ############################
-        # TODO: All of these
         if isinstance(filled, ProtectionRelayFunction):
             for it in filled.protected_switches:
                 it.add_relay_function(filled)
@@ -410,8 +409,7 @@ class SchemaNetworks:
             for it in filled.schemes:
                 it.add_function(filled)
                 service.add(it)
-            #service.add(filled.relay_info)
-            # TODO: relay_info?
+            service.add(filled.relay_info)
 
         if isinstance(filled, Sensor):
             for it in filled.relay_functions:

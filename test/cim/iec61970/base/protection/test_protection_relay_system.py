@@ -12,8 +12,8 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, sampled_from
 
-from test.cim.collection_validator import validate_collection_unordered
-from test.cim.iec61970.base.core.test_equipment import equipment_kwargs, equipment_args, verify_equipment_constructor_default, \
+from cim.collection_validator import validate_collection_unordered
+from cim.iec61970.base.core.test_equipment import equipment_kwargs, equipment_args, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args
 from zepben.evolve import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme
 

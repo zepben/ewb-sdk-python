@@ -5,16 +5,16 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
 import pytest_timeout
+from _pytest.python_api import raises
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
-from hypothesis import given
 from hypothesis.strategies import floats, sampled_from, booleans, lists, builds, text
 
-from test.cim.cim_creators import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE, boolean_or_none
-from test.cim.collection_validator import validate_collection_unordered, validate_collection_ordered
-from test.cim.property_validator import validate_property_accessor
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE, boolean_or_none
+from cim.collection_validator import validate_collection_unordered, validate_collection_ordered
+from cim.property_validator import validate_property_accessor
 from zepben.evolve import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
-    UnitSymbol, unit_symbol_from_id
+    UnitSymbol, unit_symbol_from_id, CurrentRelay
 
 # TODO: Actual strategies for threshold/time_limits
 protection_relay_function_kwargs = {
@@ -152,3 +152,23 @@ def test_thresholds_collection():
 
 def test_relay_info_accessor():
     validate_property_accessor(ProtectionRelayFunction, RelayInfo, ProtectionRelayFunction.relay_info)
+
+
+# TODO: Should this functionality actually exist
+def test_force_threshold_and_time_limit_initialization_together():
+    with raises(ValueError, match=r"Error initializing CurrentRelay\[.*\]. time_limits and thresholds must be initialized together."):
+        CurrentRelay(time_limits=[1.2, 2.3])
+    with raises(ValueError, match=r"Error initializing CurrentRelay\[.*\]. time_limits and thresholds must be initialized together."):
+        CurrentRelay(thresholds=[RelaySetting(UnitSymbol.GYPERS, 1.1)])
+
+    with raises(ValueError, match=r"Error initializing CurrentRelay\[.*\]. Thresholds exhausted before time_limits. No matching threshold for time_limit: 2.3"):
+        CurrentRelay(time_limits=[1.2, 2.3], thresholds=[RelaySetting(UnitSymbol.GYPERS, 1.1)])
+    with raises(ValueError, match=r"Error initializing CurrentRelay\[.*\]. time_limits exhausted before thresholds. No matching time_limit for threshold: "
+                                  r"RelaySetting\(unit_symbol=\<UnitSymbol.KAT: \(97, 'kat'\)\>, value=2.2, name=None\)"):
+        CurrentRelay(time_limits=[1.2], thresholds=[RelaySetting(UnitSymbol.GYPERS, 1.1), RelaySetting(UnitSymbol.KAT, 2.2)])
+
+    time_limits = [1.2, 2.3]
+    thresholds = [RelaySetting(UnitSymbol.GYPERS, 1.1), RelaySetting(UnitSymbol.KAT, 2.2)]
+    prf = ProtectionRelayFunction(time_limits=time_limits, thresholds=thresholds)
+    assert list(prf.time_limits) == time_limits
+    assert list(prf.thresholds) == thresholds

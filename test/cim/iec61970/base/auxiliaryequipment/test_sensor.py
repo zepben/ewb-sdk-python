@@ -8,7 +8,7 @@ from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxili
     verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
 from hypothesis.strategies import lists, builds
 
-from test.cim.collection_validator import validate_collection_unordered
+from cim.collection_validator import validate_collection_unordered
 from zepben.evolve import Sensor, ProtectionRelayFunction
 
 sensor_kwargs = {

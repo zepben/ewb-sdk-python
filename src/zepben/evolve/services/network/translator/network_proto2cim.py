@@ -715,7 +715,6 @@ PBAuxiliaryEquipment.to_cim = auxiliary_equipment_to_cim
 PBCurrentTransformer.to_cim = current_transformer_to_cim
 PBFaultIndicator.to_cim = fault_indicator_to_cim
 PBPotentialTransformer.to_cim = potential_transformer_to_cim
-PBSensor.to_cim = sensor_to_cim
 
 
 ######################
@@ -1025,6 +1024,7 @@ def protection_relay_function_to_cim(pb: PBProtectionRelayFunction, cim: Protect
         network_service.resolve_or_defer_reference(resolver.prf_sensor(cim), mrid)
     for mrid in pb.schemeMRIDs:
         network_service.resolve_or_defer_reference(resolver.prf_scheme(cim), mrid)
+    network_service.resolve_or_defer_reference(resolver.relay_info(cim), pb.asset_info_mrid())
 
     power_system_resource_to_cim(pb.psr, cim, network_service)
 

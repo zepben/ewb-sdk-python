@@ -85,7 +85,7 @@ class RelayInfo(AssetInfo):
         self._reclose_delays = delays.copy()
         return self
 
-    def remove_delay_by_delay(self, delay: float) -> RelayInfo:
+    def remove_delay(self, delay: float) -> RelayInfo:
         """
         Remove a delay from the list.
 
@@ -95,7 +95,7 @@ class RelayInfo(AssetInfo):
         self._reclose_delays = safe_remove(self._reclose_delays, delay)
         return self
 
-    def remove_delay(self, index: int) -> Optional[float]:
+    def remove_delay_at(self, index: int) -> Optional[float]:
         """
         Remove a delay from the list.
 

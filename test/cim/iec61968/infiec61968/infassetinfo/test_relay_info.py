@@ -64,6 +64,6 @@ def test_relay_info_reclose_delays():
                                 RelayInfo.reclose_delays,
                                 RelayInfo.add_delay,
                                 RelayInfo.add_delay,
-                                RelayInfo.remove_delay_by_delay,
+                                RelayInfo.remove_delay,
                                 RelayInfo.clear_delays
                                 )

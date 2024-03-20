@@ -414,35 +414,30 @@ class TestDatabaseSqlite:
     # ************ IEC61970 Base Protection ************
 
     @log_on_failure_decorator
-    @pytest.mark.timeout(2222222)
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(current_relay=create_current_relay(False))
     async def test_schema_current_relay(self, caplog, current_relay):
         await self._validate_schema(SchemaNetworks().network_services_of(CurrentRelay, current_relay), caplog)
 
     @log_on_failure_decorator
-    @pytest.mark.timeout(2222222)
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(distance_relay=create_distance_relay(False))
     async def test_schema_distance_relay(self, caplog, distance_relay):
         await self._validate_schema(SchemaNetworks().network_services_of(DistanceRelay, distance_relay), caplog)
 
     @log_on_failure_decorator
-    @pytest.mark.timeout(2222222)
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(voltage_relay=create_voltage_relay(False))
     async def test_schema_voltage_relay(self, caplog, voltage_relay):
         await self._validate_schema(SchemaNetworks().network_services_of(VoltageRelay, voltage_relay), caplog)
 
     @log_on_failure_decorator
-    @pytest.mark.timeout(2222222)
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(protection_relay_scheme=create_protection_relay_scheme(False))
     async def test_schema_protection_relay_scheme(self, caplog, protection_relay_scheme):
         await self._validate_schema(SchemaNetworks().network_services_of(ProtectionRelayScheme, protection_relay_scheme), caplog)
 
     @log_on_failure_decorator
-    @pytest.mark.timeout(2222222)
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(protection_relay_system=create_protection_relay_system(False))
     async def test_schema_protection_relay_system(self, caplog, protection_relay_system):
@@ -637,7 +632,6 @@ class TestDatabaseSqlite:
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(power_transformer_end=create_power_transformer_end(False))
     @pytest.mark.asyncio
-    @pytest.mark.timeout(2333333)
     async def test_schema_power_transformer_end(self, caplog, power_transformer_end):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerEnd, power_transformer_end), caplog)
 

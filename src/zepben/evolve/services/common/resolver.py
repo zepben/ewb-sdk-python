@@ -519,7 +519,7 @@ def fuse_function(fuse: Fuse) -> BoundReferenceResolver:
     return BoundReferenceResolver(fuse, fuse_to_prf_resolver, None)
 
 
-def prf_asset_info(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
+def relay_info(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(prf, prf_to_relay_info_resolver, None)
 

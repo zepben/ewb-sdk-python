@@ -346,15 +346,18 @@ Feeder.normal_energizing_substation_mrid = lambda self: getattr(self, "normalEne
 AcLineSegment.per_length_sequence_impedance_mrid = lambda self: getattr(self, "perLengthSequenceImpedanceMRID", None)
 
 # asset_info_mrid
+CurrentRelay.asset_info_mrid = lambda self: self.prf.asset_info_mrid
 ConductingEquipment.asset_info_mrid = lambda self: self.eq.asset_info_mrid()
 Conductor.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
 CurrentTransformer.asset_info_mrid = lambda self: self.sn.ae.eq.asset_info_mrid()
+DistanceRelay.asset_info_mrid = lambda self: self.prf.asset_info_mrid
 Equipment.asset_info_mrid = lambda self: self.psr.assetInfoMRID
 PotentialTransformer.asset_info_mrid = lambda self: self.sn.ae.eq.asset_info_mrid()
 PowerTransformer.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
 ProtectionRelayFunction.asset_info_mrid = lambda self: self.psr.assetInfoMRID
 ShuntCompensator.asset_info_mrid = lambda self: self.rce.ec.ce.asset_info_mrid()
 Switch.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
+VoltageRelay.asset_info_mrid = lambda self: self.prf.asset_info_mrid
 
 # ratio_tap_changer_mrid
 TransformerEnd.ratio_tap_changer_mrid = lambda self: getattr(self, "ratioTapChangerMRID", None)

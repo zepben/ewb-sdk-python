@@ -212,8 +212,6 @@ class TransformerEnd(IdentifiedObject):
     """(accurate for 2- or 3-winding transformers only) Pi-model impedances of this transformer end. By convention, for a two winding transformer, the full
      values of the transformer should be entered on the high voltage end (endNumber=1)."""
 
-    # TODO: constructor
-
     def __init__(self, terminal: Optional[Terminal] = None, **kwargs):
         super(TransformerEnd, self).__init__(**kwargs)
         if terminal is not None:

@@ -14,9 +14,8 @@ from hypothesis.strategies import builds, sampled_from, lists, floats, integers
 
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 
-from test.cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from zepben.evolve import SeriesCompensator
 
 series_compensator_kwargs = {
