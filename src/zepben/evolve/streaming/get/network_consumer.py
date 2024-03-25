@@ -24,7 +24,7 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, CurrentRelayInfo, SwitchInfo, \
-    CurrentTransformerInfo, EvChargingUnit, TapChangerControl, PotentialTransformer, PotentialTransformerInfo
+    CurrentTransformerInfo, EvChargingUnit, RegulatingControl, TapChangerControl, PotentialTransformer, PotentialTransformerInfo
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
