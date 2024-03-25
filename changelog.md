@@ -10,7 +10,7 @@
 * None.
 
 ### Fixes
-* None.
+* `PotentialTransformer` now recognised as a valid identified object type when deserializing gRPC messages.
 
 ### Notes
 * None.

@@ -1330,8 +1330,14 @@ def network_identified_objects(draw):
         # IEC61968 OPERATIONS #
         draw(builds(NetworkIdentifiedObject, operationalRestriction=operational_restriction())),
 
+        # IEC61968 InfIEC61968 ASSET INFO #
+        draw(builds(NetworkIdentifiedObject, currentTransformerInfo=current_transformer_info())),
+        draw(builds(NetworkIdentifiedObject, potentialTransformerInfo=potential_transformer_info())),
+
         # IEC61970 BASE AUXILIARY EQUIPMENT #
+        draw(builds(NetworkIdentifiedObject, currentTransformer=current_transformer())),
         draw(builds(NetworkIdentifiedObject, faultIndicator=fault_indicator())),
+        draw(builds(NetworkIdentifiedObject, potentialTransformer=potential_transformer())),
 
         # IEC61970 BASE CORE #
         draw(builds(NetworkIdentifiedObject, baseVoltage=base_voltage())),
