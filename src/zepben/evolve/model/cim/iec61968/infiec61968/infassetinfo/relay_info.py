@@ -43,7 +43,6 @@ class RelayInfo(AssetInfo):
         return nlen(self._reclose_delays)
 
     def get_delay(self, index: int) -> Optional[float]:
-        # TODO: to throw index error or not
         """
         Get the reclose delay at the specified index, if it exists. Otherwise, this returns
 
@@ -53,7 +52,7 @@ class RelayInfo(AssetInfo):
         if self._reclose_delays:
             return self._reclose_delays[index] if index in range(len(self._reclose_delays)) else None
         else:
-            return None
+            raise IndexError(index)
 
     def add_delay(self, delay: float, index: int = None) -> RelayInfo:
         """

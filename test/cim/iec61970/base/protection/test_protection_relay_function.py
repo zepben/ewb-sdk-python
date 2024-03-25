@@ -26,7 +26,8 @@ protection_relay_function_kwargs = {
     "protected_switches": lists(builds(ProtectedSwitch), max_size=2),
     "schemes": lists(builds(ProtectionRelayScheme), max_size=2),
     "time_limits": lists(floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX), min_size=4, max_size=4),
-    "thresholds": lists(builds(RelaySetting), min_size=4, max_size=4),
+    "thresholds": lists(builds(RelaySetting, unit_symbol=sampled_from(UnitSymbol), value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+                               name=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)), min_size=4, max_size=4),
 }
 
 protection_relay_function_args = [*power_system_resource_args, "model_string", False, 1.1, ProtectionKind.JG, True, PowerDirectionKind.FORWARD, [Sensor()],
@@ -149,23 +150,3 @@ def test_thresholds_collection():
 
 def test_relay_info_accessor():
     validate_property_accessor(ProtectionRelayFunction, RelayInfo, ProtectionRelayFunction.relay_info)
-
-
-# TODO: Should this functionality actually exist
-def test_force_threshold_and_time_limit_initialization_together():
-    with raises(ValueError, match=r"Error initializing CurrentRelay\[.*\]. time_limits and thresholds must be initialized together."):
-        CurrentRelay(time_limits=[1.2, 2.3])
-    with raises(ValueError, match=r"Error initializing CurrentRelay\[.*\]. time_limits and thresholds must be initialized together."):
-        CurrentRelay(thresholds=[RelaySetting(UnitSymbol.GYPERS, 1.1)])
-
-    with raises(ValueError, match=r"Error initializing CurrentRelay\[.*\]. Thresholds exhausted before time_limits. No matching threshold for time_limit: 2.3"):
-        CurrentRelay(time_limits=[1.2, 2.3], thresholds=[RelaySetting(UnitSymbol.GYPERS, 1.1)])
-    with raises(ValueError, match=r"Error initializing CurrentRelay\[.*\]. time_limits exhausted before thresholds. No matching time_limit for threshold: "
-                                  r"RelaySetting\(unit_symbol=\<UnitSymbol.KAT: \(97, 'kat'\)\>, value=2.2, name=None\)"):
-        CurrentRelay(time_limits=[1.2], thresholds=[RelaySetting(UnitSymbol.GYPERS, 1.1), RelaySetting(UnitSymbol.KAT, 2.2)])
-
-    time_limits = [1.2, 2.3]
-    thresholds = [RelaySetting(UnitSymbol.GYPERS, 1.1), RelaySetting(UnitSymbol.KAT, 2.2)]
-    prf = ProtectionRelayFunction(time_limits=time_limits, thresholds=thresholds)
-    assert list(prf.time_limits) == time_limits
-    assert list(prf.thresholds) == thresholds

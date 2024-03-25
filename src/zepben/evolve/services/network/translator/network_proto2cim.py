@@ -1068,7 +1068,7 @@ def protection_relay_system_to_cim(pb: PBProtectionRelaySystem, network_service:
 def relay_setting_to_cim(pb: PBRelaySetting) -> Optional[RelaySetting]:
     return RelaySetting(
         name=pb.name,
-        unit_symbol=unit_symbol_from_id(pb.unitSymbol),  # TODO: I assume I need this?
+        unit_symbol=unit_symbol_from_id(pb.unitSymbol),
         value=float_or_none(pb.value)
     )
 

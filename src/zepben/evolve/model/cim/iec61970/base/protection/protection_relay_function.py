@@ -70,25 +70,12 @@ class ProtectionRelayFunction(PowerSystemResource):
         if schemes is not None:
             for scheme in schemes:
                 self.add_scheme(scheme)
-
-        if (time_limits is not None) != (thresholds is not None):
-            raise ValueError(f"Error initializing {self.__class__.__name__}[{self.mrid}]. time_limits and thresholds must be initialized together.")
-
-        if time_limits is not None and (thresholds is not None):
-            thresholds_iter = iter(thresholds)
+        if time_limits is not None:
             for time_limit in time_limits:
-                threshold = next(thresholds_iter, None)
-                if threshold is None:
-                    raise ValueError(
-                        f"Error initializing {self.__class__.__name__}[{self.mrid}]. Thresholds exhausted before time_limits. No matching threshold "
-                        f"for time_limit: {time_limit}")
                 self.add_time_limit(time_limit)
+        if thresholds is not None:
+            for threshold in thresholds:
                 self.add_threshold(threshold)
-
-            confirm_none = next(thresholds_iter, None)
-            if confirm_none is not None:
-                raise ValueError(f"Error initializing {self.__class__.__name__}[{self.mrid}]. time_limits exhausted before thresholds. No matching time_limit "
-                                 f"for threshold: {confirm_none}")
         if relay_info is not None:
             self.relay_info = relay_info
 
@@ -137,7 +124,6 @@ class ProtectionRelayFunction(PowerSystemResource):
         return nlen(self._thresholds)
 
     def get_threshold(self, sequence_number: int) -> Optional[RelaySetting]:
-        # TODO: raise index error or return None, see RelayInfo.get_delay()
         """
         Get the threshold[:class:`RelaySetting`] for this :class:`ProtectionRelayFunction` by its `sequence_number`.
 

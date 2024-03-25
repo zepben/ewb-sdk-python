@@ -909,7 +909,7 @@ def protection_relay_function_to_pb(cim: ProtectionRelayFunction, include_asset_
 def protection_relay_scheme_to_pb(cim: ProtectionRelayScheme) -> PBProtectionRelayScheme:
     return PBProtectionRelayScheme(
         io=identified_object_to_pb(cim),
-        systemMRID=mrid_or_empty(cim.system),  # TODO: why warnings noa?
+        systemMRID=mrid_or_empty(cim.system),
         functionMRIDs=[str(io.mrid) for io in cim.functions]
     )
 
