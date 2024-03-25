@@ -15,6 +15,7 @@ are encountered but no successful response is received from the known services, 
 ### Fixes
 * `SetDirection` now traces through non-substation transformers.
 * `Feeder.normal_head_terminal` can now be freely updated when the `Feeder` has no equipment assigned to it.
+* `PotentialTransformer` now recognised as a valid identified object type when deserializing gRPC messages.
 
 ### Notes
 * Default grpc channel message size is now 20MB.
