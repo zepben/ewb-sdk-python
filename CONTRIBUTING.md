@@ -72,8 +72,8 @@ to prevent the test from timing out while you step through the code:
    * Test for model classes.
    * Add new classes to corresponding service translator test. [```test/services/...```](test/services)
    * Add the required creators to:
-     - [```pb_creators.py```](test/pb_creators.py)
-     - [```cim_creators.py```](test/cim_creators.py)
+     - [```pb_creators.py```](test/streaming/get/pb_creators.py)
+     - [```cim_creators.py```](test/cim/cim_creators.py)
    * Add test for each new comparison to  [test/services/...](test/services) package.
    * Add test for each new class to  [test/cim/...](test/cim) package.
    * Test database schema:
