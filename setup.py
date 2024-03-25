@@ -36,7 +36,7 @@ test_deps = [
 
 setup(
     name="zepben.evolve",
-    version="0.37.3b2",
+    version="0.37.3",
     description="Python SDK for interacting with the Evolve platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
