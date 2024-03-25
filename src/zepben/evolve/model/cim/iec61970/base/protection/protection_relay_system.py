@@ -61,9 +61,9 @@ class ProtectionRelaySystem(Equipment):
 
     def num_schemes(self) -> int:
         """
-        Get the number of :class:`ProtectionRelayScheme`'s for this :class:`ProtectionRelaySystem`.
+        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
 
-        :return: The number of :class:`ProtectionRelayScheme`'s for this :class:`ProtectionRelaySystem`.
+        :return: The number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` for this :class:`ProtectionRelaySystem`.
         """
         return nlen(self._schemes)
 
@@ -80,7 +80,7 @@ class ProtectionRelaySystem(Equipment):
 
     def clear_scheme(self) -> ProtectionRelaySystem:
         """
-        Remove all :class:`ProtectionRelayScheme`'s from this :class:`ProtectionRelaySystem`.
+        Remove all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` from this :class:`ProtectionRelaySystem`.
 
         :return: A reference to this :class:`ProtectionRelaySystem` for fluent use.
         """

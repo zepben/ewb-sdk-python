@@ -207,7 +207,6 @@ class TransformerEnd(IdentifiedObject):
     Highest voltage winding should be 1. Each end within a power transformer should have a unique subsequent end number. 
     Note the transformer end number need not match the terminal sequence number."""
 
-    # TODO: jvm sdk has some validation for this
     star_impedance: Optional[TransformerStarImpedance] = None
     """(accurate for 2- or 3-winding transformers only) Pi-model impedances of this transformer end. By convention, for a two winding transformer, the full
      values of the transformer should be entered on the high voltage end (endNumber=1)."""
@@ -227,9 +226,8 @@ class TransformerEnd(IdentifiedObject):
     @terminal.setter
     def terminal(self, value: Optional[Terminal]):
         if value is not None:
-            # TODO: actual error message / include conducting_equipment type
             require(value.conducting_equipment is None or isinstance(value.conducting_equipment, PowerTransformer),
-                    lambda: f"Cannot assign {self.mrid} to {value.mrid}, which is connected to a " +
+                    lambda: f"Cannot assign {self.__class__.__name__}[{self.mrid}] to {value.__class__.__name__}[{value.mrid}], which is connected to a " +
                             f"{value.conducting_equipment.__class__.__name__}[{value.conducting_equipment.mrid}] rather than a PowerTransformer.")
             self._terminal = value
 

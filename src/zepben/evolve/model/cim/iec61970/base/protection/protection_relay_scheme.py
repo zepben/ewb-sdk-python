@@ -50,7 +50,6 @@ class ProtectionRelayScheme(IdentifiedObject):
         return get_by_mrid(self._functions, mrid)
 
     def add_function(self, function: ProtectionRelayFunction) -> ProtectionRelayScheme:
-        # TODO: function vs relay_function in sensor and system?
         """
         Associate a :class:`ProtectionRelayFunction` with this :class:`ProtectionRelayScheme`.
 
@@ -65,9 +64,9 @@ class ProtectionRelayScheme(IdentifiedObject):
 
     def num_functions(self) -> int:
         """
-        Get the number of :class:`ProtectionRelayFunction`'s operated as part of this :class:`ProtectionRelayScheme`.
+        Get the number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
 
-        :return: The number of :class:`ProtectionRelayFunction`'s operated as part of this :class:`ProtectionRelayScheme`.
+        :return: The number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operated as part of this :class:`ProtectionRelayScheme`.
         """
         return nlen(self._functions)
 
@@ -84,7 +83,7 @@ class ProtectionRelayScheme(IdentifiedObject):
 
     def clear_function(self) -> ProtectionRelayScheme:
         """
-        Disassociate all :class:`ProtectionRelayFunction`'s from this :class:`ProtectionRelayScheme`.
+        Disassociate all :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` from this :class:`ProtectionRelayScheme`.
 
         :return: A reference to this :class:`ProtectionRelayScheme` for fluent use.
         """

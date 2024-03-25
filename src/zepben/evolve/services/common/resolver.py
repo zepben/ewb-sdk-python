@@ -476,7 +476,7 @@ def rc_terminal(rc: RegulatingControl) -> BoundReferenceResolver:
 
 def prf_protected_switch(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
     # noinspection PyArgumentList
-    return BoundReferenceResolver(prf, prf_to_ps_resolver, ps_to_prf_resolver)
+    return BoundReferenceResolver(prf, prf_to_psw_resolver, psw_to_prf_resolver)
 
 
 def prf_sensor(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
@@ -511,7 +511,7 @@ def sen_relay_function(sen: Sensor) -> BoundReferenceResolver:
 
 def ps_relay_function(ps: ProtectedSwitch) -> BoundReferenceResolver:
     # noinspection PyArgumentList
-    return BoundReferenceResolver(ps, ps_to_prf_resolver, prf_to_ps_resolver)
+    return BoundReferenceResolver(ps, psw_to_prf_resolver, prf_to_psw_resolver)
 
 
 def fuse_function(fuse: Fuse) -> BoundReferenceResolver:

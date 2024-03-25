@@ -77,8 +77,8 @@ def test_terminal_must_belong_to_power_transformer():
     t1 = Terminal(mrid="terminal_mrid")
     t1.conducting_equipment = Fuse(mrid="fuse_mrid")
 
-    with raises(ValueError, match=r"Cannot assign transformer_end_mrid to terminal_mrid, which is connected to a Fuse\[fuse_mrid\] rather than a "
-                                  "PowerTransformer."):
+    with raises(ValueError, match=r"Cannot assign TransformerEnd\[transformer_end_mrid\] to Terminal\[terminal_mrid\], which is connected to a "
+                                  r"Fuse\[fuse_mrid\] rather than a PowerTransformer."):
         te.terminal = t1
 
     t2 = Terminal()

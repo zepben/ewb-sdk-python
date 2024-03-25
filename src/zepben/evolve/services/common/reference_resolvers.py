@@ -93,9 +93,9 @@ __all__ = [
     "tti_to_tei_resolver", "tei_to_tsi_resolver", "tsi_to_tei_resolver", "te_to_tsi_resolver", "pti_to_tti_resolver", "peu_to_pec_resolver",
     "pec_to_peu_resolver", "pecphase_to_pec_resolver", "pec_to_pecphase_resolver", "tei_to_ee_nlt_resolver", "tei_to_ee_sct_resolver", "tei_to_ge_sct_resolver",
     "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver", "shunt_compensator_to_shunt_compensator_info_resolver", "lvfeeder_to_nht_resolver",
-    "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "prf_to_ps_resolver", "ps_to_prf_resolver", "switch_to_switch_info_resolver",
-    "prf_to_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver", "prf_to_ps_resolver",
-    "ps_to_prf_resolver", "prf_to_sen_resolver", "sen_to_prf_resolver", "prf_to_prscheme_resolver", "prscheme_to_prf_resolver", "prscheme_to_prsystem_resolver",
+    "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "prf_to_psw_resolver", "psw_to_prf_resolver", "switch_to_switch_info_resolver",
+    "prf_to_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver", "prf_to_psw_resolver",
+    "psw_to_prf_resolver", "prf_to_sen_resolver", "sen_to_prf_resolver", "prf_to_prscheme_resolver", "prscheme_to_prf_resolver", "prscheme_to_prsystem_resolver",
     "prsystem_to_prscheme_resolver", "fuse_to_prf_resolver"]
 
 
@@ -317,9 +317,8 @@ tei_to_ee_oct_resolver = ReferenceResolver(TransformerEndInfo, OpenCircuitTest, 
 ct_to_cti_resolver = ReferenceResolver(CurrentTransformer, CurrentTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 vt_to_vti_resolver = ReferenceResolver(PotentialTransformer, PotentialTransformerInfo, lambda t, r: setattr(t, 'asset_info', r))
 
-# TODO: ps already in use
-prf_to_ps_resolver = ReferenceResolver(ProtectionRelayFunction, ProtectedSwitch, lambda t, r: t.add_protected_switch(r))
-ps_to_prf_resolver = ReferenceResolver(ProtectedSwitch, ProtectionRelayFunction, lambda t, r: t.add_relay_function(r))
+prf_to_psw_resolver = ReferenceResolver(ProtectionRelayFunction, ProtectedSwitch, lambda t, r: t.add_protected_switch(r))
+psw_to_prf_resolver = ReferenceResolver(ProtectedSwitch, ProtectionRelayFunction, lambda t, r: t.add_relay_function(r))
 
 prf_to_sen_resolver = ReferenceResolver(ProtectionRelayFunction, Sensor, lambda t, r: t.add_sensor(r))
 sen_to_prf_resolver = ReferenceResolver(Sensor, ProtectionRelayFunction, lambda t, r: t.add_relay_function(r))

@@ -12,7 +12,6 @@ from zepben.evolve.util import ngen, nlen, safe_remove, require
 __all__ = ["RelayInfo"]
 
 
-# TODO: update doc strings
 class RelayInfo(AssetInfo):
     """Relay Datasheet Information."""
 
@@ -20,7 +19,7 @@ class RelayInfo(AssetInfo):
     """The type of curve used for the Relay."""
 
     reclose_fast: Optional[bool] = None
-    """True if recloseDelays are associated with a fast Curve, false otherwise."""
+    """True if reclose_delays are associated with a fast Curve, false otherwise."""
 
     _reclose_delays: Optional[List[float]] = None
 
@@ -57,7 +56,6 @@ class RelayInfo(AssetInfo):
             return None
 
     def add_delay(self, delay: float, index: int = None) -> RelayInfo:
-        # TODO: Index vs sequence
         """
         Add a reclose delay.
 

@@ -104,19 +104,18 @@ class ProtectionRelayFunction(PowerSystemResource):
     @property
     def thresholds(self) -> Generator[RelaySetting, None, None]:
         """
-        Yields all the threshold :class:`RelaySetting`'s for this :class:`ProtectionRelayFunction`. The order of thresholds corresponds to the order of time limits.
+        Yields all the thresholds[:class:`RelaySettings<RelaySetting>`] for this :class:`ProtectionRelayFunction`. The order of thresholds corresponds to the order of time limits.
 
-        :return: A generator that iterates over all threshold :class:`RelaySetting`'s for this relay function.
+        :return: A generator that iterates over all thresholds[:class:`RelaySettings<RelaySetting>`] for this relay function.
         """
         return ngen(self._thresholds)
 
     def add_threshold(self, threshold: RelaySetting, sequence_number: int = None) -> ProtectionRelayFunction:
-        # TODO: hmm probably add() probably doesn't need the sequence_number, leave that for an insert() if needed
         """
-        Add a threshold :class:`RelaySetting` to this :class:`ProtectionRelayFunction`'s list of thresholds.
+        Add a threshold[:class:`RelaySetting`] to this :class:`ProtectionRelayFunction`'s list of thresholds.
 
-        :param threshold: The threshold :class:`RelaySetting` to add to this :class:`ProtectionRelayFunction`.
-        :param sequence_number: See TODO
+        :param threshold: The threshold[:class:`RelaySetting`] to add to this :class:`ProtectionRelayFunction`.
+        :param sequence_number: The sequence number of the `threshold` being added.
         :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
         """
         if sequence_number is None:
@@ -131,19 +130,19 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     def num_thresholds(self) -> int:
         """
-        Get the number of threshold :class:`RelaySetting`'s for this :class:`ProtectionRelayFunction`.
+        Get the number of thresholds for this :class:`ProtectionRelayFunction`.
 
-        :return: The number of threshold :class:`RelaySetting`'s for this `ProtectionRelayFunction`.
+        :return: The number of thresholds for this `ProtectionRelayFunction`.
         """
         return nlen(self._thresholds)
 
     def get_threshold(self, sequence_number: int) -> Optional[RelaySetting]:
         # TODO: raise index error or return None, see RelayInfo.get_delay()
         """
-        Get the threshold :class:`RelaySetting` for this :class:`ProtectionRelayFunction` by its `sequence_number`.
+        Get the threshold[:class:`RelaySetting`] for this :class:`ProtectionRelayFunction` by its `sequence_number`.
 
         :param sequence_number: The sequence_number of the threshold :class:`RelaySetting` for this :class:`ProtectionRelayFunction`.
-        :returns: The threshold :class:`RelaySetting` for this :class:`ProtectionRelayFunction` with sequence number `sequence_number`
+        :returns: The threshold[:class:`RelaySetting`]  for this :class:`ProtectionRelayFunction` with sequence number `sequence_number`
         :raises IndexError: if no :class:`RelaySetting` was found with sequence_number `sequence_number`.
         """
         if self._thresholds is not None:
@@ -151,12 +150,11 @@ class ProtectionRelayFunction(PowerSystemResource):
         else:
             raise IndexError(sequence_number)
 
-    # TODO: remove_threshold_by_index()
     def remove_threshold(self, threshold: Optional[RelaySetting]) -> ProtectionRelayFunction:
         """
-        Removes a threshold :class:`RelaySetting` from this :class:`ProtectionRelayFunction`.
+        Removes a threshold[:class:`RelaySetting`] from this :class:`ProtectionRelayFunction`.
 
-        :param threshold: The threshold :class:`RelaySetting` to disassociate from this :class:`ProtectionRelayFunction`.
+        :param threshold: The threshold[:class:`RelaySetting`]  to disassociate from this :class:`ProtectionRelayFunction`.
         :returns: A reference to this :class:`ProtectionRelayFunction` for fluent use.
         """
         self._thresholds = safe_remove(self._thresholds, threshold)
@@ -164,7 +162,7 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     def clear_thresholds(self) -> ProtectionRelayFunction:
         """
-        Removes all threshold :class:`RelaySetting`'s from this :class:`ProtectionRelayFunction`.
+        Removes all thresholds from this :class:`ProtectionRelayFunction`.
 
         :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
         """
@@ -202,7 +200,6 @@ class ProtectionRelayFunction(PowerSystemResource):
         return nlen(self._time_limits)
 
     def get_time_limit(self, index: int):
-        # TODO: index vs sequence number
         """
         Get the time limit for this :class:`ProtectionRelayFunction` by its `index`.
 
@@ -251,9 +248,9 @@ class ProtectionRelayFunction(PowerSystemResource):
     @property
     def sensors(self) -> Generator[Sensor, None, None]:
         """
-        Yields all the :class:`Sensor`'s for this relay function.
+        Yields all the :class:`Sensors<Sensor>` for this relay function.
 
-        :return: A generator that iterates over all :class:`Sensor`'s  for this relay function.
+        :return: A generator that iterates over all :class:`Sensors<Sensor>`  for this relay function.
         """
         return ngen(self._sensors)
 
@@ -281,9 +278,9 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     def num_sensors(self) -> int:
         """
-        Get the number of :class:`Sensor`'s for this :class:`ProtectionRelayFunction`.
+        Get the number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
 
-        :return: The number of :class:`Sensor`'s for this :class:`ProtectionRelayFunction`.
+        :return: The number of :class:`Sensors<Sensor>` for this :class:`ProtectionRelayFunction`.
         """
         return nlen(self._sensors)
 
@@ -300,7 +297,7 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     def clear_sensors(self) -> ProtectionRelayFunction:
         """
-        Disassociate all :class:`Sensor`'s from this :class:`ProtectionRelayFunction`.
+        Disassociate all :class:`Sensors<Sensor>` from this :class:`ProtectionRelayFunction`.
 
         :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
         """
@@ -309,11 +306,10 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     @property
     def protected_switches(self) -> Generator[ProtectedSwitch, None, None]:
-        # TODO punctuation
         """
-        Yields the :class:`ProtectedSwitch`'s operated by this :class:`ProtectionRelayFunction`.
+        Yields the :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
 
-        :return: A generator that iterates over all :class:`ProtectedSwitch`'s operated by this :class:`ProtectionRelayFunction`.
+        :return: A generator that iterates over all :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
         """
         return ngen(self._protected_switches)
 
@@ -341,9 +337,9 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     def num_protected_switches(self) -> int:
         """
-        Get the number of :class:`ProtectedSwitch`'es operated by this :class:`ProtectionRelayFunction`.
+        Get the number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
 
-        :return: The number of :class:`ProtectedSwitch`'es operated by this :class:`ProtectionRelayFunction`.
+        :return: The number of :class:`ProtectedSwitches<ProtectedSwitch>` operated by this :class:`ProtectionRelayFunction`.
         """
         return nlen(self._protected_switches)
 
@@ -360,7 +356,7 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     def clear_protected_switches(self) -> ProtectionRelayFunction:
         """
-        Disassociate all :class:`ProtectedSwitch`'s from this :class:`ProtectionRelayFunction`.
+        Disassociate all :class:`ProtectedSwitches<ProtectedSwitch>` from this :class:`ProtectionRelayFunction`.
 
         :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
         """
@@ -369,11 +365,10 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     @property
     def schemes(self) -> Generator[ProtectionRelayScheme, None, None]:
-        # TODO punctuation
         """
-        Yields the :class:`ProtectionRelayScheme`'s this :class:`ProtectionRelayFunction` operates under.
+        Yields the :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
 
-        :return: A generator that iterates over all :class:`ProtectionRelayScheme`'s this :class:`ProtectionRelayFunction` operates under.
+        :return: A generator that iterates over all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
         """
         return ngen(self._schemes)
 
@@ -401,9 +396,9 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     def num_schemes(self) -> int:
         """
-        Get the number of :class:`ProtectionRelayScheme`'s this :class:`ProtectionRelayFunction` operates under.
+        Get the number of :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` this :class:`ProtectionRelayFunction` operates under.
 
-        :return: The number of :class:`ProtectionRelayScheme`'s operated by this :class:`ProtectionRelayFunction`.
+        :return: The number of:class:`ProtectionRelaySchemes<ProtectionRelayScheme>` operated by this :class:`ProtectionRelayFunction`.
         """
         return nlen(self._schemes)
 
@@ -420,7 +415,7 @@ class ProtectionRelayFunction(PowerSystemResource):
 
     def clear_schemes(self) -> ProtectionRelayFunction:
         """
-        Disassociate all :class:`ProtectionRelayScheme`'s from this :class:`ProtectionRelayFunction`.
+        Disassociate all :class:`ProtectionRelaySchemes<ProtectionRelayScheme>` from this :class:`ProtectionRelayFunction`.
 
         :return: A reference to this :class:`ProtectionRelayFunction` for fluent use.
         """

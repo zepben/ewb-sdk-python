@@ -651,7 +651,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def test_compare_voltage_relay(self):
         self._compare_protection_relay_function(VoltageRelay)
 
-    # TODO: This too
     def _compare_protection_relay_function(self, creator: Type[ProtectionRelayFunction]):
         self._compare_power_system_resource(creator)
 

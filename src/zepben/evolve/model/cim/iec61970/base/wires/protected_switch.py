@@ -18,7 +18,6 @@ __all__ = ["ProtectedSwitch"]
 
 
 class ProtectedSwitch(Switch):
-    # TODO: how to doc string
     """
     A ProtectedSwitch is a switching device that can be operated by :class:`ProtectionRelayFunction`.
     """
@@ -43,17 +42,17 @@ class ProtectedSwitch(Switch):
     @property
     def relay_functions(self) -> Generator[ProtectionRelayFunction, None, None]:
         """
-        Yields all :class:`ProtectionRelayFunction`'s operating this :class:`ProtectedSwitch`.
+        Yields all :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operating this :class:`ProtectedSwitch`.
 
-        :return: A generator that iterates over all :class:`ProtectionRelayFunction` operating this :class:`ProtectedSwitch`.
+        :return: A generator that iterates over all :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operating this :class:`ProtectedSwitch`.
         """
         return ngen(self._relay_functions)
 
     def num_relay_functions(self) -> int:
         """
-        Get the number of :class:`ProtectionRelayFunction`'s operating this :class:`ProtectedSwitch`.
+        Get the number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operating this :class:`ProtectedSwitch`.
 
-        :return: The number of :class:`ProtectionRelayFunction`'s operating this :class:`ProtectedSwitch`.
+        :return: The number of :class:`ProtectionRelayFunctions<ProtectionRelayFunction>` operating this :class:`ProtectedSwitch`.
         """
         return nlen(self._relay_functions)
 
@@ -67,7 +66,6 @@ class ProtectedSwitch(Switch):
         return get_by_mrid(self._relay_functions, mrid)
 
     def add_relay_function(self, relay_function: ProtectionRelayFunction) -> ProtectedSwitch:
-        # TODO relay_function vs protection_relay_function in sensor
         """
         Associate this :class:`ProtectedSwitch` with a :class:`ProtectionRelayFunction` operating it.
         :param relay_function: The :class:`ProtectionRelayFunction` to associate with this :class:`ProtectedSwitch`.

@@ -887,9 +887,6 @@ def create_protection_relay_system(include_runtime: bool = True):
     )
 
 
-# TODO: saving nan vs None ... I swear I added this for interop with the jvm sdk...
-
-
 #######################
 # IEC61970 BASE SCADA #
 #######################
