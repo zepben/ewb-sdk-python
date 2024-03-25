@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.37.3](#v0373)| `25 March 2024` |
 |[0.37.2](#v0372)| `16 January 2024` |
 |[0.37.1](#v0371)| `16 January 2024` |
 |[0.37.0](#v0370)| `14 November 2023` |
@@ -40,6 +41,25 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.37.3]
+
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* `PotentialTransformer` now recognised as a valid identified object type when deserializing gRPC messages.
+
+### Notes
+* None.
 
 ---
 
