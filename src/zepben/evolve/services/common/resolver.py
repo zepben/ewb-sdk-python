@@ -15,7 +15,7 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     RegulatingCondEq, TapChanger, ProtectionRelayFunction, ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Fuse
 from zepben.evolve.services.common.reference_resolvers import *
 
-__all__ = ["ae_terminal", "agreements", "asset_info", "at_location", "ce_base_voltage", "ce_terminals", "circuits", "cn_terminals", "conducting_equipment",
+__all__ = ["ae_terminal", "agreements", "at_location", "ce_base_voltage", "ce_terminals", "circuits", "cn_terminals", "conducting_equipment",
            "connectivity_node", "containers", "control", "current_containers", "current_transformer_info", "customer", "diagram", "diagram_objects",
            "ec_equipment", "ec_phases", "ed_usage_points", "end_devices", "end_substation", "end_terminal", "ends", "energised_end_no_load_tests",
            "energised_end_open_circuit_tests", "energised_end_short_circuit_tests", "energy_consumer", "energy_source", "eq_usage_points", "es_phases",
@@ -30,7 +30,7 @@ __all__ = ["ae_terminal", "agreements", "asset_info", "at_location", "ce_base_vo
            "sen_relay_function", "service_location", "shunt_compensator_info", "star_impedance_transformer_end_info", "streetlights",
            "sub_geographical_region", "sub_geographical_regions", "substations", "switch_info", "tariffs", "tc_tap_changer_control", "te_base_voltage",
            "te_terminal", "transformer_end", "transformer_end_info", "transformer_end_transformer_star_impedance", "transformer_star_impedance",
-           "transformer_tank_info", "unit_power_electronics_connection", "up_equipment", "usage_point_location"]
+           "transformer_tank_info", "unit_power_electronics_connection", "up_equipment", "usage_point_location", "wire_info"]
 
 
 def ae_terminal(auxiliary_equipment: AuxiliaryEquipment) -> BoundReferenceResolver:
@@ -41,11 +41,6 @@ def ae_terminal(auxiliary_equipment: AuxiliaryEquipment) -> BoundReferenceResolv
 def agreements(c: Customer) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(c, cust_to_custagr_resolver, custagr_to_cust_resolver)
-
-
-def asset_info(conductor: Conductor) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)
 
 
 def at_location(asset: Asset) -> BoundReferenceResolver:
@@ -406,6 +401,8 @@ def rce_regulating_control(regulating_cond_eq: RegulatingCondEq) -> BoundReferen
 def relay_info(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(prf, prf_to_relay_info_resolver, None)
+
+
 def remote_control(c: Control) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(c, control_to_remote_control_resolver, rc_to_cont_resolver)
@@ -519,3 +516,8 @@ def up_equipment(usage_point: UsagePoint) -> BoundReferenceResolver:
 def usage_point_location(usage_point: UsagePoint) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(usage_point, up_to_loc_resolver, None)
+
+
+def wire_info(conductor: Conductor) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)

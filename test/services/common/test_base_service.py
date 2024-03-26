@@ -132,7 +132,7 @@ def test_unresolved_references(service: BaseService):
     service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t2")
     # noinspection PyArgumentList
     ci1 = CableInfo(mrid="ci1")
-    service.resolve_or_defer_reference(resolver.asset_info(acls1), "ci1")
+    service.resolve_or_defer_reference(resolver.wire_info(acls1), "ci1")
     service.resolve_or_defer_reference(resolver.containers(acls1), "f")
     service.resolve_or_defer_reference(resolver.containers(acls2), "f")
 

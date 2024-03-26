@@ -1191,7 +1191,7 @@ def breaker_to_cim(pb: PBBreaker, network_service: NetworkService) -> Optional[B
 def conductor_to_cim(pb: PBConductor, cim: Conductor, network_service: NetworkService):
     cim.length = float_or_none(pb.length)
 
-    network_service.resolve_or_defer_reference(resolver.asset_info(cim), pb.asset_info_mrid())
+    network_service.resolve_or_defer_reference(resolver.wire_info(cim), pb.asset_info_mrid())
 
     conducting_equipment_to_cim(pb.ce, cim, network_service)
 
