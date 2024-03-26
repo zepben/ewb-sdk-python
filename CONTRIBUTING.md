@@ -81,7 +81,7 @@ to prevent the test from timing out while you step through the code:
      - Include new concrete CIM classes in [```test_database_sqlite.py```](test/database/sqlite/test_database_sqlite.py).
    * Verify that all the tests are passing. 
 1. Update release notes in [```changelog.md```](changelog.md).
-1. Update _nio_type_to_cim in network_consumer.py to include newly added classes.
+1. Update _nio_type_to_cim in [```network_consumer.py```](src/zepben/evolve/streaming/get/network_consumer.py) to include newly added classes.
 
 ## Adding support for new services ##
 
