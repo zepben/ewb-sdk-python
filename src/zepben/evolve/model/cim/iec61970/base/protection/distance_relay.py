@@ -15,6 +15,7 @@ class DistanceRelay(ProtectionRelayFunction):
     A protective device used in power systems that measures the impedance of a transmission line to determine the distance to a fault, and initiates
     circuit breaker tripping to isolate the faulty section and safeguard the power system.
     """
+
     backward_blind: Optional[float] = None
     """The reverse blind impedance (in ohms) that defines the area to be blinded in the opposite direction of the power flow."""
 
@@ -37,11 +38,11 @@ class DistanceRelay(ProtectionRelayFunction):
     """The forward reactance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for which the 
     relay will provide protection."""
 
-    operation_phase_angle1: Optional[float] = None
+    operation_phase_angle_1: Optional[float] = None
     """The phase angle (in degrees) between voltage and current during normal operating conditions for zone 1 relay."""
 
-    operation_phase_angle2: Optional[float] = None
+    operation_phase_angle_2: Optional[float] = None
     """The phase angle (in degrees) between voltage and current during normal operating conditions for zone 2 relay."""
 
-    operation_phase_angle3: Optional[float] = None
+    operation_phase_angle_3: Optional[float] = None
     """The phase angle (in degrees) between voltage and current during normal operating conditions for zone 3 relay."""

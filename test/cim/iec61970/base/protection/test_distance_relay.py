@@ -21,9 +21,9 @@ distance_relay_kwargs = {
     "forward_blind": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "forward_reach": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "forward_reactance": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "operation_phase_angle1": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "operation_phase_angle2": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-    "operation_phase_angle3": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    "operation_phase_angle_1": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    "operation_phase_angle_2": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    "operation_phase_angle_3": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
 }
 
 distance_relay_args = [*protection_relay_function_args, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
@@ -39,9 +39,9 @@ def test_distance_relay_constructor_default():
     assert dr.forward_blind is None
     assert dr.forward_reach is None
     assert dr.forward_reactance is None
-    assert dr.operation_phase_angle1 is None
-    assert dr.operation_phase_angle2 is None
-    assert dr.operation_phase_angle3 is None
+    assert dr.operation_phase_angle_1 is None
+    assert dr.operation_phase_angle_2 is None
+    assert dr.operation_phase_angle_3 is None
 
 
 @given(**distance_relay_kwargs)
@@ -51,9 +51,9 @@ def test_distance_relay_constructor_kwargs(backward_blind,
                                            forward_blind,
                                            forward_reach,
                                            forward_reactance,
-                                           operation_phase_angle1,
-                                           operation_phase_angle2,
-                                           operation_phase_angle3,
+                                           operation_phase_angle_1,
+                                           operation_phase_angle_2,
+                                           operation_phase_angle_3,
                                            **kwargs):
     dr = DistanceRelay(
         backward_blind=backward_blind,
@@ -62,9 +62,9 @@ def test_distance_relay_constructor_kwargs(backward_blind,
         forward_blind=forward_blind,
         forward_reach=forward_reach,
         forward_reactance=forward_reactance,
-        operation_phase_angle1=operation_phase_angle1,
-        operation_phase_angle2=operation_phase_angle2,
-        operation_phase_angle3=operation_phase_angle3,
+        operation_phase_angle_1=operation_phase_angle_1,
+        operation_phase_angle_2=operation_phase_angle_2,
+        operation_phase_angle_3=operation_phase_angle_3,
         **kwargs
     )
 
@@ -75,9 +75,9 @@ def test_distance_relay_constructor_kwargs(backward_blind,
     assert dr.forward_blind == forward_blind
     assert dr.forward_reach == forward_reach
     assert dr.forward_reactance == forward_reactance
-    assert dr.operation_phase_angle1 == operation_phase_angle1
-    assert dr.operation_phase_angle2 == operation_phase_angle2
-    assert dr.operation_phase_angle3 == operation_phase_angle3
+    assert dr.operation_phase_angle_1 == operation_phase_angle_1
+    assert dr.operation_phase_angle_2 == operation_phase_angle_2
+    assert dr.operation_phase_angle_3 == operation_phase_angle_3
 
 
 def test_distance_relay_constructor_args():
@@ -90,6 +90,6 @@ def test_distance_relay_constructor_args():
     assert dr.forward_blind == distance_relay_args[-6]
     assert dr.forward_reach == distance_relay_args[-5]
     assert dr.forward_reactance == distance_relay_args[-4]
-    assert dr.operation_phase_angle1 == distance_relay_args[-3]
-    assert dr.operation_phase_angle2 == distance_relay_args[-2]
-    assert dr.operation_phase_angle3 == distance_relay_args[-1]
+    assert dr.operation_phase_angle_1 == distance_relay_args[-3]
+    assert dr.operation_phase_angle_2 == distance_relay_args[-2]
+    assert dr.operation_phase_angle_3 == distance_relay_args[-1]

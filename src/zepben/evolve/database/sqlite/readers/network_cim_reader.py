@@ -492,7 +492,6 @@ class NetworkCIMReader(BaseCIMReader):
         terminal = Terminal(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
 
         terminal.sequence_number = rs.get_int(table.sequence_number.query_index)
-        # TODO: if sequence_number == 0: warning loading terminals with unknown sequence numbers
         terminal.conducting_equipment = self._ensure_get(rs.get_string(table.conducting_equipment_mrid.query_index, None), ConductingEquipment)
         if terminal.conducting_equipment is not None:
             terminal.conducting_equipment.add_terminal(terminal)
@@ -572,6 +571,15 @@ class NetworkCIMReader(BaseCIMReader):
 
     # ************ IEC61970 Base Protection ************
 
+    def load_current_relay(self, table: TableCurrentRelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        current_relay = CurrentRelay(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        current_relay.current_limit_1 = rs.get_double(table.current_limit_1.query_index, None)
+        current_relay.inverse_time_flag = rs.get_boolean(table.inverse_time_flag.query_index, None)
+        current_relay.time_delay_1 = rs.get_double(table.time_delay_1.query_index, None)
+
+        return self._load_protection_relay_function(current_relay, table, rs) and self._add_or_throw(current_relay)
+
     def load_distance_relay(self, table: TableDistanceRelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         distance_relay = DistanceRelay(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
 
@@ -581,25 +589,11 @@ class NetworkCIMReader(BaseCIMReader):
         distance_relay.forward_blind = rs.get_double(table.forward_blind.query_index, None)
         distance_relay.forward_reach = rs.get_double(table.forward_reach.query_index, None)
         distance_relay.forward_reactance = rs.get_double(table.forward_reactance.query_index, None)
-        distance_relay.operation_phase_angle1 = rs.get_double(table.operation_phase_angle1.query_index, None)
-        distance_relay.operation_phase_angle2 = rs.get_double(table.operation_phase_angle2.query_index, None)
-        distance_relay.operation_phase_angle3 = rs.get_double(table.operation_phase_angle3.query_index, None)
+        distance_relay.operation_phase_angle_1 = rs.get_double(table.operation_phase_angle1.query_index, None)
+        distance_relay.operation_phase_angle_2 = rs.get_double(table.operation_phase_angle2.query_index, None)
+        distance_relay.operation_phase_angle_3 = rs.get_double(table.operation_phase_angle3.query_index, None)
 
         return self._load_protection_relay_function(distance_relay, table, rs) and self._add_or_throw(distance_relay)
-
-    def load_voltage_relay(self, table: TableVoltageRelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
-        voltage_relay = VoltageRelay(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
-
-        return self._load_protection_relay_function(voltage_relay, table, rs) and self._add_or_throw(voltage_relay)
-
-    def load_current_relay(self, table: TableCurrentRelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
-        current_relay = CurrentRelay(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
-
-        current_relay.current_limit_1 = rs.get_double(table.current_limit_1.query_index, None)
-        current_relay.inverse_time_flag = rs.get_boolean(table.inverse_time_flag.query_index, None)
-        current_relay.time_delay_1 = rs.get_double(table.time_delay_1.query_index, None)
-
-        return self._load_protection_relay_function(current_relay, table, rs) and self._add_or_throw(current_relay)
 
     def _load_protection_relay_function(self, protection_relay_function: ProtectionRelayFunction, table: TableProtectionRelayFunctions, rs: ResultSet) -> bool:
         protection_relay_function.asset_info = self._ensure_get(rs.get_string(table.relay_info_mrid.query_index, None), RelayInfo)
@@ -646,18 +640,23 @@ class NetworkCIMReader(BaseCIMReader):
 
         return True
 
-    def load_protection_relay_system(self, table: TableProtectionRelaySystems, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
-        protection_relay_system = ProtectionRelaySystem(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
-        protection_relay_system.protection_kind = ProtectionKind[rs.get_string(table.protection_kind.query_index)]
-
-        return self._load_equipment(protection_relay_system, table, rs) and self._add_or_throw(protection_relay_system)
-
     def load_protection_relay_scheme(self, table: TableProtectionRelaySchemes, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         protection_relay_scheme = ProtectionRelayScheme(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
         protection_relay_scheme.system = self._ensure_get(rs.get_string(table.system_mrid.query_index, None), ProtectionRelaySystem)
         if protection_relay_scheme.system is not None:
             protection_relay_scheme.system.add_scheme(protection_relay_scheme)
         return self._load_identified_object(protection_relay_scheme, table, rs) and self._add_or_throw(protection_relay_scheme)
+
+    def load_protection_relay_system(self, table: TableProtectionRelaySystems, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        protection_relay_system = ProtectionRelaySystem(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+        protection_relay_system.protection_kind = ProtectionKind[rs.get_string(table.protection_kind.query_index)]
+
+        return self._load_equipment(protection_relay_system, table, rs) and self._add_or_throw(protection_relay_system)
+
+    def load_voltage_relay(self, table: TableVoltageRelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        voltage_relay = VoltageRelay(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        return self._load_protection_relay_function(voltage_relay, table, rs) and self._add_or_throw(voltage_relay)
 
     # ************ IEC61970 BASE SCADA ************
 

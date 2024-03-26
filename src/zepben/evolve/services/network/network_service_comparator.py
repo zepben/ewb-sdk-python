@@ -539,16 +539,18 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_distance_relay(self, source: DistanceRelay, target: DistanceRelay) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_floats(diff, DistanceRelay.backward_blind,
-                             DistanceRelay.backward_reach,
-                             DistanceRelay.backward_reactance,
-                             DistanceRelay.forward_blind,
-                             DistanceRelay.forward_reach,
-                             DistanceRelay.forward_reactance,
-                             DistanceRelay.operation_phase_angle1,
-                             DistanceRelay.operation_phase_angle2,
-                             DistanceRelay.operation_phase_angle3,
-                             )
+        self._compare_floats(
+            diff,
+            DistanceRelay.backward_blind,
+            DistanceRelay.backward_reach,
+            DistanceRelay.backward_reactance,
+            DistanceRelay.forward_blind,
+            DistanceRelay.forward_reach,
+            DistanceRelay.forward_reactance,
+            DistanceRelay.operation_phase_angle_1,
+            DistanceRelay.operation_phase_angle_2,
+            DistanceRelay.operation_phase_angle_3,
+        )
 
         return self._compare_protection_relay_function(diff)
 
@@ -558,23 +560,26 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_protection_relay_function(diff)
 
     def _compare_protection_relay_function(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(diff,
-                             ProtectionRelayFunction.model,
-                             ProtectionRelayFunction.reclosing,
-                             ProtectionRelayFunction.protection_kind,
-                             ProtectionRelayFunction.directable,
-                             ProtectionRelayFunction.power_direction
-                             )
+        self._compare_values(
+            diff,
+            ProtectionRelayFunction.model,
+            ProtectionRelayFunction.reclosing,
+            ProtectionRelayFunction.protection_kind,
+            ProtectionRelayFunction.directable,
+            ProtectionRelayFunction.power_direction
+        )
         self._compare_floats(diff, ProtectionRelayFunction.relay_delay_time)
-        self._compare_indexed_value_collections(diff,
-                                                ProtectionRelayFunction.time_limits,
-                                                ProtectionRelayFunction.thresholds
-                                                )
-        self._compare_id_reference_collections(diff,
-                                               ProtectionRelayFunction.protected_switches,
-                                               ProtectionRelayFunction.sensors,
-                                               ProtectionRelayFunction.schemes,
-                                               )
+        self._compare_indexed_value_collections(
+            diff,
+            ProtectionRelayFunction.time_limits,
+            ProtectionRelayFunction.thresholds
+        )
+        self._compare_id_reference_collections(
+            diff,
+            ProtectionRelayFunction.protected_switches,
+            ProtectionRelayFunction.sensors,
+            ProtectionRelayFunction.schemes,
+        )
         self._compare_id_references(diff, ProtectionRelayFunction.relay_info)
 
         return self._compare_power_system_resource(diff)

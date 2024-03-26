@@ -883,9 +883,9 @@ def distance_relay_to_pb(cim: DistanceRelay) -> PBDistanceRelay:
         forwardBlind=from_nullable_float(cim.forward_blind),
         forwardReach=from_nullable_float(cim.forward_reach),
         forwardReactance=from_nullable_float(cim.forward_reactance),
-        operationPhaseAngle1=from_nullable_float(cim.operation_phase_angle1),
-        operationPhaseAngle2=from_nullable_float(cim.operation_phase_angle2),
-        operationPhaseAngle3=from_nullable_float(cim.operation_phase_angle3)
+        operationPhaseAngle1=from_nullable_float(cim.operation_phase_angle_1),
+        operationPhaseAngle2=from_nullable_float(cim.operation_phase_angle_2),
+        operationPhaseAngle3=from_nullable_float(cim.operation_phase_angle_3)
     )
 
 

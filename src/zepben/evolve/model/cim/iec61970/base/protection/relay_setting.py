@@ -30,4 +30,3 @@ class RelaySetting:
     def __init__(self):
         require(self.value is not None and not math.isnan(self.value),
                 lambda: f"RelaySetting.value must be a real number. Provided: {self.value}")
-        

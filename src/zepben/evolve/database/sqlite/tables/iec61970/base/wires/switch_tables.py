@@ -82,6 +82,7 @@ class TableGroundDisconnectors(TableSwitches):
     def name(self) -> str:
         return "ground_disconnectors"
 
+
 class TableGrounds(TableConductingEquipment):
 
     def name(self) -> str:
