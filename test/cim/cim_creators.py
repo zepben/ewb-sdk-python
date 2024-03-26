@@ -833,9 +833,9 @@ def create_distance_relay(include_runtime: bool = True):
         forward_blind=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         forward_reach=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         forward_reactance=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operation_phase_angle_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operation_phase_angle_2=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        operation_phase_angle_3=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        operation_phase_angle1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operation_phase_angle2=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        operation_phase_angle3=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
 
 

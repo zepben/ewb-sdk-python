@@ -38,11 +38,11 @@ class DistanceRelay(ProtectionRelayFunction):
     """The forward reactance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for which the 
     relay will provide protection."""
 
-    operation_phase_angle_1: Optional[float] = None
+    operation_phase_angle1: Optional[float] = None
     """The phase angle (in degrees) between voltage and current during normal operating conditions for zone 1 relay."""
 
-    operation_phase_angle_2: Optional[float] = None
+    operation_phase_angle2: Optional[float] = None
     """The phase angle (in degrees) between voltage and current during normal operating conditions for zone 2 relay."""
 
-    operation_phase_angle_3: Optional[float] = None
+    operation_phase_angle3: Optional[float] = None
     """The phase angle (in degrees) between voltage and current during normal operating conditions for zone 3 relay."""

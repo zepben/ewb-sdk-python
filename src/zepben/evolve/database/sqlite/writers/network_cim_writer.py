@@ -572,9 +572,9 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.forward_blind.query_index, distance_relay.forward_blind)
         insert.add_value(table.forward_reach.query_index, distance_relay.forward_reach)
         insert.add_value(table.forward_reactance.query_index, distance_relay.forward_reactance)
-        insert.add_value(table.operation_phase_angle1.query_index, distance_relay.operation_phase_angle_1)
-        insert.add_value(table.operation_phase_angle2.query_index, distance_relay.operation_phase_angle_2)
-        insert.add_value(table.operation_phase_angle3.query_index, distance_relay.operation_phase_angle_3)
+        insert.add_value(table.operation_phase_angle1.query_index, distance_relay.operation_phase_angle1)
+        insert.add_value(table.operation_phase_angle2.query_index, distance_relay.operation_phase_angle2)
+        insert.add_value(table.operation_phase_angle3.query_index, distance_relay.operation_phase_angle3)
 
         return self._save_protection_relay_function(table, insert, distance_relay, "distance relay")
 

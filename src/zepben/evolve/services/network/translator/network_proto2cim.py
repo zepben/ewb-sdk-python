@@ -1006,9 +1006,9 @@ def distance_relay_to_cim(pb: PBDistanceRelay, network_service: NetworkService) 
         forward_blind=float_or_none(pb.forwardBlind),
         forward_reach=float_or_none(pb.forwardReach),
         forward_reactance=float_or_none(pb.forwardReactance),
-        operation_phase_angle_1=float_or_none(pb.operationPhaseAngle1),
-        operation_phase_angle_2=float_or_none(pb.operationPhaseAngle2),
-        operation_phase_angle_3=float_or_none(pb.operationPhaseAngle3)
+        operation_phase_angle1=float_or_none(pb.operationPhaseAngle1),
+        operation_phase_angle2=float_or_none(pb.operationPhaseAngle2),
+        operation_phase_angle3=float_or_none(pb.operationPhaseAngle3)
     )
 
     protection_relay_function_to_cim(pb.prf, cim, network_service)

@@ -155,7 +155,3 @@ class TableProtectionRelaySystems(TableEquipment):
 class TableVoltageRelays(TableProtectionRelayFunctions):
     def name(self) -> str:
         return "voltage_relays"
-
-
-
-

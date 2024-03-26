@@ -589,9 +589,9 @@ class NetworkCIMReader(BaseCIMReader):
         distance_relay.forward_blind = rs.get_double(table.forward_blind.query_index, None)
         distance_relay.forward_reach = rs.get_double(table.forward_reach.query_index, None)
         distance_relay.forward_reactance = rs.get_double(table.forward_reactance.query_index, None)
-        distance_relay.operation_phase_angle_1 = rs.get_double(table.operation_phase_angle1.query_index, None)
-        distance_relay.operation_phase_angle_2 = rs.get_double(table.operation_phase_angle2.query_index, None)
-        distance_relay.operation_phase_angle_3 = rs.get_double(table.operation_phase_angle3.query_index, None)
+        distance_relay.operation_phase_angle1 = rs.get_double(table.operation_phase_angle1.query_index, None)
+        distance_relay.operation_phase_angle2 = rs.get_double(table.operation_phase_angle2.query_index, None)
+        distance_relay.operation_phase_angle3 = rs.get_double(table.operation_phase_angle3.query_index, None)
 
         return self._load_protection_relay_function(distance_relay, table, rs) and self._add_or_throw(distance_relay)
 

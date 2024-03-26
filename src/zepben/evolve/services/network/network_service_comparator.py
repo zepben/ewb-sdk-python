@@ -547,9 +547,9 @@ class NetworkServiceComparator(BaseServiceComparator):
             DistanceRelay.forward_blind,
             DistanceRelay.forward_reach,
             DistanceRelay.forward_reactance,
-            DistanceRelay.operation_phase_angle_1,
-            DistanceRelay.operation_phase_angle_2,
-            DistanceRelay.operation_phase_angle_3,
+            DistanceRelay.operation_phase_angle1,
+            DistanceRelay.operation_phase_angle2,
+            DistanceRelay.operation_phase_angle3,
         )
 
         return self._compare_protection_relay_function(diff)

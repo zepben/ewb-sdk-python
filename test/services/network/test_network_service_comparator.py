@@ -644,9 +644,9 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(DistanceRelay.forward_blind, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
         self.validator.validate_property(DistanceRelay.forward_reach, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
         self.validator.validate_property(DistanceRelay.forward_reactance, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(DistanceRelay.operation_phase_angle_1, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(DistanceRelay.operation_phase_angle_2, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
-        self.validator.validate_property(DistanceRelay.operation_phase_angle_3, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(DistanceRelay.operation_phase_angle1, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(DistanceRelay.operation_phase_angle2, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(DistanceRelay.operation_phase_angle3, DistanceRelay, lambda _: 1.1, lambda _: 2.2)
 
     def test_compare_voltage_relay(self):
         self._compare_protection_relay_function(VoltageRelay)
