@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -21,11 +21,12 @@ regulating_control_kwargs = {
     "enabled": booleans(),
     "max_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "min_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    "rated_current": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "terminal": builds(Terminal),
     "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection))
 }
 
-regulating_control_args = [*power_system_resource_args, False, RegulatingControlModeKind.voltage, PhaseCode.ABC, 1.1, 2.2, True, 3.3, 4.4, Terminal(),
+regulating_control_args = [*power_system_resource_args, False, RegulatingControlModeKind.voltage, PhaseCode.ABC, 1.1, 2.2, True, 3.3, 4.4, 5.5, Terminal(),
                            [PowerElectronicsConnection()]]
 
 
@@ -39,6 +40,7 @@ def verify_regulating_control_constructor_default(rc: RegulatingControl):
     assert rc.enabled is None
     assert rc.max_allowed_target_value is None
     assert rc.min_allowed_target_value is None
+    assert rc.rated_current is None
     assert rc.terminal is None
     assert not list(rc.regulating_conducting_equipment)
 
@@ -53,6 +55,7 @@ def verify_regulating_control_constructor_kwargs(
     enabled,
     max_allowed_target_value,
     min_allowed_target_value,
+    rated_current,
     terminal,
     regulating_conducting_equipment,
     **kwargs
@@ -66,20 +69,22 @@ def verify_regulating_control_constructor_kwargs(
     assert rc.enabled == enabled
     assert rc.max_allowed_target_value == max_allowed_target_value
     assert rc.min_allowed_target_value == min_allowed_target_value
+    assert rc.rated_current == rated_current
     assert rc.terminal == terminal
     assert list(rc.regulating_conducting_equipment) == regulating_conducting_equipment
 
 
 def verify_regulating_control_constructor_args(rc):
     verify_power_system_resource_constructor_args(rc)
-    assert rc.discrete == regulating_control_args[-10]
-    assert rc.mode == regulating_control_args[-9]
-    assert rc.monitored_phase == regulating_control_args[-8]
-    assert rc.target_deadband == regulating_control_args[-7]
-    assert rc.target_value == regulating_control_args[-6]
-    assert rc.enabled == regulating_control_args[-5]
-    assert rc.max_allowed_target_value == regulating_control_args[-4]
-    assert rc.min_allowed_target_value == regulating_control_args[-3]
+    assert rc.discrete == regulating_control_args[-11]
+    assert rc.mode == regulating_control_args[-10]
+    assert rc.monitored_phase == regulating_control_args[-9]
+    assert rc.target_deadband == regulating_control_args[-8]
+    assert rc.target_value == regulating_control_args[-7]
+    assert rc.enabled == regulating_control_args[-6]
+    assert rc.max_allowed_target_value == regulating_control_args[-5]
+    assert rc.min_allowed_target_value == regulating_control_args[-4]
+    assert rc.rated_current == regulating_control_args[-3]
     assert rc.terminal == regulating_control_args[-2]
     assert list(rc.regulating_conducting_equipment) == regulating_control_args[-1]
 

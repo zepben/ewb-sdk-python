@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -13,7 +13,7 @@ __all__ = ["TableVersion", "TableMetadataDataSources"]
 class TableVersion(SqliteTable):
     version: Column = None
 
-    SUPPORTED_VERSION = 48
+    SUPPORTED_VERSION = 49
 
     def __init__(self):
         self.version = self._create_column("version", "TEXT", Nullable.NOT_NULL)

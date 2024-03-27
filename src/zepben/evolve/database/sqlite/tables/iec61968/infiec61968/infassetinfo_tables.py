@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -9,17 +9,17 @@ from zepben.evolve import SqliteTable
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import TableAssetInfo
 
-__all__ = ["TableCurrentRelayInfo", "TableCurrentTransformerInfo", "TablePotentialTransformerInfo", "TableRecloseDelays"]
+__all__ = ["TableRelayInfo", "TableCurrentTransformerInfo", "TablePotentialTransformerInfo", "TableRecloseDelays"]
 
 
 class TableRecloseDelays(SqliteTable):
-    current_relay_info_mrid: Column = None
+    relay_info_mrid: Column = None
     reclose_delay: Column = None
     sequence_number: Column = None
 
     def __init__(self):
         super(TableRecloseDelays, self).__init__()
-        self.current_relay_info_mrid = self._create_column("current_relay_info_mrid", "TEXT", Nullable.NOT_NULL)
+        self.relay_info_mrid = self._create_column("relay_info_mrid", "TEXT", Nullable.NOT_NULL)
         self.reclose_delay = self._create_column("reclose_delay", "NUMBER", Nullable.NOT_NULL)
         self.sequence_number = self._create_column("sequence_number", "INTEGER", Nullable.NOT_NULL)
 
@@ -28,27 +28,29 @@ class TableRecloseDelays(SqliteTable):
 
     def unique_index_columns(self) -> List[List[Column]]:
         cols = super(TableRecloseDelays, self).unique_index_columns()
-        cols.append([self.current_relay_info_mrid, self.sequence_number])
+        cols.append([self.relay_info_mrid, self.sequence_number])
         return cols
 
     def non_unique_index_columns(self) -> List[List[Column]]:
         cols = super(TableRecloseDelays, self).non_unique_index_columns()
-        cols.append([self.current_relay_info_mrid])
+        cols.append([self.relay_info_mrid])
         return cols
 
     def select_sql(self):
-        return super(TableRecloseDelays, self).select_sql() + " ORDER BY current_relay_info_mrid, sequence_number ASC;"
+        return super(TableRecloseDelays, self).select_sql() + " ORDER BY relay_info_mrid, sequence_number ASC;"
 
 
-class TableCurrentRelayInfo(TableAssetInfo):
+class TableRelayInfo(TableAssetInfo):
     curve_setting: Column = None
+    reclose_fast: Column = None
 
     def __init__(self):
-        super(TableCurrentRelayInfo, self).__init__()
+        super(TableRelayInfo, self).__init__()
         self.curve_setting = self._create_column("curve_setting", "TEXT", Nullable.NULL)
+        self.reclose_fast = self._create_column("reclose_fast", "BOOLEAN", Nullable.NULL)
 
     def name(self) -> str:
-        return "current_relay_info"
+        return "relay_info"
 
 
 class TableCurrentTransformerInfo(TableAssetInfo):

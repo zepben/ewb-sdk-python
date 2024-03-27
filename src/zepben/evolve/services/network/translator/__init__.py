@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -30,7 +30,7 @@ from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import Custome
 from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff
-from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentRelayInfo_pb2 import CurrentRelayInfo
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.RelayInfo_pb2 import RelayInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice
@@ -68,7 +68,11 @@ from zepben.protobuf.cim.iec61970.base.meas.Discrete_pb2 import Discrete
 from zepben.protobuf.cim.iec61970.base.meas.IoPoint_pb2 import IoPoint
 from zepben.protobuf.cim.iec61970.base.meas.Measurement_pb2 import Measurement
 from zepben.protobuf.cim.iec61970.base.protection.CurrentRelay_pb2 import CurrentRelay
-from zepben.protobuf.cim.iec61970.base.protection.ProtectionEquipment_pb2 import ProtectionEquipment
+from zepben.protobuf.cim.iec61970.base.protection.DistanceRelay_pb2 import DistanceRelay
+from zepben.protobuf.cim.iec61970.base.protection.ProtectionRelayFunction_pb2 import ProtectionRelayFunction
+from zepben.protobuf.cim.iec61970.base.protection.ProtectionRelayScheme_pb2 import ProtectionRelayScheme
+from zepben.protobuf.cim.iec61970.base.protection.ProtectionRelaySystem_pb2 import ProtectionRelaySystem
+from zepben.protobuf.cim.iec61970.base.protection.VoltageRelay_pb2 import VoltageRelay
 from zepben.protobuf.cim.iec61970.base.scada.RemoteControl_pb2 import RemoteControl
 from zepben.protobuf.cim.iec61970.base.scada.RemotePoint_pb2 import RemotePoint
 from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSource
@@ -84,6 +88,8 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergyConsumer_pb2 import EnergyCon
 from zepben.protobuf.cim.iec61970.base.wires.EnergySourcePhase_pb2 import EnergySourcePhase
 from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySource
 from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse
+from zepben.protobuf.cim.iec61970.base.wires.Ground_pb2 import Ground
+from zepben.protobuf.cim.iec61970.base.wires.GroundDisconnector_pb2 import GroundDisconnector
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction
 from zepben.protobuf.cim.iec61970.base.wires.Line_pb2 import Line
@@ -101,6 +107,7 @@ from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTap
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl
+from zepben.protobuf.cim.iec61970.base.wires.SeriesCompensator_pb2 import SeriesCompensator
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
@@ -147,7 +154,7 @@ Customer.mrid = lambda self: getattr(self, "or").mrid()
 CustomerAgreement.mrid = lambda self: self.agr.mrid()
 PricingStructure.mrid = lambda self: self.doc.mrid()
 Tariff.mrid = lambda self: self.doc.mrid()
-CurrentRelayInfo.mrid = lambda self: self.ai.mrid()
+RelayInfo.mrid = lambda self: self.ai.mrid()
 CurrentTransformerInfo.mrid = lambda self: self.ai.mrid()
 PotentialTransformerInfo.mrid = lambda self: self.ai.mrid()
 EndDevice.mrid = lambda self: self.ac.mrid()
@@ -184,8 +191,12 @@ Discrete.mrid = lambda self: self.measurement.mrid()
 Control.mrid = lambda self: self.ip.mrid()
 IoPoint.mrid = lambda self: self.io.mrid()
 Measurement.mrid = lambda self: self.io.mrid()
-CurrentRelay.mrid = lambda self: self.pe.mrid()
-ProtectionEquipment.mrid = lambda self: self.eq.mrid()
+CurrentRelay.mrid = lambda self: self.prf.mrid()
+DistanceRelay.mrid = lambda self: self.prf.mrid()
+ProtectionRelayFunction.mrid = lambda self: self.psr.mrid()
+ProtectionRelayScheme.mrid = lambda self: self.io.mrid()
+ProtectionRelaySystem.mrid = lambda self: self.eq.mrid()
+VoltageRelay.mrid = lambda self: self.prf.mrid()
 RemoteControl.mrid = lambda self: self.rp.mrid()
 RemotePoint.mrid = lambda self: self.io.mrid()
 RemoteSource.mrid = lambda self: self.rp.mrid()
@@ -205,6 +216,8 @@ EnergyConsumerPhase.mrid = lambda self: self.psr.mrid()
 EnergySource.mrid = lambda self: self.ec.mrid()
 EnergySourcePhase.mrid = lambda self: self.psr.mrid()
 Fuse.mrid = lambda self: self.sw.mrid()
+Ground.mrid = lambda self: self.ce.mrid()
+GroundDisconnector.mrid = lambda self: self.sw.mrid()
 Jumper.mrid = lambda self: self.sw.mrid()
 Junction.mrid = lambda self: self.cn.mrid()
 Line.mrid = lambda self: self.ec.mrid()
@@ -222,6 +235,7 @@ RatioTapChanger.mrid = lambda self: self.tc.mrid()
 Recloser.mrid = lambda self: self.sw.mrid()
 RegulatingCondEq.mrid = lambda self: self.ec.mrid()
 RegulatingControl.mrid = lambda self: self.psr.mrid()
+SeriesCompensator.mrid = lambda self: self.ce.mrid()
 ShuntCompensator.mrid = lambda self: self.rce.mrid()
 Switch.mrid = lambda self: self.ce.mrid()
 TapChanger.mrid = lambda self: self.psr.mrid()
@@ -331,15 +345,18 @@ Feeder.normal_energizing_substation_mrid = lambda self: getattr(self, "normalEne
 AcLineSegment.per_length_sequence_impedance_mrid = lambda self: getattr(self, "perLengthSequenceImpedanceMRID", None)
 
 # asset_info_mrid
+CurrentRelay.asset_info_mrid = lambda self: self.prf.asset_info_mrid
 ConductingEquipment.asset_info_mrid = lambda self: self.eq.asset_info_mrid()
 Conductor.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
 CurrentTransformer.asset_info_mrid = lambda self: self.sn.ae.eq.asset_info_mrid()
-CurrentRelay.asset_info_mrid = lambda self: self.pe.eq.asset_info_mrid()
+DistanceRelay.asset_info_mrid = lambda self: self.prf.asset_info_mrid
 Equipment.asset_info_mrid = lambda self: self.psr.assetInfoMRID
 PotentialTransformer.asset_info_mrid = lambda self: self.sn.ae.eq.asset_info_mrid()
 PowerTransformer.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
+ProtectionRelayFunction.asset_info_mrid = lambda self: self.psr.assetInfoMRID
 ShuntCompensator.asset_info_mrid = lambda self: self.rce.ec.ce.asset_info_mrid()
 Switch.asset_info_mrid = lambda self: self.ce.asset_info_mrid()
+VoltageRelay.asset_info_mrid = lambda self: self.prf.asset_info_mrid
 
 # ratio_tap_changer_mrid
 TransformerEnd.ratio_tap_changer_mrid = lambda self: getattr(self, "ratioTapChangerMRID", None)

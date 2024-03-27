@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -196,7 +196,7 @@ class TransformerEnd(IdentifiedObject):
     ratio_tap_changer: Optional[RatioTapChanger] = None
     """Ratio tap changer associated with this transformer end."""
 
-    terminal: Optional[Terminal] = None
+    _terminal: Optional[Terminal] = None
     """The terminal of the transformer that this end is associated with"""
 
     base_voltage: Optional[BaseVoltage] = None
@@ -210,6 +210,26 @@ class TransformerEnd(IdentifiedObject):
     star_impedance: Optional[TransformerStarImpedance] = None
     """(accurate for 2- or 3-winding transformers only) Pi-model impedances of this transformer end. By convention, for a two winding transformer, the full
      values of the transformer should be entered on the high voltage end (endNumber=1)."""
+
+    def __init__(self, terminal: Optional[Terminal] = None, **kwargs):
+        super(TransformerEnd, self).__init__(**kwargs)
+        if terminal is not None:
+            self.terminal = terminal
+
+    @property
+    def terminal(self) -> Optional[Terminal]:
+        """
+        The terminal of the transformer that this end is associated with
+        """
+        return self._terminal
+
+    @terminal.setter
+    def terminal(self, value: Optional[Terminal]):
+        if value is not None:
+            require(value.conducting_equipment is None or isinstance(value.conducting_equipment, PowerTransformer),
+                    lambda: f"Cannot assign {self.__class__.__name__}[{self.mrid}] to {value.__class__.__name__}[{value.mrid}], which is connected to a " +
+                            f"{value.conducting_equipment.__class__.__name__}[{value.conducting_equipment.mrid}] rather than a PowerTransformer.")
+            self._terminal = value
 
 
 @dataclass(slots=True)

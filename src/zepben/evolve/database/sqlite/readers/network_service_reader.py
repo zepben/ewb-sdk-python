@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -15,9 +15,11 @@ from zepben.evolve import BaseServiceReader, TableCableInfo, TableOverheadWireIn
     TableLoops, TableCircuits, TablePositionPoints, TableLocationStreetAddresses, TableAssetOrganisationRolesAssets, TableUsagePointsEndDevices, \
     TableEquipmentUsagePoints, TableEquipmentOperationalRestrictions, TableEquipmentEquipmentContainers, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableLoopsSubstations, TableControls, TableRemoteControls, TableRemoteSources, TableAnalogs, TableAccumulators, TableDiscretes, TableLvFeeders, \
-    TableCurrentTransformers, TablePotentialTransformers, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableCurrentRelayInfo, \
-    TableCurrentRelays, TableSwitchInfo, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, TableTapChangerControls, \
-    TablePowerTransformerEndRatings
+    TableCurrentTransformers, TablePotentialTransformers, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableRelayInfo, \
+    TableCurrentRelays, TableSwitchInfo, TableProtectionRelayFunctionsProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, TableTapChangerControls, \
+    TablePowerTransformerEndRatings, TableProtectionRelayFunctionThresholds, TableDistanceRelays, TableVoltageRelays, TableProtectionRelayFunctionTimeLimits, \
+    TableProtectionRelaySystems, TableProtectionRelaySchemes, TableGrounds, TableGroundDisconnectors, TableSeriesCompensators, \
+    TableProtectionRelayFunctionsSensors, TableProtectionRelaySchemesProtectionRelayFunctions
 from zepben.evolve.database.sqlite.readers.network_cim_reader import NetworkCIMReader
 
 __all__ = ["NetworkServiceReader"]
@@ -43,7 +45,7 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableTransformerEndInfo, "transformer end info", reader.load_transformer_end_info)
         status = status and self._load_each(TableCurrentTransformerInfo, "current transformer info", reader.load_current_transformer_info)
         status = status and self._load_each(TablePotentialTransformerInfo, "potential transformer info", reader.load_potential_transformer_info)
-        status = status and self._load_each(TableCurrentRelayInfo, "current relay info", reader.load_current_relay_info)
+        status = status and self._load_each(TableRelayInfo, "relay info", reader.load_relay_info)
         status = status and self._load_each(TableRecloseDelays, "reclose delays", reader.load_reclose_delays)
         status = status and self._load_each(TableLocations, "locations", reader.load_location)
         status = status and self._load_each(TableOrganisations, "organisations", reader.load_organisation)
@@ -66,6 +68,12 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableLoadBreakSwitches, "load break switches", reader.load_load_break_switch)
         status = status and self._load_each(TableBusbarSections, "busbar sections", reader.load_busbar_section)
         status = status and self._load_each(TableCurrentRelays, "current relays", reader.load_current_relay)
+        status = status and self._load_each(TableDistanceRelays, "distance relays", reader.load_distance_relay)
+        status = status and self._load_each(TableVoltageRelays, "voltage relays", reader.load_voltage_relay)
+        status = status and self._load_each(TableProtectionRelayFunctionThresholds, "protection relay function thresholds", reader.load_protection_relay_function_thresholds)
+        status = status and self._load_each(TableProtectionRelayFunctionTimeLimits, "protection relay function time limits", reader.load_protection_relay_function_time_limits)
+        status = status and self._load_each(TableProtectionRelaySystems, "protection relay system", reader.load_protection_relay_system)
+        status = status and self._load_each(TableProtectionRelaySchemes, "protection relay scheme", reader.load_protection_relay_scheme)
         status = status and self._load_each(TableDisconnectors, "disconnectors", reader.load_disconnector)
         status = status and self._load_each(TableEnergyConsumers, "energy consumers", reader.load_energy_consumer)
         status = status and self._load_each(TableEnergyConsumerPhases, "energy consumer phases", reader.load_energy_consumer_phase)
@@ -74,6 +82,9 @@ class NetworkServiceReader(BaseServiceReader):
         status = status and self._load_each(TableFuses, "fuses", reader.load_fuse)
         status = status and self._load_each(TableJumpers, "jumpers", reader.load_jumper)
         status = status and self._load_each(TableJunctions, "junctions", reader.load_junction)
+        status = status and self._load_each(TableGrounds, "grounds", reader.load_ground)
+        status = status and self._load_each(TableGroundDisconnectors, "ground disconnectors", reader.load_ground_disconnector)
+        status = status and self._load_each(TableSeriesCompensators, "series compensators", reader.load_series_compensator)
         status = status and self._load_each(TableLinearShuntCompensators, "linear shunt compensators", reader.load_linear_shunt_compensator)
         status = status and self._load_each(TablePowerTransformers, "power transformers", reader.load_power_transformer)
         status = status and self._load_each(TableReclosers, "reclosers", reader.load_recloser)
@@ -115,14 +126,24 @@ class NetworkServiceReader(BaseServiceReader):
             "equipment to equipment container associations",
             reader.load_equipment_equipment_container
         )
-        status = status and self._load_each(
-            TableProtectionEquipmentProtectedSwitches,
-            "protection equipment to protected switch associations",
-            reader.load_protection_equipment_protected_switch
-        )
         status = status and self._load_each(TableCircuitsSubstations, "circuit to substation associations", reader.load_circuit_substation)
         status = status and self._load_each(TableCircuitsTerminals, "circuit to terminal associations", reader.load_circuit_terminal)
         status = status and self._load_each(TableLoopsSubstations, "loop to substation associations", reader.load_loop_substation)
+        status = status and self._load_each(
+            TableProtectionRelayFunctionsProtectedSwitches,
+            "protection equipment to protected switch associations",
+            reader.load_protection_equipment_protected_switch
+        )
+        status = status and self._load_each(
+            TableProtectionRelayFunctionsSensors,
+            "protection equipment to sensor associations",
+            reader.load_protection_relay_functions_sensors
+        )
+        status = status and self._load_each(
+            TableProtectionRelaySchemesProtectionRelayFunctions,
+            "protection relay scheme to protection relay function associations",
+            reader.load_protection_relay_schemes_protection_relay_functions
+        )
         status = status and self._load_each(TableControls, "controls", reader.load_control)
         status = status and self._load_each(TableRemoteControls, "remote controls", reader.load_remote_control)
         status = status and self._load_each(TableRemoteSources, "remote sources", reader.load_remote_source)

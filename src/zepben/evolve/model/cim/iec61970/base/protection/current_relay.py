@@ -1,17 +1,16 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_relay_info import CurrentRelayInfo
-from zepben.evolve.model.cim.iec61970.base.protection.protection_equipment import ProtectionEquipment
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 __all__ = ["CurrentRelay"]
 
 
-class CurrentRelay(ProtectionEquipment):
+class CurrentRelay(ProtectionRelayFunction):
     """A device that checks current flow values in any direction or designated direction."""
 
     current_limit_1: Optional[float] = None
@@ -22,16 +21,3 @@ class CurrentRelay(ProtectionEquipment):
 
     time_delay_1: Optional[float] = None
     """Inverse time delay number 1 for current limit number 1 in seconds."""
-
-    @property
-    def current_relay_info(self) -> Optional[CurrentRelayInfo]:
-        """Datasheet information for this :class:`CurrentRelay`."""
-        return self.asset_info
-
-    @current_relay_info.setter
-    def current_relay_info(self, cri: Optional[CurrentRelayInfo]):
-        """
-        Set the :class:`CurrentRelayInfo` for this :class:`CurrentRelay`
-        :param cri: The CurrentRelayInfo for this CurrentRelay
-        """
-        self.asset_info = cri

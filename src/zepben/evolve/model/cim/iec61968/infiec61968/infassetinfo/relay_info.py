@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -9,19 +9,22 @@ from typing import Optional, List, Generator
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.util import ngen, nlen, safe_remove, require
 
-__all__ = ["CurrentRelayInfo"]
+__all__ = ["RelayInfo"]
 
 
-class CurrentRelayInfo(AssetInfo):
-    """Current Relay Datasheet Information."""
+class RelayInfo(AssetInfo):
+    """Relay Datasheet Information."""
 
     curve_setting: Optional[str] = None
-    """The type of curve used for the Current Relay."""
+    """The type of curve used for the Relay."""
+
+    reclose_fast: Optional[bool] = None
+    """True if reclose_delays are associated with a fast Curve, false otherwise."""
 
     _reclose_delays: Optional[List[float]] = None
 
     def __init__(self, reclose_delays: Optional[List[float]] = None, **kwargs):
-        super(CurrentRelayInfo, self).__init__(**kwargs)
+        super(RelayInfo, self).__init__(**kwargs)
         if reclose_delays:
             for index, delay in enumerate(reclose_delays):
                 self.add_delay(delay, index)
@@ -35,22 +38,29 @@ class CurrentRelayInfo(AssetInfo):
 
     def num_delays(self) -> int:
         """
-        Get the numder of reclose delays for this `CurrentRelayInfo`
+        Get the number of reclose delays for this :class:`RelayInfo`
         """
         return nlen(self._reclose_delays)
 
     def get_delay(self, index: int) -> Optional[float]:
+        """
+        Get the reclose delay at the specified index, if it exists. Otherwise, this returns
+
+        :param index: The index of the delay to retrieve.
+        :return: The reclose delay at `index` if it exists, otherwise None.
+        """
         if self._reclose_delays:
             return self._reclose_delays[index] if index in range(len(self._reclose_delays)) else None
         else:
-            return None
+            raise IndexError(index)
 
-    def add_delay(self, delay: float, index: int = None) -> CurrentRelayInfo:
+    def add_delay(self, delay: float, index: int = None) -> RelayInfo:
         """
-        Add a reclose delay
-        `delay` The delay in seconds to add.
-        `index` The index into the list to add the delay at. Defaults to the end of the list.
-        Returns A reference to this `CurrentRelayInfo` to allow fluent use.
+        Add a reclose delay.
+
+        :param delay: The delay in seconds to add.
+        :param index: The index into the list to add the delay at. Defaults to the end of the list.
+        :return: A reference to this :class:`RelayInfo` to allow fluent use.
         """
         if index is None:
             index = self.num_delays()
@@ -62,30 +72,32 @@ class CurrentRelayInfo(AssetInfo):
         self._reclose_delays.insert(index, delay)
         return self
 
-    def set_delays(self, delays: List[float]) -> CurrentRelayInfo:
+    def set_delays(self, delays: List[float]) -> RelayInfo:
         """
-        Set the reclose delays for this CurrentRelayInfo
+        Set the reclose delays for this :class:`RelayInfo`.
 
-        `delays` The delays to set. The provided list will be copied.
-        Returns A reference to this `CurrentRelayInfo` to allow fluent use.
+        :param delays: The delays to set. The provided list will be copied.
+        :return: A reference to this :class:`RelayInfo` to allow fluent use.
         """
         self._reclose_delays = delays.copy()
         return self
 
-    def remove_delay_by_delay(self, delay: float) -> CurrentRelayInfo:
+    def remove_delay(self, delay: float) -> RelayInfo:
         """
         Remove a delay from the list.
-        `delay` The delay to remove.
-        Returns A reference to this `CurrentRelayInfo` to allow fluent use.
+
+        :param delay: The delay to remove.
+        :return: A reference to this :class:`RelayInfo` to allow fluent use.
         """
         self._reclose_delays = safe_remove(self._reclose_delays, delay)
         return self
 
-    def remove_delay(self, index: int) -> Optional[float]:
+    def remove_delay_at(self, index: int) -> Optional[float]:
         """
         Remove a delay from the list.
-        `index` The index of the delay to remove.
-        Returns The delay that was removed, or `None` if no delay was present at `index`.
+
+        :param index: The index of the delay to remove.
+        :return: The delay that was removed, or `None` if no delay was present at `index`.
         """
         if self._reclose_delays:
             try:
@@ -94,10 +106,11 @@ class CurrentRelayInfo(AssetInfo):
                 return None
         return None
 
-    def clear_delays(self) -> CurrentRelayInfo:
+    def clear_delays(self) -> RelayInfo:
         """
         Clear all reclose delays.
-        Returns A reference to this `CurrentRelayInfo` to allow fluent use.
+
+        :return: A reference to this :class:`RelayInfo` to allow fluent use.
         """
         self._reclose_delays = None
         return self

@@ -1,4 +1,4 @@
-#  Copyright 2021 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -14,8 +14,9 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, Name, \
     PowerSystemResource, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, \
     PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, \
-    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, ProtectionEquipment, \
-    CurrentTransformer, PotentialTransformer, Breaker, RegulatingCondEq, RegulatingControl
+    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, \
+    CurrentTransformer, PotentialTransformer, Breaker, RegulatingCondEq, RegulatingControl, ProtectionRelayFunction, Sensor, ProtectionRelayScheme, \
+    ProtectionRelaySystem, Fuse
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -398,10 +399,34 @@ class SchemaNetworks:
         ############################
         # IEC61970 Base Protection #
         ############################
-
-        if isinstance(filled, ProtectionEquipment):
+        if isinstance(filled, ProtectionRelayFunction):
             for it in filled.protected_switches:
-                it.add_operated_by_protection_equipment(filled)
+                it.add_relay_function(filled)
+                service.add(it)
+            for it in filled.sensors:
+                it.add_relay_function(filled)
+                service.add(it)
+            for it in filled.schemes:
+                it.add_function(filled)
+                service.add(it)
+            service.add(filled.relay_info)
+
+        if isinstance(filled, Sensor):
+            for it in filled.relay_functions:
+                it.add_sensor(filled)
+                service.add(it)
+
+        if isinstance(filled, ProtectionRelayScheme):
+            if filled.system is not None:
+                filled.system.add_scheme(filled)
+                service.add(filled.system)
+            for it in filled.functions:
+                it.add_scheme(filled)
+                service.add(it)
+
+        if isinstance(filled, ProtectionRelaySystem):
+            for it in filled.schemes:
+                it.system = filled
                 service.add(it)
 
         #######################
@@ -452,6 +477,9 @@ class SchemaNetworks:
             filled.energy_source.add_phase(filled)
             service.add(filled.energy_source)
 
+        if isinstance(filled, Fuse):
+            service.add(filled.function)
+
         if isinstance(filled, PowerElectronicsConnection):
             for it in filled.units:
                 it.power_electronics_connection = filled
@@ -485,7 +513,7 @@ class SchemaNetworks:
             service.add(filled.power_transformer)
 
         if isinstance(filled, ProtectedSwitch):
-            for it in filled.operated_by_protection_equipment:
+            for it in filled.relay_functions:
                 it.add_protected_switch(filled)
                 service.add(it)
 

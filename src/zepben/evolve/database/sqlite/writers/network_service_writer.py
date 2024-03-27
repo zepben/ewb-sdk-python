@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -11,11 +11,19 @@ from zepben.evolve import NetworkService, CableInfo, OverheadWireInfo, PowerTran
     EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, Analog, \
     Accumulator, Discrete, Control, RemoteControl, RemoteSource, BatteryUnit, PowerElectronicsWindUnit, LvFeeder, CurrentTransformerInfo, \
-    PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, CurrentRelayInfo, CurrentRelay, SwitchInfo, EvChargingUnit, TapChangerControl
+    PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, RelayInfo, CurrentRelay, SwitchInfo, EvChargingUnit, TapChangerControl, \
+    SeriesCompensator
 from zepben.evolve.database.sqlite.writers.base_service_writer import BaseServiceWriter
 from zepben.evolve.database.sqlite.writers.network_cim_writer import NetworkCIMWriter
 
 __all__ = ["NetworkServiceWriter"]
+
+from zepben.evolve.model.cim.iec61970.base.protection.distance_relay import DistanceRelay
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
+from zepben.evolve.model.cim.iec61970.base.protection.voltage_relay import VoltageRelay
+from zepben.evolve.model.cim.iec61970.base.wires.ground import Ground
+from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import GroundDisconnector
 
 
 class NetworkServiceWriter(BaseServiceWriter):
@@ -88,9 +96,16 @@ class NetworkServiceWriter(BaseServiceWriter):
         status = status and self._save_all(service, PotentialTransformerInfo, writer.save_potential_transformer_info)
         status = status and self._save_all(service, CurrentTransformer, writer.save_current_transformer)
         status = status and self._save_all(service, PotentialTransformer, writer.save_potential_transformer)
-        status = status and self._save_all(service, CurrentRelayInfo, writer.save_current_relay_info)
+        status = status and self._save_all(service, RelayInfo, writer.save_relay_info)
         status = status and self._save_all(service, CurrentRelay, writer.save_current_relay)
         status = status and self._save_all(service, TapChangerControl, writer.save_tap_changer_control)
         status = status and self._save_all(service, EvChargingUnit, writer.save_ev_charging_unit)
+        status = status and self._save_all(service, DistanceRelay, writer.save_distance_relay)
+        status = status and self._save_all(service, ProtectionRelayScheme, writer.save_protection_relay_scheme)
+        status = status and self._save_all(service, ProtectionRelaySystem, writer.save_protection_relay_system)
+        status = status and self._save_all(service, VoltageRelay, writer.save_voltage_relay)
+        status = status and self._save_all(service, Ground, writer.save_ground)
+        status = status and self._save_all(service, GroundDisconnector, writer.save_ground_disconnector)
+        status = status and self._save_all(service, SeriesCompensator, writer.save_series_compensator)
 
         return status

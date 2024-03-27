@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -32,10 +32,14 @@ from zepben.evolve import CableInfo, TableCableInfo, PreparedStatement, WireInfo
     IoPoint, TableRemotePoints, RemotePoint, RemoteControl, TableRemoteControls, RemoteSource, TableRemoteSources, ShuntCompensatorInfo, \
     CurrentTransformer, TableSensors, Sensor, TableCurrentTransformers, PotentialTransformer, TablePotentialTransformers, CurrentTransformerInfo, \
     TableCurrentTransformerInfo, PotentialTransformerInfo, TablePotentialTransformerInfo, TableShuntCompensatorInfo, EquivalentBranch, EquivalentEquipment, \
-    Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableCurrentRelayInfo, \
-    CurrentRelayInfo, CurrentRelay, ProtectionEquipment, TableProtectionEquipment, TableCurrentRelays, TableProtectionEquipmentProtectedSwitches, \
+    Recloser, TableReclosers, TableEquipmentOperationalRestrictions, TableLvFeeders, LvFeeder, TableSwitchInfo, SwitchInfo, TableRelayInfo, \
+    RelayInfo, CurrentRelay, TableProtectionRelayFunctions, TableCurrentRelays, TableProtectionRelayFunctionsProtectedSwitches, \
     TableRecloseDelays, EvChargingUnit, TableEvChargingUnits, TableRegulatingControls, RegulatingControl, TapChangerControl, TableTapChangerControls, \
-    TransformerEndRatedS, TablePowerTransformerEndRatings
+    TablePowerTransformerEndRatings, TableGrounds, TableGroundDisconnectors, SeriesCompensator, TableSeriesCompensators, \
+    ProtectionRelayFunction, RelaySetting, TableProtectionRelayFunctionThresholds, TableProtectionRelayFunctionTimeLimits, TableVoltageRelays, \
+    TableDistanceRelays, TableProtectionRelaySchemes, TableProtectionRelaySystems, TableProtectionRelayFunctionsSensors, \
+    TableProtectionRelaySchemesProtectionRelayFunctions, DistanceRelay, ProtectionRelayScheme, ProtectionRelaySystem, VoltageRelay, Ground, GroundDisconnector
+
 from zepben.evolve.database.sqlite.tables.iec61970.base.equivalent_tables import TableEquivalentBranches, TableEquivalentEquipment
 from zepben.evolve.database.sqlite.writers.base_cim_writer import BaseCIMWriter
 
@@ -279,22 +283,23 @@ class NetworkCIMWriter(BaseCIMWriter):
 
     # ************ IEC61968 infIEC61968 InfAssetInfo ************
 
-    def save_current_relay_info(self, current_relay_info: CurrentRelayInfo) -> bool:
-        table = self.database_tables.get_table(TableCurrentRelayInfo)
-        insert = self.database_tables.get_insert(TableCurrentRelayInfo)
+    def save_relay_info(self, relay_info: RelayInfo) -> bool:
+        table = self.database_tables.get_table(TableRelayInfo)
+        insert = self.database_tables.get_insert(TableRelayInfo)
 
         delay_table = self.database_tables.get_table(TableRecloseDelays)
-        if current_relay_info.reclose_delays:
-            for idx, delay in enumerate(current_relay_info.reclose_delays):
+        if relay_info.reclose_delays:
+            for idx, delay in enumerate(relay_info.reclose_delays):
                 delay_insert = self.database_tables.get_insert(TableRecloseDelays)
-                delay_insert.add_value(delay_table.current_relay_info_mrid.query_index, current_relay_info.mrid)
+                delay_insert.add_value(delay_table.relay_info_mrid.query_index, relay_info.mrid)
                 delay_insert.add_value(delay_table.sequence_number.query_index, idx)
                 delay_insert.add_value(delay_table.reclose_delay.query_index, delay)
-                self._try_execute_single_update(delay_insert, f"{current_relay_info.mrid}-rd-{idx}", "reclose delay")
+                self._try_execute_single_update(delay_insert, f"{relay_info.mrid}-rd-{idx}", "reclose delay")
 
-        insert.add_value(table.curve_setting.query_index, current_relay_info.curve_setting)
+        insert.add_value(table.curve_setting.query_index, relay_info.curve_setting)
+        insert.add_value(table.reclose_fast.query_index, relay_info.reclose_fast)
 
-        return self._save_asset_info(table, insert, current_relay_info, "current relay info")
+        return self._save_asset_info(table, insert, relay_info, "relay info")
 
     # ************ IEC61968 infIEC61968 InfAssetInfo ************
 
@@ -554,18 +559,94 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.current_limit_1.query_index, current_relay.current_limit_1)
         insert.add_value(table.inverse_time_flag.query_index, current_relay.inverse_time_flag)
         insert.add_value(table.time_delay_1.query_index, current_relay.time_delay_1)
-        insert.add_value(table.current_relay_info_mrid.query_index, self._mrid_or_none(current_relay.current_relay_info))
 
-        return self._save_protection_equipment(table, insert, current_relay, "current relay")
+        return self._save_protection_relay_function(table, insert, current_relay, "current relay")
 
-    def _save_protection_equipment(self, table: TableProtectionEquipment, insert: PreparedStatement, protection_equipment: ProtectionEquipment,
-                                   description: str) -> bool:
-        insert.add_value(table.relay_delay_time.query_index, protection_equipment.relay_delay_time)
-        insert.add_value(table.protection_kind.query_index, protection_equipment.protection_kind.short_name)
-        insert.add_value(table.directable.query_index, protection_equipment.directable)
-        insert.add_value(table.power_direction.query_index, protection_equipment.power_direction.short_name)
+    def save_distance_relay(self, distance_relay: DistanceRelay) -> bool:
+        table = self.database_tables.get_table(TableDistanceRelays)
+        insert = self.database_tables.get_insert(TableDistanceRelays)
 
-        return self._save_equipment(table, insert, protection_equipment, description)
+        insert.add_value(table.backward_blind.query_index, distance_relay.backward_blind)
+        insert.add_value(table.backward_reach.query_index, distance_relay.backward_reach)
+        insert.add_value(table.backward_reactance.query_index, distance_relay.backward_reactance)
+        insert.add_value(table.forward_blind.query_index, distance_relay.forward_blind)
+        insert.add_value(table.forward_reach.query_index, distance_relay.forward_reach)
+        insert.add_value(table.forward_reactance.query_index, distance_relay.forward_reactance)
+        insert.add_value(table.operation_phase_angle1.query_index, distance_relay.operation_phase_angle1)
+        insert.add_value(table.operation_phase_angle2.query_index, distance_relay.operation_phase_angle2)
+        insert.add_value(table.operation_phase_angle3.query_index, distance_relay.operation_phase_angle3)
+
+        return self._save_protection_relay_function(table, insert, distance_relay, "distance relay")
+
+    def _save_protection_relay_function(self, table: TableProtectionRelayFunctions, insert: PreparedStatement,
+                                        protection_relay_function: ProtectionRelayFunction,
+                                        description: str) -> bool:
+        insert.add_value(table.model.query_index, protection_relay_function.model)
+        insert.add_value(table.reclosing.query_index, protection_relay_function.reclosing)
+        insert.add_value(table.relay_delay_time.query_index, protection_relay_function.relay_delay_time)
+        insert.add_value(table.protection_kind.query_index, protection_relay_function.protection_kind.short_name)
+        insert.add_value(table.directable.query_index, protection_relay_function.directable)
+        insert.add_value(table.power_direction.query_index, protection_relay_function.power_direction.short_name)
+        insert.add_value(table.relay_info_mrid.query_index, self._mrid_or_none(protection_relay_function.asset_info))
+
+        status = True
+        for protected_switch in protection_relay_function.protected_switches:
+            status = status and self._save_protection_relay_function_protected_switch(protection_relay_function, protected_switch)
+        for sensor in protection_relay_function.sensors:
+            status = status and self._save_protection_relay_function_sensor(protection_relay_function, sensor)
+        for sequence_number, threshold in enumerate(protection_relay_function.thresholds):
+            status = status and self.save_protection_relay_threshold(protection_relay_function, sequence_number, threshold)
+        for sequence_number, time_limit in enumerate(protection_relay_function.time_limits):
+            status = status and self.save_protection_relay_time_limit(protection_relay_function, sequence_number, time_limit)
+
+        return status and self._save_power_system_resource(table, insert, protection_relay_function, description)
+
+    def save_protection_relay_threshold(self, protection_relay_function: ProtectionRelayFunction, sequence_number: int, threshold: RelaySetting) -> bool:
+        table = self.database_tables.get_table(TableProtectionRelayFunctionThresholds)
+        insert = self.database_tables.get_insert(TableProtectionRelayFunctionThresholds)
+
+        insert.add_value(table.protection_relay_function_mrid.query_index, protection_relay_function.mrid)
+        insert.add_value(table.sequence_number.query_index, sequence_number)
+        insert.add_value(table.unit_symbol.query_index, threshold.unit_symbol.short_name)
+        insert.add_value(table.value.query_index, threshold.value)
+        insert.add_value(table.name_.query_index, threshold.name)
+
+        return self._try_execute_single_update(insert, f"{protection_relay_function.mrid}-threshold{sequence_number}", "protection relay function threshold")
+
+    def save_protection_relay_time_limit(self, protection_relay_function: ProtectionRelayFunction, sequence_number: int, time_limit: float) -> bool:
+        table = self.database_tables.get_table(TableProtectionRelayFunctionTimeLimits)
+        insert = self.database_tables.get_insert(TableProtectionRelayFunctionTimeLimits)
+
+        insert.add_value(table.protection_relay_function_mrid.query_index, protection_relay_function.mrid)
+        insert.add_value(table.sequence_number.query_index, sequence_number)
+        insert.add_value(table.time_limit.query_index, time_limit)
+
+        return self._try_execute_single_update(insert, f"{protection_relay_function.mrid}-time_limit{sequence_number}", "protection relay function time limit")
+
+    def save_protection_relay_scheme(self, protection_relay_scheme: ProtectionRelayScheme) -> bool:
+        table = self.database_tables.get_table(TableProtectionRelaySchemes)
+        insert = self.database_tables.get_insert(TableProtectionRelaySchemes)
+
+        insert.add_value(table.system_mrid.query_index, self._mrid_or_none(protection_relay_scheme.system))
+
+        status = True
+        for function in protection_relay_scheme.functions:
+            status = status and self._save_protection_relay_scheme_protection_relay_function(protection_relay_scheme, function)
+        return status and self._save_identified_object(table, insert, protection_relay_scheme,  "protection relay scheme")
+
+    def save_protection_relay_system(self, protection_relay_system: ProtectionRelaySystem) -> bool:
+        table = self.database_tables.get_table(TableProtectionRelaySystems)
+        insert = self.database_tables.get_insert(TableProtectionRelaySystems)
+
+        insert.add_value(table.protection_kind.query_index, protection_relay_system.protection_kind.short_name)
+
+        return self._save_equipment(table, insert, protection_relay_system, "protection relay system")
+
+    def save_voltage_relay(self, voltage_relay: VoltageRelay) -> bool:
+        table = self.database_tables.get_table(TableVoltageRelays)
+        insert = self.database_tables.get_insert(TableVoltageRelays)
+
+        return self._save_protection_relay_function(table, insert, voltage_relay, "voltage relay")
 
     # ************ IEC61970 BASE WIRES ************
 
@@ -721,7 +802,21 @@ class NetworkCIMWriter(BaseCIMWriter):
         table = self.database_tables.get_table(TableFuses)
         insert = self.database_tables.get_insert(TableFuses)
 
+        insert.add_value(table.function_mrid.query_index, self._mrid_or_none(fuse.function))
+
         return self._save_switch(table, insert, fuse, "fuse")
+
+    def save_ground(self, ground: Ground) -> bool:
+        table = self.database_tables.get_table(TableGrounds)
+        insert = self.database_tables.get_insert(TableGrounds)
+
+        return self._save_conducting_equipment(table, insert, ground, "ground")
+
+    def save_ground_disconnector(self, ground_disconnector: GroundDisconnector) -> bool:
+        table = self.database_tables.get_table(TableGroundDisconnectors)
+        insert = self.database_tables.get_insert(TableGroundDisconnectors)
+
+        return self._save_switch(table, insert, ground_disconnector, "ground disconnector")
 
     def save_jumper(self, jumper: Jumper) -> bool:
         table = self.database_tables.get_table(TableJumpers)
@@ -868,11 +963,7 @@ class NetworkCIMWriter(BaseCIMWriter):
     def _save_protected_switch(self, table: TableProtectedSwitches, insert: PreparedStatement, protected_switch: ProtectedSwitch, description: str) -> bool:
         insert.add_value(table.breaking_capacity.query_index, protected_switch.breaking_capacity)
 
-        status = True
-        for pe in protected_switch.operated_by_protection_equipment:
-            status = status and self._save_protection_equipment_protected_switch(pe, protected_switch)
-
-        return status and self._save_switch(table, insert, protected_switch, description)
+        return self._save_switch(table, insert, protected_switch, description)
 
     def save_ratio_tap_changer(self, ratio_tap_changer: RatioTapChanger) -> bool:
         table = self.database_tables.get_table(TableRatioTapChangers)
@@ -905,9 +996,23 @@ class NetworkCIMWriter(BaseCIMWriter):
         insert.add_value(table.enabled.query_index, regulating_control.enabled)
         insert.add_value(table.max_allowed_target_value.query_index, regulating_control.max_allowed_target_value)
         insert.add_value(table.min_allowed_target_value.query_index, regulating_control.min_allowed_target_value)
+        insert.add_value(table.rated_current.query_index, regulating_control.rated_current)
         insert.add_value(table.terminal_mrid.query_index, self._mrid_or_none(regulating_control.terminal))
 
         return self._save_power_system_resource(table, insert, regulating_control, description)
+
+    def save_series_compensator(self, series_compensator: SeriesCompensator) -> bool:
+        table = self.database_tables.get_table(TableSeriesCompensators)
+        insert = self.database_tables.get_insert(TableSeriesCompensators)
+
+        insert.add_value(table.r.query_index, series_compensator.r)
+        insert.add_value(table.r0.query_index, series_compensator.r0)
+        insert.add_value(table.x.query_index, series_compensator.x)
+        insert.add_value(table.x0.query_index, series_compensator.x0)
+        insert.add_value(table.varistor_rated_current.query_index, series_compensator.varistor_rated_current)
+        insert.add_value(table.varistor_voltage_threshold.query_index, series_compensator.varistor_voltage_threshold)
+
+        return self._save_conducting_equipment(table, insert, series_compensator, "series compensator")
 
     def _save_shunt_compensator(self, table: TableShuntCompensators, insert: PreparedStatement, shunt_compensator: ShuntCompensator, description: str) -> bool:
         insert.add_value(table.shunt_compensator_info_mrid.query_index, self._mrid_or_none(shunt_compensator.shunt_compensator_info))
@@ -1160,12 +1265,33 @@ class NetworkCIMWriter(BaseCIMWriter):
 
         return self._try_execute_single_update(insert, f"{loop.mrid}-to-{substation.mrid}", f"loop to substation association")
 
-    def _save_protection_equipment_protected_switch(self, protection_equipment: ProtectionEquipment, protected_switch: ProtectedSwitch) -> bool:
-        table = self.database_tables.get_table(TableProtectionEquipmentProtectedSwitches)
-        insert = self.database_tables.get_insert(TableProtectionEquipmentProtectedSwitches)
+    def _save_protection_relay_function_protected_switch(self, protection_relay_function: ProtectionRelayFunction, protected_switch: ProtectedSwitch) -> bool:
+        table = self.database_tables.get_table(TableProtectionRelayFunctionsProtectedSwitches)
+        insert = self.database_tables.get_insert(TableProtectionRelayFunctionsProtectedSwitches)
 
-        insert.add_value(table.protection_equipment_mrid.query_index, protection_equipment.mrid)
+        insert.add_value(table.protection_relay_function_mrid.query_index, protection_relay_function.mrid)
         insert.add_value(table.protected_switch_mrid.query_index, protected_switch.mrid)
 
-        return self._try_execute_single_update(insert, f"{protection_equipment.mrid}-to-{protected_switch.mrid}",
+        return self._try_execute_single_update(insert, f"{protection_relay_function.mrid}-to-{protected_switch.mrid}",
                                                "protection equipment to protected switch association")
+
+    def _save_protection_relay_function_sensor(self, protection_relay_function: ProtectionRelayFunction, sensor: Sensor) -> bool:
+        table = self.database_tables.get_table(TableProtectionRelayFunctionsSensors)
+        insert = self.database_tables.get_insert(TableProtectionRelayFunctionsSensors)
+
+        insert.add_value(table.protection_relay_function_mrid.query_index, protection_relay_function.mrid)
+        insert.add_value(table.sensor_mrid.query_index, sensor.mrid)
+
+        return self._try_execute_single_update(insert, f"{protection_relay_function.mrid}-to-{sensor.mrid}",
+                                               "sensor to protected switch association")
+
+    def _save_protection_relay_scheme_protection_relay_function(self, protection_relay_scheme: ProtectionRelayScheme,
+                                                                protection_relay_function: ProtectionRelayFunction) -> bool:
+        table = self.database_tables.get_table(TableProtectionRelaySchemesProtectionRelayFunctions)
+        insert = self.database_tables.get_insert(TableProtectionRelaySchemesProtectionRelayFunctions)
+
+        insert.add_value(table.protection_relay_scheme_mrid.query_index, protection_relay_scheme.mrid)
+        insert.add_value(table.protection_relay_function_mrid.query_index, protection_relay_function.mrid)
+
+        return self._try_execute_single_update(insert, f"{protection_relay_scheme.mrid}-to-{protection_relay_function.mrid}",
+                                               "protection relay function to protection relay function association")

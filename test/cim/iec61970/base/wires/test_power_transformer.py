@@ -1,4 +1,4 @@
-#  Copyright 2021 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -71,15 +71,16 @@ def test_get_end_by_terminal():
     t2 = Terminal(mrid="t2")
     t3 = Terminal(mrid="t3")
 
+    pt = PowerTransformer(mrid="pt")
+    pt.add_terminal(t1)
+    pt.add_terminal(t2)
+    pt.add_terminal(t3)
+
     e1 = PowerTransformerEnd(mrid="e1")
     e1.terminal = t3
     e2 = PowerTransformerEnd(mrid="e2")
     e2.terminal = t1
 
-    pt = PowerTransformer(mrid="pt")
-    pt.add_terminal(t1)
-    pt.add_terminal(t2)
-    pt.add_terminal(t3)
     pt.add_end(e1)
     pt.add_end(e2)
 

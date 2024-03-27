@@ -1,4 +1,4 @@
-#  Copyright 2020 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -13,7 +13,7 @@ with open("README.md", "r") as fh:
 deps = [
     "requests<2.27.0,>=2.26.0",
     "zepben.auth==0.11.0",
-    "zepben.protobuf==0.26.0",
+    "zepben.protobuf==0.27.0b5",
     "dataclassy==0.6.2",
     "six==1.16.0"
 ]

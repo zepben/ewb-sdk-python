@@ -72,8 +72,8 @@ to prevent the test from timing out while you step through the code:
    * Test for model classes.
    * Add new classes to corresponding service translator test. [```test/services/...```](test/services)
    * Add the required creators to:
-     - [```pb_creators.py```](test/pb_creators.py)
-     - [```cim_creators.py```](test/cim_creators.py)
+     - [```pb_creators.py```](test/streaming/get/pb_creators.py)
+     - [```cim_creators.py```](test/cim/cim_creators.py)
    * Add test for each new comparison to  [test/services/...](test/services) package.
    * Add test for each new class to  [test/cim/...](test/cim) package.
    * Test database schema:
@@ -81,7 +81,7 @@ to prevent the test from timing out while you step through the code:
      - Include new concrete CIM classes in [```test_database_sqlite.py```](test/database/sqlite/test_database_sqlite.py).
    * Verify that all the tests are passing. 
 1. Update release notes in [```changelog.md```](changelog.md).
-1. Update _nio_type_to_cim in network_consumer.py to include newly added classes.
+1. Update _nio_type_to_cim in [```network_consumer.py```](src/zepben/evolve/streaming/get/network_consumer.py) to include newly added classes.
 
 ## Adding support for new services ##
 

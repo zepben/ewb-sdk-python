@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 #
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -8,13 +8,15 @@ from typing import Dict, TypeVar, Type, Any, Optional
 
 from dataclassy import dataclass
 
-from zepben.evolve import TableProtectionEquipmentProtectedSwitches
 from zepben.evolve.database.sqlite.tables.associations.assetorganisationroles_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.circuit_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.customeragreements_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.equipment_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.loop_association_tables import *
 from zepben.evolve.database.sqlite.tables.associations.pricingstructure_association_tables import *
+from zepben.evolve.database.sqlite.tables.associations.protection_relay_functions_protected_switches import *
+from zepben.evolve.database.sqlite.tables.associations.protection_relay_schemes_protection_relay_functions import *
+from zepben.evolve.database.sqlite.tables.associations.protection_relay_functions_sensors import *
 from zepben.evolve.database.sqlite.tables.associations.usagepoints_association_tables import *
 from zepben.evolve.database.sqlite.tables.exceptions import MissingTableConfigException, SqlException
 from zepben.evolve.database.sqlite.tables.iec61968.asset_tables import *
@@ -67,7 +69,6 @@ def _create_tables() -> Dict[Type[T], T]:
         TableCircuitsTerminals: TableCircuitsTerminals(),
         TableConnectivityNodes: TableConnectivityNodes(),
         TableControls: TableControls(),
-        TableCurrentRelayInfo: TableCurrentRelayInfo(),
         TableCurrentRelays: TableCurrentRelays(),
         TableCurrentTransformerInfo: TableCurrentTransformerInfo(),
         TableCurrentTransformers: TableCurrentTransformers(),
@@ -79,6 +80,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TableDiagrams: TableDiagrams(),
         TableDisconnectors: TableDisconnectors(),
         TableDiscretes: TableDiscretes(),
+        TableDistanceRelays: TableDistanceRelays(),
         TableEnergyConsumerPhases: TableEnergyConsumerPhases(),
         TableEnergyConsumers: TableEnergyConsumers(),
         TableEnergySourcePhases: TableEnergySourcePhases(),
@@ -92,6 +94,8 @@ def _create_tables() -> Dict[Type[T], T]:
         TableFeeders: TableFeeders(),
         TableFuses: TableFuses(),
         TableGeographicalRegions: TableGeographicalRegions(),
+        TableGrounds: TableGrounds(),
+        TableGroundDisconnectors: TableGroundDisconnectors(),
         TableJumpers: TableJumpers(),
         TableJunctions: TableJunctions(),
         TableLinearShuntCompensators: TableLinearShuntCompensators(),
@@ -125,12 +129,20 @@ def _create_tables() -> Dict[Type[T], T]:
         TablePowerTransformers: TablePowerTransformers(),
         TablePricingStructures: TablePricingStructures(),
         TablePricingStructuresTariffs: TablePricingStructuresTariffs(),
-        TableProtectionEquipmentProtectedSwitches: TableProtectionEquipmentProtectedSwitches(),
+        TableProtectionRelayFunctionThresholds: TableProtectionRelayFunctionThresholds(),
+        TableProtectionRelayFunctionTimeLimits: TableProtectionRelayFunctionTimeLimits(),
+        TableProtectionRelayFunctionsProtectedSwitches: TableProtectionRelayFunctionsProtectedSwitches(),
+        TableProtectionRelayFunctionsSensors: TableProtectionRelayFunctionsSensors(),
+        TableProtectionRelaySchemes: TableProtectionRelaySchemes(),
+        TableProtectionRelaySchemesProtectionRelayFunctions: TableProtectionRelaySchemesProtectionRelayFunctions(),
+        TableProtectionRelaySystems: TableProtectionRelaySystems(),
         TableRatioTapChangers: TableRatioTapChangers(),
         TableReclosers: TableReclosers(),
         TableRecloseDelays: TableRecloseDelays(),
+        TableRelayInfo: TableRelayInfo(),
         TableRemoteControls: TableRemoteControls(),
         TableRemoteSources: TableRemoteSources(),
+        TableSeriesCompensators: TableSeriesCompensators(),
         TableShortCircuitTests: TableShortCircuitTests(),
         TableShuntCompensatorInfo: TableShuntCompensatorInfo(),
         TableSites: TableSites(),
@@ -147,6 +159,7 @@ def _create_tables() -> Dict[Type[T], T]:
         TableUsagePoints: TableUsagePoints(),
         TableUsagePointsEndDevices: TableUsagePointsEndDevices(),
         TableVersion: TableVersion(),
+        TableVoltageRelays: TableVoltageRelays(),
     }
 
 

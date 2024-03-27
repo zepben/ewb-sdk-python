@@ -1,4 +1,4 @@
-#  Copyright 2023 Zeppelin Bend Pty Ltd
+#  Copyright 2024 Zeppelin Bend Pty Ltd
 # 
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -36,10 +36,15 @@ from zepben.evolve import BaseCIMReader, TableCableInfo, ResultSet, CableInfo, T
     TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableUsagePointsEndDevices, TableCircuitsSubstations, TableCircuitsTerminals, \
     TablePotentialTransformers, PotentialTransformer, PotentialTransformerKind, PotentialTransformerInfo, Sensor, TableSensors, TableCurrentTransformers, \
     CurrentTransformer, CurrentTransformerInfo, TableCurrentTransformerInfo, TablePotentialTransformerInfo, TableLoopsSubstations, LoopSubstationRelationship, \
-    LvFeeder, TableLvFeeders, CurrentRelayInfo, TableCurrentRelayInfo, SwitchInfo, TableSwitchInfo, ProtectionEquipment, TableProtectionEquipment, \
-    ProtectionKind, PowerDirectionKind, TableCurrentRelays, CurrentRelay, TableProtectionEquipmentProtectedSwitches, TableRecloseDelays, TableEvChargingUnits, \
-    EvChargingUnit, RegulatingControl, TableRegulatingControls, RegulatingControlModeKind, TapChangerControl, TableTapChangerControls, \
-    TablePowerTransformerEndRatings, TransformerCoolingType, TransformerEndRatedS
+    LvFeeder, TableLvFeeders, RelayInfo, TableRelayInfo, SwitchInfo, TableSwitchInfo, TableProtectionRelayFunctions, \
+    ProtectionKind, PowerDirectionKind, TableCurrentRelays, CurrentRelay, TableProtectionRelayFunctionsProtectedSwitches, TableRecloseDelays, \
+    TableEvChargingUnits, EvChargingUnit, RegulatingControl, TableRegulatingControls, RegulatingControlModeKind, TapChangerControl, TableTapChangerControls, \
+    TablePowerTransformerEndRatings, TransformerCoolingType, TableProtectionRelayFunctionThresholds, TableDistanceRelays, \
+    TableVoltageRelays, TableProtectionRelayFunctionTimeLimits, TableProtectionRelaySystems, TableProtectionRelaySchemes, TableGrounds, \
+    TableGroundDisconnectors, TableSeriesCompensators, TableProtectionRelayFunctionsSensors, TableProtectionRelaySchemesProtectionRelayFunctions, \
+    ProtectionRelayScheme, ProtectionRelaySystem, RelaySetting, DistanceRelay, ProtectionRelayFunction, VoltageRelay, Ground, GroundDisconnector, \
+    SeriesCompensator
+
 from zepben.evolve.services.common.resolver import rce_regulating_control
 
 __all__ = ["NetworkCIMReader"]
@@ -283,12 +288,13 @@ class NetworkCIMReader(BaseCIMReader):
 
     # ************ IEC61968 infIEC61968 InfAssetInfo ************
 
-    def load_current_relay_info(self, table: TableCurrentRelayInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
-        current_relay_info = CurrentRelayInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+    def load_relay_info(self, table: TableRelayInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        relay_info = RelayInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
 
-        current_relay_info.curve_setting = rs.get_string(table.curve_setting.query_index, None)
+        relay_info.curve_setting = rs.get_string(table.curve_setting.query_index, None)
+        relay_info.reclose_fast = rs.get_boolean(table.reclose_fast.query_index, None)
 
-        return self._load_asset_info(current_relay_info, table, rs) and self._add_or_throw(current_relay_info)
+        return self._load_asset_info(relay_info, table, rs) and self._add_or_throw(relay_info)
 
     def load_current_transformer_info(self, table: TableCurrentTransformerInfo, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         current_transformer_info = CurrentTransformerInfo(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
@@ -322,11 +328,11 @@ class NetworkCIMReader(BaseCIMReader):
 
     def load_reclose_delays(self, table: TableRecloseDelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         # Note TableRecloseDelays.selectSql ensures we process ratings in the correct order.
-        current_relay_info_mrid = rs.get_string(table.current_relay_info_mrid.query_index)
+        relay_info_mrid = rs.get_string(table.relay_info_mrid.query_index)
         reclose_delay = rs.get_double(table.reclose_delay.query_index)
-        set_last_mrid(f"{current_relay_info_mrid}.s{reclose_delay}")
-        cri = self._ensure_get(current_relay_info_mrid, CurrentRelayInfo)
-        cri.add_delay(reclose_delay)
+        set_last_mrid(f"{relay_info_mrid}.s{reclose_delay}")
+        ri = self._ensure_get(relay_info_mrid, RelayInfo)
+        ri.add_delay(reclose_delay)
 
         return True
 
@@ -571,17 +577,86 @@ class NetworkCIMReader(BaseCIMReader):
         current_relay.current_limit_1 = rs.get_double(table.current_limit_1.query_index, None)
         current_relay.inverse_time_flag = rs.get_boolean(table.inverse_time_flag.query_index, None)
         current_relay.time_delay_1 = rs.get_double(table.time_delay_1.query_index, None)
-        current_relay.asset_info = self._ensure_get(rs.get_string(table.current_relay_info_mrid.query_index, None), WireInfo)
 
-        return self._load_protection_equipment(current_relay, table, rs) and self._add_or_throw(current_relay)
+        return self._load_protection_relay_function(current_relay, table, rs) and self._add_or_throw(current_relay)
 
-    def _load_protection_equipment(self, protection_equipment: ProtectionEquipment, table: TableProtectionEquipment, rs: ResultSet) -> bool:
-        protection_equipment.relay_delay_time = rs.get_double(table.relay_delay_time.query_index, None)
-        protection_equipment.protection_kind = ProtectionKind[rs.get_string(table.protection_kind.query_index)]
-        protection_equipment.directable = rs.get_boolean(table.directable.query_index, None)
-        protection_equipment.power_direction = PowerDirectionKind[rs.get_string(table.power_direction.query_index)]
+    def load_distance_relay(self, table: TableDistanceRelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        distance_relay = DistanceRelay(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
 
-        return self._load_equipment(protection_equipment, table, rs)
+        distance_relay.backward_blind = rs.get_double(table.backward_blind.query_index, None)
+        distance_relay.backward_reach = rs.get_double(table.backward_reach.query_index, None)
+        distance_relay.backward_reactance = rs.get_double(table.backward_reactance.query_index, None)
+        distance_relay.forward_blind = rs.get_double(table.forward_blind.query_index, None)
+        distance_relay.forward_reach = rs.get_double(table.forward_reach.query_index, None)
+        distance_relay.forward_reactance = rs.get_double(table.forward_reactance.query_index, None)
+        distance_relay.operation_phase_angle1 = rs.get_double(table.operation_phase_angle1.query_index, None)
+        distance_relay.operation_phase_angle2 = rs.get_double(table.operation_phase_angle2.query_index, None)
+        distance_relay.operation_phase_angle3 = rs.get_double(table.operation_phase_angle3.query_index, None)
+
+        return self._load_protection_relay_function(distance_relay, table, rs) and self._add_or_throw(distance_relay)
+
+    def _load_protection_relay_function(self, protection_relay_function: ProtectionRelayFunction, table: TableProtectionRelayFunctions, rs: ResultSet) -> bool:
+        protection_relay_function.asset_info = self._ensure_get(rs.get_string(table.relay_info_mrid.query_index, None), RelayInfo)
+        protection_relay_function.model = rs.get_string(table.model.query_index, None)
+        protection_relay_function.reclosing = rs.get_boolean(table.reclosing.query_index, None)
+        protection_relay_function.relay_delay_time = rs.get_double(table.relay_delay_time.query_index, None)
+        protection_relay_function.protection_kind = ProtectionKind[rs.get_string(table.protection_kind.query_index)]
+        protection_relay_function.directable = rs.get_boolean(table.directable.query_index, None)
+        protection_relay_function.power_direction = PowerDirectionKind[rs.get_string(table.power_direction.query_index)]
+
+        return self._load_power_system_resource(protection_relay_function, table, rs)
+
+    def load_protection_relay_function_thresholds(self, table: TableProtectionRelayFunctionThresholds, rs: ResultSet,
+                                                  set_last_mrid: Callable[[str], str]) -> bool:
+        protection_relay_function_mrid = rs.get_string(table.protection_relay_function_mrid.query_index)
+
+        protection_relay_function = self._ensure_get(protection_relay_function_mrid, ProtectionRelayFunction)
+
+        sequence_number = rs.get_int(table.sequence_number.query_index)
+        unit_symbol = UnitSymbol[rs.get_string(table.unit_symbol.query_index)]
+        value = rs.get_double(table.value.query_index)
+        name = rs.get_string(table.name_.query_index, None)
+
+        set_last_mrid(f"{protection_relay_function_mrid}.s{sequence_number}")
+
+        new_relay_setting = RelaySetting(unit_symbol, value, name)
+
+        protection_relay_function.add_threshold(new_relay_setting, sequence_number)
+
+        return True
+
+    def load_protection_relay_function_time_limits(self, table: TableProtectionRelayFunctionTimeLimits, rs: ResultSet,
+                                                   set_last_mrid: Callable[[str], str]) -> bool:
+        protection_relay_function_mrid = rs.get_string(table.protection_relay_function_mrid.query_index)
+
+        protection_relay_function = self._ensure_get(protection_relay_function_mrid, ProtectionRelayFunction)
+
+        sequence_number = rs.get_int(table.sequence_number.query_index)
+        time_limit = rs.get_double(table.time_limit.query_index)
+
+        set_last_mrid(f"{protection_relay_function_mrid} time limit {sequence_number}")
+
+        protection_relay_function.add_time_limit(time_limit, sequence_number)
+
+        return True
+
+    def load_protection_relay_scheme(self, table: TableProtectionRelaySchemes, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        protection_relay_scheme = ProtectionRelayScheme(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+        protection_relay_scheme.system = self._ensure_get(rs.get_string(table.system_mrid.query_index, None), ProtectionRelaySystem)
+        if protection_relay_scheme.system is not None:
+            protection_relay_scheme.system.add_scheme(protection_relay_scheme)
+        return self._load_identified_object(protection_relay_scheme, table, rs) and self._add_or_throw(protection_relay_scheme)
+
+    def load_protection_relay_system(self, table: TableProtectionRelaySystems, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        protection_relay_system = ProtectionRelaySystem(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+        protection_relay_system.protection_kind = ProtectionKind[rs.get_string(table.protection_kind.query_index)]
+
+        return self._load_equipment(protection_relay_system, table, rs) and self._add_or_throw(protection_relay_system)
+
+    def load_voltage_relay(self, table: TableVoltageRelays, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        voltage_relay = VoltageRelay(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        return self._load_protection_relay_function(voltage_relay, table, rs) and self._add_or_throw(voltage_relay)
 
     # ************ IEC61970 BASE SCADA ************
 
@@ -754,8 +829,19 @@ class NetworkCIMReader(BaseCIMReader):
 
     def load_fuse(self, table: TableFuses, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         fuse = Fuse(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+        fuse.function = self._ensure_get(rs.get_string(table.function_mrid.query_index, None), ProtectionRelayFunction)
 
         return self._load_switch(fuse, table, rs) and self._add_or_throw(fuse)
+
+    def load_ground(self, table: TableGrounds, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        ground = Ground(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        return self._load_conducting_equipment(ground, table, rs) and self._add_or_throw(ground)
+
+    def load_ground_disconnector(self, table: TableGroundDisconnectors, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        ground_disconnector = GroundDisconnector(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        return self._load_switch(ground_disconnector, table, rs) and self._add_or_throw(ground_disconnector)
 
     def load_jumper(self, table: TableJumpers, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
         jumper = Jumper(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
@@ -935,9 +1021,22 @@ class NetworkCIMReader(BaseCIMReader):
         regulating_control.enabled = rs.get_boolean(table.enabled.query_index, None)
         regulating_control.max_allowed_target_value = rs.get_double(table.max_allowed_target_value.query_index, None)
         regulating_control.min_allowed_target_value = rs.get_double(table.min_allowed_target_value.query_index, None)
+        regulating_control.rated_current = rs.get_double(table.rated_current.query_index, None)
         regulating_control.terminal = self._ensure_get(rs.get_string(table.terminal_mrid.query_index, None), Terminal)
 
         return self._load_power_system_resource(regulating_control, table, rs)
+
+    def load_series_compensator(self, table: TableSeriesCompensators, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        series_compensator = SeriesCompensator(mrid=set_last_mrid(rs.get_string(table.mrid.query_index)))
+
+        series_compensator.r = rs.get_double(table.r.query_index, None)
+        series_compensator.r0 = rs.get_double(table.r0.query_index, None)
+        series_compensator.x = rs.get_double(table.x.query_index, None)
+        series_compensator.x0 = rs.get_double(table.x0.query_index, None)
+        series_compensator.varistor_rated_current = rs.get_int(table.varistor_rated_current.query_index, None)
+        series_compensator.varistor_voltage_threshold = rs.get_int(table.varistor_voltage_threshold.query_index, None)
+
+        return self._load_conducting_equipment(series_compensator, table, rs) and self._add_or_throw(series_compensator)
 
     def _load_shunt_compensator(self, shunt_compensator: ShuntCompensator, table: TableShuntCompensators, rs: ResultSet) -> bool:
         shunt_compensator.asset_info = self._ensure_get(rs.get_string(table.shunt_compensator_info_mrid.query_index, None), ShuntCompensatorInfo)
@@ -1163,18 +1262,45 @@ class NetworkCIMReader(BaseCIMReader):
 
         return True
 
-    def load_protection_equipment_protected_switch(self, table: TableProtectionEquipmentProtectedSwitches, rs: ResultSet,
+    def load_protection_equipment_protected_switch(self, table: TableProtectionRelayFunctionsProtectedSwitches, rs: ResultSet,
                                                    set_last_mrid: Callable[[str], str]) -> bool:
-        protection_equipment_mrid = set_last_mrid(rs.get_string(table.protection_equipment_mrid.query_index))
-        set_last_mrid(f"{protection_equipment_mrid}-to-UNKNOWN")
+        protection_relay_function_mrid = rs.get_string(table.protection_relay_function_mrid.query_index)
+        set_last_mrid(f"{protection_relay_function_mrid}-to-UNKNOWN")
 
         protected_switch_mrid = rs.get_string(table.protected_switch_mrid.query_index)
-        set_last_mrid(f"{protection_equipment_mrid}-to-{protected_switch_mrid}")
+        set_last_mrid(f"{protection_relay_function_mrid}-to-{protected_switch_mrid}")
 
-        protection_equipment = self._base_service.get(protection_equipment_mrid, ProtectionEquipment)
+        protection_relay_function = self._base_service.get(protection_relay_function_mrid, ProtectionRelayFunction)
         protected_switch = self._base_service.get(protected_switch_mrid, ProtectedSwitch)
 
-        protection_equipment.add_protected_switch(protected_switch)
-        protected_switch.add_operated_by_protection_equipment(protection_equipment)
+        protection_relay_function.add_protected_switch(protected_switch)
+        protected_switch.add_relay_function(protection_relay_function)
+        return True
 
+    def load_protection_relay_functions_sensors(self, table: TableProtectionRelayFunctionsSensors, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        protection_relay_function_mrid = rs.get_string(table.protection_relay_function_mrid.query_index)
+        set_last_mrid(f"{protection_relay_function_mrid}-to-UNKNOWN")
+
+        sensor_mrid = rs.get_string(table.sensor_mrid.query_index)
+        set_last_mrid(f"{protection_relay_function_mrid}-to-{sensor_mrid}")
+
+        protection_relay_function = self._base_service.get(protection_relay_function_mrid, ProtectionRelayFunction)
+        sensor = self._base_service.get(sensor_mrid, Sensor)
+
+        protection_relay_function.add_sensor(sensor)
+        sensor.add_relay_function(protection_relay_function)  # I feel like there was a resolver for this somewhere? oh maybe for pb
+        return True
+
+    def load_protection_relay_schemes_protection_relay_functions(self, table: TableProtectionRelaySchemesProtectionRelayFunctions, rs: ResultSet, set_last_mrid: Callable[[str], str]) -> bool:
+        protection_relay_scheme_mrid = rs.get_string(table.protection_relay_scheme_mrid.query_index)
+        set_last_mrid(f"{protection_relay_scheme_mrid}-to-UNKNOWN")
+
+        protection_relay_function_mrid = rs.get_string(table.protection_relay_function_mrid.query_index)
+        set_last_mrid(f"{protection_relay_scheme_mrid}-to-{protection_relay_function_mrid}")
+
+        protection_relay_scheme = self._base_service.get(protection_relay_scheme_mrid, ProtectionRelayScheme)
+        protection_relay_function = self._base_service.get(protection_relay_function_mrid, ProtectionRelayFunction)
+
+        protection_relay_scheme.add_function(protection_relay_function)
+        protection_relay_function.add_scheme(protection_relay_scheme)
         return True
