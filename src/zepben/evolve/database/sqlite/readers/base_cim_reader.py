@@ -65,8 +65,7 @@ class BaseCIMReader(object):
         # don't check or warn about that.
         io = self._base_service.get(rs.get_string(table.identified_object_mrid.query_index), default=None)
         if io is not None:
-            name = name_type.get_or_add_name(name_name, io)
-            io.add_name(name)
+            io.add_name(name_name, name_type)
 
         return True
 

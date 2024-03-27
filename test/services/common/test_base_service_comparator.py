@@ -7,9 +7,9 @@ from datetime import datetime
 from typing import Type
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
+
 from zepben.evolve import IdentifiedObject, Document, OrganisationRole, Organisation, Junction, ObjectDifference, ValueDifference, CollectionDifference, \
     BaseService, BaseServiceComparator
-from zepben.evolve.model.cim.iec61970.base.core.name import Name
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 
 
@@ -23,12 +23,13 @@ class TestBaseServiceComparator:
         self.validator.validate_property(IdentifiedObject.description, create_identified_object, lambda _: "description", lambda _: "other description")
 
         # noinspection PyArgumentList
-        self.validator.validate_collection(
+        self.validator.validate_name_collection(
             IdentifiedObject.names,
             IdentifiedObject.add_name,
             create_identified_object,
-            lambda it: Name("name1", NameType("type1"), it),
-            lambda it: Name("name2", NameType("type2"), it)
+            NameType("type1"),
+            "name1",
+            "name2"
         )
 
     def _compare_document(self, create_document: Type[Document]):

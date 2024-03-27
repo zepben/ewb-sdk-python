@@ -3,7 +3,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+from collections import Counter
 from typing import TypeVar, Callable, Type, Optional
 
 from pytest import raises
@@ -77,6 +77,78 @@ def validate_collection(create_it: Callable[[], T],
     if support_duplicates:
         # Make sure adding an already-added item does not change the collection
         add(it, other1)
+        assert num(it) == 1
+
+    remove(it, other1)
+    assert num(it) == 0
+
+    # Make sure remove on an empty list raises an exception.
+    with raises(expected_remove_error):
+        remove(it, other2)
+    assert num(it) == 0
+
+
+def validate_identified_object_name_collection(create_it: Callable[[], T],
+                                               create_other: Callable[[str, T], U],
+                                               num: Callable[[T], int],
+                                               get: Callable[[T, U], U],
+                                               get_all_with_type: Callable[[T], T],
+                                               get_all: property,
+                                               add: Callable[..., T],
+                                               remove: Callable[..., T],
+                                               clear: Callable[[T], T],
+                                               expected_error_message: Callable[[T, U], str],
+                                               expected_remove_error: Type[E] = ValueError,
+                                               support_duplicates: bool = True):
+    it = create_it()
+    other1 = create_other("1", it)
+    other2 = create_other("2", it)
+    other3 = create_other("3", it)
+    duplicate = create_other("2", it)
+    assert other1 != other2
+    assert other1 != other3
+    assert other2 != other3
+    assert num(it) == 0
+
+    add(it, other1.name, other1.type)
+    add(it, other2.name, other2.type)
+    add(it, other3.name, other3.type)
+    assert num(it) == 3
+
+    assert Counter(get_all_with_type(it, other1.type.name)) == Counter([other1, other2, other3])
+    assert Counter(get_all_with_type(it, other1.type)) == Counter([other1, other2, other3])
+
+    with raises(ValueError, match=expected_error_message(it, duplicate.name)):
+        add(it, duplicate.name, duplicate.type)
+
+    assert num(it) == 3
+    assert remove(it, other1)
+
+    with raises(expected_remove_error):
+        remove(it, other1)
+
+    with raises(expected_remove_error):
+        remove(it, None)
+
+    assert num(it) == 2
+
+    assert get(it, duplicate) == other2
+
+    # noinspection PyArgumentList
+    all_objects = list(get_all.fget(it))
+    assert other2 in all_objects
+    assert other3 in all_objects
+
+    clear(it)
+    assert num(it) == 0
+
+    # Make sure you can add an item back after it has been removed
+    add(it, other1.name, other1.type)
+    assert num(it) == 1
+
+    if support_duplicates:
+        # Make sure adding an already-added item does not change the collection
+        add(it, other1.name, other1.type)
         assert num(it) == 1
 
     remove(it, other1)

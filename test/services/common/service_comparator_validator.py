@@ -179,6 +179,49 @@ class ServiceComparatorValidator(object):
         })
         self._validate_expected(diff, options, options_stop_compare, expected_differences)
 
+    def validate_name_collection(
+        self,
+        prop: Property,
+        add_to_collection: Callable[..., Any],
+        creator: [[str], TIdentifiedObject],
+        name_type: NameType,
+        name1: str,
+        name2: str,
+        options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
+        options_stop_compare: bool = False,
+        expected_differences: Set[str] = None
+    ):
+        source_empty = creator("mRID")
+        target_empty = creator("mRID")
+        in_source = creator("mRID")
+        in_target = creator("mRID")
+        in_target_difference = creator("mRID")
+
+        add_to_collection(in_source, name1, name_type)
+        add_to_collection(in_target, name1, name_type)
+        add_to_collection(in_target_difference, name2, name_type)
+
+        self.validate_compare(source_empty, target_empty, options=options, options_stop_compare=options_stop_compare)
+        self.validate_compare(in_source, in_target, options=options, options_stop_compare=options_stop_compare)
+
+        diff = ObjectDifference(in_source, target_empty, {
+            _prop_name(prop): CollectionDifference(missing_from_target=[next(_get_prop(in_source, prop))])
+        })
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
+
+        diff = ObjectDifference(source_empty, in_target, {
+            _prop_name(prop): CollectionDifference(missing_from_source=[next(_get_prop(in_target, prop))])
+        })
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
+
+        diff = ObjectDifference(in_source, in_target_difference, {
+            _prop_name(prop): CollectionDifference(
+                missing_from_source=[next(_get_prop(in_target_difference, prop))],
+                missing_from_target=[next(_get_prop(in_source, prop))]
+            )
+        })
+        self._validate_expected(diff, options, options_stop_compare, expected_differences)
+
     def validate_indexed_collection(
         self,
         prop: Property,
@@ -234,8 +277,10 @@ class ServiceComparatorValidator(object):
         else:
             return ValueDifference(source, target)
 
-    def _validate_expected(self, diff: ObjectDifference, options: NetworkServiceComparatorOptions, options_stop_compare: bool = False, expected_differences: Set[str] = None):
-        self.validate_compare(diff.source, diff.target, expect_modification=diff, options=options, options_stop_compare=options_stop_compare, expected_differences=expected_differences)
+    def _validate_expected(self, diff: ObjectDifference, options: NetworkServiceComparatorOptions, options_stop_compare: bool = False,
+                           expected_differences: Set[str] = None):
+        self.validate_compare(diff.source, diff.target, expect_modification=diff, options=options, options_stop_compare=options_stop_compare,
+                              expected_differences=expected_differences)
 
 
 def _prop_name(prop: Property) -> str:

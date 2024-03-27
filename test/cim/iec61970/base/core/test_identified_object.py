@@ -5,10 +5,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
 from hypothesis.strategies import uuids, text, lists, builds
 
-from cim.collection_validator import validate_collection
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
+from test.cim.collection_validator import validate_identified_object_name_collection
 from zepben.evolve import IdentifiedObject, Junction
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
@@ -46,6 +46,10 @@ def verify_identified_object_constructor_kwargs(io: IdentifiedObject, mrid, name
     assert io.mrid == mrid
     assert io.name == name
     assert io.description == description
+    # Assign identified object to the names we are checking against due to no identified object requirement on Name creation
+    # Note: this is due to automatic two-way association introduced in the name rejig rework
+    for name in names:
+        name.identified_object = io
     assert list(io.names) == names
 
 
@@ -58,12 +62,13 @@ def verify_identified_object_constructor_args(io: IdentifiedObject):
 
 def test_names_collection():
     # noinspection PyTypeChecker, PyArgumentList
-    validate_collection(IdentifiedObject,
-                        lambda mrid, io: Name(mrid, NameType("name_type"), io),
-                        IdentifiedObject.num_names,
-                        lambda io, name: io.get_name(name.type.name, name.name),
-                        IdentifiedObject.names,
-                        IdentifiedObject.add_name,
-                        IdentifiedObject.remove_name,
-                        IdentifiedObject.clear_names,
-                        lambda it, dup: re.escape(rf"Failed to add duplicate name {str(dup)} to {str(it)}."))
+    validate_identified_object_name_collection(IdentifiedObject,
+                                               lambda mrid, io: Name(mrid, NameType("name_type"), io),
+                                               IdentifiedObject.num_names,
+                                               lambda io, name: io.get_name(name.type.name, name.name),
+                                               lambda io, name: io.get_names(name),
+                                               IdentifiedObject.names,
+                                               IdentifiedObject.add_name,
+                                               IdentifiedObject.remove_name,
+                                               IdentifiedObject.clear_names,
+                                               lambda it, dup: re.escape(rf"Failed to add duplicate name {str(dup)} to {str(it)}."))
