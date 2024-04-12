@@ -5,7 +5,9 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Generator, overload
+from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 from dataclassy import dataclass
 
@@ -20,7 +22,7 @@ class NameType:
     Type of name. Possible values for attribute 'name' are implementation dependent but standard profiles may specify types. An enterprise may have multiple
     IT systems each having its own local name for the same object, e.g. a planning system may have different names from an EMS. An object may also have
     different names within the same IT system, e.g. localName as defined in CIM version 14. The definition from CIM14 is:
-    The localName is a human readable name of the object. It is a free text name local to a node in a naming hierarchy similar to a file directory structure.
+    The localName is a human-readable name of the object. It is a free text name local to a node in a naming hierarchy similar to a file directory structure.
     A power system related naming hierarchy may be: Substation, VoltageLevel, Equipment etc. Children of the same parent in such a hierarchy have names that
     typically are unique among them.
     """
@@ -92,7 +94,7 @@ class NameType:
             except KeyError:
                 pass
 
-    def get_or_add_name(self, name: str, identified_object):
+    def get_or_add_name(self, name: str, identified_object: IdentifiedObject) -> Name:
         """
         Gets a :class:`Name` for the given `name` and `identifiedObject` combination or adds a new :class:`Name`
         to this :class:`NameType` with the combination and returns the new instance.
@@ -101,33 +103,28 @@ class NameType:
             existing = self._names_index[name]
             if existing.identified_object is identified_object:
                 return existing
-            else:
-                # noinspection PyArgumentList
-                name_obj = Name(name, self, identified_object)
+
+            def move_to_multi_index(name_obj: Name):
                 self._names_multi_index[name] = [existing, name_obj]
                 del self._names_index[name]
-                if not identified_object.get_name(self, name):
-                    identified_object.add_name(name, self)
-                return name_obj
+
+            return self._get_or_create_name(name, identified_object, move_to_multi_index)
         elif name in self._names_multi_index:
             for n in self._names_multi_index[name]:
                 if n.identified_object is identified_object:
                     return n
-            # noinspection PyArgumentList
-            name_obj = Name(name, self, identified_object)
-            self._names_multi_index[name].append(name_obj)
-            if not identified_object.get_name(self, name):
-                identified_object.add_name(name, self)
-            return name_obj
-        else:
-            # noinspection PyArgumentList
-            name_obj = Name(name, self, identified_object)
-            self._names_index[name] = name_obj
-            if not identified_object.get_name(self, name):
-                identified_object.add_name(name, self)
-            return name_obj
 
-    def remove_name(self, name: Name):
+            def expand_multi_index(name_obj: Name):
+                self._names_multi_index[name].append(name_obj)
+
+            return self._get_or_create_name(name, identified_object, expand_multi_index)
+        else:
+            def add_to_index(name_obj: Name):
+                self._names_index[name] = name_obj
+
+            return self._get_or_create_name(name, identified_object, add_to_index)
+
+    def remove_name(self, name: Name) -> NameType:
         """
         Removes the `name` from this name type.
         Removes the `name` from associated `IdentifiedObject`
@@ -135,13 +132,13 @@ class NameType:
         :return: True if the name instance was successfully removed
         """
         if name.type is not self:
-            return False
+            raise ValueError(f"NameType.remove_name(name): {name} not in {self}")
 
         try:
             del self._names_index[name.name]
             if name.identified_object.get_name(name.type, name.name):
                 name.identified_object.remove_name(name)
-            return True
+            return self
         except KeyError:
             try:
                 names = self._names_multi_index[name.name]
@@ -149,11 +146,11 @@ class NameType:
                 if not names:
                     del self._names_multi_index[name.name]
                 name.identified_object.remove_name(name)
-                return True
+                return self
             except KeyError:
-                return False
+                return self
 
-    def remove_names(self, name: str):
+    def remove_names(self, name: str) -> NameType:
         """
         Removes all :class:`Name` instances associated with name `name`.
 
@@ -163,16 +160,16 @@ class NameType:
             name_obj = self._names_index[name]
             del self._names_index[name]
             name_obj.identified_object.remove_name(name_obj)
-            return True
+            return self
         except KeyError:
             try:
                 name_list = list(self._names_multi_index[name])
                 del self._names_multi_index[name]
                 for name_obj in name_list:
                     name_obj.identified_object.remove_name(name_obj)
-                return True
+                return self
             except KeyError:
-                return False
+                return self
 
     def clear_names(self) -> NameType:
         for name in list(self._names_index.values()):
@@ -183,3 +180,21 @@ class NameType:
         self._names_index = dict()
         self._names_multi_index = dict()
         return self
+
+    def _get_or_create_name(self, name: str, identified_object: IdentifiedObject, update_index: Callable[[Name], None]) -> Name:
+        #
+        # NOTE: In Python, we can add names directly into the names collection of an object, so there is a chance that we just need to update the index rather
+        # than create a new Name class
+        #
+        had_name = identified_object.has_name(self, name)
+        if had_name:
+            name_obj = identified_object.get_name(self, name)
+        else:
+            name_obj = Name(name, self, identified_object)
+
+        update_index(name_obj)
+
+        if not had_name:
+            identified_object.add_name(self, name)
+
+        return name_obj

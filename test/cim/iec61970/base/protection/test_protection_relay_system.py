@@ -6,9 +6,9 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, sampled_from
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, equipment_args, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme
 
 protection_relay_system_kwargs = {
@@ -52,12 +52,13 @@ def test_protection_relay_system_constructor_args():
 
 
 def test_schemes_collection():
-    validate_collection_unordered(ProtectionRelaySystem,
-                                  lambda mrid, _: ProtectionRelayScheme(mrid),
-                                  ProtectionRelaySystem.num_schemes,
-                                  ProtectionRelaySystem.get_scheme,
-                                  ProtectionRelaySystem.schemes,
-                                  ProtectionRelaySystem.add_scheme,
-                                  ProtectionRelaySystem.remove_scheme,
-                                  ProtectionRelaySystem.clear_scheme
-                                  )
+    validate_unordered_1234567890(
+        ProtectionRelaySystem,
+        lambda mrid: ProtectionRelayScheme(mrid),
+        ProtectionRelaySystem.schemes,
+        ProtectionRelaySystem.num_schemes,
+        ProtectionRelaySystem.get_scheme,
+        ProtectionRelaySystem.add_scheme,
+        ProtectionRelaySystem.remove_scheme,
+        ProtectionRelaySystem.clear_scheme
+    )

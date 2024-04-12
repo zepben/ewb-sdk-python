@@ -17,6 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#  Modifications Copyright Zeppelin Bend Pty Ltd as stated above
 from abc import ABC
 from typing import TypeVar, Union, AsyncIterable, Optional
 

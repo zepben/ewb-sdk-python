@@ -4,18 +4,16 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import os
 import uuid
+from typing import Union, List
+
+import pytest
 from dataclassy import dataclass
-from pytest import fixture
-from zepben.protobuf.cim.iec61970.base.wires.WindingConnection_pb2 import WindingConnection
-from zepben.protobuf.cim.iec61970.base.wires.VectorGroup_pb2 import VectorGroup
-
-
-from zepben.evolve.services.network.network_service import NetworkService
-from zepben.evolve import EnergySource, EnergyConsumer, Terminal, ConnectivityNode, IdentifiedObject, AcLineSegment, \
-    PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Breaker, EnergySourcePhase, Junction
-from zepben.evolve import PhaseCode
-from typing import Union, List, Callable
 from hypothesis import settings, Verbosity
+from pytest import fixture
+
+from zepben.evolve import Terminal, ConnectivityNode, IdentifiedObject, PowerTransformerEnd, RatioTapChanger
+from zepben.evolve.services.network.network_service import NetworkService
+# noinspection PyUnresolvedReferences
 from .network_fixtures import *
 
 settings.register_profile("ci", max_examples=1000)
@@ -67,261 +65,64 @@ class AddResult:
     node: Union[ConnectivityNode, List[ConnectivityNode]] = None
 
 
-class NetworkBuilder(object):
-    def __init__(self):
-        self.network = NetworkService()
-
-    def create_feeder_start(self, name="default", es_args=None, cb_args=None, acls_args=None):
-        if cb_args is None:
-            cb_args = {}
-        if acls_args is None:
-            acls_args = {}
-        if es_args is None:
-            es_args = {}
-        ar = self.add_energysource(mrid=f"{name}-es", **es_args)
-        plsi = self.add_plsi()
-        ar = self.add_acls(ar.node, mrid=f"{name}-acls-1", plsi=plsi, **acls_args)
-        return self.add_feeder_cb(ar.node, mrid=f"{name}-cb", **cb_args)
-
-    def add_energysource(self, mrid: str = None, with_phases: PhaseCode = PhaseCode.NONE, wiring_supplier=None, **kwargs):
-        """
-        `with_phases` If a `PhaseCode` is specified, the EnergySource will be added with an `EnergySourcePhase` for
-                            each phase specified.
-        `esp` List of EnergySourcePhase to specify for this EnergySource, overrides with_phases.
-        `kwargs` Args to pass to `EnergySource.__init__`
-        Returns AddResult(io=created EnergySource, node=created ConnectivityNode)
-        """
-        mrid = _get_mrid(mrid)
-        terms = self.gen_terminals(1, mrid=mrid)
-        try:
-            esp = kwargs["esp"]
-            del kwargs["esp"]  # Remove reference to stop duplicate key when creating EnergySource
-        except KeyError:
-            esp = []
-            if with_phases != PhaseCode.NONE:
-                for spk in with_phases.single_phases:
-                    esp.append(EnergySourcePhase(spk))
-
-        es = EnergySource(mrid, terminals=terms, energy_source_phases=[esp], **kwargs)
-        self.network.add(es)
-        return AddResult(es, terms[0].connectivity_node)
-
-    def add_energyconsumer(self, connectivity_node, mrid: str = None, num_terms=1, phases=PhaseCode.ABCN, wiring_supplier=None, **kwargs):
-        mrid = _get_mrid(mrid)
-        terms = self.gen_terminals(num_terms, conn_nodes=connectivity_node, mrid=mrid, phases=phases, wiring_supplier=wiring_supplier)
-        ec = EnergyConsumer(mrid, terminals=terms, **kwargs)
-        self.network.add(ec)
-        return AddResult(ec, terms[0].connectivity_node)
-
-    def add_acls(self, connectivity_nodes, mrid: str = None, num_terms=2, phases=PhaseCode.ABCN, wiring_supplier=None, **kwargs):
-        try:
-            plsi = kwargs["plsi"]
-            del kwargs["plsi"]  # Remove reference to stop duplicate key when creating EnergySource
-        except KeyError:
-            plsi = self.add_plsi()
-        mrid = _get_mrid(mrid)
-        terms = self.gen_terminals(num_terms, conn_nodes=connectivity_nodes, mrid=mrid, phases=phases, wiring_supplier=wiring_supplier)
-        acls = AcLineSegment(mrid, terminals=terms, plsi=plsi, **kwargs)
-        self.network.add(acls)
-        return AddResult(acls, _get_result_nodes(terms))
-
-    def add_junction(self, connectivity_node, mrid: str = None, num_terms=2, phases=PhaseCode.ABCN, wiring_supplier=None, **kwargs):
-        mrid = _get_mrid(mrid)
-        terms = self.gen_terminals(num_terms, conn_nodes=connectivity_node, mrid=mrid, phases=phases, wiring_supplier=wiring_supplier)
-        junction = Junction(mrid, terminals=terms, **kwargs)
-        self.network.add(junction)
-        return AddResult(junction, _get_result_nodes(terms))
-
-    def add_plsi(self, mrid: str = "default-plsi", wiring_supplier=None, **kwargs):
-        try:
-            plsi = self.network[mrid]
-        except KeyError:
-            mrid = _get_mrid(mrid)
-            plsi = PerLengthSequenceImpedance(mrid=mrid, **kwargs)
-            self.network.add(plsi)
-        return plsi
-
-    def add_dyn11_trafo(self, connectivity_node, mrid: str = None, wiring_supplier=None, **kwargs):
-        mrid = _get_mrid(mrid)
-        rtc1 = gen_tap_changer(high_step=4, low_step=1, step_voltage_increment=0.25, step=2)
-        end1 = gen_trafo_end(rated_s=200, rated_u=22000, r=100, x=200, r0=10, x0=20, winding=WindingConnection.D,
-                             tap_changer=rtc1)
-        rtc2 = gen_tap_changer(high_step=4, low_step=1, step_voltage_increment=0.25, step=2)
-        end2 = gen_trafo_end(rated_s=100, rated_u=11000, r=50, x=100, r0=5, x0=10, winding=WindingConnection.Yn,
-                             tap_changer=rtc2)
-        terms = self.gen_terminals(2, connectivity_node, mrid=mrid, wiring_supplier=wiring_supplier)
-        trafo = PowerTransformer(mrid=mrid, vector_group=VectorGroup.DYN11, ends=[end1, end2], terminals=terms, **kwargs)
-        self.network.add(trafo)
-        return AddResult(trafo, terms[1].connectivity_node)
-
-    def add_cb(self, connectivity_nodes, mrid: str = None, num_terms=2, phases=PhaseCode.ABCN, wiring_supplier=None, **kwargs):
-        mrid = _get_mrid(mrid)
-        terms = self.gen_terminals(num_terms, connectivity_nodes, mrid=mrid, phases=phases, wiring_supplier=wiring_supplier)
-        br = Breaker(mrid=mrid, terminals=terms, **kwargs)
-        self.network.add(br)
-        return AddResult(br, _get_result_nodes(terms))
-
-    def add_feeder_cb(self, connectivity_node, mrid: str = None, substation=None, phases=PhaseCode.ABCN, wiring_supplier=None, **kwargs):
-        """
-        For a feeder CB we return the passed in connectivity_node rather than the newly created one.
-        This is so network builders can continue building downstream from the feeder CB, rather than receiving a node
-        above the feeder.
-        `connectivity_node`
-        `mrid`
-        `substation`
-        `kwargs`
-        Returns
-        """
-        mrid = _get_mrid(mrid)
-        terms = self.gen_terminals(2, connectivity_node, mrid=mrid, phases=phases, wiring_supplier=wiring_supplier)
-        br = Breaker(mrid=mrid, terminals=terms, **kwargs)
-        if substation is not None:
-            br.add_container(substation)
-
-        self.network.add(br)
-        return AddResult(br, terms[0].connectivity_node)
-
-    def gen_terminals(self,
-                      count,
-                      conn_nodes: Union[ConnectivityNode, List[ConnectivityNode], None] = None,
-                      phases=PhaseCode.ABCN,
-                      mrid=None,
-                      wiring_supplier: Callable[[ConnectivityNode], None] = lambda cn: None,
-                      **kwargs):
-        """
-        Helper function to generate terminals for a piece of equipment. Supports the following cases:
-            - Single terminal equipment with no existing ConnectivityNode (e.g, the start of a network - EnergySource or Breaker)
-            - Multi terminal equipment, where any Terminal can map to an existing ConnectivityNode. (e.g a loop in the
-            network where an ACLineSegment can connect to an existing ConnectivityNode)
-            - Multi terminal equipment, where some Terminals can map to existing ConnectivityNode's, but new
-              ConnectivityNode's are required for some Terminals. (e.g, a junction with three terminals, two connecting
-              to existing ConnectivityNode's, and one new ConnectivityNode to be created for a new branch)
-        If you require differing phases between Terminals, you should call this function multiple times with different
-        phases for each Terminal as required. This function is only built to handle all the simpler cases described here
-        to simplify building test networks.
-        `wiring_supplier` A callback for providing the wiring for a Terminal to a specific `ConnectivityNode`.
-                                This callback will be passed the corresponding ConnectivityNode for the Terminal being
-                                generated, and expects a `Wiring` returned, or `None` if implicit wiring is desired.
-        `mrid` If provided, will be used as the base for the terminal MRID, and tN will be appended for each terminal.
-        `count` The number of terminals to generate
-        `conn_nodes` The connectivity nodes to use for the terminals. If count > len(conn_nodes) or conn_nodes == None,
-                           new `ConnectivityNode`s will be created for each extra Terminal.
-        `phases` The phase to use for the terminals. All generated terminals will get the provided phase.
-        `kwargs` Passed to `Terminal` constructor
-        Returns List of `Terminal`'s
-        """
-        if wiring_supplier is None:
-            wiring_supplier = lambda cn: None
-        terms = []
-        mrid = _get_mrid(mrid)
-        try:
-            if count > len(conn_nodes):
-                # We need extra terminals than connectivity nodes provided. Map one terminal to each ConnectivityNode
-                # and then create new ConnectivityNodes for the rest
-                for i, node in enumerate(conn_nodes):
-                    wiring = wiring_supplier(node)
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=phases, connectivity_node=node, name=f"Terminal {i}", wiring=wiring, **kwargs))
-
-                for j in range(start=i+1, stop=count):
-                    conn_node = self.network.add_connectivity_node(uuid.uuid4())
-                    wiring = wiring_supplier(conn_node)
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=phases, connectivity_node=conn_node, name=f"Terminal {j}", wiring=wiring, **kwargs))
-            elif count == len(conn_nodes):
-                # We have same number of connectivity nodes as we need terminals, map terminals to ConnectivityNode's in order
-                for i, node in enumerate(conn_nodes):
-                    wiring = wiring_supplier(node)
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=phases, connectivity_node=node, name=f"Terminal {i}", wiring=wiring, **kwargs))
-            else:
-                raise Exception("Count must either be greater than or equal to the number of connectivity nodes created")
-            return terms
-        except TypeError:
-            # only one connectivity node was provided.
-            for i, _ in enumerate(range(count), start=0):
-                if conn_nodes is None or i > 0:
-                    # These conditions require creating new connectivity nodes.
-                    conn_node = self.network.add_connectivity_node(uuid.uuid4())
-                    wiring = wiring_supplier(conn_node)
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=phases, connectivity_node=conn_node, name=f"Terminal {i}", wiring=wiring, **kwargs))
-                elif i == 0 and conn_nodes is not None:
-                    wiring = wiring_supplier(conn_nodes)
-                    # this requires connecting the terminal to an existing ConnectivityNode
-                    terms.append(_get_terminal(mrid=f"{mrid}-t{i}", phases=phases, connectivity_node=conn_nodes, name=f"Terminal {i}", wiring=wiring, **kwargs))
-            return terms
-
-
-@fixture()
-def network1():
-    """
-    Simple network, starting with a branch at the feeder (closed) CB:
-                    .
-                   cb
-       es|..|acls|...|trafo|..|acls|..|ec
-    """
-    nb = NetworkBuilder()
-    cb_ar = nb.create_feeder_start(es_args={'with_phases': PhaseCode.ABCN}, cb_args={'substation': ""})
-    ar = nb.add_dyn11_trafo(cb_ar.node, mrid="trafo-1")
-    ar = nb.add_acls(ar.node, mrid="acls-1")
-    ar = nb.add_energyconsumer(ar.node, mrid="ec-1")
-    return nb.network
-
-
-@fixture()
-def network2():
-    """
-    Simple network, one ES, one Breaker, 4 branches and a loop - all lines joined by junctions.
-                fcb
-    es|..|acls0|...|acls1|..|junc0|..|acls2|...|acls3|..|junc1
-                 |                           ^--------------------acls9------------------------|.|
-               acls4|..|junc2|..|acls5|..|junc3|..|acls6|..|br0|..|acls7|..|junc4|..|acls8|..|junc5|
-                                          |..|             |..|
-                                junc6|..|acls10           acls11|..|junc7
-    """
-    nb = NetworkBuilder()
-    ar = nb.add_energysource(mrid='es', with_phases=PhaseCode.ABCN)
-    ar = nb.add_acls(ar.node, mrid="acls0")
-    ar = nb.add_feeder_cb(ar.node, mrid=f"feeder-cb", substation="")
-    node2 = ar.node
-    # Branch 1
-    ar_b1 = nb.add_acls(node2, mrid="acls1")
-    ar_b1 = nb.add_junction(ar_b1.node, mrid="junc0")
-    ar_b1 = nb.add_acls(ar_b1.node, mrid="acls2")
-    node4 = ar_b1.node
-    ar_b1 = nb.add_acls(node4, mrid="acls3")
-    ar_b1 = nb.add_junction(ar_b1.node, mrid="junc1", num_terms=1)
-
-    # Branch 2 - 2 phases/cores
-    ar_b2 = nb.add_acls(node2, mrid="acls4", phases=PhaseCode.AB)
-    ar_b2 = nb.add_junction(ar_b2.node, mrid="junc2", phases=PhaseCode.AB)
-    ar_b2 = nb.add_acls(ar_b2.node, mrid="acls5", phases=PhaseCode.AB)
-    node8 = ar_b2.node
-    ar_b2 = nb.add_junction(node8, mrid="junc3", num_terms=3, phases=PhaseCode.AB)
-    node9 = ar_b2.node[0]
-    node16 = ar_b2.node[1]
-    ar_b2 = nb.add_acls(node9, mrid="acls6", phases=PhaseCode.AB)
-    node10 = ar_b2.node
-    ar_b2 = nb.add_junction(node10, mrid="junc4", num_terms=3, phases=PhaseCode.AB)
-    node11 = ar_b2.node[0]
-    node18 = ar_b2.node[1]
-    ar_b2 = nb.add_acls(node11, mrid="acls7", phases=PhaseCode.AB)
-    ar_b2 = nb.add_cb(ar_b2.node, mrid="br0", open_=[True, True], phases=PhaseCode.AB)
-    ar_b2 = nb.add_acls(ar_b2.node, mrid="acls8", phases=PhaseCode.AB)
-    ar_b2 = nb.add_junction(ar_b2.node, mrid="junc5", phases=PhaseCode.AB)
-
-    # Loops back from branch 2 to branch 1
-    ar_b2 = nb.add_acls([ar_b2.node, node4], mrid="acls9", phases=PhaseCode.AB)
-    # Branch 3 - 1 phase/core
-    ar_b3 = nb.add_acls(node16, mrid="acls10", phases=PhaseCode.A)
-    ar_b3 = nb.add_junction(ar_b3.node, mrid="junc6", num_terms=1, phases=PhaseCode.A)
-
-    # branch 4 - 1 phase/core
-    ar_b3 = nb.add_acls(node18, mrid="acls11", phases=PhaseCode.B)
-    ar_b3 = nb.add_junction(ar_b3.node, mrid="junc7", num_terms=1, phases=PhaseCode.B)
-
-    return nb.network
-
-
-
-
 @fixture()
 def network_service():
     return NetworkService()
+
+
+@pytest.hookimpl(hookwrapper=True, trylast=True)
+def pytest_runtest_makereport(item):
+    """
+    A hook wrapper that fails the test report if there were any "never awaited" warnings captured by pytest.
+
+    Additionally, we will print the captured log on all tests failures, or if you set `caplog.unmute = True`
+
+    See `_pytest/hookspec.py` for typing information and additional hooks.
+    """
+
+    # We want to yield to the actual hook before doing anything, so that is there are any other initialisation issues they are not hidden by our processing. For
+    # example, trying to use unknown fixtures in the tests can cause `recwarn` to go missing from the function args, so that warning would be replaced with the
+    # complaint about using `recwarn`, even thought it is included with the auto-use fixture below.
+    res = yield
+    report = res.get_result()
+
+    # We only want to run our checks on the "call" stage, leaving "setup" and "teardown" to be handled by pytest only. This prevents us from failing the wrong
+    # parts of the test when there are warnings detected, and double printing the log.
+    if report.when != "call":
+        return
+
+    if 'recwarn' in item.fixturenames:
+        recwarn = item.funcargs['recwarn']
+    else:
+        raise ValueError("recwarn not found, please enable it by including it in an auto-use fixture.")
+
+    if 'caplog' in item.fixturenames:
+        caplog = item.funcargs['caplog']
+    else:
+        raise ValueError("caplog not found, please enable it by including it in an auto-use fixture.")
+
+    # We only want to print the log for failed tests, or if caplog has been deliberately unmuted.
+    if report.outcome == "failed" or getattr(caplog, 'unmute', False):
+        print()
+        print("----------------------------------------")
+        print()
+        print(caplog.text)
+        print("----------------------------------------")
+
+    # Check to see if there were any async calls that were not awaited. This is done as there are cases where the IDE does not warn you of this happening, and
+    # the behaviour can cause strange issues, or even tests successes with failing code.
+    never_awaited = list(filter(lambda warning: "never awaited" in warning.message.args[0], recwarn.list))
+    if never_awaited:
+        for warn in recwarn.list:
+            print(warn.message.args[0])
+
+        # Update the report outcome rather than using `pytest.fail("Missing awaits...")` to get the correct behaviour in the test output.
+        report.outcome = "failed"
+        report.longrepr = "You must await all calls to make your tests run correctly."
+
+
+@fixture(autouse=True)
+def include_hook_fixtures(caplog, recwarn):
+    """
+    A fixture to enable caplog and recwarn for all tests, so they can be used in our hook wrapper above.
+    """

@@ -5,6 +5,7 @@
 
 from hypothesis.strategies import lists, builds
 
+from cim.private_collection_validator import validate_ordered_1234567890
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
 from zepben.evolve import ConductingEquipment, BaseVoltage, Terminal
@@ -34,3 +35,18 @@ def verify_conducting_equipment_constructor_args(ce: ConductingEquipment):
     verify_equipment_constructor_args(ce)
     assert ce.base_voltage == conducting_equipment_args[-2]
     assert list(ce.terminals) == conducting_equipment_args[-1]
+
+
+def test_terminals_collection():
+    validate_ordered_1234567890(
+        ConductingEquipment,
+        lambda mrid, sn: Terminal(mrid, sequence_number=sn),
+        ConductingEquipment.terminals,
+        ConductingEquipment.num_terminals,
+        ConductingEquipment.get_terminal_by_mrid,
+        ConductingEquipment.get_terminal_by_sn,
+        ConductingEquipment.add_terminal,
+        ConductingEquipment.remove_terminal,
+        ConductingEquipment.clear_terminals,
+        lambda t: t.sequence_number
+    )

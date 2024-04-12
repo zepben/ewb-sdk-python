@@ -5,9 +5,8 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, Dict, Generator
-
-from dataclassy import dataclass
+from dataclasses import dataclass
+from typing import List, Optional, Dict, Generator, Callable
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
@@ -17,7 +16,7 @@ from zepben.evolve.util import nlen, require, ngen, safe_remove, safe_remove_by_
 __all__ = ["DiagramObjectPoint", "Diagram", "DiagramObject"]
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True)
 class DiagramObjectPoint(object):
     """
     A point in a given space defined by 3 coordinates and associated to a diagram object.  The coordinates may be positive
@@ -105,6 +104,15 @@ class DiagramObject(IdentifiedObject):
     def __getitem__(self, item: int) -> DiagramObjectPoint:
         return self.get_point(item)
 
+    def for_each_point(self, action: Callable[[int, DiagramObjectPoint], None]):
+        """
+        Call the `action` on each :class:`DiagramObjectPoint` in the `points` collection
+
+        :param action: An action to apply to each :class:`DiagramObjectPoint` in the `points` collection, taking the index of the point, and the point itself.
+        """
+        for index, point in enumerate(self.points):
+            action(index, point)
+
     def add_point(self, point: DiagramObjectPoint) -> DiagramObject:
         """
         Associate a `DiagramObjectPoint` with this `DiagramObject`, assigning it a sequence_number of `num_points`.
@@ -127,7 +135,7 @@ class DiagramObject(IdentifiedObject):
         require(0 <= sequence_number <= self.num_points(),
                 lambda: f"Unable to add DiagramObjectPoint to {str(self)}. Sequence number {sequence_number}"
                         f" is invalid. Expected a value between 0 and {self.num_points()}. Make sure you are "
-                        f"adding the points in the correct order and there are no gaps in the numbering.")
+                        f"adding the items in order and there are no gaps in the numbering.")
         self._diagram_object_points = list() if self._diagram_object_points is None else self._diagram_object_points
         self._diagram_object_points.insert(sequence_number, point)
         return self
@@ -145,6 +153,20 @@ class DiagramObject(IdentifiedObject):
         """
         self._diagram_object_points = safe_remove(self._diagram_object_points, point)
         return self
+
+    def remove_point_by_sequence_number(self, sequence_number: int) -> DiagramObjectPoint:
+        """
+        Remove a :class:`DiagramObjectPoint` from this :class:`DiagramObject` by its sequence number.
+
+        NOTE: This will update the sequence numbers of all items located after the removed sequence number.
+
+        :param sequence_number: The sequence number of the `DiagramObjectPoint` to remove.
+        :return: The :class:`DiagramObjectPoint` that was removed, or null if there was no :class:`DiagramObjectPoint` for the given `sequenceNumber`.
+        :raises IndexError: If no :class:`DiagramObjectPoint` with the specified `sequence_number` was not associated with this :class:`DiagramObject`.
+        """
+        point = self.get_point(sequence_number)
+        self._diagram_object_points = safe_remove(self._diagram_object_points, point)
+        return point
 
     def clear_points(self) -> DiagramObject:
         """

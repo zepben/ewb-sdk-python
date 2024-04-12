@@ -5,18 +5,84 @@
 from dataclasses import dataclass
 from typing import Callable, Optional, Any
 
-from zepben.evolve import AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, ShortCircuitTest, TransformerEndInfo, \
-    TransformerTankInfo, TransformerTest, WireInfo, AssetOwner, Pole, Asset, Streetlight, Location, EndDevice, Meter, UsagePoint, OperationalRestriction, \
-    AuxiliaryEquipment, FaultIndicator, BaseVoltage, ConductingEquipment, ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, \
-    PowerSystemResource, Site, SubGeographicalRegion, Substation, Terminal, PowerElectronicsUnit, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, \
-    Breaker, LoadBreakSwitch, BusbarSection, Conductor, Disconnector, EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, \
-    Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, \
-    PowerTransformerEnd, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, TapChanger, TransformerEnd, TransformerStarImpedance, Circuit, \
-    Loop, SinglePhaseKind, ValueDifference, PhaseCode, Control, Measurement, Analog, Accumulator, Discrete, RemoteControl, RemoteSource, EquivalentBranch, \
-    Switch, ShuntCompensatorInfo, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, PotentialTransformer, SwitchInfo, \
-    RelayInfo, CurrentRelay, ProtectedSwitch, EvChargingUnit, RegulatingControl, TapChangerControl, ProtectionRelayFunction, DistanceRelay, VoltageRelay, \
-    ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Ground, GroundDisconnector, SeriesCompensator
+from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
+from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
+from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.short_circuit_test import ShortCircuitTest
+from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import ShuntCompensatorInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.switch_info import SwitchInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.transformer_test import TransformerTest
+from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import CableInfo, OverheadWireInfo, WireInfo
+from zepben.evolve.model.cim.iec61968.assets.asset import Asset
+from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import AssetOwner
+from zepben.evolve.model.cim.iec61968.assets.pole import Pole
+from zepben.evolve.model.cim.iec61968.assets.streetlight import Streetlight
+from zepben.evolve.model.cim.iec61968.common.location import Location
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
+from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, Meter, UsagePoint
+from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment, FaultIndicator
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.current_transformer import CurrentTransformer
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.potential_transformer import PotentialTransformer
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
+from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer, Feeder, Site
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
+from zepben.evolve.model.cim.iec61970.base.core.regions import GeographicalRegion, SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_branch import EquivalentBranch
+from zepben.evolve.model.cim.iec61970.base.meas.control import Control
+from zepben.evolve.model.cim.iec61970.base.meas.measurement import Accumulator, Analog, Discrete, Measurement
+from zepben.evolve.model.cim.iec61970.base.protection.current_relay import CurrentRelay
+from zepben.evolve.model.cim.iec61970.base.protection.distance_relay import DistanceRelay
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
+from zepben.evolve.model.cim.iec61970.base.protection.voltage_relay import VoltageRelay
+from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
+from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
+from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
+from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
+from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection, Junction
+from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
+from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
+from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
+from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import BatteryUnit, PhotoVoltaicUnit, PowerElectronicsUnit, \
+    PowerElectronicsWindUnit
+from zepben.evolve.model.cim.iec61970.base.wires.ground import Ground
+from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import GroundDisconnector
+from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
+from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
+from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TapChanger, TransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
+from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
+from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import SeriesCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import LinearShuntCompensator, ShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
+from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import EvChargingUnit
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
+from zepben.evolve.services.common.difference import ValueDifference
 from zepben.evolve.services.common.translator.service_differences import ObjectDifference
 
 

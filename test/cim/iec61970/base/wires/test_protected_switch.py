@@ -5,9 +5,9 @@
 from hypothesis.strategies import integers, lists, builds
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.wires.test_switch import switch_kwargs, verify_switch_constructor_default, verify_switch_constructor_kwargs, \
     verify_switch_constructor_args, switch_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import ProtectionRelayFunction, ProtectedSwitch
 
 protected_switch_kwargs = {
@@ -40,11 +40,13 @@ def verify_protected_switch_constructor_args(ps: ProtectedSwitch):
 
 
 def test_relay_function_collection():
-    validate_collection_unordered(ProtectedSwitch,
-                                  lambda mrid, _: ProtectionRelayFunction(mrid),
-                                  ProtectedSwitch.num_relay_functions,
-                                  ProtectedSwitch.get_relay_function,
-                                  ProtectedSwitch.relay_functions,
-                                  ProtectedSwitch.add_relay_function,
-                                  ProtectedSwitch.remove_relay_function,
-                                  ProtectedSwitch.clear_relay_functions)
+    validate_unordered_1234567890(
+        ProtectedSwitch,
+        lambda mrid: ProtectionRelayFunction(mrid),
+        ProtectedSwitch.relay_functions,
+        ProtectedSwitch.num_relay_functions,
+        ProtectedSwitch.get_relay_function,
+        ProtectedSwitch.add_relay_function,
+        ProtectedSwitch.remove_relay_function,
+        ProtectedSwitch.clear_relay_functions
+    )

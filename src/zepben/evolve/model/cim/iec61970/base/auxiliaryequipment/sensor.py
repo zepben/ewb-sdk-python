@@ -45,12 +45,13 @@ class Sensor(AuxiliaryEquipment):
         """
         return nlen(self._relay_functions)
 
-    def get_relay_function(self, mrid: str) -> Optional[ProtectionRelayFunction]:
+    def get_relay_function(self, mrid: str) -> ProtectionRelayFunction:
         """
         Get a :class:`ProtectionRelayFunction` that are influenced by this :class:`Sensor`.
 
         :param mrid: The mRID of the desired ProtectionRelayFunction
         :return: The ProtectionRelayFunction with the specified mRID if it exists, otherwise None.
+        :raises KeyError: If `mrid` wasn't present.
         """
         return get_by_mrid(self._relay_functions, mrid)
 

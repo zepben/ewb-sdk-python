@@ -5,9 +5,9 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import Substation, Feeder, Loop, Circuit, SubGeographicalRegion
 
 substation_kwargs = {
@@ -62,44 +62,52 @@ def test_substation_constructor_args():
 
 
 def test_normal_energized_feeders_collection():
-    validate_collection_unordered(Substation,
-                                  lambda mrid, _: Feeder(mrid),
-                                  Substation.num_feeders,
-                                  Substation.get_feeder,
-                                  Substation.feeders,
-                                  Substation.add_feeder,
-                                  Substation.remove_feeder,
-                                  Substation.clear_feeders)
+    validate_unordered_1234567890(
+        Substation,
+        lambda mrid: Feeder(mrid),
+        Substation.feeders,
+        Substation.num_feeders,
+        Substation.get_feeder,
+        Substation.add_feeder,
+        Substation.remove_feeder,
+        Substation.clear_feeders
+    )
 
 
 def test_loops_collection():
-    validate_collection_unordered(Substation,
-                                  lambda mrid, _: Loop(mrid),
-                                  Substation.num_loops,
-                                  Substation.get_loop,
-                                  Substation.loops,
-                                  Substation.add_loop,
-                                  Substation.remove_loop,
-                                  Substation.clear_loops)
+    validate_unordered_1234567890(
+        Substation,
+        lambda mrid: Loop(mrid),
+        Substation.loops,
+        Substation.num_loops,
+        Substation.get_loop,
+        Substation.add_loop,
+        Substation.remove_loop,
+        Substation.clear_loops
+    )
 
 
 def test_energized_loops_collection():
-    validate_collection_unordered(Substation,
-                                  lambda mrid, _: Loop(mrid),
-                                  Substation.num_energized_loops,
-                                  Substation.get_energized_loop,
-                                  Substation.energized_loops,
-                                  Substation.add_energized_loop,
-                                  Substation.remove_energized_loop,
-                                  Substation.clear_energized_loops)
+    validate_unordered_1234567890(
+        Substation,
+        lambda mrid: Loop(mrid),
+        Substation.energized_loops,
+        Substation.num_energized_loops,
+        Substation.get_energized_loop,
+        Substation.add_energized_loop,
+        Substation.remove_energized_loop,
+        Substation.clear_energized_loops
+    )
 
 
 def test_circuits_collection():
-    validate_collection_unordered(Substation,
-                                  lambda mrid, _: Circuit(mrid),
-                                  Substation.num_circuits,
-                                  Substation.get_circuit,
-                                  Substation.circuits,
-                                  Substation.add_circuit,
-                                  Substation.remove_circuit,
-                                  Substation.clear_circuits)
+    validate_unordered_1234567890(
+        Substation,
+        lambda mrid: Circuit(mrid),
+        Substation.circuits,
+        Substation.num_circuits,
+        Substation.get_circuit,
+        Substation.add_circuit,
+        Substation.remove_circuit,
+        Substation.clear_circuits
+    )

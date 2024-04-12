@@ -4,21 +4,18 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+__all__ = ["BaseService", "TBaseService"]
 
 from abc import ABCMeta
 from collections import OrderedDict
-from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set
-from typing import TypeVar, Type
+from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set, TypeVar
+from typing import Type
 
 from dataclassy import dataclass
 
-from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject, TIdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
-
-__all__ = ["BaseService"]
-
-T = TypeVar("T", bound=IdentifiedObject)
 
 _GET_DEFAULT = (1,)
 
@@ -133,8 +130,8 @@ class BaseService(object, metaclass=ABCMeta):
             for ur in unresolved_refs:
                 yield ur
 
-    def get(self, mrid: str, type_: Type[T] = IdentifiedObject, default=_GET_DEFAULT,
-            generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> T:
+    def get(self, mrid: str, type_: Type[TIdentifiedObject] = IdentifiedObject, default=_GET_DEFAULT,
+            generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> TIdentifiedObject:
         """
         Get an object associated with this service.
 
@@ -321,7 +318,7 @@ class BaseService(object, metaclass=ABCMeta):
         del self._objects_by_type[identified_object.__class__][identified_object.mrid]
         return True
 
-    def objects(self, obj_type: Optional[Type[T]] = None, exc_types: Optional[List[type]] = None) -> Generator[T, None, None]:
+    def objects(self, obj_type: Optional[Type[TIdentifiedObject]] = None, exc_types: Optional[List[type]] = None) -> Generator[TIdentifiedObject, None, None]:
         """
         Generator for the objects in this service of type `obj_type`.
         `obj_type` The type of object to yield. If this is a base class it will yield all subclasses.
@@ -370,3 +367,6 @@ class BaseService(object, metaclass=ABCMeta):
         :raises KeyError: if `name` doesn't exist in this service.
         """
         return self._name_types[name]
+
+
+TBaseService = TypeVar("TBaseService", bound=BaseService)

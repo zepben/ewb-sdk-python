@@ -2,16 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from _pytest.python_api import raises
-from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
-    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from hypothesis.strategies import floats, sampled_from, booleans, lists, builds, text
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE, boolean_or_none
-from cim.collection_validator import validate_collection_unordered, validate_collection_ordered
+from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
+    verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
+from cim.private_collection_validator import validate_unordered_1234567890, validate_ordered_other_1234567890
 from cim.property_validator import validate_property_accessor
 from zepben.evolve import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
-    UnitSymbol, unit_symbol_from_id, CurrentRelay
+    UnitSymbol, unit_symbol_from_id
 
 protection_relay_function_kwargs = {
     **power_system_resource_kwargs,
@@ -91,60 +90,74 @@ def verify_protection_relay_function_constructor_args(prf: ProtectionRelayFuncti
 
 
 def test_sensors_collection():
-    validate_collection_unordered(ProtectionRelayFunction,
-                                  lambda mrid, _: Sensor(mrid),
-                                  ProtectionRelayFunction.num_sensors,
-                                  ProtectionRelayFunction.get_sensor,
-                                  ProtectionRelayFunction.sensors,
-                                  ProtectionRelayFunction.add_sensor,
-                                  ProtectionRelayFunction.remove_sensor,
-                                  ProtectionRelayFunction.clear_sensors)
+    validate_unordered_1234567890(
+        ProtectionRelayFunction,
+        lambda mrid: Sensor(mrid),
+        ProtectionRelayFunction.sensors,
+        ProtectionRelayFunction.num_sensors,
+        ProtectionRelayFunction.get_sensor,
+        ProtectionRelayFunction.add_sensor,
+        ProtectionRelayFunction.remove_sensor,
+        ProtectionRelayFunction.clear_sensors
+    )
 
 
 def test_protected_switches_collection():
-    validate_collection_unordered(ProtectionRelayFunction,
-                                  lambda mrid, _: ProtectedSwitch(mrid),
-                                  ProtectionRelayFunction.num_protected_switches,
-                                  ProtectionRelayFunction.get_protected_switch,
-                                  ProtectionRelayFunction.protected_switches,
-                                  ProtectionRelayFunction.add_protected_switch,
-                                  ProtectionRelayFunction.remove_protected_switch,
-                                  ProtectionRelayFunction.clear_protected_switches)
+    validate_unordered_1234567890(
+        ProtectionRelayFunction,
+        lambda mrid: ProtectedSwitch(mrid),
+        ProtectionRelayFunction.protected_switches,
+        ProtectionRelayFunction.num_protected_switches,
+        ProtectionRelayFunction.get_protected_switch,
+        ProtectionRelayFunction.add_protected_switch,
+        ProtectionRelayFunction.remove_protected_switch,
+        ProtectionRelayFunction.clear_protected_switches
+    )
 
 
 def test_scheme_collection():
-    validate_collection_unordered(ProtectionRelayFunction,
-                                  lambda mrid, _: ProtectionRelayScheme(mrid),
-                                  ProtectionRelayFunction.num_schemes,
-                                  ProtectionRelayFunction.get_scheme,
-                                  ProtectionRelayFunction.schemes,
-                                  ProtectionRelayFunction.add_scheme,
-                                  ProtectionRelayFunction.remove_scheme,
-                                  ProtectionRelayFunction.clear_schemes)
+    validate_unordered_1234567890(
+        ProtectionRelayFunction,
+        lambda mrid: ProtectionRelayScheme(mrid),
+        ProtectionRelayFunction.schemes,
+        ProtectionRelayFunction.num_schemes,
+        ProtectionRelayFunction.get_scheme,
+        ProtectionRelayFunction.add_scheme,
+        ProtectionRelayFunction.remove_scheme,
+        ProtectionRelayFunction.clear_schemes
+    )
 
 
 def test_time_limits_collection():
-    validate_collection_ordered(ProtectionRelayFunction,
-                                lambda i, _: float(i),
-                                ProtectionRelayFunction.num_time_limits,
-                                ProtectionRelayFunction.get_time_limit,
-                                ProtectionRelayFunction.time_limits,
-                                ProtectionRelayFunction.add_time_limit,
-                                ProtectionRelayFunction.add_time_limit,
-                                ProtectionRelayFunction.remove_time_limit_by_time_limit,
-                                ProtectionRelayFunction.clear_time_limits)
+    validate_ordered_other_1234567890(
+        ProtectionRelayFunction,
+        lambda i: float(i),
+        ProtectionRelayFunction.time_limits,
+        ProtectionRelayFunction.num_time_limits,
+        ProtectionRelayFunction.get_time_limit,
+        ProtectionRelayFunction.for_each_time_limit,
+        ProtectionRelayFunction.add_time_limit,
+        ProtectionRelayFunction.add_time_limit,
+        ProtectionRelayFunction.remove_time_limit,
+        ProtectionRelayFunction.remove_time_limit_at,
+        ProtectionRelayFunction.clear_time_limits
+    )
 
 
 def test_thresholds_collection():
-    validate_collection_ordered(ProtectionRelayFunction,
-                                lambda i, _: RelaySetting(unit_symbol_from_id(i), int(i), str(i)),
-                                ProtectionRelayFunction.num_thresholds,
-                                ProtectionRelayFunction.get_threshold,
-                                ProtectionRelayFunction.thresholds,
-                                ProtectionRelayFunction.add_threshold,
-                                ProtectionRelayFunction.add_threshold,
-                                ProtectionRelayFunction.remove_threshold,
-                                ProtectionRelayFunction.clear_thresholds)
+    validate_ordered_other_1234567890(
+        ProtectionRelayFunction,
+        lambda i: RelaySetting(unit_symbol_from_id(i), int(i), str(i)),
+        ProtectionRelayFunction.thresholds,
+        ProtectionRelayFunction.num_thresholds,
+        ProtectionRelayFunction.get_threshold,
+        ProtectionRelayFunction.for_each_threshold,
+        ProtectionRelayFunction.add_threshold,
+        ProtectionRelayFunction.add_threshold,
+        ProtectionRelayFunction.remove_threshold,
+        ProtectionRelayFunction.remove_threshold_at,
+        ProtectionRelayFunction.clear_thresholds
+    )
 
 
 def test_relay_info_accessor():

@@ -8,10 +8,10 @@ from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import integers, builds, lists, floats, text, booleans
 
-from cim.collection_validator import validate_collection_unordered
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_kwargs, regulating_cond_eq_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import PowerElectronicsUnit, PowerElectronicsConnectionPhase, BatteryUnit, PowerElectronicsConnection
 
 power_electronics_connection_kwargs = {
@@ -223,26 +223,29 @@ def test_power_electronics_connection_constructor_args():
 
 
 def test_power_electronics_units_collection():
-    validate_collection_unordered(PowerElectronicsConnection,
-                                  lambda mrid, _: PowerElectronicsUnit(mrid),
-                                  PowerElectronicsConnection.num_units,
-                                  PowerElectronicsConnection.get_unit,
-                                  PowerElectronicsConnection.units,
-                                  PowerElectronicsConnection.add_unit,
-                                  PowerElectronicsConnection.remove_unit,
-                                  PowerElectronicsConnection.clear_units)
+    validate_unordered_1234567890(
+        PowerElectronicsConnection,
+        lambda mrid: PowerElectronicsUnit(mrid),
+        PowerElectronicsConnection.units,
+        PowerElectronicsConnection.num_units,
+        PowerElectronicsConnection.get_unit,
+        PowerElectronicsConnection.add_unit,
+        PowerElectronicsConnection.remove_unit,
+        PowerElectronicsConnection.clear_units
+    )
 
 
 def test_power_electronics_connection_phases_collection():
-    # noinspection PyArgumentList
-    validate_collection_unordered(PowerElectronicsConnection,
-                                  lambda mrid, _: PowerElectronicsConnectionPhase(mrid),
-                                  PowerElectronicsConnection.num_phases,
-                                  PowerElectronicsConnection.get_phase,
-                                  PowerElectronicsConnection.phases,
-                                  PowerElectronicsConnection.add_phase,
-                                  PowerElectronicsConnection.remove_phase,
-                                  PowerElectronicsConnection.clear_phases)
+    validate_unordered_1234567890(
+        PowerElectronicsConnection,
+        lambda mrid: PowerElectronicsConnectionPhase(mrid),
+        PowerElectronicsConnection.phases,
+        PowerElectronicsConnection.num_phases,
+        PowerElectronicsConnection.get_phase,
+        PowerElectronicsConnection.add_phase,
+        PowerElectronicsConnection.remove_phase,
+        PowerElectronicsConnection.clear_phases
+    )
 
 
 def test_power_electronics_connection_property_bounds():

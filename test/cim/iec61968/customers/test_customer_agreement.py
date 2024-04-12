@@ -6,9 +6,9 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61968.common.test_agreement import agreement_kwargs, verify_agreement_constructor_default, verify_agreement_constructor_kwargs, \
     verify_agreement_constructor_args, agreement_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import CustomerAgreement, Customer, PricingStructure
 
 customer_agreement_kwargs = {
@@ -50,11 +50,13 @@ def test_customer_agreement_constructor_args():
 
 
 def test_pricing_structures_collection():
-    validate_collection_unordered(CustomerAgreement,
-                                  lambda mrid, _: PricingStructure(mrid),
-                                  CustomerAgreement.num_pricing_structures,
-                                  CustomerAgreement.get_pricing_structure,
-                                  CustomerAgreement.pricing_structures,
-                                  CustomerAgreement.add_pricing_structure,
-                                  CustomerAgreement.remove_pricing_structure,
-                                  CustomerAgreement.clear_pricing_structures)
+    validate_unordered_1234567890(
+        CustomerAgreement,
+        lambda mrid: PricingStructure(mrid),
+        CustomerAgreement.pricing_structures,
+        CustomerAgreement.num_pricing_structures,
+        CustomerAgreement.get_pricing_structure,
+        CustomerAgreement.add_pricing_structure,
+        CustomerAgreement.remove_pricing_structure,
+        CustomerAgreement.clear_pricing_structures
+    )

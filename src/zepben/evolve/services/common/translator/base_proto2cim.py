@@ -63,7 +63,7 @@ def identified_object_to_cim(pb: PBIdentifiedObject, cim: IdentifiedObject, serv
     cim.mrid = pb.mRID
     cim.name = pb.name
     cim.description = pb.description
-    [cim.add_name(name.name, name_to_cim(name, cim, service).type) for name in pb.names]
+    [cim.add_name(name_to_cim(name, cim, service).type, name.name) for name in pb.names]
 
 
 def name_to_cim(pb: PBName, io: IdentifiedObject, service: BaseService):

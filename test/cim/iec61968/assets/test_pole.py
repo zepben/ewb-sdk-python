@@ -5,10 +5,10 @@
 from hypothesis import given
 from hypothesis.strategies import text, lists, builds
 
-from cim.collection_validator import validate_collection_unordered
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_structure import structure_kwargs, verify_structure_constructor_default, \
     verify_structure_constructor_kwargs, verify_structure_constructor_args, structure_args
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import Pole, Streetlight
 
 pole_kwargs = {
@@ -48,11 +48,13 @@ def test_pole_constructor_args():
 
 
 def test_streetlights_collection():
-    validate_collection_unordered(Pole,
-                                  lambda mrid, _: Streetlight(mrid),
-                                  Pole.num_streetlights,
-                                  Pole.get_streetlight,
-                                  Pole.streetlights,
-                                  Pole.add_streetlight,
-                                  Pole.remove_streetlight,
-                                  Pole.clear_streetlights)
+    validate_unordered_1234567890(
+        Pole,
+        lambda mrid: Streetlight(mrid),
+        Pole.streetlights,
+        Pole.num_streetlights,
+        Pole.get_streetlight,
+        Pole.add_streetlight,
+        Pole.remove_streetlight,
+        Pole.clear_streetlights
+    )

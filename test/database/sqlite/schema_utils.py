@@ -7,32 +7,16 @@ from typing import TypeVar, Type, Optional
 
 from hypothesis import assume
 
-from zepben.evolve import MetadataCollection, NetworkService, DiagramService, CustomerService, MeasurementService, NameType, Organisation, DataSource, \
-    IdentifiedObject, EnergyConsumerPhase, EnergyConsumer, EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, \
-    TransformerTankInfo, Asset, Pole, Streetlight, OrganisationRole, Customer, CustomerAgreement, PricingStructure, EndDevice, UsagePoint, \
-    OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, Name, \
-    PowerSystemResource, SubGeographicalRegion, Substation, Terminal, Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, \
-    PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, \
-    RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, \
-    CurrentTransformer, PotentialTransformer, Breaker, RegulatingCondEq, RegulatingControl, ProtectionRelayFunction, Sensor, ProtectionRelayScheme, \
-    ProtectionRelaySystem, Fuse
+from zepben.evolve import MetadataCollection, NetworkService, DiagramService, CustomerService, NameType, DataSource, IdentifiedObject, EnergyConsumerPhase, \
+    EnergyConsumer, EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, TransformerTankInfo, Asset, Pole, Streetlight, \
+    OrganisationRole, Customer, CustomerAgreement, PricingStructure, EndDevice, UsagePoint, OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, \
+    ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, Name, PowerSystemResource, SubGeographicalRegion, Substation, Terminal, \
+    Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, \
+    PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, \
+    Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
+    ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject
 
 T = TypeVar("T", bound=IdentifiedObject)
-
-
-class Services(object):
-    metadata_collection: MetadataCollection
-    network_service: NetworkService
-    diagram_service: DiagramService
-    customer_service: CustomerService
-    measurement_service: MeasurementService
-
-    def __init__(self):
-        self.metadata_collection = MetadataCollection()
-        self.network_service = NetworkService()
-        self.diagram_service = DiagramService()
-        self.customer_service = CustomerService()
-        self.measurement_service = MeasurementService()
 
 
 def assume_non_blank_street_address_details(address: Optional[StreetAddress]):
@@ -42,121 +26,61 @@ def assume_non_blank_street_address_details(address: Optional[StreetAddress]):
 class SchemaNetworks:
 
     @staticmethod
-    def create_name_test_services() -> Services:
-        services = Services()
-        # noinspection PyArgumentList
-        name_type = NameType(name="type1")
-        name_type.description = "type description"
-
-        org = Organisation(mrid="org1")
-        org.add_name(name_type.get_or_add_name("name1", org))
-        services.network_service.add(org)
-
-        services.network_service.add_name_type(name_type)
+    def create_name_test_services(service_type: Type[TBaseService], object_type: Type[TIdentifiedObject]) -> TBaseService:
+        services = service_type()
 
         # noinspection PyArgumentList
         name_type = NameType(name="type1")
         name_type.description = "type description"
+        services.add_name_type(name_type)
 
-        org = Organisation(mrid="org1")
-        org.add_name(name_type.get_or_add_name("name1", org))
-        services.customer_service.add(org)
+        obj: object_type
+        try:
+            obj = object_type(mrid="obj1")
+        except Exception as ex:
+            raise ValueError(f"Class should have a single mrid constructor: {object_type}") from ex
 
-        services.customer_service.add_name_type(name_type)
-
-        # noinspection PyArgumentList
-        name_type = NameType(name="type1")
-        name_type.description = "type description"
-
-        services.diagram_service.add_name_type(name_type)
+        obj.add_name(name_type, "name1")
+        services.add(obj)
 
         return services
 
     @staticmethod
-    def create_data_source_test_services() -> Services:
-        services = Services()
+    def create_data_source_test_services() -> MetadataCollection:
+        metadata_collection = MetadataCollection()
         # noinspection PyArgumentList
-        services.metadata_collection.add(DataSource("source1", "v1", datetime(1970, 1, 1)))
+        metadata_collection.add(DataSource("source1", "v1", datetime(1970, 1, 1)))
         # noinspection PyArgumentList
-        services.metadata_collection.add(DataSource("source2", "v2", datetime.now()))
+        metadata_collection.add(DataSource("source2", "v2", datetime.now()))
 
-        return services
+        return metadata_collection
 
-    def customer_services_of(self, factory: Type[T], filled: T) -> Services:
-        services = Services()
-        services.customer_service.add(factory("empty"))
-        self._add_with_references(filled, services.customer_service)
-
-        # Copy items to other services that get auto loaded there.
-        for org in services.customer_service.objects(Organisation):
-            services.network_service.add(org)
-
-        for name_type in services.customer_service.name_types:
-            # noinspection PyArgumentList
-            nt = NameType(name=name_type.name)
-            nt.description = name_type.description
-
-            for name in filter(lambda it: it.identified_object is Organisation, name_type.names):
-                nt.get_or_add_name(name.name, name.identified_object)
-
-            services.network_service.add_name_type(nt)
-
-            # noinspection PyArgumentList
-            nt = NameType(name=name_type.name)
-            nt.description = name_type.description
-            services.diagram_service.add_name_type(nt)
-
-        return services
-
-    def diagram_services_of(self, factory: Type[T], filled: T) -> Services:
-        services = Services()
-        services.diagram_service.add(factory("empty"))
-        self._add_with_references(filled, services.diagram_service)
-
-        # Copy items to other services that get auto loaded there.
-        for name_type in services.diagram_service.name_types:
-            # noinspection PyArgumentList
-            nt = NameType(name=name_type.name)
-            nt.description = name_type.description
-            services.customer_service.add_name_type(nt)
-
-            # noinspection PyArgumentList
-            nt = NameType(name=name_type.name)
-            nt.description = name_type.description
-            services.network_service.add_name_type(nt)
-
-        return services
-
-    def network_services_of(self, factory: Type[T], filled: T) -> Services:
-        services = Services()
-        services.network_service.add(self._fill_required(services.network_service, factory("empty")))
+    def customer_services_of(self, factory: Type[T], filled: T) -> CustomerService:
+        customer_service = CustomerService()
+        customer_service.add(factory("empty"))
 
         filled.mrid = "filled"
-        self._add_with_references(filled, services.network_service)
+        self._add_with_references(filled, customer_service)
 
-        # Not yet supported
-        # traces.set_phases().run(services.network_service)
+        return customer_service
 
-        # Copy items to other services that get auto loaded there.
-        for org in services.network_service.objects(Organisation):
-            services.customer_service.add(org)
+    def diagram_services_of(self, factory: Type[T], filled: T) -> DiagramService:
+        diagram_service = DiagramService()
+        diagram_service.add(factory("empty"))
 
-        for name_type in services.network_service.name_types:
-            # noinspection PyArgumentList
-            nt = NameType(name=name_type.name)
-            nt.description = name_type.description
+        filled.mrid = "filled"
+        self._add_with_references(filled, diagram_service)
 
-            for name in filter(lambda it: it.identified_object is Organisation, name_type.names):
-                nt.get_or_add_name(name.name, name.identified_object)
+        return diagram_service
 
-            services.customer_service.add_name_type(nt)
+    def network_services_of(self, factory: Type[T], filled: T) -> NetworkService:
+        network_service = NetworkService()
+        network_service.add(self._fill_required(network_service, factory("empty")))
 
-            # noinspection PyArgumentList
-            nt = NameType(name=name_type.name)
-            nt.description = name_type.description
-            services.diagram_service.add_name_type(nt)
+        filled.mrid = "filled"
+        self._add_with_references(filled, network_service)
 
-        return services
+        return network_service
 
     @staticmethod
     def _fill_required(service: NetworkService, io: T) -> T:
@@ -333,7 +257,7 @@ class SchemaNetworks:
                 service.add(it)
 
         if isinstance(filled, Name):
-            filled.identified_object.add_name(filled)
+            filled.identified_object.add_name(filled.type, filled.name)
             service.add(filled.identified_object)
             service.add_name_type(filled.type)
 

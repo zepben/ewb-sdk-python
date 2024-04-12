@@ -6,9 +6,9 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import PricingStructure, Tariff
 
 pricing_structure_kwargs = {
@@ -48,11 +48,13 @@ def test_pricing_structure_constructor_args():
 
 def test_tariffs_collection():
     # noinspection PyArgumentList
-    validate_collection_unordered(PricingStructure,
-                                  lambda mrid, _: Tariff(mrid),
-                                  PricingStructure.num_tariffs,
-                                  PricingStructure.get_tariff,
-                                  PricingStructure.tariffs,
-                                  PricingStructure.add_tariff,
-                                  PricingStructure.remove_tariff,
-                                  PricingStructure.clear_tariffs)
+    validate_unordered_1234567890(
+        PricingStructure,
+        lambda mrid: Tariff(mrid),
+        PricingStructure.tariffs,
+        PricingStructure.num_tariffs,
+        PricingStructure.get_tariff,
+        PricingStructure.add_tariff,
+        PricingStructure.remove_tariff,
+        PricingStructure.clear_tariffs
+    )

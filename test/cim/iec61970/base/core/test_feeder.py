@@ -2,13 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from pytest import raises
 from hypothesis import given
 from hypothesis.strategies import builds, lists
+from pytest import raises
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import Feeder, Terminal, Substation, Equipment, LvFeeder, Switch
 
 feeder_kwargs = {
@@ -56,27 +56,29 @@ def test_feeder_constructor_args():
 
 
 def test_current_equipment_collection():
-    validate_collection_unordered(Feeder,
-                                  lambda mrid, _: Equipment(mrid),
-                                  Feeder.num_current_equipment,
-                                  Feeder.get_current_equipment,
-                                  Feeder.current_equipment,
-                                  Feeder.add_current_equipment,
-                                  Feeder.remove_current_equipment,
-                                  Feeder.clear_current_equipment,
-                                  KeyError)
+    validate_unordered_1234567890(
+        Feeder,
+        lambda mrid: Equipment(mrid),
+        Feeder.current_equipment,
+        Feeder.num_current_equipment,
+        Feeder.get_current_equipment,
+        Feeder.add_current_equipment,
+        Feeder.remove_current_equipment,
+        Feeder.clear_current_equipment
+    )
 
 
 def test_normal_energized_lv_feeder_collection():
-    validate_collection_unordered(Feeder,
-                                  lambda mrid, _: LvFeeder(mrid),
-                                  Feeder.num_normal_energized_lv_feeders,
-                                  Feeder.get_normal_energized_lv_feeder,
-                                  Feeder.normal_energized_lv_feeders,
-                                  Feeder.add_normal_energized_lv_feeder,
-                                  Feeder.remove_normal_energized_lv_feeder,
-                                  Feeder.clear_normal_energized_lv_feeders,
-                                  KeyError)
+    validate_unordered_1234567890(
+        Feeder,
+        lambda mrid: LvFeeder(mrid),
+        Feeder.normal_energized_lv_feeders,
+        Feeder.num_normal_energized_lv_feeders,
+        Feeder.get_normal_energized_lv_feeder,
+        Feeder.add_normal_energized_lv_feeder,
+        Feeder.remove_normal_energized_lv_feeder,
+        Feeder.clear_normal_energized_lv_feeders
+    )
 
 
 def test_can_update_normal_head_terminal_on_empty_feeder():

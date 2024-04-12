@@ -2,8 +2,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import sys
-
 from setuptools import setup, find_namespace_packages
 
 with open("README.md", "r") as fh:
@@ -16,11 +14,6 @@ deps = [
     "dataclassy==0.6.2",
     "six==1.16.0"
 ]
-
-# AsyncMock was not included in the base module until 3.8, so use the backport instead if required
-v = sys.version_info
-if v.major == 3 and v.minor < 8:
-    deps.append("mock==4.0.3")
 
 test_deps = [
     "pytest==7.1.2",

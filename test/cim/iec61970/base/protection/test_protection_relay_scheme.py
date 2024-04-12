@@ -5,9 +5,9 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, identified_object_args, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import ProtectionRelaySystem, ProtectionRelayFunction, ProtectionRelayScheme
 
 protection_relay_scheme_kwargs = {
@@ -49,12 +49,15 @@ def test_protection_relay_scheme_constructor_args():
     assert prs.system == protection_relay_scheme_args[-2]
     assert list(prs.functions) == protection_relay_scheme_args[-1]
 
+
 def test_functions_collection():
-    validate_collection_unordered(ProtectionRelayScheme,
-                                  lambda mrid, _: ProtectionRelayFunction(mrid),
-                                  ProtectionRelayScheme.num_functions,
-                                  ProtectionRelayScheme.get_function,
-                                  ProtectionRelayScheme.functions,
-                                  ProtectionRelayScheme.add_function,
-                                  ProtectionRelayScheme.remove_function,
-                                  ProtectionRelayScheme.clear_function)
+    validate_unordered_1234567890(
+        ProtectionRelayScheme,
+        lambda mrid: ProtectionRelayFunction(mrid),
+        ProtectionRelayScheme.functions,
+        ProtectionRelayScheme.num_functions,
+        ProtectionRelayScheme.get_function,
+        ProtectionRelayScheme.add_function,
+        ProtectionRelayScheme.remove_function,
+        ProtectionRelayScheme.clear_function
+    )

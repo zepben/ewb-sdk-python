@@ -114,12 +114,13 @@ class RegulatingControl(PowerSystemResource):
         """
         return nlen(self._regulating_cond_eq)
 
-    def get_regulating_cond_eq(self, mrid: str) -> Optional[RegulatingCondEq]:
+    def get_regulating_cond_eq(self, mrid: str) -> RegulatingCondEq:
         """
         Get a :class:`RegulatingCondEq` controlled by this :class:`RegulatingControl`.
 
         :param mrid: The mRID of the desired RegulatingCondEq
         :return: The RegulatingCondEq with the specified mRID if it exists, otherwise None.
+        :raises KeyError: If `mrid` wasn't present.
         """
         return get_by_mrid(self._regulating_cond_eq, mrid)
 

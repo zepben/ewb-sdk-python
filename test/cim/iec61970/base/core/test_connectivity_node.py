@@ -5,9 +5,9 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import ConnectivityNode, Terminal
 
 connectivity_node_kwargs = {
@@ -41,11 +41,13 @@ def test_connectivity_node_constructor_args():
 
 
 def test_terminals_collection():
-    validate_collection_unordered(ConnectivityNode,
-                                  lambda mrid, _: Terminal(mrid),
-                                  ConnectivityNode.num_terminals,
-                                  ConnectivityNode.get_terminal,
-                                  ConnectivityNode.terminals,
-                                  ConnectivityNode.add_terminal,
-                                  ConnectivityNode.remove_terminal,
-                                  ConnectivityNode.clear_terminals)
+    validate_unordered_1234567890(
+        ConnectivityNode,
+        lambda mrid: Terminal(mrid),
+        ConnectivityNode.terminals,
+        ConnectivityNode.num_terminals,
+        ConnectivityNode.get_terminal,
+        ConnectivityNode.add_terminal,
+        ConnectivityNode.remove_terminal,
+        ConnectivityNode.clear_terminals
+    )

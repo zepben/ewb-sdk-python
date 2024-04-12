@@ -2,12 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import re
+from collections import Counter
+from typing import Tuple
 
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
+import pytest
 from hypothesis.strategies import uuids, text, lists, builds
 
-from test.cim.collection_validator import validate_identified_object_name_collection
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
 from zepben.evolve import IdentifiedObject, Junction
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
@@ -59,15 +60,144 @@ def verify_identified_object_constructor_args(io: IdentifiedObject):
     assert list(io.names) == identified_object_args[3]
 
 
-def test_names_collection():
-    # noinspection PyTypeChecker, PyArgumentList
-    validate_identified_object_name_collection(IdentifiedObject,
-                                               lambda mrid, io: Name(mrid, NameType("name_type"), io),
-                                               IdentifiedObject.num_names,
-                                               lambda io, name: io.get_name(name.type.name, name.name),
-                                               lambda io, name: io.get_names(name),
-                                               IdentifiedObject.names,
-                                               IdentifiedObject.add_name,
-                                               IdentifiedObject.remove_name,
-                                               IdentifiedObject.clear_names,
-                                               lambda it, dup: re.escape(rf"Failed to add duplicate name {str(dup)} to {str(it)}."))
+def test_user_can_add_names_to_identified_object():
+    identified_object = IdentifiedObject()
+    # noinspection PyArgumentList
+    name_type = NameType("type")
+    assert identified_object.num_names() == 0
+
+    identified_object.add_name(name_type, "1")
+
+    assert identified_object.num_names() == 1
+
+
+def test_adding_identical_name_to_the_same_object_doesnt_change_the_list_of_names_belonging_to_it():
+    identified_object, name_type = _create_multiple_base_names()
+    original_names = list(identified_object.names)
+
+    identified_object.add_name(name_type, "1")
+    new_names = list(identified_object.names)
+    assert original_names == new_names
+
+
+def test_getname_obtain_expected_name_object():
+    identified_object, _ = _create_multiple_base_names()
+
+    name1 = identified_object.get_name("type", "1")
+    name2 = identified_object.get_name("type", "2")
+    name3 = identified_object.get_name("type", "3")
+
+    assert name2.name == "2"
+    assert name2.type.name == "type"
+
+    # Make sure item obtained are different
+    assert name1 is not name2
+    assert name1 is not name3
+    assert name2 is not name3
+
+
+def test_getname_grabs_the_same_object_with_string_or_name_type():
+    identified_object, name_type = _create_multiple_base_names()
+
+    name2 = identified_object.get_name("type", "2")
+    dupe_name2 = identified_object.get_name(name_type, "2")
+    assert name2 is dupe_name2
+
+
+def test_name_type_contains_the_names_added_to_the_identified_object():
+    _, name_type = _create_multiple_base_names()
+
+    assert name_type.has_name("1"), "expected to have name 1"
+    assert name_type.has_name("2"), "expected to have name 2"
+    assert name_type.has_name("3"), "expected to have name 3"
+
+
+def test_get_names_obtains_all_names_of_a_identified_object_with_a_given_name_type():
+    identified_object, name_type = _create_multiple_base_names()
+
+    # noinspection PyArgumentList
+    name_type2 = NameType("type2")
+    # noinspection PyArgumentList
+    name_type3 = NameType("type3")
+    identified_object.add_name(name_type2, "1")
+
+    assert len(identified_object.get_names(name_type)) == 3
+    assert len(identified_object.get_names(name_type2)) == 1
+    with pytest.raises(KeyError):
+        identified_object.get_names(name_type3)
+
+
+def test_remove_name_removes_name_from_the_identified_object_and_the_name_type():
+    identified_object, name_type = _create_multiple_base_names()
+    name1 = identified_object.get_name("type", "1")
+    name2 = identified_object.get_name("type", "2")
+    name3 = identified_object.get_name("type", "3")
+
+    assert identified_object.remove_name(name1), "name1 successfully removed from name_type"
+    with pytest.raises(ValueError):
+        assert not identified_object.remove_name(name1), "name1 has already been removed from name_type"
+    # not supported in python SDK: assert not identified_object.remove_name(None), "can not remove name null from identified_object"
+    assert identified_object.num_names() == 2
+    assert not name_type.has_name("1"), "should not have had name 1"
+
+    assert Counter(identified_object.names) == Counter([name2, name3])
+
+
+def test_clear_names_removes_all_names_from_the_identified_object_and_the_name_type():
+    identified_object, name_type = _create_multiple_base_names()
+
+    assert identified_object.num_names() == 3
+    assert name_type.has_name("1"), "expected to have name 1"
+    assert name_type.has_name("2"), "expected to have name 2"
+    assert name_type.has_name("3"), "expected to have name 3"
+
+    identified_object.clear_names()
+
+    assert identified_object.num_names() == 0
+    assert not name_type.has_name("1"), "should not have had name 1"
+    assert not name_type.has_name("2"), "should not have had name 2"
+    assert not name_type.has_name("3"), "should not have had name 3"
+
+
+def test_user_can_add_the_same_name_back_after_it_has_been_removed():
+    identified_object = IdentifiedObject()
+    # noinspection PyArgumentList
+    name_type = NameType("type")
+
+    identified_object.add_name(name_type, "1")
+    name1 = identified_object.get_name("type", "1")
+    identified_object.clear_names()
+
+    with pytest.raises(ValueError):
+        identified_object.remove_name(name1), "name1 should not be in the collection after a clear"
+    assert identified_object.num_names() == 0
+
+
+def test_removing_name_from_empty_name_list_does_not_cause_any_issue():
+    identified_object = IdentifiedObject()
+    # noinspection PyArgumentList
+    name_type = NameType("type")
+
+    identified_object.add_name(name_type, "1")
+    name1 = identified_object.get_name("type", "1")
+    assert identified_object.num_names() == 1
+
+    identified_object.remove_name(name1)
+    assert identified_object.num_names() == 0
+
+    identified_object.add_name(name_type, "1")
+    dupe_name1 = identified_object.get_name(name_type, "1")
+    assert name1 is not dupe_name1
+    assert identified_object.num_names() == 1
+
+
+def _create_multiple_base_names() -> Tuple[IdentifiedObject, NameType]:
+    identified_object = IdentifiedObject()
+    # noinspection PyArgumentList
+    name_type = NameType("type")
+
+    identified_object.add_name(name_type, "1")
+    identified_object.add_name(name_type, "2")
+    identified_object.add_name(name_type, "3")
+
+    return identified_object, name_type

@@ -22,14 +22,7 @@ class TestBaseServiceComparator:
         self.validator.validate_property(IdentifiedObject.description, create_identified_object, lambda _: "description", lambda _: "other description")
 
         # noinspection PyArgumentList
-        self.validator.validate_name_collection(
-            IdentifiedObject.names,
-            IdentifiedObject.add_name,
-            create_identified_object,
-            NameType("type1"),
-            "name1",
-            "name2"
-        )
+        self.validator.validate_name_collection(create_identified_object)
 
     def _compare_document(self, create_document: Type[Document]):
         self._compare_identified_object(create_document)

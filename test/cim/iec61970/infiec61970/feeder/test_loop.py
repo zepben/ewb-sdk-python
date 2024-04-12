@@ -5,9 +5,9 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, verify_identified_object_constructor_kwargs, \
     verify_identified_object_constructor_args, identified_object_kwargs, identified_object_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import Loop, Circuit, Substation
 
 loop_kwargs = {
@@ -52,33 +52,39 @@ def test_loop_constructor_args():
 
 
 def test_circuits_collection():
-    validate_collection_unordered(Loop,
-                                  lambda mrid, _: Circuit(mrid),
-                                  Loop.num_circuits,
-                                  Loop.get_circuit,
-                                  Loop.circuits,
-                                  Loop.add_circuit,
-                                  Loop.remove_circuit,
-                                  Loop.clear_circuits)
+    validate_unordered_1234567890(
+        Loop,
+        lambda mrid: Circuit(mrid),
+        Loop.circuits,
+        Loop.num_circuits,
+        Loop.get_circuit,
+        Loop.add_circuit,
+        Loop.remove_circuit,
+        Loop.clear_circuits
+    )
 
 
 def test_substations_collection():
-    validate_collection_unordered(Loop,
-                                  lambda mrid, _: Substation(mrid),
-                                  Loop.num_substations,
-                                  Loop.get_substation,
-                                  Loop.substations,
-                                  Loop.add_substation,
-                                  Loop.remove_substation,
-                                  Loop.clear_substations)
+    validate_unordered_1234567890(
+        Loop,
+        lambda mrid: Substation(mrid),
+        Loop.substations,
+        Loop.num_substations,
+        Loop.get_substation,
+        Loop.add_substation,
+        Loop.remove_substation,
+        Loop.clear_substations
+    )
 
 
 def test_energizing_substations_collection():
-    validate_collection_unordered(Loop,
-                                  lambda mrid, _: Substation(mrid),
-                                  Loop.num_energizing_substations,
-                                  Loop.get_energizing_substation,
-                                  Loop.energizing_substations,
-                                  Loop.add_energizing_substation,
-                                  Loop.remove_energizing_substation,
-                                  Loop.clear_energizing_substations)
+    validate_unordered_1234567890(
+        Loop,
+        lambda mrid: Substation(mrid),
+        Loop.energizing_substations,
+        Loop.num_energizing_substations,
+        Loop.get_energizing_substation,
+        Loop.add_energizing_substation,
+        Loop.remove_energizing_substation,
+        Loop.clear_energizing_substations
+    )

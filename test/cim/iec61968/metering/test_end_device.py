@@ -5,10 +5,10 @@
 
 from hypothesis.strategies import text, builds, lists
 
-from cim.collection_validator import validate_collection_unordered
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_asset_container import asset_container_kwargs, verify_asset_container_constructor_default, \
     verify_asset_container_constructor_kwargs, verify_asset_container_constructor_args, asset_container_args
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import EndDevice, Location, UsagePoint
 
 end_device_kwargs = {
@@ -43,11 +43,13 @@ def verify_end_device_constructor_args(ed: EndDevice):
 
 
 def test_usage_points_collection():
-    validate_collection_unordered(EndDevice,
-                                  lambda mrid, _: UsagePoint(mrid),
-                                  EndDevice.num_usage_points,
-                                  EndDevice.get_usage_point,
-                                  EndDevice.usage_points,
-                                  EndDevice.add_usage_point,
-                                  EndDevice.remove_usage_point,
-                                  EndDevice.clear_usage_points)
+    validate_unordered_1234567890(
+        EndDevice,
+        lambda mrid: UsagePoint(mrid),
+        EndDevice.usage_points,
+        EndDevice.num_usage_points,
+        EndDevice.get_usage_point,
+        EndDevice.add_usage_point,
+        EndDevice.remove_usage_point,
+        EndDevice.clear_usage_points
+    )

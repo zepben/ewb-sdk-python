@@ -5,10 +5,10 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists
 
-from test.cim.collection_validator import validate_collection_unordered
-from test.cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
+from cim.private_collection_validator import validate_unordered_1234567890
+from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
-from zepben.evolve import Feeder, Terminal, Substation, Equipment, LvFeeder
+from zepben.evolve import Feeder, Terminal, Equipment, LvFeeder
 
 lv_feeder_kwargs = {
     **equipment_container_kwargs,
@@ -52,24 +52,26 @@ def test_lv_feeder_constructor_args():
 
 
 def test_current_equipment_collection():
-    validate_collection_unordered(LvFeeder,
-                                  lambda mrid, _: Equipment(mrid),
-                                  LvFeeder.num_current_equipment,
-                                  LvFeeder.get_current_equipment,
-                                  LvFeeder.current_equipment,
-                                  LvFeeder.add_current_equipment,
-                                  LvFeeder.remove_current_equipment,
-                                  LvFeeder.clear_current_equipment,
-                                  KeyError)
+    validate_unordered_1234567890(
+        LvFeeder,
+        lambda mrid: Equipment(mrid),
+        LvFeeder.current_equipment,
+        LvFeeder.num_current_equipment,
+        LvFeeder.get_current_equipment,
+        LvFeeder.add_current_equipment,
+        LvFeeder.remove_current_equipment,
+        LvFeeder.clear_current_equipment
+    )
 
 
 def test_normal_energizing_feeder_collection():
-    validate_collection_unordered(LvFeeder,
-                                  lambda mrid, _: Feeder(mrid),
-                                  LvFeeder.num_normal_energizing_feeders,
-                                  LvFeeder.get_normal_energizing_feeder,
-                                  LvFeeder.normal_energizing_feeders,
-                                  LvFeeder.add_normal_energizing_feeder,
-                                  LvFeeder.remove_normal_energizing_feeder,
-                                  LvFeeder.clear_normal_energizing_feeders,
-                                  KeyError)
+    validate_unordered_1234567890(
+        LvFeeder,
+        lambda mrid: Feeder(mrid),
+        LvFeeder.normal_energizing_feeders,
+        LvFeeder.num_normal_energizing_feeders,
+        LvFeeder.get_normal_energizing_feeder,
+        LvFeeder.add_normal_energizing_feeder,
+        LvFeeder.remove_normal_energizing_feeder,
+        LvFeeder.clear_normal_energizing_feeders
+    )

@@ -5,9 +5,9 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds, sampled_from
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import DiagramObject, DiagramStyle, Diagram, OrientationKind
 
 diagram_kwargs = {
@@ -53,12 +53,13 @@ def test_diagram_constructor_args():
 
 
 def test_diagram_objects_collection():
-    validate_collection_unordered(Diagram,
-                                  lambda mrid, d: DiagramObject(mrid, diagram=d),
-                                  Diagram.num_diagram_objects,
-                                  Diagram.get_diagram_object,
-                                  Diagram.diagram_objects,
-                                  Diagram.add_diagram_object,
-                                  Diagram.remove_diagram_object,
-                                  Diagram.clear_diagram_objects,
-                                  KeyError)
+    validate_unordered_1234567890(
+        Diagram,
+        lambda mrid: DiagramObject(mrid),
+        Diagram.diagram_objects,
+        Diagram.num_diagram_objects,
+        Diagram.get_diagram_object,
+        Diagram.add_diagram_object,
+        Diagram.remove_diagram_object,
+        Diagram.clear_diagram_objects
+    )

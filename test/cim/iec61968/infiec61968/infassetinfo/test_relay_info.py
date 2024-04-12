@@ -6,9 +6,9 @@ from hypothesis import given
 from hypothesis.strategies import text, lists, floats, booleans
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, FLOAT_MIN, FLOAT_MAX
-from cim.collection_validator import validate_collection_ordered
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args
+from cim.private_collection_validator import validate_ordered_other_1234567890
 from zepben.evolve import RelayInfo
 
 relay_info_kwargs = {
@@ -56,13 +56,16 @@ def test_relay_info_constructor_args():
 
 
 def test_relay_info_reclose_delays():
-    validate_collection_ordered(RelayInfo,
-                                lambda i, _: float(i),
-                                RelayInfo.num_delays,
-                                RelayInfo.get_delay,
-                                RelayInfo.reclose_delays,
-                                RelayInfo.add_delay,
-                                RelayInfo.add_delay,
-                                RelayInfo.remove_delay,
-                                RelayInfo.clear_delays
-                                )
+    validate_ordered_other_1234567890(
+        RelayInfo,
+        lambda i: float(i),
+        RelayInfo.reclose_delays,
+        RelayInfo.num_delays,
+        RelayInfo.get_delay,
+        RelayInfo.for_each_delay,
+        RelayInfo.add_delay,
+        RelayInfo.add_delay,
+        RelayInfo.remove_delay,
+        RelayInfo.remove_delay_at,
+        RelayInfo.clear_delays
+    )

@@ -2,24 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import sys
 from typing import Callable, Awaitable
+from unittest.mock import create_autospec, patch, call, Mock
 
 import pytest
 
 from zepben.evolve import ConnectedEquipmentTraversal, NetworkService, Feeder, FindSwerEquipment, Junction, TestNetworkBuilder, PhaseCode, BaseVoltage, \
     ConductingEquipment, verify_stop_conditions, ConductingEquipmentStep, step_on_when_run, step_on_when_run_with_is_stopping
-
-# AsyncMock was not included in the base module until 3.8, so use the backport instead if required
-v = sys.version_info
-if v.major == 3 and v.minor < 8:
-    # noinspection PyPackageRequirements
-    # noinspection PyUnresolvedReferences
-    # pylint: disable=import-error
-    from mock import create_autospec, patch, call, Mock
-    # pylint: enable=import-error
-else:
-    from unittest.mock import create_autospec, patch, call, Mock
 
 
 def create_mock_connected_equipment_traversal() -> Mock:
@@ -45,6 +34,7 @@ class TestFindSwerEquipment:
         self.create_trace = create_autospec(Callable[[], ConnectedEquipmentTraversal], side_effect=[self.trace1, self.trace2])
 
         self.find_swer_equipment = FindSwerEquipment(self.create_trace)
+
     # pylint: enable=attribute-defined-outside-init
 
     @pytest.mark.asyncio

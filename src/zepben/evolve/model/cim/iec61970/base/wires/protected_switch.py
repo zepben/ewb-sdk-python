@@ -55,12 +55,13 @@ class ProtectedSwitch(Switch):
         """
         return nlen(self._relay_functions)
 
-    def get_relay_function(self, mrid: str) -> Optional[ProtectionRelayFunction]:
+    def get_relay_function(self, mrid: str) -> ProtectionRelayFunction:
         """
         Get a :class:`ProtectionRelayFunction` operating this :class:`ProtectedSwitch` with the specified `mrid`.
 
         :param mrid: The mRID of the desired :class:`ProtectionRelayFunction`
         :return: The :class:`ProtectionRelayFunction` with the specified mRID if it exists, otherwise None.
+        :raises KeyError: If `mrid` wasn't present.
         """
         return get_by_mrid(self._relay_functions, mrid)
 

@@ -16,8 +16,7 @@ __all__ = ["get_by_mrid", "contains_mrid", "safe_remove", "safe_remove_by_id", "
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from zepben.evolve import IdentifiedObject
-    TIdentifiedObject = TypeVar('TIdentifiedObject', bound=IdentifiedObject)
+    from zepben.evolve import IdentifiedObject, TIdentifiedObject
 
 T = TypeVar('T')
 
@@ -71,34 +70,32 @@ def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -
         return False
 
 
-def safe_remove(collection: Optional[List[T]], obj: T):
+def safe_remove(collection: Optional[List[T]], obj: T) -> Optional[List[T]]:
     """
     Remove an IdentifiedObject from a collection safely.
     Raises `ValueError` if `obj` is not in the collection.
     Returns The collection if successfully removed or None if after removal the collection was empty.
     """
-    if collection is not None:
-        collection.remove(obj)
-        if not collection:
-            return None
-        return collection
-    else:
+    if not collection:
         raise ValueError(obj)
 
+    collection.remove(obj)
 
-def safe_remove_by_id(collection: Optional[Dict[str, IdentifiedObject]], obj: Optional[IdentifiedObject]):
+    return collection if collection else None
+
+
+def safe_remove_by_id(collection: Optional[Dict[str, IdentifiedObject]], obj: IdentifiedObject) -> {Optional[Dict[str, IdentifiedObject]]}:
     """
     Remove an IdentifiedObject from a collection safely.
-    Raises `ValueError` if `obj` is not in the collection.
+    Raises `KeyError` if `obj` is not in the collection.
     Returns The collection if successfully removed or None if after removal the collection was empty.
     """
-    if not obj or not collection:
+    if not collection:
         raise KeyError(obj)
 
     del collection[obj.mrid]
-    if not collection:
-        return None
-    return collection
+
+    return collection if collection else None
 
 
 def nlen(sized: Optional[Sized]) -> int:

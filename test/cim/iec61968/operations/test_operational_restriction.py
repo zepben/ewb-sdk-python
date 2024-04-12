@@ -6,9 +6,9 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import OperationalRestriction, Equipment
 
 operational_restriction_kwargs = {
@@ -48,11 +48,13 @@ def test_operational_restriction_constructor_args():
 
 def test_equipment_collection():
     # noinspection PyArgumentList
-    validate_collection_unordered(OperationalRestriction,
-                                  lambda mrid, _: Equipment(mrid),
-                                  OperationalRestriction.num_equipment,
-                                  OperationalRestriction.get_equipment,
-                                  OperationalRestriction.equipment,
-                                  OperationalRestriction.add_equipment,
-                                  OperationalRestriction.remove_equipment,
-                                  OperationalRestriction.clear_equipment)
+    validate_unordered_1234567890(
+        OperationalRestriction,
+        lambda mrid: Equipment(mrid),
+        OperationalRestriction.equipment,
+        OperationalRestriction.num_equipment,
+        OperationalRestriction.get_equipment,
+        OperationalRestriction.add_equipment,
+        OperationalRestriction.remove_equipment,
+        OperationalRestriction.clear_equipment
+    )
