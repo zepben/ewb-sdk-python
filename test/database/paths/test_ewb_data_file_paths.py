@@ -24,33 +24,25 @@ def expected_path(file_descriptor):
 
 
 def test_validates_directory_is_valid_at_construction():
-    is_directory_return = True
+    mock_is_directory = Mock(return_value=True)
+    EwbDataFilePaths(base_dir, is_directory=mock_is_directory)
+    mock_is_directory.assert_called_once_with(base_dir)
 
-    def is_directory(test: Path) -> bool:
-        assert test == base_dir
-        return is_directory_return
-
-    EwbDataFilePaths(base_dir, is_directory=is_directory)
-
-    is_directory_return = False
+    mock_is_directory.reset_mock()
+    mock_is_directory.return_value = False
     with raises(ValueError, match="base_dir must be a directory"):
-        EwbDataFilePaths(base_dir, is_directory=is_directory)
+        EwbDataFilePaths(base_dir, is_directory=mock_is_directory)
+    mock_is_directory.assert_called_once_with(base_dir)
 
 
 def test_creates_missing_root_directory_if_requested():
-    create_dir_called = 0
-
-    def mock_create_dir(to_create: Path) -> Path:
-        nonlocal create_dir_called
-        assert to_create == base_dir
-        create_dir_called += 1
-        return to_create
+    mock_create_dir = Mock(side_effect=lambda to_create: to_create)
 
     EwbDataFilePaths(base_dir, create_path=False, is_directory=lambda _: True, create_directories_func=mock_create_dir)
-    assert create_dir_called == 0
+    mock_create_dir.assert_not_called()
 
     EwbDataFilePaths(base_dir, create_path=True, is_directory=lambda _: True, create_directories_func=mock_create_dir)
-    assert create_dir_called == 1
+    mock_create_dir.assert_called_once_with(base_dir)
 
 
 def test_formats_paths():
@@ -78,21 +70,13 @@ def test_formats_paths():
 
 
 def test_creates_data_directories_if_they_dont_exist():
-    create_dir_called = 0
-    exists_return = True
     test_date = date(1111, 2, 3)
 
     expected_date_path = Path(str(base_dir), str(test_date))
 
-    def mock_exists(test: Path) -> bool:
-        assert test == expected_date_path
-        return exists_return
+    mock_exists = Mock(return_value=True)
 
-    def mock_create_dir(to_create: Path) -> Path:
-        nonlocal create_dir_called
-        assert to_create == expected_date_path
-        create_dir_called += 1
-        return to_create
+    mock_create_dir = Mock(side_effect=lambda to_create: to_create)
 
     ewb_paths = EwbDataFilePaths(base_dir,
                                  create_path=False,
@@ -101,37 +85,30 @@ def test_creates_data_directories_if_they_dont_exist():
                                  exists=mock_exists,
                                  list_files=lambda _: iter(list())
                                  )
-    assert expected_date_path == ewb_paths.create_directories(test_date)
-    assert create_dir_called == 0
 
-    exists_return = False
-    assert expected_date_path == ewb_paths.create_directories(test_date)
-    assert create_dir_called == 1
+    # if the date directory already exists
+    assert ewb_paths.create_directories(test_date) == expected_date_path
+    mock_exists.assert_called_once_with(expected_date_path)
+    mock_create_dir.assert_not_called()
+
+    mock_exists.reset_mock()
+    mock_exists.return_value = False
+
+    # if the date directory needs to be created
+    assert ewb_paths.create_directories(test_date) == expected_date_path
+    mock_exists.assert_called_once_with(expected_date_path)
+    mock_create_dir.assert_called_once_with(expected_date_path)
 
 
 def test_finds_specified_date_if_it_exists():
     test_date = date(2222, 3, 4)
     for db_type in DatabaseType:
         if db_type.per_date:
-            validate_specified_date(db_type, test_date, 1, False)
+            validate_closest_by_exists_calls(db_type, test_date, test_date, 10, False, 1, True, lambda _: True)
+            # confirm finds the database on the exact day if max_days_to_search = 0
+            validate_closest_by_exists_calls(db_type, test_date, test_date, 0, False, 1, True, lambda _: True)
         else:
-            validate_specified_date(db_type, None, 0, False)
-
-
-def validate_specified_date(database_type: DatabaseType, expected_date: Optional[date], expected_exist_calls: int, search_forwards: bool):
-    mock_exists = Mock(return_value=True)
-    ewb_paths = EwbDataFilePaths(base_dir,
-                                 create_path=False,
-                                 create_directories_func=Mock(),
-                                 is_directory=lambda _: True,
-                                 exists=mock_exists,
-                                 list_files=lambda _: iter(list())
-                                 )
-
-    assert expected_date == ewb_paths.find_closest(database_type, target_date=expected_date, search_forwards=search_forwards)
-    if expected_date is not None:
-        mock_exists.assert_called_once_with(expected_dated_path(expected_date, database_type.file_descriptor))
-    assert mock_exists.call_count == expected_exist_calls
+            validate_closest_by_exists_calls(db_type, test_date, test_date, 10, False, 0, False, lambda _: True)
 
 
 def test_finds_previous_date_if_it_exists_and_today_is_missing():
@@ -142,7 +119,7 @@ def test_finds_previous_date_if_it_exists_and_today_is_missing():
             validate_closest_by_exists_calls(db_type, actual_date, search_date, 10, False, 3, True)
 
 
-def validate_closest_by_exists_calls(database_type: DatabaseType, db_date: date, search_date: date, days_to_search: int, search_forwards: bool,
+def validate_closest_by_exists_calls(database_type: DatabaseType, db_date: date, search_date: date, max_days_to_search: int, search_forwards: bool,
                                      expected_exist_calls: int, expect_to_find: bool, my_exists=None):
     if my_exists is None:
         def my_exists(to_test: Path) -> bool:
@@ -162,7 +139,8 @@ def validate_closest_by_exists_calls(database_type: DatabaseType, db_date: date,
     if expect_to_find:
         expected_return = db_date
 
-    assert expected_return == ewb_paths.find_closest(database_type, max_days_to_search=days_to_search, target_date=search_date, search_forwards=search_forwards)
+    assert ewb_paths.find_closest(database_type, max_days_to_search=max_days_to_search, target_date=search_date,
+                                  search_forwards=search_forwards) == expected_return
     assert mock_exists.call_count == expected_exist_calls
 
 
@@ -183,10 +161,7 @@ def test_can_search_forwards_in_time():
         if db_type.per_date:
             my_list = [expected_dated_path(previous_date, db_type.file_descriptor), expected_dated_path(forward_date, db_type.file_descriptor)]
 
-            def my_my_exists(to_test: Path) -> bool:
-                return to_test in my_list
-
-            validate_closest_by_exists_calls(db_type, forward_date, search_date, 10, True, 5, expect_to_find=True, my_exists=my_my_exists)
+            validate_closest_by_exists_calls(db_type, forward_date, search_date, 10, True, 5, expect_to_find=True, my_exists=lambda to_test: to_test in my_list)
 
 
 def test_closest_date_using_default_parameters():
@@ -197,10 +172,7 @@ def test_closest_date_using_default_parameters():
         if db_type.per_date:
             my_list = [expected_dated_path(previous_date, db_type.file_descriptor), expected_dated_path(forward_date, db_type.file_descriptor)]
 
-            def my_exists(to_test: Path) -> bool:
-                return to_test in my_list
-
-            mock_exists = Mock(side_effect=my_exists)
+            mock_exists = Mock(side_effect=lambda to_test: to_test in my_list)
 
             ewb_paths = EwbDataFilePaths(base_dir,
                                          create_path=False,
@@ -218,7 +190,6 @@ def test_get_available_dates_for_accepts_date_types():
     for db_type in DatabaseType:
         if db_type.per_date:
             validate_get_available_dates_for(db_type)
-    # raise NotImplementedError
 
 
 def test_get_available_dates_for_throws_on_non_date_type():
@@ -231,32 +202,19 @@ def test_get_available_dates_for_throws_on_non_date_type():
 def test_get_available_dates_for_sorts_the_returned_dates():
     unsorted_dates = ["2001-02-03", "2032-05-07", "2009-05-09", "2009-05-08"]
 
-    def my_list_dir(to_list: Path) -> Iterator[Path]:
-        return iter([Path(str(base_dir), x) for x in unsorted_dates])
-
-    def my_is_directory(to_test: Path) -> bool:
-        return True
-
-    def my_exists(to_test: Path) -> bool:
-        return True
-
-    mock_list_dir = Mock(side_effect=my_list_dir)
-    mock_is_directory = Mock(side_effect=my_is_directory)
-    mock_exists = Mock(side_effect=my_exists)
-
     ewb_paths = EwbDataFilePaths(base_dir,
                                  create_path=False,
                                  create_directories_func=Mock(),
-                                 is_directory=mock_is_directory,
-                                 exists=mock_exists,
-                                 list_files=mock_list_dir
+                                 is_directory=Mock(return_value=True),
+                                 exists=Mock(return_value=True),
+                                 list_files=Mock(return_value=iter([Path(str(base_dir), x) for x in unsorted_dates]))
                                  )
     sorted_dates = [
         date.fromisoformat("2001-02-03"),
         date.fromisoformat("2009-05-08"),
         date.fromisoformat("2009-05-09"),
         date.fromisoformat("2032-05-07")]
-    assert sorted_dates == ewb_paths._get_available_dates_for(DatabaseType.NETWORK_MODEL)
+    assert ewb_paths._get_available_dates_for(DatabaseType.NETWORK_MODEL) == sorted_dates
 
 
 def validate_get_available_dates_for(db_type: DatabaseType):

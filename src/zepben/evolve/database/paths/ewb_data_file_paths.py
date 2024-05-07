@@ -23,7 +23,7 @@ class EwbDataFilePaths:
 
     def __init__(self, base_dir: Path,
                  create_path: bool = False,
-                 create_directories_func: Callable[[Path], Path] = lambda it: it.mkdir(parents=True), # TODO: actually return Path or change sig?
+                 create_directories_func: Callable[[Path], Path] = lambda it: it.mkdir(parents=True),  # TODO: actually return Path or change sig?
                  is_directory: Callable[[Path], bool] = Path.is_dir,
                  exists: Callable[[Path], bool] = Path.exists,
                  list_files: Callable[[Path], Iterator[Path]] = Path.iterdir):
