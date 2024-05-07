@@ -16,24 +16,24 @@ __all__ = ['EwbDataFilePaths']
 class EwbDataFilePaths:
     """Provides paths to all the various data files / folders used by EWB."""
     _base_dir: Path = None
-    create_directories: Callable[[Path], Path] = None
+    create_directories_func: Callable[[Path], Path] = None
     is_directory: Callable[[Path], bool] = None
     exists: Callable[[Path], bool] = None
     list_files: Callable[[Path], Iterator[Path]] = None
 
     def __init__(self, base_dir: Path,
                  create_path: bool = False,
-                 create_directories: Callable[[Path], Path] = lambda it: it.mkdir(parents=True),
+                 create_directories_func: Callable[[Path], Path] = lambda it: it.mkdir(parents=True), # TODO: actually return Path or change sig?
                  is_directory: Callable[[Path], bool] = Path.is_dir,
                  exists: Callable[[Path], bool] = Path.exists,
                  list_files: Callable[[Path], Iterator[Path]] = Path.iterdir):
         """
-        :param: base_dir The root directory of the EWB data structure.
-        :param: createPath Create the root directory (and any missing parent folders) if it does not exist.
+        :param base_dir: The root directory of the EWB data structure.
+        :param create_path: Create the root directory (and any missing parent folders) if it does not exist.
         """
 
-        if create_directories is not None:
-            self.create_directories = create_directories
+        if create_directories_func is not None:
+            self.create_directories_func = create_directories_func
         if is_directory is not None:
             self.is_directory = is_directory
         if exists is not None:
@@ -44,12 +44,12 @@ class EwbDataFilePaths:
             self._base_dir = base_dir
 
         if create_path:
-            self.create_directories(base_dir)
+            self.create_directories_func(base_dir)
 
-        require(self.is_directory(base_dir), lambda: f"baseDir must be a directory")
+        require(self.is_directory(base_dir), lambda: f"base_dir must be a directory")
 
     @property
-    def baseDir(self):
+    def base_dir(self):
         """The root directory of the EWB data structure."""
         return self._base_dir
 
@@ -60,7 +60,7 @@ class EwbDataFilePaths:
         :param database_date: The :class:`date` to use for the "customers" database.
         :return: The :class:`path` to the "customers" database for the specified date.
         """
-        return self._to_dated_path(database_date, DatabaseType.CUSTOMER.fileDescriptor)
+        return self._to_dated_path(database_date, DatabaseType.CUSTOMER.file_descriptor)
 
     def diagram(self, database_date: date) -> Path:
         """
@@ -69,7 +69,7 @@ class EwbDataFilePaths:
         :param database_date: The :class:`date` to use for the "diagrams" database.
         :return: The :class:`path` to the "diagrams" database for the specified date.
         """
-        return self._to_dated_path(database_date, DatabaseType.DIAGRAM.fileDescriptor)
+        return self._to_dated_path(database_date, DatabaseType.DIAGRAM.file_descriptor)
 
     def measurement(self, database_date: date) -> Path:
         """
@@ -78,68 +78,68 @@ class EwbDataFilePaths:
         :param database_date: The :class:`date` to use for the "measurements" database.
         :return: The :class:`path` to the "measurements" database for the specified date.
         """
-        return self._to_dated_path(database_date, DatabaseType.MEASUREMENT.fileDescriptor)
+        return self._to_dated_path(database_date, DatabaseType.MEASUREMENT.file_descriptor)
 
-    def networkModel(self, database_date: date) -> Path:
+    def network_model(self, database_date: date) -> Path:
         """
         Determine the path to the "network model" database for the specified date.
 
         :param database_date: The :class:`date` to use for the "network model" database.
         :return: The :class:`path` to the "network model" database for the specified date.
         """
-        return self._to_dated_path(database_date, DatabaseType.NETWORK_MODEL.fileDescriptor)
+        return self._to_dated_path(database_date, DatabaseType.NETWORK_MODEL.file_descriptor)
 
-    def tileCache(self, database_date: date) -> Path:
+    def tile_cache(self, database_date: date) -> Path:
         """
         Determine the path to the "tile cache" database for the specified date.
 
         :param database_date: The :class:`date` to use for the "tile cache" database.
         :return: The :class:`path` to the "tile cache" database for the specified date.
         """
-        return self._to_dated_path(database_date, DatabaseType.TILE_CACHE.fileDescriptor)
+        return self._to_dated_path(database_date, DatabaseType.TILE_CACHE.file_descriptor)
 
-    def energyReading(self, database_date: date) -> Path:
+    def energy_reading(self, database_date: date) -> Path:
         """
         Determine the path to the "energy readings" database for the specified date.
 
         :param database_date: The :class:`date` to use for the "energy readings" database.
         :return: The :class:`path` to the "energy readings" database for the specified date.
         """
-        return self._to_dated_path(database_date, DatabaseType.ENERGY_READING.fileDescriptor)
+        return self._to_dated_path(database_date, DatabaseType.ENERGY_READING.file_descriptor)
 
-    def energyReadingsIndex(self, database_date: date) -> Path:
+    def energy_readings_index(self) -> Path:
         """
         Determine the path to the "energy readings index" database.
 
         :return: The :class:`path` to the "energy readings index" database.
         """
-        return self._to_dated_path(database_date, DatabaseType.ENERGY_READINGS_INDEX.fileDescriptor)
+        return Path(str(self._base_dir), f"{DatabaseType.ENERGY_READINGS_INDEX.file_descriptor}.sqlite")
 
-    def loadAggregatorMetersByDate(self, database_date: date) -> Path:
+    def load_aggregator_meters_by_date(self) -> Path:
         """
         Determine the path to the "load aggregator meters-by-date" database.
 
         :return: The :class:`path` to the "load aggregator meters-by-date" database.
         """
-        return self._to_dated_path(database_date, DatabaseType.LOAD_AGGREGATOR_METERS_BY_DATE.fileDescriptor)
+        return Path(str(self._base_dir), f"{DatabaseType.LOAD_AGGREGATOR_METERS_BY_DATE.file_descriptor}.sqlite")
 
-    def weatherReading(self, database_date: date) -> Path:
+    def weather_reading(self) -> Path:
         """
         Determine the path to the "weather readings" database.
 
         :return: The :class:`path` to the "weather readings" database.
         """
-        return self._to_dated_path(database_date, DatabaseType.WEATHER_READING.fileDescriptor)
+        return Path(str(self._base_dir), f"{DatabaseType.WEATHER_READING.file_descriptor}.sqlite")
 
-    def resultsCache(self, database_date: date) -> Path:
+    def results_cache(self) -> Path:
         """
         Determine the path to the "results cache" database.
 
         :return: The :class:`path` to the "results cache" database.
         """
-        return self._to_dated_path(database_date, DatabaseType.RESULTS_CACHE.fileDescriptor)
+        return Path(str(self._base_dir), f"{DatabaseType.RESULTS_CACHE.file_descriptor}.sqlite")
 
-    def createDirectories(self, database_date: date) -> Path:
+    def create_directories(self, database_date: date) -> Path:
         """
         Create the directories required to have a valid path for the specified date.
 
@@ -150,12 +150,12 @@ class EwbDataFilePaths:
         if self.exists(date_path):
             return date_path
         else:
-            return self.create_directories(date_path)
+            return self.create_directories_func(date_path)
 
     def _to_dated_path(self, database_date: date, file: str) -> Path:
         return Path(str(self._base_dir), str(database_date), f"{database_date}-{file}.sqlite")
 
-    def check_exists(self, database_type: DatabaseType, database_date: date) -> bool:
+    def _check_exists(self, database_type: DatabaseType, database_date: date) -> bool:
         """
         Check if a database of the specified type and date exists.
 
@@ -163,7 +163,7 @@ class EwbDataFilePaths:
         :param database_date: The date to check.
         :return: `True` if a database of the specified `database_type` and `database_date` exists in the date path.
         """
-        if not database_type.perDate:
+        if not database_type.per_date:
             raise ValueError("INTERNAL ERROR: Should only be calling `checkExists` for `perDate` files.")
 
         if database_type == DatabaseType.CUSTOMER:
@@ -173,58 +173,58 @@ class EwbDataFilePaths:
         elif database_type == DatabaseType.MEASUREMENT:
             model_path = self.measurement(database_date)
         elif database_type == DatabaseType.NETWORK_MODEL:
-            model_path = self.networkModel(database_date)
+            model_path = self.network_model(database_date)
         elif database_type == DatabaseType.TILE_CACHE:
-            model_path = self.tileCache(database_date)
+            model_path = self.tile_cache(database_date)
         elif database_type == DatabaseType.ENERGY_READING:
-            model_path = self.energyReading(database_date)
+            model_path = self.energy_reading(database_date)
         else:
             raise ValueError(
-                "INTERNAL ERROR: Should only be calling `checkExists` for `perDate` files, which should all be covered above, so go ahead and add it.")
+                "INTERNAL ERROR: Should only be calling `check_exists` for `per_date` files, which should all be covered above, so go ahead and add it.")
         return self.exists(model_path)
 
-    def findClosest(self, database_type: DatabaseType, max_days_to_search: int = 999999, start_date: date = date.today(), search_forwards: bool = False) -> \
+    def find_closest(self, database_type: DatabaseType, max_days_to_search: int = 999999, target_date: date = date.today(), search_forwards: bool = False) -> \
         Optional[date]:
         """
         Find the closest date with a usable database of the specified type.
 
         :param database_type: The type of database to search for.
         :param max_days_to_search: The maximum number of days to search for a valid database.
-        :param start_date: The target :class:`date`. Defaults to today.
+        :param target_date: The target :class:`date`. Defaults to today.
         :param search_forwards: Indicates the search should also look forwards in time from `start_date` for a valid file. Defaults to reverse search only.
         :return: The closest :class:`date` to `database_date` with a valid database of `database_type` within the search parameters, or `None` if no valid database was found.
         """
-        if not database_type.perDate:
+        if not database_type.per_date:
             return None
 
-        if self.check_exists(database_type, start_date):
-            return start_date
+        if self._check_exists(database_type, target_date):
+            return target_date
 
         offset = 1
 
         while offset <= max_days_to_search:
             offset_days = timedelta(offset)
             try:
-                previous_date = start_date - offset_days
-                if self.check_exists(database_type, previous_date):
+                previous_date = target_date - offset_days
+                if self._check_exists(database_type, previous_date):
                     return previous_date
             except OverflowError:
                 pass
 
             if search_forwards:
                 try:
-                    forward_date = start_date + offset_days
-                    if self.check_exists(database_type, forward_date):
+                    forward_date = target_date + offset_days
+                    if self._check_exists(database_type, forward_date):
                         return forward_date
                 except OverflowError:
                     pass
             offset += 1
         return None
 
-    def _getAvailableDatesFor(self, database_type: DatabaseType) -> List[date]:
-        if not database_type.perDate:
+    def _get_available_dates_for(self, database_type: DatabaseType) -> List[date]:
+        if not database_type.per_date:
             raise ValueError(
-                "INTERNAL ERROR: Should only be calling `getAvailableDatesFor` for `perDate` files.")
+                "INTERNAL ERROR: Should only be calling `_get_available_dates_for` for `per_date` files.")
 
         to_return = list()
 
@@ -232,17 +232,16 @@ class EwbDataFilePaths:
             if self.is_directory(file):
                 try:
                     database_date = date.fromisoformat(file.name)
-                    if self.exists(self._to_dated_path(database_date, database_type.fileDescriptor)):
+                    if self.exists(self._to_dated_path(database_date, database_type.file_descriptor)):
                         to_return.append(database_date)
                 except ValueError:
                     pass
-        to_return.sort()
-        return to_return
+        return sorted(to_return)
 
-    def getNetworkModelDatabases(self) -> List[date]:
+    def get_network_model_databases(self) -> List[date]:
         """
         Find available network-model databases in data path.
 
         :return: A list of :class:`date`'s for which network-model databases exist in the data path.
         """
-        return self._getAvailableDatesFor(DatabaseType.NETWORK_MODEL)
+        return self._get_available_dates_for(DatabaseType.NETWORK_MODEL)

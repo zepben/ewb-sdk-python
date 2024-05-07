@@ -26,9 +26,9 @@ class DatabaseType(Enum):
         return str(self)[27:]
 
     @property
-    def perDate(self):
+    def per_date(self):
         return self.value[1]
 
     @property
-    def fileDescriptor(self):
+    def file_descriptor(self):
         return self.value[2]
