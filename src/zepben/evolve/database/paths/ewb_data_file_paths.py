@@ -113,7 +113,7 @@ class EwbDataFilePaths:
 
         :return: The :class:`path` to the "energy readings index" database.
         """
-        return Path(str(self._base_dir), f"{DatabaseType.ENERGY_READINGS_INDEX.file_descriptor}.sqlite")
+        return self._base_dir.joinpath(f"{DatabaseType.ENERGY_READINGS_INDEX.file_descriptor}.sqlite")
 
     def load_aggregator_meters_by_date(self) -> Path:
         """
@@ -121,7 +121,7 @@ class EwbDataFilePaths:
 
         :return: The :class:`path` to the "load aggregator meters-by-date" database.
         """
-        return Path(str(self._base_dir), f"{DatabaseType.LOAD_AGGREGATOR_METERS_BY_DATE.file_descriptor}.sqlite")
+        return self._base_dir.joinpath(f"{DatabaseType.LOAD_AGGREGATOR_METERS_BY_DATE.file_descriptor}.sqlite")
 
     def weather_reading(self) -> Path:
         """
@@ -129,7 +129,7 @@ class EwbDataFilePaths:
 
         :return: The :class:`path` to the "weather readings" database.
         """
-        return Path(str(self._base_dir), f"{DatabaseType.WEATHER_READING.file_descriptor}.sqlite")
+        return self._base_dir.joinpath(f"{DatabaseType.WEATHER_READING.file_descriptor}.sqlite")
 
     def results_cache(self) -> Path:
         """
@@ -137,7 +137,7 @@ class EwbDataFilePaths:
 
         :return: The :class:`path` to the "results cache" database.
         """
-        return Path(str(self._base_dir), f"{DatabaseType.RESULTS_CACHE.file_descriptor}.sqlite")
+        return self._base_dir.joinpath(f"{DatabaseType.RESULTS_CACHE.file_descriptor}.sqlite")
 
     def create_directories(self, database_date: date) -> Path:
         """
@@ -146,14 +146,14 @@ class EwbDataFilePaths:
         :param database_date: The :class:`date` required in the path.
         :return: The :class:`path` to the directory for the `database_date`.
         """
-        date_path = Path(str(self._base_dir), str(database_date))
+        date_path = self._base_dir.joinpath(str(database_date))
         if self.exists(date_path):
             return date_path
         else:
             return self.create_directories_func(date_path)
 
     def _to_dated_path(self, database_date: date, file: str) -> Path:
-        return Path(str(self._base_dir), str(database_date), f"{database_date}-{file}.sqlite")
+        return self._base_dir.joinpath(str(database_date), f"{database_date}-{file}.sqlite")
 
     def _check_exists(self, database_type: DatabaseType, database_date: date) -> bool:
         """

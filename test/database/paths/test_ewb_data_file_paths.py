@@ -5,7 +5,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Optional, Iterator
+from typing import Iterator
 from unittest.mock import Mock
 
 from _pytest.python_api import raises
