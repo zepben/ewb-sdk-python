@@ -6,8 +6,8 @@ title: EWB Database Paths
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-The Energy Workbench Server(EWB) uses a defined directory structure and naming convention for locating the various databases it is requested to load from within its "data path".
-`EwbDataFilePaths` is a class for working with the file locations used by EWB to load databases from.
+The Energy Workbench Server(EWB) uses a defined directory structure and naming convention for locating the various databases it is requested to load data from within its "data path".
+`EwbDataFilePaths` is a class for working with the file locations used by EWB.
 
 
 The basic structure for date based database files is `<base_dir>/<model_date>/<model_date>-<database_type>.sqlite`:
@@ -38,8 +38,8 @@ database_location = EwbDataFilePaths(data_path, create_path=True)
 
 ### Retrieving Database File Paths
 
-To generate file paths for the various databases used by EWB. Note: `EwbDataFilePaths` will return the expected path for the provided `database_type` and `date` regardless
-of whether it exists or not.
+EwbDataFilePaths provides methods to generate file paths for each type of database used by EWB. Date based databases require a `Date` to be provided.
+Note: `EwbDataFilePaths` will return the expected path for the provided `database_type` and `date` regardless of whether it exists or not.
 
 ```python
 from zepben.evolve import EwbDataFilePaths
@@ -55,7 +55,7 @@ expected_path_to_diagram_database = ewb_data.diagram(new_date)
 
 expected_path_to_weather_reading_db = ewb_data.weather_reading()
 
-second_date = Date(2024, 11, 11)
+second_date = Date(2024, 11, 12)
 second_network_database_path = ewb_data.network_model(second_date)
 
 ```
