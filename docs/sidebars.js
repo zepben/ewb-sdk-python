@@ -8,12 +8,12 @@
 
 module.exports = {
     someSidebar: [
+        "sdk-overview",
         {
             type: "category",
             items: ["venv-setup", "intellij-setup"],
             label: "Setup Guide"
         },
-        "sdk-overview",
         "sdk-data-model",
         "sdk-services",
         "sdk-phases",
