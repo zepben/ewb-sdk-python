@@ -15,15 +15,10 @@ __all__ = ['EwbDataFilePaths']
 
 class EwbDataFilePaths:
     """Provides paths to all the various data files / folders used by EWB."""
-    _base_dir: Path = None
-    create_directories_func: Callable[[Path], Path] = None
-    is_directory: Callable[[Path], bool] = None
-    exists: Callable[[Path], bool] = None
-    list_files: Callable[[Path], Iterator[Path]] = None
 
     def __init__(self, base_dir: Path,
                  create_path: bool = False,
-                 create_directories_func: Callable[[Path], Path] = lambda it: it.mkdir(parents=True),  # TODO: actually return Path or change sig?
+                 create_directories_func: Callable[[Path], None] = lambda it: it.mkdir(parents=True),
                  is_directory: Callable[[Path], bool] = Path.is_dir,
                  exists: Callable[[Path], bool] = Path.exists,
                  list_files: Callable[[Path], Iterator[Path]] = Path.iterdir):
@@ -31,17 +26,11 @@ class EwbDataFilePaths:
         :param base_dir: The root directory of the EWB data structure.
         :param create_path: Create the root directory (and any missing parent folders) if it does not exist.
         """
-
-        if create_directories_func is not None:
-            self.create_directories_func = create_directories_func
-        if is_directory is not None:
-            self.is_directory = is_directory
-        if exists is not None:
-            self.exists = exists
-        if list_files is not None:
-            self.list_files = list_files
-        if base_dir is not None:
-            self._base_dir = base_dir
+        self.create_directories_func = create_directories_func
+        self.is_directory = is_directory
+        self.exists = exists
+        self.list_files = list_files
+        self._base_dir = base_dir
 
         if create_path:
             self.create_directories_func(base_dir)
@@ -150,7 +139,8 @@ class EwbDataFilePaths:
         if self.exists(date_path):
             return date_path
         else:
-            return self.create_directories_func(date_path)
+            self.create_directories_func(date_path)
+            return date_path
 
     def _to_dated_path(self, database_date: date, file: str) -> Path:
         return self._base_dir.joinpath(str(database_date), f"{database_date}-{file}.sqlite")
@@ -183,7 +173,7 @@ class EwbDataFilePaths:
                 "INTERNAL ERROR: Should only be calling `check_exists` for `per_date` files, which should all be covered above, so go ahead and add it.")
         return self.exists(model_path)
 
-    def find_closest(self, database_type: DatabaseType, max_days_to_search: int = 999999, target_date: date = date.today(), search_forwards: bool = False) -> \
+    def find_closest(self, database_type: DatabaseType, max_days_to_search: int = 999, target_date: date = date.today(), search_forwards: bool = False) -> \
         Optional[date]:
         """
         Find the closest date with a usable database of the specified type.

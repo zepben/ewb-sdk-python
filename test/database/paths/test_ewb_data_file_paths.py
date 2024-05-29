@@ -48,7 +48,7 @@ def test_creates_missing_root_directory_if_requested():
 def test_formats_paths():
     ewb_paths = EwbDataFilePaths(base_dir,
                                  create_path=False,
-                                 create_directories_func=lambda _: Path(),
+                                 create_directories_func=lambda _: None,
                                  is_directory=lambda _: True,
                                  exists=lambda _: True,
                                  list_files=lambda _: iter(list())
