@@ -19,6 +19,7 @@ module.exports = {
         "sdk-tracing",
         "sdk-persistence",
         "sdk-consumer",
-        "sdk-protection"
+        "sdk-protection",
+        "sdk-ewb-file-paths"
     ]
 };

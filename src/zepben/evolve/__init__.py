@@ -213,6 +213,9 @@ from zepben.evolve.services.common.translator.service_differences import *
 from zepben.evolve.services.common.base_service_comparator import BaseServiceComparator
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparator
 
+from zepben.evolve.database.paths.database_type import *
+from zepben.evolve.database.paths.ewb_data_file_paths import *
+
 from zepben.evolve.database.sqlite.tables.column import *
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
 from zepben.evolve.database.sqlite.tables.metadata_tables import *

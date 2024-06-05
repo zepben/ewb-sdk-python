@@ -4,7 +4,7 @@
 * None.
 
 ### New Features
-* None.
+* Added `EwbDataFilePaths` class for working with the EWB various database files
 
 ### Enhancements
 * None.
