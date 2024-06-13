@@ -7,7 +7,7 @@
 * Added `EwbDataFilePaths` class for working with the EWB various database files
 
 ### Enhancements
-* None.
+* Added feature list to documentation.
 
 ### Fixes
 * None.

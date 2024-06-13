@@ -8,6 +8,7 @@
 
 module.exports = {
     someSidebar: [
+        "sdk-overview",
         {
             type: "category",
             items: ["venv-setup", "intellij-setup"],
