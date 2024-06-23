@@ -10,7 +10,7 @@
 * Added feature list to documentation.
 
 ### Fixes
-* None.
+* Updated zepben.auth to 0.11.1 to fix incorrect audience processing when requesting tokens with Entra.
 
 ### Notes
 * None.
