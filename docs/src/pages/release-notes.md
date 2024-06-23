@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.39.0](#v0390)| `23 June 2024` |
 |[0.38.0](#v0380)| `14 May 2024` |
 |[0.37.0](#v0370)| `14 November 2023` |
 |[0.36.0](#v0360)| `29 September 2023` |
@@ -39,6 +40,25 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.39.0]
+
+### Breaking Changes
+* None.
+
+### New Features
+* Added `EwbDataFilePaths` class for working with the EWB various database files
+
+### Enhancements
+* Added feature list to documentation.
+
+### Fixes
+* Updated zepben.auth to 0.11.1 to fix incorrect audience processing when requesting tokens with Entra.
+
+### Notes
+* None.
 
 ---
 
