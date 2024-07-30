@@ -1,5 +1,4 @@
 #  Copyright 2024 Zeppelin Bend Pty Ltd
-#
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -54,4 +53,3 @@ def test_current_relay_constructor_args():
     assert cr.current_limit_1 == current_relay_args[-3]
     assert cr.inverse_time_flag == current_relay_args[-2]
     assert cr.time_delay_1 == current_relay_args[-1]
-

@@ -1,5 +1,4 @@
 #  Copyright 2024 Zeppelin Bend Pty Ltd
-#
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -52,4 +51,3 @@ class TestConnectivityTracker:
 
         tracker_copy.visit(cr2)
         assert not tracker.has_visited(cr2), "Tracker copy maintains separate tracking records"
-

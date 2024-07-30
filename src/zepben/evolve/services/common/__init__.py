@@ -1,5 +1,4 @@
 #  Copyright 2024 Zeppelin Bend Pty Ltd
-#
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -15,5 +14,3 @@ PBDocument.mrid = lambda self: self.io.mRID
 PBOrganisation.mrid = lambda self: self.io.mRID
 PBIdentifiedObject.name_and_mrid = lambda self: f"{self.mRID}{f' [{self.name}]' if self.name else ''}"
 PBDocument.name_and_mrid = lambda self: self.io.name_and_mrid()
-
-
