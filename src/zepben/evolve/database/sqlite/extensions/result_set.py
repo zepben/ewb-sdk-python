@@ -122,8 +122,9 @@ class ResultSet:
         if value is None:
             return self._value_or_raise(on_none)
         else:
-            # The timestamp in the database uses Z for UTC while python uses +HH:mm format, so convert between them.
-            return datetime.fromisoformat(value.rstrip('Z'))
+            # The timestamp in the database uses Z for UTC while python uses +HH:mm format, and potentially has more than 3 decimals for the fractions
+            # of seconds field, so only use the first 23 characters (yyyy-mm-ddThh:mm:ss.zzz).
+            return datetime.fromisoformat(value[:23])
 
     def get_ratio(self, numerator_column_index: int, denominator_column_index: int, on_none: Union[Optional[bool], Type[Exception]] = ValueError):
         """

@@ -24,7 +24,7 @@ class TableTransformerStarImpedances(TableIdentifiedObjects):
 
     @property
     def name(self) -> str:
-        return "transformer_star_impedance"
+        return "transformer_star_impedances"
 
     @property
     def unique_index_columns(self) -> Generator[List[Column], None, None]:

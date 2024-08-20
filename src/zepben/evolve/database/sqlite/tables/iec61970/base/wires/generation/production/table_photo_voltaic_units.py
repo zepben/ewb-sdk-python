@@ -12,4 +12,4 @@ class TablePhotoVoltaicUnits(TablePowerElectronicsUnits):
 
     @property
     def name(self) -> str:
-        return "photo_voltaic_unit"
+        return "photo_voltaic_units"

@@ -8,8 +8,9 @@ import logging
 import os
 from abc import ABC
 from contextlib import closing
+from pathlib import Path
 from sqlite3 import Connection, Cursor, OperationalError
-from typing import Callable
+from typing import Callable, Union
 
 from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.evolve.database.sqlite.common.base_service_writer import BaseServiceWriter
@@ -27,7 +28,7 @@ class BaseDatabaseWriter(ABC):
 
     def __init__(
         self,
-        database_file: str,
+        database_file: Union[Path, str],
         database_tables: BaseDatabaseTables,
         create_metadata_writer: Callable[[], MetadataCollectionWriter],
         create_service_writer: Callable[[], BaseServiceWriter],
@@ -39,7 +40,7 @@ class BaseDatabaseWriter(ABC):
         The logger to use for this database writer.
         """
 
-        self._database_file: str = database_file
+        self._database_file: str = str(database_file)
         """
         The filename of the database to write.
         """

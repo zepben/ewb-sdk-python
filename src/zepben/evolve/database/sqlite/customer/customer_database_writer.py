@@ -5,8 +5,9 @@
 __all__ = ["CustomerDatabaseWriter"]
 
 import sqlite3
+from pathlib import Path
 from sqlite3 import Connection
-from typing import Callable
+from typing import Callable, Union
 
 from zepben.evolve.database.sqlite.common.base_database_writer import BaseDatabaseWriter
 from zepben.evolve.database.sqlite.common.metadata_collection_writer import MetadataCollectionWriter
@@ -27,7 +28,7 @@ class CustomerDatabaseWriter(BaseDatabaseWriter):
 
     def __init__(
         self,
-        database_file: str,
+        database_file: Union[Path, str],
         metadata: MetadataCollection,
         service: CustomerService,
         database_tables: CustomerDatabaseTables = None,

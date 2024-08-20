@@ -3,9 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import sqlite3
+from pathlib import Path
 from sqlite3 import Connection
-from typing import Callable
-
+from typing import Callable, Union
 
 __all__ = ["NetworkDatabaseWriter"]
 
@@ -28,7 +28,7 @@ class NetworkDatabaseWriter(BaseDatabaseWriter):
 
     def __init__(
         self,
-        database_file: str,
+        database_file: Union[Path, str],
         metadata: MetadataCollection,
         service: NetworkService,
         database_tables: NetworkDatabaseTables = NetworkDatabaseTables(),

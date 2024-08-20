@@ -21,7 +21,7 @@ class TableProtectionRelaySchemesProtectionRelayFunctions(SqliteTable):
 
     @property
     def name(self) -> str:
-        return "protection_relay_scheme_protection_relay_functions"
+        return "protection_relay_schemes_protection_relay_functions"
 
     @property
     def unique_index_columns(self) -> Generator[List[Column], None, None]:
