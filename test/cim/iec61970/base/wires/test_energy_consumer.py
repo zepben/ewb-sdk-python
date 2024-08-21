@@ -5,10 +5,10 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, integers, booleans, sampled_from, floats
 
-from cim.collection_validator import validate_collection_unordered
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import EnergyConsumer, EnergyConsumerPhase, PhaseShuntConnectionKind
 
 energy_consumer_kwargs = {
@@ -78,11 +78,13 @@ def test_energy_consumer_constructor_args():
 
 
 def test_phases_collection():
-    validate_collection_unordered(EnergyConsumer,
-                                  lambda mrid, _: EnergyConsumerPhase(mrid),
-                                  EnergyConsumer.num_phases,
-                                  EnergyConsumer.get_phase,
-                                  EnergyConsumer.phases,
-                                  EnergyConsumer.add_phase,
-                                  EnergyConsumer.remove_phase,
-                                  EnergyConsumer.clear_phases)
+    validate_unordered_1234567890(
+        EnergyConsumer,
+        lambda mrid: EnergyConsumerPhase(mrid),
+        EnergyConsumer.phases,
+        EnergyConsumer.num_phases,
+        EnergyConsumer.get_phase,
+        EnergyConsumer.add_phase,
+        EnergyConsumer.remove_phase,
+        EnergyConsumer.clear_phases
+    )

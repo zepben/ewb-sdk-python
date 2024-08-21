@@ -160,7 +160,7 @@ class ConductingEquipment(Equipment):
         if self._validate_reference(terminal, self.get_terminal_by_mrid, "A Terminal"):
             return True
 
-        if self._validate_reference_by_sn(terminal.sequence_number, terminal, self.get_terminal_by_sn, "A Terminal"):
+        if self._validate_reference_by_field(terminal, terminal.sequence_number, self.get_terminal_by_sn, "sequence_number"):
             return True
 
         if not terminal.conducting_equipment:

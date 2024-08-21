@@ -2,23 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import sys
+
+from unittest.mock import patch, MagicMock
 
 import pytest
 
 from zepben.evolve import Junction
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_traversal import ConnectedEquipmentTraversal
-
-# AsyncMock was not included in the base module until 3.8, so use the backport instead if required
-v = sys.version_info
-if v.major == 3 and v.minor < 8:
-    # noinspection PyPackageRequirements
-    # noinspection PyUnresolvedReferences
-    # pylint: disable=import-error
-    from mock import patch, MagicMock
-    # pylint: enable=import-error
-else:
-    from unittest.mock import patch, MagicMock
 
 
 class TestConnectedEquipmentTraversal:

@@ -6,9 +6,9 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, verify_line_constructor_args, line_kwargs, \
     line_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import Circuit, Loop, Terminal, Substation
 
 circuit_kwargs = {
@@ -50,22 +50,26 @@ def test_circuit_constructor_args():
 
 
 def test_end_terminals_collection():
-    validate_collection_unordered(Circuit,
-                                  lambda mrid, _: Terminal(mrid),
-                                  Circuit.num_end_terminals,
-                                  Circuit.get_end_terminal,
-                                  Circuit.end_terminals,
-                                  Circuit.add_end_terminal,
-                                  Circuit.remove_end_terminal,
-                                  Circuit.clear_end_terminals)
+    validate_unordered_1234567890(
+        Circuit,
+        lambda mrid: Terminal(mrid),
+        Circuit.end_terminals,
+        Circuit.num_end_terminals,
+        Circuit.get_end_terminal,
+        Circuit.add_end_terminal,
+        Circuit.remove_end_terminal,
+        Circuit.clear_end_terminals
+    )
 
 
 def test_end_substations_collection():
-    validate_collection_unordered(Circuit,
-                                  lambda mrid, _: Substation(mrid),
-                                  Circuit.num_end_substations,
-                                  Circuit.get_end_substation,
-                                  Circuit.end_substations,
-                                  Circuit.add_end_substation,
-                                  Circuit.remove_end_substation,
-                                  Circuit.clear_end_substations)
+    validate_unordered_1234567890(
+        Circuit,
+        lambda mrid: Substation(mrid),
+        Circuit.end_substations,
+        Circuit.num_end_substations,
+        Circuit.get_end_substation,
+        Circuit.add_end_substation,
+        Circuit.remove_end_substation,
+        Circuit.clear_end_substations
+    )

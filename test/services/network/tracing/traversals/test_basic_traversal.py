@@ -106,7 +106,7 @@ async def test_runs_all_stop_checks():
 async def test_runs_all_step_actions():
     step_calls = [0, 0, 0]
 
-    async def queue_nothing(_: int, _2: bool):
+    def queue_nothing(_: int, _2: bool):
         pass
 
     def set_step_call(stop_calls_i: int):
@@ -124,7 +124,7 @@ async def test_runs_all_step_actions():
 @pytest.mark.asyncio
 async def test_stop_checking_actions_are_triggered_correctly():
     # We do not bother with the queue next as we will just prime the queue with what we want to test.
-    async def queue_nothing(_: int, _2: bool):
+    def queue_nothing(_: int, _2: bool):
         pass
 
     stepped_on = set()

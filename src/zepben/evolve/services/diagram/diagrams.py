@@ -61,7 +61,7 @@ class DiagramService(BaseService):
         `diagram_object` The `DiagramObject` to disassociate with this service.
         Returns True if the `DiagramObject` was removed successfully.
         """
-        return super(DiagramService, self).remove(diagram_object) and self._remove_index(diagram_object)
+        return super().remove(diagram_object) and self._remove_index(diagram_object)
 
     def _add_index(self, diagram_object: DiagramObject) -> bool:
         """

@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxiliary_equipment_kwargs, verify_auxiliary_equipment_constructor_default, \
-    verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
 from hypothesis.strategies import lists, builds
 
-from cim.collection_validator import validate_collection_unordered
+from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxiliary_equipment_kwargs, verify_auxiliary_equipment_constructor_default, \
+    verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import Sensor, ProtectionRelayFunction
 
 sensor_kwargs = {
@@ -35,11 +35,13 @@ def verify_sensor_constructor_args(sn: Sensor):
 
 
 def test_relay_functions_collection():
-    validate_collection_unordered(Sensor,
-                                  lambda mrid, _: ProtectionRelayFunction(mrid),
-                                  Sensor.num_relay_functions,
-                                  Sensor.get_relay_function,
-                                  Sensor.relay_functions,
-                                  Sensor.add_relay_function,
-                                  Sensor.remove_relay_function,
-                                  Sensor.clear_relay_function)
+    validate_unordered_1234567890(
+        Sensor,
+        lambda mrid: ProtectionRelayFunction(mrid),
+        Sensor.relay_functions,
+        Sensor.num_relay_functions,
+        Sensor.get_relay_function,
+        Sensor.add_relay_function,
+        Sensor.remove_relay_function,
+        Sensor.clear_relay_function
+    )

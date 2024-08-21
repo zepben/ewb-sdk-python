@@ -6,10 +6,10 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds, sampled_from
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61968.common.test_organisation_role import organisation_role_kwargs, verify_organisation_role_constructor_default, \
     verify_organisation_role_constructor_kwargs, \
     verify_organisation_role_constructor_args, organisation_role_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import Customer, CustomerKind, CustomerAgreement
 
 customer_kwargs = {
@@ -51,11 +51,13 @@ def test_customer_constructor_args():
 
 
 def test_customer_agreements_collection():
-    validate_collection_unordered(Customer,
-                                  lambda mrid, _: CustomerAgreement(mrid),
-                                  Customer.num_agreements,
-                                  Customer.get_agreement,
-                                  Customer.agreements,
-                                  Customer.add_agreement,
-                                  Customer.remove_agreement,
-                                  Customer.clear_agreements)
+    validate_unordered_1234567890(
+        Customer,
+        lambda mrid: CustomerAgreement(mrid),
+        Customer.agreements,
+        Customer.num_agreements,
+        Customer.get_agreement,
+        Customer.add_agreement,
+        Customer.remove_agreement,
+        Customer.clear_agreements
+    )

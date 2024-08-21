@@ -5,10 +5,10 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim.collection_validator import validate_collection_ordered
+from cim.cim_creators import create_position_point
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.cim_creators import create_position_point
+from cim.private_collection_validator import validate_ordered_other_1234567890
 from zepben.evolve import Location, PositionPoint, StreetAddress
 
 location_kwargs = {
@@ -48,12 +48,16 @@ def test_location_constructor_args():
 
 def test_points_collection():
     # noinspection PyArgumentList
-    validate_collection_ordered(Location,
-                                lambda i, _: PositionPoint(i, i),
-                                Location.num_points,
-                                Location.get_point,
-                                Location.points,
-                                Location.add_point,
-                                Location.insert_point,
-                                Location.remove_point,
-                                Location.clear_points)
+    validate_ordered_other_1234567890(
+        Location,
+        lambda i: PositionPoint(i, i),
+        Location.points,
+        Location.num_points,
+        Location.get_point,
+        Location.for_each_point,
+        Location.add_point,
+        Location.insert_point,
+        Location.remove_point,
+        Location.remove_point_by_sequence_number,
+        Location.clear_points
+    )

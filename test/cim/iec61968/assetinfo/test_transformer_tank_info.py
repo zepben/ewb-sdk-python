@@ -6,9 +6,9 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo
 
 transformer_tank_info_kwargs = {
@@ -44,11 +44,13 @@ def test_transformer_tank_info_constructor_args():
 
 def test_transformer_tank_info_collection():
     # noinspection PyArgumentList
-    validate_collection_unordered(TransformerTankInfo,
-                                  lambda mrid, _: TransformerEndInfo(mrid),
-                                  TransformerTankInfo.num_transformer_end_infos,
-                                  TransformerTankInfo.get_transformer_end_info,
-                                  TransformerTankInfo.transformer_end_infos,
-                                  TransformerTankInfo.add_transformer_end_info,
-                                  TransformerTankInfo.remove_transformer_end_info,
-                                  TransformerTankInfo.clear_transformer_end_infos)
+    validate_unordered_1234567890(
+        TransformerTankInfo,
+        lambda mrid: TransformerEndInfo(mrid),
+        TransformerTankInfo.transformer_end_infos,
+        TransformerTankInfo.num_transformer_end_infos,
+        TransformerTankInfo.get_transformer_end_info,
+        TransformerTankInfo.add_transformer_end_info,
+        TransformerTankInfo.remove_transformer_end_info,
+        TransformerTankInfo.clear_transformer_end_infos
+    )

@@ -5,9 +5,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
-
-from dataclassy import dataclass
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -16,10 +15,14 @@ if TYPE_CHECKING:
 __all__ = ["Name"]
 
 
-@dataclass(slots=True)
+#
+# NOTE: unsafe_hash is used as we can't mark this class frozen due to needing to update/lazy initialise the identified_object, which shouldn't change once
+#       it has been initialised.
+#
+@dataclass(unsafe_hash=True)
 class Name:
     """
-    The Name class provides the means to define any number of human readable names for an object. A name is **not** to be used for defining inter-object
+    The Name class provides the means to define any number of human-readable names for an object. A name is **not** to be used for defining inter-object
     relationships. For inter-object relationships instead use the object identification 'mRID'.
     """
 

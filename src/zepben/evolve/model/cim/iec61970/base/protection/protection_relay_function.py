@@ -5,18 +5,17 @@
 
 from __future__ import annotations
 
-from dataclasses import field
-from typing import Optional, List, TYPE_CHECKING, Generator, Iterable
+from typing import Optional, List, Generator, Iterable, Callable
 
-from zepben.evolve.util import require, nlen, ngen, safe_remove, get_by_mrid
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
+from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
 from zepben.evolve.model.cim.iec61970.base.protection.relay_setting import RelaySetting
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
-from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import ProtectionKind
 from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import PowerDirectionKind
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
-from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
-from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
+from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import ProtectionKind
+from zepben.evolve.util import require, nlen, ngen, safe_remove, get_by_mrid
 __all__ = ["ProtectionRelayFunction"]
 
 
@@ -96,6 +95,15 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return ngen(self._thresholds)
 
+    def for_each_threshold(self, action: Callable[[int, RelaySetting], None]):
+        """
+        Call the `action` on each :class:`RelaySetting` in the `thresholds` collection
+
+        :param action: An action to apply to each :class:`RelaySetting` in the `thresholds` collection, taking the index of the threshold, and the threshold itself.
+        """
+        for index, point in enumerate(self.thresholds):
+            action(index, point)
+
     def add_threshold(self, threshold: RelaySetting, sequence_number: int = None) -> ProtectionRelayFunction:
         """
         Add a threshold[:class:`RelaySetting`] to this :class:`ProtectionRelayFunction`'s list of thresholds.
@@ -109,7 +117,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         require(0 <= sequence_number <= self.num_thresholds(),
                 lambda: f"Unable to add RelaySetting to {str(self)}. Sequence number {sequence_number} "
                         f"is invalid. Expected a value between 0 and {self.num_thresholds()}. Make sure you are "
-                        f"adding the thresholds in the correct order and there are no gaps in the numbering.")
+                        f"adding the items in order and there are no gaps in the numbering.")
         self._thresholds = list() if self._thresholds is None else self._thresholds
         self._thresholds.insert(sequence_number, threshold)
         return self
@@ -122,7 +130,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return nlen(self._thresholds)
 
-    def get_threshold(self, sequence_number: int) -> Optional[RelaySetting]:
+    def get_threshold(self, sequence_number: int) -> RelaySetting:
         """
         Get the threshold[:class:`RelaySetting`] for this :class:`ProtectionRelayFunction` by its `sequence_number`.
 
@@ -135,15 +143,27 @@ class ProtectionRelayFunction(PowerSystemResource):
         else:
             raise IndexError(sequence_number)
 
-    def remove_threshold(self, threshold: Optional[RelaySetting]) -> ProtectionRelayFunction:
+    def remove_threshold(self, threshold: RelaySetting) -> ProtectionRelayFunction:
         """
         Removes a threshold[:class:`RelaySetting`] from this :class:`ProtectionRelayFunction`.
 
-        :param threshold: The threshold[:class:`RelaySetting`]  to disassociate from this :class:`ProtectionRelayFunction`.
+        :param threshold: The threshold[:class:`RelaySetting`] to disassociate from this :class:`ProtectionRelayFunction`.
         :returns: A reference to this :class:`ProtectionRelayFunction` for fluent use.
         """
         self._thresholds = safe_remove(self._thresholds, threshold)
         return self
+
+    def remove_threshold_at(self, sequence_number: int) -> RelaySetting:
+        """
+        Removes a threshold[:class:`RelaySetting`] from this :class:`ProtectionRelayFunction`.
+
+        :param sequence_number: The sequence_number of the threshold[:class:`RelaySetting`] to disassociate from this :class:`ProtectionRelayFunction`.
+        :returns: A reference to removed threshold[:class:`RelaySetting`].
+        :raises IndexError: If `sequence_number` is out of range.
+        """
+        threshold = self.get_threshold(sequence_number)
+        self._thresholds = safe_remove(self._thresholds, threshold)
+        return threshold
 
     def clear_thresholds(self) -> ProtectionRelayFunction:
         """
@@ -163,6 +183,15 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return ngen(self._time_limits)
 
+    def for_each_time_limit(self, action: Callable[[int, float], None]):
+        """
+        Call the `action` on each time limit in the `time_limits` collection
+
+        :param action: An action to apply to each time limit in the `time_limits` collection, taking the index of the limit, and the limit itself.
+        """
+        for index, limit in enumerate(self.time_limits):
+            action(index, limit)
+
     def add_time_limit(self, time_limit: float, index: int = None) -> ProtectionRelayFunction:
         """
         Add a time limit.
@@ -176,7 +205,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         require(0 <= index <= self.num_time_limits(),
                 lambda: f"Unable to add float to {str(self)}. Sequence number {index} "
                         f"is invalid. Expected a value between 0 and {self.num_time_limits()}. Make sure you are "
-                        f"adding the time_limits in the correct order and there are no gaps in the numbering.")
+                        f"adding the items in order and there are no gaps in the numbering.")
         self._time_limits = list() if self._time_limits is None else self._time_limits
         self._time_limits.insert(index, time_limit)
         return self
@@ -197,7 +226,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         else:
             raise IndexError(index)
 
-    def remove_time_limit_by_time_limit(self, time_limit: float) -> ProtectionRelayFunction:
+    def remove_time_limit(self, time_limit: float) -> ProtectionRelayFunction:
         """
         Remove a time limit from the list.
 
@@ -207,19 +236,19 @@ class ProtectionRelayFunction(PowerSystemResource):
         self._time_limits = safe_remove(self._time_limits, time_limit)
         return self
 
-    def remove_time_limit(self, index: int) -> Optional[float]:
+    def remove_time_limit_at(self, index: int) -> float:
         """
         Remove a time limit from the list.
 
         :param index: The time limit to remove.
         :returns: The time limit that was removed, or `None` if no time limit was present at `index`.
+        :raises IndexError: If `sequence_number` is out of range.
         """
         if self._time_limits:
-            try:
-                return self._time_limits.pop(index)
-            except IndexError:
-                return None
-        return None
+            limit = self._time_limits.pop(index)
+            self._time_limits = self._time_limits if self._time_limits else None
+            return limit
+        raise IndexError(index)
 
     def clear_time_limits(self) -> ProtectionRelayFunction:
         """
@@ -239,12 +268,13 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return ngen(self._sensors)
 
-    def get_sensor(self, mrid: str) -> Optional[Sensor]:
+    def get_sensor(self, mrid: str) -> Sensor:
         """
         Get a sensor :class:`Sensor` for this :class:`ProtectionRelayFunction` by its mrid.
 
         :param mrid: The mrid of the desired :class:`Sensor`.
         :returns: The :class:`Sensor` with the specified mrid if it exists, otherwise None.
+        :raises KeyError: If `mrid` wasn't present.
         """
         return get_by_mrid(self._sensors, mrid)
 
@@ -298,12 +328,13 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return ngen(self._protected_switches)
 
-    def get_protected_switch(self, mrid: str) -> Optional[ProtectedSwitch]:
+    def get_protected_switch(self, mrid: str) -> ProtectedSwitch:
         """
         Get a :class:`ProtectedSwitch` operated by this :class:`ProtectionRelayFunction` by its mrid.
 
         :param mrid: The mrid of the desired :class:`ProtectedSwitch`.
         :returns: The :class:`ProtectedSwitch` with the specified mrid if it exists, otherwise None.
+        :raises KeyError: If `mrid` wasn't present.
         """
         return get_by_mrid(self._protected_switches, mrid)
 
@@ -357,12 +388,13 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return ngen(self._schemes)
 
-    def get_scheme(self, mrid: str) -> Optional[ProtectionRelayScheme]:
+    def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
         """
         Get a :class:`ProtectionRelayScheme` this :class:`ProtectionRelayFunction` operates under by its mRID.
 
         :param mrid: The mRID of the desired :class:`ProtectionRelayScheme`.
         :returns: The :class:`ProtectionRelayScheme` with the specified mrid if it exists, otherwise None.
+        :raises KeyError: If `mrid` wasn't present.
         """
         return get_by_mrid(self._schemes, mrid)
 

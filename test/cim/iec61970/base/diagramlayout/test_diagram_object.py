@@ -5,10 +5,10 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds, text, floats
 
-from cim.collection_validator import validate_collection_ordered
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
+from cim.private_collection_validator import validate_ordered_other_1234567890
 from zepben.evolve import DiagramObject, DiagramObjectPoint, Diagram
 
 diagram_object_kwargs = {
@@ -65,12 +65,16 @@ def test_diagram_object_constructor_args():
 
 def test_points_collection():
     # noinspection PyArgumentList
-    validate_collection_ordered(DiagramObject,
-                                lambda i, _: DiagramObjectPoint(i, i),
-                                DiagramObject.num_points,
-                                DiagramObject.get_point,
-                                DiagramObject.points,
-                                DiagramObject.add_point,
-                                DiagramObject.insert_point,
-                                DiagramObject.remove_point,
-                                DiagramObject.clear_points)
+    validate_ordered_other_1234567890(
+        DiagramObject,
+        lambda i: DiagramObjectPoint(i, i),
+        DiagramObject.points,
+        DiagramObject.num_points,
+        DiagramObject.get_point,
+        DiagramObject.for_each_point,
+        DiagramObject.add_point,
+        DiagramObject.insert_point,
+        DiagramObject.remove_point,
+        DiagramObject.remove_point_by_sequence_number,
+        DiagramObject.clear_points
+    )

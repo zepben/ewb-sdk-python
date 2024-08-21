@@ -6,10 +6,10 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, booleans, text, integers
 
-from cim.collection_validator import validate_collection_unordered
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import UsagePoint, Location, Equipment, EndDevice
 
 usage_point_kwargs = {
@@ -74,24 +74,27 @@ def test_usage_point_constructor_args():
     assert list(up.end_devices) == usage_point_args[-1]
 
 
-
 def test_equipment_collection():
-    validate_collection_unordered(UsagePoint,
-                                  lambda mrid, _: Equipment(mrid),
-                                  UsagePoint.num_equipment,
-                                  UsagePoint.get_equipment,
-                                  UsagePoint.equipment,
-                                  UsagePoint.add_equipment,
-                                  UsagePoint.remove_equipment,
-                                  UsagePoint.clear_equipment)
+    validate_unordered_1234567890(
+        UsagePoint,
+        lambda mrid: Equipment(mrid),
+        UsagePoint.equipment,
+        UsagePoint.num_equipment,
+        UsagePoint.get_equipment,
+        UsagePoint.add_equipment,
+        UsagePoint.remove_equipment,
+        UsagePoint.clear_equipment
+    )
 
 
 def test_end_devices_collection():
-    validate_collection_unordered(UsagePoint,
-                                  lambda mrid, _: EndDevice(mrid),
-                                  UsagePoint.num_end_devices,
-                                  UsagePoint.get_end_device,
-                                  UsagePoint.end_devices,
-                                  UsagePoint.add_end_device,
-                                  UsagePoint.remove_end_device,
-                                  UsagePoint.clear_end_devices)
+    validate_unordered_1234567890(
+        UsagePoint,
+        lambda mrid: EndDevice(mrid),
+        UsagePoint.end_devices,
+        UsagePoint.num_end_devices,
+        UsagePoint.get_end_device,
+        UsagePoint.add_end_device,
+        UsagePoint.remove_end_device,
+        UsagePoint.clear_end_devices
+    )

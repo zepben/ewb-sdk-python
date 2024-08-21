@@ -6,11 +6,9 @@
 from __future__ import annotations
 
 import warnings
+from dataclasses import dataclass
 from typing import List, Optional, Generator
 
-from dataclassy import dataclass, Internal
-
-from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
@@ -24,6 +22,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.transformer_cooling_type import
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.vector_group import VectorGroup
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import WindingConnection
+from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.util import require, nlen, get_by_mrid, ngen, safe_remove
 
 __all__ = ["TapChanger", "RatioTapChanger", "PowerTransformer", "PowerTransformerEnd", "TransformerEnd", "TransformerEndRatedS"]
@@ -231,7 +230,7 @@ class TransformerEnd(IdentifiedObject):
             self._terminal = value
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True)
 class TransformerEndRatedS:
     cooling_type: TransformerCoolingType
     rated_s: int
@@ -243,7 +242,7 @@ class PowerTransformerEnd(TransformerEnd):
 
     The impedance values r, r0, x, and x0 of a PowerTransformerEnd represents a star equivalent as follows
 
-    1) for a two Terminal PowerTransformer the high voltage PowerTransformerEnd has non zero values on r, r0, x, and x0
+    1) for a two Terminal PowerTransformer the high voltage PowerTransformerEnd has non-zero values on r, r0, x, and x0
     while the low voltage PowerTransformerEnd has zero values for r, r0, x, and x0.
     2) for a three Terminal PowerTransformer the three PowerTransformerEnds represents a star equivalent with each leg
     in the star represented by r, r0, x, and x0 values.
@@ -363,60 +362,49 @@ class PowerTransformerEnd(TransformerEnd):
     def num_ratings(self) -> int:
         return nlen(self._s_ratings)
 
-    def get_rating_by_rated_s(self, rated_s: int) -> Optional[TransformerEndRatedS]:
-        if self._s_ratings:
-            for s_rating in self._s_ratings:
-                if s_rating.rated_s == rated_s:
-                    return s_rating
-        return None
-
-    def get_rating_by_cooling_type(self, cooling_type: TransformerCoolingType) -> Optional[TransformerEndRatedS]:
+    def get_rating(self, cooling_type: TransformerCoolingType) -> TransformerEndRatedS:
         if self._s_ratings:
             for s_rating in self._s_ratings:
                 if s_rating.cooling_type == cooling_type:
                     return s_rating
-        return None
+        raise KeyError(cooling_type)
 
-    def add_rating(self, cooling_type: TransformerCoolingType, rated_s: int) -> PowerTransformerEnd:
-        return self.add_transformer_end_rated_s(TransformerEndRatedS(cooling_type, rated_s))
-
-    def add_transformer_end_rated_s(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
+    def add_rating(self, rated_s: int, cooling_type: TransformerCoolingType = TransformerCoolingType.UNKNOWN_COOLING_TYPE) -> PowerTransformerEnd:
         self._s_ratings = self._s_ratings if self._s_ratings else list()
 
         for s_rating in self._s_ratings:
-            if s_rating.cooling_type == transformer_end_rated_s.cooling_type:
-                raise ValueError(f"A rating for coolingType {transformer_end_rated_s.cooling_type.name} already exists, please remove it first.")
+            if s_rating.cooling_type == cooling_type:
+                raise ValueError(f"A rating for coolingType {cooling_type.name} already exists, please remove it first.")
 
-        self._s_ratings.append(transformer_end_rated_s)
-        self._s_ratings.sort(key=lambda t: t.rated_s, reverse=True)
+        self._s_ratings.append(TransformerEndRatedS(cooling_type, rated_s))
+
+        def sort_by_rated_s(t: TransformerEndRatedS) -> int:
+            return t.rated_s
+
+        self._s_ratings.sort(key=sort_by_rated_s, reverse=True)
+
         return self
+
+    def add_transformer_end_rated_s(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
+        return self.add_rating(transformer_end_rated_s.rated_s, transformer_end_rated_s.cooling_type)
 
     def remove_rating(self, transformer_end_rated_s: TransformerEndRatedS) -> PowerTransformerEnd:
         self._s_ratings = safe_remove(self._s_ratings, transformer_end_rated_s)
         return self
 
-    def remove_rating_by_cooling_type(self, cooling_type: TransformerCoolingType) -> Optional[TransformerEndRatedS]:
+    def remove_rating_by_cooling_type(self, cooling_type: TransformerCoolingType) -> TransformerEndRatedS:
         if self._s_ratings:
             for transformer_end_rated_s in self._s_ratings:
                 if transformer_end_rated_s.cooling_type == cooling_type:
                     self._s_ratings.remove(transformer_end_rated_s)
+                    self._s_ratings = self._s_ratings if self._s_ratings else None
                     return transformer_end_rated_s
-        return None
-
-    def remove_rating_by_rated_s(self, rated_s: int) -> Optional[TransformerEndRatedS]:
-        if self._s_ratings:
-            for transformer_end_rated_s in self._s_ratings:
-                if transformer_end_rated_s.rated_s == rated_s:
-                    self._s_ratings.remove(transformer_end_rated_s)
-                    return transformer_end_rated_s
-        return None
+        raise IndexError(cooling_type)
 
     def clear_ratings(self) -> PowerTransformerEnd:
         self._s_ratings = None
         return self
 
-    # noinspection PyUnusedLocal
-    # pylint: disable=unused-argument
     def resistance_reactance(self):
         """
         Get the `ResistanceReactance` for this `PowerTransformerEnd` from either:
@@ -430,9 +418,9 @@ class PowerTransformerEnd(TransformerEnd):
         ResistanceReactance(self.r, self.x, self.r0, self.x0).merge_if_incomplete(
             lambda: self.star_impedance.resistance_reactance() if self.star_impedance is not None else None
         ).merge_if_incomplete(
-            lambda: self.power_transformer.asset_info.resistance_reactance(self.end_number) if self.power_transformer.asset_info is not None else None
+            lambda: self.power_transformer.power_transformer_info.resistance_reactance(self.end_number) if self.power_transformer.asset_info is not None
+            else None
         )
-    # pylint: enable=unused-argument
 
 
 class PowerTransformer(ConductingEquipment):
@@ -620,7 +608,7 @@ class PowerTransformer(ConductingEquipment):
         if self._validate_reference(end, self.get_end_by_mrid, "A PowerTransformerEnd"):
             return True
 
-        if self._validate_reference_by_sn(end.end_number, end, self.get_end_by_num, "A PowerTransformerEnd", "end_number"):
+        if self._validate_reference_by_field(end, end.end_number, self.get_end_by_num, "end_number"):
             return True
 
         if not end.power_transformer:

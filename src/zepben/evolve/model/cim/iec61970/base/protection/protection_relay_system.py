@@ -36,12 +36,13 @@ class ProtectionRelaySystem(Equipment):
         """
         return ngen(self._schemes)
 
-    def get_scheme(self, mrid: str) -> Optional[ProtectionRelayScheme]:
+    def get_scheme(self, mrid: str) -> ProtectionRelayScheme:
         """
         Get a :class:`ProtectionRelayScheme` for this :class:`ProtectionRelaySystem` by its mRID.
 
         :param mrid: The mRID of the desired :class:`ProtectionRelayScheme`.
         :returns: The :class:`ProtectionRelayScheme` with the specified mrid if it exists, otherwise None.
+        :raises KeyError: If `mrid` wasn't present.
         """
         return get_by_mrid(self._schemes, mrid)
 

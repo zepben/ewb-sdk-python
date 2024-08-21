@@ -39,12 +39,13 @@ class ProtectionRelayScheme(IdentifiedObject):
         """
         return ngen(self._functions)
 
-    def get_function(self, mrid: str) -> Optional[ProtectionRelayFunction]:
+    def get_function(self, mrid: str) -> ProtectionRelayFunction:
         """
         Get a :class:`ProtectionRelayFunction` operated as part of this :class:`ProtectionRelayScheme`.
 
         :param mrid: The mrid of the desired :class:`ProtectionRelayFunction`.
         :returns: The :class:`ProtectionRelayFunction` with the specified mrid if it exists, otherwise None.
+        :raises KeyError: If `mrid` wasn't present.
         """
         return get_by_mrid(self._functions, mrid)
 

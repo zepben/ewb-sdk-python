@@ -9,7 +9,7 @@ from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import builds, integers, floats, sampled_from
 
-from cim.collection_validator import validate_collection
+from cim.private_collection_validator import validate_unordered_other_1234567890
 from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
     verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
@@ -76,6 +76,7 @@ def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, ra
     verify_transformer_end_constructor_kwargs(pte, **kwargs)
     assert pte.power_transformer == power_transformer
     assert pte.rated_s == rated_s
+    # noinspection PyArgumentList
     assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, rated_s)]
     assert pte.rated_u == rated_u
     assert pte.r == r
@@ -109,19 +110,18 @@ def test_power_transformer_end_constructor_args():
     assert pte.connection_kind == power_transformer_end_args[-2]
     assert pte.phase_angle_clock == power_transformer_end_args[-1]
 
-
 def test_power_transformer_end_s_ratings():
-    validate_collection(
+    validate_unordered_other_1234567890(
         PowerTransformerEnd,
-        lambda i, _: TransformerEndRatedS(cooling_type=TransformerCoolingType(int(i)), rated_s=int(i)),  # how python?
-        PowerTransformerEnd.num_ratings,
-        lambda pte, rs: pte.get_rating_by_rated_s(rs.rated_s),  # how python?
+        lambda i: TransformerEndRatedS(cooling_type=TransformerCoolingType(int(i)), rated_s=int(i)),  # how python?
         PowerTransformerEnd.s_ratings,
+        PowerTransformerEnd.num_ratings,
+        PowerTransformerEnd.get_rating,
         PowerTransformerEnd.add_transformer_end_rated_s,
         PowerTransformerEnd.remove_rating,
         PowerTransformerEnd.clear_ratings,
-        lambda _, dup: rf"A rating for coolingType {dup.cooling_type.name} already exists, please remove it first.",
-        support_duplicates=False
+        lambda rs: rs.cooling_type,
+        lambda ct: ct.name
     )
 
 
@@ -134,18 +134,19 @@ def test_power_transformer_cant_add_rating_with_same_cooling_type():
         s_rating2 = TransformerEndRatedS(TransformerCoolingType.KNAF, 2)
         pte.add_transformer_end_rated_s(s_rating2)
     with raises(ValueError, match=re.escape("A rating for coolingType KNAF already exists, please remove it first.")):
-        pte.add_rating(TransformerCoolingType.KNAF, 3)
+        pte.add_rating(3, TransformerCoolingType.KNAF)
 
 
 def test_power_transformer_remove_rating_by_cooling_type():
     pte = PowerTransformerEnd()
     for index, cooling_type in enumerate(TransformerCoolingType):
-        pte.add_rating(cooling_type, index * 10)
+        pte.add_rating(index * 10, cooling_type)
 
     for index, cooling_type in enumerate(TransformerCoolingType):
         assert pte.remove_rating_by_cooling_type(cooling_type) == TransformerEndRatedS(cooling_type, index * 10)
         assert pte.num_ratings() == len(TransformerCoolingType) - (index + 1)
-        assert pte.get_rating_by_cooling_type(cooling_type) is None
+        with pytest.raises(KeyError):
+            pte.get_rating(cooling_type)
 
 
 def test_power_transformer_rated_s_backwards_compatibility():
@@ -155,13 +156,13 @@ def test_power_transformer_rated_s_backwards_compatibility():
     assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 1)]
     assert pte.num_ratings() == 1
     pte.rated_s = None
-    assert pte.rated_s == None
+    assert pte.rated_s is None
     assert not list(pte.s_ratings)
     assert pte.num_ratings() == 0
 
     # s_rating's can be added on top of rated_s but adding rated_s clears any existing s_rating's
     pte.rated_s = 2
-    pte.add_rating(TransformerCoolingType.KNAF, 333)
+    pte.add_rating(333, TransformerCoolingType.KNAF)
     assert pte.num_ratings() == 2
     pte.rated_s = 4
     assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 4)]

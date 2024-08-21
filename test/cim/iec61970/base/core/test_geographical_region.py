@@ -5,9 +5,9 @@
 from hypothesis import given
 from hypothesis.strategies import lists, builds
 
-from cim.collection_validator import validate_collection_unordered
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import GeographicalRegion, SubGeographicalRegion
 
 geographical_region_kwargs = {
@@ -41,11 +41,13 @@ def test_geographical_region_constructor_args():
 
 
 def test_sub_geographical_regions_collection():
-    validate_collection_unordered(GeographicalRegion,
-                                  lambda mrid, _: SubGeographicalRegion(mrid),
-                                  GeographicalRegion.num_sub_geographical_regions,
-                                  GeographicalRegion.get_sub_geographical_region,
-                                  GeographicalRegion.sub_geographical_regions,
-                                  GeographicalRegion.add_sub_geographical_region,
-                                  GeographicalRegion.remove_sub_geographical_region,
-                                  GeographicalRegion.clear_sub_geographical_regions)
+    validate_unordered_1234567890(
+        GeographicalRegion,
+        lambda mrid: SubGeographicalRegion(mrid),
+        GeographicalRegion.sub_geographical_regions,
+        GeographicalRegion.num_sub_geographical_regions,
+        GeographicalRegion.get_sub_geographical_region,
+        GeographicalRegion.add_sub_geographical_region,
+        GeographicalRegion.remove_sub_geographical_region,
+        GeographicalRegion.clear_sub_geographical_regions
+    )

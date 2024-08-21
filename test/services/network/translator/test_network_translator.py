@@ -4,7 +4,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar
 
-import pytest
 from hypothesis import given, HealthCheck, settings
 
 from database.sqlite.schema_utils import assume_non_blank_street_address_details
@@ -125,7 +124,7 @@ types_to_test = {
     ########################################
 
     "create_battery_unit": create_battery_unit(),
-    "create_photovoltaic_unit": create_photovoltaic_unit(),
+    "create_photo_voltaic_unit": create_photo_voltaic_unit(),
     "create_power_electronics_wind_unit": create_power_electronics_wind_unit(),
 
     #######################
@@ -176,14 +175,12 @@ types_to_test = {
 
 @given(**types_to_test)
 @settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.large_base_example])
-@pytest.mark.timeout(10000)
 def test_network_service_translations(**kwargs):
     validate_service_translations(NetworkService, NetworkServiceComparator(), **kwargs)
 
 
 @given(location=create_location())
 @settings(suppress_health_check=[HealthCheck.too_slow])
-@pytest.mark.timeout(10000)
 def test_network_service_translations_location(location: Location):
     assume_non_blank_street_address_details(location.main_address)
     validate_service_translations(NetworkService, NetworkServiceComparator(), location=location)

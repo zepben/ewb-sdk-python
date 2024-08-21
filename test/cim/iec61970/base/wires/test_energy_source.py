@@ -5,10 +5,10 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists, floats, booleans
 
-from cim.collection_validator import validate_collection_unordered
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import EnergySource, EnergySourcePhase
 
 energy_source_kwargs = {
@@ -171,11 +171,13 @@ def test_energy_source_constructor_args():
 
 
 def test_phases_collection():
-    validate_collection_unordered(EnergySource,
-                                  lambda mrid, _: EnergySourcePhase(mrid),
-                                  EnergySource.num_phases,
-                                  EnergySource.get_phase,
-                                  EnergySource.phases,
-                                  EnergySource.add_phase,
-                                  EnergySource.remove_phase,
-                                  EnergySource.clear_phases)
+    validate_unordered_1234567890(
+        EnergySource,
+        lambda mrid: EnergySourcePhase(mrid),
+        EnergySource.phases,
+        EnergySource.num_phases,
+        EnergySource.get_phase,
+        EnergySource.add_phase,
+        EnergySource.remove_phase,
+        EnergySource.clear_phases
+    )

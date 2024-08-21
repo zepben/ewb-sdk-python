@@ -10,6 +10,7 @@ import logging
 from enum import Enum
 from typing import TYPE_CHECKING, Dict, List, Union, Iterable
 
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode

@@ -4,10 +4,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import booleans, sampled_from, floats, builds, lists
 
-from cim.cim_creators import sampled_phase_code, create_identified_object, FLOAT_MAX, FLOAT_MIN
-from cim.collection_validator import validate_collection_unordered
+from cim.cim_creators import sampled_phase_code, FLOAT_MAX, FLOAT_MIN
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_args, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, power_system_resource_kwargs, verify_power_system_resource_constructor_args
+from cim.private_collection_validator import validate_unordered_1234567890
 from zepben.evolve import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq
 
 regulating_control_kwargs = {
@@ -90,11 +90,13 @@ def verify_regulating_control_constructor_args(rc):
 
 def test_regulating_control_regulating_conducting_equipment():
     # noinspection PyArgumentList
-    validate_collection_unordered(RegulatingControl,
-                                  lambda mrid, _: RegulatingCondEq(mrid),
-                                  RegulatingControl.num_regulating_cond_eq,
-                                  RegulatingControl.get_regulating_cond_eq,
-                                  RegulatingControl.regulating_conducting_equipment,
-                                  RegulatingControl.add_regulating_cond_eq,
-                                  RegulatingControl.remove_regulating_cond_eq,
-                                  RegulatingControl.clear_regulating_cond_eq)
+    validate_unordered_1234567890(
+        RegulatingControl,
+        lambda mrid: RegulatingCondEq(mrid),
+        RegulatingControl.regulating_conducting_equipment,
+        RegulatingControl.num_regulating_cond_eq,
+        RegulatingControl.get_regulating_cond_eq,
+        RegulatingControl.add_regulating_cond_eq,
+        RegulatingControl.remove_regulating_cond_eq,
+        RegulatingControl.clear_regulating_cond_eq
+    )

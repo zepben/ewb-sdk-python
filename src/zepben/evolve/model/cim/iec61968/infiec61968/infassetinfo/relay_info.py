@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, Callable
 
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.util import ngen, nlen, safe_remove, require
@@ -41,7 +41,7 @@ class RelayInfo(AssetInfo):
         """
         return nlen(self._reclose_delays)
 
-    def get_delay(self, index: int) -> Optional[float]:
+    def get_delay(self, index: int) -> float:
         """
         Get the reclose delay at the specified index, if it exists. Otherwise, this returns
 
@@ -49,9 +49,18 @@ class RelayInfo(AssetInfo):
         :return: The reclose delay at `index` if it exists, otherwise None.
         """
         if self._reclose_delays:
-            return self._reclose_delays[index] if index in range(len(self._reclose_delays)) else None
+            return self._reclose_delays[index]
         else:
             raise IndexError(index)
+
+    def for_each_delay(self, action: Callable[[int, float], None]):
+        """
+        Call the `action` on each delay in the `reclose_delays` collection
+
+        :param action: An action to apply to each delay in the `reclose_delays` collection, taking the index of the delay, and the delay itself.
+        """
+        for index, point in enumerate(self._reclose_delays):
+            action(index, point)
 
     def add_delay(self, delay: float, index: int = None) -> RelayInfo:
         """
@@ -66,7 +75,7 @@ class RelayInfo(AssetInfo):
         require(0 <= index <= self.num_delays(),
                 lambda: f"Unable to add float to {str(self)}. Index number {index} "
                         f"is invalid. Expected a value between 0 and {self.num_delays()}. Make sure you are "
-                        f"adding the reclose_delays in the correct order and there are no gaps in the numbering.")
+                        f"adding the items in order and there are no gaps in the numbering.")
         self._reclose_delays = list() if self._reclose_delays is None else self._reclose_delays
         self._reclose_delays.insert(index, delay)
         return self
@@ -91,19 +100,19 @@ class RelayInfo(AssetInfo):
         self._reclose_delays = safe_remove(self._reclose_delays, delay)
         return self
 
-    def remove_delay_at(self, index: int) -> Optional[float]:
+    def remove_delay_at(self, index: int) -> float:
         """
         Remove a delay from the list.
 
         :param index: The index of the delay to remove.
         :return: The delay that was removed, or `None` if no delay was present at `index`.
+        :raises IndexError: If `sequence_number` is out of range.
         """
         if self._reclose_delays:
-            try:
-                return self._reclose_delays.pop(index)
-            except IndexError:
-                return None
-        return None
+            delay = self._reclose_delays.pop(index)
+            self._reclose_delays = self._reclose_delays if self._reclose_delays else None
+            return delay
+        raise IndexError(index)
 
     def clear_delays(self) -> RelayInfo:
         """

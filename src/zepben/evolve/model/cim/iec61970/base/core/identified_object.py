@@ -4,18 +4,17 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+__all__ = ["IdentifiedObject", "TIdentifiedObject"]
 
 import logging
 from abc import ABCMeta
-from typing import Callable, Any, List, Generator, Optional, overload
+from typing import Callable, Any, List, Generator, Optional, overload, TypeVar
 
 from dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.util import require, CopyableUUID, nlen, ngen, safe_remove
-
-__all__ = ["IdentifiedObject"]
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         super(IdentifiedObject, self).__init__(**kwargs)
         if names:
             for name in names:
-                self.add_name(name.name, name.type)
+                self.add_name(name.type, name.name)
 
     def __str__(self):
         return f"{self.__class__.__name__}{{{'|'.join(a for a in (str(self.mrid), str(self.name)) if a)}}}"
@@ -62,11 +61,35 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         return nlen(self._names)
 
     @overload
-    def get_name(self, name_type: NameType, name: str) -> Optional[Name]:
+    def has_name(self, name_type: NameType, name: str) -> bool:
         ...
 
     @overload
-    def get_name(self, name_type: str, name: str) -> Optional[Name]:
+    def has_name(self, name_type: str, name: str) -> bool:
+        ...
+
+    def has_name(self, name_type, name) -> bool:
+        """
+        Check to see if this object has a `Name` with the matching `name_type` and `name`
+
+        :return: True if a matching `Name` was found, otherwise False.
+        """
+        if self._names:
+            for name_ in self._names:
+                if isinstance(name_type, str):
+                    if name_.type.name == name_type and name_.name == name:
+                        return True
+                elif isinstance(name_type, NameType):
+                    if name_.type == name_type and name_.name == name:
+                        return True
+        return False
+
+    @overload
+    def get_name(self, name_type: NameType, name: str) -> Name:
+        ...
+
+    @overload
+    def get_name(self, name_type: str, name: str) -> Name:
         ...
 
     def get_name(self, name_type, name):
@@ -74,6 +97,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         Find the `Name` with the matching `name_type` and `name`
 
         :return: The matched Name or None
+        :raises KeyError: If `name` in `name_type` wasn't present.
         """
         if self._names:
             for name_ in self._names:
@@ -83,14 +107,14 @@ class IdentifiedObject(object, metaclass=ABCMeta):
                 elif isinstance(name_type, NameType):
                     if name_.type == name_type and name_.name == name:
                         return name_
-        return None
+        raise KeyError(name_type, name)
 
     @overload
-    def get_names(self, name_type: NameType) -> Optional[Name]:
+    def get_names(self, name_type: NameType) -> List[Name]:
         ...
 
     @overload
-    def get_names(self, name_type: str) -> Optional[Name]:
+    def get_names(self, name_type: str) -> List[Name]:
         ...
 
     def get_names(self, name_type):
@@ -98,20 +122,26 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         Find all `Name` with the matching `name_type`
 
         :return: A list of matching Name or None
+        :raises KeyError: If `name_type` wasn't present.
         """
+        matches = None
         if self._names:
             if isinstance(name_type, str):
-                return [name for name in self._names if name.type.name == name_type]
+                matches = [name for name in self._names if name.type.name == name_type]
             elif isinstance(name_type, NameType):
-                return [name for name in self._names if name.type == name_type]
-        return None
+                matches = [name for name in self._names if name.type == name_type]
 
-    def add_name(self, name: str, name_type: NameType) -> IdentifiedObject:
+        if matches:
+            return matches
+        else:
+            raise KeyError(f"{name_type}")
+
+    def add_name(self, name_type: NameType, name: str) -> IdentifiedObject:
         """
         Associate a `Name` with this `IdentifiedObject`
 
-        :param name: A free string to associate with this `IdentifiedObject`.
         :param name_type: A `NameType` this `Name` belongs to.
+        :param name: A free string to associate with this `IdentifiedObject`.
         :return: A reference to this `IdentifiedObject` to allow fluent use.
         :raise ValueError: If `name` references another `IdentifiedObject`, or another `Name` already exists with the matching `type` and `name`.
         """
@@ -122,8 +152,8 @@ class IdentifiedObject(object, metaclass=ABCMeta):
             name_obj.identified_object = self
         require(name_obj.identified_object is self, lambda: f"Attempting to add a Name to {str(self)} that does not reference this identified object")
 
-        existing = self.get_name(name_obj.type, name_obj.name)
-        if existing:
+        if self.has_name(name_obj.type, name_obj.name):
+            existing = self.get_name(name_obj.type, name_obj.name)
             if existing is name_obj:
                 return self
             else:
@@ -139,11 +169,14 @@ class IdentifiedObject(object, metaclass=ABCMeta):
 
         :param name: The `Name` to disassociate from this `IdentifiedObject`.
         :return: A reference to this `IdentifiedObject` to allow fluent use.
-        :raises ValueError: Iif `name` was not associated with this `IdentifiedObject`.
+        :raises ValueError: If `name` was not associated with this `IdentifiedObject`.
         """
         self._names = safe_remove(self._names, name)
+
+        # Remove the reverse reference from the NameType if it still exists.
         if name.type.has_name(name):
             name.type.remove_name(name)
+
         return self
 
     def clear_names(self) -> IdentifiedObject:
@@ -153,8 +186,9 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         :return: A reference to this `IdentifiedObject` to allow fluent use.
         """
         for name in list(self._names):
-            if not name.type.remove_name(name):
-                name.type.remove_names(name.name)
+            self.remove_name(name)
+        self._names = None
+
         return self
 
     def _validate_reference(self, other: IdentifiedObject, getter: Callable[[str], IdentifiedObject], type_descr: str) -> bool:
@@ -174,20 +208,27 @@ class IdentifiedObject(object, metaclass=ABCMeta):
         except (KeyError, AttributeError):
             return False
 
-    def _validate_reference_by_sn(self, field: Any, other: IdentifiedObject, getter: Callable[[Any], IdentifiedObject], type_descr: str,
-                                  field_name: str = "sequence_number") -> bool:
+    def _validate_reference_by_field(self, other: IdentifiedObject, field: Any, getter: Callable[[Any], IdentifiedObject],
+                                     field_name: str) -> bool:
         """
         Validate whether a given reference exists to `other` using the provided getter function called with `field`.
 
         :param other: The object to look up with the getter using its mRID.
-        :param getter: A function that takes takes `field` and returns an `IdentifiedObject`, and throws an `IndexError` if it couldn't be found.
-        :param type_descr: The type description to use for the lazily generated error message. Should be of the form "A[n] type(other)"
+        :param field: The value of the field from `other` that needs to be validated.
+        :param getter: A function that takes `field` and returns an `IdentifiedObject`, and throws an `IndexError` if it couldn't be found.
+        :param field_name: The name of the field to use for the lazily generated error message.
         :return: True if `other` was retrieved with `getter` and was equivalent, False otherwise.
         :raises ValueError: If the object retrieved from `getter` is not `other`.
         """
         try:
             get_result = getter(field)
-            require(get_result is other, lambda: f"{type_descr} with {field_name} {field} already exists in {str(self)}")
+            require(get_result is other, lambda: f"Unable to add {other} to {self}. A {get_result} already exists with {field_name} {field}.")
             return True
         except IndexError:
             return False
+
+
+TIdentifiedObject = TypeVar("TIdentifiedObject", bound=IdentifiedObject)
+"""
+Generic type of IdentifiedObject which can be used for type hinting generics.
+"""

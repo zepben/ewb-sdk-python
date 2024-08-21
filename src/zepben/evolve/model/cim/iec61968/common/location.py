@@ -5,9 +5,8 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, Generator
-
-from dataclassy import dataclass
+from dataclasses import dataclass
+from typing import List, Optional, Generator, Callable
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import require, nlen, ngen, safe_remove
@@ -15,12 +14,12 @@ from zepben.evolve.util import require, nlen, ngen, safe_remove
 __all__ = ["PositionPoint", "Location", "StreetAddress", "TownDetail", "StreetDetail"]
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class PositionPoint(object):
     """
     Set of spatial coordinates that determine a point, defined in WGS84 (latitudes and longitudes).
 
-    Use a single position point instance to desribe a point-oriented location.
+    Use a single position point instance to describe a point-oriented location.
     Use a sequence of position points to describe a line-oriented object (physical location of non-point oriented
     objects like cables or lines), or area of an object (like a substation or a geographical zone - in this case,
     have first and last position point with the same values).
@@ -31,7 +30,7 @@ class PositionPoint(object):
     y_position: float
     """Y axis position - latitude"""
 
-    def __init__(self):
+    def __post_init__(self):
         require(-90.0 <= self.y_position <= 90.0,
                 lambda: f"Latitude is out of range. Expected -90 to 90, got {self.y_position}.")
         require(-180.0 <= self.x_position <= 180.0,
@@ -49,7 +48,7 @@ class PositionPoint(object):
         return self.y_position
 
 
-@dataclass(slots=True)
+@dataclass
 class TownDetail(object):
     """
     Town details, in the context of address.
@@ -65,7 +64,7 @@ class TownDetail(object):
         return not (self.name or self.state_or_province)
 
 
-@dataclass(slots=True)
+@dataclass
 class StreetDetail(object):
     """
     Street details, in the context of address.
@@ -102,7 +101,7 @@ class StreetDetail(object):
         )
 
 
-@dataclass(slots=True)
+@dataclass
 class StreetAddress(object):
     """
     General purpose street and postal address information.
@@ -151,7 +150,7 @@ class Location(IdentifiedObject):
         for point in ngen(self._position_points):
             yield point
 
-    def get_point(self, sequence_number: int) -> Optional[PositionPoint]:
+    def get_point(self, sequence_number: int) -> PositionPoint:
         """
         Get the `sequence_number` `PositionPoint` for this `Location`.
 
@@ -159,10 +158,19 @@ class Location(IdentifiedObject):
         Returns The `PositionPoint` identified by `sequence_number`
         Raises IndexError if this `Location` didn't contain `sequence_number` points.
         """
-        return self._position_points[sequence_number] if 0 <= sequence_number < nlen(self._position_points) else None
+        return self._position_points[sequence_number]
 
     def __getitem__(self, item):
         return self.get_point(item)
+
+    def for_each_point(self, action: Callable[[int, PositionPoint], None]):
+        """
+        Call the `action` on each :class:`PositionPoint` in the `points` collection
+
+        :param action: An action to apply to each :class:`PositionPoint` in the `points` collection, taking the index of the point, and the point itself.
+        """
+        for index, point in enumerate(self.points):
+            action(index, point)
 
     def add_point(self, point: PositionPoint) -> Location:
         """
@@ -186,7 +194,7 @@ class Location(IdentifiedObject):
         require(0 <= sequence_number <= self.num_points(),
                 lambda: f"Unable to add PositionPoint to {str(self)}. Sequence number {sequence_number} "
                         f"is invalid. Expected a value between 0 and {self.num_points()}. Make sure you are "
-                        f"adding the points in the correct order and there are no gaps in the numbering.")
+                        f"adding the items in order and there are no gaps in the numbering.")
         self._position_points = list() if self._position_points is None else self._position_points
         self._position_points.insert(sequence_number, point)
         return self
@@ -203,6 +211,20 @@ class Location(IdentifiedObject):
         """
         self._position_points = safe_remove(self._position_points, point)
         return self
+
+    def remove_point_by_sequence_number(self, sequence_number: int) -> PositionPoint:
+        """
+        Remove a :class:`PositionPoint` from this :class:`Location` by its sequence number.
+
+        NOTE: This will update the sequence numbers of all items located after the removed sequence number.
+
+        :param sequence_number: The sequence number of the `PositionPoint` to remove.
+        :return: The :class:`PositionPoint` that was removed, or null if there was no :class:`PositionPoint` for the given `sequenceNumber`.
+        :raises IndexError: If no :class:`PositionPoint` with the specified `sequence_number` was not associated with this :class:`Location`.
+        """
+        point = self.get_point(sequence_number)
+        self._position_points = safe_remove(self._position_points, point)
+        return point
 
     def clear_points(self) -> Location:
         self._position_points = None
