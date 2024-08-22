@@ -176,7 +176,8 @@ def _validate_unordered_other(
     remove: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject, UOther], TIdentifiedObject]
     clear: Callable[..., TIdentifiedObject],  # Callable[[TIdentifiedObject], TIdentifiedObject]
     get_key: Callable[..., K],  # Callable[[UOther], K]
-    key_to_str: Callable[[K], str] = str):
+    key_to_str: Callable[[K], str] = str
+):
     """
     Validate the internal collection for an associated object that is not an [IdentifiedObject] that has no order significance.
     """
@@ -474,8 +475,11 @@ def _assert_ordered(actual: Generator[_U, None, None], expected: List[_U]):
     assert list(actual) == expected
 
 
-def _create_duplicates_throw_validator(it: TIdentifiedObject, expected_duplicate_errors: Dict[_U, str],
-                                       add: Callable[[TIdentifiedObject, _U], TIdentifiedObject]) -> Callable[[], None]:
+def _create_duplicates_throw_validator(
+    it: TIdentifiedObject,
+    expected_duplicate_errors: Dict[_U, str],
+    add: Callable[[TIdentifiedObject, _U], TIdentifiedObject]
+) -> Callable[[], None]:
     def func():
         for other_duplicate, expected_error in expected_duplicate_errors.items():
             with pytest.raises(ValueError, match=expected_error):

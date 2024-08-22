@@ -16,6 +16,7 @@ ratio_kwargs = {
 
 ratio_args = [9.0, 6.0]
 
+
 # noinspection PyArgumentList
 def test_ratio_constructor_default():
     #
@@ -35,7 +36,6 @@ def test_ratio_constructor_default():
 def test_ratio_constructor_kwargs(denominator, numerator, **kwargs):
     assert not kwargs
 
-    # noinspection PyArgumentList
     ratio = Ratio(denominator=denominator, numerator=numerator)
 
     assert ratio.denominator == denominator
@@ -43,23 +43,22 @@ def test_ratio_constructor_kwargs(denominator, numerator, **kwargs):
 
 
 def test_ratio_constructor_args():
-    # noinspection PyArgumentList
     ratio = Ratio(*ratio_args)
 
     # non-alphabetic order is due to mathematical convention (numerator before denominator)
-    assert ratio.numerator == ratio_args[-2]
-    assert ratio.denominator == ratio_args[-1]
+    assert ratio_args[-2:] == [
+        ratio.numerator,
+        ratio.denominator
+    ]
 
 
 def test_quotient_nonzero_denominator():
-    # noinspection PyArgumentList
     ratio = Ratio(9.0, 6.0)
 
     assert ratio.quotient == 1.5
 
 
 def test_quotient_zero_denominator():
-    # noinspection PyArgumentList
     ratio = Ratio(9.0, 0)
 
     with raises(AttributeError, match="Cannot calculate the quotient of a Ratio with a denominator of zero."):

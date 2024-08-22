@@ -15,7 +15,7 @@ __all__ = ["TableVersion"]
 
 
 class TableVersion(SqliteTable):
-    SUPPORTED_VERSION = 52
+    SUPPORTED_VERSION = 55  # todo - skipped 53 and 54. Remove this comment when they are both added.
 
     def __init__(self):
         self.version: Column = self._create_column("version", "TEXT", Nullable.NOT_NULL)

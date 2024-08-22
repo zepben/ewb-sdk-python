@@ -30,7 +30,9 @@ def verify_conductor_constructor_kwargs(c: Conductor, length, **kwargs):
 
 def verify_conductor_constructor_args(c: Conductor):
     verify_conducting_equipment_constructor_args(c)
-    assert c.length == conductor_args[-1]
+    assert conductor_args[-1:] == [
+        c.length
+    ]
 
 
 def test_wire_info_accessor():

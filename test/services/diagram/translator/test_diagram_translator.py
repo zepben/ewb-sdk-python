@@ -5,11 +5,11 @@
 from typing import TypeVar
 
 from hypothesis import given
+from zepben.evolve import IdentifiedObject, DiagramService, NameType, DiagramDatabaseTables, TableDiagramObjectPoints
+from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
 from cim.cim_creators import *
 from services.common.translator.base_test_translator import validate_service_translations
-from zepben.evolve import IdentifiedObject, DiagramService, NameType
-from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -27,7 +27,15 @@ types_to_test = {
 
 @given(**types_to_test)
 def test_diagram_service_translations(**kwargs):
-    validate_service_translations(DiagramService, DiagramServiceComparator(), **kwargs)
+    validate_service_translations(
+        DiagramService,
+        DiagramServiceComparator(),
+        DiagramDatabaseTables(),
+        excluded_tables={
+            TableDiagramObjectPoints
+        },
+        **kwargs
+    )
 
 
 #

@@ -4,8 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional, Dict
 
-# noinspection PyPackageRequirements
+# noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.struct_pb2 import NullValue
+# noinspection PyPackageRequirements,PyUnresolvedReferences
 from google.protobuf.timestamp_pb2 import Timestamp
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, composite, uuids
 from zepben.protobuf.cc.cc_data_pb2 import CustomerIdentifiedObject

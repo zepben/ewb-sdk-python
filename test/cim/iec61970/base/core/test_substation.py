@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
+from zepben.evolve import Substation, Feeder, Loop, Circuit, SubGeographicalRegion
 
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Substation, Feeder, Loop, Circuit, SubGeographicalRegion
 
 substation_kwargs = {
     **equipment_container_kwargs,
@@ -54,11 +54,13 @@ def test_substation_constructor_args():
     cn = Substation(*substation_args)
 
     verify_equipment_container_constructor_args(cn)
-    assert cn.sub_geographical_region == substation_args[-5]
-    assert list(cn.feeders) == substation_args[-4]
-    assert list(cn.loops) == substation_args[-3]
-    assert list(cn.energized_loops) == substation_args[-2]
-    assert list(cn.circuits) == substation_args[-1]
+    assert substation_args[-5:] == [
+        cn.sub_geographical_region,
+        list(cn.feeders),
+        list(cn.loops),
+        list(cn.energized_loops),
+        list(cn.circuits)
+    ]
 
 
 def test_normal_energized_feeders_collection():

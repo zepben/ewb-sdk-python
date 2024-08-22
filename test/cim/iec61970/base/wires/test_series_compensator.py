@@ -3,15 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from pytest import raises
 from hypothesis import given
-from hypothesis.strategies import builds, sampled_from, lists, floats, integers
+from hypothesis.strategies import floats, integers
+from zepben.evolve import SeriesCompensator
 
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_conducting_equipment import verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_kwargs, conducting_equipment_args
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-
-from zepben.evolve import SeriesCompensator
 
 series_compensator_kwargs = {
     **conducting_equipment_kwargs,
@@ -40,13 +38,15 @@ def test_series_compensator_constructor_default():
 
 @given(**series_compensator_kwargs)
 def test_series_compensator_constructor_kwargs(r, r0, x, x0, varistor_rated_current, varistor_voltage_threshold, **kwargs):
-    sc = SeriesCompensator(r=r,
-                           r0=r0,
-                           x=x,
-                           x0=x0,
-                           varistor_rated_current=varistor_rated_current,
-                           varistor_voltage_threshold=varistor_voltage_threshold,
-                           **kwargs)
+    sc = SeriesCompensator(
+        r=r,
+        r0=r0,
+        x=x,
+        x0=x0,
+        varistor_rated_current=varistor_rated_current,
+        varistor_voltage_threshold=varistor_voltage_threshold,
+        **kwargs
+    )
 
     verify_conducting_equipment_constructor_kwargs(sc, **kwargs)
     assert sc.r == r
@@ -61,12 +61,14 @@ def test_series_compensator_constructor_args():
     sc = SeriesCompensator(*series_compensator_args)
 
     verify_conducting_equipment_constructor_args(sc)
-    assert sc.r == series_compensator_args[-6]
-    assert sc.r0 == series_compensator_args[-5]
-    assert sc.x == series_compensator_args[-4]
-    assert sc.x0 == series_compensator_args[-3]
-    assert sc.varistor_rated_current == series_compensator_args[-2]
-    assert sc.varistor_voltage_threshold == series_compensator_args[-1]
+    assert series_compensator_args[-6:] == [
+        sc.r,
+        sc.r0,
+        sc.x,
+        sc.x0,
+        sc.varistor_rated_current,
+        sc.varistor_voltage_threshold
+    ]
 
 
 def test_varistor_present_flag():

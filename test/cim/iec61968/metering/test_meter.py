@@ -19,10 +19,8 @@ def test_meter_constructor_default():
 
 @given(**meter_kwargs)
 def test_meter_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
     verify_end_device_constructor_kwargs(Meter(**kwargs), **kwargs)
 
 
 def test_meter_constructor_args():
-    # noinspection PyArgumentList
     verify_end_device_constructor_args(Meter(*meter_args))

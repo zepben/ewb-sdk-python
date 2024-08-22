@@ -30,6 +30,8 @@ def verify_equipment_container_constructor_kwargs(ec: EquipmentContainer, equipm
 
 def verify_equipment_container_constructor_args(ec: EquipmentContainer):
     verify_connectivity_node_container_constructor_args(ec)
+
+    # We use a different style of matching here as the passed in arg for equipment is a map and the stored collection is a list.
     assert list(ec.equipment) == list(equipment_container_args[-1].values())
 
 

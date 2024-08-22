@@ -18,10 +18,8 @@ def test_analog_constructor_default():
 
 @given(**analog_kwargs)
 def test_analog_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
     verify_measurement_constructor_kwargs(Analog(**kwargs), **kwargs)
 
 
 def test_analog_constructor_args():
-    # noinspection PyArgumentList
     verify_measurement_constructor_args(Analog(*analog_args))

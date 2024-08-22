@@ -13,11 +13,17 @@ __all__ = ["TablePricingStructuresTariffs"]
 
 
 class TablePricingStructuresTariffs(SqliteTable):
+    """
+    A class representing the association between PricingStructures and Tariffs.
+    """
 
     def __init__(self):
         super().__init__()
         self.pricing_structure_mrid: Column = self._create_column("pricing_structure_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of PricingStructures."""
+
         self.tariff_mrid: Column = self._create_column("tariff_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of Tariffs."""
 
     @property
     def name(self) -> str:

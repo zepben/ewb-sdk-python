@@ -14,7 +14,7 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, \
     Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
-    ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject
+    ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -447,6 +447,11 @@ class SchemaNetworks:
 
         if isinstance(filled, ShuntCompensator):
             service.add(filled.asset_info)
+
+        if isinstance(filled, SynchronousMachine):
+            # The curves use a one way link, so we just need to add them.
+            for it in filled.curves:
+                service.add(it)
 
         if isinstance(filled, TransformerEnd):
             service.add(filled.terminal)

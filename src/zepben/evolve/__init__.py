@@ -3,6 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#
+# NOTE: We need to disable the IntelliJ formatter to prevent it messing with the import order of these files, several of which need to be
+#       imported in a specific order to prevent unresolved dependency errors.
+#
+# @formatter:off
+
 # We need to import SinglePhaseKind before anything uses PhaseCode to prevent cyclic dependencies.
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
 
@@ -67,6 +73,7 @@ from zepben.evolve.model.cim.iec61970.base.protection.voltage_relay import *
 from zepben.evolve.model.cim.iec61970.base.protection.relay_setting import *
 from zepben.evolve.model.cim.iec61970.base.wires.ground import *
 from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import *
+from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import *
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_state_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.line import *
@@ -79,21 +86,26 @@ from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
+from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
 from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
 from zepben.evolve.model.cim.iec61970.base.wires.switch import *
+from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import *
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import *
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import *
+from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.fuse import *
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import *
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
+from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import *
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_control_mode_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import *
+from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import *
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_cooling_type import *
@@ -109,6 +121,8 @@ from zepben.evolve.model.cim.iec61970.base.core.regions import *
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import *
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import *
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import *
+from zepben.evolve.model.cim.iec61970.base.core.curve import *
+from zepben.evolve.model.cim.iec61970.base.core.curve_data import *
 from zepben.evolve.model.cim.iec61970.base.core.name import *
 from zepben.evolve.model.cim.iec61970.base.core.name_type import *
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
@@ -401,3 +415,5 @@ from zepben.evolve.database.sqlite.network.network_service_reader import *
 
 from zepben.evolve.testing.test_network_builder import *
 from zepben.evolve.testing.test_traversal import *
+
+# @formatter:on

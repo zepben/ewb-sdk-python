@@ -6,13 +6,13 @@ from unittest.mock import patch
 
 from hypothesis import given
 from hypothesis.strategies import integers, floats
-
-from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
-    verify_asset_info_constructor_args, asset_info_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection_kind, create_transformer_tank_info, \
-    create_transformer_star_impedance, create_no_load_test, create_short_circuit_test, create_open_circuit_test
 from zepben.evolve import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
     ShortCircuitTest, OpenCircuitTest
+
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection_kind, create_transformer_tank_info, \
+    create_transformer_star_impedance, create_no_load_test, create_short_circuit_test, create_open_circuit_test
+from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
+    verify_asset_info_constructor_args, asset_info_args
 
 transformer_end_info_kwargs = {
     **asset_info_kwargs,
@@ -65,7 +65,6 @@ def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, e
                                                  transformer_tank_info, transformer_star_impedance, energised_end_no_load_tests,
                                                  energised_end_short_circuit_tests, grounded_end_short_circuit_tests, open_end_open_circuit_tests,
                                                  energised_end_open_circuit_tests, **kwargs):
-    # noinspection PyArgumentList
     tei = TransformerEndInfo(
         connection_kind=connection_kind,
         emergency_s=emergency_s,
@@ -106,31 +105,31 @@ def test_transformer_end_info_constructor_kwargs(connection_kind, emergency_s, e
 
 
 def test_transformer_end_info_constructor_args():
-    # noinspection PyArgumentList
     tei = TransformerEndInfo(*transformer_end_info_args)
 
     verify_asset_info_constructor_args(tei)
-    assert tei.connection_kind is transformer_end_info_args[-16]
-    assert tei.emergency_s == transformer_end_info_args[-15]
-    assert tei.end_number == transformer_end_info_args[-14]
-    assert tei.insulation_u == transformer_end_info_args[-13]
-    assert tei.phase_angle_clock == transformer_end_info_args[-12]
-    assert tei.r == transformer_end_info_args[-11]
-    assert tei.rated_s == transformer_end_info_args[-10]
-    assert tei.rated_u == transformer_end_info_args[-9]
-    assert tei.short_term_s == transformer_end_info_args[-8]
-    assert tei.transformer_tank_info is transformer_end_info_args[-7]
-    assert tei.transformer_star_impedance is transformer_end_info_args[-6]
-    assert tei.energised_end_no_load_tests is transformer_end_info_args[-5]
-    assert tei.energised_end_short_circuit_tests is transformer_end_info_args[-4]
-    assert tei.grounded_end_short_circuit_tests is transformer_end_info_args[-3]
-    assert tei.open_end_open_circuit_tests is transformer_end_info_args[-2]
-    assert tei.energised_end_open_circuit_tests is transformer_end_info_args[-1]
+    assert transformer_end_info_args[-16:] == [
+        tei.connection_kind,
+        tei.emergency_s,
+        tei.end_number,
+        tei.insulation_u,
+        tei.phase_angle_clock,
+        tei.r,
+        tei.rated_s,
+        tei.rated_u,
+        tei.short_term_s,
+        tei.transformer_tank_info,
+        tei.transformer_star_impedance,
+        tei.energised_end_no_load_tests,
+        tei.energised_end_short_circuit_tests,
+        tei.grounded_end_short_circuit_tests,
+        tei.open_end_open_circuit_tests,
+        tei.energised_end_open_circuit_tests
+    ]
 
 
 def test_populates_resistance_reactance_off_end_star_impedance_if_available():
     with patch.object(TransformerEndInfo, "calculate_resistance_reactance_from_tests") as method:
-        # noinspection PyArgumentList
         info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, x=1.2, r0=1.3, x0=1.4))
         validate_resistance_reactance(info.resistance_reactance(), 1.1, 1.2, 1.3, 1.4)
         method.assert_not_called()
@@ -138,7 +137,6 @@ def test_populates_resistance_reactance_off_end_star_impedance_if_available():
 
 def test_populates_resistance_reactance_off_end_info_tests_if_available():
     with patch.object(TransformerEndInfo, "calculate_resistance_reactance_from_tests") as method:
-        # noinspection PyArgumentList
         method.return_value = ResistanceReactance(2.1, 2.2, 2.3, 2.4)
         info = TransformerEndInfo()
         validate_resistance_reactance(info.resistance_reactance(), 2.1, 2.2, 2.3, 2.4)
@@ -147,15 +145,12 @@ def test_populates_resistance_reactance_off_end_info_tests_if_available():
 
 def test_merges_resistance_reactance_if_required():
     with patch.object(TransformerEndInfo, "calculate_resistance_reactance_from_tests") as method:
-        # noinspection PyArgumentList
         method.return_value = ResistanceReactance(None, 2.2, None, None)
-        # noinspection PyArgumentList
         info = TransformerEndInfo(transformer_star_impedance=TransformerStarImpedance(r=1.1, x=None, r0=None, x0=None))
         validate_resistance_reactance(info.resistance_reactance(), 1.1, 2.2, None, None)
         method.assert_called_once()
 
 
-# noinspection PyArgumentList
 def test_calculates_resistance_reactance_of_end_info_tests_if_available():
     loss_test = ShortCircuitTest(loss=2020180, voltage=11.85)
     loss_no_voltage_test = ShortCircuitTest(loss=2020180)

@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from pytest import raises
 from hypothesis import given
 from hypothesis.strategies import floats
+from pytest import raises
+from zepben.evolve import DiagramObjectPoint
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import DiagramObjectPoint
 
 diagram_object_point_kwargs = {
     "x_position": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -36,7 +36,6 @@ def test_diagram_object_point_constructor_default():
 def test_diagram_object_point_constructor_kwargs(x_position, y_position, **kwargs):
     assert not kwargs
 
-    # noinspection PyArgumentList
     dop = DiagramObjectPoint(x_position=x_position, y_position=y_position)
 
     assert dop.x_position == x_position
@@ -44,8 +43,9 @@ def test_diagram_object_point_constructor_kwargs(x_position, y_position, **kwarg
 
 
 def test_diagram_object_point_constructor_args():
-    # noinspection PyArgumentList
     dop = DiagramObjectPoint(*diagram_object_point_args)
 
-    assert dop.x_position == diagram_object_point_args[-2]
-    assert dop.y_position == diagram_object_point_args[-1]
+    assert diagram_object_point_args[-2:] == [
+        dop.x_position,
+        dop.y_position
+    ]

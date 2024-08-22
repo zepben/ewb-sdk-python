@@ -32,6 +32,7 @@ from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sens
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.evolve.model.cim.iec61970.base.core.curve import Curve
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer, Feeder, Site
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -54,6 +55,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegm
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection, Junction
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
+from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
@@ -63,18 +65,23 @@ from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_ele
     PowerElectronicsWindUnit
 from zepben.evolve.model.cim.iec61970.base.wires.ground import Ground
 from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import GroundDisconnector
+from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import GroundingImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TapChanger, TransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
+from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
+from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
 from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import SeriesCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import LinearShuntCompensator, ShuntCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
+from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
@@ -365,7 +372,14 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_id_references(diff, UsagePoint.usage_point_location)
-        self._compare_values(diff, UsagePoint.is_virtual, UsagePoint.connection_category, UsagePoint.rated_power, UsagePoint.approved_inverter_capacity)
+        self._compare_values(
+            diff,
+            UsagePoint.is_virtual,
+            UsagePoint.connection_category,
+            UsagePoint.rated_power,
+            UsagePoint.approved_inverter_capacity,
+            UsagePoint.phase_code
+        )
         if self._options.compare_lv_simplification:
             self._compare_id_reference_collections(diff, UsagePoint.equipment)
             self._compare_id_reference_collections(diff, UsagePoint.end_devices)
@@ -448,6 +462,11 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_connectivity_node_container(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_power_system_resource(diff)
+
+    def _compare_curve(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_indexed_value_collections(diff, Curve.data)
+
+        return self._compare_identified_object(diff)
 
     def _compare_equipment(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, Equipment.in_service, Equipment.normally_in_service, Equipment.commissioned_date)
@@ -741,6 +760,11 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_disconnector(self, source: Disconnector, target: Disconnector) -> ObjectDifference:
         return self._compare_switch(ObjectDifference(source, target))
 
+    def _compare_earth_fault_compensator(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_floats(diff, EarthFaultCompensator.r)
+
+        return self._compare_conducting_equipment(diff)
+
     def _compare_energy_connection(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_conducting_equipment(diff)
 
@@ -819,6 +843,11 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_compare_ground_disconnector(self, source: GroundDisconnector, target: GroundDisconnector) -> ObjectDifference:
         return self._compare_switch(ObjectDifference(source, target))
 
+    def _compare_compare_grounding_impedance(self, source: GroundingImpedance, target: GroundingImpedance) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        self._compare_floats(diff, GroundingImpedance.x)
+        return self._compare_earth_fault_compensator(diff)
+
     def _compare_jumper(self, source: Jumper, target: Jumper) -> ObjectDifference:
         return self._compare_switch(ObjectDifference(source, target))
 
@@ -866,6 +895,11 @@ class NetworkServiceComparator(BaseServiceComparator):
         )
 
         return self._compare_per_length_impedance(diff)
+
+    def _compare_petersen_coil(self, source: PetersenCoil, target: PetersenCoil) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        self._compare_floats(diff, PetersenCoil.x_ground_nominal)
+        return self._compare_earth_fault_compensator(diff)
 
     def _compare_power_electronics_connection(self, source: PowerElectronicsConnection, target: PowerElectronicsConnection) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -1000,6 +1034,15 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_power_system_resource(diff)
 
+    def _compare_reactive_capability_curve(self, source: ReactiveCapabilityCurve, target: ReactiveCapabilityCurve) -> ObjectDifference:
+        return self._compare_curve(ObjectDifference(source, target))
+
+    def _compare_rotating_machine(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(diff, RotatingMachine.rated_u)
+        self._compare_floats(diff, RotatingMachine.rated_power_factor, RotatingMachine.rated_s, RotatingMachine.p, RotatingMachine.q)
+
+        return self._compare_regulating_cond_eq(diff)
+
     def _compare_series_compensator(self, source: SeriesCompensator, target: SeriesCompensator) -> ObjectDifference:
         diff = ObjectDifference(source, target)
         self._compare_values(diff, SeriesCompensator.varistor_rated_current, SeriesCompensator.varistor_voltage_threshold)
@@ -1016,11 +1059,46 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_switch(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_floats(diff, Switch.rated_current)
-        self._add_if_different(diff, "isNormallyOpen", self._compare_open_status(diff, Switch.is_normally_open))
-        self._add_if_different(diff, "isOpen", self._compare_open_status(diff, Switch.is_open))
+        self._add_if_different(diff, "isNormallyOpen", self._compare_open_status(diff, lambda it, phase: it.is_normally_open(phase)))
+        self._add_if_different(diff, "isOpen", self._compare_open_status(diff, lambda it, phase: it.is_open(phase)))
         self._compare_id_references(diff, Switch.switch_info)
 
         return self._compare_conducting_equipment(diff)
+
+    def _compare_synchronous_machine(self, source: SynchronousMachine, target: SynchronousMachine) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(
+            diff,
+            SynchronousMachine.condenser_p,
+            SynchronousMachine.earthing,
+            SynchronousMachine.max_u,
+            SynchronousMachine.min_u,
+            SynchronousMachine.type,
+            SynchronousMachine.operating_mode
+        )
+
+        self._compare_floats(
+            diff,
+            SynchronousMachine.base_q,
+            SynchronousMachine.earthing_star_point_r,
+            SynchronousMachine.earthing_star_point_x,
+            SynchronousMachine.ikk,
+            SynchronousMachine.max_q,
+            SynchronousMachine.min_q,
+            SynchronousMachine.mu,
+            SynchronousMachine.r,
+            SynchronousMachine.r0,
+            SynchronousMachine.r2,
+            SynchronousMachine.sat_direct_subtrans_x,
+            SynchronousMachine.sat_direct_sync_x,
+            SynchronousMachine.sat_direct_trans_x,
+            SynchronousMachine.x0,
+            SynchronousMachine.x2,
+        )
+        self._compare_id_reference_collections(diff, SynchronousMachine.curves)
+
+        return self._compare_rotating_machine(diff)
 
     def _compare_tap_changer(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(

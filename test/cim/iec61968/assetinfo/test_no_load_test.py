@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers, floats
+from zepben.evolve import NoLoadTest
 
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61968.assetinfo.test_transformer_test import transformer_test_kwargs, verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import NoLoadTest
 
 no_load_test_kwargs = {
     **transformer_test_kwargs,
@@ -35,7 +35,6 @@ def test_no_load_test_constructor_default():
 
 @given(**no_load_test_kwargs)
 def test_no_load_test_constructor_kwargs(energised_end_voltage, exciting_current, exciting_current_zero, loss, loss_zero, **kwargs):
-    # noinspection PyArgumentList
     nlt = NoLoadTest(energised_end_voltage=energised_end_voltage,
                      exciting_current=exciting_current,
                      exciting_current_zero=exciting_current_zero,
@@ -52,12 +51,13 @@ def test_no_load_test_constructor_kwargs(energised_end_voltage, exciting_current
 
 
 def test_no_load_test_constructor_args():
-    # noinspection PyArgumentList
     nlt = NoLoadTest(*no_load_test_args)
 
     verify_transformer_test_constructor_args(nlt)
-    assert nlt.energised_end_voltage == no_load_test_args[-5]
-    assert nlt.exciting_current == no_load_test_args[-4]
-    assert nlt.exciting_current_zero == no_load_test_args[-3]
-    assert nlt.loss == no_load_test_args[-2]
-    assert nlt.loss_zero == no_load_test_args[-1]
+    assert no_load_test_args[-5:] == [
+        nlt.energised_end_voltage,
+        nlt.exciting_current,
+        nlt.exciting_current_zero,
+        nlt.loss,
+        nlt.loss_zero
+    ]

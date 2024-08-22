@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import floats
+from zepben.evolve import LinearShuntCompensator
 
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_shunt_compensator import verify_shunt_compensator_constructor_default, \
     verify_shunt_compensator_constructor_kwargs, verify_shunt_compensator_constructor_args, shunt_compensator_kwargs, shunt_compensator_args
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import LinearShuntCompensator
 
 linear_shunt_compensator_kwargs = {
     **shunt_compensator_kwargs,
@@ -34,11 +34,13 @@ def test_linear_shunt_compensator_constructor_default():
 
 @given(**linear_shunt_compensator_kwargs)
 def test_linear_shunt_compensator_constructor_kwargs(b0_per_section, b_per_section, g0_per_section, g_per_section, **kwargs):
-    lsc = LinearShuntCompensator(b0_per_section=b0_per_section,
-                                 b_per_section=b_per_section,
-                                 g0_per_section=g0_per_section,
-                                 g_per_section=g_per_section,
-                                 **kwargs)
+    lsc = LinearShuntCompensator(
+        b0_per_section=b0_per_section,
+        b_per_section=b_per_section,
+        g0_per_section=g0_per_section,
+        g_per_section=g_per_section,
+        **kwargs
+    )
 
     verify_shunt_compensator_constructor_kwargs(lsc, **kwargs)
     assert lsc.b0_per_section == b0_per_section
@@ -51,7 +53,9 @@ def test_linear_shunt_compensator_constructor_args():
     lsc = LinearShuntCompensator(*linear_shunt_compensator_args)
 
     verify_shunt_compensator_constructor_args(lsc)
-    assert lsc.b0_per_section == linear_shunt_compensator_args[-4]
-    assert lsc.b_per_section == linear_shunt_compensator_args[-3]
-    assert lsc.g0_per_section == linear_shunt_compensator_args[-2]
-    assert lsc.g_per_section == linear_shunt_compensator_args[-1]
+    assert linear_shunt_compensator_args[-4:] == [
+        lsc.b0_per_section,
+        lsc.b_per_section,
+        lsc.g0_per_section,
+        lsc.g_per_section
+    ]

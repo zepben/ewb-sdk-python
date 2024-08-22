@@ -13,11 +13,17 @@ __all__ = ["TableCircuitsSubstations"]
 
 
 class TableCircuitsSubstations(SqliteTable):
+    """
+    A class representing the association between Circuits and Substations.
+    """
 
     def __init__(self):
         super().__init__()
         self.circuit_mrid: Column = self._create_column("circuit_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of Circuits."""
+
         self.substation_mrid: Column = self._create_column("substation_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of Substations."""
 
     @property
     def name(self) -> str:

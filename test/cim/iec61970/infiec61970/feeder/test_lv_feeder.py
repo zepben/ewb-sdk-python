@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists
+from zepben.evolve import Feeder, Terminal, Equipment, LvFeeder
 
-from cim.private_collection_validator import validate_unordered_1234567890
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
-from zepben.evolve import Feeder, Terminal, Equipment, LvFeeder
+from cim.private_collection_validator import validate_unordered_1234567890
 
 lv_feeder_kwargs = {
     **equipment_container_kwargs,
@@ -31,10 +31,12 @@ def test_lv_feeder_constructor_default():
 
 @given(**lv_feeder_kwargs)
 def test_lv_feeder_constructor_kwargs(normal_head_terminal, normal_energizing_feeders, current_equipment, **kwargs):
-    lvf = LvFeeder(normal_head_terminal=normal_head_terminal,
-                   normal_energizing_feeders=normal_energizing_feeders,
-                   current_equipment=current_equipment,
-                   **kwargs)
+    lvf = LvFeeder(
+        normal_head_terminal=normal_head_terminal,
+        normal_energizing_feeders=normal_energizing_feeders,
+        current_equipment=current_equipment,
+        **kwargs
+    )
 
     verify_equipment_container_constructor_kwargs(lvf, **kwargs)
     assert lvf.normal_head_terminal == normal_head_terminal
@@ -46,7 +48,11 @@ def test_lv_feeder_constructor_args():
     lvf = LvFeeder(*lv_feeder_args)
 
     verify_equipment_container_constructor_args(lvf)
-    assert lvf.normal_head_terminal == lv_feeder_args[-3]
+    assert lv_feeder_args[-3:-2] == [
+        lvf.normal_head_terminal
+    ]
+    # We use a different style of matching here as the passed in args for normal_energizing_feeders and current_equipment
+    # are maps and the stored collections are lists.
     assert list(lvf.normal_energizing_feeders) == list(lv_feeder_args[-2].values())
     assert list(lvf.current_equipment) == list(lv_feeder_args[-1].values())
 

@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import text, floats
+from zepben.evolve import AnalogValue
 
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.meas.test_measurement_value import measurement_value_kwargs, verify_measurement_value_constructor_default, \
     verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import AnalogValue
 
 analog_value_kwargs = {
     **measurement_value_kwargs,
@@ -30,9 +30,11 @@ def test_analog_value_constructor_default():
 @given(**analog_value_kwargs)
 def test_analog_value_constructor_kwargs(value, analog_mrid, **kwargs):
     # noinspection PyArgumentList
-    av = AnalogValue(value=value,
-                     analog_mrid=analog_mrid,
-                     **kwargs)
+    av = AnalogValue(
+        value=value,
+        analog_mrid=analog_mrid,
+        **kwargs
+    )
 
     verify_measurement_value_constructor_kwargs(av, **kwargs)
     assert av.value == value
@@ -44,5 +46,7 @@ def test_analog_value_constructor_args():
     av = AnalogValue(*analog_value_args)
 
     verify_measurement_value_constructor_args(av)
-    assert av.value == analog_value_args[-2]
-    assert av.analog_mrid == analog_value_args[-1]
+    assert analog_value_args[-2:] == [
+        av.value,
+        av.analog_mrid
+    ]

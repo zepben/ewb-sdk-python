@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
+from zepben.evolve import SubGeographicalRegion, Substation, GeographicalRegion
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import SubGeographicalRegion, Substation, GeographicalRegion
 
 sub_geographical_region_kwargs = {
     **identified_object_kwargs,
@@ -41,8 +41,10 @@ def test_sub_geographical_region_constructor_args():
     sgr = SubGeographicalRegion(*sub_geographical_region_args)
 
     verify_identified_object_constructor_args(sgr)
-    assert sgr.geographical_region == sub_geographical_region_args[-2]
-    assert list(sgr.substations) == sub_geographical_region_args[-1]
+    assert sub_geographical_region_args[-2:] == [
+        sgr.geographical_region,
+        list(sgr.substations)
+    ]
 
 
 def test_substations_collection():

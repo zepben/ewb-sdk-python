@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import integers, lists, builds
+from zepben.evolve import ProtectionRelayFunction, ProtectedSwitch
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.test_switch import switch_kwargs, verify_switch_constructor_default, verify_switch_constructor_kwargs, \
     verify_switch_constructor_args, switch_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import ProtectionRelayFunction, ProtectedSwitch
 
 protected_switch_kwargs = {
     **switch_kwargs,
@@ -35,8 +35,10 @@ def verify_protected_switch_constructor_kwargs(ps: ProtectedSwitch, breaking_cap
 def verify_protected_switch_constructor_args(ps: ProtectedSwitch):
     verify_switch_constructor_args(ps)
 
-    assert ps.breaking_capacity == protected_switch_args[-2]
-    assert list(ps.relay_functions) == protected_switch_args[-1]
+    assert protected_switch_args[-2:] == [
+        ps.breaking_capacity,
+        list(ps.relay_functions)
+    ]
 
 
 def test_relay_function_collection():

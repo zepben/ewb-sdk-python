@@ -7,6 +7,25 @@ __all__ = ["NetworkCimReader"]
 import sys
 from typing import Callable, Optional
 
+from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
+    TableSynchronousMachinesReactiveCapabilityCurves
+from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data import TableCurveData
+from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curves import TableCurves
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_earth_fault_compensators import TableEarthFaultCompensators
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_grounding_impedances import TableGroundingImpedances
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reactive_capability_curves import TableReactiveCapabilityCurves
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_rotating_machines import TableRotatingMachines
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_synchronous_machines import TableSynchronousMachines
+from zepben.evolve.model.cim.iec61970.base.core.curve import Curve
+from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import GroundingImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
+from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
+from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
+from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
+from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
+
 # `assert_never` changed packages with the release of 3.11, so import it from the old spot while we still support 3.9 and 3.10.
 v = sys.version_info
 if v.major == 3 and v.minor < 11:
@@ -251,16 +270,16 @@ from zepben.evolve.services.network.network_service import NetworkService
 
 class NetworkCimReader(BaseCimReader):
     """
-    A class for reading the `NetworkService` tables from the database.
+    A class for reading the :class:`NetworkService` tables from the database.
     
-    :param service: The `NetworkService` to populate from the database.
+    :param service: The :class:`NetworkService` to populate from the database.
     """
 
     def __init__(self, service: NetworkService):
         super().__init__(service)
 
         self._service = service
-        """The `NetworkService` used to store any items read from the database."""
+        """The :class:`NetworkService` used to store any items read from the database."""
 
     #######################
     # IEC61968 Asset Info #
@@ -268,28 +287,28 @@ class NetworkCimReader(BaseCimReader):
 
     def load_cable_info(self, table: TableCableInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `CableInfo` and populate its fields from `TableCableInfo`.
+        Create a :class:`CableInfo` and populate its fields from :class:`TableCableInfo`.
 
-        :param table: The database table to read the `CableInfo` fields from.
-        :param result_set: The record in the database table containing the fields for this `CableInfo`.
-        :param set_identifier: A callback to register the mRID of this `CableInfo` for logging purposes.
+        :param table: The database table to read the :class:`CableInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`CableInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`CableInfo` for logging purposes.
 
-        :return: True if the `CableInfo` was successfully read from the database and added to the service.
+        :return: True if the :class:`CableInfo` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         cable_info = CableInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_wire_info(cable_info, table, result_set) and self._add_or_throw(cable_info)
 
-    def load_no_load_tests(self, table: TableNoLoadTests, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_no_load_test(self, table: TableNoLoadTests, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `NoLoadTest` and populate its fields from `TableNoLoadTests`.
+        Create a :class:`NoLoadTest` and populate its fields from :class:`TableNoLoadTests`.
 
-        :param table: The database table to read the `NoLoadTest` fields from.
-        :param result_set: The record in the database table containing the fields for this `NoLoadTest`.
-        :param set_identifier: A callback to register the mRID of this `NoLoadTest` for logging purposes.
+        :param table: The database table to read the :class:`NoLoadTest` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`NoLoadTest`.
+        :param set_identifier: A callback to register the mRID of this :class:`NoLoadTest` for logging purposes.
 
-        :return: True if the `NoLoadTest` was successfully read from the database and added to the service.
+        :return: True if the :class:`NoLoadTest` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         no_load_test = NoLoadTest(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -302,15 +321,15 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_transformer_test(no_load_test, table, result_set) and self._add_or_throw(no_load_test)
 
-    def load_open_circuit_tests(self, table: TableOpenCircuitTests, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_open_circuit_test(self, table: TableOpenCircuitTests, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create an `OpenCircuitTest` and populate its fields from `TableOpenCircuitTests`.
+        Create an :class:`OpenCircuitTest` and populate its fields from :class:`TableOpenCircuitTests`.
 
-        :param table: The database table to read the `OpenCircuitTest` fields from.
-        :param result_set: The record in the database table containing the fields for this `OpenCircuitTest`.
-        :param set_identifier: A callback to register the mRID of this `OpenCircuitTest` for logging purposes.
+        :param table: The database table to read the :class:`OpenCircuitTest` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`OpenCircuitTest`.
+        :param set_identifier: A callback to register the mRID of this :class:`OpenCircuitTest` for logging purposes.
 
-        :return: True if the `OpenCircuitTest` was successfully read from the database and added to the service.
+        :return: True if the :class:`OpenCircuitTest` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         open_circuit_test = OpenCircuitTest(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -325,13 +344,13 @@ class NetworkCimReader(BaseCimReader):
 
     def load_overhead_wire_info(self, table: TableOverheadWireInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create an `OverheadWireInfo` and populate its fields from `TableOverheadWireInfo`.
+        Create an :class:`OverheadWireInfo` and populate its fields from :class:`TableOverheadWireInfo`.
 
-        :param table: The database table to read the `OverheadWireInfo` fields from.
-        :param result_set: The record in the database table containing the fields for this `OverheadWireInfo`.
-        :param set_identifier: A callback to register the mRID of this `OverheadWireInfo` for logging purposes.
+        :param table: The database table to read the :class:`OverheadWireInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`OverheadWireInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`OverheadWireInfo` for logging purposes.
 
-        :return: True if the `OverheadWireInfo` was successfully read from the database and added to the service.
+        :return: True if the :class:`OverheadWireInfo` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         overhead_wire_info = OverheadWireInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -340,28 +359,28 @@ class NetworkCimReader(BaseCimReader):
 
     def load_power_transformer_info(self, table: TablePowerTransformerInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `PowerTransformerInfo` and populate its fields from `TablePowerTransformerInfo`.
+        Create a :class:`PowerTransformerInfo` and populate its fields from :class:`TablePowerTransformerInfo`.
 
-        :param table: The database table to read the `PowerTransformerInfo` fields from.
-        :param result_set: The record in the database table containing the fields for this `PowerTransformerInfo`.
-        :param set_identifier: A callback to register the mRID of this `PowerTransformerInfo` for logging purposes.
+        :param table: The database table to read the :class:`PowerTransformerInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PowerTransformerInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`PowerTransformerInfo` for logging purposes.
 
-        :return: True if the `PowerTransformerInfo` was successfully read from the database and added to the service.
+        :return: True if the :class:`PowerTransformerInfo` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         power_transformer_info = PowerTransformerInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_asset_info(power_transformer_info, table, result_set) and self._add_or_throw(power_transformer_info)
 
-    def load_short_circuit_tests(self, table: TableShortCircuitTests, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_short_circuit_test(self, table: TableShortCircuitTests, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `ShortCircuitTest` and populate its fields from `TableShortCircuitTests`.
+        Create a :class:`ShortCircuitTest` and populate its fields from :class:`TableShortCircuitTests`.
 
-        :param table: The database table to read the `ShortCircuitTest` fields from.
-        :param result_set: The record in the database table containing the fields for this `ShortCircuitTest`.
-        :param set_identifier: A callback to register the mRID of this `ShortCircuitTest` for logging purposes.
+        :param table: The database table to read the :class:`ShortCircuitTest` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`ShortCircuitTest`.
+        :param set_identifier: A callback to register the mRID of this :class:`ShortCircuitTest` for logging purposes.
 
-        :return: True if the `ShortCircuitTest` was successfully read from the database and added to the service.
+        :return: True if the :class:`ShortCircuitTest` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         short_circuit_test = ShortCircuitTest(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -381,13 +400,13 @@ class NetworkCimReader(BaseCimReader):
 
     def load_shunt_compensator_info(self, table: TableShuntCompensatorInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `ShuntCompensatorInfo` and populate its fields from `TableShuntCompensatorInfo`.
+        Create a :class:`ShuntCompensatorInfo` and populate its fields from :class:`TableShuntCompensatorInfo`.
 
-        :param table: The database table to read the `ShuntCompensatorInfo` fields from.
-        :param result_set: The record in the database table containing the fields for this `ShuntCompensatorInfo`.
-        :param set_identifier: A callback to register the mRID of this `ShuntCompensatorInfo` for logging purposes.
+        :param table: The database table to read the :class:`ShuntCompensatorInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`ShuntCompensatorInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`ShuntCompensatorInfo` for logging purposes.
 
-        :return: True if the `ShuntCompensatorInfo` was successfully read from the database and added to the service.
+        :return: True if the :class:`ShuntCompensatorInfo` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         shunt_compensator_info = ShuntCompensatorInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -401,13 +420,13 @@ class NetworkCimReader(BaseCimReader):
 
     def load_switch_info(self, table: TableSwitchInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `SwitchInfo` and populate its fields from `TableSwitchInfo`.
+        Create a :class:`SwitchInfo` and populate its fields from :class:`TableSwitchInfo`.
 
-        :param table: The database table to read the `SwitchInfo` fields from.
-        :param result_set: The record in the database table containing the fields for this `SwitchInfo`.
-        :param set_identifier: A callback to register the mRID of this `SwitchInfo` for logging purposes.
+        :param table: The database table to read the :class:`SwitchInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`SwitchInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`SwitchInfo` for logging purposes.
 
-        :return: True if the `SwitchInfo` was successfully read from the database and added to the service.
+        :return: True if the :class:`SwitchInfo` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         switch_info = SwitchInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -418,13 +437,13 @@ class NetworkCimReader(BaseCimReader):
 
     def load_transformer_end_info(self, table: TableTransformerEndInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `TransformerEndInfo` and populate its fields from `TableTransformerEndInfo`.
+        Create a :class:`TransformerEndInfo` and populate its fields from :class:`TableTransformerEndInfo`.
 
-        :param table: The database table to read the `TransformerEndInfo` fields from.
-        :param result_set: The record in the database table containing the fields for this `TransformerEndInfo`.
-        :param set_identifier: A callback to register the mRID of this `TransformerEndInfo` for logging purposes.
+        :param table: The database table to read the :class:`TransformerEndInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`TransformerEndInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`TransformerEndInfo` for logging purposes.
 
-        :return: True if the `TransformerEndInfo` was successfully read from the database and added to the service.
+        :return: True if the :class:`TransformerEndInfo` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         transformer_end_info = TransformerEndInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -471,13 +490,13 @@ class NetworkCimReader(BaseCimReader):
 
     def load_transformer_tank_info(self, table: TableTransformerTankInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `TransformerTankInfo` and populate its fields from `TableTransformerTankInfo`.
+        Create a :class:`TransformerTankInfo` and populate its fields from :class:`TableTransformerTankInfo`.
 
-        :param table: The database table to read the `TransformerTankInfo` fields from.
-        :param result_set: The record in the database table containing the fields for this `TransformerTankInfo`.
-        :param set_identifier: A callback to register the mRID of this `TransformerTankInfo` for logging purposes.
+        :param table: The database table to read the :class:`TransformerTankInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`TransformerTankInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`TransformerTankInfo` for logging purposes.
 
-        :return: True if the `TransformerTankInfo` was successfully read from the database and added to the service.
+        :return: True if the :class:`TransformerTankInfo` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         transformer_tank_info = TransformerTankInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -527,30 +546,30 @@ class NetworkCimReader(BaseCimReader):
     def _load_structure(self, structure: Structure, table: TableStructures, result_set: ResultSet) -> bool:
         return self._load_asset_container(structure, table, result_set)
 
-    def load_asset_owners(self, table: TableAssetOwners, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_asset_owner(self, table: TableAssetOwners, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create an `AssetOwner` and populate its fields from `TableAssetOwners`.
+        Create an :class:`AssetOwner` and populate its fields from :class:`TableAssetOwners`.
 
-        :param table: The database table to read the `AssetOwner` fields from.
-        :param result_set: The record in the database table containing the fields for this `AssetOwner`.
-        :param set_identifier: A callback to register the mRID of this `AssetOwner` for logging purposes.
+        :param table: The database table to read the :class:`AssetOwner` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`AssetOwner`.
+        :param set_identifier: A callback to register the mRID of this :class:`AssetOwner` for logging purposes.
 
-        :return: True if the `AssetOwner` was successfully read from the database and added to the service.
+        :return: True if the :class:`AssetOwner` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         asset_owner = AssetOwner(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_asset_organisation_role(asset_owner, table, result_set) and self._add_or_throw(asset_owner)
 
-    def load_poles(self, table: TablePoles, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_pole(self, table: TablePoles, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `Pole` and populate its fields from `TablePoles`.
+        Create a :class:`Pole` and populate its fields from :class:`TablePoles`.
 
-        :param table: The database table to read the `Pole` fields from.
-        :param result_set: The record in the database table containing the fields for this `Pole`.
-        :param set_identifier: A callback to register the mRID of this `Pole` for logging purposes.
+        :param table: The database table to read the :class:`Pole` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Pole`.
+        :param set_identifier: A callback to register the mRID of this :class:`Pole` for logging purposes.
 
-        :return: True if the `Pole` was successfully read from the database and added to the service.
+        :return: True if the :class:`Pole` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         pole = Pole(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -559,15 +578,15 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_structure(pole, table, result_set) and self._add_or_throw(pole)
 
-    def load_streetlights(self, table: TableStreetlights, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_streetlight(self, table: TableStreetlights, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `Streetlight` and populate its fields from `TableStreetlights`.
+        Create a :class:`Streetlight` and populate its fields from :class:`TableStreetlights`.
 
-        :param table: The database table to read the `Streetlight` fields from.
-        :param result_set: The record in the database table containing the fields for this `Streetlight`.
-        :param set_identifier: A callback to register the mRID of this `Streetlight` for logging purposes.
+        :param table: The database table to read the :class:`Streetlight` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Streetlight`.
+        :param set_identifier: A callback to register the mRID of this :class:`Streetlight` for logging purposes.
 
-        :return: True if the `Streetlight` was successfully read from the database and added to the service.
+        :return: True if the :class:`Streetlight` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         streetlight = Streetlight(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
@@ -587,30 +606,30 @@ class NetworkCimReader(BaseCimReader):
     # IEC61968 Common #
     ###################
 
-    def load_locations(self, table: TableLocations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_location(self, table: TableLocations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `Location` and populate its fields from `TableLocations`.
+        Create a :class:`Location` and populate its fields from :class:`TableLocations`.
 
-        :param table: The database table to read the `Location` fields from.
-        :param result_set: The record in the database table containing the fields for this `Location`.
-        :param set_identifier: A callback to register the mRID of this `Location` for logging purposes.
+        :param table: The database table to read the :class:`Location` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Location`.
+        :param set_identifier: A callback to register the mRID of this :class:`Location` for logging purposes.
 
-        :return: True if the `Location` was successfully read from the database and added to the service.
+        :return: True if the :class:`Location` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         location = Location(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_identified_object(location, table, result_set) and self._add_or_throw(location)
 
-    def load_location_street_addresses(self, table: TableLocationStreetAddresses, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_location_street_address(self, table: TableLocationStreetAddresses, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
-        Create a `set_identifier` and populate its fields from `TableLocationStreetAddresses`.
+        Create a :class:`StreetAddress` and populate its fields from :class:`TableLocationStreetAddresses`.
 
-        :param table: The database table to read the `set_identifier` fields from.
-        :param result_set: The record in the database table containing the fields for this `set_identifier`.
-        :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
+        :param table: The database table to read the :class:`StreetAddress` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`StreetAddress`.
+        :param set_identifier: A callback to register the identified of this :class:`StreetAddress` for logging purposes.
 
-        :return: True if the `set_identifier` was successfully read from the database and added to the service.
+        :return: True if the :class:`StreetAddress` was successfully read from the database and added to the service.
         :raises SqlException: For any errors encountered reading from the database.
         """
         location_mrid = set_identifier(result_set.get_string(table.location_mrid.query_index))
@@ -623,18 +642,17 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Create a `set_identifier` and populate its fields from `TablePositionPoints`.
+    def load_position_point(self, table: TablePositionPoints, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PositionPoint` and populate its fields from :class:`TablePositionPoints`.
 
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
+        :param table: The database table to read the :class:`PositionPoint` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PositionPoint`.
+        :param set_identifier: A callback to register the mRID of this :class:`PositionPoint` for logging purposes.
 
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_position_points(self, table: TablePositionPoints, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`PositionPoint` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         location_mrid = set_identifier(result_set.get_string(table.location_mrid.query_index))
         sequence_number = result_set.get_int(table.sequence_number.query_index)
 
@@ -685,18 +703,17 @@ class NetworkCimReader(BaseCimReader):
     # IEC61968 infIEC61968 InfAssetInfo #
     #####################################
 
-    """
-    Create a `RelayInfo` and populate its fields from `TableRelayInfo`.
-
-    :param table: The database table to read the `RelayInfo` fields from.
-    :param result_set: The record in the database table containing the fields for this `RelayInfo`.
-    :param set_identifier: A callback to register the mRID of this `RelayInfo` for logging purposes.
-
-    :return: True if the `RelayInfo` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
     def load_relay_info(self, table: TableRelayInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`RelayInfo` and populate its fields from :class:`TableRelayInfo`.
+
+        :param table: The database table to read the :class:`RelayInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`RelayInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`RelayInfo` for logging purposes.
+
+        :return: True if the :class:`RelayInfo` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         relay_info = RelayInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         relay_info.curve_setting = result_set.get_string(table.curve_setting.query_index, on_none=None)
@@ -704,18 +721,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_asset_info(relay_info, table, result_set) and self._add_or_throw(relay_info)
 
-    """
-    Adds a delay to a `RelayInfo` and populate its fields from `TableRecloseDelays`.
+    def load_reclose_delay(self, table: TableRecloseDelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Adds a delay to a :class:`RelayInfo` and populate its fields from :class:`TableRecloseDelays`.
 
-    :param table: The database table to read the delay fields from.
-    :param result_set: The record in the database table containing the fields for this delay.
-    :param set_identifier: A callback to register the mRID of this delay for logging purposes.
+        :param table: The database table to read the delay fields from.
+        :param result_set: The record in the database table containing the fields for this delay.
+        :param set_identifier: A callback to register the mRID of this delay for logging purposes.
 
-    :return: True if the delay was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_reclose_delays(self, table: TableRecloseDelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the delay was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         # Note TableRecloseDelays.selectSql ensures we process ratings in the correct order.
         relay_info_mrid = result_set.get_string(table.relay_info_mrid.query_index)
         reclose_delay = result_set.get_float(table.reclose_delay.query_index)
@@ -727,18 +743,17 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Create a `CurrentTransformerInfo` and populate its fields from `TableCurrentTransformerInfo`.
-
-    :param table: The database table to read the `CurrentTransformerInfo` fields from.
-    :param result_set: The record in the database table containing the fields for this `CurrentTransformerInfo`.
-    :param set_identifier: A callback to register the mRID of this `CurrentTransformerInfo` for logging purposes.
-
-    :return: True if the `CurrentTransformerInfo` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
     def load_current_transformer_info(self, table: TableCurrentTransformerInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`CurrentTransformerInfo` and populate its fields from :class:`TableCurrentTransformerInfo`.
+
+        :param table: The database table to read the :class:`CurrentTransformerInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`CurrentTransformerInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`CurrentTransformerInfo` for logging purposes.
+
+        :return: True if the :class:`CurrentTransformerInfo` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         current_transformer_info = CurrentTransformerInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         current_transformer_info.accuracy_class = result_set.get_string(table.accuracy_class.query_index, on_none=None)
@@ -760,18 +775,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_asset_info(current_transformer_info, table, result_set) and self._add_or_throw(current_transformer_info)
 
-    """
-    Create a `PotentialTransformerInfo` and populate its fields from `TablePotentialTransformerInfo`.
-
-    :param table: The database table to read the `PotentialTransformerInfo` fields from.
-    :param result_set: The record in the database table containing the fields for this `PotentialTransformerInfo`.
-    :param set_identifier: A callback to register the mRID of this `PotentialTransformerInfo` for logging purposes.
-
-    :return: True if the `PotentialTransformerInfo` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
     def load_potential_transformer_info(self, table: TablePotentialTransformerInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PotentialTransformerInfo` and populate its fields from :class:`TablePotentialTransformerInfo`.
+
+        :param table: The database table to read the :class:`PotentialTransformerInfo` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PotentialTransformerInfo`.
+        :param set_identifier: A callback to register the mRID of this :class:`PotentialTransformerInfo` for logging purposes.
+
+        :return: True if the :class:`PotentialTransformerInfo` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         potential_transformer_info = PotentialTransformerInfo(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         potential_transformer_info.accuracy_class = result_set.get_string(table.accuracy_class.query_index, on_none=None)
@@ -800,34 +814,32 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_asset_container(end_device, table, result_set)
 
-    """
-    Create a `Meter` and populate its fields from `TableMeters`.
+    def load_meter(self, table: TableMeters, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Meter` and populate its fields from :class:`TableMeters`.
 
-    :param table: The database table to read the `Meter` fields from.
-    :param result_set: The record in the database table containing the fields for this `Meter`.
-    :param set_identifier: A callback to register the mRID of this `Meter` for logging purposes.
+        :param table: The database table to read the :class:`Meter` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Meter`.
+        :param set_identifier: A callback to register the mRID of this :class:`Meter` for logging purposes.
 
-    :return: True if the `Meter` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_meters(self, table: TableMeters, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Meter` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         meter = Meter(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_end_device(meter, table, result_set) and self._add_or_throw(meter)
 
-    """
-    Create a `UsagePoint` and populate its fields from `TableUsagePoints`.
+    def load_usage_point(self, table: TableUsagePoints, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`UsagePoint` and populate its fields from :class:`TableUsagePoints`.
 
-    :param table: The database table to read the `UsagePoint` fields from.
-    :param result_set: The record in the database table containing the fields for this `UsagePoint`.
-    :param set_identifier: A callback to register the mRID of this `UsagePoint` for logging purposes.
+        :param table: The database table to read the :class:`UsagePoint` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`UsagePoint`.
+        :param set_identifier: A callback to register the mRID of this :class:`UsagePoint` for logging purposes.
 
-    :return: True if the `UsagePoint` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_usage_points(self, table: TableUsagePoints, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`UsagePoint` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         usage_point = UsagePoint(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         usage_point.usage_point_location = self._ensure_get(
@@ -839,24 +851,25 @@ class NetworkCimReader(BaseCimReader):
         usage_point.rated_power = result_set.get_int(table.rated_power.query_index, on_none=None)
         usage_point.approved_inverter_capacity = result_set.get_int(table.approved_inverter_capacity.query_index, on_none=None)
 
+        usage_point.phase_code = PhaseCode[result_set.get_string(table.phase_code.query_index)]
+
         return self._load_identified_object(usage_point, table, result_set) and self._add_or_throw(usage_point)
 
     #######################
     # IEC61968 Operations #
     #######################
 
-    """
-    Create an `OperationalRestriction` and populate its fields from `TableOperationalRestrictions`.
+    def load_operational_restriction(self, table: TableOperationalRestrictions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`OperationalRestriction` and populate its fields from :class:`TableOperationalRestrictions`.
 
-    :param table: The database table to read the `OperationalRestriction` fields from.
-    :param result_set: The record in the database table containing the fields for this `OperationalRestriction`.
-    :param set_identifier: A callback to register the mRID of this `OperationalRestriction` for logging purposes.
+        :param table: The database table to read the :class:`OperationalRestriction` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`OperationalRestriction`.
+        :param set_identifier: A callback to register the mRID of this :class:`OperationalRestriction` for logging purposes.
 
-    :return: True if the `OperationalRestriction` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_operational_restrictions(self, table: TableOperationalRestrictions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`OperationalRestriction` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         operational_restriction = OperationalRestriction(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_document(operational_restriction, table, result_set) and self._add_or_throw(operational_restriction)
@@ -873,18 +886,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_equipment(auxiliary_equipment, table, result_set)
 
-    """
-    Create a `CurrentTransformer` and populate its fields from `TableCurrentTransformers`.
+    def load_current_transformer(self, table: TableCurrentTransformers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`CurrentTransformer` and populate its fields from :class:`TableCurrentTransformers`.
 
-    :param table: The database table to read the `CurrentTransformer` fields from.
-    :param result_set: The record in the database table containing the fields for this `CurrentTransformer`.
-    :param set_identifier: A callback to register the mRID of this `CurrentTransformer` for logging purposes.
+        :param table: The database table to read the :class:`CurrentTransformer` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`CurrentTransformer`.
+        :param set_identifier: A callback to register the mRID of this :class:`CurrentTransformer` for logging purposes.
 
-    :return: True if the `CurrentTransformer` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_current_transformers(self, table: TableCurrentTransformers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`CurrentTransformer` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         current_transformer = CurrentTransformer(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         current_transformer.asset_info = self._ensure_get(
@@ -895,34 +907,32 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_sensor(current_transformer, table, result_set) and self._add_or_throw(current_transformer)
 
-    """
-    Create a `FaultIndicator` and populate its fields from `TableFaultIndicators`.
+    def load_fault_indicator(self, table: TableFaultIndicators, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`FaultIndicator` and populate its fields from :class:`TableFaultIndicators`.
 
-    :param table: The database table to read the `FaultIndicator` fields from.
-    :param result_set: The record in the database table containing the fields for this `FaultIndicator`.
-    :param set_identifier: A callback to register the mRID of this `FaultIndicator` for logging purposes.
+        :param table: The database table to read the :class:`FaultIndicator` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`FaultIndicator`.
+        :param set_identifier: A callback to register the mRID of this :class:`FaultIndicator` for logging purposes.
 
-    :return: True if the `FaultIndicator` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_fault_indicators(self, table: TableFaultIndicators, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`FaultIndicator` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         fault_indicator = FaultIndicator(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_auxiliary_equipment(fault_indicator, table, result_set) and self._add_or_throw(fault_indicator)
 
-    """
-    Create a `PotentialTransformer` and populate its fields from `TablePotentialTransformers`.
+    def load_potential_transformer(self, table: TablePotentialTransformers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PotentialTransformer` and populate its fields from :class:`TablePotentialTransformers`.
 
-    :param table: The database table to read the `PotentialTransformer` fields from.
-    :param result_set: The record in the database table containing the fields for this `PotentialTransformer`.
-    :param set_identifier: A callback to register the mRID of this `PotentialTransformer` for logging purposes.
+        :param table: The database table to read the :class:`PotentialTransformer` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PotentialTransformer`.
+        :param set_identifier: A callback to register the mRID of this :class:`PotentialTransformer` for logging purposes.
 
-    :return: True if the `PotentialTransformer` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_potential_transformers(self, table: TablePotentialTransformers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`PotentialTransformer` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         potential_transformer = PotentialTransformer(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         potential_transformer.asset_info = self._ensure_get(
@@ -943,18 +953,17 @@ class NetworkCimReader(BaseCimReader):
     def _load_ac_dc_terminal(self, ac_dc_terminal: AcDcTerminal, table: TableAcDcTerminals, result_set: ResultSet) -> bool:
         return self._load_identified_object(ac_dc_terminal, table, result_set)
 
-    """
-    Create a `BaseVoltage` and populate its fields from `TableBaseVoltages`.
+    def load_base_voltage(self, table: TableBaseVoltages, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`BaseVoltage` and populate its fields from :class:`TableBaseVoltages`.
 
-    :param table: The database table to read the `BaseVoltage` fields from.
-    :param result_set: The record in the database table containing the fields for this `BaseVoltage`.
-    :param set_identifier: A callback to register the mRID of this `BaseVoltage` for logging purposes.
+        :param table: The database table to read the :class:`BaseVoltage` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`BaseVoltage`.
+        :param set_identifier: A callback to register the mRID of this :class:`BaseVoltage` for logging purposes.
 
-    :return: True if the `BaseVoltage` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_base_voltages(self, table: TableBaseVoltages, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`BaseVoltage` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         base_voltage = BaseVoltage(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         base_voltage.nominal_voltage = result_set.get_int(table.nominal_voltage.query_index)
@@ -969,18 +978,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_equipment(conducting_equipment, table, result_set)
 
-    """
-    Create a `ConnectivityNode` and populate its fields from `TableConnectivityNodes`.
+    def load_connectivity_node(self, table: TableConnectivityNodes, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`ConnectivityNode` and populate its fields from :class:`TableConnectivityNodes`.
 
-    :param table: The database table to read the `ConnectivityNode` fields from.
-    :param result_set: The record in the database table containing the fields for this `ConnectivityNode`.
-    :param set_identifier: A callback to register the mRID of this `ConnectivityNode` for logging purposes.
+        :param table: The database table to read the :class:`ConnectivityNode` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`ConnectivityNode`.
+        :param set_identifier: A callback to register the mRID of this :class:`ConnectivityNode` for logging purposes.
 
-    :return: True if the `ConnectivityNode` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_connectivity_nodes(self, table: TableConnectivityNodes, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`ConnectivityNode` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         connectivity_node = ConnectivityNode(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_identified_object(connectivity_node, table, result_set) and self._add_or_throw(connectivity_node)
@@ -993,6 +1001,34 @@ class NetworkCimReader(BaseCimReader):
     ) -> bool:
         return self._load_power_system_resource(connectivity_node_container, table, result_set)
 
+    def _load_curve(self, curve: Curve, table: TableCurves, result_set: ResultSet) -> bool:
+        return self._load_identified_object(curve, table, result_set)
+
+    def load_curve_data(self, table: TableCurveData, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`CurveData` and populate its fields from :class:`TableConnectivityNodes`.
+
+        :param table: The database table to read the :class:`CurveData` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`CurveData`.
+        :param set_identifier: A callback to register the mRID of this :class:`CurveData` for logging purposes.
+
+        :return: True if the :class:`CurveData` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        curve_mrid = result_set.get_string(table.curve_mrid.query_index)
+        set_identifier(f"{curve_mrid}-x-{result_set.get_float(table.x_value.query_index)}")
+
+        curve = self._service.get(curve_mrid, Curve)
+
+        curve.add_data(
+            result_set.get_float(table.x_value.query_index),
+            result_set.get_float(table.y1_value.query_index),
+            result_set.get_float(table.y2_value.query_index, on_none=None),
+            result_set.get_float(table.y3_value.query_index, on_none=None)
+        )
+
+        return True
+
     def _load_equipment(self, equipment: Equipment, table: TableEquipment, result_set: ResultSet) -> bool:
         equipment.normally_in_service = result_set.get_boolean(table.normally_in_service.query_index)
         equipment.in_service = result_set.get_boolean(table.in_service.query_index)
@@ -1003,18 +1039,17 @@ class NetworkCimReader(BaseCimReader):
     def _load_equipment_container(self, equipment_container: EquipmentContainer, table: TableEquipmentContainers, result_set: ResultSet) -> bool:
         return self._load_connectivity_node_container(equipment_container, table, result_set)
 
-    """
-    Create a `Feeder` and populate its fields from `TableFeeders`.
+    def load_feeder(self, table: TableFeeders, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Feeder` and populate its fields from :class:`TableFeeders`.
 
-    :param table: The database table to read the `Feeder` fields from.
-    :param result_set: The record in the database table containing the fields for this `Feeder`.
-    :param set_identifier: A callback to register the mRID of this `Feeder` for logging purposes.
+        :param table: The database table to read the :class:`Feeder` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Feeder`.
+        :param set_identifier: A callback to register the mRID of this :class:`Feeder` for logging purposes.
 
-    :return: True if the `Feeder` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_feeders(self, table: TableFeeders, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Feeder` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         feeder = Feeder(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         feeder.normal_head_terminal = self._ensure_get(
@@ -1031,18 +1066,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_equipment_container(feeder, table, result_set) and self._add_or_throw(feeder)
 
-    """
-    Create a `GeographicalRegion` and populate its fields from `TableGeographicalRegions`.
+    def load_geographical_region(self, table: TableGeographicalRegions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`GeographicalRegion` and populate its fields from :class:`TableGeographicalRegions`.
 
-    :param table: The database table to read the `GeographicalRegion` fields from.
-    :param result_set: The record in the database table containing the fields for this `GeographicalRegion`.
-    :param set_identifier: A callback to register the mRID of this `GeographicalRegion` for logging purposes.
+        :param table: The database table to read the :class:`GeographicalRegion` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`GeographicalRegion`.
+        :param set_identifier: A callback to register the mRID of this :class:`GeographicalRegion` for logging purposes.
 
-    :return: True if the `GeographicalRegion` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_geographical_regions(self, table: TableGeographicalRegions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`GeographicalRegion` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         geographical_region = GeographicalRegion(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_identified_object(geographical_region, table, result_set) and self._add_or_throw(geographical_region)
@@ -1056,34 +1090,32 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_identified_object(power_system_resource, table, result_set)
 
-    """
-    Create a `Site` and populate its fields from `TableSites`.
+    def load_site(self, table: TableSites, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Site` and populate its fields from :class:`TableSites`.
 
-    :param table: The database table to read the `Site` fields from.
-    :param result_set: The record in the database table containing the fields for this `Site`.
-    :param set_identifier: A callback to register the mRID of this `Site` for logging purposes.
+        :param table: The database table to read the :class:`Site` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Site`.
+        :param set_identifier: A callback to register the mRID of this :class:`Site` for logging purposes.
 
-    :return: True if the `Site` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_sites(self, table: TableSites, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Site` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         site = Site(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_equipment_container(site, table, result_set) and self._add_or_throw(site)
 
-    """
-    Create a `SubGeographicalRegion` and populate its fields from `TableSubGeographicalRegions`.
+    def load_sub_geographical_region(self, table: TableSubGeographicalRegions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`SubGeographicalRegion` and populate its fields from :class:`TableSubGeographicalRegions`.
 
-    :param table: The database table to read the `SubGeographicalRegion` fields from.
-    :param result_set: The record in the database table containing the fields for this `SubGeographicalRegion`.
-    :param set_identifier: A callback to register the mRID of this `SubGeographicalRegion` for logging purposes.
+        :param table: The database table to read the :class:`SubGeographicalRegion` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`SubGeographicalRegion`.
+        :param set_identifier: A callback to register the mRID of this :class:`SubGeographicalRegion` for logging purposes.
 
-    :return: True if the `SubGeographicalRegion` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_sub_geographical_regions(self, table: TableSubGeographicalRegions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`SubGeographicalRegion` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         sub_geographical_region = SubGeographicalRegion(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         sub_geographical_region.geographical_region = self._ensure_get(
@@ -1096,18 +1128,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_identified_object(sub_geographical_region, table, result_set) and self._add_or_throw(sub_geographical_region)
 
-    """
-    Create a `Substation` and populate its fields from `TableSubstations`.
+    def load_substation(self, table: TableSubstations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Substation` and populate its fields from :class:`TableSubstations`.
 
-    :param table: The database table to read the `Substation` fields from.
-    :param result_set: The record in the database table containing the fields for this `Substation`.
-    :param set_identifier: A callback to register the mRID of this `Substation` for logging purposes.
+        :param table: The database table to read the :class:`Substation` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Substation`.
+        :param set_identifier: A callback to register the mRID of this :class:`Substation` for logging purposes.
 
-    :return: True if the `Substation` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_substations(self, table: TableSubstations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Substation` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         substation = Substation(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         substation.sub_geographical_region = self._ensure_get(
@@ -1120,18 +1151,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_equipment_container(substation, table, result_set) and self._add_or_throw(substation)
 
-    """
-    Create a `Terminal` and populate its fields from `TableTerminals`.
+    def load_terminal(self, table: TableTerminals, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Terminal` and populate its fields from :class:`TableTerminals`.
 
-    :param table: The database table to read the `Terminal` fields from.
-    :param result_set: The record in the database table containing the fields for this `Terminal`.
-    :param set_identifier: A callback to register the mRID of this `Terminal` for logging purposes.
+        :param table: The database table to read the :class:`Terminal` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Terminal`.
+        :param set_identifier: A callback to register the mRID of this :class:`Terminal` for logging purposes.
 
-    :return: True if the `Terminal` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_terminals(self, table: TableTerminals, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Terminal` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         terminal = Terminal(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         terminal.sequence_number = result_set.get_int(table.sequence_number.query_index)
@@ -1152,18 +1182,17 @@ class NetworkCimReader(BaseCimReader):
     # IEC61970 Base Equivalents #
     #############################
 
-    """
-    Create an `EquivalentBranch` and populate its fields from `TableEquivalentBranches`.
+    def load_equivalent_branch(self, table: TableEquivalentBranches, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`EquivalentBranch` and populate its fields from :class:`TableEquivalentBranches`.
 
-    :param table: The database table to read the `EquivalentBranch` fields from.
-    :param result_set: The record in the database table containing the fields for this `EquivalentBranch`.
-    :param set_identifier: A callback to register the mRID of this `EquivalentBranch` for logging purposes.
+        :param table: The database table to read the :class:`EquivalentBranch` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`EquivalentBranch`.
+        :param set_identifier: A callback to register the mRID of this :class:`EquivalentBranch` for logging purposes.
 
-    :return: True if the `EquivalentBranch` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_equivalent_branches(self, table: TableEquivalentBranches, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`EquivalentBranch` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         equivalent_branch = EquivalentBranch(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         equivalent_branch.negative_r12 = result_set.get_float(table.negative_r12.query_index, on_none=None)
@@ -1192,70 +1221,66 @@ class NetworkCimReader(BaseCimReader):
     # IEC61970 Base Meas #
     ######################
 
-    """
-    Create an `Accumulator` and populate its fields from `TableAccumulators`.
+    def load_accumulator(self, table: TableAccumulators, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`Accumulator` and populate its fields from :class:`TableAccumulators`.
 
-    :param table: The database table to read the `Accumulator` fields from.
-    :param result_set: The record in the database table containing the fields for this `Accumulator`.
-    :param set_identifier: A callback to register the mRID of this `Accumulator` for logging purposes.
+        :param table: The database table to read the :class:`Accumulator` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Accumulator`.
+        :param set_identifier: A callback to register the mRID of this :class:`Accumulator` for logging purposes.
 
-    :return: True if the `Accumulator` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_accumulators(self, table: TableAccumulators, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Accumulator` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         meas = Accumulator(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_measurement(meas, table, result_set) and self._add_or_throw(meas)
 
-    """
-    Create an `Analog` and populate its fields from `TableAnalogs`.
+    def load_analog(self, table: TableAnalogs, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`Analog` and populate its fields from :class:`TableAnalogs`.
 
-    :param table: The database table to read the `Analog` fields from.
-    :param result_set: The record in the database table containing the fields for this `Analog`.
-    :param set_identifier: A callback to register the mRID of this `Analog` for logging purposes.
+        :param table: The database table to read the :class:`Analog` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Analog`.
+        :param set_identifier: A callback to register the mRID of this :class:`Analog` for logging purposes.
 
-    :return: True if the `Analog` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_analogs(self, table: TableAnalogs, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Analog` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         meas = Analog(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         meas.positive_flow_in = result_set.get_boolean(table.positive_flow_in.query_index)
 
         return self._load_measurement(meas, table, result_set) and self._add_or_throw(meas)
 
-    """
-    Create a `Control` and populate its fields from `TableControls`.
+    def load_control(self, table: TableControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Control` and populate its fields from :class:`TableControls`.
 
-    :param table: The database table to read the `Control` fields from.
-    :param result_set: The record in the database table containing the fields for this `Control`.
-    :param set_identifier: A callback to register the mRID of this `Control` for logging purposes.
+        :param table: The database table to read the :class:`Control` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Control`.
+        :param set_identifier: A callback to register the mRID of this :class:`Control` for logging purposes.
 
-    :return: True if the `Control` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_controls(self, table: TableControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Control` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         control = Control(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         control.power_system_resource_mrid = result_set.get_string(table.power_system_resource_mrid.query_index, on_none=None)
 
         return self._load_io_point(control, table, result_set) and self._add_or_throw(control)
 
-    """
-    Create a `Discrete` and populate its fields from `TableDiscretes`.
+    def load_discrete(self, table: TableDiscretes, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Discrete` and populate its fields from :class:`TableDiscretes`.
 
-    :param table: The database table to read the `Discrete` fields from.
-    :param result_set: The record in the database table containing the fields for this `Discrete`.
-    :param set_identifier: A callback to register the mRID of this `Discrete` for logging purposes.
+        :param table: The database table to read the :class:`Discrete` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Discrete`.
+        :param set_identifier: A callback to register the mRID of this :class:`Discrete` for logging purposes.
 
-    :return: True if the `Discrete` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_discretes(self, table: TableDiscretes, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Discrete` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         meas = Discrete(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_measurement(meas, table, result_set) and self._add_or_throw(meas)
@@ -1282,18 +1307,17 @@ class NetworkCimReader(BaseCimReader):
     # IEC61970 Base Protection #
     ############################
 
-    """
-    Create a `CurrentRelay` and populate its fields from `TableCurrentRelays`.
+    def load_current_relay(self, table: TableCurrentRelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`CurrentRelay` and populate its fields from :class:`TableCurrentRelays`.
 
-    :param table: The database table to read the `CurrentRelay` fields from.
-    :param result_set: The record in the database table containing the fields for this `CurrentRelay`.
-    :param set_identifier: A callback to register the mRID of this `CurrentRelay` for logging purposes.
+        :param table: The database table to read the :class:`CurrentRelay` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`CurrentRelay`.
+        :param set_identifier: A callback to register the mRID of this :class:`CurrentRelay` for logging purposes.
 
-    :return: True if the `CurrentRelay` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_current_relays(self, table: TableCurrentRelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`CurrentRelay` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         current_relay = CurrentRelay(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         current_relay.current_limit_1 = result_set.get_float(table.current_limit_1.query_index, on_none=None)
@@ -1302,18 +1326,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_protection_relay_function(current_relay, table, result_set) and self._add_or_throw(current_relay)
 
-    """
-    Create a `DistanceRelay` and populate its fields from `TableDistanceRelays`.
+    def load_distance_relay(self, table: TableDistanceRelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`DistanceRelay` and populate its fields from :class:`TableDistanceRelays`.
 
-    :param table: The database table to read the `DistanceRelay` fields from.
-    :param result_set: The record in the database table containing the fields for this `DistanceRelay`.
-    :param set_identifier: A callback to register the mRID of this `DistanceRelay` for logging purposes.
+        :param table: The database table to read the :class:`DistanceRelay` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`DistanceRelay`.
+        :param set_identifier: A callback to register the mRID of this :class:`DistanceRelay` for logging purposes.
 
-    :return: True if the `DistanceRelay` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_distance_relays(self, table: TableDistanceRelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`DistanceRelay` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         distance_relay = DistanceRelay(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         distance_relay.backward_blind = result_set.get_float(table.backward_blind.query_index, on_none=None)
@@ -1328,11 +1351,12 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_protection_relay_function(distance_relay, table, result_set) and self._add_or_throw(distance_relay)
 
-    def _load_protection_relay_function(self,
-                                        protection_relay_function: ProtectionRelayFunction,
-                                        table: TableProtectionRelayFunctions,
-                                        result_set: ResultSet
-                                        ) -> bool:
+    def _load_protection_relay_function(
+        self,
+        protection_relay_function: ProtectionRelayFunction,
+        table: TableProtectionRelayFunctions,
+        result_set: ResultSet
+    ) -> bool:
         protection_relay_function.asset_info = self._ensure_get(
             result_set.get_string(table.relay_info_mrid.query_index, on_none=None),
             RelayInfo
@@ -1346,23 +1370,22 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_power_system_resource(protection_relay_function, table, result_set)
 
-    """
-    Create a `set_identifier` and populate its fields from `TableProtectionRelayFunctionThresholds`.
-
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
-
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_protection_relay_function_thresholds(
+    def load_protection_relay_function_threshold(
         self,
         table: TableProtectionRelayFunctionThresholds,
         result_set: ResultSet,
         set_identifier: Callable[[str], str]
     ) -> bool:
+        """
+        Create a :class:`RelaySetting` and populate its fields from :class:`TableProtectionRelayFunctionThresholds`.
+
+        :param table: The database table to read the :class:`RelaySetting` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`RelaySetting`.
+        :param set_identifier: A callback to register the mRID of this :class:`RelaySetting` for logging purposes.
+
+        :return: True if the :class:`RelaySetting` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         protection_relay_function_mrid = set_identifier(result_set.get_string(table.protection_relay_function_mrid.query_index))
         sequence_number = result_set.get_int(table.sequence_number.query_index)
 
@@ -1380,23 +1403,22 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Adds a time limit to a `ProtectionRelayFunction` and populate its fields from `TableProtectionRelayFunctionTimeLimits`.
-
-    :param table: The database table to read the time limit fields from.
-    :param result_set: The record in the database table containing the fields for this time limit.
-    :param set_identifier: A callback to register the mRID of this time limit for logging purposes.
-
-    :return: True if the time limit was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_protection_relay_function_time_limits(
+    def load_protection_relay_function_time_limit(
         self,
         table: TableProtectionRelayFunctionTimeLimits,
         result_set: ResultSet,
         set_identifier: Callable[[str], str]
     ) -> bool:
+        """
+        Adds a time limit to a :class:`ProtectionRelayFunction` and populate its fields from :class:`TableProtectionRelayFunctionTimeLimits`.
+
+        :param table: The database table to read the time limit fields from.
+        :param result_set: The record in the database table containing the fields for this time limit.
+        :param set_identifier: A callback to register the mRID of this time limit for logging purposes.
+
+        :return: True if the time limit was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         # Note TableProtectionRelayFunctionTimeLimits.selectSql ensures we process ratings in the correct order.
         protection_relay_function_mrid = set_identifier(result_set.get_string(table.protection_relay_function_mrid.query_index))
         sequence_number = result_set.get_int(table.sequence_number.query_index)
@@ -1409,18 +1431,17 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Create a `ProtectionRelayScheme` and populate its fields from `TableProtectionRelaySchemes`.
+    def load_protection_relay_scheme(self, table: TableProtectionRelaySchemes, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`ProtectionRelayScheme` and populate its fields from :class:`TableProtectionRelaySchemes`.
 
-    :param table: The database table to read the `ProtectionRelayScheme` fields from.
-    :param result_set: The record in the database table containing the fields for this `ProtectionRelayScheme`.
-    :param set_identifier: A callback to register the mRID of this `ProtectionRelayScheme` for logging purposes.
+        :param table: The database table to read the :class:`ProtectionRelayScheme` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`ProtectionRelayScheme`.
+        :param set_identifier: A callback to register the mRID of this :class:`ProtectionRelayScheme` for logging purposes.
 
-    :return: True if the `ProtectionRelayScheme` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_protection_relay_schemes(self, table: TableProtectionRelaySchemes, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`ProtectionRelayScheme` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         protection_relay_scheme = ProtectionRelayScheme(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         protection_relay_scheme.system = self._ensure_get(
@@ -1432,36 +1453,34 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_identified_object(protection_relay_scheme, table, result_set) and self._add_or_throw(protection_relay_scheme)
 
-    """
-    Create a `ProtectionRelaySystem` and populate its fields from `TableProtectionRelaySystems`.
+    def load_protection_relay_system(self, table: TableProtectionRelaySystems, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`ProtectionRelaySystem` and populate its fields from :class:`TableProtectionRelaySystems`.
 
-    :param table: The database table to read the `ProtectionRelaySystem` fields from.
-    :param result_set: The record in the database table containing the fields for this `ProtectionRelaySystem`.
-    :param set_identifier: A callback to register the mRID of this `ProtectionRelaySystem` for logging purposes.
+        :param table: The database table to read the :class:`ProtectionRelaySystem` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`ProtectionRelaySystem`.
+        :param set_identifier: A callback to register the mRID of this :class:`ProtectionRelaySystem` for logging purposes.
 
-    :return: True if the `ProtectionRelaySystem` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_protection_relay_systems(self, table: TableProtectionRelaySystems, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`ProtectionRelaySystem` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         protection_relay_system = ProtectionRelaySystem(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         protection_relay_system.protection_kind = ProtectionKind[result_set.get_string(table.protection_kind.query_index)]
 
         return self._load_equipment(protection_relay_system, table, result_set) and self._add_or_throw(protection_relay_system)
 
-    """
-    Create a `VoltageRelay` and populate its fields from `TableVoltageRelays`.
+    def load_voltage_relay(self, table: TableVoltageRelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`VoltageRelay` and populate its fields from :class:`TableVoltageRelays`.
 
-    :param table: The database table to read the `VoltageRelay` fields from.
-    :param result_set: The record in the database table containing the fields for this `VoltageRelay`.
-    :param set_identifier: A callback to register the mRID of this `VoltageRelay` for logging purposes.
+        :param table: The database table to read the :class:`VoltageRelay` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`VoltageRelay`.
+        :param set_identifier: A callback to register the mRID of this :class:`VoltageRelay` for logging purposes.
 
-    :return: True if the `VoltageRelay` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_voltage_relays(self, table: TableVoltageRelays, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`VoltageRelay` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         voltage_relay = VoltageRelay(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_protection_relay_function(voltage_relay, table, result_set) and self._add_or_throw(voltage_relay)
@@ -1470,18 +1489,17 @@ class NetworkCimReader(BaseCimReader):
     # IEC61970 Base SCADA #
     #######################
 
-    """
-    Create a `RemoteControl` and populate its fields from `TableRemoteControls`.
+    def load_remote_control(self, table: TableRemoteControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`RemoteControl` and populate its fields from :class:`TableRemoteControls`.
 
-    :param table: The database table to read the `RemoteControl` fields from.
-    :param result_set: The record in the database table containing the fields for this `RemoteControl`.
-    :param set_identifier: A callback to register the mRID of this `RemoteControl` for logging purposes.
+        :param table: The database table to read the :class:`RemoteControl` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`RemoteControl`.
+        :param set_identifier: A callback to register the mRID of this :class:`RemoteControl` for logging purposes.
 
-    :return: True if the `RemoteControl` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_remote_controls(self, table: TableRemoteControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`RemoteControl` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         remote_control = RemoteControl(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         remote_control.control = self._ensure_get(
@@ -1496,18 +1514,17 @@ class NetworkCimReader(BaseCimReader):
     def _load_remote_point(self, remote_point: RemotePoint, table: TableRemotePoints, result_set: ResultSet) -> bool:
         return self._load_identified_object(remote_point, table, result_set)
 
-    """
-    Create a `RemoteSource` and populate its fields from `TableRemoteSources`.
+    def load_remote_source(self, table: TableRemoteSources, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`RemoteSource` and populate its fields from :class:`TableRemoteSources`.
 
-    :param table: The database table to read the `RemoteSource` fields from.
-    :param result_set: The record in the database table containing the fields for this `RemoteSource`.
-    :param set_identifier: A callback to register the mRID of this `RemoteSource` for logging purposes.
+        :param table: The database table to read the :class:`RemoteSource` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`RemoteSource`.
+        :param set_identifier: A callback to register the mRID of this :class:`RemoteSource` for logging purposes.
 
-    :return: True if the `RemoteSource` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_remote_sources(self, table: TableRemoteSources, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`RemoteSource` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         remote_source = RemoteSource(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_remote_point(remote_source, table, result_set) and self._add_or_throw(remote_source)
@@ -1516,18 +1533,17 @@ class NetworkCimReader(BaseCimReader):
     # IEC61970 Base Wires Generation Production #
     #############################################
 
-    """
-    Create a `BatteryUnit` and populate its fields from `TableBatteryUnits`.
+    def load_battery_unit(self, table: TableBatteryUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`BatteryUnit` and populate its fields from :class:`TableBatteryUnits`.
 
-    :param table: The database table to read the `BatteryUnit` fields from.
-    :param result_set: The record in the database table containing the fields for this `BatteryUnit`.
-    :param set_identifier: A callback to register the mRID of this `BatteryUnit` for logging purposes.
+        :param table: The database table to read the :class:`BatteryUnit` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`BatteryUnit`.
+        :param set_identifier: A callback to register the mRID of this :class:`BatteryUnit` for logging purposes.
 
-    :return: True if the `BatteryUnit` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_battery_units(self, table: TableBatteryUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`BatteryUnit` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         battery_unit = BatteryUnit(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         battery_unit.battery_state = BatteryStateKind[result_set.get_string(table.battery_state.query_index)]
@@ -1536,18 +1552,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_power_electronics_unit(battery_unit, table, result_set) and self._add_or_throw(battery_unit)
 
-    """
-    Create a `PhotoVoltaicUnit` and populate its fields from `TablePhotoVoltaicUnits`.
+    def load_photo_voltaic_unit(self, table: TablePhotoVoltaicUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PhotoVoltaicUnit` and populate its fields from :class:`TablePhotoVoltaicUnits`.
 
-    :param table: The database table to read the `PhotoVoltaicUnit` fields from.
-    :param result_set: The record in the database table containing the fields for this `PhotoVoltaicUnit`.
-    :param set_identifier: A callback to register the mRID of this `PhotoVoltaicUnit` for logging purposes.
+        :param table: The database table to read the :class:`PhotoVoltaicUnit` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PhotoVoltaicUnit`.
+        :param set_identifier: A callback to register the mRID of this :class:`PhotoVoltaicUnit` for logging purposes.
 
-    :return: True if the `PhotoVoltaicUnit` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_photo_voltaic_units(self, table: TablePhotoVoltaicUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`PhotoVoltaicUnit` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         photo_voltaic_unit = PhotoVoltaicUnit(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_power_electronics_unit(photo_voltaic_unit, table, result_set) and self._add_or_throw(photo_voltaic_unit)
@@ -1565,18 +1580,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_equipment(power_electronics_unit, table, result_set)
 
-    """
-    Create a `PowerElectronicsWindUnit` and populate its fields from `TablePowerElectronicsWindUnits`.
+    def load_power_electronics_wind_unit(self, table: TablePowerElectronicsWindUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PowerElectronicsWindUnit` and populate its fields from :class:`TablePowerElectronicsWindUnits`.
 
-    :param table: The database table to read the `PowerElectronicsWindUnit` fields from.
-    :param result_set: The record in the database table containing the fields for this `PowerElectronicsWindUnit`.
-    :param set_identifier: A callback to register the mRID of this `PowerElectronicsWindUnit` for logging purposes.
+        :param table: The database table to read the :class:`PowerElectronicsWindUnit` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PowerElectronicsWindUnit`.
+        :param set_identifier: A callback to register the mRID of this :class:`PowerElectronicsWindUnit` for logging purposes.
 
-    :return: True if the `PowerElectronicsWindUnit` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_power_electronics_wind_units(self, table: TablePowerElectronicsWindUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`PowerElectronicsWindUnit` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         power_electronics_wind_unit = PowerElectronicsWindUnit(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_power_electronics_unit(power_electronics_wind_unit, table, result_set) and self._add_or_throw(power_electronics_wind_unit)
@@ -1585,18 +1599,17 @@ class NetworkCimReader(BaseCimReader):
     # IEC61970 Base Wires #
     #######################
 
-    """
-    Create an `AcLineSegment` and populate its fields from `TableAcLineSegments`.
+    def load_ac_line_segment(self, table: TableAcLineSegments, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`AcLineSegment` and populate its fields from :class:`TableAcLineSegments`.
 
-    :param table: The database table to read the `AcLineSegment` fields from.
-    :param result_set: The record in the database table containing the fields for this `AcLineSegment`.
-    :param set_identifier: A callback to register the mRID of this `AcLineSegment` for logging purposes.
+        :param table: The database table to read the :class:`AcLineSegment` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`AcLineSegment`.
+        :param set_identifier: A callback to register the mRID of this :class:`AcLineSegment` for logging purposes.
 
-    :return: True if the `AcLineSegment` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_ac_line_segments(self, table: TableAcLineSegments, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`AcLineSegment` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         ac_line_segment = AcLineSegment(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         ac_line_segment.per_length_sequence_impedance = self._ensure_get(
@@ -1606,52 +1619,49 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_conductor(ac_line_segment, table, result_set) and self._add_or_throw(ac_line_segment)
 
-    """
-    Create a `Breaker` and populate its fields from `TableBreakers`.
+    def load_breaker(self, table: TableBreakers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Breaker` and populate its fields from :class:`TableBreakers`.
 
-    :param table: The database table to read the `Breaker` fields from.
-    :param result_set: The record in the database table containing the fields for this `Breaker`.
-    :param set_identifier: A callback to register the mRID of this `Breaker` for logging purposes.
+        :param table: The database table to read the :class:`Breaker` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Breaker`.
+        :param set_identifier: A callback to register the mRID of this :class:`Breaker` for logging purposes.
 
-    :return: True if the `Breaker` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_breakers(self, table: TableBreakers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Breaker` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         breaker = Breaker(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         breaker.in_transit_time = result_set.get_float(table.in_transit_time.query_index, on_none=None)
 
         return self._load_protected_switch(breaker, table, result_set) and self._add_or_throw(breaker)
 
-    """
-    Create a `LoadBreakSwitch` and populate its fields from `TableLoadBreakSwitches`.
+    def load_load_break_switch(self, table: TableLoadBreakSwitches, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`LoadBreakSwitch` and populate its fields from :class:`TableLoadBreakSwitches`.
 
-    :param table: The database table to read the `LoadBreakSwitch` fields from.
-    :param result_set: The record in the database table containing the fields for this `LoadBreakSwitch`.
-    :param set_identifier: A callback to register the mRID of this `LoadBreakSwitch` for logging purposes.
+        :param table: The database table to read the :class:`LoadBreakSwitch` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`LoadBreakSwitch`.
+        :param set_identifier: A callback to register the mRID of this :class:`LoadBreakSwitch` for logging purposes.
 
-    :return: True if the `LoadBreakSwitch` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_load_break_switches(self, table: TableLoadBreakSwitches, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`LoadBreakSwitch` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         load_break_switch = LoadBreakSwitch(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_protected_switch(load_break_switch, table, result_set) and self._add_or_throw(load_break_switch)
 
-    """
-    Create a `BusbarSection` and populate its fields from `TableBusbarSections`.
+    def load_busbar_section(self, table: TableBusbarSections, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`BusbarSection` and populate its fields from :class:`TableBusbarSections`.
 
-    :param table: The database table to read the `BusbarSection` fields from.
-    :param result_set: The record in the database table containing the fields for this `BusbarSection`.
-    :param set_identifier: A callback to register the mRID of this `BusbarSection` for logging purposes.
+        :param table: The database table to read the :class:`BusbarSection` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`BusbarSection`.
+        :param set_identifier: A callback to register the mRID of this :class:`BusbarSection` for logging purposes.
 
-    :return: True if the `BusbarSection` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_busbar_sections(self, table: TableBusbarSections, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`BusbarSection` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         busbar_section = BusbarSection(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_connector(busbar_section, table, result_set) and self._add_or_throw(busbar_section)
@@ -1668,37 +1678,40 @@ class NetworkCimReader(BaseCimReader):
     def _load_connector(self, connector: Connector, table: TableConnectors, result_set: ResultSet) -> bool:
         return self._load_conducting_equipment(connector, table, result_set)
 
-    """
-    Create a `Disconnector` and populate its fields from `TableDisconnectors`.
+    def load_disconnector(self, table: TableDisconnectors, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Disconnector` and populate its fields from :class:`TableDisconnectors`.
 
-    :param table: The database table to read the `Disconnector` fields from.
-    :param result_set: The record in the database table containing the fields for this `Disconnector`.
-    :param set_identifier: A callback to register the mRID of this `Disconnector` for logging purposes.
+        :param table: The database table to read the :class:`Disconnector` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Disconnector`.
+        :param set_identifier: A callback to register the mRID of this :class:`Disconnector` for logging purposes.
 
-    :return: True if the `Disconnector` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_disconnectors(self, table: TableDisconnectors, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Disconnector` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         disconnector = Disconnector(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_switch(disconnector, table, result_set) and self._add_or_throw(disconnector)
 
+    def _load_earth_fault_compensator(self, earth_fault_compensator: EarthFaultCompensator, table: TableEarthFaultCompensators, result_set: ResultSet) -> bool:
+        earth_fault_compensator.r = result_set.get_float(table.r.query_index, on_none=None)
+
+        return self._load_conducting_equipment(earth_fault_compensator, table, result_set)
+
     def _load_energy_connection(self, energy_connection: EnergyConnection, table: TableEnergyConnections, result_set: ResultSet) -> bool:
         return self._load_conducting_equipment(energy_connection, table, result_set)
 
-    """
-    Create an `EnergyConsumer` and populate its fields from `TableEnergyConsumers`.
+    def load_energy_consumer(self, table: TableEnergyConsumers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`EnergyConsumer` and populate its fields from :class:`TableEnergyConsumers`.
 
-    :param table: The database table to read the `EnergyConsumer` fields from.
-    :param result_set: The record in the database table containing the fields for this `EnergyConsumer`.
-    :param set_identifier: A callback to register the mRID of this `EnergyConsumer` for logging purposes.
+        :param table: The database table to read the :class:`EnergyConsumer` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`EnergyConsumer`.
+        :param set_identifier: A callback to register the mRID of this :class:`EnergyConsumer` for logging purposes.
 
-    :return: True if the `EnergyConsumer` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_energy_consumers(self, table: TableEnergyConsumers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`EnergyConsumer` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         energy_consumer = EnergyConsumer(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         energy_consumer.customer_count = result_set.get_int(table.customer_count.query_index, on_none=None)
@@ -1711,18 +1724,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_energy_connection(energy_consumer, table, result_set) and self._add_or_throw(energy_consumer)
 
-    """
-    Create an `EnergyConsumerPhase` and populate its fields from `TableEnergyConsumerPhases`.
+    def load_energy_consumer_phase(self, table: TableEnergyConsumerPhases, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`EnergyConsumerPhase` and populate its fields from :class:`TableEnergyConsumerPhases`.
 
-    :param table: The database table to read the `EnergyConsumerPhase` fields from.
-    :param result_set: The record in the database table containing the fields for this `EnergyConsumerPhase`.
-    :param set_identifier: A callback to register the mRID of this `EnergyConsumerPhase` for logging purposes.
+        :param table: The database table to read the :class:`EnergyConsumerPhase` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`EnergyConsumerPhase`.
+        :param set_identifier: A callback to register the mRID of this :class:`EnergyConsumerPhase` for logging purposes.
 
-    :return: True if the `EnergyConsumerPhase` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_energy_consumer_phases(self, table: TableEnergyConsumerPhases, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`EnergyConsumerPhase` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         energy_consumer_phase = EnergyConsumerPhase(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         energy_consumer_phase.energy_consumer = self._ensure_get(
@@ -1740,18 +1752,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_power_system_resource(energy_consumer_phase, table, result_set) and self._add_or_throw(energy_consumer_phase)
 
-    """
-    Create an `EnergySource` and populate its fields from `TableEnergySources`.
+    def load_energy_source(self, table: TableEnergySources, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`EnergySource` and populate its fields from :class:`TableEnergySources`.
 
-    :param table: The database table to read the `EnergySource` fields from.
-    :param result_set: The record in the database table containing the fields for this `EnergySource`.
-    :param set_identifier: A callback to register the mRID of this `EnergySource` for logging purposes.
+        :param table: The database table to read the :class:`EnergySource` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`EnergySource`.
+        :param set_identifier: A callback to register the mRID of this :class:`EnergySource` for logging purposes.
 
-    :return: True if the `EnergySource` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_energy_sources(self, table: TableEnergySources, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`EnergySource` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         energy_source = EnergySource(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         energy_source.active_power = result_set.get_float(table.active_power.query_index, on_none=None)
@@ -1782,18 +1793,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_energy_connection(energy_source, table, result_set) and self._add_or_throw(energy_source)
 
-    """
-    Create an `EnergySourcePhase` and populate its fields from `TableEnergySourcePhases`.
+    def load_energy_source_phase(self, table: TableEnergySourcePhases, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`EnergySourcePhase` and populate its fields from :class:`TableEnergySourcePhases`.
 
-    :param table: The database table to read the `EnergySourcePhase` fields from.
-    :param result_set: The record in the database table containing the fields for this `EnergySourcePhase`.
-    :param set_identifier: A callback to register the mRID of this `EnergySourcePhase` for logging purposes.
+        :param table: The database table to read the :class:`EnergySourcePhase` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`EnergySourcePhase`.
+        :param set_identifier: A callback to register the mRID of this :class:`EnergySourcePhase` for logging purposes.
 
-    :return: True if the `EnergySourcePhase` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_energy_source_phases(self, table: TableEnergySourcePhases, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`EnergySourcePhase` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         energy_source_phase = EnergySourcePhase(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         energy_source_phase.energy_source = self._ensure_get(
@@ -1807,18 +1817,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_power_system_resource(energy_source_phase, table, result_set) and self._add_or_throw(energy_source_phase)
 
-    """
-    Create a `Fuse` and populate its fields from `TableFuses`.
+    def load_fuse(self, table: TableFuses, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Fuse` and populate its fields from :class:`TableFuses`.
 
-    :param table: The database table to read the `Fuse` fields from.
-    :param result_set: The record in the database table containing the fields for this `Fuse`.
-    :param set_identifier: A callback to register the mRID of this `Fuse` for logging purposes.
+        :param table: The database table to read the :class:`Fuse` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Fuse`.
+        :param set_identifier: A callback to register the mRID of this :class:`Fuse` for logging purposes.
 
-    :return: True if the `Fuse` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_fuses(self, table: TableFuses, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Fuse` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         fuse = Fuse(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         fuse.function = self._ensure_get(
@@ -1828,66 +1837,79 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_switch(fuse, table, result_set) and self._add_or_throw(fuse)
 
-    """
-    Create a `Ground` and populate its fields from `TableGrounds`.
+    def load_ground(self, table: TableGrounds, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Ground` and populate its fields from :class:`TableGrounds`.
 
-    :param table: The database table to read the `Ground` fields from.
-    :param result_set: The record in the database table containing the fields for this `Ground`.
-    :param set_identifier: A callback to register the mRID of this `Ground` for logging purposes.
+        :param table: The database table to read the :class:`Ground` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Ground`.
+        :param set_identifier: A callback to register the mRID of this :class:`Ground` for logging purposes.
 
-    :return: True if the `Ground` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_grounds(self, table: TableGrounds, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Ground` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         ground = Ground(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_conducting_equipment(ground, table, result_set) and self._add_or_throw(ground)
 
-    """
-    Create a `GroundDisconnector` and populate its fields from `TableGroundDisconnectors`.
+    def load_ground_disconnector(self, table: TableGroundDisconnectors, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`GroundDisconnector` and populate its fields from :class:`TableGroundDisconnectors`.
 
-    :param table: The database table to read the `GroundDisconnector` fields from.
-    :param result_set: The record in the database table containing the fields for this `GroundDisconnector`.
-    :param set_identifier: A callback to register the mRID of this `GroundDisconnector` for logging purposes.
+        :param table: The database table to read the :class:`GroundDisconnector` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`GroundDisconnector`.
+        :param set_identifier: A callback to register the mRID of this :class:`GroundDisconnector` for logging purposes.
 
-    :return: True if the `GroundDisconnector` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_ground_disconnectors(self, table: TableGroundDisconnectors, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`GroundDisconnector` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         ground_disconnector = GroundDisconnector(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_switch(ground_disconnector, table, result_set) and self._add_or_throw(ground_disconnector)
 
-    """
-    Create a `Jumper` and populate its fields from `TableJumpers`.
+    def load_grounding_impedance(self, table: TableGroundingImpedances, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`GroundingImpedance` and populate its fields from :class:`TableGroundingImpedances`.
 
-    :param table: The database table to read the `Jumper` fields from.
-    :param result_set: The record in the database table containing the fields for this `Jumper`.
-    :param set_identifier: A callback to register the mRID of this `Jumper` for logging purposes.
+        :param table: The database table to read the :class:`GroundingImpedance` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`GroundingImpedance`.
+        :param set_identifier: A callback to register the mRID of this :class:`GroundingImpedance` for logging purposes.
 
-    :return: True if the `Jumper` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
+        :return: True if the :class:`GroundingImpedance` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        grounding_impedance = GroundingImpedance(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
-    def load_jumpers(self, table: TableJumpers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        grounding_impedance.x = result_set.get_float(table.x.query_index, on_none=None)
+
+        return self._load_earth_fault_compensator(grounding_impedance, table, result_set) and self._add_or_throw(grounding_impedance)
+
+    def load_jumper(self, table: TableJumpers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Jumper` and populate its fields from :class:`TableJumpers`.
+
+        :param table: The database table to read the :class:`Jumper` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Jumper`.
+        :param set_identifier: A callback to register the mRID of this :class:`Jumper` for logging purposes.
+
+        :return: True if the :class:`Jumper` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         jumper = Jumper(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_switch(jumper, table, result_set) and self._add_or_throw(jumper)
 
-    """
-    Create a `Junction` and populate its fields from `TableJunctions`.
+    def load_junction(self, table: TableJunctions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Junction` and populate its fields from :class:`TableJunctions`.
 
-    :param table: The database table to read the `Junction` fields from.
-    :param result_set: The record in the database table containing the fields for this `Junction`.
-    :param set_identifier: A callback to register the mRID of this `Junction` for logging purposes.
+        :param table: The database table to read the :class:`Junction` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Junction`.
+        :param set_identifier: A callback to register the mRID of this :class:`Junction` for logging purposes.
 
-    :return: True if the `Junction` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_junctions(self, table: TableJunctions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Junction` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         junction = Junction(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_connector(junction, table, result_set) and self._add_or_throw(junction)
@@ -1895,18 +1917,17 @@ class NetworkCimReader(BaseCimReader):
     def _load_line(self, line: Line, table: TableLines, result_set: ResultSet) -> bool:
         return self._load_equipment_container(line, table, result_set)
 
-    """
-    Create a `LinearShuntCompensator` and populate its fields from `TableLinearShuntCompensators`.
+    def load_linear_shunt_compensator(self, table: TableLinearShuntCompensators, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`LinearShuntCompensator` and populate its fields from :class:`TableLinearShuntCompensators`.
 
-    :param table: The database table to read the `LinearShuntCompensator` fields from.
-    :param result_set: The record in the database table containing the fields for this `LinearShuntCompensator`.
-    :param set_identifier: A callback to register the mRID of this `LinearShuntCompensator` for logging purposes.
+        :param table: The database table to read the :class:`LinearShuntCompensator` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`LinearShuntCompensator`.
+        :param set_identifier: A callback to register the mRID of this :class:`LinearShuntCompensator` for logging purposes.
 
-    :return: True if the `LinearShuntCompensator` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_linear_shunt_compensators(self, table: TableLinearShuntCompensators, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`LinearShuntCompensator` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         linear_shunt_compensator = LinearShuntCompensator(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         linear_shunt_compensator.b0_per_section = result_set.get_float(table.b0_per_section.query_index, on_none=None)
@@ -1927,18 +1948,17 @@ class NetworkCimReader(BaseCimReader):
     ) -> bool:
         return self._load_identified_object(per_length_line_parameter, table, result_set)
 
-    """
-    Create a `PerLengthSequenceImpedance` and populate its fields from `TablePerLengthSequenceImpedances`.
+    def load_per_length_sequence_impedance(self, table: TablePerLengthSequenceImpedances, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PerLengthSequenceImpedance` and populate its fields from :class:`TablePerLengthSequenceImpedances`.
 
-    :param table: The database table to read the `PerLengthSequenceImpedance` fields from.
-    :param result_set: The record in the database table containing the fields for this `PerLengthSequenceImpedance`.
-    :param set_identifier: A callback to register the mRID of this `PerLengthSequenceImpedance` for logging purposes.
+        :param table: The database table to read the :class:`PerLengthSequenceImpedance` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PerLengthSequenceImpedance`.
+        :param set_identifier: A callback to register the mRID of this :class:`PerLengthSequenceImpedance` for logging purposes.
 
-    :return: True if the `PerLengthSequenceImpedance` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_per_length_sequence_impedances(self, table: TablePerLengthSequenceImpedances, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`PerLengthSequenceImpedance` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         per_length_sequence_impedance = PerLengthSequenceImpedance(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         per_length_sequence_impedance.r = result_set.get_float(table.r.query_index, on_none=None)
@@ -1952,18 +1972,34 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_per_length_impedance(per_length_sequence_impedance, table, result_set) and self._add_or_throw(per_length_sequence_impedance)
 
-    """
-    Create a `PowerElectronicsConnection` and populate its fields from `TablePowerElectronicsConnections`.
+    def load_petersen_coil(self, table: TablePetersenCoils, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PetersenCoil` and populate its fields from :class:`TablePetersenCoils`.
 
-    :param table: The database table to read the `PowerElectronicsConnection` fields from.
-    :param result_set: The record in the database table containing the fields for this `PowerElectronicsConnection`.
-    :param set_identifier: A callback to register the mRID of this `PowerElectronicsConnection` for logging purposes.
+        :param table: The database table to read the :class:`PetersenCoil` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PetersenCoil`.
+        :param set_identifier: A callback to register the mRID of this :class:`PetersenCoil` for logging purposes.
 
-    :return: True if the `PowerElectronicsConnection` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
+        :return: True if the :class:`PetersenCoil` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        petersen_coil = PetersenCoil(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
-    def load_power_electronics_connections(self, table: TablePowerElectronicsConnections, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        petersen_coil.x_ground_nominal = result_set.get_float(table.x_ground_nominal.query_index, on_none=None)
+
+        return self._load_earth_fault_compensator(petersen_coil, table, result_set) and self._add_or_throw(petersen_coil)
+
+    def load_power_electronics_connection(self, table: TablePowerElectronicsConnections, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PowerElectronicsConnection` and populate its fields from :class:`TablePowerElectronicsConnections`.
+
+        :param table: The database table to read the :class:`PowerElectronicsConnection` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PowerElectronicsConnection`.
+        :param set_identifier: A callback to register the mRID of this :class:`PowerElectronicsConnection` for logging purposes.
+
+        :return: True if the :class:`PowerElectronicsConnection` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         power_electronics_connection = PowerElectronicsConnection(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         power_electronics_connection.max_i_fault = result_set.get_int(table.max_i_fault.query_index, on_none=None)
@@ -2000,23 +2036,22 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_regulating_cond_eq(power_electronics_connection, table, result_set) and self._add_or_throw(power_electronics_connection)
 
-    """
-    Create a `PowerElectronicsConnectionPhase` and populate its fields from `TablePowerElectronicsConnectionPhases`.
-
-    :param table: The database table to read the `PowerElectronicsConnectionPhase` fields from.
-    :param result_set: The record in the database table containing the fields for this `PowerElectronicsConnectionPhase`.
-    :param set_identifier: A callback to register the mRID of this `PowerElectronicsConnectionPhase` for logging purposes.
-
-    :return: True if the `PowerElectronicsConnectionPhase` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_power_electronics_connection_phases(
+    def load_power_electronics_connection_phase(
         self,
         table: TablePowerElectronicsConnectionPhases,
         result_set: ResultSet,
         set_identifier: Callable[[str], str]
     ) -> bool:
+        """
+        Create a :class:`PowerElectronicsConnectionPhase` and populate its fields from :class:`TablePowerElectronicsConnectionPhases`.
+
+        :param table: The database table to read the :class:`PowerElectronicsConnectionPhase` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PowerElectronicsConnectionPhase`.
+        :param set_identifier: A callback to register the mRID of this :class:`PowerElectronicsConnectionPhase` for logging purposes.
+
+        :return: True if the :class:`PowerElectronicsConnectionPhase` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         power_electronics_connection_phase = PowerElectronicsConnectionPhase(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         power_electronics_connection_phase.power_electronics_connection = self._ensure_get(
@@ -2034,18 +2069,17 @@ class NetworkCimReader(BaseCimReader):
         return self._load_power_system_resource(power_electronics_connection_phase, table, result_set) and self._add_or_throw(
             power_electronics_connection_phase)
 
-    """
-    Create a `PowerTransformer` and populate its fields from `TablePowerTransformers`.
+    def load_power_transformer(self, table: TablePowerTransformers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PowerTransformer` and populate its fields from :class:`TablePowerTransformers`.
 
-    :param table: The database table to read the `PowerTransformer` fields from.
-    :param result_set: The record in the database table containing the fields for this `PowerTransformer`.
-    :param set_identifier: A callback to register the mRID of this `PowerTransformer` for logging purposes.
+        :param table: The database table to read the :class:`PowerTransformer` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PowerTransformer`.
+        :param set_identifier: A callback to register the mRID of this :class:`PowerTransformer` for logging purposes.
 
-    :return: True if the `PowerTransformer` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_power_transformers(self, table: TablePowerTransformers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`PowerTransformer` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         power_transformer = PowerTransformer(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         power_transformer.vector_group = VectorGroup[result_set.get_string(table.vector_group.query_index)]
@@ -2059,18 +2093,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_conducting_equipment(power_transformer, table, result_set) and self._add_or_throw(power_transformer)
 
-    """
-    Create a `PowerTransformerEnd` and populate its fields from `TablePowerTransformerEnds`.
+    def load_power_transformer_end(self, table: TablePowerTransformerEnds, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PowerTransformerEnd` and populate its fields from :class:`TablePowerTransformerEnds`.
 
-    :param table: The database table to read the `PowerTransformerEnd` fields from.
-    :param result_set: The record in the database table containing the fields for this `PowerTransformerEnd`.
-    :param set_identifier: A callback to register the mRID of this `PowerTransformerEnd` for logging purposes.
+        :param table: The database table to read the :class:`PowerTransformerEnd` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PowerTransformerEnd`.
+        :param set_identifier: A callback to register the mRID of this :class:`PowerTransformerEnd` for logging purposes.
 
-    :return: True if the `PowerTransformerEnd` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_power_transformer_ends(self, table: TablePowerTransformerEnds, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`PowerTransformerEnd` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         power_transformer_end = PowerTransformerEnd(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         power_transformer_end.end_number = result_set.get_int(table.end_number.query_index)
@@ -2095,18 +2128,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_transformer_end(power_transformer_end, table, result_set) and self._add_or_throw(power_transformer_end)
 
-    """
-    Adds a rating to a `PowerTransformerEnd` from `TablePowerTransformerEndRatings`.
+    def load_power_transformer_end_rating(self, table: TablePowerTransformerEndRatings, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Adds a rating to a :class:`PowerTransformerEnd` from :class:`TablePowerTransformerEndRatings`.
 
-    :param table: The database table to read the rating fields from.
-    :param result_set: The record in the database table containing the fields for this rating.
-    :param set_identifier: A callback to register the mRID of this rating for logging purposes.
+        :param table: The database table to read the rating fields from.
+        :param result_set: The record in the database table containing the fields for this rating.
+        :param set_identifier: A callback to register the mRID of this rating for logging purposes.
 
-    :return: True if the rating was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_power_transformer_end_ratings(self, table: TablePowerTransformerEndRatings, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the rating was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         # Note TablePowerTransformerEndRatings.selectSql ensures we process ratings in the correct order.
         power_transformer_end_mrid = result_set.get_string(table.power_transformer_end_mrid.query_index)
         rated_s = result_set.get_int(table.rated_s.query_index)
@@ -2124,18 +2156,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_switch(protected_switch, table, result_set)
 
-    """
-    Create a `RatioTapChanger` and populate its fields from `TableRatioTapChangers`.
+    def load_ratio_tap_changer(self, table: TableRatioTapChangers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`RatioTapChanger` and populate its fields from :class:`TableRatioTapChangers`.
 
-    :param table: The database table to read the `RatioTapChanger` fields from.
-    :param result_set: The record in the database table containing the fields for this `RatioTapChanger`.
-    :param set_identifier: A callback to register the mRID of this `RatioTapChanger` for logging purposes.
+        :param table: The database table to read the :class:`RatioTapChanger` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`RatioTapChanger`.
+        :param set_identifier: A callback to register the mRID of this :class:`RatioTapChanger` for logging purposes.
 
-    :return: True if the `RatioTapChanger` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_ratio_tap_changers(self, table: TableRatioTapChangers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`RatioTapChanger` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         ratio_tap_changer = RatioTapChanger(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         ratio_tap_changer.transformer_end = self._ensure_get(
@@ -2149,18 +2180,32 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_tap_changer(ratio_tap_changer, table, result_set) and self._add_or_throw(ratio_tap_changer)
 
-    """
-    Create a `Recloser` and populate its fields from `TableReclosers`.
+    def load_reactive_capability_curve(self, table: TableReactiveCapabilityCurves, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`ReactiveCapabilityCurve` and populate its fields from :class:`TableReactiveCapabilityCurves`.
 
-    :param table: The database table to read the `Recloser` fields from.
-    :param result_set: The record in the database table containing the fields for this `Recloser`.
-    :param set_identifier: A callback to register the mRID of this `Recloser` for logging purposes.
+        :param table: The database table to read the :class:`ReactiveCapabilityCurve` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`ReactiveCapabilityCurve`.
+        :param set_identifier: A callback to register the mRID of this :class:`ReactiveCapabilityCurve` for logging purposes.
 
-    :return: True if the `Recloser` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
+        :return: True if the :class:`ReactiveCapabilityCurve` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        reactive_capability_curve = ReactiveCapabilityCurve(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
-    def load_reclosers(self, table: TableReclosers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        return self._load_curve(reactive_capability_curve, table, result_set) and self._add_or_throw(reactive_capability_curve)
+
+    def load_recloser(self, table: TableReclosers, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Recloser` and populate its fields from :class:`TableReclosers`.
+
+        :param table: The database table to read the :class:`Recloser` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Recloser`.
+        :param set_identifier: A callback to register the mRID of this :class:`Recloser` for logging purposes.
+
+        :return: True if the :class:`Recloser` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         recloser = Recloser(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_protected_switch(recloser, table, result_set) and self._add_or_throw(recloser)
@@ -2193,18 +2238,26 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_power_system_resource(regulating_control, table, result_set)
 
-    """
-    Create a `SeriesCompensator` and populate its fields from `TableSeriesCompensators`.
+    def _load_rotating_machine(self, rotating_machine: RotatingMachine, table: TableRotatingMachines, result_set: ResultSet) -> bool:
+        rotating_machine.rated_power_factor = result_set.get_float(table.rated_power_factor.query_index, on_none=None)
+        rotating_machine.rated_s = result_set.get_float(table.rated_s.query_index, on_none=None)
+        rotating_machine.rated_u = result_set.get_int(table.rated_u.query_index, on_none=None)
+        rotating_machine.p = result_set.get_float(table.p.query_index, on_none=None)
+        rotating_machine.q = result_set.get_float(table.q.query_index, on_none=None)
 
-    :param table: The database table to read the `SeriesCompensator` fields from.
-    :param result_set: The record in the database table containing the fields for this `SeriesCompensator`.
-    :param set_identifier: A callback to register the mRID of this `SeriesCompensator` for logging purposes.
+        return self._load_regulating_cond_eq(rotating_machine, table, result_set)
 
-    :return: True if the `SeriesCompensator` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
+    def load_series_compensator(self, table: TableSeriesCompensators, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`SeriesCompensator` and populate its fields from :class:`TableSeriesCompensators`.
 
-    def load_series_compensators(self, table: TableSeriesCompensators, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :param table: The database table to read the :class:`SeriesCompensator` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`SeriesCompensator`.
+        :param set_identifier: A callback to register the mRID of this :class:`SeriesCompensator` for logging purposes.
+
+        :return: True if the :class:`SeriesCompensator` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         series_compensator = SeriesCompensator(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         series_compensator.r = result_set.get_float(table.r.query_index, on_none=None)
@@ -2240,6 +2293,43 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_conducting_equipment(switch, table, result_set)
 
+    def load_synchronous_machine(self, table: TableSynchronousMachines, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`SynchronousMachine` and populate its fields from :class:`TableSynchronousMachines`.
+
+        :param table: The database table to read the :class:`SynchronousMachine` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`SynchronousMachine`.
+        :param set_identifier: A callback to register the mRID of this :class:`SynchronousMachine` for logging purposes.
+
+        :return: True if the :class:`SynchronousMachine` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        synchronous_machine = SynchronousMachine(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        synchronous_machine.base_q = result_set.get_float(table.base_q.query_index, on_none=None)
+        synchronous_machine.condenser_p = result_set.get_int(table.condenser_p.query_index, on_none=None)
+        synchronous_machine.earthing = result_set.get_boolean(table.earthing.query_index)
+        synchronous_machine.earthing_star_point_r = result_set.get_float(table.earthing_star_point_r.query_index, on_none=None)
+        synchronous_machine.earthing_star_point_x = result_set.get_float(table.earthing_star_point_x.query_index, on_none=None)
+        synchronous_machine.ikk = result_set.get_float(table.ikk.query_index, on_none=None)
+        synchronous_machine.max_q = result_set.get_float(table.max_q.query_index, on_none=None)
+        synchronous_machine.max_u = result_set.get_int(table.max_u.query_index, on_none=None)
+        synchronous_machine.min_q = result_set.get_float(table.min_q.query_index, on_none=None)
+        synchronous_machine.min_u = result_set.get_int(table.min_u.query_index, on_none=None)
+        synchronous_machine.mu = result_set.get_float(table.mu.query_index, on_none=None)
+        synchronous_machine.r = result_set.get_float(table.r.query_index, on_none=None)
+        synchronous_machine.r0 = result_set.get_float(table.r0.query_index, on_none=None)
+        synchronous_machine.r2 = result_set.get_float(table.r2.query_index, on_none=None)
+        synchronous_machine.sat_direct_subtrans_x = result_set.get_float(table.sat_direct_subtrans_x.query_index, on_none=None)
+        synchronous_machine.sat_direct_sync_x = result_set.get_float(table.sat_direct_sync_x.query_index, on_none=None)
+        synchronous_machine.sat_direct_trans_x = result_set.get_float(table.sat_direct_trans_x.query_index, on_none=None)
+        synchronous_machine.x0 = result_set.get_float(table.x0.query_index, on_none=None)
+        synchronous_machine.x2 = result_set.get_float(table.x2.query_index, on_none=None)
+        synchronous_machine.type = SynchronousMachineKind[result_set.get_string(table.type.query_index)]
+        synchronous_machine.operating_mode = SynchronousMachineKind[result_set.get_string(table.operating_mode.query_index)]
+
+        return self._load_rotating_machine(synchronous_machine, table, result_set) and self._add_or_throw(synchronous_machine)
+
     def _load_tap_changer(self, tap_changer: TapChanger, table: TableTapChangers, result_set: ResultSet) -> bool:
         tap_changer.control_enabled = result_set.get_boolean(table.control_enabled.query_index)
         tap_changer.high_step = result_set.get_int(table.high_step.query_index, on_none=None)
@@ -2255,18 +2345,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_power_system_resource(tap_changer, table, result_set)
 
-    """
-    Create a `TapChangerControl` and populate its fields from `TableTapChangerControls`.
+    def load_tap_changer_control(self, table: TableTapChangerControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`TapChangerControl` and populate its fields from :class:`TableTapChangerControls`.
 
-    :param table: The database table to read the `TapChangerControl` fields from.
-    :param result_set: The record in the database table containing the fields for this `TapChangerControl`.
-    :param set_identifier: A callback to register the mRID of this `TapChangerControl` for logging purposes.
+        :param table: The database table to read the :class:`TapChangerControl` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`TapChangerControl`.
+        :param set_identifier: A callback to register the mRID of this :class:`TapChangerControl` for logging purposes.
 
-    :return: True if the `TapChangerControl` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_tap_changer_controls(self, table: TableTapChangerControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`TapChangerControl` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         tap_changer_control = TapChangerControl(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         tap_changer_control.limit_voltage = result_set.get_int(table.limit_voltage.query_index, on_none=None)
@@ -2300,18 +2389,17 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_identified_object(transformer_end, table, result_set)
 
-    """
-    Create a `TransformerStarImpedance` and populate its fields from `TableTransformerStarImpedances`.
+    def load_transformer_star_impedance(self, table: TableTransformerStarImpedances, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`TransformerStarImpedance` and populate its fields from :class:`TableTransformerStarImpedances`.
 
-    :param table: The database table to read the `TransformerStarImpedance` fields from.
-    :param result_set: The record in the database table containing the fields for this `TransformerStarImpedance`.
-    :param set_identifier: A callback to register the mRID of this `TransformerStarImpedance` for logging purposes.
+        :param table: The database table to read the :class:`TransformerStarImpedance` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`TransformerStarImpedance`.
+        :param set_identifier: A callback to register the mRID of this :class:`TransformerStarImpedance` for logging purposes.
 
-    :return: True if the `TransformerStarImpedance` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_transformer_star_impedances(self, table: TableTransformerStarImpedances, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`TransformerStarImpedance` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         transformer_star_impedance = TransformerStarImpedance(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         transformer_star_impedance.r = result_set.get_float(table.r.query_index, on_none=None)
@@ -2332,18 +2420,17 @@ class NetworkCimReader(BaseCimReader):
     # IEC61970 InfIEC61970 Feeder #
     ###############################
 
-    """
-    Create a `Circuit` and populate its fields from `TableCircuits`.
+    def load_circuit(self, table: TableCircuits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Circuit` and populate its fields from :class:`TableCircuits`.
 
-    :param table: The database table to read the `Circuit` fields from.
-    :param result_set: The record in the database table containing the fields for this `Circuit`.
-    :param set_identifier: A callback to register the mRID of this `Circuit` for logging purposes.
+        :param table: The database table to read the :class:`Circuit` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Circuit`.
+        :param set_identifier: A callback to register the mRID of this :class:`Circuit` for logging purposes.
 
-    :return: True if the `Circuit` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_circuits(self, table: TableCircuits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Circuit` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         circuit = Circuit(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         circuit.loop = self._ensure_get(
@@ -2355,34 +2442,32 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_line(circuit, table, result_set) and self._add_or_throw(circuit)
 
-    """
-    Create a `Loop` and populate its fields from `TableLoops`.
+    def load_loop(self, table: TableLoops, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Loop` and populate its fields from :class:`TableLoops`.
 
-    :param table: The database table to read the `Loop` fields from.
-    :param result_set: The record in the database table containing the fields for this `Loop`.
-    :param set_identifier: A callback to register the mRID of this `Loop` for logging purposes.
+        :param table: The database table to read the :class:`Loop` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Loop`.
+        :param set_identifier: A callback to register the mRID of this :class:`Loop` for logging purposes.
 
-    :return: True if the `Loop` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_loops(self, table: TableLoops, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`Loop` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         loop = Loop(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_identified_object(loop, table, result_set) and self._add_or_throw(loop)
 
-    """
-    Create a `LvFeeder` and populate its fields from `TableLvFeeders`.
+    def load_lv_feeder(self, table: TableLvFeeders, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`LvFeeder` and populate its fields from :class:`TableLvFeeders`.
 
-    :param table: The database table to read the `LvFeeder` fields from.
-    :param result_set: The record in the database table containing the fields for this `LvFeeder`.
-    :param set_identifier: A callback to register the mRID of this `LvFeeder` for logging purposes.
+        :param table: The database table to read the :class:`LvFeeder` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`LvFeeder`.
+        :param set_identifier: A callback to register the mRID of this :class:`LvFeeder` for logging purposes.
 
-    :return: True if the `LvFeeder` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_lv_feeders(self, table: TableLvFeeders, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`LvFeeder` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         lv_feeder = LvFeeder(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         lv_feeder.normal_head_terminal = self._ensure_get(
@@ -2396,18 +2481,17 @@ class NetworkCimReader(BaseCimReader):
     # IEC61970 InfIEC61970 Wires Generation Production #
     ####################################################
 
-    """
-    Create an `EvChargingUnit` and populate its fields from `TableEvChargingUnits`.
+    def load_ev_charging_unit(self, table: TableEvChargingUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create an :class:`EvChargingUnit` and populate its fields from :class:`TableEvChargingUnits`.
 
-    :param table: The database table to read the `EvChargingUnit` fields from.
-    :param result_set: The record in the database table containing the fields for this `EvChargingUnit`.
-    :param set_identifier: A callback to register the mRID of this `EvChargingUnit` for logging purposes.
+        :param table: The database table to read the :class:`EvChargingUnit` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`EvChargingUnit`.
+        :param set_identifier: A callback to register the mRID of this :class:`EvChargingUnit` for logging purposes.
 
-    :return: True if the `EvChargingUnit` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_ev_charging_units(self, table: TableEvChargingUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        :return: True if the :class:`EvChargingUnit` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
         ev_charging_unit = EvChargingUnit(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         return self._load_power_electronics_unit(ev_charging_unit, table, result_set) and self._add_or_throw(ev_charging_unit)
@@ -2416,20 +2500,23 @@ class NetworkCimReader(BaseCimReader):
     # Associations #
     ################
 
-    """
-    Create a `set_identifier` and populate its fields from `TableAssetOrganisationRolesAssets`.
+    def load_asset_organisation_roles_asset(
+        self,
+        table: TableAssetOrganisationRolesAssets,
+        result_set: ResultSet,
+        set_identifier: Callable[[str], str]
+    ) -> bool:
+        """
+        Create a :class:`AssetOrganisationRole` to :class:`Asset` association from :class:`TableAssetOrganisationRolesAssets`.
 
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
 
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_asset_organisation_roles_assets(self, table: TableAssetOrganisationRolesAssets, result_set: ResultSet,
-                                             set_identifier: Callable[[str], str]) -> bool:
-        asset_organisation_role_mrid = set_identifier(result_set.get_string(table.asset_organisation_role_mrid.query_index))
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        asset_organisation_role_mrid = result_set.get_string(table.asset_organisation_role_mrid.query_index)
         set_identifier(f"{asset_organisation_role_mrid}-to-UNKNOWN")
 
         asset_mrid = result_set.get_string(table.asset_mrid.query_index)
@@ -2442,125 +2529,18 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Create a `set_identifier` and populate its fields from `TableEquipmentEquipmentContainers`.
+    def load_circuits_substation(self, table: TableCircuitsSubstations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Circuit` to :class:`Substation` association from :class:`TablePricingStructuresTariffsTableCircuitsSubstations.
 
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
 
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_equipment_equipment_containers(self, table: TableEquipmentEquipmentContainers, result_set: ResultSet,
-                                            set_identifier: Callable[[str], str]) -> bool:
-        equipment_mrid = set_identifier(result_set.get_string(table.equipment_mrid.query_index))
-        set_identifier(f"{equipment_mrid}-to-UNKNOWN")
-
-        equipment_container_mrid = result_set.get_string(table.equipment_container_mrid.query_index)
-        set_identifier(f"{equipment_mrid}-to-{equipment_container_mrid}")
-
-        equipment = self._service.get(equipment_mrid, Equipment)
-        equipment_container = self._service.get(equipment_container_mrid, EquipmentContainer)
-
-        equipment_container.add_equipment(equipment)
-        equipment.add_container(equipment_container)
-
-        return True
-
-    """
-    Create a `set_identifier` and populate its fields from `TableEquipmentOperationalRestrictions`.
-
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
-
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_equipment_operational_restrictions(self, table: TableEquipmentOperationalRestrictions, result_set: ResultSet,
-                                                set_identifier: Callable[[str], str]) -> bool:
-        equipment_mrid = set_identifier(result_set.get_string(table.equipment_mrid.query_index))
-        set_identifier(f"{equipment_mrid}-to-UNKNOWN")
-
-        operational_restriction_mrid = result_set.get_string(table.operational_restriction_mrid.query_index)
-        set_identifier(f"{equipment_mrid}-to-{operational_restriction_mrid}")
-
-        equipment = self._service.get(equipment_mrid, Equipment)
-        operational_restriction = self._service.get(operational_restriction_mrid, OperationalRestriction)
-
-        operational_restriction.add_equipment(equipment)
-        equipment.add_operational_restriction(operational_restriction)
-
-        return True
-
-    """
-    Create a `set_identifier` and populate its fields from `TableEquipmentUsagePoints`.
-
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
-
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_equipment_usage_points(self, table: TableEquipmentUsagePoints, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
-        equipment_mrid = set_identifier(result_set.get_string(table.equipment_mrid.query_index))
-        set_identifier(f"{equipment_mrid}-to-UNKNOWN")
-
-        usage_point_mrid = result_set.get_string(table.usage_point_mrid.query_index)
-        set_identifier(f"{equipment_mrid}-to-{usage_point_mrid}")
-
-        equipment = self._service.get(equipment_mrid, Equipment)
-        usage_point = self._service.get(usage_point_mrid, UsagePoint)
-
-        usage_point.add_equipment(equipment)
-        equipment.add_usage_point(usage_point)
-
-        return True
-
-    """
-    Create a `set_identifier` and populate its fields from `TableUsagePointsEndDevices`.
-
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
-
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_usage_points_end_devices(self, table: TableUsagePointsEndDevices, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
-        usage_point_mrid = set_identifier(result_set.get_string(table.usage_point_mrid.query_index))
-        set_identifier(f"{usage_point_mrid}-to-UNKNOWN")
-
-        end_device_mrid = result_set.get_string(table.end_device_mrid.query_index)
-        set_identifier(f"{usage_point_mrid}-to-{end_device_mrid}")
-
-        usage_point = self._service.get(usage_point_mrid, UsagePoint)
-        end_device = self._service.get(end_device_mrid, EndDevice)
-
-        end_device.add_usage_point(usage_point)
-        usage_point.add_end_device(end_device)
-
-        return True
-
-    """
-    Create a `set_identifier` and populate its fields from `TableCircuitsSubstations`.
-
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
-
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_circuits_substations(self, table: TableCircuitsSubstations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
-        circuit_mrid = set_identifier(result_set.get_string(table.circuit_mrid.query_index))
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        circuit_mrid = result_set.get_string(table.circuit_mrid.query_index)
         set_identifier(f"{circuit_mrid}-to-UNKNOWN")
 
         substation_mrid = result_set.get_string(table.substation_mrid.query_index)
@@ -2574,19 +2554,18 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Create a `set_identifier` and populate its fields from `TableCircuitsTerminals`.
+    def load_circuits_terminal(self, table: TableCircuitsTerminals, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Circuit` to :class:`Terminal` association from :class:`TablePricingStructuresTariffsTableCircuitsTerminals.
 
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
 
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_circuits_terminals(self, table: TableCircuitsTerminals, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
-        circuit_mrid = set_identifier(result_set.get_string(table.circuit_mrid.query_index))
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        circuit_mrid = result_set.get_string(table.circuit_mrid.query_index)
         set_identifier(f"{circuit_mrid}-to-UNKNOWN")
 
         terminal_mrid = result_set.get_string(table.terminal_mrid.query_index)
@@ -2599,19 +2578,103 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Create a `set_identifier` and populate its fields from `TableLoopsSubstations`.
+    def load_equipment_equipment_container(
+        self,
+        table: TableEquipmentEquipmentContainers,
+        result_set: ResultSet,
+        set_identifier: Callable[[str], str]
+    ) -> bool:
+        """
+        Create a :class:`Equipment` to :class:`EquipmentContainer` association from :class:`TableEquipmentEquipmentContainers`.
 
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
 
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        equipment_mrid = result_set.get_string(table.equipment_mrid.query_index)
+        set_identifier(f"{equipment_mrid}-to-UNKNOWN")
 
-    def load_loops_substations(self, table: TableLoopsSubstations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
-        asset_organisation_role_mrid = set_identifier(result_set.get_string(table.loop_mrid.query_index))
+        equipment_container_mrid = result_set.get_string(table.equipment_container_mrid.query_index)
+        set_identifier(f"{equipment_mrid}-to-{equipment_container_mrid}")
+
+        equipment = self._service.get(equipment_mrid, Equipment)
+        equipment_container = self._service.get(equipment_container_mrid, EquipmentContainer)
+
+        equipment_container.add_equipment(equipment)
+        equipment.add_container(equipment_container)
+
+        return True
+
+    def load_equipment_operational_restriction(
+        self,
+        table: TableEquipmentOperationalRestrictions,
+        result_set: ResultSet,
+        set_identifier: Callable[[str], str]
+    ) -> bool:
+        """
+        Create a :class:`Equipment` to :class:`OperationalRestriction` association from :class:`TableEquipmentOperationalRestrictions`.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        equipment_mrid = result_set.get_string(table.equipment_mrid.query_index)
+        set_identifier(f"{equipment_mrid}-to-UNKNOWN")
+
+        operational_restriction_mrid = result_set.get_string(table.operational_restriction_mrid.query_index)
+        set_identifier(f"{equipment_mrid}-to-{operational_restriction_mrid}")
+
+        equipment = self._service.get(equipment_mrid, Equipment)
+        operational_restriction = self._service.get(operational_restriction_mrid, OperationalRestriction)
+
+        operational_restriction.add_equipment(equipment)
+        equipment.add_operational_restriction(operational_restriction)
+
+        return True
+
+    def load_equipment_usage_point(self, table: TableEquipmentUsagePoints, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Equipment` to :class:`UsagePoint` association from :class:`TablePricingStructuresTariffsTableEquipmentUsagePoints.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        equipment_mrid = result_set.get_string(table.equipment_mrid.query_index)
+        set_identifier(f"{equipment_mrid}-to-UNKNOWN")
+
+        usage_point_mrid = result_set.get_string(table.usage_point_mrid.query_index)
+        set_identifier(f"{equipment_mrid}-to-{usage_point_mrid}")
+
+        equipment = self._service.get(equipment_mrid, Equipment)
+        usage_point = self._service.get(usage_point_mrid, UsagePoint)
+
+        usage_point.add_equipment(equipment)
+        equipment.add_usage_point(usage_point)
+
+        return True
+
+    def load_loops_substation(self, table: TableLoopsSubstations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Loop` to :class:`Substation` association from :class:`TablePricingStructuresTariffsTableLoopsSubstations.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        asset_organisation_role_mrid = result_set.get_string(table.loop_mrid.query_index)
         set_identifier(f"{asset_organisation_role_mrid}-to-UNKNOWN")
 
         asset_mrid = result_set.get_string(table.substation_mrid.query_index)
@@ -2632,20 +2695,23 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Create a `set_identifier` and populate its fields from `TableProtectionRelayFunctionsProtectedSwitches`.
+    def load_protection_relay_functions_protected_switch(
+        self,
+        table: TableProtectionRelayFunctionsProtectedSwitches,
+        result_set: ResultSet,
+        set_identifier: Callable[[str], str]
+    ) -> bool:
+        """
+        Create a :class:`ProtectionRelayFunction` to :class:`ProtectedSwitch` association from :class:`TableProtectionRelayFunctionsProtectedSwitches`.
 
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
 
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_protection_relay_functions_protected_switches(self, table: TableProtectionRelayFunctionsProtectedSwitches, result_set: ResultSet,
-                                                           set_identifier: Callable[[str], str]) -> bool:
-        protection_relay_function_mrid = set_identifier(result_set.get_string(table.protection_relay_function_mrid.query_index))
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        protection_relay_function_mrid = result_set.get_string(table.protection_relay_function_mrid.query_index)
         set_identifier(f"{protection_relay_function_mrid}-to-UNKNOWN")
 
         protected_switch_mrid = result_set.get_string(table.protected_switch_mrid.query_index)
@@ -2659,20 +2725,23 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Create a `set_identifier` and populate its fields from `TableProtectionRelayFunctionsSensors`.
+    def load_protection_relay_functions_sensor(
+        self,
+        table: TableProtectionRelayFunctionsSensors,
+        result_set: ResultSet,
+        set_identifier: Callable[[str], str]
+    ) -> bool:
+        """
+        Create a :class:`ProtectionRelayFunction` to :class:`Sensor` association from :class:`TableProtectionRelayFunctionsSensors`.
 
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
 
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_protection_relay_functions_sensors(self, table: TableProtectionRelayFunctionsSensors, result_set: ResultSet,
-                                                set_identifier: Callable[[str], str]) -> bool:
-        protection_relay_function_mrid = set_identifier(result_set.get_string(table.protection_relay_function_mrid.query_index))
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        protection_relay_function_mrid = result_set.get_string(table.protection_relay_function_mrid.query_index)
         set_identifier(f"{protection_relay_function_mrid}-to-UNKNOWN")
 
         sensor_mrid = result_set.get_string(table.sensor_mrid.query_index)
@@ -2686,20 +2755,23 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
-    """
-    Create a `set_identifier` and populate its fields from `TableProtectionRelaySchemesProtectionRelayFunctions`.
+    def load_protection_relay_schemes_protection_relay_function(
+        self,
+        table: TableProtectionRelaySchemesProtectionRelayFunctions,
+        result_set: ResultSet,
+        set_identifier: Callable[[str], str]
+    ) -> bool:
+        """
+        Create a :class:`ProtectionRelayScheme` to :class:`ProtectionRelayFunction` association from :class:`TableProtectionRelaySchemesProtectionRelayFunctions`.
 
-    :param table: The database table to read the `set_identifier` fields from.
-    :param result_set: The record in the database table containing the fields for this `set_identifier`.
-    :param set_identifier: A callback to register the mRID of this `set_identifier` for logging purposes.
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
 
-    :return: True if the `set_identifier` was successfully read from the database and added to the service.
-    :raises SqlException: For any errors encountered reading from the database.
-    """
-
-    def load_protection_relay_schemes_protection_relay_functions(self, table: TableProtectionRelaySchemesProtectionRelayFunctions, result_set: ResultSet,
-                                                                 set_identifier: Callable[[str], str]) -> bool:
-        protection_relay_scheme_mrid = set_identifier(result_set.get_string(table.protection_relay_scheme_mrid.query_index))
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        protection_relay_scheme_mrid = result_set.get_string(table.protection_relay_scheme_mrid.query_index)
         set_identifier(f"{protection_relay_scheme_mrid}-to-UNKNOWN")
 
         protection_relay_function_mrid = result_set.get_string(table.protection_relay_function_mrid.query_index)
@@ -2710,5 +2782,59 @@ class NetworkCimReader(BaseCimReader):
 
         protection_relay_scheme.add_function(protection_relay_function)
         protection_relay_function.add_scheme(protection_relay_scheme)
+
+        return True
+
+    def load_synchronous_machines_reactive_capability_curve(
+        self,
+        table: TableSynchronousMachinesReactiveCapabilityCurves,
+        result_set: ResultSet,
+        set_identifier: Callable[[str], str]
+    ) -> bool:
+        """
+        Create a :class:`SynchronousMachine` to :class:`ReactiveCapabilityCurve` association from :class:`TableSynchronousMachinesReactiveCapabilityCurves`.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        synchronous_machine_mrid = result_set.get_string(table.synchronous_machine_mrid.query_index)
+        set_identifier(f"{synchronous_machine_mrid}-to-UNKNOWN")
+
+        reactive_capability_curve_mrid = result_set.get_string(table.reactive_capability_curve_mrid.query_index)
+        set_identifier(f"{synchronous_machine_mrid}-to-{reactive_capability_curve_mrid}")
+
+        synchronous_machine = self._service.get(synchronous_machine_mrid, SynchronousMachine)
+        reactive_capability_curve = self._service.get(reactive_capability_curve_mrid, ReactiveCapabilityCurve)
+
+        synchronous_machine.add_curve(reactive_capability_curve)
+
+        return True
+
+    def load_usage_points_end_device(self, table: TableUsagePointsEndDevices, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`UsagePoint` to :class:`EndDevice` association from :class:`TablePricingStructuresTariffsTableUsagePointsEndDevices.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        usage_point_mrid = result_set.get_string(table.usage_point_mrid.query_index)
+        set_identifier(f"{usage_point_mrid}-to-UNKNOWN")
+
+        end_device_mrid = result_set.get_string(table.end_device_mrid.query_index)
+        set_identifier(f"{usage_point_mrid}-to-{end_device_mrid}")
+
+        usage_point = self._service.get(usage_point_mrid, UsagePoint)
+        end_device = self._service.get(end_device_mrid, EndDevice)
+
+        end_device.add_usage_point(usage_point)
+        usage_point.add_end_device(end_device)
 
         return True
