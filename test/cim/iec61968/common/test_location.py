@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
+from zepben.evolve import Location, PositionPoint, StreetAddress
 
 from cim.cim_creators import create_position_point
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_ordered_other_1234567890
-from zepben.evolve import Location, PositionPoint, StreetAddress
 
 location_kwargs = {
     **identified_object_kwargs,
@@ -17,7 +17,6 @@ location_kwargs = {
     "position_points": lists(create_position_point(), max_size=2),
 }
 
-# noinspection PyArgumentList
 location_args = [*identified_object_args, StreetAddress(), [PositionPoint(1.1, 2.2)]]
 
 
@@ -42,12 +41,13 @@ def test_location_constructor_args():
     loc = Location(*location_args)
 
     verify_identified_object_constructor_args(loc)
-    assert loc.main_address == location_args[-2]
-    assert list(loc.points) == location_args[-1]
+    assert location_args[-2:] == [
+        loc.main_address,
+        list(loc.points)
+    ]
 
 
 def test_points_collection():
-    # noinspection PyArgumentList
     validate_ordered_other_1234567890(
         Location,
         lambda i: PositionPoint(i, i),

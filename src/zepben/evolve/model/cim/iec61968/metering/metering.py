@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 from zepben.evolve.model.cim.iec61968.assets.asset import AssetContainer
 from zepben.evolve.model.cim.iec61968.common.location import Location
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
 
 __all__ = ["Meter", "EndDevice", "UsagePoint"]
@@ -134,6 +135,12 @@ class UsagePoint(IdentifiedObject):
 
     approved_inverter_capacity: Optional[int] = None
     """The approved inverter capacity at this UsagePoint in volt-amperes."""
+
+    phase_code: PhaseCode = PhaseCode.NONE
+    """
+    Phase code. Number of wires and specific nominal phases can be deduced from enumeration literal values. For example, ABCN is three-phase,
+    four-wire, s12n (splitSecondary12N) is single-phase, three-wire, and s1n and s2n are single-phase, two-wire.
+    """
 
     _equipment: Optional[List[Equipment]] = None
     _end_devices: Optional[List[EndDevice]] = None

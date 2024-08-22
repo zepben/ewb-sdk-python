@@ -5,12 +5,12 @@
 
 from hypothesis import given
 from hypothesis.strategies import text, builds
-
-from cim.iec61970.base.core.test_name_type import name_type_kwargs
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
 from zepben.evolve import Junction
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
+
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, sampled_equipment
+from cim.iec61970.base.core.test_name_type import name_type_kwargs
 
 name_kwargs = {
     "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
@@ -31,8 +31,9 @@ name_args = ["1", NameType("nt1"), Junction()]
 # noinspection PyShadowingBuiltins
 @given(**name_kwargs)
 def test_name_constructor_kwargs(name, type, identified_object, **kwargs):
-    # noinspection PyArgumentList
-    n = Name(name, type, identified_object, **kwargs)
+    assert not kwargs, f"found unexpected args: {kwargs}"
+
+    n = Name(name, type, identified_object)
 
     assert n.name == name
     assert n.type == type
@@ -40,9 +41,10 @@ def test_name_constructor_kwargs(name, type, identified_object, **kwargs):
 
 
 def test_name_constructor_args():
-    # noinspection PyArgumentList
     n = Name(*name_args)
 
-    assert n.name == name_args[0]
-    assert n.type == name_args[1]
-    assert n.identified_object == name_args[2]
+    assert name_args == [
+        n.name,
+        n.type,
+        n.identified_object
+    ]

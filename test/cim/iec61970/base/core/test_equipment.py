@@ -5,12 +5,12 @@
 import datetime
 
 from hypothesis.strategies import booleans, lists, builds, datetimes
+from zepben.evolve import Equipment, UsagePoint, OperationalRestriction, Feeder, EquipmentContainer
 
 from cim.cim_creators import sampled_equipment_container, sampled_hvlv_feeder
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Equipment, UsagePoint, OperationalRestriction, Feeder, EquipmentContainer
 
 equipment_kwargs = {
     **power_system_resource_kwargs,
@@ -54,13 +54,15 @@ def verify_equipment_constructor_kwargs(eq: Equipment, in_service, normally_in_s
 
 def verify_equipment_constructor_args(eq: Equipment):
     verify_power_system_resource_constructor_args(eq)
-    assert eq.in_service == equipment_args[-7]
-    assert eq.normally_in_service == equipment_args[-6]
-    assert eq.commissioned_date == equipment_args[-5]
-    assert list(eq.usage_points) == equipment_args[-4]
-    assert list(eq.containers) == equipment_args[-3]
-    assert list(eq.operational_restrictions) == equipment_args[-2]
-    assert list(eq.current_containers) == equipment_args[-1]
+    assert equipment_args[-7:] == [
+        eq.in_service,
+        eq.normally_in_service,
+        eq.commissioned_date,
+        list(eq.usage_points),
+        list(eq.containers),
+        list(eq.operational_restrictions),
+        list(eq.current_containers)
+    ]
 
 
 def test_usage_points_collection():

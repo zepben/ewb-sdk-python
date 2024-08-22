@@ -18,10 +18,8 @@ def test_discrete_constructor_default():
 
 @given(**discrete_kwargs)
 def test_discrete_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
     verify_measurement_constructor_kwargs(Discrete(**kwargs), **kwargs)
 
 
 def test_discrete_constructor_args():
-    # noinspection PyArgumentList
     verify_measurement_constructor_args(Discrete(*discrete_args))

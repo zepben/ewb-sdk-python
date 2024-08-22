@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import text, builds, sampled_from
+from zepben.evolve import Measurement, RemoteSource, PhaseCode, UnitSymbol
 
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from zepben.evolve import Measurement, RemoteSource, PhaseCode, UnitSymbol
 
 measurement_kwargs = {
     **identified_object_kwargs,
@@ -42,8 +42,10 @@ def verify_measurement_constructor_kwargs(m: Measurement, power_system_resource_
 
 def verify_measurement_constructor_args(m: Measurement):
     verify_identified_object_constructor_args(m)
-    assert m.power_system_resource_mrid == measurement_args[-5]
-    assert m.remote_source == measurement_args[-4]
-    assert m.terminal_mrid == measurement_args[-3]
-    assert m.phases == measurement_args[-2]
-    assert m.unit_symbol == measurement_args[-1]
+    assert measurement_args[-5:] == [
+        m.power_system_resource_mrid,
+        m.remote_source,
+        m.terminal_mrid,
+        m.phases,
+        m.unit_symbol
+    ]

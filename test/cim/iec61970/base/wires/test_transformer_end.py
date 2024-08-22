@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from _pytest.python_api import raises
 from hypothesis.strategies import floats, booleans, builds, integers
+from zepben.evolve import TransformerEnd, RatioTapChanger, Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse
 
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from zepben.evolve import TransformerEnd, RatioTapChanger, Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse
 
 transformer_end_kwargs = {
     **identified_object_kwargs,
@@ -52,14 +52,16 @@ def verify_transformer_end_constructor_kwargs(te: TransformerEnd, grounded, r_gr
 
 def verify_transformer_end_constructor_args(te: TransformerEnd):
     verify_identified_object_constructor_args(te)
-    assert te.grounded == transformer_end_args[-8]
-    assert te.r_ground == transformer_end_args[-7]
-    assert te.x_ground == transformer_end_args[-6]
-    assert te.ratio_tap_changer == transformer_end_args[-5]
-    assert te.terminal == transformer_end_args[-4]
-    assert te.base_voltage == transformer_end_args[-3]
-    assert te.end_number == transformer_end_args[-2]
-    assert te.star_impedance == transformer_end_args[-1]
+    assert transformer_end_args[-8:] == [
+        te.grounded,
+        te.r_ground,
+        te.x_ground,
+        te.ratio_tap_changer,
+        te.terminal,
+        te.base_voltage,
+        te.end_number,
+        te.star_impedance
+    ]
 
 
 def test_allow_terminal_with_no_conducting_equipment():

@@ -5,11 +5,11 @@
 from hypothesis import given
 from hypothesis.strategies import builds, lists
 from pytest import raises
+from zepben.evolve import Feeder, Terminal, Substation, Equipment, LvFeeder, Switch
 
 from cim.iec61970.base.core.test_equipment_container import equipment_container_kwargs, verify_equipment_container_constructor_default, \
     verify_equipment_container_constructor_kwargs, verify_equipment_container_constructor_args, equipment_container_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Feeder, Terminal, Substation, Equipment, LvFeeder, Switch
 
 feeder_kwargs = {
     **equipment_container_kwargs,
@@ -49,8 +49,13 @@ def test_feeder_constructor_args():
     f = Feeder(*feeder_args)
 
     verify_equipment_container_constructor_args(f)
-    assert f.normal_head_terminal == feeder_args[-4]
-    assert f.normal_energizing_substation == feeder_args[-3]
+
+    assert feeder_args[-4:-2] == [
+        f.normal_head_terminal,
+        f.normal_energizing_substation
+    ]
+    # We use a different style of matching here as the passed in args for current_equipment and normal_energized_lv_feeders
+    # are maps and the stored collections are lists.
     assert list(f.current_equipment) == list(feeder_args[-2].values())
     assert list(f.normal_energized_lv_feeders) == list(feeder_args[-1].values())
 

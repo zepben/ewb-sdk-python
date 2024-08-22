@@ -5,7 +5,6 @@
 from datetime import datetime
 
 from hypothesis.strategies import datetimes
-
 from zepben.evolve import MeasurementValue
 
 measurement_value_kwargs = {"time_stamp": datetimes()}
@@ -22,4 +21,6 @@ def verify_measurement_value_constructor_kwargs(mv: MeasurementValue, time_stamp
 
 
 def verify_measurement_value_constructor_args(mv: MeasurementValue):
-    assert mv.time_stamp == measurement_value_args[-1]
+    assert measurement_value_args[-1:] == [
+        mv.time_stamp
+    ]

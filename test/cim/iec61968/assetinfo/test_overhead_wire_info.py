@@ -18,10 +18,8 @@ def test_overhead_wire_info_constructor_default():
 
 @given(**overhead_wire_info_kwargs)
 def test_overhead_wire_info_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
     verify_wire_info_constructor_kwargs(OverheadWireInfo(**kwargs), **kwargs)
 
 
 def test_overhead_wire_info_constructor_args():
-    # noinspection PyArgumentList
     verify_wire_info_constructor_args(OverheadWireInfo(*overhead_wire_info_args))

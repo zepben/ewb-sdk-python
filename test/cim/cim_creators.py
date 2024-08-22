@@ -31,14 +31,15 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'traced_phases', 'sampled_wire_info', 'sampled_conducting_equipment', 'sampled_equipment', 'sampled_equipment_container', 'sampled_hvlv_feeder',
            'sampled_measurement', 'sampled_protected_switches', 'create_tap_changer_control', 'MIN_32_BIT_INTEGER', 'MAX_32_BIT_INTEGER',
            'MAX_32_BIT_UNSIGNED_INTEGER', 'MAX_64_BIT_INTEGER', 'MIN_64_BIT_INTEGER', 'TEXT_MAX_SIZE', 'FLOAT_MIN', 'FLOAT_MAX', 'MAX_END_NUMBER',
-           'MAX_SEQUENCE_NUMBER', 'MIN_SEQUENCE_NUMBER', 'ALPHANUM', "boolean_or_none"
+           'MAX_SEQUENCE_NUMBER', 'MIN_SEQUENCE_NUMBER', 'ALPHANUM', 'boolean_or_none', 'create_grounding_impedance', 'create_petersen_coil',
+           'create_reactive_capability_curve', 'create_synchronous_machine', 'create_earth_fault_compensator', 'create_curve', 'create_curve_data',
+           'create_rotating_machine', 'sampled_curves'
            ]
 
 from datetime import datetime
 from random import choice
 
-from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes
-
+from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
 from zepben.evolve import *
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
 
@@ -547,6 +548,23 @@ def create_connectivity_node_container(include_runtime: bool):
     return {**create_power_system_resource(include_runtime)}
 
 
+def create_curve(include_runtime: bool):
+    return {
+        **create_identified_object(include_runtime),
+        "data": lists(create_curve_data(), max_size=4, unique_by=lambda it: it.x_value)
+    }
+
+
+def create_curve_data():
+    return builds(
+        CurveData,
+        x_value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y1_value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y2_value=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        y3_value=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    )
+
+
 def create_equipment(include_runtime: bool):
     runtime = {
         "current_containers": lists(sampled_hvlv_feeder(include_runtime), min_size=1, max_size=2)
@@ -989,6 +1007,13 @@ def create_disconnector(include_runtime: bool = True):
     return builds(Disconnector, **create_switch(include_runtime))
 
 
+def create_earth_fault_compensator(include_runtime: bool):
+    return {
+        **create_conducting_equipment(include_runtime),
+        "r": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    }
+
+
 def create_energy_connection(include_runtime: bool):
     return {**create_conducting_equipment(include_runtime)}
 
@@ -1100,6 +1125,14 @@ def create_ground_disconnector(include_runtime: bool = True):
     )
 
 
+def create_grounding_impedance(include_runtime: bool = True):
+    return builds(
+        GroundingImpedance,
+        **create_earth_fault_compensator(include_runtime),
+        x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    )
+
+
 def create_jumper(include_runtime: bool = True):
     return builds(Jumper, **create_switch(include_runtime))
 
@@ -1120,19 +1153,6 @@ def create_linear_shunt_compensator(include_runtime: bool = True):
         b_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g0_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g_per_section=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
-    )
-
-
-def create_series_compensator(include_runtime: bool = True):
-    return builds(
-        SeriesCompensator,
-        **create_conducting_equipment(include_runtime),
-        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        varistor_rated_current=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        varistor_voltage_threshold=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     )
 
 
@@ -1160,6 +1180,14 @@ def create_per_length_sequence_impedance(include_runtime: bool = True):
         gch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         b0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         g0ch=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+    )
+
+
+def create_petersen_coil(include_runtime: bool = True):
+    return builds(
+        PetersenCoil,
+        **create_earth_fault_compensator(include_runtime),
+        x_ground_nominal=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
     )
 
 
@@ -1280,6 +1308,13 @@ def create_ratio_tap_changer(include_runtime: bool = True):
     )
 
 
+def create_reactive_capability_curve(include_runtime: bool = True):
+    return builds(
+        ReactiveCapabilityCurve,
+        **create_curve(include_runtime)
+    )
+
+
 def create_recloser(include_runtime: bool = True):
     return builds(Recloser, **create_protected_switch(include_runtime))
 
@@ -1307,6 +1342,59 @@ def create_regulating_control(include_runtime: bool):
         "terminal": builds(Terminal, **create_identified_object(include_runtime)),
         "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection, **create_identified_object(include_runtime)))
     }
+
+
+def create_rotating_machine(include_runtime: bool):
+    return {
+        **create_regulating_cond_eq(include_runtime),
+        "rated_power_factor": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        "rated_s": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        "rated_u": one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        "p": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        "q": one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    }
+
+
+def create_series_compensator(include_runtime: bool = True):
+    return builds(
+        SeriesCompensator,
+        **create_conducting_equipment(include_runtime),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x0=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        varistor_rated_current=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        varistor_voltage_threshold=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+    )
+
+
+def create_synchronous_machine(include_runtime: bool = True):
+    return builds(
+        SynchronousMachine,
+        **create_rotating_machine(include_runtime),
+        curves=one_of(none(), lists(builds(ReactiveCapabilityCurve, **create_identified_object(include_runtime)), min_size=1, max_size=2)),
+        base_q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        condenser_p=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        earthing=booleans(),
+        earthing_star_point_r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        earthing_star_point_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        ikk=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        max_q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        max_u=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        min_q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        min_u=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        mu=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        r0=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        r2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        sat_direct_subtrans_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        sat_direct_sync_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        sat_direct_trans_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        x0=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        x2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        type=sampled_from(SynchronousMachineKind),
+        operating_mode=sampled_from(SynchronousMachineKind)
+    )
 
 
 def create_tap_changer_control(include_runtime: bool = True):
@@ -1481,6 +1569,12 @@ def sampled_conducting_equipment(include_runtime: bool):
         builds(Breaker, **create_identified_object(include_runtime)),
         builds(Disconnector, **create_identified_object(include_runtime)),
         builds(EnergyConsumer, **create_identified_object(include_runtime)),
+    ])
+
+
+def sampled_curves(include_runtime: bool):
+    return choice([
+        builds(ReactiveCapabilityCurve, **create_identified_object(include_runtime))
     ])
 
 

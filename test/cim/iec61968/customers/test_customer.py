@@ -5,12 +5,12 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds, sampled_from
+from zepben.evolve import Customer, CustomerKind, CustomerAgreement
 
 from cim.iec61968.common.test_organisation_role import organisation_role_kwargs, verify_organisation_role_constructor_default, \
     verify_organisation_role_constructor_kwargs, \
     verify_organisation_role_constructor_args, organisation_role_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Customer, CustomerKind, CustomerAgreement
 
 customer_kwargs = {
     **organisation_role_kwargs,
@@ -46,8 +46,10 @@ def test_customer_constructor_args():
     c = Customer(*customer_args)
 
     verify_organisation_role_constructor_args(c)
-    assert c.kind == customer_args[-2]
-    assert list(c.agreements) == customer_args[-1]
+    assert customer_args[-2:] == [
+        c.kind,
+        list(c.agreements)
+    ]
 
 
 def test_customer_agreements_collection():

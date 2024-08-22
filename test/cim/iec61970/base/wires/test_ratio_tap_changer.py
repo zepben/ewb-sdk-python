@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, floats
+from zepben.evolve import RatioTapChanger, TransformerEnd
 
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_tap_changer import verify_tap_changer_constructor_default, \
     verify_tap_changer_constructor_kwargs, verify_tap_changer_constructor_args, tap_changer_kwargs, tap_changer_args, assume_step_values
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import RatioTapChanger, TransformerEnd
 
 ratio_tap_changer_kwargs = {
     **tap_changer_kwargs,
@@ -26,6 +26,7 @@ def test_ratio_tap_changer_constructor_default():
     assert not rtc.transformer_end
     assert rtc.step_voltage_increment is None
 
+
 @given(**ratio_tap_changer_kwargs)
 def test_ratio_tap_changer_constructor_kwargs(transformer_end, step_voltage_increment, **kwargs):
     assume_step_values(kwargs["high_step"], kwargs["low_step"], kwargs["neutral_step"], kwargs["normal_step"], kwargs["step"])
@@ -36,9 +37,12 @@ def test_ratio_tap_changer_constructor_kwargs(transformer_end, step_voltage_incr
     assert rtc.transformer_end == transformer_end
     assert rtc.step_voltage_increment == step_voltage_increment
 
+
 def test_ratio_tap_changer_constructor_args():
     rtc = RatioTapChanger(*ratio_tap_changer_args)
 
     verify_tap_changer_constructor_args(rtc)
-    assert rtc.transformer_end == ratio_tap_changer_args[-2]
-    assert rtc.step_voltage_increment == ratio_tap_changer_args[-1]
+    assert ratio_tap_changer_args[-2:] == [
+        rtc.transformer_end,
+        rtc.step_voltage_increment
+    ]

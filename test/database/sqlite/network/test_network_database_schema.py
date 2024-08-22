@@ -12,6 +12,19 @@ from sqlite3 import Connection
 
 import pytest
 from hypothesis import given, settings, HealthCheck, assume
+from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, \
+    ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, AssetOwner, Pole, Streetlight, Meter, UsagePoint, Location, Organisation, \
+    OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, Feeder, GeographicalRegion, Site, SubGeographicalRegion, Substation, Terminal, \
+    EquivalentBranch, Accumulator, Analog, Control, Discrete, RemoteControl, RemoteSource, BatteryUnit, PhotoVoltaicUnit, \
+    PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, EnergyConsumer, \
+    EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, PerLengthSequenceImpedance, \
+    PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, NetworkDatabaseWriter, \
+    NetworkDatabaseReader, NetworkServiceComparator, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, \
+    PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
+    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, StreetAddress, TownDetail, StreetDetail, GroundingImpedance, \
+    PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine
+from zepben.evolve.services.common import resolver
+from zepben.evolve.services.network.tracing import tracing
 
 from cim.cim_creators import create_cable_info, create_no_load_test, create_open_circuit_test, create_overhead_wire_info, create_power_transformer_info, \
     create_short_circuit_test, create_shunt_compensator_info, create_transformer_end_info, create_transformer_tank_info, create_asset_owner, create_pole, \
@@ -25,21 +38,10 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_ratio_tap_changer, create_recloser, create_transformer_star_impedance, create_circuit, create_loop, create_lv_feeder, \
     create_current_transformer_info, create_current_transformer, create_potential_transformer, create_current_relay, create_relay_info, create_switch_info, \
     create_ev_charging_unit, create_tap_changer_control, create_distance_relay, create_voltage_relay, create_protection_relay_scheme, \
-    create_protection_relay_system, create_ground, create_ground_disconnector, create_series_compensator, create_potential_transformer_info
+    create_protection_relay_system, create_ground, create_ground_disconnector, create_series_compensator, create_potential_transformer_info, \
+    create_grounding_impedance, create_petersen_coil, create_reactive_capability_curve, create_synchronous_machine
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
-from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, \
-    ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, AssetOwner, Pole, Streetlight, Meter, UsagePoint, Location, Organisation, \
-    OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, Feeder, GeographicalRegion, Site, SubGeographicalRegion, Substation, Terminal, \
-    EquivalentBranch, Accumulator, Analog, Control, Discrete, RemoteControl, RemoteSource, BatteryUnit, PhotoVoltaicUnit, \
-    PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, EnergyConsumer, \
-    EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, PerLengthSequenceImpedance, \
-    PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, NetworkDatabaseWriter, \
-    NetworkDatabaseReader, NetworkServiceComparator, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, \
-    PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
-    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, StreetAddress, TownDetail, StreetDetail
-from zepben.evolve.services.common import resolver
-from zepben.evolve.services.network.tracing import tracing
 
 
 # pylint: disable=too-many-public-methods
@@ -457,6 +459,11 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(GroundDisconnector, ground_disconnector))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(grounding_impedance=create_grounding_impedance(False))
+    async def test_schema_grounding_impedance(self, grounding_impedance):
+        await self._validate_schema(SchemaNetworks().network_services_of(GroundingImpedance, grounding_impedance))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(jumper=create_jumper(False))
     async def test_schema_jumper(self, jumper):
         await self._validate_schema(SchemaNetworks().network_services_of(Jumper, jumper))
@@ -482,6 +489,11 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(PerLengthSequenceImpedance, per_length_sequence_impedance))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(petersen_coil=create_petersen_coil(False))
+    async def test_schema_petersen_coil(self, petersen_coil):
+        await self._validate_schema(SchemaNetworks().network_services_of(PetersenCoil, petersen_coil))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(power_transformer=create_power_transformer(False))
     async def test_schema_power_transformer(self, power_transformer):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerTransformer, power_transformer))
@@ -497,6 +509,11 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(RatioTapChanger, ratio_tap_changer))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(reactive_capability_curve=create_reactive_capability_curve(False))
+    async def test_schema_reactive_capability_curve(self, reactive_capability_curve):
+        await self._validate_schema(SchemaNetworks().network_services_of(ReactiveCapabilityCurve, reactive_capability_curve))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(recloser=create_recloser(False))
     async def test_schema_recloser(self, recloser):
         await self._validate_schema(SchemaNetworks().network_services_of(Recloser, recloser))
@@ -505,6 +522,11 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     @given(series_compensator=create_series_compensator(False))
     async def test_schema_series_compensator(self, series_compensator):
         await self._validate_schema(SchemaNetworks().network_services_of(SeriesCompensator, series_compensator))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(synchronous_machine=create_synchronous_machine(False))
+    async def test_schema_synchronous_machine(self, synchronous_machine):
+        await self._validate_schema(SchemaNetworks().network_services_of(SynchronousMachine, synchronous_machine))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(tap_changer_control=create_tap_changer_control(False))

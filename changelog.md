@@ -4,7 +4,17 @@
 * None.
 
 ### New Features
-* None.
+* Data Model change:
+  * Add `phaseCode` variable to `UsagePoint`
+  * Added new classes:
+    * `Curve`
+    * `CurveData`
+    * `EarthFaultCompensator`
+    * `GroundingImpedance`
+    * `PetersenCoil`
+    * `ReactiveCapabilityCurve`
+    * `RotatingMachine`
+    * `SynchronousMachine`
 
 ### Enhancements
 * None.

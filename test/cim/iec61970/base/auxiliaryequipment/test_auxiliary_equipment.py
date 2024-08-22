@@ -3,10 +3,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import builds
+from zepben.evolve import AuxiliaryEquipment, Terminal
 
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
-from zepben.evolve import AuxiliaryEquipment, Terminal
 
 auxiliary_equipment_kwargs = {
     **equipment_kwargs,
@@ -28,4 +28,6 @@ def verify_auxiliary_equipment_constructor_kwargs(ae: AuxiliaryEquipment, termin
 
 def verify_auxiliary_equipment_constructor_args(ae: AuxiliaryEquipment):
     verify_equipment_constructor_args(ae)
-    assert ae.terminal == auxiliary_equipment_args[-1]
+    assert auxiliary_equipment_args[-1:] == [
+        ae.terminal
+    ]

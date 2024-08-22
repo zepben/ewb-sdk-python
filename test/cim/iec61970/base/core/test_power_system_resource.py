@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import builds, integers
+from zepben.evolve import PowerSystemResource, Location, PowerTransformerInfo
 
 from cim.cim_creators import sampled_wire_info, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from zepben.evolve import PowerSystemResource, Location, PowerTransformerInfo
 
 power_system_resource_kwargs = {
     **identified_object_kwargs,
@@ -35,6 +35,8 @@ def verify_power_system_resource_constructor_kwargs(psr: PowerSystemResource, lo
 
 def verify_power_system_resource_constructor_args(psr: PowerSystemResource):
     verify_identified_object_constructor_args(psr)
-    assert psr.location is power_system_resource_args[-3]
-    assert psr.asset_info is power_system_resource_args[-2]
-    assert psr.num_controls is power_system_resource_args[-1]
+    assert power_system_resource_args[-3:] == [
+        psr.location,
+        psr.asset_info,
+        psr.num_controls
+    ]

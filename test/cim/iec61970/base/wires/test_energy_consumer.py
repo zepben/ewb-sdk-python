@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists, integers, booleans, sampled_from, floats
+from zepben.evolve import EnergyConsumer, EnergyConsumerPhase, PhaseShuntConnectionKind
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import EnergyConsumer, EnergyConsumerPhase, PhaseShuntConnectionKind
 
 energy_consumer_kwargs = {
     **energy_connection_kwargs,
@@ -42,15 +42,17 @@ def test_energy_consumer_constructor_default():
 
 @given(**energy_consumer_kwargs)
 def test_energy_consumer_constructor_kwargs(energy_consumer_phases, customer_count, grounded, phase_connection, p, p_fixed, q, q_fixed, **kwargs):
-    ec = EnergyConsumer(energy_consumer_phases=energy_consumer_phases,
-                        customer_count=customer_count,
-                        grounded=grounded,
-                        phase_connection=phase_connection,
-                        p=p,
-                        p_fixed=p_fixed,
-                        q=q,
-                        q_fixed=q_fixed,
-                        **kwargs)
+    ec = EnergyConsumer(
+        energy_consumer_phases=energy_consumer_phases,
+        customer_count=customer_count,
+        grounded=grounded,
+        phase_connection=phase_connection,
+        p=p,
+        p_fixed=p_fixed,
+        q=q,
+        q_fixed=q_fixed,
+        **kwargs
+    )
 
     verify_energy_connection_constructor_kwargs(ec, **kwargs)
     assert list(ec.phases) == energy_consumer_phases
@@ -67,14 +69,16 @@ def test_energy_consumer_constructor_args():
     ec = EnergyConsumer(*energy_consumer_args)
 
     verify_energy_connection_constructor_args(ec)
-    assert list(ec.phases) == energy_consumer_args[-8]
-    assert ec.customer_count == energy_consumer_args[-7]
-    assert ec.grounded == energy_consumer_args[-6]
-    assert ec.phase_connection == energy_consumer_args[-5]
-    assert ec.p == energy_consumer_args[-4]
-    assert ec.p_fixed == energy_consumer_args[-3]
-    assert ec.q == energy_consumer_args[-2]
-    assert ec.q_fixed == energy_consumer_args[-1]
+    assert energy_consumer_args[-8:] == [
+        list(ec.phases),
+        ec.customer_count,
+        ec.grounded,
+        ec.phase_connection,
+        ec.p,
+        ec.p_fixed,
+        ec.q,
+        ec.q_fixed
+    ]
 
 
 def test_phases_collection():

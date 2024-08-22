@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
+from zepben.evolve import PricingStructure, Tariff
 
 from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import PricingStructure, Tariff
 
 pricing_structure_kwargs = {
     **document_kwargs,
@@ -28,7 +28,6 @@ def test_pricing_structure_constructor_default():
 
 @given(**pricing_structure_kwargs)
 def test_pricing_structure_constructor_kwargs(tariffs, **kwargs):
-    # noinspection PyArgumentList
     ps = PricingStructure(
         tariffs=tariffs,
         **kwargs
@@ -39,15 +38,15 @@ def test_pricing_structure_constructor_kwargs(tariffs, **kwargs):
 
 
 def test_pricing_structure_constructor_args():
-    # noinspection PyArgumentList
     ps = PricingStructure(*pricing_structure_args)
 
     verify_document_constructor_args(ps)
-    assert list(ps.tariffs) == pricing_structure_args[-1]
+    assert pricing_structure_args[-1:] == [
+               list(ps.tariffs)
+           ]
 
 
 def test_tariffs_collection():
-    # noinspection PyArgumentList
     validate_unordered_1234567890(
         PricingStructure,
         lambda mrid: Tariff(mrid),

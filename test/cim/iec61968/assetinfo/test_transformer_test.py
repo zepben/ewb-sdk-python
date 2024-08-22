@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import integers, floats
+from zepben.evolve import TransformerTest
 
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import TransformerTest
 
 transformer_test_kwargs = {
     **identified_object_kwargs,
@@ -32,5 +32,7 @@ def verify_transformer_test_constructor_kwargs(tt: TransformerTest, base_power, 
 
 def verify_transformer_test_constructor_args(tt: TransformerTest):
     verify_identified_object_constructor_args(tt)
-    assert tt.base_power == transformer_test_args[-2]
-    assert tt.temperature == transformer_test_args[-1]
+    assert transformer_test_args[-2:] == [
+        tt.base_power,
+        tt.temperature
+    ]

@@ -2,15 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import pytest
 from hypothesis import given
-from hypothesis.strategies import floats, booleans
+from hypothesis.strategies import floats
+from zepben.evolve import DistanceRelay
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.protection.test_protection_relay_function import protection_relay_function_kwargs, protection_relay_function_args, \
     verify_protection_relay_function_constructor_default, verify_protection_relay_function_constructor_kwargs, verify_protection_relay_function_constructor_args
-
-from zepben.evolve import DistanceRelay
 
 distance_relay_kwargs = {
     **protection_relay_function_kwargs,
@@ -44,16 +42,18 @@ def test_distance_relay_constructor_default():
 
 
 @given(**distance_relay_kwargs)
-def test_distance_relay_constructor_kwargs(backward_blind,
-                                           backward_reach,
-                                           backward_reactance,
-                                           forward_blind,
-                                           forward_reach,
-                                           forward_reactance,
-                                           operation_phase_angle1,
-                                           operation_phase_angle2,
-                                           operation_phase_angle3,
-                                           **kwargs):
+def test_distance_relay_constructor_kwargs(
+    backward_blind,
+    backward_reach,
+    backward_reactance,
+    forward_blind,
+    forward_reach,
+    forward_reactance,
+    operation_phase_angle1,
+    operation_phase_angle2,
+    operation_phase_angle3,
+    **kwargs
+):
     dr = DistanceRelay(
         backward_blind=backward_blind,
         backward_reach=backward_reach,
@@ -83,12 +83,14 @@ def test_distance_relay_constructor_args():
     dr = DistanceRelay(*distance_relay_args)
 
     verify_protection_relay_function_constructor_args(dr)
-    assert dr.backward_blind == distance_relay_args[-9]
-    assert dr.backward_reach == distance_relay_args[-8]
-    assert dr.backward_reactance == distance_relay_args[-7]
-    assert dr.forward_blind == distance_relay_args[-6]
-    assert dr.forward_reach == distance_relay_args[-5]
-    assert dr.forward_reactance == distance_relay_args[-4]
-    assert dr.operation_phase_angle1 == distance_relay_args[-3]
-    assert dr.operation_phase_angle2 == distance_relay_args[-2]
-    assert dr.operation_phase_angle3 == distance_relay_args[-1]
+    assert distance_relay_args[-9:] == [
+        dr.backward_blind,
+        dr.backward_reach,
+        dr.backward_reactance,
+        dr.forward_blind,
+        dr.forward_reach,
+        dr.forward_reactance,
+        dr.operation_phase_angle1,
+        dr.operation_phase_angle2,
+        dr.operation_phase_angle3
+    ]

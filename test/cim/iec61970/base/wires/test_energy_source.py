@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists, floats, booleans
+from zepben.evolve import EnergySource, EnergySourcePhase
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \
     verify_energy_connection_constructor_kwargs, verify_energy_connection_constructor_args, energy_connection_kwargs, energy_connection_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import EnergySource, EnergySourcePhase
 
 energy_source_kwargs = {
     **energy_connection_kwargs,
@@ -81,33 +81,35 @@ def test_energy_source_constructor_default():
 def test_energy_source_constructor_kwargs(energy_source_phases, active_power, reactive_power, voltage_angle, voltage_magnitude, p_max, p_min,
                                           r, r0, rn, x, x0, xn, is_external_grid, r_min, rn_min, r0_min, x_min, xn_min, x0_min,
                                           r_max, rn_max, r0_max, x_max, xn_max, x0_max, **kwargs):
-    es = EnergySource(energy_source_phases=energy_source_phases,
-                      active_power=active_power,
-                      reactive_power=reactive_power,
-                      voltage_angle=voltage_angle,
-                      voltage_magnitude=voltage_magnitude,
-                      p_max=p_max,
-                      p_min=p_min,
-                      r=r,
-                      r0=r0,
-                      rn=rn,
-                      x=x,
-                      x0=x0,
-                      xn=xn,
-                      is_external_grid=is_external_grid,
-                      r_min=r_min,
-                      rn_min=rn_min,
-                      r0_min=r0_min,
-                      x_min=x_min,
-                      xn_min=xn_min,
-                      x0_min=x0_min,
-                      r_max=r_max,
-                      rn_max=rn_max,
-                      r0_max=r0_max,
-                      x_max=x_max,
-                      xn_max=xn_max,
-                      x0_max=x0_max,
-                      **kwargs)
+    es = EnergySource(
+        energy_source_phases=energy_source_phases,
+        active_power=active_power,
+        reactive_power=reactive_power,
+        voltage_angle=voltage_angle,
+        voltage_magnitude=voltage_magnitude,
+        p_max=p_max,
+        p_min=p_min,
+        r=r,
+        r0=r0,
+        rn=rn,
+        x=x,
+        x0=x0,
+        xn=xn,
+        is_external_grid=is_external_grid,
+        r_min=r_min,
+        rn_min=rn_min,
+        r0_min=r0_min,
+        x_min=x_min,
+        xn_min=xn_min,
+        x0_min=x0_min,
+        r_max=r_max,
+        rn_max=rn_max,
+        r0_max=r0_max,
+        x_max=x_max,
+        xn_max=xn_max,
+        x0_max=x0_max,
+        **kwargs
+    )
 
     verify_energy_connection_constructor_kwargs(es, **kwargs)
     assert list(es.phases) == energy_source_phases
@@ -142,32 +144,34 @@ def test_energy_source_constructor_args():
     es = EnergySource(*energy_source_args)
 
     verify_energy_connection_constructor_args(es)
-    assert list(es.phases) == energy_source_args[-26]
-    assert es.active_power == energy_source_args[-25]
-    assert es.reactive_power == energy_source_args[-24]
-    assert es.voltage_angle == energy_source_args[-23]
-    assert es.voltage_magnitude == energy_source_args[-22]
-    assert es.p_max == energy_source_args[-21]
-    assert es.p_min == energy_source_args[-20]
-    assert es.r == energy_source_args[-19]
-    assert es.r0 == energy_source_args[-18]
-    assert es.rn == energy_source_args[-17]
-    assert es.x == energy_source_args[-16]
-    assert es.x0 == energy_source_args[-15]
-    assert es.xn == energy_source_args[-14]
-    assert es.is_external_grid == energy_source_args[-13]
-    assert es.r_min == energy_source_args[-12]
-    assert es.rn_min == energy_source_args[-11]
-    assert es.r0_min == energy_source_args[-10]
-    assert es.x_min == energy_source_args[-9]
-    assert es.xn_min == energy_source_args[-8]
-    assert es.x0_min == energy_source_args[-7]
-    assert es.r_max == energy_source_args[-6]
-    assert es.rn_max == energy_source_args[-5]
-    assert es.r0_max == energy_source_args[-4]
-    assert es.x_max == energy_source_args[-3]
-    assert es.xn_max == energy_source_args[-2]
-    assert es.x0_max == energy_source_args[-1]
+    assert energy_source_args[-26:] == [
+        list(es.phases),
+        es.active_power,
+        es.reactive_power,
+        es.voltage_angle,
+        es.voltage_magnitude,
+        es.p_max,
+        es.p_min,
+        es.r,
+        es.r0,
+        es.rn,
+        es.x,
+        es.x0,
+        es.xn,
+        es.is_external_grid,
+        es.r_min,
+        es.rn_min,
+        es.r0_min,
+        es.x_min,
+        es.xn_min,
+        es.x0_min,
+        es.r_max,
+        es.rn_max,
+        es.r0_max,
+        es.x_max,
+        es.xn_max,
+        es.x0_max
+    ]
 
 
 def test_phases_collection():

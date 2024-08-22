@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from dataclassy import dataclass
-
 __all__ = ["Ratio"]
 
+from dataclasses import dataclass
 
-@dataclass(slots=True, frozen=True)
+
+@dataclass(frozen=True)
 class Ratio:
     """
     Fraction specified explicitly with a numerator and denominator, which can be used to calculate the quotient.

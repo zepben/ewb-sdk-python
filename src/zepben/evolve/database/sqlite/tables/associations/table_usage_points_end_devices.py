@@ -13,11 +13,17 @@ __all__ = ["TableUsagePointsEndDevices"]
 
 
 class TableUsagePointsEndDevices(SqliteTable):
+    """
+    A class representing the association between UsagePoints and EndDevices.
+    """
 
     def __init__(self):
         super().__init__()
         self.usage_point_mrid: Column = self._create_column("usage_point_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of UsagePoints."""
+
         self.end_device_mrid: Column = self._create_column("end_device_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of EndDevices."""
 
     @property
     def name(self) -> str:

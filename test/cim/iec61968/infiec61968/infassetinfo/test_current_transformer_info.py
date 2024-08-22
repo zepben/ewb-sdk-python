@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, floats, integers, text
+from zepben.evolve import CurrentTransformerInfo, Ratio
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
-from zepben.evolve import CurrentTransformerInfo, Ratio
 
 current_transformer_info_kwargs = {
     **asset_info_kwargs,
@@ -87,15 +87,17 @@ def test_current_transformer_info_constructor_args():
     cti = CurrentTransformerInfo(*current_transformer_info_args)
 
     verify_asset_info_constructor_args(cti)
-    assert cti.accuracy_class == current_transformer_info_args[-12]
-    assert cti.accuracy_limit == current_transformer_info_args[-11]
-    assert cti.core_count == current_transformer_info_args[-10]
-    assert cti.ct_class == current_transformer_info_args[-9]
-    assert cti.knee_point_voltage == current_transformer_info_args[-8]
-    assert cti.max_ratio == current_transformer_info_args[-7]
-    assert cti.nominal_ratio == current_transformer_info_args[-6]
-    assert cti.primary_ratio == current_transformer_info_args[-5]
-    assert cti.rated_current == current_transformer_info_args[-4]
-    assert cti.secondary_fls_rating == current_transformer_info_args[-3]
-    assert cti.secondary_ratio == current_transformer_info_args[-2]
-    assert cti.usage == current_transformer_info_args[-1]
+    assert [
+               cti.accuracy_class,
+               cti.accuracy_limit,
+               cti.core_count,
+               cti.ct_class,
+               cti.knee_point_voltage,
+               cti.max_ratio,
+               cti.nominal_ratio,
+               cti.primary_ratio,
+               cti.rated_current,
+               cti.secondary_fls_rating,
+               cti.secondary_ratio,
+               cti.usage
+           ] == current_transformer_info_args[-12:]

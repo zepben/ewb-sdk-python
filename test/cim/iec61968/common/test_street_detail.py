@@ -5,9 +5,9 @@
 
 from hypothesis import given
 from hypothesis.strategies import text
+from zepben.evolve import StreetDetail
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from zepben.evolve import StreetDetail
 
 street_detail_kwargs = {
     "building_name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
@@ -38,7 +38,6 @@ def test_street_detail_constructor_default():
 def test_street_detail_constructor_kwargs(building_name, floor_identification, name, number, suite_number, street_type, display_address, **kwargs):
     assert not kwargs
 
-    # noinspection PyArgumentList
     sd = StreetDetail(
         building_name=building_name,
         floor_identification=floor_identification,
@@ -59,19 +58,19 @@ def test_street_detail_constructor_kwargs(building_name, floor_identification, n
 
 
 def test_street_detail_constructor_args():
-    # noinspection PyArgumentList
     sd = StreetDetail(*street_detail_args)
 
-    assert sd.building_name == street_detail_args[-7]
-    assert sd.floor_identification == street_detail_args[-6]
-    assert sd.name == street_detail_args[-5]
-    assert sd.number == street_detail_args[-4]
-    assert sd.suite_number == street_detail_args[-3]
-    assert sd.type == street_detail_args[-2]
-    assert sd.display_address == street_detail_args[-1]
+    assert street_detail_args[-7:] == [
+        sd.building_name,
+        sd.floor_identification,
+        sd.name,
+        sd.number,
+        sd.suite_number,
+        sd.type,
+        sd.display_address
+    ]
 
 
-# noinspection PyArgumentList
 def test_all_fields_empty():
     assert StreetDetail().all_fields_empty()
 

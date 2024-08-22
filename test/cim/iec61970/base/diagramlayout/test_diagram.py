@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds, sampled_from
+from zepben.evolve import DiagramObject, DiagramStyle, Diagram, OrientationKind
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import DiagramObject, DiagramStyle, Diagram, OrientationKind
 
 diagram_kwargs = {
     **identified_object_kwargs,
@@ -47,8 +47,11 @@ def test_diagram_constructor_args():
     d = Diagram(*diagram_args)
 
     verify_identified_object_constructor_args(d)
-    assert d.diagram_style == diagram_args[-3]
-    assert d.orientation_kind == diagram_args[-2]
+    assert diagram_args[-3:-1] == [
+        d.diagram_style,
+        d.orientation_kind
+    ]
+    # We use a different style of matching here as the passed in arg for diagram_objects is a map and the stored collection is a list.
     assert list(d.diagram_objects) == list(diagram_args[-1].values())
 
 

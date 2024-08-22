@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats
+from zepben.evolve import EquivalentBranch
 
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.equivalents.test_equivalent_equipment import equivalent_equipment_kwargs, verify_equivalent_equipment_constructor_default, \
     verify_equivalent_equipment_constructor_kwargs, verify_equivalent_equipment_constructor_args, equivalent_equipment_args
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import EquivalentBranch
 
 equivalent_branch_kwargs = {
     **equivalent_equipment_kwargs,
@@ -56,7 +56,8 @@ def test_equivalent_branch_constructor_default():
 
 
 @given(**equivalent_branch_kwargs)
-def test_equivalent_branch_constructor_kwargs(negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r, r21, x,
+def test_equivalent_branch_constructor_kwargs(negative_r12, negative_r21, negative_x12, negative_x21, positive_r12, positive_r21, positive_x12, positive_x21, r,
+                                              r21, x,
                                               x21, zero_r12, zero_r21, zero_x12, zero_x21, **kwargs):
     t = EquivalentBranch(
         negative_r12=negative_r12,
@@ -101,19 +102,21 @@ def test_equivalent_branch_constructor_args():
     t = EquivalentBranch(*equivalent_branch_args)
 
     verify_equivalent_equipment_constructor_args(t)
-    assert t.negative_r12 == equivalent_branch_args[-16]
-    assert t.negative_r21 == equivalent_branch_args[-15]
-    assert t.negative_x12 == equivalent_branch_args[-14]
-    assert t.negative_x21 == equivalent_branch_args[-13]
-    assert t.positive_r12 == equivalent_branch_args[-12]
-    assert t.positive_r21 == equivalent_branch_args[-11]
-    assert t.positive_x12 == equivalent_branch_args[-10]
-    assert t.positive_x21 == equivalent_branch_args[-9]
-    assert t.r == equivalent_branch_args[-8]
-    assert t.r21 == equivalent_branch_args[-7]
-    assert t.x == equivalent_branch_args[-6]
-    assert t.x21 == equivalent_branch_args[-5]
-    assert t.zero_r12 == equivalent_branch_args[-4]
-    assert t.zero_r21 == equivalent_branch_args[-3]
-    assert t.zero_x12 == equivalent_branch_args[-2]
-    assert t.zero_x21 == equivalent_branch_args[-1]
+    assert equivalent_branch_args[-16:] == [
+        t.negative_r12,
+        t.negative_r21,
+        t.negative_x12,
+        t.negative_x21,
+        t.positive_r12,
+        t.positive_r21,
+        t.positive_x12,
+        t.positive_x21,
+        t.r,
+        t.r21,
+        t.x,
+        t.x21,
+        t.zero_r12,
+        t.zero_r21,
+        t.zero_x12,
+        t.zero_x21
+    ]

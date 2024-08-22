@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import text, lists, builds
+from zepben.evolve import Pole, Streetlight
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_structure import structure_kwargs, verify_structure_constructor_default, \
     verify_structure_constructor_kwargs, verify_structure_constructor_args, structure_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Pole, Streetlight
 
 pole_kwargs = {
     **structure_kwargs,
@@ -43,8 +43,10 @@ def test_pole_constructor_args():
     p = Pole(*pole_args)
 
     verify_structure_constructor_args(p)
-    assert p.classification == pole_args[-2]
-    assert list(p.streetlights) == pole_args[-1]
+    assert pole_args[-2:] == [
+        p.classification,
+        list(p.streetlights)
+    ]
 
 
 def test_streetlights_collection():

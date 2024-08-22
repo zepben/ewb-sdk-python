@@ -3,14 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import floats, sampled_from, booleans, lists, builds, text
+from zepben.evolve import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
+    UnitSymbol, unit_symbol_from_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE, boolean_or_none
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
 from cim.private_collection_validator import validate_unordered_1234567890, validate_ordered_other_1234567890
 from cim.property_validator import validate_property_accessor
-from zepben.evolve import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
-    UnitSymbol, unit_symbol_from_id
 
 protection_relay_function_kwargs = {
     **power_system_resource_kwargs,
@@ -48,18 +48,21 @@ def verify_protection_relay_function_constructor_default(prf: ProtectionRelayFun
     assert len(list(prf.thresholds)) == 0
 
 
-def verify_protection_relay_function_constructor_kwargs(prf: ProtectionRelayFunction, model,
-                                                        reclosing,
-                                                        relay_delay_time,
-                                                        protection_kind,
-                                                        directable,
-                                                        power_direction,
-                                                        sensors,
-                                                        protected_switches,
-                                                        schemes,
-                                                        time_limits,
-                                                        thresholds,
-                                                        **kwargs):
+def verify_protection_relay_function_constructor_kwargs(
+    prf: ProtectionRelayFunction,
+    model,
+    reclosing,
+    relay_delay_time,
+    protection_kind,
+    directable,
+    power_direction,
+    sensors,
+    protected_switches,
+    schemes,
+    time_limits,
+    thresholds,
+    **kwargs
+):
     verify_power_system_resource_constructor_kwargs(prf, **kwargs)
     assert prf.model == model
     assert prf.reclosing == reclosing
@@ -76,17 +79,19 @@ def verify_protection_relay_function_constructor_kwargs(prf: ProtectionRelayFunc
 
 def verify_protection_relay_function_constructor_args(prf: ProtectionRelayFunction):
     verify_power_system_resource_constructor_args(prf)
-    assert prf.model == protection_relay_function_args[-11]
-    assert prf.reclosing == protection_relay_function_args[-10]
-    assert prf.relay_delay_time == protection_relay_function_args[-9]
-    assert prf.protection_kind == protection_relay_function_args[-8]
-    assert prf.directable == protection_relay_function_args[-7]
-    assert prf.power_direction == protection_relay_function_args[-6]
-    assert list(prf.sensors) == protection_relay_function_args[-5]
-    assert list(prf.protected_switches) == protection_relay_function_args[-4]
-    assert list(prf.schemes) == protection_relay_function_args[-3]
-    assert list(prf.time_limits) == protection_relay_function_args[-2]
-    assert list(prf.thresholds) == protection_relay_function_args[-1]
+    assert protection_relay_function_args[-11:] == [
+        prf.model,
+        prf.reclosing,
+        prf.relay_delay_time,
+        prf.protection_kind,
+        prf.directable,
+        prf.power_direction,
+        list(prf.sensors),
+        list(prf.protected_switches),
+        list(prf.schemes),
+        list(prf.time_limits),
+        list(prf.thresholds)
+    ]
 
 
 def test_sensors_collection():
