@@ -73,7 +73,7 @@
       unknown.
 
 ### New Features
-* None.
+* Support zepben.auth 0.12.0 which brings support for auth against EWB servers backed by EntraID.
 
 ### Enhancements
 * Added the following accessors/helpers to our CIM objects:
