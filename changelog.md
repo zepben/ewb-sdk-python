@@ -91,7 +91,7 @@
 * Added missing type information to the following `NameType` functions: `get_or_add_name`, `remove_name` and `remove_names`
 
 ### Notes
-* None.
+* Updated to support zepben.protobuf 0.27.0. This has actually been supported since 0.38.0, however the released version was not captured in the dependencies.
 
 ## [0.39.0] - 2024-06-24
 ### Breaking Changes
