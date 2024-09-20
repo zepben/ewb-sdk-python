@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.40.0](#v0400)| `20 September 2024` |
 |[0.39.0](#v0390)| `23 June 2024` |
 |[0.38.0](#v0380)| `14 May 2024` |
 |[0.37.0](#v0370)| `14 November 2023` |
@@ -40,6 +41,103 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.40.0]
+
+### Breaking Changes
+* The database has been split into three databases, which will change the imports of most related classes:
+  1. The existing database containing the network model (`*-network-model.sqlite`) with classes in the `network` package.
+  2. A new database containing the customer information (`*-customers.sqlite`) with classes in the `customer` package.
+  3. A new database containing the diagrams (`*-diagrams.sqlite`) with classes in the `diagram` package.
+* The database split has resulted in the database classes also being split, e.g. `DatabaseReader` is now `NetworkDatabaseReader`, `CustomerDatabaseReader` and `
+  DiagramDatabaseReader`.
+* Database table classes now return a `Generator` rather than a `List` or their index collections. This will have no impact if you are just looping over the
+  result, but it will have an impact if you have inherited your own tables.
+* `Equipment` to `EquipmentContainer` links for LV feeders are no longer written to the database, they should never have been.
+* Converted the following classes to use `@dataclass` from `dataclasses` instead of `dataclassy`:
+  * `PositionPoint`
+  * `TownDetail`
+  * `StreetDetail`
+  * `StreetAddress`
+  * `Name`
+  * `DiagramObjectPoint`
+  * `RelaySetting`
+  * `TransformerEndRatedS`
+  * `ResistanceReactance`
+  * `DataSource`
+* All private collections inside our CIM objects that index objects by mrid now raise `KeyError` rather than `ValueError` if you try and remove an object from
+  an empty collection.
+* Rationalised accessors for the private collections inside our CIM objects, which has added and/or removed some functions. If you were using one of the removed
+  functions, there should be another that can give close/equivalent operation. The most notable change is the accessors should now be throwing exceptions
+  correctly, rather than returning `None` in some circumstances and throwing in others.
+  * `Location`:
+    * `get_point` now throws when provided an invalid `sequence_number` rather than returning `None`.
+    * Updated error message for providing an incorrect `sequence_number` to `insert_point`.
+  * `RelayInfo`:
+    * `get_delay` and `remove_delay_at` now throw when provided an invalid `index` rather than returning `None`.
+    * Updated error message for providing an incorrect `index` to `add_delay`.
+  * `Sensor`:
+    * Type information for `get_relay_function` has been updated to indicate the return value is not optional, as the function throws if the `mrid` is unknown.
+  * `ConductingEquipment`:
+    * Updated error message for providing a `Terminal` with an incorrect `sequence_number` to `add_terminal`.
+  * `IdentifiedObject`:
+    * `get_name` now throws when provided an invalid `name_type` or `name` rather than returning `None`.
+    * `get_names` now throws when provided an invalid `name_type` rather than returning `None` if it had no names, or an `EmptyList` if it had names, but none
+      of the requested type.
+  * `DiagramObject`:
+    * Updated error message for providing an incorrect `sequence_number` to `insert_point`.
+  * `ProtectionRelayFunction`:
+    * Updated error message for providing an incorrect `sequence_number` to `add_threshold`.
+    * Type information for `get_threshold` has been updated to indicate the return value is not optional, as the function throws if the `sequence_number` is
+      unknown.
+    * Type information for `remove_threshold` has been updated to indicate the `threshold` to remove is not optional.
+    * Updated error message for providing an incorrect `index` to `add_time_limit`.
+    * `remove_time_limit_by_time_limit` was renamed to `remove_time_limit`.
+    * `remove_time_limit` was renamed to `remove_time_limit_at` and now throws when provided an invalid `index` rather than returning `None`.
+    * Type information for the following functions have been updated to indicate the return value is not optional, as the functions throw if the `mrid` is
+      unknown:
+      * `get_sensor`
+      * `get_protected_switch`
+      * `get_scheme`
+  * `ProtectionRelayScheme`:
+    * Type information for `get_function` has been updated to indicate the return value is not optional, as the function throws if the `mrid` is unknown.
+  * `ProtectionRelaySystem`:
+    * Type information for `get_scheme` has been updated to indicate the return value is not optional, as the function throws if the `mrid` is unknown.
+  * `PowerTransformerEnd`:
+    * Updated error message for providing a `PowerTransformerEnd` with an incorrect `end_number` to `add_end`.
+    * `get_rating_by_rated_s` has been removed.
+    * `get_rating_by_cooling_type` has been renamed to `get_rating` and now throws when provided an invalid `cooling_type` rather than returning `None`.
+    * The parameters for `add_rating` have been reordered, and `cooling_type` now defaults to `UNKNOWN_COOLING_TYPE`.
+    * `add_transformer_end_rated_s` now takes a copy of the provided `transformer_end_rated_s` rather than adding the object directly into the collection.
+    * `remove_rating_by_cooling_type` now throws when provided an invalid `cooling_type` rather than returning `None`.
+  * `ProtectedSwitch`:
+    * Type information for `get_relay_function` has been updated to indicate the return value is not optional, as the function throws if the `mrid` is unknown.
+  * `RegulatingControl`:
+    * Type information for `get_regulating_cond_eq` has been updated to indicate the return value is not optional, as the function throws if the `mrid` is
+      unknown.
+
+### New Features
+* Support zepben.auth 0.12.0 which brings support for auth against EWB servers backed by EntraID.
+
+### Enhancements
+* Added the following accessors/helpers to our CIM objects:
+  * `Location.for_each_point`
+  * `RelayInfo.for_each_point`
+  * `IdentifiedObject.has_name`
+  * `DiagramObject.for_each_point`
+  * `DiagramObject.remove_point_by_sequence_number`
+  * `ProtectionRelayFunction.for_each_threshold`
+  * `ProtectionRelayFunction.remove_threshold_at`
+  * `ProtectionRelayFunction.for_each_time_limit`
+* Added missing `num_controls` field to `PowerSystemResource`.
+
+### Fixes
+* Added missing type information to the following `NameType` functions: `get_or_add_name`, `remove_name` and `remove_names`
+
+### Notes
+* Updated to support zepben.protobuf 0.27.0. This has actually been supported since 0.38.0, however the released version was not captured in the dependencies.
 
 ---
 

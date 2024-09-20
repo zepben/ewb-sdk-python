@@ -1,0 +1,84 @@
+---
+id: sdk-persistence
+title: Persisting Models
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+## Evolve data service
+
+:::warning
+The API for persisting data to a remote server is currently in alpha and very likely to experience breaking changes 
+in the future. Please provide any feedback about this API to [Zepben](http://www.zepben.com).
+:::
+
+The SDK provides a client to send models to a remote data server via [gRPC](http://grpc.io/). The service and proto
+definitions for this API can be found [here](http://github.com/zepben/evolve-grpc). An implementation of the server for
+the services is provided with the Evolve platform data services.
+
+Here is an example of how to connect to and send a model to the evolve data server:
+
+```python
+from zepben.evolve import connect_async, connect, ProducerClient, NetworkService, CustomerService, DiagramService
+
+async with connect_async(host="localhost", rpc_port=50051) as channel:
+    client = ProducerClient(channel)
+
+    network_service = NetworkService()
+    customer_service = CustomerService()
+    diagram_service = DiagramService()
+    populate_network_objects(network_service)
+
+    await client.send([network_service, customer_service, diagram_service])
+
+# Or using the synchronous API:
+with connect(host="localhost", rpc_port=50051) as channel:
+    client = ProducerClient(channel)
+
+    network_service = NetworkService()
+    customer_service = CustomerService()
+    diagram_service = DiagramService()
+    populate_network_objects(network_service)
+
+    client.send([network_service, customer_service, diagram_service])
+```
+
+The `ProducerClient` is an abstraction layer that allows sending all services at once (useful for a server that exposes
+more than one service), however typically you'll want to use a dedicated service for the data you are working with.
+For these cases there are the following classes:
+
+- `NetworkProducerClient`
+- `CustomerProducerClient`
+- `DiagramProducerClient`
+
+These classes expose a similar API to `ProducerClient`, however accepting a single service of the named type rather than a list.
+For example:
+
+```python
+from zepben.evolve import connect_async, NetworkService, CustomerService, DiagramService, NetworkProducerClient, CustomerProducerClient, DiagramProducerClient
+
+async with connect_async(host="localhost", rpc_port=50051) as channel:
+    network_client = NetworkProducerClient(channel)
+
+    network_service = NetworkService()
+    populate_network_objects(network_service)
+
+    await client.send([network_service, customer_service, diagram_service])
+
+async with connect_async(host="localhost", rpc_port=50052) as channel:
+    customer_client = CustomerProducerClient(channel)
+
+    customer_service = CustomerService()
+    populate_customer_objects(customer_service)
+
+    await client.send(customer_service)
+
+async with connect_async(host="localhost", rpc_port=50052) as channel:
+    diagram_client = DiagramProducerClient(channel)
+
+    diagram_service = DiagramService()
+    populate_diagram_objects(diagram_service)
+
+    await client.send(diagram_service)
+```
