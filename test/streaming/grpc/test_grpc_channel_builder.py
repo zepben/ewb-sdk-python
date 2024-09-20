@@ -148,7 +148,7 @@ def test_make_secure_filename_version(mocked_mswb, mocked_open):
 def test_with_token_fetcher(mocked_ssl_channel_creds, mocked_md_call_creds, mocked_comp_channel_creds, mocked_secure_channel, mock_test_connection,
                             mock_secure_sync_channel):
     GrpcChannelBuilder().for_address("hostname", 1234).make_secure().with_token_fetcher(
-        ZepbenTokenFetcher("audience", "issuer_domain")).build()
+        ZepbenTokenFetcher("audience", "issuer_domain", "token_endpoint")).build()
 
     mocked_ssl_channel_creds.assert_called_once()
     mocked_md_call_creds.assert_called_once()
@@ -160,7 +160,7 @@ def test_with_token_fetcher(mocked_ssl_channel_creds, mocked_md_call_creds, mock
 
 def test_with_token_fetcher_before_make_secure():
     with pytest.raises(Exception, match="You must call make_secure before calling with_token_fetcher."):
-        GrpcChannelBuilder().with_token_fetcher(ZepbenTokenFetcher("audience", "issuer_domain"))
+        GrpcChannelBuilder().with_token_fetcher(ZepbenTokenFetcher("audience", "issuer_domain", "token_endpoint"))
 
 
 @mock.patch("grpc._channel._UnaryUnaryMultiCallable.__call__",
