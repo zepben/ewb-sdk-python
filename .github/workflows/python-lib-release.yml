@@ -8,5 +8,4 @@ jobs:
     with:
       private: false
       product-key: "python-sdk"   # Must be unique
-      licencecheck: true  # Set to true if private = false (OSS)
     secrets: inherit
