@@ -1,5 +1,21 @@
 # Zepben Python SDK
-## [0.40.0] - UNRELEASED
+## [0.41.0b1] - UNRELEASED
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
+
+## [0.40.0] - 2024-09-20
 ### Breaking Changes
 * The database has been split into three databases, which will change the imports of most related classes:
   1. The existing database containing the network model (`*-network-model.sqlite`) with classes in the `network` package.
