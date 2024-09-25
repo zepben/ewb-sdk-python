@@ -336,6 +336,8 @@ def create_customer(include_runtime: bool = True):
         Customer,
         **create_organisation_role(include_runtime),
         kind=sampled_customer_kind(),
+        # We can't use blank strings as it breaks some of the tests due to protobuf conversions dropping the blanks for None.
+        special_need=text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
         customer_agreements=lists(builds(CustomerAgreement, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     )
 

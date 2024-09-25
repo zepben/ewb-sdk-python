@@ -15,6 +15,7 @@ class TableCustomers(TableOrganisationRoles):
         super().__init__()
         self.kind: Column = self._create_column("kind", "TEXT", Nullable.NOT_NULL)
         self.num_end_devices: Column = self._create_column("num_end_devices", "INTEGER", Nullable.NOT_NULL)
+        self.special_need: Column = self._create_column("special_need", "TEXT", Nullable.NULL)
 
     @property
     def name(self) -> str:
