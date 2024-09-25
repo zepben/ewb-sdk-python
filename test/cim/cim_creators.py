@@ -1431,7 +1431,7 @@ def sampled_single_phase_kind():
 def create_switch(include_runtime: bool):
     return {
         **create_conducting_equipment(include_runtime),
-        "rated_current": integers(min_value=1, max_value=MAX_32_BIT_INTEGER),
+        "rated_current": floats(min_value=1, max_value=FLOAT_MAX),
         # NOTE: These are not currently encoded properly in protobuf so we can only use all or none.
         "_normally_open": sampled_from([0, 15]),
         "_open": sampled_from([0, 15])

@@ -5,8 +5,6 @@
 import datetime
 from typing import Type
 
-import pytest
-
 from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
     TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, AssetOwner, Location, AssetContainer, AssetInfo, \
     AssetOrganisationRole, Pole, Streetlight, WindingConnection, StreetlightLampKind, Structure, StreetAddress, TownDetail, PositionPoint, EndDevice, \
@@ -839,7 +837,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(Conductor.length, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(Conductor.asset_info, creator, lambda _: CableInfo(mrid="c1"), lambda _: CableInfo(mrid="c2"),
                                          expected_differences={"wire_info"})
-        self.validator.validate_property(Conductor.wire_info, creator, lambda _: OverheadWireInfo(mrid="owi1"), lambda _: CableInfo(mrid="c2"),
+        self.validator.validate_property(Conductor.wire_info, creator, lambda _: OverheadWireInfo(mrid="owi1"), lambda _: OverheadWireInfo(mrid="c2"),
                                          expected_differences={"asset_info"})
 
     def _compare_connector(self, creator: Type[Connector]):
@@ -1211,7 +1209,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_switch(self, creator: Type[Switch]):
         self._compare_conducting_equipment(creator)
 
-        self.validator.validate_property(Switch.rated_current, creator, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(Switch.rated_current, creator, lambda _: 1.1, lambda _: 2.2)
         self.validator.validate_property(Switch.asset_info, creator, lambda _: SwitchInfo(mrid="asi1"), lambda _: SwitchInfo(mrid="sai2"),
                                          expected_differences={"switch_info"})
         self.validator.validate_property(Switch.switch_info, creator, lambda _: SwitchInfo(mrid="si1"), lambda _: SwitchInfo(mrid="si2"),

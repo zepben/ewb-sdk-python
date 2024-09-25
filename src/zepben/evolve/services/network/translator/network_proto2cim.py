@@ -1612,7 +1612,7 @@ def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, netw
 
 def switch_to_cim(pb: PBSwitch, cim: Switch, network_service: NetworkService):
     network_service.resolve_or_defer_reference(resolver.switch_info(cim), pb.asset_info_mrid())
-    cim.rated_current = uint_or_none(pb.ratedCurrent)
+    cim.rated_current = float_or_none(pb.ratedCurrent)
     cim.set_normally_open(pb.normalOpen)
     cim.set_open(pb.open)
 

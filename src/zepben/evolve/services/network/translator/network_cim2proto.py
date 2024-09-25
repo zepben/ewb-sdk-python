@@ -1374,7 +1374,7 @@ def shunt_compensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
 def switch_to_pb(cim: Switch) -> PBSwitch:
     return PBSwitch(
         ce=conducting_equipment_to_pb(cim, True),
-        ratedCurrent=from_nullable_uint(cim.rated_current),
+        ratedCurrent=from_nullable_float(cim.rated_current),
         normalOpen=cim.get_normal_state() != 0,
         open=cim.get_state() != 0
     )
