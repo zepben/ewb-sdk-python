@@ -2287,7 +2287,7 @@ class NetworkCimReader(BaseCimReader):
             result_set.get_string(table.switch_info_mrid.query_index, on_none=None),
             SwitchInfo
         )
-        switch.rated_current = result_set.get_int(table.rated_current.query_index, on_none=None)
+        switch.rated_current = result_set.get_float(table.rated_current.query_index, on_none=None)
         switch._normally_open = result_set.get_int(table.normal_open.query_index)
         switch._open = result_set.get_int(table.open.query_index)
 

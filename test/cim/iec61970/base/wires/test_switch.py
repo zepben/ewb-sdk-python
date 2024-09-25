@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis.strategies import integers
+from hypothesis.strategies import integers, floats
 from zepben.evolve import Switch, SinglePhaseKind, SwitchInfo
 
 from cim.cim_creators import MAX_32_BIT_INTEGER
@@ -12,12 +12,12 @@ from cim.property_validator import validate_property_accessor
 
 switch_kwargs = {
     **conducting_equipment_kwargs,
-    "rated_current": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+    "rated_current": floats(min_value=0, max_value=MAX_32_BIT_INTEGER),
     "_open": integers(min_value=0, max_value=15),
     "_normally_open": integers(min_value=0, max_value=15),
 }
 
-switch_args = [*conducting_equipment_args, 1, 2, 3]
+switch_args = [*conducting_equipment_args, 1.1, 2, 3]
 
 
 # noinspection PyProtectedMember

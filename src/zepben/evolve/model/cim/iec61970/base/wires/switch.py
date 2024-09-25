@@ -45,7 +45,7 @@ class Switch(ConductingEquipment):
       value for each phase of the switch.
     """
 
-    rated_current: Optional[int] = None
+    rated_current: Optional[float] = None
     """The maximum continuous current carrying capacity in amps governed by the device material and construction. The attribute shall be a positive value."""
 
     _open: int = 0

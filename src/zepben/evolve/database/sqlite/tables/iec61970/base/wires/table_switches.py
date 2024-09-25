@@ -16,5 +16,5 @@ class TableSwitches(TableConductingEquipment, ABC):
         super().__init__()
         self.normal_open: Column = self._create_column("normal_open", "INTEGER", Nullable.NOT_NULL)
         self.open: Column = self._create_column("open", "INTEGER", Nullable.NOT_NULL)
-        self.rated_current: Column = self._create_column("rated_current", "INTEGER", Nullable.NULL)
+        self.rated_current: Column = self._create_column("rated_current", "NUMBER", Nullable.NULL)
         self.switch_info_mrid: Column = self._create_column("switch_info_mrid", "TEXT", Nullable.NULL)
