@@ -36,7 +36,8 @@ def agreement_to_cim(pb: PBAgreement, cim: Agreement, service: BaseService):
 def customer_to_cim(pb: PBCustomer, service: CustomerService) -> Optional[Customer]:
     cim = Customer(
         mrid=pb.mrid(),
-        kind=CustomerKind(pb.kind)
+        kind=CustomerKind(pb.kind),
+        special_need=pb.specialNeed if pb.specialNeed else None
     )
 
     for mrid in pb.customerAgreementMRIDs:
