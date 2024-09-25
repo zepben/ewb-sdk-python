@@ -1039,7 +1039,9 @@ def busbar_section_to_pb(cim: BusbarSection) -> PBBusbarSection:
 def conductor_to_pb(cim: Conductor) -> PBConductor:
     return PBConductor(
         ce=conducting_equipment_to_pb(cim, True),
-        length=from_nullable_float(cim.length)
+        length=from_nullable_float(cim.length),
+        designTemperature=from_nullable_int(cim.design_temperature),
+        designRating=from_nullable_float(cim.design_rating)
     )
 
 

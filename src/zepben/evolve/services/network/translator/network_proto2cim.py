@@ -1196,6 +1196,8 @@ def breaker_to_cim(pb: PBBreaker, network_service: NetworkService) -> Optional[B
 
 def conductor_to_cim(pb: PBConductor, cim: Conductor, network_service: NetworkService):
     cim.length = float_or_none(pb.length)
+    cim.design_temperature = int_or_none(pb.designTemperature)
+    cim.design_rating = float_or_none(pb.designRating)
 
     network_service.resolve_or_defer_reference(resolver.wire_info(cim), pb.asset_info_mrid())
 

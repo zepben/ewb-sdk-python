@@ -835,6 +835,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_conducting_equipment(creator)
 
         self.validator.validate_property(Conductor.length, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(Conductor.design_temperature, creator, lambda _: 1, lambda _: 2)
+        self.validator.validate_property(Conductor.design_rating, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(Conductor.asset_info, creator, lambda _: CableInfo(mrid="c1"), lambda _: CableInfo(mrid="c2"),
                                          expected_differences={"wire_info"})
         self.validator.validate_property(Conductor.wire_info, creator, lambda _: OverheadWireInfo(mrid="owi1"), lambda _: OverheadWireInfo(mrid="c2"),

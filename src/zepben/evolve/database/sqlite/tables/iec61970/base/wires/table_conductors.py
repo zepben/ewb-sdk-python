@@ -15,4 +15,6 @@ class TableConductors(TableConductingEquipment, ABC):
     def __init__(self):
         super().__init__()
         self.length: Column = self._create_column("length", "NUMBER", Nullable.NULL)
+        self.design_temperature: Column = self._create_column("design_temperature", "INTEGER", Nullable.NULL)
+        self.design_rating: Column = self._create_column("design_rating", "NUMBER", Nullable.NULL)
         self.wire_info_mrid: Column = self._create_column("wire_info_mrid", "TEXT", Nullable.NULL)
