@@ -997,7 +997,9 @@ def create_conductor(include_runtime: bool):
     return {
         **create_conducting_equipment(include_runtime),
         "asset_info": sampled_wire_info(include_runtime),
-        "length": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
+        "length": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        "design_temperature": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
+        "design_rating": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     }
 
 

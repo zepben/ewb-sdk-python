@@ -15,6 +15,8 @@
     * `ReactiveCapabilityCurve`
     * `RotatingMachine`
     * `SynchronousMachine`
+* Added `designTemperature` and `designRating` to `Conductor` to capture limitations in the conductor based on the network design and physical surrounds of the
+  conductor.
 * Added `specialNeed` to `Customer` to capture any special needs of the customer, e.g. life support.
 
 ### Enhancements

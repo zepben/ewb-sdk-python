@@ -749,7 +749,8 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_connector(ObjectDifference(source, target))
 
     def _compare_conductor(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_floats(diff, Conductor.length)
+        self._compare_floats(diff, Conductor.length, Conductor.design_rating)
+        self._compare_values(diff, Conductor.design_temperature)
         self._compare_id_references(diff, Conductor.wire_info)
 
         return self._compare_conducting_equipment(diff)

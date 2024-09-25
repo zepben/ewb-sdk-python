@@ -1668,6 +1668,8 @@ class NetworkCimReader(BaseCimReader):
 
     def _load_conductor(self, conductor: Conductor, table: TableConductors, result_set: ResultSet) -> bool:
         conductor.length = result_set.get_float(table.length.query_index, on_none=None)
+        conductor.design_temperature = result_set.get_int(table.design_temperature.query_index, on_none=None)
+        conductor.design_rating = result_set.get_float(table.design_rating.query_index, on_none=None)
         conductor.asset_info = self._ensure_get(
             result_set.get_string(table.wire_info_mrid.query_index, on_none=None),
             WireInfo

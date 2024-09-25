@@ -1428,6 +1428,8 @@ class NetworkCimWriter(BaseCimWriter):
 
     def _save_conductor(self, table: TableConductors, insert: PreparedStatement, conductor: Conductor, description: str) -> bool:
         insert.add_value(table.length.query_index, conductor.length)
+        insert.add_value(table.design_temperature.query_index, conductor.design_temperature)
+        insert.add_value(table.design_rating.query_index, conductor.design_rating)
         insert.add_value(table.wire_info_mrid.query_index, self._mrid_or_none(conductor.wire_info))
 
         return self._save_conducting_equipment(table, insert, conductor, description)
