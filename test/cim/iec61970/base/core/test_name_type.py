@@ -97,7 +97,7 @@ def test_get_names():
     n2 = nt.get_or_add_name("n2", j2)
 
     assert Counter(list(nt.get_names("n1"))) == Counter({n1a, n1b})
-    assert Counter([entry for entries in list(nt.get_names(j2)) for entry in entries]) == Counter({n1b, n2})
+    assert Counter(nt.get_names(j2)) == Counter({n1b, n2})
     assert list(nt.get_names("n2")) == [n2]
     assert not list(nt.get_names("n3"))
 

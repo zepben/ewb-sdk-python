@@ -87,10 +87,13 @@ class NameType:
                     pass
         else:
             try:
-                yield [entry for entry in self._names_index.values() if entry.identified_object == name_or_io] + [entry for entries in
-                                                                                                                  self._names_multi_index.values() for entry in
-                                                                                                                  entries if
-                                                                                                                  entry.identified_object == name_or_io]
+                for name_ in self._names_index.values():
+                    if name_.identified_object == name_or_io:
+                        yield name_
+                for names in self._names_multi_index.values():
+                    for name_ in names:
+                        if name_.identified_object == name_or_io:
+                            yield name_
             except KeyError:
                 pass
 
