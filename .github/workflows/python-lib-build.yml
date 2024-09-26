@@ -9,6 +9,4 @@ jobs:
     uses: zepben/.github/.github/workflows/python-build.yml@main
     with:
       private: false
-      licencecheck: true
     secrets: inherit
-
