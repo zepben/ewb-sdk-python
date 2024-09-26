@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import text, builds, lists
+from zepben.evolve import EndDevice, Location, UsagePoint
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_asset_container import asset_container_kwargs, verify_asset_container_constructor_default, \
     verify_asset_container_constructor_kwargs, verify_asset_container_constructor_args, asset_container_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import EndDevice, Location, UsagePoint
 
 end_device_kwargs = {
     **asset_container_kwargs,
@@ -37,9 +37,11 @@ def verify_end_device_constructor_kwargs(ed: EndDevice, customer_mrid, service_l
 
 def verify_end_device_constructor_args(ed: EndDevice):
     verify_asset_container_constructor_args(ed)
-    assert ed.customer_mrid == end_device_args[-3]
-    assert ed.service_location == end_device_args[-2]
-    assert list(ed.usage_points) == end_device_args[-1]
+    assert end_device_args[-3:] == [
+        ed.customer_mrid,
+        ed.service_location,
+        list(ed.usage_points)
+    ]
 
 
 def test_usage_points_collection():

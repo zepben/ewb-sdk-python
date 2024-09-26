@@ -57,6 +57,7 @@ class CustomerCimWriter(BaseCimWriter):
 
         insert.add_value(table.kind.query_index, customer.kind.name)
         insert.add_value(table.num_end_devices.query_index, 0)  # Currently unused
+        insert.add_value(table.special_need.query_index, customer.special_need)
 
         return self._save_organisation_role(table, insert, customer, "customer")
 

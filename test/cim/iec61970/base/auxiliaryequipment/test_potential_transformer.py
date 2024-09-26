@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import sampled_from
+from zepben.evolve import PotentialTransformer, PotentialTransformerInfo, PotentialTransformerKind
 
 from cim.iec61970.base.auxiliaryequipment.test_sensor import sensor_kwargs, verify_sensor_constructor_default, \
     verify_sensor_constructor_kwargs, verify_sensor_constructor_args, sensor_args
 from cim.property_validator import validate_property_accessor
-from zepben.evolve import PotentialTransformer, PotentialTransformerInfo, PotentialTransformerKind
 
 potential_transformer_kwargs = {
     **sensor_kwargs,
@@ -28,7 +28,6 @@ def test_potential_transformer_constructor_default():
 # noinspection PyShadowingBuiltins
 @given(**potential_transformer_kwargs)
 def test_potential_transformer_constructor_kwargs(type, **kwargs):
-    # noinspection PyArgumentList
     vt = PotentialTransformer(type=type, **kwargs)
 
     verify_sensor_constructor_kwargs(vt, **kwargs)
@@ -36,11 +35,12 @@ def test_potential_transformer_constructor_kwargs(type, **kwargs):
 
 
 def test_potential_transformer_constructor_args():
-    # noinspection PyArgumentList
     vt = PotentialTransformer(*potential_transformer_args)
 
     verify_sensor_constructor_args(vt)
-    assert vt.type == potential_transformer_args[-1]
+    assert potential_transformer_args[-1:] == [
+        vt.type
+    ]
 
 
 def test_potential_transformer_info_accessor():

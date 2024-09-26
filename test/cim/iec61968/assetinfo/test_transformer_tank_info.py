@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
+from zepben.evolve import TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo
 
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo
 
 transformer_tank_info_kwargs = {
     **asset_info_kwargs,
@@ -39,11 +39,12 @@ def test_transformer_tank_info_constructor_args():
     tti = TransformerTankInfo(*transformer_tank_info_args)
 
     verify_asset_info_constructor_args(tti)
-    assert list(tti.transformer_end_infos) == transformer_tank_info_args[-1]
+    assert transformer_tank_info_args[-1:] == [
+        list(tti.transformer_end_infos)
+    ]
 
 
 def test_transformer_tank_info_collection():
-    # noinspection PyArgumentList
     validate_unordered_1234567890(
         TransformerTankInfo,
         lambda mrid: TransformerEndInfo(mrid),

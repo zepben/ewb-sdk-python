@@ -13,11 +13,17 @@ __all__ = ["TableEquipmentOperationalRestrictions"]
 
 
 class TableEquipmentOperationalRestrictions(SqliteTable):
+    """
+    A class representing the association between Equipment and OperationalRestrictions.
+    """
 
     def __init__(self):
         super().__init__()
         self.equipment_mrid: Column = self._create_column("equipment_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of Equipment."""
+
         self.operational_restriction_mrid: Column = self._create_column("operational_restriction_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of OperationalRestrictions."""
 
     @property
     def name(self) -> str:

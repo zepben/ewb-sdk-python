@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import lists, builds
+from zepben.evolve import ConductingEquipment, BaseVoltage, Terminal
 
-from cim.private_collection_validator import validate_ordered_1234567890
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
-from zepben.evolve import ConductingEquipment, BaseVoltage, Terminal
+from cim.private_collection_validator import validate_ordered_1234567890
 
 conducting_equipment_kwargs = {
     **equipment_kwargs,
@@ -33,8 +33,10 @@ def verify_conducting_equipment_constructor_kwargs(ce: ConductingEquipment, base
 
 def verify_conducting_equipment_constructor_args(ce: ConductingEquipment):
     verify_equipment_constructor_args(ce)
-    assert ce.base_voltage == conducting_equipment_args[-2]
-    assert list(ce.terminals) == conducting_equipment_args[-1]
+    assert conducting_equipment_args[-2:] == [
+        ce.base_voltage,
+        list(ce.terminals)
+    ]
 
 
 def test_terminals_collection():

@@ -21,6 +21,12 @@ class Conductor(ConductingEquipment):
     length: Optional[float] = None
     """Segment length for calculating line section capabilities."""
 
+    design_temperature: Optional[int] = None
+    """[ZBEX] The temperature in degrees Celsius for the network design of this conductor."""
+
+    design_rating: Optional[float] = None
+    """[ZBEX] The current rating in Amperes at the specified design temperature that can be used without the conductor breaching physical network"""
+
     @property
     def wire_info(self):
         """The `WireInfo` for this `Conductor`"""

@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers, floats
+from zepben.evolve import ShortCircuitTest
 
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61968.assetinfo.test_transformer_test import transformer_test_kwargs, verify_transformer_test_constructor_default, \
     verify_transformer_test_constructor_kwargs, verify_transformer_test_constructor_args, transformer_test_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import ShortCircuitTest
 
 short_circuit_test_kwargs = {
     **transformer_test_kwargs,
@@ -46,7 +46,6 @@ def test_short_circuit_test_constructor_default():
 @given(**short_circuit_test_kwargs)
 def test_short_circuit_test_constructor_kwargs(current, energised_end_step, grounded_end_step, leakage_impedance, leakage_impedance_zero, loss, loss_zero,
                                                power, voltage, voltage_ohmic_part, **kwargs):
-    # noinspection PyArgumentList
     sct = ShortCircuitTest(current=current,
                            energised_end_step=energised_end_step,
                            grounded_end_step=grounded_end_step,
@@ -73,17 +72,18 @@ def test_short_circuit_test_constructor_kwargs(current, energised_end_step, grou
 
 
 def test_short_circuit_test_constructor_args():
-    # noinspection PyArgumentList
     sct = ShortCircuitTest(*short_circuit_test_args)
 
     verify_transformer_test_constructor_args(sct)
-    assert sct.current == short_circuit_test_args[-10]
-    assert sct.energised_end_step == short_circuit_test_args[-9]
-    assert sct.grounded_end_step == short_circuit_test_args[-8]
-    assert sct.leakage_impedance == short_circuit_test_args[-7]
-    assert sct.leakage_impedance_zero == short_circuit_test_args[-6]
-    assert sct.loss == short_circuit_test_args[-5]
-    assert sct.loss_zero == short_circuit_test_args[-4]
-    assert sct.power == short_circuit_test_args[-3]
-    assert sct.voltage == short_circuit_test_args[-2]
-    assert sct.voltage_ohmic_part == short_circuit_test_args[-1]
+    assert short_circuit_test_args[-10:] == [
+        sct.current,
+        sct.energised_end_step,
+        sct.grounded_end_step,
+        sct.leakage_impedance,
+        sct.leakage_impedance_zero,
+        sct.loss,
+        sct.loss_zero,
+        sct.power,
+        sct.voltage,
+        sct.voltage_ohmic_part
+    ]

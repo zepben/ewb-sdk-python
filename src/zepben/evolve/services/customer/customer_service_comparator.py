@@ -20,7 +20,7 @@ class CustomerServiceComparator(BaseServiceComparator):
     def _compare_customer(self, source: Customer, target: Customer) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_values(diff, Customer.kind)
+        self._compare_values(diff, Customer.kind, Customer.special_need)
         self._compare_id_reference_collections(diff, Customer.agreements)
 
         return self._compare_organisation_role(diff)

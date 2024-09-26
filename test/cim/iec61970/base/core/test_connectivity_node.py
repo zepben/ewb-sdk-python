@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
+from zepben.evolve import ConnectivityNode, Terminal
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import ConnectivityNode, Terminal
 
 connectivity_node_kwargs = {
     **identified_object_kwargs,
@@ -37,7 +37,9 @@ def test_connectivity_node_constructor_args():
     cn = ConnectivityNode(*connectivity_node_args)
 
     verify_identified_object_constructor_args(cn)
-    assert list(cn.terminals) == connectivity_node_args[-1]
+    assert connectivity_node_args[-1:] == [
+        list(cn.terminals)
+    ]
 
 
 def test_terminals_collection():

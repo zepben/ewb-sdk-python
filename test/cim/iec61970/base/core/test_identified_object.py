@@ -7,8 +7,6 @@ from typing import Tuple
 
 import pytest
 from hypothesis.strategies import uuids, text, lists, builds
-
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
 from zepben.evolve import IdentifiedObject, Junction
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
@@ -19,6 +17,8 @@ from zepben.evolve import IdentifiedObject, Junction
 # constructors.
 #
 from zepben.evolve.model.cim.iec61970.base.core.name_type import Name, NameType
+
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
 
 identified_object_kwargs = {
     "mrid": uuids(version=4).map(lambda x: str(x)),
@@ -54,10 +54,12 @@ def verify_identified_object_constructor_kwargs(io: IdentifiedObject, mrid, name
 
 
 def verify_identified_object_constructor_args(io: IdentifiedObject):
-    assert io.mrid == identified_object_args[0]
-    assert io.name == identified_object_args[1]
-    assert io.description == identified_object_args[2]
-    assert list(io.names) == identified_object_args[3]
+    assert identified_object_args == [
+        io.mrid,
+        io.name,
+        io.description,
+        list(io.names)
+    ]
 
 
 def test_user_can_add_names_to_identified_object():

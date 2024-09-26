@@ -18,10 +18,8 @@ def test_accumulator_constructor_default():
 
 @given(**accumulator_kwargs)
 def test_accumulator_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
     verify_measurement_constructor_kwargs(Accumulator(**kwargs), **kwargs)
 
 
 def test_accumulator_constructor_args():
-    # noinspection PyArgumentList
     verify_measurement_constructor_args(Accumulator(*accumulator_args))

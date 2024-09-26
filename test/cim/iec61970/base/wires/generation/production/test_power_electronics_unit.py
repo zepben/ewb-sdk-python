@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import integers, builds
+from zepben.evolve import PowerElectronicsUnit, PowerElectronicsConnection
 
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args
-from zepben.evolve import PowerElectronicsUnit, PowerElectronicsConnection
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 
 power_electronics_unit_kwargs = {
     **equipment_kwargs,
@@ -35,6 +35,8 @@ def verify_power_electronics_unit_constructor_kwargs(peu: PowerElectronicsUnit, 
 
 def verify_power_electronics_unit_constructor_args(peu: PowerElectronicsUnit):
     verify_equipment_constructor_args(peu)
-    assert peu.power_electronics_connection is power_electronics_unit_args[-3]
-    assert peu.max_p == power_electronics_unit_args[-2]
-    assert peu.min_p == power_electronics_unit_args[-1]
+    assert power_electronics_unit_args[-3:] == [
+        peu.power_electronics_connection,
+        peu.max_p,
+        peu.min_p
+    ]

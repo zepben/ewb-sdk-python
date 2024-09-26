@@ -445,13 +445,6 @@ class PowerElectronicsConnection(RegulatingCondEq):
         """
         return ngen(self._power_electronics_connection_phases)
 
-    def has_units(self):
-        """
-        Check if this connection has any associated `PowerElectronicsUnit`s
-        Returns True if there is at least one `PowerElectronicsUnit`, otherwise False
-        """
-        return nlen(self._power_electronics_units) > 0
-
     def num_units(self):
         """Return the number of `PowerElectronicsUnit`s associated with this `PowerElectronicsConnection`"""
         return nlen(self._power_electronics_units)
@@ -502,13 +495,6 @@ class PowerElectronicsConnection(RegulatingCondEq):
         """
         self._power_electronics_units = None
         return self
-
-    def has_phases(self):
-        """
-        Check if this connection has any associated `PowerElectronicsConnectionPhase`s
-        Returns True if there is at least one `PowerElectronicsConnectionPhase`, otherwise False
-        """
-        return nlen(self._power_electronics_connection_phases) > 0
 
     def num_phases(self):
         """Return the number of `PowerElectronicsConnectionPhase`s associated with this `PowerElectronicsConnection`"""

@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats, builds
+from zepben.evolve import TransformerStarImpedance, TransformerEndInfo
 
+from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import TransformerStarImpedance, TransformerEndInfo
 
 transformer_star_impedance_kwargs = {
     **identified_object_kwargs,
@@ -35,13 +35,14 @@ def test_transformer_star_impedance_constructor_default():
 
 @given(**transformer_star_impedance_kwargs)
 def test_transformer_star_impedance_constructor_kwargs(r, r0, x, x0, transformer_end_info, **kwargs):
-    # noinspection PyArgumentList
-    tsi = TransformerStarImpedance(r=r,
-                                   r0=r0,
-                                   x=x,
-                                   x0=x0,
-                                   transformer_end_info=transformer_end_info,
-                                   **kwargs)
+    tsi = TransformerStarImpedance(
+        r=r,
+        r0=r0,
+        x=x,
+        x0=x0,
+        transformer_end_info=transformer_end_info,
+        **kwargs
+    )
 
     verify_identified_object_constructor_kwargs(tsi, **kwargs)
     assert tsi.r == r
@@ -52,12 +53,13 @@ def test_transformer_star_impedance_constructor_kwargs(r, r0, x, x0, transformer
 
 
 def test_transformer_star_impedance_constructor_args():
-    # noinspection PyArgumentList
     tsi = TransformerStarImpedance(*transformer_star_impedance_args)
 
     verify_identified_object_constructor_args(tsi)
-    assert tsi.r == transformer_star_impedance_args[-5]
-    assert tsi.r0 == transformer_star_impedance_args[-4]
-    assert tsi.x == transformer_star_impedance_args[-3]
-    assert tsi.x0 == transformer_star_impedance_args[-2]
-    assert tsi.transformer_end_info == transformer_star_impedance_args[-1]
+    assert transformer_star_impedance_args[-5:] == [
+        tsi.r,
+        tsi.r0,
+        tsi.x,
+        tsi.x0,
+        tsi.transformer_end_info
+    ]

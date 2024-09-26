@@ -54,14 +54,18 @@ from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit
 from zepben.evolve.model.cim.iec61970.base.wires.ground import Ground
 from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import GroundDisconnector
+from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import GroundingImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger
+from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
 from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import SeriesCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import LinearShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
@@ -172,4 +176,8 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Ground, self._writer.save_ground),
             self._save_each_object(GroundDisconnector, self._writer.save_ground_disconnector),
             self._save_each_object(SeriesCompensator, self._writer.save_series_compensator),
+            self._save_each_object(SynchronousMachine, self._writer.save_synchronous_machine),
+            self._save_each_object(PetersenCoil, self._writer.save_petersen_coil),
+            self._save_each_object(GroundingImpedance, self._writer.save_grounding_impedance),
+            self._save_each_object(ReactiveCapabilityCurve, self._writer.save_reactive_capability_curve),
         ])

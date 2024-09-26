@@ -60,6 +60,7 @@ class CustomerCimReader(BaseCimReader):
 
         customer.kind = CustomerKind[result_set.get_string(table.kind.query_index)]
         # Currently unused customer.num_end_devices = rs.get_int(table.num_end_devices.query_index, None)
+        customer.special_need = result_set.get_string(table.special_need.query_index, on_none=None)
 
         return self._load_organisation_role(customer, table, result_set) and self._add_or_throw(customer)
 

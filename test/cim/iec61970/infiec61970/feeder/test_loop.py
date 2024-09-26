@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists
+from zepben.evolve import Loop, Circuit, Substation
 
 from cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, verify_identified_object_constructor_kwargs, \
     verify_identified_object_constructor_args, identified_object_kwargs, identified_object_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Loop, Circuit, Substation
 
 loop_kwargs = {
     **identified_object_kwargs,
@@ -31,10 +31,12 @@ def test_loop_constructor_default():
 
 @given(**loop_kwargs)
 def test_loop_constructor_kwargs(circuits, substations, energizing_substations, **kwargs):
-    loop = Loop(circuits=circuits,
-                substations=substations,
-                energizing_substations=energizing_substations,
-                **kwargs)
+    loop = Loop(
+        circuits=circuits,
+        substations=substations,
+        energizing_substations=energizing_substations,
+        **kwargs
+    )
 
     verify_identified_object_constructor_kwargs(loop, **kwargs)
     assert list(loop.circuits) == circuits
@@ -46,9 +48,11 @@ def test_loop_constructor_args():
     loop = Loop(*loop_args)
 
     verify_identified_object_constructor_args(loop)
-    assert list(loop.circuits) == loop_args[-3]
-    assert list(loop.substations) == loop_args[-2]
-    assert list(loop.energizing_substations) == loop_args[-1]
+    assert loop_args[-3:] == [
+        list(loop.circuits),
+        list(loop.substations),
+        list(loop.energizing_substations)
+    ]
 
 
 def test_circuits_collection():

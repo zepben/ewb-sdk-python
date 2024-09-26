@@ -18,10 +18,8 @@ def test_fault_indicator_constructor_default():
 
 @given(**fault_indicator_kwargs)
 def test_fault_indicator_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
     verify_auxiliary_equipment_constructor_kwargs(FaultIndicator(**kwargs), **kwargs)
 
 
 def test_fault_indicator_constructor_args():
-    # noinspection PyArgumentList
     verify_auxiliary_equipment_constructor_args(FaultIndicator(*fault_indicator_args))

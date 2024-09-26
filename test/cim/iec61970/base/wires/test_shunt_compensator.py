@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import floats, booleans, integers, sampled_from
+from zepben.evolve import ShuntCompensator, PhaseShuntConnectionKind, ShuntCompensatorInfo
 
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.test_regulating_cond_eq import regulating_cond_eq_kwargs, verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_args
 from cim.property_validator import validate_property_accessor
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from zepben.evolve import ShuntCompensator, PhaseShuntConnectionKind, ShuntCompensatorInfo
 
 shunt_compensator_kwargs = {
     **regulating_cond_eq_kwargs,
@@ -40,10 +40,12 @@ def verify_shunt_compensator_constructor_kwargs(sc: ShuntCompensator, grounded, 
 
 def verify_shunt_compensator_constructor_args(sc: ShuntCompensator):
     verify_regulating_cond_eq_constructor_args(sc)
-    assert sc.grounded == shunt_compensator_args[-4]
-    assert sc.nom_u == shunt_compensator_args[-3]
-    assert sc.phase_connection == shunt_compensator_args[-2]
-    assert sc.sections == shunt_compensator_args[-1]
+    assert shunt_compensator_args[-4:] == [
+        sc.grounded,
+        sc.nom_u,
+        sc.phase_connection,
+        sc.sections
+    ]
 
 
 def test_shunt_compensator_info_accessor():

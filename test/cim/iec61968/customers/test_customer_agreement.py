@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
+from zepben.evolve import CustomerAgreement, Customer, PricingStructure
 
 from cim.iec61968.common.test_agreement import agreement_kwargs, verify_agreement_constructor_default, verify_agreement_constructor_kwargs, \
     verify_agreement_constructor_args, agreement_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import CustomerAgreement, Customer, PricingStructure
 
 customer_agreement_kwargs = {
     **agreement_kwargs,
@@ -45,8 +45,10 @@ def test_customer_agreement_constructor_args():
     ca = CustomerAgreement(*customer_agreement_args)
 
     verify_agreement_constructor_args(ca)
-    assert ca.customer == customer_agreement_args[-2]
-    assert list(ca.pricing_structures) == customer_agreement_args[-1]
+    assert customer_agreement_args[-2:] == [
+        ca.customer,
+        list(ca.pricing_structures)
+    ]
 
 
 def test_pricing_structures_collection():

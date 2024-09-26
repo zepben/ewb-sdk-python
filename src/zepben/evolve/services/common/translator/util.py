@@ -2,6 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+__all__ = [
+    "mrid_or_empty", "int_or_none", "uint_or_none", "float_or_none", "long_or_none", "str_or_none", "from_nullable_int", "from_nullable_uint",
+    "from_nullable_float", "from_nullable_long", "nullable_bool_settings"
+]
+
 from typing import Optional, Dict
 
 # noinspection PyPackageRequirements
@@ -9,12 +14,7 @@ from typing import Optional, Dict
 # pylint: disable=import-error
 from google.protobuf.struct_pb2 import NullValue
 
-from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
-
-__all__ = [
-    "mrid_or_empty", "int_or_none", "uint_or_none", "float_or_none", "long_or_none", "str_or_none", "from_nullable_int", "from_nullable_uint",
-    "from_nullable_float", "from_nullable_long", "nullable_bool_settings"
-]
+from zepben.evolve import IdentifiedObject
 
 #
 # NOTE: These values must be comparable using standard equality operators (i.e ==)
@@ -26,7 +26,7 @@ _UNKNOWN_UINT = 4294967295
 _UNKNOWN_LONG = -9223372036854775808
 
 
-def mrid_or_empty(io: PBIdentifiedObject) -> str:
+def mrid_or_empty(io: Optional[IdentifiedObject]) -> str:
     return str(io.mrid) if io else ""
 
 

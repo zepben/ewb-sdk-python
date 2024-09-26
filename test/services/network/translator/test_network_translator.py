@@ -6,10 +6,18 @@ from typing import TypeVar
 
 from hypothesis import given, HealthCheck, settings
 
-from database.sqlite.schema_utils import assume_non_blank_street_address_details
 from cim.cim_creators import *
+from database.sqlite.schema_utils import assume_non_blank_street_address_details
 from services.common.translator.base_test_translator import validate_service_translations
-from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, Location, NetworkServiceComparator, NameType
+from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, Location, NetworkServiceComparator, NameType, \
+    NetworkDatabaseTables, TableLocations, TableAssetOrganisationRolesAssets, TableCircuitsSubstations, TableCircuitsTerminals, \
+    TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableLoopsSubstations, \
+    TableProtectionRelayFunctionsProtectedSwitches, TableProtectionRelaySchemesProtectionRelayFunctions, TableUsagePointsEndDevices, \
+    TableLocationStreetAddresses, TablePositionPoints, TablePowerTransformerEndRatings, TableProtectionRelayFunctionThresholds, \
+    TableProtectionRelayFunctionTimeLimits, TableProtectionRelayFunctionsSensors, TableRecloseDelays
+from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
+    TableSynchronousMachinesReactiveCapabilityCurves
+from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data import TableCurveData
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -125,6 +133,8 @@ types_to_test = {
 
     "create_battery_unit": create_battery_unit(),
     "create_photo_voltaic_unit": create_photo_voltaic_unit(),
+    "create_power_electronics_connection": create_power_electronics_connection(),
+    "create_power_electronics_connection_phase": create_power_electronics_connection_phase(),
     "create_power_electronics_wind_unit": create_power_electronics_wind_unit(),
 
     #######################
@@ -142,19 +152,20 @@ types_to_test = {
     "create_fuse": create_fuse(),
     "create_ground": create_ground(),
     "create_ground_disconnector": create_ground_disconnector(),
+    "create_grounding_impedance": create_grounding_impedance(),
     "create_jumper": create_jumper(),
     "create_junction": create_junction(),
-
-    "create_series_compensator": create_series_compensator(),
     "create_linear_shunt_compensator": create_linear_shunt_compensator(),
     "create_load_break_switch": create_load_break_switch(),
     "create_per_length_sequence_impedance": create_per_length_sequence_impedance(),
-    "create_power_electronics_connection": create_power_electronics_connection(),
-    "create_power_electronics_connection_phase": create_power_electronics_connection_phase(),
+    "create_petersen_coil": create_petersen_coil(),
     "create_power_transformer": create_power_transformer(),
     "create_power_transformer_end": create_power_transformer_end(),
     "create_ratio_tap_changer": create_ratio_tap_changer(),
+    "create_reactive_capability_curve": create_reactive_capability_curve(),
     "create_recloser": create_recloser(),
+    "create_series_compensator": create_series_compensator(),
+    "create_synchronous_machine": create_synchronous_machine(),
     "create_transformer_star_impedance": create_transformer_star_impedance(),
     "create_tap_changer_control": create_tap_changer_control(),
 
@@ -173,17 +184,63 @@ types_to_test = {
     "create_ev_charging_unit": create_ev_charging_unit(),
 }
 
+
 @given(**types_to_test)
 @settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.large_base_example])
 def test_network_service_translations(**kwargs):
-    validate_service_translations(NetworkService, NetworkServiceComparator(), **kwargs)
+    #
+    # NOTE: To prevent the `assume` required for the location from making this test take way too long, it has been separated out.
+    #
+    # If this test still appears to lock up, it is likely you have missed validating a class or forgot to exclude the table. Either figure out which
+    # case you have, or wait for the test to finish, and it will tell you.
+    #
+    validate_service_translations(
+        NetworkService,
+        NetworkServiceComparator(),
+        NetworkDatabaseTables(),
+        excluded_tables={
+            # Excluded associations.
+            TableAssetOrganisationRolesAssets,
+            TableCircuitsSubstations,
+            TableCircuitsTerminals,
+            TableEquipmentEquipmentContainers,
+            TableEquipmentOperationalRestrictions,
+            TableEquipmentUsagePoints,
+            TableLoopsSubstations,
+            TableProtectionRelayFunctionsProtectedSwitches,
+            TableProtectionRelaySchemesProtectionRelayFunctions,
+            TableSynchronousMachinesReactiveCapabilityCurves,
+            TableUsagePointsEndDevices,
+
+            # Excluded array data.
+            TableCurveData,
+            TableLocationStreetAddresses,
+            TablePositionPoints,
+            TablePowerTransformerEndRatings,
+            TableProtectionRelayFunctionThresholds,
+            TableProtectionRelayFunctionTimeLimits,
+            TableProtectionRelayFunctionsSensors,
+            TableRecloseDelays,
+
+            # Excluded location table in the other test.
+            TableLocations
+        },
+        **kwargs
+    )
 
 
 @given(location=create_location())
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_network_service_translations_location(location: Location):
+    # If this `assume` is placed with the other checks it makes the test take a very long time to run due to the number of falsifying examples it creates.
     assume_non_blank_street_address_details(location.main_address)
-    validate_service_translations(NetworkService, NetworkServiceComparator(), location=location)
+    validate_service_translations(
+        NetworkService,
+        NetworkServiceComparator(),
+        NetworkDatabaseTables(),
+        excluded_tables={it.__class__ for it in NetworkDatabaseTables().tables if not isinstance(it, TableLocations)},
+        location=location
+    )
 
 
 #
@@ -222,8 +279,11 @@ def test_power_transformer_end_order():
     tx = PowerTransformer(mrid="tx", power_transformer_ends=[e1, e2])
 
     ns = NetworkService()
+    # noinspection PyUnresolvedReferences
     ns.add_from_pb(tx.to_pb())
+    # noinspection PyUnresolvedReferences
     ns.add_from_pb(e2.to_pb())
+    # noinspection PyUnresolvedReferences
     ns.add_from_pb(e1.to_pb())
 
     assert [end.mrid for end in ns["tx"].ends] == ["e1", "e2"]

@@ -122,13 +122,6 @@ class EnergySource(EnergyConnection):
         """
         return ngen(self._energy_source_phases)
 
-    def has_phases(self):
-        """
-        Check if this source has any associated `EnergySourcePhase`s
-        Returns True if there is at least one `EnergySourcePhase`, otherwise False
-        """
-        return nlen(self._energy_source_phases) > 0
-
     def num_phases(self):
         """Return the number of `EnergySourcePhase`s associated with this `EnergySource`"""
         return nlen(self._energy_source_phases)

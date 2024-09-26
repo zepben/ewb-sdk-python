@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers, text
+from zepben.evolve import DiscreteValue
 
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.meas.test_measurement_value import measurement_value_kwargs, verify_measurement_value_constructor_default, \
     verify_measurement_value_constructor_kwargs, verify_measurement_value_constructor_args, measurement_value_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
-from zepben.evolve import DiscreteValue
 
 discrete_value_kwargs = {
     **measurement_value_kwargs,
@@ -30,9 +30,11 @@ def test_discrete_value_constructor_default():
 @given(**discrete_value_kwargs)
 def test_discrete_value_constructor_kwargs(value, discrete_mrid, **kwargs):
     # noinspection PyArgumentList
-    dv = DiscreteValue(value=value,
-                       discrete_mrid=discrete_mrid,
-                       **kwargs)
+    dv = DiscreteValue(
+        value=value,
+        discrete_mrid=discrete_mrid,
+        **kwargs
+    )
 
     verify_measurement_value_constructor_kwargs(dv, **kwargs)
     assert dv.value == value
@@ -44,5 +46,7 @@ def test_discrete_value_constructor_args():
     dv = DiscreteValue(*discrete_value_args)
 
     verify_measurement_value_constructor_args(dv)
-    assert dv.value == discrete_value_args[-2]
-    assert dv.discrete_mrid == discrete_value_args[-1]
+    assert discrete_value_args[-2:] == [
+        dv.value,
+        dv.discrete_mrid
+    ]

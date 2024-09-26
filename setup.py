@@ -8,9 +8,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 deps = [
-    "requests<2.27.0,>=2.26.0",
     "zepben.auth==0.12.0",
-    "zepben.protobuf==0.27.0",
+    "zepben.protobuf==0.31.0b7",
     "dataclassy==0.6.2",
     "six==1.16.0"
 ]

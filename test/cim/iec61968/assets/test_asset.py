@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import builds, lists
+from zepben.evolve import Asset, Location, AssetOrganisationRole
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Asset, Location, AssetOrganisationRole
 
 asset_kwargs = {
     **identified_object_kwargs,
@@ -33,12 +33,13 @@ def verify_asset_constructor_kwargs(a: Asset, location, organisation_roles, **kw
 
 def verify_asset_constructor_args(a: Asset):
     verify_identified_object_constructor_args(a)
-    assert a.location == asset_args[-2]
-    assert list(a.organisation_roles) == asset_args[-1]
+    assert asset_args[-2:] == [
+        a.location,
+        list(a.organisation_roles)
+    ]
 
 
 def test_organisation_roles_collection():
-    # noinspection PyArgumentList
     validate_unordered_1234567890(
         Asset,
         lambda mrid: AssetOrganisationRole(mrid),

@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, lists
+from zepben.evolve import Circuit, Loop, Terminal, Substation
 
 from cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, verify_line_constructor_args, line_kwargs, \
     line_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Circuit, Loop, Terminal, Substation
 
 circuit_kwargs = {
     **line_kwargs,
@@ -44,9 +44,11 @@ def test_circuit_constructor_args():
     c = Circuit(*circuit_args)
 
     verify_line_constructor_args(c)
-    assert c.loop == circuit_args[-3]
-    assert list(c.end_terminals) == circuit_args[-2]
-    assert list(c.end_substations) == circuit_args[-1]
+    assert circuit_args[-3:] == [
+        c.loop,
+        list(c.end_terminals),
+        list(c.end_substations)
+    ]
 
 
 def test_end_terminals_collection():

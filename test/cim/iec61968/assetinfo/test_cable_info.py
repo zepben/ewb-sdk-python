@@ -18,10 +18,8 @@ def test_cable_info_constructor_default():
 
 @given(**cable_info_kwargs)
 def test_cable_info_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
     verify_wire_info_constructor_kwargs(CableInfo(**kwargs), **kwargs)
 
 
 def test_cable_info_constructor_args():
-    # noinspection PyArgumentList
     verify_wire_info_constructor_args(CableInfo(*cable_info_args))

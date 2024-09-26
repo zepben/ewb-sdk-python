@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import lists, builds
+from zepben.evolve import Sensor, ProtectionRelayFunction
 
 from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxiliary_equipment_kwargs, verify_auxiliary_equipment_constructor_default, \
     verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Sensor, ProtectionRelayFunction
 
 sensor_kwargs = {
     **auxiliary_equipment_kwargs,
@@ -31,7 +31,9 @@ def verify_sensor_constructor_kwargs(sn: Sensor, relay_functions, **kwargs):
 
 def verify_sensor_constructor_args(sn: Sensor):
     verify_auxiliary_equipment_constructor_args(sn)
-    assert list(sn.relay_functions) == sensor_args[-1]
+    assert sensor_args[-1:] == [
+        list(sn.relay_functions)
+    ]
 
 
 def test_relay_functions_collection():

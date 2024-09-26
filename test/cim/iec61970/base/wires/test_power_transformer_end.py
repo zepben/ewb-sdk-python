@@ -8,12 +8,12 @@ import pytest
 from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import builds, integers, floats, sampled_from
+from zepben.evolve import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerEndRatedS, TransformerCoolingType
 
-from cim.private_collection_validator import validate_unordered_other_1234567890
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_transformer_end import verify_transformer_end_constructor_default, \
     verify_transformer_end_constructor_kwargs, verify_transformer_end_constructor_args, transformer_end_kwargs, transformer_end_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
-from zepben.evolve import PowerTransformerEnd, PowerTransformer, WindingConnection, TransformerEndRatedS, TransformerCoolingType
+from cim.private_collection_validator import validate_unordered_other_1234567890
 
 power_transformer_end_kwargs = {
     **transformer_end_kwargs,
@@ -58,20 +58,22 @@ def test_power_transformer_end_constructor_default():
 @given(**power_transformer_end_kwargs)
 def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, rated_u, r, x, r0, x0, g, g0, b, b0, connection_kind, phase_angle_clock,
                                                   **kwargs):
-    pte = PowerTransformerEnd(power_transformer=power_transformer,
-                              rated_s=rated_s,
-                              rated_u=rated_u,
-                              r=r,
-                              x=x,
-                              r0=r0,
-                              x0=x0,
-                              g=g,
-                              g0=g0,
-                              b=b,
-                              b0=b0,
-                              connection_kind=connection_kind,
-                              phase_angle_clock=phase_angle_clock,
-                              **kwargs)
+    pte = PowerTransformerEnd(
+        power_transformer=power_transformer,
+        rated_s=rated_s,
+        rated_u=rated_u,
+        r=r,
+        x=x,
+        r0=r0,
+        x0=x0,
+        g=g,
+        g0=g0,
+        b=b,
+        b0=b0,
+        connection_kind=connection_kind,
+        phase_angle_clock=phase_angle_clock,
+        **kwargs
+    )
 
     verify_transformer_end_constructor_kwargs(pte, **kwargs)
     assert pte.power_transformer == power_transformer
@@ -95,20 +97,26 @@ def test_power_transformer_end_constructor_args():
     pte = PowerTransformerEnd(*power_transformer_end_args)
 
     verify_transformer_end_constructor_args(pte)
-    assert pte.power_transformer == power_transformer_end_args[-13]
-    assert pte.rated_s == power_transformer_end_args[-12]
+    assert power_transformer_end_args[-13:-11] == [
+        pte.power_transformer,
+        pte.rated_s
+    ]
+    # We use a different style of matching here as the passed in arg for rated_s is translated to a TransformerEndRatedS.
     assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, power_transformer_end_args[-12])]
-    assert pte.rated_u == power_transformer_end_args[-11]
-    assert pte.r == power_transformer_end_args[-10]
-    assert pte.x == power_transformer_end_args[-9]
-    assert pte.r0 == power_transformer_end_args[-8]
-    assert pte.x0 == power_transformer_end_args[-7]
-    assert pte.g == power_transformer_end_args[-6]
-    assert pte.g0 == power_transformer_end_args[-5]
-    assert pte.b == power_transformer_end_args[-4]
-    assert pte.b0 == power_transformer_end_args[-3]
-    assert pte.connection_kind == power_transformer_end_args[-2]
-    assert pte.phase_angle_clock == power_transformer_end_args[-1]
+    assert power_transformer_end_args[-11:] == [
+        pte.rated_u,
+        pte.r,
+        pte.x,
+        pte.r0,
+        pte.x0,
+        pte.g,
+        pte.g0,
+        pte.b,
+        pte.b0,
+        pte.connection_kind,
+        pte.phase_angle_clock
+    ]
+
 
 def test_power_transformer_end_s_ratings():
     validate_unordered_other_1234567890(
