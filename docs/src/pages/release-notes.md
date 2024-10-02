@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.37.4](#v0374)| `02 October 2024` |
 |[0.37.3](#v0373)| `25 March 2024` |
 |[0.37.2](#v0372)| `16 January 2024` |
 |[0.37.1](#v0371)| `16 January 2024` |
@@ -41,6 +42,14 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.37.4]
+
+### Notes
+* Update to support requests up to version 3.0.0 (exclusive)
+* Update to corresponding zepben.auth library for requests support
 
 ---
 
