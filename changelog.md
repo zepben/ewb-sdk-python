@@ -1,5 +1,5 @@
 # Zepben Python SDK
-## [0.41.0b1] - UNRELEASED
+## [0.41.0] - UNRELEASED
 ### Breaking Changes
 * None.
 
@@ -14,6 +14,11 @@
 
 ### Notes
 * None.
+
+## [0.37.4] - UNRELEASED
+### Notes
+* Update to support requests up to version 3.0.0 (exclusive)
+* Update to corresponding zepben.auth library for requests support
 
 ## [0.40.0] - 2024-09-20
 ### Breaking Changes
