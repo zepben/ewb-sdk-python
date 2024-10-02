@@ -5,6 +5,10 @@
 |[0.40.0](#v0400)| `20 September 2024` |
 |[0.39.0](#v0390)| `23 June 2024` |
 |[0.38.0](#v0380)| `14 May 2024` |
+|[0.37.4](#v0374)| `02 October 2024` |
+|[0.37.3](#v0373)| `25 March 2024` |
+|[0.37.2](#v0372)| `16 January 2024` |
+|[0.37.1](#v0371)| `16 January 2024` |
 |[0.37.0](#v0370)| `14 November 2023` |
 |[0.36.0](#v0360)| `29 September 2023` |
 |[0.35.0](#v0350)| `06 September 2023` |
@@ -43,6 +47,15 @@ NOTE: This library is not yet stable, and breaking changes should be expected un
 a 1.0.0 release.
 
 ---
+
+## [0.37.4]
+
+### Notes
+* Update to support requests up to version 3.0.0 (exclusive)
+* Update to corresponding zepben.auth library for requests support
+
+---
+
 
 ## [0.40.0]
 
