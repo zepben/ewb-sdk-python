@@ -15,7 +15,7 @@
 ### Notes
 * None.
 
-## [0.37.4] - UNRELEASED
+## [0.37.4] - 2024-10-02
 ### Notes
 * Update to support requests up to version 3.0.0 (exclusive)
 * Update to corresponding zepben.auth library for requests support
