@@ -5,15 +5,22 @@
 from typing import TypeVar
 
 from hypothesis import given
+from zepben.evolve import IdentifiedObject, CustomerService, NameType, CustomerDatabaseTables, TableCustomerAgreementsPricingStructures, \
+    TablePricingStructuresTariffs
+from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 
 from cim.cim_creators import *
 from services.common.translator.base_test_translator import validate_service_translations
-from zepben.evolve import IdentifiedObject, CustomerService, NameType
-from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 
 T = TypeVar("T", bound=IdentifiedObject)
 
 types_to_test = {
+
+    ###################
+    # IEC61968 COMMON #
+    ###################
+
+    "create_organisation": create_organisation(),
 
     ######################
     # IEC61968 CUSTOMERS #
@@ -29,7 +36,16 @@ types_to_test = {
 
 @given(**types_to_test)
 def test_customer_service_translations(**kwargs):
-    validate_service_translations(CustomerService, CustomerServiceComparator(), **kwargs)
+    validate_service_translations(
+        CustomerService,
+        CustomerServiceComparator(),
+        CustomerDatabaseTables(),
+        excluded_tables={
+            TableCustomerAgreementsPricingStructures,
+            TablePricingStructuresTariffs
+        },
+        **kwargs
+    )
 
 
 #

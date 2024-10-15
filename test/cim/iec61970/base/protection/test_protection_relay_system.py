@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, lists, sampled_from
+from zepben.evolve import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme
 
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, equipment_args, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import ProtectionRelaySystem, ProtectionKind, ProtectionRelayScheme
 
 protection_relay_system_kwargs = {
     **equipment_kwargs,
@@ -29,9 +29,7 @@ def test_protection_relay_system_constructor_default():
 
 
 @given(**protection_relay_system_kwargs)
-def test_protection_relay_system_constructor_kwargs(protection_kind,
-                                                    schemes,
-                                                    **kwargs):
+def test_protection_relay_system_constructor_kwargs(protection_kind, schemes, **kwargs):
     prs = ProtectionRelaySystem(
         protection_kind=protection_kind,
         schemes=schemes,
@@ -47,8 +45,10 @@ def test_protection_relay_system_constructor_args():
     prs = ProtectionRelaySystem(*protection_relay_system_args)
 
     verify_equipment_constructor_args(prs)
-    assert prs.protection_kind == protection_relay_system_args[-2]
-    assert list(prs.schemes) == protection_relay_system_args[-1]
+    assert protection_relay_system_args[-2:] == [
+        prs.protection_kind,
+        list(prs.schemes)
+    ]
 
 
 def test_schemes_collection():

@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats
+from zepben.evolve import SwitchInfo
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args
-from zepben.evolve import SwitchInfo
 
 switch_info_kwargs = {
     **asset_info_kwargs,
@@ -40,4 +40,6 @@ def test_switch_info_constructor_args():
     si = SwitchInfo(*switch_info_args)
 
     verify_asset_info_constructor_args(si)
-    assert si.rated_interrupting_time == switch_info_args[-1]
+    assert switch_info_args[-1:] == [
+        si.rated_interrupting_time
+    ]

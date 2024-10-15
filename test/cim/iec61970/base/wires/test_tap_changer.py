@@ -4,14 +4,14 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 
-from pytest import raises
 from hypothesis import assume
 from hypothesis.strategies import floats, booleans, integers, builds
+from pytest import raises
+from zepben.evolve import TapChanger, TapChangerControl
 
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, verify_power_system_resource_constructor_args, power_system_resource_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from zepben.evolve import TapChanger, TapChangerControl
 
 tap_changer_kwargs = {
     **power_system_resource_kwargs,
@@ -47,7 +47,8 @@ def assume_step_values(high_step, low_step, neutral_step, normal_step, step):
     assume(high_step >= step >= low_step)
 
 
-def verify_tap_changer_constructor_kwargs(tc: TapChanger, control_enabled, neutral_u, high_step, low_step, neutral_step, normal_step, step, tap_changer_control, **kwargs):
+def verify_tap_changer_constructor_kwargs(tc: TapChanger, control_enabled, neutral_u, high_step, low_step, neutral_step, normal_step, step, tap_changer_control,
+                                          **kwargs):
     assume_step_values(high_step, low_step, neutral_step, normal_step, step)
 
     verify_power_system_resource_constructor_kwargs(tc, **kwargs)
@@ -63,14 +64,16 @@ def verify_tap_changer_constructor_kwargs(tc: TapChanger, control_enabled, neutr
 
 def verify_tap_changer_constructor_args(tc: TapChanger):
     verify_power_system_resource_constructor_args(tc)
-    assert tc.control_enabled == tap_changer_args[-8]
-    assert tc.neutral_u == tap_changer_args[-7]
-    assert tc.tap_changer_control == tap_changer_args[-6]
-    assert tc.high_step == tap_changer_args[-5]
-    assert tc.low_step == tap_changer_args[-4]
-    assert tc.neutral_step == tap_changer_args[-3]
-    assert tc.normal_step == tap_changer_args[-2]
-    assert tc.step == tap_changer_args[-1]
+    assert tap_changer_args[-8:] == [
+        tc.control_enabled,
+        tc.neutral_u,
+        tc.tap_changer_control,
+        tc.high_step,
+        tc.low_step,
+        tc.neutral_step,
+        tc.normal_step,
+        tc.step
+    ]
 
 
 # noinspection PyArgumentList

@@ -5,11 +5,11 @@
 from datetime import datetime
 
 from hypothesis.strategies import text, datetimes
+from zepben.evolve import Document
 
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from zepben.evolve import Document
 
 document_kwargs = {
     **identified_object_kwargs,
@@ -47,9 +47,11 @@ def verify_document_constructor_kwargs(d: Document, title, created_date_time, au
 
 def verify_document_constructor_args(d: Document):
     verify_identified_object_constructor_args(d)
-    assert d.title == document_args[-6]
-    assert d.created_date_time == document_args[-5]
-    assert d.author_name == document_args[-4]
-    assert d.type == document_args[-3]
-    assert d.status == document_args[-2]
-    assert d.comment == document_args[-1]
+    assert document_args[-6:] == [
+        d.title,
+        d.created_date_time,
+        d.author_name,
+        d.type,
+        d.status,
+        d.comment
+    ]

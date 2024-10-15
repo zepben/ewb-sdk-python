@@ -13,11 +13,17 @@ __all__ = ["TableAssetOrganisationRolesAssets"]
 
 
 class TableAssetOrganisationRolesAssets(SqliteTable):
+    """
+    A class representing the association between AssetOrganisationRoles and Assets.
+    """
 
     def __init__(self):
         super().__init__()
         self.asset_organisation_role_mrid: Column = self._create_column("asset_organisation_role_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of AssetOrganisationRoles."""
+
         self.asset_mrid: Column = self._create_column("asset_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of Assets."""
 
     @property
     def name(self) -> str:

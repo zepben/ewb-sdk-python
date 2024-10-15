@@ -13,11 +13,17 @@ __all__ = ["TableProtectionRelayFunctionsSensors"]
 
 
 class TableProtectionRelayFunctionsSensors(SqliteTable):
+    """
+    A class representing the association between ProtectionRelayFunctions and Sensors.
+    """
 
     def __init__(self):
         super().__init__()
         self.protection_relay_function_mrid: Column = self._create_column("protection_relay_function_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of ProtectionRelayFunctions."""
+
         self.sensor_mrid: Column = self._create_column("sensor_mrid", "TEXT", Nullable.NOT_NULL)
+        """A column storing the mRID of Sensors."""
 
     @property
     def name(self) -> str:

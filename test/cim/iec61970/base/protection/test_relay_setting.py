@@ -9,10 +9,12 @@ from zepben.evolve import RelaySetting, UnitSymbol
 
 def test_relay_setting_value_must_be_real():
     with raises(ValueError, match=r"RelaySetting.value must be a real number. Provided: None"):
+        # noinspection PyTypeChecker
         RelaySetting(unit_symbol=UnitSymbol.METRES, value=None)
     with raises(ValueError, match=r"RelaySetting.value must be a real number. Provided: nan"):
         RelaySetting(unit_symbol=UnitSymbol.METRES, value=float('nan'), name="threshold name")
     with raises(TypeError, match=r"must be real number, not str"):
+        # noinspection PyTypeChecker
         RelaySetting(unit_symbol=UnitSymbol.METRES, value='string', name="threshold name")
 
     rs = RelaySetting(unit_symbol=UnitSymbol.METRES, value=0.0, name="threshold name")

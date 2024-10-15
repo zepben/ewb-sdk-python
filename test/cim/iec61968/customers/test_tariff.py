@@ -19,10 +19,8 @@ def test_tariff_constructor_default():
 
 @given(**tariff_kwargs)
 def test_tariff_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
     verify_document_constructor_kwargs(Tariff(**kwargs), **kwargs)
 
 
 def test_tariff_constructor_args():
-    # noinspection PyArgumentList
     verify_document_constructor_args(Tariff(*tariff_args))

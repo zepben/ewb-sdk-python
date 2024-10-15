@@ -45,6 +45,7 @@ from zepben.protobuf.cim.iec61970.base.core.AcDcTerminal_pb2 import AcDcTerminal
 from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNodeContainer_pb2 import ConnectivityNodeContainer
+from zepben.protobuf.cim.iec61970.base.core.Curve_pb2 import Curve
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode
 from zepben.protobuf.cim.iec61970.base.core.EquipmentContainer_pb2 import EquipmentContainer
 from zepben.protobuf.cim.iec61970.base.core.Equipment_pb2 import Equipment
@@ -81,6 +82,7 @@ from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSect
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor
 from zepben.protobuf.cim.iec61970.base.wires.Connector_pb2 import Connector
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector
+from zepben.protobuf.cim.iec61970.base.wires.EarthFaultCompensator_pb2 import EarthFaultCompensator
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConnection_pb2 import EnergyConnection
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConsumerPhase_pb2 import EnergyConsumerPhase
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConsumer_pb2 import EnergyConsumer
@@ -89,6 +91,7 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySourc
 from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse
 from zepben.protobuf.cim.iec61970.base.wires.Ground_pb2 import Ground
 from zepben.protobuf.cim.iec61970.base.wires.GroundDisconnector_pb2 import GroundDisconnector
+from zepben.protobuf.cim.iec61970.base.wires.GroundingImpedance_pb2 import GroundingImpedance
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction
 from zepben.protobuf.cim.iec61970.base.wires.Line_pb2 import Line
@@ -97,18 +100,22 @@ from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBrea
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance
+from zepben.protobuf.cim.iec61970.base.wires.PetersenCoil_pb2 import PetersenCoil
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import PowerTransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import ProtectedSwitch
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger
+from zepben.protobuf.cim.iec61970.base.wires.ReactiveCapabilityCurve_pb2 import ReactiveCapabilityCurve
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import RegulatingControl
+from zepben.protobuf.cim.iec61970.base.wires.RotatingMachine_pb2 import RotatingMachine
 from zepben.protobuf.cim.iec61970.base.wires.SeriesCompensator_pb2 import SeriesCompensator
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch
+from zepben.protobuf.cim.iec61970.base.wires.SynchronousMachine_pb2 import SynchronousMachine
 from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd
@@ -170,6 +177,7 @@ BaseVoltage.mrid = lambda self: self.io.mrid()
 ConductingEquipment.mrid = lambda self: self.eq.mrid()
 ConnectivityNode.mrid = lambda self: self.io.mrid()
 ConnectivityNodeContainer.mrid = lambda self: self.psr.mrid()
+Curve.mrid = lambda self: self.io.mrid()
 Equipment.mrid = lambda self: self.psr.mrid()
 EquipmentContainer.mrid = lambda self: self.cnc.mrid()
 Feeder.mrid = lambda self: self.ec.mrid()
@@ -209,6 +217,7 @@ BusbarSection.mrid = lambda self: self.cn.mrid()
 Conductor.mrid = lambda self: self.ce.mrid()
 Connector.mrid = lambda self: self.ce.mrid()
 Disconnector.mrid = lambda self: self.sw.mrid()
+EarthFaultCompensator.mrid = lambda self: self.ce.mrid()
 EnergyConnection.mrid = lambda self: self.ce.mrid()
 EnergyConsumer.mrid = lambda self: self.ec.mrid()
 EnergyConsumerPhase.mrid = lambda self: self.psr.mrid()
@@ -217,6 +226,7 @@ EnergySourcePhase.mrid = lambda self: self.psr.mrid()
 Fuse.mrid = lambda self: self.sw.mrid()
 Ground.mrid = lambda self: self.ce.mrid()
 GroundDisconnector.mrid = lambda self: self.sw.mrid()
+GroundingImpedance.mrid = lambda self: self.efc.mrid()
 Jumper.mrid = lambda self: self.sw.mrid()
 Junction.mrid = lambda self: self.cn.mrid()
 Line.mrid = lambda self: self.ec.mrid()
@@ -225,18 +235,22 @@ LoadBreakSwitch.mrid = lambda self: self.ps.mrid()
 PerLengthImpedance.mrid = lambda self: self.lp.mrid()
 PerLengthLineParameter.mrid = lambda self: self.io.mrid()
 PerLengthSequenceImpedance.mrid = lambda self: self.pli.mrid()
+PetersenCoil.mrid = lambda self: self.efc.mrid()
 PowerTransformer.mrid = lambda self: self.ce.mrid()
 PowerElectronicsConnection.mrid = lambda self: self.rce.mrid()
 PowerElectronicsConnectionPhase.mrid = lambda self: self.psr.mrid()
 PowerTransformerEnd.mrid = lambda self: self.te.mrid()
 ProtectedSwitch.mrid = lambda self: self.sw.mrid()
 RatioTapChanger.mrid = lambda self: self.tc.mrid()
+ReactiveCapabilityCurve.mrid = lambda self: self.c.mrid()
 Recloser.mrid = lambda self: self.sw.mrid()
 RegulatingCondEq.mrid = lambda self: self.ec.mrid()
 RegulatingControl.mrid = lambda self: self.psr.mrid()
+RotatingMachine.mrid = lambda self: self.rce.mrid()
 SeriesCompensator.mrid = lambda self: self.ce.mrid()
 ShuntCompensator.mrid = lambda self: self.rce.mrid()
 Switch.mrid = lambda self: self.ce.mrid()
+SynchronousMachine.mrid = lambda self: self.rm.mrid()
 TapChanger.mrid = lambda self: self.psr.mrid()
 TapChangerControl.mrid = lambda self: self.rc.mrid()
 TransformerEnd.mrid = lambda self: self.io.mrid()

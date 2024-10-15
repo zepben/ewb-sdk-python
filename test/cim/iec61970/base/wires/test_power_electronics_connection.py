@@ -7,12 +7,12 @@ import re
 from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import integers, builds, lists, floats, text, booleans
+from zepben.evolve import PowerElectronicsUnit, PowerElectronicsConnectionPhase, BatteryUnit, PowerElectronicsConnection
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \
     verify_regulating_cond_eq_constructor_kwargs, verify_regulating_cond_eq_constructor_args, regulating_cond_eq_kwargs, regulating_cond_eq_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import PowerElectronicsUnit, PowerElectronicsConnectionPhase, BatteryUnit, PowerElectronicsConnection
 
 power_electronics_connection_kwargs = {
     **regulating_cond_eq_kwargs,
@@ -96,56 +96,78 @@ def test_power_electronics_connection_constructor_default():
 
 
 @given(**power_electronics_connection_kwargs)
-def test_power_electronics_connection_constructor_kwargs(max_i_fault, p, q, max_q, min_q, rated_s, rated_u, inverter_standard, sustain_op_overvolt_limit,
-                                                         stop_at_over_freq,
-                                                         stop_at_under_freq,
-                                                         inv_volt_watt_resp_mode,
-                                                         inv_watt_resp_v1,
-                                                         inv_watt_resp_v2,
-                                                         inv_watt_resp_v3,
-                                                         inv_watt_resp_v4,
-                                                         inv_watt_resp_p_at_v1,
-                                                         inv_watt_resp_p_at_v2,
-                                                         inv_watt_resp_p_at_v3,
-                                                         inv_watt_resp_p_at_v4,
-                                                         inv_volt_var_resp_mode,
-                                                         inv_var_resp_v1,
-                                                         inv_var_resp_v2,
-                                                         inv_var_resp_v3,
-                                                         inv_var_resp_v4,
-                                                         inv_var_resp_q_at_v1,
-                                                         inv_var_resp_q_at_v2,
-                                                         inv_var_resp_q_at_v3,
-                                                         inv_var_resp_q_at_v4,
-                                                         inv_reactive_power_mode,
-                                                         inv_fix_reactive_power, power_electronics_units, power_electronics_connection_phases, **kwargs):
-    pec = PowerElectronicsConnection(max_i_fault=max_i_fault, p=p, q=q, max_q=max_q, min_q=min_q, rated_s=rated_s, rated_u=rated_u,
-                                     inverter_standard=inverter_standard,
-                                     sustain_op_overvolt_limit=sustain_op_overvolt_limit,
-                                     stop_at_over_freq=stop_at_over_freq,
-                                     stop_at_under_freq=stop_at_under_freq,
-                                     inv_volt_watt_resp_mode=inv_volt_watt_resp_mode,
-                                     inv_watt_resp_v1=inv_watt_resp_v1,
-                                     inv_watt_resp_v2=inv_watt_resp_v2,
-                                     inv_watt_resp_v3=inv_watt_resp_v3,
-                                     inv_watt_resp_v4=inv_watt_resp_v4,
-                                     inv_watt_resp_p_at_v1=inv_watt_resp_p_at_v1,
-                                     inv_watt_resp_p_at_v2=inv_watt_resp_p_at_v2,
-                                     inv_watt_resp_p_at_v3=inv_watt_resp_p_at_v3,
-                                     inv_watt_resp_p_at_v4=inv_watt_resp_p_at_v4,
-                                     inv_volt_var_resp_mode=inv_volt_var_resp_mode,
-                                     inv_var_resp_v1=inv_var_resp_v1,
-                                     inv_var_resp_v2=inv_var_resp_v2,
-                                     inv_var_resp_v3=inv_var_resp_v3,
-                                     inv_var_resp_v4=inv_var_resp_v4,
-                                     inv_var_resp_q_at_v1=inv_var_resp_q_at_v1,
-                                     inv_var_resp_q_at_v2=inv_var_resp_q_at_v2,
-                                     inv_var_resp_q_at_v3=inv_var_resp_q_at_v3,
-                                     inv_var_resp_q_at_v4=inv_var_resp_q_at_v4,
-                                     inv_reactive_power_mode=inv_reactive_power_mode,
-                                     inv_fix_reactive_power=inv_fix_reactive_power,
-                                     power_electronics_units=power_electronics_units,
-                                     power_electronics_connection_phases=power_electronics_connection_phases, **kwargs)
+def test_power_electronics_connection_constructor_kwargs(
+    max_i_fault,
+    p,
+    q,
+    max_q,
+    min_q,
+    rated_s,
+    rated_u,
+    inverter_standard,
+    sustain_op_overvolt_limit,
+    stop_at_over_freq,
+    stop_at_under_freq,
+    inv_volt_watt_resp_mode,
+    inv_watt_resp_v1,
+    inv_watt_resp_v2,
+    inv_watt_resp_v3,
+    inv_watt_resp_v4,
+    inv_watt_resp_p_at_v1,
+    inv_watt_resp_p_at_v2,
+    inv_watt_resp_p_at_v3,
+    inv_watt_resp_p_at_v4,
+    inv_volt_var_resp_mode,
+    inv_var_resp_v1,
+    inv_var_resp_v2,
+    inv_var_resp_v3,
+    inv_var_resp_v4,
+    inv_var_resp_q_at_v1,
+    inv_var_resp_q_at_v2,
+    inv_var_resp_q_at_v3,
+    inv_var_resp_q_at_v4,
+    inv_reactive_power_mode,
+    inv_fix_reactive_power,
+    power_electronics_units,
+    power_electronics_connection_phases,
+    **kwargs
+):
+    pec = PowerElectronicsConnection(
+        max_i_fault=max_i_fault,
+        p=p,
+        q=q,
+        max_q=max_q,
+        min_q=min_q,
+        rated_s=rated_s,
+        rated_u=rated_u,
+        inverter_standard=inverter_standard,
+        sustain_op_overvolt_limit=sustain_op_overvolt_limit,
+        stop_at_over_freq=stop_at_over_freq,
+        stop_at_under_freq=stop_at_under_freq,
+        inv_volt_watt_resp_mode=inv_volt_watt_resp_mode,
+        inv_watt_resp_v1=inv_watt_resp_v1,
+        inv_watt_resp_v2=inv_watt_resp_v2,
+        inv_watt_resp_v3=inv_watt_resp_v3,
+        inv_watt_resp_v4=inv_watt_resp_v4,
+        inv_watt_resp_p_at_v1=inv_watt_resp_p_at_v1,
+        inv_watt_resp_p_at_v2=inv_watt_resp_p_at_v2,
+        inv_watt_resp_p_at_v3=inv_watt_resp_p_at_v3,
+        inv_watt_resp_p_at_v4=inv_watt_resp_p_at_v4,
+        inv_volt_var_resp_mode=inv_volt_var_resp_mode,
+        inv_var_resp_v1=inv_var_resp_v1,
+        inv_var_resp_v2=inv_var_resp_v2,
+        inv_var_resp_v3=inv_var_resp_v3,
+        inv_var_resp_v4=inv_var_resp_v4,
+        inv_var_resp_q_at_v1=inv_var_resp_q_at_v1,
+        inv_var_resp_q_at_v2=inv_var_resp_q_at_v2,
+        inv_var_resp_q_at_v3=inv_var_resp_q_at_v3,
+        inv_var_resp_q_at_v4=inv_var_resp_q_at_v4,
+        inv_reactive_power_mode=inv_reactive_power_mode,
+        inv_fix_reactive_power=inv_fix_reactive_power,
+        power_electronics_units=power_electronics_units,
+        power_electronics_connection_phases=power_electronics_connection_phases,
+        **kwargs
+    )
 
     verify_regulating_cond_eq_constructor_kwargs(pec, **kwargs)
     assert pec.max_i_fault == max_i_fault
@@ -187,39 +209,41 @@ def test_power_electronics_connection_constructor_args():
     pec = PowerElectronicsConnection(*power_electronics_connection_args)
 
     verify_regulating_cond_eq_constructor_args(pec)
-    assert pec.max_i_fault == power_electronics_connection_args[-33]
-    assert pec.p == power_electronics_connection_args[-32]
-    assert pec.q == power_electronics_connection_args[-31]
-    assert pec.max_q == power_electronics_connection_args[-30]
-    assert pec.min_q == power_electronics_connection_args[-29]
-    assert pec.rated_s == power_electronics_connection_args[-28]
-    assert pec.rated_u == power_electronics_connection_args[-27]
-    assert pec.inverter_standard == power_electronics_connection_args[-26]
-    assert pec.sustain_op_overvolt_limit == power_electronics_connection_args[-25]
-    assert pec.stop_at_over_freq == power_electronics_connection_args[-24]
-    assert pec.stop_at_under_freq == power_electronics_connection_args[-23]
-    assert pec.inv_volt_watt_resp_mode == power_electronics_connection_args[-22]
-    assert pec.inv_watt_resp_v1 == power_electronics_connection_args[-21]
-    assert pec.inv_watt_resp_v2 == power_electronics_connection_args[-20]
-    assert pec.inv_watt_resp_v3 == power_electronics_connection_args[-19]
-    assert pec.inv_watt_resp_v4 == power_electronics_connection_args[-18]
-    assert pec.inv_watt_resp_p_at_v1 == power_electronics_connection_args[-17]
-    assert pec.inv_watt_resp_p_at_v2 == power_electronics_connection_args[-16]
-    assert pec.inv_watt_resp_p_at_v3 == power_electronics_connection_args[-15]
-    assert pec.inv_watt_resp_p_at_v4 == power_electronics_connection_args[-14]
-    assert pec.inv_volt_var_resp_mode == power_electronics_connection_args[-13]
-    assert pec.inv_var_resp_v1 == power_electronics_connection_args[-12]
-    assert pec.inv_var_resp_v2 == power_electronics_connection_args[-11]
-    assert pec.inv_var_resp_v3 == power_electronics_connection_args[-10]
-    assert pec.inv_var_resp_v4 == power_electronics_connection_args[-9]
-    assert pec.inv_var_resp_q_at_v1 == power_electronics_connection_args[-8]
-    assert pec.inv_var_resp_q_at_v2 == power_electronics_connection_args[-7]
-    assert pec.inv_var_resp_q_at_v3 == power_electronics_connection_args[-6]
-    assert pec.inv_var_resp_q_at_v4 == power_electronics_connection_args[-5]
-    assert pec.inv_reactive_power_mode == power_electronics_connection_args[-4]
-    assert pec.inv_fix_reactive_power == power_electronics_connection_args[-3]
-    assert list(pec.units) == power_electronics_connection_args[-2]
-    assert list(pec.phases) == power_electronics_connection_args[-1]
+    assert power_electronics_connection_args[-33:] == [
+        pec.max_i_fault,
+        pec.p,
+        pec.q,
+        pec.max_q,
+        pec.min_q,
+        pec.rated_s,
+        pec.rated_u,
+        pec.inverter_standard,
+        pec.sustain_op_overvolt_limit,
+        pec.stop_at_over_freq,
+        pec.stop_at_under_freq,
+        pec.inv_volt_watt_resp_mode,
+        pec.inv_watt_resp_v1,
+        pec.inv_watt_resp_v2,
+        pec.inv_watt_resp_v3,
+        pec.inv_watt_resp_v4,
+        pec.inv_watt_resp_p_at_v1,
+        pec.inv_watt_resp_p_at_v2,
+        pec.inv_watt_resp_p_at_v3,
+        pec.inv_watt_resp_p_at_v4,
+        pec.inv_volt_var_resp_mode,
+        pec.inv_var_resp_v1,
+        pec.inv_var_resp_v2,
+        pec.inv_var_resp_v3,
+        pec.inv_var_resp_v4,
+        pec.inv_var_resp_q_at_v1,
+        pec.inv_var_resp_q_at_v2,
+        pec.inv_var_resp_q_at_v3,
+        pec.inv_var_resp_q_at_v4,
+        pec.inv_reactive_power_mode,
+        pec.inv_fix_reactive_power,
+        list(pec.units),
+        list(pec.phases)
+    ]
 
 
 def test_power_electronics_units_collection():

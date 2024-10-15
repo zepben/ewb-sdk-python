@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, text
+from zepben.evolve import Control, RemoteControl
 
+from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_point_constructor_default, \
     verify_io_point_constructor_kwargs, verify_io_point_constructor_args, io_point_args
-from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from zepben.evolve import Control, RemoteControl
 
 control_kwargs = {
     **io_point_kwargs,
@@ -29,7 +29,6 @@ def test_control_constructor_default():
 
 @given(**control_kwargs)
 def test_control_constructor_kwargs(power_system_resource_mrid, remote_control, **kwargs):
-    # noinspection PyArgumentList
     c = Control(power_system_resource_mrid=power_system_resource_mrid, remote_control=remote_control, **kwargs)
 
     verify_io_point_constructor_kwargs(c, **kwargs)
@@ -38,9 +37,10 @@ def test_control_constructor_kwargs(power_system_resource_mrid, remote_control, 
 
 
 def test_control_constructor_args():
-    # noinspection PyArgumentList
     c = Control(*control_args)
 
     verify_io_point_constructor_args(c)
-    assert c.power_system_resource_mrid == control_args[-2]
-    assert c.remote_control == control_args[-1]
+    assert control_args[-2:] == [
+        c.power_system_resource_mrid,
+        c.remote_control
+    ]

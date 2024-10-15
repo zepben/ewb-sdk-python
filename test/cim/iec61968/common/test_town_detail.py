@@ -5,9 +5,9 @@
 
 from hypothesis import given
 from hypothesis.strategies import text
+from zepben.evolve import TownDetail
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from zepben.evolve import TownDetail
 
 town_detail_kwargs = {
     "name": text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
@@ -28,7 +28,6 @@ def test_town_detail_constructor_default():
 def test_town_detail_constructor_kwargs(name, state_or_province, **kwargs):
     assert not kwargs
 
-    # noinspection PyArgumentList
     td = TownDetail(name=name, state_or_province=state_or_province)
 
     assert td.name == name
@@ -36,14 +35,14 @@ def test_town_detail_constructor_kwargs(name, state_or_province, **kwargs):
 
 
 def test_town_detail_constructor_args():
-    # noinspection PyArgumentList
     td = TownDetail(*town_detail_args)
 
-    assert td.name == town_detail_args[-2]
-    assert td.state_or_province == town_detail_args[-1]
+    assert town_detail_args[-2:] == [
+        td.name,
+        td.state_or_province
+    ]
 
 
-# noinspection PyArgumentList
 def test_all_fields_empty():
     assert TownDetail().all_fields_null_or_empty()
     assert TownDetail("", "").all_fields_null_or_empty()

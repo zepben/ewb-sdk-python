@@ -15,6 +15,8 @@ from zepben.evolve.database.sqlite.tables.associations.table_loops_substations i
 from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_functions_protected_switches import *
 from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_functions_sensors import *
 from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_schemes_protection_relay_functions import *
+from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
+    TableSynchronousMachinesReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.associations.table_usage_points_end_devices import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_cable_info import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_no_load_tests import *
@@ -45,6 +47,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.auxiliaryequipment.table
 from zepben.evolve.database.sqlite.tables.iec61970.base.auxiliaryequipment.table_potential_transformers import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_base_voltages import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_connectivity_nodes import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data import TableCurveData
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_feeders import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_geographical_regions import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_sites import *
@@ -78,20 +81,24 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_energy_sourc
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_energy_sources import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_fuses import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ground_disconnectors import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_grounding_impedances import TableGroundingImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_grounds import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_jumpers import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_junctions import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_linear_shunt_compensators import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_load_break_switches import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_sequence_impedances import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connection_phases import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connections import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_end_ratings import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_ends import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformers import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ratio_tap_changers import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reactive_capability_curves import TableReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reclosers import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_series_compensators import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_synchronous_machines import TableSynchronousMachines
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_tap_changer_controls import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_transformer_star_impedances import *
 from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder.table_circuits import *
@@ -101,7 +108,6 @@ from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.wires.generation.
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
 
 __all__ = ["NetworkDatabaseTables"]
-
 
 class NetworkDatabaseTables(BaseDatabaseTables):
     """
@@ -131,6 +137,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableCurrentRelays()
         yield TableCurrentTransformerInfo()
         yield TableCurrentTransformers()
+        yield TableCurveData()
         yield TableDisconnectors()
         yield TableDiscretes()
         yield TableDistanceRelays()
@@ -149,6 +156,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableGeographicalRegions()
         yield TableGrounds()
         yield TableGroundDisconnectors()
+        yield TableGroundingImpedances()
         yield TableJumpers()
         yield TableJunctions()
         yield TableLinearShuntCompensators()
@@ -165,6 +173,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableOrganisations()
         yield TableOverheadWireInfo()
         yield TablePerLengthSequenceImpedances()
+        yield TablePetersenCoils()
         yield TablePhotoVoltaicUnits()
         yield TablePoles()
         yield TablePositionPoints()
@@ -185,6 +194,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableProtectionRelaySchemesProtectionRelayFunctions()
         yield TableProtectionRelaySystems()
         yield TableRatioTapChangers()
+        yield TableReactiveCapabilityCurves()
         yield TableReclosers()
         yield TableRecloseDelays()
         yield TableRelayInfo()
@@ -198,6 +208,8 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableSubGeographicalRegions()
         yield TableSubstations()
         yield TableSwitchInfo()
+        yield TableSynchronousMachines()
+        yield TableSynchronousMachinesReactiveCapabilityCurves()
         yield TableTapChangerControls()
         yield TableTerminals()
         yield TableTransformerEndInfo()

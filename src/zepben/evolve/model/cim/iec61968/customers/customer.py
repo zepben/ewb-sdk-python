@@ -25,6 +25,9 @@ class Customer(OrganisationRole):
     kind: CustomerKind = CustomerKind.UNKNOWN
     """Kind of customer"""
 
+    special_need: Optional[str] = None
+    """A special service need such as life support, hospitals, etc."""
+
     _customer_agreements: Optional[List[CustomerAgreement]] = None
 
     def __init__(self, customer_agreements: List[CustomerAgreement] = None, **kwargs):

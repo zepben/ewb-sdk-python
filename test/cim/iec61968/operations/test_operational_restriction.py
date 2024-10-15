@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
+from zepben.evolve import OperationalRestriction, Equipment
 
 from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import OperationalRestriction, Equipment
 
 operational_restriction_kwargs = {
     **document_kwargs,
@@ -28,7 +28,6 @@ def test_operational_restriction_constructor_default():
 
 @given(**operational_restriction_kwargs)
 def test_operational_restriction_constructor_kwargs(equipment, **kwargs):
-    # noinspection PyArgumentList
     or_ = OperationalRestriction(
         equipment=equipment,
         **kwargs
@@ -39,15 +38,15 @@ def test_operational_restriction_constructor_kwargs(equipment, **kwargs):
 
 
 def test_operational_restriction_constructor_args():
-    # noinspection PyArgumentList
     or_ = OperationalRestriction(*operational_restriction_args)
 
     verify_document_constructor_args(or_)
-    assert list(or_.equipment) == operational_restriction_args[-1]
+    assert operational_restriction_args[-1:] == [
+        list(or_.equipment)
+    ]
 
 
 def test_equipment_collection():
-    # noinspection PyArgumentList
     validate_unordered_1234567890(
         OperationalRestriction,
         lambda mrid: Equipment(mrid),

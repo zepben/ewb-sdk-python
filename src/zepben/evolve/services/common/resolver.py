@@ -12,6 +12,7 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     PowerElectronicsUnit, PowerElectronicsConnectionPhase, PowerElectronicsConnection, TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, \
     TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectedSwitch, Switch, RegulatingControl, \
     RegulatingCondEq, TapChanger, ProtectionRelayFunction, ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Fuse
+from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["ae_terminal", "agreements", "at_location", "ce_base_voltage", "ce_terminals", "circuits", "cn_terminals", "conducting_equipment",
@@ -30,6 +31,8 @@ __all__ = ["ae_terminal", "agreements", "at_location", "ce_base_voltage", "ce_te
            "sub_geographical_region", "sub_geographical_regions", "substations", "switch_info", "tariffs", "tc_tap_changer_control", "te_base_voltage",
            "te_terminal", "transformer_end", "transformer_end_info", "transformer_end_transformer_star_impedance", "transformer_star_impedance",
            "transformer_tank_info", "unit_power_electronics_connection", "up_equipment", "usage_point_location", "wire_info"]
+
+from zepben.evolve.services.common.reference_resolvers import sm_to_rcc_resolver
 
 
 def ae_terminal(auxiliary_equipment: AuxiliaryEquipment) -> BoundReferenceResolver:
@@ -520,3 +523,8 @@ def usage_point_location(usage_point: UsagePoint) -> BoundReferenceResolver:
 def wire_info(conductor: Conductor) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)
+
+
+def reactive_capability_curve(synchronous_machine: SynchronousMachine) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(synchronous_machine, sm_to_rcc_resolver, None)

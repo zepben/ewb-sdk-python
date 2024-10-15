@@ -95,13 +95,6 @@ class EnergyConsumer(EnergyConnection):
             for phase in energy_consumer_phases:
                 self.add_phase(phase)
 
-    def has_phases(self):
-        """
-        Check if this consumer has any associated `EnergyConsumerPhases`
-        Returns True if there is at least one `EnergyConsumerPhase`, otherwise False
-        """
-        return nlen(self._energy_consumer_phases) > 0
-
     def num_phases(self):
         """Get the number of `EnergySourcePhase`s for this `EnergyConsumer`."""
         return nlen(self._energy_consumer_phases)

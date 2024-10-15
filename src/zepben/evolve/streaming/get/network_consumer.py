@@ -7,10 +7,9 @@ from __future__ import annotations
 import warnings
 from asyncio import get_event_loop
 from itertools import chain
-from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable
+from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable, cast
 
 from dataclassy import dataclass
-
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
@@ -28,11 +27,13 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, RelayInfo, SwitchInfo, \
     CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo
-
+from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import GroundingImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
+from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
+from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
-
 
 MAX_64_BIT_INTEGER = 9223372036854775807
 
@@ -345,7 +346,10 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             mor.objects.update({sub.mrid: sub for sub in it.substations})
             mor.objects.update({sub.mrid: sub for sub in it.energizing_substations})
 
-            containers: Set[str] = set(map(lambda ec: ec.mrid, chain(it.circuits, it.substations, it.energizing_substations)))
+            # `chain` infers the type as Circuit instead of EquipmentContainer, so provide a wrapper that forces the correct type.
+            def chain_typed(*iterables: Iterable[EquipmentContainer]): return chain(*iterables)
+
+            containers: Set[str] = {ec.mrid for ec in chain_typed(it.circuits, it.substations, it.energizing_substations)}
             result = await self._get_equipment_for_containers(containers)
             if result.was_failure:
                 # noinspection PyArgumentList
@@ -375,7 +379,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         containers: Set[EquipmentContainer] = set()
         for loop in hierarchy.loops.values():
-            containers.update(chain(loop.circuits, loop.substations, loop.energizing_substations))
+            containers.update(chain(cast(Iterable[EquipmentContainer], loop.circuits), loop.substations, loop.energizing_substations))
 
         result = await self._get_equipment_for_containers(map(lambda it: it.mrid, containers))
         if result.was_failure:
@@ -724,18 +728,22 @@ _nio_type_to_cim = {
     "fuse": Fuse,
     "ground": Ground,
     "groundDisconnector": GroundDisconnector,
+    "groundingImpedance": GroundingImpedance,
     "jumper": Jumper,
     "junction": Junction,
     "linearShuntCompensator": LinearShuntCompensator,
     "loadBreakSwitch": LoadBreakSwitch,
     "perLengthSequenceImpedance": PerLengthSequenceImpedance,
+    "petersenCoil": PetersenCoil,
     "powerElectronicsConnection": PowerElectronicsConnection,
     "powerElectronicsConnectionPhase": PowerElectronicsConnectionPhase,
     "powerTransformer": PowerTransformer,
     "powerTransformerEnd": PowerTransformerEnd,
     "ratioTapChanger": RatioTapChanger,
+    "reactiveCapabilityCurve": ReactiveCapabilityCurve,
     "recloser": Recloser,
     "seriesCompensator": SeriesCompensator,
+    "synchronousMachine": SynchronousMachine,
     "tapChangerControl": TapChangerControl,
     "transformerStarImpedance": TransformerStarImpedance,
 

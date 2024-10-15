@@ -2,22 +2,22 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from hypothesis.strategies import integers
+from hypothesis.strategies import integers, floats
+from zepben.evolve import Switch, SinglePhaseKind, SwitchInfo
 
 from cim.cim_creators import MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
 from cim.property_validator import validate_property_accessor
-from zepben.evolve import Switch, SinglePhaseKind, SwitchInfo
 
 switch_kwargs = {
     **conducting_equipment_kwargs,
-    "rated_current": integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
+    "rated_current": floats(min_value=0, max_value=MAX_32_BIT_INTEGER),
     "_open": integers(min_value=0, max_value=15),
     "_normally_open": integers(min_value=0, max_value=15),
 }
 
-switch_args = [*conducting_equipment_args, 1, 2, 3]
+switch_args = [*conducting_equipment_args, 1.1, 2, 3]
 
 
 # noinspection PyProtectedMember
@@ -39,9 +39,11 @@ def verify_switch_constructor_kwargs(s: Switch, rated_current, _open, _normally_
 # noinspection PyProtectedMember
 def verify_switch_constructor_args(s: Switch):
     verify_conducting_equipment_constructor_args(s)
-    assert s.rated_current == switch_args[-3]
-    assert s._open == switch_args[-2]
-    assert s._normally_open == switch_args[-1]
+    assert switch_args[-3:] == [
+        s.rated_current,
+        s._open,
+        s._normally_open
+    ]
 
 
 def test_switch_info_accessor():

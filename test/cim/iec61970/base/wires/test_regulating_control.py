@@ -75,17 +75,19 @@ def verify_regulating_control_constructor_kwargs(
 
 def verify_regulating_control_constructor_args(rc):
     verify_power_system_resource_constructor_args(rc)
-    assert rc.discrete == regulating_control_args[-11]
-    assert rc.mode == regulating_control_args[-10]
-    assert rc.monitored_phase == regulating_control_args[-9]
-    assert rc.target_deadband == regulating_control_args[-8]
-    assert rc.target_value == regulating_control_args[-7]
-    assert rc.enabled == regulating_control_args[-6]
-    assert rc.max_allowed_target_value == regulating_control_args[-5]
-    assert rc.min_allowed_target_value == regulating_control_args[-4]
-    assert rc.rated_current == regulating_control_args[-3]
-    assert rc.terminal == regulating_control_args[-2]
-    assert list(rc.regulating_conducting_equipment) == regulating_control_args[-1]
+    assert regulating_control_args[-11:] == [
+        rc.discrete,
+        rc.mode,
+        rc.monitored_phase,
+        rc.target_deadband,
+        rc.target_value,
+        rc.enabled,
+        rc.max_allowed_target_value,
+        rc.min_allowed_target_value,
+        rc.rated_current,
+        rc.terminal,
+        list(rc.regulating_conducting_equipment)
+    ]
 
 
 def test_regulating_control_regulating_conducting_equipment():

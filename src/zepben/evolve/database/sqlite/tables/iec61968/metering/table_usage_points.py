@@ -16,6 +16,7 @@ class TableUsagePoints(TableIdentifiedObjects):
         self.connection_category: Column = self._create_column("connection_category", "TEXT", Nullable.NULL)
         self.rated_power: Column = self._create_column("rated_power", "INTEGER", Nullable.NULL)
         self.approved_inverter_capacity: Column = self._create_column("approved_inverter_capacity", "INTEGER", Nullable.NULL)
+        self.phase_code: Column = self._create_column("phase_code", "TEXT", Nullable.NOT_NULL)
 
     @property
     def name(self) -> str:

@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
-
-from cim.iec61970.base.core.test_ac_dc_terminal import ac_dc_terminal_kwargs, verify_ac_dc_terminal_constructor_default, \
-    verify_ac_dc_terminal_constructor_kwargs, verify_ac_dc_terminal_constructor_args, ac_dc_terminal_args
-from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from zepben.evolve import Terminal, ConnectivityNode, TracedPhases, ConductingEquipment, PhaseCode
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
+
+from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
+from cim.iec61970.base.core.test_ac_dc_terminal import ac_dc_terminal_kwargs, verify_ac_dc_terminal_constructor_default, \
+    verify_ac_dc_terminal_constructor_kwargs, verify_ac_dc_terminal_constructor_args, ac_dc_terminal_args
 
 terminal_kwargs = {
     **ac_dc_terminal_kwargs,
@@ -66,10 +66,12 @@ def test_terminal_constructor_args():
     t = Terminal(*terminal_args)
 
     verify_ac_dc_terminal_constructor_args(t)
-    assert t.conducting_equipment == terminal_args[-7]
-    assert t.phases == terminal_args[-6]
-    assert t.sequence_number == terminal_args[-5]
-    assert t.normal_feeder_direction == terminal_args[-4]
-    assert t.current_feeder_direction == terminal_args[-3]
-    assert t.traced_phases == terminal_args[-2]
-    assert t.connectivity_node == terminal_args[-1]
+    assert terminal_args[-7:] == [
+        t.conducting_equipment,
+        t.phases,
+        t.sequence_number,
+        t.normal_feeder_direction,
+        t.current_feeder_direction,
+        t.traced_phases,
+        t.connectivity_node
+    ]

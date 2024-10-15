@@ -18,10 +18,8 @@ def test_asset_owner_constructor_default():
 
 @given(**asset_owner_kwargs)
 def test_asset_owner_constructor_kwargs(**kwargs):
-    # noinspection PyArgumentList
     verify_asset_organisation_role_constructor_kwargs(AssetOwner(**kwargs), **kwargs)
 
 
 def test_asset_owner_constructor_args():
-    # noinspection PyArgumentList
     verify_asset_organisation_role_constructor_args(AssetOwner(*asset_owner_args))

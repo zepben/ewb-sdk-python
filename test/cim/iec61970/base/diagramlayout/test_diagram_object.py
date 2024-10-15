@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds, text, floats
+from zepben.evolve import DiagramObject, DiagramObjectPoint, Diagram
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_diagram_object_point
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
 from cim.private_collection_validator import validate_ordered_other_1234567890
-from zepben.evolve import DiagramObject, DiagramObjectPoint, Diagram
 
 diagram_object_kwargs = {
     **identified_object_kwargs,
@@ -56,11 +56,13 @@ def test_diagram_object_constructor_args():
     do = DiagramObject(*diagram_object_args)
 
     verify_identified_object_constructor_args(do)
-    assert do.diagram == diagram_object_args[-5]
-    assert do.identified_object_mrid == diagram_object_args[-4]
-    assert do.style == diagram_object_args[-3]
-    assert do.rotation == diagram_object_args[-2]
-    assert list(do.points) == diagram_object_args[-1]
+    assert diagram_object_args[-5:] == [
+        do.diagram,
+        do.identified_object_mrid,
+        do.style,
+        do.rotation,
+        list(do.points)
+    ]
 
 
 def test_points_collection():

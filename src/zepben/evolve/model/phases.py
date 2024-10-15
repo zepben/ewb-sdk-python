@@ -6,8 +6,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-
-from dataclassy import dataclass
+from dataclasses import dataclass
 
 from zepben.evolve.exceptions import PhaseException
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -54,7 +53,7 @@ def _shifted_value(nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind
     return PHASE_TO_BITS[traced_phase] << _byte_selector(nominal_phase)
 #todo split file into correct packages
 
-@dataclass(slots=True)
+@dataclass(frozen=True)
 class NominalPhasePath(object):
     """
     Defines how a nominal phase is wired through a connectivity node between two terminals
@@ -67,7 +66,7 @@ class NominalPhasePath(object):
     """The nominal phase where the path goes to."""
 
 
-@dataclass(slots=True)
+@dataclass
 class TracedPhases(object):
     """
     Class that holds the traced phase statuses for the current and normal state of the network.

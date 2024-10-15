@@ -4,10 +4,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds
+from zepben.evolve import RemoteSource, Measurement
 
 from cim.iec61970.base.scada.test_remote_point import remote_point_kwargs, verify_remote_point_constructor_default, \
     verify_remote_point_constructor_kwargs, verify_remote_point_constructor_args, remote_point_args
-from zepben.evolve import RemoteSource, Measurement
 
 remote_source_kwargs = {
     **remote_point_kwargs,
@@ -26,7 +26,6 @@ def test_remote_source_constructor_default():
 
 @given(**remote_source_kwargs)
 def test_remote_source_constructor_kwargs(measurement, **kwargs):
-    # noinspection PyArgumentList
     c = RemoteSource(measurement=measurement, **kwargs)
 
     verify_remote_point_constructor_kwargs(c, **kwargs)
@@ -34,8 +33,9 @@ def test_remote_source_constructor_kwargs(measurement, **kwargs):
 
 
 def test_remote_source_constructor_args():
-    # noinspection PyArgumentList
     c = RemoteSource(*remote_source_args)
 
     verify_remote_point_constructor_args(c)
-    assert c.measurement == remote_source_args[-1]
+    assert remote_source_args[-1:] == [
+        c.measurement
+    ]

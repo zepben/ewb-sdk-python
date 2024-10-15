@@ -5,12 +5,12 @@
 
 from hypothesis import given
 from hypothesis.strategies import integers
+from zepben.evolve import CurrentTransformer, CurrentTransformerInfo
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.auxiliaryequipment.test_sensor import sensor_kwargs, verify_sensor_constructor_default, \
     verify_sensor_constructor_kwargs, verify_sensor_constructor_args, sensor_args
 from cim.property_validator import validate_property_accessor
-from zepben.evolve import CurrentTransformer, CurrentTransformerInfo
 
 current_transformer_kwargs = {
     **sensor_kwargs,
@@ -28,7 +28,6 @@ def test_current_transformer_constructor_default():
 
 @given(**current_transformer_kwargs)
 def test_current_transformer_constructor_kwargs(core_burden, **kwargs):
-    # noinspection PyArgumentList
     ct = CurrentTransformer(core_burden=core_burden, **kwargs)
 
     verify_sensor_constructor_kwargs(ct, **kwargs)
@@ -36,11 +35,12 @@ def test_current_transformer_constructor_kwargs(core_burden, **kwargs):
 
 
 def test_current_transformer_constructor_args():
-    # noinspection PyArgumentList
     ct = CurrentTransformer(*current_transformer_args)
 
     verify_sensor_constructor_args(ct)
-    assert ct.core_burden == current_transformer_args[-1]
+    assert current_transformer_args[-1:] == [
+        ct.core_burden
+    ]
 
 
 def test_current_transformer_info_accessor():

@@ -5,11 +5,11 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, floats, integers, text
+from zepben.evolve import PotentialTransformerInfo, PowerTransformerInfo, Ratio
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, verify_asset_info_constructor_default, \
     verify_asset_info_constructor_kwargs, verify_asset_info_constructor_args, asset_info_args
-from zepben.evolve import PotentialTransformerInfo, PowerTransformerInfo, Ratio
 
 potential_transformer_info_kwargs = {
     **asset_info_kwargs,
@@ -62,9 +62,11 @@ def test_potential_transformer_info_constructor_args():
     vti = PotentialTransformerInfo(*potential_transformer_info_args)
 
     verify_asset_info_constructor_args(vti)
-    assert vti.accuracy_class == potential_transformer_info_args[-6]
-    assert vti.nominal_ratio == potential_transformer_info_args[-5]
-    assert vti.primary_ratio == potential_transformer_info_args[-4]
-    assert vti.pt_class == potential_transformer_info_args[-3]
-    assert vti.rated_voltage == potential_transformer_info_args[-2]
-    assert vti.secondary_ratio == potential_transformer_info_args[-1]
+    assert potential_transformer_info_args[-6:] == [
+        vti.accuracy_class,
+        vti.nominal_ratio,
+        vti.primary_ratio,
+        vti.pt_class,
+        vti.rated_voltage,
+        vti.secondary_ratio
+    ]
