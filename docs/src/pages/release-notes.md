@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.41.0](#v0410)| `21 October 2024` |
 |[0.40.0](#v0400)| `20 September 2024` |
 |[0.39.0](#v0390)| `23 June 2024` |
 |[0.38.0](#v0380)| `14 May 2024` |
@@ -45,6 +46,38 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.41.0]
+
+### Breaking Changes
+* None.
+
+### New Features
+* Data Model change:
+  * Add `phaseCode` variable to `UsagePoint`
+  * Added new classes:
+    * `Curve`
+    * `CurveData`
+    * `EarthFaultCompensator`
+    * `GroundingImpedance`
+    * `PetersenCoil`
+    * `ReactiveCapabilityCurve`
+    * `RotatingMachine`
+    * `SynchronousMachine`
+* Added `designTemperature` and `designRating` to `Conductor` to capture limitations in the conductor based on the network design and physical surrounds of the
+  conductor.
+* Added `specialNeed` to `Customer` to capture any special needs of the customer, e.g. life support.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
 
 ---
 
