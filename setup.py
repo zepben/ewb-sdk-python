@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
 deps = [
     "requests<3.0.0,>=2.26.0",
     "zepben.auth==0.12.1",
-    "zepben.protobuf==0.31.0b7",
+    "zepben.protobuf==0.31.0",
     "dataclassy==0.6.2",
     "six==1.16.0"
 ]
