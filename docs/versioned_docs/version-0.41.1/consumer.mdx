@@ -1,0 +1,218 @@
+---
+id: sdk-consumer
+title: Requesting Models
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+:::warning
+The API for consuming data from the Evolve data server is currently in alpha and very likely to experience breaking changes 
+in the future. Please provide any feedback about this API to [Zepben](http://www.zepben.com).
+:::
+
+The SDK provides a client to request models to a remote data server via [gRPC](https://grpc.io/). The service and proto 
+definitions for this API can be found [here](https://github.com/zepben/evolve-grpc). An implementation of the consumer 
+server is provided with the Evolve platform data services.
+
+When working with models, it is often impractical to load a whole model to a client due to the size of the data. This 
+is generally not a problem however, as most use cases only operate on a small subsection of the model at a time. So, the 
+consumer API provides the ability to request smaller portions of the model quickly and easily. The other benefit to this
+is you can set up many clients in parallel operating on different chunks of the model to reduce the amount of time to
+run any analytics you may wish to perform across the whole model.
+
+## Connecting to a server
+
+There are many helper functions to connect to a Energy Workbench server (EWB). All authenticated connections are based on OAuth2 flows, and
+you will need to use the correct function for the configuration of the server, and for which credentials you plan to use.
+This will typically be one of the following:
+
+1. `connect_insecure()`, for unauthenticated, insecure connections. Cannot be used against a secured (HTTPS) EWB.
+1. `connect_tls()`, for unauthenticated, but https connections. Can only be used if EWB is configured without auth.
+1. `connect_with_password()`, for authenticating with a username, password, and client ID.
+1. `connect_with_secret()`, for authenticating with a client ID and secret, typically used for machine-to-machine services.1
+1. `connect_with_identity()`, for authenticating with an Azure managed identity.
+
+All connection functions return a channel that can be used for synchronous or asynchronous (asyncio) consumer clients.
+
+### Connecting Insecurely
+
+```python
+from zepben.evolve import connect_insecure, Feeder, SyncNetworkConsumerClient, NetworkConsumerClient
+
+# Synchronous
+channel = connect_insecure(host="localhost", rpc_port=50051)
+client = SyncNetworkConsumerClient(channel)
+result = client.get_equipment_container("xxx", Feeder)
+# do stuff with service
+client.service.get('...')
+
+# Asyncio
+async with connect_insecure(host="localhost", rpc_port=50051) as channel:
+    client = NetworkConsumerClient(channel)
+    result = await client.get_equipment_container("xxx", Feeder)
+    # do stuff with service
+    client.service.get('...')
+```
+
+### Connecting with HTTPS
+
+To connect to a HTTPS server with no auth all that's needed is the CA for the server. If the CA is in your system certificates it should be picked up
+automatically and the following should suffice:
+
+```python
+from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
+
+channel = connect_tls(host="ewb.zepben.com", rpc_port=443)
+client = SyncNetworkConsumerClient(channel)
+result = client.get_equipment_container("xxx", Feeder)
+client.service.get('...')
+```
+
+To specify a CA bundle pass the ca parameter:
+```python
+from zepben.evolve import connect_tls, SyncNetworkConsumerClient, Feeder
+from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
+
+channel = connect_tls(host="ewb.zepben.com", rpc_port=443, ca_filename="path/to/ca/bundle")
+client = SyncNetworkConsumerClient(channel)
+
+result = client.get_equipment_container("xxx", Feeder)
+# The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
+result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
+
+client.service.get('...')
+```
+
+If client authentication is required by the server, use the underlying `GrpcChannelBuilder` class instead:
+```python
+from zepben.evolve import GrpcChannelBuilder, SyncNetworkConsumerClient, Feeder
+from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
+
+channel = (
+    GrpcChannelBuilder()
+    .for_address("ewb.zepben.com", 443)
+    .make_secure("path/to/ca/bundle", "path/to/cert/chain", "path/to/private/key")
+    .build()
+)
+client = SyncNetworkConsumerClient(channel)
+
+result = client.get_equipment_container("xxx", Feeder)
+
+client.service.get('...')
+```
+
+### Authentication
+
+Password Credentials and Client credentials OAuth2 flows are supported through the `connect_with_secret` and `connect_with_password` functions respectively:
+
+```python
+from zepben.evolve import connect_with_password, connect_with_secret, SyncNetworkConsumerClient
+
+# Client credentials configuration
+channel = connect_with_secret(client_id="some_client_id", client_secret="some_client_secret", host="ewb.zepben.com", rpc_port=443)
+client = SyncNetworkConsumerClient(channel)
+# ...
+
+# Password credentials configuration
+channel = connect_with_password(client_id="some_client_id", username="user@email.com", password="password1", host="ewb.zepben.com", rpc_port=443)
+client = SyncNetworkConsumerClient(channel)
+# ...
+```
+
+If EWB is running in Azure with Entra ID set up for auth on the EWB server, we support Azure managed identities using `connect_with_identity`:
+
+```python
+from zepben.evolve import connect_with_identity, SyncNetworkConsumerClient
+
+# Client credentials configuration
+channel = connect_with_identity(host="ewb.zepben.com", rpc_port=443, identity_url="http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=<SOME_IDENTIFIER>")
+client = SyncNetworkConsumerClient(channel)
+# ...
+```
+
+## Network Hierarchy
+
+The network can be built with a hierarchy as discussed earlier [here](datamodel.mdx#network-hierarchy). This allows you
+to easily identify and request smaller chunks of the network so you can focus on areas of concern. Here is an example
+of how to request the network hierarchy and print it out as a tree to the console.
+
+```python
+from zepben.evolve import SyncNetworkConsumerClient
+
+def print_network_hierarchy(client: SyncNetworkConsumerClient):
+    hierarchy = client.get_network_hierarchy().result
+    if not hierarchy:
+        return
+    for region in hierarchy.geographical_regions:
+        print(f"- {region.name} [{region.mrid}]")
+        for sub_region in region.sub_geographical_regions:
+            print(f"  |- {sub_region.name} [{sub_region.mrid}]")
+            for substation in sub_region.substations:
+                print(f"    |- {sub_region.name} [{sub_region.mrid}]")
+                for feeder in substation.feeders:
+                    print(f"      |- {feeder.name} [{feeder.mrid}]")
+```
+
+Each item from the hierarchy result contains an identified object mRID and it's name. This simplified data structure
+enables you to do things like easily build a suitable UI component allowing a user to select a portion of the network
+they wish to use, without needing to pull back large amounts of full object data.
+
+## Requesting Identified Objects
+
+:::warning
+The *ConsumerClient APIs will take care of this for you, and you typically only need these functions if you're
+developing the consumer client APIs themselves. Make sure what you want to achieve isn't already covered by the
+API before delving into this code.
+:::
+
+Identified objects can be requested to build a model client side. When identified objects are loaded, any referenced
+objects that have not been previously requested need to be requested explicitly.
+
+To find the references that need to be requested you can use the [deferred reference](services.mdx#deferred-references)
+functions on the service provided when requesting identified objects.
+
+```python
+from zepben.evolve import NetworkService, SyncNetworkConsumerClient, resolver
+
+def get_with_base_voltage(service: NetworkService, client: SyncNetworkConsumerClient, mrid: str):
+    equipment = client.get_identified_object(mrid).result
+    if not equipment:
+        return
+
+    # Get all base voltage relationships
+    mrids = list(service.get_unresolved_reference_mrids_by_resolver(resolver.ce_base_voltage(equipment)))
+    if mrids:
+        client.get_identified_object(mrids[0])
+```
+
+You can also query the services UnresolvedReferences in the following ways:
+
+```python
+# To get unresolved references pointing from `equipment` to other objects:
+for ref in service.get_unresolved_references_from(equipment.mrid):
+    await client.get_identified_object(service, ref.to_mrid)
+
+# To get unresolved references pointing to `equipment`:
+for ref in service.get_unresolved_references_to(equipment.mrid):
+    await client.get_identified_object(service, ref.from_ref.mrid)
+
+# Get all unresolved references. Note this will iterate over every unresolved reference and is likely undesirable. You should prefer to use the above two methods.
+for ref in service.unresolved_references():
+    await client.get_identified_object(service, ref.to_mrid)
+```
+
+## Service metadata
+
+Metadata about the servers title, version, and data sources can be retrieved via the `getMetadata()` call.
+
+```python
+service_info = client.get_metadata()
+print(service_info.title)
+
+print("Data sources:")
+for ds in service_info.data_sources:
+    print(f"  {ds.title}")
+    print(f"  {ds.version}")
+    print(f"  {ds.timestamp}")
+```
