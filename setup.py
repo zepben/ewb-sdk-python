@@ -48,7 +48,7 @@ setup(
     ],
     package_dir={"": "src"},
     packages=find_namespace_packages(where="src"),
-    python_requires='>=3.7',
+    python_requires='>=3.9,<3.13',
     install_requires=deps,
     extras_require={
         "test": test_deps,
