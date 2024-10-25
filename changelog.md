@@ -1,19 +1,7 @@
 # Zepben Python SDK
 ## [0.41.2] - UNRELEASED
-### Breaking Changes
-* None.
-
-### New Features
-* None.
-
-### Enhancements
-* None.
-
 ### Fixes
-* None.
-
-### Notes
-* None.
+* Don't use typing_extensions for Optional import (fixes import of library on Python >3.12)
 
 ## [0.41.1] - 2024-10-25
 ### Breaking Changes
