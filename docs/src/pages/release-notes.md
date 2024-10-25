@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.41.2](#v0412)| `25 October 2024` |
 |[0.41.1](#v0411)| `23 October 2024` |
 |[0.41.0](#v0410)| `21 October 2024` |
 |[0.40.0](#v0400)| `20 September 2024` |
@@ -47,6 +48,13 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.41.2]
+
+### Fixes
+* Don't use typing_extensions for Optional import (fixes import of library on Python >3.12)
 
 ---
 
