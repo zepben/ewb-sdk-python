@@ -1,5 +1,21 @@
 # Zepben Python SDK
-## [0.41.1] - UNRELEASED
+## [0.41.2] - UNRELEASED
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
+
+## [0.41.1] - 2024-10-25
 ### Breaking Changes
 * Restrict installation to supported Python versions 3.9 -> 3.12.
 
