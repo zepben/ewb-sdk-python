@@ -31,7 +31,7 @@ class TestCurrentStateEvent:
         _test_from_pb_not_implemented(PBCurrentStateEvent(addJumper=PBAddJumperEvent()))
         _test_from_pb_not_implemented(PBCurrentStateEvent(removeJumper=PBRemoveJumperEvent()))
 
-    def test_switch_state_event_prtobuf_conversion(self):
+    def test_switch_state_event_protobuf_conversion(self):
         ts = PBTimestamp()
         ts.FromDatetime(datetime.now())
         event = PBCurrentStateEvent(eventId="event1", timestamp=ts,

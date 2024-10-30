@@ -6,18 +6,16 @@
 from abc import ABC
 from enum import Enum
 from datetime import datetime
-from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent, SwitchStateEvent as PBSwitchStateEvent, \
-    SwitchAction as PBSwitchAction
-from zepben.protobuf.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode as PBPhaseCode
+from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent, SwitchStateEvent as PBSwitchStateEvent
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode, phase_code_by_id
 from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
 
 def _datetime_to_timestamp(date_time: datetime) -> PBTimestamp:
     ts = PBTimestamp()
-    if date_time:
-        ts.FromDatetime(date_time)
+    ts.FromDatetime(date_time)
     return ts
+
 
 class CurrentStateEvent(ABC):
     def __init__(self, event_id: str, timestamp: datetime = None):
