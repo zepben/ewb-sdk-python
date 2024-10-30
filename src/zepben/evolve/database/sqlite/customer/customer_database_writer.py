@@ -13,7 +13,6 @@ from zepben.evolve.database.sqlite.common.base_database_writer import BaseDataba
 from zepben.evolve.database.sqlite.common.metadata_collection_writer import MetadataCollectionWriter
 from zepben.evolve.database.sqlite.customer.customer_database_tables import CustomerDatabaseTables
 from zepben.evolve.database.sqlite.customer.customer_service_writer import CustomerServiceWriter
-from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 from zepben.evolve.services.customer.customers import CustomerService
 
 
@@ -22,14 +21,12 @@ class CustomerDatabaseWriter(BaseDatabaseWriter):
     A class for writing the `CustomerService` objects and `MetadataCollection` to our customer database.
 
     :param database_file: the filename of the database to write.
-    :param metadata: The `MetadataCollection` to save to the database.
     :param service: The `CustomerService` to save to the database.
     """
 
     def __init__(
         self,
         database_file: Union[Path, str],
-        metadata: MetadataCollection,
         service: CustomerService,
         database_tables: CustomerDatabaseTables = None,
         create_metadata_writer: Callable[[], MetadataCollectionWriter] = None,
@@ -41,7 +38,7 @@ class CustomerDatabaseWriter(BaseDatabaseWriter):
         super().__init__(
             database_file,
             database_tables,
-            create_metadata_writer if create_metadata_writer is not None else lambda: MetadataCollectionWriter(metadata, database_tables),
+            create_metadata_writer if create_metadata_writer is not None else lambda: MetadataCollectionWriter(service, database_tables),
             create_service_writer if create_service_writer is not None else lambda: CustomerServiceWriter(service, database_tables),
             get_connection if get_connection is not None else sqlite3.connect
         )

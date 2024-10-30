@@ -4,16 +4,16 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import List, Generator
 
-from dataclassy import dataclass
-
-from zepben.evolve import DataSource
+from zepben.evolve.services.common.meta.data_source import DataSource
 
 __all__ = ["MetadataCollection"]
 
 
-@dataclass(slots=True)
-class MetadataCollection(object):
-    _data_sources: List[DataSource] = list()
+class MetadataCollection:
+
+    def __init__(self):
+        super().__init__()
+        self._data_sources: List[DataSource] = []
 
     @property
     def data_sources(self) -> Generator[DataSource, None, None]:

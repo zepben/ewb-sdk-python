@@ -12,7 +12,7 @@ from sqlite3 import Connection
 
 import pytest
 from hypothesis import given, settings, HealthCheck, assume
-from zepben.evolve import MetadataCollection, IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, \
+from zepben.evolve import IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, \
     ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, AssetOwner, Pole, Streetlight, Meter, UsagePoint, Location, Organisation, \
     OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, Feeder, GeographicalRegion, Site, SubGeographicalRegion, Substation, Terminal, \
     EquivalentBranch, Accumulator, Analog, Control, Discrete, RemoteControl, RemoteSource, BatteryUnit, PhotoVoltaicUnit, \
@@ -50,11 +50,11 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     def create_service(self) -> TService:
         return NetworkService()
 
-    def create_writer(self, filename: str, metadata: MetadataCollection, service: TService) -> TWriter:
-        return NetworkDatabaseWriter(filename, metadata, service)
+    def create_writer(self, filename: str, service: TService) -> TWriter:
+        return NetworkDatabaseWriter(filename, service)
 
-    def create_reader(self, connection: Connection, metadata: MetadataCollection, service: TService, database_description: str) -> TReader:
-        return NetworkDatabaseReader(connection, metadata, service, database_description)
+    def create_reader(self, connection: Connection, service: TService, database_description: str) -> TReader:
+        return NetworkDatabaseReader(connection, service, database_description)
 
     def create_comparator(self) -> TComparator:
         return NetworkServiceComparator()
@@ -77,11 +77,10 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
         assert os.path.isfile(database_file), "database must exist"
 
-        metadata = MetadataCollection()
         network_service = NetworkService()
 
         with contextlib.closing(sqlite3.connect(database_file)) as connection:
-            assert await NetworkDatabaseReader(connection, metadata, network_service, database_file).load(), "Database should have loaded"
+            assert await NetworkDatabaseReader(connection, network_service, database_file).load(), "Database should have loaded"
 
         print("Sleeping...")
         try:
@@ -584,7 +583,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         write_service = NetworkService()
         write_service.add(Location(mrid="loc1", main_address=StreetAddress(town_detail=TownDetail(), street_detail=StreetDetail())))
 
-        def validate(service: NetworkService, _: MetadataCollection):
+        def validate(service: NetworkService):
             assert service.get("loc1", Location).main_address == StreetAddress(), \
                 "Expected a default street address as blank parts should have been removed during teh database read"
 

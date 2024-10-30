@@ -34,7 +34,6 @@ class TestCustomerDatabaseReader:
 
         self.reader = CustomerDatabaseReader(
             self.connection,
-            Mock(),  # The metadata is unused if we provide a metadata_reader.
             self.service,
             self.database_file,
             Mock(),  # tables should not be used if we provide the rest of the parameters, so provide a mockk that will throw if used.

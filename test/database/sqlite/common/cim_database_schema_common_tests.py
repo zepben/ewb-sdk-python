@@ -38,11 +38,11 @@ class CimDatabaseSchemaCommonTests(Generic[TService, TWriter, TReader, TComparat
         pass
 
     @abstractmethod
-    def create_writer(self, filename: str, metadata: MetadataCollection, service: TService) -> TWriter:
+    def create_writer(self, filename: str, service: TService) -> TWriter:
         pass
 
     @abstractmethod
-    def create_reader(self, connection: Connection, metadata: MetadataCollection, service: TService, database_description: str) -> TReader:
+    def create_reader(self, connection: Connection, service: TService, database_description: str) -> TReader:
         pass
 
     @abstractmethod
@@ -60,7 +60,11 @@ class CimDatabaseSchemaCommonTests(Generic[TService, TWriter, TReader, TComparat
 
     @pytest.mark.asyncio
     async def test_metadata_data_source_schema(self):
-        await self._validate_schema(expected_metadata=SchemaNetworks().create_data_source_test_services())
+        service = self.create_service()
+        for data_source in SchemaNetworks().create_data_source_test_services().data_sources:
+            service.metadata.add(data_source)
+
+        await self._validate_schema(service)
 
     @pytest.mark.asyncio
     async def test_check_for_error_on_duplicate_id(self):
@@ -76,8 +80,7 @@ class CimDatabaseSchemaCommonTests(Generic[TService, TWriter, TReader, TComparat
 
         assert f"Failed to load {identified_object}. Unable to add to service '{read_service.name}': duplicate MRID" in self.caplog.text
 
-    async def _validate_schema(self, expected_service: Optional[TService] = None, expected_metadata: MetadataCollection = MetadataCollection()):
-        expected_service = expected_service or self.create_service()
+    async def _validate_schema(self, expected_service: TService):
         #
         # NOTE: We need to stop hypothesis from generating empty location addresses as the database load will throw these away, removing the test of
         #       those tables/fields.
@@ -85,39 +88,35 @@ class CimDatabaseSchemaCommonTests(Generic[TService, TWriter, TReader, TComparat
         for location in expected_service.objects(Location):
             assume_non_blank_street_address_details(location.main_address)
 
-        def validate(service: TService, metadata: MetadataCollection):
-            self._validate_metadata(metadata, expected_metadata)
+        def validate(service: TService):
+            self._validate_metadata(service.metadata, expected_service.metadata)
             self._validate_service(service, expected_service, self.create_comparator())
 
-        await self._validate_write_read(expected_service, expected_metadata, validate_read=validate)
+        await self._validate_write_read(expected_service, validate_read=validate)
 
     async def _validate_write_read(
         self,
         write_service: Optional[TService] = None,
-        write_metadata: Optional[MetadataCollection] = None,
         read_service: Optional[TService] = None,
-        read_metadata: Optional[MetadataCollection] = None,
-        validate_read: Optional[Callable[[TService, MetadataCollection], None]] = None,
+        validate_read: Optional[Callable[[TService], None]] = None,
     ):
         write_service = write_service or self.create_service()
-        write_metadata = write_metadata or MetadataCollection()
         read_service = read_service or self.create_service()
-        read_metadata = read_metadata or MetadataCollection()
 
         with tempfile.NamedTemporaryFile() as schema_test_file_temp:
             schema_test_file = schema_test_file_temp.name
-            assert self.create_writer(schema_test_file, write_metadata, write_service).save(), "Database should have been saved"
+            assert self.create_writer(schema_test_file, write_service).save(), "Database should have been saved"
 
             assert f"Creating database schema v{TableVersion.SUPPORTED_VERSION}" in self.caplog.text
             assert os.path.isfile(schema_test_file), "Database should now exist"
 
             self.caplog.clear()
             with contextlib.closing(sqlite3.connect(schema_test_file)) as connection:
-                status = await self.create_reader(connection, read_metadata, read_service, schema_test_file).load()
+                status = await self.create_reader(connection, read_service, schema_test_file).load()
 
             if validate_read:
                 assert status, "Database read should have succeeded"
-                validate_read(read_service, read_metadata)
+                validate_read(read_service)
             else:
                 assert not status, "Database read should have failed"
 

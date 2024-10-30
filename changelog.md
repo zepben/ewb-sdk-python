@@ -1,10 +1,13 @@
 # Zepben Python SDK
 ## [0.42.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* Database readers and writes for each `BaseService` no longer accept a `MetadataCollection`, and will instead use the collection of the provided service.
+* `BaseService` and `MetadataCollection` are no longer dataclassy dataclasses. This will only affect you if you were making use of the auto generated
+  constructors to pass initial values (which didn't always work as expected anyway)
 
 ### New Features
-* None.
+* `BaseService` now contains a `MetadataCollection` to tightly couple the metadata to the associated service.
+* Added `Services`, a new class which contains a copy of each `BaseService` supported by the SDK.
 
 ### Enhancements
 * None.

@@ -10,7 +10,7 @@ from hypothesis import given, settings, HealthCheck
 from cim.cim_creators import create_diagram, create_diagram_object
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
-from zepben.evolve import MetadataCollection, IdentifiedObject, Diagram, DiagramObject, DiagramDatabaseReader, DiagramDatabaseWriter, DiagramService
+from zepben.evolve import IdentifiedObject, Diagram, DiagramObject, DiagramDatabaseReader, DiagramDatabaseWriter, DiagramService
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
 T = TypeVar("T", bound=IdentifiedObject)
@@ -22,11 +22,11 @@ class TestDiagramDatabaseSchema(CimDatabaseSchemaCommonTests[DiagramService, Dia
     def create_service(self) -> TService:
         return DiagramService()
 
-    def create_writer(self, filename: str, metadata: MetadataCollection, service: TService) -> TWriter:
-        return DiagramDatabaseWriter(filename, metadata, service)
+    def create_writer(self, filename: str, service: TService) -> TWriter:
+        return DiagramDatabaseWriter(filename, service)
 
-    def create_reader(self, connection: Connection, metadata: MetadataCollection, service: TService, database_description: str) -> TReader:
-        return DiagramDatabaseReader(connection, metadata, service, database_description)
+    def create_reader(self, connection: Connection, service: TService, database_description: str) -> TReader:
+        return DiagramDatabaseReader(connection, service, database_description)
 
     def create_comparator(self) -> TComparator:
         return DiagramServiceComparator()

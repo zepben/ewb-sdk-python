@@ -4,6 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
+__all__ = ["MeasurementService"]
+
 from typing import List, Optional, Generator, TYPE_CHECKING
 
 from zepben.evolve import MeasurementValue
@@ -11,14 +13,12 @@ from zepben.evolve import MeasurementValue
 if TYPE_CHECKING:
     from zepben.evolve import IdentifiedObject
 
-from zepben.evolve.services.common.base_service import BaseService
 
-__all__ = ["MeasurementService"]
+class MeasurementService:
 
-
-class MeasurementService(BaseService):
-    name: str = "measurement"
-    _measurements: List[MeasurementValue] = []
+    def __init__(self):
+        super().__init__()
+        self._measurements: List[MeasurementValue] = []
 
     def add(self, value: MeasurementValue):
         self._measurements.append(value)

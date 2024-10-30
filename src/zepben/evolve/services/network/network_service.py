@@ -5,22 +5,23 @@
 
 from __future__ import annotations
 
+__all__ = ["connect", "connected_terminals", "connected_equipment", "NetworkService"]
+
 import itertools
 import logging
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Union, Iterable
-
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from pathlib import Path
+from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.common.base_service import BaseService
+from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
-from pathlib import Path
 if TYPE_CHECKING:
     from zepben.evolve import Terminal, SinglePhaseKind, ConnectivityResult, Measurement, ConductingEquipment
 
-__all__ = ["connect", "connected_terminals", "connected_equipment", "NetworkService"]
 logger = logging.getLogger(__name__)
 TRACED_NETWORK_FILE = str(Path.home().joinpath(Path("traced.json")))
 
@@ -103,12 +104,16 @@ class NetworkService(BaseService):
         metrics_store : Storage for meter measurement data associated with this network.
     """
 
-    name: str = "network"
-    _connectivity_nodes: Dict[str, ConnectivityNode] = dict()
-    _auto_cn_index: int = 0
-    _measurements: Dict[str, List[Measurement]] = []
+    def __init__(
+        self,
+        metadata: Optional[MetadataCollection] = None
+    ):
+        super().__init__("network", metadata)
 
-    def __init__(self):
+        self._connectivity_nodes: Dict[str, ConnectivityNode] = dict()
+        self._auto_cn_index: int = 0
+        self._measurements: Dict[str, List[Measurement]] = {}
+
         self._objects_by_type[ConnectivityNode] = self._connectivity_nodes
 
     def get_measurements(self, mrid: str, t: type) -> List[Measurement]:
