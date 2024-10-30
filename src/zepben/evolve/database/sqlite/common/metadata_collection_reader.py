@@ -11,27 +11,27 @@ from zepben.evolve.database.sqlite.common.base_collection_reader import BaseColl
 from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.evolve.database.sqlite.common.metadata_entry_reader import MetadataEntryReader
 from zepben.evolve.database.sqlite.tables.table_metadata_data_sources import TableMetadataDataSources
-from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
+from zepben.evolve.services.common.base_service import BaseService
 
 
 class MetadataCollectionReader(BaseCollectionReader):
     """
     Class for reading the `MetadataCollection` from the database.
 
-    :param metadata: The `MetadataCollection` to populate from the database.
+    :param service: The `BaseService` containing the `MetadataCollection` to populate from the database.
     :param tables: The tables available in the database.
     :param connection: The `Connection` to the database.
     """
 
     def __init__(
         self,
-        metadata: MetadataCollection,
+        service: BaseService,
         tables: BaseDatabaseTables,
         connection: Connection,
         reader: MetadataEntryReader = None
     ):
         super().__init__(tables, connection)
-        self._reader: MetadataEntryReader = reader if reader is not None else MetadataEntryReader(metadata)
+        self._reader: MetadataEntryReader = reader if reader is not None else MetadataEntryReader(service)
 
     def load(self) -> bool:
         return all([

@@ -13,7 +13,6 @@ from zepben.evolve.database.sqlite.common.base_database_writer import BaseDataba
 from zepben.evolve.database.sqlite.common.metadata_collection_writer import MetadataCollectionWriter
 from zepben.evolve.database.sqlite.network.network_database_tables import NetworkDatabaseTables
 from zepben.evolve.database.sqlite.network.network_service_writer import NetworkServiceWriter
-from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 from zepben.evolve.services.network.network_service import NetworkService
 
 
@@ -22,14 +21,12 @@ class NetworkDatabaseWriter(BaseDatabaseWriter):
     A class for writing the `NetworkService` objects and `MetadataCollection` to our network database.
 
     :param database_file: the filename of the database to write.
-    :param metadata: The `MetadataCollection` to save to the database.
     :param service: The `NetworkService` to save to the database.
     """
 
     def __init__(
         self,
         database_file: Union[Path, str],
-        metadata: MetadataCollection,
         service: NetworkService,
         database_tables: NetworkDatabaseTables = NetworkDatabaseTables(),
         create_metadata_writer: Callable[[Connection], MetadataCollectionWriter] = None,
@@ -39,7 +36,7 @@ class NetworkDatabaseWriter(BaseDatabaseWriter):
         super().__init__(
             database_file,
             database_tables,
-            create_metadata_writer if create_metadata_writer is not None else lambda: MetadataCollectionWriter(metadata, database_tables),
+            create_metadata_writer if create_metadata_writer is not None else lambda: MetadataCollectionWriter(service, database_tables),
             create_service_writer if create_service_writer is not None else lambda: NetworkServiceWriter(service, database_tables),
             get_connection if get_connection is not None else sqlite3.connect
         )

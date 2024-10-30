@@ -10,7 +10,7 @@ from hypothesis import given, settings, HealthCheck
 from cim.cim_creators import create_organisation, create_customer, create_customer_agreement, create_pricing_structure, create_tariffs
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
-from zepben.evolve import MetadataCollection, IdentifiedObject, CustomerAgreement, PricingStructure, Tariff, Organisation, Customer, CustomerDatabaseReader, \
+from zepben.evolve import IdentifiedObject, CustomerAgreement, PricingStructure, Tariff, Organisation, Customer, CustomerDatabaseReader, \
     CustomerDatabaseWriter, CustomerService
 from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
 
@@ -23,11 +23,11 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
     def create_service(self) -> TService:
         return CustomerService()
 
-    def create_writer(self, filename: str, metadata: MetadataCollection, service: TService) -> TWriter:
-        return CustomerDatabaseWriter(filename, metadata, service)
+    def create_writer(self, filename: str, service: TService) -> TWriter:
+        return CustomerDatabaseWriter(filename, service)
 
-    def create_reader(self, connection: Connection, metadata: MetadataCollection, service: TService, database_description: str) -> TReader:
-        return CustomerDatabaseReader(connection, metadata, service, database_description)
+    def create_reader(self, connection: Connection, service: TService, database_description: str) -> TReader:
+        return CustomerDatabaseReader(connection, service, database_description)
 
     def create_comparator(self) -> TComparator:
         return CustomerServiceComparator()

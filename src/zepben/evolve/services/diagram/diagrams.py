@@ -2,24 +2,26 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+__all__ = ["DiagramService"]
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import DiagramObject
 from zepben.evolve.services.common.base_service import BaseService
-
-__all__ = ["DiagramService"]
+from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 
 
 class DiagramService(BaseService):
-    name: str = "diagram"
-    _diagram_objects_by_diagram_mrid: Dict[str, Dict[str, DiagramObject]] = dict()
-    _diagram_objects_by_identified_object_mrid: Dict[str, Dict[str, DiagramObject]] = dict()
-    _diagram_object_indexes: List[Dict[str, Dict[str, DiagramObject]]] = list()
 
-    def __init__(self):
-        self._diagram_object_indexes.append(self._diagram_objects_by_identified_object_mrid)
-        self._diagram_object_indexes.append(self._diagram_objects_by_diagram_mrid)
+    def __init__(
+        self,
+        metadata: Optional[MetadataCollection] = None
+    ):
+        super().__init__("diagram", metadata)
+
+        self._diagram_objects_by_diagram_mrid: Dict[str, Dict[str, DiagramObject]] = dict()
+        self._diagram_objects_by_identified_object_mrid: Dict[str, Dict[str, DiagramObject]] = dict()
+        self._diagram_object_indexes: List[Dict[str, Dict[str, DiagramObject]]] = list()
 
     def get_diagram_objects(self, mrid: str) -> List[DiagramObject]:
         """

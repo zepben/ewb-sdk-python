@@ -11,7 +11,6 @@ from zepben.evolve.database.sqlite.common.metadata_collection_reader import Meta
 from zepben.evolve.database.sqlite.customer.customer_database_tables import CustomerDatabaseTables
 from zepben.evolve.database.sqlite.customer.customer_service_reader import CustomerServiceReader
 from zepben.evolve.database.sqlite.tables.table_version import TableVersion
-from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 from zepben.evolve.services.customer.customers import CustomerService
 
 class CustomerDatabaseReader(BaseDatabaseReader):
@@ -19,7 +18,6 @@ class CustomerDatabaseReader(BaseDatabaseReader):
     A class for reading the `CustomerService` objects and `MetadataCollection` from our customer database.
 
     :param connection: The connection to the database.
-    :param metadata: The `MetadataCollection` to populate with metadata from the database.
     :param service: The `CustomerService` to populate with CIM objects from the database.
     :param database_description: The description of the database for logging (e.g. filename).
     """
@@ -27,7 +25,6 @@ class CustomerDatabaseReader(BaseDatabaseReader):
     def __init__(
         self,
         connection: Connection,
-        metadata: MetadataCollection,
         service: CustomerService,
         database_description: str,
         tables: CustomerDatabaseTables = None,
@@ -38,7 +35,7 @@ class CustomerDatabaseReader(BaseDatabaseReader):
         tables = tables if tables is not None else CustomerDatabaseTables()
         super().__init__(
             connection,
-            metadata_reader if metadata_reader is not None else MetadataCollectionReader(metadata, tables, connection),
+            metadata_reader if metadata_reader is not None else MetadataCollectionReader(service, tables, connection),
             service_reader if service_reader is not None else CustomerServiceReader(service, tables, connection),
             service,
             database_description,

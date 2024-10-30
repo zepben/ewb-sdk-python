@@ -7,26 +7,26 @@ __all__ = ["MetadataCollectionWriter"]
 from zepben.evolve.database.sqlite.common.base_collection_writer import BaseCollectionWriter
 from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.evolve.database.sqlite.common.metadata_entry_writer import MetadataEntryWriter
+from zepben.evolve.services.common.base_service import BaseService
 from zepben.evolve.services.common.meta.data_source import DataSource
-from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 
 
 class MetadataCollectionWriter(BaseCollectionWriter):
     """
     Class for writing the `MetadataCollection` to the database.
 
-    :param metadata: The `MetadataCollection` to save to the database.
+    :param service: The `BaseService` containing the `MetadataCollection` to save to the database.
     :param database_tables: The tables available in the database.
     """
 
     def __init__(
         self,
-        metadata: MetadataCollection,
+        service: BaseService,
         database_tables: BaseDatabaseTables,
         writer: MetadataEntryWriter = None
     ):
         super().__init__()
-        self._metadata: MetadataCollection = metadata
+        self._service: BaseService = service
         self._writer: MetadataEntryWriter = writer if writer is not None else MetadataEntryWriter(database_tables)
 
 
@@ -34,4 +34,4 @@ class MetadataCollectionWriter(BaseCollectionWriter):
         def log_error(it: DataSource, e: Exception):
             self._logger.error(f"Failed to save {it}: {e}")
 
-        return self._save_each(self._metadata.data_sources, self._writer.save_data_source, log_error)
+        return self._save_each(self._service.metadata.data_sources, self._writer.save_data_source, log_error)

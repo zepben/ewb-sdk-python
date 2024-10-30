@@ -14,7 +14,6 @@ from zepben.evolve.database.sqlite.tables.table_version import TableVersion
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
-from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 from zepben.evolve.services.network.network_service import NetworkService, connected_equipment
 
 __all__ = ["NetworkDatabaseReader"]
@@ -36,7 +35,6 @@ class NetworkDatabaseReader(BaseDatabaseReader):
       remove the split database logic - Check `UpgradeRunner` to see if this is still required.
 
     :param connection: The connection to the database.
-    :param metadata: The `MetadataCollection` to populate with metadata from the database.
     :param service: The `NetworkService` to populate with CIM objects from the database.
     :param database_description: The description of the database for logging (e.g. filename).
     """
@@ -44,7 +42,6 @@ class NetworkDatabaseReader(BaseDatabaseReader):
     def __init__(
         self,
         connection: Connection,
-        metadata: MetadataCollection,
         service: NetworkService,
         database_description: str,
         tables: NetworkDatabaseTables = NetworkDatabaseTables(),
@@ -59,7 +56,7 @@ class NetworkDatabaseReader(BaseDatabaseReader):
     ):
         super().__init__(
             connection,
-            metadata_reader if metadata_reader else MetadataCollectionReader(metadata, tables, connection),
+            metadata_reader if metadata_reader else MetadataCollectionReader(service, tables, connection),
             service_reader if service_reader else NetworkServiceReader(service, tables, connection),
             service,
             database_description,

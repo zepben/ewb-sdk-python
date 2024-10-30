@@ -168,7 +168,7 @@ def test_add_resolves_reverse_relationship():
     or1.add_equipment(eq1)
 
     # noinspection PyArgumentList
-    ns = NetworkService(name="test")
+    ns = NetworkService()
     # noinspection PyUnresolvedReferences
     ns.add_from_pb(eq1.to_pb())
     # noinspection PyUnresolvedReferences

@@ -6,62 +6,72 @@
 from __future__ import annotations
 __all__ = ["BaseService", "TBaseService"]
 
-from abc import ABCMeta
+from abc import ABC
 from collections import OrderedDict
 from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set, TypeVar
 from typing import Type
 
-from dataclassy import dataclass
-
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject, TIdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
+from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 from zepben.evolve.services.common.reference_resolvers import BoundReferenceResolver, UnresolvedReference
 
 _GET_DEFAULT = (1,)
 
 
-@dataclass(slots=True)
-class BaseService(object, metaclass=ABCMeta):
-    name: str
-    _objects_by_type: Dict[type, Dict[str, IdentifiedObject]] = OrderedDict()
-    _name_types: Dict[str, NameType] = dict()
-    _unresolved_references_to: Dict[str, Set[UnresolvedReference]] = OrderedDict()
-    """
-    A dictionary of references between mRID's that as yet have not been resolved - typically when transferring services between systems.
-    The key is the to_mrid of the `UnresolvedReference`s, and the value is a list of `UnresolvedReference`s for that specific object.
-    For example, if an AcLineSegment with mRID 'acls1' is present in the service, but the service is missing its `location` with mRID 'location-l1' 
-    and `perLengthSequenceImpedance` with mRID 'plsi-1', the following key value pairs would be present:
-    {
-        "plsi-1": [
-            UnresolvedReference(from_ref=AcLineSegment('acls1'),
-                                to_mrid='plsi-1',
-                                 resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
-        ],
-        "location-l1": [
-            UnresolvedReference(from_ref=AcLineSegment('acls1'),
-                                to_mrid='location-l1',
-                                resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...)
-        ]
-    }
-    
-    `resolve` in `ReferenceResolver` will be the function used to populate the relationship between the `IdentifiedObject`s either when 
-    `resolveOrDeferReference() is called if the other side of the reference exists in the service, or otherwise when the second object is added to the service.
-    """
+class BaseService(ABC):
 
-    _unresolved_references_from: Dict[str, Set[UnresolvedReference]] = OrderedDict()
-    """ 
-    An index of the unresolved references by their `from_ref.mrid`. For the above example this will be a dictionary of the form:
-    {
-        "acls1": [
-            UnresolvedReference(from_ref=AcLineSegment('acls1'),
-                                to_mrid='location-l1',
-                                resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...),
-            UnresolvedReference(from_ref=AcLineSegment('acls1'),
-                                to_mrid='plsi-1',
-                                resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
-        ]
-    }
-    """
+    def __init__(
+        self,
+        name: str,
+        metadata: Optional[MetadataCollection] = None
+    ):
+        super().__init__()
+
+        self.name: str = name
+        self.metadata: MetadataCollection = metadata or MetadataCollection()
+
+        self._objects_by_type: Dict[type, Dict[str, IdentifiedObject]] = OrderedDict()
+        self._name_types: Dict[str, NameType] = dict()
+        self._unresolved_references_to: Dict[str, Set[UnresolvedReference]] = OrderedDict()
+        """
+        A dictionary of references between mRID's that as yet have not been resolved - typically when transferring services between systems.
+        The key is the to_mrid of the `UnresolvedReference`s, and the value is a list of `UnresolvedReference`s for that specific object.
+        For example, if an AcLineSegment with mRID 'acls1' is present in the service, but the service is missing its `location` with mRID 'location-l1' 
+        and `perLengthSequenceImpedance` with mRID 'plsi-1', the following key value pairs would be present:
+    
+        {
+            "plsi-1": [
+                UnresolvedReference(from_ref=AcLineSegment('acls1'),
+                                    to_mrid='plsi-1',
+                                     resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
+            ],
+            "location-l1": [
+                UnresolvedReference(from_ref=AcLineSegment('acls1'),
+                                    to_mrid='location-l1',
+                                    resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...)
+            ]
+        }
+        
+        `resolve` in `ReferenceResolver` will be the function used to populate the relationship between the `IdentifiedObject`s either when 
+        `resolveOrDeferReference() is called if the other side of the reference exists in the service, or otherwise when the second object is added to the service.
+        """
+
+        self._unresolved_references_from: Dict[str, Set[UnresolvedReference]] = OrderedDict()
+        """ 
+        An index of the unresolved references by their `from_ref.mrid`. For the above example this will be a dictionary of the form:
+    
+        {
+            "acls1": [
+                UnresolvedReference(from_ref=AcLineSegment('acls1'),
+                                    to_mrid='location-l1',
+                                    resolver=ReferenceResolver(from_class=AcLineSegment, to_class=Location, resolve=...), ...),
+                UnresolvedReference(from_ref=AcLineSegment('acls1'),
+                                    to_mrid='plsi-1',
+                                    resolver=ReferenceResolver(from_class=AcLineSegment, to_class=PerLengthSequenceImpedance, resolve=...), ...)
+            ]
+        }
+        """
 
     def __contains__(self, mrid: str) -> bool:
         """
@@ -148,7 +158,7 @@ class BaseService(object, metaclass=ABCMeta):
         if not mrid:
             raise KeyError("You must specify an mRID to get. Empty/None is invalid.")
 
-        # This can be written much simpler than below but we want to avoid throwing any exceptions in this high frequency function
+        # This can be written much simpler than below, but we want to avoid throwing any exceptions in this high frequency function
         if type_ != IdentifiedObject:
             objs = self._objects_by_type.get(type_)
             if objs:

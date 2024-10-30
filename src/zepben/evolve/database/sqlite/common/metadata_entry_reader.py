@@ -9,20 +9,20 @@ from typing import Callable
 
 from zepben.evolve.database.sqlite.extensions.result_set import ResultSet
 from zepben.evolve.database.sqlite.tables.table_metadata_data_sources import TableMetadataDataSources
+from zepben.evolve.services.common.base_service import BaseService
 from zepben.evolve.services.common.meta.data_source import DataSource
-from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 
 
 class MetadataEntryReader:
     """
     A class for reading the `MetadataCollection` entries from the database.
 
-    :param metadata: The `MetadataCollection` to populate from the database.
+    :param service: The `BaseService` containing the `MetadataCollection` to populate from the database.
     """
 
-    def __init__(self, metadata: MetadataCollection):
+    def __init__(self, service: BaseService):
         super().__init__()
-        self._metadata: MetadataCollection = metadata
+        self._service: BaseService = service
 
     def load_metadata(self, table: TableMetadataDataSources, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
@@ -41,4 +41,4 @@ class MetadataEntryReader:
             result_set.get_instant(table.timestamp.query_index, datetime.datetime(1970, 1, 1))
         )
 
-        return self._metadata.add(data_source)
+        return self._service.metadata.add(data_source)
