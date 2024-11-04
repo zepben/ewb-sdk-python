@@ -32,5 +32,5 @@ class QueryNetworkStateClient(GrpcClient):
         toTimestamp = Timestamp()
         toTimestamp.FromDatetime(toDatetime)
         async for response in self._stub.getCurrentStates(GetCurrentStatesRequest(messageId=queryId, fromTimestamp=fromTimestamp, toTimestamp=toTimestamp)):
-            yield [CurrentStateEvent._from_pb(event) for event in response.event]
+            yield [CurrentStateEvent.from_pb(event) for event in response.event]
 

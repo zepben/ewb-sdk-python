@@ -19,4 +19,4 @@ class QueryNetworkStateService(QueryNetworkStateServiceServicer):
 
     def getCurrentStates(self, request: GetCurrentStatesRequest, context) -> Iterator[GetCurrentStatesResponse]:
         for events in self.on_get_current_states(request.fromTimestamp.ToDatetime(), request.toTimestamp.ToDatetime()):
-            yield GetCurrentStatesResponse(messageId=request.messageId, event=[event._to_pb() for event in events])
+            yield GetCurrentStatesResponse(messageId=request.messageId, event=[event.to_pb() for event in events])

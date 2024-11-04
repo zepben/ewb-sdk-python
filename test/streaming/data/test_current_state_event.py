@@ -17,13 +17,13 @@ from zepben.protobuf.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode as PB
 
 def _test_from_pb_not_implemented(event: PBCurrentStateEvent):
     with pytest.raises(NotImplementedError):
-        CurrentStateEvent._from_pb(event)
+        CurrentStateEvent.from_pb(event)
 
 
 class TestCurrentStateEvent:
 
     def test_from_pb(self):
-        switch_event = CurrentStateEvent._from_pb(PBCurrentStateEvent(switch=PBSwitchStateEvent()))
+        switch_event = CurrentStateEvent.from_pb(PBCurrentStateEvent(switch=PBSwitchStateEvent()))
         assert isinstance(switch_event, SwitchStateEvent)
 
     def test_from_pb_not_implemented(self):
@@ -37,14 +37,14 @@ class TestCurrentStateEvent:
         ts.FromDatetime(datetime.now())
         event = PBCurrentStateEvent(eventId="event1", timestamp=ts,
                                     switch=PBSwitchStateEvent(mRID="switch-1", action=PBSwitchAction.OPEN, phases=PBPhaseCode.ABCN))
-        current_state_event = SwitchStateEvent._from_pb(event)
+        current_state_event = SwitchStateEvent.from_pb(event)
         assert current_state_event.event_id == event.eventId
         assert current_state_event.timestamp == event.timestamp.ToDatetime()
         assert current_state_event.mRID == event.switch.mRID
         assert current_state_event.action == SwitchAction.OPEN
         assert current_state_event.phases == PhaseCode.ABCN
 
-        pb = current_state_event._to_pb()
+        pb = current_state_event.to_pb()
         assert pb.eventId == event.eventId
         assert pb.timestamp == event.timestamp
         assert pb.switch.mRID == event.switch.mRID

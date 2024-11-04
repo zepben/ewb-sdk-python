@@ -26,15 +26,15 @@ class CurrentStateEvent(ABC):
         self.timestamp = timestamp
 
     @staticmethod
-    def _from_pb(event: PBCurrentStateEvent) -> 'CurrentStateEvent':
+    def from_pb(event: PBCurrentStateEvent) -> 'CurrentStateEvent':
         active_event = event.WhichOneof("event")
         if active_event == "switch":
-            return SwitchStateEvent._from_pb(event)
+            return SwitchStateEvent.from_pb(event)
         else:
             raise NotImplementedError(f"'{active_event}' is currently unsupported.")
 
     @abstractmethod
-    def _to_pb(self) -> PBCurrentStateEvent:
+    def to_pb(self) -> PBCurrentStateEvent:
         pass
 
 
@@ -48,7 +48,7 @@ class SwitchStateEvent(CurrentStateEvent):
         self.phases = phases
 
     @staticmethod
-    def _from_pb(event: PBCurrentStateEvent) -> 'SwitchStateEvent':
+    def from_pb(event: PBCurrentStateEvent) -> 'SwitchStateEvent':
         return SwitchStateEvent(
             event.eventId,
             event.timestamp.ToDatetime(),
@@ -57,9 +57,10 @@ class SwitchStateEvent(CurrentStateEvent):
             phase_code_by_id(event.switch.phases)
         )
 
-    def _to_pb(self) -> PBCurrentStateEvent:
+    def to_pb(self) -> PBCurrentStateEvent:
         return PBCurrentStateEvent(eventId=self.event_id, timestamp=_datetime_to_timestamp(self.timestamp),
                                    switch=PBSwitchStateEvent(mRID=self.mRID, action=self.action.name, phases=self.phases.name))
+
 
 class SwitchAction(Enum):
     UNKNOWN = 0

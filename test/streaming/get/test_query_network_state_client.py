@@ -61,9 +61,9 @@ class TestQueryNetworkStateClient:
         to_timestamp = Timestamp()
         to_timestamp.FromDatetime(to_datetime)
 
-        response1 = GetCurrentStatesResponse(messageId=1, event=[event._to_pb() for event in self.current_state_events[0]])
-        response2 = GetCurrentStatesResponse(messageId=1, event=[event._to_pb() for event in self.current_state_events[1]])
-        response3 = GetCurrentStatesResponse(messageId=1, event=[event._to_pb() for event in self.current_state_events[2]])
+        response1 = GetCurrentStatesResponse(messageId=1, event=[event.to_pb() for event in self.current_state_events[0]])
+        response2 = GetCurrentStatesResponse(messageId=1, event=[event.to_pb() for event in self.current_state_events[1]])
+        response3 = GetCurrentStatesResponse(messageId=1, event=[event.to_pb() for event in self.current_state_events[2]])
 
         await self.mock_server.validate(client_test, [StreamGrpc('getCurrentStates',
                                                                  mock_service(from_timestamp, to_timestamp, [response1, response2, response3]))])

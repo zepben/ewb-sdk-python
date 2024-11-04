@@ -15,11 +15,12 @@ from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatch
 
 
 def _test_state_event_failure_protobuf_conversion(pb: PBStateEventFailure, clazz: type):
-    status = StateEventFailure._from_pb(pb)
+    status = StateEventFailure.from_pb(pb)
     assert status.event_id == pb.eventId
     assert isinstance(status, clazz)
 
-    to_pb = status._to_pb()
+    # noinspection PyUnresolvedReferences
+    to_pb = status.to_pb()
     assert to_pb.eventId == pb.eventId
     assert to_pb.WhichOneof("reason") == pb.WhichOneof("reason")
 
@@ -29,29 +30,29 @@ class TestSetCurrentStatesStatus:
     invalidMrid = PBStateEventFailure(eventId="event2", invalidMrid=PBStateEventInvalidMrid())
 
     def test_batch_successful_protobuf_conversion(self):
-        status = BatchSuccessful._from_pb(PBBatchSuccessful())
+        status = BatchSuccessful.from_pb(PBBatchSuccessful())
 
         assert isinstance(status, BatchSuccessful)
-        assert isinstance(status._to_pb(), PBBatchSuccessful)
+        assert isinstance(status.to_pb(), PBBatchSuccessful)
 
     def test_processing_paused_protobuf_conversion(self):
         ts = PBTimestamp()
         ts.FromDatetime(datetime.now())
         pb = PBProcessingPaused(since=ts)
-        status = ProcessingPaused._from_pb(pb)
+        status = ProcessingPaused.from_pb(pb)
 
         assert status.since == pb.since.ToDatetime()
-        assert status._to_pb().since == pb.since
+        assert status.to_pb().since == pb.since
 
     def test_batch_failure_protobuf_conversion(self):
         pb = PBBatchFailure(partialFailure=True, failed=[self.invalidMrid])
-        status = BatchFailure._from_pb(pb)
+        status = BatchFailure.from_pb(pb)
 
         assert status.partial_failure == pb.partialFailure
         assert len(status.failures) == 1
         assert isinstance(status.failures[0], StateEventInvalidMrid)
 
-        to_pb = status._to_pb()
+        to_pb = status.to_pb()
         assert to_pb.partialFailure == pb.partialFailure
         assert len(to_pb.failed) == 1
         assert to_pb.failed[0].WhichOneof("reason") == "invalidMrid"
@@ -64,4 +65,4 @@ class TestSetCurrentStatesStatus:
             PBStateEventFailure(eventId="event4", unsupportedPhasing=PBStateEventUnsupportedPhasing()),
             StateEventUnsupportedPhasing)
 
-        assert StateEventFailure._from_pb(PBStateEventFailure()) is None
+        assert StateEventFailure.from_pb(PBStateEventFailure()) is None
