@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from enum import Enum
 from datetime import datetime
 from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent, SwitchStateEvent as PBSwitchStateEvent
@@ -29,6 +29,10 @@ class CurrentStateEvent(ABC):
             return SwitchStateEvent._from_pb(event)
         else:
             raise NotImplementedError(f"'{active_event}' is currently unsupported.")
+
+    @abstractmethod
+    def _to_pb(self) -> PBCurrentStateEvent:
+        pass
 
 
 class SwitchStateEvent(CurrentStateEvent):
