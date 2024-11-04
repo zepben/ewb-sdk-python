@@ -30,11 +30,11 @@ class TestQueryNetworkStateService:
         self.mock_server = MockServer(self.channel, network_state_pb2.DESCRIPTOR.services_by_name['QueryNetworkStateService'])
         self.stub = QueryNetworkStateServiceStub(self.channel)
         self.on_get_current_states = Mock()
-        self.current_state_events = [
-            [SwitchStateEvent("event1", datetime.now(), "mrid1", SwitchAction.OPEN, PhaseCode.ABC)],
-            [SwitchStateEvent("event2", datetime.now(), "mrid1", SwitchAction.CLOSE, PhaseCode.ABN)],
-            [SwitchStateEvent("event3", datetime.now(), "mrid2", SwitchAction.CLOSE, PhaseCode.A)]
-        ]
+        self.current_state_events = (
+            (SwitchStateEvent("event1", datetime.now(), "mrid1", SwitchAction.OPEN, PhaseCode.ABC),),
+            (SwitchStateEvent("event2", datetime.now(), "mrid1", SwitchAction.CLOSE, PhaseCode.ABN),),
+            (SwitchStateEvent("event3", datetime.now(), "mrid2", SwitchAction.CLOSE, PhaseCode.A),)
+        )
         self.on_get_current_states.return_value = iter(self.current_state_events)
         self.service = QueryNetworkStateService(self.on_get_current_states)
 

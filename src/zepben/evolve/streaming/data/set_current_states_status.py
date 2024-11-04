@@ -12,12 +12,11 @@ from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatch
     StateEventUnsupportedPhasing as PBStateEventUnsupportedPhasing
 from .current_state_event import _datetime_to_timestamp
 
-
 class SetCurrentStatesStatus(ABC):
     pass
 
-
 class BatchSuccessful(SetCurrentStatesStatus):
+
     @staticmethod
     def _from_pb(pb: PBBatchSuccessful) -> 'BatchSuccessful':
         return BatchSuccessful()
@@ -27,6 +26,7 @@ class BatchSuccessful(SetCurrentStatesStatus):
 
 
 class ProcessingPaused(SetCurrentStatesStatus):
+
     def __init__(self, since: datetime):
         self.since = since
 
@@ -39,6 +39,7 @@ class ProcessingPaused(SetCurrentStatesStatus):
 
 
 class BatchFailure(SetCurrentStatesStatus):
+
     def __init__(self, partial_failure: bool, failures: Tuple['StateEventFailure', ...]):
         self.partial_failure = partial_failure
         self.failures = failures
@@ -58,6 +59,7 @@ class BatchFailure(SetCurrentStatesStatus):
 
 
 class StateEventFailure(ABC):
+
     def __init__(self, event_id: str):
         self.event_id = event_id
 
@@ -81,6 +83,7 @@ class StateEventFailure(ABC):
 
 
 class StateEventUnknownMrid(StateEventFailure):
+
     @staticmethod
     def _from_pb(pb: PBStateEventFailure) -> 'StateEventUnknownMrid':
         return StateEventUnknownMrid(pb.eventId)
@@ -90,6 +93,7 @@ class StateEventUnknownMrid(StateEventFailure):
 
 
 class StateEventDuplicateMrid(StateEventFailure):
+
     @staticmethod
     def _from_pb(pb: PBStateEventFailure) -> 'StateEventDuplicateMrid':
         return StateEventDuplicateMrid(pb.eventId)
@@ -99,6 +103,7 @@ class StateEventDuplicateMrid(StateEventFailure):
 
 
 class StateEventInvalidMrid(StateEventFailure):
+
     @staticmethod
     def _from_pb(pb: PBStateEventFailure) -> 'StateEventInvalidMrid':
         return StateEventInvalidMrid(pb.eventId)
@@ -108,6 +113,7 @@ class StateEventInvalidMrid(StateEventFailure):
 
 
 class StateEventUnsupportedPhasing(StateEventFailure):
+
     @staticmethod
     def _from_pb(pb: PBStateEventFailure) -> 'StateEventUnsupportedPhasing':
         return StateEventUnsupportedPhasing(pb.eventId)

@@ -4,6 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import Enum
 from datetime import datetime
 from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent, SwitchStateEvent as PBSwitchStateEvent
@@ -17,7 +18,9 @@ def _datetime_to_timestamp(date_time: datetime) -> PBTimestamp:
     return ts
 
 
+@dataclass
 class CurrentStateEvent(ABC):
+
     def __init__(self, event_id: str, timestamp: datetime = None):
         self.event_id = event_id
         self.timestamp = timestamp
@@ -35,7 +38,9 @@ class CurrentStateEvent(ABC):
         pass
 
 
+@dataclass
 class SwitchStateEvent(CurrentStateEvent):
+
     def __init__(self, event_id: str, timestamp: datetime, mRID: str, action: 'SwitchAction', phases: PhaseCode = PhaseCode.NONE):
         super().__init__(event_id, timestamp)
         self.mRID = mRID
@@ -55,7 +60,6 @@ class SwitchStateEvent(CurrentStateEvent):
     def _to_pb(self) -> PBCurrentStateEvent:
         return PBCurrentStateEvent(eventId=self.event_id, timestamp=_datetime_to_timestamp(self.timestamp),
                                    switch=PBSwitchStateEvent(mRID=self.mRID, action=self.action.name, phases=self.phases.name))
-
 
 class SwitchAction(Enum):
     UNKNOWN = 0

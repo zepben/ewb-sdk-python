@@ -21,6 +21,7 @@ def _test_from_pb_not_implemented(event: PBCurrentStateEvent):
 
 
 class TestCurrentStateEvent:
+
     def test_from_pb(self):
         switch_event = CurrentStateEvent._from_pb(PBCurrentStateEvent(switch=PBSwitchStateEvent()))
         assert isinstance(switch_event, SwitchStateEvent)
