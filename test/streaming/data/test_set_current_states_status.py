@@ -4,8 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime
 
-import pytest
-from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
+from zepben.evolve import datetime_to_timestamp
 from zepben.evolve.streaming.data.set_current_states_status import BatchSuccessful, ProcessingPaused, BatchFailure, StateEventInvalidMrid, StateEventFailure, \
     StateEventUnknownMrid, StateEventDuplicateMrid, StateEventUnsupportedPhasing
 from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, ProcessingPaused as PBProcessingPaused, \
@@ -26,7 +25,6 @@ def _test_state_event_failure_protobuf_conversion(pb: PBStateEventFailure, clazz
 
 
 class TestSetCurrentStatesStatus:
-
     invalidMrid = PBStateEventFailure(eventId="event2", invalidMrid=PBStateEventInvalidMrid())
 
     def test_batch_successful_protobuf_conversion(self):
@@ -36,9 +34,7 @@ class TestSetCurrentStatesStatus:
         assert isinstance(status.to_pb(), PBBatchSuccessful)
 
     def test_processing_paused_protobuf_conversion(self):
-        ts = PBTimestamp()
-        ts.FromDatetime(datetime.now())
-        pb = PBProcessingPaused(since=ts)
+        pb = PBProcessingPaused(since=datetime_to_timestamp(datetime.now()))
         status = ProcessingPaused.from_pb(pb)
 
         assert status.since == pb.since.ToDatetime()

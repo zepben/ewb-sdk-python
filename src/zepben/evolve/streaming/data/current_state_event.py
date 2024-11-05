@@ -9,19 +9,14 @@ from enum import Enum
 from datetime import datetime
 from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent, SwitchStateEvent as PBSwitchStateEvent
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode, phase_code_by_id
-from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
-
-def _datetime_to_timestamp(date_time: datetime) -> PBTimestamp:
-    ts = PBTimestamp()
-    ts.FromDatetime(date_time)
-    return ts
+from zepben.evolve.util import datetime_to_timestamp
 
 
 @dataclass
 class CurrentStateEvent(ABC):
 
-    def __init__(self, event_id: str, timestamp: datetime = None):
+    def __init__(self, event_id: str, timestamp: datetime):
         self.event_id = event_id
         self.timestamp = timestamp
 
@@ -58,7 +53,7 @@ class SwitchStateEvent(CurrentStateEvent):
         )
 
     def to_pb(self) -> PBCurrentStateEvent:
-        return PBCurrentStateEvent(eventId=self.event_id, timestamp=_datetime_to_timestamp(self.timestamp),
+        return PBCurrentStateEvent(eventId=self.event_id, timestamp=datetime_to_timestamp(self.timestamp),
                                    switch=PBSwitchStateEvent(mRID=self.mRID, action=self.action.name, phases=self.phases.name))
 
 

@@ -10,7 +10,8 @@ from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatch
     BatchFailure as PBBatchFailure, StateEventFailure as PBStateEventFailure, StateEventUnknownMrid as PBStateEventUnknownMrid, \
     StateEventDuplicateMrid as PBStateEventDuplicateMrid, StateEventInvalidMrid as PBStateEventInvalidMrid, \
     StateEventUnsupportedPhasing as PBStateEventUnsupportedPhasing
-from .current_state_event import _datetime_to_timestamp
+
+from zepben.evolve import datetime_to_timestamp
 
 
 class SetCurrentStatesStatus(ABC):
@@ -37,7 +38,7 @@ class ProcessingPaused(SetCurrentStatesStatus):
         return ProcessingPaused(pb.since.ToDatetime())
 
     def to_pb(self) -> PBProcessingPaused:
-        return PBProcessingPaused(since=_datetime_to_timestamp(self.since))
+        return PBProcessingPaused(since=datetime_to_timestamp(self.since))
 
 
 class BatchFailure(SetCurrentStatesStatus):
