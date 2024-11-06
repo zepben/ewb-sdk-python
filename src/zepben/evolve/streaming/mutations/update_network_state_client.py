@@ -10,7 +10,7 @@ from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceS
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
 
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
-from zepben.evolve.streaming.data.set_current_states_status import SetCurrentStatesStatus, BatchSuccessful
+from zepben.evolve.streaming.data.set_current_states_status import SetCurrentStatesStatus, BatchSuccessful, ProcessingPaused, BatchFailure
 from zepben.evolve.streaming.grpc.grpc import GrpcClient
 
 
@@ -43,7 +43,17 @@ class UpdateNetworkStateClient(GrpcClient):
                 yield PBSetCurrentStatesRequest(messageId=batch.batch_id, event=[event.to_pb() for event in batch.events])
 
         async for response in self._stub.setCurrentStates(request_generator()):
-            yield UpdateNetworkStateClient.SetCurrentStatesResponse(batch_id=response.messageId, status=BatchSuccessful())
+            match response.WhichOneof("status"):
+                case "success":
+                    status = BatchSuccessful.from_pb(response.success)
+                case "paused":
+                    status = ProcessingPaused.from_pb(response.paused)
+                case "failure":
+                    status = BatchFailure.from_pb(response.failure)
+                case _:
+                    status = None
+
+            yield UpdateNetworkStateClient.SetCurrentStatesResponse(batch_id=response.messageId, status=status)
 
     @dataclass
     class SetCurrentStatesRequest:
