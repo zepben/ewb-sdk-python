@@ -11,11 +11,10 @@ from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesReques
 from zepben.protobuf.ns.network_state_responses_pb2 import GetCurrentStatesResponse
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
 
-GetCurrentStates = Callable[[datetime, datetime], AsyncGenerator[Tuple[CurrentStateEvent, ...], None]]
-
 
 class QueryNetworkStateService(QueryNetworkStateServiceServicer):
-    def __init__(self, on_get_current_states: GetCurrentStates):
+
+    def __init__(self, on_get_current_states: Callable[[datetime, datetime], AsyncGenerator[Tuple[CurrentStateEvent, ...], None]]):
         self.on_get_current_states = on_get_current_states
 
     async def getCurrentStates(self, request: GetCurrentStatesRequest, context) -> AsyncGenerator[GetCurrentStatesResponse, None]:
