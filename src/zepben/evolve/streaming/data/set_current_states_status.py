@@ -2,6 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple
 from abc import ABC, abstractmethod
@@ -17,7 +18,7 @@ from zepben.evolve import datetime_to_timestamp
 class SetCurrentStatesStatus(ABC):
     pass
 
-
+@dataclass
 class BatchSuccessful(SetCurrentStatesStatus):
 
     @staticmethod
@@ -27,7 +28,7 @@ class BatchSuccessful(SetCurrentStatesStatus):
     def to_pb(self) -> PBBatchSuccessful:
         return PBBatchSuccessful()
 
-
+@dataclass
 class ProcessingPaused(SetCurrentStatesStatus):
 
     def __init__(self, since: datetime):
@@ -40,7 +41,7 @@ class ProcessingPaused(SetCurrentStatesStatus):
     def to_pb(self) -> PBProcessingPaused:
         return PBProcessingPaused(since=datetime_to_timestamp(self.since))
 
-
+@dataclass
 class BatchFailure(SetCurrentStatesStatus):
 
     def __init__(self, partial_failure: bool, failures: Tuple['StateEventFailure', ...]):

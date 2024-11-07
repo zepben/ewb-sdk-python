@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest
 
-from util import grpc_server
+from util import grpc_aio_server
 from zepben.evolve import datetime_to_timestamp
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub, add_QueryNetworkStateServiceServicer_to_server
@@ -36,13 +36,12 @@ class TestQueryNetworkStateService:
             for event in self.current_state_events:
                 yield event
 
-        server, host = grpc_server()
+        server, host = grpc_aio_server()
         add_QueryNetworkStateServiceServicer_to_server(QueryNetworkStateService(on_get_current_states), server)
 
         await server.start()
         async with grpc.aio.insecure_channel(host) as channel:
-            stub = QueryNetworkStateServiceStub(channel)
-            yield stub
+            yield QueryNetworkStateServiceStub(channel)
 
         await server.stop(None)
 

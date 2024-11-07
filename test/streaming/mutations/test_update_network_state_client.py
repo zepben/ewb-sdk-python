@@ -10,7 +10,7 @@ import grpc
 import pytest
 from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceServicer, add_UpdateNetworkStateServiceServicer_to_server
 
-from util import grpc_server
+from util import grpc_aio_server
 from zepben.evolve import PhaseCode, datetime_to_timestamp
 from zepben.evolve.streaming.data.current_state_event import SwitchStateEvent, SwitchAction, CurrentStateEvent
 from zepben.evolve.streaming.data.set_current_states_status import BatchSuccessful, ProcessingPaused, BatchFailure
@@ -46,7 +46,7 @@ class TestUpdateNetworkStateClient:
 
     @pytest.fixture
     async def grpc_service_client_pair(self):
-        server, host = grpc_server()
+        server, host = grpc_aio_server()
         service = MockUpdateNetworkStateService()
         add_UpdateNetworkStateServiceServicer_to_server(service, server)
         await server.start()
