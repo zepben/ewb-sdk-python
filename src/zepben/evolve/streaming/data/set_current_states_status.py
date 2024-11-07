@@ -33,13 +33,13 @@ class SetCurrentStatesStatus(ABC):
         """
         Creates a BatchSuccessful object from a protobuf SetCurrentStatesResponse.
         """
-        match pb.WhichOneof("status"):
-            case "success":
-                return BatchSuccessful.from_pb(pb)
-            case "paused":
-                return ProcessingPaused.from_pb(pb)
-            case "failure":
-                return BatchFailure.from_pb(pb)
+        status = pb.WhichOneof("status")
+        if (status == "success"):
+            return BatchSuccessful.from_pb(pb)
+        elif (status == "paused"):
+            return ProcessingPaused.from_pb(pb)
+        elif (status == "failure"):
+            return BatchFailure.from_pb(pb)
 
     @abstractmethod
     def to_pb(self) -> PBSetCurrentStatesResponse:
