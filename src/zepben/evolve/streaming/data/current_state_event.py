@@ -15,6 +15,14 @@ from zepben.evolve.util import datetime_to_timestamp
 
 @dataclass
 class CurrentStateEvent(ABC):
+    """
+    An event to apply to the current state of the network.
+
+    Attributes:
+        event_id: An identifier of this event. This must be unique across requests to allow detection of
+                  duplicates when requesting events via dates versus those streamed via live updates.
+        timestamp: The timestamp when the event occurred.
+    """
 
     def __init__(self, event_id: str, timestamp: datetime):
         self.event_id = event_id
@@ -22,6 +30,9 @@ class CurrentStateEvent(ABC):
 
     @staticmethod
     def from_pb(event: PBCurrentStateEvent) -> 'CurrentStateEvent':
+        """
+        Creates a CurrentStateEvent object from a protobuf CurrentStateEvent.
+        """
         active_event = event.WhichOneof("event")
         if active_event == "switch":
             return SwitchStateEvent.from_pb(event)
@@ -30,11 +41,25 @@ class CurrentStateEvent(ABC):
 
     @abstractmethod
     def to_pb(self) -> PBCurrentStateEvent:
+        """
+        Creates a protobuf CurrentStateEvent object with switch from a CurrentStateEvent.
+        """
         pass
 
 
 @dataclass
 class SwitchStateEvent(CurrentStateEvent):
+    """
+    An event to update the state of a switch.
+
+    Attributes:
+        event_id: An identifier of this event. This must be unique across requests to allow detection of
+                  duplicates when requesting events via dates versus those streamed via live updates.
+        timestamp: The timestamp when the event occurred, always in UTC (Coordinated Universal Time).
+        mRID: The mRID of the switch affected by this event.
+        action: The action to take on the switch for the specified phases.
+        phases: The phases affected by this event. Defaults to 'NONE'.
+    """
 
     def __init__(self, event_id: str, timestamp: datetime, mRID: str, action: 'SwitchAction', phases: PhaseCode = PhaseCode.NONE):
         super().__init__(event_id, timestamp)
@@ -44,6 +69,9 @@ class SwitchStateEvent(CurrentStateEvent):
 
     @staticmethod
     def from_pb(event: PBCurrentStateEvent) -> 'SwitchStateEvent':
+        """
+        Creates a SwitchStateEvent object from a protobuf CurrentStateEvent.
+        """
         return SwitchStateEvent(
             event.eventId,
             event.timestamp.ToDatetime(),
@@ -53,11 +81,17 @@ class SwitchStateEvent(CurrentStateEvent):
         )
 
     def to_pb(self) -> PBCurrentStateEvent:
+        """
+        Creates a protobuf CurrentStateEvent object with switch from a SwitchStateEvent.
+        """
         return PBCurrentStateEvent(eventId=self.event_id, timestamp=datetime_to_timestamp(self.timestamp),
                                    switch=PBSwitchStateEvent(mRID=self.mRID, action=self.action.name, phases=self.phases.name))
 
 
 class SwitchAction(Enum):
-    UNKNOWN = 0
-    OPEN = 1
-    CLOSE = 2
+    """
+    Enum representing possible actions for a switch.
+    """
+    UNKNOWN = 0  # The specified action was unknown, or was not set.
+    OPEN = 1  # A request to open a switch.
+    CLOSE = 2  # A request to close a switch.

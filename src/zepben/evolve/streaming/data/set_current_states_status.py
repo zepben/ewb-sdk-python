@@ -16,33 +16,68 @@ from zepben.evolve import datetime_to_timestamp
 
 
 class SetCurrentStatesStatus(ABC):
+    """
+    The outcome of processing this batch of updates.
+    """
     pass
+
 
 @dataclass
 class BatchSuccessful(SetCurrentStatesStatus):
+    """
+    A response indicating all items in the batch were applied successfully.
+    """
 
     @staticmethod
     def from_pb(pb: PBBatchSuccessful) -> 'BatchSuccessful':
+        """
+        Creates a BatchSuccessful object from a protobuf BatchSuccessful.
+        """
         return BatchSuccessful()
 
     def to_pb(self) -> PBBatchSuccessful:
+        """
+        Creates a protobuf BatchSuccessful object.
+        """
         return PBBatchSuccessful()
+
 
 @dataclass
 class ProcessingPaused(SetCurrentStatesStatus):
+    """
+    A response indicating that current state events are not currently being processed. There is no need to retry these,
+    the missed events will be requested when processing resumes.
+
+    Attributes:
+        since: The timestamp when the processing was paused.
+    """
 
     def __init__(self, since: datetime):
         self.since = since
 
     @staticmethod
     def from_pb(pb: PBProcessingPaused) -> 'ProcessingPaused':
+        """
+        Creates a ProcessingPaused object from a protobuf ProcessingPaused.
+        """
         return ProcessingPaused(pb.since.ToDatetime())
 
     def to_pb(self) -> PBProcessingPaused:
+        """
+        Creates a protobuf ProcessingPaused object.
+        """
         return PBProcessingPaused(since=datetime_to_timestamp(self.since))
+
 
 @dataclass
 class BatchFailure(SetCurrentStatesStatus):
+    """
+    A response indicating one or more items in the batch couldn't be applied.
+
+    Attributes:
+        partial_failure: Indicates if only some of the batch failed (True), or all entries in the batch failed (False).
+        failures: The status of each item processed in the batch that failed.
+    """
 
     def __init__(self, partial_failure: bool, failures: Tuple['StateEventFailure', ...]):
         self.partial_failure = partial_failure
@@ -50,6 +85,9 @@ class BatchFailure(SetCurrentStatesStatus):
 
     @staticmethod
     def from_pb(pb: PBBatchFailure) -> 'BatchFailure':
+        """
+        Creates a BatchFailure object from a protobuf BatchFailure.
+        """
         failures: List['StateEventFailure'] = []
         for fail in pb.failed:
             event_failure = StateEventFailure.from_pb(fail)
@@ -59,16 +97,28 @@ class BatchFailure(SetCurrentStatesStatus):
         return BatchFailure(pb.partialFailure, tuple(failures))
 
     def to_pb(self) -> PBBatchFailure:
+        """
+        Creates a protobuf BatchFailure object.
+        """
         return PBBatchFailure(partialFailure=self.partial_failure, failed=[fail.to_pb() for fail in self.failures])
 
 
 class StateEventFailure(ABC):
+    """
+    A wrapper class for allowing a one-of to be repeated.
+
+    Attributes:
+        event_id: The event ID of the state event that failed.
+    """
 
     def __init__(self, event_id: str):
         self.event_id = event_id
 
     @staticmethod
     def from_pb(pb: PBStateEventFailure) -> Optional['StateEventFailure']:
+        """
+        Creates a StateEventFailure object from a protobuf StateEventFailure.
+        """
         reason_code = pb.WhichOneof('reason')
         if reason_code == "unknownMrid":
             return StateEventUnknownMrid.from_pb(pb)
@@ -83,44 +133,84 @@ class StateEventFailure(ABC):
 
     @abstractmethod
     def to_pb(self) -> PBStateEventFailure:
+        """
+        Creates a protobuf StateEventFailure with event_id assigned along with the specified block.
+        """
         pass
 
 
 class StateEventUnknownMrid(StateEventFailure):
+    """
+    The requested mRID was not found in the network.
+    """
 
     @staticmethod
     def from_pb(pb: PBStateEventFailure) -> 'StateEventUnknownMrid':
+        """
+        Creates a StateEventUnknownMrid object from a protobuf StateEventFailure.
+        """
         return StateEventUnknownMrid(pb.eventId)
 
     def to_pb(self) -> PBStateEventFailure:
+        """
+        Creates a protobuf StateEventFailure with event_id assigned along with the unknownMrid.
+        """
         return PBStateEventFailure(eventId=self.event_id, unknownMrid=PBStateEventUnknownMrid())
 
 
 class StateEventDuplicateMrid(StateEventFailure):
+    """
+    The requested mRID already existed in the network and can't be used.
+    """
 
     @staticmethod
     def from_pb(pb: PBStateEventFailure) -> 'StateEventDuplicateMrid':
+        """
+        Creates a StateEventDuplicateMrid object from a protobuf StateEventFailure.
+        """
         return StateEventDuplicateMrid(pb.eventId)
 
     def to_pb(self) -> PBStateEventFailure:
+        """
+        Creates a protobuf StateEventFailure with event_id assigned along with the duplicateMrid.
+        """
         return PBStateEventFailure(eventId=self.event_id, duplicateMrid=PBStateEventDuplicateMrid())
 
 
 class StateEventInvalidMrid(StateEventFailure):
+    """
+    The requested mRID was found in the network model, but was of an invalid type.
+    """
 
     @staticmethod
     def from_pb(pb: PBStateEventFailure) -> 'StateEventInvalidMrid':
+        """
+        Creates a StateEventInvalidMrid object from a protobuf StateEventFailure.
+        """
         return StateEventInvalidMrid(pb.eventId)
 
     def to_pb(self) -> PBStateEventFailure:
+        """
+        Creates a protobuf StateEventFailure with event_id assigned along with the invalidMrid.
+        """
         return PBStateEventFailure(eventId=self.event_id, invalidMrid=PBStateEventInvalidMrid())
 
 
 class StateEventUnsupportedPhasing(StateEventFailure):
+    """
+    The requested phasing was not available for the given operation. For example, an open state request was made with
+    unsupported phases.
+    """
 
     @staticmethod
     def from_pb(pb: PBStateEventFailure) -> 'StateEventUnsupportedPhasing':
+        """
+        Creates a StateEventUnsupportedPhasing object from a protobuf StateEventFailure.
+        """
         return StateEventUnsupportedPhasing(pb.eventId)
 
     def to_pb(self) -> PBStateEventFailure:
+        """
+        Creates a protobuf StateEventFailure with event_id assigned along with the unsupportedPhasing.
+        """
         return PBStateEventFailure(eventId=self.event_id, unsupportedPhasing=PBStateEventUnsupportedPhasing())
