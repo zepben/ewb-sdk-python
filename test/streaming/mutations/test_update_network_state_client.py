@@ -65,7 +65,7 @@ class TestUpdateNetworkStateClient:
         assert tuple([CurrentStateEvent.from_pb(event) for event in request.event]) == self.current_state_events
 
         assert result.batch_id == 1
-        assert isinstance(result.status, BatchSuccessful)
+        assert isinstance(result, BatchSuccessful)
 
     @pytest.mark.asyncio
     async def test_set_current_states_in_batches(self, grpc_service_client_pair):
@@ -81,7 +81,6 @@ class TestUpdateNetworkStateClient:
             assert tuple([CurrentStateEvent.from_pb(event) for event in request.event]) == self.current_state_events
 
         assert [r.batch_id for r in result] == [1, 2 ,3]
-        statuses = [r.status for r in result]
-        assert isinstance(statuses[0], BatchSuccessful)
-        assert isinstance(statuses[1], ProcessingPaused)
-        assert isinstance(statuses[2], BatchFailure)
+        assert isinstance(result[0], BatchSuccessful)
+        assert isinstance(result[1], ProcessingPaused)
+        assert isinstance(result[2], BatchFailure)

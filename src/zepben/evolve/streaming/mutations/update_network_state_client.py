@@ -2,7 +2,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import asyncio
 from typing import List, Callable, AsyncGenerator, Tuple, overload
 
 from attr import dataclass
@@ -31,7 +30,7 @@ class UpdateNetworkStateClient(GrpcClient):
         else:
             self._stub = UpdateNetworkStateServiceStub(channel)
 
-    async def set_current_states(self, batch_id: int, batch: Tuple[CurrentStateEvent, ...]) -> 'UpdateNetworkStateClient.SetCurrentStatesResponse':
+    async def set_current_states(self, batch_id: int, batch: Tuple[CurrentStateEvent, ...]) -> SetCurrentStatesStatus:
         """
         Sends a single batch of current state events to the gRPC service for processing.
 
@@ -55,7 +54,7 @@ class UpdateNetworkStateClient(GrpcClient):
         return responses[0]
 
     async def set_current_states_in_batches(self, batches: AsyncGenerator['UpdateNetworkStateClient.SetCurrentStatesRequest', None]) -> AsyncGenerator[
-        'UpdateNetworkStateClient.SetCurrentStatesResponse', None]:
+        SetCurrentStatesStatus, None]:
         """
         Sends a stream of current state events to the gRPC service for processing.
 
@@ -73,17 +72,7 @@ class UpdateNetworkStateClient(GrpcClient):
                 yield PBSetCurrentStatesRequest(messageId=batch.batch_id, event=[event.to_pb() for event in batch.events])
 
         async for response in self._stub.setCurrentStates(request_generator()):
-            match response.WhichOneof("status"):
-                case "success":
-                    status = BatchSuccessful.from_pb(response.success)
-                case "paused":
-                    status = ProcessingPaused.from_pb(response.paused)
-                case "failure":
-                    status = BatchFailure.from_pb(response.failure)
-                case _:
-                    status = None
-
-            yield UpdateNetworkStateClient.SetCurrentStatesResponse(batch_id=response.messageId, status=status)
+            yield SetCurrentStatesStatus.from_pb(response)
 
     @dataclass
     class SetCurrentStatesRequest:
@@ -97,17 +86,3 @@ class UpdateNetworkStateClient(GrpcClient):
 
         batch_id: int
         events: Tuple[CurrentStateEvent, ...]
-
-    @dataclass
-    class SetCurrentStatesResponse:
-        """
-        A response object representing the result of processing a batch of current state events.
-
-        Attributes:
-            batch_id: The unique identifier of the batch that was processed. This matches the
-                      batch ID from the original request to allow correlation between request and response.
-            status: The result of the batch processing, represented by a SetCurrentStatesStatus object.
-        """
-
-        batch_id: int
-        status: SetCurrentStatesStatus

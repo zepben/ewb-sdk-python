@@ -53,10 +53,4 @@ class UpdateNetworkStateService(UpdateNetworkStateServiceServicer):
                 yield request.messageId, tuple([CurrentStateEvent.from_pb(event) for event in request.event])
 
         async for status in self.on_set_current_states(request_generator()):
-            match status:
-                case BatchSuccessful() as status:
-                    yield PBSetCurrentStatesResponse(messageId=1, success=status.to_pb())  # TODO: Update SetCurrentStatesStatus to have the batch id
-                case ProcessingPaused() as status:
-                    yield PBSetCurrentStatesResponse(messageId=1, paused=status.to_pb())
-                case BatchFailure() as status:
-                    yield PBSetCurrentStatesResponse(messageId=1, failure=status.to_pb())
+            yield status.to_pb()

@@ -11,6 +11,7 @@ from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatch
     BatchFailure as PBBatchFailure, StateEventFailure as PBStateEventFailure, StateEventUnknownMrid as PBStateEventUnknownMrid, \
     StateEventDuplicateMrid as PBStateEventDuplicateMrid, StateEventInvalidMrid as PBStateEventInvalidMrid, \
     StateEventUnsupportedPhasing as PBStateEventUnsupportedPhasing
+from zepben.protobuf.ns.network_state_responses_pb2 import SetCurrentStatesResponse as PBSetCurrentStatesResponse
 
 from zepben.evolve import datetime_to_timestamp
 
@@ -18,28 +19,61 @@ from zepben.evolve import datetime_to_timestamp
 class SetCurrentStatesStatus(ABC):
     """
     The outcome of processing this batch of updates.
+
+    Attributes:
+        batch_id: The unique identifier of the batch that was processed. This matches the
+                  batch ID from the original request to allow correlation between request and response.
     """
-    pass
+
+    def __init__(self, batch_id: int):
+        self.batch_id = batch_id
+
+    @staticmethod
+    def from_pb(pb: PBSetCurrentStatesResponse) -> 'SetCurrentStatesStatus':
+        """
+        Creates a BatchSuccessful object from a protobuf SetCurrentStatesResponse.
+        """
+        match pb.WhichOneof("status"):
+            case "success":
+                return BatchSuccessful.from_pb(pb)
+            case "paused":
+                return ProcessingPaused.from_pb(pb)
+            case "failure":
+                return BatchFailure.from_pb(pb)
+
+    @abstractmethod
+    def to_pb(self) -> PBSetCurrentStatesResponse:
+        """
+        Creates a protobuf SetCurrentStatesResponse object with status.
+        """
+        pass
 
 
 @dataclass
 class BatchSuccessful(SetCurrentStatesStatus):
     """
     A response indicating all items in the batch were applied successfully.
+
+    Attributes:
+        batch_id: The unique identifier of the batch that was processed. This matches the
+                  batch ID from the original request to allow correlation between request and response.
     """
 
-    @staticmethod
-    def from_pb(pb: PBBatchSuccessful) -> 'BatchSuccessful':
-        """
-        Creates a BatchSuccessful object from a protobuf BatchSuccessful.
-        """
-        return BatchSuccessful()
+    def __init__(self, batch_id: int):
+        super().__init__(batch_id)
 
-    def to_pb(self) -> PBBatchSuccessful:
+    @staticmethod
+    def from_pb(pb: PBSetCurrentStatesResponse) -> 'BatchSuccessful':
         """
-        Creates a protobuf BatchSuccessful object.
+        Creates a BatchSuccessful object from a protobuf SetCurrentStatesResponse.
         """
-        return PBBatchSuccessful()
+        return BatchSuccessful(batch_id=pb.messageId)
+
+    def to_pb(self) -> PBSetCurrentStatesResponse:
+        """
+        Creates a protobuf SetCurrentStatesResponse object with success.
+        """
+        return PBSetCurrentStatesResponse(messageId=self.batch_id, success=PBBatchSuccessful())
 
 
 @dataclass
@@ -49,24 +83,27 @@ class ProcessingPaused(SetCurrentStatesStatus):
     the missed events will be requested when processing resumes.
 
     Attributes:
+        batch_id: The unique identifier of the batch that was processed. This matches the
+                  batch ID from the original request to allow correlation between request and response.
         since: The timestamp when the processing was paused.
     """
 
-    def __init__(self, since: datetime):
+    def __init__(self, batch_id: int, since: datetime):
+        super().__init__(batch_id)
         self.since = since
 
     @staticmethod
-    def from_pb(pb: PBProcessingPaused) -> 'ProcessingPaused':
+    def from_pb(pb: PBSetCurrentStatesResponse) -> 'ProcessingPaused':
         """
-        Creates a ProcessingPaused object from a protobuf ProcessingPaused.
+        Creates a ProcessingPaused object from a protobuf SetCurrentStatesResponse.
         """
-        return ProcessingPaused(pb.since.ToDatetime())
+        return ProcessingPaused(batch_id=pb.messageId, since=pb.paused.since.ToDatetime())
 
-    def to_pb(self) -> PBProcessingPaused:
+    def to_pb(self) -> PBSetCurrentStatesResponse:
         """
-        Creates a protobuf ProcessingPaused object.
+        Creates a protobuf SetCurrentStatesResponse object with paused.
         """
-        return PBProcessingPaused(since=datetime_to_timestamp(self.since))
+        return PBSetCurrentStatesResponse(messageId=self.batch_id, paused=PBProcessingPaused(since=datetime_to_timestamp(self.since)))
 
 
 @dataclass
@@ -75,32 +112,36 @@ class BatchFailure(SetCurrentStatesStatus):
     A response indicating one or more items in the batch couldn't be applied.
 
     Attributes:
+        batch_id: The unique identifier of the batch that was processed. This matches the
+                  batch ID from the original request to allow correlation between request and response.
         partial_failure: Indicates if only some of the batch failed (True), or all entries in the batch failed (False).
         failures: The status of each item processed in the batch that failed.
     """
 
-    def __init__(self, partial_failure: bool, failures: Tuple['StateEventFailure', ...]):
+    def __init__(self, batch_id: int, partial_failure: bool, failures: Tuple['StateEventFailure', ...]):
+        super().__init__(batch_id)
         self.partial_failure = partial_failure
         self.failures = failures
 
     @staticmethod
-    def from_pb(pb: PBBatchFailure) -> 'BatchFailure':
+    def from_pb(pb: PBSetCurrentStatesResponse) -> 'BatchFailure':
         """
-        Creates a BatchFailure object from a protobuf BatchFailure.
+        Creates a BatchFailure object from a protobuf SetCurrentStatesResponse.
         """
         failures: List['StateEventFailure'] = []
-        for fail in pb.failed:
+        for fail in pb.failure.failed:
             event_failure = StateEventFailure.from_pb(fail)
             if event_failure is not None:
                 failures.append(event_failure)
 
-        return BatchFailure(pb.partialFailure, tuple(failures))
+        return BatchFailure(batch_id=pb.messageId, partial_failure=pb.failure.partialFailure, failures=tuple(failures))
 
-    def to_pb(self) -> PBBatchFailure:
+    def to_pb(self) -> PBSetCurrentStatesResponse:
         """
-        Creates a protobuf BatchFailure object.
+        Creates a protobuf SetCurrentStatesResponse object with failure.
         """
-        return PBBatchFailure(partialFailure=self.partial_failure, failed=[fail.to_pb() for fail in self.failures])
+        return PBSetCurrentStatesResponse(messageId=self.batch_id,
+                                          failure=PBBatchFailure(partialFailure=self.partial_failure, failed=[fail.to_pb() for fail in self.failures]))
 
 
 class StateEventFailure(ABC):

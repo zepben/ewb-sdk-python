@@ -25,9 +25,9 @@ class TestUpdateNetworkStateService:
     )
 
     expected_results = {
-        1: BatchSuccessful(),
-        2: ProcessingPaused(since=datetime.now()),
-        3: BatchFailure(partial_failure=False, failures=())
+        1: BatchSuccessful(batch_id=1),
+        2: ProcessingPaused(batch_id=2, since=datetime.now()),
+        3: BatchFailure(batch_id=3, partial_failure=False, failures=())
     }
 
     @pytest.fixture
@@ -56,8 +56,6 @@ class TestUpdateNetworkStateService:
         expected_results = [status for status in self.expected_results.values()]
         actual_result = [result async for result in grpc_stub.setCurrentStates(request_generator())]
 
-        assert len(actual_result) == 3
-        assert [result.messageId for result in actual_result] == [1, 1, 1]  # TODO: This should be [1, 2, 3]
-        assert BatchSuccessful.from_pb(actual_result[0].success) == expected_results[0]
-        assert ProcessingPaused.from_pb(actual_result[1].paused) == expected_results[1]
-        assert BatchFailure.from_pb(actual_result[2].failure) == expected_results[2]
+        assert [result.messageId for result in actual_result] == [1, 2, 3]
+        for actual, expected in zip(actual_result, expected_results):
+            assert SetCurrentStatesStatus.from_pb(actual) == expected
