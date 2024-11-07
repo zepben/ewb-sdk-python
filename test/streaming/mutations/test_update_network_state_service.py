@@ -18,6 +18,7 @@ from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesReques
 
 
 class TestUpdateNetworkStateService:
+
     current_state_events = (
         (SwitchStateEvent("event1", datetime.now(), "mrid1", SwitchAction.OPEN, PhaseCode.ABC),),
         (SwitchStateEvent("event2", datetime.now(), "mrid1", SwitchAction.CLOSE, PhaseCode.ABN),),

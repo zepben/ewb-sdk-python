@@ -22,6 +22,7 @@ from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesReques
 
 
 class MockUpdateNetworkStateService(UpdateNetworkStateServiceServicer):
+
     responses = {
         1: PBSetCurrentStatesResponse(messageId=1, success=PBBatchSuccessful()),
         2: PBSetCurrentStatesResponse(messageId=2, paused=PBProcessingPaused()),
@@ -38,6 +39,7 @@ class MockUpdateNetworkStateService(UpdateNetworkStateServiceServicer):
 
 
 class TestUpdateNetworkStateClient:
+
     current_state_events = (
         SwitchStateEvent("event1", datetime.now(), "mrid1", SwitchAction.OPEN, PhaseCode.ABC),
         SwitchStateEvent("event2", datetime.now(), "mrid1", SwitchAction.CLOSE, PhaseCode.ABN),

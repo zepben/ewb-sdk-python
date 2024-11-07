@@ -26,6 +26,7 @@ def _test_state_event_failure_protobuf_conversion(pb: PBStateEventFailure, clazz
 
 
 class TestSetCurrentStatesStatus:
+
     invalidMrid = PBStateEventFailure(eventId="event2", invalidMrid=PBStateEventInvalidMrid())
 
     def test_batch_successful_protobuf_conversion(self):
