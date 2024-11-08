@@ -2,10 +2,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple
-from abc import ABC, abstractmethod
 
 from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, ProcessingPaused as PBProcessingPaused, \
     BatchFailure as PBBatchFailure, StateEventFailure as PBStateEventFailure, StateEventUnknownMrid as PBStateEventUnknownMrid, \
@@ -34,11 +34,11 @@ class SetCurrentStatesStatus(ABC):
         Creates a BatchSuccessful object from a protobuf SetCurrentStatesResponse.
         """
         status = pb.WhichOneof("status")
-        if (status == "success"):
+        if status == "success":
             return BatchSuccessful.from_pb(pb)
-        elif (status == "paused"):
+        elif status == "paused":
             return ProcessingPaused.from_pb(pb)
-        elif (status == "failure"):
+        elif status == "failure":
             return BatchFailure.from_pb(pb)
 
     @abstractmethod

@@ -3,15 +3,16 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import pytest
 from datetime import datetime
+
+import pytest
+from zepben.protobuf.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode as PBPhaseCode
 from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent, SwitchStateEvent as PBSwitchStateEvent, \
     AddCutEvent as PBAddCutEvent, RemoveCutEvent as PBRemoveCutEvent, AddJumperEvent as PBAddJumperEvent, RemoveJumperEvent as PBRemoveJumperEvent, \
     SwitchAction as PBSwitchAction
 
 from zepben.evolve import PhaseCode, datetime_to_timestamp
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent, SwitchStateEvent, SwitchAction
-from zepben.protobuf.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode as PBPhaseCode
 
 
 def _test_from_pb_not_implemented(event: PBCurrentStateEvent):
@@ -33,11 +34,11 @@ class TestCurrentStateEvent:
 
     def test_switch_state_event_protobuf_conversion(self):
         pb_event = PBCurrentStateEvent(eventId="event1", timestamp=datetime_to_timestamp(datetime.now()),
-                                    switch=PBSwitchStateEvent(mRID="switch-1", action=PBSwitchAction.OPEN, phases=PBPhaseCode.ABCN))
+                                       switch=PBSwitchStateEvent(mRID="switch-1", action=PBSwitchAction.OPEN, phases=PBPhaseCode.ABCN))
         switch_state_event = SwitchStateEvent.from_pb(pb_event)
         assert switch_state_event.event_id == pb_event.eventId
         assert switch_state_event.timestamp == pb_event.timestamp.ToDatetime()
-        assert switch_state_event.mRID == pb_event.switch.mRID
+        assert switch_state_event.mrid == pb_event.switch.mRID
         assert switch_state_event.action == SwitchAction.OPEN
         assert switch_state_event.phases == PhaseCode.ABCN
 

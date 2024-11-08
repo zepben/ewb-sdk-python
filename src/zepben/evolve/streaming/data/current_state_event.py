@@ -5,11 +5,12 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum
 from datetime import datetime
-from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent, SwitchStateEvent as PBSwitchStateEvent
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode, phase_code_by_id
+from enum import Enum
 
+from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent, SwitchStateEvent as PBSwitchStateEvent
+
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode, phase_code_by_id
 from zepben.evolve.util import datetime_to_timestamp
 
 
@@ -56,14 +57,14 @@ class SwitchStateEvent(CurrentStateEvent):
         event_id: An identifier of this event. This must be unique across requests to allow detection of
                   duplicates when requesting events via dates versus those streamed via live updates.
         timestamp: The timestamp when the event occurred, always in UTC (Coordinated Universal Time).
-        mRID: The mRID of the switch affected by this event.
+        mrid: The mRID of the switch affected by this event.
         action: The action to take on the switch for the specified phases.
         phases: The phases affected by this event. Defaults to 'NONE'.
     """
 
-    def __init__(self, event_id: str, timestamp: datetime, mRID: str, action: 'SwitchAction', phases: PhaseCode = PhaseCode.NONE):
+    def __init__(self, event_id: str, timestamp: datetime, mrid: str, action: 'SwitchAction', phases: PhaseCode = PhaseCode.NONE):
         super().__init__(event_id, timestamp)
-        self.mRID = mRID
+        self.mrid = mrid
         self.action = action
         self.phases = phases
 
@@ -85,7 +86,7 @@ class SwitchStateEvent(CurrentStateEvent):
         Creates a protobuf CurrentStateEvent object with switch from a SwitchStateEvent.
         """
         return PBCurrentStateEvent(eventId=self.event_id, timestamp=datetime_to_timestamp(self.timestamp),
-                                   switch=PBSwitchStateEvent(mRID=self.mRID, action=self.action.name, phases=self.phases.name))
+                                   switch=PBSwitchStateEvent(mRID=self.mrid, action=self.action.name, phases=self.phases.name))
 
 
 class SwitchAction(Enum):

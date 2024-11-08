@@ -4,10 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from datetime import datetime
-
-from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub
 from typing import List, Callable, AsyncGenerator, Tuple
 
+from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest
 
 from zepben.evolve import datetime_to_timestamp

@@ -50,6 +50,7 @@ def import_submodules(package: str, recursive=True):
             results.update(import_submodules(full_name))
     return results
 
+
 def grpc_aio_server():
     server = grpc.aio.server(futures.ThreadPoolExecutor(max_workers=1))
     host = 'localhost:50051'

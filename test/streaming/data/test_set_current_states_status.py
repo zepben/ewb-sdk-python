@@ -4,14 +4,15 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime
 
-from zepben.evolve import datetime_to_timestamp
-from zepben.evolve.streaming.data.set_current_states_status import BatchSuccessful, ProcessingPaused, BatchFailure, StateEventInvalidMrid, StateEventFailure, \
-    StateEventUnknownMrid, StateEventDuplicateMrid, StateEventUnsupportedPhasing, SetCurrentStatesStatus
 from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, ProcessingPaused as PBProcessingPaused, \
     BatchFailure as PBBatchFailure, StateEventFailure as PBStateEventFailure, StateEventUnknownMrid as PBStateEventUnknownMrid, \
     StateEventDuplicateMrid as PBStateEventDuplicateMrid, StateEventInvalidMrid as PBStateEventInvalidMrid, \
     StateEventUnsupportedPhasing as PBStateEventUnsupportedPhasing
 from zepben.protobuf.ns.network_state_responses_pb2 import SetCurrentStatesResponse as PBSetCurrentStatesResponse
+
+from zepben.evolve import datetime_to_timestamp
+from zepben.evolve.streaming.data.set_current_states_status import BatchSuccessful, ProcessingPaused, BatchFailure, StateEventInvalidMrid, StateEventFailure, \
+    StateEventUnknownMrid, StateEventDuplicateMrid, StateEventUnsupportedPhasing, SetCurrentStatesStatus
 
 
 def _test_state_event_failure_protobuf_conversion(pb: PBStateEventFailure, clazz: type):
@@ -26,8 +27,7 @@ def _test_state_event_failure_protobuf_conversion(pb: PBStateEventFailure, clazz
 
 
 class TestSetCurrentStatesStatus:
-
-    invalidMrid = PBStateEventFailure(eventId="event2", invalidMrid=PBStateEventInvalidMrid())
+    invalid_mrid = PBStateEventFailure(eventId="event2", invalidMrid=PBStateEventInvalidMrid())
 
     def test_batch_successful_protobuf_conversion(self):
         pb = PBSetCurrentStatesResponse(messageId=1, success=PBBatchSuccessful())
@@ -45,7 +45,7 @@ class TestSetCurrentStatesStatus:
         assert status.to_pb() == pb
 
     def test_batch_failure_protobuf_conversion(self):
-        pb = PBSetCurrentStatesResponse(messageId=1, failure=PBBatchFailure(partialFailure=True, failed=[self.invalidMrid]))
+        pb = PBSetCurrentStatesResponse(messageId=1, failure=PBBatchFailure(partialFailure=True, failed=[self.invalid_mrid]))
         status = SetCurrentStatesStatus.from_pb(pb)
 
         assert status == BatchFailure(batch_id=1, partial_failure=True, failures=(StateEventInvalidMrid(event_id="event2"),))
@@ -53,7 +53,7 @@ class TestSetCurrentStatesStatus:
 
     def test_state_event_failure_protobuf_conversion(self):
         _test_state_event_failure_protobuf_conversion(PBStateEventFailure(eventId="event1", unknownMrid=PBStateEventUnknownMrid()), StateEventUnknownMrid)
-        _test_state_event_failure_protobuf_conversion(self.invalidMrid, StateEventInvalidMrid)
+        _test_state_event_failure_protobuf_conversion(self.invalid_mrid, StateEventInvalidMrid)
         _test_state_event_failure_protobuf_conversion(PBStateEventFailure(eventId="event3", duplicateMrid=PBStateEventDuplicateMrid()), StateEventDuplicateMrid)
         _test_state_event_failure_protobuf_conversion(
             PBStateEventFailure(eventId="event4", unsupportedPhasing=PBStateEventUnsupportedPhasing()),

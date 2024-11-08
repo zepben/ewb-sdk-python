@@ -3,12 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import Callable, Tuple, AsyncGenerator
 from datetime import datetime
+from typing import Callable, Tuple, AsyncGenerator
 
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceServicer
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest
 from zepben.protobuf.ns.network_state_responses_pb2 import GetCurrentStatesResponse
+
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
 
 
@@ -39,6 +40,7 @@ class QueryNetworkStateService(QueryNetworkStateServiceServicer):
         Args:
             request: The request object containing parameters for fetching current state events,
             including the time range for the query.
+            context: The gRPC context.
 
         Returns:
            A stream of gRPC response message

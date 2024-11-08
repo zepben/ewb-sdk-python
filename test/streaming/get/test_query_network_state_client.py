@@ -8,7 +8,7 @@ from typing import List, Callable, Generator, Iterable, Tuple
 import grpc_testing
 import pytest
 from zepben.protobuf.ns import network_state_pb2
-from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub
+from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent
 from zepben.protobuf.ns.network_state_responses_pb2 import GetCurrentStatesResponse
 
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
@@ -16,7 +16,6 @@ from streaming.get.mock_server import MockServer, GrpcRequest, GrpcResponse, Str
 from zepben.evolve import PhaseCode, datetime_to_timestamp
 from zepben.evolve.streaming.data.current_state_event import SwitchStateEvent, SwitchAction, CurrentStateEvent
 from zepben.evolve.streaming.get.query_network_state_client import QueryNetworkStateClient
-from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent
 
 
 def _current_state_events_to_pb(current_state_events: Tuple[CurrentStateEvent, ...]) -> Tuple[PBCurrentStateEvent, ...]:

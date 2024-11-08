@@ -5,11 +5,11 @@
 from typing import Tuple, Callable, AsyncGenerator
 
 from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceServicer
-
-from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
-from zepben.evolve.streaming.data.set_current_states_status import BatchSuccessful, ProcessingPaused, BatchFailure, SetCurrentStatesStatus
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
 from zepben.protobuf.ns.network_state_responses_pb2 import SetCurrentStatesResponse as PBSetCurrentStatesResponse
+
+from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
+from zepben.evolve.streaming.data.set_current_states_status import SetCurrentStatesStatus
 
 
 class UpdateNetworkStateService(UpdateNetworkStateServiceServicer):
@@ -44,10 +44,12 @@ class UpdateNetworkStateService(UpdateNetworkStateServiceServicer):
 
         Args:
             request_iterator: The stream of protobuf requests to process.
+            context: The gRPC context.
 
         Returns:
             A stream of protobuf SetCurrentStatesResponse sent back.
         """
+
         async def request_generator() -> AsyncGenerator[Tuple[int, Tuple[CurrentStateEvent, ...]], None]:
             async for request in request_iterator:
                 yield request.messageId, tuple([CurrentStateEvent.from_pb(event) for event in request.event])

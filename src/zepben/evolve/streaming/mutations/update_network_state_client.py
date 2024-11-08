@@ -2,14 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import List, Callable, AsyncGenerator, Tuple, overload
+from dataclasses import dataclass
+from typing import List, Callable, AsyncGenerator, Tuple
 
-from attr import dataclass
 from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceStub
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
 
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
-from zepben.evolve.streaming.data.set_current_states_status import SetCurrentStatesStatus, BatchSuccessful, ProcessingPaused, BatchFailure
+from zepben.evolve.streaming.data.set_current_states_status import SetCurrentStatesStatus
 from zepben.evolve.streaming.grpc.grpc import GrpcClient
 
 
@@ -44,6 +44,7 @@ class UpdateNetworkStateClient(GrpcClient):
         Returns:
             A SetCurrentStatesResponse object representing the status of the batch after being processed by the service.
         """
+
         async def request_generator() -> AsyncGenerator['UpdateNetworkStateClient.SetCurrentStatesRequest', None]:
             yield UpdateNetworkStateClient.SetCurrentStatesRequest(batch_id, batch)
 
@@ -67,6 +68,7 @@ class UpdateNetworkStateClient(GrpcClient):
         Returns:
             A stream of SetCurrentStatesResponse objects representing the status of each batch after being processed by the gRPC service.
         """
+
         async def request_generator():
             async for batch in batches:
                 yield PBSetCurrentStatesRequest(messageId=batch.batch_id, event=[event.to_pb() for event in batch.events])

@@ -3,23 +3,22 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import AsyncGenerator
+from datetime import datetime, timedelta
 from typing import Tuple
 
 import grpc
 import pytest
-from datetime import datetime, timedelta
-
+from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub, add_QueryNetworkStateServiceServicer_to_server
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest
 
 from util import grpc_aio_server
 from zepben.evolve import datetime_to_timestamp
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub, add_QueryNetworkStateServiceServicer_to_server
 from zepben.evolve.streaming.data.current_state_event import SwitchStateEvent, SwitchAction, CurrentStateEvent
 from zepben.evolve.streaming.get.query_network_state_service import QueryNetworkStateService
 
-class TestQueryNetworkStateService:
 
+class TestQueryNetworkStateService:
     from_datetime = datetime.now()
     to_datetime = datetime.now() + timedelta(days=1)
     current_state_events = (
@@ -57,6 +56,6 @@ class TestQueryNetworkStateService:
         assert [a.messageId for a in responses] == [1, 1, 1]
         assert [a.eventId for a in actual_result] == [e.event_id for e in expected_result]
         assert [a.timestamp for a in actual_result] == [datetime_to_timestamp(e.timestamp) for e in expected_result]
-        assert [a.switch.mRID for a in actual_result] == [e.mRID for e in expected_result]
+        assert [a.switch.mRID for a in actual_result] == [e.mrid for e in expected_result]
         assert [a.switch.action for a in actual_result] == [e.action.value for e in expected_result]
         assert [a.switch.phases for a in actual_result] == [e.phases.value[0] for e in expected_result]
