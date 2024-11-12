@@ -11,8 +11,7 @@ from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCur
     AddCutEvent as PBAddCutEvent, RemoveCutEvent as PBRemoveCutEvent, AddJumperEvent as PBAddJumperEvent, RemoveJumperEvent as PBRemoveJumperEvent, \
     SwitchAction as PBSwitchAction
 
-from zepben.evolve import PhaseCode, datetime_to_timestamp
-from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent, SwitchStateEvent, SwitchAction
+from zepben.evolve import PhaseCode, datetime_to_timestamp, CurrentStateEvent, SwitchStateEvent, SwitchAction
 
 
 def _test_from_pb_not_implemented(event: PBCurrentStateEvent):

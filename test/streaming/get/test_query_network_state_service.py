@@ -12,10 +12,7 @@ from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceSt
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest
 
 from util import grpc_aio_server
-from zepben.evolve import datetime_to_timestamp
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.streaming.data.current_state_event import SwitchStateEvent, SwitchAction, CurrentStateEvent
-from zepben.evolve.streaming.get.query_network_state_service import QueryNetworkStateService
+from zepben.evolve import datetime_to_timestamp, SwitchStateEvent, SwitchAction, CurrentStateEvent, QueryNetworkStateService, PhaseCode
 
 
 class TestQueryNetworkStateService:

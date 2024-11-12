@@ -11,10 +11,8 @@ from zepben.protobuf.ns.network_state_pb2_grpc import add_UpdateNetworkStateServ
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
 
 from util import grpc_aio_server
-from zepben.evolve import PhaseCode
-from zepben.evolve.streaming.data.current_state_event import SwitchStateEvent, SwitchAction, CurrentStateEvent
-from zepben.evolve.streaming.data.set_current_states_status import SetCurrentStatesStatus, BatchSuccessful, ProcessingPaused, BatchFailure
-from zepben.evolve.streaming.mutations.update_network_state_service import UpdateNetworkStateService
+from zepben.evolve import PhaseCode, SwitchStateEvent, SwitchAction, CurrentStateEvent, SetCurrentStatesStatus, BatchSuccessful, ProcessingPaused, BatchFailure, \
+    UpdateNetworkStateService
 
 
 class TestUpdateNetworkStateService:
