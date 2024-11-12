@@ -8,7 +8,7 @@ import grpc
 from zepben.auth import ZepbenTokenFetcher, create_token_fetcher, create_token_fetcher_managed_identity
 from zepben.evolve import GrpcChannelBuilder
 
-__all__ = ["connect_tls", "connect_insecure", "connect_with_password", "connect_with_secret", "connect_with_identity"]
+__all__ = ["connect_tls", "connect_insecure", "connect_with_password", "connect_with_secret", "connect_with_identity", "connect_with_token"]
 
 GRPC_READY_TIMEOUT = 20  # seconds
 
@@ -109,6 +109,32 @@ def connect_with_secret(
         return connect_tls(host, rpc_port, ca_filename, **kwargs)
 
 
+def connect_with_token(
+    access_token: str,
+    host: str = "localhost",
+    rpc_port: int = 50051,
+    ca_filename: Optional[str] = None,
+    **kwargs
+) -> grpc.aio.Channel:
+    """
+    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and the OAuth client credentials flow.
+    The OAuth provider's domain and the "audience" parameter of the token request are fetched as JSON from a specified URL.
+
+    :param access_token: The token string of the client generated using Evolve App
+    :param host: The hostname where the gRPC service is hosted
+    :param rpc_port: The port of the gRPC service
+    :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
+                        and defaults to null, in which case only the system CAs are used to verify certificates.
+    :return: An authenticated, encrypted connection to the gRPC service based on OAuth2 flows. If the authentication configuration specifies that no
+             authentication is required, a non-authenticated, encrypted connection is returned instead.
+    """
+
+    if access_token:
+        return _connect_with_access_token(access_token, host, rpc_port, ca_filename, **kwargs)
+    else:
+        return connect_tls(host, rpc_port, ca_filename, **kwargs)
+
+
 def connect_with_password(
     client_id: str,
     username: str,
@@ -183,3 +209,14 @@ def _connect_with_password_using_token_fetcher(
     token_fetcher.token_request_data["scope"] = "offline_access"
 
     return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build(**kwargs)
+
+
+def _connect_with_access_token(
+    access_token: str,
+    host: str,
+    rpc_port: int,
+    ca_filename: Optional[str],
+    **kwargs
+) -> grpc.aio.Channel:
+
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_client_token(access_token).build(**kwargs)
