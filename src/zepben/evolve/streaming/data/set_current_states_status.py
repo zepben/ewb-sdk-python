@@ -16,7 +16,7 @@ from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatch
     StateEventUnsupportedPhasing as PBStateEventUnsupportedPhasing
 from zepben.protobuf.ns.network_state_responses_pb2 import SetCurrentStatesResponse as PBSetCurrentStatesResponse
 
-from zepben.evolve import datetime_to_timestamp
+from zepben.evolve.util import datetime_to_timestamp
 
 
 class SetCurrentStatesStatus(ABC):

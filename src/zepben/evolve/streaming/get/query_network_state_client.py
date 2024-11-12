@@ -10,7 +10,7 @@ from typing import List, Callable, AsyncGenerator, Tuple
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest
 
-from zepben.evolve import datetime_to_timestamp
+from zepben.evolve.util import datetime_to_timestamp
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
 from zepben.evolve.streaming.grpc.grpc import GrpcClient
 
