@@ -5,7 +5,7 @@
 __all__ = ["UpdateNetworkStateClient"]
 
 from dataclasses import dataclass
-from typing import List, Callable, AsyncGenerator, Tuple
+from typing import List, Callable, AsyncGenerator, Iterable
 
 from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceStub
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
@@ -32,7 +32,7 @@ class UpdateNetworkStateClient(GrpcClient):
         else:
             self._stub = UpdateNetworkStateServiceStub(channel)
 
-    async def set_current_states(self, batch_id: int, batch: Tuple[CurrentStateEvent, ...]) -> SetCurrentStatesStatus:
+    async def set_current_states(self, batch_id: int, batch: Iterable[CurrentStateEvent]) -> SetCurrentStatesStatus:
         """
         Sends a single batch of current state events to the gRPC service for processing.
 
@@ -89,4 +89,4 @@ class UpdateNetworkStateClient(GrpcClient):
         """
 
         batch_id: int
-        events: Tuple[CurrentStateEvent, ...]
+        events: Iterable[CurrentStateEvent]

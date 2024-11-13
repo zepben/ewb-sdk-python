@@ -5,7 +5,7 @@
 __all__ = ["QueryNetworkStateService"]
 
 from datetime import datetime
-from typing import Callable, Tuple, AsyncGenerator
+from typing import Callable, AsyncGenerator, Iterable
 
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceServicer
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest
@@ -26,7 +26,7 @@ class QueryNetworkStateService(QueryNetworkStateServiceServicer):
         on_get_current_states: An function that retrieves CurrentStateEvent objects within the specified time range.
     """
 
-    def __init__(self, on_get_current_states: Callable[[datetime, datetime], AsyncGenerator[Tuple[CurrentStateEvent, ...], None]]):
+    def __init__(self, on_get_current_states: Callable[[datetime, datetime], AsyncGenerator[Iterable[CurrentStateEvent], None]]):
         self.on_get_current_states = on_get_current_states
 
     async def getCurrentStates(self, request: GetCurrentStatesRequest, context) -> AsyncGenerator[GetCurrentStatesResponse, None]:

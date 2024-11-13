@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import AsyncGenerator
 from datetime import datetime, timedelta
-from typing import Tuple
+from typing import Iterable
 
 import grpc
 import pytest
@@ -26,7 +26,7 @@ class TestQueryNetworkStateService:
 
     @pytest.fixture
     async def grpc_stub(self):
-        async def on_get_current_states(from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[Tuple[CurrentStateEvent, ...], None]:
+        async def on_get_current_states(from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[Iterable[CurrentStateEvent], None]:
             assert from_datetime == self.from_datetime
             assert to_datetime == self.to_datetime
             for event in self.current_state_events:
