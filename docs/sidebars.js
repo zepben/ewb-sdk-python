@@ -21,6 +21,11 @@ module.exports = {
         "sdk-persistence",
         "sdk-consumer",
         "sdk-protection",
-        "sdk-ewb-file-paths"
+        "sdk-ewb-file-paths",
+        {
+            type: "category",
+            label: "Network State",
+            items: ["query-network-state-client", "query-network-state-service", "update-network-state-client", "update-network-state-service"]
+        },
     ]
 };

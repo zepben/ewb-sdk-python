@@ -5,6 +5,9 @@
 
 import importlib
 import pkgutil
+from concurrent import futures
+
+import grpc
 
 
 def all_subclasses(cls, package):
@@ -46,3 +49,11 @@ def import_submodules(package: str, recursive=True):
         if recursive and is_pkg:
             results.update(import_submodules(full_name))
     return results
+
+
+def grpc_aio_server():
+    server = grpc.aio.server(futures.ThreadPoolExecutor(max_workers=1))
+    host = 'localhost:50051'
+    server.add_insecure_port(host)
+
+    return server, host

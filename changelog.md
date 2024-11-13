@@ -4,6 +4,8 @@
 * Database readers and writes for each `BaseService` no longer accept a `MetadataCollection`, and will instead use the collection of the provided service.
 * `BaseService` and `MetadataCollection` are no longer dataclassy dataclasses. This will only affect you if you were making use of the auto generated
   constructors to pass initial values (which didn't always work as expected anyway)
+* Network state services for updating and querying network state events via gRPC.
+* Client functionality for updating and querying network states via gRPC service stub.
 
 ### New Features
 * `BaseService` now contains a `MetadataCollection` to tightly couple the metadata to the associated service.

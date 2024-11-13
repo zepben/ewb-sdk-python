@@ -5,15 +5,18 @@
 
 from __future__ import annotations
 
+__all__ = ["get_by_mrid", "contains_mrid", "safe_remove", "safe_remove_by_id", "nlen", "ngen", "is_none_or_empty", "require", "pb_or_none", "CopyableUUID",
+           "datetime_to_timestamp"]
+
 import os
 import re
 from collections.abc import Sized
+from datetime import datetime
 from typing import List, Optional, Iterable, Callable, Any, TypeVar, Generator, Dict
+from typing import TYPE_CHECKING
 from uuid import UUID
 
-__all__ = ["get_by_mrid", "contains_mrid", "safe_remove", "safe_remove_by_id", "nlen", "ngen", "is_none_or_empty", "require", "pb_or_none", "CopyableUUID"]
-
-from typing import TYPE_CHECKING
+from google.protobuf.timestamp_pb2 import Timestamp as PBTimestamp
 
 if TYPE_CHECKING:
     from zepben.evolve import IdentifiedObject, TIdentifiedObject
@@ -144,3 +147,9 @@ class CopyableUUID(UUID):
     @staticmethod
     def copy():
         return str(UUID(bytes=os.urandom(16), version=4))
+
+
+def datetime_to_timestamp(date_time: datetime) -> PBTimestamp:
+    timestamp = PBTimestamp()
+    timestamp.FromDatetime(date_time)
+    return timestamp
