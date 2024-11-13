@@ -24,12 +24,12 @@ current state events that occurred between those date/times (inclusive)
 
 ```python
 from datetime import datetime
-from typing import AsyncGenerator, Tuple
+from typing import AsyncGenerator, Iterable
 
 from zepben.evolve import CurrentStateEvent
 
 
-async def on_get_current_states(from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[Tuple[CurrentStateEvent, ...], None]:
+async def on_get_current_states(from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[Iterable[CurrentStateEvent], None]:
     events = []
     # build the batch of events
     yield events
@@ -68,7 +68,7 @@ Putting each of the steps above together, you can build the scaffold of a workin
 
 ```python
 from datetime import datetime
-from typing import AsyncGenerator, Tuple
+from typing import AsyncGenerator, Iterable
 
 import grpc
 from zepben.protobuf.ns.network_state_pb2_grpc import add_QueryNetworkStateServiceServicer_to_server
@@ -80,7 +80,7 @@ class QueryNetworkStateServiceImpl:
     def __init__(self):
         self.service = QueryNetworkStateService(self.on_get_current_states)
 
-    async def on_get_current_states(self, from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[Tuple[CurrentStateEvent, ...], None]:
+    async def on_get_current_states(self, from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[Iterable[CurrentStateEvent], None]:
         events = []
         # build the batch of events
         yield events
