@@ -174,6 +174,8 @@ class GrpcChannelBuilder(ABC):
         """
         if client_token is None:
             raise Exception("You must have a client_token.")
+        if self._channel_credentials is None:
+            raise Exception("You must call make_secure before calling with_client_token.")
         self._channel_credentials = grpc.composite_channel_credentials(
             self._channel_credentials,
             grpc.access_token_call_credentials(client_token)
