@@ -165,7 +165,7 @@ def test_with_token_fetcher_before_make_secure():
 
 def test_with_client_token_before_make_secure():
     with pytest.raises(Exception, match="You must call make_secure before calling with_client_token."):
-        GrpcChannelBuilder().with_client_token(ZepbenTokenFetcher("audience", "issuer_domain", "token_endpoint"))
+        GrpcChannelBuilder().with_client_token("access_token")
 
 
 @mock.patch("grpc._channel._UnaryUnaryMultiCallable.__call__",

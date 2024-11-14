@@ -129,10 +129,7 @@ def connect_with_token(
              authentication is required, a non-authenticated, encrypted connection is returned instead.
     """
 
-    if access_token:
-        return _connect_with_access_token(access_token, host, rpc_port, ca_filename, **kwargs)
-    else:
-        return connect_tls(host, rpc_port, ca_filename, **kwargs)
+    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_client_token(access_token).build(**kwargs)
 
 
 def connect_with_password(
@@ -209,14 +206,3 @@ def _connect_with_password_using_token_fetcher(
     token_fetcher.token_request_data["scope"] = "offline_access"
 
     return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_token_fetcher(token_fetcher).build(**kwargs)
-
-
-def _connect_with_access_token(
-    access_token: str,
-    host: str,
-    rpc_port: int,
-    ca_filename: Optional[str],
-    **kwargs
-) -> grpc.aio.Channel:
-
-    return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_client_token(access_token).build(**kwargs)

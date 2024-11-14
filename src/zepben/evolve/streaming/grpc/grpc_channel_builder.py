@@ -172,8 +172,6 @@ class GrpcChannelBuilder(ABC):
         :param client_token: The :class:`str` that has been generated in Evolve application.
         :return: This builder
         """
-        if client_token is None:
-            raise Exception("You must have a client_token.")
         if self._channel_credentials is None:
             raise Exception("You must call make_secure before calling with_client_token.")
         self._channel_credentials = grpc.composite_channel_credentials(
