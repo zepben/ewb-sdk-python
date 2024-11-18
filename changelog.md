@@ -10,6 +10,7 @@
 ### New Features
 * `BaseService` now contains a `MetadataCollection` to tightly couple the metadata to the associated service.
 * Added `Services`, a new class which contains a copy of each `BaseService` supported by the SDK.
+* Added a new connection method `connect_with_token` which allows you to connect to the EWB using an access token.
 
 ### Enhancements
 * None.
