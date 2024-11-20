@@ -33,6 +33,7 @@ This will typically be one of the following:
 1. `connect_with_secret()`, for authenticating with a client ID and secret, typically used for machine-to-machine services.1
 1. `connect_with_identity()`, for authenticating with an Azure managed identity.
 1. `connect_with_token()`, for authenticating with a personal access token and TLS.
+1. `connect_with_token_insecure()`, for authenticating with a personal access token without TLS.
 
 All connection functions return a channel that can be used for synchronous or asynchronous (asyncio) consumer clients.
 
@@ -91,6 +92,21 @@ from zepben.evolve import connect_with_token, SyncNetworkConsumerClient, Feeder
 from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
 
 channel = connect_with_token(access_token="your_personal_access_token", host="ewb.zepben.com", rpc_port=443, ca_filename="path/to/ca/bundle")
+client = SyncNetworkConsumerClient(channel)
+
+result = client.get_equipment_container("xxx", Feeder)
+# The Feeder container only contains HV/MV equipment. To include LV, use the following line instead:
+result = client.get_equipment_container("xxx", Feeder, include_energized_containers=INCLUDE_ENERGIZED_LV_FEEDERS)
+
+client.service.get('...')
+```
+
+If a personal access token is generated from the Evolve App Server or Evolve Web Client and there is no CA the `connect_with_token_insecure` function can be used to make an insecure connection:
+```python
+from zepben.evolve import connect_with_token, SyncNetworkConsumerClient, Feeder
+from zepben.protobuf.nc.nc_requests_pb2 import INCLUDE_ENERGIZED_LV_FEEDERS
+
+channel = connect_with_token_insecure(access_token="your_personal_access_token", host="ewb.zepben.com", rpc_port=443)
 client = SyncNetworkConsumerClient(channel)
 
 result = client.get_equipment_container("xxx", Feeder)
