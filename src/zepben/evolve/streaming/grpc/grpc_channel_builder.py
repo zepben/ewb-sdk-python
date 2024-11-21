@@ -164,3 +164,18 @@ class GrpcChannelBuilder(ABC):
             grpc.metadata_call_credentials(AuthTokenPlugin(token_fetcher=token_fetcher))
         )
         return self
+
+    def with_client_token(self, client_token: str) -> 'GrpcChannelBuilder':
+        """
+        Authenticates calls for the gRPC channel using a client access token string.
+
+        :param client_token: The :class:`str` that has been generated in Evolve application.
+        :return: This builder
+        """
+        if self._channel_credentials is None:
+            raise Exception("You must call make_secure before calling with_client_token.")
+        self._channel_credentials = grpc.composite_channel_credentials(
+            self._channel_credentials,
+            grpc.access_token_call_credentials(client_token)
+        )
+        return self
