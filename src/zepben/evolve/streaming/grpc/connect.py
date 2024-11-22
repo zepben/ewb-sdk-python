@@ -8,7 +8,7 @@ import grpc
 from zepben.auth import ZepbenTokenFetcher, create_token_fetcher, create_token_fetcher_managed_identity
 from zepben.evolve import GrpcChannelBuilder
 
-__all__ = ["connect_tls", "connect_insecure", "connect_with_password", "connect_with_secret", "connect_with_identity", "connect_with_token", "connect_with_token_insecure"]
+__all__ = ["connect_tls", "connect_insecure", "connect_with_password", "connect_with_secret", "connect_with_identity", "connect_with_token"]
 
 GRPC_READY_TIMEOUT = 20  # seconds
 
@@ -129,27 +129,6 @@ def connect_with_token(
     """
 
     return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_client_token(access_token).build(**kwargs)
-
-
-def connect_with_token_insecure(
-    access_token: str,
-    host: str = "localhost",
-    rpc_port: int = 50051,
-    **kwargs
-) -> grpc.aio.Channel:
-    """
-    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using a personal access token generated from Evolve App Server or Evolve Web Client.
-
-    :param access_token: The token string of the client generated using Evolve App
-    :param host: The hostname where the gRPC service is hosted
-    :param rpc_port: The port of the gRPC service
-    :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
-                        and defaults to null, in which case only the system CAs are used to verify certificates.
-    :return: An authenticated, encrypted connection to the gRPC service based on OAuth2 flows. If the authentication configuration specifies that no
-             authentication is required, a non-authenticated, encrypted connection is returned instead.
-    """
-
-    return GrpcChannelBuilder().for_address(host, rpc_port).with_client_token(access_token).build(**kwargs)
 
 
 def connect_with_password(

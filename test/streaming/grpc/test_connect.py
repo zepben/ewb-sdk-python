@@ -8,32 +8,28 @@ from unittest import mock
 
 import pytest
 
-from zepben.evolve import connect_insecure, connect_tls, connect_with_secret, connect_with_password, connect_with_token, connect_with_token_insecure
+from zepben.evolve import connect_insecure, connect_tls, connect_with_secret, connect_with_password, connect_with_token
 
 base_gcb = Mock()
 addressed_gcb = Mock()
 secure_gcb = Mock()
 authenticated_gcb = Mock()
 token_authenticated_gcb = Mock()
-token_authenticated_gcb_insecure = Mock()
 insecure_channel = Mock()
 secure_channel = Mock()
 authenticated_channel = Mock()
 token_authenticated_channel = Mock()
-token_authenticated_channel_insecure = Mock()
 token_fetcher = Mock()
 token_fetcher.token_request_data = {}
 
 base_gcb.for_address = Mock(return_value=addressed_gcb)
 addressed_gcb.make_secure = Mock(return_value=secure_gcb)
-addressed_gcb.with_client_token = Mock(return_value=token_authenticated_gcb_insecure)
 secure_gcb.with_token_fetcher = Mock(return_value=authenticated_gcb)
 secure_gcb.with_client_token = Mock(return_value=token_authenticated_gcb)
 addressed_gcb.build = Mock(return_value=insecure_channel)
 secure_gcb.build = Mock(return_value=secure_channel)
 authenticated_gcb.build = Mock(return_value=authenticated_channel)
 token_authenticated_gcb.build = Mock(return_value=token_authenticated_channel)
-token_authenticated_gcb_insecure.build = Mock(return_value=token_authenticated_channel_insecure)
 
 
 @pytest.fixture(autouse=True)
@@ -72,14 +68,6 @@ def test_connect_with_token(_):
     base_gcb.for_address.assert_called_once_with("localhost", 1234)
     addressed_gcb.make_secure.assert_called_once_with(root_certificates="ca.cert")
     secure_gcb.with_client_token.assert_called_once_with("access_token")
-
-
-@mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
-def test_connect_with_token_insecure(_):
-    assert connect_with_token_insecure("access_token", "localhost", 1234) is token_authenticated_channel_insecure
-
-    base_gcb.for_address.assert_called_once_with("localhost", 1234)
-    addressed_gcb.with_client_token.assert_called_once_with("access_token")
 
 
 @mock.patch("zepben.evolve.streaming.grpc.connect.GrpcChannelBuilder", return_value=base_gcb)
