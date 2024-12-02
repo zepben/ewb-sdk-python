@@ -91,6 +91,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import *
@@ -116,8 +118,6 @@ from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import *
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_cooling_type import *
-from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import *
-from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import *
 from zepben.evolve.model.cim.iec61970.base.core.substation import *
 from zepben.evolve.model.cim.iec61970.base.core.terminal import *
 from zepben.evolve.model.cim.iec61970.base.core.equipment import *
