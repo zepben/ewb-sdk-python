@@ -1,5 +1,21 @@
 # Zepben Python SDK
-## [0.42.0] - UNRELEASED
+## [0.43.0] - UNRELEASED
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
+
+## [0.42.0] - 2024-12-02
 ### Breaking Changes
 * Database readers and writes for each `BaseService` no longer accept a `MetadataCollection`, and will instead use the collection of the provided service.
 * `BaseService` and `MetadataCollection` are no longer dataclassy dataclasses. This will only affect you if you were making use of the auto generated
@@ -21,7 +37,7 @@
 ### Notes
 * None.
 
-## [0.41.2] - UNRELEASED
+## [0.41.2] - 2024-12-02
 ### Fixes
 * Don't use typing_extensions for Optional import (fixes import of library on Python >3.12)
 
