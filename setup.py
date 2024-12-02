@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 deps = [
     "zepben.auth==0.12.1",
-    "zepben.protobuf==0.32.0b1",
+    "zepben.protobuf==0.32.0",
     "dataclassy==0.6.2",
     "six==1.16.0"
 ]
@@ -27,7 +27,7 @@ test_deps = [
 
 setup(
     name="zepben.evolve",
-    version="0.42.0b6",
+    version="0.42.0",
     description="Python SDK for interacting with the Evolve platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
