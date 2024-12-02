@@ -29,5 +29,5 @@ class BatteryControl(RegulatingControl):
     reserve_percent: Optional[float] = None
     """[ZBEX] Percentage of the rated storage capacity that should be reserved during normal operations. This reserve acts as a safeguard, preventing the energy level"""
 
-    control_mode: BatteryControlMode = BatteryControlMode.unknown
+    control_mode: BatteryControlMode = BatteryControlMode.UNKNOWN
     """[ZBEX] Mode of operation for the dispatch (charging/discharging) function of BatteryControl."""

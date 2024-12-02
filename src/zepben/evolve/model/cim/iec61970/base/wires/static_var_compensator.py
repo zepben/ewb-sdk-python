@@ -27,7 +27,7 @@ class StaticVarCompensator(RegulatingCondEq):
     q: Optional[float] = None
     """Reactive power injection in VAr. Load sign convention is used, i.e. positive sign means flow out from a node. Starting value for a steady state solution."""
 
-    svc_control_mode: SVCControlMode = SVCControlMode.unknown
+    svc_control_mode: SVCControlMode = SVCControlMode.UNKNOWN
     """SVC control mode."""
 
     voltage_set_point: Optional[int] = None

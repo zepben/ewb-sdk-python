@@ -375,14 +375,14 @@ class EndDeviceFunctionKind(Enum):
     """
 
     UNKNOWN = 0
-    AUTONOMOUS_DST = 1
-    DEMAND_RESPONSE = 2
-    ELECTRIC_METERING = 3
-    METROLOGY = 4
-    ON_REQUEST_READ = 5
-    OUTAGE_HISTORY = 6
-    RELAYS_PROGRAMMING = 7
-    REVERSE_FLOW = 8
+    autonomousDst = 1
+    demandResponse = 2
+    electricMetering = 3
+    metrology = 4
+    onRequestRead = 5
+    outageHistory = 6
+    relaysProgramming = 7
+    reverseFlow = 8
 
     @property
     def short_name(self):

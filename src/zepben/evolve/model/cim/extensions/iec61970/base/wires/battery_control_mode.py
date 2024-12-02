@@ -19,7 +19,7 @@ class BatteryControlMode(Enum):
     [ZBEX] Mode of operation for the dispatch (charging/discharging) function of BatteryControl.
     """
 
-    unknown = 0
+    UNKNOWN = 0
     """Unknown control mode."""
 
     peakShaveDischarge = 1

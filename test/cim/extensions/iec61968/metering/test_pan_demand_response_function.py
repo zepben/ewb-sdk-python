@@ -18,7 +18,7 @@ pan_demand_response_function_kwargs = {
     "appliance": integers(min_value=0, max_value=4095)
 }
 
-pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.DEMAND_RESPONSE]
+pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.demandResponse]
 
 
 def test_pan_demand_response_function_constructor_default():
