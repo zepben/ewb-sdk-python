@@ -5,6 +5,8 @@
 from zepben.evolve.database.sqlite.common.base_service_writer import BaseServiceWriter
 from zepben.evolve.database.sqlite.network.network_cim_writer import NetworkCimWriter
 from zepben.evolve.database.sqlite.network.network_database_tables import NetworkDatabaseTables
+from zepben.evolve.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
@@ -65,6 +67,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve impor
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
 from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import SeriesCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import LinearShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import StaticVarCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
@@ -101,6 +104,8 @@ class NetworkServiceWriter(BaseServiceWriter):
     def _do_save(self) -> bool:
         return all([
             self._save_each_object(CableInfo, self._writer.save_cable_info),
+            self._save_each_object(PanDemandResponseFunction, self._writer.save_pan_demand_response_function),
+            self._save_each_object(BatteryControl, self._writer.save_battery_control),
             self._save_each_object(OverheadWireInfo, self._writer.save_overhead_wire_info),
             self._save_each_object(PowerTransformerInfo, self._writer.save_power_transformer_info),
             self._save_each_object(TransformerTankInfo, self._writer.save_transformer_tank_info),
@@ -176,6 +181,7 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Ground, self._writer.save_ground),
             self._save_each_object(GroundDisconnector, self._writer.save_ground_disconnector),
             self._save_each_object(SeriesCompensator, self._writer.save_series_compensator),
+            self._save_each_object(StaticVarCompensator, self._writer.save_static_var_compensator),
             self._save_each_object(SynchronousMachine, self._writer.save_synchronous_machine),
             self._save_each_object(PetersenCoil, self._writer.save_petersen_coil),
             self._save_each_object(GroundingImpedance, self._writer.save_grounding_impedance),

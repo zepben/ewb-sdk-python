@@ -6,6 +6,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction as PBPanDemandResponseFunction
+from zepben.protobuf.cim.extensions.iec61970.base.wires.BatteryControl_pb2 import BatteryControl as PBBatteryControl
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo as PBCableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.NoLoadTest_pb2 import NoLoadTest as PBNoLoadTest
 from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircuitTest as PBOpenCircuitTest
@@ -19,6 +21,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import Trans
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest as PBTransformerTest
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo as PBWireInfo
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer as PBAssetContainer
+from zepben.protobuf.cim.iec61968.assets.AssetFunction_pb2 import AssetFunction as PBAssetFunction
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo as PBAssetInfo
 from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import AssetOrganisationRole as PBAssetOrganisationRole
 from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner as PBAssetOwner
@@ -35,6 +38,7 @@ from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInf
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo as PBPotentialTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.RelayInfo_pb2 import RelayInfo as PBRelayInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infcommon.Ratio_pb2 import Ratio as PBRatio
+from zepben.protobuf.cim.iec61968.metering.EndDeviceFunction_pb2 import EndDeviceFunction as PBEndDeviceFunction
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice as PBEndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter as PBMeter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint as PBUsagePoint
@@ -116,6 +120,7 @@ from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import Regula
 from zepben.protobuf.cim.iec61970.base.wires.RotatingMachine_pb2 import RotatingMachine as PBRotatingMachine
 from zepben.protobuf.cim.iec61970.base.wires.SeriesCompensator_pb2 import SeriesCompensator as PBSeriesCompensator
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator as PBShuntCompensator
+from zepben.protobuf.cim.iec61970.base.wires.StaticVarCompensator_pb2 import StaticVarCompensator as PBStaticVarCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch as PBSwitch
 from zepben.protobuf.cim.iec61970.base.wires.SynchronousMachine_pb2 import SynchronousMachine as PBSynchronousMachine
 from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl as PBTapChangerControl
@@ -133,6 +138,9 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeede
 from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit as PBEvChargingUnit
 
 import zepben.evolve.services.common.resolver as resolver
+from zepben.evolve.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
@@ -145,6 +153,7 @@ from zepben.evolve.model.cim.iec61968.assetinfo.transformer_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
 from zepben.evolve.model.cim.iec61968.assets.asset import *
+from zepben.evolve.model.cim.iec61968.assets.asset_function import AssetFunction
 from zepben.evolve.model.cim.iec61968.assets.asset_info import *
 from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import *
 from zepben.evolve.model.cim.iec61968.assets.pole import *
@@ -225,6 +234,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import Rotatin
 from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
+from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import StaticVarCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 from zepben.evolve.model.cim.iec61970.base.wires.switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
@@ -267,9 +278,43 @@ __all__ = [
     "tap_changer_to_cim", "transformer_end_to_cim", "circuit_to_cim", "loop_to_cim", "lv_feeder_to_cim", "ev_charging_unit_to_cim",
     "transformer_end_rated_s_to_cim", "tap_changer_control_to_cim", "regulating_control_to_cim", "distance_relay_to_cim", "protection_relay_scheme_to_cim",
     "protection_relay_system_to_cim", "relay_setting_to_cim", "voltage_relay_to_cim", "ground_to_cim", "ground_disconnector_to_cim",
-    "series_compensator_to_cim",
+    "series_compensator_to_cim", "pan_demand_response_function_to_cim", 'battery_control_to_cim', "asset_function_to_cim", "end_device_function_to_cim",
+    "static_var_compensator_to_cim"
 
 ]
+
+
+#######################################
+# [ZBEX] EXTENSIONS IEC61968 METERING #
+#######################################
+def pan_demand_response_function_to_cim(pb: PBPanDemandResponseFunction, network_service: NetworkService) -> PanDemandResponseFunction:
+    cim = PanDemandResponseFunction(
+        mrid=pb.mrid(),
+        kind=EndDeviceFunctionKind(pb.kind)
+    )
+
+    cim.assign_controlled_appliance_configuration_bitmask(pb.appliance)
+    end_device_function_to_cim(pb.edf, cim, network_service)
+
+    return cim if network_service.add(cim) else None
+
+
+#########################################
+# [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
+#########################################
+def battery_control_to_cim(pb: PBBatteryControl, network_service: NetworkService) -> BatteryControl:
+    cim = BatteryControl(
+        mrid=pb.mrid(),
+        charging_rate=float_or_none(pb.chargingRate),
+        discharging_rate=float_or_none(pb.dischargingRate),
+        reserve_percent=float_or_none(pb.reservePercent),
+        control_mode=BatteryControlMode(pb.controlMode)
+    )
+
+    network_service.resolve_or_defer_reference(resolver.battery_unit(cim), pb.batteryUnitMRID)
+    regulating_control_to_cim(pb.rc, cim, network_service)
+
+    return cim if network_service.add(cim) else None
 
 
 #######################
@@ -450,6 +495,10 @@ def asset_to_cim(pb: PBAsset, cim: Asset, network_service: NetworkService):
 
 def asset_container_to_cim(pb: PBAssetContainer, cim: AssetContainer, network_service: NetworkService):
     asset_to_cim(pb.at, cim, network_service)
+
+
+def asset_function_to_cim(pb: PBAssetFunction, cim: AssetFunction, network_service: NetworkService):
+    identified_object_to_cim(pb.io, cim, network_service)
 
 
 def asset_info_to_cim(pb: PBAssetInfo, cim: AssetInfo, network_service: NetworkService):
@@ -634,8 +683,18 @@ def end_device_to_cim(pb: PBEndDevice, cim: EndDevice, network_service: NetworkS
     for mrid in pb.usagePointMRIDs:
         network_service.resolve_or_defer_reference(resolver.ed_usage_points(cim), mrid)
 
+    for mrid in pb.endDeviceFunctionMRIDs:
+        network_service.resolve_or_defer_reference(resolver.end_device_function(cim), mrid)
+
     network_service.resolve_or_defer_reference(resolver.service_location(cim), pb.serviceLocationMRID)
     asset_container_to_cim(pb.ac, cim, network_service)
+
+
+def end_device_function_to_cim(pb: PBEndDeviceFunction, cim: EndDeviceFunction, network_service: NetworkService):
+    cim.enabled = pb.enabled
+
+    network_service.resolve_or_defer_reference(resolver.edf_end_device(cim), pb.endDeviceMRID)
+    asset_function_to_cim(pb.af, cim, network_service)
 
 
 def meter_to_cim(pb: PBMeter, network_service: NetworkService) -> Optional[Meter]:
@@ -1138,6 +1197,9 @@ def battery_unit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> O
         stored_e=long_or_none(pb.storedE),
     )
 
+    for mrid in pb.batteryControlMRIDs:
+        network_service.resolve_or_defer_reference(resolver.battery_control(cim), mrid)
+
     power_electronics_unit_to_cim(pb.peu, cim, network_service)
     return cim if network_service.add(cim) else None
 
@@ -1573,6 +1635,8 @@ def regulating_control_to_cim(pb: PBRegulatingControl, cim: RegulatingControl, n
     network_service.resolve_or_defer_reference(resolver.rc_terminal(cim), pb.terminalMRID)
     for mrid in pb.regulatingCondEqMRIDs:
         network_service.resolve_or_defer_reference(resolver.rc_regulating_cond_eq(cim), mrid)
+    cim.ct_primary = float_or_none(pb.ctPrimary)
+    cim.min_target_deadband = float_or_none(pb.minTargetDeadband)
 
     power_system_resource_to_cim(pb.psr, cim, network_service)
 
@@ -1612,6 +1676,16 @@ def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, netw
     regulating_cond_eq_to_cim(pb.rce, cim, network_service)
 
 
+def static_var_compensator_to_cim(pb: PBStaticVarCompensator, cim: StaticVarCompensator, network_service: NetworkService):
+    cim.capacitive_rating = float_or_none(pb.capacitiveRating)
+    cim.inductive_rating = float_or_none(pb.inductiveRating)
+    cim.q = float_or_none(pb.q)
+    cim.svc_control_mode = SVCControlMode(pb.svcControlMode)
+    cim.voltage_set_point = int_or_none(pb.voltageSetPoint)
+
+    regulating_cond_eq_to_cim(pb.rce, cim, network_service)
+
+
 def switch_to_cim(pb: PBSwitch, cim: Switch, network_service: NetworkService):
     network_service.resolve_or_defer_reference(resolver.switch_info(cim), pb.asset_info_mrid())
     cim.rated_current = float_or_none(pb.ratedCurrent)
@@ -1626,7 +1700,7 @@ def synchronous_machine_to_cim(pb: PBSynchronousMachine, network_service: Networ
         mrid=pb.mrid(),
         base_q=float_or_none(pb.baseQ),
         condenser_p=int_or_none(pb.condenserP),
-        earthing = pb.earthing,
+        earthing=pb.earthing,
         earthing_star_point_r=float_or_none(pb.earthingStarPointR),
         earthing_star_point_x=float_or_none(pb.earthingStarPointX),
         ikk=float_or_none(pb.ikk),
@@ -1643,8 +1717,8 @@ def synchronous_machine_to_cim(pb: PBSynchronousMachine, network_service: Networ
         sat_direct_trans_x=float_or_none(pb.satDirectTransX),
         x0=float_or_none(pb.x0),
         x2=float_or_none(pb.x2),
-        type = SynchronousMachineKind(pb.type),
-        operating_mode = SynchronousMachineKind(pb.operatingMode)
+        type=SynchronousMachineKind(pb.type),
+        operating_mode=SynchronousMachineKind(pb.operatingMode)
     )
 
     for mrid in pb.reactiveCapabilityCurveMRIDs:
@@ -1712,6 +1786,8 @@ def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_se
     return cim if network_service.add(cim) else None
 
 
+PBPanDemandResponseFunction.to_cim = pan_demand_response_function_to_cim
+PBBatteryControl.to_cim = battery_control_to_cim
 PBAcLineSegment.to_cim = ac_line_segment_to_cim
 PBBreaker.to_cim = breaker_to_cim
 PBConductor.to_cim = conductor_to_cim
@@ -1746,6 +1822,7 @@ PBReactiveCapabilityCurve.to_cim = reactive_capability_curve_to_cim
 PBRecloser.to_cim = recloser_to_cim
 PBRegulatingCondEq.to_cim = regulating_cond_eq_to_cim
 PBSeriesCompensator.to_cim = series_compensator_to_cim
+PBStaticVarCompensator.to_cim = static_var_compensator_to_cim
 PBShuntCompensator.to_cim = shunt_compensator_to_cim
 PBSynchronousMachine.to_cim = synchronous_machine_to_cim
 PBSwitch.to_cim = switch_to_cim

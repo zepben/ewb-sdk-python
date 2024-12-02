@@ -3,6 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
+
 from typing import Optional, List, Generator, Iterable, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -12,7 +13,6 @@ from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import Pow
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_control_mode_kind import RegulatingControlModeKind
-
 
 from zepben.evolve.util import nlen, get_by_mrid, safe_remove, ngen
 
@@ -86,6 +86,20 @@ class RegulatingControl(PowerSystemResource):
     """
     The terminal associated with this regulating control. The terminal is associated instead of a node, since the terminal could connect into either a 
     topological node or a connectivity node. Sometimes it is useful to model regulation at a terminal of a bus bar object.
+    """
+
+    ct_primary: Optional[float] = None
+    """
+    Current rating of the CT, expressed in terms of the current (in Amperes) that flows in the Primary where the 'Primary' is the conductor
+    being monitored. It ensures proper operation of the regulating equipment by providing the necessary current references for control actions. An important side
+    effect of this current value is that it also defines the current value at which the full LDC R and X voltages are applied by the controller, where enabled.
+    """
+
+    min_target_deadband: Optional[float] = None
+    """
+    This is the minimum allowable range for discrete control in regulating devices, used to prevent frequent control actions and
+    promote operational stability. This attribute sets a baseline range within which no adjustments are made, applicable across various devices like voltage
+    regulators, shunt compensators, or battery units.
     """
 
     _regulating_cond_eq: Optional[List[RegulatingCondEq]] = None
