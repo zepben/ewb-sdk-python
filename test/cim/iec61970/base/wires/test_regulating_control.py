@@ -22,10 +22,13 @@ regulating_control_kwargs = {
     "min_allowed_target_value": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "rated_current": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "terminal": builds(Terminal),
+    "ct_primary": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    "min_target_deadband": floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
     "regulating_conducting_equipment": lists(builds(PowerElectronicsConnection))
 }
 
-regulating_control_args = [*power_system_resource_args, False, RegulatingControlModeKind.voltage, PhaseCode.ABC, 1.1, 2.2, True, 3.3, 4.4, 5.5, Terminal(),
+regulating_control_args = [*power_system_resource_args, False, RegulatingControlModeKind.voltage, PhaseCode.ABC, 1.1, 2.2, True, 3.3, 4.4, 5.5, Terminal(), 6.6,
+                           7.7,
                            [PowerElectronicsConnection()]]
 
 
@@ -41,6 +44,8 @@ def verify_regulating_control_constructor_default(rc: RegulatingControl):
     assert rc.min_allowed_target_value is None
     assert rc.rated_current is None
     assert rc.terminal is None
+    assert rc.ct_primary is None
+    assert rc.min_target_deadband is None
     assert not list(rc.regulating_conducting_equipment)
 
 
@@ -56,6 +61,8 @@ def verify_regulating_control_constructor_kwargs(
     min_allowed_target_value,
     rated_current,
     terminal,
+    ct_primary,
+    min_target_deadband,
     regulating_conducting_equipment,
     **kwargs
 ):
@@ -70,12 +77,14 @@ def verify_regulating_control_constructor_kwargs(
     assert rc.min_allowed_target_value == min_allowed_target_value
     assert rc.rated_current == rated_current
     assert rc.terminal == terminal
+    assert rc.ct_primary == ct_primary
+    assert rc.min_target_deadband == min_target_deadband
     assert list(rc.regulating_conducting_equipment) == regulating_conducting_equipment
 
 
 def verify_regulating_control_constructor_args(rc):
     verify_power_system_resource_constructor_args(rc)
-    assert regulating_control_args[-11:] == [
+    assert regulating_control_args[-13:] == [
         rc.discrete,
         rc.mode,
         rc.monitored_phase,
@@ -86,6 +95,8 @@ def verify_regulating_control_constructor_args(rc):
         rc.min_allowed_target_value,
         rc.rated_current,
         rc.terminal,
+        rc.ct_primary,
+        rc.min_target_deadband,
         list(rc.regulating_conducting_equipment)
     ]
 

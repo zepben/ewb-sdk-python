@@ -6,9 +6,9 @@ from typing import TypeVar
 
 from hypothesis import given, HealthCheck, settings
 
-from cim.cim_creators import *
 from database.sqlite.schema_utils import assume_non_blank_street_address_details
 from services.common.translator.base_test_translator import validate_service_translations
+from test.cim.cim_creators import *
 from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, Location, NetworkServiceComparator, NameType, \
     NetworkDatabaseTables, TableLocations, TableAssetOrganisationRolesAssets, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableLoopsSubstations, \
@@ -22,6 +22,18 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data im
 T = TypeVar("T", bound=IdentifiedObject)
 
 types_to_test = {
+    #######################################
+    # [ZBEX] EXTENSIONS IEC61968 METERING #
+    #######################################
+
+    "create_pan_demand_response_function": create_pan_demand_response_function(),
+
+    #########################################
+    # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
+    #########################################
+
+    "create_battery_control": create_battery_control(),
+
     #######################
     # IEC61968 ASSET INFO #
     #######################
@@ -165,6 +177,7 @@ types_to_test = {
     "create_reactive_capability_curve": create_reactive_capability_curve(),
     "create_recloser": create_recloser(),
     "create_series_compensator": create_series_compensator(),
+    "create_static_var_compensator": create_static_var_compensator(),
     "create_synchronous_machine": create_synchronous_machine(),
     "create_transformer_star_impedance": create_transformer_star_impedance(),
     "create_tap_changer_control": create_tap_changer_control(),

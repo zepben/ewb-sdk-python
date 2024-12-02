@@ -4,6 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional
 
+from zepben.evolve import EndDeviceFunction
 from zepben.evolve.database.sqlite.common.base_cim_writer import BaseCimWriter
 from zepben.evolve.database.sqlite.extensions.prepared_statement import PreparedStatement
 from zepben.evolve.database.sqlite.network.network_database_tables import NetworkDatabaseTables
@@ -22,6 +23,8 @@ from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_sc
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.associations.table_usage_points_end_devices import TableUsagePointsEndDevices
+from zepben.evolve.database.sqlite.tables.extensions.iec61968.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.table_battery_controls import TableBatteryControls
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_cable_info import TableCableInfo
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_no_load_tests import TableNoLoadTests
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_open_circuit_tests import TableOpenCircuitTests
@@ -35,6 +38,7 @@ from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_transformer_t
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_transformer_test import TableTransformerTest
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_wire_info import TableWireInfo
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_containers import TableAssetContainers
+from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_functions import TableAssetFunctions
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_info import TableAssetInfo
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_organisation_roles import TableAssetOrganisationRoles
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_owners import TableAssetOwners
@@ -52,6 +56,7 @@ from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.tabl
 from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_potential_transformer_info import TablePotentialTransformerInfo
 from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_reclose_delays import TableRecloseDelays
 from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_relay_info import TableRelayInfo
+from zepben.evolve.database.sqlite.tables.iec61968.metering.table_end_device_functions import TableEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.iec61968.metering.table_end_devices import TableEndDevices
 from zepben.evolve.database.sqlite.tables.iec61968.metering.table_meters import TableMeters
 from zepben.evolve.database.sqlite.tables.iec61968.metering.table_usage_points import TableUsagePoints
@@ -139,6 +144,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_regulating_c
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_rotating_machines import TableRotatingMachines
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_series_compensators import TableSeriesCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_shunt_compensators import TableShuntCompensators
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_static_var_compensator import TableStaticVarCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_switches import TableSwitches
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_synchronous_machines import TableSynchronousMachines
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_tap_changer_controls import TableTapChangerControls
@@ -149,6 +155,8 @@ from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder.table_circ
 from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder.table_loops import TableLoops
 from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder.table_lv_feeders import TableLvFeeders
 from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.wires.generation.production.table_ev_charging_units import TableEvChargingUnits
+from zepben.evolve.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
@@ -160,6 +168,7 @@ from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import Tra
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_test import TransformerTest
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import CableInfo, OverheadWireInfo, WireInfo
 from zepben.evolve.model.cim.iec61968.assets.asset import Asset, AssetContainer
+from zepben.evolve.model.cim.iec61968.assets.asset_function import AssetFunction
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole, AssetOwner
 from zepben.evolve.model.cim.iec61968.assets.pole import Pole
@@ -231,6 +240,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import Regul
 from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
 from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import SeriesCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import ShuntCompensator, LinearShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import StaticVarCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
@@ -242,6 +252,7 @@ from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev
 
 __all__ = ["NetworkCimWriter"]
 
+
 class NetworkCimWriter(BaseCimWriter):
     """
      A class for writing the :class:`NetworkService` tables to the database.
@@ -251,6 +262,70 @@ class NetworkCimWriter(BaseCimWriter):
 
     def __init__(self, database_tables: NetworkDatabaseTables):
         super().__init__(database_tables)
+
+    ######################################
+    # [ZBEX] Extension IEC61968 Metering #
+    ######################################
+
+    def save_pan_demand_response_function(self, pan_demand_response_function: PanDemandResponseFunction) -> bool:
+        """
+        Save the :class:`PanDemandResponseFunction` fields to :class:`TablePanDemandResponseFunctions`.
+
+        :param pan_demand_response_function: The :class:`PanDemandResponseFunction` instance to write to the database.
+        :return: True if the :class:`PanDemandResponseFunction` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TablePanDemandResponseFunctions)
+        insert = self._database_tables.get_insert(TablePanDemandResponseFunctions)
+
+        ca = None
+        if pan_demand_response_function.appliance is not None:
+            ca = pan_demand_response_function.appliance.to_int()
+
+        insert.add_value(table.kind.query_index, pan_demand_response_function.kind.short_name)
+        insert.add_value(table.appliance.query_index, ca)
+
+        return self._save_end_device_function(table, insert, pan_demand_response_function, "pan demand response function")
+
+    ########################################
+    # [ZBEX] Extension IEC61970 Base Wires #
+    ########################################
+
+    def save_battery_control(self, battery_control: BatteryControl) -> bool:
+        """
+        Save the :class:`BatteryControl` fields to :class:`TableBatteryControls`.
+
+        :param battery_control: The :class:`BatteryControl` instance to write to the database.
+        :return: True if the :class:`BatteryControl` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableBatteryControls)
+        insert = self._database_tables.get_insert(TableBatteryControls)
+
+        insert.add_value(table.battery_unit_mrid.query_index, self._mrid_or_none(battery_control.battery_unit))
+        insert.add_value(table.charging_rate.query_index, battery_control.charging_rate)
+        insert.add_value(table.discharging_rate.query_index, battery_control.discharging_rate)
+        insert.add_value(table.reserve_percent.query_index, battery_control.reserve_percent)
+        insert.add_value(table.control_mode.query_index, battery_control.control_mode.short_name)
+
+        return self._save_regulating_control(table, insert, battery_control, "battery control")
+
+    #######################
+    # IEC61968 Asset Info #
+    #######################
+
+    def save_cable_info(self, cable_info: CableInfo) -> bool:
+        """
+        Save the :class:`CableInfo` fields to :class:`TableCableInfo`.
+
+        :param cable_info: The :class:`CableInfo` instance to write to the database.
+        :return: True if the :class:`CableInfo` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableCableInfo)
+        insert = self._database_tables.get_insert(TableCableInfo)
+
+        return self._save_wire_info(table, insert, cable_info, "cable info")
 
     #######################
     # IEC61968 Asset Info #
@@ -461,6 +536,9 @@ class NetworkCimWriter(BaseCimWriter):
 
     def _save_asset_container(self, table: TableAssetContainers, insert: PreparedStatement, asset_container: AssetContainer, description: str) -> bool:
         return self._save_asset(table, insert, asset_container, description)
+
+    def _save_asset_function(self, table: TableAssetFunctions, insert: PreparedStatement, asset_function: AssetFunction, description: str) -> bool:
+        return self._save_identified_object(table, insert, asset_function, description)
 
     def _save_asset_info(self, table: TableAssetInfo, insert: PreparedStatement, asset_info: AssetInfo, description: str) -> bool:
         return self._save_identified_object(table, insert, asset_info, description)
@@ -688,6 +766,13 @@ class NetworkCimWriter(BaseCimWriter):
             status = status and self._save_usage_point_to_end_device_association(it, end_device)
 
         return status and self._save_asset_container(table, insert, end_device, description)
+
+    def _save_end_device_function(self, table: TableEndDeviceFunctions, insert: PreparedStatement, end_device_function: EndDeviceFunction,
+                                  description: str) -> bool:
+        insert.add_value(table.end_device_mrid.query_index, self._mrid_or_none(end_device_function.end_device))
+        insert.add_value(table.enabled.query_index, end_device_function.enabled)
+
+        return self._save_asset_function(table, insert, end_device_function, description)
 
     def save_meter(self, meter: Meter) -> bool:
         """
@@ -1935,6 +2020,8 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.min_allowed_target_value.query_index, regulating_control.min_allowed_target_value)
         insert.add_value(table.rated_current.query_index, regulating_control.rated_current)
         insert.add_value(table.terminal_mrid.query_index, self._mrid_or_none(regulating_control.terminal))
+        insert.add_value(table.ct_primary.query_index, regulating_control.ct_primary)
+        insert.add_value(table.min_target_deadband.query_index, regulating_control.min_target_deadband)
 
         return self._save_power_system_resource(table, insert, regulating_control, description)
 
@@ -1987,6 +2074,26 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.sections.query_index, shunt_compensator.sections)
 
         return self._save_regulating_cond_eq(table, insert, shunt_compensator, description)
+
+    def save_static_var_compensator(self, static_var_compensator: StaticVarCompensator) -> bool:
+        """
+        Save the :class:`StaticVarCompensator` fields to :class:`TableStaticVarCompensators`.
+
+        :param static_var_compensator: The :class:`StaticVarCompensator` instance to write to the database.
+
+        :return: True if the :class:`StaticVarCompensator` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableStaticVarCompensators)
+        insert = self._database_tables.get_insert(TableStaticVarCompensators)
+
+        insert.add_value(table.capacitive_rating.query_index, static_var_compensator.capacitive_rating)
+        insert.add_value(table.inductive_rating.query_index, static_var_compensator.inductive_rating)
+        insert.add_value(table.q.query_index, static_var_compensator.q)
+        insert.add_value(table.svc_control_mode.query_index, static_var_compensator.svc_control_mode)
+        insert.add_value(table.voltage_set_point.query_index, static_var_compensator.voltage_set_point)
+
+        return self._save_regulating_cond_eq(table, insert, static_var_compensator, "static var compensator")
 
     def _save_switch(self, table: TableSwitches, insert: PreparedStatement, switch: Switch, description: str) -> bool:
         # noinspection PyProtectedMember

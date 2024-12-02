@@ -2,7 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+from zepben.protobuf.cim.extensions.iec61968.metering.PanDemandResponseFunction_pb2 import PanDemandResponseFunction
+from zepben.protobuf.cim.extensions.iec61970.base.wires.BatteryControl_pb2 import BatteryControl
 from zepben.protobuf.cim.iec61968.assetinfo.CableInfo_pb2 import CableInfo
 from zepben.protobuf.cim.iec61968.assetinfo.NoLoadTest_pb2 import NoLoadTest
 from zepben.protobuf.cim.iec61968.assetinfo.OpenCircuitTest_pb2 import OpenCircuitTest
@@ -16,6 +17,7 @@ from zepben.protobuf.cim.iec61968.assetinfo.TransformerTankInfo_pb2 import Trans
 from zepben.protobuf.cim.iec61968.assetinfo.TransformerTest_pb2 import TransformerTest
 from zepben.protobuf.cim.iec61968.assetinfo.WireInfo_pb2 import WireInfo
 from zepben.protobuf.cim.iec61968.assets.AssetContainer_pb2 import AssetContainer
+from zepben.protobuf.cim.iec61968.assets.AssetFunction_pb2 import AssetFunction
 from zepben.protobuf.cim.iec61968.assets.AssetInfo_pb2 import AssetInfo
 from zepben.protobuf.cim.iec61968.assets.AssetOrganisationRole_pb2 import AssetOrganisationRole
 from zepben.protobuf.cim.iec61968.assets.AssetOwner_pb2 import AssetOwner
@@ -29,9 +31,10 @@ from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import Custome
 from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff
-from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.RelayInfo_pb2 import RelayInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.CurrentTransformerInfo_pb2 import CurrentTransformerInfo
 from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.PotentialTransformerInfo_pb2 import PotentialTransformerInfo
+from zepben.protobuf.cim.iec61968.infiec61968.infassetinfo.RelayInfo_pb2 import RelayInfo
+from zepben.protobuf.cim.iec61968.metering.EndDeviceFunction_pb2 import EndDeviceFunction
 from zepben.protobuf.cim.iec61968.metering.EndDevice_pb2 import EndDevice
 from zepben.protobuf.cim.iec61968.metering.Meter_pb2 import Meter
 from zepben.protobuf.cim.iec61968.metering.UsagePoint_pb2 import UsagePoint
@@ -45,8 +48,8 @@ from zepben.protobuf.cim.iec61970.base.core.AcDcTerminal_pb2 import AcDcTerminal
 from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNodeContainer_pb2 import ConnectivityNodeContainer
-from zepben.protobuf.cim.iec61970.base.core.Curve_pb2 import Curve
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode
+from zepben.protobuf.cim.iec61970.base.core.Curve_pb2 import Curve
 from zepben.protobuf.cim.iec61970.base.core.EquipmentContainer_pb2 import EquipmentContainer
 from zepben.protobuf.cim.iec61970.base.core.Equipment_pb2 import Equipment
 from zepben.protobuf.cim.iec61970.base.core.Feeder_pb2 import Feeder
@@ -57,8 +60,8 @@ from zepben.protobuf.cim.iec61970.base.core.Site_pb2 import Site
 from zepben.protobuf.cim.iec61970.base.core.SubGeographicalRegion_pb2 import SubGeographicalRegion
 from zepben.protobuf.cim.iec61970.base.core.Substation_pb2 import Substation
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
-from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject
+from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentBranch_pb2 import EquivalentBranch
 from zepben.protobuf.cim.iec61970.base.equivalents.EquivalentEquipment_pb2 import EquivalentEquipment
 from zepben.protobuf.cim.iec61970.base.meas.Accumulator_pb2 import Accumulator
@@ -89,8 +92,8 @@ from zepben.protobuf.cim.iec61970.base.wires.EnergyConsumer_pb2 import EnergyCon
 from zepben.protobuf.cim.iec61970.base.wires.EnergySourcePhase_pb2 import EnergySourcePhase
 from zepben.protobuf.cim.iec61970.base.wires.EnergySource_pb2 import EnergySource
 from zepben.protobuf.cim.iec61970.base.wires.Fuse_pb2 import Fuse
-from zepben.protobuf.cim.iec61970.base.wires.Ground_pb2 import Ground
 from zepben.protobuf.cim.iec61970.base.wires.GroundDisconnector_pb2 import GroundDisconnector
+from zepben.protobuf.cim.iec61970.base.wires.Ground_pb2 import Ground
 from zepben.protobuf.cim.iec61970.base.wires.GroundingImpedance_pb2 import GroundingImpedance
 from zepben.protobuf.cim.iec61970.base.wires.Jumper_pb2 import Jumper
 from zepben.protobuf.cim.iec61970.base.wires.Junction_pb2 import Junction
@@ -114,10 +117,11 @@ from zepben.protobuf.cim.iec61970.base.wires.RegulatingControl_pb2 import Regula
 from zepben.protobuf.cim.iec61970.base.wires.RotatingMachine_pb2 import RotatingMachine
 from zepben.protobuf.cim.iec61970.base.wires.SeriesCompensator_pb2 import SeriesCompensator
 from zepben.protobuf.cim.iec61970.base.wires.ShuntCompensator_pb2 import ShuntCompensator
+from zepben.protobuf.cim.iec61970.base.wires.StaticVarCompensator_pb2 import StaticVarCompensator
 from zepben.protobuf.cim.iec61970.base.wires.Switch_pb2 import Switch
 from zepben.protobuf.cim.iec61970.base.wires.SynchronousMachine_pb2 import SynchronousMachine
-from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TapChangerControl_pb2 import TapChangerControl
+from zepben.protobuf.cim.iec61970.base.wires.TapChanger_pb2 import TapChanger
 from zepben.protobuf.cim.iec61970.base.wires.TransformerEnd_pb2 import TransformerEnd
 from zepben.protobuf.cim.iec61970.base.wires.TransformerStarImpedance_pb2 import TransformerStarImpedance
 from zepben.protobuf.cim.iec61970.base.wires.generation.production.BatteryUnit_pb2 import BatteryUnit
@@ -129,10 +133,10 @@ from zepben.protobuf.cim.iec61970.infiec61970.feeder.Loop_pb2 import Loop
 from zepben.protobuf.cim.iec61970.infiec61970.feeder.LvFeeder_pb2 import LvFeeder
 from zepben.protobuf.cim.iec61970.infiec61970.wires.generation.production.EvChargingUnit_pb2 import EvChargingUnit
 
-
 __all__ = []
 
-
+PanDemandResponseFunction.mrid = lambda self: self.edf.mrid()
+BatteryControl.mrid = lambda self: self.rc.mrid()
 CableInfo.mrid = lambda self: self.wi.mrid()
 NoLoadTest.mrid = lambda self: self.tt.mrid()
 OpenCircuitTest.mrid = lambda self: self.tt.mrid()
@@ -148,6 +152,7 @@ TransformerStarImpedance.mrid = lambda self: self.io.mrid()
 WireInfo.mrid = lambda self: self.ai.mrid()
 Asset.mrid = lambda self: self.io.mrid()
 AssetContainer.mrid = lambda self: self.at.mrid()
+AssetFunction.mrid = lambda self: self.io.mrid()
 AssetInfo.mrid = lambda self: self.io.mrid()
 AssetOrganisationRole.mrid = lambda self: getattr(self, "or").mrid()
 AssetOwner.mrid = lambda self: self.aor.mrid()
@@ -164,6 +169,7 @@ RelayInfo.mrid = lambda self: self.ai.mrid()
 CurrentTransformerInfo.mrid = lambda self: self.ai.mrid()
 PotentialTransformerInfo.mrid = lambda self: self.ai.mrid()
 EndDevice.mrid = lambda self: self.ac.mrid()
+EndDeviceFunction.mrid = lambda self: self.af.mrid()
 Meter.mrid = lambda self: self.ed.mrid()
 UsagePoint.mrid = lambda self: self.io.mrid()
 OperationalRestriction.mrid = lambda self: self.doc.mrid()
@@ -249,6 +255,7 @@ RegulatingControl.mrid = lambda self: self.psr.mrid()
 RotatingMachine.mrid = lambda self: self.rce.mrid()
 SeriesCompensator.mrid = lambda self: self.ce.mrid()
 ShuntCompensator.mrid = lambda self: self.rce.mrid()
+StaticVarCompensator.mrid = lambda self: self.rce.mrid()
 Switch.mrid = lambda self: self.ce.mrid()
 SynchronousMachine.mrid = lambda self: self.rm.mrid()
 TapChanger.mrid = lambda self: self.psr.mrid()

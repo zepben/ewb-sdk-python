@@ -5,6 +5,8 @@
 import datetime
 from typing import Type
 
+from services.common.service_comparator_validator import ServiceComparatorValidator
+from services.common.test_base_service_comparator import TestBaseServiceComparator
 from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
     TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, AssetOwner, Location, AssetContainer, AssetInfo, \
     AssetOrganisationRole, Pole, Streetlight, WindingConnection, StreetlightLampKind, Structure, StreetAddress, TownDetail, PositionPoint, EndDevice, \
@@ -20,15 +22,41 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, RelayInfo, \
     CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind, \
     TransformerEndRatedS, TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
-    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator
+    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, EndDeviceFunction, \
+    PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
-
-from services.common.service_comparator_validator import ServiceComparatorValidator
-from services.common.test_base_service_comparator import TestBaseServiceComparator
 
 
 class TestNetworkServiceComparator(TestBaseServiceComparator):
     validator = ServiceComparatorValidator(lambda: NetworkService(), lambda options: NetworkServiceComparator(options))
+
+    #######################################
+    # [ZBEX] EXTENSIONS IEC61968 METERING #
+    #######################################
+
+    def test_pan_demand_response_function(self):
+        self._compare_end_device_function(PanDemandResponseFunction)
+
+        self.validator.validate_property(
+            PanDemandResponseFunction.kind,
+            PanDemandResponseFunction,
+            lambda _: EndDeviceFunctionKind.DEMAND_RESPONSE,
+            lambda _: EndDeviceFunctionKind.METROLOGY
+        )
+
+    #########################################
+    # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
+    #########################################
+
+    def test_compare_battery_control_control(self):
+        self._compare_regulating_control(BatteryControl)
+
+        self.validator.validate_property(BatteryControl.battery_unit, BatteryControl, lambda _: BatteryControl(mrid="bc1"),
+                                         lambda _: BatteryControl(mrid="bc2"))
+        self.validator.validate_property(BatteryControl.charging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(BatteryControl.discharging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(BatteryControl.reserve_percent, BatteryControl, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(BatteryControl.control_mode, BatteryControl, lambda _: BatteryControlMode.time, lambda _: BatteryControlMode.profile)
 
     #######################
     # IEC61968 ASSET INFO #
@@ -156,6 +184,9 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_asset_container(self, creator: Type[AssetContainer]):
         self._compare_asset(creator)
 
+    def _compare_asset_function(self, creator: Type[AssetFunction]):
+        self._compare_identified_object(creator)
+
     def _compare_asset_info(self, creator: Type[AssetInfo]):
         self._compare_identified_object(creator)
 
@@ -271,6 +302,20 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             NetworkServiceComparatorOptions(compare_lv_simplification=False),
             options_stop_compare=True
         )
+        self.validator.validate_collection(
+            EndDevice.end_device_functions,
+            EndDevice.add_end_device_function,
+            creator,
+            lambda _: EndDeviceFunction(mrid="edf1"),
+            lambda _: EndDeviceFunction(mrid="edf2"),
+            NetworkServiceComparatorOptions(compare_lv_simplification=False)
+        )
+
+    def _compare_end_device_function(self, creator: Type[EndDeviceFunction]):
+        self._compare_asset_function(creator)
+
+        self.validator.validate_property(EndDeviceFunction.end_device, creator, lambda _: EndDevice(mrid="ed1"), lambda _: EndDevice(mrid="ed2"))
+        self.validator.validate_property(EndDeviceFunction.enabled, creator, lambda _: False, lambda _: True)
 
     def test_compare_meter(self):
         self._compare_end_device(Meter)
@@ -1208,6 +1253,20 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(ShuntCompensator.shunt_compensator_info, creator, lambda _: ShuntCompensatorInfo(mrid="sci1"),
                                          lambda _: ShuntCompensatorInfo(mrid="sci2"), expected_differences={"asset_info"})
 
+    def test_compare_static_var_compensator(self):
+        self._compare_conducting_equipment(StaticVarCompensator)
+
+        self.validator.validate_property(StaticVarCompensator.capacitive_rating, StaticVarCompensator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(StaticVarCompensator.inductive_rating, StaticVarCompensator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(StaticVarCompensator.q, StaticVarCompensator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(
+            StaticVarCompensator.svc_control_mode,
+            StaticVarCompensator,
+            lambda _: SVCControlMode.voltage,
+            lambda _: SVCControlMode.reactivePower
+        )
+        self.validator.validate_property(StaticVarCompensator.voltage_set_point, StaticVarCompensator, lambda _: 1, lambda _: 2)
+
     def _compare_switch(self, creator: Type[Switch]):
         self._compare_conducting_equipment(creator)
 
@@ -1248,7 +1307,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(TapChanger.neutral_u, creator, lambda _: 0, lambda _: 1)
         self.validator.validate_property(TapChanger.normal_step, creator, lambda _: 0, lambda _: 1)
         self.validator.validate_property(TapChanger.step, creator, lambda _: 0, lambda _: 1)
-        self.validator.validate_property(TapChanger.tap_changer_control, creator, lambda _: TapChangerControl(mrid="tcc1"), lambda _: TapChangerControl(mrid="tcc2"))
+        self.validator.validate_property(TapChanger.tap_changer_control, creator, lambda _: TapChangerControl(mrid="tcc1"),
+                                         lambda _: TapChangerControl(mrid="tcc2"))
 
     def test_compare_tap_changer_control(self):
         self._compare_regulating_control(TapChangerControl)

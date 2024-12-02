@@ -5,6 +5,7 @@
 from dataclasses import dataclass
 from typing import Callable, Optional, Any
 
+from zepben.evolve import BatteryControl, PanDemandResponseFunction, StaticVarCompensator
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
@@ -23,7 +24,7 @@ from zepben.evolve.model.cim.iec61968.common.location import Location
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
-from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, Meter, UsagePoint
+from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, Meter, UsagePoint, EndDeviceFunction
 from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment, FaultIndicator
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.current_transformer import CurrentTransformer
@@ -119,6 +120,38 @@ class NetworkServiceComparator(BaseServiceComparator):
         """
         super().__init__()
         self._options = options
+
+    #######################################
+    # [ZBEX] EXTENSIONS IEC61968 METERING #
+    #######################################
+
+    def _compare_pan_demand_response_function(self, source: PanDemandResponseFunction, target: PanDemandResponseFunction) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, PanDemandResponseFunction.kind, PanDemandResponseFunction.appliance)
+
+        return self._compare_end_device_function(diff)
+
+    #########################################
+    # [ABEX] EXTENSIONS IEC61970 BASE WIRES #
+    #########################################
+
+    def _compare_battery_control(self, source: BatteryControl, target: BatteryControl) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_id_references(diff, BatteryControl.battery_unit)
+        self._compare_values(
+            diff,
+            BatteryControl.control_mode
+        )
+        self._compare_floats(
+            diff,
+            BatteryControl.charging_rate,
+            BatteryControl.discharging_rate,
+            BatteryControl.reserve_percent
+        )
+
+        return self._compare_regulating_control(diff)
 
     #######################
     # IEC61968 ASSET INFO #
@@ -258,6 +291,9 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_asset_container(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_asset(diff)
 
+    def _compare_asset_function(self, diff: ObjectDifference) -> ObjectDifference:
+        return self._compare_identified_object(diff)
+
     def _compare_asset_info(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_identified_object(diff)
 
@@ -362,8 +398,15 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         self._compare_values(diff, EndDevice.customer_mrid)
         self._compare_id_references(diff, EndDevice.service_location)
+        self._compare_id_reference_collections(diff, EndDevice.end_device_functions)
 
         return self._compare_asset_container(diff)
+
+    def _compare_end_device_function(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_id_references(diff, EndDeviceFunction.end_device)
+        self._compare_values(diff, EndDeviceFunction.enabled)
+
+        return self._compare_asset_function(diff)
 
     def _compare_meter(self, source: Meter, target: Meter) -> ObjectDifference:
         return self._compare_end_device(ObjectDifference(source, target))
@@ -712,6 +755,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_values(diff, BatteryUnit.battery_state, BatteryUnit.rated_e, BatteryUnit.stored_e)
+        self._compare_id_reference_collections(diff, BatteryUnit.battery_controls)
 
         return self._compare_power_electronics_unit(diff)
 
@@ -1055,6 +1099,18 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_values(diff, ShuntCompensator.grounded, ShuntCompensator.nom_u, ShuntCompensator.phase_connection)
         self._compare_floats(diff, ShuntCompensator.sections)
         self._compare_id_references(diff, ShuntCompensator.shunt_compensator_info)
+
+        return self._compare_regulating_cond_eq(diff)
+
+    def _compare_static_var_compensator(self, source: StaticVarCompensator, target: StaticVarCompensator) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        self._compare_values(diff, StaticVarCompensator.svc_control_mode, StaticVarCompensator.voltage_set_point)
+        self._compare_floats(
+            diff,
+            StaticVarCompensator.capacitive_rating,
+            StaticVarCompensator.inductive_rating,
+            StaticVarCompensator.q,
+        )
 
         return self._compare_regulating_cond_eq(diff)
 
