@@ -1,0 +1,31 @@
+{
+  "someSidebar": [
+    "sdk-overview",
+    {
+      "type": "category",
+      "items": [
+        "venv-setup",
+        "intellij-setup"
+      ],
+      "label": "Setup Guide"
+    },
+    "sdk-data-model",
+    "sdk-services",
+    "sdk-phases",
+    "sdk-tracing",
+    "sdk-persistence",
+    "sdk-consumer",
+    "sdk-protection",
+    "sdk-ewb-file-paths",
+    {
+      "type": "category",
+      "label": "Network State",
+      "items": [
+        "query-network-state-client",
+        "query-network-state-service",
+        "update-network-state-client",
+        "update-network-state-service"
+      ]
+    }
+  ]
+}

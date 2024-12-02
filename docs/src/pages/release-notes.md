@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.42.0](#v0420)| `02 December 2024` |
 |[0.41.2](#v0412)| `25 October 2024` |
 |[0.41.1](#v0411)| `23 October 2024` |
 |[0.41.0](#v0410)| `21 October 2024` |
@@ -48,6 +49,31 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.42.0]
+
+### Breaking Changes
+* Database readers and writes for each `BaseService` no longer accept a `MetadataCollection`, and will instead use the collection of the provided service.
+* `BaseService` and `MetadataCollection` are no longer dataclassy dataclasses. This will only affect you if you were making use of the auto generated
+  constructors to pass initial values (which didn't always work as expected anyway)
+* Network state services for updating and querying network state events via gRPC.
+* Client functionality for updating and querying network states via gRPC service stub.
+
+### New Features
+* `BaseService` now contains a `MetadataCollection` to tightly couple the metadata to the associated service.
+* Added `Services`, a new class which contains a copy of each `BaseService` supported by the SDK.
+* Added a new connection method `connect_with_token` which allows you to connect to the EWB using an access token.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
 
 ---
 
