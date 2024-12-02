@@ -26,7 +26,8 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, RelayInfo, SwitchInfo, \
     CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
-    ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo
+    ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo, PanDemandResponseFunction, BatteryControl, \
+    StaticVarCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import GroundingImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
@@ -644,6 +645,12 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
 
 
 _nio_type_to_cim = {
+    # [ZBEX] EXTENSIONS IEC61968 METERING #
+    "panDemandResponseFunction": PanDemandResponseFunction,
+
+    # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
+    "batteryControl": BatteryControl,
+
     # IEC61968 ASSET INFO #
     "cableInfo": CableInfo,
     "noLoadTest": NoLoadTest,
@@ -743,6 +750,7 @@ _nio_type_to_cim = {
     "reactiveCapabilityCurve": ReactiveCapabilityCurve,
     "recloser": Recloser,
     "seriesCompensator": SeriesCompensator,
+    "staticVarCompensator": StaticVarCompensator,
     "synchronousMachine": SynchronousMachine,
     "tapChangerControl": TapChangerControl,
     "transformerStarImpedance": TransformerStarImpedance,

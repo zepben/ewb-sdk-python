@@ -16,7 +16,8 @@ from zepben.evolve import Terminal, resolver, UnresolvedReference, NetworkServic
     FaultIndicator, Feeder, Site, Circuit, Substation, PowerElectronicsConnectionPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, \
     EnergyConsumerPhase, EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete, \
     Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo, \
-    AssetContainer, OrganisationRole, Document, Agreement, LvFeeder, EvChargingUnit, TapChangerControl
+    AssetContainer, OrganisationRole, Document, Agreement, LvFeeder, EvChargingUnit, TapChangerControl, BatteryControl, PanDemandResponseFunction, \
+    StaticVarCompensator
 
 
 @fixture
@@ -267,4 +268,5 @@ _types = [PowerTransformerInfo, CableInfo, OverheadWireInfo, Streetlight,
           RatioTapChanger, EnergyConsumerPhase, ConnectivityNodeContainer, Equipment, RatioTapChanger, EnergyConsumerPhase,
           EnergySourcePhase, GeographicalRegion, SubGeographicalRegion, ConnectivityNode, BaseVoltage, Accumulator, Analog, Discrete,
           Control, RemoteControl, RemoteSource, PerLengthSequenceImpedance, PowerTransformerEnd, DiagramObject, Diagram, Loop, AssetInfo,
-          AssetContainer, OrganisationRole, Document, Agreement, LvFeeder, EvChargingUnit, TapChangerControl]
+          AssetContainer, OrganisationRole, Document, Agreement, LvFeeder, EvChargingUnit, TapChangerControl, PanDemandResponseFunction, BatteryControl,
+          StaticVarCompensator]

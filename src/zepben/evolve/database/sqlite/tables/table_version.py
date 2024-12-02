@@ -10,12 +10,11 @@ from typing import Optional
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
-
 __all__ = ["TableVersion"]
 
 
 class TableVersion(SqliteTable):
-    SUPPORTED_VERSION = 56
+    SUPPORTED_VERSION = 57
 
     def __init__(self):
         self.version: Column = self._create_column("version", "TEXT", Nullable.NOT_NULL)

@@ -18,6 +18,8 @@ from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_sc
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.associations.table_usage_points_end_devices import *
+from zepben.evolve.database.sqlite.tables.extensions.iec61968.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.table_battery_controls import TableBatteryControls
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_cable_info import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_no_load_tests import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_open_circuit_tests import *
@@ -98,6 +100,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ratio_tap_ch
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reactive_capability_curves import TableReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reclosers import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_series_compensators import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_static_var_compensator import TableStaticVarCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_synchronous_machines import TableSynchronousMachines
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_tap_changer_controls import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_transformer_star_impedances import *
@@ -108,6 +111,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.wires.generation.
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
 
 __all__ = ["NetworkDatabaseTables"]
+
 
 class NetworkDatabaseTables(BaseDatabaseTables):
     """
@@ -125,6 +129,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableAssetOrganisationRolesAssets()
         yield TableAssetOwners()
         yield TableBaseVoltages()
+        yield TableBatteryControls()
         yield TableBatteryUnits()
         yield TableBreakers()
         yield TableBusbarSections()
@@ -172,6 +177,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableOperationalRestrictions()
         yield TableOrganisations()
         yield TableOverheadWireInfo()
+        yield TablePanDemandResponseFunctions()
         yield TablePerLengthSequenceImpedances()
         yield TablePetersenCoils()
         yield TablePhotoVoltaicUnits()
@@ -204,6 +210,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableShortCircuitTests()
         yield TableShuntCompensatorInfo()
         yield TableSites()
+        yield TableStaticVarCompensators()
         yield TableStreetlights()
         yield TableSubGeographicalRegions()
         yield TableSubstations()

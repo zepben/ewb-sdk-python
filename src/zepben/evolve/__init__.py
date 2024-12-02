@@ -12,6 +12,9 @@
 # We need to import SinglePhaseKind before anything uses PhaseCode to prevent cyclic dependencies.
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
 
+from zepben.evolve.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import *
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import *
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control_mode import *
 from zepben.evolve.model.cim.iec61968.customers.pricing_structure import *
 from zepben.evolve.model.cim.iec61968.customers.customer_agreement import *
 from zepben.evolve.model.cim.iec61968.customers.customer_kind import *
@@ -19,6 +22,7 @@ from zepben.evolve.model.cim.iec61968.customers.customer import *
 from zepben.evolve.model.cim.iec61968.customers.tariff import *
 from zepben.evolve.model.cim.iec61968.assets.structure import *
 from zepben.evolve.model.cim.iec61968.assets.asset import *
+from zepben.evolve.model.cim.iec61968.assets.asset_function import *
 from zepben.evolve.model.cim.iec61968.assets.pole import *
 from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import *
 from zepben.evolve.model.cim.iec61968.assets.asset_info import *
@@ -83,7 +87,9 @@ from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
 from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import *
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import *
@@ -266,6 +272,7 @@ from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_transformer_t
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_transformer_test import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_wire_info import *
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_containers import *
+from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_functions import *
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_info import *
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_organisation_roles import *
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_owners import *
@@ -377,6 +384,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_regulating_c
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_regulating_controls import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_series_compensators import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_shunt_compensators import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_static_var_compensator import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_switches import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_tap_changer_controls import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_tap_changers import *

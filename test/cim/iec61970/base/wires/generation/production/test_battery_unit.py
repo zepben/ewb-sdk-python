@@ -4,12 +4,14 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers, sampled_from
-from zepben.evolve import BatteryUnit, BatteryStateKind
 
 from cim.cim_creators import MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.generation.production.test_power_electronics_unit import power_electronics_unit_kwargs, \
     verify_power_electronics_unit_constructor_default, verify_power_electronics_unit_constructor_kwargs, verify_power_electronics_unit_constructor_args, \
     power_electronics_unit_args
+from cim.private_collection_validator import validate_unordered_1234567890
+from zepben.evolve import BatteryUnit, BatteryStateKind
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 
 battery_unit_kwargs = {
     **power_electronics_unit_kwargs,
@@ -54,3 +56,16 @@ def test_battery_unit_constructor_args():
         b.rated_e,
         b.stored_e
     ]
+
+
+def test_battery_control_collection():
+    validate_unordered_1234567890(
+        BatteryUnit,
+        lambda mrid: BatteryControl(mrid),
+        BatteryUnit.battery_controls,
+        BatteryUnit.num_battery_controls,
+        BatteryUnit.get_battery_control,
+        BatteryUnit.add_battery_control,
+        BatteryUnit.remove_battery_control,
+        BatteryUnit.clear_battery_controls
+    )

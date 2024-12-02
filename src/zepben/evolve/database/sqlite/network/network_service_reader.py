@@ -24,6 +24,8 @@ from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_sc
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.associations.table_usage_points_end_devices import TableUsagePointsEndDevices
+from zepben.evolve.database.sqlite.tables.extensions.iec61968.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.table_battery_controls import TableBatteryControls
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_cable_info import TableCableInfo
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_no_load_tests import TableNoLoadTests
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_open_circuit_tests import TableOpenCircuitTests
@@ -104,6 +106,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ratio_tap_ch
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reactive_capability_curves import TableReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reclosers import TableReclosers
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_series_compensators import TableSeriesCompensators
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_static_var_compensator import TableStaticVarCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_synchronous_machines import TableSynchronousMachines
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_tap_changer_controls import TableTapChangerControls
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_transformer_star_impedances import TableTransformerStarImpedances
@@ -161,6 +164,7 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TablePoles, self._reader.load_pole),
             self._load_each(TableStreetlights, self._reader.load_streetlight),
             self._load_each(TableMeters, self._reader.load_meter),
+            self._load_each(TablePanDemandResponseFunctions, self._reader.load_pan_demand_response_function),
             self._load_each(TableUsagePoints, self._reader.load_usage_point),
             self._load_each(TableOperationalRestrictions, self._reader.load_operational_restriction),
             self._load_each(TableBaseVoltages, self._reader.load_base_voltage),
@@ -193,6 +197,7 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableGrounds, self._reader.load_ground),
             self._load_each(TableGroundDisconnectors, self._reader.load_ground_disconnector),
             self._load_each(TableSeriesCompensators, self._reader.load_series_compensator),
+            self._load_each(TableStaticVarCompensators, self._reader.load_static_var_compensator),
             self._load_each(TableLinearShuntCompensators, self._reader.load_linear_shunt_compensator),
             self._load_each(TablePowerTransformers, self._reader.load_power_transformer),
             self._load_each(TableReclosers, self._reader.load_recloser),
@@ -206,6 +211,7 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableTapChangerControls, self._reader.load_tap_changer_control),
             self._load_each(TablePowerElectronicsConnectionPhases, self._reader.load_power_electronics_connection_phase),
             self._load_each(TableBatteryUnits, self._reader.load_battery_unit),
+            self._load_each(TableBatteryControls, self._reader.load_battery_controls),
             self._load_each(TablePhotoVoltaicUnits, self._reader.load_photo_voltaic_unit),
             self._load_each(TablePowerElectronicsWindUnits, self._reader.load_power_electronics_wind_unit),
             self._load_each(TableEvChargingUnits, self._reader.load_ev_charging_unit),
