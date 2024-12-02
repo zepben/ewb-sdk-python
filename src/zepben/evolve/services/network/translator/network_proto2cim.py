@@ -293,7 +293,7 @@ def pan_demand_response_function_to_cim(pb: PBPanDemandResponseFunction, network
         kind=EndDeviceFunctionKind(pb.kind)
     )
 
-    cim.assign_controlled_appliance_configuration_bitmask(pb.appliance)
+    cim.assign_controlled_appliance_configuration_bitmask(int_or_none(pb.appliance))
     end_device_function_to_cim(pb.edf, cim, network_service)
 
     return cim if network_service.add(cim) else None
@@ -1676,14 +1676,18 @@ def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, netw
     regulating_cond_eq_to_cim(pb.rce, cim, network_service)
 
 
-def static_var_compensator_to_cim(pb: PBStaticVarCompensator, cim: StaticVarCompensator, network_service: NetworkService):
-    cim.capacitive_rating = float_or_none(pb.capacitiveRating)
-    cim.inductive_rating = float_or_none(pb.inductiveRating)
-    cim.q = float_or_none(pb.q)
-    cim.svc_control_mode = SVCControlMode(pb.svcControlMode)
-    cim.voltage_set_point = int_or_none(pb.voltageSetPoint)
+def static_var_compensator_to_cim(pb: PBStaticVarCompensator, network_service: NetworkService):
+    cim = StaticVarCompensator(
+        mrid=pb.mrid(),
+        capacitive_rating=float_or_none(pb.capacitiveRating),
+        inductive_rating=float_or_none(pb.inductiveRating),
+        q=float_or_none(pb.q),
+        svc_control_mode=SVCControlMode(pb.svcControlMode),
+        voltage_set_point=int_or_none(pb.voltageSetPoint)
+    )
 
     regulating_cond_eq_to_cim(pb.rce, cim, network_service)
+    return cim if network_service.add(cim) else None
 
 
 def switch_to_cim(pb: PBSwitch, cim: Switch, network_service: NetworkService):

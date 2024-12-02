@@ -296,9 +296,12 @@ class CimTranslationException(Exception):
 def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanDemandResponseFunction:
     return PBPanDemandResponseFunction(
         edf=end_device_function_to_pb(cim),
-        kind=PBEndDeviceFunctionKind.Value(cim.kind.value),
-        appliance=from_nullable_int(cim.appliance.to_int())
+        kind=PBEndDeviceFunctionKind.Value(cim.kind.short_name),
+        appliance=from_nullable_int(cim.appliance.to_int() if cim.appliance else None)
     )
+
+
+PanDemandResponseFunction.to_pb = pan_demand_response_function_to_pb
 
 
 #########################################
@@ -307,12 +310,15 @@ def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanD
 def battery_control_to_pb(cim: BatteryControl) -> PBBatteryControl:
     return PBBatteryControl(
         rc=regulating_control_to_pb(cim),
-        batteryUnitMRID=cim.battery_unit.mrid,
-        chargingRate=cim.charging_rate,
-        dischargingRate=cim.discharging_rate,
-        reservePercent=cim.reserve_percent,
-        controlMode=PBBatteryControlMode.Value(cim.control_mode.value)
+        batteryUnitMRID=mrid_or_empty(cim.battery_unit),
+        chargingRate=from_nullable_float(cim.charging_rate),
+        dischargingRate=from_nullable_float(cim.discharging_rate),
+        reservePercent=from_nullable_float(cim.reserve_percent),
+        controlMode=PBBatteryControlMode.Value(cim.control_mode.short_name)
     )
+
+
+BatteryControl.to_pb = battery_control_to_pb
 
 
 #######################
@@ -614,6 +620,7 @@ def end_device_to_pb(cim: EndDevice) -> PBEndDevice:
     return PBEndDevice(
         ac=asset_container_to_pb(cim),
         usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
+        endDeviceFunctionMRIDs=[str(io.mrid) for io in cim.end_device_functions],
         customerMRID=cim.customer_mrid,
         serviceLocationMRID=mrid_or_empty(cim.service_location)
     )
@@ -622,7 +629,7 @@ def end_device_to_pb(cim: EndDevice) -> PBEndDevice:
 def end_device_function_to_pb(cim: EndDeviceFunction) -> PBEndDeviceFunction:
     return PBEndDeviceFunction(
         af=asset_function_to_pb(cim),
-        endDeviceMRID=cim.endDevice.mrid,
+        endDeviceMRID=mrid_or_empty(cim.end_device),
         enabled=cim.enabled
     )
 
@@ -1037,6 +1044,7 @@ RemoteSource.to_pb = remote_source_to_pb
 def battery_unit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
     return PBBatteryUnit(
         peu=power_electronics_unit_to_pb(cim),
+        batteryControlMRIDs=[str(io.mrid) for io in cim.battery_controls],
         ratedE=from_nullable_long(cim.rated_e),
         storedE=from_nullable_long(cim.stored_e),
         batteryState=PBBatteryStateKind.Value(cim.battery_state.short_name)
@@ -1432,7 +1440,8 @@ def static_var_compensator_to_pb(cim: StaticVarCompensator) -> PBStaticVarCompen
         capacitiveRating=from_nullable_float(cim.capacitive_rating),
         inductiveRating=from_nullable_float(cim.inductive_rating),
         q=from_nullable_float(cim.q),
-        svcControlMode=PBSVCControlMode.Enum.Value(cim.svc_control_mode.value)
+        svcControlMode=PBSVCControlMode.Enum.Value(cim.svc_control_mode.short_name),
+        voltageSetPoint=from_nullable_int(cim.voltage_set_point)
     )
 
 
@@ -1535,8 +1544,6 @@ def transformer_star_impedance_to_pb(cim: TransformerStarImpedance) -> PBTransfo
     )
 
 
-PanDemandResponseFunction.to_pb = pan_demand_response_function_to_pb
-BatteryUnit.to_pb = battery_unit_to_pb
 AcLineSegment.to_pb = ac_line_segment_to_pb
 Breaker.to_pb = breaker_to_pb
 BusbarSection.to_pb = busbar_section_to_pb

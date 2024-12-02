@@ -34,7 +34,7 @@ def test_battery_control_constructor_default():
     assert bc.charging_rate is None
     assert bc.discharging_rate is None
     assert bc.reserve_percent is None
-    assert bc.control_mode is BatteryControlMode.unknown
+    assert bc.control_mode is BatteryControlMode.UNKNOWN
 
 
 @given(**battery_control_kwargs)

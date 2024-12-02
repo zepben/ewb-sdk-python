@@ -40,8 +40,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(
             PanDemandResponseFunction.kind,
             PanDemandResponseFunction,
-            lambda _: EndDeviceFunctionKind.DEMAND_RESPONSE,
-            lambda _: EndDeviceFunctionKind.METROLOGY
+            lambda _: EndDeviceFunctionKind.demandResponse,
+            lambda _: EndDeviceFunctionKind.metrology
         )
 
     #########################################

@@ -343,7 +343,7 @@ tc_to_tcc_resolver = ReferenceResolver(TapChanger, TapChangerControl, lambda t, 
 
 sm_to_rcc_resolver = ReferenceResolver(SynchronousMachine, ReactiveCapabilityCurve, lambda t, r: t.add_curve(r))
 
-battery_control_to_battery_unit_resolver = ReferenceResolver(BatteryControl, BatteryUnit, lambda t, r: setattr(t, 'battery', r))
+battery_control_to_battery_unit_resolver = ReferenceResolver(BatteryControl, BatteryUnit, lambda t, r: setattr(t, 'battery_unit', r))
 battery_unit_to_battery_control_resolver = ReferenceResolver(BatteryUnit, BatteryControl, lambda t, r: t.add_battery_control(r))
 
 edf_to_ed_resolver = ReferenceResolver(EndDeviceFunction, EndDevice, lambda t, r: setattr(t, 'end_device', r))

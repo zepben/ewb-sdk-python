@@ -19,7 +19,7 @@ class SVCControlMode(Enum):
     Static VAr Compensator control mode.
     """
 
-    unknown = 0
+    UNKNOWN = 0
     """Unknown control."""
 
     reactivePower = 1
@@ -27,3 +27,7 @@ class SVCControlMode(Enum):
 
     voltage = 2
     """Voltage control."""
+
+    @property
+    def short_name(self):
+        return str(self)[15:]

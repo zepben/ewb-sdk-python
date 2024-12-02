@@ -34,9 +34,19 @@
 * `BaseService` now contains a `MetadataCollection` to tightly couple the metadata to the associated service.
 * Added `Services`, a new class which contains a copy of each `BaseService` supported by the SDK.
 * Added a new connection method `connect_with_token` which allows you to connect to the EWB using an access token.
+* Added `PanDemandResponseFunction`, a new class which contains `EndDeviceFunctionKind` and the identity of the `ControlledAppliance` of this function.
+* Added `BatteryControl`, a new class which describes behaviour specific to controlling a `BatteryUnit`.
+* Added `StaticVarCompensator` a new class representing a facility for providing variable and controllable shunt reactive power.
+* Added `ControlledAppliance` a new class representing the identity of the appliance controlled by a specific `EndDeviceFunction`.
+* Added new enums:
+  * `BatteryControlMode`
+  * `EndDeviceFunctionKind`
+  * `SVCControlMode`
 
 ### Enhancements
-* None.
+* Added `ctPrimary` and `minTargetDeadband` to `RegulatingContrl`.
+* Added collection of `BatteryControl` to `BatteryUnit`
+* Added collection of `EndDeviceFunctionKind` to `EndDevice`
 
 ### Fixes
 * None.

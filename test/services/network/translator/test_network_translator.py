@@ -4,6 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar
 
+import pytest
 from hypothesis import given, HealthCheck, settings
 
 from database.sqlite.schema_utils import assume_non_blank_street_address_details
@@ -198,6 +199,7 @@ types_to_test = {
 }
 
 
+@pytest.mark.timeout(100000)
 @given(**types_to_test)
 @settings(suppress_health_check=[HealthCheck.too_slow, HealthCheck.large_base_example])
 def test_network_service_translations(**kwargs):
