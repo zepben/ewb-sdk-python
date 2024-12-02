@@ -6,10 +6,8 @@ from typing import Generator
 
 from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import *
-from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import *
-from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_equipment_containers import *
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_operational_restrictions import *
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_usage_points import *
@@ -132,7 +130,6 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableAssetOwners()
         yield TableBaseVoltages()
         yield TableBatteryControls()
-        yield TableBatteryUnitsBatteryControls()
         yield TableBatteryUnits()
         yield TableBreakers()
         yield TableBusbarSections()
@@ -149,7 +146,6 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableDisconnectors()
         yield TableDiscretes()
         yield TableDistanceRelays()
-        yield TableEndDevicesEndDeviceFunctions()
         yield TableEnergyConsumerPhases()
         yield TableEnergyConsumers()
         yield TableEnergySourcePhases()
