@@ -95,8 +95,10 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_jumpers impo
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_junctions import TableJunctions
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_linear_shunt_compensators import TableLinearShuntCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_load_break_switches import TableLoadBreakSwitches
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import TablePerLengthPhaseImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_sequence_impedances import TablePerLengthSequenceImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_phase_impedance_data import TablePhaseImpedanceData
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connection_phases import TablePowerElectronicsConnectionPhases
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connections import TablePowerElectronicsConnections
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_end_ratings import TablePowerTransformerEndRatings
@@ -173,6 +175,8 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableSubGeographicalRegions, self._reader.load_sub_geographical_region),
             self._load_each(TableSubstations, self._reader.load_substation),
             self._load_each(TableSites, self._reader.load_site),
+            self._load_each(TablePerLengthPhaseImpedances, self._reader.load_per_length_phase_impedance),
+            self._load_each(TablePhaseImpedanceData, self._reader.load_phase_impedance_data),
             self._load_each(TablePerLengthSequenceImpedances, self._reader.load_per_length_sequence_impedance),
             self._load_each(TableEquivalentBranches, self._reader.load_equivalent_branch),
             self._load_each(TableAcLineSegments, self._reader.load_ac_line_segment),

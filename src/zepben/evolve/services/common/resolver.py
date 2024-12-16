@@ -312,9 +312,9 @@ def organisation_roles(asset: Asset) -> BoundReferenceResolver:
     return BoundReferenceResolver(asset, asset_to_asset_org_role_resolver, None)
 
 
-def per_length_sequence_impedance(ac_line_segment: AcLineSegment):
+def per_length_impedance(ac_line_segment: AcLineSegment):
     # noinspection PyArgumentList
-    return BoundReferenceResolver(ac_line_segment, acls_to_plsi_resolver, None)
+    return BoundReferenceResolver(ac_line_segment, acls_to_pli_resolver, None)
 
 
 def phase_power_electronics_connection(pec: PowerElectronicsConnectionPhase) -> BoundReferenceResolver:

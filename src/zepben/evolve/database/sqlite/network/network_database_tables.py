@@ -89,8 +89,10 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_jumpers impo
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_junctions import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_linear_shunt_compensators import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_load_break_switches import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import TablePerLengthPhaseImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_sequence_impedances import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_phase_impedance_data import TablePhaseImpedanceData
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connection_phases import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connections import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_end_ratings import *
@@ -178,7 +180,9 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableOrganisations()
         yield TableOverheadWireInfo()
         yield TablePanDemandResponseFunctions()
+        yield TablePerLengthPhaseImpedances()
         yield TablePerLengthSequenceImpedances()
+        yield TablePhaseImpedanceData()
         yield TablePetersenCoils()
         yield TablePhotoVoltaicUnits()
         yield TablePoles()

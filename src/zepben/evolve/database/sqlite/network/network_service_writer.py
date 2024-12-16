@@ -60,6 +60,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import Grou
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger
@@ -149,6 +150,7 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Jumper, self._writer.save_jumper),
             self._save_each_object(Junction, self._writer.save_junction),
             self._save_each_object(LinearShuntCompensator, self._writer.save_linear_shunt_compensator),
+            self._save_each_object(PerLengthPhaseImpedance, self._writer.save_per_length_phase_impedance),
             self._save_each_object(PerLengthSequenceImpedance, self._writer.save_per_length_sequence_impedance),
             self._save_each_object(PowerElectronicsConnection, self._writer.save_power_electronics_connection),
             self._save_each_object(PowerElectronicsConnectionPhase, self._writer.save_power_electronics_connection_phase),

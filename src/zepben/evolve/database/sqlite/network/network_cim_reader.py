@@ -18,7 +18,9 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data im
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curves import TableCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_earth_fault_compensators import TableEarthFaultCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_grounding_impedances import TableGroundingImpedances
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import TablePerLengthPhaseImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_phase_impedance_data import TablePhaseImpedanceData
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reactive_capability_curves import TableReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_rotating_machines import TableRotatingMachines
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_static_var_compensator import TableStaticVarCompensators
@@ -30,7 +32,9 @@ from zepben.evolve.model.cim.iec61968.assets.asset_function import AssetFunction
 from zepben.evolve.model.cim.iec61970.base.core.curve import Curve
 from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import GroundingImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
 from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
 from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import StaticVarCompensator
@@ -1695,7 +1699,7 @@ class NetworkCimReader(BaseCimReader):
         ac_line_segment = AcLineSegment(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         ac_line_segment.per_length_sequence_impedance = self._ensure_get(
-            result_set.get_string(table.per_length_sequence_impedance_mrid.query_index, on_none=None),
+            result_set.get_string(table.per_length_impedance_mrid.query_index, on_none=None),
             PerLengthSequenceImpedance
         )
 
@@ -2031,6 +2035,52 @@ class NetworkCimReader(BaseCimReader):
         result_set: ResultSet
     ) -> bool:
         return self._load_identified_object(per_length_line_parameter, table, result_set)
+
+    def load_per_length_phase_impedance(self, table: TablePerLengthPhaseImpedances, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PerLengthPhaseImpedance` and populate its fields from :class:`TablePerLengthPhaseImpedances`.
+
+        :param table: The database table to read the :class:`PerLengthPhaseImpedance` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PerLengthPhaseImpedance`.
+        :param set_identifier: A callback to register the mRID of this :class:`PerLengthPhaseImpedance` for logging purposes.
+
+        :return: True if the :class:`PerLengthPhaseImpedance` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        per_length_phase_impedance = PerLengthPhaseImpedance(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        per_length_phase_impedance.r = result_set.get_float(table.r.query_index, on_none=None)
+
+        return self._load_per_length_impedance(per_length_phase_impedance, table, result_set) and self._add_or_throw(per_length_phase_impedance)
+
+    def load_phase_impedance_data(self, table: TablePhaseImpedanceData, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PhaseImpedanceData` and populate its fields from :class:`TableConnectivityNodes`.
+
+        :param table: The database table to read the :class:`PhaseImpedanceData` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PhaseImpedanceData`.
+        :param set_identifier: A callback to register the mRID of this :class:`PhaseImpedanceData` for logging purposes.
+
+        :return: True if the :class:`PhaseImpedanceData` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        per_length_phase_impedance_mrid = result_set.get_string(table.per_length_phase_impedance_mrid.query_index)
+        set_identifier(result_set.get_string(table.per_length_phase_impedance_mrid.query_index))
+
+        per_length_phase_impedance = self._service.get(per_length_phase_impedance_mrid, PerLengthPhaseImpedance)
+
+        per_length_phase_impedance.add_data(
+            PhaseImpedanceData(
+                SinglePhaseKind[result_set.get_string(table.FROM_PHASE.query_index)],
+                SinglePhaseKind[result_set.get_string(table.TO_PHASE.query_index)],
+                result_set.get_float(table.B.query_index, on_none=None),
+                result_set.get_float(table.G.query_index, on_none=None),
+                result_set.get_float(table.R.query_index, on_none=None),
+                result_set.get_float(table.X.query_index, on_none=None),
+            )
+        )
+
+        return True
 
     def load_per_length_sequence_impedance(self, table: TablePerLengthSequenceImpedances, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """

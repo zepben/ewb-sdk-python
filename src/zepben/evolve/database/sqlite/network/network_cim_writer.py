@@ -128,8 +128,10 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_lines import
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_load_break_switches import TableLoadBreakSwitches
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_impedances import TablePerLengthImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_line_parameters import TablePerLengthLineParameters
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import TablePerLengthPhaseImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_sequence_impedances import TablePerLengthSequenceImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_phase_impedance_data import TablePhaseImpedanceData
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connection_phases import TablePowerElectronicsConnectionPhases
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connections import TablePowerElectronicsConnections
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_end_ratings import TablePowerTransformerEndRatings
@@ -230,7 +232,9 @@ from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.line import Line
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthImpedance, PerLengthLineParameter, PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import RatioTapChanger, TapChanger, TransformerEnd, PowerTransformer, PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
@@ -1476,10 +1480,7 @@ class NetworkCimWriter(BaseCimWriter):
         table = self._database_tables.get_table(TableAcLineSegments)
         insert = self._database_tables.get_insert(TableAcLineSegments)
 
-        insert.add_value(
-            table.per_length_sequence_impedance_mrid.query_index,
-            self._mrid_or_none(ac_line_segment.per_length_sequence_impedance)
-        )
+        insert.add_value(table.per_length_impedance_mrid.query_index, self._mrid_or_none(ac_line_segment.per_length_impedance))
 
         return self._save_conductor(table, insert, ac_line_segment, "AC line segment")
 
@@ -1785,6 +1786,38 @@ class NetworkCimWriter(BaseCimWriter):
         description: str
     ) -> bool:
         return self._save_identified_object(table, insert, per_length_line_parameter, description)
+
+    def _save_phase_impedance_data(self, per_length_phase_impedance: PerLengthPhaseImpedance, phase_impedance_data: PhaseImpedanceData) -> bool:
+        table = self._database_tables.get_table(TablePhaseImpedanceData)
+        insert = self._database_tables.get_insert(TablePhaseImpedanceData)
+
+        insert.add_value(table.per_length_phase_impedance_mrid.query_index, per_length_phase_impedance.mrid)
+        insert.add_value(table.from_phase.query_index, phase_impedance_data.from_phase.short_name)
+        insert.add_value(table.to_phase.query_index, phase_impedance_data.to_phase.short_name)
+        insert.add_value(table.b.query_index, phase_impedance_data.b)
+        insert.add_value(table.g.query_index, phase_impedance_data.g)
+        insert.add_value(table.r.query_index, phase_impedance_data.r)
+        insert.add_value(table.x.query_index, phase_impedance_data.x)
+
+        return self._try_execute_single_update(insert, "phase impedance data")
+
+    def save_per_length_phase_impedance(self, per_length_phase_impedance: PerLengthPhaseImpedance) -> bool:
+        """
+        Save the :class:`PerLengthPhaseImpedance` fields to :class:`TablePerLengthPhaseImpedances`.
+
+        :param per_length_phase_impedance: The :class:`PerLengthPhaseImpedance` instance to write to the database.
+        :return: True if the :class:`PerLengthPhaseImpedance` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TablePerLengthPhaseImpedances)
+        insert = self._database_tables.get_insert(TablePerLengthPhaseImpedances)
+
+        status = True
+
+        for phase_impedance_data in per_length_phase_impedance.data:
+            status = status and self._save_phase_impedance_data(per_length_phase_impedance, phase_impedance_data)
+
+        return self._save_per_length_impedance(table, insert, per_length_phase_impedance, "per length phase impedance")
 
     def save_per_length_sequence_impedance(self, per_length_sequence_impedance: PerLengthSequenceImpedance) -> bool:
         """
