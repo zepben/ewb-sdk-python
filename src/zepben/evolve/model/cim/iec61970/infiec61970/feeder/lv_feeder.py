@@ -26,6 +26,10 @@ class LvFeeder(EquipmentContainer):
     """The normal head terminal or terminals of this LvFeeder"""
 
     _normal_energizing_feeders: Optional[Dict[str, Feeder]] = None
+    """The feeders that energize this LV feeder in the normal state of the network."""
+
+    _current_energizing_feeders: Optional[Dict[str, Feeder]] = None
+    """The feeders that energize this LV feeder in the current state of the network."""
 
     _current_equipment: Optional[Dict[str, Equipment]] = None
     """The equipment contained in this LvFeeder in the current state of the network."""
@@ -64,13 +68,13 @@ class LvFeeder(EquipmentContainer):
     @property
     def normal_energizing_feeders(self) -> Generator[Feeder, None, None]:
         """
-        The HV/MV feeders that energize this LV feeder.
+        The HV/MV feeders that normally energize this LV feeder.
         """
         return ngen(self._normal_energizing_feeders.values() if self._normal_energizing_feeders is not None else None)
 
     def num_normal_energizing_feeders(self) -> int:
         """
-        Get the number of HV/MV feeders that energize this LV feeder.
+        Get the number of HV/MV feeders that normally energize this LV feeder.
         """
         return nlen(self._normal_energizing_feeders)
 
@@ -120,6 +124,67 @@ class LvFeeder(EquipmentContainer):
         @return: This `LvFeeder` for fluent use.
         """
         self._normal_energizing_feeders = None
+        return self
+
+    @property
+    def current_energizing_feeders(self) -> Generator[Feeder, None, None]:
+        """
+        The HV/MV feeders that currently energize this LV feeder.
+        """
+        return ngen(self._current_energizing_feeders.values() if self._current_energizing_feeders is not None else None)
+
+    def num_current_energizing_feeders(self) -> int:
+        """
+        Get the number of HV/MV feeders that currently energize this LV feeder.
+        """
+        return nlen(self._current_energizing_feeders)
+
+    def get_current_energizing_feeder(self, mrid: str) -> Feeder:
+        """
+        Energizing feeder using the current state of the network.
+
+        @param mrid: The mrid of the `Feeder`.
+        @return A matching `Feeder` that energizes this `LvFeeder` in the current state of the network.
+        @raise A `KeyError` if no matching `Feeder` was found.
+        """
+        if not self._current_energizing_feeders:
+            raise KeyError(mrid)
+        try:
+            return self._current_energizing_feeders[mrid]
+        except AttributeError:
+            raise KeyError(mrid)
+
+    def add_current_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
+        """
+        Associate this `LvFeeder` with a `Feeder` in the current state of the network.
+
+        @param feeder: the HV/MV feeder to associate with this LV feeder in the current state of the network.
+        @return: This `LvFeeder` for fluent use.
+        """
+        if self._validate_reference(feeder, self.get_current_energizing_feeder, "A Feeder"):
+            return self
+        self._current_energizing_feeders = dict() if self._current_energizing_feeders is None else self._current_energizing_feeders
+        self._current_energizing_feeders[feeder.mrid] = feeder
+        return self
+
+    def remove_current_energizing_feeder(self, feeder: Feeder) -> LvFeeder:
+        """
+        Disassociate this `LvFeeder` from a `Feeder` in the current state of the network.
+
+        @param feeder: the HV/MV feeder to disassociate from this LV feeder in the current state of the network.
+        @return: This `LvFeeder` for fluent use.
+        @raise: A `ValueError` if `feeder` is not found in the current energizing feeders collection.
+        """
+        self._current_energizing_feeders = safe_remove_by_id(self._current_energizing_feeders, feeder)
+        return self
+
+    def clear_current_energizing_feeders(self) -> LvFeeder:
+        """
+        Clear all `Feeder`s associated with `LvFeeder` in the current state of the network.
+
+        @return: This `LvFeeder` for fluent use.
+        """
+        self._current_energizing_feeders = None
         return self
 
     @property
