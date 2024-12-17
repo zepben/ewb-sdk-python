@@ -18,9 +18,10 @@ from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObjec
     PanDemandResponseFunction, BatteryUnit, StaticVarCompensator
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
-from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetCurrentEquipmentForFeederRequest, \
-    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, IncludedEnergizedContainers
-from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, GetCurrentEquipmentForFeederResponse, \
+from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, \
+    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, IncludedEnergizedContainers, \
+    NetworkState
+from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
 from time import sleep
@@ -346,6 +347,23 @@ class TestNetworkConsumer:
         await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
 
     @pytest.mark.asyncio
+    async def test_get_equipment_for_container_for_all_network_state(self, feeder_network: NetworkService):
+        async def client_test():
+            mor = (
+                await self.client.get_equipment_for_container(
+                    "f001",
+                    network_state=NetworkState.ALL_NETWORK_STATE
+                )
+            ).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 3
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
+
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers',
+                                                                 [_create_container_equipment_responses(feeder_network,
+                                                                                                        network_state=NetworkState.ALL_NETWORK_STATE)])])
+
+    @pytest.mark.asyncio
     async def test_get_equipment_for_containers(self, feeder_network: NetworkService):
         async def client_test():
             mor = (await self.client.get_equipment_for_containers(["f001"])).throw_on_error().value
@@ -372,15 +390,21 @@ class TestNetworkConsumer:
         await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
 
     @pytest.mark.asyncio
-    async def test_get_current_equipment_for_feeder(self, feeder_with_current: NetworkService):
+    async def test_get_equipment_for_containers_for_all_network_state(self, feeder_network: NetworkService):
         async def client_test():
-            mor = (await self.client.get_current_equipment_for_feeder("f001")).throw_on_error().value
+            mor = (
+                await self.client.get_equipment_for_containers(
+                    ["f001"],
+                    network_state=NetworkState.ALL_NETWORK_STATE
+                )
+            ).throw_on_error().value
 
-            assert len(mor.objects) == self.service.len_of(Equipment) == 5
-            _assert_contains_mrids(self.service, "fsp", "c2", "tx", "c3", "sw")
+            assert len(mor.objects) == self.service.len_of(Equipment) == 3
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
 
-        await self.mock_server.validate(client_test,
-                                        [StreamGrpc('getCurrentEquipmentForFeeder', [_create_container_current_equipment_responses(feeder_with_current)])])
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers',
+                                                                 [_create_container_equipment_responses(feeder_network,
+                                                                                                        network_state=NetworkState.ALL_NETWORK_STATE)])])
 
     @pytest.mark.asyncio
     async def test_get_equipment_for_operational_restriction(self, operational_restriction_with_equipment: NetworkService):
@@ -569,11 +593,13 @@ def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
     return nio
 
 
-def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
+def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None,
+                                          network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE) \
     -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForContainersRequest):
+        assert request.networkState == network_state
         for mrid in request.mrids:
             ec = valid[mrid]
             if ec:
@@ -614,22 +640,6 @@ def _create_cn_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = No
             raise AssertionError(f"Requested unexpected cn {request.mrid}.")
 
     return responses
-
-
-def _create_container_current_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
-    -> Callable[[GetCurrentEquipmentForFeederRequest], Generator[GetCurrentEquipmentForFeederResponse, None, None]]:
-    valid: Dict[str, Feeder] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
-
-    def responses(request: GetCurrentEquipmentForFeederRequest) -> Generator[GetCurrentEquipmentForFeederResponse, None, None]:
-        fdr = valid[request.mrid]
-        if fdr:
-            for equip in fdr.current_equipment:
-                yield _response_of(equip, GetCurrentEquipmentForFeederResponse)
-        else:
-            raise AssertionError(f"Requested unexpected feeder {request.mrid}.")
-
-    return responses
-
 
 # noinspection PyUnresolvedReferences
 def _create_hierarchy_response_with_sleep(service: NetworkService, sleep_time: int) -> GetNetworkHierarchyResponse:
