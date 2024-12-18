@@ -7,6 +7,7 @@
 * `QueryNetworkStateService.on_get_current_states` must now return a stream of `CurrentStateEventBatch` rather than just the events themselves.
 * `AcLineSegment.per_length_sequence_impedance` has been corrected to `per_length_impedance`. This has been done in a non-breaking way, however the public 
   resolver `Resolvers.per_length_sequence_impedance` is now `Resolvers.per_length_impedance`, correctly reflecting the CIM relationship.
+* Removed `get_current_equipment_for_feeder` implementation for `NetworkConsumerClient` as its functionality is now incorporated in `get_equipment_for_container`.
 
 ### New Features
 * Added `BatchNotProcessed` current state response. This is used to indicate a batch has been ignored, rather than just returning a `BatchSuccessful`.
@@ -31,6 +32,8 @@
 * Added collection of `BatteryControl` to `BatteryUnit`
 * Added collection of `EndDeviceFunctionKind` to `EndDevice`
 * Added an unordered collection comparator.
+* Added the energized relationship for the current state of network between `Feeder` and `LvFeeder`.
+* Updated `NetworkConsumerClient` `get_equipment_for_container/s` to allow requesting normal, current or all equipments.
 
 ### Fixes
 * None.
