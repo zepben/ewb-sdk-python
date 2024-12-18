@@ -5,6 +5,7 @@
 * Removed `ProcessingPaused` current state response message as this functionality won't be supported.
 * `QueryNetworkStateClient.get_current_states` now returns a `CurrentStateEventBatch` rather than just the events themselves.
 * `QueryNetworkStateService.on_get_current_states` must now return a stream of `CurrentStateEventBatch` rather than just the events themselves.
+* Removed `get_current_equipment_for_feeder` implementation for `NetworkConsumerClient` as its functionality is now incorporated in `get_equipment_for_container`.
 
 ### New Features
 * Added `BatchNotProcessed` current state response. This is used to indicate a batch has been ignored, rather than just returning a `BatchSuccessful`.
@@ -15,6 +16,8 @@
 
 ### Enhancements
 * All `StateEventFailure` classes now have a `message` included to give more context to the error.
+* Added the energized relationship for the current state of network between `Feeder` and `LvFeeder`.
+* Updated `NetworkConsumerClient` `get_equipment_for_container/s` to allow requesting normal, current or all equipments.
 
 ### Fixes
 * None.
