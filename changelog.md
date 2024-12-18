@@ -1,13 +1,14 @@
 # Zepben Python SDK
 ## [0.43.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* Removed `get_current_equipment_for_feeder` implementation for `NetworkConsumerClient` as its functionality is now incorporated in `get_equipment_for_container`.
 
 ### New Features
 * None.
 
 ### Enhancements
-* None.
+* Added the energized relationship for the current state of network between `Feeder` and `LvFeeder`.
+* Updated `NetworkConsumerClient` `get_equipment_for_container/s` to allow requesting normal, current or all equipments.
 
 ### Fixes
 * None.
