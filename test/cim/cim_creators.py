@@ -598,7 +598,8 @@ def create_equipment_container(include_runtime: bool, add_equipment: bool = True
 def create_feeder(include_runtime: bool = True):
     runtime = {
         "normal_energized_lv_feeders": lists(builds(LvFeeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
-        "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2)
+        "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2),
+        "current_energized_lv_feeders": lists(builds(LvFeeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
     } if include_runtime else {}
 
     return builds(
@@ -1520,7 +1521,8 @@ def create_loop(include_runtime: bool = True):
 def create_lv_feeder(include_runtime: bool = True):
     runtime = {
         "normal_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2),
-        "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2)
+        "current_equipment": lists(sampled_equipment(include_runtime), min_size=1, max_size=2),
+        "current_energizing_feeders": lists(builds(Feeder, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     } if include_runtime else {}
 
     return builds(
