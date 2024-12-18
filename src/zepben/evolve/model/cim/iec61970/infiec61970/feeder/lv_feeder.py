@@ -28,17 +28,18 @@ class LvFeeder(EquipmentContainer):
     _normal_energizing_feeders: Optional[Dict[str, Feeder]] = None
     """The feeders that energize this LV feeder in the normal state of the network."""
 
-    _current_energizing_feeders: Optional[Dict[str, Feeder]] = None
-    """The feeders that energize this LV feeder in the current state of the network."""
-
     _current_equipment: Optional[Dict[str, Equipment]] = None
     """The equipment contained in this LvFeeder in the current state of the network."""
+
+    _current_energizing_feeders: Optional[Dict[str, Feeder]] = None
+    """The feeders that energize this LV feeder in the current state of the network."""
 
     def __init__(
         self,
         normal_head_terminal: Terminal = None,
         normal_energizing_feeders: List[Feeder] = None,
         current_equipment: List[Equipment] = None,
+        current_energizing_feeders: List[Feeder] = None,
         **kwargs
     ):
         super(LvFeeder, self).__init__(**kwargs)
@@ -50,6 +51,10 @@ class LvFeeder(EquipmentContainer):
         if current_equipment:
             for eq in current_equipment:
                 self.add_current_equipment(eq)
+        if current_energizing_feeders:
+            for feeder in current_energizing_feeders:
+                self.add_current_energizing_feeder(feeder)
+
 
     @property
     def normal_head_terminal(self) -> Optional[Terminal]:
