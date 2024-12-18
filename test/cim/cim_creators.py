@@ -34,7 +34,7 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'MAX_SEQUENCE_NUMBER', 'MIN_SEQUENCE_NUMBER', 'ALPHANUM', 'boolean_or_none', 'create_grounding_impedance', 'create_petersen_coil',
            'create_reactive_capability_curve', 'create_synchronous_machine', 'create_earth_fault_compensator', 'create_curve', 'create_curve_data',
            'create_rotating_machine', 'sampled_curves', 'create_pan_demand_response_function', 'create_battery_control', 'create_asset_function',
-           'create_end_device_function', 'create_static_var_compensator'
+           'create_end_device_function', 'create_static_var_compensator', 'create_per_length_phase_impedance', 'create_phase_impedance_data'
            ]
 
 from datetime import datetime
@@ -43,6 +43,8 @@ from random import choice
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
 
 from zepben.evolve import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
 
 MIN_32_BIT_INTEGER = -2147483647  # _UNKNOWN_INT = -2147483648
@@ -1215,6 +1217,26 @@ def create_per_length_impedance(include_runtime: bool):
 
 def create_per_length_line_parameter(include_runtime: bool):
     return {**create_identified_object(include_runtime)}
+
+
+def create_phase_impedance_data():
+    return builds(
+        PhaseImpedanceData,
+        from_phase=sampled_from(SinglePhaseKind),
+        to_phase=sampled_from(SinglePhaseKind),
+        b=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        g=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    )
+
+
+def create_per_length_phase_impedance(include_runtime: bool = True):
+    return builds(
+        PerLengthPhaseImpedance,
+        data=lists(create_phase_impedance_data(), max_size=4, unique_by=lambda it: (it.from_phase, it.to_phase)),
+        **create_per_length_impedance(include_runtime),
+    )
 
 
 def create_per_length_sequence_impedance(include_runtime: bool = True):

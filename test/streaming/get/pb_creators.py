@@ -127,7 +127,9 @@ from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import L
 from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch as PBLoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance as PBPerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter as PBPerLengthLineParameter
+from zepben.protobuf.cim.iec61970.base.wires.PerLengthPhaseImpedance_pb2 import PerLengthPhaseImpedance as PBPerLengthPhaseImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
+from zepben.protobuf.cim.iec61970.base.wires.PhaseImpedanceData_pb2 import PhaseImpedanceData as PBPhaseImpedanceData
 from zepben.protobuf.cim.iec61970.base.wires.PhaseShuntConnectionKind_pb2 import PhaseShuntConnectionKind as PBPhaseShuntConnectionKind
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase as PBPowerElectronicsConnectionPhase
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection as PBPowerElectronicsConnection
@@ -197,7 +199,8 @@ __all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_inf
            'power_electronics_connection_phase', 'power_transformer', 'power_transformer_end', 'protected_switch', 'ratio_tap_changer', 'recloser',
            'regulating_cond_eq', 'shunt_compensator', 'switch', 'tap_changer', 'transformer_end', 'transformer_star_impedance', 'circuit', 'loop', 'lv_feeder',
            'ev_charging_unit', 'timestamp', 'network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects', 'tap_changer_control',
-           'regulating_control', 'pan_demand_response_function', 'battery_control', 'asset_function', 'end_device_function', 'static_var_compensator']
+           'regulating_control', 'pan_demand_response_function', 'battery_control', 'asset_function', 'end_device_function', 'static_var_compensator',
+           'per_length_phase_impedance', 'phase_impedance_data']
 
 
 #######################################
@@ -1147,6 +1150,26 @@ def per_length_line_parameter():
     return builds(PBPerLengthLineParameter, io=identified_object())
 
 
+def phase_impedance_data():
+    return builds(
+        PBPhaseImpedanceData,
+        fromPhase=sampled_from(PBSinglePhaseKind.values()),
+        toPhase=sampled_from(PBSinglePhaseKind.values()),
+        b=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    )
+
+
+def per_length_phase_impedance():
+    return builds(
+        PBPerLengthPhaseImpedance,
+        pli=per_length_impedance(),
+        data=lists(phase_impedance_data(), max_size=2)
+    )
+
+
 def per_length_sequence_impedance():
     return builds(
         PBPerLengthSequenceImpedance,
@@ -1456,6 +1479,12 @@ def timestamp():
 @composite
 def network_identified_objects(draw):
     nios = [
+        # [ZBEX] EXTENSIONS IEC61968 METERING #
+        draw(builds(NetworkIdentifiedObject, panDemandResponseFunction=pan_demand_response_function())),
+
+        # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
+        draw(builds(NetworkIdentifiedObject, batteryControl=battery_control())),
+
         # IEC61968 ASSET INFO #
         draw(builds(NetworkIdentifiedObject, cableInfo=cable_info())),
         draw(builds(NetworkIdentifiedObject, noLoadTest=no_load_test())),
@@ -1544,6 +1573,7 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, junction=junction())),
         draw(builds(NetworkIdentifiedObject, linearShuntCompensator=linear_shunt_compensator())),
         draw(builds(NetworkIdentifiedObject, loadBreakSwitch=load_break_switch())),
+        draw(builds(NetworkIdentifiedObject, perLengthPhaseImpedance=per_length_phase_impedance())),
         draw(builds(NetworkIdentifiedObject, perLengthSequenceImpedance=per_length_sequence_impedance())),
         draw(builds(NetworkIdentifiedObject, powerElectronicsConnection=power_electronics_connection())),
         draw(builds(NetworkIdentifiedObject, powerElectronicsConnectionPhase=power_electronics_connection_phase())),
@@ -1554,6 +1584,7 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, seriesCompensator=series_compensator())),
         draw(builds(NetworkIdentifiedObject, tapChangerControl=tap_changer_control())),
         draw(builds(NetworkIdentifiedObject, transformerStarImpedance=transformer_star_impedance())),
+        draw(builds(NetworkIdentifiedObject, staticVarCompensator=static_var_compensator())),
 
         # IEC61970 INFIEC61970 FEEDER #
         draw(builds(NetworkIdentifiedObject, circuit=circuit())),

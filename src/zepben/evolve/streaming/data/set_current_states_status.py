@@ -10,8 +10,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple
 
-from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, ProcessingPaused as PBProcessingPaused, \
-    BatchFailure as PBBatchFailure, StateEventFailure as PBStateEventFailure, StateEventUnknownMrid as PBStateEventUnknownMrid, \
+from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, BatchFailure as PBBatchFailure, \
+    StateEventFailure as PBStateEventFailure, StateEventUnknownMrid as PBStateEventUnknownMrid, \
     StateEventDuplicateMrid as PBStateEventDuplicateMrid, StateEventInvalidMrid as PBStateEventInvalidMrid, \
     StateEventUnsupportedPhasing as PBStateEventUnsupportedPhasing
 from zepben.protobuf.ns.network_state_responses_pb2 import SetCurrentStatesResponse as PBSetCurrentStatesResponse
@@ -106,7 +106,7 @@ class ProcessingPaused(SetCurrentStatesStatus):
         """
         Creates a protobuf SetCurrentStatesResponse object with paused.
         """
-        return PBSetCurrentStatesResponse(messageId=self.batch_id, paused=PBProcessingPaused(since=datetime_to_timestamp(self.since)))
+        return PBSetCurrentStatesResponse(messageId=self.batch_id)
 
 
 @dataclass

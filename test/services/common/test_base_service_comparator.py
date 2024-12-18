@@ -2,14 +2,37 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from dataclassy import dataclass
 from datetime import datetime
-from typing import Type
+from typing import Type, List, Optional
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
 
 from zepben.evolve import IdentifiedObject, Document, OrganisationRole, Organisation, Junction, ObjectDifference, ValueDifference, CollectionDifference, \
     BaseService, BaseServiceComparator
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
+
+
+@dataclass
+class UnorderedProperties(object):
+
+    _values: Optional[List[int]] = None
+
+    @property
+    def values(self):
+        return self._values
+
+
+@dataclass
+class UnorderedCheck(object):
+
+    key: int
+    value: int
+
+    def __lt__(self, other):
+        if self.value < other.value:
+            return True
+        return False
 
 
 class TestBaseServiceComparator:
@@ -85,6 +108,51 @@ class TestBaseServiceComparator:
         target_type = _create_name_type("type", "desc", "name", "id")
 
         self.validator.validate_name_types(source_type, target_type)
+
+    def test_unordered_list_comparison(self):
+        source = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(2, 3)])
+        target_same = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(2, 3)])
+        target_order = UnorderedProperties([UnorderedCheck(2, 3), UnorderedCheck(1, 2)])
+
+        target_diff_keys = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(3, 3)])
+        target_diff_values = UnorderedProperties([UnorderedCheck(1, 3), UnorderedCheck(2, 3)])
+        comparator = BaseServiceComparator()
+
+        diff = ObjectDifference(source, target_same)
+        assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+
+        diff = ObjectDifference(source, target_order)
+        assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+
+        diff = ObjectDifference(source, target_diff_keys)
+        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+
+        diff = ObjectDifference(source, target_diff_values)
+        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+
+    def test_unordered_list_comparison_with_objects(self):
+        source = UnorderedCheck([1, 1, 2])
+        target_same = UnorderedCheck([1, 1, 2])
+        target_order = UnorderedCheck([1, 2, 1])
+        target_diff_less = UnorderedCheck([2, 1])
+        target_diff_values = UnorderedCheck([2, 1, 2])
+        target_diff_more = UnorderedCheck([1, 1, 3, 4])
+        comparator = BaseServiceComparator()
+
+        diff = ObjectDifference(source, target_same)
+        assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+
+        diff = ObjectDifference(source, target_order)
+        assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+
+        diff = ObjectDifference(source, target_diff_less)
+        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+
+        diff = ObjectDifference(source, target_diff_values)
+        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+
+        diff = ObjectDifference(source, target_diff_more)
+        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
 
 def _create_name_type(name_type: str, desc: str, name: str, io_mrid: str) -> NameType:

@@ -266,6 +266,22 @@ class ServiceComparatorValidator(object):
         })
         self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
+    K = TypeVar('K')
+    R = TypeVar('R')
+
+    def validate_unordered_collection(
+        self,
+        prop: Property,
+        add_to_collection: Callable[..., Any],
+        creator: [[str], TIdentifiedObject],
+        create_item: Callable[[K], R],
+        create_other_item: Callable[[K], R],
+        options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
+        options_stop_compare: bool = False,
+        expected_differences: Set[str] = None
+    ):
+        pass
+
     @staticmethod
     def _get_value_or_reference_difference(source: Optional[R], target: Optional[R]) -> Difference:
         if isinstance(source, IdentifiedObject) or isinstance(target, IdentifiedObject):

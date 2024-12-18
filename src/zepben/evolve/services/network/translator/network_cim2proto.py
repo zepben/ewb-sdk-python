@@ -114,7 +114,9 @@ from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import L
 from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch as PBLoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance as PBPerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter as PBPerLengthLineParameter
+from zepben.protobuf.cim.iec61970.base.wires.PerLengthPhaseImpedance_pb2 import PerLengthPhaseImpedance as PBPerLengthPhaseImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
+from zepben.protobuf.cim.iec61970.base.wires.PhaseImpedanceData_pb2 import PhaseImpedanceData as PBPhaseImpedanceData
 from zepben.protobuf.cim.iec61970.base.wires.PetersenCoil_pb2 import PetersenCoil as PBPetersenCoil
 from zepben.protobuf.cim.iec61970.base.wires.PhaseShuntConnectionKind_pb2 import PhaseShuntConnectionKind as PBPhaseShuntConnectionKind
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase as PBPowerElectronicsConnectionPhase
@@ -233,6 +235,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.jumper import *
 from zepben.evolve.model.cim.iec61970.base.wires.line import *
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import *
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import *
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
@@ -278,7 +282,7 @@ __all__ = [
     "ev_charging_unit", "transformer_end_rated_s_to_pb", "tap_changer_control_to_pb", "regulating_control_to_pb", "protection_relay_function_to_pb",
     "protection_relay_scheme_to_pb", "protection_relay_system_to_pb", "relay_setting_to_pb", "ground_to_pb", "ground_disconnector_to_pb",
     "series_compensator_to_pb", "pan_demand_response_function_to_pb", "battery_control_to_pb", "asset_function_to_pb", "end_device_function_to_pb",
-    "static_var_compensator_to_pb"
+    "static_var_compensator_to_pb", "per_length_phase_impedance_to_pb", "phase_impedance_data_to_pb",
 ]
 
 
@@ -1080,7 +1084,7 @@ PowerElectronicsWindUnit.to_pb = power_electronics_wind_unit_to_pb
 def ac_line_segment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
     return PBAcLineSegment(
         cd=conductor_to_pb(cim),
-        perLengthSequenceImpedanceMRID=mrid_or_empty(cim.per_length_sequence_impedance)
+        perLengthImpedanceMRID=mrid_or_empty(cim.per_length_impedance)
     )
 
 
@@ -1247,6 +1251,24 @@ def per_length_impedance_to_pb(cim: PerLengthImpedance) -> PBPerLengthImpedance:
 
 def per_length_line_parameter_to_pb(cim: PerLengthLineParameter) -> PBPerLengthLineParameter:
     return PBPerLengthLineParameter(io=identified_object_to_pb(cim))
+
+
+def phase_impedance_data_to_pb(cim: PhaseImpedanceData) -> PBPhaseImpedanceData:
+    return PBPhaseImpedanceData(
+        fromPhase=PBSinglePhaseKind.Value(cim.from_phase.short_name),
+        toPhase=PBSinglePhaseKind.Value(cim.to_phase.short_name),
+        b=from_nullable_float(cim.b),
+        g=from_nullable_float(cim.g),
+        r=from_nullable_float(cim.r),
+        x=from_nullable_float(cim.x),
+    )
+
+
+def per_length_phase_impedance_to_pb(cim: PerLengthPhaseImpedance) -> PBPerLengthPhaseImpedance:
+    return PBPerLengthPhaseImpedance(
+        pli=per_length_impedance_to_pb(cim),
+        phaseImpedanceData=[phase_impedance_data_to_pb(it) for it in cim.data]
+    )
 
 
 def per_length_sequence_impedance_to_pb(cim: PerLengthSequenceImpedance) -> PBPerLengthSequenceImpedance:
@@ -1560,7 +1582,9 @@ Jumper.to_pb = jumper_to_pb
 Junction.to_pb = junction_to_pb
 LinearShuntCompensator.to_pb = linear_shunt_compensator_to_pb
 LoadBreakSwitch.to_pb = load_break_switch_to_pb
+PerLengthPhaseImpedance.to_pb = per_length_phase_impedance_to_pb
 PerLengthSequenceImpedance.to_pb = per_length_sequence_impedance_to_pb
+PhaseImpedanceData.to_pb = phase_impedance_data_to_pb
 PetersenCoil.to_pb = petersen_coil_to_pb
 PowerElectronicsConnection.to_pb = power_electronics_connection_to_pb
 PowerElectronicsConnectionPhase.to_pb = power_electronics_connection_phase_to_pb

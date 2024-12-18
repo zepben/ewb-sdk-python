@@ -23,6 +23,7 @@ from zepben.evolve import IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest
     PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, StreetAddress, TownDetail, StreetDetail, GroundingImpedance, \
     PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.services.common import resolver
 from zepben.evolve.services.network.tracing import tracing
 
@@ -39,7 +40,7 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_current_transformer_info, create_current_transformer, create_potential_transformer, create_current_relay, create_relay_info, create_switch_info, \
     create_ev_charging_unit, create_tap_changer_control, create_distance_relay, create_voltage_relay, create_protection_relay_scheme, \
     create_protection_relay_system, create_ground, create_ground_disconnector, create_series_compensator, create_potential_transformer_info, \
-    create_grounding_impedance, create_petersen_coil, create_reactive_capability_curve, create_synchronous_machine
+    create_grounding_impedance, create_petersen_coil, create_reactive_capability_curve, create_synchronous_machine, create_per_length_phase_impedance
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
 
@@ -481,6 +482,11 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     @given(load_break_switch=create_load_break_switch(False))
     async def test_schema_load_break_switch(self, load_break_switch):
         await self._validate_schema(SchemaNetworks().network_services_of(LoadBreakSwitch, load_break_switch))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(per_length_phase_impedance=create_per_length_phase_impedance(False))
+    async def test_schema_per_length_phase_impedance(self, per_length_phase_impedance):
+        await self._validate_schema(SchemaNetworks().network_services_of(PerLengthPhaseImpedance, per_length_phase_impedance))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(per_length_sequence_impedance=create_per_length_sequence_impedance(False))

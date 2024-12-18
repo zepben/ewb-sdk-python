@@ -70,6 +70,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import Grou
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TapChanger, TransformerEnd
@@ -778,7 +779,7 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_ac_line_segment(self, source: AcLineSegment, target: AcLineSegment) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_id_references(diff, AcLineSegment.per_length_sequence_impedance)
+        self._compare_id_references(diff, AcLineSegment.per_length_impedance)
 
         return self._compare_conductor(diff)
 
@@ -923,6 +924,13 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_per_length_line_parameter(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_identified_object(diff)
+
+    def _compare_per_length_phase_impedance(self, source: PerLengthPhaseImpedance, target: PerLengthPhaseImpedance) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_unordered_value_collection(diff, lambda it: f"{it.from_phase}-{it.to_phase}", PerLengthPhaseImpedance.data)
+
+        return self._compare_per_length_impedance(diff)
 
     def _compare_per_length_sequence_impedance(self, source: PerLengthSequenceImpedance, target: PerLengthSequenceImpedance) -> ObjectDifference:
         diff = ObjectDifference(source, target)

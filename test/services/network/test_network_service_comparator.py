@@ -23,7 +23,7 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind, \
     TransformerEndRatedS, TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, EndDeviceFunction, \
-    PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode
+    PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 
@@ -458,6 +458,17 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Terminal(mrid="2"),
             NetworkServiceComparatorOptions(compare_terminals=False),
             options_stop_compare=True
+        )
+
+    def _compare_curve(self, creator: Type[Curve]):
+        self._compare_identified_object(creator)
+
+        self.validator.validate_indexed_collection(
+            Curve.data,
+            Curve.add_curve_data,
+            creator,
+            lambda _: CurveData(1, 2),
+            lambda _: CurveData(3, 4),
         )
 
     def test_compare_connectivity_node(self):
@@ -1019,6 +1030,12 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_per_length_line_parameter(self, creator: Type[PerLengthLineParameter]):
         self._compare_identified_object(creator)
 
+    def test_compare_per_length_phase_impedance(self):
+        self._compare_per_length_impedance(PerLengthPhaseImpedance)
+
+        self.validator.validate_property(PerLengthPhaseImpedance.data, PerLengthSequenceImpedance, lambda _: 1.0, lambda _: 2.0)
+        # TODO finish this test
+
     def test_compare_per_length_sequence_impedance(self):
         self._compare_per_length_impedance(PerLengthSequenceImpedance)
 
@@ -1186,6 +1203,9 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: PowerTransformerEnd(mrid="pte2")
         )
         self.validator.validate_property(RatioTapChanger.step_voltage_increment, RatioTapChanger, lambda _: 1.0, lambda _: 2.0)
+
+    def test_compare_reactive_capability_curve(self):
+        self._compare_curve(ReactiveCapabilityCurve)
 
     def test_compare_recloser(self):
         self._compare_protected_switch(Recloser)

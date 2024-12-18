@@ -105,7 +105,9 @@ from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import L
 from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch as PBLoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance as PBPerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter as PBPerLengthLineParameter
+from zepben.protobuf.cim.iec61970.base.wires.PerLengthPhaseImpedance_pb2 import PerLengthPhaseImpedance as PBPerLengthPhaseImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
+from zepben.protobuf.cim.iec61970.base.wires.PhaseImpedanceData_pb2 import PhaseImpedanceData as PBPhaseImpedanceData
 from zepben.protobuf.cim.iec61970.base.wires.PetersenCoil_pb2 import PetersenCoil as PBPetersenCoil
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase as PBPowerElectronicsConnectionPhase
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection as PBPowerElectronicsConnection
@@ -221,6 +223,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.line import *
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import *
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import *
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
@@ -1240,7 +1244,7 @@ PBPowerElectronicsWindUnit.to_cim = power_electronics_wind_unit_to_cim
 def ac_line_segment_to_cim(pb: PBAcLineSegment, network_service: NetworkService) -> Optional[AcLineSegment]:
     cim = AcLineSegment(mrid=pb.mrid())
 
-    network_service.resolve_or_defer_reference(resolver.per_length_sequence_impedance(cim), pb.perLengthSequenceImpedanceMRID)
+    network_service.resolve_or_defer_reference(resolver.per_length_impedance(cim), pb.perLengthImpedanceMRID)
 
     conductor_to_cim(pb.cd, cim, network_service)
     return cim if network_service.add(cim) else None
@@ -1449,6 +1453,27 @@ def per_length_line_parameter_to_cim(pb: PBPerLengthLineParameter, cim: PerLengt
 
 def per_length_impedance_to_cim(pb: PBPerLengthImpedance, cim: PerLengthImpedance, network_service: NetworkService):
     per_length_line_parameter_to_cim(pb.lp, cim, network_service)
+
+
+def phase_impedance_data_to_cim(pb: PBPhaseImpedanceData) -> Optional[PhaseImpedanceData]:
+    return PhaseImpedanceData(
+        SinglePhaseKind(pb.fromPhase),
+        SinglePhaseKind(pb.toPhase),
+        float_or_none(pb.b),
+        float_or_none(pb.g),
+        float_or_none(pb.r),
+        float_or_none(pb.x),
+    )
+
+
+def per_length_phase_impedance_to_cim(pb: PBPerLengthPhaseImpedance, network_service: NetworkService) -> Optional[PerLengthPhaseImpedance]:
+    cim = PerLengthPhaseImpedance(mrid=pb.mrid())
+
+    for phase_impedance_data in pb.phaseImpedanceData:
+        cim.add_data(phase_impedance_data_to_cim(phase_impedance_data))
+
+    per_length_impedance_to_cim(pb.pli, cim, network_service)
+    return cim if network_service.add(cim) else None
 
 
 def per_length_sequence_impedance_to_cim(pb: PBPerLengthSequenceImpedance, network_service: NetworkService) -> Optional[PerLengthSequenceImpedance]:
@@ -1812,7 +1837,9 @@ PBBusbarSection.to_cim = busbar_section_to_cim
 PBLine.to_cim = line_to_cim
 PBLinearShuntCompensator.to_cim = linear_shunt_compensator_to_cim
 PBLoadBreakSwitch.to_cim = load_break_switch_to_cim
+PBPerLengthPhaseImpedance.to_cim = per_length_phase_impedance_to_cim
 PBPerLengthSequenceImpedance.to_cim = per_length_sequence_impedance_to_cim
+PBPhaseImpedanceData.to_cim = phase_impedance_data_to_cim
 PBPetersenCoil.to_cim = petersen_coil_to_cim
 PBPerLengthLineParameter.to_cim = per_length_line_parameter_to_cim
 PBPerLengthImpedance.to_cim = per_length_impedance_to_cim

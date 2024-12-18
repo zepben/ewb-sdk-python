@@ -83,7 +83,9 @@ from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_s
 from zepben.evolve.model.cim.iec61970.base.wires.line import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import *
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import *
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import *
 from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
 from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import *
@@ -371,7 +373,9 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_lines import
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_load_break_switches import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_impedances import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_line_parameters import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_sequence_impedances import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_phase_impedance_data import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connection_phases import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connections import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_end_ratings import *
