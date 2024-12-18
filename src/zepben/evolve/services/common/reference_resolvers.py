@@ -99,7 +99,7 @@ __all__ = [
     "prf_to_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver", "prf_to_psw_resolver",
     "psw_to_prf_resolver", "prf_to_sen_resolver", "sen_to_prf_resolver", "prf_to_prscheme_resolver", "prscheme_to_prf_resolver",
     "prscheme_to_prsystem_resolver", "battery_unit_to_battery_control_resolver", "ed_to_edf_resolver",
-    "prsystem_to_prscheme_resolver", "fuse_to_prf_resolver", "sm_to_rcc_resolver"]
+    "prsystem_to_prscheme_resolver", "fuse_to_prf_resolver", "sm_to_rcc_resolver", "feeder_to_celvf_resolver", "lvfeeder_to_cef_resolver"]
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -249,6 +249,7 @@ ec_to_curequipment_resolver = ReferenceResolver(EquipmentContainer, Equipment, l
 feeder_to_nes_resolver = ReferenceResolver(Feeder, Substation, lambda t, r: setattr(t, 'normal_energizing_substation', r))
 feeder_to_nht_resolver = ReferenceResolver(Feeder, Terminal, lambda t, r: setattr(t, 'normal_head_terminal', r))
 feeder_to_nelvf_resolver = ReferenceResolver(Feeder, LvFeeder, lambda t, r: t.add_normal_energized_lv_feeder(r))
+feeder_to_celvf_resolver = ReferenceResolver(Feeder, LvFeeder, lambda t, r: t.add_current_energized_lv_feeder(r))
 
 gr_to_sgr_resolver = ReferenceResolver(GeographicalRegion, SubGeographicalRegion, lambda t, r: t.add_sub_geographical_region(r))
 
@@ -301,6 +302,7 @@ loop_to_esub_resolver = ReferenceResolver(Loop, Substation, lambda t, r: t.add_e
 
 lvfeeder_to_nht_resolver = ReferenceResolver(LvFeeder, Terminal, lambda t, r: setattr(t, 'normal_head_terminal', r))
 lvfeeder_to_nef_resolver = ReferenceResolver(LvFeeder, Feeder, lambda t, r: t.add_normal_energizing_feeder(r))
+lvfeeder_to_cef_resolver = ReferenceResolver(LvFeeder, Feeder, lambda t, r: t.add_current_energizing_feeder(r))
 
 pec_to_pecphase_resolver = ReferenceResolver(PowerElectronicsConnection, PowerElectronicsConnectionPhase, lambda t, r: t.add_phase(r))
 pecphase_to_pec_resolver = ReferenceResolver(PowerElectronicsConnectionPhase,

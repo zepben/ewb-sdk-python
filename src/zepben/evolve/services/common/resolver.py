@@ -257,10 +257,18 @@ def normal_energized_lv_feeders(feeder: Feeder) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(feeder, feeder_to_nelvf_resolver, lvfeeder_to_nef_resolver)
 
+def current_energized_lv_feeders(feeder: Feeder) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(feeder, feeder_to_celvf_resolver, lvfeeder_to_cef_resolver)
+
 
 def normal_energizing_feeders(lv_feeder: LvFeeder) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(lv_feeder, lvfeeder_to_nef_resolver, feeder_to_nelvf_resolver)
+
+def current_energizing_feeders(lv_feeder: LvFeeder) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(lv_feeder, lvfeeder_to_cef_resolver, feeder_to_celvf_resolver)
 
 
 def normal_energizing_substation(feeder: Feeder) -> BoundReferenceResolver:

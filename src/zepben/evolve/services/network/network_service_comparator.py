@@ -527,6 +527,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_id_reference_collections(diff, Feeder.normal_energized_lv_feeders)
         if self._options.compare_feeder_equipment:
             self._compare_id_reference_collections(diff, Feeder.current_equipment)
+        self._compare_id_reference_collections(diff, Feeder.current_energized_lv_feeders)
 
         return self._compare_equipment_container(diff)
 
@@ -1234,6 +1235,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_id_reference_collections(diff, LvFeeder.normal_energizing_feeders)
         if self._options.compare_feeder_equipment:
             self._compare_id_reference_collections(diff, LvFeeder.current_equipment)
+        self._compare_id_reference_collections(diff, LvFeeder.current_energizing_feeders)
 
         return self._compare_equipment_container(diff)
 

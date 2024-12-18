@@ -899,6 +899,8 @@ def feeder_to_cim(pb: PBFeeder, network_service: NetworkService) -> Optional[Fee
     network_service.resolve_or_defer_reference(resolver.normal_energizing_substation(cim), pb.normalEnergizingSubstationMRID)
     for mrid in pb.normalEnergizedLvFeederMRIDs:
         network_service.resolve_or_defer_reference(resolver.normal_energized_lv_feeders(cim), mrid)
+    for mrid in pb.currentlyEnergizedLvFeedersMRIDs:
+        network_service.resolve_or_defer_reference(resolver.current_energized_lv_feeders(cim), mrid)
 
     equipment_container_to_cim(pb.ec, cim, network_service)
     return cim if network_service.add(cim) else None
@@ -1968,6 +1970,8 @@ def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optiona
     network_service.resolve_or_defer_reference(resolver.lv_feeder_normal_head_terminal(cim), pb.normalHeadTerminalMRID)
     for mrid in pb.normalEnergizingFeederMRIDs:
         network_service.resolve_or_defer_reference(resolver.normal_energizing_feeders(cim), mrid)
+    for mrid in pb.currentlyEnergizingFeedersMRIDs:
+        network_service.resolve_or_defer_reference(resolver.current_energizing_feeders(cim), mrid)
 
     equipment_container_to_cim(pb.ec, cim, network_service)
     return cim if network_service.add(cim) else None
