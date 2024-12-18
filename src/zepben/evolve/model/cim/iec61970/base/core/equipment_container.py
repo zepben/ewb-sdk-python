@@ -221,6 +221,7 @@ class Feeder(EquipmentContainer):
         normal_energizing_substation: Substation = None,
         current_equipment: List[Equipment] = None,
         normal_energized_lv_feeders: List[LvFeeder] = None,
+        current_energized_lv_feeders: List[LvFeeder] = None,
         **kwargs
     ):
         super(Feeder, self).__init__(**kwargs)
@@ -234,6 +235,9 @@ class Feeder(EquipmentContainer):
         if current_equipment:
             for eq in current_equipment:
                 self.add_current_equipment(eq)
+        if current_energized_lv_feeders:
+            for lv_feeder in current_energized_lv_feeders:
+                self.add_current_energized_lv_feeder(lv_feeder)
 
     @property
     def normal_head_terminal(self) -> Optional[Terminal]:
