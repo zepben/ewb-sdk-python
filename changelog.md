@@ -1,13 +1,20 @@
 # Zepben Python SDK
 ## [0.43.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* Renamed `UpdateNetworkStateClient.SetCurrentStatesRequest` to `CurrentStateEventBatch`. You will need to update any uses, but the class members are the same.
+* Removed `ProcessingPaused` current state response message as this functionality won't be supported.
+* `QueryNetworkStateClient.get_current_states` now returns a `CurrentStateEventBatch` rather than just the events themselves.
+* `QueryNetworkStateService.on_get_current_states` must now return a stream of `CurrentStateEventBatch` rather than just the events themselves.
 
 ### New Features
-* None.
+* Added `BatchNotProcessed` current state response. This is used to indicate a batch has been ignored, rather than just returning a `BatchSuccessful`.
+* `QueryNetworkStateService` now supports `reportBatchStatus`, which requires two new constructor callbacks:
+  * `on_current_states_status` - A callback triggered when the response status of an event returned via `on_get_current_states` is received from the client.
+  * `on_processing_error` - A function that takes a message and optional cause. Called when `on_current_states_status` raises an exception, or the
+    `SetCurrentStatesResponse` is for an unknown event status.
 
 ### Enhancements
-* None.
+* All `StateEventFailure` classes now have a `message` included to give more context to the error.
 
 ### Fixes
 * None.
