@@ -10,7 +10,7 @@
 * None.
 
 ### Fixes
-* None.
+* GrpcChannelBuilder's initial connectivity test no longer fails due to a lack of permissions on a subset of services.
 
 ### Notes
 * None.
