@@ -7,22 +7,22 @@ from typing import AsyncGenerator
 
 import grpc
 import pytest
-from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, ProcessingPaused as PBProcessingPaused, \
+from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, BatchNotProcessed as PBBatchNotProcessed, \
     BatchFailure as PBBatchFailure
 from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceServicer, add_UpdateNetworkStateServiceServicer_to_server
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
 from zepben.protobuf.ns.network_state_responses_pb2 import SetCurrentStatesResponse as PBSetCurrentStatesResponse
 
 from util import grpc_aio_server
-from zepben.evolve import PhaseCode, SwitchStateEvent, SwitchAction, CurrentStateEvent, BatchSuccessful, ProcessingPaused, BatchFailure, \
-    UpdateNetworkStateClient
+from zepben.evolve import PhaseCode, SwitchStateEvent, SwitchAction, CurrentStateEvent, BatchSuccessful, BatchNotProcessed, BatchFailure, \
+    UpdateNetworkStateClient, CurrentStateEventBatch
 
 
 class MockUpdateNetworkStateService(UpdateNetworkStateServiceServicer):
     responses = {
         1: PBSetCurrentStatesResponse(messageId=1, success=PBBatchSuccessful()),
-        2: PBSetCurrentStatesResponse(messageId=2, paused=PBProcessingPaused()),
-        3: PBSetCurrentStatesResponse(messageId=3, failure=PBBatchFailure())
+        2: PBSetCurrentStatesResponse(messageId=2, failure=PBBatchFailure()),
+        3: PBSetCurrentStatesResponse(messageId=3, notProcessed=PBBatchNotProcessed())
     }
 
     def __init__(self):
@@ -68,9 +68,9 @@ class TestUpdateNetworkStateClient:
     async def test_set_current_states_in_batches(self, grpc_service_client_pair):
         service, client = grpc_service_client_pair
 
-        async def generate_requests() -> AsyncGenerator[PBSetCurrentStatesRequest, None]:
+        async def generate_requests() -> AsyncGenerator[CurrentStateEventBatch, None]:
             for i in range(3):
-                yield UpdateNetworkStateClient.SetCurrentStatesRequest(batch_id=i + 1, events=self.current_state_events)
+                yield CurrentStateEventBatch(batch_id=i + 1, events=self.current_state_events)
 
         result = [response async for response in client.set_current_states_in_batches(generate_requests())]
 
@@ -80,5 +80,5 @@ class TestUpdateNetworkStateClient:
 
         assert [r.batch_id for r in result] == [1, 2, 3]
         assert isinstance(result[0], BatchSuccessful)
-        assert isinstance(result[1], ProcessingPaused)
-        assert isinstance(result[2], BatchFailure)
+        assert isinstance(result[1], BatchFailure)
+        assert isinstance(result[2], BatchNotProcessed)

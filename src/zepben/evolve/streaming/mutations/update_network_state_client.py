@@ -4,13 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 __all__ = ["UpdateNetworkStateClient"]
 
-from dataclasses import dataclass
 from typing import List, Callable, AsyncGenerator, Iterable
 
 from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceStub
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
 
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
+from zepben.evolve.streaming.data.current_state_event_batch import CurrentStateEventBatch
 from zepben.evolve.streaming.data.set_current_states_status import SetCurrentStatesStatus
 from zepben.evolve.streaming.grpc.grpc import GrpcClient
 
@@ -44,11 +44,11 @@ class UpdateNetworkStateClient(GrpcClient):
                                              to be processed by the gRPC service.
 
         Returns:
-            A SetCurrentStatesResponse object representing the status of the batch after being processed by the service.
+            A SetCurrentStatesStatus object representing the status of the batch after being processed by the service.
         """
 
-        async def request_generator() -> AsyncGenerator['UpdateNetworkStateClient.SetCurrentStatesRequest', None]:
-            yield UpdateNetworkStateClient.SetCurrentStatesRequest(batch_id, batch)
+        async def request_generator() -> AsyncGenerator[CurrentStateEventBatch, None]:
+            yield CurrentStateEventBatch(batch_id, batch)
 
         responses = [response async for response in self.set_current_states_in_batches(request_generator())]
         if len(responses) == 0:
@@ -56,7 +56,7 @@ class UpdateNetworkStateClient(GrpcClient):
 
         return responses[0]
 
-    async def set_current_states_in_batches(self, batches: AsyncGenerator['UpdateNetworkStateClient.SetCurrentStatesRequest', None]) -> AsyncGenerator[
+    async def set_current_states_in_batches(self, batches: AsyncGenerator[CurrentStateEventBatch, None]) -> AsyncGenerator[
         SetCurrentStatesStatus, None]:
         """
         Sends a stream of current state events to the gRPC service for processing.
@@ -64,7 +64,7 @@ class UpdateNetworkStateClient(GrpcClient):
         This method is responsible for streaming a batch of current state events to the gRPC service using the gRPC stub provided in the constructor.
 
         Args:
-            batches: A stream of SetCurrentStatesRequest objects, where each request contains a
+            batches: A stream of CurrentStateEventBatch objects, where each request contains a
                      collection of CurrentStateEvent objects to be processed by the gRPC service.
 
         Returns:
@@ -77,16 +77,3 @@ class UpdateNetworkStateClient(GrpcClient):
 
         async for response in self._stub.setCurrentStates(request_generator()):
             yield SetCurrentStatesStatus.from_pb(response)
-
-    @dataclass
-    class SetCurrentStatesRequest:
-        """
-        A request object for submitting a batch of current state events for processing.
-
-        Attributes:
-            batch_id: A unique identifier for the batch of events being processed. This allows tracking or grouping multiple events under a single batch.
-            events: A list of CurrentStateEvent objects representing the state changes or events that are being submitted in the current batch.
-        """
-
-        batch_id: int
-        events: Iterable[CurrentStateEvent]

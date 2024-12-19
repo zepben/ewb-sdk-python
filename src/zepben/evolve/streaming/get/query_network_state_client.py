@@ -5,14 +5,15 @@
 __all__ = ["QueryNetworkStateClient"]
 
 from datetime import datetime
-from typing import List, Callable, AsyncGenerator, Tuple
+from typing import List, Callable, AsyncGenerator
 
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest
 
-from zepben.evolve.util import datetime_to_timestamp
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
+from zepben.evolve.streaming.data.current_state_event_batch import CurrentStateEventBatch
 from zepben.evolve.streaming.grpc.grpc import GrpcClient
+from zepben.evolve.util import datetime_to_timestamp
 
 
 class QueryNetworkStateClient(GrpcClient):
@@ -32,7 +33,7 @@ class QueryNetworkStateClient(GrpcClient):
         else:
             self._stub = QueryNetworkStateServiceStub(channel)
 
-    async def get_current_states(self, query_id: int, from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[Tuple[CurrentStateEvent, ...], None]:
+    async def get_current_states(self, query_id: int, from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[CurrentStateEventBatch, None]:
         """
         Asynchronously retrieves a collection containing CurrentStateEvent objects, representing the network states
         within a specified time range.
@@ -45,6 +46,10 @@ class QueryNetworkStateClient(GrpcClient):
         Returns:
             A stream of batched network state events in the specified time range.
         """
-        async for response in self._stub.getCurrentStates(
-            GetCurrentStatesRequest(messageId=query_id, fromTimestamp=datetime_to_timestamp(from_datetime), toTimestamp=datetime_to_timestamp(to_datetime))):
-            yield [CurrentStateEvent.from_pb(event) for event in response.event]
+        request = GetCurrentStatesRequest(
+            messageId=query_id,
+            fromTimestamp=datetime_to_timestamp(from_datetime),
+            toTimestamp=datetime_to_timestamp(to_datetime)
+        )
+        async for response in self._stub.getCurrentStates(request):
+            yield CurrentStateEventBatch(response.messageId, [CurrentStateEvent.from_pb(event) for event in response.event])
