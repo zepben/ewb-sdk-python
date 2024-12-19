@@ -17,7 +17,7 @@
 * All `StateEventFailure` classes now have a `message` included to give more context to the error.
 
 ### Fixes
-* None.
+* GrpcChannelBuilder's initial connectivity test no longer fails due to a lack of permissions on a subset of services.
 
 ### Notes
 * None.
