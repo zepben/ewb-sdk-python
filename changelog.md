@@ -38,7 +38,7 @@
   to allow requesting normal, current or all equipments.
 
 ### Fixes
-* None.
+* GrpcChannelBuilder's initial connectivity test no longer fails due to a lack of permissions on a subset of services.
 
 ### Notes
 * `Cut` and `Clamp` have been added to the model, but no processing for them has been added to the tracing, so results will not be what you expect.

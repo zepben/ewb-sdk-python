@@ -64,7 +64,7 @@ def test_debug_connection_test(mock_insecure_channel, mock_test_connection, mock
     assert GrpcChannelBuilder().build(debug=True) == "insecure channel"
 
     mock_insecure_sync_channel.assert_called_once_with("localhost:50051")
-    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=True)
+    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=True, timeout_seconds=5)
     mock_insecure_channel.assert_called_once_with('localhost:50051', options=DEFAULT_GRPC_CHANNEL_OPTIONS)
 
 
@@ -75,7 +75,7 @@ def test_for_address(mock_insecure_channel, mock_test_connection, mock_insecure_
     assert GrpcChannelBuilder().for_address("hostname", 1234).build() == "insecure channel"
 
     mock_insecure_sync_channel.assert_called_once_with("hostname:1234")
-    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=False)
+    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=False, timeout_seconds=5)
     mock_insecure_channel.assert_called_once_with("hostname:1234", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
 
 
@@ -126,7 +126,7 @@ def test_make_secure(mocked_secure_channel, mocked_ssl_channel_creds, mock_test_
     mocked_secure_channel.assert_called_with("hostname:1234", "channel creds", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
     mock_secure_sync_channel.assert_called_with("hostname:1234", "channel creds")
     mock_test_connection.assert_has_calls(
-        [call(MockedChannel("secure sync test channel"), debug=False), call(MockedChannel("secure sync test channel"), debug=False)])
+        [call(MockedChannel("secure sync test channel"), debug=False, timeout_seconds=5), call(MockedChannel("secure sync test channel"), debug=False, timeout_seconds=5)])
 
 
 @mock.patch("builtins.open", side_effect=lambda filename, *args, **kwargs: MockReadable(str.encode(filename)))
@@ -155,7 +155,7 @@ def test_with_token_fetcher(mocked_ssl_channel_creds, mocked_md_call_creds, mock
     mocked_comp_channel_creds.assert_called_once_with("ssl creds", "call creds")
     mocked_secure_channel.assert_called_once_with("hostname:1234", "composite creds", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
     mock_secure_sync_channel.assert_called_once_with("hostname:1234", "composite creds")
-    mock_test_connection.assert_called_once_with(MockedChannel('secure sync test channel'), debug=False)
+    mock_test_connection.assert_called_once_with(MockedChannel('secure sync test channel'), timeout_seconds=5, debug=False)
 
 
 def test_with_token_fetcher_before_make_secure():
@@ -182,10 +182,10 @@ def test_with_client_token_before_make_secure():
             ])
 def test_test_connection_returns_on_first_response(mock_getMetadata):
     channel = insecure_channel("unused")
-    GrpcChannelBuilder()._test_connection(channel, False)
+    GrpcChannelBuilder()._test_connection(channel, False, timeout_seconds=5)
 
-    mock_getMetadata.assert_has_calls([call(GetMetadataRequest(), wait_for_ready=False),
-                                       call(GetMetadataRequest(), wait_for_ready=False)], any_order=False)
+    mock_getMetadata.assert_has_calls([call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
+                                       call(GetMetadataRequest(), timeout=5, wait_for_ready=False)], any_order=False)
     assert mock_getMetadata.call_count == 2
 
 
@@ -198,15 +198,15 @@ def test_test_connection_returns_on_first_response(mock_getMetadata):
         "details",
     ))
     ,
-    Exception("Exception1"),
+    "metadata response",
     Exception("Exception2")
 ])
-def test_test_connection_raises_on_first_unavailable(mock_getMetadata):
+def test_test_connection_continues_following_unavailable(mock_getMetadata):
     channel = insecure_channel("unused")
-    with pytest.raises(_InactiveRpcError, match='<_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNAVAILABLE\n\tdetails = '
-                                                '"details"\n\tdebug_error_string = "None"\n>'):
-        GrpcChannelBuilder()._test_connection(channel, False)
-    mock_getMetadata.assert_called_once()
+    GrpcChannelBuilder()._test_connection(channel, False, timeout_seconds=5)
+    mock_getMetadata.assert_has_calls([call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
+                                       call(GetMetadataRequest(), timeout=5, wait_for_ready=False)], any_order=False)
+    assert mock_getMetadata.call_count == 2
 
 
 @mock.patch("grpc._channel._UnaryUnaryMultiCallable.__call__", side_effect=[
@@ -235,11 +235,11 @@ def test_test_connection_raises_on_first_unavailable(mock_getMetadata):
 def test_test_connection_raises_connection_exception(mock_getMetadata):
     channel = insecure_channel("unused")
     with pytest.raises(GrpcConnectionException, match="Couldn't establish gRPC connection to any service on myServer.myDomain:9999.\n"):
-        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, False)
+        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, False,  timeout_seconds=5)
     mock_getMetadata.assert_has_calls(
-        [call(GetMetadataRequest(), wait_for_ready=False),
-         call(GetMetadataRequest(), wait_for_ready=False),
-         call(GetMetadataRequest(), wait_for_ready=False)]
+        [call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
+         call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
+         call(GetMetadataRequest(), timeout=5, wait_for_ready=False)]
     )
     assert mock_getMetadata.call_count == 3
 
@@ -277,10 +277,10 @@ def test_test_connection_raises_connection_exception_with_debug(mock_getMetadata
                              '\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = "details2"\n\tdebug_error_string = "None"\n>\n'
                              'Received the following exception with CustomerConsumerStub:\n<_InactiveRpcError of RPC that terminated with:\n'
                              '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details3"\n\tdebug_error_string = "None"\n>\n'):
-        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, True)
+        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, True,  timeout_seconds=5)
     mock_getMetadata.assert_has_calls(
-        [call(GetMetadataRequest(), wait_for_ready=False),
-         call(GetMetadataRequest(), wait_for_ready=False),
-         call(GetMetadataRequest(), wait_for_ready=False)]
+        [call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
+         call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
+         call(GetMetadataRequest(), timeout=5, wait_for_ready=False)]
     )
     assert mock_getMetadata.call_count == 3

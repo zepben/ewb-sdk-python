@@ -30,12 +30,13 @@ class GrpcChannelBuilder(ABC):
         self._socket_address: str = "localhost:50051"
         self._channel_credentials: Optional[grpc.ChannelCredentials] = None
 
-    def build(self, skip_connection_test: bool = False, debug: bool = False, options: Optional[List[Tuple[str, Any]]] = None) -> grpc.aio.Channel:
+    def build(self, skip_connection_test: bool = False, timeout_seconds: int = 5, debug: bool = False, options: Optional[List[Tuple[str, Any]]] = None) -> grpc.aio.Channel:
         """
         Get the resulting :class:`grpc.aio.Channel` from this builder.
 
         :param skip_connection_test: Skip confirming a connection can be established to the server. This is not recommended, but provided as a safety
         mechanism if for any reason the connection test fails unexpectedly even though the connection is fine.
+        :param timeout_seconds: The timeout used for each request made in the connection test.
         :param debug: Collect and append unhandled RPC errors to the `ConnectionException` raised on an unsuccessful connection test.
         :param options: An optional list of key-value pairs (channel_arguments in gRPC Core runtime) to configure the channel.
 
@@ -49,7 +50,7 @@ class GrpcChannelBuilder(ABC):
                 channel = grpc.secure_channel(self._socket_address, self._channel_credentials)
             else:
                 channel = grpc.insecure_channel(self._socket_address)
-            self._test_connection(channel, debug=debug)
+            self._test_connection(channel, debug=debug, timeout_seconds=timeout_seconds)
             channel.close()
 
         if options is None:
@@ -72,7 +73,7 @@ class GrpcChannelBuilder(ABC):
 
         return grpc.aio.insecure_channel(self._socket_address, options=options)
 
-    def _test_connection(self, channel: grpc.Channel, debug: bool):
+    def _test_connection(self, channel: grpc.Channel, debug: bool, timeout_seconds: int):
         stubs: List = [
             NetworkConsumerStub(channel),
             DiagramConsumerStub(channel),
@@ -81,14 +82,11 @@ class GrpcChannelBuilder(ABC):
         debug_errors = []
         for client in stubs:
             try:
-                result = client.getMetadata(GetMetadataRequest(), wait_for_ready=False)
+                result = client.getMetadata(GetMetadataRequest(), timeout=timeout_seconds, wait_for_ready=False)
                 if result:
                     return
             except _InactiveRpcError as rpc_error:
-                if rpc_error.code() in {grpc.StatusCode.UNKNOWN, grpc.StatusCode.UNAUTHENTICATED, grpc.StatusCode.UNAVAILABLE}:
-                    raise rpc_error
-                if debug:
-                    debug_errors.append(f"Received the following exception with {type(client).__name__}:\n{rpc_error}\n")
+                debug_errors.append(f"Received the following exception with {type(client).__name__}:\n{rpc_error}\n")
         raise GrpcConnectionException(f"Couldn't establish gRPC connection to any service on {self._socket_address}.\n{''.join(debug_errors) if debug else ''}")
 
     def for_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
