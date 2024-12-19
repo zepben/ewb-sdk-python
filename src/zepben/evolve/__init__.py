@@ -214,6 +214,7 @@ from zepben.evolve.streaming.grpc.grpc import *
 from zepben.evolve.streaming.grpc.grpc_channel_builder import *
 from zepben.evolve.streaming.grpc.connect import *
 from zepben.evolve.streaming.data.current_state_event import *
+from zepben.evolve.streaming.data.current_state_event_batch import *
 from zepben.evolve.streaming.data.set_current_states_status import *
 from zepben.evolve.streaming.get.query_network_state_service import *
 from zepben.evolve.streaming.get.query_network_state_client import *

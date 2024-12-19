@@ -11,8 +11,8 @@ from zepben.protobuf.ns.network_state_pb2_grpc import add_UpdateNetworkStateServ
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
 
 from util import grpc_aio_server
-from zepben.evolve import PhaseCode, SwitchStateEvent, SwitchAction, CurrentStateEvent, SetCurrentStatesStatus, BatchSuccessful, ProcessingPaused, BatchFailure, \
-    UpdateNetworkStateService
+from zepben.evolve import PhaseCode, SwitchStateEvent, SwitchAction, CurrentStateEvent, SetCurrentStatesStatus, BatchSuccessful, BatchFailure, \
+    UpdateNetworkStateService, BatchNotProcessed
 
 
 class TestUpdateNetworkStateService:
@@ -24,8 +24,8 @@ class TestUpdateNetworkStateService:
 
     expected_results = {
         1: BatchSuccessful(batch_id=1),
-        2: ProcessingPaused(batch_id=2, since=datetime.now()),
-        3: BatchFailure(batch_id=3, partial_failure=False, failures=())
+        2: BatchFailure(batch_id=2, partial_failure=False, failures=()),
+        3: BatchNotProcessed(batch_id=3),
     }
 
     @pytest.fixture
