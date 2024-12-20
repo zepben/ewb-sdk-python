@@ -1970,7 +1970,7 @@ def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optiona
     network_service.resolve_or_defer_reference(resolver.lv_feeder_normal_head_terminal(cim), pb.normalHeadTerminalMRID)
     for mrid in pb.normalEnergizingFeederMRIDs:
         network_service.resolve_or_defer_reference(resolver.normal_energizing_feeders(cim), mrid)
-    for mrid in pb.currentlyEnergizingFeedersMRIDs:
+    for mrid in pb.currentlyEnergizingFeederMRIDs:
         network_service.resolve_or_defer_reference(resolver.current_energizing_feeders(cim), mrid)
 
     equipment_container_to_cim(pb.ec, cim, network_service)
