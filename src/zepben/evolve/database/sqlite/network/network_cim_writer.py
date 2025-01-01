@@ -773,7 +773,6 @@ class NetworkCimWriter(BaseCimWriter):
 
     def _save_end_device_function(self, table: TableEndDeviceFunctions, insert: PreparedStatement, end_device_function: EndDeviceFunction,
                                   description: str) -> bool:
-        insert.add_value(table.end_device_mrid.query_index, self._mrid_or_none(end_device_function.end_device))
         insert.add_value(table.enabled.query_index, end_device_function.enabled)
 
         return self._save_asset_function(table, insert, end_device_function, description)

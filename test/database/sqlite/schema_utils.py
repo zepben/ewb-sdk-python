@@ -111,7 +111,7 @@ class SchemaNetworks:
         #######################################
 
         if isinstance(filled, BatteryControl):
-            filled.battery_unit.add_battery_control(filled)
+            filled.battery_unit.add_control(filled)
             service.add(filled.battery_unit)
 
         #######################
@@ -193,14 +193,9 @@ class SchemaNetworks:
             for it in filled.usage_points:
                 it.add_end_device(filled)
                 service.add(it)
-            for it in filled.end_device_functions:
-                it.end_device = filled
+            for it in filled.functions:
                 service.add(it)
             service.add(filled.service_location)
-
-        if isinstance(filled, EndDeviceFunction):
-            filled.end_device.add_end_device_function(filled)
-            service.add(filled.end_device)
 
         if isinstance(filled, UsagePoint):
             service.add(filled.usage_point_location)
@@ -393,7 +388,7 @@ class SchemaNetworks:
             service.add(filled.power_electronics_connection)
 
         if isinstance(filled, BatteryUnit):
-            for it in filled.battery_controls:
+            for it in filled.controls:
                 it.battery_unit = filled
                 service.add(it)
 

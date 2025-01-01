@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime
 
-from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, ProcessingPaused as PBProcessingPaused, \
+from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, \
     BatchFailure as PBBatchFailure, StateEventFailure as PBStateEventFailure, StateEventUnknownMrid as PBStateEventUnknownMrid, \
     StateEventDuplicateMrid as PBStateEventDuplicateMrid, StateEventInvalidMrid as PBStateEventInvalidMrid, \
     StateEventUnsupportedPhasing as PBStateEventUnsupportedPhasing
@@ -33,14 +33,6 @@ class TestSetCurrentStatesStatus:
         status = SetCurrentStatesStatus.from_pb(pb)
 
         assert status == BatchSuccessful(batch_id=1)
-        assert status.to_pb() == pb
-
-    def test_processing_paused_protobuf_conversion(self):
-        since = datetime.now()
-        pb = PBSetCurrentStatesResponse(messageId=1, paused=PBProcessingPaused(since=datetime_to_timestamp(since)))
-        status = SetCurrentStatesStatus.from_pb(pb)
-
-        assert status == ProcessingPaused(batch_id=1, since=since)
         assert status.to_pb() == pb
 
     def test_batch_failure_protobuf_conversion(self):

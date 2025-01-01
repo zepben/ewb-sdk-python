@@ -98,7 +98,7 @@ __all__ = [
     "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "prf_to_psw_resolver", "psw_to_prf_resolver", "switch_to_switch_info_resolver",
     "prf_to_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver", "prf_to_psw_resolver",
     "psw_to_prf_resolver", "prf_to_sen_resolver", "sen_to_prf_resolver", "prf_to_prscheme_resolver", "prscheme_to_prf_resolver",
-    "prscheme_to_prsystem_resolver",
+    "prscheme_to_prsystem_resolver", "battery_unit_to_battery_control_resolver", "battery_control_to_battery_unit_resolver", "ed_to_edf_resolver",
     "prsystem_to_prscheme_resolver", "fuse_to_prf_resolver", "sm_to_rcc_resolver"]
 
 
@@ -344,7 +344,6 @@ tc_to_tcc_resolver = ReferenceResolver(TapChanger, TapChangerControl, lambda t, 
 sm_to_rcc_resolver = ReferenceResolver(SynchronousMachine, ReactiveCapabilityCurve, lambda t, r: t.add_curve(r))
 
 battery_control_to_battery_unit_resolver = ReferenceResolver(BatteryControl, BatteryUnit, lambda t, r: setattr(t, 'battery_unit', r))
-battery_unit_to_battery_control_resolver = ReferenceResolver(BatteryUnit, BatteryControl, lambda t, r: t.add_battery_control(r))
+battery_unit_to_battery_control_resolver = ReferenceResolver(BatteryUnit, BatteryControl, lambda t, r: t.add_control(r))
 
-edf_to_ed_resolver = ReferenceResolver(EndDeviceFunction, EndDevice, lambda t, r: setattr(t, 'end_device', r))
-ed_to_edf_resolver = ReferenceResolver(EndDevice, EndDeviceFunction, lambda t, r: t.add_end_device_function(r))
+ed_to_edf_resolver = ReferenceResolver(EndDevice, EndDeviceFunction, lambda t, r: t.add_function(r))

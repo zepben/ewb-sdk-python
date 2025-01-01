@@ -10,8 +10,8 @@ from zepben.evolve import resolver
 def test_resolves_acls_plsi():
     ns = NetworkService()
     plsi = PerLengthSequenceImpedance()
-    acls = AcLineSegment(per_length_sequence_impedance=plsi)
-    br = resolver.per_length_sequence_impedance(acls)
+    acls = AcLineSegment(per_length_impedance=plsi)
+    br = resolver.per_length_impedance(acls)
     ns.resolve_or_defer_reference(br, plsi.mrid)
     assert plsi.mrid in ns.get_unresolved_reference_mrids_by_resolver(br)
     ns.add(acls)
@@ -20,7 +20,7 @@ def test_resolves_acls_plsi():
 
     ns = NetworkService()
     ns.add(plsi)
-    ns.resolve_or_defer_reference(resolver.per_length_sequence_impedance(acls), plsi.mrid)
+    ns.resolve_or_defer_reference(resolver.per_length_impedance(acls), plsi.mrid)
     assert len(list(ns.get_unresolved_reference_mrids_by_resolver(br))) == 0
     ns.add(acls)
     acls_fetched = ns.get(acls.mrid)

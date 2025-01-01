@@ -347,7 +347,7 @@ class NetworkCimReader(BaseCimReader):
         battery_control.control_mode = BatteryControlMode[result_set.get_string(table.control_mode.query_index)]
 
         if battery_control.battery_unit is not None:
-            battery_control.battery_unit.add_battery_control(battery_control)
+            battery_control.battery_unit.add_control(battery_control)
 
         return self._load_regulating_control(battery_control, table, result_set) and self._add_or_throw(battery_control)
 
@@ -889,14 +889,6 @@ class NetworkCimReader(BaseCimReader):
 
     def _load_end_device_functions(self, end_device_function: EndDeviceFunction, table: TableEndDeviceFunctions, result_set: ResultSet) -> bool:
         end_device_function.enabled = result_set.get_boolean(table.enabled.query_index)
-
-        end_device_function.end_device = self._ensure_get(
-            result_set.get_string(table.end_device_mrid.query_index, on_none=None),
-            EndDevice
-        )
-
-        if end_device_function.end_device is not None:
-            end_device_function.end_device.add_end_device_function(end_device_function)
 
         return self._load_asset_function(end_device_function, table, result_set)
 
@@ -1698,7 +1690,7 @@ class NetworkCimReader(BaseCimReader):
         """
         ac_line_segment = AcLineSegment(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
-        ac_line_segment.per_length_sequence_impedance = self._ensure_get(
+        ac_line_segment.per_length_impedance = self._ensure_get(
             result_set.get_string(table.per_length_impedance_mrid.query_index, on_none=None),
             PerLengthSequenceImpedance
         )
@@ -2049,8 +2041,6 @@ class NetworkCimReader(BaseCimReader):
         """
         per_length_phase_impedance = PerLengthPhaseImpedance(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
-        per_length_phase_impedance.r = result_set.get_float(table.r.query_index, on_none=None)
-
         return self._load_per_length_impedance(per_length_phase_impedance, table, result_set) and self._add_or_throw(per_length_phase_impedance)
 
     def load_phase_impedance_data(self, table: TablePhaseImpedanceData, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
@@ -2071,12 +2061,12 @@ class NetworkCimReader(BaseCimReader):
 
         per_length_phase_impedance.add_data(
             PhaseImpedanceData(
-                SinglePhaseKind[result_set.get_string(table.FROM_PHASE.query_index)],
-                SinglePhaseKind[result_set.get_string(table.TO_PHASE.query_index)],
-                result_set.get_float(table.B.query_index, on_none=None),
-                result_set.get_float(table.G.query_index, on_none=None),
-                result_set.get_float(table.R.query_index, on_none=None),
-                result_set.get_float(table.X.query_index, on_none=None),
+                SinglePhaseKind[result_set.get_string(table.from_phase.query_index)],
+                SinglePhaseKind[result_set.get_string(table.to_phase.query_index)],
+                result_set.get_float(table.b.query_index, on_none=None),
+                result_set.get_float(table.g.query_index, on_none=None),
+                result_set.get_float(table.r.query_index, on_none=None),
+                result_set.get_float(table.x.query_index, on_none=None),
             )
         )
 

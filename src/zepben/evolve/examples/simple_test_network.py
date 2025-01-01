@@ -86,7 +86,7 @@ async def simple_test_network() -> NetworkService:
     # Line
     line_location = Location().add_point(point2).add_point(point3)
     network.add(line_location)
-    line = AcLineSegment(mrid="line", name="Line", length=100.0, per_length_sequence_impedance=plsi,
+    line = AcLineSegment(mrid="line", name="Line", length=100.0, per_length_impedance=plsi,
                          location=line_location)
     line.asset_info = wire_info
     line.base_voltage = bv_lv

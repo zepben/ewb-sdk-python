@@ -26,7 +26,7 @@ def negligible_impedance_equipment_basic_network(nie_constructor) -> NetworkServ
     network.add(plsi)
 
     # AcLineSegment0
-    a0 = AcLineSegment(mrid="a0", length=0.0, per_length_sequence_impedance=plsi)
+    a0 = AcLineSegment(mrid="a0", length=0.0, per_length_impedance=plsi)
     network.add(a0)
     a0_t = create_terminal(network, a0)
 
@@ -38,14 +38,14 @@ def negligible_impedance_equipment_basic_network(nie_constructor) -> NetworkServ
     network.connect_terminals(a0_t, nie1_ts[0])
 
     # AcLineSegment1
-    a1 = AcLineSegment(mrid="a1", length=0.0, per_length_sequence_impedance=plsi)
+    a1 = AcLineSegment(mrid="a1", length=0.0, per_length_impedance=plsi)
     network.add(a1)
     a1_ts = create_terminals(network, a1, 2)
 
     network.connect_terminals(nie1_ts[1], a1_ts[0])
 
     # AcLineSegment2
-    a2 = AcLineSegment(mrid="a2", length=2.0, per_length_sequence_impedance=plsi)
+    a2 = AcLineSegment(mrid="a2", length=2.0, per_length_impedance=plsi)
     network.add(a2)
     a2_ts = create_terminals(network, a2, 2)
 
@@ -59,21 +59,21 @@ def negligible_impedance_equipment_basic_network(nie_constructor) -> NetworkServ
     network.connect_terminals(a2_ts[1], nie2_ts[0])
 
     # AcLineSegment3
-    a3 = AcLineSegment(mrid="a3", length=3.0, per_length_sequence_impedance=plsi)
+    a3 = AcLineSegment(mrid="a3", length=3.0, per_length_impedance=plsi)
     network.add(a3)
     a3_ts = create_terminals(network, a3, 2)
 
     network.connect_terminals(nie2_ts[1], a3_ts[0])
 
     # AcLineSegment4
-    a4 = AcLineSegment(mrid="a4", length=4.0, per_length_sequence_impedance=plsi)
+    a4 = AcLineSegment(mrid="a4", length=4.0, per_length_impedance=plsi)
     network.add(a4)
     a4_ts = create_terminals(network, a4, 2)
 
     network.connect_terminals(nie2_ts[2], a4_ts[0])
 
     # AcLineSegment5
-    a5 = AcLineSegment(mrid="a5", length=5.0, per_length_sequence_impedance=plsi)
+    a5 = AcLineSegment(mrid="a5", length=5.0, per_length_impedance=plsi)
     network.add(a5)
     a5_t = create_terminal(network, a5)
 

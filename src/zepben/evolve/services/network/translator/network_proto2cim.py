@@ -303,9 +303,13 @@ def pan_demand_response_function_to_cim(pb: PBPanDemandResponseFunction, network
     return cim if network_service.add(cim) else None
 
 
+PBPanDemandResponseFunction.to_cim = pan_demand_response_function_to_cim
+
+
 #########################################
 # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
 #########################################
+
 def battery_control_to_cim(pb: PBBatteryControl, network_service: NetworkService) -> BatteryControl:
     cim = BatteryControl(
         mrid=pb.mrid(),
@@ -315,11 +319,12 @@ def battery_control_to_cim(pb: PBBatteryControl, network_service: NetworkService
         control_mode=BatteryControlMode(pb.controlMode)
     )
 
-    network_service.resolve_or_defer_reference(resolver.battery_unit(cim), pb.batteryUnitMRID)
     regulating_control_to_cim(pb.rc, cim, network_service)
 
     return cim if network_service.add(cim) else None
 
+
+PBBatteryControl.to_cim = battery_control_to_cim
 
 #######################
 # IEC61968 ASSET INFO #
@@ -695,9 +700,7 @@ def end_device_to_cim(pb: PBEndDevice, cim: EndDevice, network_service: NetworkS
 
 
 def end_device_function_to_cim(pb: PBEndDeviceFunction, cim: EndDeviceFunction, network_service: NetworkService):
-    cim.enabled = pb.enabled
-
-    network_service.resolve_or_defer_reference(resolver.edf_end_device(cim), pb.endDeviceMRID)
+    cim.enabled = None if pb.HasField("enabledNull") else pb.enabledSet
     asset_function_to_cim(pb.af, cim, network_service)
 
 
@@ -1815,8 +1818,6 @@ def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_se
     return cim if network_service.add(cim) else None
 
 
-PBPanDemandResponseFunction.to_cim = pan_demand_response_function_to_cim
-PBBatteryControl.to_cim = battery_control_to_cim
 PBAcLineSegment.to_cim = ac_line_segment_to_cim
 PBBreaker.to_cim = breaker_to_cim
 PBConductor.to_cim = conductor_to_cim

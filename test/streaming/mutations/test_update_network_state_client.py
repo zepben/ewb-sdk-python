@@ -7,7 +7,7 @@ from typing import AsyncGenerator
 
 import grpc
 import pytest
-from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, ProcessingPaused as PBProcessingPaused, \
+from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful,  \
     BatchFailure as PBBatchFailure
 from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceServicer, add_UpdateNetworkStateServiceServicer_to_server
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
@@ -21,7 +21,6 @@ from zepben.evolve import PhaseCode, SwitchStateEvent, SwitchAction, CurrentStat
 class MockUpdateNetworkStateService(UpdateNetworkStateServiceServicer):
     responses = {
         1: PBSetCurrentStatesResponse(messageId=1, success=PBBatchSuccessful()),
-        2: PBSetCurrentStatesResponse(messageId=2, paused=PBProcessingPaused()),
         3: PBSetCurrentStatesResponse(messageId=3, failure=PBBatchFailure())
     }
 

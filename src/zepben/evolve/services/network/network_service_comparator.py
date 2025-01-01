@@ -399,12 +399,11 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         self._compare_values(diff, EndDevice.customer_mrid)
         self._compare_id_references(diff, EndDevice.service_location)
-        self._compare_id_reference_collections(diff, EndDevice.end_device_functions)
+        self._compare_id_reference_collections(diff, EndDevice.functions)
 
         return self._compare_asset_container(diff)
 
     def _compare_end_device_function(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_id_references(diff, EndDeviceFunction.end_device)
         self._compare_values(diff, EndDeviceFunction.enabled)
 
         return self._compare_asset_function(diff)
@@ -756,7 +755,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_values(diff, BatteryUnit.battery_state, BatteryUnit.rated_e, BatteryUnit.stored_e)
-        self._compare_id_reference_collections(diff, BatteryUnit.battery_controls)
+        self._compare_id_reference_collections(diff, BatteryUnit.controls)
 
         return self._compare_power_electronics_unit(diff)
 

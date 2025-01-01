@@ -46,6 +46,7 @@ from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_const
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import *
 from zepben.evolve.model.cim.iec61968.metering.metering import *
+from zepben.evolve.model.cim.iec61968.metering.controlled_appliance import *
 from zepben.evolve.model.cim.iec61968.common.organisation import *
 from zepben.evolve.model.cim.iec61968.common.document import *
 from zepben.evolve.model.cim.iec61968.common.organisation_role import *

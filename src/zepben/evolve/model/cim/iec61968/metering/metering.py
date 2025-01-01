@@ -48,16 +48,16 @@ class EndDevice(AssetContainer):
 
     _usage_points: Optional[List[UsagePoint]] = None
 
-    _end_device_functions: Optional[List[EndDeviceFunction]] = None
+    _functions: Optional[List[EndDeviceFunction]] = None
 
-    def __init__(self, usage_points: List[UsagePoint] = None, end_device_functions: List[EndDeviceFunction] = None, **kwargs):
+    def __init__(self, usage_points: List[UsagePoint] = None, functions: List[EndDeviceFunction] = None, **kwargs):
         super(EndDevice, self).__init__(**kwargs)
         if usage_points:
             for up in usage_points:
                 self.add_usage_point(up)
-        if end_device_functions:
-            for edf in end_device_functions:
-                self.add_end_device_function(edf)
+        if functions:
+            for edf in functions:
+                self.add_function(edf)
 
     def num_usage_points(self):
         """
@@ -115,20 +115,20 @@ class EndDevice(AssetContainer):
         self._usage_points = None
         return self
 
-    def num_end_device_functions(self):
+    def num_functions(self):
         """
         Returns The number of `EndDeviceFunction`s associated with this `EndDevice`
         """
-        return nlen(self._end_device_functions)
+        return nlen(self._functions)
 
     @property
-    def end_device_functions(self) -> Generator[EndDeviceFunction, None, None]:
+    def functions(self) -> Generator[EndDeviceFunction, None, None]:
         """
         The `EndDeviceFunction`s associated with this `EndDevice`
         """
-        return ngen(self._end_device_functions)
+        return ngen(self._functions)
 
-    def get_end_device_function(self, mrid: str) -> EndDeviceFunction:
+    def get_function(self, mrid: str) -> EndDeviceFunction:
         """
         Get the `EndDeviceFunction` for this `EndDevice` identified by `mrid`
 
@@ -136,9 +136,9 @@ class EndDevice(AssetContainer):
         Returns The `EndDeviceFunction` with the specified `mrid` if it exists
         Raises `KeyError` if `mrid` wasn't present.
         """
-        return get_by_mrid(self._end_device_functions, mrid)
+        return get_by_mrid(self._functions, mrid)
 
-    def add_end_device_function(self, edf: EndDeviceFunction) -> EndDevice:
+    def add_function(self, edf: EndDeviceFunction) -> EndDevice:
         """
         Associate `edf` to this `EndDevice`.
 
@@ -146,13 +146,13 @@ class EndDevice(AssetContainer):
         Returns A reference to this `EndDevice` to allow fluent use.
         Raises `ValueError` if another `EndDeviceFunction` with the same `mrid` already exists for this `EndDevice`.
         """
-        if self._validate_reference(edf, self.get_end_device_function, "An EndDeviceFunction"):
+        if self._validate_reference(edf, self.get_function, "An EndDeviceFunction"):
             return self
-        self._end_device_functions = list() if self._end_device_functions is None else self._end_device_functions
-        self._end_device_functions.append(edf)
+        self._functions = list() if self._functions is None else self._functions
+        self._functions.append(edf)
         return self
 
-    def remove_end_device_function(self, edf: EndDeviceFunction) -> EndDevice:
+    def remove_function(self, edf: EndDeviceFunction) -> EndDevice:
         """
         Disassociate `edf` from this `EndDevice`
 
@@ -160,15 +160,15 @@ class EndDevice(AssetContainer):
         Returns A reference to this `EndDevice` to allow fluent use.
         Raises `ValueError` if `up` was not associated with this `EndDevice`.
         """
-        self._end_device_functions = safe_remove(self._end_device_functions, edf)
+        self._functions = safe_remove(self._functions, edf)
         return self
 
-    def clear_end_device_functions(self) -> EndDevice:
+    def clear_functions(self) -> EndDevice:
         """
         Clear all end_device_functions.
         Returns A reference to this `EndDevice` to allow fluent use.
         """
-        self._end_device_functions = None
+        self._functions = None
         return self
 
 
@@ -362,9 +362,6 @@ class EndDeviceFunction(AssetFunction):
     Function performed by an end device such as a meter, communication equipment, controllers, etc.
     """
 
-    end_device: Optional[EndDevice] = None
-    """The `EndDevice` to which this `EndDeviceFunction` takes place."""
-
     enabled: bool = True
     """True if the function is enabled."""
 
@@ -375,14 +372,31 @@ class EndDeviceFunctionKind(Enum):
     """
 
     UNKNOWN = 0
+    """Unknown function kind."""
+
     autonomousDst = 1
+    """Autonomous application of daylight saving time (DST)."""
+
     demandResponse = 2
+    """Demand response functions."""
+
     electricMetering = 3
+    """Electricity metering."""
+
     metrology = 4
+    """Presentation of metered values to a user or another system (always a function of a meter, but might not be supported by a load control unit)."""
+
     onRequestRead = 5
+    """On-request reads."""
+
     outageHistory = 6
+    """Reporting historical power interruption data."""
+
     relaysProgramming = 7
+    """Support for one or more relays that may be programmable in the meter (and tied to TOU, time pulse, load control or other functions)."""
+
     reverseFlow = 8
+    """Detection and monitoring of reverse flow."""
 
     @property
     def short_name(self):

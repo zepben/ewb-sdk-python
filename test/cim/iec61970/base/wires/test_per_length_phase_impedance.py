@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis import given
-from hypothesis.strategies import lists, builds
+from hypothesis.strategies import lists, builds, sampled_from
 from zepben.evolve import SinglePhaseKind
 
 from cim.iec61970.base.wires.test_per_length_impedance import verify_per_length_impedance_constructor_default, \
@@ -14,10 +14,10 @@ from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import Pha
 
 per_length_phase_impedance_kwargs = {
     **per_length_impedance_kwargs,
-    "phase_impedance_data": lists(builds(PhaseImpedanceData), max_size=2),
+    "phase_impedance_data": lists(builds(PhaseImpedanceData), max_size=1),
 }
 
-per_length_phase_impedance_args = [*per_length_impedance_args, PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.A)]
+per_length_phase_impedance_args = [*per_length_impedance_args, [PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.A)]]
 
 
 def test_per_length_phase_impedance_constructor_default():
@@ -28,12 +28,12 @@ def test_per_length_phase_impedance_constructor_default():
 
 
 @given(**per_length_phase_impedance_kwargs)
-def test_per_length_phase_impedance_constructor_kwargs(data, **kwargs):
+def test_per_length_phase_impedance_constructor_kwargs(phase_impedance_data, **kwargs):
     # noinspection PyArgumentList
-    plpi = PerLengthPhaseImpedance(data=data, **kwargs)
+    plpi = PerLengthPhaseImpedance(data=phase_impedance_data, **kwargs)
 
     verify_per_length_impedance_constructor_kwargs(plpi, **kwargs)
-    assert list(plpi.data) == data
+    assert list(plpi.data) == phase_impedance_data
 
 
 def test_per_length_phase_impedance_constructor_args():

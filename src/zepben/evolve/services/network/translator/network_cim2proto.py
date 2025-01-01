@@ -314,7 +314,6 @@ PanDemandResponseFunction.to_pb = pan_demand_response_function_to_pb
 def battery_control_to_pb(cim: BatteryControl) -> PBBatteryControl:
     return PBBatteryControl(
         rc=regulating_control_to_pb(cim),
-        batteryUnitMRID=mrid_or_empty(cim.battery_unit),
         chargingRate=from_nullable_float(cim.charging_rate),
         dischargingRate=from_nullable_float(cim.discharging_rate),
         reservePercent=from_nullable_float(cim.reserve_percent),
@@ -624,7 +623,7 @@ def end_device_to_pb(cim: EndDevice) -> PBEndDevice:
     return PBEndDevice(
         ac=asset_container_to_pb(cim),
         usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
-        endDeviceFunctionMRIDs=[str(io.mrid) for io in cim.end_device_functions],
+        endDeviceFunctionMRIDs=[str(io.mrid) for io in cim.functions],
         customerMRID=cim.customer_mrid,
         serviceLocationMRID=mrid_or_empty(cim.service_location)
     )
@@ -633,8 +632,7 @@ def end_device_to_pb(cim: EndDevice) -> PBEndDevice:
 def end_device_function_to_pb(cim: EndDeviceFunction) -> PBEndDeviceFunction:
     return PBEndDeviceFunction(
         af=asset_function_to_pb(cim),
-        endDeviceMRID=mrid_or_empty(cim.end_device),
-        enabled=cim.enabled
+        **nullable_bool_settings("enabled", cim.enabled)
     )
 
 
@@ -1048,7 +1046,7 @@ RemoteSource.to_pb = remote_source_to_pb
 def battery_unit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
     return PBBatteryUnit(
         peu=power_electronics_unit_to_pb(cim),
-        batteryControlMRIDs=[str(io.mrid) for io in cim.battery_controls],
+        batteryControlMRIDs=[str(io.mrid) for io in cim.controls],
         ratedE=from_nullable_long(cim.rated_e),
         storedE=from_nullable_long(cim.stored_e),
         batteryState=PBBatteryStateKind.Value(cim.battery_state.short_name)

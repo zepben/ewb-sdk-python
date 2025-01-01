@@ -11,14 +11,12 @@ from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control_mode
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
 
 if TYPE_CHECKING:
-    from zepben.evolve import BatteryUnit
+    pass
 
 __all__ = ["BatteryControl", "BatteryControlMode"]
 
 
 class BatteryControl(RegulatingControl):
-    battery_unit: Optional[BatteryUnit] = None
-    """[ZBEX] BatteryUnit controlled by this BatteryControl."""
 
     charging_rate: Optional[float] = None
     """[ZBEX] Charging rate (input power) in percentage of maxP. (Unit: PerCent)"""
@@ -27,7 +25,11 @@ class BatteryControl(RegulatingControl):
     """[ZBEX] Discharge rate (output power) in percentage of maxP. (Unit: PerCent)"""
 
     reserve_percent: Optional[float] = None
-    """[ZBEX] Percentage of the rated storage capacity that should be reserved during normal operations. This reserve acts as a safeguard, preventing the energy level"""
+    """
+    [ZBEX] 
+    Percentage of the rated storage capacity that should be reserved during normal operations. This reserve acts as a safeguard, preventing the energy level 
+    from dropping below this threshold under standard conditions. The field must be set to a non-negative value between 0 and 1. (Unit: PerCent)
+    """
 
     control_mode: BatteryControlMode = BatteryControlMode.UNKNOWN
     """[ZBEX] Mode of operation for the dispatch (charging/discharging) function of BatteryControl."""

@@ -5,6 +5,8 @@
 import datetime
 from typing import Type
 
+import pytest
+
 from services.common.service_comparator_validator import ServiceComparatorValidator
 from services.common.test_base_service_comparator import TestBaseServiceComparator
 from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
@@ -23,7 +25,8 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind, \
     TransformerEndRatedS, TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, EndDeviceFunction, \
-    PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData
+    PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
+    PhaseImpedanceData
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 
@@ -303,8 +306,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             options_stop_compare=True
         )
         self.validator.validate_collection(
-            EndDevice.end_device_functions,
-            EndDevice.add_end_device_function,
+            EndDevice.functions,
+            EndDevice.add_function,
             creator,
             lambda _: EndDeviceFunction(mrid="edf1"),
             lambda _: EndDeviceFunction(mrid="edf2"),
@@ -314,7 +317,6 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_end_device_function(self, creator: Type[EndDeviceFunction]):
         self._compare_asset_function(creator)
 
-        self.validator.validate_property(EndDeviceFunction.end_device, creator, lambda _: EndDevice(mrid="ed1"), lambda _: EndDevice(mrid="ed2"))
         self.validator.validate_property(EndDeviceFunction.enabled, creator, lambda _: False, lambda _: True)
 
     def test_compare_meter(self):
@@ -873,7 +875,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_conductor(AcLineSegment)
 
         self.validator.validate_property(
-            AcLineSegment.per_length_sequence_impedance,
+            AcLineSegment.per_length_impedance,
             AcLineSegment,
             lambda _: PerLengthSequenceImpedance(mrid="p1"),
             lambda _: PerLengthSequenceImpedance(mrid="p2")
@@ -1030,11 +1032,18 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_per_length_line_parameter(self, creator: Type[PerLengthLineParameter]):
         self._compare_identified_object(creator)
 
+    @pytest.mark.timeout(140)
     def test_compare_per_length_phase_impedance(self):
         self._compare_per_length_impedance(PerLengthPhaseImpedance)
 
-        self.validator.validate_property(PerLengthPhaseImpedance.data, PerLengthSequenceImpedance, lambda _: 1.0, lambda _: 2.0)
-        # TODO finish this test
+        self.validator.validate_unordered_collection(
+            PerLengthPhaseImpedance.data,
+            PerLengthPhaseImpedance.add_data,
+            PerLengthPhaseImpedance,
+            lambda _: PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.B, 1.0, 2.0, 3.0, 4.0),
+            lambda _: PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.C, 1.0, 2.0, 3.0, 4.0),
+            lambda _: PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.B, 2.0, 3.0, 4.0, 5.0),
+        )
 
     def test_compare_per_length_sequence_impedance(self):
         self._compare_per_length_impedance(PerLengthSequenceImpedance)

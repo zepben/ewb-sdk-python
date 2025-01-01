@@ -125,7 +125,7 @@ def test_unresolved_references(service: BaseService):
     acls2 = AcLineSegment(mrid="acls2")
     # noinspection PyArgumentList
     plsi1 = PerLengthSequenceImpedance(mrid="plsi1")
-    service.resolve_or_defer_reference(resolver.per_length_sequence_impedance(acls1), "plsi1")
+    service.resolve_or_defer_reference(resolver.per_length_impedance(acls1), "plsi1")
     t1 = Terminal(mrid="t1")
     t2 = Terminal(mrid="t2")
     service.resolve_or_defer_reference(resolver.ce_terminals(acls1), "t1")
@@ -143,7 +143,7 @@ def test_unresolved_references(service: BaseService):
     for expected in (plsi1.mrid, t1.mrid, t2.mrid, ci1.mrid):
         assert expected in refs_for_acls1
 
-    refs = list(service.get_unresolved_reference_mrids_by_resolver(resolver.per_length_sequence_impedance(acls1)))
+    refs = list(service.get_unresolved_reference_mrids_by_resolver(resolver.per_length_impedance(acls1)))
     assert plsi1.mrid in refs
 
     _check_unresolved_reference(t1.mrid, acls1.mrid, service.get_unresolved_references_to)
@@ -153,7 +153,7 @@ def test_unresolved_references(service: BaseService):
 
     _add_and_check(service, f, [acls1, acls2], "containers")
     assert service.num_unresolved_references() == 4
-    _add_and_check(service, plsi1, acls1, "per_length_sequence_impedance")
+    _add_and_check(service, plsi1, acls1, "per_length_impedance")
     assert service.num_unresolved_references() == 3
     _add_and_check(service, ci1, acls1, "wire_info")
     assert service.num_unresolved_references() == 2

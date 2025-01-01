@@ -381,7 +381,7 @@ class BaseServiceComparator:
             target_index += 1
 
         while source_index < len(source_list):
-            differences.missing_from_source.append(ValueDifference(None, source_list[source_index]))
+            differences.missing_from_target.append(ValueDifference(source_list[source_index], None))
             source_index += 1
 
         return self._none_if_empty(differences)

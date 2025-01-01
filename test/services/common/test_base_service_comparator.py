@@ -109,50 +109,50 @@ class TestBaseServiceComparator:
 
         self.validator.validate_name_types(source_type, target_type)
 
-    def test_unordered_list_comparison(self):
-        source = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(2, 3)])
-        target_same = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(2, 3)])
-        target_order = UnorderedProperties([UnorderedCheck(2, 3), UnorderedCheck(1, 2)])
+def test_unordered_list_comparison():
+    source = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(2, 3)])
+    target_same = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(2, 3)])
+    target_order = UnorderedProperties([UnorderedCheck(2, 3), UnorderedCheck(1, 2)])
 
-        target_diff_keys = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(3, 3)])
-        target_diff_values = UnorderedProperties([UnorderedCheck(1, 3), UnorderedCheck(2, 3)])
-        comparator = BaseServiceComparator()
+    target_diff_keys = UnorderedProperties([UnorderedCheck(1, 2), UnorderedCheck(3, 3)])
+    target_diff_values = UnorderedProperties([UnorderedCheck(1, 3), UnorderedCheck(2, 3)])
+    comparator = BaseServiceComparator()
 
-        diff = ObjectDifference(source, target_same)
-        assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+    diff = ObjectDifference(source, target_same)
+    assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
-        diff = ObjectDifference(source, target_order)
-        assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+    diff = ObjectDifference(source, target_order)
+    assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
-        diff = ObjectDifference(source, target_diff_keys)
-        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+    diff = ObjectDifference(source, target_diff_keys)
+    assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
-        diff = ObjectDifference(source, target_diff_values)
-        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+    diff = ObjectDifference(source, target_diff_values)
+    assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
-    def test_unordered_list_comparison_with_objects(self):
-        source = UnorderedCheck([1, 1, 2])
-        target_same = UnorderedCheck([1, 1, 2])
-        target_order = UnorderedCheck([1, 2, 1])
-        target_diff_less = UnorderedCheck([2, 1])
-        target_diff_values = UnorderedCheck([2, 1, 2])
-        target_diff_more = UnorderedCheck([1, 1, 3, 4])
-        comparator = BaseServiceComparator()
+def test_unordered_list_comparison_with_objects():
+    source = UnorderedProperties([1, 1, 2])
+    target_same = UnorderedProperties([1, 1, 2])
+    target_order = UnorderedProperties([1, 2, 1])
+    target_diff_less = UnorderedProperties([2, 1])
+    target_diff_values = UnorderedProperties([2, 1, 2])
+    target_diff_more = UnorderedProperties([1, 1, 3, 4])
+    comparator = BaseServiceComparator()
 
-        diff = ObjectDifference(source, target_same)
-        assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+    diff = ObjectDifference(source, target_same)
+    assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
-        diff = ObjectDifference(source, target_order)
-        assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+    diff = ObjectDifference(source, target_order)
+    assert not comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
-        diff = ObjectDifference(source, target_diff_less)
-        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+    diff = ObjectDifference(source, target_diff_less)
+    assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
-        diff = ObjectDifference(source, target_diff_values)
-        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+    diff = ObjectDifference(source, target_diff_values)
+    assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
-        diff = ObjectDifference(source, target_diff_more)
-        assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
+    diff = ObjectDifference(source, target_diff_more)
+    assert comparator._compare_unordered_value_collection(diff, lambda it: it, UnorderedProperties.values).differences
 
 
 def _create_name_type(name_type: str, desc: str, name: str, io_mrid: str) -> NameType:

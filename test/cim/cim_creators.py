@@ -482,7 +482,6 @@ def create_end_device(include_runtime: bool):
 def create_end_device_function(include_runtime: bool):
     return {
         **create_asset_function(include_runtime),
-        "end_device": builds(EndDevice, **create_identified_object(include_runtime)),
         "enabled": booleans()
     }
 
@@ -1024,7 +1023,7 @@ def create_ac_line_segment(include_runtime: bool = True):
     return builds(
         AcLineSegment,
         **create_conductor(include_runtime),
-        per_length_sequence_impedance=builds(PerLengthSequenceImpedance, **create_identified_object(include_runtime))
+        per_length_impedance=builds(PerLengthSequenceImpedance, **create_identified_object(include_runtime))
     )
 
 
@@ -1234,7 +1233,7 @@ def create_phase_impedance_data():
 def create_per_length_phase_impedance(include_runtime: bool = True):
     return builds(
         PerLengthPhaseImpedance,
-        data=lists(create_phase_impedance_data(), max_size=4, unique_by=lambda it: (it.from_phase, it.to_phase)),
+        data=lists(create_phase_impedance_data(), max_size=4, unique_by=(lambda it: it.from_phase, lambda it: it.to_phase)),
         **create_per_length_impedance(include_runtime),
     )
 

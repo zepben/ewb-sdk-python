@@ -274,13 +274,77 @@ class ServiceComparatorValidator(object):
         prop: Property,
         add_to_collection: Callable[..., Any],
         creator: [[str], TIdentifiedObject],
-        create_item: Callable[[K], R],
-        create_other_item: Callable[[K], R],
+        create_item_1: Callable[[K], R],
+        create_item_2: Callable[[K], R],
+        create_diff_item_1: Callable[[K], R],
         options: NetworkServiceComparatorOptions = NetworkServiceComparatorOptions(),
         options_stop_compare: bool = False,
         expected_differences: Set[str] = None
     ):
-        pass
+        source_empty = creator("mRID")
+        target_empty = creator("mRID")
+        self.validate_compare(source_empty, target_empty, options=options, options_stop_compare=options_stop_compare)
+
+        in_source = creator("mRID")
+        item1 = create_item_1(in_source)
+        add_to_collection(in_source, item1)
+
+        item2 = create_item_2(in_source)
+        add_to_collection(in_source, item2)
+
+        in_target_same_order = creator("mRID")
+        item1 = create_item_1(in_target_same_order)
+        add_to_collection(in_target_same_order, item1)
+
+        item2 = create_item_2(in_target_same_order)
+        add_to_collection(in_target_same_order, item2)
+
+        self.validate_compare(in_source, in_target_same_order, options=options, options_stop_compare=options_stop_compare)
+
+        in_target_diff_order = creator("mRID")
+        item2 = create_item_2(in_target_diff_order)
+        add_to_collection(in_target_diff_order, item2)
+
+        item1 = create_item_1(in_target_diff_order)
+        add_to_collection(in_target_diff_order, item1)
+
+        self.validate_compare(in_source, in_target_diff_order, options=options, options_stop_compare=options_stop_compare)
+
+        def get_item_1(it):
+            return list(_get_prop(it, prop))[0]
+
+        def get_item_2(it):
+            return list(_get_prop(it, prop))[-1]
+
+        diff = ObjectDifference(in_source, target_empty, {
+            _prop_name(prop): CollectionDifference(missing_from_target=[
+                self._get_value_or_reference_difference(get_item_1(in_source), None),
+                self._get_value_or_reference_difference(get_item_2(in_source), None)
+            ])
+        })
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
+
+        diff = ObjectDifference(source_empty, in_target_same_order, {
+            _prop_name(prop): CollectionDifference(missing_from_source=[
+                self._get_value_or_reference_difference(None, get_item_1(in_target_same_order)),
+                self._get_value_or_reference_difference(None, get_item_2(in_target_same_order))
+            ])
+        })
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
+
+        target_different = creator("mRID")
+        item1 = create_diff_item_1(target_different)
+        add_to_collection(target_different, item1)
+
+        item2 = create_item_2(target_different)
+        add_to_collection(target_different, item2)
+
+        diff = ObjectDifference(in_source, target_different, {
+            _prop_name(prop): CollectionDifference(modifications=[
+                self._get_value_or_reference_difference(get_item_1(in_source), get_item_1(target_different)),
+            ])
+        })
+        self._validate_expected(diff, options, options_stop_compare, expected_differences=expected_differences)
 
     @staticmethod
     def _get_value_or_reference_difference(source: Optional[R], target: Optional[R]) -> Difference:

@@ -189,7 +189,7 @@ def create_acls_for_connecting(network: NetworkService, mrid: str = "", phases: 
         wi = OverheadWireInfo(mrid=wi_mrid)
         network.add(wi)
 
-    acls = AcLineSegment(mrid=mrid, name=f"{mrid} name", per_length_sequence_impedance=plsi, asset_info=wi, length=length)
+    acls = AcLineSegment(mrid=mrid, name=f"{mrid} name", per_length_impedance=plsi, asset_info=wi, length=length)
     create_terminals(network, acls, 2, phases)
     network.add(acls)
     return acls
