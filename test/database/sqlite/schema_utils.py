@@ -15,7 +15,7 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, \
     Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
     ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit, \
-    EndDeviceFunction, BatteryControl
+    EndDeviceFunction, BatteryControl, PanDemandResponseFunction
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -106,13 +106,6 @@ class SchemaNetworks:
         # [ZBEX] EXTENSIONS IEC61968 METERING #
         #######################################
 
-        #######################################
-        # [ZBEX] EXTENSIONS IEC61968 METERING #
-        #######################################
-
-        if isinstance(filled, BatteryControl):
-            filled.battery_unit.add_control(filled)
-            service.add(filled.battery_unit)
 
         #######################
         # IEC61968 ASSET INFO #
@@ -389,7 +382,6 @@ class SchemaNetworks:
 
         if isinstance(filled, BatteryUnit):
             for it in filled.controls:
-                it.battery_unit = filled
                 service.add(it)
 
         #######################
@@ -397,7 +389,7 @@ class SchemaNetworks:
         #######################
 
         if isinstance(filled, AcLineSegment):
-            service.add(filled.per_length_sequence_impedance)
+            service.add(filled.per_length_impedance)
 
         if isinstance(filled, Conductor):
             service.add(filled.asset_info)

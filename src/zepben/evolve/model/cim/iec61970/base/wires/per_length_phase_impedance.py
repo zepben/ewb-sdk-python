@@ -5,7 +5,7 @@
 
 from typing import Optional, List, Generator
 
-from zepben.evolve.util import require, ngen, nlen, safe_remove
+from zepben.evolve.util import require, ngen, nlen, safe_remove, none
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -71,8 +71,8 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
         :raises ValueError: If another :class:`PhaseImpedanceData` with the same `from_phase` and `to_phase` already exists for this :class:`PerLengthPhaseImpedance`.
         """
 
-        require(all([not (it.from_phase != phase_impedance_data.from_phase and it.to_phase != phase_impedance_data.to_phase) for it in self.data]),
-                lambda: f"""Unable to add PhaseImpedanceData to {self}. A PhaseImpedanceData with from_phase {phase_impedance_data.from_phase} and to_phase ${phase_impedance_data.to_phase} already exists in this PerLengthPhaseImpedance.""")
+        require(none([it.from_phase == phase_impedance_data.from_phase and it.to_phase == phase_impedance_data.to_phase for it in self.data]),
+                lambda: f"""Unable to add PhaseImpedanceData to {self}. A PhaseImpedanceData with from_phase {phase_impedance_data.from_phase} and to_phase {phase_impedance_data.to_phase} already exists in this PerLengthPhaseImpedance.""")
 
         self._data = self._data or []
         self._data.append(phase_impedance_data)

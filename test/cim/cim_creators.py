@@ -40,9 +40,11 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
 from datetime import datetime
 from random import choice
 
+# This must be above hypothesis.strategies to avoid conflicting import with zepben.evolve.util.none
+from zepben.evolve import *
+
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
 
-from zepben.evolve import *
 from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
@@ -82,7 +84,6 @@ def create_battery_control(include_runtime: bool = True):
     return builds(
         BatteryControl,
         **create_regulating_control(include_runtime),
-        battery_unit=builds(BatteryUnit, **create_identified_object(include_runtime)),
         charging_rate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         discharging_rate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         reserve_percent=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -475,7 +476,7 @@ def create_end_device(include_runtime: bool):
         "usage_points": lists(builds(UsagePoint, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         "customer_mrid": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
         "service_location": builds(Location, **create_identified_object(include_runtime)),
-        "end_device_functions": lists(sampled_end_device_function(include_runtime), min_size=1, max_size=2)
+        "functions": lists(sampled_end_device_function(include_runtime), min_size=1, max_size=2)
     }
 
 
@@ -993,7 +994,7 @@ def create_battery_unit(include_runtime: bool = True):
         battery_state=sampled_battery_state_kind(),
         rated_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER),
         stored_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER),
-        battery_controls=lists(builds(BatteryControl, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+        controls=lists(builds(BatteryControl, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     )
 
 

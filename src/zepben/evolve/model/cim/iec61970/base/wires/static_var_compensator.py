@@ -5,10 +5,9 @@
 from typing import Optional
 
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
+from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 
 __all__ = ["StaticVarCompensator"]
-
-from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 
 
 class StaticVarCompensator(RegulatingCondEq):
@@ -25,7 +24,10 @@ class StaticVarCompensator(RegulatingCondEq):
     """Inductive reactance in Ohms at maximum inductive reactive power. Shall always be negative."""
 
     q: Optional[float] = None
-    """Reactive power injection in VAr. Load sign convention is used, i.e. positive sign means flow out from a node. Starting value for a steady state solution."""
+    """
+    Reactive power injection in VAr. Load sign convention is used, i.e. positive sign means flow out from a node. 
+    Starting value for a steady state solution.
+    """
 
     svc_control_mode: SVCControlMode = SVCControlMode.UNKNOWN
     """SVC control mode."""

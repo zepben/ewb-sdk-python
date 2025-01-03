@@ -7,9 +7,10 @@ __all__ = ["NetworkCimReader"]
 import sys
 from typing import Callable, Optional
 
-from zepben.evolve import EndDeviceFunctionKind
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
+from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
+from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.extensions.iec61968.table_pan_demand_response_functions import TablePanDemandResponseFunctions
 from zepben.evolve.database.sqlite.tables.extensions.iec61970.table_battery_controls import TableBatteryControls
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_functions import TableAssetFunctions
@@ -29,6 +30,7 @@ from zepben.evolve.model.cim.extensions.iec61968.metering.pan_demand_reponse_fun
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.evolve.model.cim.iec61968.assets.asset_function import AssetFunction
+from zepben.evolve.model.cim.iec61968.metering.metering import EndDeviceFunctionKind
 from zepben.evolve.model.cim.iec61970.base.core.curve import Curve
 from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import GroundingImpedance
@@ -315,7 +317,7 @@ class NetworkCimReader(BaseCimReader):
         pan_demand_response_function = PanDemandResponseFunction(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
         pan_demand_response_function.kind = EndDeviceFunctionKind[result_set.get_string(table.kind.query_index)]
-        pan_demand_response_function.assign_controlled_appliance_configuration_bitmask(ca=result_set.get_int(table.appliance.query_index, on_none=None))
+        pan_demand_response_function._appliance_bitmask = result_set.get_int(table.appliance.query_index, on_none=None)
 
         return self._load_end_device_functions(pan_demand_response_function, table, result_set) and self._add_or_throw(pan_demand_response_function)
 
@@ -336,18 +338,10 @@ class NetworkCimReader(BaseCimReader):
         """
         battery_control = BatteryControl(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
-        battery_control.battery_unit = self._ensure_get(
-            result_set.get_string(table.battery_unit_mrid.query_index, on_none=None),
-            BatteryUnit
-        )
-
         battery_control.charging_rate = result_set.get_float(table.charging_rate.query_index, on_none=None)
         battery_control.discharging_rate = result_set.get_float(table.discharging_rate.query_index, on_none=None)
         battery_control.reserve_percent = result_set.get_float(table.reserve_percent.query_index, on_none=None)
         battery_control.control_mode = BatteryControlMode[result_set.get_string(table.control_mode.query_index)]
-
-        if battery_control.battery_unit is not None:
-            battery_control.battery_unit.add_control(battery_control)
 
         return self._load_regulating_control(battery_control, table, result_set) and self._add_or_throw(battery_control)
 
@@ -1692,7 +1686,7 @@ class NetworkCimReader(BaseCimReader):
 
         ac_line_segment.per_length_impedance = self._ensure_get(
             result_set.get_string(table.per_length_impedance_mrid.query_index, on_none=None),
-            PerLengthSequenceImpedance
+            PerLengthImpedance
         )
 
         return self._load_conductor(ac_line_segment, table, result_set) and self._add_or_throw(ac_line_segment)
@@ -2678,6 +2672,30 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
+    def load_battery_units_battery_controls(self, table: TableBatteryUnitsBatteryControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`BatteryUnit` to :class:`BatteryControl` association from :class:`TableBatteryUnitsBatteryControls`.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        battery_unit_mrid = result_set.get_string(table.battery_unit_mrid.query_index)
+        set_identifier(f"{battery_unit_mrid}-to-UNKNOWN")
+
+        battery_control_mrid = result_set.get_string(table.battery_control_mrid.query_index)
+        set_identifier(f"{battery_unit_mrid}-to-{battery_control_mrid}")
+
+        battery_unit = self._service.get(battery_unit_mrid, BatteryUnit)
+        battery_control = self._service.get(battery_control_mrid, BatteryControl)
+
+        battery_unit.add_control(battery_control)
+
+        return True
+
     def load_circuits_substation(self, table: TableCircuitsSubstations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
         Create a :class:`Circuit` to :class:`Substation` association from :class:`TablePricingStructuresTariffsTableCircuitsSubstations.
@@ -2724,6 +2742,31 @@ class NetworkCimReader(BaseCimReader):
         terminal = self._service.get(terminal_mrid, Terminal)
 
         circuit.add_end_terminal(terminal)
+
+        return True
+
+    def load_end_devices_end_device_functions(self, table: TableEndDevicesEndDeviceFunctions, result_set: ResultSet,
+                                              set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`EndDevice` to :class:`EndDeviceFunction` association from :class:`TableEndDevicesEndDeviceFunctions`.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        end_device_mrid = result_set.get_string(table.end_device_mrid.query_index)
+        set_identifier(f"{end_device_mrid}-to-UNKNOWN")
+
+        end_device_function_mrid = result_set.get_string(table.end_device_function_mrid.query_index)
+        set_identifier(f"{end_device_mrid}-to-{end_device_function_mrid}")
+
+        end_device = self._service.get(end_device_mrid, EndDevice)
+        end_device_function = self._service.get(end_device_function_mrid, EndDeviceFunction)
+
+        end_device.add_function(end_device_function)
 
         return True
 

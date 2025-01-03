@@ -29,16 +29,8 @@ class PanDemandResponseFunction(EndDeviceFunction):
     _appliance_bitmask: Optional[int] = None
 
     def __init__(self, appliance: Optional[Union[int, ControlledAppliance]] = None, **kwargs):
-        super(EndDeviceFunction, self).__init__(**kwargs)
-
-        if isinstance(appliance, int):
-            self._appliance_bitmask = appliance
-        elif isinstance(appliance, ControlledAppliance):
-            if appliance:
-                self._appliance_bitmask = appliance.bitmask
-        else:
-            if appliance:
-                raise ValueError(f"Unsupported type for appliance: {appliance}. Must be either an int or ControlledAppliance")
+        super(PanDemandResponseFunction, self).__init__(**kwargs)
+        self.appliance = appliance
 
     @property
     def appliance(self) -> Optional[ControlledAppliance]:
@@ -52,11 +44,22 @@ class PanDemandResponseFunction(EndDeviceFunction):
             return ControlledAppliance(self._appliance_bitmask)
 
     @appliance.setter
-    def appliance(self, appliance: Optional[ControlledAppliance]):
-        if appliance:
-            self._appliance_bitmask = appliance.bitmask
+    def appliance(self, appliance: Optional[Union[int, ControlledAppliance]]):
+        if isinstance(appliance, int):
+            self._appliance_bitmask = appliance
+        elif isinstance(appliance, ControlledAppliance):
+            if appliance:
+                self._appliance_bitmask = appliance.bitmask
         else:
-            self._appliance_bitmask = None
+            if appliance:
+                raise ValueError(f"Unsupported type for appliance: {appliance}. Must be either an int or ControlledAppliance")
+            else:
+                self._appliance_bitmask = None
+
+        # if appliance:
+        #     self._appliance_bitmask = appliance.bitmask
+        # else:
+        #     self._appliance_bitmask = None
 
     def add_appliance(self, appliance: Appliance) -> bool:
         """

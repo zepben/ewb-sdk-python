@@ -23,7 +23,7 @@ phase_impedance_data_args = [SinglePhaseKind.B, SinglePhaseKind.C, 1.1, 2.2, 3.3
 
 
 # noinspection PyArgumentList
-def test_curve_data_constructor_default():
+def test_data_constructor_default():
     #
     # NOTE: There is no blank constructor, so check we need to pass both required values.
     #

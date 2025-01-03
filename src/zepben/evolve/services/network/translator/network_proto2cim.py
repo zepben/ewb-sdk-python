@@ -292,12 +292,15 @@ __all__ = [
 # [ZBEX] EXTENSIONS IEC61968 METERING #
 #######################################
 def pan_demand_response_function_to_cim(pb: PBPanDemandResponseFunction, network_service: NetworkService) -> PanDemandResponseFunction:
-    cim = PanDemandResponseFunction(
-        mrid=pb.mrid(),
-        kind=EndDeviceFunctionKind(pb.kind)
-    )
-
-    cim.assign_controlled_appliance_configuration_bitmask(int_or_none(pb.appliance))
+    """
+    Convert the protobuf :class:`PBPanDemandResponseFunction` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBPanDemandResponseFunction` to convert
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`PanDemandResponseFunction`
+    """
+    cim = PanDemandResponseFunction(mrid=pb.mrid())
+    cim.appliance=int_or_none(pb.appliance)
+    cim.kind = EndDeviceFunctionKind(pb.kind)
     end_device_function_to_cim(pb.edf, cim, network_service)
 
     return cim if network_service.add(cim) else None
@@ -311,6 +314,12 @@ PBPanDemandResponseFunction.to_cim = pan_demand_response_function_to_cim
 #########################################
 
 def battery_control_to_cim(pb: PBBatteryControl, network_service: NetworkService) -> BatteryControl:
+    """
+    Convert the protobuf :class:`PBBatteryControl` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBBatteryControl` to convert
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`BatteryControl`
+    """
     cim = BatteryControl(
         mrid=pb.mrid(),
         charging_rate=float_or_none(pb.chargingRate),
@@ -325,6 +334,7 @@ def battery_control_to_cim(pb: PBBatteryControl, network_service: NetworkService
 
 
 PBBatteryControl.to_cim = battery_control_to_cim
+
 
 #######################
 # IEC61968 ASSET INFO #
@@ -507,6 +517,13 @@ def asset_container_to_cim(pb: PBAssetContainer, cim: AssetContainer, network_se
 
 
 def asset_function_to_cim(pb: PBAssetFunction, cim: AssetFunction, network_service: NetworkService):
+    """
+    Convert the protobuf :class:`PBAssetFunction` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBAssetFunction` to convert.
+    :param cim: The CIM :class:`AssetFunction` undergoing construction.
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`AssetFunction`
+    """
     identified_object_to_cim(pb.io, cim, network_service)
 
 
@@ -687,19 +704,33 @@ PBRatio.to_cim = ratio_to_cim
 
 
 def end_device_to_cim(pb: PBEndDevice, cim: EndDevice, network_service: NetworkService):
+    """
+    Convert the protobuf :class:`PBEndDevice` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBEndDevice` to convert.
+    :param cim: The CIM :class:`EndDevice` undergoing construction.
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`EndDevice`
+    """
     cim.customer_mrid = pb.customerMRID if pb.customerMRID else None
 
     for mrid in pb.usagePointMRIDs:
         network_service.resolve_or_defer_reference(resolver.ed_usage_points(cim), mrid)
 
     for mrid in pb.endDeviceFunctionMRIDs:
-        network_service.resolve_or_defer_reference(resolver.end_device_function(cim), mrid)
+        network_service.resolve_or_defer_reference(resolver.end_device_functions(cim), mrid)
 
     network_service.resolve_or_defer_reference(resolver.service_location(cim), pb.serviceLocationMRID)
     asset_container_to_cim(pb.ac, cim, network_service)
 
 
 def end_device_function_to_cim(pb: PBEndDeviceFunction, cim: EndDeviceFunction, network_service: NetworkService):
+    """
+    Convert the protobuf :class:`PBEndDeviceFunction` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBEndDeviceFunction` to convert.
+    :param cim: The CIM :class:`EndDeviceFunction` undergoing construction.
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`EndDeviceFunction`
+    """
     cim.enabled = None if pb.HasField("enabledNull") else pb.enabledSet
     asset_function_to_cim(pb.af, cim, network_service)
 
@@ -1197,6 +1228,13 @@ PBRemoteSource.to_cim = remote_source_to_cim
 #############################################
 
 def battery_unit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> Optional[BatteryUnit]:
+    """
+    Convert the protobuf :class:`PBBatteryUnit` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBBatteryUnit` to convert.
+    :param cim: The CIM :class:`BatteryUnit` undergoing construction.
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`BatteryUnit`
+    """
     cim = BatteryUnit(
         mrid=pb.mrid(),
         battery_state=BatteryStateKind(pb.batteryState),
@@ -1205,7 +1243,7 @@ def battery_unit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> O
     )
 
     for mrid in pb.batteryControlMRIDs:
-        network_service.resolve_or_defer_reference(resolver.battery_control(cim), mrid)
+        network_service.resolve_or_defer_reference(resolver.battery_controls(cim), mrid)
 
     power_electronics_unit_to_cim(pb.peu, cim, network_service)
     return cim if network_service.add(cim) else None
@@ -1245,6 +1283,13 @@ PBPowerElectronicsWindUnit.to_cim = power_electronics_wind_unit_to_cim
 #######################
 
 def ac_line_segment_to_cim(pb: PBAcLineSegment, network_service: NetworkService) -> Optional[AcLineSegment]:
+    """
+    Convert the protobuf :class:`PBAcLineSegment` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBAcLineSegment` to convert.
+    :param cim: The CIM :class:`AcLineSegment` undergoing construction.
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`AcLineSegment`
+    """
     cim = AcLineSegment(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.per_length_impedance(cim), pb.perLengthImpedanceMRID)
@@ -1459,6 +1504,13 @@ def per_length_impedance_to_cim(pb: PBPerLengthImpedance, cim: PerLengthImpedanc
 
 
 def phase_impedance_data_to_cim(pb: PBPhaseImpedanceData) -> Optional[PhaseImpedanceData]:
+    """
+    Convert the protobuf :class:`PBPhaseImpedanceData` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBPhaseImpedanceData` to convert.
+    :param cim: The CIM :class:`PhaseImpedanceData` undergoing construction.
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`PhaseImpedanceData`
+    """
     return PhaseImpedanceData(
         SinglePhaseKind(pb.fromPhase),
         SinglePhaseKind(pb.toPhase),
@@ -1470,6 +1522,13 @@ def phase_impedance_data_to_cim(pb: PBPhaseImpedanceData) -> Optional[PhaseImped
 
 
 def per_length_phase_impedance_to_cim(pb: PBPerLengthPhaseImpedance, network_service: NetworkService) -> Optional[PerLengthPhaseImpedance]:
+    """
+    Convert the protobuf :class:`PBPerLengthPhaseImpedance` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBPerLengthPhaseImpedance` to convert.
+    :param cim: The CIM :class:`PerLengthPhaseImpedance` undergoing construction.
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`PerLengthPhaseImpedance`
+    """
     cim = PerLengthPhaseImpedance(mrid=pb.mrid())
 
     for phase_impedance_data in pb.phaseImpedanceData:
@@ -1705,6 +1764,13 @@ def shunt_compensator_to_cim(pb: PBShuntCompensator, cim: ShuntCompensator, netw
 
 
 def static_var_compensator_to_cim(pb: PBStaticVarCompensator, network_service: NetworkService):
+    """
+    Convert the protobuf :class:`PBStaticVarCompensator` into its CIM counterpart.
+    :param pb: The protobuf :class:`PBStaticVarCompensator` to convert.
+    :param cim: The CIM :class:`StaticVarCompensator` undergoing construction.
+    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
+    :return: The converted `pb` as a CIM :class:`StaticVarCompensator`
+    """
     cim = StaticVarCompensator(
         mrid=pb.mrid(),
         capacitive_rating=float_or_none(pb.capacitiveRating),

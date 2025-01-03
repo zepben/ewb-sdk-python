@@ -105,8 +105,6 @@ class NetworkServiceWriter(BaseServiceWriter):
     def _do_save(self) -> bool:
         return all([
             self._save_each_object(CableInfo, self._writer.save_cable_info),
-            self._save_each_object(PanDemandResponseFunction, self._writer.save_pan_demand_response_function),
-            self._save_each_object(BatteryControl, self._writer.save_battery_control),
             self._save_each_object(OverheadWireInfo, self._writer.save_overhead_wire_info),
             self._save_each_object(PowerTransformerInfo, self._writer.save_power_transformer_info),
             self._save_each_object(TransformerTankInfo, self._writer.save_transformer_tank_info),
@@ -183,9 +181,11 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Ground, self._writer.save_ground),
             self._save_each_object(GroundDisconnector, self._writer.save_ground_disconnector),
             self._save_each_object(SeriesCompensator, self._writer.save_series_compensator),
-            self._save_each_object(StaticVarCompensator, self._writer.save_static_var_compensator),
             self._save_each_object(SynchronousMachine, self._writer.save_synchronous_machine),
             self._save_each_object(PetersenCoil, self._writer.save_petersen_coil),
             self._save_each_object(GroundingImpedance, self._writer.save_grounding_impedance),
             self._save_each_object(ReactiveCapabilityCurve, self._writer.save_reactive_capability_curve),
+            self._save_each_object(PanDemandResponseFunction, self._writer.save_pan_demand_response_function),
+            self._save_each_object(BatteryControl, self._writer.save_battery_control),
+            self._save_each_object(StaticVarCompensator, self._writer.save_static_var_compensator),
         ])

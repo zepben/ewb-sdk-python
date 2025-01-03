@@ -90,6 +90,7 @@ class RegulatingControl(PowerSystemResource):
 
     ct_primary: Optional[float] = None
     """
+    [ZBEX]
     Current rating of the CT, expressed in terms of the current (in Amperes) that flows in the Primary where the 'Primary' is the conductor
     being monitored. It ensures proper operation of the regulating equipment by providing the necessary current references for control actions. An important side
     effect of this current value is that it also defines the current value at which the full LDC R and X voltages are applied by the controller, where enabled.
@@ -97,6 +98,7 @@ class RegulatingControl(PowerSystemResource):
 
     min_target_deadband: Optional[float] = None
     """
+    [ZBEX]
     This is the minimum allowable range for discrete control in regulating devices, used to prevent frequent control actions and
     promote operational stability. This attribute sets a baseline range within which no adjustments are made, applicable across various devices like voltage
     regulators, shunt compensators, or battery units.

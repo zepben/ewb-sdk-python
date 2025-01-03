@@ -15,7 +15,8 @@ from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransforme
     TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableLoopsSubstations, \
     TableProtectionRelayFunctionsProtectedSwitches, TableProtectionRelaySchemesProtectionRelayFunctions, TableUsagePointsEndDevices, \
     TableLocationStreetAddresses, TablePositionPoints, TablePowerTransformerEndRatings, TableProtectionRelayFunctionThresholds, \
-    TableProtectionRelayFunctionTimeLimits, TableProtectionRelayFunctionsSensors, TableRecloseDelays, TablePhaseImpedanceData
+    TableProtectionRelayFunctionTimeLimits, TableProtectionRelayFunctionsSensors, TableRecloseDelays, TablePhaseImpedanceData, TableBatteryUnitsBatteryControls, \
+    TableEndDevicesEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data import TableCurveData
@@ -217,8 +218,10 @@ def test_network_service_translations(**kwargs):
         excluded_tables={
             # Excluded associations.
             TableAssetOrganisationRolesAssets,
+            TableBatteryUnitsBatteryControls,
             TableCircuitsSubstations,
             TableCircuitsTerminals,
+            TableEndDevicesEndDeviceFunctions,
             TableEquipmentEquipmentContainers,
             TableEquipmentOperationalRestrictions,
             TableEquipmentUsagePoints,

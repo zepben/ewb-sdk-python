@@ -227,7 +227,6 @@ def battery_control():
     return builds(
         PBBatteryControl,
         rc=regulating_control(),
-        batteryUnitMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         chargingRate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         dischargingRate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         reservePercent=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -592,7 +591,7 @@ def end_device_function():
     return builds(
         PBEndDeviceFunction,
         af=asset_function(),
-        enabled=booleans(),
+        **nullable_bool_settings("enabled"),
     )
 
 
@@ -1168,7 +1167,7 @@ def per_length_phase_impedance():
     return builds(
         PBPerLengthPhaseImpedance,
         pli=per_length_impedance(),
-        data=lists(phase_impedance_data(), max_size=2)
+        phaseImpedanceData=lists(phase_impedance_data(), max_size=2)
     )
 
 
@@ -1367,7 +1366,7 @@ def static_var_compensator():
         capacitiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         inductiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        svcControlMode=sampled_from(PBSVCControlMode),
+        svcControlMode=sampled_from(PBSVCControlMode.Enum.values()),
         voltageSetPoint=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
 

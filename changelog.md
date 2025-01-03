@@ -1,13 +1,26 @@
 # Zepben Python SDK
 ## [0.43.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* `AcLineSegment.per_length_sequence_impedance` has been corrected to `per_length_impedance`. This has been done in a non-breaking way, however the public 
+  resolver `Resolvers.per_length_sequence_impedance` is now `Resolvers.per_length_impedance`, correctly reflecting the CIM relationship.
 
 ### New Features
-* None.
+* Added `PanDemandResponseFunction`, a new class which contains `EndDeviceFunctionKind` and the identity of the `ControlledAppliance` of this function.
+* Added `BatteryControl`, a new class which describes behaviour specific to controlling a `BatteryUnit`.
+* Added `StaticVarCompensator` a new class representing a facility for providing variable and controllable shunt reactive power.
+* Added `ControlledAppliance` a new class representing the identity of the appliance controlled by a specific `EndDeviceFunction`.
+* Added `PerLengthPhaseImpedance` a new class used for representing the impedance of individual wires on an AcLineSegment.
+* Added `PhaseImpedanceData` a data class with a link to `PerLengthPhaseImpedance`, for capturing the phase impedance data of an individual wire.
+* Added new enums:
+  * `BatteryControlMode`
+  * `EndDeviceFunctionKind`
+  * `SVCControlMode`
 
 ### Enhancements
-* None.
+* Added `ct_primary` and `min_target_deadband` to `RegulatingContrl`.
+* Added collection of `BatteryControl` to `BatteryUnit`
+* Added collection of `EndDeviceFunctionKind` to `EndDevice`
+* Added an unordered collection comparator.
 
 ### Fixes
 * None.
@@ -27,19 +40,9 @@
 * `BaseService` now contains a `MetadataCollection` to tightly couple the metadata to the associated service.
 * Added `Services`, a new class which contains a copy of each `BaseService` supported by the SDK.
 * Added a new connection method `connect_with_token` which allows you to connect to the EWB using an access token.
-* Added `PanDemandResponseFunction`, a new class which contains `EndDeviceFunctionKind` and the identity of the `ControlledAppliance` of this function.
-* Added `BatteryControl`, a new class which describes behaviour specific to controlling a `BatteryUnit`.
-* Added `StaticVarCompensator` a new class representing a facility for providing variable and controllable shunt reactive power.
-* Added `ControlledAppliance` a new class representing the identity of the appliance controlled by a specific `EndDeviceFunction`.
-* Added new enums:
-  * `BatteryControlMode`
-  * `EndDeviceFunctionKind`
-  * `SVCControlMode`
 
 ### Enhancements
-* Added `ctPrimary` and `minTargetDeadband` to `RegulatingContrl`.
-* Added collection of `BatteryControl` to `BatteryUnit`
-* Added collection of `EndDeviceFunctionKind` to `EndDevice`
+* None.
 
 ### Fixes
 * None.

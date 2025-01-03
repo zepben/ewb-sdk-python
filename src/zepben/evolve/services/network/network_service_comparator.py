@@ -129,7 +129,7 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_pan_demand_response_function(self, source: PanDemandResponseFunction, target: PanDemandResponseFunction) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_values(diff, PanDemandResponseFunction.kind, PanDemandResponseFunction.appliance)
+        self._compare_values(diff, PanDemandResponseFunction.kind, PanDemandResponseFunction._appliance_bitmask)
 
         return self._compare_end_device_function(diff)
 
@@ -140,17 +140,8 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_battery_control(self, source: BatteryControl, target: BatteryControl) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_id_references(diff, BatteryControl.battery_unit)
-        self._compare_values(
-            diff,
-            BatteryControl.control_mode
-        )
-        self._compare_floats(
-            diff,
-            BatteryControl.charging_rate,
-            BatteryControl.discharging_rate,
-            BatteryControl.reserve_percent
-        )
+        self._compare_floats(diff, BatteryControl.charging_rate, BatteryControl.discharging_rate, BatteryControl.reserve_percent)
+        self._compare_values(diff, BatteryControl.control_mode)
 
         return self._compare_regulating_control(diff)
 
@@ -1079,7 +1070,9 @@ class NetworkServiceComparator(BaseServiceComparator):
             RegulatingControl.target_value,
             RegulatingControl.max_allowed_target_value,
             RegulatingControl.min_allowed_target_value,
-            RegulatingControl.rated_current
+            RegulatingControl.rated_current,
+            RegulatingControl.ct_primary,
+            RegulatingControl.min_target_deadband
         )
         self._compare_id_references(diff, RegulatingControl.terminal)
         self._compare_id_reference_collections(diff, RegulatingControl.regulating_conducting_equipment)

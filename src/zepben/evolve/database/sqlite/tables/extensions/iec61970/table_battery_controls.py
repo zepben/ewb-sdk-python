@@ -11,7 +11,6 @@ class TableBatteryControls(TableRegulatingControls):
 
     def __init__(self):
         super().__init__()
-        self.battery_unit_mrid: Column = self._create_column("battery_unit_mrid", "TEXT", Nullable.NULL)
         self.charging_rate: Column = self._create_column("charging_rate", "NUMBER", Nullable.NULL)
         self.discharging_rate: Column = self._create_column("discharging_rate", "NUMBER", Nullable.NULL)
         self.reserve_percent: Column = self._create_column("reserve_percent", "NUMBER", Nullable.NULL)

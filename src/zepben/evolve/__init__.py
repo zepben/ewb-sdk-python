@@ -250,6 +250,8 @@ from zepben.evolve.database.sqlite.tables.table_metadata_data_sources import *
 from zepben.evolve.database.sqlite.tables.table_version import *
 from zepben.evolve.database.sqlite.tables.associations.loop_substation_relationship import *
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import *
+from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import *
+from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import *
 from zepben.evolve.database.sqlite.tables.associations.table_customer_agreements_pricing_structures import *

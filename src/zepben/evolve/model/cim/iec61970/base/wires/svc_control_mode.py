@@ -20,7 +20,7 @@ class SVCControlMode(Enum):
     """
 
     UNKNOWN = 0
-    """Unknown control."""
+    """[ZBEX] Unknown control."""
 
     reactivePower = 1
     """Reactive power control."""

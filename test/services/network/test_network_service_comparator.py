@@ -44,22 +44,22 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PanDemandResponseFunction.kind,
             PanDemandResponseFunction,
             lambda _: EndDeviceFunctionKind.demandResponse,
-            lambda _: EndDeviceFunctionKind.metrology
+            lambda _: EndDeviceFunctionKind.onRequestRead
         )
+        self.validator.validate_property(PanDemandResponseFunction._appliance_bitmask, PanDemandResponseFunction, lambda _: 1, lambda _: 2)
 
     #########################################
     # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
     #########################################
 
-    def test_compare_battery_control_control(self):
+    def test_compare_battery_control(self):
         self._compare_regulating_control(BatteryControl)
 
-        self.validator.validate_property(BatteryControl.battery_unit, BatteryControl, lambda _: BatteryControl(mrid="bc1"),
-                                         lambda _: BatteryControl(mrid="bc2"))
         self.validator.validate_property(BatteryControl.charging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(BatteryControl.discharging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(BatteryControl.reserve_percent, BatteryControl, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(BatteryControl.control_mode, BatteryControl, lambda _: BatteryControlMode.time, lambda _: BatteryControlMode.profile)
+        self.validator.validate_property(BatteryControl.control_mode, BatteryControl, lambda _: BatteryControlMode.peakShaveCharge,
+                                         lambda _: BatteryControlMode.peakShaveDischarge)
 
     #######################
     # IEC61968 ASSET INFO #
@@ -317,7 +317,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_end_device_function(self, creator: Type[EndDeviceFunction]):
         self._compare_asset_function(creator)
 
-        self.validator.validate_property(EndDeviceFunction.enabled, creator, lambda _: False, lambda _: True)
+        self.validator.validate_property(EndDeviceFunction.enabled, creator, lambda _: True, lambda _: False)
 
     def test_compare_meter(self):
         self._compare_end_device(Meter)
@@ -1247,6 +1247,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(RegulatingControl.min_allowed_target_value, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(RegulatingControl.rated_current, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(RegulatingControl.terminal, creator, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
+        self.validator.validate_property(RegulatingControl.ct_primary, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(RegulatingControl.min_target_deadband, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_collection(
             RegulatingControl.regulating_conducting_equipment,
             RegulatingControl.add_regulating_cond_eq,
@@ -1291,8 +1293,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(
             StaticVarCompensator.svc_control_mode,
             StaticVarCompensator,
-            lambda _: SVCControlMode.voltage,
-            lambda _: SVCControlMode.reactivePower
+            lambda _: SVCControlMode.reactivePower,
+            lambda _: SVCControlMode.voltage
         )
         self.validator.validate_property(StaticVarCompensator.voltage_set_point, StaticVarCompensator, lambda _: 1, lambda _: 2)
 

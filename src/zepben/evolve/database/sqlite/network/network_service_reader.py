@@ -11,8 +11,10 @@ from zepben.evolve.database.sqlite.common.base_service_reader import BaseService
 from zepben.evolve.database.sqlite.network.network_cim_reader import NetworkCimReader
 from zepben.evolve.database.sqlite.network.network_database_tables import NetworkDatabaseTables
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import TableAssetOrganisationRolesAssets
+from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import TableCircuitsSubstations
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import TableCircuitsTerminals
+from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_equipment_containers import TableEquipmentEquipmentContainers
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_operational_restrictions import TableEquipmentOperationalRestrictions
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_usage_points import TableEquipmentUsagePoints
@@ -165,8 +167,9 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableAssetOwners, self._reader.load_asset_owner),
             self._load_each(TablePoles, self._reader.load_pole),
             self._load_each(TableStreetlights, self._reader.load_streetlight),
-            self._load_each(TableMeters, self._reader.load_meter),
             self._load_each(TablePanDemandResponseFunctions, self._reader.load_pan_demand_response_function),
+            self._load_each(TableMeters, self._reader.load_meter),
+            self._load_each(TableEndDevicesEndDeviceFunctions, self._reader.load_end_devices_end_device_functions),
             self._load_each(TableUsagePoints, self._reader.load_usage_point),
             self._load_each(TableOperationalRestrictions, self._reader.load_operational_restriction),
             self._load_each(TableBaseVoltages, self._reader.load_base_voltage),
@@ -214,8 +217,9 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableTerminals, self._reader.load_terminal),
             self._load_each(TableTapChangerControls, self._reader.load_tap_changer_control),
             self._load_each(TablePowerElectronicsConnectionPhases, self._reader.load_power_electronics_connection_phase),
-            self._load_each(TableBatteryUnits, self._reader.load_battery_unit),
             self._load_each(TableBatteryControls, self._reader.load_battery_controls),
+            self._load_each(TableBatteryUnits, self._reader.load_battery_unit),
+            self._load_each(TableBatteryUnitsBatteryControls, self._reader.load_battery_units_battery_controls),
             self._load_each(TablePhotoVoltaicUnits, self._reader.load_photo_voltaic_unit),
             self._load_each(TablePowerElectronicsWindUnits, self._reader.load_power_electronics_wind_unit),
             self._load_each(TableEvChargingUnits, self._reader.load_ev_charging_unit),

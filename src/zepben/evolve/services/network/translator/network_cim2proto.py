@@ -298,10 +298,15 @@ class CimTranslationException(Exception):
 # [ZBEX] EXTENSIONS IEC61968 METERING #
 #######################################
 def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanDemandResponseFunction:
+    """
+    Convert the :class:`PanDemandResponseFunction` into its protobuf counterpart.
+    :param cim: The :class:`PanDemandResponseFunction` to convert.
+    :return: The protobuf builder.
+    """
     return PBPanDemandResponseFunction(
         edf=end_device_function_to_pb(cim),
         kind=PBEndDeviceFunctionKind.Value(cim.kind.short_name),
-        appliance=from_nullable_int(cim.appliance.to_int() if cim.appliance else None)
+        appliance=from_nullable_int(cim._appliance_bitmask)
     )
 
 
@@ -311,7 +316,14 @@ PanDemandResponseFunction.to_pb = pan_demand_response_function_to_pb
 #########################################
 # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
 #########################################
+
 def battery_control_to_pb(cim: BatteryControl) -> PBBatteryControl:
+    """
+    Convert the :class:`BatteryControl` into its protobuf counterpart.
+    :param cim: The :class:`BatteryControl` to convert.
+    :return: The protobuf builder.
+    """
+
     return PBBatteryControl(
         rc=regulating_control_to_pb(cim),
         chargingRate=from_nullable_float(cim.charging_rate),
@@ -472,6 +484,11 @@ def asset_container_to_pb(cim: AssetContainer) -> PBAssetContainer:
 
 
 def asset_function_to_pb(cim: AssetFunction) -> PBAssetFunction:
+    """
+    Convert the :class:`AssetFunction` into its protobuf counterpart.
+    :param cim: The :class:`AssetFunction` to convert.
+    :return: The protobuf builder.
+    """
     return PBAssetFunction(io=identified_object_to_pb(cim))
 
 
@@ -620,6 +637,11 @@ def ratio_to_pb(cim: Ratio) -> PBRatio:
 #####################
 
 def end_device_to_pb(cim: EndDevice) -> PBEndDevice:
+    """
+    Convert the :class:`EndDevice` into its protobuf counterpart.
+    :param cim: The :class:`EndDevice` to convert.
+    :return: The protobuf builder.
+    """
     return PBEndDevice(
         ac=asset_container_to_pb(cim),
         usagePointMRIDs=[str(io.mrid) for io in cim.usage_points],
@@ -630,6 +652,11 @@ def end_device_to_pb(cim: EndDevice) -> PBEndDevice:
 
 
 def end_device_function_to_pb(cim: EndDeviceFunction) -> PBEndDeviceFunction:
+    """
+    Convert the :class:`EndDeviceFunction` into its protobuf counterpart.
+    :param cim: The :class:`EndDeviceFunction` to convert.
+    :return: The protobuf builder.
+    """
     return PBEndDeviceFunction(
         af=asset_function_to_pb(cim),
         **nullable_bool_settings("enabled", cim.enabled)
@@ -1044,6 +1071,11 @@ RemoteSource.to_pb = remote_source_to_pb
 #############################################
 
 def battery_unit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
+    """
+    Convert the :class:`BatteryUnit` into its protobuf counterpart.
+    :param cim: The :class:`BatteryUnit` to convert.
+    :return: The protobuf builder.
+    """
     return PBBatteryUnit(
         peu=power_electronics_unit_to_pb(cim),
         batteryControlMRIDs=[str(io.mrid) for io in cim.controls],
@@ -1080,6 +1112,11 @@ PowerElectronicsWindUnit.to_pb = power_electronics_wind_unit_to_pb
 #######################
 
 def ac_line_segment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
+    """
+    Convert the :class:`AcLineSegment` into its protobuf counterpart.
+    :param cim: The :class:`AcLineSegment` to convert.
+    :return: The protobuf builder.
+    """
     return PBAcLineSegment(
         cd=conductor_to_pb(cim),
         perLengthImpedanceMRID=mrid_or_empty(cim.per_length_impedance)
@@ -1252,6 +1289,11 @@ def per_length_line_parameter_to_pb(cim: PerLengthLineParameter) -> PBPerLengthL
 
 
 def phase_impedance_data_to_pb(cim: PhaseImpedanceData) -> PBPhaseImpedanceData:
+    """
+    Convert the :class:`PhaseImpedanceData` into its protobuf counterpart.
+    :param cim: The :class:`PhaseImpedanceData` to convert.
+    :return: The protobuf builder.
+    """
     return PBPhaseImpedanceData(
         fromPhase=PBSinglePhaseKind.Value(cim.from_phase.short_name),
         toPhase=PBSinglePhaseKind.Value(cim.to_phase.short_name),
@@ -1263,6 +1305,11 @@ def phase_impedance_data_to_pb(cim: PhaseImpedanceData) -> PBPhaseImpedanceData:
 
 
 def per_length_phase_impedance_to_pb(cim: PerLengthPhaseImpedance) -> PBPerLengthPhaseImpedance:
+    """
+    Convert the :class:`PerLengthPhaseImpedance` into its protobuf counterpart.
+    :param cim: The :class:`PerLengthPhaseImpedance` to convert.
+    :return: The protobuf builder.
+    """
     return PBPerLengthPhaseImpedance(
         pli=per_length_impedance_to_pb(cim),
         phaseImpedanceData=[phase_impedance_data_to_pb(it) for it in cim.data]
@@ -1403,6 +1450,11 @@ def regulating_cond_eq_to_pb(cim: RegulatingCondEq, include_asset_info=False) ->
 
 
 def regulating_control_to_pb(cim: RegulatingControl) -> PBRegulatingControl:
+    """
+    Convert the :class:`RegulatingControl` into its protobuf counterpart.
+    :param cim: The :class:`RegulatingControl` to convert.
+    :return: The protobuf builder.
+    """
     return PBRegulatingControl(
         psr=power_system_resource_to_pb(cim),
         **nullable_bool_settings("discrete", cim.discrete),
@@ -1415,8 +1467,8 @@ def regulating_control_to_pb(cim: RegulatingControl) -> PBRegulatingControl:
         minAllowedTargetValue=from_nullable_float(cim.min_allowed_target_value),
         ratedCurrent=from_nullable_float(cim.rated_current),
         terminalMRID=mrid_or_empty(cim.terminal),
-        ctPrimary=cim.ct_primary,
-        minTargetDeadband=cim.min_target_deadband,
+        ctPrimary=from_nullable_float(cim.ct_primary),
+        minTargetDeadband=from_nullable_float(cim.min_target_deadband),
         regulatingCondEqMRIDs=[str(io.mrid) for io in cim.regulating_conducting_equipment]
     )
 
@@ -1455,6 +1507,11 @@ def shunt_compensator_to_pb(cim: ShuntCompensator) -> PBShuntCompensator:
 
 
 def static_var_compensator_to_pb(cim: StaticVarCompensator) -> PBStaticVarCompensator:
+    """
+    Convert the :class:`StaticVarCompensator` into its protobuf counterpart.
+    :param cim: The :class:`StaticVarCompensator` to convert.
+    :return: The protobuf builder.
+    """
     return PBStaticVarCompensator(
         rce=regulating_cond_eq_to_pb(cim),
         capacitiveRating=from_nullable_float(cim.capacitive_rating),
