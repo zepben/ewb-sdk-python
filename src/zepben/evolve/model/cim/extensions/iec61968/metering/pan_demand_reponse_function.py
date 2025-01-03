@@ -28,9 +28,10 @@ class PanDemandResponseFunction(EndDeviceFunction):
 
     _appliance_bitmask: Optional[int] = None
 
-    def __init__(self, appliance: Optional[Union[int, ControlledAppliance]] = None, **kwargs):
+    def __init__(self, appliances: Union[int, ControlledAppliance] = None, **kwargs):
         super(PanDemandResponseFunction, self).__init__(**kwargs)
-        self.appliance = appliance
+        if appliances is not None:
+            self.appliance = appliances
 
     @property
     def appliance(self) -> Optional[ControlledAppliance]:

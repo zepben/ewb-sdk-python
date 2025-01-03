@@ -6,7 +6,8 @@ from pytest import raises
 from hypothesis import given
 from hypothesis.strategies import sampled_from, integers
 
-from cim.iec61968.metering.test_end_device_function import end_device_function_kwargs, end_device_function_args, verify_end_device_function_constructor_default
+from cim.iec61968.metering.test_end_device_function import end_device_function_kwargs, end_device_function_args, verify_end_device_function_constructor_default, \
+    verify_end_device_function_constructor_args
 from test.cim.iec61968.metering.test_end_device_function import verify_end_device_function_constructor_kwargs
 from zepben.evolve import EndDeviceFunctionKind, PanDemandResponseFunction, ControlledAppliance, Appliance
 
@@ -16,7 +17,7 @@ pan_demand_response_function_kwargs = {
     "appliance": integers(min_value=0, max_value=4095)
 }
 
-pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.demandResponse, 0]
+pan_demand_response_function_args = [*end_device_function_args, EndDeviceFunctionKind.demandResponse, 1]
 
 
 def test_pan_demand_response_function_constructor_default():
@@ -30,22 +31,24 @@ def test_pan_demand_response_function_constructor_default():
 
 @given(**pan_demand_response_function_kwargs)
 def test_pan_demand_response_function_constructor_kwargs(kind, appliance, **kwargs):
-    pdrf = PanDemandResponseFunction(kind=kind, appliance=appliance, **kwargs)
+    pdrf = PanDemandResponseFunction(kind=kind, appliances=appliance, **kwargs)
 
     verify_end_device_function_constructor_kwargs(pdrf, **kwargs)
     assert pdrf.kind == kind
+    assert pdrf.appliance.bitmask == appliance
 
 
 def test_pan_demand_response_function_constructor_args():
     pdrf = PanDemandResponseFunction(*pan_demand_response_function_args)
 
-    assert pdrf.kind == pan_demand_response_function_args[-2]
-    assert pdrf._appliance_bitmask == pan_demand_response_function_args[-1]
+    verify_end_device_function_constructor_args(pdrf)
+
+    assert pan_demand_response_function_args[-2:] == [pdrf.kind, pdrf.appliance.bitmask]
 
 
 def test_constructor_with_controlled_appliance():
     ca = ControlledAppliance([Appliance.SMART_APPLIANCE, Appliance.IRRIGATION_PUMP])
-    pdrf = PanDemandResponseFunction(appliance=ca)
+    pdrf = PanDemandResponseFunction(appliances=ca)
 
     assert pdrf.appliance == ca
 
