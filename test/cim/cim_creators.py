@@ -72,7 +72,7 @@ def create_pan_demand_response_function(include_runtime: bool = True):
         PanDemandResponseFunction,
         **create_end_device_function(include_runtime),
         kind=sampled_from(EndDeviceFunctionKind),
-        appliance=integers(min_value=0, max_value=4095)
+        appliances=integers(min_value=0, max_value=4095)
     )
 
 
