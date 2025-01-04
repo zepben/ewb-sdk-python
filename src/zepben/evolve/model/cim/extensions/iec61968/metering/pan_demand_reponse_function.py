@@ -57,11 +57,6 @@ class PanDemandResponseFunction(EndDeviceFunction):
             else:
                 self._appliance_bitmask = None
 
-        # if appliance:
-        #     self._appliance_bitmask = appliance.bitmask
-        # else:
-        #     self._appliance_bitmask = None
-
     def add_appliance(self, appliance: Appliance) -> bool:
         """
         Add an appliance to the appliances being controlled.
