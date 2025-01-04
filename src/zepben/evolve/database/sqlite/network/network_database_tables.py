@@ -6,8 +6,10 @@ from typing import Generator
 
 from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import *
+from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import *
+from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import *
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_equipment_containers import *
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_operational_restrictions import *
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_usage_points import *
@@ -18,6 +20,8 @@ from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_sc
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.associations.table_usage_points_end_devices import *
+from zepben.evolve.database.sqlite.tables.extensions.iec61968.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.table_battery_controls import TableBatteryControls
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_cable_info import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_no_load_tests import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_open_circuit_tests import *
@@ -87,8 +91,10 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_jumpers impo
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_junctions import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_linear_shunt_compensators import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_load_break_switches import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import TablePerLengthPhaseImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_sequence_impedances import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_phase_impedance_data import TablePhaseImpedanceData
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connection_phases import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connections import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_end_ratings import *
@@ -98,6 +104,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ratio_tap_ch
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reactive_capability_curves import TableReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reclosers import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_series_compensators import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_static_var_compensator import TableStaticVarCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_synchronous_machines import TableSynchronousMachines
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_tap_changer_controls import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_transformer_star_impedances import *
@@ -108,6 +115,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.wires.generation.
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
 
 __all__ = ["NetworkDatabaseTables"]
+
 
 class NetworkDatabaseTables(BaseDatabaseTables):
     """
@@ -125,7 +133,9 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableAssetOrganisationRolesAssets()
         yield TableAssetOwners()
         yield TableBaseVoltages()
+        yield TableBatteryControls()
         yield TableBatteryUnits()
+        yield TableBatteryUnitsBatteryControls()
         yield TableBreakers()
         yield TableBusbarSections()
         yield TableCableInfo()
@@ -141,6 +151,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableDisconnectors()
         yield TableDiscretes()
         yield TableDistanceRelays()
+        yield TableEndDevicesEndDeviceFunctions()
         yield TableEnergyConsumerPhases()
         yield TableEnergyConsumers()
         yield TableEnergySourcePhases()
@@ -172,7 +183,10 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableOperationalRestrictions()
         yield TableOrganisations()
         yield TableOverheadWireInfo()
+        yield TablePanDemandResponseFunctions()
+        yield TablePerLengthPhaseImpedances()
         yield TablePerLengthSequenceImpedances()
+        yield TablePhaseImpedanceData()
         yield TablePetersenCoils()
         yield TablePhotoVoltaicUnits()
         yield TablePoles()
@@ -204,6 +218,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableShortCircuitTests()
         yield TableShuntCompensatorInfo()
         yield TableSites()
+        yield TableStaticVarCompensators()
         yield TableStreetlights()
         yield TableSubGeographicalRegions()
         yield TableSubstations()

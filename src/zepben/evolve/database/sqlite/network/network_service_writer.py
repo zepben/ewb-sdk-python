@@ -5,6 +5,8 @@
 from zepben.evolve.database.sqlite.common.base_service_writer import BaseServiceWriter
 from zepben.evolve.database.sqlite.network.network_cim_writer import NetworkCimWriter
 from zepben.evolve.database.sqlite.network.network_database_tables import NetworkDatabaseTables
+from zepben.evolve.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
@@ -58,6 +60,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import Grou
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger
@@ -65,6 +68,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve impor
 from zepben.evolve.model.cim.iec61970.base.wires.recloser import Recloser
 from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import SeriesCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import LinearShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import StaticVarCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
@@ -144,6 +148,7 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Jumper, self._writer.save_jumper),
             self._save_each_object(Junction, self._writer.save_junction),
             self._save_each_object(LinearShuntCompensator, self._writer.save_linear_shunt_compensator),
+            self._save_each_object(PerLengthPhaseImpedance, self._writer.save_per_length_phase_impedance),
             self._save_each_object(PerLengthSequenceImpedance, self._writer.save_per_length_sequence_impedance),
             self._save_each_object(PowerElectronicsConnection, self._writer.save_power_electronics_connection),
             self._save_each_object(PowerElectronicsConnectionPhase, self._writer.save_power_electronics_connection_phase),
@@ -180,4 +185,7 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(PetersenCoil, self._writer.save_petersen_coil),
             self._save_each_object(GroundingImpedance, self._writer.save_grounding_impedance),
             self._save_each_object(ReactiveCapabilityCurve, self._writer.save_reactive_capability_curve),
+            self._save_each_object(PanDemandResponseFunction, self._writer.save_pan_demand_response_function),
+            self._save_each_object(BatteryControl, self._writer.save_battery_control),
+            self._save_each_object(StaticVarCompensator, self._writer.save_static_var_compensator),
         ])

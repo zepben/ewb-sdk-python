@@ -40,7 +40,7 @@ def lv_equivalent_branch_network(has_equivalent_branch_impedance: bool) -> Netwo
     # AcLineSegment
     plsi = _create_per_length_sequence_impedance(0.0)
     network.add(plsi)
-    line = AcLineSegment(mrid="line", length=0.0, per_length_sequence_impedance=plsi)
+    line = AcLineSegment(mrid="line", length=0.0, per_length_impedance=plsi)
     network.add(line)
     line_terminals = create_terminals(network, line, 2)
 

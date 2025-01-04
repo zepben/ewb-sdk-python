@@ -9,6 +9,7 @@ from typing import Callable, Optional
 
 from dataclassy import dataclass
 
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
@@ -29,10 +30,10 @@ from zepben.evolve.model.cim.iec61968.customers.customer import Customer
 from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure
 from zepben.evolve.model.cim.iec61968.customers.tariff import Tariff
-from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
-from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, UsagePoint
+from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
+from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, UsagePoint, EndDeviceFunction
 from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.current_transformer import CurrentTransformer
@@ -62,8 +63,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyCo
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
 from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
-from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import PowerElectronicsUnit
-from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import PowerElectronicsUnit, BatteryUnit
+from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance, PerLengthImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnectionPhase, PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd, TapChanger
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
@@ -79,7 +80,7 @@ from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 
 __all__ = [
-    "acls_to_plsi_resolver", "asset_to_asset_org_role_resolver", "asset_to_location_resolver", "pole_to_streetlight_resolver", "streetlight_to_pole_resolver",
+    "acls_to_pli_resolver", "asset_to_asset_org_role_resolver", "asset_to_location_resolver", "pole_to_streetlight_resolver", "streetlight_to_pole_resolver",
     "aux_equip_to_term_resolver", "cond_equip_to_bv_resolver", "cond_equip_to_terminal_resolver", "conductor_to_wire_info_resolver",
     "conn_node_to_term_resolver", "control_to_remote_control_resolver", "cust_to_custagr_resolver", "custagr_to_cust_resolver", "custagr_to_ps_resolver",
     "diag_to_diagobj_resolver", "diagobj_to_diag_resolver", "ed_to_up_resolver", "ed_to_loc_resolver", "ec_to_ecp_resolver", "ecp_to_ec_resolver",
@@ -96,7 +97,8 @@ __all__ = [
     "tei_to_oe_oct_resolver", "tei_to_ee_oct_resolver", "shunt_compensator_to_shunt_compensator_info_resolver", "lvfeeder_to_nht_resolver",
     "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "prf_to_psw_resolver", "psw_to_prf_resolver", "switch_to_switch_info_resolver",
     "prf_to_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver", "prf_to_psw_resolver",
-    "psw_to_prf_resolver", "prf_to_sen_resolver", "sen_to_prf_resolver", "prf_to_prscheme_resolver", "prscheme_to_prf_resolver", "prscheme_to_prsystem_resolver",
+    "psw_to_prf_resolver", "prf_to_sen_resolver", "sen_to_prf_resolver", "prf_to_prscheme_resolver", "prscheme_to_prf_resolver",
+    "prscheme_to_prsystem_resolver", "battery_unit_to_battery_control_resolver", "ed_to_edf_resolver",
     "prsystem_to_prscheme_resolver", "fuse_to_prf_resolver", "sm_to_rcc_resolver"]
 
 
@@ -180,7 +182,7 @@ def _resolve_diag_diagobj(diag, diag_obj):
     diag.add_diagram_object(diag_obj)
 
 
-acls_to_plsi_resolver = ReferenceResolver(AcLineSegment, PerLengthSequenceImpedance, lambda t, r: setattr(t, 'per_length_sequence_impedance', r))
+acls_to_pli_resolver = ReferenceResolver(AcLineSegment, PerLengthImpedance, lambda t, r: setattr(t, 'per_length_impedance', r))
 
 asset_to_asset_org_role_resolver = ReferenceResolver(Asset, AssetOrganisationRole, lambda t, r: t.add_organisation_role(r))
 asset_to_location_resolver = ReferenceResolver(Asset, Location, lambda t, r: setattr(t, 'location', r))
@@ -340,3 +342,7 @@ rc_to_term_resolver = ReferenceResolver(RegulatingControl, Terminal, lambda t, r
 tc_to_tcc_resolver = ReferenceResolver(TapChanger, TapChangerControl, lambda t, r: setattr(t, 'tap_changer_control', r))
 
 sm_to_rcc_resolver = ReferenceResolver(SynchronousMachine, ReactiveCapabilityCurve, lambda t, r: t.add_curve(r))
+
+battery_unit_to_battery_control_resolver = ReferenceResolver(BatteryUnit, BatteryControl, lambda t, r: t.add_control(r))
+
+ed_to_edf_resolver = ReferenceResolver(EndDevice, EndDeviceFunction, lambda t, r: t.add_function(r))

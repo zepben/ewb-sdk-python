@@ -26,12 +26,12 @@ def end_of_branch_multiple_ec_pec() -> NetworkService:
     network.add(plsi1)
 
     # AcLineSegment1
-    a1 = AcLineSegment(mrid="a1", length=1.0, per_length_sequence_impedance=plsi1)
+    a1 = AcLineSegment(mrid="a1", length=1.0, per_length_impedance=plsi1)
     network.add(a1)
     a1_terminals = create_terminals(network, a1, 2)
 
     # AcLineSegment2
-    a2 = AcLineSegment(mrid="a2", length=2.0, per_length_sequence_impedance=plsi1)
+    a2 = AcLineSegment(mrid="a2", length=2.0, per_length_impedance=plsi1)
     network.add(a2)
     a2_terminals = create_terminals(network, a2, 2)
 

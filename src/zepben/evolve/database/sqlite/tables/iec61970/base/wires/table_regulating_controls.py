@@ -24,3 +24,5 @@ class TableRegulatingControls(TablePowerSystemResources, ABC):
         self.min_allowed_target_value: Column = self._create_column("min_allowed_target_value", "NUMBER", Nullable.NULL)
         self.rated_current: Column = self._create_column("rated_current", "NUMBER", Nullable.NULL)
         self.terminal_mrid: Column = self._create_column("terminal_mrid", "TEXT", Nullable.NULL)
+        self.ct_primary: Column = self._create_column("ct_primary", "NUMBER", Nullable.NULL)
+        self.min_target_deadband: Column = self._create_column("min_target_deadband", "NUMBER", Nullable.NULL)

@@ -7,7 +7,8 @@ from typing import Optional
 
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import CableInfo, WireInfo
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance, PerLengthImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 
 __all__ = ["AcLineSegment", "Conductor"]
 
@@ -60,5 +61,36 @@ class AcLineSegment(Conductor):
     However, boundary lines  may have slightly different BaseVoltage.nominalVoltages and variation is allowed.
     Larger voltage difference in general requires use of an equivalent branch.
     """
-    per_length_sequence_impedance: Optional[PerLengthSequenceImpedance] = None
-    """A `zepben.evolve.PerLengthSequenceImpedance` describing this ACLineSegment"""
+
+    per_length_impedance: Optional[PerLengthImpedance] = None
+    """A `zepben.evolve.PerLengthImpedance` describing this AcLineSegment"""
+
+    @property
+    def per_length_sequence_impedance(self) -> Optional[PerLengthSequenceImpedance]:
+        """
+        Per-length sequence impedance of this line segment.
+        :return: A PerLengthSequenceImpedance if one is set, otherwise None.
+        """
+        if self.per_length_impedance:
+            if isinstance(self.per_length_impedance, PerLengthSequenceImpedance):
+                return self.per_length_impedance
+        return None
+
+    @per_length_sequence_impedance.setter
+    def per_length_sequence_impedance(self, value: Optional[PerLengthSequenceImpedance]):
+        self.per_length_impedance = value
+
+    @property
+    def per_length_phase_impedance(self) -> Optional[PerLengthPhaseImpedance]:
+        """
+        Per-length phase impedance of this line segment.
+        :return: A PerLengthPhaseImpedance if one is set, otherwise None.
+        """
+        if self.per_length_impedance:
+            if isinstance(self.per_length_impedance, PerLengthPhaseImpedance):
+                return self.per_length_impedance
+        return None
+
+    @per_length_phase_impedance.setter
+    def per_length_phase_impedance(self, value: Optional[PerLengthPhaseImpedance]):
+        self.per_length_impedance = value

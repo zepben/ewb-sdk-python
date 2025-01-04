@@ -64,7 +64,10 @@ class TapChanger(PowerSystemResource):
 
     @property
     def high_step(self):
-        """Highest possible tap step position, advance from neutral. The attribute shall be greater than lowStep."""
+        """
+        Highest possible tap step position, advance from neutral. The attribute shall be greater than lowStep. This tap position results in the
+        maximum voltage boost on secondary winding(s).
+        """
         return self._high_step
 
     @high_step.setter
@@ -76,7 +79,7 @@ class TapChanger(PowerSystemResource):
 
     @property
     def low_step(self):
-        """Lowest possible tap step position, retard from neutral"""
+        """Lowest possible tap step position, retard from neutral. This tap position results in the maximum voltage buck on secondary winding(s)."""
         return self._low_step
 
     @low_step.setter

@@ -6,7 +6,10 @@
 from __future__ import annotations
 
 import logging
+from enum import Enum
 from typing import Optional, Generator, List, TYPE_CHECKING
+
+from zepben.evolve.model.cim.iec61968.assets.asset_function import AssetFunction
 
 if TYPE_CHECKING:
     from zepben.evolve import Equipment
@@ -17,7 +20,7 @@ from zepben.evolve.model.cim.iec61970.base.core.identified_object import Identif
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
 
-__all__ = ["Meter", "EndDevice", "UsagePoint"]
+__all__ = ["Meter", "EndDevice", "UsagePoint", "EndDeviceFunction", "EndDeviceFunctionKind"]
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +48,16 @@ class EndDevice(AssetContainer):
 
     _usage_points: Optional[List[UsagePoint]] = None
 
-    def __init__(self, usage_points: List[UsagePoint] = None, **kwargs):
+    _functions: Optional[List[EndDeviceFunction]] = None
+
+    def __init__(self, usage_points: List[UsagePoint] = None, functions: List[EndDeviceFunction] = None, **kwargs):
         super(EndDevice, self).__init__(**kwargs)
         if usage_points:
             for up in usage_points:
                 self.add_usage_point(up)
+        if functions:
+            for edf in functions:
+                self.add_function(edf)
 
     def num_usage_points(self):
         """
@@ -105,6 +113,62 @@ class EndDevice(AssetContainer):
         Returns A reference to this `EndDevice` to allow fluent use.
         """
         self._usage_points = None
+        return self
+
+    def num_functions(self):
+        """
+        Returns The number of `EndDeviceFunction`s associated with this `EndDevice`
+        """
+        return nlen(self._functions)
+
+    @property
+    def functions(self) -> Generator[EndDeviceFunction, None, None]:
+        """
+        The `EndDeviceFunction`s associated with this `EndDevice`
+        """
+        return ngen(self._functions)
+
+    def get_function(self, mrid: str) -> EndDeviceFunction:
+        """
+        Get the `EndDeviceFunction` for this `EndDevice` identified by `mrid`
+
+        `mrid` the mRID of the required `EndDeviceFunction`
+        Returns The `EndDeviceFunction` with the specified `mrid` if it exists
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return get_by_mrid(self._functions, mrid)
+
+    def add_function(self, edf: EndDeviceFunction) -> EndDevice:
+        """
+        Associate `edf` to this `EndDevice`.
+
+        `edf` the `EndDeviceFunction` to associate with this `EndDevice`.
+        Returns A reference to this `EndDevice` to allow fluent use.
+        Raises `ValueError` if another `EndDeviceFunction` with the same `mrid` already exists for this `EndDevice`.
+        """
+        if self._validate_reference(edf, self.get_function, "An EndDeviceFunction"):
+            return self
+        self._functions = list() if self._functions is None else self._functions
+        self._functions.append(edf)
+        return self
+
+    def remove_function(self, edf: EndDeviceFunction) -> EndDevice:
+        """
+        Disassociate `edf` from this `EndDevice`
+
+        `up` the `EndDeviceFunction` to disassociate from this `EndDevice`.
+        Returns A reference to this `EndDevice` to allow fluent use.
+        Raises `ValueError` if `up` was not associated with this `EndDevice`.
+        """
+        self._functions = safe_remove(self._functions, edf)
+        return self
+
+    def clear_functions(self) -> EndDevice:
+        """
+        Clear all end_device_functions.
+        Returns A reference to this `EndDevice` to allow fluent use.
+        """
+        self._functions = None
         return self
 
 
@@ -291,3 +355,49 @@ class Meter(EndDevice):
         `meter_id` The ID to set for this Meter. Will use `IdentifiedObject.name` as a backing field.
         """
         self.name = meter_id
+
+
+class EndDeviceFunction(AssetFunction):
+    """
+    Function performed by an end device such as a meter, communication equipment, controllers, etc.
+    """
+
+    enabled: bool = True
+    """True if the function is enabled."""
+
+
+class EndDeviceFunctionKind(Enum):
+    """
+    Kind of end device function.
+    """
+
+    UNKNOWN = 0
+    """Unknown function kind."""
+
+    autonomousDst = 1
+    """Autonomous application of daylight saving time (DST)."""
+
+    demandResponse = 2
+    """Demand response functions."""
+
+    electricMetering = 3
+    """Electricity metering."""
+
+    metrology = 4
+    """Presentation of metered values to a user or another system (always a function of a meter, but might not be supported by a load control unit)."""
+
+    onRequestRead = 5
+    """On-request reads."""
+
+    outageHistory = 6
+    """Reporting historical power interruption data."""
+
+    relaysProgramming = 7
+    """Support for one or more relays that may be programmable in the meter (and tied to TOU, time pulse, load control or other functions)."""
+
+    reverseFlow = 8
+    """Detection and monitoring of reverse flow."""
+
+    @property
+    def short_name(self):
+        return str(self)[22:]

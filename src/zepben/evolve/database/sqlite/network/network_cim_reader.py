@@ -9,20 +9,38 @@ from typing import Callable, Optional
 
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
+from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
+from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
+from zepben.evolve.database.sqlite.tables.extensions.iec61968.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.table_battery_controls import TableBatteryControls
+from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_functions import TableAssetFunctions
+from zepben.evolve.database.sqlite.tables.iec61968.metering.table_end_device_functions import TableEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data import TableCurveData
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curves import TableCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_earth_fault_compensators import TableEarthFaultCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_grounding_impedances import TableGroundingImpedances
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import TablePerLengthPhaseImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_phase_impedance_data import TablePhaseImpedanceData
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_reactive_capability_curves import TableReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_rotating_machines import TableRotatingMachines
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_static_var_compensator import TableStaticVarCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_synchronous_machines import TableSynchronousMachines
+from zepben.evolve.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import PanDemandResponseFunction
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
+from zepben.evolve.model.cim.iec61968.assets.asset_function import AssetFunction
+from zepben.evolve.model.cim.iec61968.metering.metering import EndDeviceFunctionKind
 from zepben.evolve.model.cim.iec61970.base.core.curve import Curve
 from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import GroundingImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
 from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
+from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import StaticVarCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
 
@@ -190,7 +208,7 @@ from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
-from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, Meter, UsagePoint
+from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, Meter, UsagePoint, EndDeviceFunction
 from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment, FaultIndicator
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.current_transformer import CurrentTransformer
@@ -280,6 +298,52 @@ class NetworkCimReader(BaseCimReader):
 
         self._service = service
         """The :class:`NetworkService` used to store any items read from the database."""
+
+    #######################################
+    # [ZBEX] Eextensions IEC61968 Metering #
+    #######################################
+
+    def load_pan_demand_response_function(self, table: TablePanDemandResponseFunctions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PanDemandResponseFunction` and populate its fields from :class:`TablePanDemandResponseFunctions`.
+
+        :param table: The database table to read the :class:`PanDemandResponseFunction` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PanDemandResponseFunction`.
+        :param set_identifier: A callback to register the mRID of this :class:`PanDemandResponseFunction` for logging purposes.
+
+        :return: True if the :class:`PanDemandResponseFunction` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        pan_demand_response_function = PanDemandResponseFunction(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        pan_demand_response_function.kind = EndDeviceFunctionKind[result_set.get_string(table.kind.query_index)]
+        pan_demand_response_function._appliance_bitmask = result_set.get_int(table.appliance.query_index, on_none=None)
+
+        return self._load_end_device_functions(pan_demand_response_function, table, result_set) and self._add_or_throw(pan_demand_response_function)
+
+    #########################################
+    # [ZBEX] Extensions IEC61970 Base Wires #
+    #########################################
+
+    def load_battery_controls(self, table: TableBatteryControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`BatteryControl` and populate its fields from :class:`TableBatteryControls`.
+
+        :param table: The database table to read the :class:`BatteryControl` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`BatteryControl`.
+        :param set_identifier: A callback to register the mRID of this :class:`BatteryControl` for logging purposes.
+
+        :return: True if the :class:`BatteryControl` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        battery_control = BatteryControl(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        battery_control.charging_rate = result_set.get_float(table.charging_rate.query_index, on_none=None)
+        battery_control.discharging_rate = result_set.get_float(table.discharging_rate.query_index, on_none=None)
+        battery_control.reserve_percent = result_set.get_float(table.reserve_percent.query_index, on_none=None)
+        battery_control.control_mode = BatteryControlMode[result_set.get_string(table.control_mode.query_index)]
+
+        return self._load_regulating_control(battery_control, table, result_set) and self._add_or_throw(battery_control)
 
     #######################
     # IEC61968 Asset Info #
@@ -536,6 +600,9 @@ class NetworkCimReader(BaseCimReader):
 
     def _load_asset_container(self, asset_container: AssetContainer, table: TableAssetContainers, result_set: ResultSet) -> bool:
         return self._load_asset(asset_container, table, result_set)
+
+    def _load_asset_function(self, asset_function: AssetFunction, table: TableAssetFunctions, result_set: ResultSet) -> bool:
+        return self._load_identified_object(asset_function, table, result_set)
 
     def _load_asset_info(self, asset_info: AssetInfo, table: TableAssetInfo, result_set: ResultSet) -> bool:
         return self._load_identified_object(asset_info, table, result_set)
@@ -813,6 +880,11 @@ class NetworkCimReader(BaseCimReader):
         )
 
         return self._load_asset_container(end_device, table, result_set)
+
+    def _load_end_device_functions(self, end_device_function: EndDeviceFunction, table: TableEndDeviceFunctions, result_set: ResultSet) -> bool:
+        end_device_function.enabled = result_set.get_boolean(table.enabled.query_index)
+
+        return self._load_asset_function(end_device_function, table, result_set)
 
     def load_meter(self, table: TableMeters, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
@@ -1612,9 +1684,9 @@ class NetworkCimReader(BaseCimReader):
         """
         ac_line_segment = AcLineSegment(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
 
-        ac_line_segment.per_length_sequence_impedance = self._ensure_get(
-            result_set.get_string(table.per_length_sequence_impedance_mrid.query_index, on_none=None),
-            PerLengthSequenceImpedance
+        ac_line_segment.per_length_impedance = self._ensure_get(
+            result_set.get_string(table.per_length_impedance_mrid.query_index, on_none=None),
+            PerLengthImpedance
         )
 
         return self._load_conductor(ac_line_segment, table, result_set) and self._add_or_throw(ac_line_segment)
@@ -1950,6 +2022,50 @@ class NetworkCimReader(BaseCimReader):
     ) -> bool:
         return self._load_identified_object(per_length_line_parameter, table, result_set)
 
+    def load_per_length_phase_impedance(self, table: TablePerLengthPhaseImpedances, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PerLengthPhaseImpedance` and populate its fields from :class:`TablePerLengthPhaseImpedances`.
+
+        :param table: The database table to read the :class:`PerLengthPhaseImpedance` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PerLengthPhaseImpedance`.
+        :param set_identifier: A callback to register the mRID of this :class:`PerLengthPhaseImpedance` for logging purposes.
+
+        :return: True if the :class:`PerLengthPhaseImpedance` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        per_length_phase_impedance = PerLengthPhaseImpedance(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        return self._load_per_length_impedance(per_length_phase_impedance, table, result_set) and self._add_or_throw(per_length_phase_impedance)
+
+    def load_phase_impedance_data(self, table: TablePhaseImpedanceData, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`PhaseImpedanceData` and populate its fields from :class:`TableConnectivityNodes`.
+
+        :param table: The database table to read the :class:`PhaseImpedanceData` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`PhaseImpedanceData`.
+        :param set_identifier: A callback to register the mRID of this :class:`PhaseImpedanceData` for logging purposes.
+
+        :return: True if the :class:`PhaseImpedanceData` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        per_length_phase_impedance_mrid = result_set.get_string(table.per_length_phase_impedance_mrid.query_index)
+        set_identifier(result_set.get_string(table.per_length_phase_impedance_mrid.query_index))
+
+        per_length_phase_impedance = self._service.get(per_length_phase_impedance_mrid, PerLengthPhaseImpedance)
+
+        per_length_phase_impedance.add_data(
+            PhaseImpedanceData(
+                SinglePhaseKind[result_set.get_string(table.from_phase.query_index)],
+                SinglePhaseKind[result_set.get_string(table.to_phase.query_index)],
+                result_set.get_float(table.b.query_index, on_none=None),
+                result_set.get_float(table.g.query_index, on_none=None),
+                result_set.get_float(table.r.query_index, on_none=None),
+                result_set.get_float(table.x.query_index, on_none=None),
+            )
+        )
+
+        return True
+
     def load_per_length_sequence_impedance(self, table: TablePerLengthSequenceImpedances, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
         Create a :class:`PerLengthSequenceImpedance` and populate its fields from :class:`TablePerLengthSequenceImpedances`.
@@ -2237,6 +2353,10 @@ class NetworkCimReader(BaseCimReader):
             result_set.get_string(table.terminal_mrid.query_index, on_none=None),
             Terminal
         )
+        # ZBEX
+        regulating_control.ct_primary = result_set.get_float(table.ct_primary.query_index, on_none=None)
+        # ZBEX
+        regulating_control.min_target_deadband = result_set.get_float(table.min_target_deadband.query_index, on_none=None)
 
         return self._load_power_system_resource(regulating_control, table, result_set)
 
@@ -2283,6 +2403,27 @@ class NetworkCimReader(BaseCimReader):
         shunt_compensator.sections = result_set.get_float(table.sections.query_index, on_none=None)
 
         return self._load_regulating_cond_eq(shunt_compensator, table, result_set)
+
+    def load_static_var_compensator(self, table: TableStaticVarCompensators, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`StaticVarCompensator` and populate its fields from :class:`TableStaticVarCompensators`.
+
+        :param table: The database table to read the :class:`StaticVarCompensator` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`StaticVarCompensator`.
+        :param set_identifier: A callback to register the mRID of this :class:`StaticVarCompensator` for logging purposes.
+
+        :return: True if the :class:`StaticVarCompensator` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        static_var_compensator = StaticVarCompensator(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        static_var_compensator.capacitive_rating = result_set.get_float(table.capacitive_rating.query_index, on_none=None)
+        static_var_compensator.inductive_rating = result_set.get_float(table.inductive_rating.query_index, on_none=None)
+        static_var_compensator.q = result_set.get_float(table.q.query_index, on_none=None)
+        static_var_compensator.svc_control_mode = SVCControlMode[result_set.get_string(table.svc_control_mode.query_index, on_none=None)]
+        static_var_compensator.voltage_set_point = result_set.get_int(table.voltage_set_point.query_index, on_none=None)
+
+        return self._load_regulating_cond_eq(static_var_compensator, table, result_set) and self._add_or_throw(static_var_compensator)
 
     def _load_switch(self, switch: Switch, table: TableSwitches, result_set: ResultSet) -> bool:
         switch.asset_info = self._ensure_get(
@@ -2531,6 +2672,30 @@ class NetworkCimReader(BaseCimReader):
 
         return True
 
+    def load_battery_units_battery_controls(self, table: TableBatteryUnitsBatteryControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`BatteryUnit` to :class:`BatteryControl` association from :class:`TableBatteryUnitsBatteryControls`.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        battery_unit_mrid = result_set.get_string(table.battery_unit_mrid.query_index)
+        set_identifier(f"{battery_unit_mrid}-to-UNKNOWN")
+
+        battery_control_mrid = result_set.get_string(table.battery_control_mrid.query_index)
+        set_identifier(f"{battery_unit_mrid}-to-{battery_control_mrid}")
+
+        battery_unit = self._service.get(battery_unit_mrid, BatteryUnit)
+        battery_control = self._service.get(battery_control_mrid, BatteryControl)
+
+        battery_unit.add_control(battery_control)
+
+        return True
+
     def load_circuits_substation(self, table: TableCircuitsSubstations, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
         Create a :class:`Circuit` to :class:`Substation` association from :class:`TablePricingStructuresTariffsTableCircuitsSubstations.
@@ -2577,6 +2742,31 @@ class NetworkCimReader(BaseCimReader):
         terminal = self._service.get(terminal_mrid, Terminal)
 
         circuit.add_end_terminal(terminal)
+
+        return True
+
+    def load_end_devices_end_device_functions(self, table: TableEndDevicesEndDeviceFunctions, result_set: ResultSet,
+                                              set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`EndDevice` to :class:`EndDeviceFunction` association from :class:`TableEndDevicesEndDeviceFunctions`.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        end_device_mrid = result_set.get_string(table.end_device_mrid.query_index)
+        set_identifier(f"{end_device_mrid}-to-UNKNOWN")
+
+        end_device_function_mrid = result_set.get_string(table.end_device_function_mrid.query_index)
+        set_identifier(f"{end_device_mrid}-to-{end_device_function_mrid}")
+
+        end_device = self._service.get(end_device_mrid, EndDevice)
+        end_device_function = self._service.get(end_device_function_mrid, EndDeviceFunction)
+
+        end_device.add_function(end_device_function)
 
         return True
 
