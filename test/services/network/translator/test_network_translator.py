@@ -15,7 +15,8 @@ from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransforme
     TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableLoopsSubstations, \
     TableProtectionRelayFunctionsProtectedSwitches, TableProtectionRelaySchemesProtectionRelayFunctions, TableUsagePointsEndDevices, \
     TableLocationStreetAddresses, TablePositionPoints, TablePowerTransformerEndRatings, TableProtectionRelayFunctionThresholds, \
-    TableProtectionRelayFunctionTimeLimits, TableProtectionRelayFunctionsSensors, TableRecloseDelays
+    TableProtectionRelayFunctionTimeLimits, TableProtectionRelayFunctionsSensors, TableRecloseDelays, TablePhaseImpedanceData, TableBatteryUnitsBatteryControls, \
+    TableEndDevicesEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data import TableCurveData
@@ -170,6 +171,7 @@ types_to_test = {
     "create_junction": create_junction(),
     "create_linear_shunt_compensator": create_linear_shunt_compensator(),
     "create_load_break_switch": create_load_break_switch(),
+    "create_per_length_phase_impedance": create_per_length_phase_impedance(),
     "create_per_length_sequence_impedance": create_per_length_sequence_impedance(),
     "create_petersen_coil": create_petersen_coil(),
     "create_power_transformer": create_power_transformer(),
@@ -216,8 +218,10 @@ def test_network_service_translations(**kwargs):
         excluded_tables={
             # Excluded associations.
             TableAssetOrganisationRolesAssets,
+            TableBatteryUnitsBatteryControls,
             TableCircuitsSubstations,
             TableCircuitsTerminals,
+            TableEndDevicesEndDeviceFunctions,
             TableEquipmentEquipmentContainers,
             TableEquipmentOperationalRestrictions,
             TableEquipmentUsagePoints,
@@ -229,6 +233,7 @@ def test_network_service_translations(**kwargs):
 
             # Excluded array data.
             TableCurveData,
+            TablePhaseImpedanceData,
             TableLocationStreetAddresses,
             TablePositionPoints,
             TablePowerTransformerEndRatings,

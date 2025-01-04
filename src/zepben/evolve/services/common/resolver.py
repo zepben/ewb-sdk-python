@@ -11,19 +11,18 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     PricingStructure, RatioTapChanger, RemoteControl, RemoteSource, SubGeographicalRegion, Substation, Terminal, TransformerEnd, UsagePoint, Circuit, Loop, \
     PowerElectronicsUnit, PowerElectronicsConnectionPhase, PowerElectronicsConnection, TransformerTankInfo, TransformerEndInfo, PowerTransformerInfo, \
     TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectedSwitch, Switch, RegulatingControl, \
-    RegulatingCondEq, TapChanger, ProtectionRelayFunction, ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Fuse, EndDeviceFunction, BatteryUnit
-from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
-from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
+    RegulatingCondEq, TapChanger, ProtectionRelayFunction, ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Fuse, BatteryUnit, \
+    SynchronousMachine
 from zepben.evolve.services.common.reference_resolvers import *
 
-__all__ = ["ae_terminal", "agreements", "at_location", "battery_unit", "ce_base_voltage", "ce_terminals", "circuits", "cn_terminals", "conducting_equipment",
+__all__ = ["ae_terminal", "agreements", "at_location", "ce_base_voltage", "ce_terminals", "circuits", "cn_terminals", "conducting_equipment",
            "connectivity_node", "containers", "control", "current_containers", "current_transformer_info", "customer", "diagram", "diagram_objects",
            "ec_equipment", "ec_phases", "ed_usage_points", "end_devices", "end_substation", "end_terminal", "ends", "energised_end_no_load_tests",
            "energised_end_open_circuit_tests", "energised_end_short_circuit_tests", "energy_consumer", "energy_source", "eq_usage_points", "es_phases",
            "fuse_function", "geographical_region", "grounded_end_short_circuit_tests", "loop", "loop_circuits", "loop_energizing_substations",
            "loop_substations", "loops", "lv_feeder_normal_head_terminal", "measurement", "normal_energized_feeders", "normal_energized_loops",
            "normal_energized_lv_feeders", "normal_energizing_feeders", "normal_energizing_substation", "normal_head_terminal", "open_end_open_circuit_tests",
-           "operational_restrictions", "or_equipment", "organisation", "organisation_roles", "per_length_sequence_impedance",
+           "operational_restrictions", "or_equipment", "organisation", "organisation_roles", "per_length_impedance",
            "phase_power_electronics_connection", "pole", "potential_transformer_info", "power_electronics_connection_phase", "power_electronics_unit",
            "power_transformer", "power_transformer_info", "power_transformer_info_transformer_tank_info", "prf_protected_switch", "prf_scheme",
            "prf_sensor", "pricing_structures", "prscheme_function", "prscheme_system", "prsystem_scheme", "ps_relay_function", "psr_location",
@@ -32,9 +31,6 @@ __all__ = ["ae_terminal", "agreements", "at_location", "battery_unit", "ce_base_
            "sub_geographical_region", "sub_geographical_regions", "substations", "switch_info", "tariffs", "tc_tap_changer_control", "te_base_voltage",
            "te_terminal", "transformer_end", "transformer_end_info", "transformer_end_transformer_star_impedance", "transformer_star_impedance",
            "transformer_tank_info", "unit_power_electronics_connection", "up_equipment", "usage_point_location", "wire_info"]
-
-from zepben.evolve.services.common.reference_resolvers import sm_to_rcc_resolver, battery_control_to_battery_unit_resolver, \
-    battery_unit_to_battery_control_resolver, edf_to_ed_resolver, ed_to_edf_resolver
 
 
 def ae_terminal(auxiliary_equipment: AuxiliaryEquipment) -> BoundReferenceResolver:
@@ -52,14 +48,9 @@ def at_location(asset: Asset) -> BoundReferenceResolver:
     return BoundReferenceResolver(asset, asset_to_location_resolver, None)
 
 
-def battery_control(bu: BatteryUnit) -> BoundReferenceResolver:
+def battery_controls(bu: BatteryUnit) -> BoundReferenceResolver:
     # noinspection PyArgumentList
-    return BoundReferenceResolver(bu, battery_unit_to_battery_control_resolver, battery_control_to_battery_unit_resolver)
-
-
-def battery_unit(bc: BatteryControl) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(bc, battery_control_to_battery_unit_resolver, battery_unit_to_battery_control_resolver)
+    return BoundReferenceResolver(bu, battery_unit_to_battery_control_resolver, None)
 
 
 def ce_base_voltage(ce: ConductingEquipment) -> BoundReferenceResolver:
@@ -142,19 +133,14 @@ def ed_usage_points(end_device: EndDevice) -> BoundReferenceResolver:
     return BoundReferenceResolver(end_device, ed_to_up_resolver, up_to_ed_resolver)
 
 
-def edf_end_device(end_device_function: EndDeviceFunction) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(end_device_function, edf_to_ed_resolver, ed_to_edf_resolver)
-
-
 def end_devices(usage_point: UsagePoint) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(usage_point, up_to_ed_resolver, ed_to_up_resolver)
 
 
-def end_device_function(end_device: EndDevice) -> BoundReferenceResolver:
+def end_device_functions(end_device: EndDevice) -> BoundReferenceResolver:
     # noinspection PyArgumentList
-    return BoundReferenceResolver(end_device, ed_to_edf_resolver, edf_to_ed_resolver)
+    return BoundReferenceResolver(end_device, ed_to_edf_resolver, None)
 
 
 def end_substation(circuit: Circuit) -> BoundReferenceResolver:
@@ -312,9 +298,9 @@ def organisation_roles(asset: Asset) -> BoundReferenceResolver:
     return BoundReferenceResolver(asset, asset_to_asset_org_role_resolver, None)
 
 
-def per_length_sequence_impedance(ac_line_segment: AcLineSegment):
+def per_length_impedance(ac_line_segment: AcLineSegment):
     # noinspection PyArgumentList
-    return BoundReferenceResolver(ac_line_segment, acls_to_plsi_resolver, None)
+    return BoundReferenceResolver(ac_line_segment, acls_to_pli_resolver, None)
 
 
 def phase_power_electronics_connection(pec: PowerElectronicsConnectionPhase) -> BoundReferenceResolver:

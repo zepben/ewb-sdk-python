@@ -6,8 +6,10 @@ from typing import Generator
 
 from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import *
+from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import *
+from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import *
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_equipment_containers import *
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_operational_restrictions import *
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_usage_points import *
@@ -89,8 +91,10 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_jumpers impo
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_junctions import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_linear_shunt_compensators import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_load_break_switches import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import TablePerLengthPhaseImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_sequence_impedances import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_phase_impedance_data import TablePhaseImpedanceData
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connection_phases import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connections import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_end_ratings import *
@@ -131,6 +135,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableBaseVoltages()
         yield TableBatteryControls()
         yield TableBatteryUnits()
+        yield TableBatteryUnitsBatteryControls()
         yield TableBreakers()
         yield TableBusbarSections()
         yield TableCableInfo()
@@ -146,6 +151,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableDisconnectors()
         yield TableDiscretes()
         yield TableDistanceRelays()
+        yield TableEndDevicesEndDeviceFunctions()
         yield TableEnergyConsumerPhases()
         yield TableEnergyConsumers()
         yield TableEnergySourcePhases()
@@ -178,7 +184,9 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableOrganisations()
         yield TableOverheadWireInfo()
         yield TablePanDemandResponseFunctions()
+        yield TablePerLengthPhaseImpedances()
         yield TablePerLengthSequenceImpedances()
+        yield TablePhaseImpedanceData()
         yield TablePetersenCoils()
         yield TablePhotoVoltaicUnits()
         yield TablePoles()

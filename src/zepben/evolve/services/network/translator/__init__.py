@@ -102,6 +102,7 @@ from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import L
 from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter
+from zepben.protobuf.cim.iec61970.base.wires.PerLengthPhaseImpedance_pb2 import PerLengthPhaseImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PetersenCoil_pb2 import PetersenCoil
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase
@@ -240,6 +241,7 @@ LinearShuntCompensator.mrid = lambda self: self.sc.mrid()
 LoadBreakSwitch.mrid = lambda self: self.ps.mrid()
 PerLengthImpedance.mrid = lambda self: self.lp.mrid()
 PerLengthLineParameter.mrid = lambda self: self.io.mrid()
+PerLengthPhaseImpedance.mrid = lambda self: self.pli.mrid()
 PerLengthSequenceImpedance.mrid = lambda self: self.pli.mrid()
 PetersenCoil.mrid = lambda self: self.efc.mrid()
 PowerTransformer.mrid = lambda self: self.ce.mrid()
@@ -361,8 +363,10 @@ LinearShuntCompensator.base_voltage_mrid = lambda self: self.sc.base_voltage_mri
 # normal_energizing_substation_mrid
 Feeder.normal_energizing_substation_mrid = lambda self: getattr(self, "normalEnergizingSubstationMRID", None)
 
-# per_length_sequence_impedance_mrid
-AcLineSegment.per_length_sequence_impedance_mrid = lambda self: getattr(self, "perLengthSequenceImpedanceMRID", None)
+# per_length_impedance_mrid
+AcLineSegment.per_length_impedance_mrid = lambda self: getattr(self, "perLengthImpedanceMRID", None)
+AcLineSegment.per_length_phase_impedance_mrid = lambda self: self.pli.per_length_impedance_mrid()
+AcLineSegment.per_length_sequence_impedance_mrid = lambda self: self.pli.per_length_impedance_mrid()
 
 # asset_info_mrid
 CurrentRelay.asset_info_mrid = lambda self: self.prf.asset_info_mrid

@@ -70,6 +70,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import Grou
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TapChanger, TransformerEnd
@@ -128,7 +129,7 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_pan_demand_response_function(self, source: PanDemandResponseFunction, target: PanDemandResponseFunction) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_values(diff, PanDemandResponseFunction.kind, PanDemandResponseFunction.appliance)
+        self._compare_values(diff, PanDemandResponseFunction.kind, PanDemandResponseFunction._appliance_bitmask)
 
         return self._compare_end_device_function(diff)
 
@@ -139,17 +140,8 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_battery_control(self, source: BatteryControl, target: BatteryControl) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_id_references(diff, BatteryControl.battery_unit)
-        self._compare_values(
-            diff,
-            BatteryControl.control_mode
-        )
-        self._compare_floats(
-            diff,
-            BatteryControl.charging_rate,
-            BatteryControl.discharging_rate,
-            BatteryControl.reserve_percent
-        )
+        self._compare_floats(diff, BatteryControl.charging_rate, BatteryControl.discharging_rate, BatteryControl.reserve_percent)
+        self._compare_values(diff, BatteryControl.control_mode)
 
         return self._compare_regulating_control(diff)
 
@@ -398,12 +390,11 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         self._compare_values(diff, EndDevice.customer_mrid)
         self._compare_id_references(diff, EndDevice.service_location)
-        self._compare_id_reference_collections(diff, EndDevice.end_device_functions)
+        self._compare_id_reference_collections(diff, EndDevice.functions)
 
         return self._compare_asset_container(diff)
 
     def _compare_end_device_function(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_id_references(diff, EndDeviceFunction.end_device)
         self._compare_values(diff, EndDeviceFunction.enabled)
 
         return self._compare_asset_function(diff)
@@ -755,7 +746,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_values(diff, BatteryUnit.battery_state, BatteryUnit.rated_e, BatteryUnit.stored_e)
-        self._compare_id_reference_collections(diff, BatteryUnit.battery_controls)
+        self._compare_id_reference_collections(diff, BatteryUnit.controls)
 
         return self._compare_power_electronics_unit(diff)
 
@@ -778,7 +769,7 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_ac_line_segment(self, source: AcLineSegment, target: AcLineSegment) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_id_references(diff, AcLineSegment.per_length_sequence_impedance)
+        self._compare_id_references(diff, AcLineSegment.per_length_impedance)
 
         return self._compare_conductor(diff)
 
@@ -923,6 +914,13 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_per_length_line_parameter(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_identified_object(diff)
+
+    def _compare_per_length_phase_impedance(self, source: PerLengthPhaseImpedance, target: PerLengthPhaseImpedance) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_unordered_value_collection(diff, lambda it: f"{it.from_phase}-{it.to_phase}", PerLengthPhaseImpedance.data)
+
+        return self._compare_per_length_impedance(diff)
 
     def _compare_per_length_sequence_impedance(self, source: PerLengthSequenceImpedance, target: PerLengthSequenceImpedance) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -1072,7 +1070,9 @@ class NetworkServiceComparator(BaseServiceComparator):
             RegulatingControl.target_value,
             RegulatingControl.max_allowed_target_value,
             RegulatingControl.min_allowed_target_value,
-            RegulatingControl.rated_current
+            RegulatingControl.rated_current,
+            RegulatingControl.ct_primary,
+            RegulatingControl.min_target_deadband
         )
         self._compare_id_references(diff, RegulatingControl.terminal)
         self._compare_id_reference_collections(diff, RegulatingControl.regulating_conducting_equipment)

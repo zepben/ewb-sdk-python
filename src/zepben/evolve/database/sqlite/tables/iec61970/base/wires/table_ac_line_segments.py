@@ -13,7 +13,7 @@ class TableAcLineSegments(TableConductors):
 
     def __init__(self):
         super().__init__()
-        self.per_length_sequence_impedance_mrid: Column = self._create_column("per_length_sequence_impedance_mrid", "TEXT", Nullable.NULL)
+        self.per_length_impedance_mrid: Column = self._create_column("per_length_impedance_mrid", "TEXT", Nullable.NULL)
 
     @property
     def name(self) -> str:

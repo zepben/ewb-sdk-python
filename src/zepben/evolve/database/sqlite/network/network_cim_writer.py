@@ -4,14 +4,15 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional
 
-from zepben.evolve import EndDeviceFunction
 from zepben.evolve.database.sqlite.common.base_cim_writer import BaseCimWriter
 from zepben.evolve.database.sqlite.extensions.prepared_statement import PreparedStatement
 from zepben.evolve.database.sqlite.network.network_database_tables import NetworkDatabaseTables
 from zepben.evolve.database.sqlite.tables.associations.loop_substation_relationship import LoopSubstationRelationship
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import TableAssetOrganisationRolesAssets
+from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import TableCircuitsSubstations
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import TableCircuitsTerminals
+from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_equipment_containers import TableEquipmentEquipmentContainers
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_operational_restrictions import TableEquipmentOperationalRestrictions
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_usage_points import TableEquipmentUsagePoints
@@ -128,8 +129,10 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_lines import
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_load_break_switches import TableLoadBreakSwitches
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_impedances import TablePerLengthImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_line_parameters import TablePerLengthLineParameters
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_phase_impedances import TablePerLengthPhaseImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_sequence_impedances import TablePerLengthSequenceImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_petersen_coils import TablePetersenCoils
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_phase_impedance_data import TablePhaseImpedanceData
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connection_phases import TablePowerElectronicsConnectionPhases
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connections import TablePowerElectronicsConnections
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_end_ratings import TablePowerTransformerEndRatings
@@ -178,7 +181,7 @@ from zepben.evolve.model.cim.iec61968.common.location import StreetDetail, TownD
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
-from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, UsagePoint, Meter
+from zepben.evolve.model.cim.iec61968.metering.metering import EndDevice, UsagePoint, Meter, EndDeviceFunction
 from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment, FaultIndicator
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.current_transformer import CurrentTransformer
@@ -230,7 +233,9 @@ from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.line import Line
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthImpedance, PerLengthLineParameter, PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import RatioTapChanger, TapChanger, TransformerEnd, PowerTransformer, PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
@@ -278,12 +283,8 @@ class NetworkCimWriter(BaseCimWriter):
         table = self._database_tables.get_table(TablePanDemandResponseFunctions)
         insert = self._database_tables.get_insert(TablePanDemandResponseFunctions)
 
-        ca = None
-        if pan_demand_response_function.appliance is not None:
-            ca = pan_demand_response_function.appliance.to_int()
-
         insert.add_value(table.kind.query_index, pan_demand_response_function.kind.short_name)
-        insert.add_value(table.appliance.query_index, ca)
+        insert.add_value(table.appliance.query_index, pan_demand_response_function._appliance_bitmask)
 
         return self._save_end_device_function(table, insert, pan_demand_response_function, "pan demand response function")
 
@@ -302,30 +303,12 @@ class NetworkCimWriter(BaseCimWriter):
         table = self._database_tables.get_table(TableBatteryControls)
         insert = self._database_tables.get_insert(TableBatteryControls)
 
-        insert.add_value(table.battery_unit_mrid.query_index, self._mrid_or_none(battery_control.battery_unit))
         insert.add_value(table.charging_rate.query_index, battery_control.charging_rate)
         insert.add_value(table.discharging_rate.query_index, battery_control.discharging_rate)
         insert.add_value(table.reserve_percent.query_index, battery_control.reserve_percent)
         insert.add_value(table.control_mode.query_index, battery_control.control_mode.short_name)
 
         return self._save_regulating_control(table, insert, battery_control, "battery control")
-
-    #######################
-    # IEC61968 Asset Info #
-    #######################
-
-    def save_cable_info(self, cable_info: CableInfo) -> bool:
-        """
-        Save the :class:`CableInfo` fields to :class:`TableCableInfo`.
-
-        :param cable_info: The :class:`CableInfo` instance to write to the database.
-        :return: True if the :class:`CableInfo` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableCableInfo)
-        insert = self._database_tables.get_insert(TableCableInfo)
-
-        return self._save_wire_info(table, insert, cable_info, "cable info")
 
     #######################
     # IEC61968 Asset Info #
@@ -764,12 +747,13 @@ class NetworkCimWriter(BaseCimWriter):
         status = True
         for it in end_device.usage_points:
             status = status and self._save_usage_point_to_end_device_association(it, end_device)
+        for it in end_device.functions:
+            status = status and self._save_end_device_function_to_end_device_association(it, end_device)
 
         return status and self._save_asset_container(table, insert, end_device, description)
 
     def _save_end_device_function(self, table: TableEndDeviceFunctions, insert: PreparedStatement, end_device_function: EndDeviceFunction,
                                   description: str) -> bool:
-        insert.add_value(table.end_device_mrid.query_index, self._mrid_or_none(end_device_function.end_device))
         insert.add_value(table.enabled.query_index, end_device_function.enabled)
 
         return self._save_asset_function(table, insert, end_device_function, description)
@@ -1419,8 +1403,11 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.battery_state.query_index, battery_unit.battery_state.short_name)
         insert.add_value(table.rated_e.query_index, battery_unit.rated_e)
         insert.add_value(table.stored_e.query_index, battery_unit.stored_e)
+        status = True
+        for control in battery_unit.controls:
+            status = status and self._save_battery_unit_to_battery_control_association(battery_unit, control)
 
-        return self._save_power_electronics_unit(table, insert, battery_unit, "battery unit")
+        return status and self._save_power_electronics_unit(table, insert, battery_unit, "battery unit")
 
     def save_photo_voltaic_unit(self, photo_voltaic_unit: PhotoVoltaicUnit) -> bool:
         """
@@ -1476,10 +1463,7 @@ class NetworkCimWriter(BaseCimWriter):
         table = self._database_tables.get_table(TableAcLineSegments)
         insert = self._database_tables.get_insert(TableAcLineSegments)
 
-        insert.add_value(
-            table.per_length_sequence_impedance_mrid.query_index,
-            self._mrid_or_none(ac_line_segment.per_length_sequence_impedance)
-        )
+        insert.add_value(table.per_length_impedance_mrid.query_index, self._mrid_or_none(ac_line_segment.per_length_impedance))
 
         return self._save_conductor(table, insert, ac_line_segment, "AC line segment")
 
@@ -1786,6 +1770,38 @@ class NetworkCimWriter(BaseCimWriter):
     ) -> bool:
         return self._save_identified_object(table, insert, per_length_line_parameter, description)
 
+    def _save_phase_impedance_data(self, per_length_phase_impedance: PerLengthPhaseImpedance, phase_impedance_data: PhaseImpedanceData) -> bool:
+        table = self._database_tables.get_table(TablePhaseImpedanceData)
+        insert = self._database_tables.get_insert(TablePhaseImpedanceData)
+
+        insert.add_value(table.per_length_phase_impedance_mrid.query_index, per_length_phase_impedance.mrid)
+        insert.add_value(table.from_phase.query_index, phase_impedance_data.from_phase.short_name)
+        insert.add_value(table.to_phase.query_index, phase_impedance_data.to_phase.short_name)
+        insert.add_value(table.b.query_index, phase_impedance_data.b)
+        insert.add_value(table.g.query_index, phase_impedance_data.g)
+        insert.add_value(table.r.query_index, phase_impedance_data.r)
+        insert.add_value(table.x.query_index, phase_impedance_data.x)
+
+        return self._try_execute_single_update(insert, "phase impedance data")
+
+    def save_per_length_phase_impedance(self, per_length_phase_impedance: PerLengthPhaseImpedance) -> bool:
+        """
+        Save the :class:`PerLengthPhaseImpedance` fields to :class:`TablePerLengthPhaseImpedances`.
+
+        :param per_length_phase_impedance: The :class:`PerLengthPhaseImpedance` instance to write to the database.
+        :return: True if the :class:`PerLengthPhaseImpedance` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TablePerLengthPhaseImpedances)
+        insert = self._database_tables.get_insert(TablePerLengthPhaseImpedances)
+
+        status = True
+
+        for phase_impedance_data in per_length_phase_impedance.data:
+            status = status and self._save_phase_impedance_data(per_length_phase_impedance, phase_impedance_data)
+
+        return self._save_per_length_impedance(table, insert, per_length_phase_impedance, "per length phase impedance")
+
     def save_per_length_sequence_impedance(self, per_length_sequence_impedance: PerLengthSequenceImpedance) -> bool:
         """
         Save the :class:`PerLengthSequenceImpedance` fields to :class:`TablePerLengthSequenceImpedances`.
@@ -2090,7 +2106,7 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.capacitive_rating.query_index, static_var_compensator.capacitive_rating)
         insert.add_value(table.inductive_rating.query_index, static_var_compensator.inductive_rating)
         insert.add_value(table.q.query_index, static_var_compensator.q)
-        insert.add_value(table.svc_control_mode.query_index, static_var_compensator.svc_control_mode)
+        insert.add_value(table.svc_control_mode.query_index, static_var_compensator.svc_control_mode.short_name)
         insert.add_value(table.voltage_set_point.query_index, static_var_compensator.voltage_set_point)
 
         return self._save_regulating_cond_eq(table, insert, static_var_compensator, "static var compensator")
@@ -2305,6 +2321,15 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._try_execute_single_update(insert, "asset organisation role to asset association")
 
+    def _save_battery_unit_to_battery_control_association(self, battery_unit: BatteryUnit, battery_control: BatteryControl) -> bool:
+        table = self._database_tables.get_table(TableBatteryUnitsBatteryControls)
+        insert = self._database_tables.get_insert(TableBatteryUnitsBatteryControls)
+
+        insert.add_value(table.battery_unit_mrid.query_index, battery_unit.mrid)
+        insert.add_value(table.battery_control_mrid.query_index, battery_control.mrid)
+
+        return self._try_execute_single_update(insert, "battery control to battery unit association")
+
     def _save_circuit_to_substation_association(self, circuit: Circuit, substation: Substation) -> bool:
         table = self._database_tables.get_table(TableCircuitsSubstations)
         insert = self._database_tables.get_insert(TableCircuitsSubstations)
@@ -2322,6 +2347,16 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.terminal_mrid.query_index, terminal.mrid)
 
         return self._try_execute_single_update(insert, "circuit to terminal association")
+
+    def _save_end_device_function_to_end_device_association(self, end_device_function: EndDeviceFunction, end_device: EndDevice) -> bool:
+        table = self._database_tables.get_table(TableEndDevicesEndDeviceFunctions)
+        insert = self._database_tables.get_insert(TableEndDevicesEndDeviceFunctions)
+
+        insert.add_value(table.end_device_function_mrid.query_index, end_device_function.mrid)
+        insert.add_value(table.end_device_mrid.query_index, end_device.mrid)
+
+        return self._try_execute_single_update(insert, "end device function to end device association")
+
 
     def _save_equipment_to_equipment_container_association(self, equipment: Equipment, equipment_container: EquipmentContainer) -> bool:
         table = self._database_tables.get_table(TableEquipmentEquipmentContainers)
@@ -2406,7 +2441,7 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.synchronous_machine_mrid.query_index, synchronous_machine.mrid)
         insert.add_value(table.reactive_capability_curve_mrid.query_index, reactive_capability_curve.mrid)
 
-        return self._try_execute_single_update(insert, "usage point to end device association")
+        return self._try_execute_single_update(insert, "synchronous machine to reactivity curve association")
 
     def _save_usage_point_to_end_device_association(self, usage_point: UsagePoint, end_device: EndDevice) -> bool:
         table = self._database_tables.get_table(TableUsagePointsEndDevices)

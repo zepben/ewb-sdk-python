@@ -11,28 +11,24 @@ from zepben.evolve import EndDevice, EndDeviceFunction
 
 end_device_function_kwargs = {
     **asset_function_kwargs,
-    "end_device": builds(EndDevice),
     "enabled": booleans(),
 }
 
-end_device_function_args = [*asset_function_args, EndDeviceFunction(), False]
+end_device_function_args = [*asset_function_args, False]
 
 
 def verify_end_device_function_constructor_default(edf: EndDeviceFunction):
     verify_asset_function_constructor_default(edf)
-    assert edf.end_device is None
     assert edf.enabled == True
 
 
-def verify_end_device_function_constructor_kwargs(edf: EndDeviceFunction, end_device, enabled, **kwargs):
+def verify_end_device_function_constructor_kwargs(edf: EndDeviceFunction, enabled, **kwargs):
     verify_asset_function_constructor_kwargs(edf, **kwargs)
-    assert edf.end_device == end_device
     assert edf.enabled == enabled
 
 
 def verify_end_device_function_constructor_args(edf: EndDeviceFunction):
     verify_asset_function_constructor_args(edf)
-    assert end_device_function_args[-2:] == [
-        edf.end_device,
+    assert end_device_function_args[-1:] == [
         edf.enabled
     ]

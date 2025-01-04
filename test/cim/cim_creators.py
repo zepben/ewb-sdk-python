@@ -34,15 +34,19 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'MAX_SEQUENCE_NUMBER', 'MIN_SEQUENCE_NUMBER', 'ALPHANUM', 'boolean_or_none', 'create_grounding_impedance', 'create_petersen_coil',
            'create_reactive_capability_curve', 'create_synchronous_machine', 'create_earth_fault_compensator', 'create_curve', 'create_curve_data',
            'create_rotating_machine', 'sampled_curves', 'create_pan_demand_response_function', 'create_battery_control', 'create_asset_function',
-           'create_end_device_function', 'create_static_var_compensator'
+           'create_end_device_function', 'create_static_var_compensator', 'create_per_length_phase_impedance', 'create_phase_impedance_data'
            ]
 
 from datetime import datetime
 from random import choice
 
+# This must be above hypothesis.strategies to avoid conflicting import with zepben.evolve.util.none
+from zepben.evolve import *
+
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
 
-from zepben.evolve import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
 
 MIN_32_BIT_INTEGER = -2147483647  # _UNKNOWN_INT = -2147483648
@@ -80,7 +84,6 @@ def create_battery_control(include_runtime: bool = True):
     return builds(
         BatteryControl,
         **create_regulating_control(include_runtime),
-        battery_unit=builds(BatteryUnit, **create_identified_object(include_runtime)),
         charging_rate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         discharging_rate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         reserve_percent=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -473,14 +476,13 @@ def create_end_device(include_runtime: bool):
         "usage_points": lists(builds(UsagePoint, **create_identified_object(include_runtime)), min_size=1, max_size=2),
         "customer_mrid": text(alphabet=ALPHANUM, min_size=1, max_size=TEXT_MAX_SIZE),
         "service_location": builds(Location, **create_identified_object(include_runtime)),
-        "end_device_functions": lists(sampled_end_device_function(include_runtime), min_size=1, max_size=2)
+        "functions": lists(sampled_end_device_function(include_runtime), min_size=1, max_size=2)
     }
 
 
 def create_end_device_function(include_runtime: bool):
     return {
         **create_asset_function(include_runtime),
-        "end_device": builds(EndDevice, **create_identified_object(include_runtime)),
         "enabled": booleans()
     }
 
@@ -992,7 +994,7 @@ def create_battery_unit(include_runtime: bool = True):
         battery_state=sampled_battery_state_kind(),
         rated_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER),
         stored_e=integers(min_value=MIN_64_BIT_INTEGER, max_value=MAX_64_BIT_INTEGER),
-        battery_controls=lists(builds(BatteryControl, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+        controls=lists(builds(BatteryControl, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     )
 
 
@@ -1022,7 +1024,7 @@ def create_ac_line_segment(include_runtime: bool = True):
     return builds(
         AcLineSegment,
         **create_conductor(include_runtime),
-        per_length_sequence_impedance=builds(PerLengthSequenceImpedance, **create_identified_object(include_runtime))
+        per_length_impedance=builds(PerLengthSequenceImpedance, **create_identified_object(include_runtime))
     )
 
 
@@ -1215,6 +1217,26 @@ def create_per_length_impedance(include_runtime: bool):
 
 def create_per_length_line_parameter(include_runtime: bool):
     return {**create_identified_object(include_runtime)}
+
+
+def create_phase_impedance_data():
+    return builds(
+        PhaseImpedanceData,
+        from_phase=sampled_from(SinglePhaseKind),
+        to_phase=sampled_from(SinglePhaseKind),
+        b=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        g=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
+    )
+
+
+def create_per_length_phase_impedance(include_runtime: bool = True):
+    return builds(
+        PerLengthPhaseImpedance,
+        data=lists(create_phase_impedance_data(), max_size=4, unique_by=(lambda it: it.from_phase, lambda it: it.to_phase)),
+        **create_per_length_impedance(include_runtime),
+    )
 
 
 def create_per_length_sequence_impedance(include_runtime: bool = True):

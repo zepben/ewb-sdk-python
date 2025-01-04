@@ -31,11 +31,11 @@ def open_switch_between_different_voltages():
     network.add(open_switch)
     open_switch_ts = create_terminals(network, open_switch, 2)
 
-    acls1 = AcLineSegment(mrid="acls_415", length=1.0, base_voltage=bv415, per_length_sequence_impedance=plsi)
+    acls1 = AcLineSegment(mrid="acls_415", length=1.0, base_voltage=bv415, per_length_impedance=plsi)
     network.add(acls1)
     acls1_ts = create_terminals(network, acls1, 2)
 
-    acls2 = AcLineSegment(mrid="acls_433", length=1.0, base_voltage=bv433, per_length_sequence_impedance=plsi)
+    acls2 = AcLineSegment(mrid="acls_433", length=1.0, base_voltage=bv433, per_length_impedance=plsi)
     network.add(acls2)
     acls2_ts = create_terminals(network, acls2, 2)
 

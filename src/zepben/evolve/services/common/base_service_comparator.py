@@ -13,6 +13,8 @@ from zepben.evolve.services.common.difference import ObjectDifference, Differenc
 from zepben.evolve.services.common.translator.service_differences import ServiceDifferences
 
 T = TypeVar("T")
+R = TypeVar('R')
+K = TypeVar('K')
 
 
 class BaseServiceComparator:
@@ -206,6 +208,11 @@ class BaseServiceComparator:
             self._add_if_different(diff, it.fget.__name__, self._calculate_indexed_value_collection_diff(it, diff))
         return diff
 
+    def _compare_unordered_value_collection(self, diff: ObjectDifference, key_selector: Callable[[K], R], *properties):
+        for it in properties:
+            self._add_if_different(diff, it.fget.__name__, self._calculate_unordered_value_collection_diff(it, key_selector, diff))
+        return diff
+
     @staticmethod
     def _add_if_different(diff: ObjectDifference, name: str, difference: Optional[Difference]):
         if difference:
@@ -339,6 +346,43 @@ class BaseServiceComparator:
 
         for index in range(len(source_list), len(target_list)):
             differences.missing_from_source.append(IndexedDifference(index, ValueDifference(None, target_list[index])))
+
+        return self._none_if_empty(differences)
+
+    def _calculate_unordered_value_collection_diff(self, prop: property, key_selector: Callable[[R], K], diff: ObjectDifference) -> Optional[CollectionDifference]:
+        differences = CollectionDifference()
+        source_list = sorted(list(getattr(diff.source, prop.fget.__name__)), key=key_selector)
+        target_list = sorted(list(getattr(diff.target, prop.fget.__name__)), key=key_selector)
+
+        source_index = 0
+        target_index = 0
+
+        while source_index < len(source_list) and target_index < len(target_list):
+            source_item = source_list[source_index]
+            target_item = target_list[target_index]
+
+            source_check = key_selector(source_item)
+            target_check = key_selector(target_item)
+
+            if source_check == target_check:
+                if source_item != target_item:
+                    differences.modifications.append(ValueDifference(source_item, target_item))
+                source_index += 1
+                target_index += 1
+            elif source_check < target_check:
+                differences.missing_from_target.append(ValueDifference(source_item, None))
+                source_index += 1
+            else:
+                differences.missing_from_source.append(ValueDifference(None, target_item))
+                target_index += 1
+
+        while target_index < len(target_list):
+            differences.missing_from_source.append(ValueDifference(None, target_list[target_index]))
+            target_index += 1
+
+        while source_index < len(source_list):
+            differences.missing_from_target.append(ValueDifference(source_list[source_index], None))
+            source_index += 1
 
         return self._none_if_empty(differences)
 

@@ -5,6 +5,8 @@
 import datetime
 from typing import Type
 
+import pytest
+
 from services.common.service_comparator_validator import ServiceComparatorValidator
 from services.common.test_base_service_comparator import TestBaseServiceComparator
 from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
@@ -23,7 +25,8 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind, \
     TransformerEndRatedS, TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, EndDeviceFunction, \
-    PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode
+    PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
+    PhaseImpedanceData
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 
@@ -41,22 +44,22 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PanDemandResponseFunction.kind,
             PanDemandResponseFunction,
             lambda _: EndDeviceFunctionKind.demandResponse,
-            lambda _: EndDeviceFunctionKind.metrology
+            lambda _: EndDeviceFunctionKind.onRequestRead
         )
+        self.validator.validate_property(PanDemandResponseFunction._appliance_bitmask, PanDemandResponseFunction, lambda _: 1, lambda _: 2)
 
     #########################################
     # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
     #########################################
 
-    def test_compare_battery_control_control(self):
+    def test_compare_battery_control(self):
         self._compare_regulating_control(BatteryControl)
 
-        self.validator.validate_property(BatteryControl.battery_unit, BatteryControl, lambda _: BatteryControl(mrid="bc1"),
-                                         lambda _: BatteryControl(mrid="bc2"))
         self.validator.validate_property(BatteryControl.charging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(BatteryControl.discharging_rate, BatteryControl, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(BatteryControl.reserve_percent, BatteryControl, lambda _: 1.0, lambda _: 2.0)
-        self.validator.validate_property(BatteryControl.control_mode, BatteryControl, lambda _: BatteryControlMode.time, lambda _: BatteryControlMode.profile)
+        self.validator.validate_property(BatteryControl.control_mode, BatteryControl, lambda _: BatteryControlMode.peakShaveCharge,
+                                         lambda _: BatteryControlMode.peakShaveDischarge)
 
     #######################
     # IEC61968 ASSET INFO #
@@ -303,8 +306,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             options_stop_compare=True
         )
         self.validator.validate_collection(
-            EndDevice.end_device_functions,
-            EndDevice.add_end_device_function,
+            EndDevice.functions,
+            EndDevice.add_function,
             creator,
             lambda _: EndDeviceFunction(mrid="edf1"),
             lambda _: EndDeviceFunction(mrid="edf2"),
@@ -314,8 +317,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_end_device_function(self, creator: Type[EndDeviceFunction]):
         self._compare_asset_function(creator)
 
-        self.validator.validate_property(EndDeviceFunction.end_device, creator, lambda _: EndDevice(mrid="ed1"), lambda _: EndDevice(mrid="ed2"))
-        self.validator.validate_property(EndDeviceFunction.enabled, creator, lambda _: False, lambda _: True)
+        self.validator.validate_property(EndDeviceFunction.enabled, creator, lambda _: True, lambda _: False)
 
     def test_compare_meter(self):
         self._compare_end_device(Meter)
@@ -458,6 +460,17 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Terminal(mrid="2"),
             NetworkServiceComparatorOptions(compare_terminals=False),
             options_stop_compare=True
+        )
+
+    def _compare_curve(self, creator: Type[Curve]):
+        self._compare_identified_object(creator)
+
+        self.validator.validate_indexed_collection(
+            Curve.data,
+            Curve.add_curve_data,
+            creator,
+            lambda _: CurveData(1, 2),
+            lambda _: CurveData(3, 4),
         )
 
     def test_compare_connectivity_node(self):
@@ -862,7 +875,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_conductor(AcLineSegment)
 
         self.validator.validate_property(
-            AcLineSegment.per_length_sequence_impedance,
+            AcLineSegment.per_length_impedance,
             AcLineSegment,
             lambda _: PerLengthSequenceImpedance(mrid="p1"),
             lambda _: PerLengthSequenceImpedance(mrid="p2")
@@ -1018,6 +1031,19 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
     def _compare_per_length_line_parameter(self, creator: Type[PerLengthLineParameter]):
         self._compare_identified_object(creator)
+
+    @pytest.mark.timeout(140)
+    def test_compare_per_length_phase_impedance(self):
+        self._compare_per_length_impedance(PerLengthPhaseImpedance)
+
+        self.validator.validate_unordered_collection(
+            PerLengthPhaseImpedance.data,
+            PerLengthPhaseImpedance.add_data,
+            PerLengthPhaseImpedance,
+            lambda _: PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.B, 1.0, 2.0, 3.0, 4.0),
+            lambda _: PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.C, 1.0, 2.0, 3.0, 4.0),
+            lambda _: PhaseImpedanceData(SinglePhaseKind.A, SinglePhaseKind.B, 2.0, 3.0, 4.0, 5.0),
+        )
 
     def test_compare_per_length_sequence_impedance(self):
         self._compare_per_length_impedance(PerLengthSequenceImpedance)
@@ -1187,6 +1213,9 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         )
         self.validator.validate_property(RatioTapChanger.step_voltage_increment, RatioTapChanger, lambda _: 1.0, lambda _: 2.0)
 
+    def test_compare_reactive_capability_curve(self):
+        self._compare_curve(ReactiveCapabilityCurve)
+
     def test_compare_recloser(self):
         self._compare_protected_switch(Recloser)
 
@@ -1218,6 +1247,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(RegulatingControl.min_allowed_target_value, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(RegulatingControl.rated_current, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_property(RegulatingControl.terminal, creator, lambda _: Terminal(mrid="t1"), lambda _: Terminal(mrid="t2"))
+        self.validator.validate_property(RegulatingControl.ct_primary, creator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(RegulatingControl.min_target_deadband, creator, lambda _: 1.0, lambda _: 2.0)
         self.validator.validate_collection(
             RegulatingControl.regulating_conducting_equipment,
             RegulatingControl.add_regulating_cond_eq,
@@ -1262,8 +1293,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(
             StaticVarCompensator.svc_control_mode,
             StaticVarCompensator,
-            lambda _: SVCControlMode.voltage,
-            lambda _: SVCControlMode.reactivePower
+            lambda _: SVCControlMode.reactivePower,
+            lambda _: SVCControlMode.voltage
         )
         self.validator.validate_property(StaticVarCompensator.voltage_set_point, StaticVarCompensator, lambda _: 1, lambda _: 2)
 

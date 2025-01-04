@@ -14,7 +14,8 @@ from hypothesis import given, settings, Phase
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
     Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
-    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder, TestNetworkBuilder
+    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder, TestNetworkBuilder, PerLengthPhaseImpedance, BatteryControl, \
+    PanDemandResponseFunction, BatteryUnit, StaticVarCompensator
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetCurrentEquipmentForFeederRequest, \
@@ -541,8 +542,20 @@ def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
         nio = NetworkIdentifiedObject(overheadWireInfo=obj.to_pb())
     elif isinstance(obj, PerLengthSequenceImpedance):
         nio = NetworkIdentifiedObject(perLengthSequenceImpedance=obj.to_pb())
+    elif isinstance(obj, PerLengthPhaseImpedance):
+        nio = NetworkIdentifiedObject(perLengthPhaseImpedance=obj.to_pb())
     elif isinstance(obj, PowerTransformerEnd):
         nio = NetworkIdentifiedObject(powerTransformerEnd=obj.to_pb())
+    # Currently unused #
+    elif isinstance(obj, PanDemandResponseFunction):
+        nio = NetworkIdentifiedObject(panDemandResponseFunction=obj.to_pb())
+    elif isinstance(obj, StaticVarCompensator):
+        nio = NetworkIdentifiedObject(staticVarCompensator=obj.to_pb())
+    elif isinstance(obj, BatteryUnit):
+        nio = NetworkIdentifiedObject(batteryUnit=obj.to_pb())
+    elif isinstance(obj, BatteryControl):
+        nio = NetworkIdentifiedObject(batteryControl=obj.to_pb())
+    # End currently unused #
     elif isinstance(obj, Substation):
         nio = NetworkIdentifiedObject(substation=obj.to_pb())
     elif isinstance(obj, Loop):

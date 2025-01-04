@@ -71,6 +71,8 @@ from zepben.protobuf.cim.iec61970.base.core.BaseVoltage_pb2 import BaseVoltage a
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment as PBConductingEquipment
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNodeContainer_pb2 import ConnectivityNodeContainer as PBConnectivityNodeContainer
 from zepben.protobuf.cim.iec61970.base.core.ConnectivityNode_pb2 import ConnectivityNode as PBConnectivityNode
+from zepben.protobuf.cim.iec61970.base.core.Curve_pb2 import Curve as PBCurve
+from zepben.protobuf.cim.iec61970.base.core.CurveData_pb2 import CurveData as PBCurveData
 from zepben.protobuf.cim.iec61970.base.core.EquipmentContainer_pb2 import EquipmentContainer as PBEquipmentContainer
 from zepben.protobuf.cim.iec61970.base.core.Equipment_pb2 import Equipment as PBEquipment
 from zepben.protobuf.cim.iec61970.base.core.Feeder_pb2 import Feeder as PBFeeder
@@ -127,7 +129,9 @@ from zepben.protobuf.cim.iec61970.base.wires.LinearShuntCompensator_pb2 import L
 from zepben.protobuf.cim.iec61970.base.wires.LoadBreakSwitch_pb2 import LoadBreakSwitch as PBLoadBreakSwitch
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthImpedance_pb2 import PerLengthImpedance as PBPerLengthImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthLineParameter_pb2 import PerLengthLineParameter as PBPerLengthLineParameter
+from zepben.protobuf.cim.iec61970.base.wires.PerLengthPhaseImpedance_pb2 import PerLengthPhaseImpedance as PBPerLengthPhaseImpedance
 from zepben.protobuf.cim.iec61970.base.wires.PerLengthSequenceImpedance_pb2 import PerLengthSequenceImpedance as PBPerLengthSequenceImpedance
+from zepben.protobuf.cim.iec61970.base.wires.PhaseImpedanceData_pb2 import PhaseImpedanceData as PBPhaseImpedanceData
 from zepben.protobuf.cim.iec61970.base.wires.PhaseShuntConnectionKind_pb2 import PhaseShuntConnectionKind as PBPhaseShuntConnectionKind
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnectionPhase_pb2 import PowerElectronicsConnectionPhase as PBPowerElectronicsConnectionPhase
 from zepben.protobuf.cim.iec61970.base.wires.PowerElectronicsConnection_pb2 import PowerElectronicsConnection as PBPowerElectronicsConnection
@@ -135,6 +139,7 @@ from zepben.protobuf.cim.iec61970.base.wires.PowerTransformerEnd_pb2 import Powe
 from zepben.protobuf.cim.iec61970.base.wires.PowerTransformer_pb2 import PowerTransformer as PBPowerTransformer
 from zepben.protobuf.cim.iec61970.base.wires.ProtectedSwitch_pb2 import ProtectedSwitch as PBProtectedSwitch
 from zepben.protobuf.cim.iec61970.base.wires.RatioTapChanger_pb2 import RatioTapChanger as PBRatioTapChanger
+from zepben.protobuf.cim.iec61970.base.wires.ReactiveCapabilityCurve_pb2 import ReactiveCapabilityCurve as PBReactiveCapabilityCurve
 from zepben.protobuf.cim.iec61970.base.wires.Recloser_pb2 import Recloser as PBRecloser
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingCondEq_pb2 import RegulatingCondEq as PBRegulatingCondEq
 from zepben.protobuf.cim.iec61970.base.wires.RegulatingControlModeKind_pb2 import RegulatingControlModeKind as PBRegulatingControlModeKind
@@ -197,7 +202,8 @@ __all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_inf
            'power_electronics_connection_phase', 'power_transformer', 'power_transformer_end', 'protected_switch', 'ratio_tap_changer', 'recloser',
            'regulating_cond_eq', 'shunt_compensator', 'switch', 'tap_changer', 'transformer_end', 'transformer_star_impedance', 'circuit', 'loop', 'lv_feeder',
            'ev_charging_unit', 'timestamp', 'network_identified_objects', 'customer_identified_objects', 'diagram_identified_objects', 'tap_changer_control',
-           'regulating_control', 'pan_demand_response_function', 'battery_control', 'asset_function', 'end_device_function', 'static_var_compensator']
+           'regulating_control', 'pan_demand_response_function', 'battery_control', 'asset_function', 'end_device_function', 'static_var_compensator',
+           'per_length_phase_impedance', 'phase_impedance_data', 'reactive_capability_curve', 'curve', 'curve_data']
 
 
 #######################################
@@ -221,7 +227,6 @@ def battery_control():
     return builds(
         PBBatteryControl,
         rc=regulating_control(),
-        batteryUnitMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
         chargingRate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         dischargingRate=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         reservePercent=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
@@ -370,7 +375,7 @@ def asset_container():
 
 
 def asset_function():
-    return builds(PBAssetFunction, at=identified_object())
+    return builds(PBAssetFunction, io=identified_object())
 
 
 def asset_info():
@@ -586,8 +591,7 @@ def end_device_function():
     return builds(
         PBEndDeviceFunction,
         af=asset_function(),
-        endDeviceMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        enabled=booleans(),
+        **nullable_bool_settings("enabled"),
     )
 
 
@@ -1000,7 +1004,7 @@ def power_electronics_wind_unit():
 #######################
 
 def ac_line_segment():
-    return builds(PBAcLineSegment, cd=conductor(), perLengthSequenceImpedanceMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
+    return builds(PBAcLineSegment, cd=conductor(), perLengthImpedanceMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
 
 
 def breaker():
@@ -1147,6 +1151,26 @@ def per_length_line_parameter():
     return builds(PBPerLengthLineParameter, io=identified_object())
 
 
+def phase_impedance_data():
+    return builds(
+        PBPhaseImpedanceData,
+        fromPhase=sampled_from(PBSinglePhaseKind.values()),
+        toPhase=sampled_from(PBSinglePhaseKind.values()),
+        b=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        g=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        r=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        x=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    )
+
+
+def per_length_phase_impedance():
+    return builds(
+        PBPerLengthPhaseImpedance,
+        pli=per_length_impedance(),
+        phaseImpedanceData=lists(phase_impedance_data(), max_size=2)
+    )
+
+
 def per_length_sequence_impedance():
     return builds(
         PBPerLengthSequenceImpedance,
@@ -1268,6 +1292,31 @@ def ratio_tap_changer():
     )
 
 
+def curve_data():
+    return builds(
+        PBCurveData,
+        xValue=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y1Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y2Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        y3Value=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+    )
+
+
+def curve():
+    return builds(
+        PBCurve,
+        io=identified_object(),
+        curveData=lists(curve_data(), max_size=2)
+    )
+
+
+def reactive_capability_curve():
+    return builds(
+        PBReactiveCapabilityCurve,
+        c=curve(),
+    )
+
+
 def recloser():
     return builds(PBRecloser, sw=protected_switch())
 
@@ -1317,7 +1366,7 @@ def static_var_compensator():
         capacitiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         inductiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        svcControlMode=sampled_from(PBSVCControlMode),
+        svcControlMode=sampled_from(PBSVCControlMode.Enum.values()),
         voltageSetPoint=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
 
@@ -1456,6 +1505,12 @@ def timestamp():
 @composite
 def network_identified_objects(draw):
     nios = [
+        # [ZBEX] EXTENSIONS IEC61968 METERING #
+        draw(builds(NetworkIdentifiedObject, panDemandResponseFunction=pan_demand_response_function())),
+
+        # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
+        draw(builds(NetworkIdentifiedObject, batteryControl=battery_control())),
+
         # IEC61968 ASSET INFO #
         draw(builds(NetworkIdentifiedObject, cableInfo=cable_info())),
         draw(builds(NetworkIdentifiedObject, noLoadTest=no_load_test())),
@@ -1502,6 +1557,7 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, subGeographicalRegion=sub_geographical_region())),
         draw(builds(NetworkIdentifiedObject, substation=substation())),
         draw(builds(NetworkIdentifiedObject, terminal=terminal())),
+        draw(builds(NetworkIdentifiedObject, reactiveCapabilityCurve=reactive_capability_curve())),
 
         # IEC61970 BASE EQUIVALENTS #
         draw(builds(NetworkIdentifiedObject, equivalentBranch=equivalent_branch())),
@@ -1544,6 +1600,7 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, junction=junction())),
         draw(builds(NetworkIdentifiedObject, linearShuntCompensator=linear_shunt_compensator())),
         draw(builds(NetworkIdentifiedObject, loadBreakSwitch=load_break_switch())),
+        draw(builds(NetworkIdentifiedObject, perLengthPhaseImpedance=per_length_phase_impedance())),
         draw(builds(NetworkIdentifiedObject, perLengthSequenceImpedance=per_length_sequence_impedance())),
         draw(builds(NetworkIdentifiedObject, powerElectronicsConnection=power_electronics_connection())),
         draw(builds(NetworkIdentifiedObject, powerElectronicsConnectionPhase=power_electronics_connection_phase())),
@@ -1554,6 +1611,8 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, seriesCompensator=series_compensator())),
         draw(builds(NetworkIdentifiedObject, tapChangerControl=tap_changer_control())),
         draw(builds(NetworkIdentifiedObject, transformerStarImpedance=transformer_star_impedance())),
+        draw(builds(NetworkIdentifiedObject, staticVarCompensator=static_var_compensator())),
+        draw(builds(NetworkIdentifiedObject, reactiveCapabilityCurve=reactive_capability_curve())),
 
         # IEC61970 INFIEC61970 FEEDER #
         draw(builds(NetworkIdentifiedObject, circuit=circuit())),

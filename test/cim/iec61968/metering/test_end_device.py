@@ -61,10 +61,10 @@ def test_end_device_function_collection():
     validate_unordered_1234567890(
         EndDevice,
         lambda mrid: EndDeviceFunction(mrid),
-        EndDevice.end_device_functions,
-        EndDevice.num_end_device_functions,
-        EndDevice.get_end_device_function,
-        EndDevice.add_end_device_function,
-        EndDevice.remove_end_device_function,
-        EndDevice.clear_end_device_functions
+        EndDevice.functions,
+        EndDevice.num_functions,
+        EndDevice.get_function,
+        EndDevice.add_function,
+        EndDevice.remove_function,
+        EndDevice.clear_functions
     )

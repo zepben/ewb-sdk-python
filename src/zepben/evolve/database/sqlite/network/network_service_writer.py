@@ -60,6 +60,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import Grou
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
 from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import LoadBreakSwitch
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import PetersenCoil
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection, PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger
@@ -104,8 +105,6 @@ class NetworkServiceWriter(BaseServiceWriter):
     def _do_save(self) -> bool:
         return all([
             self._save_each_object(CableInfo, self._writer.save_cable_info),
-            self._save_each_object(PanDemandResponseFunction, self._writer.save_pan_demand_response_function),
-            self._save_each_object(BatteryControl, self._writer.save_battery_control),
             self._save_each_object(OverheadWireInfo, self._writer.save_overhead_wire_info),
             self._save_each_object(PowerTransformerInfo, self._writer.save_power_transformer_info),
             self._save_each_object(TransformerTankInfo, self._writer.save_transformer_tank_info),
@@ -149,6 +148,7 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Jumper, self._writer.save_jumper),
             self._save_each_object(Junction, self._writer.save_junction),
             self._save_each_object(LinearShuntCompensator, self._writer.save_linear_shunt_compensator),
+            self._save_each_object(PerLengthPhaseImpedance, self._writer.save_per_length_phase_impedance),
             self._save_each_object(PerLengthSequenceImpedance, self._writer.save_per_length_sequence_impedance),
             self._save_each_object(PowerElectronicsConnection, self._writer.save_power_electronics_connection),
             self._save_each_object(PowerElectronicsConnectionPhase, self._writer.save_power_electronics_connection_phase),
@@ -181,9 +181,11 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Ground, self._writer.save_ground),
             self._save_each_object(GroundDisconnector, self._writer.save_ground_disconnector),
             self._save_each_object(SeriesCompensator, self._writer.save_series_compensator),
-            self._save_each_object(StaticVarCompensator, self._writer.save_static_var_compensator),
             self._save_each_object(SynchronousMachine, self._writer.save_synchronous_machine),
             self._save_each_object(PetersenCoil, self._writer.save_petersen_coil),
             self._save_each_object(GroundingImpedance, self._writer.save_grounding_impedance),
             self._save_each_object(ReactiveCapabilityCurve, self._writer.save_reactive_capability_curve),
+            self._save_each_object(PanDemandResponseFunction, self._writer.save_pan_demand_response_function),
+            self._save_each_object(BatteryControl, self._writer.save_battery_control),
+            self._save_each_object(StaticVarCompensator, self._writer.save_static_var_compensator),
         ])

@@ -6,13 +6,13 @@
 from __future__ import annotations
 
 __all__ = ["get_by_mrid", "contains_mrid", "safe_remove", "safe_remove_by_id", "nlen", "ngen", "is_none_or_empty", "require", "pb_or_none", "CopyableUUID",
-           "datetime_to_timestamp"]
+           "datetime_to_timestamp", "none"]
 
 import os
 import re
 from collections.abc import Sized
 from datetime import datetime
-from typing import List, Optional, Iterable, Callable, Any, TypeVar, Generator, Dict
+from typing import List, Optional, Iterable, Callable, Any, TypeVar, Generator, Dict, Collection
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -137,6 +137,24 @@ def require(condition: bool, lazy_message: Callable[[], Any]):
 def pb_or_none(cim: Optional[Any]):
     """ Convert to a protobuf type or return None if cim was None """
     return cim.to_pb() if cim is not None else None
+
+
+def none(collection: Collection):
+    """
+    True if no elements in the collection resolve to True
+    :param collection: The collection to check
+    :raises: ValueError if provided collection is not of type Collection
+    """
+    if isinstance(collection, Collection):
+        if len(collection) == 0:
+            return True
+
+        for item in collection:
+            if item:
+                return False
+        return True
+
+    raise ValueError("none() only supports collection types")
 
 
 class CopyableUUID(UUID):

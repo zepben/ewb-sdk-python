@@ -15,7 +15,7 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, \
     Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
     ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit, \
-    EndDeviceFunction, BatteryControl
+    EndDeviceFunction, BatteryControl, PanDemandResponseFunction
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -106,13 +106,6 @@ class SchemaNetworks:
         # [ZBEX] EXTENSIONS IEC61968 METERING #
         #######################################
 
-        #######################################
-        # [ZBEX] EXTENSIONS IEC61968 METERING #
-        #######################################
-
-        if isinstance(filled, BatteryControl):
-            filled.battery_unit.add_battery_control(filled)
-            service.add(filled.battery_unit)
 
         #######################
         # IEC61968 ASSET INFO #
@@ -193,14 +186,9 @@ class SchemaNetworks:
             for it in filled.usage_points:
                 it.add_end_device(filled)
                 service.add(it)
-            for it in filled.end_device_functions:
-                it.end_device = filled
+            for it in filled.functions:
                 service.add(it)
             service.add(filled.service_location)
-
-        if isinstance(filled, EndDeviceFunction):
-            filled.end_device.add_end_device_function(filled)
-            service.add(filled.end_device)
 
         if isinstance(filled, UsagePoint):
             service.add(filled.usage_point_location)
@@ -393,8 +381,7 @@ class SchemaNetworks:
             service.add(filled.power_electronics_connection)
 
         if isinstance(filled, BatteryUnit):
-            for it in filled.battery_controls:
-                it.battery_unit = filled
+            for it in filled.controls:
                 service.add(it)
 
         #######################
@@ -402,7 +389,7 @@ class SchemaNetworks:
         #######################
 
         if isinstance(filled, AcLineSegment):
-            service.add(filled.per_length_sequence_impedance)
+            service.add(filled.per_length_impedance)
 
         if isinstance(filled, Conductor):
             service.add(filled.asset_info)
