@@ -10,7 +10,7 @@ import logging
 from abc import ABCMeta
 from typing import Callable, Any, List, Generator, Optional, overload, TypeVar
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType

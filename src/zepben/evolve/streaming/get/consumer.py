@@ -7,7 +7,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, Optional, AsyncGenerator, Type, Generator
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 

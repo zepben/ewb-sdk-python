@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Dict
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 __all__ = ["NetworkHierarchy"]
 

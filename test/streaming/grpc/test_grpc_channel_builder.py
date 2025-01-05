@@ -7,7 +7,7 @@ from unittest import mock
 from unittest.mock import call
 
 import pytest
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 from grpc import StatusCode, insecure_channel
 from grpc._channel import _InactiveRpcError, _RPCState
 from grpc._cython.cygrpc import OperationType

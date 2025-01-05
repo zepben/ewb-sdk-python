@@ -6,7 +6,7 @@ from collections import Counter
 from itertools import takewhile
 from typing import List, Dict, Tuple, Optional, Counter as CounterType
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 from zepben.evolve import SinglePhaseKind, PhaseCode
 

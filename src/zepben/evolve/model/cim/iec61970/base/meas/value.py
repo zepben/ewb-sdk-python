@@ -6,7 +6,7 @@
 from datetime import datetime
 from typing import Optional
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 __all__ = ["MeasurementValue", "AccumulatorValue", "AnalogValue", "DiscreteValue"]
 

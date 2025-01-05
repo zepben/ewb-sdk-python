@@ -8,7 +8,7 @@ from __future__ import annotations
 from operator import attrgetter
 from typing import List, Optional, Tuple, TYPE_CHECKING, Iterable
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal

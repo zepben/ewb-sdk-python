@@ -9,7 +9,7 @@ from abc import abstractmethod
 __all__ = ["Tracker"]
 
 from typing import TypeVar, Generic
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 T = TypeVar("T")
 
