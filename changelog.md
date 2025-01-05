@@ -1,5 +1,21 @@
 # Zepben Python SDK
-## [0.43.0] - UNRELEASED
+## [0.44.0] - UNRELEASED
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
+
+## [0.43.0] - 2025-01-05
 ### Breaking Changes
 * Renamed `UpdateNetworkStateClient.SetCurrentStatesRequest` to `CurrentStateEventBatch`. You will need to update any uses, but the class members are the same.
 * Removed `ProcessingPaused` current state response message as this functionality won't be supported.
