@@ -92,6 +92,7 @@ def test_normal_energized_lv_feeder_collection():
         Feeder.clear_normal_energized_lv_feeders
     )
 
+
 def test_current_energized_lv_feeder_collection():
     validate_unordered_1234567890(
         Feeder,

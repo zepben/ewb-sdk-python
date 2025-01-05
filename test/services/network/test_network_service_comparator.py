@@ -550,6 +550,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: LvFeeder(mrid="lvf1"),
             lambda _: LvFeeder(mrid="lvf2")
         )
+        self.validator.validate_collection(
+            Feeder.current_energized_lv_feeders,
+            Feeder.add_current_energized_lv_feeder,
+            Feeder,
+            lambda _: LvFeeder(mrid="lvf1"),
+            lambda _: LvFeeder(mrid="lvf2")
+        )
 
     def test_compare_geographical_region(self):
         self._compare_identified_object(GeographicalRegion)
@@ -1426,6 +1433,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_collection(
             LvFeeder.normal_energizing_feeders,
             LvFeeder.add_normal_energizing_feeder,
+            LvFeeder,
+            lambda _: Feeder(mrid="f1"),
+            lambda _: Feeder(mrid="f2")
+        )
+        self.validator.validate_collection(
+            LvFeeder.current_energizing_feeders,
+            LvFeeder.add_current_energizing_feeder,
             LvFeeder,
             lambda _: Feeder(mrid="f1"),
             lambda _: Feeder(mrid="f2")

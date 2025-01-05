@@ -318,7 +318,7 @@ class Feeder(EquipmentContainer):
         """
         The LV feeders that are normally energized by this feeder.
         """
-        return ngen(self._normal_energized_lv_feeders.values() if self._normal_energized_lv_feeders is not None else self._normal_energized_lv_feeders)
+        return ngen(self._normal_energized_lv_feeders.values() if self._normal_energized_lv_feeders is not None else None)
 
     def num_normal_energized_lv_feeders(self) -> int:
         """

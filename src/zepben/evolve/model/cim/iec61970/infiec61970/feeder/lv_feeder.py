@@ -55,7 +55,6 @@ class LvFeeder(EquipmentContainer):
             for feeder in current_energizing_feeders:
                 self.add_current_energizing_feeder(feeder)
 
-
     @property
     def normal_head_terminal(self) -> Optional[Terminal]:
         """
