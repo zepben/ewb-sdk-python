@@ -810,7 +810,8 @@ def feeder_to_pb(cim: Feeder) -> PBFeeder:
         ec=equipment_container_to_pb(cim),
         normalHeadTerminalMRID=mrid_or_empty(cim.normal_head_terminal),
         normalEnergizingSubstationMRID=mrid_or_empty(cim.normal_energizing_substation),
-        normalEnergizedLvFeederMRIDs=[str(io.mrid) for io in cim.normal_energized_lv_feeders]
+        normalEnergizedLvFeederMRIDs=[str(io.mrid) for io in cim.normal_energized_lv_feeders],
+        currentlyEnergizedLvFeedersMRIDs=[str(io.mrid) for io in cim.current_energized_lv_feeders]
     )
 
 
@@ -1682,7 +1683,8 @@ def lv_feeder_to_pb(cim: LvFeeder) -> PBLvFeeder:
     return PBLvFeeder(
         ec=equipment_container_to_pb(cim),
         normalHeadTerminalMRID=mrid_or_empty(cim.normal_head_terminal),
-        normalEnergizingFeederMRIDs=[str(io.mrid) for io in cim.normal_energizing_feeders]
+        normalEnergizingFeederMRIDs=[str(io.mrid) for io in cim.normal_energizing_feeders],
+        currentlyEnergizingFeederMRIDs=[str(io.mrid) for io in cim.current_energizing_feeders]
     )
 
 

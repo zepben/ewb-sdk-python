@@ -212,12 +212,16 @@ class Feeder(EquipmentContainer):
     _normal_energized_lv_feeders: Optional[Dict[str, LvFeeder]] = None
     """The LV feeders that are energized by this feeder in the normal state of the network."""
 
+    _current_energized_lv_feeders: Optional[Dict[str, LvFeeder]] = None
+    """The LV feeders that are energized by this feeder in the current state of the network."""
+
     def __init__(
         self,
         normal_head_terminal: Terminal = None,
         normal_energizing_substation: Substation = None,
         current_equipment: List[Equipment] = None,
         normal_energized_lv_feeders: List[LvFeeder] = None,
+        current_energized_lv_feeders: List[LvFeeder] = None,
         **kwargs
     ):
         super(Feeder, self).__init__(**kwargs)
@@ -231,6 +235,9 @@ class Feeder(EquipmentContainer):
         if current_equipment:
             for eq in current_equipment:
                 self.add_current_equipment(eq)
+        if current_energized_lv_feeders:
+            for lv_feeder in current_energized_lv_feeders:
+                self.add_current_energized_lv_feeder(lv_feeder)
 
     @property
     def normal_head_terminal(self) -> Optional[Terminal]:
@@ -309,13 +316,13 @@ class Feeder(EquipmentContainer):
     @property
     def normal_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
         """
-        The LV feeders that are energized by this feeder.
+        The LV feeders that are normally energized by this feeder.
         """
-        return ngen(self._normal_energized_lv_feeders.values() if self._normal_energized_lv_feeders is not None else self._normal_energized_lv_feeders)
+        return ngen(self._normal_energized_lv_feeders.values() if self._normal_energized_lv_feeders is not None else None)
 
     def num_normal_energized_lv_feeders(self) -> int:
         """
-        Get the number of LV feeders that are energized by this feeder.
+        Get the number of LV feeders that are normally energized by this feeder.
         """
         return nlen(self._normal_energized_lv_feeders)
 
@@ -365,6 +372,67 @@ class Feeder(EquipmentContainer):
         @return: This `Feeder` for fluent use.
         """
         self._normal_energized_lv_feeders = None
+        return self
+
+    @property
+    def current_energized_lv_feeders(self) -> Generator[LvFeeder, None, None]:
+        """
+        The LV feeders that are currently energized by this feeder.
+        """
+        return ngen(self._current_energized_lv_feeders.values() if self._current_energized_lv_feeders is not None else self._current_energized_lv_feeders)
+
+    def num_current_energized_lv_feeders(self) -> int:
+        """
+        Get the number of LV feeders that are currently energized by this feeder.
+        """
+        return nlen(self._current_energized_lv_feeders)
+
+    def get_current_energized_lv_feeder(self, mrid: str) -> LvFeeder:
+        """
+        Energized LvFeeder in the current state of the network.
+
+        @param mrid: The mrid of the `LvFeeder`.
+        @return A matching `LvFeeder` that is energized by this `Feeder` in the current state of the network.
+        @raise A `KeyError` if no matching `LvFeeder` was found.
+        """
+        if not self._current_energized_lv_feeders:
+            raise KeyError(mrid)
+        try:
+            return self._current_energized_lv_feeders[mrid]
+        except AttributeError:
+            raise KeyError(mrid)
+
+    def add_current_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
+        """
+        Associate this `Feeder` with an `LvFeeder` in the current state of the network.
+
+        @param lv_feeder: the LV feeder to associate with this feeder in the current state of the network.
+        @return: This `Feeder` for fluent use.
+        """
+        if self._validate_reference(lv_feeder, self.get_current_energized_lv_feeder, "An LvFeeder"):
+            return self
+        self._current_energized_lv_feeders = dict() if self._current_energized_lv_feeders is None else self._current_energized_lv_feeders
+        self._current_energized_lv_feeders[lv_feeder.mrid] = lv_feeder
+        return self
+
+    def remove_current_energized_lv_feeder(self, lv_feeder: LvFeeder) -> Feeder:
+        """
+        Disassociate this `Feeder` from an `LvFeeder` in the current state of the network.
+
+        @param lv_feeder: the LV feeder to disassociate from this feeder in the current state of the network.
+        @return: This `Feeder` for fluent use.
+        @raise: A `ValueError` if `lv_feeder` is not found in the current energized lv feeders collection.
+        """
+        self._current_energized_lv_feeders = safe_remove_by_id(self._current_energized_lv_feeders, lv_feeder)
+        return self
+
+    def clear_current_energized_lv_feeders(self) -> Feeder:
+        """
+        Clear all `LvFeeder`s associated with `Feeder` in the current state of the network.
+
+        @return: This `Feeder` for fluent use.
+        """
+        self._current_energized_lv_feeders = None
         return self
 
 
