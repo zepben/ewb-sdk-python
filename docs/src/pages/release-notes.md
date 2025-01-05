@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.43.0](#v0430)| `05 January 2025` |
 |[0.42.0](#v0420)| `02 December 2024` |
 |[0.41.2](#v0412)| `25 October 2024` |
 |[0.41.1](#v0411)| `23 October 2024` |
@@ -49,6 +50,51 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.43.0]
+
+### Breaking Changes
+* Renamed `UpdateNetworkStateClient.SetCurrentStatesRequest` to `CurrentStateEventBatch`. You will need to update any uses, but the class members are the same.
+* Removed `ProcessingPaused` current state response message as this functionality won't be supported.
+* `QueryNetworkStateClient.get_current_states` now returns a `CurrentStateEventBatch` rather than just the events themselves.
+* `QueryNetworkStateService.on_get_current_states` must now return a stream of `CurrentStateEventBatch` rather than just the events themselves.
+* `AcLineSegment.per_length_sequence_impedance` has been corrected to `per_length_impedance`. This has been done in a non-breaking way, however the public 
+  resolver `Resolvers.per_length_sequence_impedance` is now `Resolvers.per_length_impedance`, correctly reflecting the CIM relationship.
+* Removed `get_current_equipment_for_feeder` implementation for `NetworkConsumerClient` as its functionality is now incorporated in `get_equipment_for_container`.
+
+### New Features
+* Added `BatchNotProcessed` current state response. This is used to indicate a batch has been ignored, rather than just returning a `BatchSuccessful`.
+* `QueryNetworkStateService` now supports `reportBatchStatus`, which requires two new constructor callbacks:
+  * `on_current_states_status` - A callback triggered when the response status of an event returned via `on_get_current_states` is received from the client.
+  * `on_processing_error` - A function that takes a message and optional cause. Called when `on_current_states_status` raises an exception, or the
+    `SetCurrentStatesResponse` is for an unknown event status.
+* Added `PanDemandResponseFunction`, a new class which contains `EndDeviceFunctionKind` and the identity of the `ControlledAppliance` of this function.
+* Added `BatteryControl`, a new class which describes behaviour specific to controlling a `BatteryUnit`.
+* Added `StaticVarCompensator` a new class representing a facility for providing variable and controllable shunt reactive power.
+* Added `ControlledAppliance` a new class representing the identity of the appliance controlled by a specific `EndDeviceFunction`.
+* Added `PerLengthPhaseImpedance` a new class used for representing the impedance of individual wires on an AcLineSegment.
+* Added `PhaseImpedanceData` a data class with a link to `PerLengthPhaseImpedance`, for capturing the phase impedance data of an individual wire.
+* Added new enums:
+  * `BatteryControlMode`
+  * `EndDeviceFunctionKind`
+  * `SVCControlMode`
+
+### Enhancements
+* All `StateEventFailure` classes now have a `message` included to give more context to the error.
+* Added `ct_primary` and `min_target_deadband` to `RegulatingContrl`.
+* Added collection of `BatteryControl` to `BatteryUnit`
+* Added collection of `EndDeviceFunctionKind` to `EndDevice`
+* Added an unordered collection comparator.
+* Added the energized relationship for the current state of network between `Feeder` and `LvFeeder`.
+* Updated `NetworkConsumerClient` `get_equipment_for_container/s` to allow requesting normal, current or all equipments.
+
+### Fixes
+* None.
+
+### Notes
+* None.
 
 ---
 
