@@ -9,9 +9,7 @@ with open("README.md", "r") as fh:
 
 deps = [
     "zepben.auth==0.12.1",
-    "zepben.protobuf==0.33.0b5",
-    "dataclassy==0.6.2",
-    "six==1.16.0"
+    "zepben.protobuf==0.33.0b5"
 ]
 
 test_deps = [
@@ -22,6 +20,7 @@ test_deps = [
     "hypothesis==6.56.3",
     "grpcio-testing==1.57.0",
     "pylint==2.14.5",
+    "six==1.16.0",
     "tox"
 ]
 

@@ -5,7 +5,7 @@
 from abc import ABCMeta
 from typing import Optional
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 # noinspection PyPackageRequirements
 from zepben.protobuf.cim.iec61968.common.Document_pb2 import Document as PBDocument
 from zepben.protobuf.cim.iec61968.common.OrganisationRole_pb2 import OrganisationRole as PBOrganisationRole

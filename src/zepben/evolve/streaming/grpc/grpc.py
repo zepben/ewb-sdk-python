@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import TypeVar, Generic, Callable, List, Union, Coroutine
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 __all__ = ["GrpcResult", "GrpcClient"]
 

@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from enum import Enum
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 from zepben.evolve.util import require
 

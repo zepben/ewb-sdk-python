@@ -5,7 +5,7 @@
 
 __all__ = ["XyPhaseStep"]
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 from zepben.evolve import Terminal, PhaseCode
 

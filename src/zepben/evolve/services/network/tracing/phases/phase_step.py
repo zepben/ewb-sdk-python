@@ -9,7 +9,7 @@ from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import Cond
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 from typing import FrozenSet, Optional, Union, Iterable
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 __all__ = ["PhaseStep"]
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import List, Callable, Awaitable, TypeVar, Generic
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 from zepben.evolve import Tracker, BasicTracker
 from zepben.evolve.exceptions import TracingException

@@ -5,7 +5,7 @@
 
 from typing import Callable, List, Dict, Optional
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 from zepben.evolve import Terminal, FeederDirection, ConductingEquipment, ConductingEquipmentStep
 from zepben.evolve.services.network.tracing.connectivity.connected_equipment_traversal import ConnectedEquipmentTraversal

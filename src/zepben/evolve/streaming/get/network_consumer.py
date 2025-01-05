@@ -9,7 +9,7 @@ from asyncio import get_event_loop
 from itertools import chain
 from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable, cast
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub

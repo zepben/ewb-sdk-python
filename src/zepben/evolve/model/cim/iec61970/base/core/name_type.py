@@ -9,7 +9,7 @@ from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 

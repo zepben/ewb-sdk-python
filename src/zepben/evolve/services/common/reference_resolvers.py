@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Callable, Optional
 
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest

@@ -7,7 +7,7 @@ import uuid
 from typing import Union, List
 
 import pytest
-from dataclassy import dataclass
+from zepben.evolve.dataclassy import dataclass
 from hypothesis import settings, Verbosity
 from pytest import fixture
 
