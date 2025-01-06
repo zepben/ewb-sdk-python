@@ -12,8 +12,9 @@
 ### Fixes
 * None.
 
-### Notes
-* None.
+## [0.43.1] - UNRELEASED
+### Fixes
+* SinglePhaseKind will now be processed correctly when translating from protobuf.
 
 ## [0.43.0] - 2025-01-05
 ### Breaking Changes
