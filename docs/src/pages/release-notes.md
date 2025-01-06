@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.43.1](#v0431)| `06 January 2025` |
 |[0.43.0](#v0430)| `05 January 2025` |
 |[0.42.0](#v0420)| `02 December 2024` |
 |[0.41.2](#v0412)| `25 October 2024` |
@@ -50,6 +51,13 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.43.1]
+
+### Fixes
+* SinglePhaseKind will now be processed correctly when translating from protobuf.
 
 ---
 
