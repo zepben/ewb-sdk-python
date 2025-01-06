@@ -1,19 +1,7 @@
 # Zepben Python SDK
 ## [0.43.1] - UNRELEASED
-### Breaking Changes
-* None.
-
-### New Features
-* None.
-
-### Enhancements
-* None.
-
 ### Fixes
-* None.
-
-### Notes
-* None.
+* SinglePhaseKind will now be processed correctly when translating from protobuf.
 
 ## [0.43.0] - 2025-01-06
 ### Breaking Changes

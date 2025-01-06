@@ -1514,8 +1514,8 @@ def phase_impedance_data_to_cim(pb: PBPhaseImpedanceData) -> Optional[PhaseImped
     :return: The converted `pb` as a CIM :class:`PhaseImpedanceData`
     """
     return PhaseImpedanceData(
-        SinglePhaseKind(pb.fromPhase),
-        SinglePhaseKind(pb.toPhase),
+        single_phase_kind_by_id(pb.fromPhase),
+        single_phase_kind_by_id(pb.toPhase),
         float_or_none(pb.b),
         float_or_none(pb.g),
         float_or_none(pb.r),
