@@ -97,6 +97,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             - `container` - The :class:`EquipmentContainer` (or its mRID) to fetch equipment for.
             - `include_energizing_containers` - The level of energizing containers to include equipment from.
             - `include_energized_containers` - The level of energized containers to include equipment from.
+            - `network_state` - The network state of the equipment.
 
         Returns a :class:`GrpcResult` with a result of one of the following:
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
@@ -124,6 +125,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             - `containers` - The mRIDs of :class:`EquipmentContainer`'s to fetch equipment for.
             - `include_energizing_containers` - The level of energizing containers to include equipment from.
             - `include_energized_containers` - The level of energized containers to include equipment from.
+            - `network_state` - The network state of the equipment.
 
         Returns a :class:`GrpcResult` with a result of one of the following:
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
@@ -194,7 +196,8 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         mrid: str,
         expected_class: type = EquipmentContainer,
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS,
+        network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE
     ) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the equipment container network for the specified `mrid` and store the results in the `service`.
@@ -207,6 +210,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             - `expected_class` - The expected type of the fetched container.
             - `include_energizing_containers` - The level of energizing containers to include equipment from.
             - `include_energized_containers` - The level of energized containers to include equipment from.
+            - `network_state` - The network state of the equipment.
 
         Returns a :class:`GrpcResult` of a :class:`MultiObjectResult`. If successful, containing a map keyed by mRID of all the objects retrieved. If an
         item couldn't be added to `service`, its mRID will be present in `MultiObjectResult.failed`.
@@ -215,7 +219,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             - :class:`ValueError` if the requested object was not found or was of the wrong type.
 
         """
-        return await self._get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers)
+        return await self._get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers, network_state)
 
     async def get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
         """
@@ -302,10 +306,11 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         mrid: str,
         expected_class: type = EquipmentContainer,
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS,
+        network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE
     ) -> GrpcResult[MultiObjectResult]:
         async def get_additional(it: EquipmentContainer, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
-            result = await self._get_equipment_for_container(it, include_energizing_containers, include_energized_containers)
+            result = await self._get_equipment_for_container(it, include_energizing_containers, include_energized_containers, network_state)
 
             if result.was_failure:
                 # noinspection PyArgumentList
@@ -598,10 +603,11 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         mrid: str,
         expected_class: type = EquipmentContainer,
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS,
+        network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE
     ) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(
-            super().get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers)
+            super().get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers, network_state)
         )
 
     def get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
