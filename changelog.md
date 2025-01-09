@@ -17,7 +17,7 @@
 
 ## [0.44.0] - 2025-01-24
 ### Breaking Changes
-* None.
+* `GrpcChannelBuilder.build()` now accepts a `timeout_seconds` argument. This is the timeout used for each connection attempt so the total amount of time the connection test may take to fail can be greater than `timeout_seconds`.
 
 ### New Features
 * Added the following new CIM classes:

@@ -71,6 +71,17 @@ def test_debug_connection_test(mock_insecure_channel, mock_test_connection, mock
 @mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
 @mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
 @mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
+def test_timeout_connection_test(mock_insecure_channel, mock_test_connection, mock_insecure_sync_channel):
+    assert GrpcChannelBuilder().build(timeout_seconds=2789) == "insecure channel"
+
+    mock_insecure_sync_channel.assert_called_once_with("localhost:50051")
+    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=False, timeout_seconds=2789)
+    mock_insecure_channel.assert_called_once_with('localhost:50051', options=DEFAULT_GRPC_CHANNEL_OPTIONS)
+
+
+@mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
+@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
 def test_for_address(mock_insecure_channel, mock_test_connection, mock_insecure_sync_channel):
     assert GrpcChannelBuilder().for_address("hostname", 1234).build() == "insecure channel"
 
@@ -126,7 +137,8 @@ def test_make_secure(mocked_secure_channel, mocked_ssl_channel_creds, mock_test_
     mocked_secure_channel.assert_called_with("hostname:1234", "channel creds", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
     mock_secure_sync_channel.assert_called_with("hostname:1234", "channel creds")
     mock_test_connection.assert_has_calls(
-        [call(MockedChannel("secure sync test channel"), debug=False, timeout_seconds=5), call(MockedChannel("secure sync test channel"), debug=False, timeout_seconds=5)])
+        [call(MockedChannel("secure sync test channel"), debug=False, timeout_seconds=5),
+         call(MockedChannel("secure sync test channel"), debug=False, timeout_seconds=5)])
 
 
 @mock.patch("builtins.open", side_effect=lambda filename, *args, **kwargs: MockReadable(str.encode(filename)))
@@ -189,6 +201,27 @@ def test_test_connection_returns_on_first_response(mock_getMetadata):
     assert mock_getMetadata.call_count == 2
 
 
+@mock.patch("grpc._channel._UnaryUnaryMultiCallable.__call__",
+            side_effect=[
+                _InactiveRpcError(_RPCState(
+                    [OperationType.send_message],
+                    None,
+                    None,
+                    StatusCode.UNIMPLEMENTED,
+                    "details"
+                )),
+                "metadata response",
+                Exception("Exception2")
+            ])
+def test_test_connection_uses_timeout(mock_getMetadata):
+    channel = insecure_channel("unused")
+    GrpcChannelBuilder()._test_connection(channel, False, timeout_seconds=12345)
+
+    mock_getMetadata.assert_has_calls([call(GetMetadataRequest(), timeout=12345, wait_for_ready=False),
+                                       call(GetMetadataRequest(), timeout=12345, wait_for_ready=False)], any_order=False)
+    assert mock_getMetadata.call_count == 2
+
+
 @mock.patch("grpc._channel._UnaryUnaryMultiCallable.__call__", side_effect=[
     _InactiveRpcError(_RPCState(
         [OperationType.send_message],
@@ -235,7 +268,7 @@ def test_test_connection_continues_following_unavailable(mock_getMetadata):
 def test_test_connection_raises_connection_exception(mock_getMetadata):
     channel = insecure_channel("unused")
     with pytest.raises(GrpcConnectionException, match="Couldn't establish gRPC connection to any service on myServer.myDomain:9999.\n"):
-        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, False,  timeout_seconds=5)
+        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, False, timeout_seconds=5)
     mock_getMetadata.assert_has_calls(
         [call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
          call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
@@ -277,7 +310,7 @@ def test_test_connection_raises_connection_exception_with_debug(mock_getMetadata
                              '\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = "details2"\n\tdebug_error_string = "None"\n>\n'
                              'Received the following exception with CustomerConsumerStub:\n<_InactiveRpcError of RPC that terminated with:\n'
                              '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details3"\n\tdebug_error_string = "None"\n>\n'):
-        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, True,  timeout_seconds=5)
+        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, True, timeout_seconds=5)
     mock_getMetadata.assert_has_calls(
         [call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
          call(GetMetadataRequest(), timeout=5, wait_for_ready=False),
