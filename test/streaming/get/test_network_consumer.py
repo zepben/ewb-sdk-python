@@ -294,7 +294,7 @@ class TestNetworkConsumer:
         await self.mock_server.validate(client_test, [UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(feeder_network)))])
 
     @pytest.mark.asyncio
-    async def test_get_equipment_container_sends_linked_container_params(self, feeder_network: NetworkService):
+    async def test_get_equipment_container_sends_options(self, feeder_network: NetworkService):
         feeder_mrid = "f001"
 
         async def client_test():
@@ -302,7 +302,8 @@ class TestNetworkConsumer:
                 feeder_mrid,
                 Feeder,
                 IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
-                IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
+                IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS,
+                NetworkState.ALL_NETWORK_STATE
             )
 
         object_responses = _create_object_responses(feeder_network)
@@ -314,7 +315,8 @@ class TestNetworkConsumer:
                                                 _create_container_responses(
                                                     feeder_network,
                                                     expected_include_energizing_containers=IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
-                                                    expected_include_energized_containers=IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
+                                                    expected_include_energized_containers=IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS,
+                                                    network_state=NetworkState.ALL_NETWORK_STATE
                                                 )
                                             ]),
                                             StreamGrpc('getIdentifiedObjects', [object_responses, object_responses])
@@ -331,37 +333,31 @@ class TestNetworkConsumer:
         await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
 
     @pytest.mark.asyncio
-    async def test_get_equipment_for_container_supports_linked_containers(self, feeder_network: NetworkService):
+    async def test_get_equipment_for_container_sends_options(self, feeder_network: NetworkService):
+        include_energizing_containers = IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS
+        include_energized_containers = IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
+        network_state = NetworkState.ALL_NETWORK_STATE
+
         async def client_test():
-            mor = (
-                await self.client.get_equipment_for_container(
-                    "f001",
-                    IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
-                    IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
-                )
-            ).throw_on_error().value
+            await self.client.get_equipment_for_containers(
+                ["f001"],
+                include_energizing_containers,
+                include_energized_containers,
+                network_state
+            )
+            await self.client.get_equipment_for_container(
+                "f001",
+                include_energizing_containers,
+                include_energized_containers,
+                network_state
+            )
 
-            assert len(mor.objects) == self.service.len_of(Equipment) == 3
-            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
+        response = _create_container_equipment_responses(feeder_network,
+                                                         expected_include_energizing_containers=include_energizing_containers,
+                                                         expected_include_energized_containers=include_energized_containers,
+                                                         network_state=network_state)
 
-        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
-
-    @pytest.mark.asyncio
-    async def test_get_equipment_for_container_for_all_network_state(self, feeder_network: NetworkService):
-        async def client_test():
-            mor = (
-                await self.client.get_equipment_for_container(
-                    "f001",
-                    network_state=NetworkState.ALL_NETWORK_STATE
-                )
-            ).throw_on_error().value
-
-            assert len(mor.objects) == self.service.len_of(Equipment) == 3
-            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
-
-        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers',
-                                                                 [_create_container_equipment_responses(feeder_network,
-                                                                                                        network_state=NetworkState.ALL_NETWORK_STATE)])])
+        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [response, response])])
 
     @pytest.mark.asyncio
     async def test_get_equipment_for_containers(self, feeder_network: NetworkService):
@@ -372,39 +368,6 @@ class TestNetworkConsumer:
             _assert_contains_mrids(self.service, "fsp", "c2", "tx")
 
         await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
-
-    @pytest.mark.asyncio
-    async def test_get_equipment_for_containers_supports_linked_containers(self, feeder_network: NetworkService):
-        async def client_test():
-            mor = (
-                await self.client.get_equipment_for_containers(
-                    ["f001"],
-                    IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
-                    IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
-                )
-            ).throw_on_error().value
-
-            assert len(mor.objects) == self.service.len_of(Equipment) == 3
-            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
-
-        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(feeder_network)])])
-
-    @pytest.mark.asyncio
-    async def test_get_equipment_for_containers_for_all_network_state(self, feeder_network: NetworkService):
-        async def client_test():
-            mor = (
-                await self.client.get_equipment_for_containers(
-                    ["f001"],
-                    network_state=NetworkState.ALL_NETWORK_STATE
-                )
-            ).throw_on_error().value
-
-            assert len(mor.objects) == self.service.len_of(Equipment) == 3
-            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
-
-        await self.mock_server.validate(client_test, [StreamGrpc('getEquipmentForContainers',
-                                                                 [_create_container_equipment_responses(feeder_network,
-                                                                                                        network_state=NetworkState.ALL_NETWORK_STATE)])])
 
     @pytest.mark.asyncio
     async def test_get_equipment_for_operational_restriction(self, operational_restriction_with_equipment: NetworkService):
@@ -434,6 +397,7 @@ class TestNetworkConsumer:
 
     @pytest.mark.asyncio
     async def test_get_equipment_for_loop(self):
+        network_state = NetworkState.ALL_NETWORK_STATE
         ns = create_loops_network()
         loop = "loop1"
         loop_containers = ["cir1", "cir2", "cir3", "sub1", "sub2", "sub3"]
@@ -442,7 +406,7 @@ class TestNetworkConsumer:
         assoc_objs = ["cir1-j-t", "cir2-j-t", "cir3-j-t", "sub1-j-t", "sub2-j-t", "sub3-j-t"]
 
         async def client_test():
-            mor = (await self.client.get_equipment_for_loop(loop)).throw_on_error().value
+            mor = (await self.client.get_equipment_for_loop(loop, network_state=network_state)).throw_on_error().value
 
             assert self.service.len_of() == len([loop] + loop_containers + hierarchy_objs + container_equip + assoc_objs)
             assert len(mor.objects) == len([loop] + loop_containers + container_equip + assoc_objs)
@@ -450,12 +414,13 @@ class TestNetworkConsumer:
         await self.mock_server.validate(client_test,
                                         [
                                             UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns))),
-                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, loop_containers)]),
+                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, loop_containers, network_state=network_state)]),
                                             StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
                                         ])
 
     @pytest.mark.asyncio
     async def test_get_all_loops(self):
+        network_state = NetworkState.ALL_NETWORK_STATE
         ns = create_loops_network()
         loops = ["loop1", "loop2"]
         loop_containers = ["cir1", "cir2", "cir3", "cir4", "sub1", "sub2", "sub3", "sub4"]
@@ -464,14 +429,14 @@ class TestNetworkConsumer:
         assoc_objs = ["cir1-j-t", "cir2-j-t", "cir3-j-t", "cir4-j-t", "sub1-j-t", "sub2-j-t", "sub3-j-t", "sub4-j-t"]
 
         async def client_test():
-            mor = (await self.client.get_all_loops()).throw_on_error().value
+            mor = (await self.client.get_all_loops(network_state)).throw_on_error().value
 
             assert self.service.len_of() == len(mor.objects) == len(loops + loop_containers + hierarchy_objs + container_equip + assoc_objs)
 
         await self.mock_server.validate(client_test,
                                         [
                                             UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(ns))),
-                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, loop_containers)]),
+                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(ns, loop_containers, network_state=network_state)]),
                                             StreamGrpc('getIdentifiedObjects', [_create_object_responses(ns, assoc_objs)])
                                         ])
 
@@ -594,12 +559,19 @@ def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
 
 
 def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None,
-                                          network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE) \
+                                          expected_include_energizing_containers: Optional[int] = None,
+                                          expected_include_energized_containers: Optional[int] = None,
+                                          network_state: NetworkState = None) \
     -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForContainersRequest):
-        assert request.networkState == network_state
+        if expected_include_energizing_containers is not None:
+            assert request.includeEnergizingContainers == expected_include_energizing_containers
+        if expected_include_energized_containers is not None:
+            assert request.includeEnergizedContainers == expected_include_energized_containers
+        if network_state is not None:
+            assert request.networkState == network_state
         for mrid in request.mrids:
             ec = valid[mrid]
             if ec:
@@ -687,7 +659,8 @@ def _create_container_responses(
     ns: NetworkService,
     mrids: Optional[Iterable[str]] = None,
     expected_include_energizing_containers: Optional[int] = None,
-    expected_include_energized_containers: Optional[int] = None
+    expected_include_energized_containers: Optional[int] = None,
+    network_state: Optional[int] = None
 ) -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
@@ -696,6 +669,8 @@ def _create_container_responses(
             assert request.includeEnergizingContainers == expected_include_energizing_containers
         if expected_include_energized_containers is not None:
             assert request.includeEnergizedContainers == expected_include_energized_containers
+        if network_state is not None:
+            assert request.networkState == network_state
 
         for mrid in request.mrids:
             container = valid[mrid]
