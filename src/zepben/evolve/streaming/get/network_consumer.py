@@ -221,7 +221,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers, network_state)
 
-    async def get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
+    async def get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`Loop` represented by `mRID`
 
@@ -230,6 +230,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         Parameters
             - `service` - The :class:`NetworkService` to store fetched objects in.
             - `restriction` - The :class:`Loop` (or its mRID) to fetch equipment for.
+            - `network_state` - The network state of the equipment.
 
         Returns a :class:`GrpcResult` with a result of one of the following:
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
@@ -239,9 +240,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
-        return await self._get_equipment_for_loop(loop)
+        return await self._get_equipment_for_loop(loop, network_state)
 
-    async def get_all_loops(self) -> GrpcResult[MultiObjectResult]:
+    async def get_all_loops(self, network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for all :class:`Loop` instances in `service`.
 
@@ -249,6 +250,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Parameters
             - `service` - The :class:`NetworkService` to store fetched objects in.
+            - `network_state` - The network state of the equipment.
 
         Returns a :class:`GrpcResult` with a result of one of the following:
             - When `GrpcResult.wasSuccessful`, a map containing the retrieved objects keyed by mRID, accessible via `GrpcResult.value`. If an item was not
@@ -258,7 +260,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         Note the :class:`NetworkConsumerClient` warning in this case.
         """
-        return await self._get_all_loops()
+        return await self._get_all_loops(network_state)
 
     async def retrieve_network(self) -> GrpcResult[NetworkResult]:
         """
@@ -321,7 +323,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         return await self._get_with_references(mrid, expected_class, get_additional)
 
-    async def _get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
+    async def _get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE) -> GrpcResult[MultiObjectResult]:
         mrid = loop.mrid if isinstance(loop, Loop) else loop
 
         async def get_additional(it: Loop, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
@@ -333,7 +335,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             def chain_typed(*iterables: Iterable[EquipmentContainer]): return chain(*iterables)
 
             containers: Set[str] = {ec.mrid for ec in chain_typed(it.circuits, it.substations, it.energizing_substations)}
-            result = await self._get_equipment_for_containers(containers)
+            result = await self._get_equipment_for_containers(containers, network_state=network_state)
             if result.was_failure:
                 # noinspection PyArgumentList
                 return GrpcResult(result.thrown, result.was_error_handled)
@@ -344,7 +346,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         return await self._get_with_references(mrid, Loop, get_additional)
 
-    async def _get_all_loops(self) -> GrpcResult[MultiObjectResult]:
+    async def _get_all_loops(self, network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE) -> GrpcResult[MultiObjectResult]:
         response = await self._get_network_hierarchy()
         if response.was_failure:
             # noinspection PyArgumentList
@@ -364,7 +366,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         for loop in hierarchy.loops.values():
             containers.update(chain(cast(Iterable[EquipmentContainer], loop.circuits), loop.substations, loop.energizing_substations))
 
-        result = await self._get_equipment_for_containers(map(lambda it: it.mrid, containers))
+        result = await self._get_equipment_for_containers(map(lambda it: it.mrid, containers), network_state=network_state)
         if result.was_failure:
             # noinspection PyArgumentList
             return GrpcResult(result.thrown, result.was_error_handled)
@@ -610,13 +612,13 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
             super().get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers, network_state)
         )
 
-    def get_equipment_for_loop(self, loop: Union[str, Loop]) -> GrpcResult[MultiObjectResult]:
+    def get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE) -> GrpcResult[MultiObjectResult]:
         # noinspection PyArgumentList
-        return get_event_loop().run_until_complete(super().get_equipment_for_loop(self, loop))
+        return get_event_loop().run_until_complete(super().get_equipment_for_loop(self, loop, network_state))
 
-    def get_all_loops(self) -> GrpcResult[MultiObjectResult]:
+    def get_all_loops(self, network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE) -> GrpcResult[MultiObjectResult]:
         # noinspection PyArgumentList
-        return get_event_loop().run_until_complete(super().get_all_loops(self))
+        return get_event_loop().run_until_complete(super().get_all_loops(self, network_state))
 
     def retrieve_network(self) -> GrpcResult[Union[NetworkResult, Exception]]:
         return get_event_loop().run_until_complete(super().retrieve_network())
