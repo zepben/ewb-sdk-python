@@ -109,8 +109,10 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.product
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ac_line_segments import TableAcLineSegments
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_breakers import TableBreakers
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_busbar_sections import TableBusbarSections
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_clamps import TableClamps
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_conductors import TableConductors
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_connectors import TableConnectors
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_cuts import TableCuts
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_disconnectors import TableDisconnectors
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_earth_fault_compensators import TableEarthFaultCompensators
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_energy_connections import TableEnergyConnections
@@ -217,6 +219,8 @@ from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSour
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection, Connector, Junction
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
 from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq, EnergyConnection
@@ -268,9 +272,9 @@ class NetworkCimWriter(BaseCimWriter):
     def __init__(self, database_tables: NetworkDatabaseTables):
         super().__init__(database_tables)
 
-    ######################################
-    # [ZBEX] Extension IEC61968 Metering #
-    ######################################
+    ###############################
+    # Extension IEC61968 Metering #
+    ###############################
 
     def save_pan_demand_response_function(self, pan_demand_response_function: PanDemandResponseFunction) -> bool:
         """
@@ -288,9 +292,9 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_end_device_function(table, insert, pan_demand_response_function, "pan demand response function")
 
-    ########################################
-    # [ZBEX] Extension IEC61970 Base Wires #
-    ########################################
+    #################################
+    # Extension IEC61970 Base Wires #
+    #################################
 
     def save_battery_control(self, battery_control: BatteryControl) -> bool:
         """
@@ -1495,6 +1499,22 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_connector(table, insert, busbar_section, "busbar section")
 
+    def save_clamp(self, clamp: Clamp) -> bool:
+        """
+        Save the :class:`Clamp` fields to :class:`TableClamps`.
+
+        :param clamp: The :class:`Clamp` instance to write to the database.
+        :return: True if the :class:`Clamp` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableClamps)
+        insert = self._database_tables.get_insert(TableClamps)
+
+        insert.add_value(table.length_from_terminal_1.query_index, clamp.length_from_terminal_1)
+        insert.add_value(table.ac_line_segment_mrid.query_index, self._mrid_or_none(clamp.ac_line_segment))
+
+        return self._save_conducting_equipment(table, insert, clamp, "clamp")
+
     def _save_conductor(self, table: TableConductors, insert: PreparedStatement, conductor: Conductor, description: str) -> bool:
         insert.add_value(table.length.query_index, conductor.length)
         insert.add_value(table.design_temperature.query_index, conductor.design_temperature)
@@ -1505,6 +1525,22 @@ class NetworkCimWriter(BaseCimWriter):
 
     def _save_connector(self, table: TableConnectors, insert: PreparedStatement, connector: Connector, description: str) -> bool:
         return self._save_conducting_equipment(table, insert, connector, description)
+
+    def save_cut(self, cut: Cut) -> bool:
+        """
+        Save the :class:`Cut` fields to :class:`TableCuts`.
+
+        :param cut: The :class:`Cut` instance to write to the database.
+        :return: True if the :class:`Cut` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableCuts)
+        insert = self._database_tables.get_insert(TableCuts)
+
+        insert.add_value(table.length_from_terminal_1.query_index, cut.length_from_terminal_1)
+        insert.add_value(table.ac_line_segment_mrid.query_index, self._mrid_or_none(cut.ac_line_segment))
+
+        return self._save_switch(table, insert, cut, "cut")
 
     def save_disconnector(self, disconnector: Disconnector) -> bool:
         """

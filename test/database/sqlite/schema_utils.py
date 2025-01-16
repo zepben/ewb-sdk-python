@@ -14,8 +14,9 @@ from zepben.evolve import MetadataCollection, NetworkService, DiagramService, Cu
     Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, \
     PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, \
     Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
-    ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit, \
-    EndDeviceFunction, BatteryControl, PanDemandResponseFunction
+    ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -102,9 +103,9 @@ class SchemaNetworks:
     def _add_with_references(filled: T, service: BaseService):
         service.add(filled)
 
-        #######################################
-        # [ZBEX] EXTENSIONS IEC61968 METERING #
-        #######################################
+        ################################
+        # EXTENSIONS IEC61968 METERING #
+        ################################
 
 
         #######################
@@ -390,9 +391,23 @@ class SchemaNetworks:
 
         if isinstance(filled, AcLineSegment):
             service.add(filled.per_length_impedance)
+            for it in filled.cuts:
+                it.ac_line_segment = filled
+                service.add(it)
+            for it in filled.clamps:
+                it.ac_line_segment = filled
+                service.add(it)
+
+        if isinstance(filled, Clamp):
+            filled.ac_line_segment.add_clamp(filled)
+            service.add(filled.ac_line_segment)
 
         if isinstance(filled, Conductor):
             service.add(filled.asset_info)
+
+        if isinstance(filled, Cut):
+            filled.ac_line_segment.add_cut(filled)
+            service.add(filled.ac_line_segment)
 
         if isinstance(filled, EnergyConsumer):
             for it in filled.phases:

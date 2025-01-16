@@ -85,8 +85,10 @@ from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSourc
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
+from zepben.protobuf.cim.iec61970.base.wires.Clamp_pb2 import Clamp as PBClamp
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor as PBConductor
 from zepben.protobuf.cim.iec61970.base.wires.Connector_pb2 import Connector as PBConnector
+from zepben.protobuf.cim.iec61970.base.wires.Cut_pb2 import Cut as PBCut
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector as PBDisconnector
 from zepben.protobuf.cim.iec61970.base.wires.EarthFaultCompensator_pb2 import EarthFaultCompensator as PBEarthFaultCompensator
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConnection_pb2 import EnergyConnection as PBEnergyConnection
@@ -207,6 +209,8 @@ from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import *
+from zepben.evolve.model.cim.iec61970.base.wires.cut import *
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
 from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
@@ -283,14 +287,15 @@ __all__ = [
     "transformer_end_rated_s_to_cim", "tap_changer_control_to_cim", "regulating_control_to_cim", "distance_relay_to_cim", "protection_relay_scheme_to_cim",
     "protection_relay_system_to_cim", "relay_setting_to_cim", "voltage_relay_to_cim", "ground_to_cim", "ground_disconnector_to_cim",
     "series_compensator_to_cim", "pan_demand_response_function_to_cim", 'battery_control_to_cim', "asset_function_to_cim", "end_device_function_to_cim",
-    "static_var_compensator_to_cim"
+    "static_var_compensator_to_cim", "clamp_to_cim", "cut_to_cim"
 
 ]
 
 
-#######################################
-# [ZBEX] EXTENSIONS IEC61968 METERING #
-#######################################
+################################
+# EXTENSIONS IEC61968 METERING #
+################################
+
 def pan_demand_response_function_to_cim(pb: PBPanDemandResponseFunction, network_service: NetworkService) -> PanDemandResponseFunction:
     """
     Convert the protobuf :class:`PBPanDemandResponseFunction` into its CIM counterpart.
@@ -309,9 +314,9 @@ def pan_demand_response_function_to_cim(pb: PBPanDemandResponseFunction, network
 PBPanDemandResponseFunction.to_cim = pan_demand_response_function_to_cim
 
 
-#########################################
-# [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
-#########################################
+##################################
+# EXTENSIONS IEC61970 BASE WIRES #
+##################################
 
 def battery_control_to_cim(pb: PBBatteryControl, network_service: NetworkService) -> BatteryControl:
     """
@@ -1233,7 +1238,6 @@ def battery_unit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> O
     """
     Convert the protobuf :class:`PBBatteryUnit` into its CIM counterpart.
     :param pb: The protobuf :class:`PBBatteryUnit` to convert.
-    :param cim: The CIM :class:`BatteryUnit` undergoing construction.
     :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
     :return: The converted `pb` as a CIM :class:`BatteryUnit`
     """
@@ -1288,13 +1292,16 @@ def ac_line_segment_to_cim(pb: PBAcLineSegment, network_service: NetworkService)
     """
     Convert the protobuf :class:`PBAcLineSegment` into its CIM counterpart.
     :param pb: The protobuf :class:`PBAcLineSegment` to convert.
-    :param cim: The CIM :class:`AcLineSegment` undergoing construction.
     :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
     :return: The converted `pb` as a CIM :class:`AcLineSegment`
     """
     cim = AcLineSegment(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.per_length_impedance(cim), pb.perLengthImpedanceMRID)
+    for mrid in pb.cutMRIDs:
+        network_service.resolve_or_defer_reference(resolver.cuts(cim), mrid)
+    for mrid in pb.clampMRIDs:
+        network_service.resolve_or_defer_reference(resolver.clamps(cim), mrid)
 
     conductor_to_cim(pb.cd, cim, network_service)
     return cim if network_service.add(cim) else None
@@ -1310,6 +1317,23 @@ def breaker_to_cim(pb: PBBreaker, network_service: NetworkService) -> Optional[B
     return cim if network_service.add(cim) else None
 
 
+def busbar_section_to_cim(pb: PBBusbarSection, network_service: NetworkService) -> Optional[BusbarSection]:
+    cim = BusbarSection(mrid=pb.mrid())
+
+    connector_to_cim(pb.cn, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
+def clamp_to_cim(pb: PBClamp, network_service: NetworkService) -> Optional[Clamp]:
+    cim = Clamp(mrid=pb.mrid())
+
+    cim.length_from_terminal_1 = float_or_none(pb.lengthFromTerminal1)
+    network_service.resolve_or_defer_reference(resolver.clamp_ac_line_segment(cim), pb.acLineSegmentMRID)
+
+    conducting_equipment_to_cim(pb.ce, cim, network_service)
+    return cim if network_service.add(cim) else None
+
+
 def conductor_to_cim(pb: PBConductor, cim: Conductor, network_service: NetworkService):
     cim.length = float_or_none(pb.length)
     cim.design_temperature = int_or_none(pb.designTemperature)
@@ -1322,6 +1346,16 @@ def conductor_to_cim(pb: PBConductor, cim: Conductor, network_service: NetworkSe
 
 def connector_to_cim(pb: PBConnector, cim: Connector, network_service: NetworkService):
     conducting_equipment_to_cim(pb.ce, cim, network_service)
+
+
+def cut_to_cim(pb: PBCut, network_service: NetworkService) -> Optional[Cut]:
+    cim = Cut(mrid=pb.mrid())
+
+    cim.length_from_terminal_1 = float_or_none(pb.lengthFromTerminal1)
+    network_service.resolve_or_defer_reference(resolver.cut_ac_line_segment(cim), pb.acLineSegmentMRID)
+
+    switch_to_cim(pb.sw, cim, network_service)
+    return cim if network_service.add(cim) else None
 
 
 def disconnector_to_cim(pb: PBDisconnector, network_service: NetworkService) -> Optional[Disconnector]:
@@ -1466,13 +1500,6 @@ def junction_to_cim(pb: PBJunction, network_service: NetworkService) -> Optional
     return cim if network_service.add(cim) else None
 
 
-def busbar_section_to_cim(pb: PBBusbarSection, network_service: NetworkService) -> Optional[BusbarSection]:
-    cim = BusbarSection(mrid=pb.mrid())
-
-    connector_to_cim(pb.cn, cim, network_service)
-    return cim if network_service.add(cim) else None
-
-
 def line_to_cim(pb: PBLine, cim: Line, network_service: NetworkService):
     equipment_container_to_cim(pb.ec, cim, network_service)
 
@@ -1509,8 +1536,6 @@ def phase_impedance_data_to_cim(pb: PBPhaseImpedanceData) -> Optional[PhaseImped
     """
     Convert the protobuf :class:`PBPhaseImpedanceData` into its CIM counterpart.
     :param pb: The protobuf :class:`PBPhaseImpedanceData` to convert.
-    :param cim: The CIM :class:`PhaseImpedanceData` undergoing construction.
-    :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
     :return: The converted `pb` as a CIM :class:`PhaseImpedanceData`
     """
     return PhaseImpedanceData(
@@ -1527,7 +1552,6 @@ def per_length_phase_impedance_to_cim(pb: PBPerLengthPhaseImpedance, network_ser
     """
     Convert the protobuf :class:`PBPerLengthPhaseImpedance` into its CIM counterpart.
     :param pb: The protobuf :class:`PBPerLengthPhaseImpedance` to convert.
-    :param cim: The CIM :class:`PerLengthPhaseImpedance` undergoing construction.
     :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
     :return: The converted `pb` as a CIM :class:`PerLengthPhaseImpedance`
     """
@@ -1769,7 +1793,6 @@ def static_var_compensator_to_cim(pb: PBStaticVarCompensator, network_service: N
     """
     Convert the protobuf :class:`PBStaticVarCompensator` into its CIM counterpart.
     :param pb: The protobuf :class:`PBStaticVarCompensator` to convert.
-    :param cim: The CIM :class:`StaticVarCompensator` undergoing construction.
     :param network_service: The :class:`NetworkService` the converted CIM object will be added to.
     :return: The converted `pb` as a CIM :class:`StaticVarCompensator`
     """
@@ -1888,8 +1911,11 @@ def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_se
 
 PBAcLineSegment.to_cim = ac_line_segment_to_cim
 PBBreaker.to_cim = breaker_to_cim
+PBBusbarSection.to_cim = busbar_section_to_cim
+PBClamp.to_cim = clamp_to_cim
 PBConductor.to_cim = conductor_to_cim
 PBConnector.to_cim = connector_to_cim
+PBCut.to_cim = cut_to_cim
 PBDisconnector.to_cim = disconnector_to_cim
 PBEnergyConnection.to_cim = energy_connection_to_cim
 PBEnergyConsumer.to_cim = energy_consumer_to_cim
@@ -1902,7 +1928,6 @@ PBGroundDisconnector.to_cim = ground_disconnector_to_cim
 PBGroundingImpedance.to_cim = grounding_impedance_to_cim
 PBJumper.to_cim = jumper_to_cim
 PBJunction.to_cim = junction_to_cim
-PBBusbarSection.to_cim = busbar_section_to_cim
 PBLine.to_cim = line_to_cim
 PBLinearShuntCompensator.to_cim = linear_shunt_compensator_to_cim
 PBLoadBreakSwitch.to_cim = load_break_switch_to_cim

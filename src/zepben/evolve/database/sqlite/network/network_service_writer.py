@@ -48,6 +48,8 @@ from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSour
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection, Junction
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
@@ -139,6 +141,8 @@ class NetworkServiceWriter(BaseServiceWriter):
             self._save_each_object(Breaker, self._writer.save_breaker),
             self._save_each_object(LoadBreakSwitch, self._writer.save_load_break_switch),
             self._save_each_object(BusbarSection, self._writer.save_busbar_section),
+            self._save_each_object(Clamp, self._writer.save_clamp),
+            self._save_each_object(Cut, self._writer.save_cut),
             self._save_each_object(Disconnector, self._writer.save_disconnector),
             self._save_each_object(EnergyConsumer, self._writer.save_energy_consumer),
             self._save_each_object(EnergyConsumerPhase, self._writer.save_energy_consumer_phase),

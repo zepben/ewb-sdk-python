@@ -4,13 +4,27 @@
 * None.
 
 ### New Features
-* None.
+* Added the following new CIM classes:
+  * `Clamp`: A Clamp is a galvanic connection at a line segment where other equipment is connected. A Clamp does not cut the line segment. A Clamp is
+    ConductingEquipment and has one Terminal with an associated ConnectivityNode. Any other ConductingEquipment can be connected to the Clamp ConnectivityNode.
+    __NOT CURRENTLY FULLY SUPPORTED BY TRACING__
+  * `Cut`: A cut separates a line segment into two parts. The cut appears as a switch inserted between these two parts and connects them together. As the cut is
+    normally open there is no galvanic connection between the two line segment parts. But it is possible to close the cut to get galvanic connection. The cut
+    terminals are oriented towards the line segment terminals with the same sequence number. Hence the cut terminal with sequence number equal to 1 is oriented
+    to the line segment's terminal with sequence number equal to 1. The cut terminals also act as connection points for jumpers and other equipment, e.g. a
+    mobile generator. To enable this, connectivity nodes are placed at the cut terminals. Once the connectivity nodes are in place any conducting equipment can
+    be connected at them.
+    __NOT CURRENTLY FULLY SUPPORTED BY TRACING__
 
 ### Enhancements
-* None.
+* Updated `NetworkConsumerClient`'s `get_equipment_for_container/s`,  `get_equipment_container`, `get_equipment_for_loop` and `get_all_loops`
+  to allow requesting normal, current or all equipments.
 
 ### Fixes
 * None.
+
+### Notes
+* `Cut` and `Clamp` have been added to the model, but no processing for them has been added to the tracing, so results will not be what you expect.
 
 ## [0.43.1] - 2025-01-06
 ### Fixes
@@ -50,8 +64,6 @@
 * Added collection of `EndDeviceFunctionKind` to `EndDevice`
 * Added an unordered collection comparator.
 * Added the energized relationship for the current state of network between `Feeder` and `LvFeeder`.
-* Updated `NetworkConsumerClient`'s `get_equipment_for_container/s`,  `get_equipment_container`, `get_equipment_for_loop` and `get_all_loops` 
-  to allow requesting normal, current or all equipments.
 
 ### Fixes
 * None.

@@ -7,10 +7,10 @@ __all__ = ["NetworkCimReader"]
 import sys
 from typing import Callable, Optional
 
-from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
-    TableSynchronousMachinesReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
 from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
+from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
+    TableSynchronousMachinesReactiveCapabilityCurves
 from zepben.evolve.database.sqlite.tables.extensions.iec61968.table_pan_demand_response_functions import TablePanDemandResponseFunctions
 from zepben.evolve.database.sqlite.tables.extensions.iec61970.table_battery_controls import TableBatteryControls
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_functions import TableAssetFunctions
@@ -145,8 +145,10 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.product
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ac_line_segments import TableAcLineSegments
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_breakers import TableBreakers
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_busbar_sections import TableBusbarSections
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_clamps import TableClamps
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_conductors import TableConductors
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_connectors import TableConnectors
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_cuts import TableCuts
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_disconnectors import TableDisconnectors
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_energy_connections import TableEnergyConnections
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_energy_consumer_phases import TableEnergyConsumerPhases
@@ -245,6 +247,8 @@ from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSour
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection, Connector, Junction
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import EnergyConnection, RegulatingCondEq
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
@@ -299,9 +303,9 @@ class NetworkCimReader(BaseCimReader):
         self._service = service
         """The :class:`NetworkService` used to store any items read from the database."""
 
-    #######################################
-    # [ZBEX] Eextensions IEC61968 Metering #
-    #######################################
+    ################################
+    # Extensions IEC61968 Metering #
+    ################################
 
     def load_pan_demand_response_function(self, table: TablePanDemandResponseFunctions, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
@@ -321,9 +325,9 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_end_device_functions(pan_demand_response_function, table, result_set) and self._add_or_throw(pan_demand_response_function)
 
-    #########################################
-    # [ZBEX] Extensions IEC61970 Base Wires #
-    #########################################
+    ##################################
+    # Extensions IEC61970 Base Wires #
+    ##################################
 
     def load_battery_controls(self, table: TableBatteryControls, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
@@ -1738,6 +1742,27 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_connector(busbar_section, table, result_set) and self._add_or_throw(busbar_section)
 
+    def load_clamp(self, table: TableClamps, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Clamp` and populate its fields from :class:`TableClamps`.
+
+        :param table: The database table to read the :class:`Clamp` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Clamp`.
+        :param set_identifier: A callback to register the mRID of this :class:`Clamp` for logging purposes.
+
+        :return: True if the :class:`Clamp` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        clamp = Clamp(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        clamp.length_from_terminal_1 = result_set.get_float(table.length_from_terminal_1.query_index, on_none=None)
+        clamp.ac_line_segment = self._ensure_get(result_set.get_string(table.ac_line_segment_mrid.query_index, on_none=None), AcLineSegment)
+
+        if clamp.ac_line_segment:
+            clamp.ac_line_segment.add_clamp(clamp)
+
+        return self._load_conducting_equipment(clamp, table, result_set) and self._add_or_throw(clamp)
+
     def _load_conductor(self, conductor: Conductor, table: TableConductors, result_set: ResultSet) -> bool:
         conductor.length = result_set.get_float(table.length.query_index, on_none=None)
         conductor.design_temperature = result_set.get_int(table.design_temperature.query_index, on_none=None)
@@ -1751,6 +1776,27 @@ class NetworkCimReader(BaseCimReader):
 
     def _load_connector(self, connector: Connector, table: TableConnectors, result_set: ResultSet) -> bool:
         return self._load_conducting_equipment(connector, table, result_set)
+
+    def load_cut(self, table: TableCuts, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+        """
+        Create a :class:`Cut` and populate its fields from :class:`TableCuts`.
+
+        :param table: The database table to read the :class:`Cut` fields from.
+        :param result_set: The record in the database table containing the fields for this :class:`Cut`.
+        :param set_identifier: A callback to register the mRID of this :class:`Cut` for logging purposes.
+
+        :return: True if the :class:`Cut` was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        cut = Cut(mrid=set_identifier(result_set.get_string(table.mrid.query_index)))
+
+        cut.length_from_terminal_1 = result_set.get_float(table.length_from_terminal_1.query_index, on_none=None)
+        cut.ac_line_segment = self._ensure_get(result_set.get_string(table.ac_line_segment_mrid.query_index, on_none=None), AcLineSegment)
+
+        if cut.ac_line_segment:
+            cut.ac_line_segment.add_cut(cut)
+
+        return self._load_switch(cut, table, result_set) and self._add_or_throw(cut)
 
     def load_disconnector(self, table: TableDisconnectors, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """

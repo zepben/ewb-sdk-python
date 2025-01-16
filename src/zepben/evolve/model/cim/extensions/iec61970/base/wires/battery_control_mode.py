@@ -8,12 +8,15 @@ from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from zepben.evolve.model.cim.extensions.zbex import zbex
+
 if TYPE_CHECKING:
     pass
 
 __all__ = ["BatteryControlMode"]
 
 
+@zbex
 class BatteryControlMode(Enum):
     """
     [ZBEX] Mode of operation for the dispatch (charging/discharging) function of BatteryControl.

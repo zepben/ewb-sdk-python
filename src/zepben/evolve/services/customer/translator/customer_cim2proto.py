@@ -21,13 +21,17 @@ from zepben.evolve.services.common.translator.util import mrid_or_empty
 __all__ = ["agreement_to_pb", "customer_to_pb", "customer_agreement_to_pb", "pricing_structure_to_pb", "tariff_to_pb"]
 
 
-######################
-# IEC61968 CUSTOMERS #
-######################
+###################
+# IEC61968 COMMON #
+###################
 
 def agreement_to_pb(cim: Agreement) -> PBAgreement:
     return PBAgreement(doc=document_to_pb(cim))
 
+
+######################
+# IEC61968 CUSTOMERS #
+######################
 
 def customer_to_pb(cim: Customer) -> PBCustomer:
     customer = PBCustomer(

@@ -24,15 +24,15 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data im
 T = TypeVar("T", bound=IdentifiedObject)
 
 types_to_test = {
-    #######################################
-    # [ZBEX] EXTENSIONS IEC61968 METERING #
-    #######################################
+    ################################
+    # EXTENSIONS IEC61968 METERING #
+    ################################
 
     "create_pan_demand_response_function": create_pan_demand_response_function(),
 
-    #########################################
-    # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
-    #########################################
+    ##################################
+    # EXTENSIONS IEC61970 BASE WIRES #
+    ##################################
 
     "create_battery_control": create_battery_control(),
 
@@ -158,6 +158,8 @@ types_to_test = {
     "create_ac_line_segment": create_ac_line_segment(),
     "create_breaker": create_breaker(),
     "create_busbar_section": create_busbar_section(),
+    "create_clamp": create_clamp(),
+    "create_cut": create_cut(),
     "create_disconnector": create_disconnector(),
     "create_energy_consumer": create_energy_consumer(),
     "create_energy_consumer_phase": create_energy_consumer_phase(),

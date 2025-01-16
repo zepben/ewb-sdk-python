@@ -59,7 +59,7 @@ class BatteryUnit(PowerElectronicsUnit):
     @property
     def controls(self) -> Generator[BatteryControl, None, None]:
         """
-        The `BatteryControl`s associated with this `BatteryUnit`
+        [ZBEX] The `BatteryControl`s associated with this `BatteryUnit`
         """
         return ngen(self._controls)
 

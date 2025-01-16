@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING, List, Union
 
+from zepben.evolve.model.cim.extensions.zbex import zbex
 from zepben.evolve.model.cim.iec61968.metering.controlled_appliance import ControlledAppliance, Appliance
 from zepben.evolve.model.cim.iec61968.metering.metering import EndDeviceFunction, EndDeviceFunctionKind
 
@@ -18,6 +19,7 @@ from zepben.evolve.util import require
 __all__ = ["PanDemandResponseFunction"]
 
 
+@zbex
 class PanDemandResponseFunction(EndDeviceFunction):
     """
     [ZBEX] PAN function that an end device supports, distinguished by 'kind'.

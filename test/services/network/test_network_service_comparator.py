@@ -27,15 +27,17 @@ from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireIn
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, EndDeviceFunction, \
     PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
     PhaseImpedanceData
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 
 class TestNetworkServiceComparator(TestBaseServiceComparator):
     validator = ServiceComparatorValidator(lambda: NetworkService(), lambda options: NetworkServiceComparator(options))
 
-    #######################################
-    # [ZBEX] EXTENSIONS IEC61968 METERING #
-    #######################################
+    ################################
+    # EXTENSIONS IEC61968 METERING #
+    ################################
 
     def test_pan_demand_response_function(self):
         self._compare_end_device_function(PanDemandResponseFunction)
@@ -48,9 +50,9 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         )
         self.validator.validate_property(PanDemandResponseFunction._appliance_bitmask, PanDemandResponseFunction, lambda _: 1, lambda _: 2)
 
-    #########################################
-    # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
-    #########################################
+    ##################################
+    # EXTENSIONS IEC61970 BASE WIRES #
+    ##################################
 
     def test_compare_battery_control(self):
         self._compare_regulating_control(BatteryControl)
@@ -887,6 +889,20 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: PerLengthSequenceImpedance(mrid="p1"),
             lambda _: PerLengthSequenceImpedance(mrid="p2")
         )
+        self.validator.validate_collection(
+            AcLineSegment.cuts,
+            AcLineSegment.add_cut,
+            AcLineSegment,
+            lambda _: Cut(mrid="cut1"),
+            lambda _: Cut(mrid="cut2")
+        )
+        self.validator.validate_collection(
+            AcLineSegment.clamps,
+            AcLineSegment.add_clamp,
+            AcLineSegment,
+            lambda _: Clamp(mrid="clamp1"),
+            lambda _: Clamp(mrid="clamp2")
+        )
 
     def test_compare_breaker(self):
         self._compare_protected_switch(Breaker)
@@ -895,6 +911,18 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
     def test_compare_busbar_section(self):
         self._compare_connector(BusbarSection)
+
+    def test_compare_clamp(self):
+        self._compare_conducting_equipment(Clamp)
+
+        self.validator.validate_property(Clamp.length_from_terminal_1, Clamp, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(Clamp.ac_line_segment, Clamp, lambda _: AcLineSegment(mrid="c1"), lambda _: AcLineSegment(mrid="c2"))
+
+    def test_compare_cut(self):
+        self._compare_switch(Cut)
+
+        self.validator.validate_property(Cut.length_from_terminal_1, Cut, lambda _: 1.1, lambda _: 2.2)
+        self.validator.validate_property(Cut.ac_line_segment, Cut, lambda _: AcLineSegment(mrid="c1"), lambda _: AcLineSegment(mrid="c2"))
 
     def _compare_conductor(self, creator: Type[Conductor]):
         self._compare_conducting_equipment(creator)
