@@ -4,11 +4,9 @@
 # Zepben Evolve Python SDK #
 The Python Evolve SDK contains everything necessary to communicate with a [Zepben EWB Server](https://github.com/zepben/energy-workbench-server). See the complete [Evolve Python SDK Documentation](https://zepben.github.io/evolve/docs/python-sdk/) for more details.
 
-Note this project is still a work in progress and unstable, and breaking changes may occur prior to 1.0.0. 
-
 # Requirements #
 
-- Python 3.7 or later
+- Python 3.9 or later
 
 # Installation #
 
