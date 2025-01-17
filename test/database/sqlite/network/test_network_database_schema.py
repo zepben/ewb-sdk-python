@@ -23,6 +23,8 @@ from zepben.evolve import IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest
     PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, StreetAddress, TownDetail, StreetDetail, GroundingImpedance, \
     PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.services.common import resolver
 from zepben.evolve.services.network.tracing import tracing
@@ -41,7 +43,7 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_ev_charging_unit, create_tap_changer_control, create_distance_relay, create_voltage_relay, create_protection_relay_scheme, \
     create_protection_relay_system, create_ground, create_ground_disconnector, create_series_compensator, create_potential_transformer_info, \
     create_grounding_impedance, create_petersen_coil, create_reactive_capability_curve, create_synchronous_machine, create_per_length_phase_impedance, \
-    create_pan_demand_response_function, create_battery_control, create_static_var_compensator
+    create_pan_demand_response_function, create_battery_control, create_static_var_compensator, create_clamp, create_cut
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
 
@@ -427,6 +429,16 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     @given(busbar_section=create_busbar_section(False))
     async def test_schema_busbar_section(self, busbar_section):
         await self._validate_schema(SchemaNetworks().network_services_of(BusbarSection, busbar_section))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(clamp=create_clamp(False))
+    async def test_schema_clamp(self, clamp):
+        await self._validate_schema(SchemaNetworks().network_services_of(Clamp, clamp))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(cut=create_cut(False))
+    async def test_schema_cut(self, cut):
+        await self._validate_schema(SchemaNetworks().network_services_of(Cut, cut))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(disconnector=create_disconnector(False))

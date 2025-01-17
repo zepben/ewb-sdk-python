@@ -28,6 +28,8 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo, PanDemandResponseFunction, BatteryControl, \
     StaticVarCompensator, PerLengthPhaseImpedance, GroundingImpedance, PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -628,10 +630,10 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
 
 
 _nio_type_to_cim = {
-    # [ZBEX] EXTENSIONS IEC61968 METERING #
+    # EXTENSIONS IEC61968 METERING #
     "panDemandResponseFunction": PanDemandResponseFunction,
 
-    # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
+    # EXTENSIONS IEC61970 BASE WIRES #
     "batteryControl": BatteryControl,
 
     # IEC61968 ASSET INFO #
@@ -710,6 +712,8 @@ _nio_type_to_cim = {
     "acLineSegment": AcLineSegment,
     "breaker": Breaker,
     "busbarSection": BusbarSection,
+    "clamp": Clamp,
+    "cut": Cut,
     "disconnector": Disconnector,
     "energyConsumer": EnergyConsumer,
     "energyConsumerPhase": EnergyConsumerPhase,

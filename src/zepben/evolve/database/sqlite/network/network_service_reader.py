@@ -84,6 +84,8 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.product
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ac_line_segments import TableAcLineSegments
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_breakers import TableBreakers
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_busbar_sections import TableBusbarSections
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_clamps import TableClamps
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_cuts import TableCuts
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_disconnectors import TableDisconnectors
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_energy_consumer_phases import TableEnergyConsumerPhases
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_energy_consumers import TableEnergyConsumers
@@ -186,6 +188,8 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TableBreakers, self._reader.load_breaker),
             self._load_each(TableLoadBreakSwitches, self._reader.load_load_break_switch),
             self._load_each(TableBusbarSections, self._reader.load_busbar_section),
+            self._load_each(TableClamps, self._reader.load_clamp),
+            self._load_each(TableCuts, self._reader.load_cut),
             self._load_each(TableCurrentRelays, self._reader.load_current_relay),
             self._load_each(TableDistanceRelays, self._reader.load_distance_relay),
             self._load_each(TableVoltageRelays, self._reader.load_voltage_relay),

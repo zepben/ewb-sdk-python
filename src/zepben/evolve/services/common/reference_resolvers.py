@@ -8,7 +8,6 @@ from __future__ import annotations
 from typing import Callable, Optional
 
 from zepben.evolve.dataclassy import dataclass
-
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import BatteryControl
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
@@ -58,13 +57,15 @@ from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system im
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer, EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
 from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
 from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import PowerElectronicsUnit, BatteryUnit
-from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthSequenceImpedance, PerLengthImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnectionPhase, PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd, RatioTapChanger, TransformerEnd, TapChanger
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
@@ -98,8 +99,9 @@ __all__ = [
     "lvfeeder_to_nef_resolver", "ct_to_cti_resolver", "vt_to_vti_resolver", "prf_to_psw_resolver", "psw_to_prf_resolver", "switch_to_switch_info_resolver",
     "prf_to_relay_info_resolver", "rc_to_rce_resolver", "rce_to_rc_resolver", "rc_to_term_resolver", "tc_to_tcc_resolver", "prf_to_psw_resolver",
     "psw_to_prf_resolver", "prf_to_sen_resolver", "sen_to_prf_resolver", "prf_to_prscheme_resolver", "prscheme_to_prf_resolver",
-    "prscheme_to_prsystem_resolver", "battery_unit_to_battery_control_resolver", "ed_to_edf_resolver",
-    "prsystem_to_prscheme_resolver", "fuse_to_prf_resolver", "sm_to_rcc_resolver", "feeder_to_celvf_resolver", "lvfeeder_to_cef_resolver"]
+    "prscheme_to_prsystem_resolver", "battery_unit_to_battery_control_resolver", "ed_to_edf_resolver", "prsystem_to_prscheme_resolver", "fuse_to_prf_resolver",
+    "sm_to_rcc_resolver", "feeder_to_celvf_resolver", "lvfeeder_to_cef_resolver", "acls_to_cut_resolver", "cut_to_acls_resolver", "acls_to_clamp_resolver",
+    "clamp_to_acls_resolver"]
 
 
 @dataclass(frozen=True, eq=False, slots=True)
@@ -183,6 +185,12 @@ def _resolve_diag_diagobj(diag, diag_obj):
 
 
 acls_to_pli_resolver = ReferenceResolver(AcLineSegment, PerLengthImpedance, lambda t, r: setattr(t, 'per_length_impedance', r))
+
+acls_to_cut_resolver = ReferenceResolver(AcLineSegment, Cut, lambda t, r: t.add_cut(r))
+cut_to_acls_resolver = ReferenceResolver(Cut, AcLineSegment, lambda t, r: setattr(t, 'ac_line_segment', r))
+
+acls_to_clamp_resolver = ReferenceResolver(AcLineSegment, Clamp, lambda t, r: t.add_clamp(r))
+clamp_to_acls_resolver = ReferenceResolver(Clamp, AcLineSegment, lambda t, r: setattr(t, 'ac_line_segment', r))
 
 asset_to_asset_org_role_resolver = ReferenceResolver(Asset, AssetOrganisationRole, lambda t, r: t.add_organisation_role(r))
 asset_to_location_resolver = ReferenceResolver(Asset, Location, lambda t, r: setattr(t, 'location', r))

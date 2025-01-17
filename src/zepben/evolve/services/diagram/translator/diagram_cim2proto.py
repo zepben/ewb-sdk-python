@@ -15,8 +15,10 @@ from zepben.evolve.services.common.translator.util import mrid_or_empty
 
 __all__ = ["diagram_to_pb", "diagram_object_to_pb", "diagram_object_point_to_pb"]
 
-
+###########################
 # IEC61970 DIAGRAM LAYOUT #
+###########################
+
 def diagram_to_pb(cim: Diagram) -> PBDiagram:
     return PBDiagram(
         io=identified_object_to_pb(cim),

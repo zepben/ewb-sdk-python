@@ -78,6 +78,8 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.product
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ac_line_segments import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_breakers import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_busbar_sections import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_clamps import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_cuts import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_disconnectors import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_energy_consumer_phases import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_energy_consumers import *
@@ -142,12 +144,14 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableCircuits()
         yield TableCircuitsSubstations()
         yield TableCircuitsTerminals()
+        yield TableClamps()
         yield TableConnectivityNodes()
         yield TableControls()
         yield TableCurrentRelays()
         yield TableCurrentTransformerInfo()
         yield TableCurrentTransformers()
         yield TableCurveData()
+        yield TableCuts()
         yield TableDisconnectors()
         yield TableDiscretes()
         yield TableDistanceRelays()

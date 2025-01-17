@@ -34,7 +34,8 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
            'MAX_SEQUENCE_NUMBER', 'MIN_SEQUENCE_NUMBER', 'ALPHANUM', 'boolean_or_none', 'create_grounding_impedance', 'create_petersen_coil',
            'create_reactive_capability_curve', 'create_synchronous_machine', 'create_earth_fault_compensator', 'create_curve', 'create_curve_data',
            'create_rotating_machine', 'sampled_curves', 'create_pan_demand_response_function', 'create_battery_control', 'create_asset_function',
-           'create_end_device_function', 'create_static_var_compensator', 'create_per_length_phase_impedance', 'create_phase_impedance_data'
+           'create_end_device_function', 'create_static_var_compensator', 'create_per_length_phase_impedance', 'create_phase_impedance_data', 'create_clamp',
+           'create_cut'
            ]
 
 from datetime import datetime
@@ -45,6 +46,8 @@ from zepben.evolve import *
 
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
 
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
@@ -63,9 +66,9 @@ MIN_SEQUENCE_NUMBER = 1
 ALPHANUM = "abcdefghijbklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
 
-#######################################
-# [ZBEX] EXTENSIONS IEC61968 METERING #
-#######################################
+################################
+# EXTENSIONS IEC61968 METERING #
+################################
 
 def create_pan_demand_response_function(include_runtime: bool = True):
     return builds(
@@ -76,9 +79,9 @@ def create_pan_demand_response_function(include_runtime: bool = True):
     )
 
 
-#########################################
-# [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
-#########################################
+##################################
+# EXTENSIONS IEC61970 BASE WIRES #
+##################################
 
 def create_battery_control(include_runtime: bool = True):
     return builds(
@@ -1039,6 +1042,24 @@ def create_breaker(include_runtime: bool = True):
 
 def create_busbar_section(include_runtime: bool = True):
     return builds(BusbarSection, **create_connector(include_runtime))
+
+
+def create_clamp(include_runtime: bool = True):
+    return builds(
+        Clamp,
+        **create_conducting_equipment(include_runtime),
+        length_from_terminal_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ac_line_segment=builds(AcLineSegment, **create_identified_object(include_runtime))
+    )
+
+
+def create_cut(include_runtime: bool = True):
+    return builds(
+        Cut,
+        **create_switch(include_runtime),
+        length_from_terminal_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
+        ac_line_segment=builds(AcLineSegment, **create_identified_object(include_runtime))
+    )
 
 
 def create_conductor(include_runtime: bool):

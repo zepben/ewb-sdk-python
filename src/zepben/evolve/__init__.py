@@ -9,6 +9,8 @@
 #
 # @formatter:off
 
+from zepben.evolve.util import *
+
 # We need to import SinglePhaseKind before anything uses PhaseCode to prevent cyclic dependencies.
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
 
@@ -103,6 +105,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import *
 from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import *
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import *
+from zepben.evolve.model.cim.iec61970.base.wires.cut import *
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import *
 from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import *
 from zepben.evolve.model.cim.iec61970.base.wires.fuse import *
@@ -230,8 +234,6 @@ from zepben.evolve.streaming.get.query_network_state_client import *
 from zepben.evolve.streaming.mutations.update_network_state_service import *
 from zepben.evolve.streaming.mutations.update_network_state_client import *
 
-
-from zepben.evolve.util import *
 
 from zepben.evolve.services.network.network_extensions import *
 from zepben.evolve.model.busbranch.bus_branch import *

@@ -206,9 +206,9 @@ __all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_inf
            'per_length_phase_impedance', 'phase_impedance_data', 'reactive_capability_curve', 'curve', 'curve_data']
 
 
-#######################################
-# [ZBEX] EXTENSIONS IEC61968 METERING #
-#######################################
+################################
+# EXTENSIONS IEC61968 METERING #
+################################
 
 def pan_demand_response_function():
     return builds(
@@ -219,9 +219,9 @@ def pan_demand_response_function():
     )
 
 
-#########################################
-# [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
-#########################################
+##################################
+# EXTENSIONS IEC61970 BASE WIRES #
+##################################
 
 def battery_control():
     return builds(
@@ -1505,10 +1505,10 @@ def timestamp():
 @composite
 def network_identified_objects(draw):
     nios = [
-        # [ZBEX] EXTENSIONS IEC61968 METERING #
+        # EXTENSIONS IEC61968 METERING #
         draw(builds(NetworkIdentifiedObject, panDemandResponseFunction=pan_demand_response_function())),
 
-        # [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
+        # EXTENSIONS IEC61970 BASE WIRES #
         draw(builds(NetworkIdentifiedObject, batteryControl=battery_control())),
 
         # IEC61968 ASSET INFO #

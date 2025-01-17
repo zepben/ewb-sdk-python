@@ -94,8 +94,10 @@ from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSourc
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment as PBAcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker as PBBreaker
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection as PBBusbarSection
+from zepben.protobuf.cim.iec61970.base.wires.Clamp_pb2 import Clamp as PBClamp
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor as PBConductor
 from zepben.protobuf.cim.iec61970.base.wires.Connector_pb2 import Connector as PBConnector
+from zepben.protobuf.cim.iec61970.base.wires.Cut_pb2 import Cut as PBCut
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector as PBDisconnector
 from zepben.protobuf.cim.iec61970.base.wires.EarthFaultCompensator_pb2 import EarthFaultCompensator as PBEarthFaultCompensator
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConnection_pb2 import EnergyConnection as PBEnergyConnection
@@ -219,7 +221,9 @@ from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import *
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import *
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
+from zepben.evolve.model.cim.iec61970.base.wires.cut import *
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import *
 from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
@@ -294,9 +298,10 @@ class CimTranslationException(Exception):
     pass
 
 
-#######################################
-# [ZBEX] EXTENSIONS IEC61968 METERING #
-#######################################
+################################
+# EXTENSIONS IEC61968 METERING #
+################################
+
 def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanDemandResponseFunction:
     """
     Convert the :class:`PanDemandResponseFunction` into its protobuf counterpart.
@@ -313,9 +318,9 @@ def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanD
 PanDemandResponseFunction.to_pb = pan_demand_response_function_to_pb
 
 
-#########################################
-# [ZBEX] EXTENSIONS IEC61970 BASE WIRES #
-#########################################
+##################################
+# EXTENSIONS IEC61970 BASE WIRES #
+##################################
 
 def battery_control_to_pb(cim: BatteryControl) -> PBBatteryControl:
     """
@@ -1120,7 +1125,9 @@ def ac_line_segment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
     """
     return PBAcLineSegment(
         cd=conductor_to_pb(cim),
-        perLengthImpedanceMRID=mrid_or_empty(cim.per_length_impedance)
+        perLengthImpedanceMRID=mrid_or_empty(cim.per_length_impedance),
+        cutMRIDs=[str(it.mrid) for it in cim.cuts],
+        clampMRIDs=[str(it.mrid) for it in cim.clamps]
     )
 
 
@@ -1135,6 +1142,14 @@ def busbar_section_to_pb(cim: BusbarSection) -> PBBusbarSection:
     return PBBusbarSection(cn=connector_to_pb(cim))
 
 
+def clamp_to_pb(cim: Clamp) -> PBClamp:
+    return PBClamp(
+        ce=conducting_equipment_to_pb(cim),
+        lengthFromTerminal1=from_nullable_float(cim.length_from_terminal_1),
+        acLineSegmentMRID=mrid_or_empty(cim.ac_line_segment)
+    )
+
+
 def conductor_to_pb(cim: Conductor) -> PBConductor:
     return PBConductor(
         ce=conducting_equipment_to_pb(cim, True),
@@ -1146,6 +1161,14 @@ def conductor_to_pb(cim: Conductor) -> PBConductor:
 
 def connector_to_pb(cim: Connector) -> PBConnector:
     return PBConnector(ce=conducting_equipment_to_pb(cim))
+
+
+def cut_to_pb(cim: Cut) -> PBCut:
+    return PBCut(
+        sw=switch_to_pb(cim),
+        lengthFromTerminal1=from_nullable_float(cim.length_from_terminal_1),
+        acLineSegmentMRID=mrid_or_empty(cim.ac_line_segment)
+    )
 
 
 def disconnector_to_pb(cim: Disconnector) -> PBDisconnector:
@@ -1625,6 +1648,8 @@ def transformer_star_impedance_to_pb(cim: TransformerStarImpedance) -> PBTransfo
 AcLineSegment.to_pb = ac_line_segment_to_pb
 Breaker.to_pb = breaker_to_pb
 BusbarSection.to_pb = busbar_section_to_pb
+Clamp.to_pb = clamp_to_pb
+Cut.to_pb = cut_to_pb
 Disconnector.to_pb = disconnector_to_pb
 EnergyConsumer.to_pb = energy_consumer_to_pb
 EnergyConsumerPhase.to_pb = energy_consumer_phase_to_pb

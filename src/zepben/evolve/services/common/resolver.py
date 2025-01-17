@@ -13,6 +13,8 @@ from zepben.evolve import AcLineSegment, Asset, AuxiliaryEquipment, ConductingEq
     TransformerStarImpedance, ShuntCompensator, LvFeeder, PotentialTransformer, CurrentTransformer, ProtectedSwitch, Switch, RegulatingControl, \
     RegulatingCondEq, TapChanger, ProtectionRelayFunction, ProtectionRelayScheme, ProtectionRelaySystem, Sensor, Fuse, BatteryUnit, \
     SynchronousMachine
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.services.common.reference_resolvers import *
 
 __all__ = ["ae_terminal", "agreements", "at_location", "ce_base_voltage", "ce_terminals", "circuits", "cn_terminals", "conducting_equipment",
@@ -30,7 +32,8 @@ __all__ = ["ae_terminal", "agreements", "at_location", "ce_base_voltage", "ce_te
            "sen_relay_function", "service_location", "shunt_compensator_info", "star_impedance_transformer_end_info", "streetlights",
            "sub_geographical_region", "sub_geographical_regions", "substations", "switch_info", "tariffs", "tc_tap_changer_control", "te_base_voltage",
            "te_terminal", "transformer_end", "transformer_end_info", "transformer_end_transformer_star_impedance", "transformer_star_impedance",
-           "transformer_tank_info", "unit_power_electronics_connection", "up_equipment", "usage_point_location", "wire_info"]
+           "transformer_tank_info", "unit_power_electronics_connection", "up_equipment", "usage_point_location", "wire_info", "cut_ac_line_segment", "cuts",
+           "clamp_ac_line_segment", "clamps"]
 
 
 def ae_terminal(auxiliary_equipment: AuxiliaryEquipment) -> BoundReferenceResolver:
@@ -66,6 +69,16 @@ def ce_terminals(ce: ConductingEquipment) -> BoundReferenceResolver:
 def circuits(substation: Substation) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(substation, sub_to_circuit_resolver, circuit_to_sub_resolver)
+
+
+def clamp_ac_line_segment(clamp: Clamp) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(clamp, clamp_to_acls_resolver, None)
+
+
+def clamps(acls: AcLineSegment) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(acls, acls_to_clamp_resolver, None)
 
 
 def cn_terminals(cn: ConnectivityNode) -> BoundReferenceResolver:
@@ -106,6 +119,16 @@ def current_transformer_info(current_transformer: CurrentTransformer) -> BoundRe
 def customer(customer_agreement: CustomerAgreement) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(customer_agreement, custagr_to_cust_resolver, cust_to_custagr_resolver)
+
+
+def cut_ac_line_segment(cut: Cut) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(cut, cut_to_acls_resolver, None)
+
+
+def cuts(acls: AcLineSegment) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(acls, acls_to_cut_resolver, None)
 
 
 def diagram(diagram_object: DiagramObject) -> BoundReferenceResolver:
@@ -418,6 +441,11 @@ def rce_regulating_control(regulating_cond_eq: RegulatingCondEq) -> BoundReferen
     return BoundReferenceResolver(regulating_cond_eq, rce_to_rc_resolver, rc_to_rce_resolver)
 
 
+def reactive_capability_curve(synchronous_machine: SynchronousMachine) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(synchronous_machine, sm_to_rcc_resolver, None)
+
+
 def relay_info(prf: ProtectionRelayFunction) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(prf, prf_to_relay_info_resolver, None)
@@ -541,8 +569,3 @@ def usage_point_location(usage_point: UsagePoint) -> BoundReferenceResolver:
 def wire_info(conductor: Conductor) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(conductor, conductor_to_wire_info_resolver, None)
-
-
-def reactive_capability_curve(synchronous_machine: SynchronousMachine) -> BoundReferenceResolver:
-    # noinspection PyArgumentList
-    return BoundReferenceResolver(synchronous_machine, sm_to_rcc_resolver, None)

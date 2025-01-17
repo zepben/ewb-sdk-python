@@ -82,8 +82,10 @@ from zepben.protobuf.cim.iec61970.base.scada.RemoteSource_pb2 import RemoteSourc
 from zepben.protobuf.cim.iec61970.base.wires.AcLineSegment_pb2 import AcLineSegment
 from zepben.protobuf.cim.iec61970.base.wires.Breaker_pb2 import Breaker
 from zepben.protobuf.cim.iec61970.base.wires.BusbarSection_pb2 import BusbarSection
+from zepben.protobuf.cim.iec61970.base.wires.Clamp_pb2 import Clamp
 from zepben.protobuf.cim.iec61970.base.wires.Conductor_pb2 import Conductor
 from zepben.protobuf.cim.iec61970.base.wires.Connector_pb2 import Connector
+from zepben.protobuf.cim.iec61970.base.wires.Cut_pb2 import Cut
 from zepben.protobuf.cim.iec61970.base.wires.Disconnector_pb2 import Disconnector
 from zepben.protobuf.cim.iec61970.base.wires.EarthFaultCompensator_pb2 import EarthFaultCompensator
 from zepben.protobuf.cim.iec61970.base.wires.EnergyConnection_pb2 import EnergyConnection
@@ -221,8 +223,10 @@ PowerElectronicsWindUnit.mrid = lambda self: self.peu.mrid()
 AcLineSegment.mrid = lambda self: self.cd.mrid()
 Breaker.mrid = lambda self: self.sw.mrid()
 BusbarSection.mrid = lambda self: self.cn.mrid()
+Clamp.mrid = lambda self: self.ce.mrid()
 Conductor.mrid = lambda self: self.ce.mrid()
 Connector.mrid = lambda self: self.ce.mrid()
+Cut.mrid = lambda self: self.sw.mrid()
 Disconnector.mrid = lambda self: self.sw.mrid()
 EarthFaultCompensator.mrid = lambda self: self.ce.mrid()
 EnergyConnection.mrid = lambda self: self.ce.mrid()

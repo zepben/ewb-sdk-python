@@ -55,6 +55,8 @@ from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSour
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment, Conductor
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection, Junction
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import Disconnector
 from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import EarthFaultCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
@@ -122,9 +124,9 @@ class NetworkServiceComparator(BaseServiceComparator):
         super().__init__()
         self._options = options
 
-    #######################################
-    # [ZBEX] EXTENSIONS IEC61968 METERING #
-    #######################################
+    ################################
+    # EXTENSIONS IEC61968 METERING #
+    ################################
 
     def _compare_pan_demand_response_function(self, source: PanDemandResponseFunction, target: PanDemandResponseFunction) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -133,9 +135,9 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_end_device_function(diff)
 
-    #########################################
-    # [ABEX] EXTENSIONS IEC61970 BASE WIRES #
-    #########################################
+    ##################################
+    # EXTENSIONS IEC61970 BASE WIRES #
+    ##################################
 
     def _compare_battery_control(self, source: BatteryControl, target: BatteryControl) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -330,14 +332,6 @@ class NetworkServiceComparator(BaseServiceComparator):
     # IEC61968 infIEC61968 InfAssetInfo #
     #####################################
 
-    def _compare_relay_info(self, source: RelayInfo, target: RelayInfo) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_values(diff, RelayInfo.curve_setting, RelayInfo.reclose_fast)
-        self._compare_indexed_value_collections(diff, RelayInfo.reclose_delays)
-
-        return self._compare_asset_info(diff)
-
     def _compare_current_transformer_info(self, source: CurrentTransformerInfo, target: CurrentTransformerInfo) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
@@ -377,6 +371,14 @@ class NetworkServiceComparator(BaseServiceComparator):
             PotentialTransformerInfo.primary_ratio,
             PotentialTransformerInfo.secondary_ratio
         )
+
+        return self._compare_asset_info(diff)
+
+    def _compare_relay_info(self, source: RelayInfo, target: RelayInfo) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, RelayInfo.curve_setting, RelayInfo.reclose_fast)
+        self._compare_indexed_value_collections(diff, RelayInfo.reclose_delays)
 
         return self._compare_asset_info(diff)
 
@@ -771,6 +773,8 @@ class NetworkServiceComparator(BaseServiceComparator):
         diff = ObjectDifference(source, target)
 
         self._compare_id_references(diff, AcLineSegment.per_length_impedance)
+        self._compare_id_reference_collections(diff, AcLineSegment.cuts)
+        self._compare_id_reference_collections(diff, AcLineSegment.clamps)
 
         return self._compare_conductor(diff)
 
@@ -784,6 +788,14 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_busbar_section(self, source: BusbarSection, target: BusbarSection) -> ObjectDifference:
         return self._compare_connector(ObjectDifference(source, target))
 
+    def _compare_clamp(self, source: Clamp, target: Clamp) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_floats(diff, Clamp.length_from_terminal_1)
+        self._compare_id_references(diff, Clamp.ac_line_segment)
+
+        return self._compare_conducting_equipment(diff)
+
     def _compare_conductor(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_floats(diff, Conductor.length, Conductor.design_rating)
         self._compare_values(diff, Conductor.design_temperature)
@@ -793,6 +805,14 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_connector(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_conducting_equipment(diff)
+
+    def _compare_cut(self, source: Cut, target: Cut) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_floats(diff, Cut.length_from_terminal_1)
+        self._compare_id_references(diff, Cut.ac_line_segment)
+
+        return self._compare_switch(diff)
 
     def _compare_disconnector(self, source: Disconnector, target: Disconnector) -> ObjectDifference:
         return self._compare_switch(ObjectDifference(source, target))
@@ -1048,6 +1068,9 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_tap_changer(diff)
 
+    def _compare_reactive_capability_curve(self, source: ReactiveCapabilityCurve, target: ReactiveCapabilityCurve) -> ObjectDifference:
+        return self._compare_curve(ObjectDifference(source, target))
+
     def _compare_recloser(self, source: Recloser, target: Recloser) -> ObjectDifference:
         return self._compare_protected_switch(ObjectDifference(source, target))
 
@@ -1079,9 +1102,6 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_id_reference_collections(diff, RegulatingControl.regulating_conducting_equipment)
 
         return self._compare_power_system_resource(diff)
-
-    def _compare_reactive_capability_curve(self, source: ReactiveCapabilityCurve, target: ReactiveCapabilityCurve) -> ObjectDifference:
-        return self._compare_curve(ObjectDifference(source, target))
 
     def _compare_rotating_machine(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_values(diff, RotatingMachine.rated_u)
