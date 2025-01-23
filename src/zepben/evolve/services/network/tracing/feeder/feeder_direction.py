@@ -34,6 +34,16 @@ class FeederDirection(Enum):
     to trace upstream towards the feeder head, or downstream away from the feeder head.
     """
 
+    CONNECTOR = 4
+    """
+    The terminal belongs to a Connector that is modelled with only a single terminal.
+    CONNECTOR will match direction up UPSTREAM, DOWNSTREAM, and BOTH, however it exists
+    to differentiate it from BOTH which is used to indicate loops on the feeder. This
+    however means you connected tell if a terminal with CONNECTOR is part of a loop
+    directly, you need to check its connected terminals and check for BOTH to determine
+    if it is in a loop.
+    """
+
     # todo replace .has(
     def __contains__(self, other):
         """

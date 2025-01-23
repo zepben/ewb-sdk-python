@@ -28,6 +28,11 @@ class TestFeederDirection:
         assert FeederDirection.DOWNSTREAM in FeederDirection.BOTH
         assert FeederDirection.BOTH in FeederDirection.BOTH
 
+        assert FeederDirection.NONE not in FeederDirection.CONNECTOR
+        assert FeederDirection.UPSTREAM in FeederDirection.CONNECTOR
+        assert FeederDirection.DOWNSTREAM in FeederDirection.CONNECTOR
+        assert FeederDirection.BOTH in FeederDirection.CONNECTOR
+
     def test_plus(self):
         assert FeederDirection.NONE + FeederDirection.NONE == FeederDirection.NONE
         assert FeederDirection.NONE + FeederDirection.UPSTREAM == FeederDirection.UPSTREAM
@@ -48,6 +53,11 @@ class TestFeederDirection:
         assert FeederDirection.BOTH + FeederDirection.UPSTREAM == FeederDirection.BOTH
         assert FeederDirection.BOTH + FeederDirection.DOWNSTREAM == FeederDirection.BOTH
         assert FeederDirection.BOTH + FeederDirection.BOTH == FeederDirection.BOTH
+
+        assert FeederDirection.CONNECTOR + FeederDirection.NONE == FeederDirection.CONNECTOR
+        assert FeederDirection.CONNECTOR + FeederDirection.UPSTREAM == FeederDirection.CONNECTOR
+        assert FeederDirection.CONNECTOR + FeederDirection.DOWNSTREAM == FeederDirection.CONNECTOR
+        assert FeederDirection.CONNECTOR + FeederDirection.BOTH == FeederDirection.CONNECTOR
 
     def test_minus(self):
         assert FeederDirection.NONE - FeederDirection.NONE == FeederDirection.NONE
@@ -70,8 +80,14 @@ class TestFeederDirection:
         assert FeederDirection.BOTH - FeederDirection.DOWNSTREAM == FeederDirection.UPSTREAM
         assert FeederDirection.BOTH - FeederDirection.BOTH == FeederDirection.NONE
 
+        assert FeederDirection.CONNECTOR - FeederDirection.NONE == FeederDirection.CONNECTOR
+        assert FeederDirection.CONNECTOR - FeederDirection.UPSTREAM == FeederDirection.CONNECTOR
+        assert FeederDirection.CONNECTOR - FeederDirection.DOWNSTREAM == FeederDirection.CONNECTOR
+        assert FeederDirection.CONNECTOR - FeederDirection.BOTH == FeederDirection.CONNECTOR
+
     def test_not(self):
         assert ~FeederDirection.NONE == FeederDirection.BOTH
         assert ~FeederDirection.UPSTREAM == FeederDirection.DOWNSTREAM
         assert ~FeederDirection.DOWNSTREAM == FeederDirection.UPSTREAM
         assert ~FeederDirection.BOTH == FeederDirection.NONE
+        assert ~FeederDirection.CONNECTOR == FeederDirection.NONE
