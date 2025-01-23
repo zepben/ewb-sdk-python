@@ -9,9 +9,10 @@ import grpc
 from grpc._channel import _InactiveRpcError
 from zepben.auth import ZepbenTokenFetcher
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
+from zepben.protobuf.checkConnection.checkConnection_requests_pb2 import CheckConnectionRequest
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
-from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
+from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub, UpdateNetworkStateServiceStub
 
 from zepben.evolve.streaming.exceptions import GrpcConnectionException
 from zepben.evolve.streaming.grpc.auth_token_plugin import AuthTokenPlugin
@@ -77,12 +78,14 @@ class GrpcChannelBuilder(ABC):
         stubs: List = [
             NetworkConsumerStub(channel),
             DiagramConsumerStub(channel),
-            CustomerConsumerStub(channel)
+            CustomerConsumerStub(channel),
+            QueryNetworkStateServiceStub(channel),
+            UpdateNetworkStateServiceStub(channel)
         ]
         debug_errors = []
         for client in stubs:
             try:
-                result = client.getMetadata(GetMetadataRequest(), timeout=timeout_seconds, wait_for_ready=False)
+                result = client.checkConnection(CheckConnectionRequest(), timeout=timeout_seconds, wait_for_ready=False)
                 if result:
                     return
             except _InactiveRpcError as rpc_error:
