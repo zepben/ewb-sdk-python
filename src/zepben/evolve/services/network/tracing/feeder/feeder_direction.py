@@ -37,7 +37,7 @@ class FeederDirection(Enum):
     CONNECTOR = 4
     """
     The terminal belongs to a Connector that is modelled with only a single terminal.
-    CONNECTOR will match direction up UPSTREAM, DOWNSTREAM, and BOTH, however it exists
+    CONNECTOR will match direction UPSTREAM, DOWNSTREAM, and BOTH, however it exists
     to differentiate it from BOTH which is used to indicate loops on the feeder. This
     however means you connected tell if a terminal with CONNECTOR is part of a loop
     directly, you need to check its connected terminals and check for BOTH to determine
@@ -52,7 +52,7 @@ class FeederDirection(Enum):
         :param other: The `FeederDirection` to check.
         :return: `True` if this is `BOTH` and other is not `NONE`, or if the directions are the same, otherwise `False`
         """
-        if self is FeederDirection.BOTH:
+        if self in (FeederDirection.BOTH, FeederDirection.CONNECTOR):
             return other is not FeederDirection.NONE
         else:
             return self is other
@@ -64,6 +64,9 @@ class FeederDirection(Enum):
         :param other: The `FeederDirection` to add.
         :return: The resulting `FeederDirection` with `other` added.
         """
+        if self == FeederDirection.CONNECTOR:
+            return FeederDirection.CONNECTOR
+
         return FeederDirection(self.value | other.value)
 
     def __sub__(self, other):
@@ -73,6 +76,9 @@ class FeederDirection(Enum):
         :param other: The `FeederDirection` to remove.
         :return: The resulting `FeederDirection` with `other` removed.
         """
+        if self == FeederDirection.CONNECTOR:
+            return FeederDirection.CONNECTOR
+
         return FeederDirection(self.value - (self.value & other.value))
 
     def __invert__(self):
@@ -80,7 +86,7 @@ class FeederDirection(Enum):
             return FeederDirection.DOWNSTREAM
         elif self == FeederDirection.DOWNSTREAM:
             return FeederDirection.UPSTREAM
-        elif self == FeederDirection.BOTH:
+        elif self in (FeederDirection.BOTH, FeederDirection.CONNECTOR):
             return FeederDirection.NONE
         else:  # lif self == FeederDirection.NONE:
             return FeederDirection.BOTH
