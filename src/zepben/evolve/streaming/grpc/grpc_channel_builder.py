@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import ABC
-from typing import Optional, List, Tuple, Any
+from typing import Optional, List, Tuple, Any, Dict
 
 import grpc
 from grpc._channel import _InactiveRpcError
@@ -27,11 +27,20 @@ class GrpcChannelBuilder(ABC):
     Builder class for gRPC channels to connect to EWB's gRPC service.
     """
 
+    _stubs: Dict = {
+        "NetworkConsumerClient": NetworkConsumerStub,
+        "DiagramConsumerClient": DiagramConsumerStub,
+        "CustomerConsumerClient": CustomerConsumerStub,
+        "QueryNetworkStateClient": QueryNetworkStateServiceStub,
+        "UpdateNetworkStateClient": UpdateNetworkStateServiceStub
+    }
+
     def __init__(self):
         self._socket_address: str = "localhost:50051"
         self._channel_credentials: Optional[grpc.ChannelCredentials] = None
 
-    def build(self, skip_connection_test: bool = False, timeout_seconds: int = 5, debug: bool = False, options: Optional[List[Tuple[str, Any]]] = None) -> grpc.aio.Channel:
+    def build(self, skip_connection_test: bool = False, timeout_seconds: int = 5, debug: bool = False,
+              options: Optional[List[Tuple[str, Any]]] = None) -> grpc.aio.Channel:
         """
         Get the resulting :class:`grpc.aio.Channel` from this builder.
 
@@ -75,21 +84,14 @@ class GrpcChannelBuilder(ABC):
         return grpc.aio.insecure_channel(self._socket_address, options=options)
 
     def _test_connection(self, channel: grpc.Channel, debug: bool, timeout_seconds: int):
-        stubs: List = [
-            NetworkConsumerStub(channel),
-            DiagramConsumerStub(channel),
-            CustomerConsumerStub(channel),
-            QueryNetworkStateServiceStub(channel),
-            UpdateNetworkStateServiceStub(channel)
-        ]
         debug_errors = []
-        for client in stubs:
+        for name, client in zip(self._stubs.keys(), map(lambda stub: stub(channel), list(self._stubs.values()))):
             try:
                 result = client.checkConnection(CheckConnectionRequest(), timeout=timeout_seconds, wait_for_ready=False)
                 if result:
                     return
             except _InactiveRpcError as rpc_error:
-                debug_errors.append(f"Received the following exception with {type(client).__name__}:\n{rpc_error}\n")
+                debug_errors.append(f"Received the following exception with {name}:\n{rpc_error}\n")
         raise GrpcConnectionException(f"Couldn't establish gRPC connection to any service on {self._socket_address}.\n{''.join(debug_errors) if debug else ''}")
 
     def for_address(self, host: str, port: int) -> 'GrpcChannelBuilder':
