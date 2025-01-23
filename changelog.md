@@ -15,6 +15,7 @@
     mobile generator. To enable this, connectivity nodes are placed at the cut terminals. Once the connectivity nodes are in place any conducting equipment can
     be connected at them.
     __NOT CURRENTLY FULLY SUPPORTED BY TRACING__
+* Added FeederDirection.CONNECTOR, to be used by BusbarSections for their direction to differentiate from BOTH.
 
 ### Enhancements
 * Updated `NetworkConsumerClient`'s `get_equipment_for_container/s`,  `get_equipment_container`, `get_equipment_for_loop` and `get_all_loops`
