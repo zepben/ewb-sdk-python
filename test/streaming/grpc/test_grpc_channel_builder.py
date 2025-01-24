@@ -7,14 +7,16 @@ from unittest import mock
 from unittest.mock import call
 
 import pytest
+from zepben.protobuf.connection.connection_requests_pb2 import CheckConnectionRequest
+
+from test.util import all_subclasses
 from zepben.evolve.dataclassy import dataclass
 from grpc import StatusCode, insecure_channel
 from grpc._channel import _InactiveRpcError, _RPCState
 from grpc._cython.cygrpc import OperationType
 from zepben.auth import ZepbenTokenFetcher
-from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 
-from zepben.evolve import GrpcChannelBuilder, GrpcConnectionException
+from zepben.evolve import GrpcChannelBuilder, GrpcConnectionException, GrpcClient
 
 _TWENTY_MEGABYTES = 1024 * 1024 * 20
 DEFAULT_GRPC_CHANNEL_MAX_RECEIVE_MESSAGE_LENGTH = ("grpc.max_receive_message_length", _TWENTY_MEGABYTES)
@@ -64,7 +66,18 @@ def test_debug_connection_test(mock_insecure_channel, mock_test_connection, mock
     assert GrpcChannelBuilder().build(debug=True) == "insecure channel"
 
     mock_insecure_sync_channel.assert_called_once_with("localhost:50051")
-    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=True)
+    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=True, timeout_seconds=5)
+    mock_insecure_channel.assert_called_once_with('localhost:50051', options=DEFAULT_GRPC_CHANNEL_OPTIONS)
+
+
+@mock.patch("grpc.insecure_channel", return_value=MockedChannel('insecure sync test channel'))
+@mock.patch("zepben.evolve.GrpcChannelBuilder._test_connection")
+@mock.patch("grpc.aio.insecure_channel", return_value="insecure channel")
+def test_timeout_connection_test(mock_insecure_channel, mock_test_connection, mock_insecure_sync_channel):
+    assert GrpcChannelBuilder().build(timeout_seconds=2789) == "insecure channel"
+
+    mock_insecure_sync_channel.assert_called_once_with("localhost:50051")
+    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=False, timeout_seconds=2789)
     mock_insecure_channel.assert_called_once_with('localhost:50051', options=DEFAULT_GRPC_CHANNEL_OPTIONS)
 
 
@@ -75,7 +88,7 @@ def test_for_address(mock_insecure_channel, mock_test_connection, mock_insecure_
     assert GrpcChannelBuilder().for_address("hostname", 1234).build() == "insecure channel"
 
     mock_insecure_sync_channel.assert_called_once_with("hostname:1234")
-    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=False)
+    mock_test_connection.assert_called_once_with(MockedChannel('insecure sync test channel'), debug=False, timeout_seconds=5)
     mock_insecure_channel.assert_called_once_with("hostname:1234", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
 
 
@@ -126,7 +139,8 @@ def test_make_secure(mocked_secure_channel, mocked_ssl_channel_creds, mock_test_
     mocked_secure_channel.assert_called_with("hostname:1234", "channel creds", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
     mock_secure_sync_channel.assert_called_with("hostname:1234", "channel creds")
     mock_test_connection.assert_has_calls(
-        [call(MockedChannel("secure sync test channel"), debug=False), call(MockedChannel("secure sync test channel"), debug=False)])
+        [call(MockedChannel("secure sync test channel"), debug=False, timeout_seconds=5),
+         call(MockedChannel("secure sync test channel"), debug=False, timeout_seconds=5)])
 
 
 @mock.patch("builtins.open", side_effect=lambda filename, *args, **kwargs: MockReadable(str.encode(filename)))
@@ -155,7 +169,7 @@ def test_with_token_fetcher(mocked_ssl_channel_creds, mocked_md_call_creds, mock
     mocked_comp_channel_creds.assert_called_once_with("ssl creds", "call creds")
     mocked_secure_channel.assert_called_once_with("hostname:1234", "composite creds", options=DEFAULT_GRPC_CHANNEL_OPTIONS)
     mock_secure_sync_channel.assert_called_once_with("hostname:1234", "composite creds")
-    mock_test_connection.assert_called_once_with(MockedChannel('secure sync test channel'), debug=False)
+    mock_test_connection.assert_called_once_with(MockedChannel('secure sync test channel'), timeout_seconds=5, debug=False)
 
 
 def test_with_token_fetcher_before_make_secure():
@@ -177,16 +191,37 @@ def test_with_client_token_before_make_secure():
                     StatusCode.UNIMPLEMENTED,
                     "details"
                 )),
+                "empty response",
+                Exception("Exception2")
+            ])
+def test_test_connection_returns_on_first_response(mock_checkConnection):
+    channel = insecure_channel("unused")
+    GrpcChannelBuilder()._test_connection(channel, False, timeout_seconds=5)
+
+    mock_checkConnection.assert_has_calls([call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+                                           call(CheckConnectionRequest(), timeout=5, wait_for_ready=False)], any_order=False)
+    assert mock_checkConnection.call_count == 2
+
+
+@mock.patch("grpc._channel._UnaryUnaryMultiCallable.__call__",
+            side_effect=[
+                _InactiveRpcError(_RPCState(
+                    [OperationType.send_message],
+                    None,
+                    None,
+                    StatusCode.UNIMPLEMENTED,
+                    "details"
+                )),
                 "metadata response",
                 Exception("Exception2")
             ])
-def test_test_connection_returns_on_first_response(mock_getMetadata):
+def test_test_connection_uses_timeout(mock_checkConnection):
     channel = insecure_channel("unused")
-    GrpcChannelBuilder()._test_connection(channel, False)
+    GrpcChannelBuilder()._test_connection(channel, False, timeout_seconds=12345)
 
-    mock_getMetadata.assert_has_calls([call(GetMetadataRequest(), wait_for_ready=False),
-                                       call(GetMetadataRequest(), wait_for_ready=False)], any_order=False)
-    assert mock_getMetadata.call_count == 2
+    mock_checkConnection.assert_has_calls([call(CheckConnectionRequest(), timeout=12345, wait_for_ready=False),
+                                           call(CheckConnectionRequest(), timeout=12345, wait_for_ready=False)], any_order=False)
+    assert mock_checkConnection.call_count == 2
 
 
 @mock.patch("grpc._channel._UnaryUnaryMultiCallable.__call__", side_effect=[
@@ -198,15 +233,15 @@ def test_test_connection_returns_on_first_response(mock_getMetadata):
         "details",
     ))
     ,
-    Exception("Exception1"),
+    "metadata response",
     Exception("Exception2")
 ])
-def test_test_connection_raises_on_first_unavailable(mock_getMetadata):
+def test_test_connection_continues_following_unavailable(mock_checkConnection):
     channel = insecure_channel("unused")
-    with pytest.raises(_InactiveRpcError, match='<_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNAVAILABLE\n\tdetails = '
-                                                '"details"\n\tdebug_error_string = "None"\n>'):
-        GrpcChannelBuilder()._test_connection(channel, False)
-    mock_getMetadata.assert_called_once()
+    GrpcChannelBuilder()._test_connection(channel, False, timeout_seconds=5)
+    mock_checkConnection.assert_has_calls([call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+                                           call(CheckConnectionRequest(), timeout=5, wait_for_ready=False)], any_order=False)
+    assert mock_checkConnection.call_count == 2
 
 
 @mock.patch("grpc._channel._UnaryUnaryMultiCallable.__call__", side_effect=[
@@ -230,18 +265,34 @@ def test_test_connection_raises_on_first_unavailable(mock_getMetadata):
         None,
         StatusCode.RESOURCE_EXHAUSTED,
         "details2",
+    )),
+    _InactiveRpcError(_RPCState(
+        [OperationType.send_message],
+        None,
+        None,
+        StatusCode.RESOURCE_EXHAUSTED,
+        "details3",
+    )),
+    _InactiveRpcError(_RPCState(
+        [OperationType.send_message],
+        None,
+        None,
+        StatusCode.RESOURCE_EXHAUSTED,
+        "details4",
     ))
 ])
-def test_test_connection_raises_connection_exception(mock_getMetadata):
+def test_test_connection_raises_connection_exception(mock_checkConnection):
     channel = insecure_channel("unused")
     with pytest.raises(GrpcConnectionException, match="Couldn't establish gRPC connection to any service on myServer.myDomain:9999.\n"):
-        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, False)
-    mock_getMetadata.assert_has_calls(
-        [call(GetMetadataRequest(), wait_for_ready=False),
-         call(GetMetadataRequest(), wait_for_ready=False),
-         call(GetMetadataRequest(), wait_for_ready=False)]
+        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, False, timeout_seconds=5)
+    mock_checkConnection.assert_has_calls(
+        [call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+         call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+         call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+         call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+         call(CheckConnectionRequest(), timeout=5, wait_for_ready=False)]
     )
-    assert mock_getMetadata.call_count == 3
+    assert mock_checkConnection.call_count == 5
 
 
 @mock.patch("grpc._channel._UnaryUnaryMultiCallable.__call__", side_effect=[
@@ -265,22 +316,52 @@ def test_test_connection_raises_connection_exception(mock_getMetadata):
         None,
         StatusCode.RESOURCE_EXHAUSTED,
         "details3",
+    )),
+    _InactiveRpcError(_RPCState(
+        [OperationType.send_message],
+        None,
+        None,
+        StatusCode.RESOURCE_EXHAUSTED,
+        "details4",
+    )),
+    _InactiveRpcError(_RPCState(
+        [OperationType.send_message],
+        None,
+        None,
+        StatusCode.RESOURCE_EXHAUSTED,
+        "details5",
     ))
 ])
-def test_test_connection_raises_connection_exception_with_debug(mock_getMetadata):
+def test_test_connection_raises_connection_exception_with_debug(mock_checkConnection):
     channel = insecure_channel("unused")
     with pytest.raises(GrpcConnectionException,
                        match='Couldn\'t establish gRPC connection to any service on myServer.myDomain:9999.\n'
-                             'Received the following exception with NetworkConsumerStub:\n<_InactiveRpcError of RPC that terminated with:\n'
+                             'Received the following exception with NetworkConsumerClient:\n<_InactiveRpcError of RPC that terminated with:\n'
                              '\tstatus = StatusCode.DATA_LOSS\n\tdetails = "details1"\n\tdebug_error_string = "None"\n>\n'
-                             'Received the following exception with DiagramConsumerStub:\n<_InactiveRpcError of RPC that terminated with:\n'
+                             'Received the following exception with DiagramConsumerClient:\n<_InactiveRpcError of RPC that terminated with:\n'
                              '\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = "details2"\n\tdebug_error_string = "None"\n>\n'
-                             'Received the following exception with CustomerConsumerStub:\n<_InactiveRpcError of RPC that terminated with:\n'
-                             '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details3"\n\tdebug_error_string = "None"\n>\n'):
-        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, True)
-    mock_getMetadata.assert_has_calls(
-        [call(GetMetadataRequest(), wait_for_ready=False),
-         call(GetMetadataRequest(), wait_for_ready=False),
-         call(GetMetadataRequest(), wait_for_ready=False)]
+                             'Received the following exception with CustomerConsumerClient:\n<_InactiveRpcError of RPC that terminated with:\n'
+                             '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details3"\n\tdebug_error_string = "None"\n>\n'
+                             'Received the following exception with QueryNetworkStateClient:\n<_InactiveRpcError of RPC that terminated with:\n'
+                             '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details4"\n\tdebug_error_string = "None"\n>\n'
+                             'Received the following exception with UpdateNetworkStateClient:\n<_InactiveRpcError of RPC that terminated with:\n'
+                             '\tstatus = StatusCode.RESOURCE_EXHAUSTED\n\tdetails = "details5"\n\tdebug_error_string = "None"\n>\n'):
+        GrpcChannelBuilder().for_address("myServer.myDomain", 9999)._test_connection(channel, True, timeout_seconds=5)
+    mock_checkConnection.assert_has_calls(
+        [call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+         call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+         call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+         call(CheckConnectionRequest(), timeout=5, wait_for_ready=False),
+         call(CheckConnectionRequest(), timeout=5, wait_for_ready=False)]
     )
-    assert mock_getMetadata.call_count == 3
+    assert mock_checkConnection.call_count == 5
+
+
+def test_count_grpc_stubs():
+    all_clients = all_subclasses(GrpcClient, 'zepben.evolve.streaming')
+    expected_stubs = set()
+
+    for name in map(lambda klass: klass.__name__, all_clients):
+        expected_stubs.add(name.replace("Sync", ""))
+
+    assert expected_stubs == set(GrpcChannelBuilder._stubs.keys())

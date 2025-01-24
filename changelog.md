@@ -17,7 +17,7 @@
 
 ## [0.44.0] - 2025-01-24
 ### Breaking Changes
-* None.
+* `GrpcChannelBuilder.build()` now accepts a `timeout_seconds` argument. This is the timeout used for each connection attempt so the total amount of time the connection test may take to fail can be greater than `timeout_seconds`.
 
 ### New Features
 * Added the following new CIM classes:
@@ -38,7 +38,7 @@
   to allow requesting normal, current or all equipments.
 
 ### Fixes
-* None.
+* GrpcChannelBuilder's initial connectivity test no longer fails due to a lack of permissions on a subset of services.
 
 ### Notes
 * `Cut` and `Clamp` have been added to the model, but no processing for them has been added to the tracing, so results will not be what you expect.
