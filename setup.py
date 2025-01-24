@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 deps = [
     "zepben.auth==0.12.1",
-    "zepben.protobuf==0.34.0"
+    "zepben.protobuf==0.34.1"
 ]
 
 test_deps = [

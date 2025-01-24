@@ -9,7 +9,7 @@ import grpc
 from grpc._channel import _InactiveRpcError
 from zepben.auth import ZepbenTokenFetcher
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
-from zepben.protobuf.checkConnection.checkConnection_requests_pb2 import CheckConnectionRequest
+from zepben.protobuf.connection.connection_requests_pb2 import CheckConnectionRequest
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub, UpdateNetworkStateServiceStub

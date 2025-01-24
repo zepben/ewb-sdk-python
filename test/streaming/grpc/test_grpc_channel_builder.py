@@ -7,7 +7,7 @@ from unittest import mock
 from unittest.mock import call
 
 import pytest
-from zepben.protobuf.checkConnection.checkConnection_requests_pb2 import CheckConnectionRequest
+from zepben.protobuf.connection.connection_requests_pb2 import CheckConnectionRequest
 
 from test.util import all_subclasses
 from zepben.evolve.dataclassy import dataclass
