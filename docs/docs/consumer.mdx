@@ -156,8 +156,9 @@ def print_network_hierarchy(client: SyncNetworkConsumerClient):
     if not hierarchy:
         return
     for region in hierarchy.geographical_regions:
-        print(f"- {region.name} [{region.mrid}]")
-        for sub_region in region.sub_geographical_regions:
+        current_location = hierarchy.geographical_regions[region]
+        print(f"- {current_location.name} [{current_location.mrid}]")
+        for sub_region in current_location.sub_geographical_regions:
             print(f"  |- {sub_region.name} [{sub_region.mrid}]")
             for substation in sub_region.substations:
                 print(f"    |- {sub_region.name} [{sub_region.mrid}]")
