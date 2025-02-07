@@ -10,7 +10,7 @@
 * None.
 
 ### Fixes
-* None.
+* Specify typing_extensions as a dependency to fix support for Python 3.9 and 3.10
 
 ### Notes
 * None.

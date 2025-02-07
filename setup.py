@@ -9,7 +9,8 @@ with open("README.md", "r") as fh:
 
 deps = [
     "zepben.auth==0.12.1",
-    "zepben.protobuf==0.34.1"
+    "zepben.protobuf==0.34.1",
+    "typing_extensions==4.12.2",
 ]
 
 test_deps = [
@@ -37,8 +38,6 @@ setup(
     classifiers=[
         "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
