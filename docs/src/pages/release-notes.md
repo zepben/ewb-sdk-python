@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.44.1](#v0441)| `07 February 2025` |
 |[0.44.0](#v0440)| `24 January 2025` |
 |[0.43.1](#v0431)| `06 January 2025` |
 |[0.43.0](#v0430)| `05 January 2025` |
@@ -52,6 +53,25 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.44.1]
+
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* Specify typing_extensions as a dependency to fix support for Python 3.9 and 3.10
+
+### Notes
+* None.
 
 ---
 
