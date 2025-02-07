@@ -1,5 +1,21 @@
 # Zepben Python SDK
-## [0.44.0] - UNRELEASED
+## [0.44.1] - UNRELEASED
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
+
+## [0.44.0] - 2025-02-07
 ### Breaking Changes
 * None.
 
