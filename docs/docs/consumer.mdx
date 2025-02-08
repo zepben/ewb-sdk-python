@@ -44,11 +44,11 @@ result = client.get_equipment_container("xxx", Feeder)
 client.service.get('...')
 
 # Asyncio
-async with connect_insecure(host="localhost", rpc_port=50051) as channel:
-    client = NetworkConsumerClient(channel)
-    result = await client.get_equipment_container("xxx", Feeder)
-    # do stuff with service
-    client.service.get('...')
+channel = connect_insecure(host="localhost", rpc_port=50051)
+client = NetworkConsumerClient(channel)
+result = await client.get_equipment_container("xxx", Feeder)
+# do stuff with service
+client.service.get('...')
 ```
 
 ### Connecting with HTTPS
@@ -152,10 +152,10 @@ of how to request the network hierarchy and print it out as a tree to the consol
 from zepben.evolve import SyncNetworkConsumerClient
 
 def print_network_hierarchy(client: SyncNetworkConsumerClient):
-    hierarchy = client.get_network_hierarchy().result
+    hierarchy = client.get_network_hierarchy().value
     if not hierarchy:
         return
-    for region in hierarchy.geographical_regions:
+    for region in hierarchy.geographical_regions.values():
         print(f"- {region.name} [{region.mrid}]")
         for sub_region in region.sub_geographical_regions:
             print(f"  |- {sub_region.name} [{sub_region.mrid}]")
