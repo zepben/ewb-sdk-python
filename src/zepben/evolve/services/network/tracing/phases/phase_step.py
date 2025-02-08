@@ -11,7 +11,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import Single
 from typing import FrozenSet, Optional, Union, Iterable
 from zepben.evolve.dataclassy import dataclass
 
-__all__ = ["PhaseStep"]
+__all__ = ["PhaseStep", "start_at", "continue_at"]
 
 
 @dataclass(slots=True)
