@@ -147,12 +147,12 @@ from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev
 from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 
-from zepben.evolve.services.network.tracing.traversals.tracker import *
-from zepben.evolve.services.network.tracing.traversals.basic_tracker import *
-from zepben.evolve.services.network.tracing.traversals.traversal import *
-from zepben.evolve.services.network.tracing.traversals.basic_traversal import *
-from zepben.evolve.services.network.tracing.traversals.queue import *
-from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import *
+from zepben.evolve.services.network.tracing.traversal.tracker import *
+from zepben.evolve.services.network.tracing.traversal.basic_tracker import *
+from zepben.evolve.services.network.tracing.traversal.traversal import *
+from zepben.evolve.services.network.tracing.traversal.basic_traversal import *
+from zepben.evolve.services.network.tracing.traversal.queue import *
+from zepben.evolve.services.network.tracing.traversal.branch_recursive_tracing import *
 
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import *
 from zepben.evolve.services.network.tracing.util import *

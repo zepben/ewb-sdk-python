@@ -52,7 +52,7 @@ class Traversal(Generic[T]):
     """A list of callback functions, to be called on each item."""
 
     tracker: Tracker = BasicTracker()
-    """A `zepben.evolve.traversals.tracker.Tracker` for tracking which items have been seen. If not provided a `Tracker` will be created for this trace."""
+    """A `zepben.evolve.services.network.tracing.traversal.tracker.Tracker` for tracking which items have been seen. If not provided a `Tracker` will be created for this trace."""
 
     _has_run: bool = False
     """Whether this traversal has run """

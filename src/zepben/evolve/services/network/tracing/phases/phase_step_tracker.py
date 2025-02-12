@@ -8,7 +8,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, TypeVar, Dict, Set
 
 from zepben.evolve.services.network.tracing.phases.phase_step import PhaseStep
-from zepben.evolve.services.network.tracing.traversals.tracker import Tracker
+from zepben.evolve.services.network.tracing.traversal.tracker import Tracker
 if TYPE_CHECKING:
     from zepben.evolve import ConductingEquipment, SinglePhaseKind
 
