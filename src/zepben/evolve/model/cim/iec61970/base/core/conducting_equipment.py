@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import sys
 from typing import List, Optional, Generator, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
@@ -35,6 +36,7 @@ class ConductingEquipment(Equipment):
     """
 
     _terminals: List[Terminal] = []
+    max_terminals = sys.maxsize  # FIXME: im not convinced this is the best approach, but im not sure how big the number needs to be
 
     def __init__(self, terminals: List[Terminal] = None, **kwargs):
         super(ConductingEquipment, self).__init__(**kwargs)
@@ -112,9 +114,14 @@ class ConductingEquipment(Equipment):
         `terminal` The `Terminal` to associate with this `ConductingEquipment`.
         Returns A reference to this `ConductingEquipment` to allow fluent use.
         Raises `ValueError` if another `Terminal` with the same `mrid` already exists for this `ConductingEquipment`.
+        Raises `ValueError` if `max_terminals` has already been reached.
         """
         if self._validate_terminal(terminal):
             return self
+
+        require (self.num_terminals() < self.max_terminals,
+            lambda: f"Unable to add {terminal} to {str(self)}. This conducting equipment already has the maximum number of terminals ({self.max_terminals}).")
+
 
         if terminal.sequence_number == 0:
             terminal.sequence_number = self.num_terminals() + 1
