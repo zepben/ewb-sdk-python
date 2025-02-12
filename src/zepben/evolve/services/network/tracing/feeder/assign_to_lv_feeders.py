@@ -11,7 +11,7 @@ from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.feeder.associated_terminal_trace import new_normal_trace, new_current_trace, get_associated_terminals
-from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 
 __all__ = ["AssignToLvFeeders"]
 

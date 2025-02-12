@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Optional, Set
 from zepben.evolve.services.network.network_service import connected_terminals
 from zepben.evolve.exceptions import TracingException
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
-from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
-from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import BranchRecursiveTraversal
+from zepben.evolve.services.network.tracing.traversal.queue import PriorityQueue
+from zepben.evolve.services.network.tracing.traversal.branch_recursive_tracing import BranchRecursiveTraversal
 from zepben.evolve.services.network.tracing.tree.tree_node import TreeNode
 from zepben.evolve.services.network.tracing.tree.tree_node_tracker import TreeNodeTracker
 if TYPE_CHECKING:

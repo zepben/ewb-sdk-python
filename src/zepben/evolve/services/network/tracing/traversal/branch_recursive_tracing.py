@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
-from zepben.evolve.services.network.tracing.traversals.queue import Queue, depth_first
-from zepben.evolve.services.network.tracing.traversals.traversal import Traversal
+from zepben.evolve.services.network.tracing.traversal.queue import Queue, depth_first
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 from typing import Callable, TypeVar, Optional
 
 __all__ = ["BranchRecursiveTraversal"]

@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Callable, TypeVar
 
 from zepben.evolve import Traversal
-from zepben.evolve.services.network.tracing.traversals.queue import Queue, depth_first
+from zepben.evolve.services.network.tracing.traversal.queue import Queue, depth_first
 
 __all__ = ["BasicTraversal"]
 T = TypeVar('T')
@@ -25,7 +25,7 @@ class BasicTraversal(Traversal[T]):
     The process queue, an instance of `Queue` is also supplied during construction. This gives the
     flexibility for this trace to be backed by any type of queue: breadth, depth, priority etc.
 
-    The traversal also requires a `zepben.evolve.traversals.tracker.Tracker` to be supplied. This gives flexibility
+    The traversal also requires a `zepben.evolve.traversal.tracker.Tracker` to be supplied. This gives flexibility
     to track items in unique ways, more than just "has this item been visited" e.g. visiting more than once,
     visiting under different conditions etc.
     """

@@ -23,8 +23,8 @@ from zepben.evolve.services.network.tracing.phases.phase_inferrer import PhaseIn
 from zepben.evolve.services.network.tracing.phases.phase_trace import new_phase_trace, new_downstream_phase_trace, new_upstream_phase_trace
 from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
-from zepben.evolve.services.network.tracing.traversals.basic_traversal import BasicTraversal
-from zepben.evolve.services.network.tracing.traversals.queue import breadth_first, Queue, depth_first
+from zepben.evolve.services.network.tracing.traversal.basic_traversal import BasicTraversal
+from zepben.evolve.services.network.tracing.traversal.queue import breadth_first, Queue, depth_first
 from zepben.evolve.services.network.tracing.tree.downstream_tree import DownstreamTree
 from zepben.evolve.services.network.tracing.util import ignore_open, normally_open, currently_open
 if TYPE_CHECKING:

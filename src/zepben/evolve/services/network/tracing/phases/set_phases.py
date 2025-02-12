@@ -16,8 +16,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import Single
 from zepben.evolve.services.network.tracing.connectivity.connectivity_result import ConnectivityResult
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_internal import TerminalConnectivityInternal
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
-from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import BranchRecursiveTraversal
-from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
+from zepben.evolve.services.network.tracing.traversal.branch_recursive_tracing import BranchRecursiveTraversal
+from zepben.evolve.services.network.tracing.traversal.queue import PriorityQueue
 from zepben.evolve.services.network.tracing.util import normally_open, currently_open
 if TYPE_CHECKING:
     from zepben.evolve import Terminal, ConductingEquipment, NetworkService

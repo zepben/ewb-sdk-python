@@ -6,7 +6,7 @@
 from typing import Optional
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.services.network.tracing.traversals.basic_tracker import BasicTracker
+from zepben.evolve.services.network.tracing.traversal.basic_tracker import BasicTracker
 
 __all__ = ["AssociatedTerminalTracker"]
 
