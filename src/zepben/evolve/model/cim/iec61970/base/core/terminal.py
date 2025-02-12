@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.model.phases import TracedPhases
 
 __all__ = ["AcDcTerminal", "Terminal"]
 
@@ -53,10 +52,6 @@ class Terminal(AcDcTerminal):
     current_feeder_direction: FeederDirection = FeederDirection.NONE
     """ Stores the direction of the feeder head relative to this [Terminal] in the current state of the network.
     """
-
-    traced_phases: TracedPhases = TracedPhases()
-    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases
-    to match those in `phases`"""
 
     _cn: Optional[ReferenceType] = None
     """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
