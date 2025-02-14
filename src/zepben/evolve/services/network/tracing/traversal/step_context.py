@@ -1,0 +1,47 @@
+#  Copyright 2025 Zeppelin Bend Pty Ltd
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+
+class StepContext:
+    """
+    Represents the context of a traversal step, holding information about the traversal state and the ability to store arbitrary values with the context.
+    This context is passed to conditions and actions during a traversal to provide additional information about each step.
+    Any [ContextValueComputer] registered with the traversal will put the computed value into this context with the given [ContextValueComputer.key] which can
+    be retrieved by using [getValue].
+
+    `isStartItem` Indicates whether the current item is a starting item of the traversal.
+    `isBranchStartItem` Indicates whether the current item is the start of a new branch in a branching traversal.
+    `stepNumber` The number of steps taken in the traversal so far for this traversal path.
+    `branchDepth` The depth of the current branch in a branching traversal.
+    `isStopping` Indicates whether the traversal is stopping at the current item due to a stop condition.
+    """
+    is_start_item: bool
+    is_branch_start_item: bool
+    step_number: int = 0
+    branch_depth: int
+    _values: dict
+
+    # is_stoppiing: bool = false
+    # is_actionable_item: bool = false
+
+    def set_value(self, key: str, value):
+        """
+        Sets a context value associated with the specified key.
+
+        `key` The key identifying the context value.
+        `value` The value to associate with the key.
+        """
+        self._values = self._values or dict()
+        self._values[key] = value
+
+    def get_value(self, key: str):
+        """
+        Retrieves a context value associated with the specified key.
+
+        `T` The expected type of the context value. TODO: actually implement
+        `key` The key identifying the context value.
+        @return The context value associated with the key, or `null` if not found.
+        """
+        return self._values.get(key)
