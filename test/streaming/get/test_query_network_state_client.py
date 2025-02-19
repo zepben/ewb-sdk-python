@@ -7,12 +7,13 @@ from typing import List, Callable, Generator
 
 import grpc_testing
 import pytest
+from google.protobuf import empty_pb2
 from zepben.protobuf.ns import network_state_pb2
 from zepben.protobuf.ns.network_state_responses_pb2 import GetCurrentStatesResponse
 
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
-from streaming.get.mock_server import MockServer, GrpcRequest, GrpcResponse, StreamGrpc
-from zepben.evolve import PhaseCode, datetime_to_timestamp, SwitchStateEvent, SwitchAction, CurrentStateEventBatch, QueryNetworkStateClient
+from streaming.get.mock_server import MockServer, GrpcRequest, GrpcResponse, StreamGrpc, StreamUnaryGrpc
+from zepben.evolve import PhaseCode, datetime_to_timestamp, SwitchStateEvent, SwitchAction, CurrentStateEventBatch, QueryNetworkStateClient, BatchSuccessful
 
 
 def _current_state_batch_to_pb(batch: CurrentStateEventBatch) -> GetCurrentStatesResponse:
@@ -33,7 +34,7 @@ class TestQueryNetworkStateClient:
         ]
 
     @pytest.mark.asyncio
-    async def test_get_current_states(self):
+    async def test_get_current_states(self, caplog):
         query_id = 1
         from_datetime = datetime.now()
         to_datetime = datetime.now() + timedelta(days=1)
@@ -55,3 +56,19 @@ class TestQueryNetworkStateClient:
             assert results == self.batches
 
         await self.mock_server.validate(client_test, [StreamGrpc('getCurrentStates', mock_service())])
+
+    @pytest.mark.asyncio
+    async def test_can_report_batch_status(self):
+        status = BatchSuccessful(1234)
+
+        def mock_service() -> List[Callable[[GrpcRequest], None]]:
+            def validate_request(request: GrpcRequest):
+                assert request.messageId == status.batch_id
+
+            return [validate_request]
+
+        async def client_test():
+            self.client.report_batch_status(status)
+
+        # noinspection PyUnresolvedReferences
+        await self.mock_server.validate(client_test, [StreamUnaryGrpc('reportBatchStatus', mock_service(), empty_pb2.Empty())])
