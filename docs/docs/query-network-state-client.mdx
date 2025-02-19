@@ -10,8 +10,9 @@ The `QueryNetworkStateClient` will allow you to interact with a server running t
 wrapper for the gRPC library, with the ability to retrieve information about the state of the network. This is done with the following 3 steps:
 
 1. Create a gRPC connection to the server.
-1. Create an instance of the `QueryNetworkStateClient` using your gRPC connection.
-2. Use your `QueryNetworkStateClient` to retrieve the state of the network.
+2. Create an instance of the `QueryNetworkStateClient` using your gRPC connection.
+3. Use your `QueryNetworkStateClient` to retrieve the state of the network.
+4. Use your `QueryNetworkStateClient` to report the status of applying the state of the network.
 
 ## Creating a gRPC channel
 
@@ -43,10 +44,17 @@ Now that you have a client, you can use it to query the state of the network on 
 
 The current state of the network between two date/times can be retrieved using the `get_current_states` function on the `QueryNetworkStateClient`.
 
-
 ```python
 from datetime import datetime, timedelta
 
 async for events in client.get_current_states(1, datetime.now() - timedelta(days=1), datetime.now()):
     # process the list of events here.
+```
+
+### Sending current network state statuses
+
+When applying the current state of the network, you should send a status response to report how the update went.
+
+```python
+client.report_batch_status(BatchSuccessful(1))
 ```

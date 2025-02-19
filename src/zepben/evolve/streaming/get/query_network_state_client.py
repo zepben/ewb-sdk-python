@@ -12,6 +12,7 @@ from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesReques
 
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
 from zepben.evolve.streaming.data.current_state_event_batch import CurrentStateEventBatch
+from zepben.evolve.streaming.data.set_current_states_status import SetCurrentStatesStatus
 from zepben.evolve.streaming.grpc.grpc import GrpcClient
 from zepben.evolve.util import datetime_to_timestamp
 
@@ -53,3 +54,10 @@ class QueryNetworkStateClient(GrpcClient):
         )
         async for response in self._stub.getCurrentStates(request):
             yield CurrentStateEventBatch(response.messageId, [CurrentStateEvent.from_pb(event) for event in response.event])
+
+    def report_batch_status(self, status: SetCurrentStatesStatus):
+        """
+        Send a response to a previous `getCurrentStates` request to let the server know how we handled its response.
+        :param status: The batch status to report.
+        """
+        self._stub.reportBatchStatus(iter([status.to_pb()]))

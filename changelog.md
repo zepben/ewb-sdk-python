@@ -7,7 +7,8 @@
 * None.
 
 ### Enhancements
-* None.
+* `QueryNetworkStateClient.reportBatchStatus` can be used to send status responses for batches returned from the service via
+  `QueryNetworkStateClient.getCurrentStates`.
 
 ### Fixes
 * Specify typing_extensions as a dependency to fix support for Python 3.9 and 3.10
