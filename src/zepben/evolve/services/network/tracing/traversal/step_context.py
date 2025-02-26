@@ -17,14 +17,16 @@ class StepContext:
     `branchDepth` The depth of the current branch in a branching traversal.
     `isStopping` Indicates whether the traversal is stopping at the current item due to a stop condition.
     """
-    is_start_item: bool
-    is_branch_start_item: bool
-    step_number: int = 0
-    branch_depth: int
-    _values: dict
 
-    # is_stoppiing: bool = false
-    # is_actionable_item: bool = false
+    def __init__(self, is_start_item: bool, is_branch_start_item: bool, step_number: int=0, branch_depth: int=0, values: dict=None):
+        self.is_start_item = is_start_item
+        self.is_branch_start_item = is_branch_start_item
+        self.step_number = step_number
+        self.branch_depth = branch_depth
+        self._values = values
+
+        self.is_stopping: bool = False
+        self.is_actionable_item: bool = False
 
     def set_value(self, key: str, value):
         """

@@ -1,0 +1,35 @@
+#  Copyright 2025 Zeppelin Bend Pty Ltd
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+import weakref
+from abc import ABC, abstractmethod
+from typing import Self, List
+
+from zepben.evolve import IdentifiedObject
+
+
+class TreeNode(ABC):
+    """
+    represents a node in the NetworkTrace tree
+    """
+    def __init__(self, identified_object: IdentifiedObject, parent=None):
+        self.identified_object = identified_object
+        self._parent: Self = weakref.ref(parent)
+        self._children: List[Self] = []
+
+    @property
+    def parent(self):
+        return self._parent()
+
+    @property
+    def children(self):
+        return list(self._children)
+
+    def add_child(self, child: Self):
+        self._children.append(child)
+
+    def __str__(self):
+        return f"{{object: {self.identified_object}, parent: {self.parent or ''}, num children: {len(self.children)}}}"
+

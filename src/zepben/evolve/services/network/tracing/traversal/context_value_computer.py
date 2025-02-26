@@ -6,6 +6,10 @@
 from abc import ABC
 from typing import TypeVar
 
+from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
+from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
+from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition
+
 T = TypeVar('T')
 U = TypeVar('U')
 
@@ -40,6 +44,9 @@ class ContextValueComputer[T](ABC):
         Returns The updated context value for the next item.
         """
         pass
+
+    def is_standalone_computer(self):
+        return all([not isinstance(self, StepAction), not isinstance(self, StopCondition), not isinstance(self, QueueCondition)])
 
 class TypedContextValueComputer[T, U](ContextValueComputer):
     """

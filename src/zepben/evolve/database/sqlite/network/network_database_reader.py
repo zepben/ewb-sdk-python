@@ -22,8 +22,12 @@ from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import Assi
 from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import AssignToLvFeeders
 
 from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
+# TODO: com.zepben.evolve.services.network.tracing.networktrace.Tracing
+# TODO: com.zepben.evolve.services.network.tracing.networktrace.operators.NetworkStateOperators
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import PhaseInferrer
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
+
+from typing import List
 
 
 class NetworkDatabaseReader(BaseDatabaseReader):
@@ -44,7 +48,8 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         connection: Connection,
         service: NetworkService,
         database_description: str,
-        tables: NetworkDatabaseTables = NetworkDatabaseTables(),
+        tables: NetworkDatabaseTables = NetworkDatabaseTables(),  # TODO: var removed in API change, assess impact
+        infer_phases: bool = None,
         metadata_reader: MetadataCollectionReader = None,
         service_reader: NetworkServiceReader = None,
         table_version: TableVersion = TableVersion(),
@@ -63,6 +68,7 @@ class NetworkDatabaseReader(BaseDatabaseReader):
             table_version
         )
         self.service = service
+        self.infer_phases = infer_phases
         self.set_direction = set_direction
         self.set_phases = set_phases
         self.phase_inferrer = phase_inferrer
@@ -98,6 +104,17 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         self._logger.info("Sources vs feeders validated.")
 
         return status
+
+    def _log_inferred_phases(self, normal_inferred_phases: List, current_inferred_phases: List):  # FIXME: set list contents classes, this'll likely explode until then
+        # FIXME: im pretty sure this should be building a dict of lists, not just a simple KV store. if so, this logic is way too simple
+        inferred_phases = {item.conducting_equipment: item for item in normal_inferred_phases}
+
+        for it in current_inferred_phases:
+            ce = it.conducting_equipment
+            inferred_phases[ce] = (inferred_phases[ce] if inferred_phases[ce].suspect else it)
+
+        for phase in inferred_phases:
+            self._logger.warn(f"*** Action Required *** {phase.description()}")
 
     def _validate_equipment_containers(self):
         missing_containers = [it for it in self.service.objects(Equipment) if not it.containers]
