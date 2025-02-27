@@ -4,20 +4,45 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import weakref
+from random import random
 from typing import List, Self
+import uuid
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import  ConductingEquipment
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
+from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
-
-class EquipmentTreeNode(StepAction):
-    """
-    represents a node representing `Conducting Equipment` in the NetworkTrace tree
-    """
-    def __init__(self, identified_object: ConductingEquipment, parent: Self = None):
-        super().__init__(identified_object, parent)
+EquipmentTreeNode = TreeNode[ConductingEquipment]
 
 
 class EquipmentTreeBuilder:
-    def __init__(self, step_action_with_context_value: NetworkTraceStep):
+    _roots: dict[ConductingEquipment, EquipmentTreeNode]={}
+
+    def __init__(self):
+        self.key = str(uuid.uuid4())
+
+    @property
+    def roots(self):
+        return self._roots.values()
+
+    def compute_initial_value(self, item: NetworkTraceStep[...]) -> EquipmentTreeNode:
+        node = self._roots.get(item.path.to_equipment, TreeNode(item.path.to_equipment, None))
+        if node is None:
+            node = TreeNode(item.path.to_equipment, None)
+        return node
+
+    def compute_next_value_typed(self, next_item: NetworkTraceStep[...], current_item: NetworkTraceStep[...], current_value: EquipmentTreeNode) -> EquipmentTreeNode:
+        if next_item.path.traced_internally:
+            return current_value
+        else:
+            return TreeNode(next_item.path.to_equipment, current_value)
+
+    def apply(self, item: NetworkTraceStep[...], context: StepContext):
+        current_node = context.value  # TODO: huh?? this isnt defined anywhere
+        if current_node.parent:
+            current_node.parent.add_child(current_node)
+
+    def clear(self):
+        self._roots.clear()
