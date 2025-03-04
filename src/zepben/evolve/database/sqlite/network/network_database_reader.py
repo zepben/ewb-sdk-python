@@ -23,7 +23,7 @@ from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import A
 
 from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
 # TODO: com.zepben.evolve.services.network.tracing.networktrace.Tracing
-# TODO: com.zepben.evolve.services.network.tracing.networktrace.operators.NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import PhaseInferrer
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
 
@@ -48,7 +48,6 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         connection: Connection,
         service: NetworkService,
         database_description: str,
-        tables: NetworkDatabaseTables = NetworkDatabaseTables(),  # TODO: var removed in API change, assess impact
         infer_phases: bool = None,
         metadata_reader: MetadataCollectionReader = None,
         service_reader: NetworkServiceReader = None,

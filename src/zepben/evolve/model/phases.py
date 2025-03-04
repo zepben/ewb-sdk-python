@@ -12,7 +12,7 @@ from zepben.evolve.exceptions import PhaseException
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
-__all__ = ["get_phase", "set_phase", "TracedPhases", "NominalPhasePath"]
+__all__ = ["get_phase", "set_phase", "TracedPhases"]
 
 BITS_TO_PHASE = defaultdict(lambda: SinglePhaseKind.NONE)
 BITS_TO_PHASE[0b0001] = SinglePhaseKind.A
@@ -52,19 +52,6 @@ def _byte_selector(nominal_phase: SinglePhaseKind) -> int:
 def _shifted_value(nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> int:
     return PHASE_TO_BITS[traced_phase] << _byte_selector(nominal_phase)
 #todo split file into correct packages
-
-@dataclass(frozen=True)
-class NominalPhasePath(object):
-    """
-    Defines how a nominal phase is wired through a connectivity node between two terminals
-    """
-
-    from_phase: SinglePhaseKind
-    """The nominal phase where the path comes from."""
-
-    to_phase: SinglePhaseKind
-    """The nominal phase where the path goes to."""
-
 
 @dataclass
 class TracedPhases(object):
