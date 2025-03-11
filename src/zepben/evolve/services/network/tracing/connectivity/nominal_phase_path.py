@@ -4,9 +4,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclasses import dataclass
 
-from zepben.evolve import SinglePhaseKind
 
 __all__ = ["NominalPhasePath"]
+
+from zepben.evolve import SinglePhaseKind
 
 
 @dataclass(frozen=True)

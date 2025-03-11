@@ -3,6 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import logging
+from dataclasses import dataclass
 from typing import Dict, Callable, List, Set, Awaitable
 
 from zepben.evolve import Terminal, SinglePhaseKind, ConductingEquipment, NetworkService, normal_phases, normal_direction, \
@@ -18,6 +19,23 @@ class PhaseInferrer:
     """
     A class that can infer missing phases on a network that has been processed by `SetPhases`.
     """
+
+    @dataclass
+    class InferredPhase:
+        conducting_equipment: ConductingEquipment
+        suspect: bool
+
+        def description(self):
+            if self.suspect:
+                return (f"Inferred missing phases for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which may not be correct. The "
+                        "phases were inferred due to a disconnected nominal phase because of an upstream error in the source data. Phasing information for the "
+                        "upstream equipment should be fixed in the source system.")
+            else:
+                return (f"Inferred missing phase for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which should be correct. The phase "
+                        f"was inferred due to a disconnected nominal phase because of an upstream error in the source data. Phasing information for the "
+                        f"upstream equipment should be fixed in the source system.")
+
+
 
     def __init__(self) -> None:
         super().__init__()

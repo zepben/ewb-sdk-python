@@ -5,7 +5,9 @@
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Generator, List, TYPE_CHECKING
+from typing import Optional, Dict, Generator, List, TYPE_CHECKING, Collection, TypeVar
+
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 
 if TYPE_CHECKING:
     from zepben.evolve import Equipment, Terminal, Substation, LvFeeder
@@ -14,6 +16,8 @@ from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container impo
 from zepben.evolve.util import nlen, ngen, safe_remove_by_id
 
 __all__ = ['EquipmentContainer', 'Feeder', 'Site']
+
+T = TypeVar("T")
 
 
 class EquipmentContainer(ConnectivityNodeContainer):
@@ -434,6 +438,16 @@ class Feeder(EquipmentContainer):
         """
         self._current_energized_lv_feeders = None
         return self
+
+    @classmethod
+    def get_filtered_containers(cls, this, operators: NetworkStateOperators) -> Collection[T]:
+        """
+        @return: a list of EquipmentContainers` of type `this`
+        """
+        containers = operators.get_containers(this)
+        if containers is None:
+            return list()
+        return list(container for container in containers if isinstance(container, cls))
 
 
 class Site(EquipmentContainer):

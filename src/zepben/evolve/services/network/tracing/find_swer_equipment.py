@@ -17,7 +17,7 @@ class FindSwerEquipment:
 
     create_trace: Callable[[], ConnectedEquipmentTraversal]
 
-    def __init__(self, create_trace: Optional[Callable[[], ConnectedEquipmentTraversal]] = None) -> None:
+    def __init__(self, create_trace: Optional[] = None) -> None:
         super().__init__()
         self.create_trace = create_trace or new_normal_connected_equipment_trace
 
