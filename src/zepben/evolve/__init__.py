@@ -147,12 +147,8 @@ from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev
 from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 
-from zepben.evolve.services.network.tracing.traversal.tracker import *
-from zepben.evolve.services.network.tracing.traversal.basic_tracker import *
 from zepben.evolve.services.network.tracing.traversal.traversal import *
-from zepben.evolve.services.network.tracing.traversal.basic_traversal import *
-from zepben.evolve.services.network.tracing.traversal.queue import *
-from zepben.evolve.services.network.tracing.traversal.branch_recursive_tracing import *
+from zepben.evolve.services.network.tracing.traversal.traversal_queue import *
 
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import *
 from zepben.evolve.services.network.tracing.util import *
@@ -161,13 +157,8 @@ from zepben.evolve.services.network.translator.network_proto2cim import *
 from zepben.evolve.services.network.translator.network_cim2proto import *
 from zepben.evolve.services.network.network_service import *
 
-from zepben.evolve.services.network.tracing.connectivity.conducting_equipment_step import *
-from zepben.evolve.services.network.tracing.connectivity.conducting_equipment_step_tracker import *
-from zepben.evolve.services.network.tracing.connectivity.connected_equipment_trace import *
 from zepben.evolve.services.network.tracing.connectivity.connectivity_result import *
-from zepben.evolve.services.network.tracing.connectivity.connectivity_tracker import *
-from zepben.evolve.services.network.tracing.connectivity.connectivity_trace import *
-from zepben.evolve.services.network.tracing.connectivity.limited_connected_equipment_trace import *
+from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import *
 from zepben.evolve.services.network.tracing.connectivity.phase_paths import *
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import *
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_internal import *
@@ -177,10 +168,7 @@ from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import *
 from zepben.evolve.services.network.tracing.feeder.direction_status import *
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import *
 from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import *
-from zepben.evolve.services.network.tracing.feeder.associated_terminal_trace import *
-from zepben.evolve.services.network.tracing.feeder.associated_terminal_tracker import *
 from zepben.evolve.services.network.tracing.feeder.set_direction import *
-from zepben.evolve.services.network.tracing.feeder.remove_direction import *
 from zepben.evolve.services.network.tracing.phases.phase_step import *
 from zepben.evolve.services.network.tracing.phases.phase_status import *
 from zepben.evolve.services.network.tracing.phases.phase_step_tracker import *
@@ -188,12 +176,12 @@ from zepben.evolve.services.network.tracing.phases.phase_trace import *
 from zepben.evolve.services.network.tracing.phases.set_phases import *
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import *
 from zepben.evolve.services.network.tracing.phases.remove_phases import *
-from zepben.evolve.services.network.tracing.tree.downstream_tree import *
-from zepben.evolve.services.network.tracing.tree.tree_node import *
-from zepben.evolve.services.network.tracing.tree.tree_node_tracker import *
 from zepben.evolve.services.network.tracing.find import *
 from zepben.evolve.services.network.tracing.find_swer_equipment import *
 from zepben.evolve.services.network.tracing.tracing import *
+from zepben.evolve.services.network.tracing.traversal.queue_condition import *
+from zepben.evolve.services.network.tracing.traversal.context_value_computer import *
+from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
 from zepben.evolve.services.network.tracing import tracing
 
 from zepben.evolve.services.common.meta.data_source import *

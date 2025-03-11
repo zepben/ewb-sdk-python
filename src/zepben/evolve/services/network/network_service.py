@@ -11,16 +11,15 @@ import itertools
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional
+from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Set
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.common.base_service import BaseService
 from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 if TYPE_CHECKING:
-    from zepben.evolve import Terminal, SinglePhaseKind, ConnectivityResult, Measurement, ConductingEquipment
+    from zepben.evolve import Terminal, SinglePhaseKind, ConnectivityResult, Measurement, ConductingEquipment, AuxiliaryEquipment
 
 logger = logging.getLogger(__name__)
 TRACED_NETWORK_FILE = str(Path.home().joinpath(Path("traced.json")))
@@ -263,3 +262,16 @@ class NetworkService(BaseService):
             self._measurements[measurement.power_system_resource_mrid].remove(measurement)
         except KeyError:
             pass
+
+    # TODO the `self.get_*` methods in here arent implemented
+    @property
+    def aux_equipment_by_terminal(self) -> Dict[Terminal, List[AuxiliaryEquipment]]:
+        return {equipment.terminal: equipment for equipment in self.get_auxiliary_equipment() if equipment.terminal is not None}
+
+    @property
+    def feeder_start_points(self) -> Set[ConductingEquipment]:
+        return {feeder.normal_head_terminal.conducting_equipment for feeder in self.get_feeders() if feeder.normal_head_terminal}
+
+    @property
+    def lv_feeder_start_points(self) -> Set[ConductingEquipment]:
+        return {lv_feeder.normal_head_terminal.conducting_equipment for lv_feeder in self.get_lv_feeders() if lv_feeder.normal_head_terminal}

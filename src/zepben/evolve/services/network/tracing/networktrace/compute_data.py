@@ -4,6 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar
 
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 T = TypeVar('T')
@@ -13,7 +14,7 @@ class ComputeData[T]:
     """
     Functional interface used to compute contextual data stored on a NetworkTraceStep.
     """
-    def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStop.Path) -> T:
+    def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path) -> T:
         """
         Called for each new NetworkTraceStep in a NetworkTrace. The value returned from this function
         will be stored against the next step within NetworkTraceStep. data.
@@ -31,7 +32,7 @@ class ComputeDataWithPaths[T]:
     Functional interface used to compute contextual data stored on a NetworkTraceStep. This can be used when the
     contextual data can only be computed by knowing all the next paths that can be stepped to from a given step.
     """
-    def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStop.Path, next_paths: list[NetworkTraceStop.Path, ...]) -> T:
+    def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path, next_paths: list[NetworkTraceStep.Path, ...]) -> T:
         """
         Called for each new NetworkTraceStep in a NetworkTrace. The value returned from this function
         will be stored against the next step within NetworkTraceStep. data.

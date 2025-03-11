@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from zepben.evolve import Switch, ConductingEquipment, SinglePhaseKind, BasicTraversal
+from zepben.evolve import Switch, ConductingEquipment, SinglePhaseKind
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
 
 __all__ = ["normally_open", "currently_open", "ignore_open", "phase_log"]

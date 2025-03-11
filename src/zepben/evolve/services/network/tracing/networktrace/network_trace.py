@@ -23,11 +23,15 @@ T = TypeVar('T')
 
 class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
     network_state_operators: NetworkStateOperators
-    queue_type: QueueType[NetworkTraceStep[T], 'NetworkTrace[T]']
+    queue_type: QueueType[NetworkTraceStep[T], 'NetworkTrace']
     parent: 'NetworkTrace[T]' = None
     _action_type: NetworkTraceActionType
 
-    def __init__(self, queue_type: QueueType[NetworkTraceStep[T]], parent: 'NetworkTrace[T]', action_type: NetworkTraceActionType[T]):
+    def __init__(self,
+                 queue_type: QueueType[NetworkTraceStep[T], "NetworkTrace[T]"],
+                 parent: 'NetworkTrace[T]',
+                 action_type: NetworkTraceActionType):
+
         self.tracker: NetworkTraceTracker
         if isinstance(queue_type, BasicQueueType):
             self.tracker = NetworkTraceTracker(256)

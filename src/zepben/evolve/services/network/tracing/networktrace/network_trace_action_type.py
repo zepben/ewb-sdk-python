@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from enum import Enum
 
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 

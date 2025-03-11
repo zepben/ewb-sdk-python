@@ -11,6 +11,8 @@ from queue import LifoQueue
 
 T = TypeVar('T')
 
+__all__ = ['TraversalQueue']
+
 
 class TraversalQueue(Generic[T], ABC):
     def __init__(self, queue=None):

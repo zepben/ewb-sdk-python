@@ -4,11 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, TYPE_CHECKING
 
-from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
+from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
+
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -44,7 +45,6 @@ class QueueCondition[T](TraversalCondition[T]):
         """
         # FIXME: return True? kotlin code defaults to True here, so idk if the default behavious should be to just return true yet
         raise NotImplementedError()
-
 
 class QueueConditionWithContextValue[T, U](QueueCondition[T], TypedContextValueComputer[T, U]):
     """
