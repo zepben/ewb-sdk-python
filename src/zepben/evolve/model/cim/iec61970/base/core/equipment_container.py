@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from typing import Optional, Dict, Generator, List, TYPE_CHECKING, Collection, TypeVar
 
-from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 
 if TYPE_CHECKING:
     from zepben.evolve import Equipment, Terminal, Substation, LvFeeder
@@ -440,7 +439,7 @@ class Feeder(EquipmentContainer):
         return self
 
     @classmethod
-    def get_filtered_containers(cls, this, operators: NetworkStateOperators) -> Collection[T]:
+    def get_filtered_containers(cls, this, operators: 'NetworkStateOperators') -> Collection[T]:
         """
         @return: a list of EquipmentContainers` of type `this`
         """

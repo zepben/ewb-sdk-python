@@ -12,8 +12,6 @@ from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
-from zepben.evolve.services.network.tracing.traversal.branch_recursive_tracing import BranchRecursiveTraversal
-from zepben.evolve.services.network.tracing.traversal.queue import PriorityQueue
 if TYPE_CHECKING:
     from zepben.evolve import ConnectivityResult, ConductingEquipment, NetworkService
     from zepben.evolve.types import PhaseSelector

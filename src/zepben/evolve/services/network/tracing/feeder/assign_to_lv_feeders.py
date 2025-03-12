@@ -6,9 +6,10 @@ from typing import Set, Callable, Optional, Awaitable, Any
 
 from zepben.evolve import AssignToFeeders
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer, Feeder
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
+from zepben.evolve.services.common.resolver import normal_head_terminal
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
@@ -40,4 +41,16 @@ class AssignToLvFeeders(AssignToFeeders):
         terminal_to_aux_equipment = network.aux_equipment_by_terminal
 
         if start_terminal is None:
-            for it in list(it for it in network if isinstance(it, LvFeeder)):
+            for lv_feeder in list(it for it in network if isinstance(it, LvFeeder)):
+                head_equipment = lv_feeder.normal_head_terminal.conducting_equipment
+                for feeder in head_equipment.get_filtered_containers(Feeder, self.network_state_operators):
+                    self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
+                await self.run_with_feeders(lv_feeder.normal_head_terminal, lv_feeder_start_points, terminal_to_aux_equipment, [lv_feeder])
+
+        else:
+            await self.run_with_feeders(normal_head_terminal, lv_feeder_start_points, terminal_to_aux_equipment, self._lv_feeders_from_terminal(start_terminal))
+
+
+    def _lv_feeders_from_terminal(self, terminal: Terminal):
+        return terminal.conducting_equipment.get_filtered_containers(LvFeeder)(self.network_state_operators)
+
