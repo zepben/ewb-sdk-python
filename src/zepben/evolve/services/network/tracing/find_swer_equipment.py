@@ -4,8 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Callable, Set, Union, Optional
 
-from zepben.evolve import ConnectedEquipmentTraversal, ConductingEquipmentStep, NetworkService, ConductingEquipment, Feeder, PowerTransformer, Switch, \
-    new_normal_connected_equipment_trace
+from zepben.evolve import NetworkService, ConductingEquipment, Feeder, PowerTransformer, Switch
 
 __all__ = ["FindSwerEquipment"]
 
@@ -17,7 +16,7 @@ class FindSwerEquipment:
 
     create_trace: Callable[[], ConnectedEquipmentTraversal]
 
-    def __init__(self, create_trace: Optional[] = None) -> None:
+    def __init__(self, create_trace: Optional = None) -> None:
         super().__init__()
         self.create_trace = create_trace or new_normal_connected_equipment_trace
 

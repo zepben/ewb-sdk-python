@@ -2,11 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import List, Callable, Optional
+from typing import List, Optional
 
-from zepben.evolve import BranchRecursiveTraversal, Terminal, FifoQueue, NetworkService, Feeder, FeederDirection, normally_open, \
-    currently_open, current_direction, normal_direction, PowerTransformer, Switch, ConductingEquipment
-from zepben.evolve.types import OpenTest, DirectionSelector
+from zepben.evolve import Terminal, NetworkService, Feeder, PowerTransformer, Switch, ConductingEquipment
 
 __all__ = ["SetDirection"]
 
@@ -16,33 +14,6 @@ class SetDirection:
     Convenience class that provides methods for setting feeder direction on a [NetworkService]
     This class is backed by a [BranchRecursiveTraversal].
     """
-
-    def __init__(self) -> None:
-        super().__init__()
-
-        # noinspection PyArgumentList
-        self.normal_traversal: BranchRecursiveTraversal[Terminal] = BranchRecursiveTraversal(
-            queue_next=lambda terminal, traversal: self._set_downstream_and_queue_next(traversal, terminal, normally_open, normal_direction),
-            process_queue=FifoQueue(),
-            branch_queue=FifoQueue()
-        )
-        """
-         The [BranchRecursiveTraversal] used when tracing the normal state of the network.
-    
-         NOTE: If you add stop conditions to this traversal it may no longer work correctly, use at your own risk.
-         """
-
-        # noinspection PyArgumentList
-        self.current_traversal: BranchRecursiveTraversal[Terminal] = BranchRecursiveTraversal(
-            queue_next=lambda terminal, traversal: self._set_downstream_and_queue_next(traversal, terminal, currently_open, current_direction),
-            process_queue=FifoQueue(),
-            branch_queue=FifoQueue()
-        )
-        """
-         The [BranchRecursiveTraversal] used when tracing the current state of the network.
-    
-         NOTE: If you add stop conditions to this traversal it may no longer work correctly, use at your own risk.
-         """
 
     async def run(self, network: NetworkService):
         """
@@ -70,32 +41,6 @@ class SetDirection:
             await self.normal_traversal.reset().run(t)
             await self.current_traversal.reset().run(t)
 
-    def _set_downstream_and_queue_next(
-        self,
-        traversal: BranchRecursiveTraversal[Terminal],
-        terminal: Terminal,
-        open_test: OpenTest,
-        direction_selector: DirectionSelector
-    ):
-        direction = direction_selector(terminal)
-        if not direction.add(FeederDirection.DOWNSTREAM):
-            return
-
-        connected = [t for t in terminal.connectivity_node or [] if t != terminal]
-        processor = self._flow_upstream_and_queue_next_straight if len(connected) == 1 else self._flow_upstream_and_queue_next_branch
-
-        for t in connected:
-            # noinspection PyArgumentList
-            processor(traversal, t, open_test, direction_selector)
-
-    @staticmethod
-    def _is_feeder_head_terminal(terminal: Terminal) -> bool:
-        ce = terminal.conducting_equipment
-        if not ce:
-            return False
-
-        return any(f.normal_head_terminal == terminal for f in ce.containers if isinstance(f, Feeder))
-
     @staticmethod
     def _reached_substation_transformer(terminal: Terminal) -> bool:
         ce = terminal.conducting_equipment
@@ -104,65 +49,6 @@ class SetDirection:
 
         return isinstance(ce, PowerTransformer) and ce.num_substations() > 0
 
-    def _flow_upstream_and_queue_next_straight(
-        self,
-        traversal: BranchRecursiveTraversal[Terminal],
-        terminal: Terminal,
-        open_test: OpenTest,
-        direction_selector: DirectionSelector
-    ):
-        if not traversal.tracker.visit(terminal):
-            return
-
-        if terminal.conducting_equipment and (terminal.conducting_equipment.num_terminals() == 2):
-            self._flow_upstream_and_queue_next(terminal, open_test, direction_selector, traversal.process_queue.put)
-        else:
-            self._flow_upstream_and_queue_next(terminal, open_test, direction_selector, lambda it: self._start_new_branch(traversal, it))
-
-    def _flow_upstream_and_queue_next_branch(
-        self,
-        traversal: BranchRecursiveTraversal[Terminal],
-        terminal: Terminal,
-        open_test: OpenTest,
-        direction_selector: DirectionSelector
-    ):
-        # We don't want to visit the upstream terminal if we have branched as it prevents the downstream path of a loop processing correctly, but we
-        # still need to make sure we don't re-visit the upstream terminal.
-        if traversal.has_visited(terminal):
-            return
-
-        self._flow_upstream_and_queue_next(terminal, open_test, direction_selector, lambda it: self._start_new_branch(traversal, it))
-
-    def _flow_upstream_and_queue_next(
-        self,
-        terminal: Terminal,
-        open_test: OpenTest,
-        direction_selector: DirectionSelector,
-        queue: Callable[[Terminal], None]
-    ):
-        direction = direction_selector(terminal)
-        if not direction.add(FeederDirection.UPSTREAM):
-            return
-
-        if self._is_feeder_head_terminal(terminal) or self._reached_substation_transformer(terminal):
-            return
-
-        ce = terminal.conducting_equipment
-        if not ce:
-            return
-        if open_test(ce, None):
-            return
-
-        for t in ce.terminals:
-            if t != terminal:
-                queue(t)
-
-    @staticmethod
     def _is_normally_open_switch(conducting_equipment: Optional[ConductingEquipment]):
         return isinstance(conducting_equipment, Switch) and conducting_equipment.is_normally_open()
 
-    @staticmethod
-    def _start_new_branch(traversal: BranchRecursiveTraversal[Terminal], terminal: Terminal):
-        branch = traversal.create_branch()
-        branch.start_item = terminal
-        traversal.branch_queue.put(branch)
