@@ -41,7 +41,7 @@ class AssignToLvFeeders(AssignToFeeders):
         terminal_to_aux_equipment = network.aux_equipment_by_terminal
 
         if start_terminal is None:
-            for lv_feeder in list(it for it in network if isinstance(it, LvFeeder)):
+            for lv_feeder in network.objects(LvFeeder):
                 head_equipment = lv_feeder.normal_head_terminal.conducting_equipment
                 for feeder in head_equipment.get_filtered_containers(Feeder, self.network_state_operators):
                     self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)

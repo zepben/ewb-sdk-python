@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar
 
-from zepben.evolve import Traversal, ConductingEquipment, Terminal, PhaseCode, NominalPhasePath, SinglePhaseKind
+from zepben.evolve import Traversal, ConductingEquipment, Terminal, PhaseCode, NominalPhasePath, SinglePhaseKind, TraversalQueue
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
@@ -28,9 +28,12 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
     _action_type: NetworkTraceActionType
 
     def __init__(self,
-                 queue_type: QueueType[NetworkTraceStep[T], "NetworkTrace[T]"],
-                 parent: 'NetworkTrace[T]',
-                 action_type: NetworkTraceActionType):
+                 network_state_operators: NetworkStateOperators,
+                 queue: TraversalQueue[NetworkTraceStep[T]],
+                 action_type: NetworkTraceActionType,
+                 compute_data):
+        self.network_state_operators = network_state_operators
+        self.queue_type = BasicQueueType(NetworkTraceQueueNext.basic)
 
         self.tracker: NetworkTraceTracker
         if isinstance(queue_type, BasicQueueType):
