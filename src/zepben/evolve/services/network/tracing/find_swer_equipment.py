@@ -8,6 +8,9 @@ from zepben.evolve import NetworkService, ConductingEquipment, Feeder, PowerTran
 
 __all__ = ["FindSwerEquipment"]
 
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.
+
 
 class FindSwerEquipment:
     """
@@ -50,14 +53,17 @@ class FindSwerEquipment:
 
         return swer_equipment
 
-    async def _trace_from(self, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
+    async def _create_trace(self, state_operators: NetworkStateOperators) -> Set[ConductingEquipment]:
+        await Tracing
+
+    async def _trace_from(self, state_operators: NetworkStateOperators, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
         # Trace from any SWER terminals.
-        await self._trace_swer_from(transformer, swer_equipment)
+        await self._trace_swer_from(state_operators, transformer, swer_equipment)
 
         # Trace from any LV terminals.
-        await self._trace_lv_from(transformer, swer_equipment)
+        await self._trace_lv_from(state_operators, transformer, swer_equipment)
 
-    async def _trace_swer_from(self, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
+    async def _trace_swer_from(self, state_operators: NetworkStateOperators, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
         async def is_in_swer_equipment(step: ConductingEquipmentStep) -> bool:
             return step.conducting_equipment in swer_equipment
 
