@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from collections import deque
 from collections.abc import Collection
 from typing import List, Callable, TypeVar, Generic, Optional, Dict, Any, overload
@@ -16,7 +17,7 @@ from zepben.evolve.services.network.tracing.traversal.step_action import StepAct
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition, StopConditionWithContextValue
 
-__all__ = ["Traversal"]
+__all__ = ["Traversal", "QueueNext", "BranchingQueueNext"]
 
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
 from zepben.evolve.services.network.tracing.traversal.traversal_queue import TraversalQueue
@@ -46,6 +47,7 @@ class Traversal(Generic[T, D]):
     def __init__(self, queue_type: QueueType[T, D], parent: Optional[D] = None):
         self._queue_type = queue_type
         self._parent = parent
+
         self.queue_next: Callable[[T, StepContext], None] = self._initialize_queue_next()
         self.queue: TraversalQueue[T] = queue_type.queue
         self.branch_queue: Optional[TraversalQueue[D]] = queue_type.branch_queue
@@ -389,51 +391,33 @@ class Traversal(Generic[T, D]):
         return all(it.should_queue_start_item(start_item) for it in self.queue_conditions)
 
 
-class QueueNext[T]:
-    """
-    Functional interface for queuing items in a non-branching traversal.
-    """
-    def accept(self, item: T, context: 'StepContext', queue_item: Callable[[T], bool]) -> None:
-        pass
 
-class BranchingQueueNext[T]:
-    """
-    Functional interface for queuing items in a branching traversal.
-    """
-    def accept(self, item: T, context: 'StepContext', queue_item: Callable[[T], bool], queue_branch: Callable[[T], bool]) -> None:
-        pass
+# QueueNext(item, context, queue_type)
+QueueNext = Callable[[T, StepContext, T], bool]
 
-class QueueType[T, D: 'Traversal[T, D]']():
+# BranchingQueueNext(item, context, queue_item, queue_branch)
+BranchingQueueNext = Callable[[T, StepContext, Callable[[T], bool], Callable[[T], bool]], None]
+
+class QueueType[T, D: Traversal](ABC):
     """
     Defines the types of queues used in the traversal.
     """
-    @property
-    def queue(self) -> TraversalQueue[T]:
-        pass
+    queue: TraversalQueue[T]
+    branch_queue: TraversalQueue[T]
 
-    @property
-    def branch_queue(self) -> Optional['TraversalQueue[D]']:
-        pass
-
-class BasicQueueType[T, D: 'Traversal[T, D]'](QueueType[T, D]):
+class BasicQueueType[T, D: Traversal[QueueType]]:
     """
     Basic queue type that handles non-branching item queuing.
 
     `queueNext` Logic for queueing the next item in the traversal.
     `queue` The primary queue of items.
     """
-    def __init__(self, queue_next: QueueNext[T], queue: 'TraversalQueue[T]'):
+    branch_queue = None
+
+    def __init__(self, queue_next: QueueNext[T], queue: TraversalQueue[T]):
         self.queue_next = queue_next
-        self._queue = queue
-        self._branch_queue = None
+        self.queue = queue
 
-    @property
-    def queue(self) -> 'TraversalQueue[T]':
-        return self._queue
-
-    @property
-    def branch_queue(self) -> Optional['TraversalQueue[D]']:
-        return self._branch_queue
 
 class BranchingQueueType(QueueType[T, D]):
     """
@@ -443,16 +427,7 @@ class BranchingQueueType(QueueType[T, D]):
     `queueFactory` Factory function to create the main queue.
     `branchQueueFactory` Factory function to create the branch queue.
     """
-    def __init__(self, queue_next: BranchingQueueNext[T], queue_factory: Callable[[], 'TraversalQueue[T]'], branch_queue_factory: Callable[[], 'TraversalQueue[D]']):
+    def __init__(self, queue_next: BranchingQueueNext[T], queue_factory: Callable[[], TraversalQueue[T]], branch_queue_factory: Callable[[], TraversalQueue[D]]):
         self.queue_next = queue_next
         self.queue_factory = queue_factory
         self.branch_queue_factory = branch_queue_factory
-
-    @property
-    def queue(self) -> 'TraversalQueue[T]':
-        return self.queue_factory()
-
-    @property
-    def branch_queue(self) -> 'TraversalQueue[D]':
-        return self.branch_queue_factory()
-

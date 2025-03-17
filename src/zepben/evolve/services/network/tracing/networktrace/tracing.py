@@ -20,7 +20,7 @@ class Tracing:
                       action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
                       queue: TraversalQueue[NetworkTraceStep[T]]=TraversalQueue.depth_first,
                       compute_data: ComputeData[T]=None
-                      ) -> T:
+                      ) -> NetworkTrace[T]:
         """
         Creates a `NetworkTrace` that computes contextual data for every step.
 
