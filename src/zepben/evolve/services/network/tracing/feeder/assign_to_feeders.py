@@ -29,7 +29,8 @@ class AssignToFeeders:
     This class is backed by a `NetworkTrace`.
     """
 
-    network_state_operators = NetworkStateOperators.NORMAL
+    def __init__(self):
+        self.network_state_operators = NetworkStateOperators.NORMAL
 
     async def run(self,
                   network: NetworkService,
