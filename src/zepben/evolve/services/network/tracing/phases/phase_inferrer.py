@@ -223,14 +223,10 @@ class PhaseInferrer:
         await self._continue_phases(terminal, phase_selector)
         return had_changes
 
-    @staticmethod
-    async def _continue_phases(terminal: Terminal, phase_selector: PhaseSelector):
-        if terminal.conducting_equipment:
-            for other in terminal.conducting_equipment.terminals:
-                if other != terminal:
-                    set_phases = SetPhases()
-                    set_phases.spread_phases(terminal, other, phase_selector=phase_selector)
-                    await set_phases.run_with_terminal_and_phase_selector(other, phase_selector)
+    # TODO: PhaseInferrerInternal
+    async def _continue_phases(self, terminal: Terminal):
+        set_phases_trace = SetPhases()
+        [set_phases_trace.run(terminal, other, terminal.phases.single_phases, network_state_operators=self.state_operators)  for other in terminal.other_terminals()]
 
     @staticmethod
     def _first_unused(phases: List[SinglePhaseKind], used_phases: Set[SinglePhaseKind], validate: Callable[[SinglePhaseKind], bool]) -> SinglePhaseKind:

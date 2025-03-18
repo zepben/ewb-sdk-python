@@ -174,11 +174,9 @@ from zepben.evolve.services.network.tracing.phases.set_phases import *
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import *
 from zepben.evolve.services.network.tracing.phases.remove_phases import *
 from zepben.evolve.services.network.tracing.find_swer_equipment import *
-from zepben.evolve.services.network.tracing.tracing import *
 from zepben.evolve.services.network.tracing.traversal.queue_condition import *
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import *
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
-from zepben.evolve.services.network.tracing import tracing
 
 from zepben.evolve.services.common.meta.data_source import *
 from zepben.evolve.services.common.meta.metadata_collection import *
