@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from functools import reduce
 from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable
 
-from zepben.evolve import BasicTraversal, Junction, BusbarSection, EquivalentBranch
+from zepben.evolve import Junction, BusbarSection, EquivalentBranch, Traversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
@@ -897,7 +897,7 @@ async def _group_negligible_impedance_terminals(
 ) -> TerminalGrouping[ConductingEquipment]:
     tg = TerminalGrouping[ConductingEquipment]()
     # noinspection PyArgumentList
-    trace = BasicTraversal(
+    trace = Traversal(
         start_item=terminal,
         queue_next=_queue_terminals_across_negligible_impedance(has_negligible_impedance),
         step_actions=[_process_terminal(tg, has_negligible_impedance)]
@@ -923,7 +923,7 @@ def _process_terminal(
 def _queue_terminals_across_negligible_impedance(
     has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ):
-    def queue_next(terminal: Terminal, traversal: BasicTraversal[Terminal]):
+    def queue_next(terminal: Terminal, traversal: Traversal[Terminal]):
         if terminal.connectivity_node is not None:
             traversal.process_queue.extend(ot for ot in terminal.connectivity_node.terminals if ot != terminal)
 
@@ -941,7 +941,7 @@ async def _group_common_ac_line_segment_terminals(acls: AcLineSegment) -> Termin
     connectivity_node_counter = Counter()
 
     # noinspection PyArgumentList
-    trace = BasicTraversal(
+    trace = Traversal(
         start_item=acls,
         queue_next=_queue_common_impedance_lines(common_acls, has_common_impedance),
         step_actions=[_process_acls(common_acls, connectivity_node_counter)]
@@ -981,7 +981,7 @@ def _queue_common_impedance_lines(
     common_acls: TerminalGrouping[AcLineSegment],
     has_common_impedance: Callable[[AcLineSegment], bool]
 ):
-    def queue_next(acls: AcLineSegment, traversal: BasicTraversal[AcLineSegment]):
+    def queue_next(acls: AcLineSegment, traversal: Traversal[AcLineSegment]):
         traversal.process_queue.extend(_next_common_acls(acls, has_common_impedance, common_acls))
 
     return queue_next
