@@ -4,7 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar, Callable, Sequence
 
-from zepben.evolve import ConductingEquipment, StepContext
+from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
+
+from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.traversal import QueueNext, BranchingQueueNext

@@ -8,6 +8,7 @@
 #       imported in a specific order to prevent unresolved dependency errors.
 #
 # @formatter:off
+from __future__ import annotations
 
 from zepben.evolve.util import *
 
@@ -168,7 +169,6 @@ from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import *
 from zepben.evolve.services.network.tracing.feeder.direction_status import *
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import *
 from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import *
-from zepben.evolve.services.network.tracing.feeder.set_direction import *
 from zepben.evolve.services.network.tracing.phases.phase_status import *
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import *
 from zepben.evolve.services.network.tracing.phases.remove_phases import *
@@ -176,6 +176,7 @@ from zepben.evolve.services.network.tracing.find_swer_equipment import *
 from zepben.evolve.services.network.tracing.traversal.queue_condition import *
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import *
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
+from zepben.evolve.services.network.tracing.feeder.set_direction import *
 
 from zepben.evolve.services.common.meta.data_source import *
 from zepben.evolve.services.common.meta.metadata_collection import *

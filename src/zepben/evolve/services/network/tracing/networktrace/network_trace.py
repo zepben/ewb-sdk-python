@@ -2,44 +2,102 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar
+from collections.abc import Callable
+from typing import TypeVar, Union
 
-from zepben.evolve import Traversal, ConductingEquipment, Terminal, PhaseCode, NominalPhasePath, SinglePhaseKind, TraversalQueue
+from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
+from zepben.protobuf.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode
+from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind
+
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
+from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_next import NetworkTraceQueueNext
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.network_trace_tracker import NetworkTraceTracker
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
-from zepben.evolve.services.network.tracing.traversal.traversal import QueueType, BasicQueueType, BranchingQueueType, D
+from zepben.evolve.services.network.tracing.traversal.traversal import QueueType, BasicQueueType, BranchingQueueType, D, Traversal
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
+from zepben.evolve import TraversalQueue
+from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
 T = TypeVar('T')
 
 # TODO: Document this
-# TODO: implement the other constructors
+
 
 class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
-    network_state_operators: NetworkStateOperators
-    queue_type: QueueType[NetworkTraceStep[T], 'NetworkTrace']
+    """
+    A [Traversal] implementation specifically designed to trace connected [Terminal]s of [ConductingEquipment] in a network.
+
+    This trace manages the complexity of network connectivity, especially in cases where connectivity is not straightforward,
+    such as with [BusbarSection]s and [Clamp]s. It checks the in service flag of equipment and only steps to equipment that is marked as in service.
+    It also provides the optional ability to trace only specific phases.
+
+    Steps are represented by a [NetworkTraceStep], which contains a [NetworkTraceStep.Path] and allows associating arbitrary data with each step.
+    The arbitrary data for each step is computed via a [ComputeData] or [ComputeDataWithPaths] function provided at construction.
+    The trace invokes these functions when queueing each item and stores the result with the next step.
+
+    When traversing, this trace will step on every connected terminal, as long as they match all the traversal conditions.
+    Each step is classified as either an external step or an internal step:
+
+    - **External Step**: Moves from one terminal to another with different [Terminal.conductingEquipment].
+    - **Internal Step**: Moves between terminals within the same [Terminal.conductingEquipment].
+
+    Often, you may want to act upon a [ConductingEquipment] only once, rather than multiple times for each internal and external terminal step.
+    To achieve this, set [actionType] to [NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT]. With this type, the trace will only call step actions and
+    conditions once for each [ConductingEquipment], regardless of how many terminals it has. However, queue conditions can be configured to be called
+    differently for each condition as continuing the trace can rely on different conditions based on an external or internal step. For example, not
+    queuing past open switches should happen on an internal step, thus if the trace is configured with FIRST_STEP_ON_EQUIPMENT, it will by default only
+    action the first external step to each equipment, and thus the provided [Conditions.stopAtOpen] condition overrides the default behaviour such that
+    it is called on all internal steps.
+
+    The network trace is state-aware by requiring an instance of [NetworkStateOperators].
+    This allows traversal conditions and step actions to query and act upon state-based properties and functions of equipment in the network when required.
+
+    'Branching' traversals are also supported allowing tracing both ways around loops in the network. When using a branching instance, a new 'branch'
+    is created for each terminal when a step has two or more terminals it can step to. That is on an internal step, if the equipment has more than 2 terminals
+    and more than 2 terminals will be queued, a branch will be created for each terminal. On an external step, if 2 or more terminals are to be queued,
+    a branch will be created for each terminal.
+    If you do not need to trace loops both ways or have no loops, do not use a branching instance as it is less efficient than the non-branching one.
+
+    To create instances of this class, use the factory methods provided in the [Tracing] object.
+
+    :param T: the type of [NetworkTraceStep.data]
+    """
     parent: 'NetworkTrace[T]' = None
-    _action_type: NetworkTraceActionType
 
     def __init__(self,
                  network_state_operators: NetworkStateOperators,
                  queue: TraversalQueue[NetworkTraceStep[T]],
                  action_type: NetworkTraceActionType,
-                 compute_data):
+                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
+                 ):
+
+        if isinstance(compute_data, ComputeDataWithPaths):
+            # TODO: mark this as experimental
+            pass
+
+        self._compute_data = compute_data
         self.network_state_operators = network_state_operators
-        self.queue_type = BasicQueueType(NetworkTraceQueueNext.basic)
+        self._action_type = action_type
+
+        self._set_queue_type()
 
         self.tracker: NetworkTraceTracker
-        if isinstance(queue_type, BasicQueueType):
+        if isinstance(self._queue_type, BasicQueueType):
             self.tracker = NetworkTraceTracker(256)
-        if isinstance(queue_type, BranchingQueueType):
+        if isinstance(self._queue_type, BranchingQueueType):
             self.tracker = NetworkTraceTracker(16)
+
+    def _set_queue_type(self):
+        self._queue_type = BasicQueueType(NetworkTraceQueueNext.basic(
+            NetworkStateOperators.in_service_state_operators,
+            compute_data_with_action_type(self._compute_data, self._action_type)
+        ), self._queue)
 
     def add_start_item(self, start: [Terminal, ConductingEquipment], data: T, phases: PhaseCode=None) -> "NetworkTrace[T]":
         if isinstance(start, Terminal):
@@ -53,18 +111,18 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
 
     def run(self, start: ConductingEquipment, Terminal, data: T, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
         self.add_start_item(start, data, phases)
-        super().run(can_stop_on_start_item)
+        super(Traversal).run(can_stop_on_start_item)
         return self
 
     def add_condition(self, condition: TraversalCondition[T]) -> "NetworkTrace[T]":
-        super().add_condition(self.network_state_operators.condition())
+        super(Traversal).add_condition(self.network_state_operators.condition())
         return self
 
     def add_queue_condition(self, condition: QueueCondition[NetworkTraceStep[T]], step_type:NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
         if step_type is None:
-            return super().add_queue_condition(condition.to_network_trace_queue_condition(self._action_type.default_queue_condition_step_type(), False))
+            return super(Traversal, self).add_queue_condition(condition.to_network_trace_queue_condition(self._action_type.default_queue_condition_step_type(), False))
         else:
-            return super().add_queue_condition(condition.to_network_trace_queue_condition(step_type, True))
+            return super(Traversal, self).add_queue_condition(condition.to_network_trace_queue_condition(step_type, True))
 
     def can_action_item(self, item: T, context: StepContext) -> bool:
         return self._action_type.can_action_item(item, context, self.has_visited)  # TODO: WHAT IS THIS MAGIC ::hasVisited ??
@@ -102,6 +160,28 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
 
         return self.tracker.visit(terminal, phases)
 
+class BranchingNetworkTrace[T](NetworkTrace[T]):
+    def __init__(self,
+                 network_state_operators: NetworkStateOperators,
+                 queue_factory: TraversalQueue[[NetworkTraceStep[[T]]]],
+                 branch_queue_factory: TraversalQueue[NetworkTrace[T]],
+                 action_type: NetworkTraceActionType,
+                 parent: NetworkTrace[T],
+                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]],
+                 ):
+        self._queue_factory = queue_factory
+        self._branch_queue_factory = branch_queue_factory
+        self._parent = parent
+        super().__init__(network_state_operators, None, action_type, compute_data)
+
+
+    def _set_queue_type(self):
+        self._queue_type = BranchingQueueType(NetworkTraceQueueNext().branching(
+            NetworkStateOperators.in_service_state_operators, compute_data_with_action_type(self._compute_data, self._action_type)),
+            self._queue_factory,
+            self._branch_queue_factory)
+
+
 # TODO: this hurts every part of my soul.
 def to_network_trace_queue_condition(self, step_type: NetworkTraceStep.Type, override_step_type: bool):
     if isinstance(self, NetworkTraceQueueCondition[T] and not override_step_type):
@@ -120,14 +200,13 @@ def default_queue_condition_step_type(self):
 NetworkTraceActionType.default_queue_condition_step_type = default_queue_condition_step_type
 
 # FIXME: this is wrong
-def with_action_type(self, action_type: NetworkTraceActionType) -> ComputeData[T]:
+def compute_data_with_action_type(compute_data: ComputeData[T], action_type: NetworkTraceActionType) -> ComputeData[T]:
     if action_type == NetworkTraceActionType.ALL_STEPS:
-        return self
+        return compute_data
     elif action_type == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:
         return ComputeData(lambda current_step, current_context, next_path: 
-            current_step.data if next_path.traced_internally else self.compute_next(current_step, current_context, next_path)
+            current_step.data if next_path.traced_internally else compute_data.compute_next(current_step, current_context, next_path)
         )
-ComputeData[T].with_action_type = with_action_type
 
 # FIXME: this is wrong also
 def with_paths_with_action_type(self, action_type: NetworkTraceActionType) -> ComputeData[T]:

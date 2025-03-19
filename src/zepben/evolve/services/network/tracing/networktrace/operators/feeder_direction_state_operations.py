@@ -2,13 +2,17 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
+from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
+
 
 from abc import abstractmethod
 
-from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
+__all__ = ['FeederDirectionStateOperations', 'NormalFeederDirectionStateOperations', 'CurrentFeederDirectionStateOperations']
 
 
 class FeederDirectionStateOperations(StateOperator):

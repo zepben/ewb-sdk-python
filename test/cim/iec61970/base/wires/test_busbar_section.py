@@ -3,15 +3,17 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from hypothesis.strategies import builds
-from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from hypothesis.strategies import builds, lists
 
 from cim.iec61970.base.wires.test_connector import verify_connector_constructor_default, \
     verify_connector_constructor_kwargs, verify_connector_constructor_args, connector_kwargs, connector_args
-from zepben.evolve import BusbarSection
+from zepben.evolve import BusbarSection, Terminal
 
-busbar_section_kwargs = connector_kwargs
-busbar_section_kwargs.update(dict(terminals=builds(Terminal())))  # Busbar's can only have 1 terminal
+busbar_section_kwargs = {
+    **connector_kwargs,
+    'terminals': lists(builds(Terminal), max_size=1)  # Busbar's can only have 1 terminal
+}
+
 busbar_section_args = connector_args
 
 

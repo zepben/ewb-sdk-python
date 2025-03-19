@@ -2,18 +2,24 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import List, Optional, Iterable, Set
+from __future__ import annotations
+from typing import Optional, TYPE_CHECKING
 
-from zepben.evolve import Terminal, NetworkService, Feeder, PowerTransformer, Switch, ConductingEquipment, FeederDirection, \
-    BusbarSection
+from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+
+from zepben.evolve import require, Feeder
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+
+
+if TYPE_CHECKING:
+    from zepben.evolve import NetworkService, PowerTransformer, Switch, \
+        ConductingEquipment, BusbarSection
 
 __all__ = ["SetDirection"]
-
-from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
-
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 
 class SetDirection:
@@ -62,15 +68,17 @@ class SetDirection:
         reprocessed_loop_terminals: list[Terminal] = []
         return Tracing
 
-    async def run(self, network: NetworkService):
+    async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators):
         """
          Apply feeder directions from all feeder head terminals in the network.
 
          :param network: The network in which to apply feeder directions.
          """
-        await self._run_terminals(
-            [f.normal_head_terminal for f in network.objects(Feeder) if
-             f.normal_head_terminal and not self._is_normally_open_switch(f.normal_head_terminal.conducting_equipment)])
+        for feeder in (f for f in network.objects(Feeder) if f.normal_head_terminal):
+            feeder_head = feeder.conducting_equipment
+            require(feeder_head is not None, lambda: 'head terminals require conducting equipment to apply feeder direction')
+            if not network_state_operators.is_open(feeder_head, None):
+                await  self.run_terminal(feeder, network_state_operators)
 
     async def run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
         """
