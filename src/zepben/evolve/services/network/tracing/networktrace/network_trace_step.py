@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from enum import Enum
 from dataclasses import dataclass
-from typing import TypeVar
 
-from zepben.evolve import Terminal, NominalPhasePath, ConductingEquipment
+from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
+from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
 
-T = TypeVar('T')
+from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
 
 class NetworkTraceStep[T]:

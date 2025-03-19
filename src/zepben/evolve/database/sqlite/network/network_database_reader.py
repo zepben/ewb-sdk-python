@@ -52,7 +52,7 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         metadata_reader: MetadataCollectionReader = None,
         service_reader: NetworkServiceReader = None,
         table_version: TableVersion = TableVersion(),
-        set_direction: SetDirection = SetDirection(),
+        set_feeder_direction: SetDirection = Tracing.set_direction(),
         set_phases: SetPhases = SetPhases(),
         phase_inferrer: PhaseInferrer = PhaseInferrer(),
         assign_to_feeders: AssignToFeeders = AssignToFeeders(),
@@ -68,7 +68,7 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         )
         self.service = service
         self.infer_phases = infer_phases
-        self.set_direction = set_direction
+        self.set_feeder_direction = set_feeder_direction
         self.set_phases = set_phases
         self.phase_inferrer = phase_inferrer
         self.assign_to_feeders = assign_to_feeders
@@ -78,20 +78,26 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         status = await super()._post_load()
 
         self._logger.info("Applying feeder direction to network...")
-        await self.set_direction.run(self.service)
+        await self.set_feeder_direction.run(self.service, NetworkStateOperators.NORMAL)
+        await self.set_feeder_direction.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Feeder direction applied to network.")
 
         self._logger.info("Applying phases to network...")
-        await self.set_phases.run(self.service)
-        await self.phase_inferrer.run(self.service)
+        await self.set_phases.run(self.service, NetworkStateOperators.NORMAL)
+        await self.set_phases.run(self.service, NetworkStateOperators.CURRENT)
+        if self.infer_phases:
+            await self.phase_inferrer.run(self.service, NetworkStateOperators.NORMAL)
+            await self.phase_inferrer.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Phasing applied to network.")
 
         self._logger.info("Assigning equipment to feeders...")
-        await self.assign_to_feeders.run(self.service)
+        await self.assign_to_feeders.run(self.service, NetworkStateOperators.NORMAL)
+        await self.assign_to_feeders.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Equipment assigned to feeders.")
 
         self._logger.info("Assigning equipment to LV feeders...")
-        await self.assign_to_lv_feeders.run(self.service)
+        await self.assign_to_lv_feeders.run(self.service, NetworkStateOperators.NORMAL)
+        await self.assign_to_lv_feeders.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Equipment assigned to LV feeders.")
 
         self._logger.info("Validating that each equipment is assigned to a container...")

@@ -23,9 +23,9 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
 from zepben.evolve.services.network.tracing.util import normally_open, currently_open
-from zepben.evolve.services.network.network_service import connected_terminals
+from zepben.evolve.services.network.network_service import connected_terminals, NetworkService
 if TYPE_CHECKING:
-    from zepben.evolve import Terminal, ConductingEquipment, NetworkService
+    from zepben.evolve import Terminal, ConductingEquipment
     from zepben.evolve.types import PhaseSelector
     from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 
