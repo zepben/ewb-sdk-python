@@ -5,7 +5,7 @@
 from typing import Iterable
 
 import pytest
-from zepben.evolve import assign_equipment_to_feeders, Equipment, TestNetworkBuilder, Feeder, BaseVoltage
+from zepben.evolve import Equipment, TestNetworkBuilder, Feeder, BaseVoltage
 
 
 def validate_equipment(equipment: Iterable[Equipment], *expected_mrids: str):

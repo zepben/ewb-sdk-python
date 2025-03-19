@@ -5,8 +5,8 @@
 import logging
 from typing import Iterable, Optional, Union
 
-from zepben.evolve import ConductingEquipment, connected_equipment_trace, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode, \
-    ConductingEquipmentStep
+from zepben.evolve import ConductingEquipment, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 logger = logging.getLogger("phase_logger.py")
 
@@ -88,7 +88,7 @@ def get_t(network: NetworkService, mrid: str, sn: int) -> Terminal:
     return network[mrid].get_terminal_by_sn(sn)
 
 
-async def _log_equipment(step: ConductingEquipmentStep, _: bool):
+async def _log_equipment(step: NetworkTraceStep, _: bool):
     logger.info("\n###############################"
                 "\nTracing phases from: %s"
                 "\n",

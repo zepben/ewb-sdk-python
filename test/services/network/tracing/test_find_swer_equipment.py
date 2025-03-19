@@ -7,21 +7,8 @@ from unittest.mock import create_autospec, patch, call, Mock
 
 import pytest
 
-from zepben.evolve import ConnectedEquipmentTraversal, NetworkService, Feeder, FindSwerEquipment, Junction, TestNetworkBuilder, PhaseCode, BaseVoltage, \
-    ConductingEquipment, verify_stop_conditions, ConductingEquipmentStep, step_on_when_run, step_on_when_run_with_is_stopping
-
-
-def create_mock_connected_equipment_traversal() -> Mock:
-    """Create a mock version of the `ConnectedEquipmentTraversal` which calls through the run method."""
-    trace = create_autospec(ConnectedEquipmentTraversal, instance=True)
-
-    async def call_run(it):
-        # noinspection PyArgumentList
-        await trace.run(ConductingEquipmentStep(it))
-
-    trace.run_from.side_effect = call_run
-
-    return trace
+from zepben.evolve import NetworkService, FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, \
+    ConductingEquipment, verify_stop_conditions, step_on_when_run, step_on_when_run_with_is_stopping, NetworkStateOperators
 
 
 class TestFindSwerEquipment:
@@ -29,31 +16,23 @@ class TestFindSwerEquipment:
     # pylint: disable=attribute-defined-outside-init
     # noinspection PyArgumentList
     def setup_method(self):
-        self.trace1 = create_mock_connected_equipment_traversal()
-        self.trace2 = create_mock_connected_equipment_traversal()
-        self.create_trace = create_autospec(Callable[[], ConnectedEquipmentTraversal], side_effect=[self.trace1, self.trace2])
+        self.state_operators = create_autospec(NetworkStateOperators.NORMAL, instance=True)
 
-        self.find_swer_equipment = FindSwerEquipment(self.create_trace)
+        self.find_swer_equipment = FindSwerEquipment(self.state_operators)
 
     # pylint: enable=attribute-defined-outside-init
 
     @pytest.mark.asyncio
     async def test_processes_all_feeders_in_a_network(self):
-        ns = NetworkService()
-        feeder1 = Feeder()
-        feeder2 = Feeder()
-        j1 = Junction()
-        j2 = Junction()
-        j3 = Junction()
-
-        ns.add(feeder1)
-        ns.add(feeder2)
-        ns.add(j1)
-        ns.add(j2)
-        ns.add(j3)
+        ns = (TestNetworkBuilder()
+              .from_power_transformer([PhaseCode.AB, PhaseCode.A])
+              .from_power_transformer([PhaseCode.AB, PhaseCode.A])
+              .add_feeder('tx0')
+              .add_feeder('tx1')
+              .build())
 
         with patch.object(self.find_swer_equipment, 'find_on_feeder', side_effect=[[j1, j2], [j2, j3]]) as find_on_feeder:
-            assert await self.find_swer_equipment.find_all(ns) == {j1, j2, j3}
+            assert await self.find_swer_equipment.find_all(ns, self.state_operators) == {j1, j2, j3}
 
             find_on_feeder.assert_has_calls([call(feeder1), call(feeder2)])
 
@@ -71,11 +50,11 @@ class TestFindSwerEquipment:
               .add_feeder("b0")  # fdr8
               .build())
 
-        self.create_trace.side_effect = [self.trace1, self.trace2, self.trace1, self.trace2]
+        self.state_operators.side_effect = [self.trace1, self.trace2, self.trace1, self.trace2]
 
         assert await self.find_swer_equipment.find_on_feeder(ns["fdr8"]) == {ns["tx3"], ns["tx6"]}
 
-        assert self.create_trace.call_count == 4
+        assert self.state_operators.call_count == 4
         self.trace1.run_from.assert_has_calls([call(ns["c4"]), call(ns["c5"])])
         self.trace2.run_from.assert_called_once_with(ns["c7"])
 

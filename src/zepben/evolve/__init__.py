@@ -170,7 +170,6 @@ from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import *
 from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import *
 from zepben.evolve.services.network.tracing.feeder.set_direction import *
 from zepben.evolve.services.network.tracing.phases.phase_status import *
-from zepben.evolve.services.network.tracing.phases.set_phases import *
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import *
 from zepben.evolve.services.network.tracing.phases.remove_phases import *
 from zepben.evolve.services.network.tracing.find_swer_equipment import *
@@ -421,6 +420,8 @@ from zepben.evolve.database.sqlite.diagram.diagram_service_reader import *
 from zepben.evolve.database.sqlite.network.network_cim_reader import *
 from zepben.evolve.database.sqlite.network.network_database_reader import *
 from zepben.evolve.database.sqlite.network.network_service_reader import *
+
+from zepben.evolve.services.network.tracing.phases.set_phases import *
 
 from zepben.evolve.testing.test_network_builder import *
 from zepben.evolve.testing.test_traversal import *

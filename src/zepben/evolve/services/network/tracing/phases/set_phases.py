@@ -6,15 +6,15 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Union, Set, Callable, List, Iterable, Optional
+from typing import TYPE_CHECKING, Union, Set, Callable, Iterable
 
-from zepben.evolve import connected_terminals, Traversal, NominalPhasePath, TerminalConnectivityConnected, UnsupportedOperationException
-from zepben.evolve.exceptions import PhaseException
-from zepben.evolve.exceptions import TracingException
+from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
+from zepben.evolve.exceptions import PhaseException, TracingException
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.network.tracing.connectivity.connectivity_result import ConnectivityResult
+from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_internal import TerminalConnectivityInternal
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
@@ -23,9 +23,11 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
 from zepben.evolve.services.network.tracing.util import normally_open, currently_open
+from zepben.evolve.services.network.network_service import connected_terminals
 if TYPE_CHECKING:
     from zepben.evolve import Terminal, ConductingEquipment, NetworkService
     from zepben.evolve.types import PhaseSelector
+    from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 
 __all__ = ["SetPhases"]
 
@@ -280,6 +282,8 @@ class SetPhases:
                            to_terminal: Terminal,
                            nominal_phase_paths: Iterable[NominalPhasePath]
     ) -> bool:
+        from zepben.evolve import UnsupportedOperationException  # FIXME: This is a hack to avoid a circular import
+
         from_phases = state_operators.phase_status(from_terminal)
         to_phases = state_operators.phase_status(to_terminal)
         changed_phases = False
@@ -306,7 +310,7 @@ class SetPhases:
                 else:
                     terminal_desc = f'between {from_terminal} on {from_terminal.conducting_equipment.type_name_and_mrid()} and {to_terminal} on {to_terminal.conducting_equipment.type_name_and_mrid}'
                     raise Exception(
-                        f"Attempted to flow conflicting phase {from_phases[from_]} onto ${to_phases[to]} on nominal phase $phaseDesc. This occurred while " +
+                        f"Attempted to flow conflicting phase {from_phases[from_]} onto ${to_phases[to]} on nominal phase {phase_desc}. This occurred while " +
                         f"flowing {terminal_desc}. This is caused by missing open points, or incorrect phases in upstream equipment that should be " +
                         "corrected in the source data."
                     )

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Dict, Callable, List, Set, Awaitable
 
 from zepben.evolve import Terminal, SinglePhaseKind, ConductingEquipment, NetworkService, normal_phases, normal_direction, \
-    FeederDirection, X_PRIORITY, Y_PRIORITY, SetPhases, is_before, is_after, current_phases, current_direction
+    FeederDirection, X_PRIORITY, Y_PRIORITY, is_before, is_after, current_phases, current_direction
 from zepben.evolve.types import PhaseSelector, DirectionSelector
 
 __all__ = ["PhaseInferrer"]
@@ -223,8 +223,10 @@ class PhaseInferrer:
         await self._continue_phases(terminal, phase_selector)
         return had_changes
 
+
     # TODO: PhaseInferrerInternal
     async def _continue_phases(self, terminal: Terminal):
+        from zepben.evolve import SetPhases  # FIXME:
         set_phases_trace = SetPhases()
         [set_phases_trace.run(terminal, other, terminal.phases.single_phases, network_state_operators=self.state_operators)  for other in terminal.other_terminals()]
 
@@ -235,3 +237,4 @@ class PhaseInferrer:
                 return phase
 
         return SinglePhaseKind.NONE
+

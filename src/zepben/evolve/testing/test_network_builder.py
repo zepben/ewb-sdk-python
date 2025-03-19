@@ -2,6 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 try:
     from typing import Protocol
 except ImportError:
@@ -10,8 +12,10 @@ except ImportError:
 from typing import Optional, Callable, List, Union, Type
 
 from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
-    PowerTransformerEnd, PowerTransformer, set_phases, set_direction, assign_equipment_to_feeders, assign_equipment_to_lv_feeders, EnergyConsumer, \
+    PowerTransformerEnd, PowerTransformer, EnergyConsumer, \
     PowerElectronicsConnection
+
+from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases as set_phases
 
 
 def null_action(_):
@@ -472,17 +476,22 @@ class TestNetworkBuilder:
 
         :return: The `NetworkService` created by this `TestNetworkBuilder`
         """
-        await set_direction().run(self.network)
-        await set_phases().run(self.network)
+        await Tracing.set_direction().run(self.network, NetworkStateOperators.NORMAL)
+        await Tracing.set_phases().run(self.network, NetworkStateOperators.NORMAL)
+        await Tracing.set_direction().run(self.network, NetworkStateOperators.CURRENT)
+        await Tracing.set_phases().run(self.network, NetworkStateOperators.CURRENT)
 
         if apply_directions_from_sources:
             for es in self.network.objects(EnergySource):
                 for terminal in es.terminals:
-                    await set_direction().run_terminal(terminal)
+                    await Tracing.set_direction().run_terminal(terminal, NetworkStateOperators.NORMAL)
+                    await Tracing.set_direction().run_terminal(terminal, NetworkStateOperators.CURRENT)
 
         if assign_feeders and (self.network.len_of(Feeder) != 0 or self.network.len_of(LvFeeder) != 0):
-            await assign_equipment_to_feeders().run(self.network)
-            await assign_equipment_to_lv_feeders().run(self.network)
+            await Tracing.assign_equipment_to_feeders().run(self.network, NetworkStateOperators.NORMAL)
+            await Tracing.assign_equipment_to_lv_feeders().run(self.network, NetworkStateOperators.NORMAL)
+            await Tracing.assign_equipment_to_feeders().run(self.network, NetworkStateOperators.CURRENT)
+            await Tracing.assign_equipment_to_lv_feeders().run(self.network, NetworkStateOperators.CURRENT)
 
         return self.network
 
@@ -626,3 +635,5 @@ class TestNetworkBuilder:
         terminal = Terminal(mrid=f"{ce.mrid}-t{sn}", phases=nominal_phases)
         ce.add_terminal(terminal)
         self.network.add(terminal)
+
+from zepben.evolve import SetPhases  # FIXME:

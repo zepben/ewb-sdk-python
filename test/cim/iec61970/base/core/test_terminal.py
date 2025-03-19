@@ -36,7 +36,6 @@ def test_terminal_constructor_default():
     assert t.sequence_number == 0
     assert t.normal_feeder_direction == FeederDirection.NONE
     assert t.current_feeder_direction == FeederDirection.NONE
-    assert t.traced_phases == TracedPhases()
     assert not t.connectivity_node
 
 
@@ -48,7 +47,6 @@ def test_terminal_constructor_kwargs(conducting_equipment, phases, sequence_numb
                  sequence_number=sequence_number,
                  normal_feeder_direction=normal_feeder_direction,
                  current_feeder_direction=current_feeder_direction,
-                 traced_phases=traced_phases,
                  connectivity_node=connectivity_node,
                  **kwargs)
 
@@ -58,7 +56,6 @@ def test_terminal_constructor_kwargs(conducting_equipment, phases, sequence_numb
     assert t.sequence_number == sequence_number
     assert t.normal_feeder_direction == normal_feeder_direction
     assert t.current_feeder_direction == current_feeder_direction
-    assert t.traced_phases == traced_phases
     assert t.connectivity_node == connectivity_node
 
 
@@ -72,6 +69,5 @@ def test_terminal_constructor_args():
         t.sequence_number,
         t.normal_feeder_direction,
         t.current_feeder_direction,
-        t.traced_phases,
         t.connectivity_node
     ]
