@@ -9,7 +9,7 @@ from pytest import fixture
 from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
     UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
     PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, TestNetworkBuilder, LvFeeder, AssignToLvFeeders
+    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, LvFeeder, AssignToLvFeeders
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
@@ -19,6 +19,7 @@ __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_
            "single_connectivitynode_network", "create_terminal", "phase_swap_loop_network", "loop_under_feeder_head_network", "network_service"]
 
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
+from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
 from zepben.evolve.util import CopyableUUID
 
 

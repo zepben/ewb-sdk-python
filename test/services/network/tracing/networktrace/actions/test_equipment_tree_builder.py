@@ -8,7 +8,8 @@ from typing import Optional, List
 import pytest
 
 from services.network.test_data.looping_network import create_looping_network
-from zepben.evolve import set_phases, ConductingEquipment, set_direction, TreeNode, normal_downstream_tree
+from zepben.evolve import set_phases, ConductingEquipment
+from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
 
 
 @pytest.mark.asyncio
@@ -118,7 +119,7 @@ async def test_downstream_tree():
 
 
 def _verify_tree_asset(
-    tree_node: TreeNode,
+    tree_node: ConductingEquipment,
     expected_asset: Optional[ConductingEquipment],
     expected_parent: Optional[ConductingEquipment],
     expected_children: List[ConductingEquipment]
@@ -138,14 +139,14 @@ def _verify_tree_asset(
         assert child_node.conducting_equipment is expected_child
 
 
-def _find_nodes(root: TreeNode, asset_id: str) -> List[TreeNode]:
-    matches: List[TreeNode] = []
-    process_nodes: deque[TreeNode] = deque()
+def _find_nodes(root: TreeNode[ConductingEquipment], asset_id: str) -> List[TreeNode[ConductingEquipment]]:
+    matches: List[TreeNode[ConductingEquipment]] = []
+    process_nodes: deque[TreeNode[ConductingEquipment]] = deque()
     process_nodes.append(root)
 
     while process_nodes:
         node = process_nodes.popleft()
-        if node.conducting_equipment.mrid == asset_id:
+        if node.identified_object.mrid == asset_id:
             matches.append(node)
 
         for child in node.children:
@@ -154,7 +155,7 @@ def _find_nodes(root: TreeNode, asset_id: str) -> List[TreeNode]:
     return matches
 
 
-def _find_node_depths(root: TreeNode, asset_id: str) -> List[int]:
+def _find_node_depths(root: TreeNode[ConductingEquipment], asset_id: str) -> List[int]:
     nodes = _find_nodes(root, asset_id)
     depths = []
 
@@ -164,7 +165,7 @@ def _find_node_depths(root: TreeNode, asset_id: str) -> List[int]:
     return depths
 
 
-def _depth_in_tree(tree_node: TreeNode):
+def _depth_in_tree(tree_node: TreeNode[ConductingEquipment]):
     depth = -1
     node = tree_node
     while node is not None:

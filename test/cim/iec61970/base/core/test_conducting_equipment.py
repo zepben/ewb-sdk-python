@@ -2,7 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import sys
 
+import pytest
 from hypothesis.strategies import lists, builds
 from zepben.evolve import ConductingEquipment, BaseVoltage, Terminal
 
@@ -52,3 +54,22 @@ def test_terminals_collection():
         ConductingEquipment.clear_terminals,
         lambda t: t.sequence_number
     )
+
+def test_default_max_terminals_is_sys_maxsize():
+    assert ConductingEquipment().max_terminals == sys.maxsize
+
+class SingleTerminalCE(ConductingEquipment):
+    max_terminals = 1
+
+def test_exceeding_max_terminals_raises_exception():
+    ce = SingleTerminalCE()
+    ce.add_terminal(Terminal())
+
+    with pytest.raises(ValueError):
+        ce.add_terminal(Terminal())
+
+def test_adding_terminal_twice_wont_cause_max_terminals_to_raise_exception():
+    ce = SingleTerminalCE()
+    t = Terminal()
+    ce.add_terminal(t)
+    ce.add_terminal(t)

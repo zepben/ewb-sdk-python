@@ -22,7 +22,7 @@ from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import Assi
 from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import AssignToLvFeeders
 
 from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
-# TODO: com.zepben.evolve.services.network.tracing.networktrace.Tracing
+from zepben.evolve.services.network.tracing.networktrace.tracing import  Tracing
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import PhaseInferrer
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
@@ -60,8 +60,8 @@ class NetworkDatabaseReader(BaseDatabaseReader):
     ):
         super().__init__(
             connection,
-            metadata_reader if metadata_reader else MetadataCollectionReader(service, tables, connection),
-            service_reader if service_reader else NetworkServiceReader(service, tables, connection),
+            metadata_reader if metadata_reader else MetadataCollectionReader(service, NetworkDatabaseTables(), connection),
+            service_reader if service_reader else NetworkServiceReader(service, NetworkDatabaseTables(), connection),
             service,
             database_description,
             table_version

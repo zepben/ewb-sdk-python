@@ -5,12 +5,13 @@
 
 import weakref
 from abc import ABC, abstractmethod
-from typing import Self, List
+from typing import Self, List, TypeVar
 
 from zepben.evolve import IdentifiedObject
 
+T = TypeVar('T')
 
-class TreeNode(ABC):
+class TreeNode[T](ABC):
     """
     represents a node in the NetworkTrace tree
     """

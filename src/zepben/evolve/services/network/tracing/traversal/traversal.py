@@ -1,4 +1,4 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -17,7 +17,7 @@ from zepben.evolve.services.network.tracing.traversal.step_action import StepAct
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition, StopConditionWithContextValue
 
-__all__ = ["Traversal", "QueueNext", "BranchingQueueNext"]
+__all__ = ["Traversal"]
 
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
 from zepben.evolve.services.network.tracing.traversal.traversal_queue import TraversalQueue
@@ -427,7 +427,7 @@ class BranchingQueueType(QueueType[T, D]):
     `queueFactory` Factory function to create the main queue.
     `branchQueueFactory` Factory function to create the branch queue.
     """
-    def __init__(self, queue_next: BranchingQueueNext[T], queue_factory: Callable[[], TraversalQueue[T]], branch_queue_factory: Callable[[], TraversalQueue[D]]):
+    def __init__(self, queue_next: BranchingQueueNext[T], queue_factory: Callable[[], TraversalQueue[T]], branch_queue_factory: Callable[[], 'TraversalQueue[D]']):
         self.queue_next = queue_next
         self.queue_factory = queue_factory
         self.branch_queue_factory = branch_queue_factory

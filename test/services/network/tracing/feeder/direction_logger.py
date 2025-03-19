@@ -3,12 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import ConductingEquipment, connected_equipment_trace, ConductingEquipmentStep
+from zepben.evolve import ConductingEquipment
 
 __all__ = ["log_directions"]
 
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
-async def log_directions(*conducting_equipment: ConductingEquipment):
+
+async def log_directions(*conducting_equipment: NetworkTraceStep):
     """
     Logs all the feeder directions of terminals. Useful for debugging.
     """
@@ -23,6 +25,6 @@ async def log_directions(*conducting_equipment: ConductingEquipment):
         await trace.run_from(cond_equip)
 
 
-async def _step(step: ConductingEquipmentStep, _: bool):
+async def _step(step: NetworkTraceStep, _: bool):
     for term in step.conducting_equipment.terminals:
         print(f"{step.conducting_equipment.mrid}-T{term.sequence_number}: {{n:{term.normal_feeder_direction}, c:{term.current_feeder_direction}}}")
