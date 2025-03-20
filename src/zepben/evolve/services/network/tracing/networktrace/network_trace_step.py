@@ -59,7 +59,7 @@ class NetworkTraceStep[T]:
             return not self.traced_internally
 
     path: Path
-    Type = Enum('ALL', 'INTERNAL', 'EXTERNAL')
+    Type = Enum('Type', ('ALL', 'INTERNAL', 'EXTERNAL'))
     num_terminal_steps: int
     num_equipment_steps: int
     data: T

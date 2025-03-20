@@ -74,18 +74,23 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
                  network_state_operators: NetworkStateOperators,
                  queue: TraversalQueue[NetworkTraceStep[T]],
                  action_type: NetworkTraceActionType,
-                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
+                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]],
+                 **kwargs
                  ):
 
         if isinstance(compute_data, ComputeDataWithPaths):
             # TODO: mark this as experimental
             pass
 
-        self._compute_data = compute_data
-        self.network_state_operators = network_state_operators
         self._action_type = action_type
 
-        self._set_queue_type()
+        self.network_state_operators = network_state_operators
+
+        if self._queue_type is None and queue:
+            self._queue_type = BasicQueueType(NetworkTraceQueueNext.basic(
+                NetworkStateOperators.in_service_state_operators,
+                compute_data_with_action_type(compute_data, action_type)
+            ), queue)
 
         self.tracker: NetworkTraceTracker
         if isinstance(self._queue_type, BasicQueueType):
@@ -93,11 +98,8 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
         if isinstance(self._queue_type, BranchingQueueType):
             self.tracker = NetworkTraceTracker(16)
 
-    def _set_queue_type(self):
-        self._queue_type = BasicQueueType(NetworkTraceQueueNext.basic(
-            NetworkStateOperators.in_service_state_operators,
-            compute_data_with_action_type(self._compute_data, self._action_type)
-        ), self._queue)
+        super().__init__(self._queue_type, **kwargs)
+
 
     def add_start_item(self, start: [Terminal, ConductingEquipment], data: T, phases: PhaseCode=None) -> "NetworkTrace[T]":
         if isinstance(start, Terminal):
@@ -111,18 +113,18 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
 
     def run(self, start: ConductingEquipment, Terminal, data: T, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
         self.add_start_item(start, data, phases)
-        super(Traversal).run(can_stop_on_start_item)
+        super().run(can_stop_on_start_item)
         return self
 
     def add_condition(self, condition: TraversalCondition[T]) -> "NetworkTrace[T]":
-        super(Traversal).add_condition(self.network_state_operators.condition())
+        super().add_condition(self.network_state_operators.condition())
         return self
 
     def add_queue_condition(self, condition: QueueCondition[NetworkTraceStep[T]], step_type:NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
         if step_type is None:
-            return super(Traversal, self).add_queue_condition(condition.to_network_trace_queue_condition(self._action_type.default_queue_condition_step_type(), False))
+            return super().add_queue_condition(to_network_trace_queue_condition(condition, default_queue_condition_step_type(self._action_type), False))
         else:
-            return super(Traversal, self).add_queue_condition(condition.to_network_trace_queue_condition(step_type, True))
+            return super().add_queue_condition(to_network_trace_queue_condition(condition, step_type, True))
 
     def can_action_item(self, item: T, context: StepContext) -> bool:
         return self._action_type.can_action_item(item, context, self.has_visited)  # TODO: WHAT IS THIS MAGIC ::hasVisited ??
@@ -169,37 +171,29 @@ class BranchingNetworkTrace[T](NetworkTrace[T]):
                  parent: NetworkTrace[T],
                  compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]],
                  ):
-        self._queue_factory = queue_factory
-        self._branch_queue_factory = branch_queue_factory
-        self._parent = parent
-        super().__init__(network_state_operators, None, action_type, compute_data)
 
-
-    def _set_queue_type(self):
         self._queue_type = BranchingQueueType(NetworkTraceQueueNext().branching(
-            NetworkStateOperators.in_service_state_operators, compute_data_with_action_type(self._compute_data, self._action_type)),
-            self._queue_factory,
-            self._branch_queue_factory)
+            NetworkStateOperators.in_service_state_operators, compute_data_with_action_type(compute_data, action_type)),
+            queue_factory,
+            branch_queue_factory)
+
+        super().__init__(network_state_operators, None, action_type, compute_data, parent=parent)
 
 
-# TODO: this hurts every part of my soul.
-def to_network_trace_queue_condition(self, step_type: NetworkTraceStep.Type, override_step_type: bool):
-    if isinstance(self, NetworkTraceQueueCondition[T] and not override_step_type):
-        return self
+def to_network_trace_queue_condition(queue_condition: NetworkTraceActionType, step_type: NetworkTraceStep.Type, override_step_type: bool):
+    if isinstance(queue_condition, NetworkTraceQueueCondition) and not override_step_type:
+        return queue_condition
     else:
-        return NetworkTraceQueueCondition.delegate_to(step_type, self)
+        return NetworkTraceQueueCondition.delegate_to(step_type, queue_condition)
 
-QueueCondition[NetworkTraceStep[T]].to_network_trace_queue_condition = to_network_trace_queue_condition
 
-def default_queue_condition_step_type(self):
-    if self == NetworkTraceActionType.ALL_STEPS:
+def default_queue_condition_step_type(step_type):
+    if step_type == NetworkTraceActionType.ALL_STEPS:
         return NetworkTraceStep.Type.ALL
-    elif self == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:
+    elif step_type == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:
         return NetworkTraceStep.Type.EXTERNAL
 
-NetworkTraceActionType.default_queue_condition_step_type = default_queue_condition_step_type
 
-# FIXME: this is wrong
 def compute_data_with_action_type(compute_data: ComputeData[T], action_type: NetworkTraceActionType) -> ComputeData[T]:
     if action_type == NetworkTraceActionType.ALL_STEPS:
         return compute_data
