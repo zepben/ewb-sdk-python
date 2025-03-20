@@ -44,8 +44,11 @@ class Traversal(Generic[T, D]):
     `T` The type of object to be traversed.
     `D` The specific type of traversal, extending [Traversal].
     """
+    _queue_type = None
+
     def __init__(self, queue_type: QueueType[T, D], parent: Optional[D] = None):
-        self._queue_type = queue_type
+        if self._queue_type is None:
+            self._queue_type = queue_type
         self._parent = parent
 
         self.queue_next: Callable[[T, StepContext], None] = self._initialize_queue_next()
@@ -431,3 +434,5 @@ class BranchingQueueType(QueueType[T, D]):
         self.queue_next = queue_next
         self.queue_factory = queue_factory
         self.branch_queue_factory = branch_queue_factory
+        self.queue = self.queue_factory
+        self.branch_queue = self.branch_queue_factory

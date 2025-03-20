@@ -22,7 +22,6 @@ class QueueCondition[T](TraversalCondition[T]):
     `T` The type of items being traversed.
     """
 
-    @abstractmethod
     def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
         """
         Determines whether the [nextItem] should be queued for traversal.
@@ -35,7 +34,6 @@ class QueueCondition[T](TraversalCondition[T]):
         """
         raise NotImplementedError()
 
-    @abstractmethod
     def should_queue_start_item(self, item: T) -> bool:
         """
         Determines whether a traversal startItem should be queued when running a [Traversal].
@@ -43,8 +41,7 @@ class QueueCondition[T](TraversalCondition[T]):
         `item` The item to be potentially queued.
         Returns `true` if the [item] should be queued; `false` otherwise. Defaults to `true`.
         """
-        # FIXME: return True? kotlin code defaults to True here, so idk if the default behavious should be to just return true yet
-        raise NotImplementedError()
+        raise True
 
 class QueueConditionWithContextValue[T, U](QueueCondition[T], TypedContextValueComputer[T, U]):
     """

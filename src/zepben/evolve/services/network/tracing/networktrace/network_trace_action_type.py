@@ -26,7 +26,6 @@ class NetworkTraceActionType(Enum):
         cls.can_action_item = cls._can_action_item_first_step_on_equipment
 
     @staticmethod
-    @abstractmethod
     def can_action_item(item: NetworkTraceStep, context: StepContext, has_tracked) -> bool:  #TODO: type def for has_tracked
         pass
 

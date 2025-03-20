@@ -161,12 +161,16 @@ class SetPhases:
 
         nwt = Tracing.network_trace_branching(
             network_state_operators=state_operators,
-            action_step_type=NetworkTraceActionType.ALL_STEPS,
+            action_step_type=NetworkTraceActionType.ALL_STEPS(),
             queue_factory=lambda it: WeightedPriorityQueue.process_queue(lambda it: it.path.to_terminal.phases.num_phases()),  # TODO: lol, explosions expected
             branch_queue_factory=lambda it: WeightedPriorityQueue.branch_queue(lambda it: it.path.to_terminal.phases.num_phases()),  # TODO: lol, explosions expected
             compute_data=self._compute_next_phases_to_flow(state_operators)
         )
-        nwt.add_queue_condition(lambda next_step, *args: len(next_step.data.nominal_phase_paths) > 0)
+        def condition(next_step, *args):
+            return len(next_step.data.nominal_phase_paths) > 0
+        nwt.add_queue_condition(condition)
+        #nwt.add_queue_condition(lambda next_step, *args: len(next_step.data.nominal_phase_paths) > 0)
+
         nwt.add_step_action(step_action)
         return nwt
 
