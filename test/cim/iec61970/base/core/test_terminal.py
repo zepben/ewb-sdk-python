@@ -23,7 +23,7 @@ terminal_kwargs = {
 }
 
 # noinspection PyArgumentList
-terminal_args = [*ac_dc_terminal_args, ConductingEquipment(), PhaseCode.XYN, 1, FeederDirection.UPSTREAM, FeederDirection.DOWNSTREAM, TracedPhases(1),
+terminal_args = [*ac_dc_terminal_args, ConductingEquipment(), PhaseCode.XYN, 1, FeederDirection.UPSTREAM, FeederDirection.DOWNSTREAM,
                  ConnectivityNode()]
 
 
@@ -63,7 +63,7 @@ def test_terminal_constructor_args():
     t = Terminal(*terminal_args)
 
     verify_ac_dc_terminal_constructor_args(t)
-    assert terminal_args[-7:] == [
+    assert terminal_args[-6:] == [
         t.conducting_equipment,
         t.phases,
         t.sequence_number,
