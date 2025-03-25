@@ -1140,7 +1140,7 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_switch(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_floats(diff, Switch.rated_current)
         self._add_if_different(diff, "isNormallyOpen", self._compare_open_status(diff, lambda it, phase: it.is_normally_open(phase)))
-        self._add_if_different(diff, "isOpen", self._compare_open_status(diff, lambda it, phase: it.is_open(phase)))
+        self._add_if_different(diff, "isOpen", self._compare_open_status(diff, lambda it, phase: it.is_open()))
         self._compare_id_references(diff, Switch.switch_info)
 
         return self._compare_conducting_equipment(diff)

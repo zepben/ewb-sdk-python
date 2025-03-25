@@ -7,12 +7,13 @@ from typing import TYPE_CHECKING
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
 
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
-from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
 
 from abc import abstractmethod
 
 __all__ = ['FeederDirectionStateOperations', 'NormalFeederDirectionStateOperations', 'CurrentFeederDirectionStateOperations']
+
+from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
 
 class FeederDirectionStateOperations(StateOperator):

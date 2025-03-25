@@ -6,9 +6,10 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, Callable, List, Set, Awaitable
 
-from zepben.evolve import Terminal, SinglePhaseKind, ConductingEquipment, NetworkService, normal_phases, normal_direction, \
-    FeederDirection, X_PRIORITY, Y_PRIORITY, is_before, is_after, current_phases, current_direction
+from zepben.evolve import Terminal, SinglePhaseKind, ConductingEquipment, NetworkService, normal_direction, \
+    FeederDirection, X_PRIORITY, Y_PRIORITY, is_before, is_after, current_direction
 from zepben.evolve.types import PhaseSelector, DirectionSelector
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 
 __all__ = ["PhaseInferrer"]
 
@@ -42,7 +43,7 @@ class PhaseInferrer:
 
         self._tracking: Dict[ConductingEquipment, bool] = {}
 
-    async def run(self, network: NetworkService):
+    async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators.NORMAL):
         """
         Infer the missing phases on the specified `network`.
 
@@ -50,8 +51,8 @@ class PhaseInferrer:
         """
         self._tracking = {}
 
-        await self._infer_missing_phases(network, normal_phases, normal_direction)
-        await self._infer_missing_phases(network, current_phases, current_direction)
+        await self._infer_missing_phases(network, network_state_operators, normal_direction)
+        await self._infer_missing_phases(network, network_state_operators, current_direction)
 
         for (conducting_equipment, has_suspect_inferred) in self._tracking.items():
             if has_suspect_inferred:

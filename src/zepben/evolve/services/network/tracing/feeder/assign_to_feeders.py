@@ -17,31 +17,69 @@ __all__ = ["AssignToFeeders"]
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 
 class AssignToFeeders:
+    async def run(self,
+                  network: NetworkService,
+                  network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
+                  start_terminal: Terminal=None):
+        await AssignToFeedersInternal(network_state_operators).run(network, start_terminal)
+
+
+class BaseFeedersInternal:
+    def __init__(self, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+        self.network_state_operators = network_state_operators
+
+    def _feeders_from_terminal(self, terminal: Terminal):
+        return terminal.conducting_equipment.get_filtered_containers(Feeder)(self.network_state_operators)
+
+    def _associate_equipment_with_containers(self, equipment_containers: Iterable[EquipmentContainer], equipment: Iterable[Equipment]):
+        for item in equipment_containers:
+            for feeder in equipment:
+                self.network_state_operators.associate_equipment_and_container(item, feeder)
+
+    def _associate_relay_systems_with_containers(self, equipment_containers: Iterable[EquipmentContainer], to_equipment: ProtectedSwitch):
+        self._associate_equipment_with_containers(equipment_containers, [
+            scheme.system
+            for relayFunction in to_equipment.relay_functions
+            for scheme in relayFunction.schemes
+            if scheme.system is not None]
+                                                  )
+
+    def _feeder_energizes(self, feeders: Iterable[Feeder], lv_feeders: Iterable[LvFeeder]):
+        for feeder in feeders:
+            for lv_feeder in lv_feeders:
+                self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
+
+    def _feeder_try_energize_lv_feeders(self, to_equipment: PowerTransformer, lv_feeder_start_points: Set[ConductingEquipment]):
+        sites = to_equipment.get_filtered_containers(Site, self.network_state_operators)
+        if len(sites) > 0:
+            self._feeder_energizes(sites.find_lv_feeders(lv_feeder_start_points, self.network_state_operators))
+        else:
+            self._feeder_energizes(to_equipment.get_filtered_containers(LvFeeder, self.network_state_operators))
+
+
+class AssignToFeedersInternal(BaseFeedersInternal):
     """
     Convenience class that provides methods for assigning HV/MV feeders on a `NetworkService`.
     Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
     This class is backed by a `NetworkTrace`.
     """
 
-    def __init__(self):
-        self.network_state_operators = NetworkStateOperators.NORMAL
-
     async def run(self,
                   network: NetworkService,
-                  network_state_operators: NetworkStateOperators = NetworkStateOperators.NORMAL,
                   start_terminal: Terminal=None):
         """
         Assign equipment to each feeder in the specified network.
 
         :param network: The network containing the feeders to process
         """
-        self.network_state_operators = network_state_operators
+        self.network_state_operators = self.network_state_operators
 
         feeder_start_points = network.feeder_start_points
         lv_feeder_start_points = network.lv_feeder_start_points
@@ -86,7 +124,7 @@ class AssignToFeeders:
                       lv_feeder_start_points: Set[ConductingEquipment],
                       feeders_to_assign: list[Feeder]) -> NetworkTrace[...]:  # TODO NetworkTrace[Unit]?
         return (
-            NetworkTrace(NetworkTraceActionType.ALL_STEPS)
+            Tracing.network_trace(NetworkTraceActionType.ALL_STEPS)
                 .add_condition(lambda s: s._stop_at_open())
                 .add_stop_condition(lambda path: path.to_equipment in feeder_start_points)
                 .add_queue_condition(lambda path: not self._reached_substation_transformer(path.to_equipment))
@@ -111,30 +149,4 @@ class AssignToFeeders:
         elif isinstance(step_path.to_equipment, ProtectedSwitch):
             feeders_to_assign._associate_relay_systems(step_path.to_equipment)
 
-    def _feeders_from_terminal(self, terminal: Terminal):
-        return terminal.conducting_equipment.get_filtered_containers(Feeder)(self.network_state_operators)
 
-    def _associate_equipment_with_containers(self, equipment_containers: Iterable[EquipmentContainer], equipment: Iterable[Equipment]):
-        for item in equipment_containers:
-            for feeder in equipment:
-                self.network_state_operators.associate_equipment_and_container(item, feeder)
-
-    def _associate_relay_systems_with_containers(self, equipment_containers: Iterable[EquipmentContainer], to_equipment: ProtectedSwitch):
-        self._associate_equipment_with_containers(equipment_containers, [
-            scheme.system
-            for relayFunction in to_equipment.relay_functions
-            for scheme in relayFunction.schemes
-            if scheme.system is not None]
-        )
-
-    def _feeder_energizes(self, feeders: Iterable[Feeder], lv_feeders: Iterable[LvFeeder]):
-        for feeder in feeders:
-            for lv_feeder in lv_feeders:
-                self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
-
-    def _feeder_try_energize_lv_feeders(self, to_equipment: PowerTransformer, lv_feeder_start_points: Set[ConductingEquipment]):
-        sites = to_equipment.get_filtered_containers(Site, self.network_state_operators)
-        if len(sites) > 0:
-            self._feeder_energizes(sites.find_lv_feeders(lv_feeder_start_points, self.network_state_operators))
-        else:
-            self._feeder_energizes(to_equipment.get_filtered_containers(LvFeeder, self.network_state_operators))

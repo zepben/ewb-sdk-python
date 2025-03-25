@@ -123,7 +123,7 @@ class TerminalConnectivityConnected:
                 add_path(from_phase, to_phase)
 
     def _find_xy_candidate_phases(self, xy_phases: Dict[Terminal, PhaseCode], primary_phases: Dict[Terminal, PhaseCode]) -> XyCandidatePhasePaths:
-        queue = LifoQueue[XyPhaseStep]
+        queue = LifoQueue[XyPhaseStep]()
         visited = set()
         candidate_phases = self._create_candidate_phases()
 

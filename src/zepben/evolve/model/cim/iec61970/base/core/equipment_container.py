@@ -5,11 +5,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Generator, List, TYPE_CHECKING, Collection, TypeVar
-
+from typing import Optional, Dict, Generator, List, TYPE_CHECKING, Collection, TypeVar, Set
 
 if TYPE_CHECKING:
-    from zepben.evolve import Equipment, Terminal, Substation, LvFeeder
+    from zepben.evolve import Equipment, Terminal, Substation, LvFeeder, ConductingEquipment, NetworkStateOperators
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.evolve.util import nlen, ngen, safe_remove_by_id
@@ -454,4 +453,10 @@ class Site(EquipmentContainer):
     A collection of equipment for organizational purposes, used for grouping distribution resources located at a site.
     Note this is not a CIM concept - however represents an `EquipmentContainer` in CIM. This is to avoid the use of `EquipmentContainer` as a concrete class.
     """
-    pass
+
+    def find_lv_feeders(self, lv_feeder_Start_points: Set[ConductingEquipment], state_operators: NetworkStateOperators) -> Generator[LvFeeder]:
+        for ce in state_operators.get_equipment(self):
+            if isinstance(ConductingEquipment, ce):
+                if ce in lv_feeder_Start_points:
+                    if not state_operators.is_open(ce):
+                        yield ce.get_filtered_containers(LvFeeder, state_operators)

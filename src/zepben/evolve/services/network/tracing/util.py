@@ -8,8 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from zepben.evolve import Switch, ConductingEquipment, SinglePhaseKind
-from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
+from zepben.evolve import Switch, ConductingEquipment, SinglePhaseKind, Traversal
 
 __all__ = ["normally_open", "currently_open", "ignore_open", "phase_log"]
 phase_logger = logging.getLogger("phase_logger")
@@ -80,7 +79,7 @@ async def _phase_log_trace(cond_equip):
             equip_msgs.append(e_msg)
         log_msg.append(equip_msgs)
 
-    trace = BasicTraversal(queue_next=queue_next_equipment, start_item=cond_equip, step_actions=[log])
+    trace = Traversal(queue_next=queue_next_equipment, start_item=cond_equip, step_actions=[log])
     await trace.run()
     return "\n".join([", ".join(x) for x in log_msg])
 
