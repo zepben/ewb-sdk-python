@@ -576,7 +576,7 @@ class NetworkServiceComparator(BaseServiceComparator):
             Terminal.sequence_number,
             Terminal.normal_feeder_direction,
             Terminal.current_feeder_direction,
-            Terminal.traced_phases
+            Terminal.phases
         )
 
         return self._compare_ac_dc_terminal(diff)
