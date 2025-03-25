@@ -149,7 +149,7 @@ from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
 
 from zepben.evolve.services.network.tracing.traversal.traversal import *
-from zepben.evolve.services.network.tracing.traversal.traversal_queue import *
+from zepben.evolve.services.network.tracing.traversal.queue import *
 
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import *
 from zepben.evolve.services.network.tracing.util import *

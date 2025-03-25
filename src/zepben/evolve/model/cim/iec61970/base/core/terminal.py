@@ -9,11 +9,11 @@ from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
-from zepben.evolve.services.network.tracing.phases.phase_status import NormalPhases, CurrentPhases
+from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 
 if TYPE_CHECKING:
-    from zepben.evolve import ConnectivityNode, ConductingEquipment, PhaseStatus
+    from zepben.evolve import ConnectivityNode, ConductingEquipment
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -67,6 +67,7 @@ class Terminal(AcDcTerminal):
             self.connectivity_node = connectivity_node
         else:
             self.connectivity_node = self._cn
+
 
     @property
     def conducting_equipment(self):
@@ -148,7 +149,7 @@ class Terminal(AcDcTerminal):
 
         :return: The [PhaseStatus] for the terminal in the normal state of the network.
         """
-        return NormalPhases(self)
+        return PhaseStatus(self)
 
     @property
     def current_phases(self) -> PhaseStatus:
@@ -157,7 +158,7 @@ class Terminal(AcDcTerminal):
 
         :return: The `PhaseStatus` for the terminal in the normal state of the network.
         """
-        return CurrentPhases(self)
+        return PhaseStatus(self)
 
     def connect(self, connectivity_node: ConnectivityNode):
         self.connectivity_node = connectivity_node

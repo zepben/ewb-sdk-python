@@ -5,10 +5,10 @@
 
 
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch, SinglePhaseKind
-from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
 from abc import abstractmethod
 
+from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
 
 class OpenStateOperators(StateOperator):
@@ -16,8 +16,9 @@ class OpenStateOperators(StateOperator):
     Interface for managing the open state of conducting equipment, typically switches.
     """
 
+    @staticmethod
     @abstractmethod
-    def is_open(self, switch: Switch, phase: SinglePhaseKind=None) -> bool:
+    def is_open(switch: Switch, phase: SinglePhaseKind=None) -> bool:
         """
         Checks if the specified switch is open. Optionally checking the state of a specific phase.
 
@@ -27,8 +28,9 @@ class OpenStateOperators(StateOperator):
         """
         pass
 
+    @staticmethod
     @abstractmethod
-    def set_open(self, switch: Switch, is_open: bool, phase: SinglePhaseKind=None) -> None:
+    def set_open(switch: Switch, is_open: bool, phase: SinglePhaseKind=None) -> None:
         """
         Sets the open state of the specified switch. Optionally applies the state to a specific phase.
 
@@ -43,10 +45,12 @@ class NormalOpenStateOperators(OpenStateOperators):
     """
     Operates on the normal state of the `Switch`
     """
-    def is_open(self, switch: Switch, phase:SinglePhaseKind=None) -> bool:
+    @staticmethod
+    def is_open(switch: Switch, phase:SinglePhaseKind=None) -> bool:
         return switch.is_normally_open(phase)
 
-    def set_open(self, switch: Switch, is_open: bool, phase: SinglePhaseKind=None) -> None:
+    @staticmethod
+    def set_open(switch: Switch, is_open: bool, phase: SinglePhaseKind = None) -> None:
         switch.set_normally_open(is_open, phase)
 
 
@@ -54,10 +58,12 @@ class CurrentOpenStateOperators(OpenStateOperators):
     """
     Operates on the current state of the `Switch`
     """
-    def is_open(self, switch: Switch, phase: SinglePhaseKind=None) -> bool:
+    @staticmethod
+    def is_open(switch: Switch, phase: SinglePhaseKind = None) -> bool:
         return switch.is_open(phase)
 
-    def set_open(self, switch: Switch, is_open: bool, phase: SinglePhaseKind=None) -> None:
+    @staticmethod
+    def set_open(switch: Switch, is_open: bool, phase: SinglePhaseKind = None) -> None:
         switch.set_open(is_open, phase)
 
 

@@ -9,7 +9,7 @@ import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
 if TYPE_CHECKING:
-    from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction
+    from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction, NetworkStateOperators
 
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
@@ -105,6 +105,10 @@ class Equipment(PowerSystemResource):
         The `EquipmentContainer`s this equipment belongs to.
         """
         return ngen(self._equipment_containers)
+
+    def get_filtered_containers(self, equipment_type, state_operators: NetworkStateOperators) -> Generator[EquipmentContainer, None, None]:
+        for container in (c for c in state_operators.get_containers(self) if isinstance(c, equipment_type)):
+                yield container
 
     def num_containers(self) -> int:
         """

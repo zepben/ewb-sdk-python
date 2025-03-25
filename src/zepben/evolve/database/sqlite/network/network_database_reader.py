@@ -53,10 +53,10 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         service_reader: NetworkServiceReader = None,
         table_version: TableVersion = TableVersion(),
         set_feeder_direction: SetDirection = Tracing.set_direction(),
-        set_phases: SetPhases = SetPhases(),
-        phase_inferrer: PhaseInferrer = PhaseInferrer(),
-        assign_to_feeders: AssignToFeeders = AssignToFeeders(),
-        assign_to_lv_feeders: AssignToLvFeeders = AssignToLvFeeders()
+        set_phases: SetPhases = Tracing.set_phases(),
+        phase_inferrer: PhaseInferrer = Tracing.phase_inferrer(),
+        assign_to_feeders: AssignToFeeders = Tracing.assign_equipment_to_feeders(),
+        assign_to_lv_feeders: AssignToLvFeeders = Tracing.assign_equipment_to_lv_feeders()
     ):
         super().__init__(
             connection,

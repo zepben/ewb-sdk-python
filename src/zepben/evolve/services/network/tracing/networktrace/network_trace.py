@@ -87,7 +87,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
         self.network_state_operators = network_state_operators
 
         if self._queue_type is None and queue:
-            self._queue_type = BasicQueueType(NetworkTraceQueueNext.basic(
+            self._queue_type = BasicQueueType(NetworkTraceQueueNext().basic(
                 NetworkStateOperators.in_service_state_operators,
                 compute_data_with_action_type(compute_data, action_type)
             ), queue)
@@ -101,7 +101,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
         super().__init__(self._queue_type, **kwargs)
 
 
-    def add_start_item(self, start: [Terminal, ConductingEquipment], data: T, phases: PhaseCode=None) -> "NetworkTrace[T]":
+    def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T, phases: PhaseCode=None) -> "NetworkTrace[T]":
         if isinstance(start, Terminal):
             start_path = NetworkTraceStep.Path(start, start, self.start_nominal_phase_path(phases))
             super().add_start_item(NetworkTraceStep(start_path, 0, 0, data))
@@ -111,7 +111,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
                 self.add_start_item(it, data, phases)
             return self
 
-    def run(self, start: ConductingEquipment, Terminal, data: T, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
+    def run(self, start: Union[ConductingEquipment, Terminal], data: T, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
         self.add_start_item(start, data, phases)
         super().run(can_stop_on_start_item)
         return self
@@ -165,15 +165,15 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
 class BranchingNetworkTrace[T](NetworkTrace[T]):
     def __init__(self,
                  network_state_operators: NetworkStateOperators,
-                 queue_factory: TraversalQueue[[NetworkTraceStep[[T]]]],
-                 branch_queue_factory: TraversalQueue[NetworkTrace[T]],
+                 queue_factory: Callable[[...], TraversalQueue[[NetworkTraceStep[[T]]]]],
+                 branch_queue_factory: Callable[[...], TraversalQueue[NetworkTrace[T]]],
                  action_type: NetworkTraceActionType,
                  parent: NetworkTrace[T],
                  compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]],
                  ):
 
         self._queue_type = BranchingQueueType(NetworkTraceQueueNext().branching(
-            NetworkStateOperators.in_service_state_operators, compute_data_with_action_type(compute_data, action_type)),
+            network_state_operators.is_in_service, compute_data_with_action_type(compute_data, action_type)),
             queue_factory,
             branch_queue_factory)
 

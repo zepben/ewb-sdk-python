@@ -21,9 +21,8 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace import Ne
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
-from zepben.evolve.services.network.tracing.util import normally_open, currently_open
 from zepben.evolve.services.network.network_service import connected_terminals, NetworkService
+from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 if TYPE_CHECKING:
     from zepben.evolve import Terminal, ConductingEquipment
     from zepben.evolve.types import PhaseSelector
@@ -39,7 +38,7 @@ class SetPhases:
     """
 
     class PhasesToFlow:
-        def __init(self, nominal_phase_paths: list[NominalPhasePath], step_flowed_phases: bool = False):
+        def __init__(self, nominal_phase_paths: list[NominalPhasePath], step_flowed_phases: bool = False):
             self.nominal_phase_paths = nominal_phase_paths
             self.step_flowed_phases = step_flowed_phases
 
@@ -63,12 +62,12 @@ class SetPhases:
         @param network: The network in which to apply phases.
         """
         trace = await self._create_network_trace(network_state_operators)
-        def apply_run_return(term):
+        async def apply_run_return(term):
             self._apply_phases(network_state_operators, term, term.phases.single_phases)
-            self._run_terminal(term, network_state_operators, trace)
+            await self._run_terminal(term, network_state_operators, trace)
 
 
-        [apply_run_return(term) for es in network.objects(EnergySource) for term in es.terminals]
+        [await apply_run_return(term) for es in network.objects(EnergySource) for term in es.terminals]
 
     async def _run_with_terminal(self,
                                  terminal: Terminal,
@@ -130,9 +129,9 @@ class SetPhases:
                       terminal: Terminal,
                       phases: Iterable[SinglePhaseKind]):
 
-        phases_status = state_operators.phase_status(terminal)
-        for nominal_phase, traced_phase in zip(terminal.phases.single_phases, phases):
-            phases_status[nominal_phase] = traced_phase if traced_phase not in PhaseCode.XY else SinglePhaseKind.NONE
+        traced_phases = state_operators.phase_status(terminal)
+        for i, nominal_phase in enumerate(terminal.phases.single_phases):
+            traced_phases[nominal_phase] = phases[i] if phases[i] in PhaseCode.XY  else SinglePhaseKind.NONE
 
     async def _get_nominal_phase_paths(self, state_operators: NetworkStateOperators,
                                        from_terminal: Terminal,
@@ -149,7 +148,7 @@ class SetPhases:
     async def _run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators, trace: NetworkTrace[PhasesToFlow]=None):
         if trace is None:
             trace = self._create_network_trace(network_state_operators)
-        nominal_phase_paths = map(terminal.phases, lambda it: NominalPhasePath(SinglePhaseKind.NONE, it))
+        nominal_phase_paths = map(lambda it: NominalPhasePath(SinglePhaseKind.NONE, it), terminal.phases)
         trace.run(terminal, self.PhasesToFlow(nominal_phase_paths), can_stop_on_start_item=False)
         trace.reset()
 
@@ -162,9 +161,9 @@ class SetPhases:
         nwt = Tracing.network_trace_branching(
             network_state_operators=state_operators,
             action_step_type=NetworkTraceActionType.ALL_STEPS(),
-            queue_factory=lambda it: WeightedPriorityQueue.process_queue(lambda it: it.path.to_terminal.phases.num_phases()),  # TODO: lol, explosions expected
-            branch_queue_factory=lambda it: WeightedPriorityQueue.branch_queue(lambda it: it.path.to_terminal.phases.num_phases()),  # TODO: lol, explosions expected
-            compute_data=self._compute_next_phases_to_flow(state_operators)
+            queue_factory=WeightedPriorityQueue.process_queue(lambda it: it.path.to_terminal.phases.num_phases()),  # TODO: lol, explosions expected
+            branch_queue_factory=WeightedPriorityQueue.branch_queue(lambda it: it.path.to_terminal.phases.num_phases()),  # TODO: lol, explosions expected
+            compute_data=await self._compute_next_phases_to_flow(state_operators)
         )
         def condition(next_step, *args):
             return len(next_step.data.nominal_phase_paths) > 0
@@ -182,6 +181,7 @@ class SetPhases:
             return self.PhasesToFlow(
                 self._get_nominal_phase_paths(state_operators, next_path.from_terminal, next_path.to_terminal, step.data.nominal_phase_paths.to_phases())
             )
+        return inner
 
     async def _run_from_terminal(
         self,
@@ -194,12 +194,6 @@ class SetPhases:
         traversal.tracker.visit(terminal)
         self._flow_to_connected_terminals_and_queue(traversal, terminal, phase_selector, phases_to_flow)
         await traversal.run()
-
-    def _set_normal_phases_and_queue_next(self, terminal: Terminal, traversal: Traversal[Terminal]):
-        self._set_phases_and_queue_next(terminal, traversal, normally_open, normal_phases)
-
-    def _set_current_phases_and_queue_next(self, terminal: Terminal, traversal: Traversal[Terminal]):
-        self._set_phases_and_queue_next(terminal, traversal, currently_open, current_phases)
 
     def _set_phases_and_queue_next(
         self,

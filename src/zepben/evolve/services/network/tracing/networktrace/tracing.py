@@ -4,13 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar, Union
 
-from zepben.evolve import require
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.networktrace.network_trace import BranchingNetworkTrace, NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
-from zepben.evolve.services.network.tracing.traversal.traversal_queue import TraversalQueue
+from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 
 T = TypeVar('T')
 
@@ -56,30 +55,30 @@ class Tracing:
 
     @staticmethod
     def assign_equipment_to_feeders():
-        from zepben.evolve import AssignToFeeders
+        from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
         return AssignToFeeders()
 
     @staticmethod
     def assign_equipment_to_lv_feeders():
-        from zepben.evolve import AssignToLvFeeders
+        from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import AssignToLvFeeders
         return AssignToLvFeeders()
 
     @staticmethod
     def set_phases():
-        from zepben.evolve import SetPhases
+        from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
         return SetPhases()
 
     @staticmethod
     def remove_phases():
-        from zepben.evolve import RemovePhases
+        from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
         return RemovePhases()
 
     @staticmethod
     def phase_inferrer():
-        from zepben.evolve import PhaseInferrer
+        from zepben.evolve.services.network.tracing.phases.phase_inferrer import PhaseInferrer
         return PhaseInferrer()
 
     @staticmethod
     def find_swer_equipment():
-        from zepben.evolve import FindSwerEquipment
+        from zepben.evolve.services.network.tracing.find_swer_equipment import FindSwerEquipment
         return FindSwerEquipment()

@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import NormalPhases, CurrentPhases, Terminal, SinglePhaseKind, PhaseCode
+from zepben.evolve import Terminal, SinglePhaseKind, PhaseCode, PhaseStatus
 
 
 def test_normal_and_current_phases():
@@ -34,8 +34,8 @@ def test_normal_and_current_phases():
 
 def test_normal_and_current_phase_codes_three():
     terminal = Terminal(phases=PhaseCode.ABCN)
-    normal_phases = NormalPhases(terminal)
-    current_phases = CurrentPhases(terminal)
+    normal_phases = PhaseStatus(terminal)
+    current_phases = PhaseStatus(terminal)
 
     assert normal_phases.as_phase_code() == PhaseCode.NONE
     assert current_phases.as_phase_code() == PhaseCode.NONE
@@ -67,8 +67,8 @@ def test_normal_and_current_phase_codes_three():
 
 def test_normal_and_current_phase_codes_single():
     terminal = Terminal(phases=PhaseCode.BC)
-    normal_phases = NormalPhases(terminal)
-    current_phases = CurrentPhases(terminal)
+    normal_phases = PhaseStatus(terminal)
+    current_phases = PhaseStatus(terminal)
 
     assert normal_phases.as_phase_code() == PhaseCode.NONE
     assert current_phases.as_phase_code() == PhaseCode.NONE
@@ -94,8 +94,8 @@ def test_normal_and_current_phase_codes_single():
 
 def test_normal_and_current_phase_codes_none():
     terminal = Terminal(phases=PhaseCode.NONE)
-    normal_phases = NormalPhases(terminal)
-    current_phases = CurrentPhases(terminal)
+    normal_phases = PhaseStatus(terminal)
+    current_phases = PhaseStatus(terminal)
 
     assert normal_phases.as_phase_code() == PhaseCode.NONE
     assert current_phases.as_phase_code() == PhaseCode.NONE

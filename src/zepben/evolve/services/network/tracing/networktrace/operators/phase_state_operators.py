@@ -28,6 +28,10 @@ class PhaseStateOperators(StateOperator):
         """
         pass
 
+    @staticmethod
+    def NORMAL():
+        return NormalPhaseStateOperators
+
 
 class NormalPhaseStateOperators(PhaseStateOperators):
     """
@@ -45,5 +49,5 @@ class CurrentPhaseStateOperators(PhaseStateOperators):
         return terminal.current_phases
 
 
-NORMAL = NormalPhaseStateOperators()
-CURRENT = CurrentPhaseStateOperators()
+PhaseStateOperators.NORMAL = NormalPhaseStateOperators()
+PhaseStateOperators.CURRENT = CurrentPhaseStateOperators()

@@ -20,7 +20,7 @@ from zepben.evolve.services.network.tracing.traversal.stop_condition import Stop
 __all__ = ["Traversal"]
 
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
-from zepben.evolve.services.network.tracing.traversal.traversal_queue import TraversalQueue
+from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 
 T = TypeVar('T')
 D = TypeVar('D')
@@ -272,26 +272,24 @@ class Traversal(Generic[T, D]):
         """
         if start_item:
             self.start_items.append(start_item)
-            self.run(can_stop_on_start_item)  # TODO: check if this double entry of `run` is actually utilised at all
-            return self.get_derived_this()
 
+        require(not self.running, "Traversal is already running")
+
+        if self.has_run:
+            self.reset()
+
+        self.running = True
+        self.has_run = True
+
+        if (self._parent is None and isinstance(self._queue_type, BranchingQueueType) and len(self.start_items) > 1 ):
+            self.branch_start_items()
         else:
-            require(not self.running, "Traversal is already running")
+            self.traverse(can_stop_on_start_item)
 
-            if self.has_run:
-                self.reset()
+        self.traverse_branches(can_stop_on_start_item)
 
-            self.running = True
-            self.has_run = True
-
-            if (self._parent is None and isinstance(self._queue_type, BranchingQueueType) and len(self.start_items()) > 1 ):
-                self.branch_start_items()
-            else:
-                self.traverse(can_stop_on_start_item)
-
-            self.traverse_branches(can_stop_on_start_item)
-
-            self.running = False
+        self.running = False
+        return self.get_derived_this()
 
     def reset(self) -> D:
         """
@@ -384,8 +382,10 @@ class Traversal(Generic[T, D]):
         if self.branch_queue is None:
             return
 
-        while self.branch_queue.has_next():
-            self.branch_queue.get().run(can_stop_on_start_item)
+        while len(self.branch_queue) > 0:
+            next = self.branch_queue.next()
+            if next:
+                next.run(can_stop_on_start_item)
 
     def can_queue_item(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
         return all(it.should_queue(next_item, next_context, current_item, current_context) for it in self.queue_conditions)

@@ -34,6 +34,7 @@ class PhaseCode(Enum):
     loads, use the A, B, C phase codes instead of s12N.
     """
 
+
     NONE = (0, [SinglePhaseKind.NONE])
     """No phases specified"""
 
@@ -118,6 +119,7 @@ class PhaseCode(Enum):
 
     s2N = (27, [SinglePhaseKind.s2, SinglePhaseKind.N])
     """Secondary phase 2 plus neutral"""
+
 
     # pylint: enable=invalid-name
 

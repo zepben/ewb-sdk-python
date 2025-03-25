@@ -11,7 +11,6 @@ from zepben.evolve import connected_terminals
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
 if TYPE_CHECKING:
     from zepben.evolve import ConnectivityResult, ConductingEquipment, NetworkService
     from zepben.evolve.types import PhaseSelector
@@ -25,21 +24,6 @@ class RemovePhases(object):
     Convenience class that provides methods for removing phases on a `NetworkService`
     This class is backed by a `BranchRecursiveTraversal`.
     """
-
-    def __init__(self):
-        # The `BranchRecursiveTraversal` used when tracing the normal state of the network.
-        # NOTE: If you add stop conditions to this traversal it may no longer work correctly, use at your own risk.
-        # noinspection PyArgumentList
-        self.normal_traversal = BranchRecursiveTraversal(queue_next=_ebb_and_queue_normal_phases,
-                                                         process_queue=PriorityQueue(),
-                                                         branch_queue=PriorityQueue())
-
-        # The `BranchRecursiveTraversal` used when tracing the current state of the network.
-        # NOTE: If you add stop conditions to this traversal it may no longer work correctly, use at your own risk.
-        # noinspection PyArgumentList
-        self.current_traversal = BranchRecursiveTraversal(queue_next=_ebb_and_queue_current_phases,
-                                                          process_queue=PriorityQueue(),
-                                                          branch_queue=PriorityQueue())
 
     async def run(self, terminal: Terminal, nominal_phases_to_ebb: Union[None, PhaseCode, FrozenSet[SinglePhaseKind]] = None):
         """

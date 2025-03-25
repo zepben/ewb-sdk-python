@@ -7,32 +7,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-if TYPE_CHECKING:
-    from zepben.evolve import Terminal
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode
-
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from abc import ABC, abstractmethod
 
-__all__ = ["normal_phases", "current_phases", "PhaseStatus", "NormalPhases", "CurrentPhases"]
-
-
-def normal_phases(terminal: Terminal):
-    return NormalPhases(terminal)
+if TYPE_CHECKING:
+    from zepben.evolve import Terminal, UnsupportedOperationException
 
 
-def current_phases(terminal: Terminal):
-    return CurrentPhases(terminal)
-
-
-class PhaseStatus(ABC):
+class PhaseStatus:
 
     terminal: Terminal
 
     def __init__(self, terminal: Terminal):
-        self.terminal = terminal
+        self._terminal = terminal
 
-    @abstractmethod
+        self._phase_status_internal = SinglePhaseKind.NONE
+
     def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
         """
         Get the traced phase for the specified `nominal_phase`.
@@ -41,9 +31,8 @@ class PhaseStatus(ABC):
 
         Returns the traced phase.
         """
-        raise NotImplementedError()
+        return self.get(nominal_phase)
 
-    @abstractmethod
     def __setitem__(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
         """
         Set the traced phase for the specified `nominal_phase`.
@@ -54,7 +43,20 @@ class PhaseStatus(ABC):
 
         Returns True if the phase is updated, otherwise False.
         """
-        raise NotImplementedError()
+        return self._terminal.normal_phases.set(nominal_phase, traced_phase)
+
+    def get(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
+        return self._phase_status_internal
+
+    def set(self, nominal_phase: SinglePhaseKind, single_phase_kind: SinglePhaseKind) -> bool:
+        if nominal_phase == single_phase_kind:
+            return False
+        elif SinglePhaseKind.NONE in (nominal_phase, single_phase_kind):
+            # TODO: Add phase to internal
+            return True
+        else:
+            raise UnsupportedOperationException(f'Crossing phases [({nominal_phase}) ({single_phase_kind})')
+
 
     def as_phase_code(self) -> Optional[PhaseCode]:
         """
@@ -77,26 +79,3 @@ class PhaseStatus(ABC):
         else:
             return None
 
-
-class NormalPhases(PhaseStatus):
-    """
-    The traced phases in the normal state of the network.
-    """
-
-    def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
-        return self.terminal.traced_phases.normal(nominal_phase)
-
-    def __setitem__(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
-        return self.terminal.traced_phases.set_normal(nominal_phase, traced_phase)
-
-
-class CurrentPhases(PhaseStatus):
-    """
-    The traced phases in the current state of the network.
-    """
-
-    def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
-        return self.terminal.traced_phases.current(nominal_phase)
-
-    def __setitem__(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
-        return self.terminal.traced_phases.set_current(nominal_phase, traced_phase)

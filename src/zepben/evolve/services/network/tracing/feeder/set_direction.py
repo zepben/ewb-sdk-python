@@ -8,6 +8,7 @@ from typing import Optional, TYPE_CHECKING
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
 
 from zepben.evolve import require, Feeder
+from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
@@ -65,8 +66,24 @@ class SetDirection:
         return FeederDirection.NONE
 
     async def _create_traversal(self, state_operators: NetworkStateOperators) -> NetworkTrace[FeederDirection]:
+        def queue_condition(_in, *args):
+            _, direction_to_apply = _in
+            return direction_to_apply != FeederDirection.NONE
+
+        def step_action(_in, _):
+            path, direction_to_apply = _in
+            return state_operators.add_direction(path.to_terminal, direction_to_apply)
+
         reprocessed_loop_terminals: list[Terminal] = []
-        return Tracing
+        return (Tracing.network_trace_branching(
+            network_state_operators=state_operators,
+            action_step_type=NetworkTraceActionType.ALL_STEPS(),
+            compute_data=lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path)
+            ).add_condition(lambda s: s.stop_at_open())
+               .add_stop_condition(lambda path, _: path.to_terminal.is_feeder_head_terminal or self._reached_substation_transformer(path.to_terminal))
+               .add_queue_condition(queue_condition)
+               .add_step_action(step_action)
+        )
 
     async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators):
         """
@@ -74,11 +91,11 @@ class SetDirection:
 
          :param network: The network in which to apply feeder directions.
          """
-        for feeder in (f for f in network.objects(Feeder) if f.normal_head_terminal):
-            feeder_head = feeder.conducting_equipment
-            require(feeder_head is not None, lambda: 'head terminals require conducting equipment to apply feeder direction')
-            if not network_state_operators.is_open(feeder_head, None):
-                await  self.run_terminal(feeder, network_state_operators)
+        for terminal in (f.normal_head_terminal for f in network.objects(Feeder) if f.normal_head_terminal):
+            head_terminal = terminal.conducting_equipment
+            require(head_terminal is not None, lambda: 'head terminals require conducting equipment to apply feeder direction')
+            if not network_state_operators.is_open(head_terminal, None):
+                await self.run_terminal(terminal, network_state_operators)
 
     async def run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
         """
@@ -86,7 +103,8 @@ class SetDirection:
 
          :param terminal: The terminal to start applying feeder direction from.
          """
-        await self._create_traversal(network_state_operators).run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False)
+        trav = await self._create_traversal(network_state_operators)
+        return trav.run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False)
 
     @staticmethod
     def _reached_substation_transformer(terminal: Terminal) -> bool:
