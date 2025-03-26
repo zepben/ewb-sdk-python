@@ -18,7 +18,7 @@ class TestFindSwerEquipment:
     def setup_method(self):
         self.state_operators = create_autospec(NetworkStateOperators.NORMAL, instance=True)
 
-        self.find_swer_equipment = FindSwerEquipment(self.state_operators)
+        self.find_swer_equipment = FindSwerEquipment()
 
     # pylint: enable=attribute-defined-outside-init
 

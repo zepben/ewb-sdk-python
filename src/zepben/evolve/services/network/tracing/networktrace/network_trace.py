@@ -86,7 +86,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
 
         self.network_state_operators = network_state_operators
 
-        if self._queue_type is None and queue:
+        if self._queue_type is None and queue is not None:
             self._queue_type = BasicQueueType(NetworkTraceQueueNext().basic(
                 NetworkStateOperators.in_service_state_operators,
                 compute_data_with_action_type(compute_data, action_type)
@@ -113,7 +113,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
 
     def run(self, start: Union[ConductingEquipment, Terminal], data: T, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
         self.add_start_item(start, data, phases)
-        super().run(can_stop_on_start_item)
+        super().run(can_stop_on_start_item=can_stop_on_start_item)
         return self
 
     def add_condition(self, condition: TraversalCondition[T]) -> "NetworkTrace[T]":
@@ -161,6 +161,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
             parent = parent.parent
 
         return self.tracker.visit(terminal, phases)
+
 
 class BranchingNetworkTrace[T](NetworkTrace[T]):
     def __init__(self,

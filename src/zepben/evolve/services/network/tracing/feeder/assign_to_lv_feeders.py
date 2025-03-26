@@ -4,14 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Set, Callable, Optional, Awaitable, Any, Collection, Iterable
 
-from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Equipment, LvFeeder
+from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.services.common.resolver import normal_head_terminal
 from zepben.evolve.services.network.network_service import NetworkService
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import BaseFeedersInternal
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
@@ -19,6 +18,7 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace_action_ty
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
+from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 
 __all__ = ["AssignToLvFeeders"]
 
@@ -71,17 +71,17 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                                terminal: Terminal,
                                lv_feeder_start_points: Set[ConductingEquipment],
                                terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
-                               feeders_to_assign: list[Feeder]):
+                               lv_feeders_to_assign: list[LvFeeder]):
 
-        if terminal is None or len(feeders_to_assign) == 0:
+        if terminal is None or len(lv_feeders_to_assign) == 0:
             return
 
         start_ce = terminal.conducting_equipment
 
         if isinstance(start_ce, Switch) and self.network_state_operators.is_open(start_ce):
-            feeders_to_assign.associate_equipment(start_ce)
+            lv_feeders_to_assign.associate_equipment(start_ce)
         else:
-            traversal = self._create_trace(terminal_to_aux_equipment, lv_feeder_start_points, feeders_to_assign)
+            traversal = self._create_trace(terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
             traversal.run(terminal, False)
 
     def _create_trace(self,
@@ -89,27 +89,31 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                       lv_feeder_start_points: Set[ConductingEquipment],
                       lv_feeders_to_assign: list[Feeder]) -> NetworkTrace[...]:  # TODO NetworkTrace[Unit]?
 
+        def _reached_hv(ce: ConductingEquipment):
+            if ce.base_voltage:
+                if ce.base_voltage.nominal_voltage >= 1000:
+                    return True
+
         def stop_condition(_in):
             _, found_lv_feeder = _in
             return _, found_lv_feeder
 
         def queue_condition(_in, *args):
             path, found_lv_feeder = _in
-            return found_lv_feeder or not reached_hv(path.to_equipment)
+            return found_lv_feeder or not _reached_hv(path.to_equipment)
 
         def step_action(_in, context):
             path, found_lv_feeder = _in
             return self._process(path, found_lv_feeder, context, terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
 
-        return (
-            Tracing.network_trace(self.network_state_operators, NetworkTraceActionType.ALL_STEPS,compute_data=(
-                lambda _, __, next_path: next_path.to_equipment in lv_feeder_start_points
-            ))
-            .add_condition(lambda s: s._stop_at_open())
-            .add_stop_condition(stop_condition)
-            .add_queue_condition(queue_condition)
-            .add_step_action(step_action)
-        )
+        return (Tracing.network_trace(self.network_state_operators, NetworkTraceActionType.ALL_STEPS,compute_data=(
+                lambda _, __, next_path: next_path.to_equipment in lv_feeder_start_points))
+                .add_condition(lambda s: s._stop_at_open())
+                .add_stop_condition(stop_condition)
+                .add_queue_condition(QueueCondition(queue_condition))
+                .add_step_action(step_action)
+            )
+
 
     async def _process(self,
                        step_path: NetworkTraceStep.Path,
