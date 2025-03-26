@@ -44,10 +44,6 @@ Now that you have a client, you can use it to update the state of the network on
 The current state of the network can be updated using the `set_current_states` function on the `UpdateNetworkStateClient`. All events passed in the same list will
 be executed as a batch.
 
-:::note
-The current implementation only supports updating the current state of switches. In the future we will add more functionality such as cuts and jumpers.
-:::
-
 #### Updating current switch state
 
 The current state of switches can be updating by passing a `SwitchStateEvent` to the `set_current_states` function.
@@ -61,6 +57,60 @@ event1 = SwitchStateEvent("event1", datetime.now(), "switch_id_1", SwitchAction.
 event2 = SwitchStateEvent("event2", datetime.now(), "switch_id_2", SwitchAction.CLOSE)
 response = client.set_current_states(1, (event1, event2))
 ```
+
+#### Adding cuts
+
+You can cut an AcLineSegment in the current state of the network by passing an `AddCutEvent` to the `set_current_states` function.
+
+```python
+from datetime import datetime
+
+from zepben.evolve import AddCutEvent
+
+event1 = AddCutEvent("event1", datetime.now(), "cut_id", "acls_id")
+response = client.set_current_states(1, (event1))
+```
+
+#### Removing cuts
+
+You can remove a previously added cut from the current state of the network by passing a `RemoveCutEvent` to the `set_current_states` function.
+
+```python
+from datetime import datetime
+
+from zepben.evolve import RemoveCutEvent
+
+event1 = RemoveCutEvent("event1", datetime.now(), "cut_id")
+response = client.set_current_states(1, (event1))
+```
+
+#### Adding jumpers
+
+You can add a jumper between two other pieces of equipment in the current state of the network by passing an `AddJumperEvent` to the `set_current_states` function.
+
+```python
+from datetime import datetime
+
+from zepben.evolve import AddJumperEvent, JumperConnection
+
+event1 = AddJumperEvent("event1", datetime.now(), "jumper_id", JumperConnection("from_id", JumperConnection("to_id")))
+response = client.set_current_states(1, (event1))
+```
+
+#### Removing jumpers
+
+You can remove a previously added jumper from the current state of the network by passing a `RemoveJumperEvent` to the `set_current_states` function.
+
+```python
+from datetime import datetime
+
+from zepben.evolve import RemoveJumperEvent
+
+event1 = RemoveJumperEvent("event1", datetime.now(), "jumper_id")
+response = client.set_current_states(1, (event1))
+```
+
+#### Multiple Requests
 
 If you have multiple batches to send, you can use `set_current_states_in_batches` rather than calling `set_current_states` multiple times
 
