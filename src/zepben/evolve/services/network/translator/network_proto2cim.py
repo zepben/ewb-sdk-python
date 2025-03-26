@@ -975,7 +975,6 @@ def terminal_to_cim(pb: PBTerminal, network_service: NetworkService) -> Optional
         sequence_number=pb.sequenceNumber,
         normal_feeder_direction=FeederDirection(pb.normalFeederDirection),
         current_feeder_direction=FeederDirection(pb.currentFeederDirection),
-        traced_phases=TracedPhases(pb.tracedPhases),
     )
 
     network_service.resolve_or_defer_reference(resolver.conducting_equipment(cim), pb.conductingEquipmentMRID)

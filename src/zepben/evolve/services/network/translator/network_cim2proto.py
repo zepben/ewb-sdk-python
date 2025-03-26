@@ -870,7 +870,7 @@ def terminal_to_pb(cim: Terminal) -> PBTerminal:
         sequenceNumber=cim.sequence_number,
         normalFeederDirection=PBFeederDirection.Value(cim.normal_feeder_direction.short_name),
         currentFeederDirection=PBFeederDirection.Value(cim.current_feeder_direction.short_name),
-        tracedPhases=cim.traced_phases.phase_status
+        #phases=cim.pha
     )
 
 

@@ -738,18 +738,13 @@ def create_substation(include_runtime: bool = True):
 
 
 def create_terminal(include_runtime: bool = True):
-    runtime = {
-        "traced_phases": builds(TracedPhases)
-    } if include_runtime else {}
-
     return builds(
         Terminal,
         **create_ac_dc_terminal(include_runtime),
         conducting_equipment=sampled_conducting_equipment(include_runtime),
         connectivity_node=builds(ConnectivityNode, **create_identified_object(include_runtime)),
         phases=sampled_phase_code(),
-        sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER),
-        **runtime
+        sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER)
     )
 
 
@@ -1043,7 +1038,10 @@ def create_breaker(include_runtime: bool = True):
 
 
 def create_busbar_section(include_runtime: bool = True):
-    return builds(BusbarSection, **create_connector(include_runtime))
+    #  Monkey patch the args to set terminals to 1, as busbars only have 1 terminal.
+    args = create_connector(include_runtime)
+    args["terminals"] = lists(builds(Terminal, **create_identified_object(include_runtime)), min_size=1, max_size=1)
+    return builds(BusbarSection, **args)
 
 
 def create_clamp(include_runtime: bool = True):
