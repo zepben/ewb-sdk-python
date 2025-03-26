@@ -4,7 +4,11 @@
 * None.
 
 ### New Features
-* None.
+* Added support for the following `CurrentStateEvent` types:
+  * `AddCutEvent`.
+  * `RemoveCutEvent`.
+  * `AddJumperEvent`.
+  * `RemoveJumperEvent`.
 
 ### Enhancements
 * `QueryNetworkStateClient.reportBatchStatus` can be used to send status responses for batches returned from the service via

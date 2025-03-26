@@ -7,7 +7,7 @@ import platform
 from time import perf_counter, process_time
 from typing import Callable
 
-from zepben.evolve import connect, Feeder
+from zepben.evolve import connect_insecure, Feeder
 from zepben.evolve.streaming.get.network_consumer import SyncNetworkConsumerClient
 
 rpc_port = 9001
@@ -26,7 +26,7 @@ def run_streaming():
 
 
 def run_retrieve():
-    with connect(rpc_port=rpc_port) as channel:
+    with connect_insecure(rpc_port=rpc_port) as channel:
         client = SyncNetworkConsumerClient(channel=channel)
 
         client.retrieve_network().throw_on_error()
@@ -36,7 +36,7 @@ def run_retrieve():
 
 
 def run_get_object():
-    with connect(rpc_port=rpc_port) as channel:
+    with connect_insecure(rpc_port=rpc_port) as channel:
         client = SyncNetworkConsumerClient(channel=channel)
 
         client.get_identified_object("21527151-6fce-423d-84e5-8254a00b05b1").throw_on_error()
@@ -46,7 +46,7 @@ def run_get_object():
 
 
 def run_feeder():
-    with connect(rpc_port=rpc_port) as channel:
+    with connect_insecure(rpc_port=rpc_port) as channel:
         client = SyncNetworkConsumerClient(channel=channel)
 
         client.get_equipment_container("CTN005", Feeder).throw_on_error()
@@ -56,7 +56,7 @@ def run_feeder():
 
 
 def run_network_hierarchy():
-    with connect(rpc_port=rpc_port) as channel:
+    with connect_insecure(rpc_port=rpc_port) as channel:
         client = SyncNetworkConsumerClient(channel=channel)
 
         network_hierarchy = client.get_network_hierarchy().throw_on_error().value
