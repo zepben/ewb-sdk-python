@@ -10,7 +10,6 @@ from zepben.evolve.services.network.tracing.traversal.step_context import StepCo
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
 
-
 T = TypeVar('T')
 U = TypeVar('U')
 
@@ -32,7 +31,7 @@ class QueueCondition[T](TraversalCondition[T]):
         `currentContext` The context associated with the [currentItem].
         Returns `true` if the [nextItem] should be queued; `false` otherwise.
         """
-        raise NotImplementedError()
+        return self._func(next_item, next_context, current_item, current_context)
 
     def should_queue_start_item(self, item: T) -> bool:
         """
@@ -41,7 +40,8 @@ class QueueCondition[T](TraversalCondition[T]):
         `item` The item to be potentially queued.
         Returns `true` if the [item] should be queued; `false` otherwise. Defaults to `true`.
         """
-        raise True
+        return self._func(item)
+
 
 class QueueConditionWithContextValue[T, U](QueueCondition[T], TypedContextValueComputer[T, U]):
     """

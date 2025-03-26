@@ -9,4 +9,5 @@ from typing import TypeVar
 T = TypeVar('T')
 
 class TraversalCondition[T](ABC):
-    pass
+    def __init__(self, _func):
+        self._func = _func
