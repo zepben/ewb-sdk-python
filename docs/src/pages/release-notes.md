@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.45.0](#v0450)| `26 March 2025` |
 |[0.44.0](#v0440)| `24 January 2025` |
 |[0.43.1](#v0431)| `06 January 2025` |
 |[0.43.0](#v0430)| `05 January 2025` |
@@ -52,6 +53,30 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.45.0]
+
+### Breaking Changes
+* None.
+
+### New Features
+* Added support for the following `CurrentStateEvent` types:
+  * `AddCutEvent`.
+  * `RemoveCutEvent`.
+  * `AddJumperEvent`.
+  * `RemoveJumperEvent`.
+
+### Enhancements
+* `QueryNetworkStateClient.reportBatchStatus` can be used to send status responses for batches returned from the service via
+  `QueryNetworkStateClient.getCurrentStates`.
+
+### Fixes
+* Specify typing_extensions as a dependency to fix support for Python 3.9 and 3.10
+
+### Notes
+* None.
 
 ---
 
