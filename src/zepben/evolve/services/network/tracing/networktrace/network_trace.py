@@ -117,7 +117,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
         return self
 
     def add_condition(self, condition: TraversalCondition[T]) -> "NetworkTrace[T]":
-        super().add_condition(self.network_state_operators.condition())
+        super().add_condition(condition(self.network_state_operators))
         return self
 
     def add_queue_condition(self, condition: QueueCondition[NetworkTraceStep[T]], step_type:NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
