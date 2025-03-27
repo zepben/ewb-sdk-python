@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, TypeVar
 
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
 
@@ -13,8 +13,11 @@ from abc import abstractmethod
 
 __all__ = ['FeederDirectionStateOperations', 'NormalFeederDirectionStateOperations', 'CurrentFeederDirectionStateOperations']
 
+from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
+from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
+T = TypeVar('T')
 
 class FeederDirectionStateOperations(StateOperator):
     """
@@ -64,6 +67,18 @@ class FeederDirectionStateOperations(StateOperator):
         Returns `true` if the direction was removed; `false` if the direction was not present.
         """
         pass
+
+    @classmethod
+    def upstream(cls, get_direction: Callable[[Terminal], FeederDirection]) -> NetworkTraceQueueCondition[T]:
+        return cls.with_direction(FeederDirection.UPSTREAM, get_direction)
+
+    @classmethod
+    def downstream(cls, get_direction: Callable[[Terminal], FeederDirection]) -> NetworkTraceQueueCondition[T]:
+        return cls.with_direction(FeederDirection.DOWNSTREAM, get_direction)
+
+    @staticmethod
+    def with_direction(direction: FeederDirection, get_direction: Callable[[Terminal], FeederDirection]) -> NetworkTraceQueueCondition[T]:
+        return DirectionCondition(direction, get_direction)
 
 class NormalFeederDirectionStateOperations(FeederDirectionStateOperations):
     def get_direction(self, terminal: Terminal) -> FeederDirection:

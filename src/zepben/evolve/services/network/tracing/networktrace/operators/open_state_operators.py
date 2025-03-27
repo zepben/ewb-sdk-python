@@ -2,13 +2,17 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+from collections.abc import Callable
+from typing import Union, TypeVar
 
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch, SinglePhaseKind
 
 from abc import abstractmethod
 
+from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
+
+T = TypeVar('T')
 
 
 class OpenStateOperators(StateOperator):
@@ -39,6 +43,10 @@ class OpenStateOperators(StateOperator):
         `phase` The specific phase to set, or `null` to apply to all phases.
         """
         pass
+
+    @staticmethod
+    def stop_at_open(open_test: Callable[[Union[Switch, SinglePhaseKind]], bool], phase: SinglePhaseKind) -> NetworkTraceQueueCondition[T]:
+        return OpenCondition(open_test, phase)
 
 
 class NormalOpenStateOperators(OpenStateOperators):

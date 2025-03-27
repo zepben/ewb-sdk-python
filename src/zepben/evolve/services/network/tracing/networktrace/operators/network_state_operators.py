@@ -33,7 +33,11 @@ class NetworkStateOperators(ABC):
 
     def __getattribute__(self, item):
         """
-        yerp
+        This allows NetworkStateOperators to implement the functions (and accidentally, the attributes) of any class in _operators
+        if its not present in this object
+
+        TODO: this is functional, but not optimal and can be made smarter and faster.
+        TODO: pretty sure we should be using __getattr__ instead also - read line above re: functional
         """
         try:
             return super().__getattribute__(item)
@@ -43,19 +47,6 @@ class NetworkStateOperators(ABC):
                     return operator.__getattribute__(item)
             raise e
 
-    """
-    def __getattr__(self, item):
-        try:
-            print(f'dtry {self}')
-            super().__getattr__(item)
-        except AttributeError as e:
-            print(f'dexcept {self}')
-            for operator in self._operators:
-                print(f'd{operator} {self}')
-                if hasattr(operator, item):
-                    return operator.__getattr__(item)
-            raise e
-    """
 
 class NormalNetworkStateOperators(NetworkStateOperators):
     """
