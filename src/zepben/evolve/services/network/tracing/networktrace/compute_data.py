@@ -14,6 +14,9 @@ class ComputeData[T]:
     """
     Functional interface used to compute contextual data stored on a NetworkTraceStep.
     """
+    def __init__(self, func):
+        self._func = func
+
     def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path) -> T:
         """
         Called for each new NetworkTraceStep in a NetworkTrace. The value returned from this function
@@ -25,13 +28,16 @@ class ComputeData[T]:
 
         Returns The data to associate with the next NetworkTraceStep.
         """
-        pass
+        return self._func(current_step, current_context, next_path)
 
 class ComputeDataWithPaths[T]:
     """
     Functional interface used to compute contextual data stored on a NetworkTraceStep. This can be used when the
     contextual data can only be computed by knowing all the next paths that can be stepped to from a given step.
     """
+    def __init__(self, func):
+        self._func = func
+
     def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path, next_paths: list[NetworkTraceStep.Path, ...]) -> T:
         """
         Called for each new NetworkTraceStep in a NetworkTrace. The value returned from this function
@@ -44,4 +50,4 @@ class ComputeDataWithPaths[T]:
 
         Returns The data to associate with the next NetworkTraceStep.
         """
-        pass
+        return self._func(current_step, current_context, next_path, next_paths)

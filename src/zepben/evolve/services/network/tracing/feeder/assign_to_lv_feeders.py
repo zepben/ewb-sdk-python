@@ -108,7 +108,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
 
         return (Tracing.network_trace(self.network_state_operators, NetworkTraceActionType.ALL_STEPS,compute_data=(
                 lambda _, __, next_path: next_path.to_equipment in lv_feeder_start_points))
-                .add_condition(lambda s: s._stop_at_open())
+                .add_condition(lambda s: s.stop_at_open())
                 .add_stop_condition(stop_condition)
                 .add_queue_condition(QueueCondition(queue_condition))
                 .add_step_action(step_action)
