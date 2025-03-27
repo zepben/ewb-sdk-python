@@ -92,6 +92,15 @@ class FeederDirection(Enum):
             return FeederDirection.BOTH
 
     @property
+    def complementary_external_direction(self):
+        if self == FeederDirection.UPSTREAM:
+            return FeederDirection.DOWNSTREAM
+        elif self == FeederDirection.DOWNSTREAM:
+            return FeederDirection.UPSTREAM
+        else:
+            return self
+
+    @property
     def short_name(self) -> str:
         """
         :return: The name of the enum without the class name.
