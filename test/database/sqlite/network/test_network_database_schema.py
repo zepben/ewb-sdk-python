@@ -22,7 +22,7 @@ from zepben.evolve import IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest
     NetworkDatabaseReader, NetworkServiceComparator, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, \
     PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, StreetAddress, TownDetail, StreetDetail, GroundingImpedance, \
-    PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator
+    PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
@@ -277,7 +277,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     async def test_schema_feeder(self, feeder):
         # Need to set feeder directions to match database load.
         network_service = SchemaNetworks().network_services_of(Feeder, feeder)
-        await tracing.set_direction().run(network_service)
+        await Tracing().set_direction().run(network_service, NetworkStateOperators)
 
         await self._validate_schema(network_service)
 
@@ -465,7 +465,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
         # Need to apply phases to match after the database load.
         network_service = SchemaNetworks().network_services_of(EnergySource, energy_source)
-        await tracing.set_phases().run(network_service)
+        await Tracing.set_phases().run(network_service, NetworkStateOperators)
 
         await self._validate_schema(network_service)
 

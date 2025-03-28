@@ -43,7 +43,7 @@ class PhaseInferrer:
 
         self._tracking: Dict[ConductingEquipment, bool] = {}
 
-    async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators.NORMAL):
+    async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
         """
         Infer the missing phases on the specified `network`.
 
