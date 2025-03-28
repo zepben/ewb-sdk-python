@@ -68,7 +68,6 @@ class Terminal(AcDcTerminal):
         else:
             self.connectivity_node = self._cn
 
-
     @property
     def conducting_equipment(self):
         """

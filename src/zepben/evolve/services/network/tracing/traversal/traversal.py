@@ -144,8 +144,8 @@ class Traversal(Generic[T, D]):
         Adds a queue condition to the traversal. Queue conditions determine whether an item should be queued for traversal.
         All registered queue conditions must return true for an item to be queued.
 
-        `condition` The queue condition to add.
-        Returns The current traversal instance.
+        :param condition: The queue condition to add.
+        :returns: The current traversal instance.
         """
         self.queue_conditions.append(condition)
         if isinstance(condition, QueueConditionWithContextValue):
@@ -157,8 +157,8 @@ class Traversal(Generic[T, D]):
         """
         Copies all queue conditions from another traversal to this traversal.
 
-        `other` The other traversal from which to copy queue conditions.
-         Returns The current traversal instance.
+        :param other: The other traversal from which to copy queue conditions.
+        :returns: The current traversal instance.
         """
         for it in other.queue_conditions:
             self.add_queue_condition(it)
@@ -281,7 +281,7 @@ class Traversal(Generic[T, D]):
         self.running = True
         self.has_run = True
 
-        if (self._parent is None and isinstance(self._queue_type, BranchingQueueType) and len(self.start_items) > 1 ):
+        if self._parent is None and isinstance(self._queue_type, BranchingQueueType) and len(self.start_items) > 1:
             self.branch_start_items()
         else:
             self.traverse(can_stop_on_start_item)

@@ -31,7 +31,6 @@ class StepAction[T](ABC):
         """
         raise NotImplementedError()
 
-
 class StepActionWithContextValue(StepAction[T], TypedContextValueComputer[T, U]):
     """
     Interface representing a step action that utilises a value stored in the [StepContext].
