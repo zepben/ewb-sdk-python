@@ -53,7 +53,12 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
 
         if start_terminal is None:
             for lv_feeder in network.objects(LvFeeder):
-                head_equipment = lv_feeder.normal_head_terminal.conducting_equipment
+                head_terminal = lv_feeder.normal_head_terminal
+                if head_terminal is None:
+                    continue
+                head_equipment = head_terminal.conducting_equipment
+                if head_equipment is None:
+                    continue
                 for feeder in head_equipment.get_filtered_containers(Feeder, self.network_state_operators):
                     self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
                 await self.run_with_feeders(lv_feeder.normal_head_terminal,
@@ -108,7 +113,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
 
         return (Tracing.network_trace(self.network_state_operators, NetworkTraceActionType.ALL_STEPS,compute_data=(
                 lambda _, __, next_path: next_path.to_equipment in lv_feeder_start_points))
-                .add_condition(lambda s: s.stop_at_open())
+                .add_condition(lambda s: s.stop_at_open)
                 .add_stop_condition(stop_condition)
                 .add_queue_condition(QueueCondition(queue_condition))
                 .add_step_action(step_action)
