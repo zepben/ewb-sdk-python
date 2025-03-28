@@ -5,6 +5,7 @@
 from collections.abc import Callable
 from typing import Union, TypeVar
 
+from zepben.evolve import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch, SinglePhaseKind
 
 from abc import abstractmethod
@@ -55,7 +56,8 @@ class NormalOpenStateOperators(OpenStateOperators):
     """
     @staticmethod
     def is_open(switch: Switch, phase:SinglePhaseKind=None) -> bool:
-        return switch.is_normally_open(phase)
+        if isinstance(switch, Switch):
+            return switch.is_normally_open(phase)
 
     @staticmethod
     def set_open(switch: Switch, is_open: bool, phase: SinglePhaseKind = None) -> None:
@@ -68,7 +70,8 @@ class CurrentOpenStateOperators(OpenStateOperators):
     """
     @staticmethod
     def is_open(switch: Switch, phase: SinglePhaseKind = None) -> bool:
-        return switch.is_open(phase)
+        if isinstance(switch, Switch):
+            return switch.is_open(phase)
 
     @staticmethod
     def set_open(switch: Switch, is_open: bool, phase: SinglePhaseKind = None) -> None:

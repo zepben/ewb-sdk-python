@@ -79,7 +79,7 @@ class SetDirection:
             network_state_operators=state_operators,
             action_step_type=NetworkTraceActionType.ALL_STEPS(),
             compute_data=lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path)
-            ).add_condition(lambda s: s.stop_at_open())
+            ).add_condition(lambda s: s.stop_at_open)
                .add_stop_condition(lambda path, _: path.to_terminal.is_feeder_head_terminal or self._reached_substation_transformer(path.to_terminal))
                .add_queue_condition(queue_condition)
                .add_step_action(step_action)
