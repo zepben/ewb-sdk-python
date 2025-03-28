@@ -116,7 +116,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
             feeders_to_assign.associate_equipment(start_ce)
         else:
             traversal = self._create_trace(terminal_to_aux_equipment, feeder_start_points, lv_feeder_start_points, feeders_to_assign)
-            traversal.run(terminal, can_stop_on_start_item=False)
+            traversal.run(terminal, False, can_stop_on_start_item=False)
 
     def _create_trace(self,
                       terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
@@ -125,7 +125,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                       feeders_to_assign: list[Feeder]) -> NetworkTrace[...]:  # TODO NetworkTrace[Unit]?
         return (
             Tracing.network_trace(self.network_state_operators, NetworkTraceActionType.ALL_STEPS)
-                .add_condition(lambda s: s.stop_at_open())
+                .add_condition(lambda s: s.stop_at_open)
                 .add_stop_condition(lambda path: path.to_equipment in feeder_start_points)
                 .add_queue_condition(lambda path: not self._reached_substation_transformer(path.to_equipment))
                 .add_queue_condition(lambda path: not self._reached_lv(path.to_equipment))

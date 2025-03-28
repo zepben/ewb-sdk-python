@@ -6,7 +6,8 @@ import pytest
 
 from services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
 from services.network.tracing.feeder.direction_logger import log_directions
-from zepben.evolve import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment, Substation
+from zepben.evolve import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment, Substation, \
+    NetworkStateOperators
 
 UPSTREAM = FeederDirection.UPSTREAM
 DOWNSTREAM = FeederDirection.DOWNSTREAM
@@ -20,7 +21,7 @@ class TestSetDirection:
     async def test_set_direction(self):
         n = create_phase_swap_loop_network()
 
-        await self._do_set_direction_trace(n)
+        await self._do_set_direction_trace(n, NetworkStateOperators.NORMAL)
 
         self._check_expected_direction(self._get_t(n, "ac_line_segment0", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "ac_line_segment0", 2), DOWNSTREAM)
@@ -202,7 +203,7 @@ class TestSetDirection:
             .add_feeder("s0") \
             .network  # Do not call build as we do not want to trace the directions yet.
 
-        await self._do_set_direction_trace(n)
+        await self._do_set_direction_trace(n, NetworkStateOperators.NORMAL)
 
         self._check_expected_direction(self._get_t(n, "s0", 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
@@ -450,8 +451,8 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "b2", 2), NONE)
 
     @staticmethod
-    async def _do_set_direction_trace(n: NetworkService):
-        await SetDirection().run(n)
+    async def _do_set_direction_trace(n: NetworkService, nso: NetworkStateOperators):
+        await SetDirection().run(n, nso)
         for it in n.objects(Feeder):
             await log_directions(it.normal_head_terminal.conducting_equipment)
 
