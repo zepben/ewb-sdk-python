@@ -9,9 +9,19 @@ from typing import TYPE_CHECKING, Optional
 
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from zepben.evolve.services.network.tracing.phases.traced_phases_bit_manipulation import TracedPhaseBitManipulation
 
 if TYPE_CHECKING:
     from zepben.evolve import Terminal, UnsupportedOperationException
+from zepben.evolve.streaming.exceptions import UnsupportedOperationException
+
+def validate(self: SinglePhaseKind) -> SinglePhaseKind:
+    if self in (SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N,
+                SinglePhaseKind.X, SinglePhaseKind.Y, SinglePhaseKind.s1, SinglePhaseKind.s2):
+        return self
+    raise ValueError(f'INTERNAL ERROR: Phase {self} is invalid')
+
+SinglePhaseKind.validate = validate
 
 
 class PhaseStatus:
@@ -21,7 +31,7 @@ class PhaseStatus:
     def __init__(self, terminal: Terminal):
         self._terminal = terminal
 
-        self._phase_status_internal = SinglePhaseKind.NONE
+        self._phase_status_internal = 0x0
 
     def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
         """
@@ -43,20 +53,20 @@ class PhaseStatus:
 
         Returns True if the phase is updated, otherwise False.
         """
-        return self._terminal.normal_phases.set(nominal_phase, traced_phase)
+        return self.set(nominal_phase, traced_phase)
 
     def get(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
-        return self._phase_status_internal
+        return TracedPhaseBitManipulation.get(self._phase_status_internal, nominal_phase)
 
     def set(self, nominal_phase: SinglePhaseKind, single_phase_kind: SinglePhaseKind) -> bool:
-        if nominal_phase == single_phase_kind:
+        _phase = self.get(nominal_phase)
+        if _phase == single_phase_kind:
             return False
-        elif SinglePhaseKind.NONE in (nominal_phase, single_phase_kind):
-            # TODO: Add phase to internal
+        elif SinglePhaseKind.NONE in (_phase, single_phase_kind):
+            self._phase_status_internal = TracedPhaseBitManipulation.set(self._phase_status_internal, nominal_phase, single_phase_kind)
             return True
         else:
-            raise UnsupportedOperationException(f'Crossing phases [({nominal_phase}) ({single_phase_kind})')
-
+            raise UnsupportedOperationException(f'Crossing phases [ ({nominal_phase}) ({single_phase_kind}) ]')
 
     def as_phase_code(self) -> Optional[PhaseCode]:
         """
@@ -64,10 +74,10 @@ class PhaseStatus:
 
         Returns The `PhaseCode` if the combination of phases makes sense, otherwise `None`.
         """
-        if self.terminal.phases == PhaseCode.NONE:
+        if self._terminal.phases == PhaseCode.NONE:
             return PhaseCode.NONE
 
-        traced_phases = [self[it] for it in self.terminal.phases]
+        traced_phases = [self[it] for it in self._terminal.phases]
         phases = set(traced_phases)
 
         if phases == {SinglePhaseKind.NONE}:

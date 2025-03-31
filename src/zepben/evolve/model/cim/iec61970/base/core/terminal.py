@@ -41,6 +41,10 @@ class Terminal(AcDcTerminal):
     phases: PhaseCode = PhaseCode.ABC
     """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
 
+    normal_phases: Optional[PhaseStatus] = PhaseStatus
+
+    current_phases: Optional[PhaseStatus] = PhaseStatus
+
     sequence_number: int = 0
     """The orientation of the terminal connections for a multiple terminal conducting equipment. The sequence numbering starts with 1 and additional
     terminals should follow in increasing order. The first terminal is the "starting point" for a two terminal branch."""
@@ -67,6 +71,12 @@ class Terminal(AcDcTerminal):
             self.connectivity_node = connectivity_node
         else:
             self.connectivity_node = self._cn
+
+        self.normal_phases: PhaseStatus = PhaseStatus(self)
+        """Status of phases as traced for the normal state of the network"""
+
+        self.current_phases: PhaseStatus = PhaseStatus(self)
+        """Status of phases as traced for the current state of the network"""
 
     @property
     def conducting_equipment(self):
@@ -140,24 +150,6 @@ class Terminal(AcDcTerminal):
         for t in self.conducting_equipment.terminals:
             if t is not self:
                 yield t
-
-    @property
-    def normal_phases(self) -> PhaseStatus:
-        """
-        Convenience method for accessing the normal phases.
-
-        :return: The [PhaseStatus] for the terminal in the normal state of the network.
-        """
-        return PhaseStatus(self)
-
-    @property
-    def current_phases(self) -> PhaseStatus:
-        """
-        Convenience method for accessing the current phases.
-
-        :return: The `PhaseStatus` for the terminal in the normal state of the network.
-        """
-        return PhaseStatus(self)
 
     def connect(self, connectivity_node: ConnectivityNode):
         self.connectivity_node = connectivity_node

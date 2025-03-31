@@ -3,28 +3,28 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import Terminal, SinglePhaseKind, PhaseCode, PhaseStatus
+from zepben.evolve import Terminal, SinglePhaseKind, PhaseCode, PhaseStatus, NetworkStateOperators
 
 
 def test_normal_and_current_phases():
     terminal = Terminal(phases=PhaseCode.ABCN)
-    normal_phases = NormalPhases(terminal)
-    current_phases = CurrentPhases(terminal)
+    normal_phases = NetworkStateOperators.NORMAL.phase_status(terminal)
+    current_phases = NetworkStateOperators.CURRENT.phase_status(terminal)
 
     normal_phases[SinglePhaseKind.A] = SinglePhaseKind.A
     normal_phases[SinglePhaseKind.B] = SinglePhaseKind.B
     normal_phases[SinglePhaseKind.C] = SinglePhaseKind.C
     normal_phases[SinglePhaseKind.N] = SinglePhaseKind.N
 
-    current_phases[SinglePhaseKind.A] = SinglePhaseKind.N
-    current_phases[SinglePhaseKind.B] = SinglePhaseKind.C
-    current_phases[SinglePhaseKind.C] = SinglePhaseKind.B
-    current_phases[SinglePhaseKind.N] = SinglePhaseKind.A
-
     assert normal_phases[SinglePhaseKind.A] == SinglePhaseKind.A
     assert normal_phases[SinglePhaseKind.B] == SinglePhaseKind.B
     assert normal_phases[SinglePhaseKind.C] == SinglePhaseKind.C
     assert normal_phases[SinglePhaseKind.N] == SinglePhaseKind.N
+
+    current_phases[SinglePhaseKind.A] = SinglePhaseKind.N
+    current_phases[SinglePhaseKind.B] = SinglePhaseKind.C
+    current_phases[SinglePhaseKind.C] = SinglePhaseKind.B
+    current_phases[SinglePhaseKind.N] = SinglePhaseKind.A
 
     assert current_phases[SinglePhaseKind.A] == SinglePhaseKind.N
     assert current_phases[SinglePhaseKind.B] == SinglePhaseKind.C

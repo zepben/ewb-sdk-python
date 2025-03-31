@@ -8,7 +8,7 @@ from typing import Optional, List
 import pytest
 
 from services.network.test_data.looping_network import create_looping_network
-from zepben.evolve import set_phases, ConductingEquipment
+from zepben.evolve import set_phases, ConductingEquipment, Tracing
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
 
 
@@ -18,11 +18,11 @@ async def test_downstream_tree():
 
     await set_phases().run(n)
     feeder_head = n.get("j0", ConductingEquipment)
-    await set_direction().run_terminal(feeder_head.get_terminal_by_sn(1))
+    await Tracing.set_direction().run_terminal(feeder_head.get_terminal_by_sn(1))
 
     start = n.get("j2", ConductingEquipment)
     assert start is not None
-    root = await normal_downstream_tree().run(start)
+    root = await normal_downstream_tree().run(start)  # TODO: BranchingTraversal ?
 
     assert root is not None
     _verify_tree_asset(root, n["j2"], None, [n["c13"], n["c3"]])

@@ -5,7 +5,7 @@
 import logging
 from typing import Iterable, Optional, Union
 
-from zepben.evolve import ConductingEquipment, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode
+from zepben.evolve import ConductingEquipment, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode, Tracing, NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 logger = logging.getLogger("phase_logger.py")
@@ -18,9 +18,9 @@ async def connected_equipment_trace_with_logging(assets: Iterable[ConductingEqui
     :param assets: An `Iterable` of `ConductingEquipment` to start tracing from.
     """
     for asset in assets:
-        trace = connected_equipment_trace()
+        trace = Tracing.network_trace()
         trace.add_step_action(_log_equipment)
-        await trace.run_from(asset)
+        trace.run(asset, False)
 
 
 def validate_phases_from_term_or_equip(
