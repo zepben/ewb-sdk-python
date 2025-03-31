@@ -24,10 +24,25 @@ from zepben.evolve.services.network.tracing.traversal.step_context import StepCo
 
 
 class AssignToFeeders:
+    """
+    Convenience class that provides methods for assigning HV/MV feeders on a `NetworkService`.
+    Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
+    This class is backed by a `NetworkTrace`.
+    """
+
     async def run(self,
                   network: NetworkService,
                   network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
                   start_terminal: Terminal=None):
+        """
+        Assign equipment to feeders in the specified network, given an optional start terminal.
+
+        :param network: The [NetworkService] to process.
+        :param network_state_operators: operator interfaces relating to the network state we are operating on
+        :param start_terminal: An optional [Terminal] to start from:
+        * When a start terminal is provided, the trace will assign all feeders associated with the terminals equipment to all connected equipment.
+        * If no start terminal is provided, all feeder head terminals in the network will be used instead, assigning their associated feeder.
+        """
         await AssignToFeedersInternal(network_state_operators).run(network, start_terminal)
 
 
@@ -65,20 +80,10 @@ class BaseFeedersInternal:
 
 
 class AssignToFeedersInternal(BaseFeedersInternal):
-    """
-    Convenience class that provides methods for assigning HV/MV feeders on a `NetworkService`.
-    Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
-    This class is backed by a `NetworkTrace`.
-    """
 
     async def run(self,
                   network: NetworkService,
                   start_terminal: Terminal=None):
-        """
-        Assign equipment to each feeder in the specified network.
-
-        :param network: The network containing the feeders to process
-        """
         self.network_state_operators = self.network_state_operators
 
         feeder_start_points = network.feeder_start_points
