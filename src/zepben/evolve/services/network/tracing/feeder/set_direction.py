@@ -93,9 +93,10 @@ class SetDirection:
          """
         for terminal in (f.normal_head_terminal for f in network.objects(Feeder) if f.normal_head_terminal):
             head_terminal = terminal.conducting_equipment
-            require(head_terminal is not None, lambda: 'head terminals require conducting equipment to apply feeder direction')
-            if not network_state_operators.is_open(head_terminal, None):
-                await self.run_terminal(terminal, network_state_operators)
+
+            if head_terminal is not None:
+                if not network_state_operators.is_open(head_terminal, None):
+                    await self.run_terminal(terminal, network_state_operators)
 
     async def run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
         """
