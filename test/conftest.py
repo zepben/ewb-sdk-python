@@ -111,10 +111,11 @@ def pytest_runtest_makereport(item):
 
     # Check to see if there were any async calls that were not awaited. This is done as there are cases where the IDE does not warn you of this happening, and
     # the behaviour can cause strange issues, or even tests successes with failing code.
+
     never_awaited = list(filter(lambda warning: "never awaited" in warning.message.args[0], recwarn.list))
     if never_awaited:
         for warn in recwarn.list:
-            print(warn.message.args[0])
+            print(f'{warn.message}: {warn.filename}: {warn.lineno}')
 
         # Update the report outcome rather than using `pytest.fail("Missing awaits...")` to get the correct behaviour in the test output.
         report.outcome = "failed"
