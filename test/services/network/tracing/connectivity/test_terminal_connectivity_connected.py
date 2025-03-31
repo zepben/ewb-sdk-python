@@ -6,7 +6,7 @@ from collections import Counter
 from typing import List, Tuple
 
 from zepben.evolve import NetworkService, PhaseCode, SinglePhaseKind as Phase, Terminal, ConnectivityNode, AcLineSegment, NominalPhasePath, \
-    TerminalConnectivityConnected
+    TerminalConnectivityConnected, Tracing
 
 
 class TestTerminalConnectivityConnected:
@@ -228,8 +228,8 @@ class TestTerminalConnectivityConnected:
     @staticmethod
     def _replace_normal_phases(terminal: Terminal, normal_phases: PhaseCode):
         for index, phase in enumerate(terminal.phases.single_phases):
-            terminal.traced_phases.set_normal(phase, Phase.NONE)
-            terminal.traced_phases.set_normal(phase, normal_phases.single_phases[index])
+            Tracing.set_phases().run(terminal, [Phase.NONE])
+            Tracing.set_phases().run(terminal, normal_phases.single_phases[index])
 
     def _get_next_connectivity_node(self) -> ConnectivityNode:
         return self._network_service.add_connectivity_node(f"cn{self._network_service.len_of(ConnectivityNode)}")

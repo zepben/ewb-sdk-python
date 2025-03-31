@@ -8,6 +8,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Union, Set, Callable, Iterable
 
+from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 from zepben.evolve.exceptions import PhaseException, TracingException
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -24,7 +26,7 @@ from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.network_service import connected_terminals, NetworkService
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 if TYPE_CHECKING:
-    from zepben.evolve import Terminal, ConductingEquipment
+    from zepben.evolve import ConductingEquipment
     from zepben.evolve.types import PhaseSelector
     from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 

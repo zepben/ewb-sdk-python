@@ -174,7 +174,7 @@ class PhaseCode(Enum):
 
 class PhaseCodeIter:
     """
-    An iterator that can be used to iterator over the `SinglePhaseKind` of a `PhaseCode`
+    An iterator that can be used to iterate over the `SinglePhaseKind` of a `PhaseCode`
     """
 
     def __init__(self, single_phases: List[SinglePhaseKind]):
