@@ -14,14 +14,16 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 
-class StepAction[T](ABC):
+class StepAction[T]:
     """
     Functional interface representing an action to be performed at each step of a traversal.
     This allows for custom operations to be executed on each item during traversal.
 
     `T` The type of items being traversed.
     """
-    @abstractmethod
+    def __init__(self, _func):
+        self._func = _func
+
     def apply(self, item: T, context: StepContext):
         """
         Applies the action to the specified [item].
@@ -29,7 +31,7 @@ class StepAction[T](ABC):
         `item` The current item in the traversal.
         `context` The context associated with the current traversal step.
         """
-        raise NotImplementedError()
+        return self._func(item, context)
 
 class StepActionWithContextValue(StepAction[T], TypedContextValueComputer[T, U]):
     """

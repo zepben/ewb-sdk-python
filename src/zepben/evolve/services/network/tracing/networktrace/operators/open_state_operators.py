@@ -10,6 +10,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch, SinglePha
 
 from abc import abstractmethod
 
+from zepben.evolve.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
@@ -46,8 +47,8 @@ class OpenStateOperators(StateOperator):
         pass
 
     @staticmethod
-    def stop_at_open(open_test: Callable[[Union[Switch, SinglePhaseKind]], bool], phase: SinglePhaseKind) -> NetworkTraceQueueCondition[T]:
-        return OpenCondition(open_test, phase)
+    def stop_at_open() -> NetworkTraceQueueCondition[T]:
+        return OpenCondition()
 
 
 class NormalOpenStateOperators(OpenStateOperators):

@@ -28,6 +28,10 @@ D = TypeVar('D')
 
 
 class Traversal(Generic[T, D]):
+    queue_condition = lambda func: QueueCondition(func)
+    stop_condition = lambda func: StopCondition(func)
+    condition = lambda func: TraversalCondition(func)
+    step_action = lambda func: StepAction(func)
     """
     A base traversal class allowing items in a connected graph to be traced.
     It provides the main interface and implementation for traversal logic.
@@ -105,6 +109,7 @@ class Traversal(Generic[T, D]):
         `condition` The condition to add.
         Returns this traversal instance.
         """
+        assert issubclass(condition.__class__, (QueueCondition, StopCondition))
         if isinstance(condition, QueueCondition):
             self.add_queue_condition(condition)
         elif isinstance(condition, StopCondition):
@@ -120,7 +125,7 @@ class Traversal(Generic[T, D]):
         Returns this traversal instance.
         """
         self.stop_conditions.append(condition)
-        if isinstance(condition, StopConditionWithContextValue):
+        if issubclass(condition.__class__, StopConditionWithContextValue):
             self.compute_next_context_funs[condition.key] = condition
         return self.get_derived_this()
 
@@ -147,6 +152,7 @@ class Traversal(Generic[T, D]):
         :param condition: The queue condition to add.
         :returns: The current traversal instance.
         """
+        assert issubclass(condition.__class__, QueueCondition)
         self.queue_conditions.append(condition)
         if isinstance(condition, QueueConditionWithContextValue):
             self.compute_next_context_funs[condition.key] = condition
@@ -171,6 +177,7 @@ class Traversal(Generic[T, D]):
         `action` The action to perform on each item.
         Returns The current traversal instance.
         """
+        assert issubclass(action.__class__, StepAction)
         self.step_actions.append(action)
         if isinstance(action, StepActionWithContextValue):
             self.compute_next_context_funs[action.key] = action

@@ -2,14 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Dict, List, TYPE_CHECKING
+from typing import Dict, List
 
 from zepben.evolve import PhaseCode, SinglePhaseKind
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
-
-if TYPE_CHECKING:
-    pass
 
 __all__ = ["straight_phase_connectivity", "viable_inferred_phase_connectivity"]
 

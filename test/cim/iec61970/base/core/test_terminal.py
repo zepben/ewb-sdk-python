@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
-from zepben.evolve import Terminal, ConnectivityNode, TracedPhases, ConductingEquipment, PhaseCode
+from zepben.evolve import Terminal, ConnectivityNode, TracedPhases, ConductingEquipment, PhaseCode, PhaseStatus
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
@@ -23,7 +23,7 @@ terminal_kwargs = {
 }
 
 # noinspection PyArgumentList
-terminal_args = [*ac_dc_terminal_args, ConductingEquipment(), PhaseCode.XYN, 1, FeederDirection.UPSTREAM, FeederDirection.DOWNSTREAM,
+terminal_args = [*ac_dc_terminal_args, ConductingEquipment(), PhaseCode.XYN, PhaseStatus, PhaseStatus, 1, FeederDirection.UPSTREAM, FeederDirection.DOWNSTREAM,
                  ConnectivityNode()]
 
 
@@ -63,11 +63,14 @@ def test_terminal_constructor_args():
     t = Terminal(*terminal_args)
 
     verify_ac_dc_terminal_constructor_args(t)
-    assert terminal_args[-6:] == [
+    expected_args = [
         t.conducting_equipment,
         t.phases,
+        t.normal_phases,
+        t.current_phases,
         t.sequence_number,
         t.normal_feeder_direction,
         t.current_feeder_direction,
         t.connectivity_node
     ]
+    assert (terminal_args[-len(expected_args):] == expected_args)

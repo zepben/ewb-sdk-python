@@ -25,10 +25,11 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.network_service import connected_terminals, NetworkService
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
+
 if TYPE_CHECKING:
     from zepben.evolve import ConductingEquipment
     from zepben.evolve.types import PhaseSelector
-    from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 
 __all__ = ["SetPhases"]
 
@@ -169,10 +170,10 @@ class SetPhases:
         )
         def condition(next_step, *args):
             return len(next_step.data.nominal_phase_paths) > 0
-        nwt.add_queue_condition(condition)
-        #nwt.add_queue_condition(lambda next_step, *args: len(next_step.data.nominal_phase_paths) > 0)
+        nwt.add_queue_condition(Traversal.queue_condition(condition))
+        nwt.add_queue_condition(Traversal.queue_condition(lambda next_step, *args: len(next_step.data.nominal_phase_paths) > 0))
 
-        nwt.add_step_action(step_action)
+        nwt.add_step_action(Traversal.step_action(step_action))
         return nwt
 
     async def _compute_next_phases_to_flow(self, state_operators: NetworkStateOperators) -> ComputeData[PhasesToFlow]:

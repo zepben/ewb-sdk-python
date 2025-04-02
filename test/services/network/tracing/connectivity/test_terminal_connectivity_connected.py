@@ -30,12 +30,12 @@ class TestTerminalConnectivityConnected:
         self._validate_connection(t1, Phase.NONE, Phase.Y, Phase.N)
         self._validate_connection(t2, Phase.Y, Phase.N)
 
-    def test_xyn_connectivity(self):
+    async def test_xyn_connectivity(self):
         t1, t2 = self._create_connected_terminals(PhaseCode.XYN, PhaseCode.AN)
         self._validate_connection(t1, Phase.A, Phase.NONE, Phase.N)
         self._validate_connection(t2, Phase.X, Phase.N)
 
-        self._replace_normal_phases(t1, PhaseCode.BCN)
+        await self._replace_normal_phases(t1, PhaseCode.BCN)
 
         self._validate_connection(t1, Phase.NONE, Phase.NONE, Phase.N)
         self._validate_connection(t2, Phase.NONE, Phase.N)
@@ -44,7 +44,7 @@ class TestTerminalConnectivityConnected:
         self._validate_connection(t1, Phase.B, Phase.NONE, Phase.N)
         self._validate_connection(t2, Phase.X, Phase.N)
 
-        self._replace_normal_phases(t1, PhaseCode.ABN)
+        await self._replace_normal_phases(t1, PhaseCode.ABN)
 
         self._validate_connection(t1, Phase.NONE, Phase.B, Phase.N)
         self._validate_connection(t2, Phase.Y, Phase.N)
@@ -63,22 +63,22 @@ class TestTerminalConnectivityConnected:
         self._validate_connection_multi(t2, [(t1, [Phase.Y, Phase.N]), (t3, [Phase.C, Phase.N])])
         self._validate_connection_multi(t3, [(t1, [Phase.X, Phase.NONE, Phase.Y, Phase.N]), (t2, [Phase.NONE, Phase.NONE, Phase.Y, Phase.N])])
 
-    def test_xn_connectivity(self):
+    async def test_xn_connectivity(self):
         t1, t2 = self._create_connected_terminals(PhaseCode.XN, PhaseCode.ABCN)
         self._validate_connection(t1, Phase.A, Phase.N)
         self._validate_connection(t2, Phase.X, Phase.NONE, Phase.NONE, Phase.N)
 
-        self._replace_normal_phases(t1, PhaseCode.AN)
+        await self._replace_normal_phases(t1, PhaseCode.AN)
 
         self._validate_connection(t1, Phase.A, Phase.N)
         self._validate_connection(t2, Phase.X, Phase.NONE, Phase.NONE, Phase.N)
 
-        self._replace_normal_phases(t1, PhaseCode.BN)
+        await self._replace_normal_phases(t1, PhaseCode.BN)
 
         self._validate_connection(t1, Phase.B, Phase.N)
         self._validate_connection(t2, Phase.NONE, Phase.X, Phase.NONE, Phase.N)
 
-        self._replace_normal_phases(t1, PhaseCode.CN)
+        await self._replace_normal_phases(t1, PhaseCode.CN)
 
         self._validate_connection(t1, Phase.C, Phase.N)
         self._validate_connection(t2, Phase.NONE, Phase.NONE, Phase.X, Phase.N)
@@ -88,18 +88,18 @@ class TestTerminalConnectivityConnected:
         self._validate_connection_multi(t2, [(t1, [Phase.X, Phase.N]), (t3, [Phase.B, Phase.N])])
         self._validate_connection_multi(t3, [(t1, [Phase.NONE, Phase.X, Phase.NONE, Phase.N]), (t2, [Phase.NONE, Phase.B, Phase.NONE, Phase.N])])
 
-    def test_yn_connectivity(self):
+    async def test_yn_connectivity(self):
         t1, t2 = self._create_connected_terminals(PhaseCode.YN, PhaseCode.ABCN)
         self._validate_connection(t1, Phase.C, Phase.N)
         self._validate_connection(t2, Phase.NONE, Phase.NONE, Phase.Y, Phase.N)
 
-        self._replace_normal_phases(t1, PhaseCode.BN)
+        await self._replace_normal_phases(t1, PhaseCode.BN)
 
         self._validate_connection(t1, Phase.B, Phase.N)
         self._validate_connection(t2, Phase.NONE, Phase.Y, Phase.NONE, Phase.N)
 
         # Y can be forced onto phase A with traced phases (will not happen in practice).
-        self._replace_normal_phases(t1, PhaseCode.AN)
+        await self._replace_normal_phases(t1, PhaseCode.AN)
 
         self._validate_connection(t1, Phase.A, Phase.N)
         self._validate_connection(t2, Phase.Y, Phase.NONE, Phase.NONE, Phase.N)
@@ -226,10 +226,10 @@ class TestTerminalConnectivityConnected:
             )
 
     @staticmethod
-    def _replace_normal_phases(terminal: Terminal, normal_phases: PhaseCode):
+    async def _replace_normal_phases(terminal: Terminal, normal_phases: PhaseCode):
         for index, phase in enumerate(terminal.phases.single_phases):
-            Tracing.set_phases().run(terminal, [Phase.NONE])
-            Tracing.set_phases().run(terminal, normal_phases.single_phases[index])
+            terminal.normal_phases[phase] = Phase.NONE
+            terminal.normal_phases.set(phase, normal_phases.single_phases[index])
 
     def _get_next_connectivity_node(self) -> ConnectivityNode:
         return self._network_service.add_connectivity_node(f"cn{self._network_service.len_of(ConnectivityNode)}")
