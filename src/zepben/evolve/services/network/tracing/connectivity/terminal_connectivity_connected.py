@@ -2,15 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import List, Iterable, Optional, Set, Dict, Callable, TYPE_CHECKING
-from queue import LifoQueue, Queue
+from queue import Queue
+from typing import List, Iterable, Optional, Set, Dict, Callable
 
 from zepben.evolve.services.network.tracing.connectivity.connectivity_result import ConnectivityResult
 from zepben.evolve.services.network.tracing.connectivity.xy_candidate_phase_paths import XyCandidatePhasePaths
 from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import XyPhaseStep
 from zepben.evolve.services.network.tracing.connectivity.phase_paths import viable_inferred_phase_connectivity, straight_phase_connectivity
 
-from zepben.evolve import Terminal, PhaseCode, SinglePhaseKind, Switch
+from zepben.evolve import Terminal, PhaseCode, SinglePhaseKind, Switch, LifoQueue
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
 __all__ = ["TerminalConnectivityConnected"]

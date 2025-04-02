@@ -7,7 +7,7 @@ from typing import Optional, TYPE_CHECKING
 
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
 
-from zepben.evolve import require, Feeder
+from zepben.evolve import require, Feeder, Traversal
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
@@ -66,6 +66,8 @@ class SetDirection:
         return FeederDirection.NONE
 
     async def _create_traversal(self, state_operators: NetworkStateOperators) -> NetworkTrace[FeederDirection]:
+        reprocessed_loop_terminals: list[Terminal] = []
+
         def queue_condition(_in, *args):
             _, direction_to_apply = _in
             return direction_to_apply != FeederDirection.NONE
@@ -74,16 +76,30 @@ class SetDirection:
             path, direction_to_apply = _in
             return state_operators.add_direction(path.to_terminal, direction_to_apply)
 
-        reprocessed_loop_terminals: list[Terminal] = []
+        def stop_condition(_in, *args):
+            path, direction_to_apply = _in
+            return path.to_terminal.is_feeder_head_terminal or self._reached_substation_transformer(path.to_terminal)
+
         return (Tracing.network_trace_branching(
             network_state_operators=state_operators,
             action_step_type=NetworkTraceActionType.ALL_STEPS(),
             compute_data=lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path)
-            ).add_condition(lambda s: s.stop_at_open)
-               .add_stop_condition(lambda path, _: path.to_terminal.is_feeder_head_terminal or self._reached_substation_transformer(path.to_terminal))
-               .add_queue_condition(queue_condition)
-               .add_step_action(step_action)
+            ).add_condition(state_operators.stop_at_open())
+               .add_stop_condition(Traversal.stop_condition(stop_condition))
+               .add_queue_condition(Traversal.queue_condition(queue_condition))
+               .add_step_action(Traversal.step_action(step_action))
         )
+
+    @staticmethod
+    def _reached_substation_transformer(terminal: Terminal) -> bool:
+        ce = terminal.conducting_equipment
+        if not ce:
+            return False
+
+        return isinstance(ce, PowerTransformer) and ce.num_substations() > 0
+
+    def _is_normally_open_switch(conducting_equipment: Optional[ConductingEquipment]):
+        return isinstance(conducting_equipment, Switch) and conducting_equipment.is_normally_open()
 
     async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators):
         """
@@ -106,15 +122,4 @@ class SetDirection:
          """
         trav = await self._create_traversal(network_state_operators)
         return trav.run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False)
-
-    @staticmethod
-    def _reached_substation_transformer(terminal: Terminal) -> bool:
-        ce = terminal.conducting_equipment
-        if not ce:
-            return False
-
-        return isinstance(ce, PowerTransformer) and ce.num_substations() > 0
-
-    def _is_normally_open_switch(conducting_equipment: Optional[ConductingEquipment]):
-        return isinstance(conducting_equipment, Switch) and conducting_equipment.is_normally_open()
 

@@ -117,7 +117,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
         return self
 
     def add_condition(self, condition: TraversalCondition[T]) -> "NetworkTrace[T]":
-        super().add_condition(condition(self.network_state_operators))
+        super().add_condition(condition)
         return self
 
     def add_queue_condition(self, condition: QueueCondition[NetworkTraceStep[T]], step_type:NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
@@ -127,7 +127,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
             return super().add_queue_condition(to_network_trace_queue_condition(condition, step_type, True))
 
     def can_action_item(self, item: T, context: StepContext) -> bool:
-        return self._action_type.can_action_item(item, context, self.has_visited)  # TODO: WHAT IS THIS MAGIC ::hasVisited ??
+        return self._action_type.can_action_item(item, context, self.has_visited)
 
     def on_reset(self):
         self.tracker.clear()

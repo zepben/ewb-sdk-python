@@ -45,8 +45,11 @@ class TestFindSwerEquipment:
               .to_power_transformer([PhaseCode.AB, PhaseCode.A])  # tx3
               .to_acls(PhaseCode.A)  # c4
               .to_acls(PhaseCode.A)  # c5
-              .to_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx6
+              .to_power_transformer([PhaseCode.A, PhaseCode.AN, PhaseCode.AN])  # tx6
               .to_acls(PhaseCode.AN, action=self._make_lv)  # c7
+              .to_breaker(PhaseCode.AN, action=self._make_lv)  # b8
+              .branch_from('tx6', 2)
+              .to_acls(PhaseCode.AN, action=self._make_hv)  # c9
               .add_feeder("b0")  # fdr8
               .build())
 
@@ -192,7 +195,13 @@ class TestFindSwerEquipment:
         assert await FindSwerEquipment().find_all(ns) == {ns["c2"], ns["tx3"], ns["c4"], ns["tx5"], ns["c6"]}
 
     @staticmethod
-    def _make_lv(ce: ConductingEquipment):
+    def _make_bv(ce: ConductingEquipment, volts: int):
         bv = BaseVoltage()
-        bv.nominal_voltage = 415
+        bv.nominal_voltage = volts
         ce.base_voltage = bv
+
+    def _make_lv(self, ce: ConductingEquipment):
+        self._make_bv(ce, 415)
+
+    def _make_hv(self, ce: ConductingEquipment):
+        self._make_bv(ce, 11000)

@@ -6,7 +6,7 @@ from typing import Callable, Set, Union, Optional
 
 from typing_extensions import TypeVar
 
-from zepben.evolve import NetworkService, ConductingEquipment, Feeder, PowerTransformer, Switch, Terminal
+from zepben.evolve import NetworkService, ConductingEquipment, Feeder, PowerTransformer, Switch, Terminal, Traversal
 
 __all__ = ["FindSwerEquipment"]
 
@@ -86,9 +86,9 @@ class FindSwerEquipment:
                 return step.path.to_equipment not in swer_equipment
 
         trace = self._create_trace(state_operators)
-        trace.add_queue_condition(condition)
+        trace.add_queue_condition(Traversal.queue_condition(condition))
 
-        trace.add_step_action(lambda step: swer_equipment.add(step.path.to_equipment))
+        trace.add_step_action(Traversal.step_action(lambda step: swer_equipment.add(step.path.to_equipment)))
 
 
         for it in [t for t in transformer.terminals if self._is_swer_terminal(t)]:
@@ -103,8 +103,8 @@ class FindSwerEquipment:
                 return step.path.to_equipment not in swer_equipment
 
         trace = self._create_trace(state_operators)
-        trace.add_stop_condition(condition)
-        trace.add_step_action(lambda step: swer_equipment.add(step.path.to_equipment))
+        trace.add_stop_condition(Traversal.stop_condition(condition))
+        trace.add_step_action(Traversal.step_action(lambda step: swer_equipment.add(step.path.to_equipment)))
 
         for it in [t for t in transformer.terminals for ct in t.connected_terminals() if self._is_non_swer_terminal(t)]:
             trace.reset()
