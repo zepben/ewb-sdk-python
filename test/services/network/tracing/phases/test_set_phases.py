@@ -134,7 +134,7 @@ async def test_can_run_from_terminal():
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
-    await SetPhases().run_with_terminal(get_t(network_service, "c1", 2))
+    await SetPhases()._run_with_terminal(get_t(network_service, "c1", 2))
 
     validate_phases_from_term_or_equip(network_service, "c0", PhaseCode.NONE, PhaseCode.NONE)
     validate_phases_from_term_or_equip(network_service, "c1", PhaseCode.NONE, PhaseCode.ABCN)
@@ -155,7 +155,7 @@ async def test_must_provide_the_correct_number_of_phases():
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
     with pytest.raises(TracingException) as e_info:
-        await SetPhases().run_with_terminal(get_t(network_service, "c0", 2), PhaseCode.AB)
+        await SetPhases()._run_with_terminal(get_t(network_service, "c0", 2), PhaseCode.AB)
 
     assert str(e_info.value) == "Attempted to apply phases [A, B] to Terminal{c0-t2} with nominal phases A. Number of phases to apply must match the " \
                                 "number of nominal phases. Found 2, expected 1"
@@ -177,7 +177,7 @@ async def test_detects_cross_phasing_flow():
     c1 = network_service["c1"]
 
     with pytest.raises(PhaseException) as e_info:
-        await SetPhases().run_with_terminal(get_t(network_service, "c0", 2))
+        await SetPhases()._run_with_terminal(get_t(network_service, "c0", 2))
 
     assert e_info.value.args[0] == f"Attempted to flow conflicting phase A onto B on nominal phase A. This occurred while flowing from " \
                                    f"{list(c1.terminals)[0]} to {list(c1.terminals)[1]} through {c1}. This is caused by missing open " \
@@ -202,7 +202,7 @@ async def test_detects_cross_phasing_connected():
     c2 = network_service["c2"]
 
     with pytest.raises(PhaseException) as e_info:
-        await SetPhases().run_with_terminal(get_t(network_service, "c0", 2))
+        await SetPhases()._run_with_terminal(get_t(network_service, "c0", 2))
 
     assert e_info.value.args[0] == f"Attempted to flow conflicting phase A onto B on nominal phase A. This occurred while flowing between " \
                                    f"{list(c1.terminals)[1]} on {c1} and {list(c2.terminals)[0]} on {c2}. This is caused by " \

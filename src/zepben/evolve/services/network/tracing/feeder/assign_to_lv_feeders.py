@@ -100,9 +100,9 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             _, found_lv_feeder = _in
             return _, found_lv_feeder
 
-        def queue_condition(_in, *args):
-            path, found_lv_feeder = _in
-            return found_lv_feeder or not _reached_hv(path.to_equipment)
+        def queue_condition(nts: NetworkTraceStep):
+            assert isinstance(nts, NetworkTraceStep)
+            return nts.data or not _reached_hv(nts.path.to_equipment)
 
         def step_action(_in, context):
             path, found_lv_feeder = _in

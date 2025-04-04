@@ -32,6 +32,7 @@ class Traversal(Generic[T, D]):
     stop_condition = lambda func: StopCondition(func)
     condition = lambda func: TraversalCondition(func)
     step_action = lambda func: StepAction(func)
+
     """
     A base traversal class allowing items in a connected graph to be traced.
     It provides the main interface and implementation for traversal logic.
@@ -177,7 +178,7 @@ class Traversal(Generic[T, D]):
         `action` The action to perform on each item.
         Returns The current traversal instance.
         """
-        assert issubclass(action.__class__, StepAction)
+        assert issubclass(action.__class__, StepAction) or isinstance(action, StepAction)
         self.step_actions.append(action)
         if isinstance(action, StepActionWithContextValue):
             self.compute_next_context_funs[action.key] = action
@@ -307,7 +308,8 @@ class Traversal(Generic[T, D]):
         require(not self.running, "Traversal is currently running.")
         self.has_run = False
         self.queue.clear()
-        self.branch_queue.clear()
+        if self.branch_queue is not None:
+            self.branch_queue.clear()
 
         self.on_reset()
 
@@ -321,7 +323,7 @@ class Traversal(Generic[T, D]):
 
     def branch_start_items(self):
         while len(self.start_items) > 0:
-            start_item = self.start_items.popleft() # TODO: equivalent to startItems.removeFirst?
+            start_item = self.start_items.popleft()
             if self.can_queue_start_item(start_item):
                 branch = self.create_new_branch(start_item, self._compute_intial_context(start_item))
                 require(self.branch_queue is not None, "INTERNAL ERROR: self.branch_queue should never be null here")
@@ -334,12 +336,12 @@ class Traversal(Generic[T, D]):
             if self._parent is None:
                 if self.can_queue_start_item(start_item):
                     self.contexts[start_item] = self._compute_intial_context(start_item)
-                    self.queue.add(start_item)
+                    self.queue.put(start_item)
             else:
-                self.queue.add(start_item)
+                self.queue.put(start_item)
 
             can_stop = can_stop_on_start_item
-            for current in  self.queue.get():
+            for current in  self.queue.iter_get():
                 context = self.get_step_context(current)
                 if self.can_visit_item(current, context):
                     context.is_actionable_item = self.can_action_item(current, context)
@@ -407,6 +409,7 @@ QueueNext = Callable[[T, StepContext, T], bool]
 
 # BranchingQueueNext(item, context, queue_item, queue_branch)
 BranchingQueueNext = Callable[[T, StepContext, Callable[[T], bool], Callable[[T], bool]], None]
+
 
 class QueueType[T, D: Traversal](ABC):
     """

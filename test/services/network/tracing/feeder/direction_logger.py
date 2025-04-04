@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import ConductingEquipment, Tracing
+from zepben.evolve import ConductingEquipment, Tracing, Traversal
 
 __all__ = ["log_directions"]
 
@@ -21,7 +21,7 @@ async def log_directions(*conducting_equipment: NetworkTraceStep):
         print()
 
         trace = Tracing.network_trace()
-        trace.add_step_action(_step)
+        trace.add_step_action(Traversal.step_action(_step))
         trace.run(cond_equip, False)
 
 

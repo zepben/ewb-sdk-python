@@ -68,9 +68,9 @@ class SetDirection:
     async def _create_traversal(self, state_operators: NetworkStateOperators) -> NetworkTrace[FeederDirection]:
         reprocessed_loop_terminals: list[Terminal] = []
 
-        def queue_condition(_in, *args):
-            _, direction_to_apply = _in
-            return direction_to_apply != FeederDirection.NONE
+        def queue_condition(nts: NetworkTraceStep):
+            assert isinstance(nts.data, FeederDirection)
+            return nts.data != FeederDirection.NONE
 
         def step_action(_in, _):
             path, direction_to_apply = _in

@@ -4,10 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from enum import Enum
 from dataclasses import dataclass
+from typing import Set
 
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
 from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
 
+from zepben.evolve import SinglePhaseKind
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
 
@@ -16,12 +18,12 @@ class NetworkTraceStep[T]:
     Represents a single step in a network trace, containing information about the path taken and associated data.
 
     `T` The type of additional data associated with the trace step.
-    `path` The path representing the transition from one terminal to another.
-    `numTerminalSteps` The count of terminals stepped on along this path.
-    `numEquipmentSteps` The count of equipment stepped on along this path.
-    `data` Additional data associated with this step in the trace.
-    `type` The [Type] of this step.
+    :param path: The path representing the transition from one terminal to another.
+    :param num_terminal_steps: The count of terminals stepped on along this path.
+    :param num_equipment_steps: The count of equipment stepped on along this path.
+    :param data: Additional data associated with this step in the trace.
     """
+
     @dataclass
     class Path:
         """
@@ -42,6 +44,12 @@ class NetworkTraceStep[T]:
         to_terminal: Terminal
         nominal_phase_paths: list[NominalPhasePath]
 
+        def to_phases_set(self) -> Set[SinglePhaseKind]:
+            if len(self.nominal_phase_paths) == 0:
+                return set()
+            return set(map(lambda it: it.to_phase, self.nominal_phase_paths))
+
+
         @property
         def from_equipment(self) -> ConductingEquipment:
             return self.from_terminal.conducting_equipment  # TODO error("Network trace does not support terminals that do not have conducting equipment")
@@ -58,11 +66,14 @@ class NetworkTraceStep[T]:
         def traced_externally(self) -> bool:
             return not self.traced_internally
 
-    path: Path
+
     Type = Enum('Type', ('ALL', 'INTERNAL', 'EXTERNAL'))
-    num_terminal_steps: int
-    num_equipment_steps: int
-    data: T
+
+    def __init__(self, path: Path, num_terminal_steps: int, num_equipment_steps: int, data: T):
+        self.path = path
+        self.num_terminal_steps = num_terminal_steps
+        self.num_equipment_steps = num_equipment_steps
+        self.data = data
 
     def type(self) -> Path:
         """
@@ -71,8 +82,5 @@ class NetworkTraceStep[T]:
 
         Returns [Type.INTERNAL] with [Path.tracedInternally] is true, [Type.EXTERNAL] when [Path.tracedExternally] is true
         """
-        if self.path.traced_internally():
-            return self.Type.INTERNAL
-        else:
-            return self.Type.EXTERNAL
+        return self.Type.INTERNAL if self.path.traced_internally else self.Type.EXTERNAL
 

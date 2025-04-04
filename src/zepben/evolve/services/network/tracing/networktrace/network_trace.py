@@ -6,9 +6,9 @@ from collections.abc import Callable
 from typing import TypeVar, Union
 
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
-from zepben.protobuf.cim.iec61970.base.core.PhaseCode_pb2 import PhaseCode
-from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
-from zepben.protobuf.cim.iec61970.base.wires.SinglePhaseKind_pb2 import SinglePhaseKind
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
@@ -86,7 +86,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
 
         self.network_state_operators = network_state_operators
 
-        if self._queue_type is None and queue is not None:
+        if self._queue_type is None:
             self._queue_type = BasicQueueType(NetworkTraceQueueNext().basic(
                 NetworkStateOperators.in_service_state_operators,
                 compute_data_with_action_type(compute_data, action_type)
@@ -95,7 +95,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
         self.tracker: NetworkTraceTracker
         if isinstance(self._queue_type, BasicQueueType):
             self.tracker = NetworkTraceTracker(256)
-        if isinstance(self._queue_type, BranchingQueueType):
+        elif isinstance(self._queue_type, BranchingQueueType):
             self.tracker = NetworkTraceTracker(16)
 
         super().__init__(self._queue_type, **kwargs)
@@ -106,7 +106,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
             start_path = NetworkTraceStep.Path(start, start, self.start_nominal_phase_path(phases))
             super().add_start_item(NetworkTraceStep(start_path, 0, 0, data))
             return self
-        if isinstance(start, ConductingEquipment):
+        if issubclass(start.__class__, ConductingEquipment):
             for it in start.terminals:
                 self.add_start_item(it, data, phases)
             return self
@@ -133,7 +133,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
         self.tracker.clear()
 
     def can_visit_item(self, item: T, context: StepContext) -> bool:
-        return self.visit(item.path.to_terminal, item.path.nominal_phase_paths.to_phase_set())
+        return self.visit(item.path.to_terminal, item.path.to_phases_set())
 
     def get_derived_this(self) -> 'NetworkTrace[T]':
         return self
@@ -178,7 +178,7 @@ class BranchingNetworkTrace[T](NetworkTrace[T]):
             queue_factory,
             branch_queue_factory)
 
-        super().__init__(network_state_operators, None, action_type, compute_data, parent=parent)
+        super().__init__(network_state_operators, self._queue_type, action_type, compute_data, parent=parent)
 
 
 def to_network_trace_queue_condition(queue_condition: NetworkTraceActionType, step_type: NetworkTraceStep.Type, override_step_type: bool):

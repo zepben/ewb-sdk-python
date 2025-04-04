@@ -151,7 +151,7 @@ class SetPhases:
     async def _run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators, trace: NetworkTrace[PhasesToFlow]=None):
         if trace is None:
             trace = self._create_network_trace(network_state_operators)
-        nominal_phase_paths = map(lambda it: NominalPhasePath(SinglePhaseKind.NONE, it), terminal.phases)
+        nominal_phase_paths = list(map(lambda it: NominalPhasePath(SinglePhaseKind.NONE, it), terminal.phases))
         trace.run(terminal, self.PhasesToFlow(nominal_phase_paths), can_stop_on_start_item=False)
         trace.reset()
 
@@ -164,14 +164,13 @@ class SetPhases:
         nwt = Tracing.network_trace_branching(
             network_state_operators=state_operators,
             action_step_type=NetworkTraceActionType.ALL_STEPS(),
-            queue_factory=WeightedPriorityQueue.process_queue(lambda it: it.path.to_terminal.phases.num_phases()),  # TODO: lol, explosions expected
-            branch_queue_factory=WeightedPriorityQueue.branch_queue(lambda it: it.path.to_terminal.phases.num_phases()),  # TODO: lol, explosions expected
+            queue_factory=WeightedPriorityQueue.process_queue(lambda it: it.path.to_terminal.phases.num_phases),
+            branch_queue_factory=WeightedPriorityQueue.branch_queue(lambda it: it.path.to_terminal.phases.num_phases),
             compute_data=await self._compute_next_phases_to_flow(state_operators)
         )
         def condition(next_step, *args):
             return len(next_step.data.nominal_phase_paths) > 0
         nwt.add_queue_condition(Traversal.queue_condition(condition))
-        nwt.add_queue_condition(Traversal.queue_condition(lambda next_step, *args: len(next_step.data.nominal_phase_paths) > 0))
 
         nwt.add_step_action(Traversal.step_action(step_action))
         return nwt
