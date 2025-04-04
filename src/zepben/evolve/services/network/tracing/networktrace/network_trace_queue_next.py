@@ -17,17 +17,21 @@ CheckInService = Callable[[ConductingEquipment], bool]
 
 
 class NetworkTraceQueueNext:
+    # FIXME: basic looking for a class type that wont exist cos we passing lambdas - duh - compoute_data = None
     def basic(self, is_in_service: CheckInService, compute_data: ComputeData[T]) -> QueueNext[NetworkTraceStep[T]]:
         if isinstance(compute_data, ComputeData):
             return lambda item, context, queue_item: map(queue_item ,self._next_trace_steps(is_in_service, item, context, compute_data))
         elif isinstance(compute_data, ComputeDataWithPaths):
             return lambda item, context, queue_item: map(queue_item, self._next_trace_steps(is_in_service, item, context, compute_data))
 
+    # FIXME: this might aint working either when compute_data = None
     def branching(self, is_in_service: CheckInService, compute_data: ComputeData[T]) -> BranchingQueueNext[NetworkTraceStep[T]]:
         if isinstance(compute_data, ComputeData):
             return lambda item, context, queue_item, queue_branch: self._queue_next_steps_branching(list(self._next_trace_steps(is_in_service, item, context, compute_data)), queue_item, queue_branch)
         elif isinstance(compute_data, ComputeDataWithPaths):
             return lambda item, context, queue_item, queue_branch: self._queue_next_steps_branching(self._next_trace_steps(is_in_service, item, context, compute_data), queue_item, queue_branch)
+
+    # FIXME: the above errors are thrown on test o r t f s t a o r n s f l - test_swer_equip.py
 
     @staticmethod
     def _queue_next_steps_branching(next_steps: list[NetworkTraceStep[T]],

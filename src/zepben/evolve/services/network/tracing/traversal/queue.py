@@ -30,6 +30,13 @@ class TraversalQueue[T]:
         else:
             self.queue = queue
 
+    def __iter__(self):
+        return self.queue.__iter__()
+
+    def iter_get(self):
+        while len(self.queue) > 0:
+            yield self.queue.get()
+
     def len(self):
         return self.__len__()
 

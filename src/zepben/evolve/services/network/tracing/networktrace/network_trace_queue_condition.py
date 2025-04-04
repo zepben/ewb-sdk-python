@@ -17,13 +17,10 @@ class NetworkTraceQueueCondition[T](QueueCondition[NetworkTraceStep[T]]):
 
     def __init__(self, step_type: NetworkTraceStep.Type):
         self.should_queue_func = {
-        #herp = {
             NetworkTraceStep.Type.ALL: self.should_queue_matched_step,
             NetworkTraceStep.Type.INTERNAL: self.should_queue_internal_step,
             NetworkTraceStep.Type.EXTERNAL: self.should_queue_external_step
         }.get(step_type)
-        #}
-        #return herp.get(step_type)
 
 
     def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:

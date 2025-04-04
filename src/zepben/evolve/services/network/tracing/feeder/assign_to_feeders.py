@@ -140,13 +140,13 @@ class AssignToFeedersInternal(BaseFeedersInternal):
             path, *_ = _in
             return path.to_equipment in feeder_start_points
 
-        def queue_condition_a(_in, *args):
-            path, *_ = _in
-            return not _reached_substation_transformer(path.to_equipment)
+        def queue_condition_a(nts: NetworkTraceStep):
+            assert isinstance(nts, NetworkTraceStep)
+            return not _reached_substation_transformer(nts.path.to_equipment)
 
-        def queue_condition_b(_in, *args):
-            path, *_ = _in
-            return not _reached_lv(path.to_equipment)
+        def queue_condition_b(nts: NetworkTraceStep):
+            assert isinstance(nts, NetworkTraceStep)
+            return not _reached_lv(nts.path.to_equipment)
 
         def step_action(_in, context):
             path, found_lv_feeder = _in
@@ -162,7 +162,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                 .add_step_action(Traversal.step_action(step_action))
         )
 
-    async def _process(self,
+    def _process(self,
                  step_path: NetworkTraceStep.Path,
                  step_context: StepContext,
                  terminal_to_aux_equipment: dict[Terminal, Collection[AuxiliaryEquipment]],

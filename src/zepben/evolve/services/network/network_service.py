@@ -271,7 +271,14 @@ class NetworkService(BaseService):
     # TODO the `self.get_*` methods in here arent implemented
     @property
     def aux_equipment_by_terminal(self) -> Dict[Terminal, List[AuxiliaryEquipment]]:
-        return {equipment.terminal: equipment for equipment in self.objects(AuxiliaryEquipment) if equipment.terminal is not None}
+        eq_by_term = dict()
+        for aux_equipment in self.objects(AuxiliaryEquipment):
+            if aux_equipment.terminal is not None:
+                try:
+                    eq_by_term[aux_equipment.terminal].append(aux_equipment)
+                except KeyError:
+                    eq_by_term[aux_equipment.terminal] = [aux_equipment]
+        return eq_by_term
 
     @property
     def feeder_start_points(self) -> Set[ConductingEquipment]:

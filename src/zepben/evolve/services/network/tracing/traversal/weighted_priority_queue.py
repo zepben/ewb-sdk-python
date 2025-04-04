@@ -42,7 +42,7 @@ class WeightedPriorityQueue(TraversalQueue[T]):
         if weight < 0:
             return False
 
-        self._queue_provider.append(item)
+        self._queue_provider.put(item)
 
     def peek(self) -> T:
         pass
