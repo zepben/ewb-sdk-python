@@ -115,7 +115,7 @@ class TestSetDirection:
              .add_feeder("b3", 1)
              .network)
 
-        await SetDirection().run(n)
+        await SetDirection().run(n, NetworkStateOperators.NORMAL)
         await log_directions(n["b0"])
 
         self._check_expected_direction(self._get_t(n, "b0", 1), NONE)

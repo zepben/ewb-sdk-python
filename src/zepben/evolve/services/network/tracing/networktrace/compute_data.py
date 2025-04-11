@@ -36,7 +36,7 @@ class ComputeDataWithPaths[T]:
     contextual data can only be computed by knowing all the next paths that can be stepped to from a given step.
     """
     def __init__(self, func):
-        self._func = func
+        self._func = func or (lambda: None)
 
     def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path, next_paths: list[NetworkTraceStep.Path, ...]) -> T:
         """

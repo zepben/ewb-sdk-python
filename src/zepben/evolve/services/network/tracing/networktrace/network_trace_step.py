@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Set
 
-from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
-from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 from zepben.evolve import SinglePhaseKind
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
@@ -42,7 +42,7 @@ class NetworkTraceStep[T]:
         """
         from_terminal: Terminal
         to_terminal: Terminal
-        nominal_phase_paths: list[NominalPhasePath]
+        nominal_phase_paths: list[NominalPhasePath] = field(default_factory=list)
 
         def to_phases_set(self) -> Set[SinglePhaseKind]:
             if len(self.nominal_phase_paths) == 0:

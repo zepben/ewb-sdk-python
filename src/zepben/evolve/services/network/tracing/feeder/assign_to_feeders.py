@@ -55,9 +55,10 @@ class BaseFeedersInternal:
         return terminal.conducting_equipment.get_filtered_containers(Feeder)(self.network_state_operators)
 
     def _associate_equipment_with_containers(self, equipment_containers: Iterable[EquipmentContainer], equipment: Iterable[Equipment]):
-        for item in equipment_containers:
-            for feeder in equipment:
-                self.network_state_operators.associate_equipment_and_container(item, feeder)
+        for feeder in equipment_containers:
+            assert isinstance(equipment, Iterable)
+            for it in equipment:
+                self.network_state_operators.associate_equipment_and_container(it, feeder)
 
     def _associate_relay_systems_with_containers(self, equipment_containers: Iterable[EquipmentContainer], to_equipment: ProtectedSwitch):
         self._associate_equipment_with_containers(equipment_containers, [
@@ -73,7 +74,9 @@ class BaseFeedersInternal:
                 self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
 
     def _feeder_try_energize_lv_feeders(self, to_equipment: PowerTransformer, lv_feeder_start_points: Set[ConductingEquipment]):
-        sites = to_equipment.get_filtered_containers(Site, self.network_state_operators)
+        sites = []
+        for eq in to_equipment:
+            sites.extend(eq.get_filtered_containers(Site, self.network_state_operators))
         if len(sites) > 0:
             self._feeder_energizes(sites.find_lv_feeders(lv_feeder_start_points, self.network_state_operators))
         else:
@@ -121,10 +124,10 @@ class AssignToFeedersInternal(BaseFeedersInternal):
         if isinstance(start_ce, Switch) and self.network_state_operators.is_open(start_ce):
             feeders_to_assign.associate_equipment(start_ce)
         else:
-            traversal = self._create_trace(terminal_to_aux_equipment, feeder_start_points, lv_feeder_start_points, feeders_to_assign)
+            traversal = await self._create_trace(terminal_to_aux_equipment, feeder_start_points, lv_feeder_start_points, feeders_to_assign)
             traversal.run(terminal, False, can_stop_on_start_item=False)
 
-    def _create_trace(self,
+    async def _create_trace(self,
                       terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
                       feeder_start_points: Set[ConductingEquipment],
                       lv_feeder_start_points: Set[ConductingEquipment],
@@ -136,21 +139,20 @@ class AssignToFeedersInternal(BaseFeedersInternal):
         def _reached_substation_transformer(ce: ConductingEquipment):
             return True if isinstance(ce, PowerTransformer) and len(list(ce.substations)) > 0 else False
 
-        def stop_condition(_in, *args):
-            path, *_ = _in
-            return path.to_equipment in feeder_start_points
+        def stop_condition(nts: NetworkTraceStep, *args):
+            return nts.path.to_equipment in feeder_start_points
 
-        def queue_condition_a(nts: NetworkTraceStep):
+        def queue_condition_a(nts: NetworkTraceStep, *args):
             assert isinstance(nts, NetworkTraceStep)
             return not _reached_substation_transformer(nts.path.to_equipment)
 
-        def queue_condition_b(nts: NetworkTraceStep):
+        def queue_condition_b(nts: NetworkTraceStep, *args):
             assert isinstance(nts, NetworkTraceStep)
             return not _reached_lv(nts.path.to_equipment)
 
-        def step_action(_in, context):
-            path, found_lv_feeder = _in
-            return self._process(path, context, terminal_to_aux_equipment, lv_feeder_start_points, feeders_to_assign)
+        def step_action(nts: NetworkTraceStep, context):
+            assert isinstance(nts, NetworkTraceStep)
+            self._process(nts.path, context, terminal_to_aux_equipment, lv_feeder_start_points, feeders_to_assign)
 
 
         return (
@@ -171,12 +173,15 @@ class AssignToFeedersInternal(BaseFeedersInternal):
         if step_path.traced_internally and not step_context.is_start_item:
             return
 
-        self._associate_equipment_with_containers(feeders_to_assign, terminal_to_aux_equipment[step_path.to_terminal])
-        self._associate_equipment_with_containers(feeders_to_assign, step_path.to_equipment)
+        self._associate_equipment_with_containers(feeders_to_assign, terminal_to_aux_equipment.get(step_path.to_terminal, {}))
+        self._associate_equipment_with_containers(feeders_to_assign, [step_path.to_equipment])
 
         if isinstance(step_path.to_equipment, PowerTransformer):
-            feeders_to_assign._try_energize_lv_feeders(step_path.to_equipment, lv_feeder_start_points)
+            self._feeder_try_energize_lv_feeders(lv_feeder_start_points, step_path.to_equipment)
         elif isinstance(step_path.to_equipment, ProtectedSwitch):
-            feeders_to_assign._associate_relay_systems(step_path.to_equipment)
+            self._associate_relay_systems_with_containers(feeders_to_assign, step_path.to_equipment)
+
+
+
 
 

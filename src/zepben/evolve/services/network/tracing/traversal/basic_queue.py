@@ -7,12 +7,12 @@ from __future__ import annotations
 from typing import TypeVar, Iterable, Generic
 
 
-from zepben.evolve.services.network.tracing.traversal.traversal_queue import TraversalQueue
 T = TypeVar('T')
 
 # TODO: i strongly dislike that ive essentially wrapped a pre existing class in 2 layers just so the
 #  code reads the same.. *discussion point*
 
+# TODO: DELETE??
 
 class BasicQueue(TraversalQueue[T]):
     def has_next(self) -> bool:

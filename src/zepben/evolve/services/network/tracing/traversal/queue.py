@@ -12,15 +12,18 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import TypeVar, Iterable
+from typing import TypeVar, Iterable, Generic
 from heapq import heappush, heappop
 
 __all__ = ["FifoQueue", "LifoQueue", "PriorityQueue", "TraversalQueue"]
 
 T = TypeVar('T')
+U = TypeVar('U')
 
 
-class TraversalQueue[T]:
+# TODO: the methods in these classes overlap in a slightly unclear way, this needs to be tidied up.
+
+class TraversalQueue(Generic[T]):
     """
     Basic queue object, implementing some methods to align it with the kotlin sdk syntax,
     """
@@ -44,16 +47,17 @@ class TraversalQueue[T]:
         return len(self.queue)
 
     @classmethod
-    @property
-    def depth_first(cls):
-        return cls(FifoQueue())
-
-    @classmethod
-    @property
-    def breadth_first(cls):
+    def breadth_first(cls) -> TraversalQueue:
+        """ Creates a new instance backed by a breadth first (FIFO) queue. """
         return cls(LifoQueue())
 
+    @classmethod
+    def depth_first(cls) -> TraversalQueue:
+        """ Creates a new instance backed by a depth first (LIFO) queue. """
+        return cls(FifoQueue())
+
     def has_next(self) -> bool:
+        """ :return: True if the queue has more items. """
         return len(self.queue) > 0
 
     def next(self):
@@ -63,7 +67,8 @@ class TraversalQueue[T]:
         return self.queue.get(item)
 
     def put(self, item: T) -> bool:
-        return self.queue.put(item)
+        self.queue.put(item)
+        return True
 
     def extend(self, items: Iterable[T]) -> bool:
         return self.queue.extend(items)

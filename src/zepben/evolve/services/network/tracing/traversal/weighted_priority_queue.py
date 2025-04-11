@@ -23,9 +23,6 @@ class WeightedPriorityQueue(TraversalQueue[T]):
         self._get_weight = get_weight
         super().__init__()
 
-    def has_next(self) -> bool:
-        return len(self.queue) > 0
-
     def get(self) -> T:
         next = None
         iterator = self.queue
@@ -47,19 +44,16 @@ class WeightedPriorityQueue(TraversalQueue[T]):
     def peek(self) -> T:
         pass
 
-    def clear(self):
-        self.queue.clear()
-
     def extend(self, items: Iterable[T]) -> bool:
         raise NotImplementedError()
 
     @classmethod
-    def process_queue(cls, get_weight: Callable[[T], int]) -> 'WeightedPriorityQueue':
+    def process_queue(cls, get_weight: Callable[[T], int]) -> TraversalQueue:
         """Special priority queue that queues items with the largest weight as the highest priority."""
-        return cls(TraversalQueue.depth_first, get_weight)
+        return cls(TraversalQueue.depth_first(), get_weight)
 
     @classmethod
-    def branch_queue(cls, get_weight: Callable[[T], int]) -> 'WeightedPriorityQueue':
+    def branch_queue(cls, get_weight: Callable[[T], int]) -> TraversalQueue:
         """Special priority queue that queues branch items with the largest weight on the starting item as the highest priority"""
         def condition(traversal):
             items = traversal.start_items
@@ -67,4 +61,4 @@ class WeightedPriorityQueue(TraversalQueue[T]):
                 return None
             return get_weight(items) or -1
 
-        return cls(TraversalQueue.breadth_first, condition)
+        return cls(TraversalQueue.breadth_first(), condition)

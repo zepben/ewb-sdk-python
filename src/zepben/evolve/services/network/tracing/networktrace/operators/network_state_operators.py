@@ -29,7 +29,6 @@ class NetworkStateOperators(ABC):
     or creating redundant trace implementations for different network states.
     """
     _operators = []
-    in_service_state_operators = InServiceStateOperators
 
     def __getattribute__(self, item):
         """

@@ -3,6 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Callable
+from typing import Generic
 
 from typing_extensions import TypeVar
 
@@ -16,7 +17,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 T = TypeVar('T')
 
 
-class OpenCondition[T](NetworkTraceQueueCondition[T]):
+class OpenCondition(NetworkTraceQueueCondition[T], Generic[T]):
     def __init__(self, step_type: NetworkTraceStep.Type=NetworkTraceStep.Type.INTERNAL):
         super().__init__(step_type)
 
