@@ -44,7 +44,7 @@ class ClearDirection:
                       ) -> NetworkTrace[...]:
         return (
             Tracing.network_trace(network_state_operators=state_operators,
-                                  action_step_type=NetworkTraceActionType.ALL_STEPS,
+                                  action_step_type=NetworkTraceActionType.ALL_STEPS(),
                                   queue=WeightedPriorityQueue.process_queue(
                                       lambda it: it.path.to_terminal.phases.num_phases),
                                   )

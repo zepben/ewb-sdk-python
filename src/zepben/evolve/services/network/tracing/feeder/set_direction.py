@@ -5,9 +5,10 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
-from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 
-from zepben.evolve import require, Feeder, Traversal
+from zepben.evolve import Feeder, Traversal
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
@@ -17,8 +18,7 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace_step impo
 
 
 if TYPE_CHECKING:
-    from zepben.evolve import NetworkService, PowerTransformer, Switch, \
-        ConductingEquipment, BusbarSection
+    from zepben.evolve import NetworkService, PowerTransformer, Switch, ConductingEquipment
 
 __all__ = ["SetDirection"]
 
@@ -29,7 +29,7 @@ class SetDirection:
     This class is backed by a [BranchRecursiveTraversal].
     """
 
-    async def _compute_data(self,
+    def _compute_data(self,
                             reprocessed_loop_terminals: list[Terminal],
                             state_operators: NetworkStateOperators,
                             step: NetworkTraceStep[FeederDirection],
@@ -68,21 +68,19 @@ class SetDirection:
     async def _create_traversal(self, state_operators: NetworkStateOperators) -> NetworkTrace[FeederDirection]:
         reprocessed_loop_terminals: list[Terminal] = []
 
-        def queue_condition(nts: NetworkTraceStep):
+        def queue_condition(nts: NetworkTraceStep, *args):
             assert isinstance(nts.data, FeederDirection)
             return nts.data != FeederDirection.NONE
 
-        def step_action(_in, _):
-            path, direction_to_apply = _in
-            return state_operators.add_direction(path.to_terminal, direction_to_apply)
+        def step_action(nts: NetworkTraceStep, *args):
+            return state_operators.add_direction(nts.path.to_terminal, nts.data)
 
-        def stop_condition(_in, *args):
-            path, direction_to_apply = _in
-            return path.to_terminal.is_feeder_head_terminal or self._reached_substation_transformer(path.to_terminal)
+        def stop_condition(nts: NetworkTraceStep, *args):
+            return nts.path.to_terminal.is_feeder_head_terminal or self._reached_substation_transformer(nts.path.to_terminal)
 
         return (Tracing.network_trace_branching(
             network_state_operators=state_operators,
-            action_step_type=NetworkTraceActionType.ALL_STEPS(),
+            action_step_type=NetworkTraceActionType.ALL_STEPS,
             compute_data=lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path)
             ).add_condition(state_operators.stop_at_open())
                .add_stop_condition(Traversal.stop_condition(stop_condition))
@@ -98,6 +96,7 @@ class SetDirection:
 
         return isinstance(ce, PowerTransformer) and ce.num_substations() > 0
 
+    @staticmethod
     def _is_normally_open_switch(conducting_equipment: Optional[ConductingEquipment]):
         return isinstance(conducting_equipment, Switch) and conducting_equipment.is_normally_open()
 

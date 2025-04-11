@@ -268,7 +268,6 @@ class NetworkService(BaseService):
         except KeyError:
             pass
 
-    # TODO the `self.get_*` methods in here arent implemented
     @property
     def aux_equipment_by_terminal(self) -> Dict[Terminal, List[AuxiliaryEquipment]]:
         eq_by_term = dict()

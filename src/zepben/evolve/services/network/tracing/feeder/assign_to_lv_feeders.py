@@ -11,6 +11,7 @@ from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.services.common.resolver import normal_head_terminal
 from zepben.evolve.services.network.network_service import NetworkService
+from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import BaseFeedersInternal
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
@@ -85,28 +86,26 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
         if isinstance(start_ce, Switch) and self.network_state_operators.is_open(start_ce):
             lv_feeders_to_assign.associate_equipment(start_ce)
         else:
-            traversal = self._create_trace(terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
+            traversal = await self._create_trace(terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
             traversal.run(terminal, False)
 
-    def _create_trace(self,
+    async def _create_trace(self,
                       terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
                       lv_feeder_start_points: Set[ConductingEquipment],
-                      lv_feeders_to_assign: list[Feeder]) -> NetworkTrace[...]:
+                      lv_feeders_to_assign: list[LvFeeder]) -> NetworkTrace[...]:
 
         def _reached_hv(ce: ConductingEquipment):
             return True if ce.base_voltage and ce.base_voltage.nominal_voltage >= 1000 else False
 
-        def stop_condition(_in):
-            _, found_lv_feeder = _in
-            return _, found_lv_feeder
+        def stop_condition(nts: NetworkTraceStep, context):
+            return nts.data
 
-        def queue_condition(nts: NetworkTraceStep):
+        def queue_condition(nts: NetworkTraceStep, *args):
             assert isinstance(nts, NetworkTraceStep)
             return nts.data or not _reached_hv(nts.path.to_equipment)
 
-        def step_action(_in, context):
-            path, found_lv_feeder = _in
-            return self._process(path, found_lv_feeder, context, terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
+        def step_action(nts: NetworkTraceStep, context):
+            self._process(nts.path, nts.data, context, terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
 
         return (Tracing.network_trace(self.network_state_operators, NetworkTraceActionType.ALL_STEPS, compute_data=(
                         lambda _, __, next_path: next_path.to_equipment in lv_feeder_start_points)
@@ -118,7 +117,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             )
 
 
-    async def _process(self,
+    def _process(self,
                        step_path: NetworkTraceStep.Path,
                        found_lv_feeder: bool,
                        step_context: StepContext,
@@ -134,11 +133,16 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             self._energized_by(lv_feeders_to_assign, list(map(lambda it: self.network_state_operators.get_energizing_feeders(it), found_lv_feeders)))
             self._energized_by(found_lv_feeders, list(map(lambda it: self.network_state_operators.get_energizing_feeders(it), found_lv_feeders)))
 
-        self._associate_equipment_with_containers(lv_feeders_to_assign, terminal_to_aux_equipment[step_path.to_terminal])
-        self._associate_equipment_with_containers(lv_feeders_to_assign, step_path.to_equipment)
+        try:
+            aux_equip_for_this_terminal = terminal_to_aux_equipment[step_path.to_terminal]
+        except KeyError:
+            aux_equip_for_this_terminal = []
+
+        self._associate_equipment_with_containers(lv_feeders_to_assign, aux_equip_for_this_terminal)
+        self._associate_equipment_with_containers(lv_feeders_to_assign, [step_path.to_equipment])
 
         if isinstance(step_path.to_equipment, ProtectedSwitch):
-            lv_feeders_to_assign._associate_relay_systems(step_path.to_equipment)
+            self._associate_relay_systems_with_containers(lv_feeders_to_assign, step_path.to_equipment)
 
 
 

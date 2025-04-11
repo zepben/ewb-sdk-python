@@ -8,7 +8,7 @@ from __future__ import annotations
 from abc import ABC
 from collections import deque
 from collections.abc import Collection
-from typing import List, Callable, TypeVar, Generic, Optional, Dict, Any, overload
+from typing import List, Callable, TypeVar, Generic, Optional, Dict, Any, overload, Protocol
 
 from zepben.evolve import require
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
@@ -23,7 +23,7 @@ from zepben.evolve.services.network.tracing.traversal.traversal_condition import
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 
 T = TypeVar('T')
-D = TypeVar('D')
+D = TypeVar('D', bound='Traversal')
 
 
 
@@ -32,6 +32,65 @@ class Traversal(Generic[T, D]):
     stop_condition = lambda func: StopCondition(func)
     condition = lambda func: TraversalCondition(func)
     step_action = lambda func: StepAction(func)
+
+
+    class QueueType(Generic[T, D]):
+        """
+        Defines the types of queues used in the traversal.
+        """
+        @property
+        def queue(self) -> TraversalQueue[T]:
+            raise NotImplementedError
+
+        def branch_queue(self) -> Optional[TraversalQueue[D]]:
+            raise NotImplementedError
+
+
+    class BasicQueueType(QueueType[T, D], Generic[T, D]):
+        """
+        Basic queue type that handles non-branching item queuing.
+
+        `queueNext` Logic for queueing the next item in the traversal.
+        `queue` The primary queue of items.
+        """
+        def __init__(self, queue_next: Traversal.QueueNext[T], queue: TraversalQueue[T]):
+            self.queue_next = queue_next
+            self._queue = queue
+            self._branch_queue = None
+
+        @property
+        def queue(self) -> TraversalQueue[T]:
+            return self._queue
+
+        @property
+        def branch_queue(self) -> Optional[TraversalQueue[D]]:
+            return self._branch_queue
+
+
+    class BranchingQueueType(QueueType[T, D], Generic[T, D]):
+        """
+        Branching queue type, supporting operations that may split into separate branches during traversal.
+
+        `queueNext` Logic for queueing the next item in a branching traversal.
+        `queueFactory` Factory function to create the main queue.
+        `branchQueueFactory` Factory function to create the branch queue.
+        """
+        def __init__(self,
+                     queue_next: Traversal.QueueNext[T],
+                     queue_factory: Callable[[], TraversalQueue[T]],
+                     branch_queue_factory: Callable[[], TraversalQueue[D]]):
+            self.queue_next = queue_next
+            self.queue_factory = queue_factory
+            self.branch_queue_factory = branch_queue_factory
+
+        @property
+        def queue(self) -> TraversalQueue[T]:
+            return self.queue_factory()
+
+        @property
+        def branch_queue(self) -> Optional[TraversalQueue[D]]:
+            return self.branch_queue_factory()
+
 
     """
     A base traversal class allowing items in a connected graph to be traced.
@@ -54,9 +113,13 @@ class Traversal(Generic[T, D]):
     def __init__(self, queue_type: QueueType[T, D], parent: Optional[D] = None):
         if self._queue_type is None:
             self._queue_type = queue_type
-        self._parent = parent
+        self._parent: D = parent
 
-        self.queue_next: Callable[[T, StepContext], None] = self._initialize_queue_next()
+        self._queue_next = {
+            Traversal.BasicQueueType: lambda current, context: self.queue_next_non_branching(current, context, self._queue_type.queue_next),
+            Traversal.BranchingQueueType: lambda  current, context: self.queue_next_branching(current, context, self._queue_type.queue_next),
+        }
+
         self.queue: TraversalQueue[T] = queue_type.queue
         self.branch_queue: Optional[TraversalQueue[D]] = queue_type.branch_queue
         self.start_items: deque[T] = deque()
@@ -68,11 +131,9 @@ class Traversal(Generic[T, D]):
         self.compute_next_context_funs: Dict[str, ContextValueComputer[T]] = {}
         self.contexts: Dict[T, StepContext] = {}
 
-    def _initialize_queue_next(self) -> Callable[[T, StepContext], None]:
-        if isinstance(self._queue_type, BasicQueueType):
-            return lambda current, context: self.queue_next_non_branching(current, context, self._queue_type.queue_next)
-        elif isinstance(self._queue_type, BranchingQueueType):
-            return lambda current, context: self.queue_next_branching(current, context, self._queue_type.queue_next)
+    @property
+    def queue_next(self):
+        return self._queue_next[self._queue_type.__class__]
 
     def can_action_item(self, item: T, context: 'StepContext') -> bool:
         """
@@ -85,14 +146,6 @@ class Traversal(Generic[T, D]):
         return True
 
     def can_visit_item(self, item: T, context: 'StepContext') -> bool:
-        raise NotImplementedError
-
-    def get_derived_this(self) -> D:
-        """
-        Retrieves the derived instance of this traversal class.
-
-        Returns The derived traversal instance.
-        """
         raise NotImplementedError
 
     def create_new_this(self) -> D:
@@ -115,7 +168,7 @@ class Traversal(Generic[T, D]):
             self.add_queue_condition(condition)
         elif isinstance(condition, StopCondition):
             self.add_stop_condition(condition)
-        return self.get_derived_this()
+        return self
 
     def add_stop_condition(self, condition: StopCondition[T]) -> D:
         """
@@ -128,7 +181,7 @@ class Traversal(Generic[T, D]):
         self.stop_conditions.append(condition)
         if issubclass(condition.__class__, StopConditionWithContextValue):
             self.compute_next_context_funs[condition.key] = condition
-        return self.get_derived_this()
+        return self
 
     def copy_stop_conditions(self, other: Traversal[T, D]) -> D:
         """
@@ -139,11 +192,13 @@ class Traversal(Generic[T, D]):
         """
         for it in other.stop_conditions:
             self.add_stop_condition(it)
-        return self.get_derived_this()
+        return self
 
     def matches_any_stop_condition(self, item: T, context: StepContext) -> bool:
-        # TODO: need to make sure this behaviour is right, kotlin hit me for 6 on this one.
-        return any(condition.should_stop(item, context) for condition in self.stop_conditions)
+        for condition in self.stop_conditions:
+            if condition.should_stop(item, context):
+                return True
+        return False
 
     def add_queue_condition(self, condition: QueueCondition[T]) -> D:
         """
@@ -157,7 +212,7 @@ class Traversal(Generic[T, D]):
         self.queue_conditions.append(condition)
         if isinstance(condition, QueueConditionWithContextValue):
             self.compute_next_context_funs[condition.key] = condition
-        return self.get_derived_this()
+        return self
 
 
     def copy_queue_conditions(self, other: Traversal[T, D]) -> D:
@@ -169,7 +224,7 @@ class Traversal(Generic[T, D]):
         """
         for it in other.queue_conditions:
             self.add_queue_condition(it)
-        return self.get_derived_this()
+        return self
 
     def add_step_action(self, action: StepAction[T]) -> D:
         """
@@ -182,7 +237,7 @@ class Traversal(Generic[T, D]):
         self.step_actions.append(action)
         if isinstance(action, StepActionWithContextValue):
             self.compute_next_context_funs[action.key] = action
-        return self.get_derived_this()
+        return self
 
     def if_not_stopping(self, action: StepAction[T]) -> D:
         """
@@ -192,7 +247,7 @@ class Traversal(Generic[T, D]):
         Returns The current traversal instance.
         """
         self.step_actions.append(lambda it, context: action.apply(it, context) if not context.is_stopping else None)
-        return self.get_derived_this()
+        return self
 
 
     def if_stopping(self, action: StepAction[T]) -> D:
@@ -203,7 +258,7 @@ class Traversal(Generic[T, D]):
         Returns The current traversal instance.
         """
         self.step_actions.append(lambda it, context: action.apply(it, context) if context.is_stopping else None)
-        return self.get_derived_this()
+        return self
 
     def copy_step_actions(self, other: Traversal[T, D]) -> D:
         """
@@ -214,12 +269,12 @@ class Traversal(Generic[T, D]):
         """
         for it in other.step_actions:
             self.add_step_action(it)
-        return self.get_derived_this()
+        return self
 
     def apply_step_actions(self, item: T, context: StepContext) -> D:
         for it in self.step_actions:
             it.apply(item, context)
-        return self.get_derived_this()
+        return self
 
     def add_context_value_computer(self, computer: ContextValueComputer[T]) -> D:
         """
@@ -230,7 +285,7 @@ class Traversal(Generic[T, D]):
         """
         require(isinstance(computer, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
         self.compute_next_context_funs[computer.key] = computer
-        return self.get_derived_this()
+        return self
 
     def copy_context_value_computer(self, other: Traversal[T, D]) -> D:
         """
@@ -243,7 +298,7 @@ class Traversal(Generic[T, D]):
         for it in other.compute_next_context_funs.values():
             if it.is_standalone_computer():
                 self.add_context_value_computer(it)
-        return self.get_derived_this()
+        return self
 
     def _compute_intial_context(self, next_step: T) -> StepContext:
         new_context_data = dict()
@@ -267,7 +322,7 @@ class Traversal(Generic[T, D]):
         Returns The current traversal instance.
         """
         self.start_items.append(item)
-        return self.get_derived_this()
+        return self
 
 
     def run(self, start_item: T=None, can_stop_on_start_item: bool=True) -> D:
@@ -289,7 +344,7 @@ class Traversal(Generic[T, D]):
         self.running = True
         self.has_run = True
 
-        if self._parent is None and isinstance(self._queue_type, BranchingQueueType) and len(self.start_items) > 1:
+        if self._parent is None and isinstance(self._queue_type, Traversal.BranchingQueueType) and len(self.start_items) > 1:
             self.branch_start_items()
         else:
             self.traverse(can_stop_on_start_item)
@@ -297,7 +352,7 @@ class Traversal(Generic[T, D]):
         self.traverse_branches(can_stop_on_start_item)
 
         self.running = False
-        return self.get_derived_this()
+        return self
 
     def reset(self) -> D:
         """
@@ -313,7 +368,7 @@ class Traversal(Generic[T, D]):
 
         self.on_reset()
 
-        return self.get_derived_this()
+        return self
 
     def on_reset(self):
         """
@@ -326,7 +381,7 @@ class Traversal(Generic[T, D]):
             start_item = self.start_items.popleft()
             if self.can_queue_start_item(start_item):
                 branch = self.create_new_branch(start_item, self._compute_intial_context(start_item))
-                require(self.branch_queue is not None, "INTERNAL ERROR: self.branch_queue should never be null here")
+                require(self.branch_queue is not None, lambda: "INTERNAL ERROR: self.branch_queue should never be null here")
                 self.branch_queue.put(branch)
 
     def traverse(self, can_stop_on_start_item: bool):
@@ -356,8 +411,11 @@ class Traversal(Generic[T, D]):
                     can_stop = True
 
     def get_step_context(self, item: T) -> StepContext:
-        context = self.contexts.pop(item)
-        require(context is not None, "INTERNAL ERROR: Traversal item should always have a context.")
+        try:
+            context = self.contexts.pop(item)
+            return context
+        except KeyError:
+            raise KeyError("INTERNAL ERROR: Traversal item should always have a context.")
 
     def create_new_branch(self, start_item: T, context: StepContext) -> D:
         it = self.create_new_this()
@@ -372,8 +430,8 @@ class Traversal(Generic[T, D]):
 
     def item_queuer(self, current_item: T, current_context) -> Callable[[T], bool]:
         def inner(next_item: T) -> bool:
-            next_context = self._compute_next_context(current_item, current_context, next_item, False)
-            if self.can_queue_item(next_item, next_context, current_item, current_context) and self.queue.add(next_item):
+            next_context = self._compute_next_context(current_item, current_context, next_item, is_branch_start=False)
+            if self.can_queue_item(next_item, next_context, current_item, current_context) and self.queue.put(next_item):
                 self.contexts[next_item] = next_context
                 return True
             else:
@@ -382,10 +440,21 @@ class Traversal(Generic[T, D]):
         return inner
 
     def queue_next_non_branching(self, current: T, current_context: StepContext, queue_next: QueueNext[T]):
-        queue_next.accept(current, current_context, self.item_queuer(current, current_context))
+        return queue_next.accept(current, current_context, self.item_queuer(current, current_context))
 
     def queue_next_branching(self, current: T, current_context: StepContext, queue_next: BranchingQueueNext[T]):
-        pass
+        def queue_branch(next_item: T):
+            next_context = self._compute_next_context(current, current_context, next_item, is_branch_start=True)
+            if self.can_queue_item(next_item, next_context, current, current_context):
+                branch = self.create_new_branch(next_item, next_context)
+                try:
+                    self.branch_queue.put(branch)
+                    return True
+                except:
+                    raise RuntimeError('INTERNAL ERROR: branch_queue should NEVER be None here.')
+            else:
+                False
+        return queue_next.accept(current, current_context, self.item_queuer(current, current_context), queue_branch)
 
     def traverse_branches(self, can_stop_on_start_item: bool):
         if self.branch_queue is None:
@@ -397,52 +466,30 @@ class Traversal(Generic[T, D]):
                 next.run(can_stop_on_start_item)
 
     def can_queue_item(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
-        return all(it.should_queue(next_item, next_context, current_item, current_context) for it in self.queue_conditions)
+        _all = True
+        for it in self.queue_conditions:
+            check = it.should_queue(next_item, next_context, current_item, current_context)
+            if not check:
+                _all = False
+                break
+        return _all
 
     def can_queue_start_item(self, start_item: T) -> bool:
-        return all(it.should_queue_start_item(start_item) for it in self.queue_conditions)
+        can_queue = all(it.should_queue_start_item(start_item) for it in self.queue_conditions)
+        return can_queue
 
 
 
-# QueueNext(item, context, queue_type)
-QueueNext = Callable[[T, StepContext, T], bool]
+    class QueueNext(Generic[T]):
+        def __init__(self, func):
+            self._func = func
 
-# BranchingQueueNext(item, context, queue_item, queue_branch)
-BranchingQueueNext = Callable[[T, StepContext, Callable[[T], bool], Callable[[T], bool]], None]
+        def accept(self, item: T, context: StepContext, queue_item: Callable[[T], bool]) -> bool:
+            return self._func(item, context, queue_item)
 
+    class BranchingQueueNext(Generic[T]):
+        def __init__(self, func):
+            self._func = func
 
-class QueueType[T, D: Traversal](ABC):
-    """
-    Defines the types of queues used in the traversal.
-    """
-    queue: TraversalQueue[T]
-    branch_queue: TraversalQueue[T]
-
-class BasicQueueType[T, D: Traversal[QueueType]]:
-    """
-    Basic queue type that handles non-branching item queuing.
-
-    `queueNext` Logic for queueing the next item in the traversal.
-    `queue` The primary queue of items.
-    """
-    branch_queue = None
-
-    def __init__(self, queue_next: QueueNext[T], queue: TraversalQueue[T]):
-        self.queue_next = queue_next
-        self.queue = queue
-
-
-class BranchingQueueType(QueueType[T, D]):
-    """
-    Branching queue type, supporting operations that may split into separate branches during traversal.
-
-    `queueNext` Logic for queueing the next item in a branching traversal.
-    `queueFactory` Factory function to create the main queue.
-    `branchQueueFactory` Factory function to create the branch queue.
-    """
-    def __init__(self, queue_next: BranchingQueueNext[T], queue_factory: Callable[[], TraversalQueue[T]], branch_queue_factory: Callable[[], 'TraversalQueue[D]']):
-        self.queue_next = queue_next
-        self.queue_factory = queue_factory
-        self.branch_queue_factory = branch_queue_factory
-        self.queue = self.queue_factory
-        self.branch_queue = self.branch_queue_factory
+        def accept(self, item: T, context: StepContext, queue_item: Callable[[T], bool], queue_branch: Callable[[T], bool]) -> bool:
+            return self._func(item, context, queue_item, queue_branch)

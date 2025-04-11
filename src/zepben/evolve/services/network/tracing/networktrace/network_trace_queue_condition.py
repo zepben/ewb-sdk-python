@@ -24,21 +24,23 @@ class NetworkTraceQueueCondition[T](QueueCondition[NetworkTraceStep[T]]):
 
 
     def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
-        self.should_queue_func(next_item, next_context, current_item, current_context)
-
-    def should_queue_func(self):
-        pass
+        """
+        interface to call the correct `self.should_queue_****_step` function as defined by `self.should_queue_func`
+        """
+        return self.should_queue_func(next_item, next_context, current_item, current_context)
 
     def should_queue_matched_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
         raise NotImplementedError()
 
     def should_queue_internal_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
-        if next_item.type == NetworkTraceStep.Type.EXTERNAL:
-            self.should_queue_matched_step(next_item, next_context, current_item, current_context)
+        if next_item.type() == NetworkTraceStep.Type.INTERNAL:
+            return self.should_queue_matched_step(next_item, next_context, current_item, current_context)
+        return True
 
     def should_queue_external_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
-        if next_item.type == NetworkTraceStep.Type.INTERNAL:
-            self.should_queue_matched_step(next_item, next_context, current_item, current_context)
+        if next_item.type() == NetworkTraceStep.Type.EXTERNAL:
+            return self.should_queue_matched_step(next_item, next_context, current_item, current_context)
+        return True
 
     @staticmethod
     def delegate_to(step_type: NetworkTraceStep.Type, condition: QueueCondition[NetworkTraceStep[T]]) -> 'NetworkTraceQueueCondition[T]':

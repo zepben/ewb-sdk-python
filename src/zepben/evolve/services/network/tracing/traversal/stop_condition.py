@@ -27,7 +27,7 @@ class StopCondition[T](TraversalCondition[T]):
         `context` The context associated with the current traversal step.
         Returns `true` if the traversal should stop at this item; `false` otherwise.
         """
-        raise NotImplementedError()
+        return self._func(item, context)
 
 class StopConditionWithContextValue[T, U](StopCondition[T], TypedContextValueComputer[T, U]):
     """

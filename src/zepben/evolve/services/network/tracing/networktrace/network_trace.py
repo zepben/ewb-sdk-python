@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Callable
-from typing import TypeVar, Union
+from typing import TypeVar, Union, Generic
 
 from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -19,17 +19,18 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace_tracker i
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
-from zepben.evolve.services.network.tracing.traversal.traversal import QueueType, BasicQueueType, BranchingQueueType, D, Traversal
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
 from zepben.evolve import TraversalQueue
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
 T = TypeVar('T')
+D = TypeVar('D')
 
 # TODO: Document this
 
 
-class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
+class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]):
     """
     A [Traversal] implementation specifically designed to trace connected [Terminal]s of [ConductingEquipment] in a network.
 
@@ -87,15 +88,15 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
         self.network_state_operators = network_state_operators
 
         if self._queue_type is None:
-            self._queue_type = BasicQueueType(NetworkTraceQueueNext().basic(
-                NetworkStateOperators.in_service_state_operators,
+            self._queue_type = Traversal.BasicQueueType(NetworkTraceQueueNext().basic(
+                network_state_operators.is_in_service,
                 compute_data_with_action_type(compute_data, action_type)
             ), queue)
 
         self.tracker: NetworkTraceTracker
-        if isinstance(self._queue_type, BasicQueueType):
+        if isinstance(self._queue_type, Traversal.BasicQueueType):
             self.tracker = NetworkTraceTracker(256)
-        elif isinstance(self._queue_type, BranchingQueueType):
+        elif isinstance(self._queue_type, Traversal.BranchingQueueType):
             self.tracker = NetworkTraceTracker(16)
 
         super().__init__(self._queue_type, **kwargs)
@@ -127,7 +128,7 @@ class NetworkTrace[T](Traversal[NetworkTraceStep[T], 'NetworkTrace[T]']):
             return super().add_queue_condition(to_network_trace_queue_condition(condition, step_type, True))
 
     def can_action_item(self, item: T, context: StepContext) -> bool:
-        return self._action_type.can_action_item(item, context, self.has_visited)
+        return self._action_type(item, context, self.has_visited)
 
     def on_reset(self):
         self.tracker.clear()
@@ -173,7 +174,7 @@ class BranchingNetworkTrace[T](NetworkTrace[T]):
                  compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]],
                  ):
 
-        self._queue_type = BranchingQueueType(NetworkTraceQueueNext().branching(
+        self._queue_type = Traversal.BranchingQueueType(NetworkTraceQueueNext().branching(
             network_state_operators.is_in_service, compute_data_with_action_type(compute_data, action_type)),
             queue_factory,
             branch_queue_factory)
@@ -193,6 +194,7 @@ def default_queue_condition_step_type(step_type):
         return NetworkTraceStep.Type.ALL
     elif step_type == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:
         return NetworkTraceStep.Type.EXTERNAL
+    raise Exception('step doesnt match expected types')
 
 
 def compute_data_with_action_type(compute_data: ComputeData[T], action_type: NetworkTraceActionType) -> ComputeData[T]:
@@ -202,6 +204,7 @@ def compute_data_with_action_type(compute_data: ComputeData[T], action_type: Net
         return ComputeData(lambda current_step, current_context, next_path: 
             current_step.data if next_path.traced_internally else compute_data.compute_next(current_step, current_context, next_path)
         )
+    raise Exception('step doesnt match expected types')
 
 # FIXME: this is wrong also
 def with_paths_with_action_type(self, action_type: NetworkTraceActionType) -> ComputeData[T]:
@@ -211,4 +214,6 @@ def with_paths_with_action_type(self, action_type: NetworkTraceActionType) -> Co
         return ComputeDataWithPaths(lambda current_step, current_context, next_path, next_paths:
             current_step.data if next_path.traced_internally else self.compute_next(current_step, current_context, next_path, next_paths)
         )
+    raise Exception('step doesnt match expected types')
+
 ComputeDataWithPaths[T].with_action_type = with_paths_with_action_type

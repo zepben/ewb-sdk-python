@@ -15,8 +15,12 @@ class NetworkTraceTracker:
     def has_visited(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> bool:
         return self._get_key(terminal, phases) in self._visited
 
-    def visit(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> None:
-        return self._visited.add(self._get_key(terminal, phases))
+    def visit(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> bool:
+        key = self._get_key(terminal, phases)
+        if key not in self._visited:
+            self._visited.add(self._get_key(terminal, phases))
+            return True
+        return False
 
     def clear(self):
         self._visited.clear()
@@ -25,7 +29,4 @@ class NetworkTraceTracker:
         if len(phases) < 1:
             return terminal
         else:
-            return terminal, phases  # TODO: unsure if this is right.
-
-
-# TODO: internal fun List<NominalPhasePath>.toPhasesSet(): Set<SinglePhaseKind> = if (this.isEmpty()) emptySet() else this.mapTo(mutableSetOf()) { it.to }
+            return terminal, phases
