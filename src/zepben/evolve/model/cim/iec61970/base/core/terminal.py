@@ -44,8 +44,10 @@ class Terminal(AcDcTerminal):
     """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
 
     normal_phases: Optional[PhaseStatus] = PhaseStatus
+    """Status of phases as traced for the normal state of the network"""
 
     current_phases: Optional[PhaseStatus] = PhaseStatus
+    """Status of phases as traced for the current state of the network"""
 
     sequence_number: int = 0
     """The orientation of the terminal connections for a multiple terminal conducting equipment. The sequence numbering starts with 1 and additional

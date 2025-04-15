@@ -71,7 +71,8 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
             return self
-        self._equipment = dict() if self._equipment is None else self._equipment
+        if self._equipment is None:
+            self._equipment = dict()
         self._equipment[equipment.mrid] = equipment
         return self
 

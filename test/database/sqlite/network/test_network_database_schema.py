@@ -277,7 +277,18 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     async def test_schema_feeder(self, feeder):
         # Need to set feeder directions to match database load.
         network_service = SchemaNetworks().network_services_of(Feeder, feeder)
-        await Tracing().set_direction().run(network_service, NetworkStateOperators)
+        await Tracing().set_direction().run(network_service, NetworkStateOperators.NORMAL)
+        await Tracing().set_direction().run(network_service, NetworkStateOperators.CURRENT)
+
+        # TODO assign_to_feeders.py [62] line added to fix this, discuss
+        """
+        normal_head_terminal doesnt have conducting equipment?
+        network has no feeder start points
+        network has no connectivity nodes
+        network has 2 feeders 1 terminal 1 substation 1 location 0 CN's
+        1 feeder has no terminals (Feeder)
+        other feeder (feeder) has a head terminal - the one with no conducting equipment... WT[actual]F?!
+        """
 
         await self._validate_schema(network_service)
 
