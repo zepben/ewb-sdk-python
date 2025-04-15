@@ -23,7 +23,7 @@ terminal_kwargs = {
 }
 
 # noinspection PyArgumentList
-terminal_args = [*ac_dc_terminal_args, ConductingEquipment(), PhaseCode.XYN, PhaseStatus, PhaseStatus, 1, FeederDirection.UPSTREAM, FeederDirection.DOWNSTREAM,
+terminal_args = [*ac_dc_terminal_args, ConductingEquipment(), PhaseCode.XYN, PhaseStatus(1), PhaseStatus(1), 1, FeederDirection.UPSTREAM, FeederDirection.DOWNSTREAM,
                  ConnectivityNode()]
 
 

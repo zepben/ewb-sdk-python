@@ -59,7 +59,8 @@ class BaseFeedersInternal:
         for feeder in equipment_containers:
             assert isinstance(equipment, Iterable)
             for it in equipment:
-                self.network_state_operators.associate_equipment_and_container(it, feeder)
+                if it is not None:  # TODO: Should this pass silently???
+                    self.network_state_operators.associate_equipment_and_container(it, feeder)
 
     def _associate_relay_systems_with_containers(self, equipment_containers: Iterable[EquipmentContainer], to_equipment: ProtectedSwitch):
         self._associate_equipment_with_containers(equipment_containers, [
