@@ -105,7 +105,7 @@ class PhaseInferrer:
                     (FeederDirection.UPSTREAM in self.state_operators.get_direction(terminal))) and
                     terminal.connectivity_node and
                     any(not self._has_none_phase(t) for t in terminal.connectivity_node.terminals if
-                        (t != terminal) and (FeederDirection.DOWNSTREAM in self.state_operators.get_direction(t).value()))
+                        (t != terminal) and (FeederDirection.DOWNSTREAM == self.state_operators.get_direction(t)))
             ]
 
         def _missing_from_down_to_any(self, terminals: List[Terminal]) -> List[Terminal]:
@@ -114,7 +114,7 @@ class PhaseInferrer:
                 if (self._has_none_phase(terminal) and
                     terminal.connectivity_node and
                     any(not self._has_none_phase(t) for t in terminal.connectivity_node.terminals if
-                        (t != terminal) and (FeederDirection.DOWNSTREAM in self.state_operators.get_direction(t).value())))
+                        (t != terminal) and (FeederDirection.DOWNSTREAM == self.state_operators.get_direction(t))))
             ]
 
         def _missing_from_any(self, terminals: List[Terminal]) -> List[Terminal]:

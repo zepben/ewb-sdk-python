@@ -69,40 +69,58 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
     :param T: the type of [NetworkTraceStep.data]
     """
-    parent: 'NetworkTrace[T]' = None
 
     def __init__(self,
                  network_state_operators: NetworkStateOperators,
-                 queue: TraversalQueue[NetworkTraceStep[T]],
-                 action_type: NetworkTraceActionType,
-                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]],
-                 **kwargs
+                 queue_type: Traversal.QueueType[NetworkTraceStep[T], 'NetworkTrace[T]'],
+                 parent: 'NetworkTrace[T]'=None,
+                 action_type: NetworkTraceActionType=None
                  ):
 
-        if isinstance(compute_data, ComputeDataWithPaths):
-            # TODO: mark this as experimental
-            pass
-
+        self._queue_type = queue_type
+        self.network_state_operators = network_state_operators
         self._action_type = action_type
 
-        self.network_state_operators = network_state_operators
+        self.tracker = NetworkTraceTracker()
 
-        if self._queue_type is None:
-            self._queue_type = Traversal.BasicQueueType(NetworkTraceQueueNext().basic(
-                network_state_operators.is_in_service,
-                compute_data_with_action_type(compute_data, action_type)
-            ), queue)
+        super().__init__(self._queue_type, parent)
 
-        self.tracker: NetworkTraceTracker
-        if isinstance(self._queue_type, Traversal.BasicQueueType):
-            self.tracker = NetworkTraceTracker(256)
-        elif isinstance(self._queue_type, Traversal.BranchingQueueType):
-            self.tracker = NetworkTraceTracker(16)
+    @classmethod
+    def non_branching(cls,
+                      network_state_operators: NetworkStateOperators,
+                      queue: TraversalQueue[NetworkTraceStep[T]],
+                      action_type: NetworkTraceActionType,
+                      compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
+                      ):
+        return cls(network_state_operators,
+                   Traversal.BasicQueueType(NetworkTraceQueueNext().basic(
+                       network_state_operators.is_in_service,
+                       compute_data_with_action_type(compute_data, action_type)
+                   ), queue),
+                   None,
+                   action_type)
 
-        super().__init__(self._queue_type, **kwargs)
+    @classmethod
+    def branching(cls,
+                  network_state_operators: NetworkStateOperators,
+                  queue_factory: Callable[[], TraversalQueue[T]],
+                  branch_queue_factory: Callable[[], TraversalQueue['NetworkTrace[T]']],
+                  action_type: NetworkTraceActionType,
+                  parent: 'NetworkTrace[T]'=None,
+                  compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None,
+                  ):
 
+        return cls(network_state_operators,
+                   Traversal.BranchingQueueType(NetworkTraceQueueNext().branching(
+                       network_state_operators.is_in_service, compute_data_with_action_type(compute_data, action_type)
+                   ), queue_factory, branch_queue_factory),
+                   parent,
+                   action_type)
 
-    def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T, phases: PhaseCode=None) -> "NetworkTrace[T]":
+    def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T= None, phases: PhaseCode=None) -> "NetworkTrace[T]":
+        if data is None:
+            super().add_start_item(start)
+
         if isinstance(start, Terminal):
             start_path = NetworkTraceStep.Path(start, start, self.start_nominal_phase_path(phases))
             super().add_start_item(NetworkTraceStep(start_path, 0, 0, data))
@@ -140,7 +158,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return self
 
     def create_new_this(self) -> 'NetworkTrace[T]':
-        return NetworkTrace(self.network_state_operators, self.queue_type, self, self._action_type)
+        return NetworkTrace(self.network_state_operators, self._queue_type, self, self._action_type)
 
     def start_nominal_phase_path(self, phases: PhaseCode) -> list[NominalPhasePath]:
         return [NominalPhasePath(it, it) for it in phases.single_phases] if phases and phases.single_phases else []
@@ -162,24 +180,6 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
             parent = parent.parent
 
         return self.tracker.visit(terminal, phases)
-
-
-class BranchingNetworkTrace[T](NetworkTrace[T]):
-    def __init__(self,
-                 network_state_operators: NetworkStateOperators,
-                 queue_factory: Callable[[...], TraversalQueue[[NetworkTraceStep[[T]]]]],
-                 branch_queue_factory: Callable[[...], TraversalQueue[NetworkTrace[T]]],
-                 action_type: NetworkTraceActionType,
-                 parent: NetworkTrace[T],
-                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]],
-                 ):
-
-        self._queue_type = Traversal.BranchingQueueType(NetworkTraceQueueNext().branching(
-            network_state_operators.is_in_service, compute_data_with_action_type(compute_data, action_type)),
-            queue_factory,
-            branch_queue_factory)
-
-        super().__init__(network_state_operators, self._queue_type, action_type, compute_data, parent=parent)
 
 
 def to_network_trace_queue_condition(queue_condition: NetworkTraceActionType, step_type: NetworkTraceStep.Type, override_step_type: bool):
@@ -204,7 +204,7 @@ def compute_data_with_action_type(compute_data: ComputeData[T], action_type: Net
         return ComputeData(lambda current_step, current_context, next_path: 
             current_step.data if next_path.traced_internally else compute_data.compute_next(current_step, current_context, next_path)
         )
-    raise Exception('step doesnt match expected types')
+    raise Exception(f'{action_type.__class__}: step doesnt match expected types')
 
 # FIXME: this is wrong also
 def with_paths_with_action_type(self, action_type: NetworkTraceActionType) -> ComputeData[T]:

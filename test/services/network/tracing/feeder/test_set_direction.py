@@ -22,6 +22,7 @@ class TestSetDirection:
         n = create_phase_swap_loop_network()
 
         await self._do_set_direction_trace(n, NetworkStateOperators.NORMAL)
+        await self._do_set_direction_trace(n, NetworkStateOperators.CURRENT)
 
         self._check_expected_direction(self._get_t(n, "ac_line_segment0", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "ac_line_segment0", 2), DOWNSTREAM)

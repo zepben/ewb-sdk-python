@@ -18,15 +18,13 @@ T = TypeVar('T')
 
 
 class OpenCondition(NetworkTraceQueueCondition[T], Generic[T]):
-    def __init__(self, step_type: NetworkTraceStep.Type=NetworkTraceStep.Type.INTERNAL):
-        super().__init__(step_type)
-
-    def __call__(self, is_open: Callable[[Switch, SinglePhaseKind], bool], step_type: NetworkTraceStep.Type, phase: SinglePhaseKind = None):
-        self.is_open = is_open
-        self.phase = phase
+    def __init__(self, is_open: Callable[[Switch, SinglePhaseKind], bool], phase: SinglePhaseKind = None):
+        super().__init__(NetworkTraceStep.Type.INTERNAL)
+        self._is_open = is_open
+        self._phase = phase
 
     def should_queue_matched_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
-        return not self.is_open(next_item.path.to_equipment, self.phase) if isinstance(next_item.path.to_equipment, Switch) else True
+        return not self._is_open(next_item.path.to_equipment, self._phase) if isinstance(next_item.path.to_equipment, Switch) else True
 
     def should_queue_start_item(self, item: T) -> bool:
         return True

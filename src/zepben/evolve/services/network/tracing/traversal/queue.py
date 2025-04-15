@@ -36,9 +36,8 @@ class TraversalQueue(Generic[T]):
     def __iter__(self):
         return self.queue.__iter__()
 
-    def iter_get(self):
-        while len(self.queue) > 0:
-            yield self.queue.get()
+    def pop(self):
+        return self.queue.pop()
 
     def len(self):
         return self.__len__()
@@ -61,7 +60,7 @@ class TraversalQueue(Generic[T]):
         return len(self.queue) > 0
 
     def next(self):
-        self.queue.get()
+        self.queue.pop()
 
     def get(self, item: T) -> U:
         return self.queue.get(item)
@@ -89,7 +88,7 @@ class FifoQueue(TraversalQueue[T]):
     def extend(self, items: Iterable[T]):
         self.queue.extend(items)
 
-    def get(self) -> T:
+    def pop(self) -> T:
         """
         Pop an item off the queue.
         Raises `IndexError` if the queue is empty.
@@ -127,7 +126,7 @@ class LifoQueue(TraversalQueue[T]):
     def extend(self, items: Iterable[T]):
         self.queue.extend(items)
 
-    def get(self) -> T:
+    def pop(self) -> T:
         """
         Pop an item off the queue.
         Raises `IndexError` if the queue is empty.

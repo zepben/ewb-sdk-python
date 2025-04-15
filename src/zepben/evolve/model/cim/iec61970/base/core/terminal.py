@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.core.equipment import Feeder
+from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 
 __all__ = ["AcDcTerminal", "Terminal"]
 
@@ -156,3 +158,17 @@ class Terminal(AcDcTerminal):
 
     def disconnect(self):
         self.connectivity_node = None
+
+    def is_feeder_head_terminal(self):
+        if self.conducting_equipment is None:
+            return False
+
+        for feeder in filter(lambda c: isinstance(c, Feeder), self.conducting_equipment.containers):
+            if feeder.normal_head_terminal == self:
+                return True
+
+    def has_connected_busbars(self):
+        try:
+            return any(it != self and it.conducting_equipment is BusbarSection for it in self.connectivity_node.terminals) == True
+        except AttributeError:
+            return False

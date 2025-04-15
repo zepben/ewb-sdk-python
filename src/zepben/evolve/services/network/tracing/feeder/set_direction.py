@@ -7,6 +7,7 @@ from typing import Optional, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 
 from zepben.evolve import Feeder, Traversal
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
@@ -18,7 +19,7 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace_step impo
 
 
 if TYPE_CHECKING:
-    from zepben.evolve import NetworkService, PowerTransformer, Switch, ConductingEquipment
+    from zepben.evolve import NetworkService, Switch, ConductingEquipment
 
 __all__ = ["SetDirection"]
 
@@ -43,7 +44,7 @@ class SetDirection:
         next_direction = FeederDirection.NONE
         if direction_applied == FeederDirection.UPSTREAM:
             next_direction = FeederDirection.DOWNSTREAM
-        elif direction_applied in (FeederDirection.UPSTREAM, FeederDirection.CONNECTOR):
+        elif direction_applied in (FeederDirection.DOWNSTREAM, FeederDirection.CONNECTOR):
             next_direction = FeederDirection.UPSTREAM
 
         #
@@ -68,15 +69,15 @@ class SetDirection:
     async def _create_traversal(self, state_operators: NetworkStateOperators) -> NetworkTrace[FeederDirection]:
         reprocessed_loop_terminals: list[Terminal] = []
 
-        def queue_condition(nts: NetworkTraceStep, *args):
+        def queue_condition(nts: NetworkTraceStep, ctx=None, next_step=None, next_ctx=None):
             assert isinstance(nts.data, FeederDirection)
-            return nts.data != FeederDirection.NONE
+            return (nts if next_step is None else next_step).data != FeederDirection.NONE
 
         def step_action(nts: NetworkTraceStep, *args):
             return state_operators.add_direction(nts.path.to_terminal, nts.data)
 
         def stop_condition(nts: NetworkTraceStep, *args):
-            return nts.path.to_terminal.is_feeder_head_terminal or self._reached_substation_transformer(nts.path.to_terminal)
+            return nts.path.to_terminal.is_feeder_head_terminal() or self._reached_substation_transformer(nts.path.to_terminal)
 
         return (Tracing.network_trace_branching(
             network_state_operators=state_operators,

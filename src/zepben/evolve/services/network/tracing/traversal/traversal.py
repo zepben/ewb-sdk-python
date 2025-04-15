@@ -135,6 +135,16 @@ class Traversal(Generic[T, D]):
     def queue_next(self):
         return self._queue_next[self._queue_type.__class__]
 
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, value):
+        if self._parent is None:
+            self._parent = value
+        raise Exception
+
     def can_action_item(self, item: T, context: 'StepContext') -> bool:
         """
         Determines if the traversal can apply step actions and stop conditions on the specified item.
@@ -396,7 +406,8 @@ class Traversal(Generic[T, D]):
                 self.queue.put(start_item)
 
             can_stop = can_stop_on_start_item
-            for current in  self.queue.iter_get():
+            while len(self.queue) > 0:
+                current = self.queue.pop()
                 context = self.get_step_context(current)
                 if self.can_visit_item(current, context):
                     context.is_actionable_item = self.can_action_item(current, context)
@@ -422,7 +433,7 @@ class Traversal(Generic[T, D]):
         it.copy_queue_conditions(it)
         it.copy_step_actions(it)
         it.copy_stop_conditions(it)
-        it.copy_context_value_computers(it)
+        it.copy_context_value_computer(it)
 
         it.contexts[start_item] = context
         it.add_start_item(start_item)
@@ -466,13 +477,11 @@ class Traversal(Generic[T, D]):
                 next.run(can_stop_on_start_item)
 
     def can_queue_item(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
-        _all = True
         for it in self.queue_conditions:
             check = it.should_queue(next_item, next_context, current_item, current_context)
             if not check:
-                _all = False
-                break
-        return _all
+                return False
+        return True
 
     def can_queue_start_item(self, start_item: T) -> bool:
         can_queue = all(it.should_queue_start_item(start_item) for it in self.queue_conditions)

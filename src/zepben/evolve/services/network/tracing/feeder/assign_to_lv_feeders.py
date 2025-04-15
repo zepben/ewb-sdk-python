@@ -46,7 +46,6 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
 
         :param network: The network containing the feeders to process
         """
-        self.network_state_operators = self.network_state_operators
 
         lv_feeder_start_points = network.lv_feeder_start_points
         terminal_to_aux_equipment = network.aux_equipment_by_terminal
@@ -152,7 +151,6 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             return sites[0].find_lv_feeders(lv_feeder_start_points, self.network_state_operators)
         elif len(sites) == 0:
             return list(ce.get_filtered_containers(LvFeeder, self.network_state_operators))
-        raise Exception("HURR DURR")  # TODO: remove this when locig is confirmed
 
     def _lv_feeders_from_terminal(self, terminal: Terminal):
         return terminal.conducting_equipment.get_filtered_containers(LvFeeder)(self.network_state_operators)

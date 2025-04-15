@@ -136,7 +136,7 @@ class TerminalConnectivityConnected:
             self._find_more_xy_candidate_phases(XyPhaseStep(terminal, xy_phase_code), visited, queue, candidate_phases)
 
         while not queue.empty():
-            self._find_more_xy_candidate_phases(queue.get(), visited, queue, candidate_phases)
+            self._find_more_xy_candidate_phases(queue.pop(), visited, queue, candidate_phases)
 
         return candidate_phases
 

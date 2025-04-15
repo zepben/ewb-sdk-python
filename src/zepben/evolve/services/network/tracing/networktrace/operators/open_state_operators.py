@@ -32,7 +32,7 @@ class OpenStateOperators(StateOperator):
         `phase` The specific phase to check, or `null` to check if any phase is open.
         Returns `true` if open; `false` otherwise.
         """
-        pass
+        raise NotImplementedError()
 
     @staticmethod
     @abstractmethod
@@ -46,9 +46,9 @@ class OpenStateOperators(StateOperator):
         """
         pass
 
-    @staticmethod
-    def stop_at_open() -> NetworkTraceQueueCondition[T]:
-        return OpenCondition()
+    @classmethod
+    def stop_at_open(cls) -> NetworkTraceQueueCondition[T]:
+        return OpenCondition(cls.is_open)
 
 
 class NormalOpenStateOperators(OpenStateOperators):

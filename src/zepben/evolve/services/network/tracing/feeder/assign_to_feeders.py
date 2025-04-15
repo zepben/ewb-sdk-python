@@ -2,6 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import time
 from collections.abc import Collection
 from typing import Set, Callable, Optional, Awaitable, Any, Iterable
 
@@ -73,14 +74,19 @@ class BaseFeedersInternal:
             for lv_feeder in lv_feeders:
                 self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
 
-    def _feeder_try_energize_lv_feeders(self, to_equipment: PowerTransformer, lv_feeder_start_points: Set[ConductingEquipment]):
+    def _feeder_try_energize_lv_feeders(self, feeders: Iterable[Feeder], to_equipment: PowerTransformer, lv_feeder_start_points: Set[ConductingEquipment]):
         sites = []
         for eq in to_equipment:
             sites.extend(eq.get_filtered_containers(Site, self.network_state_operators))
+
         if len(sites) > 0:
-            self._feeder_energizes(sites.find_lv_feeders(lv_feeder_start_points, self.network_state_operators))
+            lv_feeders = [s.find_lv_feeders(lv_feeder_start_points, self.network_state_operators) for s in sites]
         else:
-            self._feeder_energizes(to_equipment.get_filtered_containers(LvFeeder, self.network_state_operators))
+            lv_feeders = []
+            for eq in to_equipment:
+                lv_feeders.extend(eq.get_filtered_containers(LvFeeder, self.network_state_operators))
+
+        self._feeder_energizes(feeders, lv_feeders)
 
 
 class AssignToFeedersInternal(BaseFeedersInternal):
@@ -88,7 +94,6 @@ class AssignToFeedersInternal(BaseFeedersInternal):
     async def run(self,
                   network: NetworkService,
                   start_terminal: Terminal=None):
-        self.network_state_operators = self.network_state_operators
 
         feeder_start_points = network.feeder_start_points
         lv_feeder_start_points = network.lv_feeder_start_points
@@ -134,7 +139,10 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                       feeders_to_assign: list[Feeder]) -> NetworkTrace[...]:
 
         def _reached_lv(ce: ConductingEquipment):
-            return True if ce.base_voltage and ce.base_voltage.nominal_voltage < 1000 else False
+            try:
+                return True if ce.base_voltage and ce.base_voltage.nominal_voltage < 1000 else False
+            except AttributeError:
+                pass  # TODO: this is a hack.
 
         def _reached_substation_transformer(ce: ConductingEquipment):
             return True if isinstance(ce, PowerTransformer) and len(list(ce.substations)) > 0 else False
@@ -174,10 +182,12 @@ class AssignToFeedersInternal(BaseFeedersInternal):
             return
 
         self._associate_equipment_with_containers(feeders_to_assign, terminal_to_aux_equipment.get(step_path.to_terminal, {}))
+        if step_path.to_equipment is None:
+            print('hurrrrrr')
         self._associate_equipment_with_containers(feeders_to_assign, [step_path.to_equipment])
 
         if isinstance(step_path.to_equipment, PowerTransformer):
-            self._feeder_try_energize_lv_feeders(lv_feeder_start_points, step_path.to_equipment)
+            self._feeder_try_energize_lv_feeders(feeders_to_assign, lv_feeder_start_points, step_path.to_equipment)
         elif isinstance(step_path.to_equipment, ProtectedSwitch):
             self._associate_relay_systems_with_containers(feeders_to_assign, step_path.to_equipment)
 
