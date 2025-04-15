@@ -3,17 +3,18 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import TypeVar
+from typing import TypeVar, Generic
 
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
 
+
 T = TypeVar('T')
 U = TypeVar('U')
 
 
-class StopCondition[T](TraversalCondition[T]):
+class StopCondition(TraversalCondition[T], Generic[T]):
     """
     Functional interface representing a condition that determines whether the traversal should stop at a given item.
 
@@ -29,7 +30,7 @@ class StopCondition[T](TraversalCondition[T]):
         """
         return self._func(item, context)
 
-class StopConditionWithContextValue[T, U](StopCondition[T], TypedContextValueComputer[T, U]):
+class StopConditionWithContextValue(StopCondition[T], TypedContextValueComputer[T, U], Generic[T, U]):
     """
     Interface representing a stop condition that requires a value stored in the [StepContext] to determine if an item should be queued.
 

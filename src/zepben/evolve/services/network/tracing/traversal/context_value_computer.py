@@ -3,15 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from abc import ABC
-from typing import TypeVar, TYPE_CHECKING
-
+from abc import ABC, abstractmethod
+from typing import TypeVar, TYPE_CHECKING, Generic
 
 T = TypeVar('T')
 U = TypeVar('U')
 
 
-class ContextValueComputer[T](ABC):
+class ContextValueComputer(ABC, Generic[T]):
     """
     Interface representing a context value computer used to compute and store values in a [StepContext].
     This interface does not specify a generic return type because the [StepContext] stores its values as `Any?`.
@@ -42,10 +41,10 @@ class ContextValueComputer[T](ABC):
         """
         pass
 
-#    def is_standalone_computer(self):
-#        return all([not isinstance(self, StepAction), not isinstance(self, StopCondition), not isinstance(self, QueueCondition)])
+    def is_standalone_computer(self):
+        return all(not isinstance(self, o) for o in (StepAction, StopCondition, QueueCondition))
 
-class TypedContextValueComputer[T, U](ContextValueComputer):
+class TypedContextValueComputer(ContextValueComputer, Generic[T, U]):
     """
     A typed version of [ContextValueComputer] that avoids unchecked casts by specifying the type of context value.
     This interface allows for type-safe computation of context values in implementations.
@@ -81,3 +80,9 @@ class TypedContextValueComputer[T, U](ContextValueComputer):
     Gets the computed value from the context cast to type [U].
     """
     #  val StepContext.value: U get() = this.getValue<Any?>(key) as U
+
+
+# these imports are here to stop circular imports
+from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition
+from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
+from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition

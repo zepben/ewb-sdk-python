@@ -10,6 +10,7 @@ from zepben.evolve import Equipment, TestNetworkBuilder, Feeder, BaseVoltage, Tr
 
 def validate_equipment(equipment: Iterable[Equipment], *expected_mrids: str):
     equip_mrids = [e.mrid for e in equipment]
+
     for mrid in expected_mrids:
         assert mrid in equip_mrids
 
@@ -33,11 +34,10 @@ class TestAssignToFeeders:
     @pytest.mark.parametrize('feeder_start_point_to_open_point_network', [(True, False, False)], indirect=True)
     async def test_stops_at_normally_open_points(self, feeder_start_point_to_open_point_network):
         feeder = feeder_start_point_to_open_point_network.get("f")
-        await Tracing.assign_equipment_to_feeders().run(
-            feeder_start_point_to_open_point_network,
-            NetworkStateOperators.NORMAL
-        )
+        await Tracing.assign_equipment_to_feeders().run(feeder_start_point_to_open_point_network, NetworkStateOperators.NORMAL)
         validate_equipment(feeder.equipment, "fsp", "c1", "op")
+
+        await Tracing.assign_equipment_to_feeders().run(feeder_start_point_to_open_point_network, NetworkStateOperators.CURRENT)
         validate_equipment(feeder.current_equipment, "fsp", "c1", "op", "c2")
 
     @pytest.mark.asyncio

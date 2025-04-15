@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import Set
+from typing import Set, Generic, TypeVar
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
@@ -13,7 +13,9 @@ from zepben.evolve import SinglePhaseKind
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
 
-class NetworkTraceStep[T]:
+T = TypeVar('T')
+
+class NetworkTraceStep(Generic[T]):
     """
     Represents a single step in a network trace, containing information about the path taken and associated data.
 
@@ -84,3 +86,8 @@ class NetworkTraceStep[T]:
         """
         return self.Type.INTERNAL if self.path.traced_internally else self.Type.EXTERNAL
 
+    def next_num_terminal_steps(self):
+        return self.num_terminal_steps + 1
+
+    def next_num_equipment_steps(self):
+        return self.num_equipment_steps + 1 if self.path.traced_internally else self.num_equipment_steps

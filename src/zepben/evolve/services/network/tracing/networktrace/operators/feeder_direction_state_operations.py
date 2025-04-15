@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TYPE_CHECKING, Callable, TypeVar
 
-from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 

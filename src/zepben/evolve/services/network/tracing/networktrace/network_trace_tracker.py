@@ -8,14 +8,18 @@ from zepben.evolve import Terminal, SinglePhaseKind, NominalPhasePath
 
 
 class NetworkTraceTracker:
-    _visited = set()
-    def __init__(self, initial_capacity: int):
-        self.initial_capacity = initial_capacity
+    """
+    Internal class that tracks visited state of a Terminal's Phase in a Network Trace
+    """
+    def __init__(self):
+        self._visited = set()
 
     def has_visited(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> bool:
+        """Returns True if this Terminal's Phase has been visited, False otherwise"""
         return self._get_key(terminal, phases) in self._visited
 
     def visit(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> bool:
+        """Marks this Terminal's Phase as visited"""
         key = self._get_key(terminal, phases)
         if key not in self._visited:
             self._visited.add(self._get_key(terminal, phases))
@@ -23,6 +27,7 @@ class NetworkTraceTracker:
         return False
 
     def clear(self):
+        """Unmarks this Terminal's Phase as visited"""
         self._visited.clear()
 
     def _get_key(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> ... :

@@ -5,7 +5,7 @@
 from typing import Iterable
 
 import pytest
-from zepben.evolve import Equipment, TestNetworkBuilder, Feeder, BaseVoltage, LvFeeder
+from zepben.evolve import Equipment, TestNetworkBuilder, Feeder, BaseVoltage, LvFeeder, NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 
@@ -28,7 +28,8 @@ class TestAssignToLvFeeders:
     @pytest.mark.parametrize('feeder_start_point_to_open_point_network', [(True, False, True)], indirect=True)
     async def test_stops_at_normally_open_points(self, feeder_start_point_to_open_point_network):
         lv_feeder = feeder_start_point_to_open_point_network.get("f")
-        await Tracing.assign_equipment_to_lv_feeders().run(feeder_start_point_to_open_point_network)
+        await Tracing.assign_equipment_to_lv_feeders().run(feeder_start_point_to_open_point_network, NetworkStateOperators.NORMAL)
+        await Tracing.assign_equipment_to_lv_feeders().run(feeder_start_point_to_open_point_network, NetworkStateOperators.CURRENT)
         validate_equipment(lv_feeder.equipment, "fsp", "c1", "op")
         validate_equipment(lv_feeder.current_equipment, "fsp", "c1", "op", "c2")
 

@@ -10,7 +10,7 @@ from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
-from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
+from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 
@@ -30,7 +30,7 @@ class NetworkTraceQueueNext:
     def _queue_next_steps_branching(next_steps: list[NetworkTraceStep[T]],
                                     queue_item: Callable[[NetworkTraceStep[T]], bool],
                                     queue_branch: Callable[[NetworkTraceStep[T]], bool]):
-        queue_item(next_steps[0]) if len(next_steps) == 1 else map(queue_branch, next_steps)
+        queue_item(next_steps[0]) if len(next_steps) == 1 else all(map(queue_branch, next_steps))
 
     def _next_trace_steps(self,
                           is_in_service: CheckInService,
@@ -87,15 +87,6 @@ class NetworkTraceQueueNext:
         def _filter(it: Terminal) -> bool:
             if it.conducting_equipment:
                 return is_in_service(it.conducting_equipment)
+            return False
 
         return list(filter(_filter, __next_terminals()))
-
-def _terminal_has_connected_busbars(self: Terminal):
-    try:
-        return any(it != self and it.conducting_equipment is BusbarSection for it in self.connectivity_node.terminals) == True
-    except AttributeError:
-        return False
-
-Terminal.has_connected_busbars = _terminal_has_connected_busbars
-NetworkTraceStep.next_num_terminal_steps = lambda self: self.num_terminal_steps + 1
-NetworkTraceStep.next_num_equipment_steps = lambda self: self.num_equipment_steps + 1 if self.path.traced_internally else self.num_equipment_steps

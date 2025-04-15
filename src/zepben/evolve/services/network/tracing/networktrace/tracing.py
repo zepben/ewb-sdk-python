@@ -5,7 +5,7 @@
 from typing import TypeVar, Union, Callable
 
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
-from zepben.evolve.services.network.tracing.networktrace.network_trace import BranchingNetworkTrace, NetworkTrace
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
@@ -31,7 +31,7 @@ class Tracing:
 
         :returns: a new `NetworkTrace`
         """
-        return NetworkTrace(network_state_operators, queue, action_step_type, ComputeData(compute_data or (lambda *args: None)))
+        return NetworkTrace.non_branching(network_state_operators, queue, action_step_type, ComputeData(compute_data or (lambda *args: None)))
 
     @staticmethod
     def network_trace_branching(network_state_operators: NetworkStateOperators,
@@ -42,7 +42,7 @@ class Tracing:
                                 ) -> NetworkTrace[T]:
 
 
-        return BranchingNetworkTrace(network_state_operators, queue_factory, branch_queue_factory, action_step_type, None, ComputeData(compute_data or (lambda *args: None)))
+        return NetworkTrace.branching(network_state_operators, queue_factory, branch_queue_factory, action_step_type, None, ComputeData(compute_data or (lambda *args: None)))
 
     @staticmethod
     def set_direction():
