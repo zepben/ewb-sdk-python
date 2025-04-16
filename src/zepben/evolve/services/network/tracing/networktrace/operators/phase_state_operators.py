@@ -28,10 +28,6 @@ class PhaseStateOperators(StateOperator):
         """
         pass
 
-    @staticmethod
-    def NORMAL():
-        return NormalPhaseStateOperators
-
 
 class NormalPhaseStateOperators(PhaseStateOperators):
     """

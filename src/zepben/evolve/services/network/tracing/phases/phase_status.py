@@ -7,32 +7,32 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.evolve.services.network.tracing.phases.traced_phases_bit_manipulation import TracedPhaseBitManipulation
-
 if TYPE_CHECKING:
-    from zepben.evolve import Terminal, UnsupportedOperationException
-from zepben.evolve.streaming.exceptions import UnsupportedOperationException
+    from zepben.evolve import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode
 
-def validate(self: SinglePhaseKind) -> SinglePhaseKind:
-    if self in (SinglePhaseKind.A, SinglePhaseKind.B, SinglePhaseKind.C, SinglePhaseKind.N,
-                SinglePhaseKind.X, SinglePhaseKind.Y, SinglePhaseKind.s1, SinglePhaseKind.s2):
-        return self
-    raise ValueError(f'INTERNAL ERROR: Phase {self} is invalid')
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from abc import ABC, abstractmethod
 
-SinglePhaseKind.validate = validate
+__all__ = ["normal_phases", "current_phases", "PhaseStatus", "NormalPhases", "CurrentPhases"]
 
 
-class PhaseStatus:
+def normal_phases(terminal: Terminal):
+    return NormalPhases(terminal)
+
+
+def current_phases(terminal: Terminal):
+    return CurrentPhases(terminal)
+
+
+class PhaseStatus(ABC):
 
     terminal: Terminal
 
     def __init__(self, terminal: Terminal):
-        self._terminal = terminal
+        self.terminal = terminal
 
-        self._phase_status_internal = 0x0
-
+    @abstractmethod
     def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
         """
         Get the traced phase for the specified `nominal_phase`.
@@ -41,8 +41,9 @@ class PhaseStatus:
 
         Returns the traced phase.
         """
-        return self.get(nominal_phase)
+        raise NotImplementedError()
 
+    @abstractmethod
     def __setitem__(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
         """
         Set the traced phase for the specified `nominal_phase`.
@@ -53,20 +54,7 @@ class PhaseStatus:
 
         Returns True if the phase is updated, otherwise False.
         """
-        return self.set(nominal_phase, traced_phase)
-
-    def get(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
-        return TracedPhaseBitManipulation.get(self._phase_status_internal, nominal_phase)
-
-    def set(self, nominal_phase: SinglePhaseKind, single_phase_kind: SinglePhaseKind) -> bool:
-        _phase = self.get(nominal_phase)
-        if _phase == single_phase_kind:
-            return False
-        elif SinglePhaseKind.NONE in (_phase, single_phase_kind):
-            self._phase_status_internal = TracedPhaseBitManipulation.set(self._phase_status_internal, nominal_phase, single_phase_kind)
-            return True
-        else:
-            raise UnsupportedOperationException(f'Crossing phases [ ({nominal_phase}) ({single_phase_kind}) ]')
+        raise NotImplementedError()
 
     def as_phase_code(self) -> Optional[PhaseCode]:
         """
@@ -74,10 +62,10 @@ class PhaseStatus:
 
         Returns The `PhaseCode` if the combination of phases makes sense, otherwise `None`.
         """
-        if self._terminal.phases == PhaseCode.NONE:
+        if self.terminal.phases == PhaseCode.NONE:
             return PhaseCode.NONE
 
-        traced_phases = [self[it] for it in self._terminal.phases]
+        traced_phases = [self[it] for it in self.terminal.phases]
         phases = set(traced_phases)
 
         if phases == {SinglePhaseKind.NONE}:
@@ -89,3 +77,26 @@ class PhaseStatus:
         else:
             return None
 
+
+class NormalPhases(PhaseStatus):
+    """
+    The traced phases in the normal state of the network.
+    """
+
+    def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
+        return self.terminal.traced_phases.normal(nominal_phase)
+
+    def __setitem__(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
+        return self.terminal.traced_phases.set_normal(nominal_phase, traced_phase)
+
+
+class CurrentPhases(PhaseStatus):
+    """
+    The traced phases in the current state of the network.
+    """
+
+    def __getitem__(self, nominal_phase: SinglePhaseKind) -> SinglePhaseKind:
+        return self.terminal.traced_phases.current(nominal_phase)
+
+    def __setitem__(self, nominal_phase: SinglePhaseKind, traced_phase: SinglePhaseKind) -> bool:
+        return self.terminal.traced_phases.set_current(nominal_phase, traced_phase)

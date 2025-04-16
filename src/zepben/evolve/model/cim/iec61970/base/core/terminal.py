@@ -5,12 +5,13 @@
 
 from __future__ import annotations
 
+from dataclasses import field
 from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
-from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
+from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus, NormalPhases, CurrentPhases
 
 if TYPE_CHECKING:
     from zepben.evolve import ConnectivityNode, ConductingEquipment
@@ -19,6 +20,7 @@ from zepben.evolve.model.cim.iec61970.base.core.identified_object import Identif
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
+from zepben.evolve.model.phases import TracedPhases
 
 __all__ = ["AcDcTerminal", "Terminal"]
 
@@ -43,11 +45,9 @@ class Terminal(AcDcTerminal):
     phases: PhaseCode = PhaseCode.ABC
     """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
 
-    normal_phases: Optional[PhaseStatus] = PhaseStatus
-    """Status of phases as traced for the normal state of the network"""
-
-    current_phases: Optional[PhaseStatus] = PhaseStatus
-    """Status of phases as traced for the current state of the network"""
+    traced_phases: TracedPhases = TracedPhases()
+    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases 
+    to match those in `phases`"""
 
     sequence_number: int = 0
     """The orientation of the terminal connections for a multiple terminal conducting equipment. The sequence numbering starts with 1 and additional
@@ -76,11 +76,15 @@ class Terminal(AcDcTerminal):
         else:
             self.connectivity_node = self._cn
 
-        self.normal_phases: PhaseStatus = PhaseStatus(self)
-        """Status of phases as traced for the normal state of the network"""
+    @property
+    def normal_phases(self) -> PhaseStatus:
+        """ Convenience method for accessing the normal phases"""
+        return NormalPhases(self)
 
-        self.current_phases: PhaseStatus = PhaseStatus(self)
-        """Status of phases as traced for the current state of the network"""
+    @property
+    def current_phases(self) -> PhaseStatus:
+        """ Convenience method for accessing the current phases"""
+        return CurrentPhases(self)
 
     @property
     def conducting_equipment(self):

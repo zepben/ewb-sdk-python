@@ -31,7 +31,10 @@ class Tracing:
 
         :returns: a new `NetworkTrace`
         """
-        return NetworkTrace.non_branching(network_state_operators, queue, action_step_type, ComputeData(compute_data or (lambda *args: None)))
+        if not isinstance(compute_data, ComputeData):
+            compute_data = ComputeData(compute_data or (lambda *args: None))
+
+        return NetworkTrace.non_branching(network_state_operators, queue, action_step_type, compute_data)
 
     @staticmethod
     def network_trace_branching(network_state_operators: NetworkStateOperators,
@@ -42,7 +45,10 @@ class Tracing:
                                 ) -> NetworkTrace[T]:
 
 
-        return NetworkTrace.branching(network_state_operators, queue_factory, branch_queue_factory, action_step_type, None, ComputeData(compute_data or (lambda *args: None)))
+        if not isinstance(compute_data, ComputeData):
+            compute_data = ComputeData(compute_data or (lambda *args: None))
+
+        return NetworkTrace.branching(network_state_operators, queue_factory, branch_queue_factory, action_step_type, None, compute_data)
 
     @staticmethod
     def set_direction():

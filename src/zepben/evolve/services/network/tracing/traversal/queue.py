@@ -36,12 +36,6 @@ class TraversalQueue(Generic[T]):
     def __iter__(self):
         return self.queue.__iter__()
 
-    def pop(self):
-        return self.queue.pop()
-
-    def len(self):
-        return self.__len__()
-
     def __len__(self):
         return len(self.queue)
 
@@ -59,11 +53,8 @@ class TraversalQueue(Generic[T]):
         """ :return: True if the queue has more items. """
         return len(self.queue) > 0
 
-    def next(self):
-        self.queue.pop()
-
-    def get(self, item: T) -> U:
-        return self.queue.get(item)
+    def pop(self):
+        return self.queue.pop()
 
     def put(self, item: T) -> bool:
         self.queue.put(item)
@@ -71,9 +62,6 @@ class TraversalQueue(Generic[T]):
 
     def extend(self, items: Iterable[T]) -> bool:
         return self.queue.extend(items)
-
-    def peek(self) -> T:
-        return self.queue.peek()
 
     def clear(self):
         return self.queue.clear()
@@ -83,10 +71,10 @@ class FifoQueue(TraversalQueue[T]):
     """Used for Breadth-first Traversal's"""
 
     def put(self, item: T):
-        self.queue.append(item)
+        return self.queue.append(item)
 
     def extend(self, items: Iterable[T]):
-        self.queue.extend(items)
+        return self.queue.extend(items)
 
     def pop(self) -> T:
         """
@@ -101,13 +89,6 @@ class FifoQueue(TraversalQueue[T]):
         Returns True if empty, False otherwise
         """
         return len(self.queue) == 0
-
-    def peek(self) -> T:
-        """
-        Retrieve next item on queue, but don't remove from queue.
-        Returns Next item on the queue
-        """
-        return self.queue[0]
 
     def clear(self):
         """Clear the queue."""
@@ -139,13 +120,6 @@ class LifoQueue(TraversalQueue[T]):
         Returns True if empty, False otherwise
         """
         return len(self.queue) == 0
-
-    def peek(self) -> T:
-        """
-        Retrieve next item on queue, but don't remove from queue.
-        Returns Next item on the queue
-        """
-        return self.queue[-1]
 
     def clear(self):
         """Clear the queue."""
@@ -179,22 +153,13 @@ class PriorityQueue(TraversalQueue[T]):
         for item in items:
             heappush(self.queue, item)
 
-    def get(self) -> T:
+    def pop(self) -> T:
         """
         Get the next item in the queue, removing it from the queue.
         Returns The next item in the queue by priority.
         Raises `IndexError` if the queue is empty
         """
         return heappop(self.queue)
-
-    def peek(self) -> T:
-        """
-        Retrieve the next item in the queue, but don't remove it from the queue.
-        Note that you shouldn't modify the returned item after using this function, as you could change its
-        priority and thus corrupt the queue. Always use `get` if you intend on modifying the result.
-        Returns The next item in the queue
-        """
-        return self.queue[0]
 
     def empty(self) -> bool:
         return len(self) == 0

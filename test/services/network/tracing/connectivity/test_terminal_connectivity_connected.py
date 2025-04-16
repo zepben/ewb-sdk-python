@@ -228,8 +228,8 @@ class TestTerminalConnectivityConnected:
     @staticmethod
     async def _replace_normal_phases(terminal: Terminal, normal_phases: PhaseCode):
         for index, phase in enumerate(terminal.phases.single_phases):
-            terminal.normal_phases[phase] = Phase.NONE
-            terminal.normal_phases.set(phase, normal_phases.single_phases[index])
+            terminal.traced_phases.set_normal(phase, Phase.NONE)
+            terminal.traced_phases.set_normal(phase, normal_phases.single_phases[index])
 
     def _get_next_connectivity_node(self) -> ConnectivityNode:
         return self._network_service.add_connectivity_node(f"cn{self._network_service.len_of(ConnectivityNode)}")
