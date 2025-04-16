@@ -472,9 +472,9 @@ class Traversal(Generic[T, D]):
             return
 
         while len(self.branch_queue) > 0:
-            next = self.branch_queue.next()
+            next = self.branch_queue.pop()
             if next:
-                next.run(can_stop_on_start_item)
+                next.run(can_stop_on_start_item=can_stop_on_start_item)
 
     def can_queue_item(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
         for it in self.queue_conditions:

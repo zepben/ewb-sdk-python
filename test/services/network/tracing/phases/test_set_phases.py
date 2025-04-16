@@ -6,7 +6,7 @@ import pytest
 
 from network_fixtures import phase_swap_loop_network  # noqa (Fixtures)
 from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases, validate_phases_from_term_or_equip, get_t
-from zepben.evolve import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker
+from zepben.evolve import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators
 from zepben.evolve.exceptions import TracingException, PhaseException
 
 
@@ -177,7 +177,7 @@ async def test_detects_cross_phasing_flow():
     c1 = network_service["c1"]
 
     with pytest.raises(PhaseException) as e_info:
-        await SetPhases()._run_with_terminal(get_t(network_service, "c0", 2))
+        await SetPhases().run(get_t(network_service, "c0", 2), network_state_operators=NetworkStateOperators.NORMAL)
 
     assert e_info.value.args[0] == f"Attempted to flow conflicting phase A onto B on nominal phase A. This occurred while flowing from " \
                                    f"{list(c1.terminals)[0]} to {list(c1.terminals)[1]} through {c1}. This is caused by missing open " \
