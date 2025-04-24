@@ -184,6 +184,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: AssetOwner(mrid="a1"),
             lambda _: AssetOwner(mrid="a2")
         )
+        self.validator.validate_collection(
+            Asset.power_system_resources,
+            Asset.add_power_system_resource,
+            creator,
+            lambda _: Junction(mrid="j1"),
+            lambda _: Junction(mrid="j2")
+        )
         self.validator.validate_property(Asset.location, creator, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
 
     def _compare_asset_container(self, creator: Type[AssetContainer]):
@@ -575,6 +582,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_identified_object(creator)
 
         self.validator.validate_property(PowerSystemResource.location, creator, lambda _: Location(mrid="l1"), lambda _: Location(mrid="l2"))
+        self.validator.validate_collection(
+            PowerSystemResource.assets,
+            PowerSystemResource.add_asset,
+            creator,
+            lambda _: Pole(mrid="p1"),
+            lambda _: Pole(mrid="p2")
+        )
 
     def test_compare_site(self):
         self._compare_equipment_container(Site)

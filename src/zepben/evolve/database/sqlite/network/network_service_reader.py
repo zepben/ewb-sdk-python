@@ -11,6 +11,7 @@ from zepben.evolve.database.sqlite.common.base_service_reader import BaseService
 from zepben.evolve.database.sqlite.network.network_cim_reader import NetworkCimReader
 from zepben.evolve.database.sqlite.network.network_database_tables import NetworkDatabaseTables
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import TableAssetOrganisationRolesAssets
+from zepben.evolve.database.sqlite.tables.associations.table_assets_power_system_resources import TableAssetsPowerSystemResources
 from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import TableCircuitsSubstations
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import TableCircuitsTerminals
@@ -241,6 +242,7 @@ class NetworkServiceReader(BaseServiceReader):
             self._load_each(TablePositionPoints, self._reader.load_position_point),
             self._load_each(TableLocationStreetAddresses, self._reader.load_location_street_address),
             self._load_each(TableAssetOrganisationRolesAssets, self._reader.load_asset_organisation_roles_asset),
+            self._load_each(TableAssetsPowerSystemResources, self._reader.load_asset_power_system_resources),
             self._load_each(TableUsagePointsEndDevices, self._reader.load_usage_points_end_device),
             self._load_each(TableEquipmentUsagePoints, self._reader.load_equipment_usage_point),
             self._load_each(TableEquipmentOperationalRestrictions, self._reader.load_equipment_operational_restriction),

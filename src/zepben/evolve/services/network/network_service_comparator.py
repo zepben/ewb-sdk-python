@@ -279,6 +279,7 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_asset(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_id_references(diff, Asset.location)
         self._compare_id_reference_collections(diff, Asset.organisation_roles)
+        self._compare_id_reference_collections(diff, Asset.power_system_resources)
 
         return self._compare_identified_object(diff)
 
@@ -542,6 +543,7 @@ class NetworkServiceComparator(BaseServiceComparator):
 
     def _compare_power_system_resource(self, diff: ObjectDifference) -> ObjectDifference:
         self._compare_id_references(diff, PowerSystemResource.asset_info, PowerSystemResource.location)
+        self._compare_id_reference_collections(diff, PowerSystemResource.assets)
 
         return self._compare_identified_object(diff)
 

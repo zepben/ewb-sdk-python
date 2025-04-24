@@ -9,6 +9,7 @@ from zepben.evolve.database.sqlite.extensions.prepared_statement import Prepared
 from zepben.evolve.database.sqlite.network.network_database_tables import NetworkDatabaseTables
 from zepben.evolve.database.sqlite.tables.associations.loop_substation_relationship import LoopSubstationRelationship
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import TableAssetOrganisationRolesAssets
+from zepben.evolve.database.sqlite.tables.associations.table_assets_power_system_resources import TableAssetsPowerSystemResources
 from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import TableCircuitsSubstations
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import TableCircuitsTerminals
@@ -518,6 +519,8 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.location_mrid.query_index, self._mrid_or_none(asset.location))
         for it in asset.organisation_roles:
             status = status and self._save_asset_organisation_role_to_asset_association(it, asset)
+        for it in asset.power_system_resources:
+            status = status and self._save_asset_to_power_system_resource_association(it, asset)
 
         return status and self._save_identified_object(table, insert, asset, description)
 
@@ -2357,6 +2360,15 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._try_execute_single_update(insert, "asset organisation role to asset association")
 
+    def _save_asset_to_power_system_resource_association(self, power_system_resource: PowerSystemResource, asset: Asset) -> bool:
+        table = self._database_tables.get_table(TableAssetsPowerSystemResources)
+        insert = self._database_tables.get_insert(TableAssetsPowerSystemResources)
+
+        insert.add_value(table.asset_mrid.query_index, asset.mrid)
+        insert.add_value(table.power_system_resource_mrid.query_index, power_system_resource.mrid)
+
+        return self._try_execute_single_update(insert, "asset to power system resource association")
+
     def _save_battery_unit_to_battery_control_association(self, battery_unit: BatteryUnit, battery_control: BatteryControl) -> bool:
         table = self._database_tables.get_table(TableBatteryUnitsBatteryControls)
         insert = self._database_tables.get_insert(TableBatteryUnitsBatteryControls)
@@ -2392,7 +2404,6 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.end_device_mrid.query_index, end_device.mrid)
 
         return self._try_execute_single_update(insert, "end device function to end device association")
-
 
     def _save_equipment_to_equipment_container_association(self, equipment: Equipment, equipment_container: EquipmentContainer) -> bool:
         table = self._database_tables.get_table(TableEquipmentEquipmentContainers)

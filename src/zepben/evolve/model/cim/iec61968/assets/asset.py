@@ -9,6 +9,7 @@ from typing import Optional, Generator, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from zepben.evolve import AssetOrganisationRole
+    from zepben.evolve import PowerSystemResource
 
 from zepben.evolve.model.cim.iec61968.common.location import Location
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
@@ -30,11 +31,17 @@ class Asset(IdentifiedObject):
 
     _organisation_roles: Optional[List[AssetOrganisationRole]] = None
 
-    def __init__(self, organisation_roles: List[AssetOrganisationRole] = None, **kwargs):
+    _power_system_resources: Optional[List[PowerSystemResource]] = None
+
+    def __init__(self, organisation_roles: List[AssetOrganisationRole] = None, power_system_resources: List[PowerSystemResource] = None, **kwargs):
         super(Asset, self).__init__(**kwargs)
         if organisation_roles:
             for role in organisation_roles:
                 self.add_organisation_role(role)
+
+        if power_system_resources:
+            for resource in power_system_resources:
+                self.add_power_system_resource(resource)
 
     def num_organisation_roles(self) -> int:
         """
@@ -61,8 +68,7 @@ class Asset(IdentifiedObject):
 
     def add_organisation_role(self, role: AssetOrganisationRole) -> Asset:
         """
-        `role` The `AssetOrganisationRole` to
-        associate with this `Asset`.
+        `role` The `AssetOrganisationRole` to associate with this `Asset`.
         Returns A reference to this `Asset` to allow fluent use.
         Raises `ValueError` if another `AssetOrganisationRole` with the same `mrid` already exists in this `Asset`
         """
@@ -77,8 +83,7 @@ class Asset(IdentifiedObject):
         """
         Disassociate an `AssetOrganisationRole` from this `Asset`.
 
-        `role` the `AssetOrganisationRole` to
-        disassociate with this `Asset`.
+        `role` the `AssetOrganisationRole` to disassociate from this `Asset`.
         Raises `ValueError` if `role` was not associated with this `Asset`.
         Returns A reference to this `Asset` to allow fluent use.
         """
@@ -91,6 +96,61 @@ class Asset(IdentifiedObject):
         Returns self
         """
         self._organisation_roles = None
+        return self
+
+    def num_power_system_resources(self) -> int:
+        """
+        Get the number of `PowerSystemResource`s associated with this `Asset`.
+        """
+        return nlen(self._power_system_resources)
+
+    @property
+    def power_system_resources(self) -> Generator[PowerSystemResource, None, None]:
+        """
+        The `PowerSystemResource`s of this `Asset`.
+        """
+        return ngen(self._power_system_resources)
+
+    def get_power_system_resource(self, mrid: str) -> PowerSystemResource:
+        """
+        Get the `PowerSystemResource` for this asset identified by `mrid`.
+
+        `mrid` the mRID of the required `PowerSystemResource`
+        Returns The `PowerSystemResource` with the specified `mrid`.
+        Raises `KeyError` if `mrid` wasn't present.
+        """
+        return get_by_mrid(self._power_system_resources, mrid)
+
+    def add_power_system_resource(self, resource: PowerSystemResource) -> Asset:
+        """
+        `resource` The `PowerSystemResource` to associate with this `Asset`.
+        Returns A reference to this `Asset` to allow fluent use.
+        Raises `ValueError` if another `PowerSystemResource` with the same `mrid` already exists in this `Asset`
+        """
+        if self._validate_reference(resource, self.get_power_system_resource, "An PowerSystemResource"):
+            return self
+
+        self._power_system_resources = list() if self._power_system_resources is None else self._power_system_resources
+        self._power_system_resources.append(resource)
+        return self
+
+    def remove_power_system_resource(self, resource: PowerSystemResource) -> Asset:
+        """
+        Disassociate an `PowerSystemResource` from this `Asset`.
+
+        `resource` the `PowerSystemResource` to disassociate from this `Asset`.
+        Raises `ValueError` if `resource` was not associated with this `Asset`.
+        Returns A reference to this `Asset` to allow fluent use.
+        """
+        self._power_system_resources = safe_remove(self._power_system_resources, resource)
+        return self
+
+    def clear_power_system_resources(self) -> Asset:
+        """
+        Clear all power system resources.
+        Returns self
+        """
+        self._power_system_resources = None
         return self
 
 

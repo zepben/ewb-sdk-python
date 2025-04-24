@@ -366,7 +366,8 @@ def asset():
         PBAsset,
         io=identified_object(),
         locationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        organisationRoleMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
+        organisationRoleMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2),
+        powerSystemResourceMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
 
 
@@ -720,7 +721,8 @@ def power_system_resource():
         PBPowerSystemResource,
         io=identified_object(),
         assetInfoMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
-        locationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE)
+        locationMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE),
+        assetMRIDs=lists(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE), max_size=2)
     )
 
 

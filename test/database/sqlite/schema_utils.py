@@ -143,6 +143,9 @@ class SchemaNetworks:
             service.add(filled.location)
             for it in filled.organisation_roles:
                 service.add(it)
+            for it in filled.power_system_resources:
+                service.add(it)
+                it.add_asset(filled)
 
         if isinstance(filled, Pole):
             for it in filled.streetlights:
@@ -272,6 +275,9 @@ class SchemaNetworks:
 
         if isinstance(filled, PowerSystemResource):
             service.add(filled.location)
+            for it in filled.assets:
+                it.add_power_system_resource(filled)
+                service.add(it)
 
         if isinstance(filled, SubGeographicalRegion):
             filled.geographical_region.add_sub_geographical_region(filled)

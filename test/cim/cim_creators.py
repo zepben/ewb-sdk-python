@@ -236,7 +236,8 @@ def create_asset(include_runtime: bool):
     return {
         **create_identified_object(include_runtime),
         "location": builds(Location, **create_identified_object(include_runtime)),
-        "organisation_roles": lists(builds(AssetOwner, **create_identified_object(include_runtime)), min_size=1, max_size=2)
+        "organisation_roles": lists(builds(AssetOwner, **create_identified_object(include_runtime)), min_size=1, max_size=2),
+        "power_system_resources": lists(builds(Junction, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     }
 
 
@@ -706,7 +707,8 @@ def create_power_system_resource(include_runtime: bool):
     #
     return {
         **create_identified_object(include_runtime),
-        "location": create_location()
+        "location": create_location(),
+        "assets": lists(builds(Pole, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     }
 
 
