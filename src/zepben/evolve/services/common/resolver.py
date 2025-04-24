@@ -46,6 +46,11 @@ def agreements(c: Customer) -> BoundReferenceResolver:
     return BoundReferenceResolver(c, cust_to_custagr_resolver, custagr_to_cust_resolver)
 
 
+def assets(power_system_resource: PowerSystemResource) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(power_system_resource, psr_to_asset_resolver, asset_to_psr_resolver)
+
+
 def at_location(asset: Asset) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(asset, asset_to_location_resolver, None)
@@ -374,6 +379,11 @@ def power_transformer_info(pt: PowerTransformer) -> BoundReferenceResolver:
 def power_transformer_info_transformer_tank_info(pti: PowerTransformerInfo) -> BoundReferenceResolver:
     # noinspection PyArgumentList
     return BoundReferenceResolver(pti, pti_to_tti_resolver, None)
+
+
+def power_system_resources(asset: Asset) -> BoundReferenceResolver:
+    # noinspection PyArgumentList
+    return BoundReferenceResolver(asset, asset_to_psr_resolver, psr_to_asset_resolver)
 
 
 def prf_protected_switch(prf: ProtectionRelayFunction) -> BoundReferenceResolver:

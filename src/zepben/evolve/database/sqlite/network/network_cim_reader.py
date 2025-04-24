@@ -55,6 +55,7 @@ from zepben.evolve.database.sqlite.common.base_cim_reader import BaseCimReader
 from zepben.evolve.database.sqlite.extensions.result_set import ResultSet
 from zepben.evolve.database.sqlite.tables.associations.loop_substation_relationship import LoopSubstationRelationship
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import TableAssetOrganisationRolesAssets
+from zepben.evolve.database.sqlite.tables.associations.table_assets_power_system_resources import TableAssetsPowerSystemResources
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import TableCircuitsSubstations
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import TableCircuitsTerminals
 from zepben.evolve.database.sqlite.tables.associations.table_equipment_equipment_containers import TableEquipmentEquipmentContainers
@@ -2715,6 +2716,36 @@ class NetworkCimReader(BaseCimReader):
         asset = self._service.get(asset_mrid, Asset)
 
         asset.add_organisation_role(asset_organisation_role)
+
+        return True
+
+    def load_asset_power_system_resources(
+        self,
+        table: TableAssetsPowerSystemResources,
+        result_set: ResultSet,
+        set_identifier: Callable[[str], str]
+    ) -> bool:
+        """
+        Create a :class:`Asset` to :class:`PowerSystemResource` association from :class:`TableAssetPowerSystemResources`.
+
+        :param table: The database table to read the association from.
+        :param result_set: The record in the database table containing the fields for this association.
+        :param set_identifier: A callback to register the identifier of this association for logging purposes.
+
+        :return: True if the association was successfully read from the database and added to the service.
+        :raises SqlException: For any errors encountered reading from the database.
+        """
+        asset_mrid = result_set.get_string(table.asset_mrid.query_index)
+        set_identifier(f"{asset_mrid}-to-UNKNOWN")
+
+        power_system_resource_mrid = result_set.get_string(table.power_system_resource_mrid.query_index)
+        set_identifier(f"{asset_mrid}-to-{power_system_resource_mrid}")
+
+        asset = self._service.get(asset_mrid, Asset)
+        power_system_resource = self._service.get(power_system_resource_mrid, PowerSystemResource)
+
+        asset.add_power_system_resource(power_system_resource)
+        power_system_resource.add_asset(asset)
 
         return True
 

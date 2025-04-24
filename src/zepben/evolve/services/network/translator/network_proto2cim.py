@@ -514,6 +514,9 @@ def asset_to_cim(pb: PBAsset, cim: Asset, network_service: NetworkService):
     for mrid in pb.organisationRoleMRIDs:
         network_service.resolve_or_defer_reference(resolver.organisation_roles(cim), mrid)
 
+    for mrid in pb.powerSystemResourceMRIDs:
+        network_service.resolve_or_defer_reference(resolver.power_system_resources(cim), mrid)
+
     identified_object_to_cim(pb.io, cim, network_service)
 
 
@@ -923,6 +926,9 @@ def geographical_region_to_cim(pb: PBGeographicalRegion, network_service: Networ
 
 def power_system_resource_to_cim(pb: PBPowerSystemResource, cim: PowerSystemResource, network_service: NetworkService):
     network_service.resolve_or_defer_reference(resolver.psr_location(cim), pb.locationMRID)
+
+    for mrid in pb.assetMRIDs:
+        network_service.resolve_or_defer_reference(resolver.assets(cim), mrid)
 
     identified_object_to_cim(pb.io, cim, network_service)
 

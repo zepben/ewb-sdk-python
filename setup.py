@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 deps = [
     "zepben.auth==0.12.1",
-    "zepben.protobuf==0.34.1",
+    "zepben.protobuf==0.35.0",
     "typing_extensions==4.12.2",
 ]
 
@@ -19,7 +19,7 @@ test_deps = [
     "pytest-asyncio==0.19.0",
     "pytest-timeout==1.4.2",
     "hypothesis==6.56.3",
-    "grpcio-testing==1.57.0",
+    "grpcio-testing==1.71.0",
     "pylint==2.14.5",
     "six==1.16.0",
     "tox"

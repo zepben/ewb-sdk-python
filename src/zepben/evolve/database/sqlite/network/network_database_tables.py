@@ -6,6 +6,7 @@ from typing import Generator
 
 from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import *
+from zepben.evolve.database.sqlite.tables.associations.table_assets_power_system_resources import TableAssetsPowerSystemResources
 from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_terminals import *
@@ -133,6 +134,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
         yield TableAccumulators()
         yield TableAnalogs()
         yield TableAssetOrganisationRolesAssets()
+        yield TableAssetsPowerSystemResources()
         yield TableAssetOwners()
         yield TableBaseVoltages()
         yield TableBatteryControls()

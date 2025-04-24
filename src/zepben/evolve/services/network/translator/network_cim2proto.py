@@ -480,7 +480,8 @@ def asset_to_pb(cim: Asset) -> PBAsset:
     return PBAsset(
         io=identified_object_to_pb(cim),
         locationMRID=cim.location.mrid if cim.location else None,
-        organisationRoleMRIDs=[str(io.mrid) for io in cim.organisation_roles]
+        organisationRoleMRIDs=[str(io.mrid) for io in cim.organisation_roles],
+        powerSystemResourceMRIDs=[str(io.mrid) for io in cim.power_system_resources]
     )
 
 
@@ -831,7 +832,8 @@ def power_system_resource_to_pb(cim: PowerSystemResource, include_asset_info: bo
     return PBPowerSystemResource(
         io=identified_object_to_pb(cim),
         assetInfoMRID=mrid_or_empty(cim.asset_info) if include_asset_info else None,
-        locationMRID=mrid_or_empty(cim.location)
+        locationMRID=mrid_or_empty(cim.location),
+        assetMRIDs=[str(io.mrid) for io in cim.assets]
     )
 
 

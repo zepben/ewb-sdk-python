@@ -253,6 +253,7 @@ from zepben.evolve.database.sqlite.tables.table_metadata_data_sources import *
 from zepben.evolve.database.sqlite.tables.table_version import *
 from zepben.evolve.database.sqlite.tables.associations.loop_substation_relationship import *
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import *
+from zepben.evolve.database.sqlite.tables.associations.table_assets_power_system_resources import *
 from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import *
 from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import *
 from zepben.evolve.database.sqlite.tables.associations.table_circuits_substations import *
@@ -266,6 +267,7 @@ from zepben.evolve.database.sqlite.tables.associations.table_pricing_structures_
 from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_functions_protected_switches import *
 from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_functions_sensors import *
 from zepben.evolve.database.sqlite.tables.associations.table_protection_relay_schemes_protection_relay_functions import *
+from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import *
 from zepben.evolve.database.sqlite.tables.associations.table_usage_points_end_devices import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_cable_info import *
 from zepben.evolve.database.sqlite.tables.iec61968.assetinfo.table_no_load_tests import *
@@ -320,6 +322,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_base_voltages
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_conducting_equipment import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_connectivity_node_containers import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_connectivity_nodes import *
+from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_equipment import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_equipment_containers import *
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_feeders import *
