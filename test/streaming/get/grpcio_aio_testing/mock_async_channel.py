@@ -125,25 +125,33 @@ class TestingAsyncChannel(AsyncChannel):
     def unary_unary(self,
                     method,
                     request_serializer=None,
-                    response_deserializer=None):
+                    response_deserializer=None,
+                    _registered_method=None,
+                    ):
         return UnaryUnary(method, self._state)
 
     def unary_stream(self,
                      method,
                      request_serializer=None,
-                     response_deserializer=None):
+                     response_deserializer=None,
+                     _registered_method=None,
+                     ):
         return UnaryStream(method, self._state)
 
     def stream_unary(self,
                      method,
                      request_serializer=None,
-                     response_deserializer=None):
+                     response_deserializer=None,
+                     _registered_method=None,
+                     ):
         return StreamUnary(method, self._state)
 
     def stream_stream(self,
                       method,
                       request_serializer=None,
-                      response_deserializer=None):
+                      response_deserializer=None,
+                      _registered_method=None,
+                      ):
         return StreamStream(method, self._state)
 
     def _close(self):
