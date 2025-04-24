@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.46.0](#v0460)| `24 April 2025` |
 |[0.45.0](#v0450)| `26 March 2025` |
 |[0.44.0](#v0440)| `24 January 2025` |
 |[0.43.1](#v0431)| `06 January 2025` |
@@ -53,6 +54,27 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.46.0]
+
+### Breaking Changes
+* None.
+
+### New Features
+* Added relationships between `Asset` and `PowerSystemResource` which enables linking `Equipment` to `Pole`:
+  * `Asset.powerSystemResources`
+  * `PowerSystemResource.assets`
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
 
 ---
 
