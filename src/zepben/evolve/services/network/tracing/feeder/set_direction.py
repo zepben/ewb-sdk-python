@@ -62,16 +62,17 @@ class SetDirection:
             return FeederDirection.NONE
         elif next_direction not in next_terminal_direction:
             return next_direction
-        elif (next_terminal_direction == FeederDirection.BOTH) and reprocessed_loop_terminals.append(next_path.to_terminal):
+        elif (next_terminal_direction == FeederDirection.BOTH):
+            reprocessed_loop_terminals.append(next_path.to_terminal)
             return next_direction
         return FeederDirection.NONE
 
     async def _create_traversal(self, state_operators: NetworkStateOperators) -> NetworkTrace[FeederDirection]:
         reprocessed_loop_terminals: list[Terminal] = []
 
-        def queue_condition(nts: NetworkTraceStep, ctx=None, next_step=None, next_ctx=None):
+        def queue_condition(nts: NetworkTraceStep, *args):
             assert isinstance(nts.data, FeederDirection)
-            return (nts if next_step is None else next_step).data != FeederDirection.NONE
+            return nts.data != FeederDirection.NONE
 
         def step_action(nts: NetworkTraceStep, *args):
             return state_operators.add_direction(nts.path.to_terminal, nts.data)

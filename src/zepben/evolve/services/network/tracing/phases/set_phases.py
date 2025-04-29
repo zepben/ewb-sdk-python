@@ -24,7 +24,7 @@ from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
-
+from zepben.evolve.streaming.exceptions import UnsupportedOperationException
 
 __all__ = ["SetPhases"]
 
@@ -47,13 +47,13 @@ class SetPhases:
                   network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
 
         if isinstance(apply_to, NetworkService):
-            await self._run(apply_to, network_state_operators)
+            return await self._run(apply_to, network_state_operators)
 
         elif isinstance(apply_to, Terminal):
             if phases is None:
-                await self._run_terminal(apply_to, network_state_operators)
+                return await self._run_terminal(apply_to, network_state_operators)
 
-            await self._run_with_terminal(apply_to, phases, network_state_operators)
+            return await self._run_with_phases(apply_to, phases, network_state_operators)
 
         else:
             raise Exception('INTERNAL ERROR: incorrect params')
@@ -72,7 +72,7 @@ class SetPhases:
                 self._apply_phases(network_state_operators, terminal, terminal.phases.single_phases)
                 await self._run_terminal(terminal, network_state_operators, trace)
 
-    async def _run_with_terminal(self,
+    async def _run_with_phases(self,
                                  terminal: Terminal,
                                  phases: Union[PhaseCode, Iterable[SinglePhaseKind]],
                                  network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
@@ -82,17 +82,19 @@ class SetPhases:
         @param terminal: The terminal to start applying phases from.
         @param phases: The phases to apply. Must only contain ABCN.
         """
-        if isinstance(phases, PhaseCode):
-            self._apply_phases(network_state_operators, terminal, phases.single_phases)
-
-        elif isinstance(phases, (list, set)):
-            if len(phases) != len(terminal.phases.single_phases):
+        def validate_phases(_phases):
+            if len(_phases) != len(terminal.phases.single_phases):
                 raise TracingException(
                     f"Attempted to apply phases [{', '.join(phase.name for phase in phases)}] to {terminal} with nominal phases {terminal.phases.name}. "
-                    f"Number of phases to apply must match the number of nominal phases. Found {len(phases)}, expected {len(terminal.phases.single_phases)}"
+                    f"Number of phases to apply must match the number of nominal phases. Found {len(_phases)}, expected {len(terminal.phases.single_phases)}"
                 )
+            return _phases
 
-            self._apply_phases(network_state_operators, terminal, phases)
+        if isinstance(phases, PhaseCode):
+            self._apply_phases(network_state_operators, terminal, validate_phases(phases.single_phases))
+
+        elif isinstance(phases, (list, set)):
+            self._apply_phases(network_state_operators, terminal, validate_phases(phases))
 
         else:
             raise Exception(f'INTERNAL ERROR: Phase of type {phases.__class__} is wrong.')
@@ -126,10 +128,10 @@ class SetPhases:
         :param network_state_operators: The `NetworkStateOperators` to be used when setting phases.
         """
         if phases is None:
-            await self.spread_phases(from_terminal, to_terminal, from_terminal.phases.single_phases, network_state_operators)
+            return await self.spread_phases(from_terminal, to_terminal, from_terminal.phases.single_phases, network_state_operators)
         else:
-            paths = await self._get_nominal_phase_paths(network_state_operators, from_terminal, to_terminal, list(phases))
-            await self._flow_phases(network_state_operators, from_terminal, to_terminal, paths)
+            paths = self._get_nominal_phase_paths(network_state_operators, from_terminal, to_terminal, list(phases))
+            self._flow_phases(network_state_operators, from_terminal, to_terminal, paths)
 
     async def _run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators, trace: NetworkTrace[PhasesToFlow]=None):
         if trace is None:
@@ -157,7 +159,6 @@ class SetPhases:
                 network_state_operators=state_operators,
                 action_step_type=NetworkTraceActionType.ALL_STEPS,
                 queue_factory=lambda: WeightedPriorityQueue.process_queue(_get_weight),
-                branch_queue_factory=lambda: WeightedPriorityQueue.branch_queue(_get_weight),
                 compute_data=self._compute_next_phases_to_flow(state_operators)
             )
             .add_queue_condition(Traversal.queue_condition(condition))
@@ -202,7 +203,6 @@ class SetPhases:
                            to_terminal: Terminal,
                            nominal_phase_paths: Iterable[NominalPhasePath]
     ) -> bool:
-        from zepben.evolve import UnsupportedOperationException  # FIXME: This is a hack to avoid a circular import
 
         from_phases = state_operators.phase_status(from_terminal)
         to_phases = state_operators.phase_status(to_terminal)
@@ -213,12 +213,12 @@ class SetPhases:
 
             try:
                 def _phase_to_apply():
-                    if from_ != SinglePhaseKind.NONE:
-                        return from_phases[from_]
+                    if from_ == SinglePhaseKind.NONE:
+                        return to_phases[to]
                     elif to not in PhaseCode.XY:
                         return to
                     else:
-                        return to_phases[to]
+                        return from_phases[from_]
 
                 phase = _phase_to_apply()
 

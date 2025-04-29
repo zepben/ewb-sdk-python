@@ -36,7 +36,7 @@ class ConductingEquipment(Equipment):
     """
 
     _terminals: List[Terminal] = []
-    max_terminals = int(sys.maxsize)  # FIXME: im not convinced this is the best approach, but im not sure how big the number needs to be
+    max_terminals = int(sys.maxsize)
 
     def __init__(self, terminals: List[Terminal] = None, **kwargs):
         super(ConductingEquipment, self).__init__(**kwargs)

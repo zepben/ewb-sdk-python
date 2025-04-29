@@ -6,11 +6,10 @@
 from abc import ABC
 from typing import Iterable
 
-from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 from zepben.evolve.services.network.tracing.networktrace.operators.equipment_container_state_operators import EquipmentContainerStateOperators
 from zepben.evolve.services.network.tracing.networktrace.operators.feeder_direction_state_operations import FeederDirectionStateOperations
 from zepben.evolve.services.network.tracing.networktrace.operators.in_service_state_operators import InServiceStateOperators
-from zepben.evolve.services.network.tracing.networktrace.operators.open_state_operators import OpenStateOperators, NormalOpenStateOperators
+from zepben.evolve.services.network.tracing.networktrace.operators.open_state_operators import OpenStateOperators
 from zepben.evolve.services.network.tracing.networktrace.operators.phase_state_operators import PhaseStateOperators
 
 
@@ -36,7 +35,6 @@ class NetworkStateOperators(ABC):
         if its not present in this object
 
         TODO: this is functional, but not optimal and can be made smarter and faster.
-        TODO: pretty sure we should be using __getattr__ instead also - read line above re: functional
         """
         try:
             return super().__getattribute__(item)

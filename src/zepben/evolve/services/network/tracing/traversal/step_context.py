@@ -42,7 +42,6 @@ class StepContext:
         """
         Retrieves a context value associated with the specified key.
 
-        `T` The expected type of the context value. TODO: actually implement
         `key` The key identifying the context value.
         @return The context value associated with the key, or `null` if not found.
         """
