@@ -27,8 +27,6 @@ from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path impo
 T = TypeVar('T')
 D = TypeVar('D')
 
-# TODO: Document this
-
 
 class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]):
     """
@@ -118,6 +116,17 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                    action_type)
 
     def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T= None, phases: PhaseCode=None) -> "NetworkTrace[T]":
+        """
+        Depending on the type of `start`, adds either:
+          - A starting [Terminal] to the trace with the associated step data.
+          - All terminals of the given [ConductingEquipment] as starting points in the trace, with the associated data.
+
+        Tracing will be only external from this terminal and not trace internally back through its conducting equipment.
+
+        :param start: The starting [Terminal] or [ConductingEquipment] for the trace.
+        :param data: The data associated with the start step.
+        :param phases: Phases to trace; `null` to ignore phases.
+        """
         if data is None:
             super().add_start_item(start)
 
@@ -131,12 +140,35 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
             return self
 
     def run(self, start: Union[ConductingEquipment, Terminal]=None, data: T=None, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
+        """
+        Runs the network trace starting from `start`
+
+        Depending on the type of `start`, this will either start from:
+          - A starting [Terminal] to the trace with the associated step data.
+          - All terminals of the given [ConductingEquipment] as starting points in the trace, with the associated data.
+
+        :param start: The starting [Terminal] or [ConductingEquipment] for the trace.
+        :param data: The data associated with the start step.
+        :param phases: Phases to trace; `null` to ignore phases.
+        :param can_stop_on_start_item: indicates whether the trace should check stop conditions on start items.
+        """
         if data is not None and start is not None:
             self.add_start_item(start, data, phases)
         super().run(can_stop_on_start_item=can_stop_on_start_item)
         return self
 
     def add_condition(self, condition: TraversalCondition[T]) -> "NetworkTrace[T]":
+        """
+        Adds a traversal condition to the trace using the trace's [NetworkStateOperators] as the receiver.
+
+        This overload primarily exists to enable a DSL-like syntax for adding predefined traversal conditions to the trace.
+        For example, to configure the trace to stop at open points using the [Conditions.stopAtOpen] factory, you can use:
+
+        >>> trace.addCondition(network_state_operators.stop_at_open())
+
+        :param condition: A lambda function that returns a traversal condition.
+        :returns: This [NetworkTrace] instance
+        """
         super().add_condition(condition)
         return self
 
@@ -207,8 +239,7 @@ def compute_data_with_action_type(compute_data: ComputeData[T], action_type: Net
         )
     raise Exception(f'{action_type.__class__}: step doesnt match expected types')
 
-# FIXME: this is wrong also
-def with_paths_with_action_type(self, action_type: NetworkTraceActionType) -> ComputeData[T]:
+def with_paths_with_action_type(self, action_type: NetworkTraceActionType) -> ComputeDataWithPaths[T]:
     if action_type == NetworkTraceActionType.ALL_STEPS:
         return self
     elif action_type == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:

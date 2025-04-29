@@ -10,6 +10,8 @@ from zepben.evolve import NetworkService, ConductingEquipment, Feeder, PowerTran
 
 __all__ = ["FindSwerEquipment"]
 
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+
 T = TypeVar
 
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
@@ -24,7 +26,6 @@ class FindSwerEquipment:
     """
 
     async def find(self, to_process: Union[NetworkService, Feeder], network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
-        # TODO: are we ok with delegator methods like this?
         """
         Convenience method to call out to `find_all` or `find_on_feeder` based on the class type of `to_process`
 
@@ -34,9 +35,9 @@ class FindSwerEquipment:
         :return: A `Set` of `ConductingEquipment` on `Feeder` that is SWER, or energised via SWER.
         """
         if isinstance(to_process, Feeder):
-            await self.find_on_feeder(to_process, network_state_operators)
+            return await self.find_on_feeder(to_process, network_state_operators)
         elif isinstance(to_process, NetworkService):
-            await self.find_all(to_process, network_state_operators)
+            return await self.find_all(to_process, network_state_operators)
 
     async def find_all(self, network_service: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
         """
@@ -58,7 +59,8 @@ class FindSwerEquipment:
 
         :return: A `Set` of `ConductingEquipment` on `feeder` that is SWER, or energised via SWER.
         """
-        to_process = [it for it in network_state_operators.get_equipment(feeder) if isinstance(it, PowerTransformer) and self._has_swer_terminal(it) and self._has_non_swer_terminal(it)]
+        to_process = [it for it in network_state_operators.get_equipment(feeder)
+                      if isinstance(it, PowerTransformer) and it.has_swer_terminal and it.has_non_swer_terminal]
 
         # We will add all the SWER transformers to the swer_equipment list before starting any traces to prevent tracing though them by accident. In
         # order to do this, we collect the sequence to a list to change the iteration order.
@@ -82,16 +84,19 @@ class FindSwerEquipment:
     async def _trace_swer_from(self, state_operators: NetworkStateOperators, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
 
         def condition(step, *args):
-            if self._is_swer_terminal(step.path.to_terminal) or isinstance(step.path.to_equipment, Switch):
+            if step.path.to_terminal.is_swer_terminal or isinstance(step.path.to_equipment, Switch):
                 return step.path.to_equipment not in swer_equipment
+
+        def step_action(step: NetworkTraceStep, context):
+            swer_equipment.add(step.path.to_equipment)
 
         trace = self._create_trace(state_operators)
         trace.add_queue_condition(Traversal.queue_condition(condition))
 
-        trace.add_step_action(Traversal.step_action(lambda step: swer_equipment.add(step.path.to_equipment)))
+        trace.add_step_action(Traversal.step_action(step_action))
 
 
-        for it in [t for t in transformer.terminals if self._is_swer_terminal(t)]:
+        for it in [t for t in transformer.terminals if t.is_swer_terminal()]:
             trace.reset()
             trace.run(it, None)
 
@@ -102,17 +107,21 @@ class FindSwerEquipment:
             if 1 < step.path.to_equipment.base_voltage_value < 1000:
                 return step.path.to_equipment not in swer_equipment
 
+        def step_action(step: NetworkTraceStep, context):
+            swer_equipment.add(step.path.to_equipment)
+
         trace = self._create_trace(state_operators)
         trace.add_stop_condition(Traversal.stop_condition(condition))
-        trace.add_step_action(Traversal.step_action(lambda step: swer_equipment.add(step.path.to_equipment)))
+        trace.add_step_action(Traversal.step_action(step_action))
 
-        for it in [t for t in transformer.terminals for ct in t.connected_terminals() if self._is_non_swer_terminal(t)]:
+        for it in [t for t in transformer.terminals for ct in t.connected_terminals() if t.not_swer_terminal()]:
             trace.reset()
             trace.run(it, None)
 
+    """
     @staticmethod
     def _is_swer_terminal(terminal: Terminal) -> bool:
-        return terminal.phases.num_phases ==1
+        return terminal.phases.num_phases == 1
 
     @staticmethod
     def _is_non_swer_terminal(terminal: Terminal) -> bool:
@@ -122,4 +131,10 @@ class FindSwerEquipment:
         return any(self._is_swer_terminal(it) for it in ce.terminals)
 
     def _has_non_swer_terminal(self, ce: ConductingEquipment) -> bool:
-        return any(self._is_swer_terminal(it) for it in ce.terminals)
+        return any(self._is_non_swer_terminal(it) for it in ce.terminals)
+    """
+
+Terminal.is_swer_terminal = lambda self: self.phases.num_phases == 1
+Terminal.not_swer_terminal = lambda self: self.phases.num_phases > 1
+ConductingEquipment.has_swer_terminal = lambda self: any(t.is_swer_terminal() for t in self.terminals)
+ConductingEquipment.has_non_swer_terminal = lambda self: any(t.not_swer_terminal() for t in self.terminals)

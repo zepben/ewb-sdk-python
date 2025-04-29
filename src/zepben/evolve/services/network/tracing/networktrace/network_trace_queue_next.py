@@ -30,7 +30,10 @@ class NetworkTraceQueueNext:
     def _queue_next_steps_branching(next_steps: list[NetworkTraceStep[T]],
                                     queue_item: Callable[[NetworkTraceStep[T]], bool],
                                     queue_branch: Callable[[NetworkTraceStep[T]], bool]):
-        queue_item(next_steps[0]) if len(next_steps) == 1 else all(map(queue_branch, next_steps))
+        if len(next_steps) == 1:
+            return queue_item(next_steps[0])
+        else:
+            return [queue_branch(step) for step in next_steps]
 
     def _next_trace_steps(self,
                           is_in_service: CheckInService,

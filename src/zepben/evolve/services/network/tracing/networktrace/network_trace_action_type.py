@@ -20,7 +20,10 @@ def _all_steps(item: NetworkTraceStep, context: StepContext, has_tracked) -> boo
 
 
 def _first_step_on_equipment(item: NetworkTraceStep, context: StepContext, has_tracked) -> bool:
-    return not any(filter(lambda it: has_tracked(it, item.path.to_phases_set()), item.path.to_terminal.other_terminals()))  # TODO: make sure i understood this right
+    for ot in item.path.to_terminal.other_terminals():
+        if has_tracked(ot, item.path.to_phases_set()):
+            return False
+    return True
 
 
 class NetworkTraceActionType(Enum):

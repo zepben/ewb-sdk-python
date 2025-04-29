@@ -40,7 +40,7 @@ class EquipmentTreeBuilder:
             return TreeNode(next_item.path.to_equipment, current_value)
 
     def apply(self, item: NetworkTraceStep[...], context: StepContext):
-        current_node = context.value  # TODO: huh?? this isnt defined anywhere
+        current_node = context
         if current_node.parent:
             current_node.parent.add_child(current_node)
 

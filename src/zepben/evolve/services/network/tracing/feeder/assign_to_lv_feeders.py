@@ -11,7 +11,6 @@ from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.services.common.resolver import normal_head_terminal
 from zepben.evolve.services.network.network_service import NetworkService
-from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import BaseFeedersInternal
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
@@ -123,6 +122,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                        terminal_to_aux_equipment: dict[Terminal, Collection[AuxiliaryEquipment]],
                        lv_feeder_start_points: Set[ConductingEquipment],
                        lv_feeders_to_assign: list[LvFeeder]):
+
         if step_path.traced_internally and not step_context.is_start_item:
             return
 
