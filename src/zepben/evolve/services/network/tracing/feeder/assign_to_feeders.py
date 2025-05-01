@@ -184,7 +184,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
 
         self._associate_equipment_with_containers(feeders_to_assign, terminal_to_aux_equipment.get(step_path.to_terminal, {}))
         if step_path.to_equipment is None:
-            print('hurrrrrr')
+            pass  # FIXME: this seems flaky - but needed for test/database/sqlite/network/test_network_database_schema.py:274
         self._associate_equipment_with_containers(feeders_to_assign, [step_path.to_equipment])
 
         if isinstance(step_path.to_equipment, PowerTransformer):

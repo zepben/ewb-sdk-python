@@ -10,6 +10,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 
 from zepben.evolve import Feeder, Traversal
+from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
@@ -62,7 +63,7 @@ class SetDirection:
             return FeederDirection.NONE
         elif next_direction not in next_terminal_direction:
             return next_direction
-        elif (next_terminal_direction == FeederDirection.BOTH):
+        elif next_terminal_direction == FeederDirection.BOTH:
             reprocessed_loop_terminals.append(next_path.to_terminal)
             return next_direction
         return FeederDirection.NONE
@@ -83,7 +84,7 @@ class SetDirection:
         return (Tracing.network_trace_branching(
             network_state_operators=state_operators,
             action_step_type=NetworkTraceActionType.ALL_STEPS,
-            compute_data=lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path)
+            compute_data=ComputeData(lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path))
             ).add_condition(state_operators.stop_at_open())
                .add_stop_condition(Traversal.stop_condition(stop_condition))
                .add_queue_condition(Traversal.queue_condition(queue_condition))

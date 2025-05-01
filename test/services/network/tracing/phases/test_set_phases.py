@@ -6,14 +6,35 @@ import pytest
 
 from network_fixtures import phase_swap_loop_network  # noqa (Fixtures)
 from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases, validate_phases_from_term_or_equip, get_t
-from zepben.evolve import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators
+from zepben.evolve import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators, \
+    Traversal, StepContext, Terminal, SinglePhaseKind
 from zepben.evolve.exceptions import TracingException, PhaseException
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
+
+class LoggingSetPhases(SetPhases) :
+    def __init__(self):
+        super().__init__()
+        self.step_count = 0
+
+    async def _create_network_trace(self, state_operators: NetworkStateOperators) -> NetworkTrace[SetPhases.PhasesToFlow]:
+
+        def log_step(nts: NetworkTraceStep, context: StepContext):
+            print(f'{nts.path.from_terminal}->{nts.path.to_terminal}  :: {nts.path.from_terminal.phases} >< {nts.path.to_terminal.phases}')
+
+        return (await super()._create_network_trace(state_operators)) \
+            .add_step_action(Traversal.step_action(log_step))
+
+SetPhases = LoggingSetPhases
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('phase_swap_loop_network', [(False,)], indirect=True)
 async def test_set_phases(phase_swap_loop_network):
-    await SetPhases().run(phase_swap_loop_network)
+    print(phase_swap_loop_network.__doc__)
+    await SetPhases().run(phase_swap_loop_network, network_state_operators=NetworkStateOperators.NORMAL)
+    await SetPhases().run(phase_swap_loop_network, network_state_operators=NetworkStateOperators.CURRENT)
+
     await connected_equipment_trace_with_logging(phase_swap_loop_network.objects(EnergySource))
 
     validate_phases(get_t(phase_swap_loop_network, "ac0", 1), [SPK.A, SPK.B, SPK.C, SPK.N])
@@ -134,7 +155,9 @@ async def test_can_run_from_terminal():
     )
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
-    await SetPhases()._run_with_terminal(get_t(network_service, "c1", 2))
+    t = get_t(network_service, 'c1', 2)
+    await SetPhases().run(t, t.phases, network_state_operators=NetworkStateOperators.NORMAL)
+    await SetPhases().run(t, t.phases, network_state_operators=NetworkStateOperators.CURRENT)
 
     validate_phases_from_term_or_equip(network_service, "c0", PhaseCode.NONE, PhaseCode.NONE)
     validate_phases_from_term_or_equip(network_service, "c1", PhaseCode.NONE, PhaseCode.ABCN)
@@ -155,7 +178,8 @@ async def test_must_provide_the_correct_number_of_phases():
     await connected_equipment_trace_with_logging(network_service.objects(EnergySource))
 
     with pytest.raises(TracingException) as e_info:
-        await SetPhases()._run_with_terminal(get_t(network_service, "c0", 2), PhaseCode.AB)
+        await SetPhases()._run_with_phases(get_t(network_service, "c0", 2), PhaseCode.AB, network_state_operators=NetworkStateOperators.NORMAL)
+        await SetPhases()._run_with_phases(get_t(network_service, "c0", 2), PhaseCode.AB, network_state_operators=NetworkStateOperators.CURRENT)
 
     assert str(e_info.value) == "Attempted to apply phases [A, B] to Terminal{c0-t2} with nominal phases A. Number of phases to apply must match the " \
                                 "number of nominal phases. Found 2, expected 1"
@@ -178,6 +202,7 @@ async def test_detects_cross_phasing_flow():
 
     with pytest.raises(PhaseException) as e_info:
         await SetPhases().run(get_t(network_service, "c0", 2), network_state_operators=NetworkStateOperators.NORMAL)
+        await SetPhases().run(get_t(network_service, "c0", 2), network_state_operators=NetworkStateOperators.CURRENT)
 
     assert e_info.value.args[0] == f"Attempted to flow conflicting phase A onto B on nominal phase A. This occurred while flowing from " \
                                    f"{list(c1.terminals)[0]} to {list(c1.terminals)[1]} through {c1}. This is caused by missing open " \
@@ -202,7 +227,8 @@ async def test_detects_cross_phasing_connected():
     c2 = network_service["c2"]
 
     with pytest.raises(PhaseException) as e_info:
-        await SetPhases()._run_with_terminal(get_t(network_service, "c0", 2))
+        await SetPhases().run(get_t(network_service, "c0", 2), network_state_operators=NetworkStateOperators.NORMAL)
+        await SetPhases().run(get_t(network_service, "c0", 2), network_state_operators=NetworkStateOperators.CURRENT)
 
     assert e_info.value.args[0] == f"Attempted to flow conflicting phase A onto B on nominal phase A. This occurred while flowing between " \
                                    f"{list(c1.terminals)[1]} on {c1} and {list(c2.terminals)[0]} on {c2}. This is caused by " \
@@ -258,3 +284,24 @@ def _set_normal_phase(terminal_index, from_phase: SPK, to_phase: SPK):
         list(ce.terminals)[terminal_index].normal_phases[from_phase] = to_phase
 
     return action
+
+@pytest.mark.asyncio
+async def test_can_set_phases_from_an_unknown_nominal_phase():
+    """
+    1--c0--21--c1--2
+    """
+    n = TestNetworkBuilder() \
+        .from_acls(PhaseCode.X) \
+        .to_acls(PhaseCode.ABC) \
+        .network
+
+    acls = n['c0']
+    t = get_t(n, 'c0', 2)
+    t.normal_phases[SPK.X] = SPK.A
+    t.current_phases[SPK.X] = SPK.A
+
+    await SetPhases().run(t, network_state_operators=NetworkStateOperators.NORMAL)
+    await SetPhases().run(t, network_state_operators=NetworkStateOperators.CURRENT)
+
+    validate_phases_from_term_or_equip(n, 'c0', PhaseCode.NONE, PhaseCode.A)
+    validate_phases_from_term_or_equip(n, 'c1', [SPK.A, SPK.NONE, SPK.NONE], [SPK.A, SPK.NONE, SPK.NONE])

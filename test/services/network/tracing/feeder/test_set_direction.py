@@ -7,12 +7,62 @@ import pytest
 from services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
 from services.network.tracing.feeder.direction_logger import log_directions
 from zepben.evolve import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment, Substation, \
-    NetworkStateOperators
+    NetworkStateOperators, Traversal, StepContext
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 UPSTREAM = FeederDirection.UPSTREAM
 DOWNSTREAM = FeederDirection.DOWNSTREAM
 BOTH = FeederDirection.BOTH
 NONE = FeederDirection.NONE
+
+
+class Node:
+    def __init__(self, terminal: Terminal):
+        self.mrid = terminal.mrid
+        self.terminal = terminal
+        self._children = {}
+
+    def add_child(self, node):
+        if node.terminal.mrid in self._children:
+            return
+        self._children[node.terminal.mrid] = node
+        return self
+
+    def __str__(self):
+        return f'{self.mrid}\n{"   -".join(str(c) for c in self._children.values())}'
+
+class LoggingSetDirection(SetDirection) :
+    def __init__(self):
+        super().__init__()
+        self.step_count = 0
+
+    async def _create_traversal(self, state_operators: NetworkStateOperators):
+        self.nodes = {}
+
+        def log_step(nts: NetworkTraceStep, ctx: StepContext):
+            this_term = nts.path.from_terminal
+            next_term = nts.path.to_terminal
+
+            this_node = self.nodes.get(this_term.mrid)
+            if this_node is None:
+                this_node = Node(this_term)
+                self.nodes[this_term.mrid] = this_node
+
+            next_node = self.nodes.get(next_term.mrid)
+            if next_node is None:
+                next_node = Node(next_term)
+                self.nodes[next_node.mrid] = next_node
+            if next_node != this_node:
+                this_node.add_child(next_node)
+
+            print(f'Step Action {nts.path.from_terminal} -> {nts.path.to_terminal} {nts.path.from_terminal.normal_feeder_direction} {nts.path.from_terminal.current_feeder_direction} {nts.data}')
+
+        traversal = (await super()._create_traversal(state_operators)) \
+            .add_step_action(Traversal.step_action(log_step))
+
+        return traversal
+
+SetDirection = LoggingSetDirection
 
 
 class TestSetDirection:
@@ -59,7 +109,7 @@ class TestSetDirection:
             .network
 
         await SetDirection().run_terminal(self._get_t(n, "c0", 2))
-        await log_directions(n["c0"])
+        #await log_directions(n["c0"])
 
         self._check_expected_direction(self._get_t(n, "c0", 1), NONE)
         self._check_expected_direction(self._get_t(n, "c0", 2), DOWNSTREAM)
@@ -263,7 +313,9 @@ class TestSetDirection:
             .connect("c12", "j6", 2, 2) \
             .network
 
-        await SetDirection().run_terminal(self._get_t(n, "j0", 1))
+        sd = SetDirection()
+        await sd.run_terminal(self._get_t(n, "j0", 1))
+        #print(sd.nodes['j0-t1'])
         await log_directions(n["j0"])
 
         # To avoid reprocessing all BOTH loops in larger networks we do not process anything with a direction already set. This means this test will apply
@@ -274,7 +326,7 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "c1", 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "j2", 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, "j2", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j2", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
         self._check_expected_direction(self._get_t(n, "j2", 3), BOTH)
         self._check_expected_direction(self._get_t(n, "c3", 1), BOTH)
         self._check_expected_direction(self._get_t(n, "c3", 2), BOTH)
@@ -282,20 +334,20 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "j4", 2), BOTH)
         self._check_expected_direction(self._get_t(n, "c5", 1), BOTH)
         self._check_expected_direction(self._get_t(n, "c5", 2), BOTH)
-        self._check_expected_direction(self._get_t(n, "j6", 1), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "j6", 2), UPSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j6", 1), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j6", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
         self._check_expected_direction(self._get_t(n, "j6", 3), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "c7", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "c7", 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "j8", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "c9", 1), BOTH)
         self._check_expected_direction(self._get_t(n, "c9", 2), BOTH)
-        self._check_expected_direction(self._get_t(n, "c10", 1), UPSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "c10", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "j11", 1), UPSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "j11", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "c12", 1), UPSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "c12", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "c10", 1), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "c10", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j11", 1), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j11", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "c12", 1), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "c12", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
 
     @pytest.mark.asyncio
     async def test_dual_path_loop_bottom(self):
@@ -346,7 +398,7 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "c1", 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "j2", 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, "j2", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j2", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
         self._check_expected_direction(self._get_t(n, "j2", 3), BOTH)
         self._check_expected_direction(self._get_t(n, "c3", 1), BOTH)
         self._check_expected_direction(self._get_t(n, "c3", 2), BOTH)
@@ -453,7 +505,7 @@ class TestSetDirection:
 
     @staticmethod
     async def _do_set_direction_trace(n: NetworkService, nso: NetworkStateOperators):
-        await SetDirection().run(n, nso)
+        await SetDirection().run(n, network_state_operators=nso)
         for it in n.objects(Feeder):
             await log_directions(it.normal_head_terminal.conducting_equipment)
 

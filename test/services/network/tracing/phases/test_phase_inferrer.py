@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 
 from services.network.tracing.phases.util import validate_phases_from_term_or_equip
-from zepben.evolve import TestNetworkBuilder, PhaseCode, SinglePhaseKind, PhaseInferrer, Terminal, NetworkService
+from zepben.evolve import TestNetworkBuilder, PhaseCode, SinglePhaseKind, PhaseInferrer, Terminal, NetworkService, NetworkStateOperators
 
 A = SinglePhaseKind.A
 B = SinglePhaseKind.B
@@ -74,7 +74,8 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", [B, NONE, N])
         validate_phases_from_term_or_equip(network, "c3", [NONE, B, NONE, N])
 
-        await PhaseInferrer().run(network)
+        await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.NORMAL)
+        await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.CURRENT)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.BCN)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.BCN)
