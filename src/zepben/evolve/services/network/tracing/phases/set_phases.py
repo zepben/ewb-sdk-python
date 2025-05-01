@@ -182,7 +182,7 @@ class SetPhases:
 
         traced_phases = state_operators.phase_status(terminal)
         for i, nominal_phase in enumerate(terminal.phases.single_phases):
-            traced_phases[nominal_phase] = phases[i] if phases[i] in PhaseCode.XY  else SinglePhaseKind.NONE
+            traced_phases[nominal_phase] = phases[i] if phases[i] not in PhaseCode.XY else SinglePhaseKind.NONE
 
     def _get_nominal_phase_paths(self, state_operators: NetworkStateOperators,
                                        from_terminal: Terminal,

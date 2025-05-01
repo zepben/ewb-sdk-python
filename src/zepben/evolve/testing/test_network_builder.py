@@ -476,22 +476,22 @@ class TestNetworkBuilder:
 
         :return: The `NetworkService` created by this `TestNetworkBuilder`
         """
-        await Tracing.set_direction().run(self.network, NetworkStateOperators.NORMAL)
-        await Tracing.set_phases().run(self.network, NetworkStateOperators.NORMAL)
-        await Tracing.set_direction().run(self.network, NetworkStateOperators.CURRENT)
-        await Tracing.set_phases().run(self.network, NetworkStateOperators.CURRENT)
+        await Tracing.set_direction().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.set_phases().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.set_direction().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing.set_phases().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
 
         if apply_directions_from_sources:
             for es in self.network.objects(EnergySource):
                 for terminal in es.terminals:
-                    await Tracing.set_direction().run_terminal(terminal, NetworkStateOperators.NORMAL)
-                    await Tracing.set_direction().run_terminal(terminal, NetworkStateOperators.CURRENT)
+                    await Tracing.set_direction().run_terminal(terminal, network_state_operators=NetworkStateOperators.NORMAL)
+                    await Tracing.set_direction().run_terminal(terminal, network_state_operators=NetworkStateOperators.CURRENT)
 
         if assign_feeders and (self.network.len_of(Feeder) != 0 or self.network.len_of(LvFeeder) != 0):
-            await Tracing.assign_equipment_to_feeders().run(self.network, NetworkStateOperators.NORMAL)
-            await Tracing.assign_equipment_to_lv_feeders().run(self.network, NetworkStateOperators.NORMAL)
-            await Tracing.assign_equipment_to_feeders().run(self.network, NetworkStateOperators.CURRENT)
-            await Tracing.assign_equipment_to_lv_feeders().run(self.network, NetworkStateOperators.CURRENT)
+            await Tracing.assign_equipment_to_feeders().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+            await Tracing.assign_equipment_to_lv_feeders().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+            await Tracing.assign_equipment_to_feeders().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+            await Tracing.assign_equipment_to_lv_feeders().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
 
         return self.network
 
@@ -636,4 +636,3 @@ class TestNetworkBuilder:
         ce.add_terminal(terminal)
         self.network.add(terminal)
 
-from zepben.evolve import SetPhases  # FIXME:

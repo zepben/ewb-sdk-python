@@ -10,7 +10,7 @@ __all__ = ["log_directions"]
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 
-async def log_directions(*conducting_equipment: NetworkTraceStep):
+async def log_directions(*conducting_equipment: ConductingEquipment):
     """
     Logs all the feeder directions of terminals. Useful for debugging.
     """
@@ -22,9 +22,10 @@ async def log_directions(*conducting_equipment: NetworkTraceStep):
 
         trace = Tracing.network_trace()
         trace.add_step_action(Traversal.step_action(_step))
+        trace.add_queue_condition(Traversal.queue_condition(lambda *args: True))
         trace.run(cond_equip, False)
 
 
 async def _step(step: NetworkTraceStep, _: bool):
-    for term in step.conducting_equipment.terminals:
-        print(f"{step.conducting_equipment.mrid}-T{term.sequence_number}: {{n:{term.normal_feeder_direction}, c:{term.current_feeder_direction}}}")
+    for term in step.path.to_terminal.conducting_equipment:
+        print(f"{step.path.to_terminal.conducting_equipment.mrid}-T{term.sequence_number}: {{n:{term.normal_feeder_direction}, c:{term.current_feeder_direction}}}")

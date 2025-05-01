@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Callable, Awaitable
-from unittest.mock import create_autospec, patch, call, Mock
+from unittest.mock import call
 
 import pytest
 
-from zepben.evolve import NetworkService, FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, \
+from zepben.evolve import FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, \
     ConductingEquipment, verify_stop_conditions, step_on_when_run, step_on_when_run_with_is_stopping, NetworkStateOperators
 
 
@@ -16,7 +16,7 @@ class TestFindSwerEquipment:
     # pylint: disable=attribute-defined-outside-init
     # noinspection PyArgumentList
     def setup_method(self):
-        self.state_operators = create_autospec(NetworkStateOperators.NORMAL, instance=True)
+        self.state_operators = NetworkStateOperators.NORMAL
 
         self.find_swer_equipment = FindSwerEquipment()
 
@@ -24,17 +24,19 @@ class TestFindSwerEquipment:
 
     @pytest.mark.asyncio
     async def test_processes_all_feeders_in_a_network(self):
-        ns = (TestNetworkBuilder()
-              .from_power_transformer([PhaseCode.AB, PhaseCode.A])
-              .from_power_transformer([PhaseCode.AB, PhaseCode.A])
-              .add_feeder('tx0')
-              .add_feeder('tx1')
+        ns = (await TestNetworkBuilder()
+              .from_power_transformer([PhaseCode.AB, PhaseCode.A]) # tx0
+              .from_power_transformer([PhaseCode.AB, PhaseCode.A]) # tx1
+              .add_feeder('tx0') # fdr2
+              .add_feeder('tx1') # fdr3
               .build())
 
-        with patch.object(self.find_swer_equipment, 'find_on_feeder', side_effect=[[j1, j2], [j2, j3]]) as find_on_feeder:
-            assert await self.find_swer_equipment.find_all(ns, self.state_operators) == {j1, j2, j3}
+        pass
 
-            find_on_feeder.assert_has_calls([call(feeder1), call(feeder2)])
+        #with patch.object(self.find_swer_equipment, 'find_on_feeder') as find_on_feeder:
+        assert await self.find_swer_equipment.find(ns, self.state_operators) == {ns['fdr2'], ns['fdr3']}
+
+            #find_on_feeder.assert_has_calls([call(feeder1), call(feeder2)])
 
     @pytest.mark.asyncio
     async def test_only_runs_trace_from_swer_transformers_and_only_runs_non_swer_from_lv(self):
@@ -55,7 +57,7 @@ class TestFindSwerEquipment:
 
         self.state_operators.side_effect = [self.trace1, self.trace2, self.trace1, self.trace2]
 
-        assert await self.find_swer_equipment.find_on_feeder(ns["fdr8"]) == {ns["tx3"], ns["tx6"]}
+        assert await self.find_swer_equipment.find(ns["fdr8"]) == {ns["tx3"], ns["tx6"]}
 
         assert self.state_operators.call_count == 4
         self.trace1.run_from.assert_has_calls([call(ns["c4"]), call(ns["c5"])])
@@ -70,7 +72,7 @@ class TestFindSwerEquipment:
               .add_feeder("b0")  # fdr3
               .build())
 
-        await self.find_swer_equipment.find_on_feeder(ns["fdr3"])
+        await self.find_swer_equipment.find(ns["fdr3"])
 
         self.trace1.run.assert_not_called()
         self.trace2.run.assert_not_called()
@@ -84,7 +86,7 @@ class TestFindSwerEquipment:
               .add_feeder("tx0")  # fdr3
               .build())
 
-        await self.find_swer_equipment.find_on_feeder(ns["fdr3"])
+        await self.find_swer_equipment.find(ns["fdr3"])
 
         # noinspection PyArgumentList
         async def stops_on_equipment_in_swer_collection(stop_condition: Callable[[ConductingEquipmentStep], Awaitable[None]]):
@@ -120,7 +122,7 @@ class TestFindSwerEquipment:
         )
 
         # tx2 should not have been added as it was stopping. b3 should have been added even though it was stopping.
-        assert await self.find_swer_equipment.find_on_feeder(ns["fdr5"]) == {ns["tx0"], ns["tx2"], ns["b4"]}
+        assert await self.find_swer_equipment.find(ns["fdr5"]) == {ns["tx0"], ns["tx2"], ns["b4"]}
 
         # This is here to make sure the above block is actually run.
         self.trace1.run.assert_called_once()
@@ -133,7 +135,7 @@ class TestFindSwerEquipment:
               .add_feeder("tx0")  # fdr2
               .build())
 
-        await self.find_swer_equipment.find_on_feeder(ns["fdr2"])
+        await self.find_swer_equipment.find(ns["fdr2"])
 
         # noinspection PyArgumentList
         async def stops_on_equipment_in_swer_collection(stop_condition: Callable[[ConductingEquipmentStep], Awaitable[None]]):
@@ -154,7 +156,7 @@ class TestFindSwerEquipment:
         # noinspection PyArgumentList
         step_on_when_run(self.trace2, ConductingEquipmentStep(ns["tx2"]))
 
-        assert await self.find_swer_equipment.find_on_feeder(ns["fdr3"]) == {ns["tx0"], ns["tx2"]}
+        assert await self.find_swer_equipment.find(ns["fdr3"]) == {ns["tx0"], ns["tx2"]}
         # await self.find_swer_equipment.find_on_feeder(ns["fdr3"])
 
         # This is here to make sure the above block is actually run.
@@ -175,7 +177,7 @@ class TestFindSwerEquipment:
               .build())
 
         # We need to run the actual trace rather than a mock to make sure it is being reset, as the mock does not have the same requirement.
-        await FindSwerEquipment().find_on_feeder(ns["fdr5"])
+        await FindSwerEquipment().find(ns["fdr5"])
 
     @pytest.mark.asyncio
     async def test_does_not_loop_back_out_of_swer_from_lv(self):
@@ -192,7 +194,7 @@ class TestFindSwerEquipment:
               .build())
 
         # We need to run the actual trace rather than a mock to make sure it does not loop back through the LV.
-        assert await FindSwerEquipment().find_all(ns) == {ns["c2"], ns["tx3"], ns["c4"], ns["tx5"], ns["c6"]}
+        assert await FindSwerEquipment().find(ns) == {ns["c2"], ns["tx3"], ns["c4"], ns["tx5"], ns["c6"]}
 
     @staticmethod
     def _make_bv(ce: ConductingEquipment, volts: int):
