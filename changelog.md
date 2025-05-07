@@ -1,19 +1,7 @@
 # Zepben Python SDK
 ## [0.47.0] - UNRELEASED
-### Breaking Changes
-* None.
-
-### New Features
-* None.
-
-### Enhancements
-* None.
-
 ### Fixes
-* None.
-
-### Notes
-* None.
+* Downgrade protobuf and gRPC deps to fix SyncNetworkConsumerClient
 
 ## [0.46.0] - 2025-04-24
 ### Breaking Changes
