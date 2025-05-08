@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.47.0](#v0470)| `08 May 2025` |
 |[0.46.0](#v0460)| `24 April 2025` |
 |[0.45.0](#v0450)| `26 March 2025` |
 |[0.44.0](#v0440)| `24 January 2025` |
@@ -54,6 +55,13 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.47.0]
+
+### Fixes
+* Downgrade protobuf and gRPC deps to fix SyncNetworkConsumerClient
 
 ---
 
