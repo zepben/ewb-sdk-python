@@ -1,3 +1,4 @@
+# LICENCE EXCLUDED
 """
  Copyright (C) 2020 biqqles.
  This Source Code Form is subject to the terms of the Mozilla Public
