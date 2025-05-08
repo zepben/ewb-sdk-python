@@ -213,12 +213,12 @@ class SetPhases:
 
             try:
                 def _phase_to_apply():
-                    if from_ == SinglePhaseKind.NONE:
-                        return to_phases[to]
+                    if from_ != SinglePhaseKind.NONE:
+                        return from_phases[from_]
                     elif to not in PhaseCode.XY:
                         return to
                     else:
-                        return from_phases[from_]
+                        return to_phases[to]
 
                 phase = _phase_to_apply()
 
@@ -226,6 +226,8 @@ class SetPhases:
                 if phase != SinglePhaseKind.NONE:
                     to_phases[to] = phase
                     changed_phases = True
+                else:
+                    pass  # TODO: remove
 
             except UnsupportedOperationException:
                 phase_desc = f'{from_}' if from_ == to else f'path {from_} to {to}'

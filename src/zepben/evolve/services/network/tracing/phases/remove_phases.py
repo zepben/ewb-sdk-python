@@ -5,18 +5,27 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Tuple, Set, Optional, Union, FrozenSet
+from typing import TYPE_CHECKING, Set, Union
 
-from zepben.evolve import connected_terminals
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
+from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-if TYPE_CHECKING:
-    from zepben.evolve import ConnectivityResult, ConductingEquipment, NetworkService
-    from zepben.evolve.types import PhaseSelector
-    EbbPhases = Tuple[Terminal, FrozenSet[SinglePhaseKind]]
+from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
+from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
+from zepben.evolve import NetworkService
 
-__all__ = ["RemovePhases", "remove_all_traced_phases"]
+
+class EbbPhases:
+    def __init__(self, phases_to_ebb: Set[SinglePhaseKind]):
+        self.phases_to_ebb = phases_to_ebb
+        self.ebbed_phases: Set[SinglePhaseKind] = set()
 
 
 class RemovePhases(object):
@@ -25,65 +34,64 @@ class RemovePhases(object):
     This class is backed by a `BranchRecursiveTraversal`.
     """
 
-    async def run(self, terminal: Terminal, nominal_phases_to_ebb: Union[None, PhaseCode, FrozenSet[SinglePhaseKind]] = None):
-        """
-        Allows the removal of traced phases from a terminal and the connected equipment chain.
-        @param terminal: The terminal from which to start the phase removal.
-        @param nominal_phases_to_ebb: The nominal phases to remove traced phasing from. Defaults to all phases.
-        """
-        nominal_phases_to_ebb = nominal_phases_to_ebb or terminal.phases
+    async def run(self,
+                  start: Union[NetworkService, Terminal],
+                  nominal_phases_to_ebb: Union[PhaseCode, SinglePhaseKind]=None,
+                  network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+        if nominal_phases_to_ebb is None:
+
+            if isinstance(start, NetworkService):
+                return await self._run_with_network(start, network_state_operators)
+
+            if isinstance(start, Terminal):
+                return await self._run_with_terminal(start, network_state_operators)
+
+        return await self._run_with_phases_to_ebb(start, nominal_phases_to_ebb, network_state_operators)
+
+    async def _run_with_network(self, network_service: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+        for t in network_service.objects(Terminal):
+            t.traced_phases.phase_status = 0
+
+    async def _run_with_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+        return await self._run_with_phases_to_ebb(terminal, terminal.phases, network_state_operators)
+
+    async def _run_with_phases_to_ebb(self,
+                                terminal: Terminal,
+                                nominal_phases_to_ebb: Union[PhaseCode, Set[SinglePhaseKind]],
+                                network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+
         if isinstance(nominal_phases_to_ebb, PhaseCode):
-            nominal_phases_to_ebb = frozenset(nominal_phases_to_ebb.single_phases)
+            return await self._run_with_phases_to_ebb(terminal, set(nominal_phases_to_ebb.single_phases), network_state_operators)
 
-        for traversal in (self.normal_traversal, self.current_traversal):
-            traversal.reset()
-            await traversal.run((terminal, nominal_phases_to_ebb))
+        return self._create_trace(network_state_operators).run(terminal, EbbPhases(nominal_phases_to_ebb), terminal.phases)
 
+    def _create_trace(self, state_operators: NetworkStateOperators) -> NetworkTrace[EbbPhases]:
 
-def remove_all_traced_phases(network_service: NetworkService):
-    for terminal in network_service.objects(Terminal):
-        terminal.traced_phases.phase_status = 0
+        def compute_data(step: NetworkTraceStep[EbbPhases], context: StepContext, next_path: NetworkTraceStep.Path):
+            data = []
+            for to_phase in [phase.to_phase for phase in next_path.nominal_phase_paths]:
+                if to_phase in step.data.phases_to_ebb:
+                    data.append(to_phase)
+            return EbbPhases(set(data))
 
+        def step_action(nts: NetworkTraceStep, ctx: StepContext):
+            nts.data.ebbed_phases = self._ebb(state_operators, nts.path.to_terminal, nts.data.phases_to_ebb)
 
-def _ebb_and_queue_normal_phases(ebb_phases: EbbPhases, traversal: BranchRecursiveTraversal[EbbPhases]):
-    _ebb_and_queue(ebb_phases, traversal, normal_phases)
+        def queue_condition(next_step: NetworkTraceStep, next_ctx: StepContext=None, step: NetworkTraceStep=None, ctx: StepContext=None):
+            return len(next_step.data.phases_to_ebb) > 0 and (step is None or len(step.data.ebbed_phases) > 0)
 
+        return Tracing.network_trace(
+            network_state_operators=state_operators,
+            action_step_type=NetworkTraceActionType.ALL_STEPS,
+            queue=WeightedPriorityQueue.process_queue(lambda it: len(it.data.phases_to_ebb)),
+            compute_data=ComputeData(compute_data)
+        ).add_condition(state_operators.stop_at_open()) \
+        .add_step_action(Traversal.step_action(step_action)) \
+        .add_queue_condition(Traversal.queue_condition(queue_condition))
 
-def _ebb_and_queue_current_phases(ebb_phases: EbbPhases, traversal: BranchRecursiveTraversal[EbbPhases]):
-    _ebb_and_queue(ebb_phases, traversal, current_phases)
-
-
-def _ebb_and_queue(ebb_phases: EbbPhases, traversal: BranchRecursiveTraversal[EbbPhases], phase_selector: PhaseSelector):
-    terminal, nominal_phases = ebb_phases
-    ebbed_phases = _ebb(terminal, nominal_phases, phase_selector)
-
-    for cr in connected_terminals(terminal, nominal_phases):
-        _queue_through_equipment(traversal, cr.to_equip, cr.to_terminal, _ebb_from_connected_terminal(ebbed_phases, cr, phase_selector))
-
-
-def _ebb(terminal: Terminal, phases_to_ebb: Set[SinglePhaseKind], phase_selector: PhaseSelector) -> Set[SinglePhaseKind]:
-    phases = phase_selector(terminal)
-    ebbed_phases = set(filter(lambda p: phases[p] != SinglePhaseKind.NONE, phases_to_ebb))
-    for phase in ebbed_phases:
-        phases[phase] = SinglePhaseKind.NONE
-
-    return phases_to_ebb
-
-
-def _ebb_from_connected_terminal(phases_to_ebb: Set[SinglePhaseKind], cr: ConnectivityResult, phase_selector: PhaseSelector) -> Set[SinglePhaseKind]:
-    connected_phases = set()
-    for phase in phases_to_ebb:
-        connected_phase = next((path.to_phase for path in cr.nominal_phase_paths if path.from_phase == phase), None)
-        if connected_phase:
-            connected_phases.add(connected_phase)
-
-    return _ebb(cr.to_terminal, connected_phases, phase_selector)
-
-
-def _queue_through_equipment(traversal: BranchRecursiveTraversal[EbbPhases],
-                             conducting_equipment: Optional[ConductingEquipment],
-                             terminal: Terminal,
-                             phases_to_ebb: Set[SinglePhaseKind]):
-    if conducting_equipment:
-        for term in filter(lambda t: t != terminal, conducting_equipment.terminals):
-            traversal.process_queue.put((term, frozenset(phases_to_ebb)))
+    def _ebb(self, state_operators: NetworkStateOperators, terminal: Terminal, phases_to_ebb: Set[SinglePhaseKind]) -> Set[SinglePhaseKind]:
+        phases = state_operators.phase_status(terminal)
+        for phase in phases_to_ebb:
+            if phases[phase] != SinglePhaseKind.NONE:
+                phases[phase] = SinglePhaseKind.NONE
+        return set(phases_to_ebb)

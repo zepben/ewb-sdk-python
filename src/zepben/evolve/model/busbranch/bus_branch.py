@@ -36,6 +36,8 @@ ES = TypeVar('ES')  # Energy Source
 EC = TypeVar('EC')  # Energy Consumer
 PEC = TypeVar('PEC')  # Power Electronics Connection
 
+D = TypeVar('D')
+
 
 class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC], metaclass=abc.ABCMeta):
     """
@@ -981,7 +983,7 @@ def _queue_common_impedance_lines(
     common_acls: TerminalGrouping[AcLineSegment],
     has_common_impedance: Callable[[AcLineSegment], bool]
 ):
-    def queue_next(acls: AcLineSegment, traversal: Traversal[AcLineSegment]):
+    def queue_next(acls: AcLineSegment, traversal: Traversal[AcLineSegment, D]):
         traversal.process_queue.extend(_next_common_acls(acls, has_common_impedance, common_acls))
 
     return queue_next

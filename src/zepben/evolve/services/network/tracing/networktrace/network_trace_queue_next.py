@@ -41,6 +41,8 @@ class NetworkTraceQueueNext:
                           current_context: StepContext,
                           compute_data: ComputeData[T]
                           ) -> Sequence[NetworkTraceStep[T]]:
+        """ Builds a list of next `NetworkTraceStep` to add to the `NetworkTrace` queue """
+
         next_num_terminal_steps = current_step.next_num_terminal_steps()
         next_num_equipment_steps = current_step.next_num_equipment_steps()
         return list(NetworkTraceStep(

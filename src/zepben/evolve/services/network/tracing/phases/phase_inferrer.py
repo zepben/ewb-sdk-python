@@ -26,17 +26,13 @@ class PhaseInferrer:
         conducting_equipment: ConductingEquipment
         suspect: bool
 
-        def description(self):
+        def description(self) -> str:
             if self.suspect:
-                return (f"Inferred missing phases for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which may not be correct. The "
-                        "phases were inferred due to a disconnected nominal phase because of an upstream error in the source data. Phasing information for the "
-                        "upstream equipment should be fixed in the source system.")
+                return f"phases for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which may not be correct. The phases were inferred"
             else:
-                return (f"Inferred missing phase for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which should be correct. The phase "
-                        f"was inferred due to a disconnected nominal phase because of an upstream error in the source data. Phasing information for the "
-                        f"upstream equipment should be fixed in the source system.")
+                return f"phase for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which should be correct. The phase was inferred"
 
-    async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators = NetworkStateOperators.NORMAL):
+    async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> list[InferredPhase]:
         """
         Infer the missing phases on the specified `network`.
 
@@ -46,7 +42,13 @@ class PhaseInferrer:
 
         await self.PhaseInferrerInternal(network_state_operators).infer_missing_phases(network, tracking)
 
-        return map(lambda it: {it.key, it.value}, tracking)
+        inferred_phases = [self.InferredPhase(k, v) for k, v in tracking.items()]
+
+        for phase in inferred_phases:
+                logger.warning(f'*** Action Required *** Inferred missing {phase.description()} due to a disconnected nominal phase because of an '
+                               f'upstream error in the source data. Phasing information for the upstream equipment should be fixed in the source system.')
+
+        return inferred_phases
 
 
     class PhaseInferrerInternal:
@@ -62,10 +64,10 @@ class PhaseInferrer:
                     return await self._set_missing_to_nominal(terminal, tracking)
 
                 async def infer_xy_phases_1(terminal: Terminal) -> bool:
-                    return await self._infer_xy_phases(terminal, tracking, 1)
+                    return await self._infer_xy_phases(terminal, 1, tracking)
 
                 async def infer_xy_phases_4(terminal: Terminal) -> bool:
-                    return await self._infer_xy_phases(terminal, tracking, 4)
+                    return await self._infer_xy_phases(terminal, 4, tracking)
 
                 did_nominal = await self._process(terms_missing_phases, set_missing_to_nominal)
                 did_xy_1 = await self._process(terms_missing_xy_phases, infer_xy_phases_1)
@@ -203,7 +205,7 @@ class PhaseInferrer:
 
         async def _continue_phases(self, terminal: Terminal):
             set_phases_trace = Tracing.set_phases()
-            [set_phases_trace.spread_phases(terminal, other, terminal.phases.single_phases, network_state_operators=self.state_operators)  for other in terminal.other_terminals()]
+            [await set_phases_trace.spread_phases(terminal, other, terminal.phases.single_phases, network_state_operators=self.state_operators)  for other in terminal.other_terminals()]
 
         @staticmethod
         def _first_unused(phases: List[SinglePhaseKind], used_phases: Set[SinglePhaseKind], validate: Callable[[SinglePhaseKind], bool]) -> SinglePhaseKind:
