@@ -5,7 +5,7 @@
 import pytest
 
 from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases_from_term_or_equip, get_t
-from zepben.evolve import TestNetworkBuilder, PhaseCode, EnergySource, RemovePhases, remove_all_traced_phases, SinglePhaseKind as SPK
+from zepben.evolve import TestNetworkBuilder, PhaseCode, EnergySource, RemovePhases, SinglePhaseKind as SPK, NetworkStateOperators
 
 
 @pytest.fixture()
@@ -40,7 +40,8 @@ async def simple_network():
 
 @pytest.mark.asyncio
 async def test_removes_all_core_by_default(simple_network):
-    await RemovePhases().run(get_t(simple_network, "c1", 2))
+    await RemovePhases().run(get_t(simple_network, "c1", 2), network_state_operators=NetworkStateOperators.NORMAL)
+    await RemovePhases().run(get_t(simple_network, "c1", 2), network_state_operators=NetworkStateOperators.CURRENT)
 
     validate_phases_from_term_or_equip(simple_network, "s0", PhaseCode.ABCN)
     validate_phases_from_term_or_equip(simple_network, "c1", PhaseCode.ABCN, PhaseCode.NONE)
@@ -52,7 +53,8 @@ async def test_removes_all_core_by_default(simple_network):
 
 @pytest.mark.asyncio
 async def test_can_remove_specific_phases(simple_network):
-    await RemovePhases().run(get_t(simple_network, "s0", 1), PhaseCode.AB)
+    await RemovePhases().run(get_t(simple_network, "s0", 1), PhaseCode.AB, network_state_operators=NetworkStateOperators.NORMAL)
+    await RemovePhases().run(get_t(simple_network, "s0", 1), PhaseCode.AB, network_state_operators=NetworkStateOperators.CURRENT)
 
     validate_phases_from_term_or_equip(simple_network, "s0", [SPK.NONE, SPK.NONE, SPK.C, SPK.N])
     validate_phases_from_term_or_equip(simple_network, "c1", [SPK.NONE, SPK.NONE, SPK.C, SPK.N], [SPK.NONE, SPK.NONE, SPK.C, SPK.N])
@@ -64,7 +66,8 @@ async def test_can_remove_specific_phases(simple_network):
 
 @pytest.mark.asyncio
 async def test_can_remove_from_entire_network(simple_network):
-    remove_all_traced_phases(simple_network)
+    await RemovePhases().run(simple_network, network_state_operators=NetworkStateOperators.NORMAL)
+    await RemovePhases().run(simple_network, network_state_operators=NetworkStateOperators.CURRENT)
 
     validate_phases_from_term_or_equip(simple_network, "s0", PhaseCode.NONE)
     validate_phases_from_term_or_equip(simple_network, "c1", PhaseCode.NONE, PhaseCode.NONE)

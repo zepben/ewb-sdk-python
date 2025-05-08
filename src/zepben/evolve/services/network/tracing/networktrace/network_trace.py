@@ -134,6 +134,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
             start_path = NetworkTraceStep.Path(start, start, self.start_nominal_phase_path(phases))
             super().add_start_item(NetworkTraceStep(start_path, 0, 0, data))
             return self
+
         if issubclass(start.__class__, ConductingEquipment):
             for it in start.terminals:
                 self.add_start_item(it, data, phases)
