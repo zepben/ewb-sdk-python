@@ -23,9 +23,13 @@ class PhaseInferrer:
 
     @dataclass
     class InferredPhase:
-        conducting_equipment: ConductingEquipment
-        suspect: bool
+        def __init__(self, conducting_equipment: ConductingEquipment, suspect: bool):
+            self.conducting_equipment = conducting_equipment
+            self.suspect = suspect
+            logger.warning(f'*** Action Required *** Inferred missing {self.description} due to a disconnected nominal phase because of an '
+                           f'upstream error in the source data. Phasing information for the upstream equipment should be fixed in the source system.')
 
+        @property
         def description(self) -> str:
             if self.suspect:
                 return f"phases for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which may not be correct. The phases were inferred"
@@ -42,13 +46,7 @@ class PhaseInferrer:
 
         await self.PhaseInferrerInternal(network_state_operators).infer_missing_phases(network, tracking)
 
-        inferred_phases = [self.InferredPhase(k, v) for k, v in tracking.items()]
-
-        for phase in inferred_phases:
-                logger.warning(f'*** Action Required *** Inferred missing {phase.description()} due to a disconnected nominal phase because of an '
-                               f'upstream error in the source data. Phasing information for the upstream equipment should be fixed in the source system.')
-
-        return inferred_phases
+        return [self.InferredPhase(k, v) for k, v in tracking.items()]
 
 
     class PhaseInferrerInternal:
@@ -60,20 +58,10 @@ class PhaseInferrer:
                 terms_missing_phases = [it for it in network.objects(Terminal) if self._is_connected_to_others(it) and self._has_none_phase(it)]
                 terms_missing_xy_phases = [it for it in terms_missing_phases if self._has_xy_phases(it)]
 
-                async def set_missing_to_nominal(terminal: Terminal) -> bool:
-                    return await self._set_missing_to_nominal(terminal, tracking)
-
-                async def infer_xy_phases_1(terminal: Terminal) -> bool:
-                    return await self._infer_xy_phases(terminal, 1, tracking)
-
-                async def infer_xy_phases_4(terminal: Terminal) -> bool:
-                    return await self._infer_xy_phases(terminal, 4, tracking)
-
-                did_nominal = await self._process(terms_missing_phases, set_missing_to_nominal)
-                did_xy_1 = await self._process(terms_missing_xy_phases, infer_xy_phases_1)
-                did_xy_4 = await self._process(terms_missing_xy_phases, infer_xy_phases_4)
-
-                if not (did_nominal or did_xy_1 or did_xy_4):
+                if not (await self._process(terms_missing_phases, lambda t: self._set_missing_to_nominal(t, tracking)) or
+                        await self._process(terms_missing_xy_phases, lambda t: self._infer_xy_phases(t, 1, tracking)) or
+                        await self._process(terms_missing_xy_phases, lambda t: self._infer_xy_phases(t, 4, tracking))
+                ):
                     break
 
         @staticmethod
@@ -86,7 +74,7 @@ class PhaseInferrer:
 
         @staticmethod
         def _has_xy_phases(terminal: Terminal) -> bool:
-            return (SinglePhaseKind.X in terminal.phases) or (SinglePhaseKind.Y in terminal.phases)
+            return any(p in terminal.phases for p in (SinglePhaseKind.X, SinglePhaseKind.Y))
 
         def _find_terminal_at_start_of_missing_phases(
             self,
@@ -153,7 +141,7 @@ class PhaseInferrer:
             phases = self.state_operators.phase_status(terminal)
 
             phases_to_process = [it for it in terminal.phases.single_phases if
-                                 (it != SinglePhaseKind.X) and (it != SinglePhaseKind.Y) and (phases[it] == SinglePhaseKind.NONE)]
+                                 it not in [SinglePhaseKind.X, SinglePhaseKind.Y] and (phases[it] == SinglePhaseKind.NONE)]
 
             if not phases_to_process:
                 return False
@@ -205,7 +193,8 @@ class PhaseInferrer:
 
         async def _continue_phases(self, terminal: Terminal):
             set_phases_trace = Tracing.set_phases()
-            [await set_phases_trace.spread_phases(terminal, other, terminal.phases.single_phases, network_state_operators=self.state_operators)  for other in terminal.other_terminals()]
+            for other in terminal.other_terminals():
+                await set_phases_trace.spread_phases(terminal, other, terminal.phases.single_phases, network_state_operators=self.state_operators)
 
         @staticmethod
         def _first_unused(phases: List[SinglePhaseKind], used_phases: Set[SinglePhaseKind], validate: Callable[[SinglePhaseKind], bool]) -> SinglePhaseKind:

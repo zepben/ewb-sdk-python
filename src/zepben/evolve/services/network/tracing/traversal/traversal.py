@@ -16,6 +16,7 @@ from zepben.evolve.services.network.tracing.traversal.queue_condition import Que
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction, StepActionWithContextValue
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition, StopConditionWithContextValue
+from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
 
 __all__ = ["Traversal"]
 
@@ -176,11 +177,13 @@ class Traversal(Generic[T, D]):
         `condition` The condition to add.
         Returns this traversal instance.
         """
-        assert issubclass(condition.__class__, (QueueCondition, StopCondition))
-        if isinstance(condition, QueueCondition):
+        assert issubclass(condition.__class__, (QueueCondition, StopCondition, DirectionCondition))
+        if isinstance(condition, (QueueCondition, DirectionCondition)):
             self.add_queue_condition(condition)
         elif isinstance(condition, StopCondition):
             self.add_stop_condition(condition)
+        else:
+            raise RuntimeError(f'Condition does not match expected: {condition.__class__.__name__}')
         return self
 
     def add_stop_condition(self, condition: StopCondition[T]) -> D:
@@ -315,13 +318,13 @@ class Traversal(Generic[T, D]):
 
     def _compute_intial_context(self, next_step: T) -> StepContext:
         new_context_data = dict()
-        for key, computer in self.compute_next_context_funs:
+        for key, computer in self.compute_next_context_funs.items():
             new_context_data[key] = computer.compute_initial_value(next_step)
         return StepContext(True, False, 0, 0, new_context_data)
 
     def _compute_next_context(self, current_item: T, context: StepContext, next_step: T, is_branch_start: bool) -> StepContext:
         new_context_data = dict()
-        for key, computer in self.compute_next_context_funs:
+        for key, computer in self.compute_next_context_funs.items():
             new_context_data[key] = computer.compute_next_value(next_step, current_item, context.get_value(key))
 
         branch_depth = context.branch_depth +1 if is_branch_start else context.branch_depth

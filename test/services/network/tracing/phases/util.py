@@ -89,11 +89,12 @@ def get_t(network: NetworkService, mrid: str, sn: int) -> Terminal:
     return network[mrid].get_terminal_by_sn(sn)
 
 
-async def _log_equipment(step: NetworkTraceStep, _: bool):
+def _log_equipment(step: NetworkTraceStep, _: bool):
+    ce = step.path.from_terminal.conducting_equipment
     logger.info("\n###############################"
                 "\nTracing phases from: %s"
                 "\n",
-                step.conducting_equipment)
+                ce)
 
     def phase_info(term, phase):
         nps = term.normal_phases[phase]
@@ -101,10 +102,10 @@ async def _log_equipment(step: NetworkTraceStep, _: bool):
 
         return f"{{{phase}: n:{nps}, c:{cps}}}"
 
-    for t in step.conducting_equipment.terminals:
+    for t in ce.terminals:
         logger.info(
             "%s-T%s: %s",
-            step.conducting_equipment.mrid,
+            ce.mrid,
             t.sequence_number,
             ", ".join(phase_info(t, phase) for phase in t.phases.single_phases)
         )

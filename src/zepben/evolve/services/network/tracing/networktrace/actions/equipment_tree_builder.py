@@ -11,13 +11,13 @@ import uuid
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import  ConductingEquipment
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
-from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
+from zepben.evolve.services.network.tracing.traversal.step_action import StepAction, StepActionWithContextValue
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 EquipmentTreeNode = TreeNode[ConductingEquipment]
 
 
-class EquipmentTreeBuilder:
+class EquipmentTreeBuilder(StepActionWithContextValue):
     _roots: dict[ConductingEquipment, EquipmentTreeNode]={}
 
     def __init__(self):
@@ -28,9 +28,10 @@ class EquipmentTreeBuilder:
         return self._roots.values()
 
     def compute_initial_value(self, item: NetworkTraceStep[...]) -> EquipmentTreeNode:
-        node = self._roots.get(item.path.to_equipment, TreeNode(item.path.to_equipment, None))
+        node = self._roots.get(item.path.to_equipment)
         if node is None:
             node = TreeNode(item.path.to_equipment, None)
+            self._roots[item.path.to_equipment] = node
         return node
 
     def compute_next_value_typed(self, next_item: NetworkTraceStep[...], current_item: NetworkTraceStep[...], current_value: EquipmentTreeNode) -> EquipmentTreeNode:
@@ -40,7 +41,7 @@ class EquipmentTreeBuilder:
             return TreeNode(next_item.path.to_equipment, current_value)
 
     def apply(self, item: NetworkTraceStep[...], context: StepContext):
-        current_node = context
+        current_node = self.get_context_value(context)
         if current_node.parent:
             current_node.parent.add_child(current_node)
 

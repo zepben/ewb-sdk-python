@@ -131,7 +131,8 @@ class SetPhases:
             return await self.spread_phases(from_terminal, to_terminal, from_terminal.phases.single_phases, network_state_operators)
         else:
             paths = self._get_nominal_phase_paths(network_state_operators, from_terminal, to_terminal, list(phases))
-            self._flow_phases(network_state_operators, from_terminal, to_terminal, paths)
+            if self._flow_phases(network_state_operators, from_terminal, to_terminal, paths):
+                await self.run(from_terminal, network_state_operators=network_state_operators)
 
     async def _run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators, trace: NetworkTrace[PhasesToFlow]=None):
         if trace is None:

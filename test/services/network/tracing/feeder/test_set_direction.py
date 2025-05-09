@@ -109,7 +109,7 @@ class TestSetDirection:
             .network
 
         await SetDirection().run_terminal(self._get_t(n, "c0", 2))
-        #await log_directions(n["c0"])
+        await log_directions(n["c0"])
 
         self._check_expected_direction(self._get_t(n, "c0", 1), NONE)
         self._check_expected_direction(self._get_t(n, "c0", 2), DOWNSTREAM)
