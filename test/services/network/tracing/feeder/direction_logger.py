@@ -26,6 +26,6 @@ async def log_directions(*conducting_equipment: ConductingEquipment):
         trace.run(cond_equip, False)
 
 
-async def _step(step: NetworkTraceStep, _: bool):
+def _step(step: NetworkTraceStep, _: bool):
     for term in step.path.to_terminal.conducting_equipment:
         print(f"{step.path.to_terminal.conducting_equipment.mrid}-T{term.sequence_number}: {{n:{term.normal_feeder_direction}, c:{term.current_feeder_direction}}}")

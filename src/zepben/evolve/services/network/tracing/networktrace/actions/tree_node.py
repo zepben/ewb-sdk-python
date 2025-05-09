@@ -17,12 +17,12 @@ class TreeNode[T](ABC):
     """
     def __init__(self, identified_object: IdentifiedObject, parent=None):
         self.identified_object = identified_object
-        self._parent: Self = weakref.ref(parent)
+        self._parent: Self = weakref.ref(parent) if parent is not None else None
         self._children: List[Self] = []
 
     @property
     def parent(self):
-        return self._parent()
+        return self._parent
 
     @property
     def children(self):

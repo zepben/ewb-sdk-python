@@ -23,7 +23,7 @@ class StepContext:
         self.is_branch_start_item = is_branch_start_item
         self.step_number = step_number
         self.branch_depth = branch_depth
-        self._values = values
+        self._values = values or dict()
 
         self.is_stopping: bool = False
         self.is_actionable_item: bool = False
@@ -35,7 +35,6 @@ class StepContext:
         `key` The key identifying the context value.
         `value` The value to associate with the key.
         """
-        self._values = self._values or dict()
         self._values[key] = value
 
     def get_value(self, key: str):
@@ -43,6 +42,6 @@ class StepContext:
         Retrieves a context value associated with the specified key.
 
         `key` The key identifying the context value.
-        @return The context value associated with the key, or `null` if not found.
+        @return The context value associated with the key, or `None` if not found.
         """
         return self._values.get(key)

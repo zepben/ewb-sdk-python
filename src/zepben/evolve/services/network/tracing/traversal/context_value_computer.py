@@ -3,8 +3,10 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from abc import ABC, abstractmethod
-from typing import TypeVar, TYPE_CHECKING, Generic
+from abc import ABC
+from typing import TypeVar, Generic
+
+from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -79,7 +81,8 @@ class TypedContextValueComputer(ContextValueComputer, Generic[T, U]):
     """
     Gets the computed value from the context cast to type [U].
     """
-    #  val StepContext.value: U get() = this.getValue<Any?>(key) as U
+    def get_context_value(self, context: StepContext):
+        return context.get_value(self.key)
 
 
 # these imports are here to stop circular imports

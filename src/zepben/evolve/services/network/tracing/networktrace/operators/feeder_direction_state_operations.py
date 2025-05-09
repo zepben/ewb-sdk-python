@@ -24,8 +24,9 @@ class FeederDirectionStateOperations(StateOperator):
     Interface for accessing and managing the [FeederDirection] associated with [Terminal]s.
     """
 
+    @staticmethod
     @abstractmethod
-    def get_direction(self, terminal: Terminal) -> FeederDirection:
+    def get_direction(terminal: Terminal) -> FeederDirection:
         """
         Retrieves the feeder direction for the specified terminal.
 
@@ -34,8 +35,9 @@ class FeederDirectionStateOperations(StateOperator):
         """
         pass
 
+    @staticmethod
     @abstractmethod
-    def set_direction(self, terminal: Terminal, direction: FeederDirection) -> bool:
+    def set_direction(terminal: Terminal, direction: FeederDirection) -> bool:
         """
         Sets the feeder direction for the specified terminal.
 
@@ -45,8 +47,9 @@ class FeederDirectionStateOperations(StateOperator):
         """
         pass
 
+    @staticmethod
     @abstractmethod
-    def add_direction(self, terminal: Terminal, direction: FeederDirection) -> bool:
+    def add_direction(terminal: Terminal, direction: FeederDirection) -> bool:
         """
         Adds the specified feeder direction to the terminal, preserving existing directions.
 
@@ -57,8 +60,9 @@ class FeederDirectionStateOperations(StateOperator):
         pass
 
 
+    @staticmethod
     @abstractmethod
-    def remove_direction(self, terminal: Terminal, direction: FeederDirection) -> bool:
+    def remove_direction(terminal: Terminal, direction: FeederDirection) -> bool:
         """
         Removes the specified feeder direction from the terminal.
 
@@ -69,29 +73,32 @@ class FeederDirectionStateOperations(StateOperator):
         pass
 
     @classmethod
-    def upstream(cls, get_direction: Callable[[Terminal], FeederDirection]) -> NetworkTraceQueueCondition[T]:
-        return cls.with_direction(FeederDirection.UPSTREAM, get_direction)
+    def upstream(cls) -> NetworkTraceQueueCondition[T]:
+        return cls.with_direction(FeederDirection.UPSTREAM, cls.get_direction)
 
     @classmethod
-    def downstream(cls, get_direction: Callable[[Terminal], FeederDirection]) -> NetworkTraceQueueCondition[T]:
-        return cls.with_direction(FeederDirection.DOWNSTREAM, get_direction)
+    def downstream(cls) -> NetworkTraceQueueCondition[T]:
+        return cls.with_direction(FeederDirection.DOWNSTREAM, cls.get_direction)
 
     @staticmethod
     def with_direction(direction: FeederDirection, get_direction: Callable[[Terminal], FeederDirection]) -> NetworkTraceQueueCondition[T]:
         return DirectionCondition(direction, get_direction)
 
 class NormalFeederDirectionStateOperations(FeederDirectionStateOperations):
-    def get_direction(self, terminal: Terminal) -> FeederDirection:
+    @staticmethod
+    def get_direction(terminal: Terminal) -> FeederDirection:
         return terminal.normal_feeder_direction
 
-    def set_direction(self, terminal: Terminal, direction: FeederDirection) -> bool:
+    @staticmethod
+    def set_direction(terminal: Terminal, direction: FeederDirection) -> bool:
         if terminal.normal_feeder_direction == direction:
             return False
 
         terminal.normal_feeder_direction = direction
         return True
 
-    def add_direction(self, terminal: Terminal, direction: FeederDirection) -> bool:
+    @staticmethod
+    def add_direction(terminal: Terminal, direction: FeederDirection) -> bool:
         previous = terminal.normal_feeder_direction
         new = previous + direction
         if new == previous:
@@ -100,7 +107,8 @@ class NormalFeederDirectionStateOperations(FeederDirectionStateOperations):
         terminal.normal_feeder_direction = new
         return True
 
-    def remove_direction(self, terminal: Terminal, direction: FeederDirection) -> bool:
+    @staticmethod
+    def remove_direction(terminal: Terminal, direction: FeederDirection) -> bool:
         previous = terminal.normal_feeder_direction
         new = previous - direction
         if new == previous:
@@ -111,17 +119,20 @@ class NormalFeederDirectionStateOperations(FeederDirectionStateOperations):
 
 
 class CurrentFeederDirectionStateOperations(FeederDirectionStateOperations):
-    def get_direction(self, terminal: Terminal) -> FeederDirection:
+    @staticmethod
+    def get_direction(terminal: Terminal) -> FeederDirection:
         return terminal.current_feeder_direction
 
-    def set_direction(self, terminal: Terminal, direction: FeederDirection) -> bool:
+    @staticmethod
+    def set_direction(terminal: Terminal, direction: FeederDirection) -> bool:
         if terminal.current_feeder_direction == direction:
             return False
 
         terminal.current_feeder_direction = direction
         return True
 
-    def add_direction(self, terminal: Terminal, direction: FeederDirection) -> bool:
+    @staticmethod
+    def add_direction(terminal: Terminal, direction: FeederDirection) -> bool:
         previous = terminal.current_feeder_direction
         new = previous + direction
         if new == previous:
@@ -130,7 +141,8 @@ class CurrentFeederDirectionStateOperations(FeederDirectionStateOperations):
         terminal.current_feeder_direction = new
         return True
 
-    def remove_direction(self, terminal: Terminal, direction: FeederDirection) -> bool:
+    @staticmethod
+    def remove_direction(terminal: Terminal, direction: FeederDirection) -> bool:
         previous = terminal.current_feeder_direction
         new = previous - direction
         if new == previous:

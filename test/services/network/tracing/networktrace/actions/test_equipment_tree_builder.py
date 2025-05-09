@@ -8,8 +8,10 @@ from typing import Optional, List
 import pytest
 
 from services.network.test_data.looping_network import create_looping_network
-from zepben.evolve import set_phases, ConductingEquipment, Tracing
+from zepben.evolve import set_phases, ConductingEquipment, Tracing, NetworkStateOperators, Traversal
+from zepben.evolve.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
+from zepben.evolve.services.network.tracing.networktrace.conditions.condition import Conditions
 
 
 @pytest.mark.asyncio
@@ -22,7 +24,14 @@ async def test_downstream_tree():
 
     start = n.get("j2", ConductingEquipment)
     assert start is not None
-    root = await normal_downstream_tree().run(start)  # TODO: BranchingTraversal ?
+    tree_builder = EquipmentTreeBuilder()
+    state_operators = NetworkStateOperators.NORMAL
+    Tracing.network_trace_branching(network_state_operators=state_operators) \
+        .add_condition(state_operators.downstream()) \
+        .add_step_action(tree_builder) \
+        .run(start)
+
+    root = list(tree_builder.roots)[0]
 
     assert root is not None
     _verify_tree_asset(root, n["j2"], None, [n["c13"], n["c3"]])
@@ -119,12 +128,12 @@ async def test_downstream_tree():
 
 
 def _verify_tree_asset(
-    tree_node: ConductingEquipment,
+    tree_node: TreeNode,
     expected_asset: Optional[ConductingEquipment],
     expected_parent: Optional[ConductingEquipment],
     expected_children: List[ConductingEquipment]
 ):
-    assert tree_node.conducting_equipment is expected_asset
+    assert tree_node.identified_object is expected_asset
 
     if expected_parent is not None:
         tree_parent = tree_node.parent

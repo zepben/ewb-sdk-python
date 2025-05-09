@@ -5,7 +5,7 @@
 from collections.abc import Callable
 from typing import TypeVar, Union, Generic
 
-from zepben.protobuf.cim.iec61970.base.core.ConductingEquipment_pb2 import ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -127,18 +127,18 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         :param data: The data associated with the start step.
         :param phases: Phases to trace; `null` to ignore phases.
         """
-        if data is None:
-            super().add_start_item(start)
-
         if isinstance(start, Terminal):
             start_path = NetworkTraceStep.Path(start, start, self.start_nominal_phase_path(phases))
             super().add_start_item(NetworkTraceStep(start_path, 0, 0, data))
             return self
 
-        if issubclass(start.__class__, ConductingEquipment):
+        if issubclass(start.__class__, ConductingEquipment) or isinstance(start, ConductingEquipment):
             for it in start.terminals:
                 self.add_start_item(it, data, phases)
             return self
+
+        super().add_start_item(start)
+        return self
 
     def run(self, start: Union[ConductingEquipment, Terminal]=None, data: T=None, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
         """
@@ -153,8 +153,9 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         :param phases: Phases to trace; `null` to ignore phases.
         :param can_stop_on_start_item: indicates whether the trace should check stop conditions on start items.
         """
-        if data is not None and start is not None:
+        if start is not None:
             self.add_start_item(start, data, phases)
+
         super().run(can_stop_on_start_item=can_stop_on_start_item)
         return self
 
