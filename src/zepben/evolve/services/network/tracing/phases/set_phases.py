@@ -8,8 +8,9 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Union, Set, Iterable, List
 
+from zepben.evolve import IdentifiedObject
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
-from zepben.evolve.exceptions import TracingException
+from zepben.evolve.exceptions import TracingException, PhaseException
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
@@ -24,7 +25,6 @@ from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
-from zepben.evolve.streaming.exceptions import UnsupportedOperationException
 
 __all__ = ["SetPhases"]
 
@@ -145,11 +145,12 @@ class SetPhases:
         def step_action(nts, ctx):
             path = nts.path
             phases_to_flow = nts.data
+            #  We always assume the first step terminal already has the phases applied, so we don't do anything on the first step
             phases_to_flow.step_flowed_phases = True if ctx.is_start_item else (
                 self._flow_phases(state_operators, path.from_terminal, path.to_terminal, phases_to_flow.nominal_phase_paths)
             )
 
-        def condition(next_step, *args):
+        def condition(next_step, nctx, step, ctx):
             return len(next_step.data.nominal_phase_paths) > 0
 
         def _get_weight(it) -> int:
@@ -214,6 +215,7 @@ class SetPhases:
 
             try:
                 def _phase_to_apply():
+                    # If the path comes from NONE, then we want to apply the `to phase`
                     if from_ != SinglePhaseKind.NONE:
                         return from_phases[from_]
                     elif to not in PhaseCode.XY:
@@ -223,27 +225,25 @@ class SetPhases:
 
                 phase = _phase_to_apply()
 
-                # If the path comes from NONE, then we want to apply the `to phase`
                 if phase != SinglePhaseKind.NONE:
                     to_phases[to] = phase
                     changed_phases = True
-                else:
-                    pass  # TODO: remove
 
-            except UnsupportedOperationException:
-                phase_desc = f'{from_}' if from_ == to else f'path {from_} to {to}'
+            except PhaseException:
+                phase_desc = f'{from_.name}' if from_ == to else f'path {from_.name} to {to.name}'
 
                 def get_ce_details(terminal: Terminal):
                     if terminal.conducting_equipment:
-                        return terminal.conducting_equipment.type_name_and_mrid
+                        return terminal.conducting_equipment
                     return ''
 
                 if from_terminal.conducting_equipment and from_terminal.conducting_equipment == to_terminal.conducting_equipment:
-                    terminal_desc = f'from {from_terminal} to {to_terminal} through {from_terminal.conducting_equipment.type_name_and_mrid()}'
+                    terminal_desc = f'from {from_terminal} to {to_terminal} through {from_terminal.conducting_equipment}'
                 else:
                     terminal_desc = f'between {from_terminal} on {get_ce_details(from_terminal)} and {to_terminal} on {get_ce_details(to_terminal)}'
-                raise Exception(
-                    f"Attempted to flow conflicting phase {from_phases[from_]} onto ${to_phases[to]} on nominal phase {phase_desc}. This occurred while " +
+
+                raise PhaseException(
+                    f"Attempted to flow conflicting phase {from_phases[from_].name} onto {to_phases[to].name} on nominal phase {phase_desc}. This occurred while " +
                     f"flowing {terminal_desc}. This is caused by missing open points, or incorrect phases in upstream equipment that should be " +
                     "corrected in the source data."
                 )

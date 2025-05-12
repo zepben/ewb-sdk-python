@@ -24,11 +24,10 @@ class DirectionCondition[T](QueueCondition[NetworkTraceStep[T]]):
         self.get_direction = get_direction
 
     def should_queue(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext[T]) -> bool:
-        path = next_item.path
-        if path.traced_externally:
-            return self.direction in self.get_direction(path.to_terminal)
+        if next_item.path.traced_externally:
+            return self.should_queue_start_item(next_item)
         else:
-            return self.direction.complementary_external_direction in self.get_direction(path.to_terminal)
+            return self.direction.complementary_external_direction in self.get_direction(next_item.path.to_terminal)
 
     def should_queue_start_item(self, item: NetworkTraceStep[T]) -> bool:
         return self.direction in self.get_direction(item.path.to_terminal)
