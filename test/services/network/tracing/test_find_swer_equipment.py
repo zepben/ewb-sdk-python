@@ -2,13 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Callable, Awaitable
 from unittest.mock import call, patch
 
 import pytest
 
-from zepben.evolve import FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, \
-    ConductingEquipment, verify_stop_conditions, step_on_when_run, step_on_when_run_with_is_stopping, NetworkStateOperators
+from zepben.evolve import FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, ConductingEquipment, NetworkStateOperators
 
 
 class TestFindSwerEquipment:
@@ -60,14 +58,12 @@ class TestFindSwerEquipment:
 
         assert results
 
-        for n in ('tx3', 'c4', 'c5', 'tx6', 'c7', 'b8'):
-            assert ns[n] in results
-
+        self._check_showing_simple_diff(results, [ns[n] for n in ('tx3', 'c4', 'c5', 'tx6', 'c7', 'b8')])
 
     @pytest.mark.asyncio
     async def test_does_not_run_from_SWER_regulators(self):
         ns = (
-            await TestNetworkBuilder
+            await TestNetworkBuilder()
             .from_breaker(PhaseCode.A)  # b0
             .to_power_transformer([PhaseCode.A, PhaseCode.A])  # tx1
             .to_acls(PhaseCode.A)  # c2
@@ -75,7 +71,7 @@ class TestFindSwerEquipment:
             .build()
         )
 
-        assert len(self.find_swer_equipment.find(ns['fdr3'], self.state_operators)) == 0
+        assert len(await self.find_swer_equipment.find(ns['fdr3'], self.state_operators)) == 0
 
     @pytest.mark.asyncio
     async def test_does_not_run_through_other_transformers_that_will_be_traced(self):
@@ -93,9 +89,7 @@ class TestFindSwerEquipment:
 
         results = await self.find_swer_equipment.find(ns, self.state_operators)
 
-        for n in ['tx1', 'c2', 'tx3', 'c4', 'tx5']:
-            assert ns[n] in results
-
+        self._check_showing_simple_diff(results, [ns[n] for n in['tx1', 'c2', 'tx3', 'c4', 'tx5']])
 
     @pytest.mark.asyncio
     async def test_SWER_includes_open_switches_and_stops_at_them(self):
@@ -109,8 +103,8 @@ class TestFindSwerEquipment:
         )
 
         results = await self.find_swer_equipment.find(ns['fdr3'], self.state_operators)
-        for n in ('tx0', 'b1'):
-            assert ns[n] in results
+
+        self._check_showing_simple_diff(results, [ns[n] for n in ('tx0', 'b1')])
 
         assert self.state_operators.is_open(ns['b1'])
 
@@ -127,8 +121,7 @@ class TestFindSwerEquipment:
         )
         results = await self.find_swer_equipment.find(ns['fdr4'], self.state_operators)
 
-        for n in ('tx0', 'c1', 'b2'):
-            assert ns[n] in results
+        self._check_showing_simple_diff(results, [ns[n] for n in ('tx0', 'c1', 'b2')])
 
         assert self.state_operators.is_open(ns['b2'])
 
@@ -148,8 +141,7 @@ class TestFindSwerEquipment:
 
         results = await self.find_swer_equipment.find(ns["fdr5"], self.state_operators)
 
-        for n in ('tx0', 'c1', 'c2', 'c3', 'c4'):
-            assert ns[n] in results
+        self._check_showing_simple_diff(results, [ns[n] for n in ('tx0', 'c1', 'c2', 'c3', 'c4')])
 
     @pytest.mark.asyncio
     async def test_does_not_loop_back_out_of_swer_from_lv(self):
@@ -167,9 +159,34 @@ class TestFindSwerEquipment:
 
         results = await self.find_swer_equipment.find(ns, self.state_operators)
 
-        for n in ('c2', 'tx3', 'c4', 'tx5', 'c6'):
-            assert ns[n] in results
+        self._check_showing_simple_diff(results, [ns[n] for n in ('c2', 'tx3', 'c4', 'tx5', 'c6')])
 
+    @staticmethod
+    def _check_showing_simple_diff(results, expected):
+        print()
+        print(f'Results  = {" | ".join([r.mrid for r in results])}')
+        print(f'Expected = {" | ".join([e.mrid for e in expected])}')
+
+        missing = list(expected)  # we don't want to modify the list passed in incase we need to run other checks later
+        extra = list()
+        for n in results:
+            for i, m in enumerate(missing):
+                if n not in expected:
+                    extra.append(n)
+                if n == m:
+                    missing.pop(i)
+                    break
+
+        if missing:
+            print(f'Missing: {[m.mrid for m in missing]} from expected results')
+
+        if extra:
+            print(f'Extras: {[e.mrid for e in extra]} from expected results')
+
+        if len(results) != len(expected):
+            pytest.fail(f'results dont match expected:')
+
+        assert not missing or extra
 
     @staticmethod
     def _make_bv(ce: ConductingEquipment, volts: int):

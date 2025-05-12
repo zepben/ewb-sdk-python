@@ -40,8 +40,13 @@ class QueueCondition[T](TraversalCondition[T]):
         `item` The item to be potentially queued.
         Returns `true` if the [item] should be queued; `false` otherwise. Defaults to `true`.
         """
-        return self._func(item)
-
+        try:  # this is a filthy hack to avoid this being called on a queue condition function that doesnt match this signature
+              # TODO: this absolute hack of a method to use this as a functional interface needs to go..
+            return self._func(item)
+        except TypeError as e:
+            if self._func.__code__.co_argcount == 4:
+                return True
+            raise e
 
 class QueueConditionWithContextValue[T, U](QueueCondition[T], TypedContextValueComputer[T, U]):
     """
