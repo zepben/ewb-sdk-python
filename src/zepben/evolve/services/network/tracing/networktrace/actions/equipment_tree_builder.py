@@ -11,7 +11,7 @@ import uuid
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import  ConductingEquipment
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
-from zepben.evolve.services.network.tracing.traversal.step_action import StepAction, StepActionWithContextValue
+from zepben.evolve.services.network.tracing.traversal.step_action import StepActionWithContextValue
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 EquipmentTreeNode = TreeNode[ConductingEquipment]
@@ -41,7 +41,7 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
             return TreeNode(next_item.path.to_equipment, current_value)
 
     def apply(self, item: NetworkTraceStep[...], context: StepContext):
-        current_node = self.get_context_value(context)
+        current_node: TreeNode = self.get_context_value(context)
         if current_node.parent:
             current_node.parent.add_child(current_node)
 

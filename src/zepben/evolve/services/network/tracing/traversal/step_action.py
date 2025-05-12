@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 
-from typing import TypeVar
+from typing import TypeVar, Generic
 from abc import ABC, abstractmethod
 
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
@@ -14,7 +14,7 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 
-class StepAction[T]:
+class StepAction(Generic[T]):
     """
     Functional interface representing an action to be performed at each step of a traversal.
     This allows for custom operations to be executed on each item during traversal.

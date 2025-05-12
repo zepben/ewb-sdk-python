@@ -5,23 +5,23 @@
 
 import weakref
 from abc import ABC, abstractmethod
-from typing import Self, List, TypeVar
+from typing import Self, List, TypeVar, Generic
 
 from zepben.evolve import IdentifiedObject
 
 T = TypeVar('T')
 
-class TreeNode[T](ABC):
+class TreeNode(Generic[T]):
     """
     represents a node in the NetworkTrace tree
     """
     def __init__(self, identified_object: IdentifiedObject, parent=None):
         self.identified_object = identified_object
-        self._parent: Self = weakref.ref(parent) if parent is not None else None
+        self._parent: Self = parent
         self._children: List[Self] = []
 
     @property
-    def parent(self):
+    def parent(self) -> 'TreeNode[T]':
         return self._parent
 
     @property

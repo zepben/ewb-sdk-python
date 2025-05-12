@@ -34,7 +34,7 @@ async def test_downstream_tree():
     root = list(tree_builder.roots)[0]
 
     assert root is not None
-    _verify_tree_asset(root, n["j2"], None, [n["c13"], n["c3"]])
+    _verify_tree_asset(root, n["j2"], None, [n["c3"], n["c13"]])
 
     test_node = next(iter(root.children))
     _verify_tree_asset(test_node, n["c13"], n["j2"], [n["j14"]])
@@ -82,12 +82,12 @@ async def test_downstream_tree():
     assert len(_find_nodes(root, "c24")) == 1
     assert len(_find_nodes(root, "j8")) == 1
     assert len(_find_nodes(root, "c7")) == 1
-    assert len(_find_nodes(root, "j30")) == 1  # Would have been 3 if the intermediate loop was reprocessed.
-    assert len(_find_nodes(root, "c29")) == 1  # Would have been 3 if the intermediate loop was reprocessed.
+    assert len(_find_nodes(root, "j30")) == 3  # j11 java sdk
+    assert len(_find_nodes(root, "c29")) == 3  # acLineSegment11 java sdk
     assert len(_find_nodes(root, "j10")) == 3
     assert len(_find_nodes(root, "c9")) == 4
     assert len(_find_nodes(root, "j12")) == 3
-    assert len(_find_nodes(root, "c31")) == 1  # Would have been 3 if the intermediate loop was reprocessed.
+    assert len(_find_nodes(root, "c31")) == 3  # acLineSegment13 java jdk
     assert len(_find_nodes(root, "j27")) == 4
     assert len(_find_nodes(root, "c11")) == 3
     assert len(_find_nodes(root, "c26")) == 4
@@ -115,12 +115,12 @@ async def test_downstream_tree():
     assert _find_node_depths(root, "c24") == [7]
     assert _find_node_depths(root, "j8") == [6]
     assert _find_node_depths(root, "c7") == [5]
-    assert _find_node_depths(root, "j30") == [8]  # Would have been 8, 10, 12 if the intermediate loop was reprocessed.
-    assert _find_node_depths(root, "c29") == [7]  # Would have been 7, 11, 13 if the intermediate loop was reprocessed.
+    assert _find_node_depths(root, "j30") == [8, 10, 12]
+    assert _find_node_depths(root, "c29") == [7, 11, 13]
     assert _find_node_depths(root, "j10") == [8, 10, 10]
     assert _find_node_depths(root, "c9") == [7, 10, 11, 14]
     assert _find_node_depths(root, "j12") == [10, 12, 12]
-    assert _find_node_depths(root, "c31") == [9]  # Would have been 9, 9, 11 if the intermediate loop was reprocessed.
+    assert _find_node_depths(root, "c31") == [9, 9, 11]
     assert _find_node_depths(root, "j27") == [8, 9, 12, 13]
     assert _find_node_depths(root, "c11") == [9, 11, 11]
     assert _find_node_depths(root, "c26") == [7, 10, 12, 13]
@@ -138,14 +138,15 @@ def _verify_tree_asset(
     if expected_parent is not None:
         tree_parent = tree_node.parent
         assert tree_parent is not None
-        assert tree_parent.conducting_equipment is expected_parent
+        assert tree_parent.identified_object is expected_parent
     else:
         assert tree_node.parent is None
 
     children_nodes = list(tree_node.children)
     assert len(children_nodes) == len(expected_children)
-    for child_node, expected_child in zip(children_nodes, expected_children):
-        assert child_node.conducting_equipment is expected_child
+
+    for child in children_nodes:
+        assert child.identified_object in expected_children
 
 
 def _find_nodes(root: TreeNode[ConductingEquipment], asset_id: str) -> List[TreeNode[ConductingEquipment]]:

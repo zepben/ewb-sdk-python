@@ -42,12 +42,12 @@ class TraversalQueue(Generic[T]):
     @classmethod
     def breadth_first(cls) -> TraversalQueue:
         """ Creates a new instance backed by a breadth first (FIFO) queue. """
-        return cls(LifoQueue())
+        return cls(FifoQueue())
 
     @classmethod
     def depth_first(cls) -> TraversalQueue:
         """ Creates a new instance backed by a depth first (LIFO) queue. """
-        return cls(FifoQueue())
+        return cls(LifoQueue())
 
     def has_next(self) -> bool:
         """ :return: True if the queue has more items. """
