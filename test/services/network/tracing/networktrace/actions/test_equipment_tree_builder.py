@@ -26,7 +26,7 @@ async def test_downstream_tree():
     assert start is not None
     tree_builder = EquipmentTreeBuilder()
     state_operators = NetworkStateOperators.NORMAL
-    Tracing.network_trace_branching(network_state_operators=state_operators) \
+    await Tracing.network_trace_branching(network_state_operators=state_operators) \
         .add_condition(state_operators.downstream()) \
         .add_step_action(tree_builder) \
         .run(start)

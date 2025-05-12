@@ -75,8 +75,8 @@ class SetDirection:
             assert isinstance(nts.data, FeederDirection)
             return nts.data != FeederDirection.NONE
 
-        def step_action(nts: NetworkTraceStep, *args):
-            return state_operators.add_direction(nts.path.to_terminal, nts.data)
+        async def step_action(nts: NetworkTraceStep, *args):
+            state_operators.add_direction(nts.path.to_terminal, nts.data)
 
         def stop_condition(nts: NetworkTraceStep, *args):
             return nts.path.to_terminal.is_feeder_head_terminal() or self._reached_substation_transformer(nts.path.to_terminal)
@@ -123,5 +123,5 @@ class SetDirection:
          :param terminal: The terminal to start applying feeder direction from.
          """
         trav = await self._create_traversal(network_state_operators)
-        return trav.run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False)
+        return await trav.run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False)
 

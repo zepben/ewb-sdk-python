@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Callable
-from typing import Union, TypeVar
+from typing import Union, TypeVar, Optional
 
 from zepben.evolve import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch, SinglePhaseKind
@@ -56,7 +56,7 @@ class NormalOpenStateOperators(OpenStateOperators):
     Operates on the normal state of the `Switch`
     """
     @staticmethod
-    def is_open(switch: Switch, phase:SinglePhaseKind=None) -> bool:
+    def is_open(switch: Switch, phase:SinglePhaseKind=None) -> Optional[bool]:
         if isinstance(switch, Switch):
             return switch.is_normally_open(phase)
 
@@ -70,7 +70,7 @@ class CurrentOpenStateOperators(OpenStateOperators):
     Operates on the current state of the `Switch`
     """
     @staticmethod
-    def is_open(switch: Switch, phase: SinglePhaseKind = None) -> bool:
+    def is_open(switch: Switch, phase: SinglePhaseKind = None) -> Optional[bool]:
         if isinstance(switch, Switch):
             return switch.is_open(phase)
 

@@ -68,7 +68,7 @@ class Switch(ConductingEquipment):
         """
         self.asset_info = si
 
-    def is_normally_open(self, phase: SinglePhaseKind = None):
+    def is_normally_open(self, phase: SinglePhaseKind = None) -> bool:
         """
         Check if the switch is normally open on `phase`.
 
@@ -83,7 +83,7 @@ class Switch(ConductingEquipment):
         """
         return self._normally_open
 
-    def is_open(self, phase: SinglePhaseKind = None):
+    def is_open(self, phase: SinglePhaseKind = None) -> bool:
         """
         Check if the switch is currently open on `phase`.
 

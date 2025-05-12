@@ -106,7 +106,7 @@ class FindSwerEquipment:
 
         for it in (t for t in transformer.terminals if _is_swer_terminal(t)):
             trace.reset()
-            trace.run(it, None)
+            await trace.run(it, None)
 
 
     async def _trace_lv_from(self, state_operators: NetworkStateOperators,  transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
@@ -125,7 +125,7 @@ class FindSwerEquipment:
         for terminal in transformer.terminals:
             if _is_non_swer_terminal(terminal):
                 trace.reset()
-                trace.run(terminal, None)
+                await trace.run(terminal, None)
 
 def _is_swer_terminal(terminal: Terminal) -> bool:
     return terminal.phases.num_phases == 1

@@ -140,7 +140,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         super().add_start_item(start)
         return self
 
-    def run(self, start: Union[ConductingEquipment, Terminal]=None, data: T=None, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
+    async def run(self, start: Union[ConductingEquipment, Terminal]=None, data: T=None, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
         """
         Runs the network trace starting from `start`
 
@@ -156,7 +156,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         if start is not None:
             self.add_start_item(start, data, phases)
 
-        super().run(can_stop_on_start_item=can_stop_on_start_item)
+        await super().run(can_stop_on_start_item=can_stop_on_start_item)
         return self
 
     def add_condition(self, condition: TraversalCondition[T]) -> "NetworkTrace[T]":

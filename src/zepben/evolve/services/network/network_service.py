@@ -11,7 +11,9 @@ import itertools
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Set
+from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Generator
+
+from zepben.evolve.util import ngen
 
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
@@ -280,9 +282,9 @@ class NetworkService(BaseService):
         return eq_by_term
 
     @property
-    def feeder_start_points(self) -> Set[ConductingEquipment]:
-        return {feeder.normal_head_terminal.conducting_equipment for feeder in self.objects(Feeder) if feeder.normal_head_terminal}
+    def feeder_start_points(self) -> Generator[ConductingEquipment, None, None]:
+        return ngen(feeder.normal_head_terminal.conducting_equipment for feeder in self.objects(Feeder) if feeder.normal_head_terminal)
 
     @property
-    def lv_feeder_start_points(self) -> Set[ConductingEquipment]:
-        return {lv_feeder.normal_head_terminal.conducting_equipment for lv_feeder in self.objects(LvFeeder) if lv_feeder.normal_head_terminal}
+    def lv_feeder_start_points(self) -> Generator[ConductingEquipment, None, None]:
+        return ngen(lv_feeder.normal_head_terminal.conducting_equipment for lv_feeder in self.objects(LvFeeder) if lv_feeder.normal_head_terminal)

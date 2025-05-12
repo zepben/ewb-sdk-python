@@ -63,9 +63,10 @@ class RemovePhases(object):
         if isinstance(nominal_phases_to_ebb, PhaseCode):
             return await self._run_with_phases_to_ebb(terminal, set(nominal_phases_to_ebb.single_phases), network_state_operators)
 
-        return self._create_trace(network_state_operators).run(terminal, EbbPhases(nominal_phases_to_ebb), terminal.phases)
+        trace = await self._create_trace(network_state_operators)
+        return await trace.run(terminal, EbbPhases(nominal_phases_to_ebb), terminal.phases)
 
-    def _create_trace(self, state_operators: NetworkStateOperators) -> NetworkTrace[EbbPhases]:
+    async def _create_trace(self, state_operators: NetworkStateOperators) -> NetworkTrace[EbbPhases]:
 
         def compute_data(step: NetworkTraceStep[EbbPhases], context: StepContext, next_path: NetworkTraceStep.Path):
             data = []
@@ -74,8 +75,8 @@ class RemovePhases(object):
                     data.append(to_phase)
             return EbbPhases(set(data))
 
-        def step_action(nts: NetworkTraceStep, ctx: StepContext):
-            nts.data.ebbed_phases = self._ebb(state_operators, nts.path.to_terminal, nts.data.phases_to_ebb)
+        async def step_action(nts: NetworkTraceStep, ctx: StepContext):
+            nts.data.ebbed_phases = await self._ebb(state_operators, nts.path.to_terminal, nts.data.phases_to_ebb)
 
         def queue_condition(next_step: NetworkTraceStep, next_ctx: StepContext=None, step: NetworkTraceStep=None, ctx: StepContext=None):
             return len(next_step.data.phases_to_ebb) > 0 and (step is None or len(step.data.ebbed_phases) > 0)
@@ -89,7 +90,7 @@ class RemovePhases(object):
         .add_step_action(Traversal.step_action(step_action)) \
         .add_queue_condition(Traversal.queue_condition(queue_condition))
 
-    def _ebb(self, state_operators: NetworkStateOperators, terminal: Terminal, phases_to_ebb: Set[SinglePhaseKind]) -> Set[SinglePhaseKind]:
+    async def _ebb(self, state_operators: NetworkStateOperators, terminal: Terminal, phases_to_ebb: Set[SinglePhaseKind]) -> Set[SinglePhaseKind]:
         phases = state_operators.phase_status(terminal)
         for phase in phases_to_ebb:
             if phases[phase] != SinglePhaseKind.NONE:

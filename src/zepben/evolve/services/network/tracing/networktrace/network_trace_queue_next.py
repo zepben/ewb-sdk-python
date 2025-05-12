@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar, Callable, Sequence, List
+from typing import TypeVar, Callable, Sequence, Iterable, Generator
 
 from zepben.evolve import TerminalConnectivityConnected
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -52,22 +52,21 @@ class NetworkTraceQueueNext:
             compute_data.compute_next(current_step, current_context, path)
         ) for path in self._next_step_paths(is_in_service, current_step.path))
 
-    def _next_step_paths(self, is_in_service: CheckInService, path: NetworkTraceStep.Path) -> List[NetworkTraceStep.Path]:
+    def _next_step_paths(self, is_in_service: CheckInService, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:
         next_terminals = self._next_terminals(is_in_service, path)
 
         if len(path.nominal_phase_paths) > 0:
             phase_paths = set(it.to_phase for it in path.nominal_phase_paths)
-            return list(
-                map(lambda t: NetworkTraceStep.Path(path.to_terminal, t.to_terminal, t.nominal_phase_paths),
-                filter(lambda t: len(t.nominal_phase_paths) > 0,
-                map(lambda t: TerminalConnectivityConnected().terminal_connectivity(path.to_terminal, t, phase_paths), next_terminals)))
-            )
-        else:
-            return list(
-                map(lambda t: NetworkTraceStep.Path(path.to_terminal, t), next_terminals)
-            )
 
-    def _next_terminals(self, is_in_service: CheckInService, path: NetworkTraceStep.Path) -> List[Terminal]:
+            for result in (TerminalConnectivityConnected().terminal_connectivity(path.to_terminal, t, phase_paths) for t in next_terminals):
+                if result.nominal_phase_paths:
+                    yield NetworkTraceStep.Path(path.to_terminal, result.to_terminal, result.nominal_phase_paths)
+
+        else:
+            for terminal in next_terminals:
+                yield NetworkTraceStep.Path(path.to_terminal, terminal)
+
+    def _next_terminals(self, is_in_service: CheckInService, path: NetworkTraceStep.Path) -> Iterable[Terminal]:
         def __next_terminals():
             if path.traced_internally:
                 # We need to step externally to connected terminals. However:
@@ -75,7 +74,7 @@ class NetworkTraceQueueNext:
                 # other (non busbar) equipment connected to the same connectivity node. Once the busbar has been
                 # visited we then step to the other non busbar terminals connected to the same connectivity node.
                 if path.to_terminal.has_connected_busbars():
-                    return list(filter(lambda it: it.conducting_equipment is BusbarSection, path.to_terminal.connected_terminals()))
+                    return (t for t in path.to_terminal.connected_terminals() if t.conducting_equipment is BusbarSection)
                 else:
                     return path.to_terminal.connected_terminals()
             
@@ -83,9 +82,9 @@ class NetworkTraceQueueNext:
                 # If we just visited a busbar, we step to the other terminals that share the same connectivity node.
                 # Otherwise, we internally step to the other terminals on the equipment
                 if path.to_equipment is BusbarSection:
-                    # We dont need to step to terminals that are busbars as they would have been queued at the same time this busbar step was.
-                    # We also dont try and go back to the terminals we came from as we already visited it to get to this busbar.
-                    return list(filter(lambda it: it != path.from_terminal and it.conducting_equipment is not BusbarSection, path.to_terminal.connected_terminals()))
+                    # We don't need to step to terminals that are busbars as they would have been queued at the same time this busbar step was.
+                    # We also don't try and go back to the terminals we came from as we already visited it to get to this busbar.
+                    return (t for t in path.to_terminal.connected_terminals() if t != path.from_terminal and t.conducting_equipment is not BusbarSection)
                 else:
                     return path.to_terminal.other_terminals()
                     
@@ -94,4 +93,4 @@ class NetworkTraceQueueNext:
                 return is_in_service(it.conducting_equipment)
             return False
 
-        return list(filter(_filter, __next_terminals()))
+        return (t for t in __next_terminals() if _filter(t))

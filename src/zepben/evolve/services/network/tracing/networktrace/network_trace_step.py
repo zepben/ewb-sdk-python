@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import Set, Generic, TypeVar
+from typing import Set, Generic, TypeVar, Tuple
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
@@ -44,7 +44,7 @@ class NetworkTraceStep(Generic[T]):
         """
         from_terminal: Terminal
         to_terminal: Terminal
-        nominal_phase_paths: list[NominalPhasePath] = field(default_factory=list)
+        nominal_phase_paths: Tuple[NominalPhasePath] = field(default_factory=list)
 
         def to_phases_set(self) -> Set[SinglePhaseKind]:
             if len(self.nominal_phase_paths) == 0:

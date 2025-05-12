@@ -5,10 +5,8 @@
 
 from __future__ import annotations
 
-from abc import ABC
 from collections import deque
-from collections.abc import Collection
-from typing import List, Callable, TypeVar, Generic, Optional, Dict, Any, overload, Protocol, Union
+from typing import List, Callable, TypeVar, Generic, Optional, Dict, Union
 
 from zepben.evolve import require
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
@@ -287,9 +285,12 @@ class Traversal(Generic[T, D]):
             self.add_step_action(it)
         return self
 
-    def apply_step_actions(self, item: T, context: StepContext) -> D:
+    async def apply_step_actions(self, item: T, context: StepContext) -> D:
         for it in self.step_actions:
-            it.apply(item, context)
+            try:
+                await it.apply(item, context)
+            except TypeError:
+                pass
         return self
 
     def add_context_value_computer(self, computer: ContextValueComputer[T]) -> D:
@@ -299,7 +300,7 @@ class Traversal(Generic[T, D]):
         `computer` The context value computer to add.
         Returns The current traversal instance.
         """
-        require(isinstance(computer, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
+        require(not isinstance(computer, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
         self.compute_next_context_funs[computer.key] = computer
         return self
 
@@ -341,7 +342,7 @@ class Traversal(Generic[T, D]):
         return self
 
 
-    def run(self, start_item: T=None, can_stop_on_start_item: bool=True) -> D:
+    async def run(self, start_item: T=None, can_stop_on_start_item: bool=True) -> D:
         """
         Runs the traversal optionally adding [startItem] to the collection of start items.
 
@@ -363,9 +364,9 @@ class Traversal(Generic[T, D]):
         if self._parent is None and isinstance(self._queue_type, Traversal.BranchingQueueType) and len(self.start_items) > 1:
             self.branch_start_items()
         else:
-            self.traverse(can_stop_on_start_item)
+            await self.traverse(can_stop_on_start_item)
 
-        self.traverse_branches(can_stop_on_start_item)
+        await self.traverse_branches(can_stop_on_start_item)
 
         self.running = False
         return self
@@ -402,7 +403,7 @@ class Traversal(Generic[T, D]):
 
                 self.branch_queue.put(branch)
 
-    def traverse(self, can_stop_on_start_item: bool):
+    async def traverse(self, can_stop_on_start_item: bool):
         while len(self.start_items) > 0:
             start_item = self.start_items.popleft()
 
@@ -422,7 +423,7 @@ class Traversal(Generic[T, D]):
 
                     if context.is_actionable_item:
                         context.is_stopping = can_stop and self.matches_any_stop_condition(current, context)
-                        self.apply_step_actions(current, context)
+                        await self.apply_step_actions(current, context)
 
                     if not context.is_stopping:
                         self.queue_next(current, context)
@@ -470,7 +471,7 @@ class Traversal(Generic[T, D]):
             return False
         return queue_next.accept(current, current_context, self.item_queuer(current, current_context), queue_branch)
 
-    def traverse_branches(self, can_stop_on_start_item: bool):
+    async def traverse_branches(self, can_stop_on_start_item: bool):
         if self.branch_queue is None:
             return
 
@@ -482,7 +483,7 @@ class Traversal(Generic[T, D]):
         while len(self.branch_queue) > 0:
             next = self.branch_queue.pop()
             if next:
-                next.run(can_stop_on_start_item=can_stop_on_start_item)
+                await next.run(can_stop_on_start_item=can_stop_on_start_item)
 
     def can_queue_item(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
         for it in self.queue_conditions:

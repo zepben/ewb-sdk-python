@@ -2,9 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import time
 from collections.abc import Collection
-from typing import Set, Callable, Optional, Awaitable, Any, Iterable
+from typing import Set, Iterable, Union
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Equipment, LvFeeder
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -57,7 +56,6 @@ class BaseFeedersInternal:
 
     def _associate_equipment_with_containers(self, equipment_containers: Iterable[EquipmentContainer], equipment: Iterable[Equipment]):
         for feeder in equipment_containers:
-            assert isinstance(equipment, Iterable)
             for it in equipment:
                 if it is not None:  # TODO: Should this pass silently???
                     self.network_state_operators.associate_equipment_and_container(it, feeder)
@@ -128,10 +126,10 @@ class AssignToFeedersInternal(BaseFeedersInternal):
         start_ce = terminal.conducting_equipment
 
         if isinstance(start_ce, Switch) and self.network_state_operators.is_open(start_ce):
-            feeders_to_assign.associate_equipment(start_ce)
+            self._associate_equipment_with_containers(feeders_to_assign, [start_ce])
         else:
             traversal = await self._create_trace(terminal_to_aux_equipment, feeder_start_points, lv_feeder_start_points, feeders_to_assign)
-            traversal.run(terminal, False, can_stop_on_start_item=False)
+            await traversal.run(terminal, False, can_stop_on_start_item=False)
 
     async def _create_trace(self,
                       terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
@@ -140,28 +138,22 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                       feeders_to_assign: list[Feeder]) -> NetworkTrace[...]:
 
         def _reached_lv(ce: ConductingEquipment):
-            try:
-                return True if ce.base_voltage and ce.base_voltage.nominal_voltage < 1000 else False
-            except AttributeError:
-                pass  # TODO: this is a hack.
+            return True if ce.base_voltage and ce.base_voltage.nominal_voltage < 1000 else False
 
         def _reached_substation_transformer(ce: ConductingEquipment):
             return True if isinstance(ce, PowerTransformer) and len(list(ce.substations)) > 0 else False
 
-        def stop_condition(nts: NetworkTraceStep, *args):
-            return nts.path.to_equipment in feeder_start_points
+        def stop_condition(next_step: NetworkTraceStep, ctx: StepContext):
+            return next_step.path.to_equipment in feeder_start_points
 
-        def queue_condition_a(nts: NetworkTraceStep, *args):
-            assert isinstance(nts, NetworkTraceStep)
-            return not _reached_substation_transformer(nts.path.to_equipment)
+        def queue_condition_a(next_step: NetworkTraceStep, nctx: StepContext, step: NetworkTraceStep, ctx: StepContext):
+            return not _reached_substation_transformer(next_step.path.to_equipment)
 
-        def queue_condition_b(nts: NetworkTraceStep, *args):
-            assert isinstance(nts, NetworkTraceStep)
-            return not _reached_lv(nts.path.to_equipment)
+        def queue_condition_b(next_step: NetworkTraceStep, nctx: StepContext, step: NetworkTraceStep, ctx: StepContext):
+            return not _reached_lv(next_step.path.to_equipment)
 
-        def step_action(nts: NetworkTraceStep, context):
-            assert isinstance(nts, NetworkTraceStep)
-            self._process(nts.path, context, terminal_to_aux_equipment, lv_feeder_start_points, feeders_to_assign)
+        async def step_action(nts: NetworkTraceStep, context: StepContext):
+            await self._process(nts.path, context, terminal_to_aux_equipment, lv_feeder_start_points, feeders_to_assign)
 
 
         return (
@@ -173,19 +165,18 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                 .add_step_action(Traversal.step_action(step_action))
         )
 
-    def _process(self,
+    async def _process(self,
                  step_path: NetworkTraceStep.Path,
                  step_context: StepContext,
                  terminal_to_aux_equipment: dict[Terminal, Collection[AuxiliaryEquipment]],
                  lv_feeder_start_points: Set[ConductingEquipment],
                  feeders_to_assign: list[Feeder]):
+
         if step_path.traced_internally and not step_context.is_start_item:
             return
 
-        self._associate_equipment_with_containers(feeders_to_assign, terminal_to_aux_equipment.get(step_path.to_terminal, {}))
-        if step_path.to_equipment is None:
-            pass  # FIXME: this seems flaky - but needed for test/database/sqlite/network/test_network_database_schema.py:274
-        self._associate_equipment_with_containers(feeders_to_assign, [step_path.to_equipment])
+        for equip_group in (terminal_to_aux_equipment.get(step_path.to_terminal, {}), [step_path.to_equipment]):
+            self._associate_equipment_with_containers(feeders_to_assign, equip_group)
 
         if isinstance(step_path.to_equipment, PowerTransformer):
             self._feeder_try_energize_lv_feeders(feeders_to_assign, lv_feeder_start_points, step_path.to_equipment)

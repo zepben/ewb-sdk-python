@@ -131,23 +131,23 @@ class SetPhases:
             return await self.spread_phases(from_terminal, to_terminal, from_terminal.phases.single_phases, network_state_operators)
         else:
             paths = self._get_nominal_phase_paths(network_state_operators, from_terminal, to_terminal, list(phases))
-            if self._flow_phases(network_state_operators, from_terminal, to_terminal, paths):
+            if await self._flow_phases(network_state_operators, from_terminal, to_terminal, paths):
                 await self.run(from_terminal, network_state_operators=network_state_operators)
 
     async def _run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators, trace: NetworkTrace[PhasesToFlow]=None):
         if trace is None:
             trace = await self._create_network_trace(network_state_operators)
         nominal_phase_paths = list(map(lambda it: NominalPhasePath(SinglePhaseKind.NONE, it), terminal.phases))
-        trace.run(terminal, self.PhasesToFlow(nominal_phase_paths), can_stop_on_start_item=False)
+        await trace.run(terminal, self.PhasesToFlow(nominal_phase_paths), can_stop_on_start_item=False)
         trace.reset()
 
     async def _create_network_trace(self, state_operators: NetworkStateOperators) -> NetworkTrace[PhasesToFlow]:
-        def step_action(nts, ctx):
+        async def step_action(nts, ctx):
             path = nts.path
             phases_to_flow = nts.data
             #  We always assume the first step terminal already has the phases applied, so we don't do anything on the first step
             phases_to_flow.step_flowed_phases = True if ctx.is_start_item else (
-                self._flow_phases(state_operators, path.from_terminal, path.to_terminal, phases_to_flow.nominal_phase_paths)
+                await self._flow_phases(state_operators, path.from_terminal, path.to_terminal, phases_to_flow.nominal_phase_paths)
             )
 
         def condition(next_step, nctx, step, ctx):
@@ -199,7 +199,7 @@ class SetPhases:
         else:
             return TerminalConnectivityConnected().terminal_connectivity(from_terminal, to_terminal, phases_to_flow).nominal_phase_paths
 
-    def _flow_phases(self,
+    async def _flow_phases(self,
                            state_operators: NetworkStateOperators,
                            from_terminal: Terminal,
                            to_terminal: Terminal,

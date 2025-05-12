@@ -80,32 +80,32 @@ class PhaseInferrer:
             self,
             terminals: List[Terminal],
         ) -> List[Terminal]:
-            candidates = self._missing_from_down_to_up(terminals)
-            if not candidates:
-                candidates = self._missing_from_down_to_any(terminals)
-            if not candidates:
-                candidates = self._missing_from_any(terminals)
-
-            return candidates
+            return (
+                self._missing_from_down_to_up(terminals)
+                or self._missing_from_down_to_any(terminals)
+                or self._missing_from_any(terminals)
+            )
 
         def _missing_from_down_to_up(self, terminals: List[Terminal]) -> List[Terminal]:
             return [
                 terminal for terminal in terminals
-                if (self._has_none_phase(terminal) and
-                    (FeederDirection.UPSTREAM in self.state_operators.get_direction(terminal))) and
-                    terminal.connectivity_node and
-                    any(not self._has_none_phase(t) for t in terminal.connectivity_node.terminals if
-                        (t != terminal) and (FeederDirection.DOWNSTREAM == self.state_operators.get_direction(t)))
+                if (self._missing_from_down_filter(terminal) and
+                    (FeederDirection.UPSTREAM in self.state_operators.get_direction(terminal)))
             ]
 
         def _missing_from_down_to_any(self, terminals: List[Terminal]) -> List[Terminal]:
             return [
                 terminal for terminal in terminals
-                if (self._has_none_phase(terminal) and
-                    terminal.connectivity_node and
-                    any(not self._has_none_phase(t) for t in terminal.connectivity_node.terminals if
-                        (t != terminal) and (FeederDirection.DOWNSTREAM == self.state_operators.get_direction(t))))
+                if self._missing_from_down_filter(terminal)
             ]
+
+        def _missing_from_down_filter(self, terminal: Terminal) -> bool:
+            return (
+                self._has_none_phase(terminal) and terminal.connectivity_node and
+                any(not self._has_none_phase(t)
+                    for t in terminal.connectivity_node.terminals
+                    if (t != terminal) and (FeederDirection.DOWNSTREAM in self.state_operators.get_direction(t)))
+                )
 
         def _missing_from_any(self, terminals: List[Terminal]) -> List[Terminal]:
             return [
@@ -115,21 +115,14 @@ class PhaseInferrer:
                     any(not self._has_none_phase(t) for t in terminal.connectivity_node.terminals if t != terminal))
             ]
 
-        async def _process(
-            self,
-            terminals: List[Terminal],
-            processor: Callable[[Terminal], Awaitable[bool]]
-        ) -> bool:
-            terminals_to_process = self._find_terminal_at_start_of_missing_phases(terminals)
+        async def _process(self, terminals: List[Terminal], processor: Callable[[Terminal], Awaitable[bool]]) -> bool:
 
             has_processed = False
             while True:
                 continue_processing = False
 
-                for terminal in terminals_to_process:
-                    continue_processing = await processor(terminal) or continue_processing
-
-                terminals_to_process = self._find_terminal_at_start_of_missing_phases(terminals)
+                for terminal in self._find_terminal_at_start_of_missing_phases(terminals):
+                    continue_processing = await processor(terminal)
 
                 has_processed = has_processed or continue_processing
                 if not continue_processing:
