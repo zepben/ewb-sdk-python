@@ -1,19 +1,7 @@
 # Zepben Python SDK
 ## [0.48.0] - UNRELEASED
-### Breaking Changes
-* None.
-
-### New Features
-* None.
-
-### Enhancements
-* None.
-
 ### Fixes
-* None.
-
-### Notes
-* None.
+* Only resolve PowerSystemResource -> Asset relationship in one direction when calling `get_equipment_container` to stop deadlock.
 
 ## [0.47.0] - 2025-05-08
 ### Fixes

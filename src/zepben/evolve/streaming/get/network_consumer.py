@@ -27,7 +27,7 @@ from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, O
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, RelayInfo, SwitchInfo, \
     CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo, PanDemandResponseFunction, BatteryControl, \
-    StaticVarCompensator, PerLengthPhaseImpedance, GroundingImpedance, PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine
+    StaticVarCompensator, PerLengthPhaseImpedance, GroundingImpedance, PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PowerSystemResource, Asset
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
@@ -530,6 +530,10 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
                     # Skip any reference trying to resolve from an EquipmentContainer on subsequent passes - e.g a PowerTransformer trying to pull in its LvFeeder.
                     # EquipmentContainers should be retrieved explicitly or via a hierarchy call.
                     if subsequent and EquipmentContainer in ref.resolver.from_class.__bases__:
+                        continue
+                    # Skip any reference trying to resolve from an asset back to a PSR (e.g Pole back to ConductingEquipment).
+                    # We'll only resolve the relationship one way, from the PSR to the Asset, so that we don't get stuck in an endless loop.
+                    if Asset == ref.resolver.from_class and PowerSystemResource == ref.resolver.to_class:
                         continue
                     to_resolve.add(ref.to_mrid)
 
