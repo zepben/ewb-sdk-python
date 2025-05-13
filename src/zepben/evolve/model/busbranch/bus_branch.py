@@ -9,7 +9,7 @@ from functools import reduce
 from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable
 
 from zepben.evolve import Junction, BusbarSection, EquivalentBranch, Traversal, NetworkTrace, TraversalQueue, NetworkStateOperators, NetworkTraceActionType, \
-    Tracing, ComputeData, StepContext, ContextValueComputer
+    Tracing, ComputeData, StepContext, ContextValueComputer, NetworkTraceStep
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
@@ -902,25 +902,32 @@ async def _group_negligible_impedance_terminals(
 ) -> TerminalGrouping[ConductingEquipment]:
     tg = TerminalGrouping[ConductingEquipment]()
 
-
-    trace = (Traversal(
-        queue_type=Traversal.BasicQueueType(
-            queue_next=Traversal.QueueNext(_queue_terminals_across_negligible_impedance(has_negligible_impedance)),
-            queue=TraversalQueue.depth_first()
-        ),
-    ).add_start_item(terminal)
-    .add_step_action(Traversal.step_action(_process_terminal(tg, has_negligible_impedance))))
     tracker = NetworkTraceTracker()
-    trace.can_visit_item = lambda item, context: tracker.visit(item, [1])
+
+    trace = (
+        Traversal(
+            queue_type=Traversal.BasicQueueType(
+                queue_next=Traversal.QueueNext(_queue_terminals_across_negligible_impedance(has_negligible_impedance)),
+                queue=TraversalQueue.depth_first()
+            ),
+        ).add_start_item(NetworkTraceStep(NetworkTraceStep.Path(terminal, terminal), 0, 0, None))
+        .add_step_action(Traversal.step_action(_process_terminal(tg, has_negligible_impedance)))
+    )
+    trace.can_visit_item = lambda item, context: tracker.visit(item.path.to_terminal, [1])
 
     await trace.run()
     return tg
+
+def _create_traversal_step_object(current_item: NetworkTraceStep[None], next_item: Terminal) -> NetworkTraceStep[None]:
+    path = NetworkTraceStep.Path(current_item.path.to_terminal, next_item)
+    return NetworkTraceStep(path, current_item.next_num_terminal_steps(), current_item.next_num_equipment_steps(), None)
 
 def _process_terminal(
     tg: TerminalGrouping[ConductingEquipment],
     has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ):
-    async def add_to_group(t: Terminal, _):
+    async def add_to_group(item: NetworkTraceStep[None], _):
+        t = item.path.to_terminal
         if has_negligible_impedance(t.conducting_equipment):
             tg.conducting_equipment_group.add(t.conducting_equipment)
             tg.inner_terminals.add(t)
@@ -933,16 +940,17 @@ def _process_terminal(
 def _queue_terminals_across_negligible_impedance(
     has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ):
-    def queue_next(terminal: Terminal, context: StepContext, _queue_next: Callable[[Terminal], bool]):
+    def queue_next(item: NetworkTraceStep[None], context: StepContext, _queue_next: Callable[[NetworkTraceStep[None]], bool]):
+        terminal = item.path.to_terminal
         if terminal.connectivity_node is not None:
             for ot in terminal.connectivity_node.terminals:
                 if ot != terminal:
-                    _queue_next(ot)
+                    _queue_next(_create_traversal_step_object(item, ot))
 
         if has_negligible_impedance(terminal.conducting_equipment):
             for ot in terminal.conducting_equipment.terminals:
                 if ot != terminal:
-                    _queue_next(ot)
+                    _queue_next(_create_traversal_step_object(item, ot))
 
     return queue_next
 
@@ -954,15 +962,18 @@ async def _group_common_ac_line_segment_terminals(acls: AcLineSegment) -> Termin
     common_acls: TerminalGrouping[AcLineSegment] = TerminalGrouping()
     connectivity_node_counter = Counter()
 
-    # noinspection PyArgumentList
-    trace = Traversal(
-        queue_type=Traversal.BasicQueueType(
-            queue_next=Traversal.QueueNext(_queue_common_impedance_lines(common_acls, has_common_impedance)),
-            queue=TraversalQueue.depth_first()
-        ),
-    ).add_start_item(acls) \
-    .add_step_action(Traversal.step_action(_process_acls(common_acls, connectivity_node_counter)))
-    trace.can_visit_item = lambda *args: True
+    tracker = NetworkTraceTracker()
+
+    trace = (
+        Traversal(
+            queue_type=Traversal.BasicQueueType(
+                queue_next=Traversal.QueueNext(_queue_common_impedance_lines(common_acls, has_common_impedance)),
+                queue=TraversalQueue.depth_first()
+            ),
+        ).add_start_item(acls)
+        .add_step_action(Traversal.step_action(_process_acls(common_acls, connectivity_node_counter)))
+    )
+    trace.can_visit_item = lambda item, context: tracker.visit(item, [1])
     await trace.run()
 
     for t in (t for line in common_acls.conducting_equipment_group for t in line.terminals):
