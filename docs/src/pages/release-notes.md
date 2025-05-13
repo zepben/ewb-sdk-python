@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.47.1](#v0471)| `13 May 2025` |
 |[0.47.0](#v0470)| `08 May 2025` |
 |[0.46.0](#v0460)| `24 April 2025` |
 |[0.45.0](#v0450)| `26 March 2025` |
@@ -55,6 +56,14 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.47.1]
+
+### Fixes
+* Only resolve PowerSystemResource -> Asset relationship in one direction when calling `get_equipment_container` to stop deadlock.
+* MultiObjectResult now exposes result types inheriting from IdentifiedObject to allow better type completion
 
 ---
 
