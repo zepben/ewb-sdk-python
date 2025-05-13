@@ -1,5 +1,21 @@
 # Zepben Python SDK
-## [0.47.1] - UNRELEASED
+## [0.48.0] - UNRELEASED
+### Breaking Changes
+* None.
+
+### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* None.
+
+### Notes
+* None.
+
+## [0.47.1] - 2025-05-14
 ### Fixes
 * Only resolve PowerSystemResource -> Asset relationship in one direction when calling `get_equipment_container` to stop deadlock.
 * MultiObjectResult now exposes result types inheriting from IdentifiedObject to allow better type completion
