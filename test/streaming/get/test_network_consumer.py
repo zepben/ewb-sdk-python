@@ -29,7 +29,7 @@ from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObjec
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
     Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
     SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder, TestNetworkBuilder, PerLengthPhaseImpedance, BatteryControl, \
-    PanDemandResponseFunction, BatteryUnit, StaticVarCompensator
+    PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')
@@ -278,6 +278,50 @@ class TestNetworkConsumer:
                                             UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeders_with_open_point))),
                                             StreamGrpc('getIdentifiedObjects', [object_responses]),
                                             StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeders_with_open_point)]),
+                                            StreamGrpc('getIdentifiedObjects', [object_responses]),
+                                            StreamGrpc('getIdentifiedObjects', [object_responses])
+                                        ])
+
+    @pytest.mark.asyncio
+    async def test_resolve_references_skips_resolvers_from_asset_to_power_system_resources(self):
+        """
+        NOTE: If this test hangs forever then we're resolving asset -> psr and psr -> asset in a loop. There's no explicit check for this,
+        the test is just here to make sure asset (pole) -> psr is resolved and that an EquipmentContainer with a pole doesn't cause a deadlock.
+        lvf2:[-------]
+             tx0 -- c1
+            {p2}   {p2}
+        """
+        pole = Pole(mrid="p2")
+        lv_feeder_with_pole = (await TestNetworkBuilder()
+                               .from_power_transformer(action=lambda x: x.add_asset(pole))  # tx0
+                               .to_acls(action=lambda x: x.add_asset(pole))  # c1
+                               .add_lv_feeder("tx0", 2)
+                               .build())
+        tx0 = lv_feeder_with_pole.get("tx0")
+        c1 = lv_feeder_with_pole.get("c1")
+        pole.add_power_system_resource(tx0)
+        pole.add_power_system_resource(c1)
+        lv_feeder_with_pole.add(pole)
+        feeder_mrid = "lvf2"
+
+        async def client_test():
+            mor = (await self.client.get_equipment_container(feeder_mrid, LvFeeder)).throw_on_error().value
+
+            assert self.service.len_of() == 11
+            assert len(mor.objects) == 11
+            assert len({"lvf2", "tx0", "p2", "c1", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "generated_cn_0"}.difference(mor.objects.keys())) == 0
+            assert self.service.get("tx0") == mor.objects["tx0"]
+            received_pole: Pole = mor.objects["p2"]
+            assert self.service.get("p2") == received_pole
+            assert received_pole.num_power_system_resources() == 2
+
+        object_responses = _create_object_responses(lv_feeder_with_pole)
+
+        await self.mock_server.validate(client_test,
+                                        [
+                                            UnaryGrpc('getNetworkHierarchy', unary_from_fixed(None, _create_hierarchy_response(lv_feeder_with_pole))),
+                                            StreamGrpc('getIdentifiedObjects', [object_responses]),
+                                            StreamGrpc('getEquipmentForContainers', [_create_container_equipment_responses(lv_feeder_with_pole)]),
                                             StreamGrpc('getIdentifiedObjects', [object_responses]),
                                             StreamGrpc('getIdentifiedObjects', [object_responses])
                                         ])
@@ -563,6 +607,8 @@ def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
         nio = NetworkIdentifiedObject(circuit=obj.to_pb())
     elif isinstance(obj, LvFeeder):
         nio = NetworkIdentifiedObject(lvFeeder=obj.to_pb())
+    elif isinstance(obj, Pole):
+        nio = NetworkIdentifiedObject(pole=obj.to_pb())
     else:
         raise Exception(f"Missing class in create response - you should implement it: {str(obj)}")
     return nio
@@ -572,7 +618,7 @@ def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[It
                                           expected_include_energizing_containers: Optional[int] = None,
                                           expected_include_energized_containers: Optional[int] = None,
                                           network_state: NetworkState = None) \
-    -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
+      -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForContainersRequest):
@@ -594,7 +640,7 @@ def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[It
 
 
 def _create_restriction_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
-    -> Callable[[GetEquipmentForRestrictionRequest], Generator[GetEquipmentForRestrictionResponse, None, None]]:
+      -> Callable[[GetEquipmentForRestrictionRequest], Generator[GetEquipmentForRestrictionResponse, None, None]]:
     valid: Dict[str, OperationalRestriction] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForRestrictionRequest) -> Generator[GetEquipmentForRestrictionResponse, None, None]:
@@ -609,7 +655,7 @@ def _create_restriction_equipment_responses(ns: NetworkService, mrids: Optional[
 
 
 def _create_cn_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
-    -> Callable[[GetTerminalsForNodeRequest], Generator[GetTerminalsForNodeResponse, None, None]]:
+      -> Callable[[GetTerminalsForNodeRequest], Generator[GetTerminalsForNodeResponse, None, None]]:
     valid: Dict[str, ConnectivityNode] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetTerminalsForNodeRequest) -> Generator[GetTerminalsForNodeResponse, None, None]:
@@ -652,7 +698,7 @@ def _validate_hierarchy(hierarchy, service):
 
 
 def _create_object_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
-    -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
+      -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
     valid: Dict[str, IdentifiedObject] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetIdentifiedObjectsRequest) -> Generator[GetIdentifiedObjectsResponse, None, None]:

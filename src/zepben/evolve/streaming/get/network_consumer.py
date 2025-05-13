@@ -276,7 +276,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         container: Union[str, EquipmentContainer],
         include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.EXCLUDE_ENERGIZING_CONTAINERS,
         include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.EXCLUDE_ENERGIZED_CONTAINERS,
-        network_state: NetworkState =  NetworkState.NORMAL_NETWORK_STATE
+        network_state: NetworkState = NetworkState.NORMAL_NETWORK_STATE
     ) -> GrpcResult[MultiObjectResult]:
         return await self._handle_multi_object_rpc(
             lambda: self._process_equipment_for_container(container, include_energizing_containers, include_energized_containers, network_state)
@@ -531,9 +531,10 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
                     # EquipmentContainers should be retrieved explicitly or via a hierarchy call.
                     if subsequent and EquipmentContainer in ref.resolver.from_class.__bases__:
                         continue
-                    # Skip any reference trying to resolve from an asset back to a PSR (e.g Pole back to ConductingEquipment).
-                    # We'll only resolve the relationship one way, from the PSR to the Asset, so that we don't get stuck in an endless loop.
-                    if Asset == ref.resolver.from_class and PowerSystemResource == ref.resolver.to_class:
+                    # Skip any reference trying to resolve from an asset back to a PSR (e.g. Pole back to ConductingEquipment) on subsequent passes.
+                    # Subsequent here is not currently necessary, but makes sure that if any future caller of this function starts by resolving
+                    # from an Asset first, it will pull in the PSR.
+                    if subsequent and Asset == ref.resolver.from_class and PowerSystemResource == ref.resolver.to_class:
                         continue
                     to_resolve.add(ref.to_mrid)
 
