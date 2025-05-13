@@ -53,7 +53,7 @@ def import_submodules(package: str, recursive=True):
 
 def grpc_aio_server():
     server = grpc.aio.server(futures.ThreadPoolExecutor(max_workers=1))
-    host = 'localhost:50051'
+    host = 'localhost:50053'
     server.add_insecure_port(host)
 
     return server, host

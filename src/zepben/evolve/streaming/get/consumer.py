@@ -17,10 +17,12 @@ from zepben.evolve.streaming.grpc.grpc import GrpcClient, GrpcResult
 
 __all__ = ["CimConsumerClient", "MultiObjectResult"]
 
+T = TypeVar('T', bound=IdentifiedObject)
+
 
 @dataclass()
 class MultiObjectResult(object):
-    objects: Dict[str, IdentifiedObject] = dict()
+    objects: Dict[str, T] = dict()
     failed: Set[str] = set()
 
 
@@ -65,7 +67,7 @@ class CimConsumerClient(GrpcClient, Generic[ServiceType]):
 
         Returns a :class:`GrpcResult` with a result of one of the following:
             - When `GrpcResult.wasSuccessful`, the item found, accessible via `GrpcResult.value`.
-            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the the object, accessible via `GrpcResult.thrown`. One of:
+            - When `GrpcResult.wasFailure`, the error that occurred retrieving or processing the object, accessible via `GrpcResult.thrown`. One of:
                 - :class:`NoSuchElementException` if the object could not be found.
                 - The gRPC error that occurred while retrieving the object
         """
