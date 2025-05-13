@@ -12,7 +12,7 @@ class NetworkTraceTracker:
     Internal class that tracks visited state of a Terminal's Phase in a Network Trace
     """
     def __init__(self):
-        self._visited = list()  # TODO: if tracings broken, this was a set
+        self._visited = list()
 
     def has_visited(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> bool:
         """Returns True if this Terminal's Phase has been visited, False otherwise"""

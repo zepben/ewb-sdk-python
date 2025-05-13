@@ -2,16 +2,16 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, TYPE_CHECKING
+from typing import TypeVar, TYPE_CHECKING
 
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
-from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
 
-T = TypeVar('T')
-U = TypeVar('U')
+if TYPE_CHECKING:
+    T = TypeVar('T')
+    U = TypeVar('U')
 
 
 class QueueCondition[T](TraversalCondition[T]):
@@ -47,6 +47,9 @@ class QueueCondition[T](TraversalCondition[T]):
             if self._func.__code__.co_argcount == 4:
                 return True
             raise e
+
+
+from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
 
 class QueueConditionWithContextValue[T, U](QueueCondition[T], TypedContextValueComputer[T, U]):
     """

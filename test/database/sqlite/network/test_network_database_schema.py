@@ -277,8 +277,10 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     async def test_schema_feeder(self, feeder):
         # Need to set feeder directions to match database load.
         network_service = SchemaNetworks().network_services_of(Feeder, feeder)
-        await Tracing().set_direction().run(network_service, NetworkStateOperators.NORMAL)
-        await Tracing().set_direction().run(network_service, NetworkStateOperators.CURRENT)
+        await Tracing().assign_equipment_to_feeders().run(network_service, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing().assign_equipment_to_feeders().run(network_service, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing().set_direction().run(network_service, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing().set_direction().run(network_service, network_state_operators=NetworkStateOperators.CURRENT)
 
         # TODO assign_to_feeders.py [62] line added to fix this, discuss
         """
@@ -616,7 +618,11 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(lv_feeder=create_lv_feeder(False))
     async def test_schema_lv_feeder(self, lv_feeder):
-        await self._validate_schema(SchemaNetworks().network_services_of(LvFeeder, lv_feeder))
+        network = SchemaNetworks().network_services_of(LvFeeder, lv_feeder)
+        await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.CURRENT)
+        await self._validate_schema(network)
+        # TODO: NetworkDatabaseTestSchema 238
 
     # ************ Services ************
 

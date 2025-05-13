@@ -59,7 +59,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                     head_equipment = head_terminal.conducting_equipment
                     if head_equipment is not None:
 
-                        for feeder in head_equipment.get_filtered_containers(Feeder, self.network_state_operators):
+                        for feeder in head_equipment.feeders(self.network_state_operators):
                             self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
 
                 await self.run_with_feeders(lv_feeder.normal_head_terminal,
@@ -147,14 +147,14 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             self._associate_relay_systems_with_containers(lv_feeders_to_assign, step_path.to_equipment)
 
     def _find_lv_feeders(self, ce: ConductingEquipment, lv_feeder_start_points: Iterable[ConductingEquipment]) -> Generator[LvFeeder, None, None]:
-        sites = list(ce.get_filtered_containers(Site, self.network_state_operators))
+        sites = list(ce.sites)
         if sites:
             for site in sites:
                 for feeder in site.find_lv_feeders(lv_feeder_start_points, self.network_state_operators):
                     yield feeder
         else:
-            for feeder in ce.get_filtered_containers(LvFeeder, self.network_state_operators):
+            for feeder in ce.lv_feeders(self.network_state_operators):
                 yield feeder
 
     def _lv_feeders_from_terminal(self, terminal: Terminal) -> List[LvFeeder]:
-        return terminal.conducting_equipment.get_filtered_containers(LvFeeder, self.network_state_operators)
+        return terminal.conducting_equipment.lv_feeders(self.network_state_operators)

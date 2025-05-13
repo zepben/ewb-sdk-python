@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Collection
-from typing import Set, Iterable, Union
+from typing import Set, Iterable, Union, Generator
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Equipment, LvFeeder
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -52,12 +52,12 @@ class BaseFeedersInternal:
         self.network_state_operators = network_state_operators
 
     def _feeders_from_terminal(self, terminal: Terminal):
-        return terminal.conducting_equipment.get_filtered_containers(Feeder)(self.network_state_operators)
+        return terminal.conducting_equipment.feeders(self.network_state_operators)
 
     def _associate_equipment_with_containers(self, equipment_containers: Iterable[EquipmentContainer], equipment: Iterable[Equipment]):
         for feeder in equipment_containers:
             for it in equipment:
-                if it is not None:  # TODO: Should this pass silently???
+                if it is not None:
                     self.network_state_operators.associate_equipment_and_container(it, feeder)
 
     def _associate_relay_systems_with_containers(self, equipment_containers: Iterable[EquipmentContainer], to_equipment: ProtectedSwitch):
@@ -76,14 +76,14 @@ class BaseFeedersInternal:
     def _feeder_try_energize_lv_feeders(self, feeders: Iterable[Feeder], to_equipment: PowerTransformer, lv_feeder_start_points: Set[ConductingEquipment]):
         sites = []
         for eq in to_equipment:
-            sites.extend(eq.get_filtered_containers(Site, self.network_state_operators))
+            sites.extend(eq.sites)
 
         if len(sites) > 0:
             lv_feeders = [s.find_lv_feeders(lv_feeder_start_points, self.network_state_operators) for s in sites]
         else:
             lv_feeders = []
             for eq in to_equipment:
-                lv_feeders.extend(eq.get_filtered_containers(LvFeeder, self.network_state_operators))
+                lv_feeders.extend(eq.lv_feeders(self.network_state_operators))
 
         self._feeder_energizes(feeders, lv_feeders)
 
@@ -115,8 +115,8 @@ class AssignToFeedersInternal(BaseFeedersInternal):
 
     async def run_with_feeders(self,
                                terminal: Terminal,
-                               feeder_start_points: Set[ConductingEquipment],
-                               lv_feeder_start_points: Set[ConductingEquipment],
+                               feeder_start_points: Generator[ConductingEquipment, None, None],
+                               lv_feeder_start_points: Generator[ConductingEquipment, None, None],
                                terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
                                feeders_to_assign: list[Feeder]):
 
@@ -133,8 +133,8 @@ class AssignToFeedersInternal(BaseFeedersInternal):
 
     async def _create_trace(self,
                       terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
-                      feeder_start_points: Set[ConductingEquipment],
-                      lv_feeder_start_points: Set[ConductingEquipment],
+                      feeder_start_points: Generator[ConductingEquipment, None, None],
+                      lv_feeder_start_points: Generator[ConductingEquipment, None, None],
                       feeders_to_assign: list[Feeder]) -> NetworkTrace[...]:
 
         def _reached_lv(ce: ConductingEquipment):

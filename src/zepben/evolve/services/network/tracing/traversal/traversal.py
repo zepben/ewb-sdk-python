@@ -475,15 +475,10 @@ class Traversal(Generic[T, D]):
         if self.branch_queue is None:
             return
 
-        # TODO: massive rewrite of branch queue
-        """
-        self.branch_queue should be a queue of traversals
-        """
-
         while len(self.branch_queue) > 0:
-            next = self.branch_queue.pop()
-            if next:
-                await next.run(can_stop_on_start_item=can_stop_on_start_item)
+            next_branch = self.branch_queue.pop()
+            if next_branch:
+                await next_branch.run(can_stop_on_start_item=can_stop_on_start_item)
 
     def can_queue_item(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
         for it in self.queue_conditions:

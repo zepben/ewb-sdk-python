@@ -44,7 +44,6 @@ class FeederDirection(Enum):
     if it is in a loop.
     """
 
-    # todo replace .has(
     def __contains__(self, other):
         """
         Check whether this `FeederDirection`` contains another `FeederDirection`.

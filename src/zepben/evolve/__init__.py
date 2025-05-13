@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from zepben.evolve.util import *
 
+
 # We need to import SinglePhaseKind before anything uses PhaseCode to prevent cyclic dependencies.
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
 

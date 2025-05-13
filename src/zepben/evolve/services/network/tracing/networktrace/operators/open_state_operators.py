@@ -2,11 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from collections.abc import Callable
-from typing import Union, TypeVar, Optional
+from __future__ import annotations
 
-from zepben.evolve import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch, SinglePhaseKind
+from typing import TypeVar, Optional, TYPE_CHECKING
+
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 from abc import abstractmethod
 
@@ -14,7 +14,10 @@ from zepben.evolve.services.network.tracing.networktrace.conditions.open_conditi
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
-T = TypeVar('T')
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
+
+    T = TypeVar('T')
 
 
 class OpenStateOperators(StateOperator):
@@ -57,8 +60,10 @@ class NormalOpenStateOperators(OpenStateOperators):
     """
     @staticmethod
     def is_open(switch: Switch, phase:SinglePhaseKind=None) -> Optional[bool]:
-        if isinstance(switch, Switch):
+        try:
             return switch.is_normally_open(phase)
+        except AttributeError:
+            return False
 
     @staticmethod
     def set_open(switch: Switch, is_open: bool, phase: SinglePhaseKind = None) -> None:
@@ -71,8 +76,10 @@ class CurrentOpenStateOperators(OpenStateOperators):
     """
     @staticmethod
     def is_open(switch: Switch, phase: SinglePhaseKind = None) -> Optional[bool]:
-        if isinstance(switch, Switch):
+        try:
             return switch.is_open(phase)
+        except AttributeError:
+            return False
 
     @staticmethod
     def set_open(switch: Switch, is_open: bool, phase: SinglePhaseKind = None) -> None:

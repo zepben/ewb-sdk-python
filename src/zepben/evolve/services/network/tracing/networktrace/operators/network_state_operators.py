@@ -4,7 +4,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from abc import ABC
-from typing import Iterable
 
 from zepben.evolve.services.network.tracing.networktrace.operators.equipment_container_state_operators import EquipmentContainerStateOperators
 from zepben.evolve.services.network.tracing.networktrace.operators.feeder_direction_state_operations import FeederDirectionStateOperations

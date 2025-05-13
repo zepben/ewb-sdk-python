@@ -2,19 +2,20 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TYPE_CHECKING, Callable, TypeVar
+from __future__ import annotations
 
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from abc import abstractmethod
+from typing import TYPE_CHECKING, Callable, TypeVar
 
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 
-
-from abc import abstractmethod
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+    from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
 
 __all__ = ['FeederDirectionStateOperations', 'NormalFeederDirectionStateOperations', 'CurrentFeederDirectionStateOperations']
 
 from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
-from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
 T = TypeVar('T')

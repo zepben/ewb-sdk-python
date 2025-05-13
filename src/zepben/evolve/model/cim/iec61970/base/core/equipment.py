@@ -9,8 +9,7 @@ import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
 if TYPE_CHECKING:
-    from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction, NetworkStateOperators
-
+    from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
@@ -18,8 +17,10 @@ from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import Pow
 from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 
 __all__ = ['Equipment']
+
 
 
 class Equipment(PowerSystemResource):
@@ -63,6 +64,14 @@ class Equipment(PowerSystemResource):
         """
         return ngen(_of_type(self._equipment_containers, Site))
 
+    def feeders(self, network_state_operators: NetworkStateOperators) -> Generator[Feeder, None, None]:
+        """
+        The `Feeder` this equipment belongs too based on `NetworkStateOperators`
+        """
+        if network_state_operators == NetworkStateOperators.NORMAL:
+            return self.normal_feeders
+        else:
+            return self.current_feeders
 
     @property
     def normal_feeders(self) -> Generator[Feeder, None, None]:
@@ -70,6 +79,15 @@ class Equipment(PowerSystemResource):
         The normal `Feeder`s this equipment belongs to.
         """
         return ngen(_of_type(self._equipment_containers, Feeder))
+
+    def lv_feeders(self, network_state_operators: NetworkStateOperators) -> Generator[LvFeeder, None, None]:
+        """
+        The `LvFeeder` this equipment belongs too based on `NetworkStateOperators`
+        """
+        if network_state_operators == NetworkStateOperators.NORMAL:
+            return self.normal_lv_feeders
+        else:
+            return self.current_lv_feeders
 
     @property
     def normal_lv_feeders(self) -> Generator[LvFeeder, None, None]:
@@ -105,10 +123,6 @@ class Equipment(PowerSystemResource):
         The `EquipmentContainer`s this equipment belongs to.
         """
         return ngen(self._equipment_containers)
-
-    def get_filtered_containers(self, equipment_type, state_operators: NetworkStateOperators) -> Generator[EquipmentContainer, None, None]:
-        for container in (c for c in state_operators.get_containers(self) if isinstance(c, equipment_type)):
-                yield container
 
     def num_containers(self) -> int:
         """
@@ -351,3 +365,4 @@ def _of_type(containers: Optional[List[EquipmentContainer]], ectype: Type[TEquip
         return [ec for ec in containers if isinstance(ec, ectype)]
     else:
         return []
+

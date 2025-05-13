@@ -77,11 +77,10 @@ class TypedContextValueComputer(ContextValueComputer, Generic[T, U]):
         """
         pass
     
-    # TODO: implement
-    """
-    Gets the computed value from the context cast to type [U].
-    """
     def get_context_value(self, context: StepContext):
+        """
+        Gets the computed value from the context cast to type [U].
+        """
         return context.get_value(self.key)
 
 

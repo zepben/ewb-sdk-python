@@ -438,18 +438,6 @@ class Feeder(EquipmentContainer):
         self._current_energized_lv_feeders = None
         return self
 
-    """
-    @classmethod
-    def get_filtered_containers(cls, this, operators: 'NetworkStateOperators') -> Collection[T]:
-        ""
-        return: a list of EquipmentContainers` of type `this`
-        ""
-        containers = operators.get_containers(this)
-        if containers is None:
-            return list()
-        return list(container for container in containers if isinstance(container, cls))
-    """
-
 
 class Site(EquipmentContainer):
     """
@@ -462,4 +450,5 @@ class Site(EquipmentContainer):
             if isinstance(ConductingEquipment, ce):
                 if ce in lv_feeder_Start_points:
                     if not state_operators.is_open(ce):
-                        yield ce.get_filtered_containers(LvFeeder, state_operators)
+                        for lv_feeder in ce.lv_feeders(state_operators):
+                            yield lv_feeder

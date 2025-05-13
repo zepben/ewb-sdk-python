@@ -2,16 +2,19 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from __future__ import  annotations
+
 from enum import Enum
 from dataclasses import dataclass, field
-from typing import Set, Generic, TypeVar, Tuple
+from typing import Set, Generic, TypeVar, Tuple, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 from zepben.evolve import SinglePhaseKind
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+    from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 T = TypeVar('T')
 
@@ -54,11 +57,17 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def from_equipment(self) -> ConductingEquipment:
-            return self.from_terminal.conducting_equipment  # TODO error("Network trace does not support terminals that do not have conducting equipment")
+            ce = self.from_terminal.conducting_equipment
+            if not ce:
+                raise AttributeError("Network trace does not support terminals that do not have conducting equipment")
+            return ce
 
         @property
         def to_equipment(self) -> ConductingEquipment:
-            return self.to_terminal.conducting_equipment  # TODO error("Network trace does not support terminals that do not have conducting equipment")
+            ce = self.to_terminal.conducting_equipment
+            if not ce:
+                raise AttributeError("Network trace does not support terminals that do not have conducting equipment")
+            return ce
 
         @property
         def traced_internally(self) -> bool:
