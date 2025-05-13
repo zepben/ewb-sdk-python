@@ -8,10 +8,9 @@ from typing import Optional, List
 import pytest
 
 from services.network.test_data.looping_network import create_looping_network
-from zepben.evolve import set_phases, ConductingEquipment, Tracing, NetworkStateOperators, Traversal
+from zepben.evolve import set_phases, ConductingEquipment, Tracing, NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
-from zepben.evolve.services.network.tracing.networktrace.conditions.condition import Conditions
 
 
 @pytest.mark.asyncio
