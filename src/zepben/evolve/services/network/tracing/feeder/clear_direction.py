@@ -8,7 +8,9 @@ from typing import TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
-from zepben.evolve import FeederDirection, Tracing, WeightedPriorityQueue, Traversal
+from zepben.evolve import FeederDirection, Traversal
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators

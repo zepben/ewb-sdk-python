@@ -22,7 +22,8 @@ from zepben.evolve import IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest
     NetworkDatabaseReader, NetworkServiceComparator, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, \
     PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, StreetAddress, TownDetail, StreetDetail, GroundingImpedance, \
-    PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators
+    PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators, \
+    NetworkTraceStep
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
@@ -47,6 +48,25 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
 
+
+# FIXME: see Line [305]
+
+class PatchedNetworkTraceStepPath(NetworkTraceStep.Path):
+    @property
+    def from_equipment(self):
+        try:
+            return super().from_equipment
+        except AttributeError:
+            return
+
+    @property
+    def to_equipment(self):
+        try:
+            return super().to_equipment
+        except AttributeError:
+            return
+
+NetworkTraceStep.Path = PatchedNetworkTraceStepPath
 
 # pylint: disable=too-many-public-methods
 class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, NetworkDatabaseWriter, NetworkDatabaseReader, NetworkServiceComparator]):

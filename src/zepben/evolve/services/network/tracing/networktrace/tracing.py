@@ -37,7 +37,7 @@ class Tracing:
         return NetworkTrace.non_branching(network_state_operators, queue, action_step_type, compute_data)
 
     @staticmethod
-    def network_trace_branching(network_state_operators: NetworkStateOperators,
+    def network_trace_branching(network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
                                 action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
                                 queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]]=lambda: TraversalQueue.depth_first(),
                                 branch_queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]]=lambda: TraversalQueue.breadth_first(),
@@ -57,6 +57,7 @@ class Tracing:
 
     @staticmethod
     def clear_direction():
+        from zepben.evolve.services.network.tracing.feeder.clear_direction import ClearDirection
         return ClearDirection()
 
     @staticmethod
