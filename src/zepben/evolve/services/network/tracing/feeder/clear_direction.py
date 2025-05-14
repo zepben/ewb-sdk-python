@@ -2,14 +2,19 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Iterable
+from __future__ import annotations
 
-from zepben.protobuf.cim.iec61970.base.core.Terminal_pb2 import Terminal
+from typing import TYPE_CHECKING
 
-from zepben.evolve import FeederDirection, Tracing
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+
+from zepben.evolve import FeederDirection, Tracing, WeightedPriorityQueue, Traversal
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+
+if TYPE_CHECKING:
+    from zepben.evolve import StepContext, NetworkTraceStep
 
 
 class ClearDirection:
@@ -19,7 +24,7 @@ class ClearDirection:
     #      However, this caused all sorts of pain when trying to determine which directions to remove from dual fed equipment that contains inner loops.
     #      We decided it is so much simpler to just clear the directions and reapply from other feeder heads even if its a bit more computationally expensive.
     #
-    def run(self,
+    async def run(self,
             terminal: Terminal,
             network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL
             ) -> list[Terminal]:
@@ -35,21 +40,29 @@ class ClearDirection:
         """
         feeder_head_terminals: list[Terminal] = []
 
-        self._create_trace(network_state_operators, feeder_head_terminals).run(terminal, can_stop_on_start_item=False)
+        trace = self._create_trace(network_state_operators, feeder_head_terminals)
+        await trace.run(terminal, can_stop_on_start_item=False)
         return feeder_head_terminals
 
     def _create_trace(self,
                       state_operators: NetworkStateOperators,
                       visited_feeder_head_terminals: list[Terminal]
                       ) -> NetworkTrace[...]:
+        def queue_condition(step: NetworkTraceStep, context: StepContext, _, __):
+            return state_operators.get_direction(step.path.to_terminal) != FeederDirection.NONE
+
+        def step_action(item, context):
+            state_operators.set_direction(item.path.to_terminal, FeederDirection.NONE)
+            visited_feeder_head_terminals.append(item.path.to_terminal) if item.path.to_terminal.is_feeder_head_terminal() else None
+
         return (
-            Tracing.network_trace(network_state_operators=state_operators,
-                                  action_step_type=NetworkTraceActionType.ALL_STEPS(),
-                                  queue=WeightedPriorityQueue.process_queue(
-                                      lambda it: it.path.to_terminal.phases.num_phases),
-                                  )
-                .add_condition(lambda this: this.stop_at_open())
-                .add_queue_condition(lambda next_path, *args: state_operators.get_direction(next_path.to_terminal) != FeederDirection.NONE)
-                .add_step_action(lambda item: state_operators.set_direction(item.path.to_terminal, FeederDirection.NONE))
-                .add_step_action(lambda item: visited_feeder_head_terminals.append(item.path.to_terminal) if item.path.to_terminal.is_feeder_head_terminal() else None)
+            Tracing.network_trace(
+                network_state_operators=state_operators,
+                action_step_type=NetworkTraceActionType.ALL_STEPS,
+                queue=WeightedPriorityQueue.process_queue(
+                    lambda it: it.path.to_terminal.phases.num_phases),
+            )
+            .add_condition(state_operators.stop_at_open())
+            .add_queue_condition(Traversal.queue_condition(queue_condition))
+            .add_step_action(Traversal.step_action(step_action))
         )
