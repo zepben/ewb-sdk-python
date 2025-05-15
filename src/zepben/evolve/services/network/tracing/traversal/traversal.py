@@ -16,6 +16,7 @@ from zepben.evolve.services.network.tracing.traversal.step_action import StepAct
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition, StopConditionWithContextValue
 from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 __all__ = ["Traversal"]
 
@@ -45,12 +46,6 @@ class Traversal(Generic[T, D]):
     `T` The type of object to be traversed.
     `D` The specific type of traversal, extending [Traversal].
     """
-
-    queue_condition = lambda func: QueueCondition(func)
-    stop_condition = lambda func: StopCondition(func)
-    condition = lambda func: TraversalCondition(func)
-    step_action = lambda func: StepAction(func)
-
 
     class QueueType(Generic[T, D]):
         """
@@ -171,23 +166,30 @@ class Traversal(Generic[T, D]):
         """
         raise NotImplementedError
 
-    def add_condition(self, condition: TraversalCondition[T]) -> D:
+    def add_condition(self, condition: Union[QueueCondition, Callable[[NetworkTraceStep[T], StepContext], None]]) -> D:
         """
         Adds a traversal condition to the traversal.
 
         `condition` The condition to add.
         Returns this traversal instance.
         """
+        if callable(condition):
+            if condition.__code__.co_argcount == 2:
+                return self.add_stop_condition(condition)
+            elif condition.__code__.co_argcount == 4:
+                return self.add_queue_condition(condition)
+            raise RuntimeError(f'Condition does not match expected: Number of args is not 2(Stop Condition) or 4(QueueCondition)')
+
         assert issubclass(condition.__class__, (QueueCondition, StopCondition, DirectionCondition))
         if isinstance(condition, (QueueCondition, DirectionCondition)):
-            self.add_queue_condition(condition)
+            return self.add_queue_condition(condition)
         elif isinstance(condition, StopCondition):
-            self.add_stop_condition(condition)
+            return self.add_stop_condition(condition)
+
         else:
             raise RuntimeError(f'Condition does not match expected: {condition.__class__.__name__}')
-        return self
 
-    def add_stop_condition(self, condition: Union[StopCondition[T], StopConditionWithContextValue[T, U]]) -> D:
+    def add_stop_condition(self, condition: Union[Callable, StopCondition[T], StopConditionWithContextValue[T, U]]) -> D:
         """
         Adds a stop condition to the traversal. If any stop condition returns `true`, the traversal
         will not call the callback to queue more items from the current item.
@@ -195,10 +197,15 @@ class Traversal(Generic[T, D]):
         `condition` The stop condition to add.
         Returns this traversal instance.
         """
-        self.stop_conditions.append(condition)
-        if issubclass(condition.__class__, StopConditionWithContextValue):
-            self.compute_next_context_funs[condition.key] = condition
-        return self
+        if callable(condition):
+            return self.add_stop_condition(StopCondition(condition))
+
+        elif isinstance(condition, StopCondition):
+            self.stop_conditions.append(condition)
+            if issubclass(condition.__class__, StopConditionWithContextValue):
+                self.compute_next_context_funs[condition.key] = condition
+            return self
+        raise RuntimeError(f'Condition does not match expected: {condition.__class__.__name__}')
 
     def copy_stop_conditions(self, other: Traversal[T, D]) -> D:
         """
@@ -217,7 +224,7 @@ class Traversal(Generic[T, D]):
                 return True
         return False
 
-    def add_queue_condition(self, condition: QueueCondition[T]) -> D:
+    def add_queue_condition(self, condition: Union[Callable, QueueCondition[T]]) -> D:
         """
         Adds a queue condition to the traversal. Queue conditions determine whether an item should be queued for traversal.
         All registered queue conditions must return true for an item to be queued.
@@ -225,11 +232,16 @@ class Traversal(Generic[T, D]):
         :param condition: The queue condition to add.
         :returns: The current traversal instance.
         """
-        assert issubclass(condition.__class__, QueueCondition)
-        self.queue_conditions.append(condition)
-        if isinstance(condition, QueueConditionWithContextValue):
-            self.compute_next_context_funs[condition.key] = condition
-        return self
+        if callable(condition):
+            return self.add_queue_condition(QueueCondition(condition))
+
+        elif isinstance(condition, QueueCondition):
+            assert issubclass(condition.__class__, QueueCondition)
+            self.queue_conditions.append(condition)
+            if isinstance(condition, QueueConditionWithContextValue):
+                self.compute_next_context_funs[condition.key] = condition
+            return self
+        raise RuntimeError(f'Condition does not match expected: {condition.__class__.__name__}')
 
 
     def copy_queue_conditions(self, other: Traversal[T, D]) -> D:
@@ -243,38 +255,43 @@ class Traversal(Generic[T, D]):
             self.add_queue_condition(it)
         return self
 
-    def add_step_action(self, action: StepAction[T]) -> D:
+    def add_step_action(self, action: Union[Callable, StepAction[T]]) -> D:
         """
         Adds an action to be performed on each item in the traversal, including the starting items.
 
         `action` The action to perform on each item.
         Returns The current traversal instance.
         """
-        assert issubclass(action.__class__, StepAction) or isinstance(action, StepAction)
-        self.step_actions.append(action)
-        if isinstance(action, StepActionWithContextValue):
-            self.compute_next_context_funs[action.key] = action
-        return self
+        if callable(action):
+            return self.add_step_action(StepAction(action))
 
-    def if_not_stopping(self, action: StepAction[T]) -> D:
+        elif isinstance(action, StepAction):
+            assert issubclass(action.__class__, StepAction) or isinstance(action, StepAction)
+            self.step_actions.append(action)
+            if isinstance(action, StepActionWithContextValue):
+                self.compute_next_context_funs[action.key] = action
+            return self
+        raise RuntimeError(f'Condition does not match expected: {action.__class__.__name__}')
+
+    def if_not_stopping(self, action: Callable) -> D:
         """
         Adds an action to be performed on each item that does not match any stop condition.
 
         `action` The action to perform on each non-stopping item.
         Returns The current traversal instance.
         """
-        self.step_actions.append(Traversal.step_action(lambda it, context: action.apply(it, context) if not context.is_stopping else None))
+        self.step_actions.append(StepAction(lambda it, context: action(it, context) if not context.is_stopping else None))
         return self
 
 
-    def if_stopping(self, action: StepAction[T]) -> D:
+    def if_stopping(self, action: Callable) -> D:
         """
         Adds an action to be performed on each item that matches a stop condition.
 
         `action` The action to perform on each stopping item.
         Returns The current traversal instance.
         """
-        self.step_actions.append(Traversal.step_action(lambda it, context: action.apply(it, context) if context.is_stopping else None))
+        self.step_actions.append(StepAction(lambda it, context: action(it, context) if context.is_stopping else None))
         return self
 
     def copy_step_actions(self, other: Traversal[T, D]) -> D:

@@ -40,7 +40,7 @@ class Tracing:
     def network_trace_branching(network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
                                 action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
                                 queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]]=lambda: TraversalQueue.depth_first(),
-                                branch_queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]]=lambda: TraversalQueue.breadth_first(),
+                                branch_queue_factory: Callable[[], TraversalQueue[NetworkTrace[NetworkTraceStep[T]]]]=lambda: TraversalQueue.breadth_first(),
                                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None
                                 ) -> NetworkTrace[T]:
 

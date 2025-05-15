@@ -86,10 +86,10 @@ class RemovePhases(object):
             network_state_operators=state_operators,
             action_step_type=NetworkTraceActionType.ALL_STEPS,
             queue=WeightedPriorityQueue.process_queue(lambda it: len(it.data.phases_to_ebb)),
-            compute_data=ComputeData(compute_data)
+            compute_data=compute_data
         ).add_condition(state_operators.stop_at_open()) \
-        .add_step_action(Traversal.step_action(step_action)) \
-        .add_queue_condition(Traversal.queue_condition(queue_condition))
+        .add_step_action(step_action) \
+        .add_queue_condition(queue_condition)
 
     @staticmethod
     async def _ebb(state_operators: NetworkStateOperators, terminal: Terminal, phases_to_ebb: Set[SinglePhaseKind]) -> Set[SinglePhaseKind]:

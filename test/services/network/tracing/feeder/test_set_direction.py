@@ -58,7 +58,7 @@ class LoggingSetDirection(SetDirection) :
             print(f'Step Action {nts.path.from_terminal} -> {nts.path.to_terminal} {nts.path.from_terminal.normal_feeder_direction} {nts.path.from_terminal.current_feeder_direction} {nts.data}')
 
         traversal = (await super()._create_traversal(state_operators)) \
-            .add_step_action(Traversal.step_action(log_step))
+            .add_step_action(log_step)
 
         return traversal
 

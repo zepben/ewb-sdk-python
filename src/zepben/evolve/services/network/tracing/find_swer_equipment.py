@@ -12,7 +12,7 @@ from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feede
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 
-from zepben.evolve import NetworkService, Traversal
+from zepben.evolve import NetworkService
 
 __all__ = ["FindSwerEquipment"]
 
@@ -96,13 +96,11 @@ class FindSwerEquipment:
             if _is_swer_terminal(next_step.path.to_terminal) or isinstance(next_step.path.to_equipment, Switch):
                 return next_step.path.to_equipment not in swer_equipment
 
-        def step_action(step: NetworkTraceStep, context):
-            swer_equipment.add(step.path.to_equipment)
-
-        trace = self._create_trace(state_operators)
-        trace.add_queue_condition(Traversal.queue_condition(condition))
-
-        trace.add_step_action(Traversal.step_action(step_action))
+        trace = (
+            self._create_trace(state_operators)
+            .add_queue_condition(condition)
+            .add_step_action(lambda step, ctx: swer_equipment.add(step.path.to_equipment))
+        )
 
         for it in (t for t in transformer.terminals if _is_swer_terminal(t)):
             trace.reset()
@@ -115,12 +113,11 @@ class FindSwerEquipment:
             if 1 <= next_step.path.to_equipment.base_voltage_value <= 1000:
                 return next_step.path.to_equipment not in swer_equipment
 
-        def step_action(step: NetworkTraceStep, context):
-            swer_equipment.add(step.path.to_equipment)
-
-        trace = self._create_trace(state_operators)
-        trace.add_queue_condition(Traversal.queue_condition(condition))
-        trace.add_step_action(Traversal.step_action(step_action))
+        trace = (
+            self._create_trace(state_operators)
+            .add_queue_condition(condition)
+            .add_step_action(lambda step, ctx: swer_equipment.add(step.path.to_equipment))
+        )
 
         for terminal in transformer.terminals:
             if _is_non_swer_terminal(terminal):

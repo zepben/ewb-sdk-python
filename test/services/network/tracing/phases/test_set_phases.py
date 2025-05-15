@@ -24,7 +24,7 @@ class LoggingSetPhases(SetPhases) :
             print(f'{nts.path.from_terminal}->{nts.path.to_terminal}  :: {nts.path.from_terminal.phases} >< {nts.path.to_terminal.phases}')
 
         return (await super()._create_network_trace(state_operators)) \
-            .add_step_action(Traversal.step_action(log_step))
+            .add_step_action(log_step)
 
 SetPhases = LoggingSetPhases
 

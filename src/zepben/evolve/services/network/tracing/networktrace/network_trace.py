@@ -20,7 +20,6 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
-from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
@@ -68,7 +67,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
     def __init__(self,
                  network_state_operators: NetworkStateOperators,
-                 queue_type: Traversal.QueueType[NetworkTraceStep[T], 'NetworkTrace[T]'],
+                 queue_type: Union[Traversal.BasicQueueType, Traversal.BranchingQueueType],
                  parent: 'NetworkTrace[T]'=None,
                  action_type: NetworkTraceActionType=None
                  ):
@@ -157,7 +156,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         await super().run(can_stop_on_start_item=can_stop_on_start_item)
         return self
 
-    def add_condition(self, condition: TraversalCondition[T]) -> "NetworkTrace[T]":
+    def add_condition(self, condition: QueueCondition[T]) -> "NetworkTrace[T]":
         """
         Adds a traversal condition to the trace using the trace's [NetworkStateOperators] as the receiver.
 
@@ -172,7 +171,10 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         super().add_condition(condition)
         return self
 
-    def add_queue_condition(self, condition: QueueCondition[NetworkTraceStep[T]], step_type:NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
+    def add_queue_condition(self, condition: Union[Callable, QueueCondition[NetworkTraceStep[T]]], step_type:NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
+        if callable(condition):
+            return self.add_queue_condition(QueueCondition(condition))
+
         if step_type is None:
             return super().add_queue_condition(to_network_trace_queue_condition(condition, default_queue_condition_step_type(self._action_type), False))
         else:

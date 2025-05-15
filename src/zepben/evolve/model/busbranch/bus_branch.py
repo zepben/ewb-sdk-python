@@ -905,7 +905,7 @@ async def _group_negligible_impedance_terminals(
         BusBranchTrace(
             queue_next=Traversal.QueueNext(_queue_terminals_across_negligible_impedance(has_negligible_impedance))
         ).add_start_item(terminal)
-        .add_step_action(Traversal.step_action(_process_terminal(tg, has_negligible_impedance)))
+        .add_step_action(_process_terminal(tg, has_negligible_impedance))
     )
 
     await trace.run()
@@ -958,7 +958,7 @@ async def _group_common_ac_line_segment_terminals(acls: AcLineSegment) -> Termin
         BusBranchTrace(
             queue_next=Traversal.QueueNext(_queue_common_impedance_lines(common_acls, has_common_impedance))
         ).add_start_item(acls)
-        .add_step_action(Traversal.step_action(_process_acls(common_acls, connectivity_node_counter)))
+        .add_step_action(_process_acls(common_acls, connectivity_node_counter))
     )
 
     await trace.run()

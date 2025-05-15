@@ -19,7 +19,7 @@ async def connected_equipment_trace_with_logging(assets: Iterable[ConductingEqui
     """
     for asset in assets:
         trace = Tracing.network_trace()
-        trace.add_step_action(Traversal.step_action(_log_equipment))
+        trace.add_step_action(_log_equipment)
         await trace.run(asset, False)
 
 

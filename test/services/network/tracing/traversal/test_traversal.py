@@ -85,8 +85,8 @@ class TestTraversal:
             self.last_num = item
 
         await (_create_traversal()
-            .add_condition(NetworkTrace.stop_condition(lambda item, _: item == 2))
-            .add_step_action(NetworkTrace.step_action(step_action))
+            .add_condition(lambda item, _: item == 2)
+            .add_step_action(step_action)
             .run(1))
 
         assert self.last_num == 2
@@ -97,8 +97,8 @@ class TestTraversal:
             self.last_num = item
 
         await (_create_traversal()
-            .add_condition(NetworkTrace.queue_condition(lambda item, x, y, z: item < 3))
-            .add_step_action(NetworkTrace.step_action(step_action))
+            .add_condition(lambda item, x, y, z: item < 3)
+            .add_step_action(step_action)
             .run(1))
 
         assert self.last_num == 2
@@ -108,8 +108,8 @@ class TestTraversal:
         steps = []
 
         await (_create_traversal()
-            .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 3))
-            .add_step_action(NetworkTrace.step_action(lambda item, ctx: steps.append((item, ctx))))
+            .add_stop_condition(lambda item, _: item == 3)
+            .add_step_action(lambda item, ctx: steps.append((item, ctx)))
             .run(1))
 
         def check_item_ctx(step: Tuple[int, StepContext], item_val: int, ctx_stopping=False):
@@ -125,9 +125,9 @@ class TestTraversal:
             self.last_num = item
 
         await (_create_traversal()
-            .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 3))
-            .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item % 2 == 0))
-            .add_step_action(NetworkTrace.step_action(step_action))
+            .add_stop_condition(lambda item, _: item == 3)
+            .add_stop_condition(lambda item, _: item % 2 == 0)
+            .add_step_action(step_action)
             .run(1))
 
         assert self.last_num == 2
@@ -138,9 +138,9 @@ class TestTraversal:
             self.last_num = item
 
         await (_create_traversal()
-            .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 1))
-            .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 2))
-            .add_step_action(NetworkTrace.step_action(step_action))
+            .add_stop_condition(lambda item, _: item == 1)
+            .add_stop_condition(lambda item, _: item == 2)
+            .add_step_action(step_action)
             .run(1, can_stop_on_start_item=True))
 
         assert self.last_num == 1
@@ -151,9 +151,9 @@ class TestTraversal:
             self.last_num = item
 
         await (_create_traversal()
-               .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 1))
-               .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 2))
-               .add_step_action(NetworkTrace.step_action(step_action))
+               .add_stop_condition(lambda item, _: item == 1)
+               .add_stop_condition(lambda item, _: item == 2)
+               .add_step_action(step_action)
                .run(1, can_stop_on_start_item=False))
 
         assert self.last_num == 2
@@ -164,8 +164,8 @@ class TestTraversal:
             self.last_num = item
 
         await (_create_traversal()
-            .add_queue_condition(NetworkTrace.queue_condition(lambda next_item, x, y, z: next_item < 3))
-            .add_step_action(NetworkTrace.step_action(step_action))
+            .add_queue_condition(lambda next_item, x, y, z: next_item < 3)
+            .add_step_action(step_action)
             .run(1))
 
         assert self.last_num == 2
@@ -176,9 +176,9 @@ class TestTraversal:
             self.last_num = item
 
         await (_create_traversal()
-               .add_queue_condition(NetworkTrace.queue_condition(lambda next_item, x, y, z: next_item < 3))
-               .add_queue_condition(NetworkTrace.queue_condition(lambda next_item, x, y, z: next_item > 3))
-               .add_step_action(NetworkTrace.step_action(step_action))
+               .add_queue_condition(lambda next_item, x, y, z: next_item < 3)
+               .add_queue_condition(lambda next_item, x, y, z: next_item > 3)
+               .add_step_action(step_action)
                .run(1))
 
         assert self.last_num == 1
@@ -189,9 +189,9 @@ class TestTraversal:
         called2 = []
 
         await (_create_traversal()
-            .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 2))
-            .add_step_action(NetworkTrace.step_action(lambda x, y: called1.append(True)))
-            .add_step_action(NetworkTrace.step_action(lambda x, y: called2.append(True)))
+            .add_stop_condition(lambda item, _: item == 2)
+            .add_step_action(lambda x, y: called1.append(True))
+            .add_step_action(lambda x, y: called2.append(True))
             .run(1))
 
         assert len(called1) == 2
@@ -201,8 +201,8 @@ class TestTraversal:
     async def test_if_not_stopping_helper_only_calls_when_not_stopping(self):
         steps = []
         await (_create_traversal()
-            .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 3))
-            .if_not_stopping(NetworkTrace.step_action(lambda item, _: steps.append(item)))
+            .add_stop_condition(lambda item, _: item == 3)
+            .if_not_stopping(lambda item, _: steps.append(item))
             .run(1))
 
         assert steps == [1, 2]
@@ -211,8 +211,8 @@ class TestTraversal:
     async def test_if_stopping_helper_only_calls_when_stopping(self):
         steps = []
         await (_create_traversal()
-               .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 3))
-               .if_stopping(NetworkTrace.step_action(lambda item, _: steps.append(item)))
+               .add_stop_condition(lambda item, _: item == 3)
+               .if_stopping(lambda item, _: steps.append(item))
                .run(1))
 
         assert steps == [3]
@@ -232,8 +232,8 @@ class TestTraversal:
 
         await (_create_traversal()
             .add_context_value_computer(TestCVC('test'))
-            .add_step_action(NetworkTrace.step_action(step_action))
-            .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 2))
+            .add_step_action(step_action)
+            .add_stop_condition(lambda item, _: item == 2)
             .run(1))
 
         assert data_capture[1] == '1'
@@ -248,8 +248,8 @@ class TestTraversal:
         traversal = (_create_traversal()
                      .add_start_item(1)
                      .add_start_item(-1)
-                     .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: abs(item) == 2))
-                     .add_step_action(NetworkTrace.step_action(step_action)))
+                     .add_stop_condition(lambda item, _: abs(item) == 2)
+                     .add_step_action(step_action))
 
         assert traversal.start_items == deque([1, -1])
         await traversal.run()
@@ -262,8 +262,8 @@ class TestTraversal:
         steps = []
 
         await (_create_traversal(can_visit_item=lambda item, _: item < 0)
-            .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == -2))
-            .add_step_action(NetworkTrace.step_action(lambda item, _: steps.append(item)))
+            .add_stop_condition(lambda item, _: item == -2)
+            .add_step_action(lambda item, _: steps.append(item))
             .add_start_item(1)
             .add_start_item(-1)
             .run())
@@ -276,9 +276,9 @@ class TestTraversal:
         steps = []
 
         await (_create_traversal(can_action_item=lambda item, _: item % 2 == 1)
-               .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 2))
-               .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 3))
-               .add_step_action(NetworkTrace.step_action(lambda item, _: steps.append(item)))
+               .add_stop_condition(lambda item, _: item == 2)
+               .add_stop_condition(lambda item, _: item == 3)
+               .add_step_action(lambda item, _: steps.append(item))
                .run(1))
 
         assert steps == [1, 3]
@@ -291,8 +291,8 @@ class TestTraversal:
 
         reset_called = []
         traversal = (_create_traversal(on_reset=lambda: reset_called.append(True))
-                     .add_stop_condition(NetworkTrace.stop_condition(lambda item, _: item == 2))
-                     .add_step_action(NetworkTrace.step_action(step_action)))
+                     .add_stop_condition(lambda item, _: item == 2)
+                     .add_step_action(step_action))
 
         await traversal.run(1)
         await traversal.run(2)
@@ -308,8 +308,8 @@ class TestTraversal:
             steps[item] = ctx
 
         await(_create_branching_traversal()
-            .add_queue_condition(NetworkTrace.queue_condition(lambda  item, ctx, x, y: ctx.branch_depth <= 2))
-            .add_step_action(NetworkTrace.step_action(step_action))
+            .add_queue_condition(lambda  item, ctx, x, y: ctx.branch_depth <= 2)
+            .add_step_action(step_action)
             .run(1))
 
         assert not steps[1].is_branch_start_item

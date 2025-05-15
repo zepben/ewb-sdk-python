@@ -65,6 +65,6 @@ class ClearDirection:
                     lambda it: it.path.to_terminal.phases.num_phases),
             )
             .add_condition(state_operators.stop_at_open())
-            .add_queue_condition(Traversal.queue_condition(queue_condition))
-            .add_step_action(Traversal.step_action(step_action))
+            .add_queue_condition(queue_condition)
+            .add_step_action(step_action)
         )

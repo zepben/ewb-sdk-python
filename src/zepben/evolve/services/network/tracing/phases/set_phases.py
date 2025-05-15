@@ -162,8 +162,8 @@ class SetPhases:
                 queue_factory=lambda: WeightedPriorityQueue.process_queue(_get_weight),
                 compute_data=self._compute_next_phases_to_flow(state_operators)
             )
-            .add_queue_condition(Traversal.queue_condition(condition))
-            .add_step_action(Traversal.step_action(step_action))
+            .add_queue_condition(condition)
+            .add_step_action(step_action)
         )
 
     def _compute_next_phases_to_flow(self, state_operators: NetworkStateOperators) -> ComputeData[PhasesToFlow]:

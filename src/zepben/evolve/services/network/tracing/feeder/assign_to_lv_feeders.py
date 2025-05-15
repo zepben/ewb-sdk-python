@@ -98,23 +98,23 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
         def _reached_hv(ce: ConductingEquipment):
             return True if ce.base_voltage and ce.base_voltage.nominal_voltage >= 1000 else False
 
-        def stop_condition(next_step: NetworkTraceStep, ctx: StepContext):
-            return next_step.data
-
         def queue_condition(next_step: NetworkTraceStep, nctx: StepContext, step: NetworkTraceStep, ctx: StepContext):
             return next_step.data or not _reached_hv(next_step.path.to_equipment)
 
         async def step_action(nts: NetworkTraceStep, context):
             await self._process(nts.path, nts.data, context, terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
 
-        return (Tracing.network_trace(self.network_state_operators, NetworkTraceActionType.ALL_STEPS, compute_data=ComputeData(
-                        lambda _, __, next_path: next_path.to_equipment in lv_feeder_start_points)
-                    )
-                .add_condition(self.network_state_operators.stop_at_open())
-                .add_stop_condition(Traversal.stop_condition(stop_condition))
-                .add_queue_condition(Traversal.queue_condition(queue_condition))
-                .add_step_action(Traversal.step_action(step_action))
+        return (
+            Tracing.network_trace(
+                network_state_operators=self.network_state_operators,
+                action_step_type=NetworkTraceActionType.ALL_STEPS,
+                compute_data=(lambda _, __, next_path: next_path.to_equipment in lv_feeder_start_points)
             )
+            .add_condition(self.network_state_operators.stop_at_open())
+            .add_stop_condition(lambda step, ctx: step.data)
+            .add_queue_condition(queue_condition)
+            .add_step_action(step_action)
+        )
 
     async def _process(self,
                        step_path: NetworkTraceStep.Path,

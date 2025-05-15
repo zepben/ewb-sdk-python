@@ -20,7 +20,6 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace_step impo
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
-from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 
@@ -143,15 +142,6 @@ class AssignToFeedersInternal(BaseFeedersInternal):
         def _reached_substation_transformer(ce: ConductingEquipment):
             return True if isinstance(ce, PowerTransformer) and len(list(ce.substations)) > 0 else False
 
-        def stop_condition(next_step: NetworkTraceStep, ctx: StepContext):
-            return next_step.path.to_equipment in feeder_start_points
-
-        def queue_condition_a(next_step: NetworkTraceStep, nctx: StepContext, step: NetworkTraceStep, ctx: StepContext):
-            return not _reached_substation_transformer(next_step.path.to_equipment)
-
-        def queue_condition_b(next_step: NetworkTraceStep, nctx: StepContext, step: NetworkTraceStep, ctx: StepContext):
-            return not _reached_lv(next_step.path.to_equipment)
-
         async def step_action(nts: NetworkTraceStep, context: StepContext):
             await self._process(nts.path, context, terminal_to_aux_equipment, lv_feeder_start_points, feeders_to_assign)
 
@@ -159,10 +149,10 @@ class AssignToFeedersInternal(BaseFeedersInternal):
         return (
             Tracing.network_trace(self.network_state_operators, NetworkTraceActionType.ALL_STEPS)
                 .add_condition(self.network_state_operators.stop_at_open())
-                .add_stop_condition(Traversal.stop_condition(stop_condition))
-                .add_queue_condition(Traversal.queue_condition(queue_condition_a))
-                .add_queue_condition(Traversal.queue_condition(queue_condition_b))
-                .add_step_action(Traversal.step_action(step_action))
+                .add_stop_condition(lambda step, ctx: step.path.to_equipment in feeder_start_points)
+                .add_queue_condition(lambda step, ctx, _, __: not _reached_substation_transformer(step.path.to_equipment))
+                .add_queue_condition(lambda step, ctx, _, __: not _reached_lv(step.path.to_equipment))
+                .add_step_action(step_action)
         )
 
     async def _process(self,

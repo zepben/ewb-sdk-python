@@ -21,8 +21,8 @@ async def log_directions(*conducting_equipment: ConductingEquipment):
         print()
 
         trace = Tracing.network_trace()
-        trace.add_step_action(Traversal.step_action(_step))
-        trace.add_queue_condition(Traversal.queue_condition(lambda *args: True))
+        trace.add_step_action(_step)
+        trace.add_queue_condition(lambda *args: True)
         await trace.run(cond_equip, False)
 
 

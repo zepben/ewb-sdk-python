@@ -81,14 +81,16 @@ class SetDirection:
         def stop_condition(nts: NetworkTraceStep, *args):
             return nts.path.to_terminal.is_feeder_head_terminal() or self._reached_substation_transformer(nts.path.to_terminal)
 
-        return (Tracing.network_trace_branching(
-            network_state_operators=state_operators,
-            action_step_type=NetworkTraceActionType.ALL_STEPS,
-            compute_data=ComputeData(lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path))
-            ).add_condition(state_operators.stop_at_open())
-               .add_stop_condition(Traversal.stop_condition(stop_condition))
-               .add_queue_condition(Traversal.queue_condition(queue_condition))
-               .add_step_action(Traversal.step_action(step_action))
+        return (
+            Tracing.network_trace_branching(
+                network_state_operators=state_operators,
+                action_step_type=NetworkTraceActionType.ALL_STEPS,
+                compute_data=lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path)
+            )
+            .add_condition(state_operators.stop_at_open())
+            .add_stop_condition(stop_condition)
+            .add_queue_condition(queue_condition)
+            .add_step_action(step_action)
         )
 
     @staticmethod
