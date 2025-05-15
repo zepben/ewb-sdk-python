@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import Terminal, SinglePhaseKind, PhaseCode, PhaseStatus, NetworkStateOperators, NormalPhases, CurrentPhases
+from zepben.evolve import Terminal, SinglePhaseKind, PhaseCode, NetworkStateOperators, NormalPhases, CurrentPhases
 
 
 def test_normal_and_current_phases():

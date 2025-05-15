@@ -46,8 +46,8 @@ class ClearDirection:
         await trace.run(terminal, can_stop_on_start_item=False)
         return feeder_head_terminals
 
-    def _create_trace(self,
-                      state_operators: NetworkStateOperators,
+    @staticmethod
+    def _create_trace(state_operators: NetworkStateOperators,
                       visited_feeder_head_terminals: list[Terminal]
                       ) -> NetworkTrace[...]:
         def queue_condition(step: NetworkTraceStep, context: StepContext, _, __):

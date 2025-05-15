@@ -4,14 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TypeVar, TYPE_CHECKING, Generic
+from typing import TypeVar, Generic
 
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
 
-if TYPE_CHECKING:
-    T = TypeVar('T')
-    U = TypeVar('U')
+T = TypeVar('T')
+U = TypeVar('U')
 
 
 class QueueCondition(TraversalCondition[T], Generic[T]):

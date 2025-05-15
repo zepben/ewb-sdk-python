@@ -8,7 +8,7 @@ from typing import Optional, List
 import pytest
 
 from services.network.test_data.looping_network import create_looping_network
-from zepben.evolve import set_phases, ConductingEquipment, Tracing, NetworkStateOperators
+from zepben.evolve import ConductingEquipment, Tracing, NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
 
@@ -17,7 +17,7 @@ from zepben.evolve.services.network.tracing.networktrace.actions.tree_node impor
 async def test_downstream_tree():
     n = create_looping_network()
 
-    await set_phases().run(n)
+    await Tracing.set_phases().run(n)
     feeder_head = n.get("j0", ConductingEquipment)
     await Tracing.set_direction().run_terminal(feeder_head.get_terminal_by_sn(1))
 

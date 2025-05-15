@@ -5,7 +5,6 @@
 
 
 from typing import TypeVar, Generic
-from abc import ABC, abstractmethod
 
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext

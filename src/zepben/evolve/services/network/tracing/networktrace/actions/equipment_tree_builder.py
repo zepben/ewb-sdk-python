@@ -3,12 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import weakref
-from random import random
-from typing import List, Self
 import uuid
 
-from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import  ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.step_action import StepActionWithContextValue

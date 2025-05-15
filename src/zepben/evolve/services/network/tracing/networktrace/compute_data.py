@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar
+from typing import TypeVar, Generic
 
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
@@ -10,7 +10,7 @@ from zepben.evolve.services.network.tracing.traversal.step_context import StepCo
 T = TypeVar('T')
 
 
-class ComputeData[T]:
+class ComputeData(Generic[T]):
     """
     Functional interface used to compute contextual data stored on a NetworkTraceStep.
     """
@@ -30,13 +30,13 @@ class ComputeData[T]:
         """
         return self._func(current_step, current_context, next_path)
 
-class ComputeDataWithPaths[T]:
+class ComputeDataWithPaths(Generic[T]):
     """
     Functional interface used to compute contextual data stored on a NetworkTraceStep. This can be used when the
     contextual data can only be computed by knowing all the next paths that can be stepped to from a given step.
     """
     def __init__(self, func):
-        self._func = func or (lambda: None)
+        self._func = func or (lambda *args: None)
 
     def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path, next_paths: list[NetworkTraceStep.Path, ...]) -> T:
         """

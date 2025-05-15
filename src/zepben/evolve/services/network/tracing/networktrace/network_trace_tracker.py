@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Set
 
-from zepben.evolve import Terminal, SinglePhaseKind, NominalPhasePath
+from zepben.evolve import Terminal, SinglePhaseKind
 
 
 class NetworkTraceTracker:
@@ -30,8 +30,9 @@ class NetworkTraceTracker:
         """Unmarks this Terminal's Phase as visited"""
         self._visited.clear()
 
-    def _get_key(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> ... :
-        if len(phases) < 1:
+    @staticmethod
+    def _get_key(terminal: Terminal, phases: Set[SinglePhaseKind]) -> ... :
+        if phases and len(phases) < 1:
             return terminal
         else:
             return terminal, phases

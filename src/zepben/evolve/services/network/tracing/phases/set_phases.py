@@ -8,13 +8,13 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Union, Set, Iterable, List
 
-from zepben.evolve import IdentifiedObject
-from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 from zepben.evolve.exceptions import TracingException, PhaseException
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from zepben.evolve.services.network.network_service import NetworkService
+from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_internal import TerminalConnectivityInternal
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
@@ -22,9 +22,8 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace import Ne
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-from zepben.evolve.services.network.network_service import NetworkService
-from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
+from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 
 __all__ = ["SetPhases"]
 
@@ -199,12 +198,12 @@ class SetPhases:
         else:
             return TerminalConnectivityConnected().terminal_connectivity(from_terminal, to_terminal, phases_to_flow).nominal_phase_paths
 
-    async def _flow_phases(self,
-                           state_operators: NetworkStateOperators,
+    @staticmethod
+    async def _flow_phases(state_operators: NetworkStateOperators,
                            from_terminal: Terminal,
                            to_terminal: Terminal,
                            nominal_phase_paths: Iterable[NominalPhasePath]
-    ) -> bool:
+                           ) -> bool:
 
         from_phases = state_operators.phase_status(from_terminal)
         to_phases = state_operators.phase_status(to_terminal)

@@ -2,12 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from collections import deque, defaultdict
+from collections import deque
 from typing import Callable, TypeVar, Tuple
 
 import pytest
 
-from zepben.evolve import StepContext, Traversal, TraversalQueue, Tracing, NetworkTrace, ContextValueComputer
+from zepben.evolve import StepContext, Traversal, TraversalQueue, NetworkTrace, ContextValueComputer
 from zepben.evolve.services.network.tracing.traversal.traversal import D
 
 T = TypeVar('T')
@@ -73,7 +73,7 @@ def _create_branching_traversal() -> TraversalTest[int]:
                          can_action_item=lambda x, y: True,
                          on_reset=lambda: None)
 
-class TestTraversal():
+class TestTraversal:
 
     def setup_method(self, test_method) -> None:
         self.last_num = None

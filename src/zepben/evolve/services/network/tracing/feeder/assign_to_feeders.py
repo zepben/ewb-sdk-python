@@ -3,11 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Collection
-from typing import Set, Iterable, Union, Generator
+from typing import Iterable, Generator, Union
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Equipment, LvFeeder
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, EquipmentContainer, Site
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, EquipmentContainer
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.services.network.network_service import NetworkService
@@ -31,8 +31,8 @@ class AssignToFeeders:
     This class is backed by a `NetworkTrace`.
     """
 
-    async def run(self,
-                  network: NetworkService,
+    @staticmethod
+    async def run(network: NetworkService,
                   network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
                   start_terminal: Terminal=None):
         """
@@ -68,12 +68,12 @@ class BaseFeedersInternal:
             if scheme.system is not None]
                                                   )
 
-    def _feeder_energizes(self, feeders: Iterable[Feeder], lv_feeders: Iterable[LvFeeder]):
+    def _feeder_energizes(self, feeders: Iterable[Union[LvFeeder, Feeder]], lv_feeders: Iterable[LvFeeder]):
         for feeder in feeders:
             for lv_feeder in lv_feeders:
                 self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
 
-    def _feeder_try_energize_lv_feeders(self, feeders: Iterable[Feeder], to_equipment: PowerTransformer, lv_feeder_start_points: Set[ConductingEquipment]):
+    def _feeder_try_energize_lv_feeders(self, feeders: Iterable[Feeder], lv_feeder_start_points: Generator[ConductingEquipment, None, None], to_equipment: PowerTransformer):
         sites = []
         for eq in to_equipment:
             sites.extend(eq.sites)
@@ -169,7 +169,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                  step_path: NetworkTraceStep.Path,
                  step_context: StepContext,
                  terminal_to_aux_equipment: dict[Terminal, Collection[AuxiliaryEquipment]],
-                 lv_feeder_start_points: Set[ConductingEquipment],
+                 lv_feeder_start_points: Generator[ConductingEquipment, None, None],
                  feeders_to_assign: list[Feeder]):
 
         if step_path.traced_internally and not step_context.is_start_item:

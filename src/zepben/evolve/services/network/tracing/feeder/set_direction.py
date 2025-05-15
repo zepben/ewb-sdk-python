@@ -31,11 +31,11 @@ class SetDirection:
     This class is backed by a [BranchRecursiveTraversal].
     """
 
-    def _compute_data(self,
-                            reprocessed_loop_terminals: list[Terminal],
-                            state_operators: NetworkStateOperators,
-                            step: NetworkTraceStep[FeederDirection],
-                            next_path: NetworkTraceStep.Path) -> FeederDirection:
+    @staticmethod
+    def _compute_data(reprocessed_loop_terminals: list[Terminal],
+                      state_operators: NetworkStateOperators,
+                      step: NetworkTraceStep[FeederDirection],
+                      next_path: NetworkTraceStep.Path) -> FeederDirection:
 
         if next_path.to_equipment is BusbarSection:
             return FeederDirection.CONNECTOR
@@ -108,6 +108,7 @@ class SetDirection:
          Apply feeder directions from all feeder head terminals in the network.
 
          :param network: The network in which to apply feeder directions.
+        :param network_state_operators: The `NetworkStateOperators` to be used when setting feeder direction
          """
         for terminal in (f.normal_head_terminal for f in network.objects(Feeder) if f.normal_head_terminal):
             head_terminal = terminal.conducting_equipment
@@ -121,6 +122,7 @@ class SetDirection:
          Apply [FeederDirection.DOWNSTREAM] from the [terminal].
 
          :param terminal: The terminal to start applying feeder direction from.
+        :param network_state_operators: The `NetworkStateOperators` to be used when setting feeder direction
          """
         trav = await self._create_traversal(network_state_operators)
         return await trav.run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False)

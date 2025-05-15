@@ -21,7 +21,7 @@ from zepben.evolve.services.network.tracing.traversal.queue_condition import Que
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
-from zepben.evolve import TraversalQueue
+from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
 T = TypeVar('T')
@@ -64,8 +64,6 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     If you do not need to trace loops both ways or have no loops, do not use a branching instance as it is less efficient than the non-branching one.
 
     To create instances of this class, use the factory methods provided in the [Tracing] object.
-
-    :param T: the type of [NetworkTraceStep.data]
     """
 
     def __init__(self,
@@ -79,7 +77,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         self.network_state_operators = network_state_operators
         self._action_type = action_type
 
-        self.tracker = NetworkTraceTracker()
+        self._tracker = NetworkTraceTracker()
 
         super().__init__(self._queue_type, parent)
 
@@ -125,7 +123,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
         :param start: The starting [Terminal] or [ConductingEquipment] for the trace.
         :param data: The data associated with the start step.
-        :param phases: Phases to trace; `null` to ignore phases.
+        :param phases: Phases to trace; `None` to ignore phases.
         """
         if isinstance(start, Terminal):
             start_path = NetworkTraceStep.Path(start, start, self.start_nominal_phase_path(phases))
@@ -150,7 +148,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
         :param start: The starting [Terminal] or [ConductingEquipment] for the trace.
         :param data: The data associated with the start step.
-        :param phases: Phases to trace; `null` to ignore phases.
+        :param phases: Phases to trace; `None` to ignore phases.
         :param can_stop_on_start_item: indicates whether the trace should check stop conditions on start items.
         """
         if start is not None:
@@ -166,7 +164,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         This overload primarily exists to enable a DSL-like syntax for adding predefined traversal conditions to the trace.
         For example, to configure the trace to stop at open points using the [Conditions.stopAtOpen] factory, you can use:
 
-        >>> trace.addCondition(network_state_operators.stop_at_open())
+        >>> NetworkTrace().add_condition(NetworkStateOperators.NORMAL.stop_at_open())
 
         :param condition: A lambda function that returns a traversal condition.
         :returns: This [NetworkTrace] instance
@@ -184,7 +182,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return self._action_type(item, context, self.has_visited)
 
     def on_reset(self):
-        self.tracker.clear()
+        self._tracker.clear()
 
     def can_visit_item(self, item: T, context: StepContext) -> bool:
         return self.visit(item.path.to_terminal, item.path.to_phases_set())
@@ -195,29 +193,30 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     def create_new_this(self) -> 'NetworkTrace[T]':
         return NetworkTrace(self.network_state_operators, self._queue_type, self, self._action_type)
 
-    def start_nominal_phase_path(self, phases: PhaseCode) -> list[NominalPhasePath]:
+    @staticmethod
+    def start_nominal_phase_path(phases: PhaseCode) -> list[NominalPhasePath]:
         return [NominalPhasePath(it, it) for it in phases.single_phases] if phases and phases.single_phases else []
 
     def has_visited(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
         parent = self.parent
         while parent is not None:
-            if parent.tracker.has_visited(terminal, phases):
+            if parent._tracker.has_visited(terminal, phases):
                 return True
             parent = parent.parent
 
-        return self.tracker.has_visited(terminal, phases)
+        return self._tracker.has_visited(terminal, phases)
 
     def visit(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
         parent = self.parent
         while parent is not None:
-            if parent.tracker.has_visited(terminal, phases):
+            if parent._tracker.has_visited(terminal, phases):
                 return False
             parent = parent.parent
 
-        return self.tracker.visit(terminal, phases)
+        return self._tracker.visit(terminal, phases)
 
 
-def to_network_trace_queue_condition(queue_condition: NetworkTraceActionType, step_type: NetworkTraceStep.Type, override_step_type: bool):
+def to_network_trace_queue_condition(queue_condition: QueueCondition[NetworkTraceStep[T]], step_type: NetworkTraceStep.Type, override_step_type: bool):
     if isinstance(queue_condition, NetworkTraceQueueCondition) and not override_step_type:
         return queue_condition
     else:

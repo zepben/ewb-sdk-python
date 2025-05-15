@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Set, Union
+from typing import Set, Union, Generator, AsyncGenerator
 
 from typing_extensions import TypeVar
 
@@ -41,11 +41,11 @@ class FindSwerEquipment:
         :return: A `Set` of `ConductingEquipment` on `Feeder` that is SWER, or energised via SWER.
         """
         if isinstance(to_process, Feeder):
-            return await self.find_on_feeder(to_process, network_state_operators)
+            return set(await self.find_on_feeder(to_process, network_state_operators))
         elif isinstance(to_process, NetworkService):
-            return await self.find_all(to_process, network_state_operators)
+            return set([item async for item in self.find_all(to_process, network_state_operators)])
 
-    async def find_all(self, network_service: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
+    async def find_all(self, network_service: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> AsyncGenerator[ConductingEquipment, None]:
         """
         Find the `ConductingEquipment` on any `Feeder` in a `NetworkService` which is SWER. This will include any equipment on the LV network that is energised
         via SWER.
@@ -55,16 +55,16 @@ class FindSwerEquipment:
 
         :return: A `Set` of `ConductingEquipment` on `Feeder` that is SWER, or energised via SWER.
         """
-        ce = []
         for feeder in network_service.objects(Feeder):
-            ce.extend(await self.find_on_feeder(feeder, network_state_operators))
-        return set(ce)
+            for item in await self.find_on_feeder(feeder, network_state_operators):
+                yield item
 
     async def find_on_feeder(self, feeder: Feeder, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
         """
         Find the `ConductingEquipment` on a `Feeder` which is SWER. This will include any equipment on the LV network that is energised via SWER.
 
         :param feeder: The `Feeder` to process.
+        :param network_state_operators: The `NetworkStateOperators` to be used when finding SWER equipment
 
         :return: A `Set` of `ConductingEquipment` on `feeder` that is SWER, or energised via SWER.
         """
@@ -77,10 +77,10 @@ class FindSwerEquipment:
                 if _has_swer_terminal(equipment) and _has_non_swer_terminal(equipment):
                     swer_equipment.add(equipment)
                     await self._trace_from(network_state_operators, equipment, swer_equipment)
-
         return swer_equipment
 
-    def _create_trace(self, state_operators: NetworkStateOperators) -> NetworkTrace[T]:
+    @staticmethod
+    def _create_trace(state_operators: NetworkStateOperators) -> NetworkTrace[T]:
         return Tracing.network_trace(state_operators).add_condition(state_operators.stop_at_open())
 
     async def _trace_from(self, state_operators: NetworkStateOperators, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):

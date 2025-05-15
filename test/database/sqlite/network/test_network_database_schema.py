@@ -12,23 +12,6 @@ from sqlite3 import Connection
 
 import pytest
 from hypothesis import given, settings, HealthCheck, assume
-from zepben.evolve import IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, \
-    ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, AssetOwner, Pole, Streetlight, Meter, UsagePoint, Location, Organisation, \
-    OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, Feeder, GeographicalRegion, Site, SubGeographicalRegion, Substation, Terminal, \
-    EquivalentBranch, Accumulator, Analog, Control, Discrete, RemoteControl, RemoteSource, BatteryUnit, PhotoVoltaicUnit, \
-    PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, EnergyConsumer, \
-    EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, PerLengthSequenceImpedance, \
-    PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, NetworkDatabaseWriter, \
-    NetworkDatabaseReader, NetworkServiceComparator, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, \
-    PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
-    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, StreetAddress, TownDetail, StreetDetail, GroundingImpedance, \
-    PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators, \
-    NetworkTraceStep
-from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
-from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
-from zepben.evolve.services.common import resolver
-from zepben.evolve.services.network.tracing.networktrace import tracing
 
 from cim.cim_creators import create_cable_info, create_no_load_test, create_open_circuit_test, create_overhead_wire_info, create_power_transformer_info, \
     create_short_circuit_test, create_shunt_compensator_info, create_transformer_end_info, create_transformer_tank_info, create_asset_owner, create_pole, \
@@ -47,6 +30,22 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_pan_demand_response_function, create_battery_control, create_static_var_compensator, create_clamp, create_cut
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
+from zepben.evolve import IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, \
+    ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, AssetOwner, Pole, Streetlight, Meter, UsagePoint, Location, Organisation, \
+    OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, Feeder, GeographicalRegion, Site, SubGeographicalRegion, Substation, Terminal, \
+    EquivalentBranch, Accumulator, Analog, Control, Discrete, RemoteControl, RemoteSource, BatteryUnit, PhotoVoltaicUnit, \
+    PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, EnergyConsumer, \
+    EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, PerLengthSequenceImpedance, \
+    PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, NetworkDatabaseWriter, \
+    NetworkDatabaseReader, NetworkServiceComparator, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, \
+    PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
+    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, StreetAddress, TownDetail, StreetDetail, GroundingImpedance, \
+    PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators, \
+    NetworkTraceStep
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
+from zepben.evolve.services.common import resolver
 
 
 # FIXME: see Line [305]

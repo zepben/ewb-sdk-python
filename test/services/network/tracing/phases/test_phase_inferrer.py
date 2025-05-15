@@ -449,8 +449,8 @@ class TestPhaseInferrer:
         self._validate_returned_phases(network, changes, ['c6'])
         self._validate_log(caplog, correct=["c6", 'c6'])
 
-    def _validate_returned_phases(self,
-                                  network: NetworkService,
+    @staticmethod
+    def _validate_returned_phases(network: NetworkService,
                                   returned_phases: tuple[List[PhaseInferrer.InferredPhase], List[PhaseInferrer.InferredPhase]],
                                   correct: List[str]):
         def check_phases(phases):

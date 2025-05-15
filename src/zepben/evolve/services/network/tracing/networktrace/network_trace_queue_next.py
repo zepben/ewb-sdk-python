@@ -66,7 +66,8 @@ class NetworkTraceQueueNext:
             for terminal in next_terminals:
                 yield NetworkTraceStep.Path(path.to_terminal, terminal)
 
-    def _next_terminals(self, is_in_service: CheckInService, path: NetworkTraceStep.Path) -> Iterable[Terminal]:
+    @staticmethod
+    def _next_terminals(is_in_service: CheckInService, path: NetworkTraceStep.Path) -> Iterable[Terminal]:
         def __next_terminals():
             if path.traced_internally:
                 # We need to step externally to connected terminals. However:

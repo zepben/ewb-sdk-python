@@ -119,7 +119,7 @@ class NetworkDatabaseReader(BaseDatabaseReader):
             inferred_phases[ce] = (inferred_phases[ce] if inferred_phases[ce].suspect else it)
 
         for phase in inferred_phases:
-            self._logger.warn(f"*** Action Required *** {phase.description()}")
+            self._logger.warning(f"*** Action Required *** {phase.description()}")
 
     def _validate_equipment_containers(self):
         missing_containers = [it for it in self.service.objects(Equipment) if not it.containers]

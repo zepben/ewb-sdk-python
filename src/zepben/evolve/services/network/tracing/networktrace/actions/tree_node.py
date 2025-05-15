@@ -3,8 +3,6 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import weakref
-from abc import ABC, abstractmethod
 from typing import Self, List, TypeVar, Generic
 
 from zepben.evolve import IdentifiedObject

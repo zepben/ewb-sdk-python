@@ -2,9 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import TypeVar, Generic
 
+T = TypeVar('T')
 
-class StepContext:
+class StepContext(Generic[T]):
     """
     Represents the context of a traversal step, holding information about the traversal state and the ability to store arbitrary values with the context.
     This context is passed to conditions and actions during a traversal to provide additional information about each step.
@@ -37,7 +39,7 @@ class StepContext:
         """
         self._values[key] = value
 
-    def get_value(self, key: str):
+    def get_value(self, key: str) -> T:
         """
         Retrieves a context value associated with the specified key.
 

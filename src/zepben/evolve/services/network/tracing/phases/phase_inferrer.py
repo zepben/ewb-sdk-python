@@ -41,6 +41,7 @@ class PhaseInferrer:
         Infer the missing phases on the specified `network`.
 
         :param network: The `NetworkService` to infer phases on.
+        :param network_state_operators: The `NetworkStateOperators` to be used when inferring phases
         """
         tracking: Dict[ConductingEquipment, bool] = {}
 

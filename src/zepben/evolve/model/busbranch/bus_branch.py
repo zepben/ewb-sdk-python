@@ -911,7 +911,7 @@ async def _group_negligible_impedance_terminals(
     await trace.run()
     return tg
 
-def _create_traversal_step_object(next_item: Terminal) -> BusBranchTraceStep:
+def _create_traversal_step_object(next_item: Union[Terminal, AcLineSegment]) -> BusBranchTraceStep:
     return BusBranchTraceStep(next_item)
 
 def _process_terminal(

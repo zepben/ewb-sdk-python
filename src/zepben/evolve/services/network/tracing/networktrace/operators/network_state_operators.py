@@ -56,7 +56,8 @@ class NormalNetworkStateOperators(NetworkStateOperators):
         PhaseStateOperators.NORMAL
     ]
 
-    def condition(self):
+    @staticmethod
+    def condition():
         return NetworkStateOperators.NORMAL
 
 class CurrentNetworkStateOperators(NetworkStateOperators):
@@ -71,7 +72,8 @@ class CurrentNetworkStateOperators(NetworkStateOperators):
         PhaseStateOperators.CURRENT,
     ]
 
-    def condition(self):
+    @staticmethod
+    def condition():
         return NetworkStateOperators.CURRENT
 
 

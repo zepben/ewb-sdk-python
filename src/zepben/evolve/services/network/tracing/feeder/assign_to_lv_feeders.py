@@ -3,29 +3,28 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Iterable
-from typing import Set, Collection, List, Generator
+from typing import Collection, List, Generator
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Traversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.services.network.network_service import NetworkService
-from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import BaseFeedersInternal
-from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
-from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
 
 __all__ = ["AssignToLvFeeders"]
 
 
 class AssignToLvFeeders:
-    async def run(self,
-                  network: NetworkService,
+    @staticmethod
+    async def run(network: NetworkService,
                   network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
                   start_terminal: Terminal=None):
         await AssignToLvFeedersInternal(network_state_operators).run(network, start_terminal)
@@ -45,6 +44,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
         Assign equipment to each feeder in the specified network.
 
         :param network: The network containing the feeders to process
+        :param start_terminal: get the lv feeders for this `Terminal`s `ConductingEquipment`
         """
 
         lv_feeder_start_points = network.lv_feeder_start_points

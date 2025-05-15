@@ -5,12 +5,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Set, Union
+from typing import Set, Union
 
-from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
-from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
-from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve import NetworkService
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
@@ -18,8 +15,11 @@ from zepben.evolve.services.network.tracing.networktrace.compute_data import Com
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
-from zepben.evolve import NetworkService
 
 
 class EbbPhases:
@@ -48,7 +48,8 @@ class RemovePhases(object):
 
         return await self._run_with_phases_to_ebb(start, nominal_phases_to_ebb, network_state_operators)
 
-    async def _run_with_network(self, network_service: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+    @staticmethod
+    async def _run_with_network(network_service: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
         for t in network_service.objects(Terminal):
             t.traced_phases.phase_status = 0
 
@@ -90,7 +91,8 @@ class RemovePhases(object):
         .add_step_action(Traversal.step_action(step_action)) \
         .add_queue_condition(Traversal.queue_condition(queue_condition))
 
-    async def _ebb(self, state_operators: NetworkStateOperators, terminal: Terminal, phases_to_ebb: Set[SinglePhaseKind]) -> Set[SinglePhaseKind]:
+    @staticmethod
+    async def _ebb(state_operators: NetworkStateOperators, terminal: Terminal, phases_to_ebb: Set[SinglePhaseKind]) -> Set[SinglePhaseKind]:
         phases = state_operators.phase_status(terminal)
         for phase in phases_to_ebb:
             if phases[phase] != SinglePhaseKind.NONE:

@@ -15,8 +15,6 @@ from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, Energy
     PowerTransformerEnd, PowerTransformer, EnergyConsumer, \
     PowerElectronicsConnection
 
-from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases as set_phases
-
 
 def null_action(_):
     """

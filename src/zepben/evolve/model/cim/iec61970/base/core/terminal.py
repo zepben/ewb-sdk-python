@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-from dataclasses import field
 from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.model.cim.iec61970.base.core.equipment import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 from zepben.evolve.model.phases import TracedPhases
 

@@ -2,12 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Set
 
 from typing_extensions import TypeVar
 
-from zepben.evolve.services.network.tracing.traversal.traversal import Traversal, TraversalQueue
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal, TraversalQueue
 
 T = TypeVar('T')
 
@@ -39,21 +38,25 @@ class BusBranchTracker:
         """Clear the visit state tracker"""
         self._visited.clear()
 
-    def _get_key(self, item: BusBranchTraceStep):
+    @staticmethod
+    def _get_key(item: BusBranchTraceStep):
         return item.identified_object
 
 
 class BusBranchTrace(Traversal):
     def __init__(self, queue_next: Traversal.QueueNext):
-        self.tracker = BusBranchTracker()
+        self._tracker = BusBranchTracker()
         queue_type = Traversal.BasicQueueType(
             queue_next=queue_next,
             queue=TraversalQueue.depth_first()
         )
         super().__init__(queue_type)
 
+    def on_reset(self):
+        self._tracker.clear()
+
     def can_visit_item(self, item: BusBranchTraceStep, context: StepContext) -> bool:
-        return self.tracker.visit(item)
+        return self._tracker.visit(item)
 
     def add_start_item(self, item: T) -> 'BusBranchTrace':
         super().add_start_item(BusBranchTraceStep(item))

@@ -10,10 +10,10 @@ from zepben.evolve.services.network.tracing.networktrace.conditions.open_conditi
 
 
 
-def mock_nts(type: NetworkTraceStep.Type=None, path:NetworkTraceStep.Path=None) -> NetworkTraceStep:
+def mock_nts(step_type: NetworkTraceStep.Type=None, path:NetworkTraceStep.Path=None) -> NetworkTraceStep:
     next_step = MagicMock(spec=NetworkTraceStep)
-    if type:
-        next_step.type = lambda: type
+    if step_type:
+        next_step.type = lambda: step_type
 
     if path:
         next_step.path = path
@@ -35,7 +35,7 @@ class TestOpenCondition:
     def test_always_queues_external_steps(self):
         is_open = Callable[[Switch, SinglePhaseKind], bool]
         spk = MagicMock(spec=SinglePhaseKind)
-        next_step = mock_nts(type=NetworkTraceStep.Type.EXTERNAL)
+        next_step = mock_nts(step_type=NetworkTraceStep.Type.EXTERNAL)
 
         assert OpenCondition(is_open, spk).should_queue(*should_queue_params(next_step))
 
@@ -45,7 +45,7 @@ class TestOpenCondition:
 
         next_path = mock_nts_path(to_equipment=MagicMock(spec=ConductingEquipment))
         next_step = mock_nts(
-            type=NetworkTraceStep.Type.INTERNAL,
+            step_type=NetworkTraceStep.Type.INTERNAL,
             path=next_path)
 
         assert OpenCondition(MagicMock(spec=is_open), spk).should_queue(*should_queue_params(next_step))
@@ -54,11 +54,11 @@ class TestOpenCondition:
         switch = MagicMock(spec=Switch)
         spk = MagicMock(spec=SinglePhaseKind)
 
-        is_open = lambda switch, _spk: False
+        is_open = lambda _, _spk: False
 
         next_path = mock_nts_path(to_equipment=switch)
         next_step = mock_nts(
-            type=NetworkTraceStep.Type.INTERNAL,
+            step_type=NetworkTraceStep.Type.INTERNAL,
             path=next_path
         )
 
@@ -68,11 +68,11 @@ class TestOpenCondition:
         switch = MagicMock(spec=Switch)
         spk = MagicMock(spec=SinglePhaseKind)
 
-        is_open = lambda switch, _spk: True
+        is_open = lambda _, _spk: True
 
         next_path = mock_nts_path(to_equipment=switch)
         next_step = mock_nts(
-            type=NetworkTraceStep.Type.INTERNAL,
+            step_type=NetworkTraceStep.Type.INTERNAL,
             path=next_path
         )
 

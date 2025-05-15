@@ -2,12 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from __future__ import  annotations
+from __future__ import annotations
 
-from enum import Enum
 from dataclasses import dataclass, field
-from typing import Set, Generic, TypeVar, Tuple, TYPE_CHECKING
-
+from enum import Enum
+from typing import Set, Generic, TypeVar, TYPE_CHECKING, List
 
 from zepben.evolve import SinglePhaseKind
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
@@ -47,7 +46,7 @@ class NetworkTraceStep(Generic[T]):
         """
         from_terminal: Terminal
         to_terminal: Terminal
-        nominal_phase_paths: Tuple[NominalPhasePath] = field(default_factory=list)
+        nominal_phase_paths: List[NominalPhasePath] = field(default_factory=list)
 
         def to_phases_set(self) -> Set[SinglePhaseKind]:
             if len(self.nominal_phase_paths) == 0:
