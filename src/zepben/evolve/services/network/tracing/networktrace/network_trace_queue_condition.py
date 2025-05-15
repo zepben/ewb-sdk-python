@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import abstractmethod
-from typing import TypeVar
+from typing import TypeVar, Generic
 
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
@@ -12,7 +12,7 @@ from zepben.evolve.services.network.tracing.traversal.step_context import StepCo
 T = TypeVar('T')
 
 
-class NetworkTraceQueueCondition[T](QueueCondition[NetworkTraceStep[T]]):
+class NetworkTraceQueueCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]):
     step_type:NetworkTraceStep.Type
 
     def __init__(self, step_type: NetworkTraceStep.Type):
@@ -47,7 +47,7 @@ class NetworkTraceQueueCondition[T](QueueCondition[NetworkTraceStep[T]]):
         return DelegatedNetworkTraceQueueCondition(step_type, condition)
 
 
-class DelegatedNetworkTraceQueueCondition[T](NetworkTraceQueueCondition[T]):
+class DelegatedNetworkTraceQueueCondition(NetworkTraceQueueCondition[T], Generic[T]):
     def __init__(self, step_type: NetworkTraceStep.Type, delegate: QueueCondition[NetworkTraceStep[T]]):
         super().__init__(step_type)
         self.delegate = delegate

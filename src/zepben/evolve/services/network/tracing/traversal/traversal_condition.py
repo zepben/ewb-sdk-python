@@ -4,10 +4,10 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from abc import ABC
-from typing import TypeVar
+from typing import TypeVar, Generic
 
 T = TypeVar('T')
 
-class TraversalCondition[T](ABC):
+class TraversalCondition(ABC, Generic[T]):
     def __init__(self, _func):
         self._func = _func

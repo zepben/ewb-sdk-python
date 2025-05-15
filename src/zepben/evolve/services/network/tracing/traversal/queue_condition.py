@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TypeVar, TYPE_CHECKING
+from typing import TypeVar, TYPE_CHECKING, Generic
 
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     U = TypeVar('U')
 
 
-class QueueCondition[T](TraversalCondition[T]):
+class QueueCondition(TraversalCondition[T], Generic[T]):
     """
     Functional interface representing a condition that determines whether a traversal should queue a next item.
 
@@ -51,7 +51,7 @@ class QueueCondition[T](TraversalCondition[T]):
 
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
 
-class QueueConditionWithContextValue[T, U](QueueCondition[T], TypedContextValueComputer[T, U]):
+class QueueConditionWithContextValue(QueueCondition[T], TypedContextValueComputer[T, U], Generic[T, U]):
     """
     Interface representing a queue condition that requires a value stored in the [StepContext] to determine if an item should be queued.
 
