@@ -14,11 +14,11 @@ class NetworkTraceTracker:
     def __init__(self):
         self._visited = list()
 
-    def has_visited(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> bool:
+    def has_visited(self, terminal: Terminal, phases: Set[SinglePhaseKind]=None) -> bool:
         """Returns True if this Terminal's Phase has been visited, False otherwise"""
         return self._get_key(terminal, phases) in self._visited
 
-    def visit(self, terminal: Terminal, phases: Set[SinglePhaseKind]) -> bool:
+    def visit(self, terminal: Terminal, phases: Set[SinglePhaseKind]=None) -> bool:
         """Marks this Terminal's Phase as visited"""
         key = self._get_key(terminal, phases)
         if key not in self._visited:
