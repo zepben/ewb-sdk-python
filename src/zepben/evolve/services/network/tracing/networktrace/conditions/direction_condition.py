@@ -5,7 +5,7 @@
 from __future__ import  annotations
 
 from collections.abc import Callable
-from typing import TypeVar, TYPE_CHECKING
+from typing import TypeVar, TYPE_CHECKING, Generic
 
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 T = TypeVar('T')
 
 
-class DirectionCondition[T](QueueCondition[NetworkTraceStep[T]]):
+class DirectionCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]):
 
     def __init__(self, direction: FeederDirection, get_direction: Callable[[Terminal], FeederDirection]):
         self.direction = direction
