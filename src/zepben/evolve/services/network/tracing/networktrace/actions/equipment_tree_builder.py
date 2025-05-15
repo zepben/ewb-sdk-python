@@ -15,6 +15,22 @@ EquipmentTreeNode = TreeNode[ConductingEquipment]
 
 
 class EquipmentTreeBuilder(StepActionWithContextValue):
+    """
+    
+    A `StepAction` that can be added to a `NetworkTrace` to build a tree structure representing the paths taken during a trace.
+    The `_roots` are the start items of the trace and the children of a tree node represent the next step paths from a given step in the trace.
+    
+    eg:
+
+    >>> from zepben.evolve import Tracing, NetworkStateOperators
+    >>>
+    >>> tree_builder = EquipmentTreeBuilder()
+    >>> state_operators = NetworkStateOperators.NORMAL
+    >>> (Tracing.network_trace_branching(network_state_operators=state_operators)
+    >>>     .add_condition(state_operators.downstream())
+    >>>     .add_step_action(tree_builder)).run()
+    """
+
     _roots: dict[ConductingEquipment, EquipmentTreeNode]={}
 
     def __init__(self):
