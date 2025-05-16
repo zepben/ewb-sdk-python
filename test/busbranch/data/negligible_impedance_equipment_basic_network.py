@@ -33,7 +33,7 @@ def negligible_impedance_equipment_basic_network(nie_constructor) -> NetworkServ
     # NegligibleImpedanceEquipment1
     nie1 = nie_constructor("nie1")
     network.add(nie1)
-    nie1_ts = create_terminals(network, nie1, 2)
+    nie1_ts = create_terminals(network, nie1, 1)
 
     network.connect_terminals(a0_t, nie1_ts[0])
 
@@ -42,7 +42,7 @@ def negligible_impedance_equipment_basic_network(nie_constructor) -> NetworkServ
     network.add(a1)
     a1_ts = create_terminals(network, a1, 2)
 
-    network.connect_terminals(nie1_ts[1], a1_ts[0])
+    network.connect_terminals(nie1_ts[0], a1_ts[0])
 
     # AcLineSegment2
     a2 = AcLineSegment(mrid="a2", length=2.0, per_length_impedance=plsi)

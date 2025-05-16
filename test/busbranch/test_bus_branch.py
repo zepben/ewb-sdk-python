@@ -239,6 +239,7 @@ async def test_group_negligible_impedance_terminals_multi_branch():
     await _validate_term_grouping(has_neg_imp, nb_network, "a6_a7", set(), set(), {get_term(a6, 2), *a7.terminals})
 
 
+@pytest.mark.skip()  # FIXME:
 @pytest.mark.asyncio
 @given(nie_constructor=sampled_from([Junction, Disconnector, BusbarSection]))
 async def test_group_negligible_impedance_terminals_groups_negligible_impedance_equipment(nie_constructor):

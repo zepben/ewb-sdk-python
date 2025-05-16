@@ -5,10 +5,12 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 __all__ = ["AuxiliaryEquipment", "FaultIndicator"]
 

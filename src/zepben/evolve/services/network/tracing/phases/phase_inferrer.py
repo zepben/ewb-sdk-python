@@ -3,11 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import logging
+from dataclasses import dataclass
 from typing import Dict, Callable, List, Set, Awaitable
 
-from zepben.evolve import Terminal, SinglePhaseKind, ConductingEquipment, NetworkService, normal_phases, normal_direction, \
-    FeederDirection, X_PRIORITY, Y_PRIORITY, SetPhases, is_before, is_after, current_phases, current_direction
-from zepben.evolve.types import PhaseSelector, DirectionSelector
+from zepben.evolve import Terminal, SinglePhaseKind, ConductingEquipment, NetworkService, \
+    FeederDirection, X_PRIORITY, Y_PRIORITY, is_before, is_after
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 
 __all__ = ["PhaseInferrer"]
 
@@ -19,205 +21,180 @@ class PhaseInferrer:
     A class that can infer missing phases on a network that has been processed by `SetPhases`.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    @dataclass
+    class InferredPhase:
+        def __init__(self, conducting_equipment: ConductingEquipment, suspect: bool):
+            self.conducting_equipment = conducting_equipment
+            self.suspect = suspect
+            logger.warning(f'*** Action Required *** Inferred missing {self.description} due to a disconnected nominal phase because of an '
+                           f'upstream error in the source data. Phasing information for the upstream equipment should be fixed in the source system.')
 
-        self._tracking: Dict[ConductingEquipment, bool] = {}
+        @property
+        def description(self) -> str:
+            if self.suspect:
+                return f"phases for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which may not be correct. The phases were inferred"
+            else:
+                return f"phase for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which should be correct. The phase was inferred"
 
-    async def run(self, network: NetworkService):
+    async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> list[InferredPhase]:
         """
         Infer the missing phases on the specified `network`.
 
         :param network: The `NetworkService` to infer phases on.
+        :param network_state_operators: The `NetworkStateOperators` to be used when inferring phases
         """
-        self._tracking = {}
+        tracking: Dict[ConductingEquipment, bool] = {}
 
-        await self._infer_missing_phases(network, normal_phases, normal_direction)
-        await self._infer_missing_phases(network, current_phases, current_direction)
+        await self.PhaseInferrerInternal(network_state_operators).infer_missing_phases(network, tracking)
 
-        for (conducting_equipment, has_suspect_inferred) in self._tracking.items():
-            if has_suspect_inferred:
-                logger.warning(
-                    "*** Action Required *** Inferred missing phases for '%s' [%s] which may not be correct. The phases were inferred due to a disconnected "
-                    "nominal phase because of an upstream error in the source data. Phasing information for the upstream equipment should be fixed in the "
-                    "source system.",
-                    conducting_equipment.name,
-                    conducting_equipment.mrid
+        return [self.InferredPhase(k, v) for k, v in tracking.items()]
+
+
+    class PhaseInferrerInternal:
+        def __init__(self, state_operators: NetworkStateOperators):
+            self.state_operators = state_operators
+
+        async def infer_missing_phases(self, network: NetworkService, tracking: Dict[ConductingEquipment, bool]):
+            while True:
+                terms_missing_phases = [it for it in network.objects(Terminal) if self._is_connected_to_others(it) and self._has_none_phase(it)]
+                terms_missing_xy_phases = [it for it in terms_missing_phases if self._has_xy_phases(it)]
+
+                if not (await self._process(terms_missing_phases, lambda t: self._set_missing_to_nominal(t, tracking)) or
+                        await self._process(terms_missing_xy_phases, lambda t: self._infer_xy_phases(t, 1, tracking)) or
+                        await self._process(terms_missing_xy_phases, lambda t: self._infer_xy_phases(t, 4, tracking))
+                ):
+                    break
+
+        @staticmethod
+        def _is_connected_to_others(terminal: Terminal) -> bool:
+            return terminal.connectivity_node and (terminal.connectivity_node.num_terminals() > 1)
+
+        def _has_none_phase(self, terminal: Terminal) -> bool:
+            phases = self.state_operators.phase_status(terminal)
+            return any(phases[it] == SinglePhaseKind.NONE for it in terminal.phases.single_phases)
+
+        @staticmethod
+        def _has_xy_phases(terminal: Terminal) -> bool:
+            return any(p in terminal.phases for p in (SinglePhaseKind.X, SinglePhaseKind.Y))
+
+        def _find_terminal_at_start_of_missing_phases(
+            self,
+            terminals: List[Terminal],
+        ) -> List[Terminal]:
+            return (
+                self._missing_from_down_to_up(terminals)
+                or self._missing_from_down_to_any(terminals)
+                or self._missing_from_any(terminals)
+            )
+
+        def _missing_from_down_to_up(self, terminals: List[Terminal]) -> List[Terminal]:
+            return [
+                terminal for terminal in terminals
+                if (self._missing_from_down_filter(terminal) and
+                    (FeederDirection.UPSTREAM in self.state_operators.get_direction(terminal)))
+            ]
+
+        def _missing_from_down_to_any(self, terminals: List[Terminal]) -> List[Terminal]:
+            return [
+                terminal for terminal in terminals
+                if self._missing_from_down_filter(terminal)
+            ]
+
+        def _missing_from_down_filter(self, terminal: Terminal) -> bool:
+            return (
+                self._has_none_phase(terminal) and terminal.connectivity_node and
+                any(not self._has_none_phase(t)
+                    for t in terminal.connectivity_node.terminals
+                    if (t != terminal) and (FeederDirection.DOWNSTREAM in self.state_operators.get_direction(t)))
                 )
-            else:
-                logger.warning(
-                    "*** Action Required *** Inferred missing phase for '%s' [%s] which should be correct. The phase was inferred due to a disconnected "
-                    "nominal phase because of an upstream error in the source data. Phasing information for the upstream equipment should be fixed in the "
-                    "source system.",
-                    conducting_equipment.name,
-                    conducting_equipment.mrid
-                )
 
-    async def _infer_missing_phases(self, network: NetworkService, phase_selector: PhaseSelector, direction_selector: DirectionSelector):
-        while True:
-            terms_missing_phases = [it for it in network.objects(Terminal) if self._is_connected_to_others(it) and self._has_none_phase(it, phase_selector)]
-            terms_missing_xy_phases = [it for it in terms_missing_phases if self._has_xy_phases(it)]
+        def _missing_from_any(self, terminals: List[Terminal]) -> List[Terminal]:
+            return [
+                terminal for terminal in terminals
+                if (self._has_none_phase(terminal) and
+                    terminal.connectivity_node and
+                    any(not self._has_none_phase(t) for t in terminal.connectivity_node.terminals if t != terminal))
+            ]
 
-            async def set_missing_to_nominal(terminal: Terminal) -> bool:
-                return await self._set_missing_to_nominal(terminal, phase_selector)
+        async def _process(self, terminals: List[Terminal], processor: Callable[[Terminal], Awaitable[bool]]) -> bool:
 
-            async def infer_xy_phases_1(terminal: Terminal) -> bool:
-                return await self._infer_xy_phases(terminal, phase_selector, 1)
+            has_processed = False
+            while True:
+                continue_processing = False
 
-            async def infer_xy_phases_4(terminal: Terminal) -> bool:
-                return await self._infer_xy_phases(terminal, phase_selector, 4)
+                for terminal in self._find_terminal_at_start_of_missing_phases(terminals):
+                    continue_processing = await processor(terminal)
 
-            did_nominal = await self._process(terms_missing_phases, phase_selector, direction_selector, set_missing_to_nominal)
-            did_xy_1 = await self._process(terms_missing_xy_phases, phase_selector, direction_selector, infer_xy_phases_1)
-            did_xy_4 = await self._process(terms_missing_xy_phases, phase_selector, direction_selector, infer_xy_phases_4)
+                has_processed = has_processed or continue_processing
+                if not continue_processing:
+                    break
 
-            if not (did_nominal or did_xy_1 or did_xy_4):
-                break
+            return has_processed
 
-    @staticmethod
-    def _is_connected_to_others(terminal: Terminal) -> bool:
-        return terminal.connectivity_node and (terminal.connectivity_node.num_terminals() > 1)
+        async def _set_missing_to_nominal(self, terminal: Terminal, tracking: Dict[ConductingEquipment, bool]) -> bool:
+            phases = self.state_operators.phase_status(terminal)
 
-    @staticmethod
-    def _has_none_phase(terminal: Terminal, phase_selector: PhaseSelector) -> bool:
-        phases = phase_selector(terminal)
-        return any(phases[it] == SinglePhaseKind.NONE for it in terminal.phases.single_phases)
+            phases_to_process = [it for it in terminal.phases.single_phases if
+                                 it not in [SinglePhaseKind.X, SinglePhaseKind.Y] and (phases[it] == SinglePhaseKind.NONE)]
 
-    @staticmethod
-    def _has_xy_phases(terminal: Terminal) -> bool:
-        return (SinglePhaseKind.X in terminal.phases) or (SinglePhaseKind.Y in terminal.phases)
+            if not phases_to_process:
+                return False
 
-    def _find_terminal_at_start_of_missing_phases(
-        self,
-        terminals: List[Terminal],
-        phase_selector: PhaseSelector,
-        direction_selector: DirectionSelector
-    ) -> List[Terminal]:
-        candidates = self._missing_from_down_to_up(terminals, phase_selector, direction_selector)
-        if not candidates:
-            candidates = self._missing_from_down_to_any(terminals, phase_selector, direction_selector)
-        if not candidates:
-            candidates = self._missing_from_any(terminals, phase_selector)
+            for it in phases_to_process:
+                phases[it] = it
+            await self._continue_phases(terminal)
 
-        return candidates
+            if terminal.conducting_equipment:
+                tracking[terminal.conducting_equipment] = False
 
-    def _missing_from_down_to_up(self, terminals: List[Terminal], phase_selector: PhaseSelector, direction_selector: DirectionSelector) -> List[Terminal]:
-        return [
-            terminal for terminal in terminals
-            if (self._has_none_phase(terminal, phase_selector) and
-                (FeederDirection.UPSTREAM in direction_selector(terminal).value()) and
-                terminal.connectivity_node and
-                any(not self._has_none_phase(t, phase_selector) for t in terminal.connectivity_node.terminals if
-                    (t != terminal) and (FeederDirection.DOWNSTREAM in direction_selector(t).value())))
-        ]
+            return True
 
-    def _missing_from_down_to_any(self, terminals: List[Terminal], phase_selector: PhaseSelector, direction_selector: DirectionSelector) -> List[Terminal]:
-        return [
-            terminal for terminal in terminals
-            if (self._has_none_phase(terminal, phase_selector) and
-                terminal.connectivity_node and
-                any(not self._has_none_phase(t, phase_selector) for t in terminal.connectivity_node.terminals if
-                    (t != terminal) and (FeederDirection.DOWNSTREAM in direction_selector(t).value())))
-        ]
+        async def _infer_xy_phases(self, terminal: Terminal, max_missing_phases: int, tracking: Dict[ConductingEquipment, bool]) -> bool:
+            none: List[SinglePhaseKind] = []
+            used_phases: Set[SinglePhaseKind] = set()
 
-    def _missing_from_any(self, terminals: List[Terminal], phase_selector: PhaseSelector) -> List[Terminal]:
-        return [
-            terminal for terminal in terminals
-            if (self._has_none_phase(terminal, phase_selector) and
-                terminal.connectivity_node and
-                any(not self._has_none_phase(t, phase_selector) for t in terminal.connectivity_node.terminals if t != terminal))
-        ]
+            if not terminal.conducting_equipment:
+                return False
 
-    async def _process(
-        self,
-        terminals: List[Terminal],
-        phase_selector: PhaseSelector,
-        direction_selector: DirectionSelector,
-        processor: Callable[[Terminal], Awaitable[bool]]
-    ) -> bool:
-        terminals_to_process = self._find_terminal_at_start_of_missing_phases(terminals, phase_selector, direction_selector)
+            phases = self.state_operators.phase_status(terminal)
+            for nominal_phase in terminal.phases:
+                phase = phases[nominal_phase]
+                if phase == SinglePhaseKind.NONE:
+                    none.append(nominal_phase)
+                else:
+                    used_phases.add(phase)
 
-        has_processed = False
-        while True:
-            continue_processing = False
+            if not none or (len(none) > max_missing_phases):
+                return False
 
-            for terminal in terminals_to_process:
-                continue_processing = await processor(terminal) or continue_processing
+            tracking[terminal.conducting_equipment] = True
 
-            terminals_to_process = self._find_terminal_at_start_of_missing_phases(terminals, phase_selector, direction_selector)
+            had_changes = False
+            for nominal_phase in none:
+                if nominal_phase == SinglePhaseKind.X:
+                    new_phase = self._first_unused(X_PRIORITY, used_phases, lambda it: is_before(it, phases[SinglePhaseKind.Y]))
+                else:
+                    new_phase = self._first_unused(Y_PRIORITY, used_phases, lambda it: is_after(it, phases[SinglePhaseKind.X]))
 
-            has_processed = has_processed or continue_processing
-            if not continue_processing:
-                break
+                if new_phase != SinglePhaseKind.NONE:
+                    phases[nominal_phase] = new_phase
+                    used_phases.add(phases[nominal_phase])
+                    had_changes = True
 
-        return has_processed
+            await self._continue_phases(terminal)
+            return had_changes
 
-    async def _set_missing_to_nominal(self, terminal: Terminal, phase_selector: PhaseSelector) -> bool:
-        phases = phase_selector(terminal)
 
-        phases_to_process = [it for it in terminal.phases.single_phases if
-                             (it != SinglePhaseKind.X) and (it != SinglePhaseKind.Y) and (phases[it] == SinglePhaseKind.NONE)]
+        async def _continue_phases(self, terminal: Terminal):
+            set_phases_trace = Tracing.set_phases()
+            for other in terminal.other_terminals():
+                await set_phases_trace.spread_phases(terminal, other, terminal.phases.single_phases, network_state_operators=self.state_operators)
 
-        if not phases_to_process:
-            return False
+        @staticmethod
+        def _first_unused(phases: List[SinglePhaseKind], used_phases: Set[SinglePhaseKind], validate: Callable[[SinglePhaseKind], bool]) -> SinglePhaseKind:
+            for phase in phases:
+                if (phase not in used_phases) and validate(phase):
+                    return phase
 
-        for it in phases_to_process:
-            phases[it] = it
-        await self._continue_phases(terminal, phase_selector)
+            return SinglePhaseKind.NONE
 
-        if terminal.conducting_equipment:
-            self._tracking[terminal.conducting_equipment] = False
-
-        return True
-
-    async def _infer_xy_phases(self, terminal: Terminal, phase_selector: PhaseSelector, max_missing_phases: int) -> bool:
-        none: List[SinglePhaseKind] = []
-        used_phases: Set[SinglePhaseKind] = set()
-
-        if not terminal.conducting_equipment:
-            return False
-
-        phases = phase_selector(terminal)
-        for nominal_phase in terminal.phases:
-            phase = phases[nominal_phase]
-            if phase == SinglePhaseKind.NONE:
-                none.append(nominal_phase)
-            else:
-                used_phases.add(phase)
-
-        if not none or (len(none) > max_missing_phases):
-            return False
-
-        self._tracking[terminal.conducting_equipment] = True
-
-        had_changes = False
-        for nominal_phase in none:
-            if nominal_phase == SinglePhaseKind.X:
-                new_phase = self._first_unused(X_PRIORITY, used_phases, lambda it: is_before(it, phases[SinglePhaseKind.Y]))
-            else:
-                new_phase = self._first_unused(Y_PRIORITY, used_phases, lambda it: is_after(it, phases[SinglePhaseKind.X]))
-
-            if new_phase != SinglePhaseKind.NONE:
-                phases[nominal_phase] = new_phase
-                used_phases.add(phases[nominal_phase])
-                had_changes = True
-
-        await self._continue_phases(terminal, phase_selector)
-        return had_changes
-
-    @staticmethod
-    async def _continue_phases(terminal: Terminal, phase_selector: PhaseSelector):
-        if terminal.conducting_equipment:
-            for other in terminal.conducting_equipment.terminals:
-                if other != terminal:
-                    set_phases = SetPhases()
-                    set_phases.spread_phases(terminal, other, phase_selector=phase_selector)
-                    await set_phases.run_with_terminal_and_phase_selector(other, phase_selector)
-
-    @staticmethod
-    def _first_unused(phases: List[SinglePhaseKind], used_phases: Set[SinglePhaseKind], validate: Callable[[SinglePhaseKind], bool]) -> SinglePhaseKind:
-        for phase in phases:
-            if (phase not in used_phases) and validate(phase):
-                return phase
-
-        return SinglePhaseKind.NONE

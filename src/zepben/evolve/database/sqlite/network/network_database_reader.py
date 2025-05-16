@@ -22,8 +22,12 @@ from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import Assi
 from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import AssignToLvFeeders
 
 from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
+from zepben.evolve.services.network.tracing.networktrace.tracing import  Tracing
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import PhaseInferrer
 from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
+
+from typing import List
 
 
 class NetworkDatabaseReader(BaseDatabaseReader):
@@ -44,26 +48,27 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         connection: Connection,
         service: NetworkService,
         database_description: str,
-        tables: NetworkDatabaseTables = NetworkDatabaseTables(),
+        infer_phases: bool = None,
         metadata_reader: MetadataCollectionReader = None,
         service_reader: NetworkServiceReader = None,
         table_version: TableVersion = TableVersion(),
-        set_direction: SetDirection = SetDirection(),
-        set_phases: SetPhases = SetPhases(),
-        phase_inferrer: PhaseInferrer = PhaseInferrer(),
-        assign_to_feeders: AssignToFeeders = AssignToFeeders(),
-        assign_to_lv_feeders: AssignToLvFeeders = AssignToLvFeeders()
+        set_feeder_direction: SetDirection = Tracing.set_direction(),
+        set_phases: SetPhases = Tracing.set_phases(),
+        phase_inferrer: PhaseInferrer = Tracing.phase_inferrer(),
+        assign_to_feeders: AssignToFeeders = Tracing.assign_equipment_to_feeders(),
+        assign_to_lv_feeders: AssignToLvFeeders = Tracing.assign_equipment_to_lv_feeders()
     ):
         super().__init__(
             connection,
-            metadata_reader if metadata_reader else MetadataCollectionReader(service, tables, connection),
-            service_reader if service_reader else NetworkServiceReader(service, tables, connection),
+            metadata_reader if metadata_reader else MetadataCollectionReader(service, NetworkDatabaseTables(), connection),
+            service_reader if service_reader else NetworkServiceReader(service, NetworkDatabaseTables(), connection),
             service,
             database_description,
             table_version
         )
         self.service = service
-        self.set_direction = set_direction
+        self.infer_phases = infer_phases
+        self.set_feeder_direction = set_feeder_direction
         self.set_phases = set_phases
         self.phase_inferrer = phase_inferrer
         self.assign_to_feeders = assign_to_feeders
@@ -73,20 +78,26 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         status = await super()._post_load()
 
         self._logger.info("Applying feeder direction to network...")
-        await self.set_direction.run(self.service)
+        await self.set_feeder_direction.run(self.service, NetworkStateOperators.NORMAL)
+        await self.set_feeder_direction.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Feeder direction applied to network.")
 
         self._logger.info("Applying phases to network...")
-        await self.set_phases.run(self.service)
-        await self.phase_inferrer.run(self.service)
+        await self.set_phases.run(self.service, NetworkStateOperators.NORMAL)
+        await self.set_phases.run(self.service, NetworkStateOperators.CURRENT)
+        if self.infer_phases:
+            await self.phase_inferrer.run(self.service, NetworkStateOperators.NORMAL)
+            await self.phase_inferrer.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Phasing applied to network.")
 
         self._logger.info("Assigning equipment to feeders...")
-        await self.assign_to_feeders.run(self.service)
+        await self.assign_to_feeders.run(self.service, NetworkStateOperators.NORMAL)
+        await self.assign_to_feeders.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Equipment assigned to feeders.")
 
         self._logger.info("Assigning equipment to LV feeders...")
-        await self.assign_to_lv_feeders.run(self.service)
+        await self.assign_to_lv_feeders.run(self.service, NetworkStateOperators.NORMAL)
+        await self.assign_to_lv_feeders.run(self.service, NetworkStateOperators.CURRENT)
         self._logger.info("Equipment assigned to LV feeders.")
 
         self._logger.info("Validating that each equipment is assigned to a container...")
@@ -98,6 +109,17 @@ class NetworkDatabaseReader(BaseDatabaseReader):
         self._logger.info("Sources vs feeders validated.")
 
         return status
+
+    def _log_inferred_phases(self, normal_inferred_phases: List, current_inferred_phases: List):  # FIXME: set list contents classes, this'll likely explode until then
+        # FIXME: im pretty sure this should be building a dict of lists, not just a simple KV store. if so, this logic is way too simple
+        inferred_phases = {item.conducting_equipment: item for item in normal_inferred_phases}
+
+        for it in current_inferred_phases:
+            ce = it.conducting_equipment
+            inferred_phases[ce] = (inferred_phases[ce] if inferred_phases[ce].suspect else it)
+
+        for phase in inferred_phases:
+            self._logger.warning(f"*** Action Required *** {phase.description()}")
 
     def _validate_equipment_containers(self):
         missing_containers = [it for it in self.service.objects(Equipment) if not it.containers]

@@ -5,23 +5,25 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union, Set, Callable, List, Iterable, Optional
+from collections.abc import Sequence
+from typing import Union, Set, Iterable, List
 
-from zepben.evolve import connected_terminals
-from zepben.evolve.exceptions import PhaseException
-from zepben.evolve.exceptions import TracingException
+from zepben.evolve.exceptions import TracingException, PhaseException
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.evolve.services.network.tracing.connectivity.connectivity_result import ConnectivityResult
+from zepben.evolve.services.network.network_service import NetworkService
+from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
+from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_internal import TerminalConnectivityInternal
-from zepben.evolve.services.network.tracing.phases.phase_status import normal_phases, current_phases
-from zepben.evolve.services.network.tracing.traversals.branch_recursive_tracing import BranchRecursiveTraversal
-from zepben.evolve.services.network.tracing.traversals.queue import PriorityQueue
-from zepben.evolve.services.network.tracing.util import normally_open, currently_open
-if TYPE_CHECKING:
-    from zepben.evolve import Terminal, ConductingEquipment, NetworkService
-    from zepben.evolve.types import PhaseSelector
+from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
+from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
+from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 
 __all__ = ["SetPhases"]
 
@@ -29,227 +31,236 @@ __all__ = ["SetPhases"]
 class SetPhases:
     """
     Convenience class that provides methods for setting phases on a `NetworkService`.
-    This class is backed by a `BranchRecursiveTraversal`.
+    This class is backed by a `NetworkTrace`.
     """
 
-    def __init__(self, terminal_connectivity_internal: TerminalConnectivityInternal = TerminalConnectivityInternal()):
-        self._terminal_connectivity_internal = terminal_connectivity_internal
+    class PhasesToFlow:
+        def __init__(self, nominal_phase_paths: Iterable[NominalPhasePath], step_flowed_phases: bool = False):
+            self.nominal_phase_paths = nominal_phase_paths
+            self.step_flowed_phases = step_flowed_phases
 
-        # The `BranchRecursiveTraversal` used when tracing the normal state of the network.
-        # NOTE: If you add stop conditions to this traversal it may no longer work correctly, use at your own risk.
-        # noinspection PyArgumentList
-        self.normal_traversal = BranchRecursiveTraversal(queue_next=self._set_normal_phases_and_queue_next,
-                                                         process_queue=PriorityQueue(),
-                                                         branch_queue=PriorityQueue())
 
-        # The `BranchRecursiveTraversal` used when tracing the current state of the network.
-        # NOTE: If you add stop conditions to this traversal it may no longer work correctly, use at your own risk.
-        # noinspection PyArgumentList
-        self.current_traversal = BranchRecursiveTraversal(queue_next=self._set_current_phases_and_queue_next,
-                                                          process_queue=PriorityQueue(),
-                                                          branch_queue=PriorityQueue())
+    async def run(self,
+                  apply_to: Union[NetworkService, Terminal],
+                  phases: Union[PhaseCode, Iterable[SinglePhaseKind]]=None,
+                  network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
 
-    async def run(self, network: NetworkService):
+        if isinstance(apply_to, NetworkService):
+            return await self._run(apply_to, network_state_operators)
+
+        elif isinstance(apply_to, Terminal):
+            if phases is None:
+                return await self._run_terminal(apply_to, network_state_operators)
+
+            return await self._run_with_phases(apply_to, phases, network_state_operators)
+
+        else:
+            raise Exception('INTERNAL ERROR: incorrect params')
+
+    async def _run(self,
+                   network: NetworkService,
+                   network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
         """
         Apply phases from all sources in the network.
 
         @param network: The network in which to apply phases.
         """
-        terminals = [term for es in network.objects(EnergySource) for term in es.terminals]
+        trace = await self._create_network_trace(network_state_operators)
+        for energy_source in network.objects(EnergySource):
+            for terminal in energy_source.terminals:
+                self._apply_phases(network_state_operators, terminal, terminal.phases.single_phases)
+                await self._run_terminal(terminal, network_state_operators, trace)
 
-        for term in terminals:
-            self._apply_phases(term, normal_phases, term.phases.single_phases)
-            self._apply_phases(term, current_phases, term.phases.single_phases)
-
-        await self._run_with_terminals(terminals)
-
-    async def run_with_terminal(self, terminal: Terminal, phases: Union[None, PhaseCode, List[SinglePhaseKind]] = None):
+    async def _run_with_phases(self,
+                                 terminal: Terminal,
+                                 phases: Union[PhaseCode, Iterable[SinglePhaseKind]],
+                                 network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
         """
         Apply phases from the `terminal`.
 
         @param terminal: The terminal to start applying phases from.
         @param phases: The phases to apply. Must only contain ABCN.
         """
-        phases = phases or terminal.phases
+        def validate_phases(_phases):
+            if len(_phases) != len(terminal.phases.single_phases):
+                raise TracingException(
+                    f"Attempted to apply phases [{', '.join(phase.name for phase in phases)}] to {terminal} with nominal phases {terminal.phases.name}. "
+                    f"Number of phases to apply must match the number of nominal phases. Found {len(_phases)}, expected {len(terminal.phases.single_phases)}"
+                )
+            return _phases
+
         if isinstance(phases, PhaseCode):
-            phases = phases.single_phases
+            self._apply_phases(network_state_operators, terminal, validate_phases(phases.single_phases))
 
-        if len(phases) != len(terminal.phases.single_phases):
-            raise TracingException(
-                f"Attempted to apply phases [{', '.join(phase.name for phase in phases)}] to {terminal} with nominal phases {terminal.phases.name}. "
-                f"Number of phases to apply must match the number of nominal phases. Found {len(phases)}, expected {len(terminal.phases.single_phases)}"
-            )
+        elif isinstance(phases, (list, set)):
+            self._apply_phases(network_state_operators, terminal, validate_phases(phases))
 
-        self._apply_phases(terminal, normal_phases, phases)
-        self._apply_phases(terminal, current_phases, phases)
+        else:
+            raise Exception(f'INTERNAL ERROR: Phase of type {phases.__class__} is wrong.')
 
-        self.normal_traversal.tracker.clear()
-        self.current_traversal.tracker.clear()
+        await self._run_terminal(terminal, network_state_operators)
 
-        await self._run_with_terminals([terminal])
+    async def _run_spread_phases_and_flow(self,
+                                          seed_terminal: Terminal,
+                                          start_terminal: Terminal,
+                                          phases: List[SinglePhaseKind],
+                                          network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
 
-    def spread_phases(
+        nominal_phase_paths = self._get_nominal_phase_paths(network_state_operators, seed_terminal, start_terminal, list(phases))
+        if self._flow_phases(network_state_operators, seed_terminal, start_terminal, nominal_phase_paths):
+            await self.run(start_terminal, network_state_operators=network_state_operators)
+
+
+    async def spread_phases(
         self,
         from_terminal: Terminal,
         to_terminal: Terminal,
-        phase_selector: PhaseSelector,
-        phases_to_flow: Optional[Set[SinglePhaseKind]] = None
-    ) -> Set[SinglePhaseKind]:
+        phases: List[SinglePhaseKind]=None,
+        network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL
+    ):
         """
         Apply phases from the `from_terminal` to the `to_terminal`.
 
-        @param from_terminal: The terminal to from which to spread phases.
-        @param to_terminal: The terminal to spread phases to.
-        @param phase_selector: The selector to use to spread the phases.
-        @param phases_to_flow: The nominal phases on which to spread phases.
-
-        @return: True if any phases were spread, otherwise False.
+        :param from_terminal: The terminal to from which to spread phases.
+        :param to_terminal: The terminal to spread phases to.
+        :param phases: The nominal phases on which to spread phases.
+        :param network_state_operators: The `NetworkStateOperators` to be used when setting phases.
         """
-        cr = self._terminal_connectivity_internal.between(from_terminal, to_terminal, phases_to_flow)
-        return self._flow_via_paths(cr, phase_selector)
-
-    async def run_with_terminal_and_phase_selector(self, terminal: Terminal, phase_selector: PhaseSelector):
-        """
-        Apply phases from the `terminal` on the selected phases. Only spreads existing phases.
-
-        @param terminal: The terminal from which to spread phases.
-        @param phase_selector: The selector to use to spread the phases. Must be `normal_phases` or `current_phases`.
-
-        @return: True if any phases were spread, otherwise False.
-        """
-        if phase_selector is normal_phases:
-            await self._run_with_traversal_and_phase_selector([terminal], self.normal_traversal, phase_selector)
-        elif phase_selector is current_phases:
-            await self._run_with_traversal_and_phase_selector([terminal], self.current_traversal, phase_selector)
+        if phases is None:
+            return await self.spread_phases(from_terminal, to_terminal, from_terminal.phases.single_phases, network_state_operators)
         else:
-            raise TracingException("Invalid PhaseSelector specified. Must be normal_phases or current_phases")
+            paths = self._get_nominal_phase_paths(network_state_operators, from_terminal, to_terminal, list(phases))
+            if await self._flow_phases(network_state_operators, from_terminal, to_terminal, paths):
+                await self.run(from_terminal, network_state_operators=network_state_operators)
 
-    async def _run_with_terminals(self, start_terminals: Iterable[Terminal]):
-        await self._run_with_traversal_and_phase_selector(start_terminals, self.normal_traversal, normal_phases)
-        await self._run_with_traversal_and_phase_selector(start_terminals, self.current_traversal, current_phases)
+    async def _run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators, trace: NetworkTrace[PhasesToFlow]=None):
+        if trace is None:
+            trace = await self._create_network_trace(network_state_operators)
+        nominal_phase_paths = list(map(lambda it: NominalPhasePath(SinglePhaseKind.NONE, it), terminal.phases))
+        await trace.run(terminal, self.PhasesToFlow(nominal_phase_paths), can_stop_on_start_item=False)
+        trace.reset()
 
-    @staticmethod
-    def _apply_phases(terminal: Terminal, phase_selector: PhaseSelector, phases: Iterable[SinglePhaseKind]):
-        phases_status = phase_selector(terminal)
-        for nominal_phase, traced_phase in zip(terminal.phases.single_phases, phases):
-            phases_status[nominal_phase] = traced_phase if traced_phase not in PhaseCode.XY else SinglePhaseKind.NONE
+    async def _create_network_trace(self, state_operators: NetworkStateOperators) -> NetworkTrace[PhasesToFlow]:
+        async def step_action(nts, ctx):
+            path = nts.path
+            phases_to_flow = nts.data
+            #  We always assume the first step terminal already has the phases applied, so we don't do anything on the first step
+            phases_to_flow.step_flowed_phases = True if ctx.is_start_item else (
+                await self._flow_phases(state_operators, path.from_terminal, path.to_terminal, phases_to_flow.nominal_phase_paths)
+            )
 
-    async def _run_with_traversal_and_phase_selector(
-        self,
-        start_terminals: Iterable[Terminal],
-        traversal: BranchRecursiveTraversal[Terminal],
-        phase_selector: PhaseSelector
-    ):
-        for terminal in start_terminals:
-            await self._run_terminal(terminal, traversal, phase_selector)
+        def condition(next_step, nctx, step, ctx):
+            return len(next_step.data.nominal_phase_paths) > 0
 
-    async def _run_terminal(self, start: Terminal, traversal: BranchRecursiveTraversal[Terminal], phase_selector: PhaseSelector):
-        await self._run_from_terminal(traversal, start, phase_selector, set(start.phases.single_phases))
+        def _get_weight(it) -> int:
+            return it.path.to_terminal.phases.num_phases
 
-    async def _run_from_terminal(
-        self,
-        traversal: BranchRecursiveTraversal[Terminal],
-        terminal: Terminal,
-        phase_selector: PhaseSelector,
-        phases_to_flow: Set[SinglePhaseKind]
-    ):
-        traversal.reset()
-        traversal.tracker.visit(terminal)
-        self._flow_to_connected_terminals_and_queue(traversal, terminal, phase_selector, phases_to_flow)
-        await traversal.run()
+        return (
+            Tracing.network_trace_branching(
+                network_state_operators=state_operators,
+                action_step_type=NetworkTraceActionType.ALL_STEPS,
+                queue_factory=lambda: WeightedPriorityQueue.process_queue(_get_weight),
+                compute_data=self._compute_next_phases_to_flow(state_operators)
+            )
+            .add_queue_condition(condition)
+            .add_step_action(step_action)
+        )
 
-    def _set_normal_phases_and_queue_next(self, terminal: Terminal, traversal: BranchRecursiveTraversal[Terminal]):
-        self._set_phases_and_queue_next(terminal, traversal, normally_open, normal_phases)
+    def _compute_next_phases_to_flow(self, state_operators: NetworkStateOperators) -> ComputeData[PhasesToFlow]:
+        def inner(step, _, next_path):
+            if not step.data.step_flowed_phases:
+                return self.PhasesToFlow([])
 
-    def _set_current_phases_and_queue_next(self, terminal: Terminal, traversal: BranchRecursiveTraversal[Terminal]):
-        self._set_phases_and_queue_next(terminal, traversal, currently_open, current_phases)
-
-    def _set_phases_and_queue_next(
-        self,
-        current: Terminal,
-        traversal: BranchRecursiveTraversal[Terminal],
-        open_test: Callable[[ConductingEquipment, SinglePhaseKind], bool],
-        phase_selector: PhaseSelector
-    ):
-        phases_to_flow = self._get_phases_to_flow(current, open_test)
-
-        if current.conducting_equipment:
-            for out_terminal in current.conducting_equipment.terminals:
-                if out_terminal != current:
-                    phases_flowed = self._flow_through_equipment(traversal, current, out_terminal, phase_selector, phases_to_flow)
-                    if phases_flowed:
-                        self._flow_to_connected_terminals_and_queue(traversal, out_terminal, phase_selector, phases_flowed)
-
-    def _flow_through_equipment(
-        self,
-        traversal: BranchRecursiveTraversal[Terminal],
-        from_terminal: Terminal,
-        to_terminal: Terminal,
-        phase_selector: PhaseSelector,
-        phases_to_flow: Set[SinglePhaseKind]
-    ) -> Set[SinglePhaseKind]:
-        traversal.tracker.visit(to_terminal)
-        return self.spread_phases(from_terminal, to_terminal, phase_selector, phases_to_flow)
-
-    def _flow_to_connected_terminals_and_queue(
-        self,
-        traversal: BranchRecursiveTraversal[Terminal],
-        from_terminal: Terminal,
-        phase_selector: PhaseSelector,
-        phases_to_flow: Set[SinglePhaseKind]
-    ):
-        """
-        Applies all the `phases_to_flow` from the `from_terminal` to the connected terminals and queues them.
-        """
-        connectivity_results = connected_terminals(from_terminal, phases_to_flow)
-
-        conducting_equip = from_terminal.conducting_equipment
-        use_branch_queue = len(connectivity_results) > 1 or (conducting_equip and conducting_equip.num_terminals() > 2)
-
-        for cr in connectivity_results:
-            if self._flow_via_paths(cr, phase_selector):
-                if use_branch_queue:
-                    branch = traversal.create_branch()
-                    branch.start_item = cr.to_terminal
-                    traversal.branch_queue.put(branch)
-                else:
-                    traversal.process_queue.put(cr.to_terminal)
+            return self.PhasesToFlow(
+                self._get_nominal_phase_paths(state_operators, next_path.from_terminal, next_path.to_terminal, self._nominal_phase_path_to_phases(step.data.nominal_phase_paths))
+            )
+        return ComputeData(inner)
 
     @staticmethod
-    def _flow_via_paths(cr: ConnectivityResult, phase_selector: PhaseSelector) -> Set[SinglePhaseKind]:
-        from_phases = phase_selector(cr.from_terminal)
-        to_phases = phase_selector(cr.to_terminal)
+    def _apply_phases(state_operators: NetworkStateOperators,
+                      terminal: Terminal,
+                      phases: List[SinglePhaseKind]):
 
-        changed_phases = set()
-        for path in cr.nominal_phase_paths:
+        traced_phases = state_operators.phase_status(terminal)
+        for i, nominal_phase in enumerate(terminal.phases.single_phases):
+            traced_phases[nominal_phase] = phases[i] if phases[i] not in PhaseCode.XY else SinglePhaseKind.NONE
+
+    def _get_nominal_phase_paths(self, state_operators: NetworkStateOperators,
+                                       from_terminal: Terminal,
+                                       to_terminal: Terminal,
+                                       phases: Sequence[SinglePhaseKind]
+                                       ) -> tuple[NominalPhasePath]:
+        traced_internally = from_terminal.conducting_equipment == to_terminal.conducting_equipment
+        phases_to_flow = self._get_phases_to_flow(state_operators, from_terminal, phases, traced_internally)
+
+        if traced_internally:
+            return TerminalConnectivityInternal().between(from_terminal, to_terminal, phases_to_flow).nominal_phase_paths
+        else:
+            return TerminalConnectivityConnected().terminal_connectivity(from_terminal, to_terminal, phases_to_flow).nominal_phase_paths
+
+    @staticmethod
+    async def _flow_phases(state_operators: NetworkStateOperators,
+                           from_terminal: Terminal,
+                           to_terminal: Terminal,
+                           nominal_phase_paths: Iterable[NominalPhasePath]
+                           ) -> bool:
+
+        from_phases = state_operators.phase_status(from_terminal)
+        to_phases = state_operators.phase_status(to_terminal)
+        changed_phases = False
+
+        for nominal_phase_path in nominal_phase_paths:
+            (from_, to) = (nominal_phase_path.from_phase, nominal_phase_path.to_phase)
+
             try:
-                # If the path comes from NONE, then we want to apply the `to phase`.
-                phase = from_phases[path.from_phase] if path.from_phase != SinglePhaseKind.NONE else \
-                    path.to_phase if path.to_phase not in PhaseCode.XY else to_phases[path.to_phase]
+                def _phase_to_apply():
+                    # If the path comes from NONE, then we want to apply the `to phase`
+                    if from_ != SinglePhaseKind.NONE:
+                        return from_phases[from_]
+                    elif to not in PhaseCode.XY:
+                        return to
+                    else:
+                        return to_phases[to]
 
-                if (phase != SinglePhaseKind.NONE) and to_phases.__setitem__(path.to_phase, phase):
-                    changed_phases.add(path.to_phase)
-            except PhaseException as ex:
-                phase_desc = path.from_phase.name if path.from_phase == path.to_phase else f"path {path.from_phase.name} to {path.to_phase.name}"
+                phase = _phase_to_apply()
 
-                terminal_desc = f"from {cr.from_terminal} to {cr.to_terminal} through {cr.from_equip}" if cr.from_equip == cr.to_equip else \
-                    f"between {cr.from_terminal} on {cr.from_equip} and {cr.to_terminal} on {cr.to_equip}"
+                if phase != SinglePhaseKind.NONE:
+                    to_phases[to] = phase
+                    changed_phases = True
+
+            except PhaseException:
+                phase_desc = f'{from_.name}' if from_ == to else f'path {from_.name} to {to.name}'
+
+                def get_ce_details(terminal: Terminal):
+                    if terminal.conducting_equipment:
+                        return terminal.conducting_equipment
+                    return ''
+
+                if from_terminal.conducting_equipment and from_terminal.conducting_equipment == to_terminal.conducting_equipment:
+                    terminal_desc = f'from {from_terminal} to {to_terminal} through {from_terminal.conducting_equipment}'
+                else:
+                    terminal_desc = f'between {from_terminal} on {get_ce_details(from_terminal)} and {to_terminal} on {get_ce_details(to_terminal)}'
 
                 raise PhaseException(
-                    f"Attempted to flow conflicting phase {from_phases[path.from_phase].name} onto {to_phases[path.to_phase].name} on nominal phase " +
-                    f"{phase_desc}. This occurred while flowing {terminal_desc}. This is caused by missing open points, or incorrect phases in upstream " +
-                    "equipment that should be corrected in the source data."
-                ) from ex
-
-        return changed_phases
+                    f"Attempted to flow conflicting phase {from_phases[from_].name} onto {to_phases[to].name} on nominal phase {phase_desc}. This occurred while " +
+                    f"flowing {terminal_desc}. This is caused by missing open points, or incorrect phases in upstream equipment that should be " +
+                    "corrected in the source data."
+                )
+        return  changed_phases
 
     @staticmethod
     def _get_phases_to_flow(
+        state_operators: NetworkStateOperators,
         terminal: Terminal,
-        open_test: Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool]
+        phases: Sequence[SinglePhaseKind],
+        internal_flow: bool
     ) -> Set[SinglePhaseKind]:
-        equip = terminal.conducting_equipment
-        if not equip:
-            return set()
 
-        return {phase for phase in terminal.phases.single_phases if not open_test(equip, phase)}
+            equip = terminal.conducting_equipment
+            if equip and internal_flow:
+                return {phase for phase in terminal.phases.single_phases if not state_operators.is_open(equip, phase)}
+            return set(phases)
+
+    @staticmethod
+    def _nominal_phase_path_to_phases(nominal_phase_paths: list[NominalPhasePath]) -> list[SinglePhaseKind]:
+        return list(map((lambda it: it.to_phase), nominal_phase_paths))

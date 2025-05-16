@@ -637,13 +637,13 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
 
         for i in range(0, 32, 4):
             # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.traced_phases, Terminal, lambda _: TracedPhases(0x00000001 << i), lambda _: TracedPhases(0x00000002 << i))
+            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000001 << i), lambda _: TracedPhases(0x00000002 << i))
             # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.traced_phases, Terminal, lambda _: TracedPhases(0x00000004 << i), lambda _: TracedPhases(0x00000008 << i))
+            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000004 << i), lambda _: TracedPhases(0x00000008 << i))
             # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.traced_phases, Terminal, lambda _: TracedPhases(0x00000010 << i), lambda _: TracedPhases(0x00000020 << i))
+            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000010 << i), lambda _: TracedPhases(0x00000020 << i))
             # noinspection PyArgumentList
-            self.validator.validate_property(Terminal.traced_phases, Terminal, lambda _: TracedPhases(0x00000040 << i), lambda _: TracedPhases(0x00000080 << i))
+            self.validator.validate_property(Terminal.phases, Terminal, lambda _: TracedPhases(0x00000040 << i), lambda _: TracedPhases(0x00000080 << i))
 
         self.validator.validate_val_property(
             Terminal.connectivity_node,

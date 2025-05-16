@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from functools import reduce
 from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable
 
-from zepben.evolve import BasicTraversal, Junction, BusbarSection, EquivalentBranch
+from zepben.evolve import Junction, BusbarSection, EquivalentBranch, Traversal, StepContext
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
@@ -18,6 +18,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection im
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.services.network.network_service import NetworkService
+from zepben.evolve.services.network.tracing.busbranch_trace import BusBranchTrace, BusBranchTraceStep
 
 __all__ = [
     "BusBranchNetworkCreationValidator",
@@ -27,6 +28,7 @@ __all__ = [
     "TerminalGrouping"
 ]
 
+
 BBN = TypeVar('BBN')  # Bus-Branch Network
 TN = TypeVar('TN')  # Topological Node
 TB = TypeVar('TB')  # Topological Branch
@@ -35,6 +37,8 @@ PT = TypeVar('PT')  # Power Transformer
 ES = TypeVar('ES')  # Energy Source
 EC = TypeVar('EC')  # Energy Consumer
 PEC = TypeVar('PEC')  # Power Electronics Connection
+
+D = TypeVar('D')
 
 
 class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC], metaclass=abc.ABCMeta):
@@ -896,21 +900,26 @@ async def _group_negligible_impedance_terminals(
     has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ) -> TerminalGrouping[ConductingEquipment]:
     tg = TerminalGrouping[ConductingEquipment]()
-    # noinspection PyArgumentList
-    trace = BasicTraversal(
-        start_item=terminal,
-        queue_next=_queue_terminals_across_negligible_impedance(has_negligible_impedance),
-        step_actions=[_process_terminal(tg, has_negligible_impedance)]
+
+    trace = (
+        BusBranchTrace(
+            queue_next=Traversal.QueueNext(_queue_terminals_across_negligible_impedance(has_negligible_impedance))
+        ).add_start_item(terminal)
+        .add_step_action(_process_terminal(tg, has_negligible_impedance))
     )
+
     await trace.run()
     return tg
 
+def _create_traversal_step_object(next_item: Union[Terminal, AcLineSegment]) -> BusBranchTraceStep:
+    return BusBranchTraceStep(next_item)
 
 def _process_terminal(
     tg: TerminalGrouping[ConductingEquipment],
     has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ):
-    async def add_to_group(t: Terminal, _):
+    async def add_to_group(item: BusBranchTraceStep, _):
+        t = item.identified_object
         if has_negligible_impedance(t.conducting_equipment):
             tg.conducting_equipment_group.add(t.conducting_equipment)
             tg.inner_terminals.add(t)
@@ -923,12 +932,17 @@ def _process_terminal(
 def _queue_terminals_across_negligible_impedance(
     has_negligible_impedance: Callable[[ConductingEquipment], bool]
 ):
-    def queue_next(terminal: Terminal, traversal: BasicTraversal[Terminal]):
+    def queue_next(item: BusBranchTraceStep, context: StepContext, _queue_next: Callable[[BusBranchTraceStep], bool]):
+        terminal = item.identified_object
         if terminal.connectivity_node is not None:
-            traversal.process_queue.extend(ot for ot in terminal.connectivity_node.terminals if ot != terminal)
+            for ot in terminal.connectivity_node.terminals:
+                if ot != terminal:
+                    _queue_next(_create_traversal_step_object(ot))
 
         if has_negligible_impedance(terminal.conducting_equipment):
-            traversal.process_queue.extend(ot for ot in terminal.conducting_equipment.terminals if ot != terminal)
+            for ot in terminal.conducting_equipment.terminals:
+                if ot != terminal:
+                    _queue_next(_create_traversal_step_object(ot))
 
     return queue_next
 
@@ -940,12 +954,13 @@ async def _group_common_ac_line_segment_terminals(acls: AcLineSegment) -> Termin
     common_acls: TerminalGrouping[AcLineSegment] = TerminalGrouping()
     connectivity_node_counter = Counter()
 
-    # noinspection PyArgumentList
-    trace = BasicTraversal(
-        start_item=acls,
-        queue_next=_queue_common_impedance_lines(common_acls, has_common_impedance),
-        step_actions=[_process_acls(common_acls, connectivity_node_counter)]
+    trace = (
+        BusBranchTrace(
+            queue_next=Traversal.QueueNext(_queue_common_impedance_lines(common_acls, has_common_impedance))
+        ).add_start_item(acls)
+        .add_step_action(_process_acls(common_acls, connectivity_node_counter))
     )
+
     await trace.run()
 
     for t in (t for line in common_acls.conducting_equipment_group for t in line.terminals):
@@ -966,7 +981,8 @@ def _process_acls(
     common_acls: TerminalGrouping[AcLineSegment],
     connectivity_node_counter: Counter
 ):
-    async def add_to_group(acls: AcLineSegment, _):
+    async def add_to_group(item: BusBranchTraceStep, _):
+        acls = item.identified_object
         if acls in common_acls.conducting_equipment_group:
             return
 
@@ -981,8 +997,11 @@ def _queue_common_impedance_lines(
     common_acls: TerminalGrouping[AcLineSegment],
     has_common_impedance: Callable[[AcLineSegment], bool]
 ):
-    def queue_next(acls: AcLineSegment, traversal: BasicTraversal[AcLineSegment]):
-        traversal.process_queue.extend(_next_common_acls(acls, has_common_impedance, common_acls))
+    def queue_next(item: BusBranchTraceStep, context: StepContext, _queue_next: Callable[[BusBranchTraceStep], bool]):
+        acls = item.identified_object
+
+        for it in _next_common_acls(acls, has_common_impedance, common_acls):
+            _queue_next(_create_traversal_step_object(it))
 
     return queue_next
 

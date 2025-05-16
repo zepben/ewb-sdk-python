@@ -5,8 +5,8 @@
 import logging
 from typing import Iterable, Optional, Union
 
-from zepben.evolve import ConductingEquipment, connected_equipment_trace, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode, \
-    ConductingEquipmentStep
+from zepben.evolve import ConductingEquipment, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode, Tracing, Traversal
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 logger = logging.getLogger("phase_logger.py")
 
@@ -18,9 +18,9 @@ async def connected_equipment_trace_with_logging(assets: Iterable[ConductingEqui
     :param assets: An `Iterable` of `ConductingEquipment` to start tracing from.
     """
     for asset in assets:
-        trace = connected_equipment_trace()
+        trace = Tracing.network_trace()
         trace.add_step_action(_log_equipment)
-        await trace.run_from(asset)
+        await trace.run(asset, False)
 
 
 def validate_phases_from_term_or_equip(
@@ -88,11 +88,12 @@ def get_t(network: NetworkService, mrid: str, sn: int) -> Terminal:
     return network[mrid].get_terminal_by_sn(sn)
 
 
-async def _log_equipment(step: ConductingEquipmentStep, _: bool):
+def _log_equipment(step: NetworkTraceStep, _: bool):
+    ce = step.path.from_terminal.conducting_equipment
     logger.info("\n###############################"
                 "\nTracing phases from: %s"
                 "\n",
-                step.conducting_equipment)
+                ce)
 
     def phase_info(term, phase):
         nps = term.normal_phases[phase]
@@ -100,10 +101,10 @@ async def _log_equipment(step: ConductingEquipmentStep, _: bool):
 
         return f"{{{phase}: n:{nps}, c:{cps}}}"
 
-    for t in step.conducting_equipment.terminals:
+    for t in step.path.to_equipment.terminals:
         logger.info(
             "%s-T%s: %s",
-            step.conducting_equipment.mrid,
+            ce.mrid,
             t.sequence_number,
             ", ".join(phase_info(t, phase) for phase in t.phases.single_phases)
         )
@@ -112,12 +113,13 @@ async def _log_equipment(step: ConductingEquipmentStep, _: bool):
 def _do_phase_validation(terminal: Terminal, phase_status: PhaseStatus, expected_phases: Union[Iterable[Phase], PhaseCode]):
     if list(expected_phases) == [Phase.NONE]:
         for nominal_phase in terminal.phases.single_phases:
-            assert phase_status[nominal_phase] == Phase.NONE, f"nominal phase {nominal_phase}"
+            assert phase_status[nominal_phase] == Phase.NONE, \
+                f"{phase_status.__class__.__name__} :: {terminal.mrid}: nominal phase {nominal_phase}. expected SinglePhaseKind.NONE, found {phase_status[nominal_phase]}"
 
     else:
         count = -1
         for (count, (nominal_phase, expected_phase)) in enumerate(zip(terminal.phases.single_phases, expected_phases)):
             assert phase_status[nominal_phase] == expected_phase, \
-                f"nominal phase {nominal_phase}. expected {expected_phase}, found {phase_status[nominal_phase]}"
+                f"{phase_status.__class__.__name__}  ::  {terminal.mrid}: nominal phase {nominal_phase}. expected {expected_phase}, found {phase_status[nominal_phase]}"
 
         assert len(terminal.phases.single_phases) == count + 1, f"{terminal.phases.single_phases} should be of length {count + 1}"

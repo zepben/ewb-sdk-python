@@ -9,14 +9,16 @@ from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
-from zepben.evolve.services.network.tracing.phases.phase_status import NormalPhases, CurrentPhases
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
+from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus, NormalPhases, CurrentPhases
 
 if TYPE_CHECKING:
-    from zepben.evolve import ConnectivityNode, ConductingEquipment, PhaseStatus
+    from zepben.evolve import ConnectivityNode, ConductingEquipment
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
+from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 from zepben.evolve.model.phases import TracedPhases
 
 __all__ = ["AcDcTerminal", "Terminal"]
@@ -42,6 +44,10 @@ class Terminal(AcDcTerminal):
     phases: PhaseCode = PhaseCode.ABC
     """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
 
+    traced_phases: TracedPhases = TracedPhases()
+    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases 
+    to match those in `phases`"""
+
     sequence_number: int = 0
     """The orientation of the terminal connections for a multiple terminal conducting equipment. The sequence numbering starts with 1 and additional
     terminals should follow in increasing order. The first terminal is the "starting point" for a two terminal branch."""
@@ -53,10 +59,6 @@ class Terminal(AcDcTerminal):
     current_feeder_direction: FeederDirection = FeederDirection.NONE
     """ Stores the direction of the feeder head relative to this [Terminal] in the current state of the network.
     """
-
-    traced_phases: TracedPhases = TracedPhases()
-    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases
-    to match those in `phases`"""
 
     _cn: Optional[ReferenceType] = None
     """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
@@ -72,6 +74,16 @@ class Terminal(AcDcTerminal):
             self.connectivity_node = connectivity_node
         else:
             self.connectivity_node = self._cn
+
+    @property
+    def normal_phases(self) -> PhaseStatus:
+        """ Convenience method for accessing the normal phases"""
+        return NormalPhases(self)
+
+    @property
+    def current_phases(self) -> PhaseStatus:
+        """ Convenience method for accessing the current phases"""
+        return CurrentPhases(self)
 
     @property
     def conducting_equipment(self):
@@ -146,26 +158,22 @@ class Terminal(AcDcTerminal):
             if t is not self:
                 yield t
 
-    @property
-    def normal_phases(self) -> PhaseStatus:
-        """
-        Convenience method for accessing the normal phases.
-
-        :return: The [PhaseStatus] for the terminal in the normal state of the network.
-        """
-        return NormalPhases(self)
-
-    @property
-    def current_phases(self) -> PhaseStatus:
-        """
-        Convenience method for accessing the current phases.
-
-        :return: The `PhaseStatus` for the terminal in the normal state of the network.
-        """
-        return CurrentPhases(self)
-
     def connect(self, connectivity_node: ConnectivityNode):
         self.connectivity_node = connectivity_node
 
     def disconnect(self):
         self.connectivity_node = None
+
+    def is_feeder_head_terminal(self):
+        if self.conducting_equipment is None:
+            return False
+
+        for feeder in filter(lambda c: isinstance(c, Feeder), self.conducting_equipment.containers):
+            if feeder.normal_head_terminal == self:
+                return True
+
+    def has_connected_busbars(self):
+        try:
+            return any(it != self and it.conducting_equipment is BusbarSection for it in self.connectivity_node.terminals) == True
+        except AttributeError:
+            return False

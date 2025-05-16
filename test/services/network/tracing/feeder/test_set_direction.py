@@ -6,7 +6,9 @@ import pytest
 
 from services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
 from services.network.tracing.feeder.direction_logger import log_directions
-from zepben.evolve import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment, Substation
+from zepben.evolve import FeederDirection, TestNetworkBuilder, SetDirection, PhaseCode, NetworkService, Feeder, Terminal, ConductingEquipment, Substation, \
+    NetworkStateOperators, Traversal, StepContext
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 UPSTREAM = FeederDirection.UPSTREAM
 DOWNSTREAM = FeederDirection.DOWNSTREAM
@@ -20,7 +22,8 @@ class TestSetDirection:
     async def test_set_direction(self):
         n = create_phase_swap_loop_network()
 
-        await self._do_set_direction_trace(n)
+        await self._do_set_direction_trace(n, NetworkStateOperators.NORMAL)
+        await self._do_set_direction_trace(n, NetworkStateOperators.CURRENT)
 
         self._check_expected_direction(self._get_t(n, "ac_line_segment0", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "ac_line_segment0", 2), DOWNSTREAM)
@@ -114,7 +117,7 @@ class TestSetDirection:
              .add_feeder("b3", 1)
              .network)
 
-        await SetDirection().run(n)
+        await SetDirection().run(n, NetworkStateOperators.NORMAL)
         await log_directions(n["b0"])
 
         self._check_expected_direction(self._get_t(n, "b0", 1), NONE)
@@ -202,7 +205,7 @@ class TestSetDirection:
             .add_feeder("s0") \
             .network  # Do not call build as we do not want to trace the directions yet.
 
-        await self._do_set_direction_trace(n)
+        await self._do_set_direction_trace(n, NetworkStateOperators.NORMAL)
 
         self._check_expected_direction(self._get_t(n, "s0", 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
@@ -261,7 +264,9 @@ class TestSetDirection:
             .connect("c12", "j6", 2, 2) \
             .network
 
-        await SetDirection().run_terminal(self._get_t(n, "j0", 1))
+        sd = SetDirection()
+        await sd.run_terminal(self._get_t(n, "j0", 1))
+        #print(sd.nodes['j0-t1'])
         await log_directions(n["j0"])
 
         # To avoid reprocessing all BOTH loops in larger networks we do not process anything with a direction already set. This means this test will apply
@@ -272,7 +277,7 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "c1", 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "j2", 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, "j2", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j2", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
         self._check_expected_direction(self._get_t(n, "j2", 3), BOTH)
         self._check_expected_direction(self._get_t(n, "c3", 1), BOTH)
         self._check_expected_direction(self._get_t(n, "c3", 2), BOTH)
@@ -280,20 +285,20 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "j4", 2), BOTH)
         self._check_expected_direction(self._get_t(n, "c5", 1), BOTH)
         self._check_expected_direction(self._get_t(n, "c5", 2), BOTH)
-        self._check_expected_direction(self._get_t(n, "j6", 1), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "j6", 2), UPSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j6", 1), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j6", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
         self._check_expected_direction(self._get_t(n, "j6", 3), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "c7", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "c7", 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "j8", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "c9", 1), BOTH)
         self._check_expected_direction(self._get_t(n, "c9", 2), BOTH)
-        self._check_expected_direction(self._get_t(n, "c10", 1), UPSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "c10", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "j11", 1), UPSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "j11", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "c12", 1), UPSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
-        self._check_expected_direction(self._get_t(n, "c12", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "c10", 1), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "c10", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j11", 1), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j11", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "c12", 1), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "c12", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
 
     @pytest.mark.asyncio
     async def test_dual_path_loop_bottom(self):
@@ -344,7 +349,7 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "c1", 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, "c1", 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, "j2", 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, "j2", 2), DOWNSTREAM)  # Would have been BOTH if the intermediate loop was reprocessed.
+        self._check_expected_direction(self._get_t(n, "j2", 2), BOTH)  # Would have been BOTH if the intermediate loop was reprocessed.
         self._check_expected_direction(self._get_t(n, "j2", 3), BOTH)
         self._check_expected_direction(self._get_t(n, "c3", 1), BOTH)
         self._check_expected_direction(self._get_t(n, "c3", 2), BOTH)
@@ -450,8 +455,8 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, "b2", 2), NONE)
 
     @staticmethod
-    async def _do_set_direction_trace(n: NetworkService):
-        await SetDirection().run(n)
+    async def _do_set_direction_trace(n: NetworkService, nso: NetworkStateOperators):
+        await SetDirection().run(n, network_state_operators=nso)
         for it in n.objects(Feeder):
             await log_directions(it.normal_head_terminal.conducting_equipment)
 

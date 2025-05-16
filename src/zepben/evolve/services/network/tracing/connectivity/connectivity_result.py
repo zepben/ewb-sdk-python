@@ -13,10 +13,9 @@ from zepben.evolve.dataclassy import dataclass
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-from zepben.evolve.model.phases import NominalPhasePath
 
 if TYPE_CHECKING:
-    pass
+    from zepben.evolve import NominalPhasePath
 
 __all__ = ["ConnectivityResult", "terminal_compare"]
 

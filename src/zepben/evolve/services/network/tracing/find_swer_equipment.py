@@ -2,12 +2,28 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Callable, Set, Union, Optional
+from typing import Set, Union, Generator, AsyncGenerator
 
-from zepben.evolve import ConnectedEquipmentTraversal, ConductingEquipmentStep, NetworkService, ConductingEquipment, Feeder, PowerTransformer, Switch, \
-    new_normal_connected_equipment_trace
+from typing_extensions import TypeVar
+
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
+from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
+
+from zepben.evolve import NetworkService
 
 __all__ = ["FindSwerEquipment"]
+
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+
+T = TypeVar
+
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
+
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 
 class FindSwerEquipment:
@@ -15,100 +31,107 @@ class FindSwerEquipment:
     A class which can be used for finding the SWER equipment in a [NetworkService] or [Feeder].
     """
 
-    create_trace: Callable[[], ConnectedEquipmentTraversal]
+    async def find(self, to_process: Union[NetworkService, Feeder], network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
+        """
+        Convenience method to call out to `find_all` or `find_on_feeder` based on the class type of `to_process`
 
-    def __init__(self, create_trace: Optional[Callable[[], ConnectedEquipmentTraversal]] = None) -> None:
-        super().__init__()
-        self.create_trace = create_trace or new_normal_connected_equipment_trace
+        :param to_process: the object to process
+        :param network_state_operators: The `NetworkStateOperators` to be used when finding SWER equipment
 
-    async def find_all(self, network_service: NetworkService) -> Set[ConductingEquipment]:
+        :return: A `Set` of `ConductingEquipment` on `Feeder` that is SWER, or energised via SWER.
+        """
+        if isinstance(to_process, Feeder):
+            return set(await self.find_on_feeder(to_process, network_state_operators))
+        elif isinstance(to_process, NetworkService):
+            return set([item async for item in self.find_all(to_process, network_state_operators)])
+
+    async def find_all(self, network_service: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> AsyncGenerator[ConductingEquipment, None]:
         """
         Find the `ConductingEquipment` on any `Feeder` in a `NetworkService` which is SWER. This will include any equipment on the LV network that is energised
         via SWER.
 
         :param network_service: The `NetworkService` to process.
+        :param network_state_operators: The `NetworkStateOperators` to be used when finding SWER equipment
 
-        :return: A `Set` of `ConductingEquipment` on any `Feeder` in `network_service` that is SWER, or energised via SWER.
+        :return: A `Set` of `ConductingEquipment` on `Feeder` that is SWER, or energised via SWER.
         """
-        return {it for feeder in network_service.objects(Feeder) for it in await self.find_on_feeder(feeder)}
+        for feeder in network_service.objects(Feeder):
+            for item in await self.find_on_feeder(feeder, network_state_operators):
+                yield item
 
-    async def find_on_feeder(self, feeder: Feeder) -> Set[ConductingEquipment]:
+    async def find_on_feeder(self, feeder: Feeder, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
         """
         Find the `ConductingEquipment` on a `Feeder` which is SWER. This will include any equipment on the LV network that is energised via SWER.
 
         :param feeder: The `Feeder` to process.
+        :param network_state_operators: The `NetworkStateOperators` to be used when finding SWER equipment
 
         :return: A `Set` of `ConductingEquipment` on `feeder` that is SWER, or energised via SWER.
         """
-        to_process = [it for it in feeder.equipment if isinstance(it, PowerTransformer) and self._has_swer_terminal(it) and self._has_non_swer_terminal(it)]
+        swer_equipment: Set[ConductingEquipment] = set()
 
         # We will add all the SWER transformers to the swer_equipment list before starting any traces to prevent tracing though them by accident. In
         # order to do this, we collect the sequence to a list to change the iteration order.
-        swer_equipment = set(to_process)
-
-        for it in to_process:
-            await self._trace_from(it, swer_equipment)
-
+        for equipment in network_state_operators.get_equipment(feeder):
+            if isinstance(equipment, PowerTransformer):
+                if _has_swer_terminal(equipment) and _has_non_swer_terminal(equipment):
+                    swer_equipment.add(equipment)
+                    await self._trace_from(network_state_operators, equipment, swer_equipment)
         return swer_equipment
 
-    async def _trace_from(self, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
+    @staticmethod
+    def _create_trace(state_operators: NetworkStateOperators) -> NetworkTrace[T]:
+        return Tracing.network_trace(state_operators).add_condition(state_operators.stop_at_open())
+
+    async def _trace_from(self, state_operators: NetworkStateOperators, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
         # Trace from any SWER terminals.
-        await self._trace_swer_from(transformer, swer_equipment)
+        await self._trace_swer_from(state_operators, transformer, swer_equipment)
 
         # Trace from any LV terminals.
-        await self._trace_lv_from(transformer, swer_equipment)
+        await self._trace_lv_from(state_operators, transformer, swer_equipment)
 
-    async def _trace_swer_from(self, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
-        async def is_in_swer_equipment(step: ConductingEquipmentStep) -> bool:
-            return step.conducting_equipment in swer_equipment
+    async def _trace_swer_from(self, state_operators: NetworkStateOperators, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
 
-        async def has_no_swer_terminals(step: ConductingEquipmentStep) -> bool:
-            return not self._has_swer_terminal(step)
+        def condition(next_step, nctx, step, ctx):
+            if _is_swer_terminal(next_step.path.to_terminal) or isinstance(next_step.path.to_equipment, Switch):
+                return next_step.path.to_equipment not in swer_equipment
 
-        async def add_swer_equipment(step: ConductingEquipmentStep, is_stopping: bool):
-            # To make sure we include any open points on a SWER network (unlikely) we include stop equipment if it is a `Switch`.
-            if not is_stopping or isinstance(step.conducting_equipment, Switch):
-                swer_equipment.add(step.conducting_equipment)
+        trace = (
+            self._create_trace(state_operators)
+            .add_queue_condition(condition)
+            .add_step_action(lambda step, ctx: swer_equipment.add(step.path.to_equipment))
+        )
 
-        trace = self.create_trace()
-        trace.add_stop_condition(is_in_swer_equipment)
-        trace.add_stop_condition(has_no_swer_terminals)
-        trace.add_step_action(add_swer_equipment)
-
-        # We start from the connected equipment to prevent tracing in the wrong direction, as we are using the connected equipment trace.
-        to_process = [ct.conducting_equipment for t in transformer.terminals for ct in t.connected_terminals() if
-                      t.phases.num_phases == 1 and ct.conducting_equipment]
-
-        for it in to_process:
+        for it in (t for t in transformer.terminals if _is_swer_terminal(t)):
             trace.reset()
-            await trace.run_from(it)
+            await trace.run(it, None)
 
-    async def _trace_lv_from(self, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
-        async def is_in_swer_equipment(step: ConductingEquipmentStep) -> bool:
-            return step.conducting_equipment in swer_equipment
 
-        async def add_swer_equipment(step: ConductingEquipmentStep, _: bool):
-            swer_equipment.add(step.conducting_equipment)
+    async def _trace_lv_from(self, state_operators: NetworkStateOperators,  transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
 
-        trace = self.create_trace()
-        trace.add_stop_condition(is_in_swer_equipment)
-        trace.add_step_action(add_swer_equipment)
+        def condition(next_step, nctx, step, ctx):
+            if 1 <= next_step.path.to_equipment.base_voltage_value <= 1000:
+                return next_step.path.to_equipment not in swer_equipment
 
-        # We start from the connected equipment to prevent tracing in the wrong direction, as we are using the connected equipment trace.
-        to_process = [ct.conducting_equipment for t in transformer.terminals for ct in t.connected_terminals() if
-                      t.phases.num_phases > 1 and ct.conducting_equipment and 1 <= ct.conducting_equipment.base_voltage_value <= 1000]
+        trace = (
+            self._create_trace(state_operators)
+            .add_queue_condition(condition)
+            .add_step_action(lambda step, ctx: swer_equipment.add(step.path.to_equipment))
+        )
 
-        for it in to_process:
-            trace.reset()
-            await trace.run_from(it)
+        for terminal in transformer.terminals:
+            if _is_non_swer_terminal(terminal):
+                trace.reset()
+                await trace.run(terminal, None)
 
-    @staticmethod
-    def _has_swer_terminal(item: Union[ConductingEquipmentStep, ConductingEquipment]) -> bool:
-        if isinstance(item, ConductingEquipmentStep):
-            item = item.conducting_equipment
+def _is_swer_terminal(terminal: Terminal) -> bool:
+    return terminal.phases.num_phases == 1
 
-        return any(t.phases.num_phases == 1 for t in item.terminals)
+def _is_non_swer_terminal(terminal: Terminal) -> bool:
+    return terminal.phases.num_phases > 1
 
-    @staticmethod
-    def _has_non_swer_terminal(ce: ConductingEquipment) -> bool:
-        return any(t.phases.num_phases > 1 for t in ce.terminals)
+def _has_swer_terminal(ce: ConductingEquipment) -> bool:
+    return any(_is_swer_terminal(it) for it in ce.terminals)
+
+def _has_non_swer_terminal(ce: ConductingEquipment) -> bool:
+    return any(_is_non_swer_terminal(it) for it in ce.terminals)

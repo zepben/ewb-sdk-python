@@ -2,26 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Callable, Awaitable
-from unittest.mock import create_autospec, patch, call, Mock
+from unittest.mock import call, patch
 
 import pytest
 
-from zepben.evolve import ConnectedEquipmentTraversal, NetworkService, Feeder, FindSwerEquipment, Junction, TestNetworkBuilder, PhaseCode, BaseVoltage, \
-    ConductingEquipment, verify_stop_conditions, ConductingEquipmentStep, step_on_when_run, step_on_when_run_with_is_stopping
-
-
-def create_mock_connected_equipment_traversal() -> Mock:
-    """Create a mock version of the `ConnectedEquipmentTraversal` which calls through the run method."""
-    trace = create_autospec(ConnectedEquipmentTraversal, instance=True)
-
-    async def call_run(it):
-        # noinspection PyArgumentList
-        await trace.run(ConductingEquipmentStep(it))
-
-    trace.run_from.side_effect = call_run
-
-    return trace
+from zepben.evolve import FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, ConductingEquipment, NetworkStateOperators
 
 
 class TestFindSwerEquipment:
@@ -29,33 +14,28 @@ class TestFindSwerEquipment:
     # pylint: disable=attribute-defined-outside-init
     # noinspection PyArgumentList
     def setup_method(self):
-        self.trace1 = create_mock_connected_equipment_traversal()
-        self.trace2 = create_mock_connected_equipment_traversal()
-        self.create_trace = create_autospec(Callable[[], ConnectedEquipmentTraversal], side_effect=[self.trace1, self.trace2])
+        self.state_operators = NetworkStateOperators.NORMAL
 
-        self.find_swer_equipment = FindSwerEquipment(self.create_trace)
+        self.find_swer_equipment = FindSwerEquipment()
 
     # pylint: enable=attribute-defined-outside-init
 
     @pytest.mark.asyncio
     async def test_processes_all_feeders_in_a_network(self):
-        ns = NetworkService()
-        feeder1 = Feeder()
-        feeder2 = Feeder()
-        j1 = Junction()
-        j2 = Junction()
-        j3 = Junction()
+        ns = (await TestNetworkBuilder()
+              .from_power_transformer([PhaseCode.AB, PhaseCode.A]) # tx0
+              .from_power_transformer([PhaseCode.AB, PhaseCode.A]) # tx1
+              .add_feeder('tx0') # fdr2
+              .add_feeder('tx1') # fdr3
+              .build())
 
-        ns.add(feeder1)
-        ns.add(feeder2)
-        ns.add(j1)
-        ns.add(j2)
-        ns.add(j3)
+        pass
 
-        with patch.object(self.find_swer_equipment, 'find_on_feeder', side_effect=[[j1, j2], [j2, j3]]) as find_on_feeder:
-            assert await self.find_swer_equipment.find_all(ns) == {j1, j2, j3}
+        with patch.object(self.find_swer_equipment, 'find_on_feeder') as find_on_feeder:
+            await self.find_swer_equipment.find(ns, self.state_operators)
 
-            find_on_feeder.assert_has_calls([call(feeder1), call(feeder2)])
+            for feeder in ['fdr2', 'fdr3']:
+                find_on_feeder.assert_has_calls([call(ns[feeder], self.state_operators)])
 
     @pytest.mark.asyncio
     async def test_only_runs_trace_from_swer_transformers_and_only_runs_non_swer_from_lv(self):
@@ -66,117 +46,84 @@ class TestFindSwerEquipment:
               .to_power_transformer([PhaseCode.AB, PhaseCode.A])  # tx3
               .to_acls(PhaseCode.A)  # c4
               .to_acls(PhaseCode.A)  # c5
-              .to_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx6
+              .to_power_transformer([PhaseCode.A, PhaseCode.AN, PhaseCode.AN])  # tx6
               .to_acls(PhaseCode.AN, action=self._make_lv)  # c7
+              .to_breaker(PhaseCode.AN, action=self._make_lv)  # b8
+              .branch_from('tx6', 2)
+              .to_acls(PhaseCode.AN, action=self._make_hv)  # c9
               .add_feeder("b0")  # fdr8
               .build())
 
-        self.create_trace.side_effect = [self.trace1, self.trace2, self.trace1, self.trace2]
+        results = await self.find_swer_equipment.find(ns['fdr10'])
 
-        assert await self.find_swer_equipment.find_on_feeder(ns["fdr8"]) == {ns["tx3"], ns["tx6"]}
+        assert results
 
-        assert self.create_trace.call_count == 4
-        self.trace1.run_from.assert_has_calls([call(ns["c4"]), call(ns["c5"])])
-        self.trace2.run_from.assert_called_once_with(ns["c7"])
+        self._check_showing_simple_diff(results, [ns[n] for n in ('tx3', 'c4', 'c5', 'tx6', 'c7', 'b8')])
 
     @pytest.mark.asyncio
-    async def test_does_not_run_from_swer_regulators(self):
-        ns = (await TestNetworkBuilder()
-              .from_breaker(PhaseCode.A)  # b0
-              .to_power_transformer([PhaseCode.A, PhaseCode.A])  # tx1
-              .to_acls(PhaseCode.A)  # c2
-              .add_feeder("b0")  # fdr3
-              .build())
-
-        await self.find_swer_equipment.find_on_feeder(ns["fdr3"])
-
-        self.trace1.run.assert_not_called()
-        self.trace2.run.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_validate_swer_trace_stop_conditions(self):
-        ns = (await TestNetworkBuilder()
-              .from_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx0
-              .from_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx0
-              .from_power_transformer()  # tx2
-              .add_feeder("tx0")  # fdr3
-              .build())
-
-        await self.find_swer_equipment.find_on_feeder(ns["fdr3"])
-
-        # noinspection PyArgumentList
-        async def stops_on_equipment_in_swer_collection(stop_condition: Callable[[ConductingEquipmentStep], Awaitable[None]]):
-            assert await stop_condition(ConductingEquipmentStep(ns["tx0"])), "Stops on equipment in swer collection"
-            assert not await stop_condition(ConductingEquipmentStep(ns["tx1"])), "Does not stop on equipment not in SWER collection"
-            assert not await stop_condition(ConductingEquipmentStep(ns["tx2"])), "Does not stop on equipment not in SWER collection"
-
-        # noinspection PyArgumentList
-        async def stops_on_equipment_without_swer_terminal(stop_condition: Callable[[ConductingEquipmentStep], Awaitable[None]]):
-            assert not await stop_condition(ConductingEquipmentStep(ns["tx0"])), "Does not stop on equipment with SWER terminal"
-            assert not await stop_condition(ConductingEquipmentStep(ns["tx1"])), "Does not stop on equipment with SWER terminal"
-            assert await stop_condition(ConductingEquipmentStep(ns["tx2"])), "Stops on equipment without SWER terminals"
-
-        await verify_stop_conditions(self.trace1, stops_on_equipment_in_swer_collection, stops_on_equipment_without_swer_terminal)
-
-    @pytest.mark.asyncio
-    async def test_validate_swer_trace_step_action(self):
-        ns = (await TestNetworkBuilder()
-              .from_power_transformer([PhaseCode.AN, PhaseCode.A])  # tx0
-              .to_acls()  # c1 -- this is here to make the trace actually run, so things are stepped on.
-              .from_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx2
-              .from_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx3
-              .from_breaker()  # b4
-              .add_feeder("tx0")  # fdr5
-              .build())
-
-        # noinspection PyArgumentList
-        step_on_when_run_with_is_stopping(
-            self.trace1,
-            (ConductingEquipmentStep(ns["tx2"]), False),
-            (ConductingEquipmentStep(ns["tx3"]), True),
-            (ConductingEquipmentStep(ns["b4"]), True)
+    async def test_does_not_run_from_SWER_regulators(self):
+        ns = (
+            await TestNetworkBuilder()
+            .from_breaker(PhaseCode.A)  # b0
+            .to_power_transformer([PhaseCode.A, PhaseCode.A])  # tx1
+            .to_acls(PhaseCode.A)  # c2
+            .add_feeder('b0')  # fdr3
+            .build()
         )
 
-        # tx2 should not have been added as it was stopping. b3 should have been added even though it was stopping.
-        assert await self.find_swer_equipment.find_on_feeder(ns["fdr5"]) == {ns["tx0"], ns["tx2"], ns["b4"]}
-
-        # This is here to make sure the above block is actually run.
-        self.trace1.run.assert_called_once()
+        assert len(await self.find_swer_equipment.find(ns['fdr3'], self.state_operators)) == 0
 
     @pytest.mark.asyncio
-    async def test_validate_lv_trace_stop_condition(self):
-        ns = (await TestNetworkBuilder()
-              .from_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx0
-              .from_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx0
-              .add_feeder("tx0")  # fdr2
-              .build())
+    async def test_does_not_run_through_other_transformers_that_will_be_traced(self):
+        ns = (
+            await TestNetworkBuilder()
+            .from_acls(PhaseCode.AN)  # c9
+            .to_power_transformer([PhaseCode.AN, PhaseCode.A])  #tx1
+            .to_acls(PhaseCode.A)  # c2
+            .to_power_transformer([PhaseCode.A, PhaseCode.A])  # tx3
+            .to_acls(PhaseCode.A)  # c4
+            .to_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx5
+            .to_acls(PhaseCode.AN)  # c6
+            .add_feeder("c0")  # fdr7
+            .build())
 
-        await self.find_swer_equipment.find_on_feeder(ns["fdr2"])
+        results = await self.find_swer_equipment.find(ns, self.state_operators)
 
-        # noinspection PyArgumentList
-        async def stops_on_equipment_in_swer_collection(stop_condition: Callable[[ConductingEquipmentStep], Awaitable[None]]):
-            assert await stop_condition(ConductingEquipmentStep(ns["tx0"])), "Stops on equipment in swer collection"
-            assert not await stop_condition(ConductingEquipmentStep(ns["tx1"])), "Does not stop on equipment not in SWER collection"
-
-        await verify_stop_conditions(self.trace2, stops_on_equipment_in_swer_collection)
+        self._check_showing_simple_diff(results, [ns[n] for n in['tx1', 'c2', 'tx3', 'c4', 'tx5']])
 
     @pytest.mark.asyncio
-    async def test_validate_lv_trace_step_action(self):
-        ns = (await TestNetworkBuilder()
-              .from_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx0
-              .to_acls(PhaseCode.AN, action=self._make_lv)  # c1 -- this is here to make the trace actually run, so things are stepped on.
-              .from_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx2
-              .add_feeder("tx0")  # fdr3
-              .build())
+    async def test_SWER_includes_open_switches_and_stops_at_them(self):
+        ns = (
+            await TestNetworkBuilder()
+            .from_power_transformer([PhaseCode.AN, PhaseCode.A])  # tx0
+            .to_breaker(is_normally_open=True)  # b1
+            .to_acls()  # c2
+            .add_feeder('tx0')  # fdr3
+            .build()
+        )
 
-        # noinspection PyArgumentList
-        step_on_when_run(self.trace2, ConductingEquipmentStep(ns["tx2"]))
+        results = await self.find_swer_equipment.find(ns['fdr3'], self.state_operators)
 
-        assert await self.find_swer_equipment.find_on_feeder(ns["fdr3"]) == {ns["tx0"], ns["tx2"]}
-        # await self.find_swer_equipment.find_on_feeder(ns["fdr3"])
+        self._check_showing_simple_diff(results, [ns[n] for n in ('tx0', 'b1')])
 
-        # This is here to make sure the above block is actually run.
-        self.trace2.run.assert_called_once()
+        assert self.state_operators.is_open(ns['b1'])
+
+    @pytest.mark.asyncio
+    async def test_LV_includes_open_switches_and_stops_at_them(self):
+        ns = (
+            await TestNetworkBuilder()
+            .from_power_transformer([PhaseCode.A, PhaseCode.AN])  # tx0
+            .to_acls(PhaseCode.AN, action=self._make_lv)  # c1
+            .to_breaker(PhaseCode.AN, is_normally_open=True, action=self._make_lv)  # b2
+            .to_acls(PhaseCode.AN, action=self._make_lv)  # c3
+            .add_feeder('tx0')  # fdr4
+            .build()
+        )
+        results = await self.find_swer_equipment.find(ns['fdr4'], self.state_operators)
+
+        self._check_showing_simple_diff(results, [ns[n] for n in ('tx0', 'c1', 'b2')])
+
+        assert self.state_operators.is_open(ns['b2'])
 
     @pytest.mark.asyncio
     async def test_runs_off_multiple_terminals(self):
@@ -192,8 +139,9 @@ class TestFindSwerEquipment:
               .add_feeder("tx0")  # fdr5
               .build())
 
-        # We need to run the actual trace rather than a mock to make sure it is being reset, as the mock does not have the same requirement.
-        await FindSwerEquipment().find_on_feeder(ns["fdr5"])
+        results = await self.find_swer_equipment.find(ns["fdr5"], self.state_operators)
+
+        self._check_showing_simple_diff(results, [ns[n] for n in ('tx0', 'c1', 'c2', 'c3', 'c4')])
 
     @pytest.mark.asyncio
     async def test_does_not_loop_back_out_of_swer_from_lv(self):
@@ -209,11 +157,45 @@ class TestFindSwerEquipment:
               .add_feeder("j0")  # fdr7
               .build())
 
-        # We need to run the actual trace rather than a mock to make sure it does not loop back through the LV.
-        assert await FindSwerEquipment().find_all(ns) == {ns["c2"], ns["tx3"], ns["c4"], ns["tx5"], ns["c6"]}
+        results = await self.find_swer_equipment.find(ns, self.state_operators)
+
+        self._check_showing_simple_diff(results, [ns[n] for n in ('c2', 'tx3', 'c4', 'tx5', 'c6')])
 
     @staticmethod
-    def _make_lv(ce: ConductingEquipment):
+    def _check_showing_simple_diff(results, expected):
+        print()
+        print(f'Results  = {" | ".join([r.mrid for r in results])}')
+        print(f'Expected = {" | ".join([e.mrid for e in expected])}')
+
+        missing = list(expected)  # we don't want to modify the list passed in incase we need to run other checks later
+        extra = list()
+        for n in results:
+            for i, m in enumerate(missing):
+                if n not in expected:
+                    extra.append(n)
+                if n == m:
+                    missing.pop(i)
+                    break
+
+        if missing:
+            print(f'Missing: {[m.mrid for m in missing]} from expected results')
+
+        if extra:
+            print(f'Extras: {[e.mrid for e in extra]} from expected results')
+
+        if len(results) != len(expected):
+            pytest.fail(f'results dont match expected:')
+
+        assert not missing or extra
+
+    @staticmethod
+    def _make_bv(ce: ConductingEquipment, volts: int):
         bv = BaseVoltage()
-        bv.nominal_voltage = 415
+        bv.nominal_voltage = volts
         ce.base_voltage = bv
+
+    def _make_lv(self, ce: ConductingEquipment):
+        self._make_bv(ce, 415)
+
+    def _make_hv(self, ce: ConductingEquipment):
+        self._make_bv(ce, 11000)

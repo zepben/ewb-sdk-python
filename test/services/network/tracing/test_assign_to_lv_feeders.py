@@ -5,8 +5,8 @@
 from typing import Iterable
 
 import pytest
-from zepben.evolve import assign_equipment_to_feeders, Equipment, TestNetworkBuilder, Feeder, BaseVoltage, LvFeeder
-from zepben.evolve.services.network.tracing.tracing import assign_equipment_to_lv_feeders
+from zepben.evolve import Equipment, TestNetworkBuilder, Feeder, BaseVoltage, LvFeeder, NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 
 def validate_equipment(equipment: Iterable[Equipment], *expected_mrids: str):
@@ -21,21 +21,22 @@ class TestAssignToLvFeeders:
     @pytest.mark.parametrize('feeder_start_point_between_conductors_network', [(True,)], indirect=True)
     async def test_applies_to_equipment_on_head_terminal_side(self, feeder_start_point_between_conductors_network):
         lv_feeder = feeder_start_point_between_conductors_network.get("f")
-        await assign_equipment_to_lv_feeders().run(feeder_start_point_between_conductors_network)
+        await Tracing.assign_equipment_to_lv_feeders().run(feeder_start_point_between_conductors_network)
         validate_equipment(lv_feeder.equipment, "fsp", "c2")
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize('feeder_start_point_to_open_point_network', [(True, False, True)], indirect=True)
     async def test_stops_at_normally_open_points(self, feeder_start_point_to_open_point_network):
         lv_feeder = feeder_start_point_to_open_point_network.get("f")
-        await assign_equipment_to_lv_feeders().run(feeder_start_point_to_open_point_network)
+        await Tracing.assign_equipment_to_lv_feeders().run(feeder_start_point_to_open_point_network, NetworkStateOperators.NORMAL)
+        await Tracing.assign_equipment_to_lv_feeders().run(feeder_start_point_to_open_point_network, NetworkStateOperators.CURRENT)
         validate_equipment(lv_feeder.equipment, "fsp", "c1", "op")
         validate_equipment(lv_feeder.current_equipment, "fsp", "c1", "op", "c2")
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize('loop_under_feeder_head_network', [(True,)], indirect=True)
     async def test_assigns_equipment_to_feeders_with_loops(self, caplog, loop_under_feeder_head_network):
-        await assign_equipment_to_lv_feeders().run(loop_under_feeder_head_network)
+        await Tracing.assign_equipment_to_lv_feeders().run(loop_under_feeder_head_network)
 
         lv_feeder = loop_under_feeder_head_network.get("f", LvFeeder)
         validate_equipment(lv_feeder.equipment, "s0", "c1", "c2", "c3", "c4")
@@ -58,7 +59,7 @@ class TestAssignToLvFeeders:
 
         lv_feeder = network_service.get("lvf3")
 
-        await assign_equipment_to_lv_feeders().run(network_service)
+        await Tracing.assign_equipment_to_lv_feeders().run(network_service)
         validate_equipment(lv_feeder.equipment, "b0", "c1")
 
     @pytest.mark.asyncio
@@ -80,7 +81,7 @@ class TestAssignToLvFeeders:
 
         lv_feeder = network_service.get("lvf4", LvFeeder)
 
-        await assign_equipment_to_lv_feeders().run(network_service)
+        await Tracing.assign_equipment_to_lv_feeders().run(network_service)
         validate_equipment(lv_feeder.equipment, "b0", "c1", "tx2")
 
     @pytest.mark.asyncio
@@ -105,8 +106,8 @@ class TestAssignToLvFeeders:
         feeder = network_service.get("fdr4", Feeder)
         lv_feeder = network_service.get("lvf5", LvFeeder)
 
-        await assign_equipment_to_feeders().run(network_service)
-        await assign_equipment_to_lv_feeders().run(network_service)
+        await Tracing.assign_equipment_to_feeders().run(network_service)
+        await Tracing.assign_equipment_to_lv_feeders().run(network_service)
 
         assert set(feeder.normal_energized_lv_feeders) == set()
         assert set(lv_feeder.normal_energizing_feeders) == set()
@@ -124,8 +125,8 @@ class TestAssignToLvFeeders:
         lv_feeder1 = network_service.get("lvf2", LvFeeder)
         lv_feeder2 = network_service.get("lvf3", LvFeeder)
 
-        await assign_equipment_to_feeders().run(network_service)
-        await assign_equipment_to_lv_feeders().run(network_service)
+        await Tracing.assign_equipment_to_feeders().run(network_service)
+        await Tracing.assign_equipment_to_lv_feeders().run(network_service)
 
         assert set(feeder.normal_energized_lv_feeders) == {lv_feeder1, lv_feeder2}
         assert set(lv_feeder1.normal_energizing_feeders) == {feeder}
@@ -144,8 +145,8 @@ class TestAssignToLvFeeders:
         feeder2 = network_service.get("fdr2", Feeder)
         lv_feeder = network_service.get("lvf3", LvFeeder)
 
-        await assign_equipment_to_feeders().run(network_service)
-        await assign_equipment_to_lv_feeders().run(network_service)
+        await Tracing.assign_equipment_to_feeders().run(network_service)
+        await Tracing.assign_equipment_to_lv_feeders().run(network_service)
 
         assert set(feeder1.normal_energized_lv_feeders) == {lv_feeder}
         assert set(feeder2.normal_energized_lv_feeders) == {lv_feeder}

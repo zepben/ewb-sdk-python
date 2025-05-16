@@ -1,7 +1,7 @@
 # Zepben Python SDK
 ## [0.48.0] - UNRELEASED
 ### Breaking Changes
-* None.
+* Updated to new Tracing API. All old traces will need to be re-written with the new API.
 
 ### New Features
 * None.

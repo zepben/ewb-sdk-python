@@ -5,15 +5,17 @@
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Generator, List, TYPE_CHECKING
+from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable
 
 if TYPE_CHECKING:
-    from zepben.evolve import Equipment, Terminal, Substation, LvFeeder
+    from zepben.evolve import Equipment, Terminal, Substation, LvFeeder, ConductingEquipment, NetworkStateOperators
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.evolve.util import nlen, ngen, safe_remove_by_id
 
 __all__ = ['EquipmentContainer', 'Feeder', 'Site']
+
+T = TypeVar("T")
 
 
 class EquipmentContainer(ConnectivityNodeContainer):
@@ -69,7 +71,8 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         if self._validate_reference(equipment, self.get_equipment, "An Equipment"):
             return self
-        self._equipment = dict() if self._equipment is None else self._equipment
+        if self._equipment is None:
+            self._equipment = dict()
         self._equipment[equipment.mrid] = equipment
         return self
 
@@ -183,7 +186,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
 
     def normal_lv_feeders(self) -> Generator[LvFeeder, None, None]:
         """
-        Convenience function to find all of the normal LV feeders of the equipment associated with this equipment container.
+        Convenience function to find all the normal LV feeders of the equipment associated with this equipment container.
         Returns the normal LV feeders for all associated LV feeders
         """
         seen = set()
@@ -441,4 +444,11 @@ class Site(EquipmentContainer):
     A collection of equipment for organizational purposes, used for grouping distribution resources located at a site.
     Note this is not a CIM concept - however represents an `EquipmentContainer` in CIM. This is to avoid the use of `EquipmentContainer` as a concrete class.
     """
-    pass
+
+    def find_lv_feeders(self, lv_feeder_start_points: Iterable[ConductingEquipment], state_operators: NetworkStateOperators) -> Generator[LvFeeder]:
+        for ce in state_operators.get_equipment(self):
+            if isinstance(ConductingEquipment, ce):
+                if ce in lv_feeder_start_points:
+                    if not state_operators.is_open(ce):
+                        for lv_feeder in ce.lv_feeders(state_operators):
+                            yield lv_feeder

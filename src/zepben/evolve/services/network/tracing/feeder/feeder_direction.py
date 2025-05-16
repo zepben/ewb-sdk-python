@@ -44,7 +44,6 @@ class FeederDirection(Enum):
     if it is in a loop.
     """
 
-    # todo replace .has(
     def __contains__(self, other):
         """
         Check whether this `FeederDirection`` contains another `FeederDirection`.
@@ -90,6 +89,15 @@ class FeederDirection(Enum):
             return FeederDirection.NONE
         else:  # lif self == FeederDirection.NONE:
             return FeederDirection.BOTH
+
+    @property
+    def complementary_external_direction(self):
+        if self == FeederDirection.UPSTREAM:
+            return FeederDirection.DOWNSTREAM
+        elif self == FeederDirection.DOWNSTREAM:
+            return FeederDirection.UPSTREAM
+        else:
+            return self
 
     @property
     def short_name(self) -> str:

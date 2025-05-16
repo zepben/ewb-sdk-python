@@ -11,14 +11,20 @@ import itertools
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional
+from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Generator
+
+from zepben.evolve.util import ngen
+
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
+from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.common.base_service import BaseService
 from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
+
 if TYPE_CHECKING:
     from zepben.evolve import Terminal, SinglePhaseKind, ConnectivityResult, Measurement, ConductingEquipment
 
@@ -263,3 +269,22 @@ class NetworkService(BaseService):
             self._measurements[measurement.power_system_resource_mrid].remove(measurement)
         except KeyError:
             pass
+
+    @property
+    def aux_equipment_by_terminal(self) -> Dict[Terminal, List[AuxiliaryEquipment]]:
+        eq_by_term = dict()
+        for aux_equipment in self.objects(AuxiliaryEquipment):
+            if aux_equipment.terminal is not None:
+                try:
+                    eq_by_term[aux_equipment.terminal].append(aux_equipment)
+                except KeyError:
+                    eq_by_term[aux_equipment.terminal] = [aux_equipment]
+        return eq_by_term
+
+    @property
+    def feeder_start_points(self) -> Generator[ConductingEquipment, None, None]:
+        return ngen(feeder.normal_head_terminal.conducting_equipment for feeder in self.objects(Feeder) if feeder.normal_head_terminal)
+
+    @property
+    def lv_feeder_start_points(self) -> Generator[ConductingEquipment, None, None]:
+        return ngen(lv_feeder.normal_head_terminal.conducting_equipment for lv_feeder in self.objects(LvFeeder) if lv_feeder.normal_head_terminal)

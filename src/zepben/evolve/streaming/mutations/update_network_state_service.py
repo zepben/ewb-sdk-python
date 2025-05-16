@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 __all__ = ["UpdateNetworkStateService"]
 
-from typing import Tuple, Callable, AsyncGenerator
+from typing import Tuple, Callable, AsyncGenerator, Any
 
 from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceServicer
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest
@@ -29,7 +29,7 @@ class UpdateNetworkStateService(UpdateNetworkStateServiceServicer):
     """
 
     def __init__(self, on_set_current_states: Callable[
-        [AsyncGenerator[Tuple[int, Tuple[CurrentStateEvent, ...]], None]], AsyncGenerator[SetCurrentStatesStatus, None]]):
+        [AsyncGenerator[Tuple[int, Tuple[CurrentStateEvent, Any]], None]], AsyncGenerator[SetCurrentStatesStatus, None]]):
         self.on_set_current_states = on_set_current_states
 
     async def setCurrentStates(self, request_iterator: AsyncGenerator[PBSetCurrentStatesRequest, None], context) -> AsyncGenerator[
@@ -52,7 +52,7 @@ class UpdateNetworkStateService(UpdateNetworkStateServiceServicer):
             A stream of protobuf SetCurrentStatesResponse sent back.
         """
 
-        async def request_generator() -> AsyncGenerator[Tuple[int, Tuple[CurrentStateEvent, ...]], None]:
+        async def request_generator() -> AsyncGenerator[Tuple[int, Tuple[CurrentStateEvent, Any]], None]:
             async for request in request_iterator:
                 yield request.messageId, tuple([CurrentStateEvent.from_pb(event) for event in request.event])
 
