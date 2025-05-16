@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Iterable
-from typing import Collection, List, Generator
+from typing import Collection, List, Generator, TypeVar
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Traversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -18,6 +18,8 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace_step impo
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
+
+T = TypeVar("T")
 
 __all__ = ["AssignToLvFeeders"]
 
@@ -93,7 +95,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
     async def _create_trace(self,
                       terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
                       lv_feeder_start_points: Iterable[ConductingEquipment],
-                      lv_feeders_to_assign: list[LvFeeder]) -> NetworkTrace[...]:
+                      lv_feeders_to_assign: list[LvFeeder]) -> NetworkTrace[T]:
 
         def _reached_hv(ce: ConductingEquipment):
             return True if ce.base_voltage and ce.base_voltage.nominal_voltage >= 1000 else False

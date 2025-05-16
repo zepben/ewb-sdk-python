@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import defaultdict
-from typing import TypeVar, Callable, Iterable
+from typing import TypeVar, Callable, Iterable, Any
 
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 
@@ -26,7 +26,7 @@ class WeightedPriorityQueue(TraversalQueue[T]):
     :param queue_provider: A queue provider. This allows you to customise the priority of items with the same weight.
     :param get_weight:     A method to extract the weight of an item being added to the queue.
     """
-    def __init__(self, queue_provider: Callable[[], TraversalQueue[T]], get_weight: Callable[[...], int]):
+    def __init__(self, queue_provider: Callable[[], TraversalQueue[T]], get_weight: Callable[[Any], int]):
         self._queue_provider = queue_provider
         self._get_weight = get_weight
         super().__init__(queue=SortedDefaultDict(self._queue_provider))

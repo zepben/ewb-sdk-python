@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
@@ -49,7 +49,7 @@ class ClearDirection:
     @staticmethod
     def _create_trace(state_operators: NetworkStateOperators,
                       visited_feeder_head_terminals: list[Terminal]
-                      ) -> NetworkTrace[...]:
+                      ) -> NetworkTrace[Any]:
         def queue_condition(step: NetworkTraceStep, context: StepContext, _, __):
             return state_operators.get_direction(step.path.to_terminal) != FeederDirection.NONE
 

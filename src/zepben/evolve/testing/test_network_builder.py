@@ -5,7 +5,7 @@
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 try:
-    from typing import Protocol
+    from typing import Protocol, Any
 except ImportError:
     Protocol = object
 
@@ -27,7 +27,7 @@ def null_action(_):
 class OtherCreator(Protocol):
     """Type hint class"""
 
-    def __call__(self, mrid: str, *args, **kwargs) -> ConductingEquipment: ...
+    def __call__(self, mrid: str, *args, **kwargs) -> ConductingEquipment: Any
 
 
 class TestNetworkBuilder:

@@ -3,11 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import Self, List, TypeVar, Generic
+from typing import List, TypeVar, Generic
 
 from zepben.evolve import IdentifiedObject
 
 T = TypeVar('T')
+
 
 class TreeNode(Generic[T]):
     """
@@ -15,8 +16,8 @@ class TreeNode(Generic[T]):
     """
     def __init__(self, identified_object: IdentifiedObject, parent=None):
         self.identified_object = identified_object
-        self._parent: Self = parent
-        self._children: List[Self] = []
+        self._parent: TreeNode = parent
+        self._children: List[TreeNode] = []
 
     @property
     def parent(self) -> 'TreeNode[T]':
@@ -26,7 +27,7 @@ class TreeNode(Generic[T]):
     def children(self):
         return list(self._children)
 
-    def add_child(self, child: Self):
+    def add_child(self, child: 'TreeNode'):
         self._children.append(child)
 
     def __str__(self):

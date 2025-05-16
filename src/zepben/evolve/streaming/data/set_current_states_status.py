@@ -7,7 +7,7 @@ __all__ = ["SetCurrentStatesStatus", "BatchSuccessful", "BatchFailure", "BatchNo
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Any
 
 from zepben.protobuf.ns.data.change_status_pb2 import BatchSuccessful as PBBatchSuccessful, BatchFailure as PBBatchFailure, \
     BatchNotProcessed as PBBatchNotProcessed, StateEventFailure as PBStateEventFailure, StateEventUnknownMrid as PBStateEventUnknownMrid, \
@@ -88,7 +88,7 @@ class BatchFailure(SetCurrentStatesStatus):
         failures: The status of each item processed in the batch that failed.
     """
 
-    def __init__(self, batch_id: int, partial_failure: bool, failures: Tuple['StateEventFailure', ...]):
+    def __init__(self, batch_id: int, partial_failure: bool, failures: Tuple['StateEventFailure', Any]):
         super().__init__(batch_id)
         self.partial_failure = partial_failure
         self.failures = failures

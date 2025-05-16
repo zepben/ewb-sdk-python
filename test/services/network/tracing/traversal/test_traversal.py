@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import deque
-from typing import Callable, TypeVar, Tuple
+from typing import Callable, TypeVar, Tuple, Any
 
 import pytest
 
@@ -17,7 +17,7 @@ class TraversalTest(Traversal[T, 'TestTraversal[T]']):
     def __init__(self, queue_type, parent,
                  can_visit_item: Callable[[T, StepContext], bool],
                  can_action_item: Callable[[T, StepContext], bool],
-                 on_reset: Callable[[], ...]):
+                 on_reset: Callable[[], Any]):
         super().__init__(queue_type, parent)
         self._can_visit_item_impl = can_visit_item
         self._can_action_item_impl = can_action_item
@@ -38,7 +38,7 @@ class TraversalTest(Traversal[T, 'TestTraversal[T]']):
 
 def _create_traversal(can_visit_item: Callable[[int, StepContext], bool]=lambda x, y: True,
                       can_action_item: Callable[[int, StepContext], bool]=lambda x, y: True,
-                      on_reset: Callable[[], ...]=lambda: None) -> TraversalTest[int]:
+                      on_reset: Callable[[], Any]=lambda: None) -> TraversalTest[int]:
 
     def queue_next(item, _, queue_item):
         if item < 0:
