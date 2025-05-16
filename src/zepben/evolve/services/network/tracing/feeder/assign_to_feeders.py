@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Collection
-from typing import Iterable, Generator, Union
+from typing import Iterable, Generator, Union, List, Dict, Any
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Equipment, LvFeeder
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -116,8 +116,8 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                                terminal: Terminal,
                                feeder_start_points: Generator[ConductingEquipment, None, None],
                                lv_feeder_start_points: Generator[ConductingEquipment, None, None],
-                               terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
-                               feeders_to_assign: list[Feeder]):
+                               terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
+                               feeders_to_assign: List[Feeder]):
 
         if terminal is None or len(feeders_to_assign) == 0:
             return
@@ -131,10 +131,10 @@ class AssignToFeedersInternal(BaseFeedersInternal):
             await traversal.run(terminal, False, can_stop_on_start_item=False)
 
     async def _create_trace(self,
-                      terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
+                      terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
                       feeder_start_points: Generator[ConductingEquipment, None, None],
                       lv_feeder_start_points: Generator[ConductingEquipment, None, None],
-                      feeders_to_assign: list[Feeder]) -> NetworkTrace[...]:
+                      feeders_to_assign: List[Feeder]) -> NetworkTrace[Any]:
 
         def _reached_lv(ce: ConductingEquipment):
             return True if ce.base_voltage and ce.base_voltage.nominal_voltage < 1000 else False
@@ -158,9 +158,9 @@ class AssignToFeedersInternal(BaseFeedersInternal):
     async def _process(self,
                  step_path: NetworkTraceStep.Path,
                  step_context: StepContext,
-                 terminal_to_aux_equipment: dict[Terminal, Collection[AuxiliaryEquipment]],
+                 terminal_to_aux_equipment: Dict[Terminal, Collection[AuxiliaryEquipment]],
                  lv_feeder_start_points: Generator[ConductingEquipment, None, None],
-                 feeders_to_assign: list[Feeder]):
+                 feeders_to_assign: List[Feeder]):
 
         if step_path.traced_internally and not step_context.is_start_item:
             return

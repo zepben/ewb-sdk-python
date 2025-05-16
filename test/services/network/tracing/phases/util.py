@@ -101,7 +101,7 @@ def _log_equipment(step: NetworkTraceStep, _: bool):
 
         return f"{{{phase}: n:{nps}, c:{cps}}}"
 
-    for t in ce.terminals:
+    for t in step.path.to_equipment.terminals:
         logger.info(
             "%s-T%s: %s",
             ce.mrid,

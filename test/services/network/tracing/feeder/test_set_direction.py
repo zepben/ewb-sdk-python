@@ -16,55 +16,6 @@ BOTH = FeederDirection.BOTH
 NONE = FeederDirection.NONE
 
 
-class Node:
-    def __init__(self, terminal: Terminal):
-        self.mrid = terminal.mrid
-        self.terminal = terminal
-        self._children = {}
-
-    def add_child(self, node):
-        if node.terminal.mrid in self._children:
-            return
-        self._children[node.terminal.mrid] = node
-        return self
-
-    def __str__(self):
-        return f'{self.mrid}\n{"   -".join(str(c) for c in self._children.values())}'
-
-class LoggingSetDirection(SetDirection) :
-    def __init__(self):
-        super().__init__()
-        self.step_count = 0
-
-    async def _create_traversal(self, state_operators: NetworkStateOperators):
-        self.nodes = {}
-
-        def log_step(nts: NetworkTraceStep, ctx: StepContext):
-            this_term = nts.path.from_terminal
-            next_term = nts.path.to_terminal
-
-            this_node = self.nodes.get(this_term.mrid)
-            if this_node is None:
-                this_node = Node(this_term)
-                self.nodes[this_term.mrid] = this_node
-
-            next_node = self.nodes.get(next_term.mrid)
-            if next_node is None:
-                next_node = Node(next_term)
-                self.nodes[next_node.mrid] = next_node
-            if next_node != this_node:
-                this_node.add_child(next_node)
-
-            print(f'Step Action {nts.path.from_terminal} -> {nts.path.to_terminal} {nts.path.from_terminal.normal_feeder_direction} {nts.path.from_terminal.current_feeder_direction} {nts.data}')
-
-        traversal = (await super()._create_traversal(state_operators)) \
-            .add_step_action(log_step)
-
-        return traversal
-
-SetDirection = LoggingSetDirection
-
-
 class TestSetDirection:
 
     @pytest.mark.asyncio

@@ -3,15 +3,15 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Iterable
-from typing import Collection, List, Generator, TypeVar
+from typing import Collection, List, Generator, TypeVar, Dict
 
-from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Traversal
+
+from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import BaseFeedersInternal
-from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
@@ -78,8 +78,8 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
     async def run_with_feeders(self,
                                terminal: Terminal,
                                lv_feeder_start_points: Iterable[ConductingEquipment],
-                               terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
-                               lv_feeders_to_assign: list[LvFeeder]):
+                               terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
+                               lv_feeders_to_assign: List[LvFeeder]):
 
         if terminal is None or len(lv_feeders_to_assign) == 0:
             return
@@ -93,9 +93,9 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             await traversal.run(terminal, False)
 
     async def _create_trace(self,
-                      terminal_to_aux_equipment: dict[Terminal, list[AuxiliaryEquipment]],
+                      terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
                       lv_feeder_start_points: Iterable[ConductingEquipment],
-                      lv_feeders_to_assign: list[LvFeeder]) -> NetworkTrace[T]:
+                      lv_feeders_to_assign: List[LvFeeder]) -> NetworkTrace[T]:
 
         def _reached_hv(ce: ConductingEquipment):
             return True if ce.base_voltage and ce.base_voltage.nominal_voltage >= 1000 else False
@@ -122,9 +122,9 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                        step_path: NetworkTraceStep.Path,
                        found_lv_feeder: bool,
                        step_context: StepContext,
-                       terminal_to_aux_equipment: dict[Terminal, Collection[AuxiliaryEquipment]],
+                       terminal_to_aux_equipment: Dict[Terminal, Collection[AuxiliaryEquipment]],
                        lv_feeder_start_points: Iterable[ConductingEquipment],
-                       lv_feeders_to_assign: list[LvFeeder]):
+                       lv_feeders_to_assign: List[LvFeeder]):
 
         if step_path.traced_internally and not step_context.is_start_item:
             return
