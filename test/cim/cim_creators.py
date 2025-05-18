@@ -738,13 +738,17 @@ def create_substation(include_runtime: bool = True):
 
 
 def create_terminal(include_runtime: bool = True):
+    runtime = {
+        "traced_phases": builds(TracedPhases)
+    } if include_runtime else {}
     return builds(
         Terminal,
         **create_ac_dc_terminal(include_runtime),
         conducting_equipment=sampled_conducting_equipment(include_runtime),
         connectivity_node=builds(ConnectivityNode, **create_identified_object(include_runtime)),
         phases=sampled_phase_code(),
-        sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER)
+        sequence_number=integers(min_value=MIN_SEQUENCE_NUMBER, max_value=MAX_SEQUENCE_NUMBER),
+        **runtime
     )
 
 
