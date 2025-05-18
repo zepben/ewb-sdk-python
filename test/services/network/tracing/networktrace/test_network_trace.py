@@ -2,27 +2,36 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import sys
+
 import pytest
 
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
 
 
+
 class TestNetworkTrace:
 
-    @pytest.mark.skip
     @pytest.mark.asyncio
     async def test_can_run_large_branching_traces(self):
-        builder = TestNetworkBuilder()
-        network = builder.network
+        try:
+            sys.setrecursionlimit(100000)  # need to bump this for this test, we're going 1000+ recursive calls deep
 
-        builder.from_junction(num_terminals=1) \
-               .to_acls()
+            builder = TestNetworkBuilder()
+            network = builder.network
 
-        for i in range(250):
-            builder.to_junction(mrid=f'junc-{i}', num_terminals=3) \
-                   .to_acls(mrid=f'acls-{i}-top') \
-                   .from_acls(mrid=f'acls-{i}-bottom') \
-                   .connect(f'junc-{i}', f'acls-{i}-bottom', 2, 1)
+            builder.from_junction(num_terminals=1) \
+                   .to_acls()
 
-        await Tracing.network_trace_branching().run(network['j0'].get_terminal_by_sn(1))
+            for i in range(1000):
+                builder.to_junction(mrid=f'junc-{i}', num_terminals=3) \
+                       .to_acls(mrid=f'acls-{i}-top') \
+                       .from_acls(mrid=f'acls-{i}-bottom') \
+                       .connect(f'junc-{i}', f'acls-{i}-bottom', 2, 1)
+
+            await Tracing.network_trace_branching().run(network['j0'].get_terminal_by_sn(1))
+
+        except Exception as e:
+            sys.setrecursionlimit(1000)  # back to default
+            raise e
