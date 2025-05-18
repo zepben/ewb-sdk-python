@@ -32,7 +32,7 @@ class NetworkTraceTracker:
 
     @staticmethod
     def _get_key(terminal: Terminal, phases: Set[SinglePhaseKind]) -> Any:
-        if phases and len(phases) < 1:
-            return terminal
-        else:
+        if phases:
             return terminal, phases
+        else:
+            return terminal

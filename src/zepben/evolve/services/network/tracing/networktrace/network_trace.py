@@ -200,22 +200,10 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return [NominalPhasePath(it, it) for it in phases.single_phases] if phases and phases.single_phases else []
 
     def has_visited(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
-        parent = self.parent
-        while parent is not None:
-            if parent._tracker.has_visited(terminal, phases):
-                return True
-            parent = parent.parent
-
-        return self._tracker.has_visited(terminal, phases)
+        return self._tracker.has_visited(terminal, phases) or (self.parent and self.parent.has_visited(terminal, phases))
 
     def visit(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
-        parent = self.parent
-        while parent is not None:
-            if parent._tracker.has_visited(terminal, phases):
-                return False
-            parent = parent.parent
-
-        return self._tracker.visit(terminal, phases)
+        return not (self.parent and self.parent.has_visited(terminal, phases)) and self._tracker.visit(terminal, phases)
 
 
 def to_network_trace_queue_condition(queue_condition: QueueCondition[NetworkTraceStep[T]], step_type: NetworkTraceStep.Type, override_step_type: bool):
