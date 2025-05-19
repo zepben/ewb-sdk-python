@@ -6,14 +6,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Set, Generic, TypeVar, TYPE_CHECKING, List
+from typing import Set, Generic, TypeVar, TYPE_CHECKING
 
-from zepben.evolve import SinglePhaseKind
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
     from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+    from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
+    from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 T = TypeVar('T')
 
@@ -33,20 +34,21 @@ class NetworkTraceStep(Generic[T]):
         """
         Represents the path taken in a network trace step, detailing the transition from one terminal to another.
 
-        A limitation of the network trace is that all terminals must have associated conducting equipment. This means that if the [fromTerminal]
-        or [toTerminal] have `null` conducting equipment an [IllegalStateException] will be thrown.
+        A limitation of the network trace is that all terminals must have associated conducting equipment. This means that if the `from_terminal`
+        or `to_terminal` have `None` conducting equipment an [IllegalStateException] will be thrown.
 
-        `fromTerminal` The terminal that was stepped from.
-        `toTerminal` The terminal that was stepped to.
-        `nominalPhasePaths` A list of nominal phase paths traced in this step. If this is empty, phases have been ignored.
-        `fromEquipment` The conducting equipment associated with the [fromTerminal].
-        `toEquipment` The conducting equipment associated with the [toTerminal].
-        `tracedInternally` `true` if the from and to terminals belong to the same equipment; `false` otherwise.
-        `tracedExternally` `true` if the from and to terminals belong to different equipment; `false` otherwise.
+        No validation is done on the `traversed_ac_line_segment` against the `from_terminal` and `to_terminal`. It assumes the creator knows what they are doing
+        and thus avoids the overhead of validation as this class will have lots if instances created as part of a [NetworkTrace].
+
+        :param from_terminal: The terminal that was stepped from.
+        :param to_terminal: The terminal that was stepped to.
+        :param traversed_ac_line_segment: If the from_terminal and to_terminal path was via an `AcLineSegment`, this is the segment that was traversed
+        :param nominal_phase_paths: A list of nominal phase paths traced in this step. If this is empty, phases have been ignored.
         """
         from_terminal: Terminal
         to_terminal: Terminal
-        nominal_phase_paths: List[NominalPhasePath] = field(default_factory=list)
+        traversed_ac_line_segment: AcLineSegment = field(default=None)
+        nominal_phase_paths: Set[NominalPhasePath] = field(default_factory=set)
 
         def to_phases_set(self) -> Set[SinglePhaseKind]:
             if len(self.nominal_phase_paths) == 0:
@@ -56,6 +58,9 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def from_equipment(self) -> ConductingEquipment:
+            """
+            The conducting equipment associated with `self.from_terminal`.
+            """
             ce = self.from_terminal.conducting_equipment
             if not ce:
                 raise AttributeError("Network trace does not support terminals that do not have conducting equipment")
@@ -63,6 +68,9 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def to_equipment(self) -> ConductingEquipment:
+            """
+            The conducting equipment associated with `self.to_terminal`.
+            """
             ce = self.to_terminal.conducting_equipment
             if not ce:
                 raise AttributeError("Network trace does not support terminals that do not have conducting equipment")
@@ -70,11 +78,21 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def traced_internally(self) -> bool:
+            """
+            `True` if the from and to terminals belong to the same equipment; `False` otherwise.
+            """
             return self.from_equipment == self.to_equipment
 
         @property
         def traced_externally(self) -> bool:
+            """
+            `True` if the from and to terminals belong to different equipment; `False` otherwise.
+            """
             return not self.traced_internally
+
+        @property
+        def did_traverse_ac_line_segment(self) -> bool:
+            return self.traversed_ac_line_segment is not None
 
 
     Type = Enum('Type', ('ALL', 'INTERNAL', 'EXTERNAL'))

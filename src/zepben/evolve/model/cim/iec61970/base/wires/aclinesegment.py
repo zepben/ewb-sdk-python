@@ -64,6 +64,7 @@ class AcLineSegment(Conductor):
     However, boundary lines  may have slightly different BaseVoltage.nominalVoltages and variation is allowed.
     Larger voltage difference in general requires use of an equivalent branch.
     """
+    max_terminals = 2
 
     per_length_impedance: Optional[PerLengthImpedance] = None
     """A `zepben.evolve.PerLengthImpedance` describing this AcLineSegment"""

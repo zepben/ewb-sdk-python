@@ -25,3 +25,5 @@ class Clamp(ConductingEquipment):
 
     ac_line_segment: Optional[AcLineSegment] = None
     """The line segment to which the clamp is connected."""
+
+    max_terminals = 1
