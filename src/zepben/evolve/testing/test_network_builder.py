@@ -13,7 +13,7 @@ from typing import Optional, Callable, List, Union, Type
 
 from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
     PowerTransformerEnd, PowerTransformer, EnergyConsumer, \
-    PowerElectronicsConnection
+    PowerElectronicsConnection, BusbarSection
 
 
 def null_action(_):
@@ -343,6 +343,51 @@ class TestNetworkBuilder:
         self._current = it
         return self
 
+    def from_busbar_section(
+        self,
+        nominal_phases: PhaseCode=PhaseCode.ABC,
+        mrid: str=None,
+        action: Callable[[BusbarSection], None]=null_action
+    ) -> 'TestNetworkBuilder':
+        """
+        Start a new network island from a `BusbarSection`, updating the network pointer to the new `BusbarSection`.
+
+        :param nominal_phases: The nominal phases for the new `BusbarSection`.
+        :param mrid: Optional mRID for the new `BusbarSection`.
+        :param action: An action that accepts the new `BusbarSection` to allow for additional initialisation.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
+        it = self._create_busbar_section(mrid, nominal_phases)
+        action(it)
+        self._current = it
+        return self
+
+    def to_busbar_section(
+        self,
+        nominal_phases: PhaseCode = PhaseCode.ABC,
+        mrid: str = None,
+        connectivity_node_mrid: Optional[str] = None,
+        action: Callable[[BusbarSection], None] = null_action
+        ) -> 'TestNetworkBuilder':
+        """
+
+        Add a new `BusbarSection` to the network and connect it to the current network pointer, updating the network pointer to the new `BusbarSection`.
+
+        :param nominal_phases: The nominal phases for the new `BusbarSection`.
+        :param mrid: Optional mRID for the new `BusbarSection`.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `BusbarSection` to the previous item. Will only be used
+         if the previous item is not already connected.
+        :param action: An action that accepts the new `BusbarSection` to allow for additional initialisation.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
+        it = self._create_busbar_section(mrid, nominal_phases)
+        self._connect(self._current, it, connectivity_node_mrid)
+        action(it)
+        self._current = it
+        return self
+
     def from_other(
         self,
         creator: Union[OtherCreator, Type[ConductingEquipment]],
@@ -554,6 +599,13 @@ class TestNetworkBuilder:
 
         self.network.add(j)
         return j
+
+    def _create_busbar_section(self, mrid: Optional[str], nominal_phases: PhaseCode) -> BusbarSection:
+        b = BusbarSection(mrid=self._next_id(mrid, 'bbs'))
+        self._add_terminal(b, 1, nominal_phases)
+
+        self.network.add(b)
+        return b
 
     def _create_power_electronics_connection(self, mrid: Optional[str], nominal_phases: PhaseCode, num_terminals: Optional[int]) -> PowerElectronicsConnection:
         pec = PowerElectronicsConnection(mrid=self._next_id(mrid, "pec"))
