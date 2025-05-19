@@ -174,6 +174,6 @@ class Terminal(AcDcTerminal):
 
     def has_connected_busbars(self):
         try:
-            return any(it != self and it.conducting_equipment is BusbarSection for it in self.connectivity_node.terminals) == True
+            return any(it != self and isinstance(it.conducting_equipment, BusbarSection) for it in self.connectivity_node.terminals) == True
         except AttributeError:
             return False

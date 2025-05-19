@@ -14,8 +14,7 @@ from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStat
 
 T = TypeVar("T")
 
-__all__ = ["OpenTest", "PhaseSelector", "DirectionSelector"]
+__all__ = ["OpenTest"]
 
 OpenTest = Callable[[ConductingEquipment, Optional[SinglePhaseKind]], bool]
-PhaseSelector = Callable[[Terminal], PhaseStatus]
-DirectionSelector = Callable[[Terminal], DirectionStatus]
+
