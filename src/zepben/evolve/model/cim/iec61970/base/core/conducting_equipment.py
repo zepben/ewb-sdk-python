@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import sys
-from typing import List, Optional, Generator, TYPE_CHECKING
+from typing import List, Optional, Generator, TYPE_CHECKING, Union
 
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
@@ -80,12 +80,31 @@ class ConductingEquipment(Equipment):
         """
         return len(self._terminals)
 
+    def get_terminal(self, identifier: Union[int, str]):
+        """
+        Get the `Terminal` for this `ConductingEquipment` identified by `mrid` or `sequence_number`
+
+        :param identifier: the mRID of the required `Terminal`, or the `sequence_number` of the terminal in relation
+            to this `ConductingEquipment`
+        :return: The `Terminal` with the specified `mrid` if it exists
+
+        Raises `KeyError` if `mrid` wasn't present.
+        Raises `TypeError` if the identifier wasn't a recognised type
+        """
+        if isinstance(identifier, int):
+            return self.get_terminal_by_sn(identifier)
+        elif isinstance(identifier, str):
+            return self.get_terminal_by_mrid(identifier)
+        raise TypeError(f'`identifier` parameter not a recognised type: {type(identifier)}')
+
     def get_terminal_by_mrid(self, mrid: str) -> Terminal:
         """
         Get the `Terminal` for this `ConductingEquipment` identified by `mrid`
 
-        `mrid` the mRID of the required `Terminal`
-        Returns The `Terminal` with the specified `mrid` if it exists
+        :param mrid: the mRID of the required `Terminal`
+
+        :return: The `Terminal` with the specified `mrid` if it exists
+
         Raises `KeyError` if `mrid` wasn't present.
         """
         return get_by_mrid(self._terminals, mrid)
@@ -94,8 +113,10 @@ class ConductingEquipment(Equipment):
         """
         Get the `Terminal` on this `ConductingEquipment` by its `sequence_number`.
 
-        `sequence_number` The `sequence_number` of the `Terminal` in relation to this `ConductingEquipment`.
-        Returns The `Terminal` on this `ConductingEquipment` with sequence number `sequence_number`
+        :param sequence_number: The `sequence_number` of the `Terminal` in relation to this `ConductingEquipment`.
+
+        :return: The `Terminal` on this `ConductingEquipment` with sequence number `sequence_number`
+
         Raises IndexError if no `Terminal` was found with sequence_number `sequence_number`.
         """
         for term in self._terminals:
