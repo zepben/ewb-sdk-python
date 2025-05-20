@@ -13,7 +13,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
-from zepben.evolve.services.network.tracing.networktrace.operators.in_service_state_operators import InServiceStateOperators
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
 
 PathFactory = Callable[[Terminal, AcLineSegment], Optional[NetworkTraceStep.Path]]
@@ -21,7 +21,7 @@ PathFactory = Callable[[Terminal, AcLineSegment], Optional[NetworkTraceStep.Path
 
 
 class NetworkTraceStepPathProvider:
-    def __init__(self, state_operators: InServiceStateOperators):
+    def __init__(self, state_operators: NetworkStateOperators):
         self.state_operators = state_operators
 
     def next_paths(self, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:

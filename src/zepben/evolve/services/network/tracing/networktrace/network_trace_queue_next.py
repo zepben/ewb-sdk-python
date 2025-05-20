@@ -2,96 +2,85 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar, Callable, Sequence, Iterable, Generator
+from abc import ABC
+from typing import TypeVar, Callable, Generator, TYPE_CHECKING, Generic, List, Union
 
-from zepben.evolve import TerminalConnectivityConnected
-from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
-from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
-from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 
 T = TypeVar('T')
 
-CheckInService = Callable[[ConductingEquipment], bool]
+from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
+from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
+QueueItem = Callable[[NetworkTraceStep[T]], bool]
+QueueBranch = Callable[[NetworkTraceStep[T]], bool]
+GetNextSteps = Callable[[NetworkTraceStep[T], StepContext], Generator[NetworkTraceStep[T], None, None]]
+GetNextStepsBranching = Callable[[NetworkTraceStep[T], StepContext], List[NetworkTraceStep[T]]]
 
 
-class NetworkTraceQueueNext:
-    def basic(self, is_in_service: CheckInService, compute_data: ComputeData[T]) -> Traversal.QueueNext[NetworkTraceStep[T]]:
-        return Traversal.QueueNext(lambda item, context, queue_item: list(map(queue_item ,self._next_trace_steps(is_in_service, item, context, compute_data))))
+class NetworkTraceQueueNext(ABC):
+    path_provider = NetworkTraceStepPathProvider
 
-    def branching(self, is_in_service: CheckInService, compute_data: ComputeData[T]) -> Traversal.BranchingQueueNext[NetworkTraceStep[T]]:
-        return Traversal.BranchingQueueNext(lambda item, context, queue_item, queue_branch: self._queue_next_steps_branching(list(self._next_trace_steps(is_in_service, item, context, compute_data)), queue_item, queue_branch))
+    def __init__(self, path_provider: NetworkTraceStepPathProvider):
+        self.path_provider = path_provider
 
-    @staticmethod
-    def _queue_next_steps_branching(next_steps: list[NetworkTraceStep[T]],
-                                    queue_item: Callable[[NetworkTraceStep[T]], bool],
-                                    queue_branch: Callable[[NetworkTraceStep[T]], bool]):
-        if len(next_steps) == 1:
-            return queue_item(next_steps[0])
-        else:
-            return [queue_branch(step) for step in next_steps]
 
-    def _next_trace_steps(self,
-                          is_in_service: CheckInService,
+    def next_trace_steps(self,
                           current_step: NetworkTraceStep[T],
                           current_context: StepContext,
-                          compute_data: ComputeData[T]
-                          ) -> Sequence[NetworkTraceStep[T]]:
+                          compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
+                          ) -> Generator[NetworkTraceStep[T], None, None]:
         """ Builds a list of next `NetworkTraceStep` to add to the `NetworkTrace` queue """
+        next_paths = self.path_provider.next_paths(current_step.path)
+        if isinstance(compute_data, ComputeData):
+            compute_next = lambda it: compute_data.compute_next(current_step, current_context, it)
+        elif isinstance(compute_data, ComputeDataWithPaths):
+            next_paths = list(next_paths)
+            compute_next = lambda it: compute_data.compute_next(current_step, current_context, it, next_paths)
+        else:
+            raise TypeError(f'ComputeData was not of a recognised class: {compute_data.__class__} not in [ComputeData, ComputeDataWithPaths]')
 
         next_num_terminal_steps = current_step.next_num_terminal_steps()
-        next_num_equipment_steps = current_step.next_num_equipment_steps()
-        return list(NetworkTraceStep(
-            path,
-            next_num_terminal_steps,
-            next_num_equipment_steps,
-            compute_data.compute_next(current_step, current_context, path)
-        ) for path in self._next_step_paths(is_in_service, current_step.path))
+        for it in next_paths:
+            data = compute_next(it)
+            yield NetworkTraceStep(it, next_num_terminal_steps, it.next_num_equipment_steps(current_step.num_equipment_steps), data)
 
-    def _next_step_paths(self, is_in_service: CheckInService, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:
-        next_terminals = self._next_terminals(is_in_service, path)
+    @classmethod
+    def Basic(cls, path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+        return Basic(path_provider, compute_data)
 
-        if len(path.nominal_phase_paths) > 0:
-            phase_paths = set(it.to_phase for it in path.nominal_phase_paths)
+    @classmethod
+    def Branching(cls, path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+        return Branching(path_provider, compute_data)
 
-            for result in (TerminalConnectivityConnected().terminal_connectivity(path.to_terminal, t, phase_paths) for t in next_terminals):
-                if result.nominal_phase_paths:
-                    yield NetworkTraceStep.Path(path.to_terminal, result.to_terminal, result.nominal_phase_paths)
 
+class Basic(NetworkTraceQueueNext, Traversal.QueueNext[NetworkTraceStep[T]], Generic[T]):
+    def __init__(self, path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+        super().__init__(path_provider)
+
+        self._get_next_steps: GetNextSteps = lambda item, context: self.next_trace_steps(item, context, compute_data)
+
+    def __iinit__(self, get_next_steps: GetNextSteps):
+        self._get_next_steps: GetNextSteps = get_next_steps
+
+    def accept(self, item: NetworkTraceStep[T], context: StepContext, queue_item: QueueItem):
+        for it in self._get_next_steps(item, context):
+            queue_item(it)
+
+
+class Branching(NetworkTraceQueueNext, Traversal.BranchingQueueNext[NetworkTraceStep[T]], Generic[T]):
+    def __init__(self, path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+        super().__init__(path_provider)
+        
+        self._get_next_steps: GetNextStepsBranching = lambda item, context: list(self.next_trace_steps(item, context, compute_data))
+
+    def accept(self, item: NetworkTraceStep[T], context: StepContext, queue_item: QueueItem, queue_branch: QueueBranch):
+        next_steps = list(self._get_next_steps(item, context))
+        if len(next_steps) == 1:
+            queue_item(next_steps[0])
         else:
-            for terminal in next_terminals:
-                yield NetworkTraceStep.Path(path.to_terminal, terminal)
+            for step in next_steps:
+                queue_branch(step)
 
-    @staticmethod
-    def _next_terminals(is_in_service: CheckInService, path: NetworkTraceStep.Path) -> Iterable[Terminal]:
-        def __next_terminals():
-            if path.traced_internally:
-                # We need to step externally to connected terminals. However:
-                # Busbars are only modelled with a single terminal. So if we find any we need to step to them before the
-                # other (non busbar) equipment connected to the same connectivity node. Once the busbar has been
-                # visited we then step to the other non busbar terminals connected to the same connectivity node.
-                if path.to_terminal.has_connected_busbars():
-                    return (t for t in path.to_terminal.connected_terminals() if t.conducting_equipment is BusbarSection)
-                else:
-                    return path.to_terminal.connected_terminals()
-            
-            else:
-                # If we just visited a busbar, we step to the other terminals that share the same connectivity node.
-                # Otherwise, we internally step to the other terminals on the equipment
-                if path.to_equipment is BusbarSection:
-                    # We don't need to step to terminals that are busbars as they would have been queued at the same time this busbar step was.
-                    # We also don't try and go back to the terminals we came from as we already visited it to get to this busbar.
-                    return (t for t in path.to_terminal.connected_terminals() if t != path.from_terminal and t.conducting_equipment is not BusbarSection)
-                else:
-                    return path.to_terminal.other_terminals()
-                    
-        def _filter(it: Terminal) -> bool:
-            if it.conducting_equipment:
-                return is_in_service(it.conducting_equipment)
-            return False
-
-        return (t for t in __next_terminals() if _filter(t))

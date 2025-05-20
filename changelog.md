@@ -2,12 +2,14 @@
 ## [0.48.0] - UNRELEASED
 ### Breaking Changes
 * Updated to new Tracing API. All old traces will need to be re-written with the new API.
+* `AcLineSegment` supports adding a maximum of 2 terminals. Mid-span terminals are no longer supported and models should migrate to using `Clamp`.
+* `Clamp` supports only adding a single terminal.
 
 ### New Features
-* None.
+* Added `ClearDirection` that clears feeder directions.
 
 ### Enhancements
-* None.
+* Tracing models with `Cut` and `Clamp` are now supported via the new tracing API.
 
 ### Fixes
  When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`

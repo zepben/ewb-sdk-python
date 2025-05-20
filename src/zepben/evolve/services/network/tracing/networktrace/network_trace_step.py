@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Set, Generic, TypeVar, TYPE_CHECKING
+from typing import Set, Generic, TypeVar, TYPE_CHECKING, Optional
 
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
@@ -47,8 +47,8 @@ class NetworkTraceStep(Generic[T]):
         """
         from_terminal: Terminal
         to_terminal: Terminal
-        traversed_ac_line_segment: AcLineSegment = field(default=None)
-        nominal_phase_paths: Set[NominalPhasePath] = field(default_factory=set)
+        traversed_ac_line_segment: Optional[AcLineSegment] = field(default=None)
+        nominal_phase_paths: Optional[Set[NominalPhasePath]] = field(default_factory=set)
 
         def to_phases_set(self) -> Set[SinglePhaseKind]:
             if len(self.nominal_phase_paths) == 0:
@@ -93,6 +93,10 @@ class NetworkTraceStep(Generic[T]):
         def did_traverse_ac_line_segment(self) -> bool:
             return self.traversed_ac_line_segment is not None
 
+        def next_num_equipment_steps(self, current_num: int) -> int:
+            return current_num + 1 if self.traced_externally else current_num
+
+
     Type = Enum('Type', ('ALL', 'INTERNAL', 'EXTERNAL'))
 
     def __init__(self, path: Path, num_terminal_steps: int, num_equipment_steps: int, data: T):
@@ -113,5 +117,3 @@ class NetworkTraceStep(Generic[T]):
     def next_num_terminal_steps(self):
         return self.num_terminal_steps + 1
 
-    def next_num_equipment_steps(self):
-        return self.num_equipment_steps + 1 if self.path.traced_internally else self.num_equipment_steps

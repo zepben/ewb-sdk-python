@@ -38,7 +38,7 @@ class ComputeDataWithPaths(Generic[T]):
     def __init__(self, func):
         self._func = func or (lambda *args: None)
 
-    def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path, next_paths: list[NetworkTraceStep.Path, Any]) -> T:
+    def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path, next_paths: list[NetworkTraceStep.Path]) -> T:
         """
         Called for each new NetworkTraceStep in a NetworkTrace. The value returned from this function
         will be stored against the next step within NetworkTraceStep. data.
