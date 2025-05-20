@@ -5,7 +5,7 @@
 
 import itertools
 import sys
-from typing import Generator, Optional, Callable, Iterable
+from typing import Generator, Optional, Callable, Iterable, List
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
@@ -105,7 +105,7 @@ class NetworkTraceStepPathProvider:
 
             next_paths_towards_T1 = self._acls_traverse_from_terminal(clamp.ac_line_segment,
                                                                       path.to_terminal,
-                                                                      length_from_T1=clamp.length_from_terminal_1 or 0.0,
+                                                                      length_from_T1=clamp.length_from_terminal_1,
                                                                       towards_segment_T2=False,
                                                                       can_stop_at_cut_at_same_position=False,
                                                                       cut_at_same_position_from_terminal_number=1,
@@ -113,7 +113,7 @@ class NetworkTraceStepPathProvider:
 
             next_paths_towards_T2 = self._acls_traverse_from_terminal(clamp.ac_line_segment,
                                                                       path.to_terminal,
-                                                                      length_from_T1=clamp.length_from_terminal_1 or 0.0,
+                                                                      length_from_T1=clamp.length_from_terminal_1,
                                                                       towards_segment_T2=True,
                                                                       can_stop_at_cut_at_same_position=True,
                                                                       cut_at_same_position_from_terminal_number=1,
@@ -128,7 +128,7 @@ class NetworkTraceStepPathProvider:
             self._next_external_paths(path, path_factory) if path.did_traverse_ac_line_segment else
             self._acls_traverse_from_terminal(cut.ac_line_segment,
                                               path.to_terminal,
-                                              length_from_T1=cut.length_from_terminal_1 or 0.0,
+                                              length_from_T1=cut.length_from_terminal_1,
                                               towards_segment_T2=path.to_terminal.sequence_number != 1,
                                               can_stop_at_cut_at_same_position=False,
                                               cut_at_same_position_from_terminal_number=path.to_terminal.sequence_number,
@@ -157,14 +157,16 @@ class NetworkTraceStepPathProvider:
         else:
             return seq_term_map_to_path(path.to_terminal.connected_terminals(), path_factory)
 
-    def _acls_traverse_from_terminal(self,
-                                    acls: AcLineSegment,
-                                    from_terminal: Terminal,
-                                    length_from_T1: float,
-                                    towards_segment_T2: bool,
-                                    can_stop_at_cut_at_same_position: bool,
-                                    cut_at_same_position_from_terminal_number: int,
-                                    path_factory: PathFactory) -> Generator[NetworkTraceStep.Path, None, None]:
+    def _acls_traverse_from_terminal(
+        self,
+        acls: AcLineSegment,
+        from_terminal: Terminal,
+        length_from_T1: float,
+        towards_segment_T2: bool,
+        can_stop_at_cut_at_same_position: bool,
+        cut_at_same_position_from_terminal_number: int,
+        path_factory: PathFactory
+    ) -> Generator[NetworkTraceStep.Path, None, None]:
         """
         This returns terminals found traversing along an AcLineSegment from any terminal "on" the segment. Terminals considered on the segment are any clamp
         or cut terminals that belong to the segment as well as the segment's own terminals. When traversing the segment, the traversal stops
@@ -185,21 +187,21 @@ class NetworkTraceStepPathProvider:
         :param length_from_T1: The length from terminal 1 the fromTerminal is.
         :param towards_segment_T2: Use `true` if the segment should be traversed towards terminal 2, otherwise `False` to traverse towards terminal 1
         """
+        # Can do a simple return if we don't need to do any special cuts/clamps processing
+        if not(any((acls.cuts, acls.clamps))):
+            yield from seq_term_map_to_path(from_terminal.other_terminals(), path_factory, acls)
+
         # We need to ignore cuts and clamps that are not "in service" because that means they do not exist!
         # We also make sure we filter out the cut or the clamp we are starting at, so we don't compare it in our checks
         filter_func = lambda it: it != from_terminal.conducting_equipment and self.state_operators.is_in_service(it)
-        cuts = list(filter(filter_func, acls.cuts))
-        clamps = list(filter(filter_func, acls.clamps))
+        cuts: List[Cut] = list(filter(filter_func, acls.cuts))
+        clamps: List[Clamp] = list(filter(filter_func, acls.clamps))
 
-        # Can do a simple return if we don't need to do any special cuts/clamps processing
-        if not(any((cuts, clamps))):
-            yield from seq_term_map_to_path(from_terminal.other_terminals(), path_factory, acls)
-
-        cuts_at_same_position = list(filter(lambda it: it.length_from_T1_or_0 == length_from_T1, cuts))
-        stop_at_cuts_at_same_position = can_stop_at_cut_at_same_position and cuts_at_same_position
+        cuts_at_same_position = list(filter(lambda it: it.length_from_terminal_1 == length_from_T1, cuts))
+        stop_at_cuts_at_same_position = bool(can_stop_at_cut_at_same_position and cuts_at_same_position)
 
         def next_cut_length_from_terminal_1_func():
-            cut_length_generator = (it.length_from_T1_or_0 for it in cuts if it.length_from_T1_or_0 > length_from_T1)
+            cut_length_generator = (it.length_from_terminal_1 for it in cuts if it.length_from_terminal_1 > length_from_T1)
             if stop_at_cuts_at_same_position:
                 return length_from_T1
             elif towards_segment_T2:
@@ -209,24 +211,26 @@ class NetworkTraceStepPathProvider:
 
         next_cut_length_from_terminal_1 = next_cut_length_from_terminal_1_func()
 
-        next_cuts = [it for it in cuts if it.length_from_T1_or_0 == next_cut_length_from_terminal_1] if next_cut_length_from_terminal_1 else []
+        next_cuts = [it for it in cuts if it.length_from_terminal_1 == next_cut_length_from_terminal_1] if next_cut_length_from_terminal_1 else []
 
-        next_terminal_length_from_terminal_1 = next_cut_length_from_terminal_1 or acls_length_or_max(acls) if towards_segment_T2 else 0.0
+        next_terminal_length_from_terminal_1 = next_cut_length_from_terminal_1 or (acls_length_or_max(acls) if towards_segment_T2 else 0.0)
 
         def clamps_before_next_terminal_filter() -> Callable[[Clamp], bool]:
             if isinstance(from_terminal.conducting_equipment, AcLineSegment) and towards_segment_T2:
-                return lambda it: length_from_T1 < it.length_from_T1_or_0 < next_terminal_length_from_terminal_1
+                return lambda it: length_from_T1 <= it.length_from_terminal_1 <= next_terminal_length_from_terminal_1
             elif towards_segment_T2:
-                return lambda it: length_from_T1 < it.length_from_T1_or_0 <= next_terminal_length_from_terminal_1
-            elif next_terminal_length_from_terminal_1 == 0.0 and not next_cuts:
-                return lambda it: next_terminal_length_from_terminal_1 < it.length_from_T1_or_0 < length_from_T1
+                return lambda it: it.length_from_terminal_1 > length_from_T1 and it.length_from_terminal_1 <= next_terminal_length_from_terminal_1
+            elif (next_terminal_length_from_terminal_1 == 0.0) and not len(next_cuts) == 0:
+                return lambda it: next_terminal_length_from_terminal_1 <= it.length_from_terminal_1 <= length_from_T1
             else:
-                return lambda it: length_from_T1 >= it.length_from_T1_or_0 > next_terminal_length_from_terminal_1
-        clamps_before_next_terminal = filter(clamps_before_next_terminal_filter(), clamps)
+                return lambda it: it.length_from_terminal_1 <= length_from_T1  and it.length_from_terminal_1 > next_terminal_length_from_terminal_1
+        _filter = clamps_before_next_terminal_filter()
+
+        clamps_before_next_terminal = filter(_filter, clamps)
 
         next_stop_terminals = [] if stop_at_cuts_at_same_position else (
                 it.get_terminal(1 if towards_segment_T2 else 2) for it in next_cuts
-        ) if next_cuts else (it.get_terminal(1 if towards_segment_T2 else 2) for it in next_cuts)
+        ) if next_cuts else list(acls.get_terminal(2 if towards_segment_T2 else 1))
 
         next_terminals = (
             (it.get_terminal(cut_at_same_position_from_terminal_number) for it in cuts_at_same_position),
