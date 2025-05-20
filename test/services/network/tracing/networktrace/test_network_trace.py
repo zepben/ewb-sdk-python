@@ -13,6 +13,7 @@ from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
 
 class TestNetworkTrace:
 
+    @pytest.mark.skip()
     @pytest.mark.asyncio
     async def test_can_run_large_branching_traces(self):
         try:

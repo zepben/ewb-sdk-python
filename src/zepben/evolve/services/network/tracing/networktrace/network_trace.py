@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Callable
-from typing import TypeVar, Union, Generic
+from typing import TypeVar, Union, Generic, Set
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -15,6 +15,7 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace_action_ty
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_next import NetworkTraceQueueNext
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 from zepben.evolve.services.network.tracing.networktrace.network_trace_tracker import NetworkTraceTracker
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
@@ -86,10 +87,10 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                       queue: TraversalQueue[NetworkTraceStep[T]],
                       action_type: NetworkTraceActionType,
                       compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
-                      ):
+                      ) -> 'NetworkTrace[T]':
         return cls(network_state_operators,
-                   Traversal.BasicQueueType(NetworkTraceQueueNext().basic(
-                       network_state_operators.is_in_service,
+                   Traversal.BasicQueueType(NetworkTraceQueueNext.Basic(
+                       NetworkTraceStepPathProvider(network_state_operators),
                        compute_data_with_action_type(compute_data, action_type)
                    ), queue),
                    None,
@@ -103,11 +104,12 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                   action_type: NetworkTraceActionType,
                   parent: 'NetworkTrace[T]'=None,
                   compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None,
-                  ):
+                  ) -> 'NetworkTrace[T]':
 
         return cls(network_state_operators,
-                   Traversal.BranchingQueueType(NetworkTraceQueueNext().branching(
-                       network_state_operators.is_in_service, compute_data_with_action_type(compute_data, action_type)
+                   Traversal.BranchingQueueType(NetworkTraceQueueNext.Branching(
+                       NetworkTraceStepPathProvider(network_state_operators),
+                       compute_data_with_action_type(compute_data, action_type)
                    ), queue_factory, branch_queue_factory),
                    parent,
                    action_type)
@@ -125,7 +127,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         :param phases: Phases to trace; `None` to ignore phases.
         """
         if isinstance(start, Terminal):
-            start_path = NetworkTraceStep.Path(start, start, self.start_nominal_phase_path(phases))
+            start_path = NetworkTraceStep.Path(start, start, None, self.start_nominal_phase_path(phases))
             super().add_start_item(NetworkTraceStep(start_path, 0, 0, data))
             return self
 
@@ -196,8 +198,8 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return NetworkTrace(self.network_state_operators, self._queue_type, self, self._action_type)
 
     @staticmethod
-    def start_nominal_phase_path(phases: PhaseCode) -> list[NominalPhasePath]:
-        return [NominalPhasePath(it, it) for it in phases.single_phases] if phases and phases.single_phases else []
+    def start_nominal_phase_path(phases: PhaseCode) -> Set[NominalPhasePath]:
+        return {NominalPhasePath(it, it) for it in phases.single_phases} if phases and phases.single_phases else set()
 
     def has_visited(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
         return self._tracker.has_visited(terminal, phases) or (self.parent and self.parent.has_visited(terminal, phases))
