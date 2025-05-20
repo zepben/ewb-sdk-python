@@ -1026,9 +1026,11 @@ def create_power_electronics_wind_unit(include_runtime: bool = True):
 
 
 def create_ac_line_segment(include_runtime: bool = True):
+    args = create_conductor(include_runtime)
+    args["terminals"] = lists(builds(Terminal, **create_identified_object(include_runtime)), min_size=1, max_size=1)
     return builds(
         AcLineSegment,
-        **create_conductor(include_runtime),
+        **args,
         per_length_impedance=builds(PerLengthSequenceImpedance, **create_identified_object(include_runtime))
     )
 
@@ -1049,20 +1051,24 @@ def create_busbar_section(include_runtime: bool = True):
 
 
 def create_clamp(include_runtime: bool = True):
+    args = create_conducting_equipment(include_runtime)
+    args["terminals"] = lists(builds(Terminal, **create_identified_object(include_runtime)), min_size=1, max_size=1)
     return builds(
         Clamp,
-        **create_conducting_equipment(include_runtime),
+        **args,
         length_from_terminal_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         ac_line_segment=builds(AcLineSegment, **create_identified_object(include_runtime))
     )
 
 
 def create_cut(include_runtime: bool = True):
+    args = create_switch(include_runtime)
+    args["terminals"] = lists(builds(Terminal, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     return builds(
         Cut,
-        **create_switch(include_runtime),
+        **args,
         length_from_terminal_1=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        ac_line_segment=builds(AcLineSegment, **create_identified_object(include_runtime))
+        ac_line_segment=builds(AcLineSegment, **create_identified_object(include_runtime)),
     )
 
 

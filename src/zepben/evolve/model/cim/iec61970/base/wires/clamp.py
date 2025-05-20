@@ -27,3 +27,7 @@ class Clamp(ConductingEquipment):
     """The line segment to which the clamp is connected."""
 
     max_terminals = 1
+
+    @property
+    def length_from_T1_or_0(self) -> float:
+        return self.length_from_terminal_1 or 0.0

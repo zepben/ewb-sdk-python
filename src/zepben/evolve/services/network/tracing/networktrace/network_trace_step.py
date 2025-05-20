@@ -55,7 +55,6 @@ class NetworkTraceStep(Generic[T]):
                 return set()
             return set(map(lambda it: it.to_phase, self.nominal_phase_paths))
 
-
         @property
         def from_equipment(self) -> ConductingEquipment:
             """
@@ -93,7 +92,6 @@ class NetworkTraceStep(Generic[T]):
         @property
         def did_traverse_ac_line_segment(self) -> bool:
             return self.traversed_ac_line_segment is not None
-
 
     Type = Enum('Type', ('ALL', 'INTERNAL', 'EXTERNAL'))
 
