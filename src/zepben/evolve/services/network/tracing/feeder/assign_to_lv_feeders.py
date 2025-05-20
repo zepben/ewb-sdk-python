@@ -1,10 +1,9 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from collections.abc import Iterable
-from typing import Collection, List, Generator, TypeVar, Dict
 
+from typing import Collection, List, Generator, TypeVar, Dict, Set
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -64,6 +63,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                         for feeder in head_equipment.feeders(self.network_state_operators):
                             self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
 
+                #  We can run from each LV feeder as we process them, as being associated with their energizing feeders is not a requirement of the trace.
                 await self.run_with_feeders(lv_feeder.normal_head_terminal,
                                             lv_feeder_start_points,
                                             terminal_to_aux_equipment,
@@ -77,7 +77,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
 
     async def run_with_feeders(self,
                                terminal: Terminal,
-                               lv_feeder_start_points: Iterable[ConductingEquipment],
+                               lv_feeder_start_points: Set[ConductingEquipment],
                                terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
                                lv_feeders_to_assign: List[LvFeeder]):
 
@@ -89,12 +89,12 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
         if isinstance(start_ce, Switch) and self.network_state_operators.is_open(start_ce):
             self._associate_equipment_with_containers(lv_feeders_to_assign, [start_ce])
         else:
-            traversal = await self._create_trace(terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
+            traversal = self._create_trace(terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
             await traversal.run(terminal, False)
 
-    async def _create_trace(self,
+    def _create_trace(self,
                       terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
-                      lv_feeder_start_points: Iterable[ConductingEquipment],
+                      lv_feeder_start_points: Set[ConductingEquipment],
                       lv_feeders_to_assign: List[LvFeeder]) -> NetworkTrace[T]:
 
         def _reached_hv(ce: ConductingEquipment):
@@ -123,19 +123,19 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                        found_lv_feeder: bool,
                        step_context: StepContext,
                        terminal_to_aux_equipment: Dict[Terminal, Collection[AuxiliaryEquipment]],
-                       lv_feeder_start_points: Iterable[ConductingEquipment],
+                       lv_feeder_start_points: Set[ConductingEquipment],
                        lv_feeders_to_assign: List[LvFeeder]):
 
         if step_path.traced_internally and not step_context.is_start_item:
             return
 
         if found_lv_feeder:
-            found_lv_feeders = self._find_lv_feeders(step_path.to_equipment, lv_feeder_start_points)
+            found_lv_feeders = list(self._find_lv_feeders(step_path.to_equipment, lv_feeder_start_points))
 
-            energizing_feeders = list(self.network_state_operators.get_energizing_feeders(it) for it in found_lv_feeders)
 
-            for feeder_group in (lv_feeders_to_assign, found_lv_feeders):
-                self._feeder_energizes(feeder_group, energizing_feeders)
+            for energizing_feeder in (self.network_state_operators.get_energizing_feeders(it) for it in found_lv_feeders):
+                for feeder_group in (lv_feeders_to_assign, found_lv_feeders):
+                    self._feeder_energizes(feeder_group, energizing_feeder)
 
         try:
             aux_equip_for_this_terminal = terminal_to_aux_equipment[step_path.to_terminal]
@@ -148,7 +148,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
         if isinstance(step_path.to_equipment, ProtectedSwitch):
             self._associate_relay_systems_with_containers(lv_feeders_to_assign, step_path.to_equipment)
 
-    def _find_lv_feeders(self, ce: ConductingEquipment, lv_feeder_start_points: Iterable[ConductingEquipment]) -> Generator[LvFeeder, None, None]:
+    def _find_lv_feeders(self, ce: ConductingEquipment, lv_feeder_start_points: Set[ConductingEquipment]) -> Generator[LvFeeder, None, None]:
         sites = list(ce.sites)
         if sites:
             for site in sites:
@@ -159,4 +159,4 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                 yield feeder
 
     def _lv_feeders_from_terminal(self, terminal: Terminal) -> List[LvFeeder]:
-        return terminal.conducting_equipment.lv_feeders(self.network_state_operators)
+        return list(terminal.conducting_equipment.lv_feeders(self.network_state_operators))

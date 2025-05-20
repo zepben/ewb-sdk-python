@@ -10,7 +10,7 @@
 * None.
 
 ### Fixes
-* None.
+ When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`
 
 ### Notes
 * None.

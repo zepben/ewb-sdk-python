@@ -1,4 +1,4 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -8,7 +8,8 @@ from __future__ import annotations
 from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable
 
 if TYPE_CHECKING:
-    from zepben.evolve import Equipment, Terminal, Substation, LvFeeder, ConductingEquipment, NetworkStateOperators
+    from zepben.evolve import Equipment, Terminal, Substation, LvFeeder, NetworkStateOperators
+    from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.evolve.util import nlen, ngen, safe_remove_by_id
@@ -445,10 +446,11 @@ class Site(EquipmentContainer):
     Note this is not a CIM concept - however represents an `EquipmentContainer` in CIM. This is to avoid the use of `EquipmentContainer` as a concrete class.
     """
 
-    def find_lv_feeders(self, lv_feeder_start_points: Iterable[ConductingEquipment], state_operators: NetworkStateOperators) -> Generator[LvFeeder]:
+    def find_lv_feeders(self, lv_feeder_start_points: Iterable[ConductingEquipment], state_operators: NetworkStateOperators) -> Generator[LvFeeder, None, None]:
+        from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
         for ce in state_operators.get_equipment(self):
-            if isinstance(ConductingEquipment, ce):
+            if isinstance(ce, ConductingEquipment):
                 if ce in lv_feeder_start_points:
-                    if not state_operators.is_open(ce):
+                    if not state_operators.is_open(ce):  # Exclude any open switch that might be energised by a different feeder on the other side
                         for lv_feeder in ce.lv_feeders(state_operators):
                             yield lv_feeder
