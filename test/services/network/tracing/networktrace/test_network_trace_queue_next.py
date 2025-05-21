@@ -15,7 +15,7 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path
 T = TypeVar('T')
 
 
-class TestQueuer:
+class Queuer:
     def __init__(self):
         self.queued: List[NetworkTraceStep[T]] = []
 
@@ -34,8 +34,8 @@ class TestNetworkTraceQueueNext:
         self.path_provider = MagicMock(NetworkTraceStepPathProvider)
         #self.path_provider = NetworkTraceStepPathProvider(NetworkStateOperators.NORMAL)
         self.data_computer = MagicMock(ComputeData)
-        self.queuer = TestQueuer()
-        self.branching_queuer = TestQueuer()
+        self.queuer = Queuer()
+        self.branching_queuer = Queuer()
         yield
 
     def test_queues_next_basic(self):
