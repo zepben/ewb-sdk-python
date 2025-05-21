@@ -1,4 +1,4 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 __all__ = ["get_by_mrid", "contains_mrid", "safe_remove", "safe_remove_by_id", "nlen", "ngen", "is_none_or_empty", "require", "pb_or_none", "CopyableUUID",
-           "datetime_to_timestamp", "none"]
+           "datetime_to_timestamp", "none", "classproperty"]
 
 import os
 import re

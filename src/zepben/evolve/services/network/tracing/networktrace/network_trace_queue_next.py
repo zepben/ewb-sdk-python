@@ -2,18 +2,18 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from abc import ABC
 from typing import TypeVar, Callable, Generator, Generic, List, Union
 
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
-
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
+from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
+from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
 T = TypeVar('T')
 
-from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
-from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 QueueItem = Callable[[NetworkTraceStep[T]], bool]
 QueueBranch = Callable[[NetworkTraceStep[T]], bool]
 GetNextSteps = Callable[[NetworkTraceStep[T], StepContext], Generator[NetworkTraceStep[T], None, None]]
