@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import Collection, List, Generator, TypeVar, Dict, Set
+from typing import Collection, List, Generator, TypeVar, Dict, Set, Type
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -26,7 +26,7 @@ __all__ = ["AssignToLvFeeders"]
 class AssignToLvFeeders:
     @staticmethod
     async def run(network: NetworkService,
-                  network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
+                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
                   start_terminal: Terminal=None):
         await AssignToLvFeedersInternal(network_state_operators).run(network, start_terminal)
 

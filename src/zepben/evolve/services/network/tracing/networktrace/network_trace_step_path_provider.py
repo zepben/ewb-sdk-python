@@ -5,7 +5,7 @@
 
 import itertools
 import sys
-from typing import Generator, Optional, Callable, Iterable, List, Union
+from typing import Generator, Optional, Callable, Iterable, List, Union, Type
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
@@ -21,7 +21,7 @@ PathFactory = Callable[[Terminal, AcLineSegment], Optional[NetworkTraceStep.Path
 
 
 class NetworkTraceStepPathProvider:
-    def __init__(self, state_operators: NetworkStateOperators):
+    def __init__(self, state_operators: Type[NetworkStateOperators]):
         self.state_operators = state_operators
 
     def next_paths(self, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:

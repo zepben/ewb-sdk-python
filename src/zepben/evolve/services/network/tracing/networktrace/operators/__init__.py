@@ -9,3 +9,6 @@ from abc import ABC
 class StateOperator(ABC):
     NORMAL = None
     CURRENT = None
+
+    def __init__(self):
+        raise TypeError('Any class subclassing (StateOperators) should not be instantiated or have state.')

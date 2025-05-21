@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Callable
-from typing import TypeVar, Union, Generic, Set
+from typing import TypeVar, Union, Generic, Set, Type
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -67,7 +67,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     """
 
     def __init__(self,
-                 network_state_operators: NetworkStateOperators,
+                 network_state_operators: Type[NetworkStateOperators],
                  queue_type: Union[Traversal.BasicQueueType, Traversal.BranchingQueueType],
                  parent: 'NetworkTrace[T]'=None,
                  action_type: NetworkTraceActionType=None
@@ -83,7 +83,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
     @classmethod
     def non_branching(cls,
-                      network_state_operators: NetworkStateOperators,
+                      network_state_operators: Type[NetworkStateOperators],
                       queue: TraversalQueue[NetworkTraceStep[T]],
                       action_type: NetworkTraceActionType,
                       compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
@@ -98,7 +98,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
     @classmethod
     def branching(cls,
-                  network_state_operators: NetworkStateOperators,
+                  network_state_operators: Type[NetworkStateOperators],
                   queue_factory: Callable[[], TraversalQueue[T]],
                   branch_queue_factory: Callable[[], TraversalQueue['NetworkTrace[T]']],
                   action_type: NetworkTraceActionType,
