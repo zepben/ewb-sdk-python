@@ -64,3 +64,4 @@ def _add_to_site(equipment: Equipment, site: Site):
     equipment.add_container(site)
     site.add_current_equipment(equipment)
     equipment.add_current_container(site)
+    
