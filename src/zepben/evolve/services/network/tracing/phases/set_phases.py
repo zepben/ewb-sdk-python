@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Union, Set, Iterable, List
+from typing import Union, Set, Iterable, List, Type
 
 from zepben.evolve.exceptions import TracingException, PhaseException
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -22,7 +22,6 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace import Ne
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 
 __all__ = ["SetPhases"]
@@ -43,7 +42,7 @@ class SetPhases:
     async def run(self,
                   apply_to: Union[NetworkService, Terminal],
                   phases: Union[PhaseCode, Iterable[SinglePhaseKind]]=None,
-                  network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
 
         if isinstance(apply_to, NetworkService):
             return await self._run(apply_to, network_state_operators)
@@ -59,7 +58,7 @@ class SetPhases:
 
     async def _run(self,
                    network: NetworkService,
-                   network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+                   network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         Apply phases from all sources in the network.
 
@@ -74,7 +73,7 @@ class SetPhases:
     async def _run_with_phases(self,
                                  terminal: Terminal,
                                  phases: Union[PhaseCode, Iterable[SinglePhaseKind]],
-                                 network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+                                 network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         Apply phases from the `terminal`.
 
@@ -104,7 +103,7 @@ class SetPhases:
                                           seed_terminal: Terminal,
                                           start_terminal: Terminal,
                                           phases: List[SinglePhaseKind],
-                                          network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+                                          network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
 
         nominal_phase_paths = self._get_nominal_phase_paths(network_state_operators, seed_terminal, start_terminal, list(phases))
         if self._flow_phases(network_state_operators, seed_terminal, start_terminal, nominal_phase_paths):
@@ -116,7 +115,7 @@ class SetPhases:
         from_terminal: Terminal,
         to_terminal: Terminal,
         phases: List[SinglePhaseKind]=None,
-        network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL
     ):
         """
         Apply phases from the `from_terminal` to the `to_terminal`.
@@ -133,14 +132,14 @@ class SetPhases:
             if await self._flow_phases(network_state_operators, from_terminal, to_terminal, paths):
                 await self.run(from_terminal, network_state_operators=network_state_operators)
 
-    async def _run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators, trace: NetworkTrace[PhasesToFlow]=None):
+    async def _run_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators], trace: NetworkTrace[PhasesToFlow]=None):
         if trace is None:
             trace = await self._create_network_trace(network_state_operators)
         nominal_phase_paths = list(map(lambda it: NominalPhasePath(SinglePhaseKind.NONE, it), terminal.phases))
         await trace.run(terminal, self.PhasesToFlow(nominal_phase_paths), can_stop_on_start_item=False)
         trace.reset()
 
-    async def _create_network_trace(self, state_operators: NetworkStateOperators) -> NetworkTrace[PhasesToFlow]:
+    async def _create_network_trace(self, state_operators: Type[NetworkStateOperators]) -> NetworkTrace[PhasesToFlow]:
         async def step_action(nts, ctx):
             path = nts.path
             phases_to_flow = nts.data
@@ -166,7 +165,7 @@ class SetPhases:
             .add_step_action(step_action)
         )
 
-    def _compute_next_phases_to_flow(self, state_operators: NetworkStateOperators) -> ComputeData[PhasesToFlow]:
+    def _compute_next_phases_to_flow(self, state_operators: Type[NetworkStateOperators]) -> ComputeData[PhasesToFlow]:
         def inner(step, _, next_path):
             if not step.data.step_flowed_phases:
                 return self.PhasesToFlow([])
@@ -177,7 +176,7 @@ class SetPhases:
         return ComputeData(inner)
 
     @staticmethod
-    def _apply_phases(state_operators: NetworkStateOperators,
+    def _apply_phases(state_operators: Type[NetworkStateOperators],
                       terminal: Terminal,
                       phases: List[SinglePhaseKind]):
 
@@ -185,7 +184,7 @@ class SetPhases:
         for i, nominal_phase in enumerate(terminal.phases.single_phases):
             traced_phases[nominal_phase] = phases[i] if phases[i] not in PhaseCode.XY else SinglePhaseKind.NONE
 
-    def _get_nominal_phase_paths(self, state_operators: NetworkStateOperators,
+    def _get_nominal_phase_paths(self, state_operators: Type[NetworkStateOperators],
                                        from_terminal: Terminal,
                                        to_terminal: Terminal,
                                        phases: Sequence[SinglePhaseKind]
@@ -199,7 +198,7 @@ class SetPhases:
             return TerminalConnectivityConnected().terminal_connectivity(from_terminal, to_terminal, phases_to_flow).nominal_phase_paths
 
     @staticmethod
-    async def _flow_phases(state_operators: NetworkStateOperators,
+    async def _flow_phases(state_operators: Type[NetworkStateOperators],
                            from_terminal: Terminal,
                            to_terminal: Terminal,
                            nominal_phase_paths: Iterable[NominalPhasePath]
@@ -250,7 +249,7 @@ class SetPhases:
 
     @staticmethod
     def _get_phases_to_flow(
-        state_operators: NetworkStateOperators,
+        state_operators: Type[NetworkStateOperators],
         terminal: Terminal,
         phases: Sequence[SinglePhaseKind],
         internal_flow: bool

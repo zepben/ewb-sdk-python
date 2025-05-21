@@ -8,30 +8,92 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from collections import deque
-from typing import TypeVar, Iterable, Generic
-from heapq import heappush, heappop
+from typing import TypeVar, Iterable, Generic, Deque, TYPE_CHECKING, Union
 
-__all__ = ["FifoQueue", "LifoQueue", "PriorityQueue", "TraversalQueue"]
+__all__ = ["TraversalQueue"]
+
+if TYPE_CHECKING:
+    from zepben.evolve import NetworkTraceStep
 
 T = TypeVar('T')
 U = TypeVar('U')
 
 
-# TODO: the methods in these classes overlap in a slightly unclear way, this needs to be tidied up.
+class FIFODeque(deque):
+    def pop(self):
+        return self.popleft()
 
-class TraversalQueue(Generic[T]):
+    def peek(self) -> T:
+        return self[-1]
+
+
+class LIFODeque(deque):
+    def peek(self) -> T:
+        return self[0]
+
+
+class TraversalQueue(Generic[T], ABC):
     """
     Basic queue object, implementing some methods to align it with the kotlin sdk syntax,
     """
-    def __init__(self, queue=None):
-        if queue is None:
-            self.queue = deque()
-        else:
-            self.queue = queue
+    @abstractmethod
+    def __len__(self):
+        """:return: the length of the queue"""
+
+    @classmethod
+    def breadth_first(cls) -> TraversalQueue[T]:
+        """ Creates a new instance backed by a breadth first (FIFO) queue. """
+        return BasicQueue(FIFODeque())
+
+    @classmethod
+    def depth_first(cls) -> TraversalQueue[T]:
+        """ Creates a new instance backed by a depth first (LIFO) queue. """
+        return BasicQueue(LIFODeque())
+
+    @abstractmethod
+    def has_next(self) -> bool:
+        """:return: True if the queue has more items."""
+
+    @abstractmethod
+    def pop(self):
+        """:return: The next item in the queue"""
+
+    @abstractmethod
+    def append(self, item: T) -> bool:
+        """
+        Adds an item to the queue
+
+        :param item: The item to be added to the queue
+
+        :return: True if the item was added
+        """
+
+    @abstractmethod
+    def extend(self, items: Iterable[T]):
+        """
+        Adds the items to the queue
+
+        :param items: The items to be added to the queue
+        """
+
+    @abstractmethod
+    def peek(self) -> T:
+        """:return: The next item on the queue without removing it"""
+
+    @abstractmethod
+    def clear(self):
+        """Clears the queue"""
+
+
+class BasicQueue(TraversalQueue, Generic[T]):
+    queue: Union[FIFODeque, LIFODeque]
+
+    def __init__(self, queue):
+        self.queue: Union[FIFODeque, LIFODeque] = queue
 
     def __iter__(self):
         return self.queue.__iter__()
@@ -39,135 +101,22 @@ class TraversalQueue(Generic[T]):
     def __len__(self):
         return len(self.queue)
 
-    @classmethod
-    def breadth_first(cls) -> TraversalQueue:
-        """ Creates a new instance backed by a breadth first (FIFO) queue. """
-        return cls(FifoQueue())
-
-    @classmethod
-    def depth_first(cls) -> TraversalQueue:
-        """ Creates a new instance backed by a depth first (LIFO) queue. """
-        return cls(LifoQueue())
 
     def has_next(self) -> bool:
-        """ :return: True if the queue has more items. """
         return len(self.queue) > 0
 
     def pop(self):
         return self.queue.pop()
 
-    def put(self, item: T) -> bool:
-        self.queue.put(item)
+    def append(self, item: T) -> bool:
+        self.queue.append(item)
         return True
 
-    def extend(self, items: Iterable[T]) -> bool:
-        return self.queue.extend(items)
-
-    def clear(self):
-        return self.queue.clear()
-
-
-class FifoQueue(TraversalQueue[T]):
-    """Used for Breadth-first Traversal's"""
-
-    def put(self, item: T):
-        return self.queue.append(item)
-
-    def extend(self, items: Iterable[T]):
-        return self.queue.extend(items)
-
-    def pop(self) -> T:
-        """
-        Pop an item off the queue.
-        Raises `IndexError` if the queue is empty.
-        """
-        return self.queue.popleft()
-
-    def empty(self) -> bool:
-        """
-        Check if queue is empty
-        Returns True if empty, False otherwise
-        """
-        return len(self.queue) == 0
-
-    def clear(self):
-        """Clear the queue."""
-        self.queue.clear()
-
-    def copy(self) -> FifoQueue[T]:
-        return FifoQueue(self.queue.copy())
-
-
-class LifoQueue(TraversalQueue[T]):
-    """Used for Depth-first Traversal's"""
-
-    def put(self, item: T):
-        self.queue.append(item)
-
-    def extend(self, items: Iterable[T]):
+    def extend(self, items: Iterable[T]) -> None:
         self.queue.extend(items)
 
-    def pop(self) -> T:
-        """
-        Pop an item off the queue.
-        Raises `IndexError` if the queue is empty.
-        """
-        return self.queue.pop()
-
-    def empty(self) -> bool:
-        """
-        Check if queue is empty
-        Returns True if empty, False otherwise
-        """
-        return len(self.queue) == 0
+    def peek(self) -> T:
+        return self.queue.peek()
 
     def clear(self):
-        """Clear the queue."""
         self.queue.clear()
-
-    def copy(self) -> LifoQueue[T]:
-        return LifoQueue(self.queue.copy())
-
-
-class PriorityQueue(TraversalQueue[T]):
-    """Used for custom `Traversal`s"""
-
-    def __init__(self, queue=None):
-        if queue is None:
-            super().__init__([])
-        else:
-            super().__init__(queue)
-
-    def __len__(self):
-        return len(self.queue)
-
-    def put(self, item: T):
-        """
-        Place an item in the queue based on its priority.
-        `item` The item to place on the queue. Must implement `__lt__`
-        Returns True if put was successful, False otherwise.
-        """
-        heappush(self.queue, item)
-
-    def extend(self, items: Iterable[T]):
-        for item in items:
-            heappush(self.queue, item)
-
-    def pop(self) -> T:
-        """
-        Get the next item in the queue, removing it from the queue.
-        Returns The next item in the queue by priority.
-        Raises `IndexError` if the queue is empty
-        """
-        return heappop(self.queue)
-
-    def empty(self) -> bool:
-        return len(self) == 0
-
-    def clear(self):
-        """Clear the queue."""
-        self.queue.clear()
-
-    def copy(self) -> PriorityQueue[T]:
-        return PriorityQueue(self.queue.copy())
-

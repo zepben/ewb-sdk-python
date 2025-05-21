@@ -5,7 +5,7 @@
 from typing import Tuple
 from unittest.mock import MagicMock
 
-from zepben.evolve import FeederDirection, NetworkTraceStep, Terminal
+from zepben.evolve import FeederDirection, NetworkTraceStep, Terminal, Junction, NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
 
 
@@ -92,10 +92,15 @@ def _terminal_should_queue(condition: Tuple[FeederDirection, FeederDirection, bo
     next_path = MagicMock(spec=NetworkTraceStep.Path)()
     next_path.traced_internally = traced_internally
     next_path.to_terminal = Terminal()
+    next_path.to_equipment = Junction()
+    next_path.did_traverse_ac_line_segment = False
 
     next_item = NetworkTraceStep(next_path, 0, 0, None)
 
-    result = DirectionCondition(direction, lambda terminal: to_direction).should_queue(next_item, None, None, None)
+    state_operators = NetworkStateOperators
+    state_operators.get_direction = lambda t: to_direction
+
+    result = DirectionCondition(direction, state_operators).should_queue(next_item, None, None, None)
     assert result == expected
 
 def _start_terminal_should_queue(condition: Tuple[FeederDirection, FeederDirection], expected):
@@ -103,8 +108,13 @@ def _start_terminal_should_queue(condition: Tuple[FeederDirection, FeederDirecti
 
     next_path = MagicMock(spec=NetworkTraceStep.Path)()
     next_path.to_terminal = Terminal()
+    next_path.to_equipment = Junction()
+    next_path.did_traverse_ac_line_segment = False
 
     next_item = NetworkTraceStep(next_path, 0, 0, None)
 
-    result = DirectionCondition(direction, lambda terminal: to_direction).should_queue_start_item(next_item)
+    state_operators = NetworkStateOperators
+    state_operators.get_direction = lambda t: to_direction
+
+    result = DirectionCondition(direction, state_operators).should_queue_start_item(next_item)
     assert result == expected

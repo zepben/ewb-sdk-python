@@ -10,7 +10,7 @@ from zepben.evolve.services.network.tracing.traversal.stop_condition import Stop
 T = TypeVar('T')
 
 
-class EquipmentStepLimitCondition(StopCondition, Generic[T]):
+class EquipmentStepLimitCondition(StopCondition[NetworkTraceStep[T]], Generic[T]):
     def __init__(self, limit: int):
         super().__init__(self.should_stop)
         self.limit = limit
