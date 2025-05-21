@@ -10,11 +10,11 @@ from typing import Generator, Optional, Callable, Iterable, List, Union
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
-from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
+from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
-from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
 
 PathFactory = Callable[[Terminal, AcLineSegment], Optional[NetworkTraceStep.Path]]
 

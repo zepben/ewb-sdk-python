@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from abc import ABC
-from typing import TypeVar, Callable, Generator, TYPE_CHECKING, Generic, List, Union
+from typing import TypeVar, Callable, Generator, Generic, List, Union
 
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
@@ -47,12 +47,12 @@ class NetworkTraceQueueNext(ABC):
             data = compute_next(it)
             yield NetworkTraceStep(it, next_num_terminal_steps, it.next_num_equipment_steps(current_step.num_equipment_steps), data)
 
-    @classmethod
-    def Basic(cls, path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+    @staticmethod
+    def Basic(path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
         return Basic(path_provider, compute_data)
 
-    @classmethod
-    def Branching(cls, path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+    @staticmethod
+    def Branching(path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
         return Branching(path_provider, compute_data)
 
 

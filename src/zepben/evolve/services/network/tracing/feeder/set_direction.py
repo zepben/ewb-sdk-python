@@ -6,11 +6,10 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
-
-from zepben.evolve import Feeder, Traversal
-from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
@@ -42,11 +41,19 @@ class SetDirection:
 
         direction_applied = step.data
 
-        next_direction = FeederDirection.NONE
-        if direction_applied == FeederDirection.UPSTREAM:
-            next_direction = FeederDirection.DOWNSTREAM
-        elif direction_applied in (FeederDirection.DOWNSTREAM, FeederDirection.CONNECTOR):
-            next_direction = FeederDirection.UPSTREAM
+        def next_direction_func():
+            if step.data == FeederDirection.NONE:
+                return FeederDirection.NONE
+            elif next_path.traced_internally:
+                return FeederDirection.DOWNSTREAM
+            elif isinstance(next_path.to_equipment, Cut):
+                return FeederDirection.UPSTREAM
+            elif next_path.did_traverse_ac_line_segment:
+                return FeederDirection.DOWNSTREAM
+            else:
+                return FeederDirection.UPSTREAM
+
+        next_direction = next_direction_func()
 
         #
         # NOTE: Stopping / short-circuiting by checking that the next direction is already present in the toTerminal,

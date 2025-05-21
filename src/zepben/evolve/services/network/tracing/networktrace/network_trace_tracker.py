@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Set, Any
 
-from zepben.evolve import Terminal, SinglePhaseKind
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 
 class NetworkTraceTracker:
