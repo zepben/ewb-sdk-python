@@ -612,7 +612,9 @@ class TestNetworkBuilder:
         )
 
         f.add_equipment(head_equipment)
+        f.add_current_equipment(head_equipment)
         head_equipment.add_container(f)
+        head_equipment.add_current_container(f)
 
         self.network.add(f)
         return f
@@ -624,7 +626,9 @@ class TestNetworkBuilder:
         )
 
         lvf.add_equipment(head_equipment)
+        lvf.add_current_equipment(head_equipment)
         head_equipment.add_container(lvf)
+        head_equipment.add_current_container(lvf)
 
         self.network.add(lvf)
         return lvf

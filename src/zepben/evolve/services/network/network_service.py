@@ -1,4 +1,4 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -11,7 +11,7 @@ import itertools
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Generator
+from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Generator, Set
 
 from zepben.evolve.util import ngen
 
@@ -282,9 +282,9 @@ class NetworkService(BaseService):
         return eq_by_term
 
     @property
-    def feeder_start_points(self) -> Generator[ConductingEquipment, None, None]:
-        return ngen(feeder.normal_head_terminal.conducting_equipment for feeder in self.objects(Feeder) if feeder.normal_head_terminal)
+    def feeder_start_points(self) -> Set[ConductingEquipment]:
+        return {it.normal_head_terminal.conducting_equipment for it in self.objects(Feeder) if it.normal_head_terminal}
 
     @property
-    def lv_feeder_start_points(self) -> Generator[ConductingEquipment, None, None]:
-        return ngen(lv_feeder.normal_head_terminal.conducting_equipment for lv_feeder in self.objects(LvFeeder) if lv_feeder.normal_head_terminal)
+    def lv_feeder_start_points(self) -> Set[ConductingEquipment]:
+        return {it.normal_head_terminal.conducting_equipment for it in self.objects(LvFeeder) if it.normal_head_terminal}

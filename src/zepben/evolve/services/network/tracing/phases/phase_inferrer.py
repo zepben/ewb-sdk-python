@@ -75,7 +75,7 @@ class PhaseInferrer:
 
         @staticmethod
         def _has_xy_phases(terminal: Terminal) -> bool:
-            return any(p in terminal.phases for p in (SinglePhaseKind.X, SinglePhaseKind.Y))
+            return SinglePhaseKind.Y in terminal.phases.single_phases or SinglePhaseKind.X in terminal.phases.single_phases
 
         def _find_terminal_at_start_of_missing_phases(
             self,

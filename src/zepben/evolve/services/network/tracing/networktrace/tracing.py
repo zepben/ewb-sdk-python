@@ -19,7 +19,7 @@ class Tracing:
     def network_trace(network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
                       action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
                       queue: TraversalQueue[NetworkTraceStep[T]]=TraversalQueue.depth_first(),
-                      compute_data: ComputeData[T]=None
+                      compute_data: Union[ComputeData[T], Callable]=None
                       ) -> NetworkTrace[T]:
         """
         Creates a `NetworkTrace` that computes contextual data for every step.

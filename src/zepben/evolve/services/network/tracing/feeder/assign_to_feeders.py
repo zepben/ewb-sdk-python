@@ -1,9 +1,9 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Collection
-from typing import Iterable, Generator, Union, List, Dict, Any
+from typing import Iterable, Generator, Union, List, Dict, Any, Set
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Equipment, LvFeeder
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -72,7 +72,7 @@ class BaseFeedersInternal:
             for lv_feeder in lv_feeders:
                 self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
 
-    def _feeder_try_energize_lv_feeders(self, feeders: Iterable[Feeder], lv_feeder_start_points: Generator[ConductingEquipment, None, None], to_equipment: PowerTransformer):
+    def _feeder_try_energize_lv_feeders(self, feeders: Iterable[Feeder], lv_feeder_start_points: Set[ConductingEquipment], to_equipment: PowerTransformer):
         sites = []
         for eq in to_equipment:
             sites.extend(eq.sites)
@@ -114,8 +114,8 @@ class AssignToFeedersInternal(BaseFeedersInternal):
 
     async def run_with_feeders(self,
                                terminal: Terminal,
-                               feeder_start_points: Generator[ConductingEquipment, None, None],
-                               lv_feeder_start_points: Generator[ConductingEquipment, None, None],
+                               feeder_start_points: Set[ConductingEquipment],
+                               lv_feeder_start_points: Set[ConductingEquipment],
                                terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
                                feeders_to_assign: List[Feeder]):
 
@@ -132,8 +132,8 @@ class AssignToFeedersInternal(BaseFeedersInternal):
 
     async def _create_trace(self,
                       terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
-                      feeder_start_points: Generator[ConductingEquipment, None, None],
-                      lv_feeder_start_points: Generator[ConductingEquipment, None, None],
+                      feeder_start_points: Set[ConductingEquipment],
+                      lv_feeder_start_points: Set[ConductingEquipment],
                       feeders_to_assign: List[Feeder]) -> NetworkTrace[Any]:
 
         def _reached_lv(ce: ConductingEquipment):
@@ -159,7 +159,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                  step_path: NetworkTraceStep.Path,
                  step_context: StepContext,
                  terminal_to_aux_equipment: Dict[Terminal, Collection[AuxiliaryEquipment]],
-                 lv_feeder_start_points: Generator[ConductingEquipment, None, None],
+                 lv_feeder_start_points: Set[ConductingEquipment],
                  feeders_to_assign: List[Feeder]):
 
         if step_path.traced_internally and not step_context.is_start_item:
