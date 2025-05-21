@@ -3,9 +3,11 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+from __future__ import annotations
+
 import itertools
 import sys
-from typing import Generator, Optional, Callable, Iterable, List, Union, Type
+from typing import Generator, Optional, Callable, Iterable, List, Union, Type, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
@@ -14,10 +16,13 @@ from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
-from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+
+if TYPE_CHECKING:
+    from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+
+__all__ = ['NetworkTraceStepPathProvider']
 
 PathFactory = Callable[[Terminal, AcLineSegment], Optional[NetworkTraceStep.Path]]
-
 
 
 class NetworkTraceStepPathProvider:
@@ -45,12 +50,14 @@ class NetworkTraceStepPathProvider:
 
         return (p for p in _get_next_paths() if p and self.state_operators.is_in_service(p.to_terminal.conducting_equipment))
 
-    def _create_path_factory(self, path: NetworkTraceStep.Path) -> PathFactory:
+    @staticmethod
+    def _create_path_factory(path: NetworkTraceStep.Path) -> PathFactory:
         def path_factory(next_terminal: Terminal, traversed: AcLineSegment) -> NetworkTraceStep.Path:
             return NetworkTraceStep.Path(path.to_terminal, next_terminal, traversed)
         return path_factory
 
-    def _create_path_with_phases_factory(self, path: NetworkTraceStep.Path) -> PathFactory:
+    @staticmethod
+    def _create_path_with_phases_factory(path: NetworkTraceStep.Path) -> PathFactory:
         phase_paths = set(p.to_phase for p in path.nominal_phase_paths)
         next_from_terminal = path.to_terminal
 
@@ -62,8 +69,8 @@ class NetworkTraceStepPathProvider:
 
     def _next_paths_from_ac_line_segment(self, segment: AcLineSegment, path: NetworkTraceStep.Path, path_factory: PathFactory
                                          ) -> Generator[NetworkTraceStep.Path, None, None]:
-        #If the current path traversed the segment, we need to step externally from the segment terminal.
-        #Otherwise, we traverse the segment
+        # If the current path traversed the segment, we need to step externally from the segment terminal.
+        # Otherwise, we traverse the segment
         if path.traced_internally or path.did_traverse_ac_line_segment:
             return self._next_external_paths(path, path_factory)
         else:
@@ -84,13 +91,16 @@ class NetworkTraceStepPathProvider:
                                                          cut_at_same_position_from_terminal_number=2,
                                                          path_factory=path_factory)
 
-    def _next_paths_from_busbar(self, path: NetworkTraceStep.Path, path_factory: PathFactory) -> Generator[NetworkTraceStep.Path, None, None]:
-        return seq_term_map_to_path((t for t in path.to_terminal.connected_terminals() 
-                                     # We don't go back to the terminal we came from as we already visited it to get to this busbar.
-                                     if t != path.from_terminal
-                                     # We don't step to terminals that are busbars as they would have been returned at the same time this busbar step was.
-                                     and not isinstance(t.conducting_equipment, BusbarSection))
-                                    , path_factory)
+    @staticmethod
+    def _next_paths_from_busbar(path: NetworkTraceStep.Path, path_factory: PathFactory) -> Generator[NetworkTraceStep.Path, None, None]:
+        return seq_term_map_to_path(
+            (t for t in path.to_terminal.connected_terminals()
+             # We don't go back to the terminal we came from as we already visited it to get to this busbar.
+             if t != path.from_terminal
+             # We don't step to terminals that are busbars as they would have been returned at the same time this busbar step was.
+             and not isinstance(t.conducting_equipment, BusbarSection)
+             ), path_factory
+        )
 
     def _next_paths_from_clamp(self, clamp: Clamp, path: NetworkTraceStep.Path, path_factory: PathFactory) -> Iterable[NetworkTraceStep.Path]:
         # If the current path was from traversing an AcLineSegment, we need to step externally to other equipment.

@@ -2,9 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from abc import abstractmethod
-from typing import Type
 
+from __future__ import annotations
+
+from abc import abstractmethod
+from functools import lru_cache
+from typing import Type, Generator, TYPE_CHECKING
+
+from zepben.evolve.util import classproperty
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 from zepben.evolve.services.network.tracing.networktrace.operators.equipment_container_state_operators import EquipmentContainerStateOperators, \
     NormalEquipmentContainerStateOperators, CurrentEquipmentContainerStateOperators
 from zepben.evolve.services.network.tracing.networktrace.operators.feeder_direction_state_operations import FeederDirectionStateOperations, \
@@ -16,9 +22,11 @@ from zepben.evolve.services.network.tracing.networktrace.operators.open_state_op
 from zepben.evolve.services.network.tracing.networktrace.operators.phase_state_operators import PhaseStateOperators, NormalPhaseStateOperators, \
     CurrentPhaseStateOperators
 
-from zepben.evolve.util import classproperty
+if TYPE_CHECKING:
+    from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 
+# noinspection PyPep8Naming
 class NetworkStateOperators(OpenStateOperators,
                             FeederDirectionStateOperations,
                             EquipmentContainerStateOperators,
@@ -46,9 +54,9 @@ class NetworkStateOperators(OpenStateOperators,
     def CURRENT(cls) -> Type['CurrentNetworkStateOperators']:
         return CurrentNetworkStateOperators
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def condition():
+    def next_paths(cls, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:
         pass
 
 
@@ -62,10 +70,17 @@ class NormalNetworkStateOperators(NetworkStateOperators,
     Instance that operates on the normal state of network objects.
     """
 
-    @staticmethod
-    def condition():
-        return NetworkStateOperators.NORMAL
+    CURRENT = False
+    NORMAL = True
 
+    @classmethod
+    @lru_cache
+    def network_trace_step_path_provider(cls):
+        return NetworkTraceStepPathProvider(cls)
+
+    @classmethod
+    def next_paths(cls, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:
+        yield from cls.network_trace_step_path_provider().next_paths(path)
 
 class CurrentNetworkStateOperators(NetworkStateOperators,
                                    CurrentOpenStateOperators,
@@ -77,7 +92,14 @@ class CurrentNetworkStateOperators(NetworkStateOperators,
     Instance that operates on the current state of network objects.
     """
 
-    @staticmethod
-    def condition():
-        return NetworkStateOperators.CURRENT
+    CURRENT = True
+    NORMAL = False
 
+    @classmethod
+    @lru_cache
+    def network_trace_step_path_provider(cls):
+        return NetworkTraceStepPathProvider(cls)
+
+    @classmethod
+    def next_paths(cls, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:
+        yield from cls.network_trace_step_path_provider().next_paths(path)
