@@ -64,7 +64,7 @@ class Equipment(PowerSystemResource):
         """
         return ngen(_of_type(self._equipment_containers, Site))
 
-    def feeders(self, network_state_operators: NetworkStateOperators) -> Generator[Feeder, None, None]:
+    def feeders(self, network_state_operators: Type[NetworkStateOperators]) -> Generator[Feeder, None, None]:
         """
         The `Feeder` this equipment belongs too based on `NetworkStateOperators`
         """
@@ -80,7 +80,7 @@ class Equipment(PowerSystemResource):
         """
         return ngen(_of_type(self._equipment_containers, Feeder))
 
-    def lv_feeders(self, network_state_operators: NetworkStateOperators) -> Generator[LvFeeder, None, None]:
+    def lv_feeders(self, network_state_operators: Type[NetworkStateOperators]) -> Generator[LvFeeder, None, None]:
         """
         The `LvFeeder` this equipment belongs too based on `NetworkStateOperators`
         """

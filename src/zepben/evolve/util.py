@@ -167,6 +167,11 @@ class CopyableUUID(UUID):
         return str(UUID(bytes=os.urandom(16), version=4))
 
 
+class classproperty(property):
+    def __get__(self, cls, owner: T) -> T:
+        return classmethod(self.fget).__get__(None, owner)()
+
+
 def datetime_to_timestamp(date_time: datetime) -> PBTimestamp:
     timestamp = PBTimestamp()
     timestamp.FromDatetime(date_time)

@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from services.network.tracing.networktrace.util import mock_nts_path, mock_nts, mock_ctx
-from zepben.evolve import ComputeData, NetworkTraceStep, ngen, NetworkStateOperators
+from zepben.evolve import ComputeData, NetworkTraceStep, ngen
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_next import NetworkTraceQueueNext
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
@@ -32,7 +32,6 @@ class TestNetworkTraceQueueNext:
     @pytest.fixture(autouse=True)
     def setup_method(self):
         self.path_provider = MagicMock(NetworkTraceStepPathProvider)
-        #self.path_provider = NetworkTraceStepPathProvider(NetworkStateOperators.NORMAL)
         self.data_computer = MagicMock(ComputeData)
         self.queuer = Queuer()
         self.branching_queuer = Queuer()

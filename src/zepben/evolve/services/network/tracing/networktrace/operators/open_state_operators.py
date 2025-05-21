@@ -96,5 +96,5 @@ class CurrentOpenStateOperators(OpenStateOperators):
         switch.set_open(is_open, phase)
 
 
-OpenStateOperators.NORMAL = NormalOpenStateOperators()
-OpenStateOperators.CURRENT = CurrentOpenStateOperators()
+OpenStateOperators.NORMAL = NormalOpenStateOperators
+OpenStateOperators.CURRENT = CurrentOpenStateOperators

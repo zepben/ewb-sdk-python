@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Collection
-from typing import Iterable, Generator, Union, List, Dict, Any, Set
+from typing import Iterable, Generator, Union, List, Dict, Any, Set, Type
 
 from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Equipment, LvFeeder
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -32,7 +32,7 @@ class AssignToFeeders:
 
     @staticmethod
     async def run(network: NetworkService,
-                  network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
+                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
                   start_terminal: Terminal=None):
         """
         Assign equipment to feeders in the specified network, given an optional start terminal.
@@ -47,7 +47,7 @@ class AssignToFeeders:
 
 
 class BaseFeedersInternal:
-    def __init__(self, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+    def __init__(self, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         self.network_state_operators = network_state_operators
 
     def _feeders_from_terminal(self, terminal: Terminal):

@@ -152,5 +152,5 @@ class CurrentFeederDirectionStateOperations(FeederDirectionStateOperations):
         terminal.current_feeder_direction = new
         return True
 
-FeederDirectionStateOperations.NORMAL = NormalFeederDirectionStateOperations()
-FeederDirectionStateOperations.CURRENT = CurrentFeederDirectionStateOperations()
+FeederDirectionStateOperations.NORMAL = NormalFeederDirectionStateOperations
+FeederDirectionStateOperations.CURRENT = CurrentFeederDirectionStateOperations
