@@ -4,6 +4,9 @@
 * Updated to new Tracing API. All old traces will need to be re-written with the new API.
 * `AcLineSegment` supports adding a maximum of 2 terminals. Mid-span terminals are no longer supported and models should migrate to using `Clamp`.
 * `Clamp` supports only adding a single terminal.
+* `FeederDirectionStateOperations` have been reworked to take `NetworkStateOperators` as a parameter.
+
+
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.

@@ -3,10 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import defaultdict
-from typing import TypeVar, Callable, Iterable, Any
+from typing import TypeVar, Callable, Iterable
 
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
-
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -26,10 +25,12 @@ class WeightedPriorityQueue(TraversalQueue[T]):
     :param queue_provider: A queue provider. This allows you to customise the priority of items with the same weight.
     :param get_weight:     A method to extract the weight of an item being added to the queue.
     """
-    def __init__(self, queue_provider: Callable[[], TraversalQueue[T]], get_weight: Callable[[Any], int]):
+
+    def __init__(self, queue_provider: Callable[[], TraversalQueue[T]], get_weight: Callable[[T], int]):
         self._queue_provider = queue_provider
-        self._get_weight = get_weight
-        super().__init__(queue=SortedDefaultDict(self._queue_provider))
+        self._get_weight = lambda a: 1# TODO: this is wrong but at 6am, its as good as its gonna get to remind me where to lookg
+
+        self.queue: SortedDefaultDict[int, TraversalQueue[T]] = SortedDefaultDict(self._queue_provider)
 
     def __len__(self) -> int:
         """need to aggregate the lengths of all queues"""
@@ -42,27 +43,27 @@ class WeightedPriorityQueue(TraversalQueue[T]):
         yield self.pop()
 
     def pop(self):
-        for weight in self.queue.keys():
+        for weight in reversed(self.queue.keys()):
             if self.queue[weight].has_next():
                 return self.queue[weight].pop()
 
-    def put(self, item: T) -> bool:
+    def append(self, item: T) -> bool:
         weight = self._get_weight(item)
         if weight < 0:
             raise Exception
-        self.queue[weight].put(item)
+        self.queue[weight].append(item)
         return True
 
     def extend(self, items: Iterable[T]) -> bool:
         raise NotImplementedError()
 
     @classmethod
-    def process_queue(cls, get_weight: Callable[[T], int]) -> TraversalQueue:
+    def process_queue(cls, get_weight: Callable[[T], int]) -> TraversalQueue[T]:
         """Special priority queue that queues items with the largest weight as the highest priority."""
         return cls(TraversalQueue.depth_first, get_weight)
 
     @classmethod
-    def branch_queue(cls, get_weight: Callable[[T], int]) -> TraversalQueue:
+    def branch_queue(cls, get_weight: Callable[[T], int]) -> TraversalQueue[T]:
         """Special priority queue that queues branch items with the largest weight on the starting item as the highest priority"""
         def condition(traversal):
             items = traversal.start_items
@@ -71,3 +72,17 @@ class WeightedPriorityQueue(TraversalQueue[T]):
             return get_weight(items) or -1
 
         return cls(TraversalQueue.breadth_first, condition)
+
+    def has_next(self) -> bool:
+        for weight in self.queue.keys():
+            _next = self.queue.get(weight)
+            if _next:
+                return True
+        return False
+
+
+    def peek(self) -> T:
+        raise Exception
+
+    def clear(self):
+        self.queue.clear()

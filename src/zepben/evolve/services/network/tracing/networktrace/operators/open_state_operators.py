@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TypeVar, Optional, TYPE_CHECKING
+from typing import TypeVar, Optional, TYPE_CHECKING, Callable
 
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
@@ -66,8 +66,8 @@ class OpenStateOperators(StateOperator):
         raise NotImplementedError()
 
     @classmethod
-    def stop_at_open(cls) -> NetworkTraceQueueCondition[T]:
-        return OpenCondition(cls.is_open)
+    def stop_at_open(cls, open_test: Optional[Callable[[Switch, Optional[SinglePhaseKind]], bool]]=None, phase: Optional[SinglePhaseKind]=None) -> NetworkTraceQueueCondition[T]:
+        return OpenCondition(open_test or cls.is_open, phase)
 
 
 class NormalOpenStateOperators(OpenStateOperators):

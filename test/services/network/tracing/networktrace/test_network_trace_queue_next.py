@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from services.network.tracing.networktrace.util import mock_nts_path, mock_nts, mock_ctx
-from zepben.evolve import ComputeData, NetworkTraceStep, ngen
+from zepben.evolve import ComputeData, NetworkTraceStep, ngen, NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_next import NetworkTraceQueueNext
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
@@ -32,14 +32,14 @@ class TestNetworkTraceQueueNext:
 
     @pytest.fixture(autouse=True)
     def setup_method(self):
-        self.path_provider = MagicMock(NetworkTraceStepPathProvider)
+        self.state_operators = MagicMock(NetworkStateOperators)
         self.data_computer = MagicMock(ComputeData)
         self.queuer = Queuer()
         self.branching_queuer = Queuer()
         yield
 
     def test_queues_next_basic(self):
-        queue_next = NetworkTraceQueueNext.Basic(self.path_provider, self.data_computer)
+        queue_next = NetworkTraceQueueNext.Basic(self.state_operators, self.data_computer)
 
         seed_path = mock_nts_path()
         seed_step = mock_nts(seed_path, 3, 1)
@@ -55,7 +55,7 @@ class TestNetworkTraceQueueNext:
         next_path_1 = mock_nts_path(traced_internally=False)
         next_path_2 = mock_nts_path(traced_internally=True)
 
-        self.path_provider.next_paths = lambda seed_path: ngen((next_path_1, next_path_2))
+        self.state_operators.next_paths = lambda seed_path: ngen((next_path_1, next_path_2))
 
         def mock_computer(seed_step, seed_context, path):
             if path is next_path_1:
@@ -73,7 +73,7 @@ class TestNetworkTraceQueueNext:
         _assert_step_equal(self.queuer.queued[1], next_path_2, "Bar", 4, 1)
 
     def test_calls_branching_queuer_when_queing_more_then_1_path_on_branching_queue_next(self):
-        queue_next = NetworkTraceQueueNext.Branching(self.path_provider, self.data_computer)
+        queue_next = NetworkTraceQueueNext.Branching(self.state_operators, self.data_computer)
 
         seed_path = mock_nts_path()
         seed_step = mock_nts(seed_path, 3, 1)
@@ -83,7 +83,7 @@ class TestNetworkTraceQueueNext:
         next_path_1 = mock_nts_path(traced_internally=False)
         next_path_2 = mock_nts_path(traced_internally=True)
 
-        self.path_provider.next_paths = lambda seed_path: ngen((next_path_1, next_path_2))
+        self.state_operators.next_paths = lambda seed_path: ngen((next_path_1, next_path_2))
 
         def mock_computer(seed_step, seed_context, path):
             if path is next_path_1:
@@ -102,7 +102,7 @@ class TestNetworkTraceQueueNext:
         _assert_step_equal(self.branching_queuer.queued[1], next_path_2, "Bar", 4, 1)
 
     def test_calls_straight_queuer_when_queuing_a_single_path_on_branching_queue_next(self):
-        queue_next = NetworkTraceQueueNext.Branching(self.path_provider, self.data_computer)
+        queue_next = NetworkTraceQueueNext.Branching(self.state_operators, self.data_computer)
 
         seed_path = mock_nts_path()
         seed_step = mock_nts(seed_path, 3, 1)
@@ -111,7 +111,7 @@ class TestNetworkTraceQueueNext:
 
         next_path_1 = mock_nts_path(traced_internally=False)
 
-        self.path_provider.next_paths = lambda seed_path: ngen([next_path_1])
+        self.state_operators.next_paths = lambda seed_path: ngen([next_path_1])
 
         def mock_computer(seed_step, seed_context, path):
             if path is next_path_1:

@@ -2,9 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from collections.abc import Callable
-from typing import TypeVar, Union, Generic, Set, Type
 
+from collections.abc import Callable
+from typing import TypeVar, Union, Generic, Set, Type, Generator
+
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
@@ -114,7 +117,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                    parent,
                    action_type)
 
-    def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T= None, phases: PhaseCode=None) -> "NetworkTrace[T]":
+    def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T=None, phases: PhaseCode=None) -> "NetworkTrace[T]":
         """
         Depending on the type of `start`, adds either:
           - A starting [Terminal] to the trace with the associated step data.
@@ -126,18 +129,56 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         :param data: The data associated with the start step.
         :param phases: Phases to trace; `None` to ignore phases.
         """
+        #if isinstance(start, NetworkTraceStep):
+        #    super().add_start_item(start)
+        #    return self
+
         if isinstance(start, Terminal):
-            start_path = NetworkTraceStep.Path(start, start, None, self.start_nominal_phase_path(phases))
-            super().add_start_item(NetworkTraceStep(start_path, 0, 0, data))
+            # We have a special case when starting specifically on a clamp terminal that we mark it as having traversed the segment such that it
+            # will only trace externally from the clamp terminal. This behaves differently to when the whole Clamp is added as a start item.
+            traversed_ac_line_segment = None
+            if isinstance(start.conducting_equipment, Clamp):
+                traversed_ac_line_segment = start.conducting_equipment.ac_line_segment
+            self._add_start_item(start, data, phases, traversed_ac_line_segment)
             return self
 
-        if issubclass(start.__class__, ConductingEquipment) or isinstance(start, ConductingEquipment):
-            for it in start.terminals:
-                self.add_start_item(it, data, phases)
+        elif issubclass(start.__class__, ConductingEquipment) or isinstance(start, ConductingEquipment):
+            # If we start on an AcLineSegment, we queue the segments terminals, and all its Cut and Clamp terminals as if we have traversed the segment,
+            # so the next steps will be external from all the terminals "belonging" to the segment.
+            if isinstance(start, AcLineSegment):
+                def start_terminals() -> Generator[Terminal, None, None]:
+                    for terminal in start.terminals:
+                        yield terminal
+                    for clamp in start.clamps:
+                        for terminal in clamp.terminals:
+                            yield terminal
+                            break
+                    for cut in start.cuts:
+                        for terminal in cut.terminals:
+                            yield terminal
+                for terminal in start_terminals():
+                    self._add_start_item(terminal, data, phases, start)
+
+            # We don't have a special case for Clamp here because we say if you start from the whole Clamp rather than its terminal specifically,
+            # we want to trace externally from it and traverse its segment.
+            else:
+                for it in start.terminals:
+                    self._add_start_item(it, data, phases, None)
+
             return self
 
-        super().add_start_item(start)
-        return self
+        raise Exception('INTERNAL ERROR:: unexpected add_start_item params')
+
+    def _add_start_item(self,
+                       start: Terminal=None,
+                       data: T=None,
+                       phases: PhaseCode=None,
+                       traversed_ac_line_segment: AcLineSegment=None):
+
+        if start is None:
+            return
+        start_path = NetworkTraceStep.Path(start, start, traversed_ac_line_segment, self.start_nominal_phase_path(phases))
+        super().add_start_item(NetworkTraceStep(start_path, 0, 0, data))
 
     async def run(self, start: Union[ConductingEquipment, Terminal]=None, data: T=None, phases: PhaseCode=None, can_stop_on_start_item: bool=True) -> "NetworkTrace[T]":
         """

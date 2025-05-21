@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Generator, Tuple, Iterable, Optional
+from typing import Generator, Tuple, Iterable, Optional, Union
 
 from pytest_subtests.plugin import subtests
 
@@ -353,7 +353,27 @@ class TestNetworkTraceStepPathProvider:
 
         _verify_paths(next_paths, (cut2[1] - clamp2[1], cut2[1] - clamp3[1], cut2[1] - cut1[2], cut2[1] + c8[1]))
 
-    def test_traverse_with_cut_with_known_length_from_t1_does_not_return_clamp_with_known_length_from_t1(self, subtests):
+    def test_starting_on_clamp_terminal_flagged_as_traversed_segment_only_steps_externally(self):
+        network = self._acls_with_clamps_and_cuts_network()
+
+        c3 = network['c3']
+        clamp1 = network['clamp1']
+
+        next_paths = self.path_provider.next_paths(clamp1[1] - clamp1[1])
+        _verify_paths(next_paths, (clamp1[1] + c3[1], ))
+
+    def test_starting_on_clamp_terminal_that_flagged_as_not_traversed_segment_steps_externally_and_traverses(self):
+        network = self._acls_with_clamps_and_cuts_network()
+
+        c3 = network['c3']
+        clamp1 = network['clamp1']
+        cut1 = network['cut1']
+        c1 = network['c1']
+
+        next_paths = self.path_provider.next_paths(clamp1[1] + clamp1[1])
+        _verify_paths(next_paths, (clamp1[1] + c3[1], clamp1[1] - c1[1], clamp1[1] - cut1[1]))
+
+    def test_traverse_with_cut_with_unknown_length_from_t1_does_not_return_clamp_with_known_length_from_t1(self, subtests):
         #
         # (Cut with null length is treated as 0.0
         # 1 b0 21*1 cut1 2*-c1-*-21 b2 2
@@ -779,8 +799,8 @@ def _segment_with_cut(network: NetworkService, segment: AcLineSegment, length_fr
 
 
 def _verify_paths(in_paths: Generator[NetworkTraceStep.Path, None, None], in_expected: Iterable[NetworkTraceStep.Path], check_length=True):
-    paths = sorted(list(in_paths), key=lambda p: (p.from_terminal, p.to_terminal))
-    expected = sorted(in_expected, key=lambda p: (p.from_terminal, p.to_terminal))
+    paths = list(in_paths)
+    expected = list(in_expected)
     for path in paths:
         if path in expected:
             continue
