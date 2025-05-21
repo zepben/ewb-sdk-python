@@ -132,7 +132,6 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
         if found_lv_feeder:
             found_lv_feeders = list(self._find_lv_feeders(step_path.to_equipment, lv_feeder_start_points))
 
-
             for energizing_feeder in (self.network_state_operators.get_energizing_feeders(it) for it in found_lv_feeders):
                 for feeder_group in (lv_feeders_to_assign, found_lv_feeders):
                     self._feeder_energizes(feeder_group, energizing_feeder)
