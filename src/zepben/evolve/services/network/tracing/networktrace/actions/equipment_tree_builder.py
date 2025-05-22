@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import uuid
-from typing import Any
+from typing import Any, Generator
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
@@ -38,8 +38,8 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
         self.key = str(uuid.uuid4())
 
     @property
-    def roots(self):
-        return self._roots.values()
+    def roots(self) -> Generator[TreeNode[ConductingEquipment], None, None]:
+        return (r for r in self._roots.values())
 
     def compute_initial_value(self, item: NetworkTraceStep[Any]) -> EquipmentTreeNode:
         node = self._roots.get(item.path.to_equipment)

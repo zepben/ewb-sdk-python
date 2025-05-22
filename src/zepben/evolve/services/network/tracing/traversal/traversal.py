@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections import deque
+from functools import singledispatch, singledispatchmethod
 from typing import List, Callable, TypeVar, Generic, Optional, Dict, Union
 
 from zepben.evolve import require
@@ -168,19 +169,15 @@ class Traversal(Generic[T, D]):
         """
         raise NotImplementedError
 
-    def add_condition(self, condition: QueueCondition | Callable[[NetworkTraceStep[T], StepContext], None]) -> D:
+    @singledispatchmethod
+    def add_condition(self, condition: Union[QueueCondition, Callable[[NetworkTraceStep[T], StepContext], None]]) -> D:
         """
         Adds a traversal condition to the traversal.
 
         `condition` The condition to add.
         Returns this traversal instance.
         """
-        if isinstance(condition, (QueueCondition, DirectionCondition)):
-            return self.add_queue_condition(condition)
-        elif isinstance(condition, StopCondition):
-            return self.add_stop_condition(condition)
-
-        elif callable(condition): # Callable[[NetworkTraceStep[T], StepContext], None]
+        if callable(condition): # Callable[[NetworkTraceStep[T], StepContext], None]
             assert not isinstance(condition, TraversalCondition)
             if condition.__code__.co_argcount == 2:
                 return self.add_stop_condition(condition)
@@ -193,6 +190,7 @@ class Traversal(Generic[T, D]):
             raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: ' +
         "[QueueCondition | DirectionCondition | StopCondition | Callable[_,_] | Callable[_,_,_,_]]")
 
+    @add_condition.register(StopCondition)
     def add_stop_condition(self, condition: Union[Callable, StopCondition[T], StopConditionWithContextValue[T, U]]) -> D:
         """
         Adds a stop condition to the traversal. If any stop condition returns `true`, the traversal
@@ -230,6 +228,7 @@ class Traversal(Generic[T, D]):
                 return True
         return False
 
+    @add_condition.register(QueueCondition)
     def add_queue_condition(self, condition: Union[Callable, QueueCondition[T]]) -> D:
         """
         Adds a queue condition to the traversal. Queue conditions determine whether an item should be queued for traversal.

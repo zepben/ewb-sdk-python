@@ -31,16 +31,19 @@ def should_queue_params(next_step, next_context=None, current_step=None, current
                         ) -> (NetworkTraceStep, StepContext, NetworkTraceStep, StepContext):
     return next_step, next_context or MagicMock(), current_step or MagicMock(), current_context or MagicMock()
 
+def _is_open(switch: Switch, phase: SinglePhaseKind) -> bool:
+    pass
+
 class TestOpenCondition:
     def test_always_queues_external_steps(self):
-        is_open = Callable[[Switch, SinglePhaseKind], bool]
+        is_open = _is_open
         spk = MagicMock(spec=SinglePhaseKind)
         next_step = mock_nts(step_type=NetworkTraceStep.Type.EXTERNAL)
 
         assert OpenCondition(is_open, spk).should_queue(*should_queue_params(next_step))
 
     def test_always_queues_non_switch_equipment(self):
-        is_open = Callable[[Switch, SinglePhaseKind], bool]
+        is_open = _is_open
         spk = MagicMock(spec=SinglePhaseKind)
 
         next_path = mock_nts_path(to_equipment=MagicMock(spec=ConductingEquipment))

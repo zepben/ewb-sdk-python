@@ -2,12 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar, Generic, Any
+from typing import TypeVar, Generic
 
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 T = TypeVar('T')
+
+__all__ = ['ComputeData', 'ComputeDataWithPaths']
 
 
 class ComputeData(Generic[T]):
