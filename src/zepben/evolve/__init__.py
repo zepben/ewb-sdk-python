@@ -185,6 +185,7 @@ from zepben.evolve.services.network.tracing.traversal.queue_condition import *
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import *
 from zepben.evolve.services.network.tracing.traversal.step_action import *
 from zepben.evolve.services.network.tracing.traversal.stop_condition import *
+from zepben.evolve.services.network.tracing.traversal.traversal_condition import *
 from zepben.evolve.services.network.tracing.feeder.set_direction import *
 
 from zepben.evolve.services.common.meta.data_source import *
