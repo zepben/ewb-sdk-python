@@ -2,7 +2,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
 from __future__ import  annotations
 
 from typing import TypeVar, TYPE_CHECKING, Generic, Type
@@ -19,6 +18,8 @@ if TYPE_CHECKING:
     from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 
 T = TypeVar('T')
+
+__all__ = ['DirectionCondition']
 
 
 class DirectionCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]):

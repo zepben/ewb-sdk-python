@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
 T = TypeVar('T')
 
+__all__ = ['OpenCondition']
+
 
 class OpenCondition(NetworkTraceQueueCondition[T], Generic[T]):
     def __init__(self, is_open: Callable[[Switch, SinglePhaseKind], bool], phase: SinglePhaseKind = None):

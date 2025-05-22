@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod, ABCMeta
 from collections import deque
 from typing import TypeVar, Iterable, Generic, Deque, TYPE_CHECKING, Union
 
@@ -18,6 +18,8 @@ __all__ = ["TraversalQueue"]
 
 if TYPE_CHECKING:
     from zepben.evolve import NetworkTraceStep
+
+
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -36,7 +38,7 @@ class LIFODeque(deque):
         return self[0]
 
 
-class TraversalQueue(Generic[T], ABC):
+class TraversalQueue(Generic[T], metaclass=ABCMeta):
     """
     Basic queue object, implementing some methods to align it with the kotlin sdk syntax,
     """

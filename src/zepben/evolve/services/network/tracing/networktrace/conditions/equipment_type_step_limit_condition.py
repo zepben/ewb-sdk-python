@@ -14,10 +14,12 @@ if TYPE_CHECKING:
 
 T = TypeVar('T')
 
+__all__ = ['EquipmentTypeStepLimitCondition']
+
 
 class EquipmentTypeStepLimitCondition(StopConditionWithContextValue, Generic[T]):
     def __init__(self, limit: int, equipment_type: Type[ConductingEquipment]):
-        StopConditionWithContextValue.__init__(self, _func=self.should_stop)
+        StopConditionWithContextValue.__init__(self, self.should_stop)
         TypedContextValueComputer.__init__(self, f'sdk:{equipment_type.name}Count')
         self.limit = limit
         self.equipment_type = equipment_type
