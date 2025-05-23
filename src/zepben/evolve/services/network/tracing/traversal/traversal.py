@@ -7,15 +7,16 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections import deque
-from functools import singledispatch, singledispatchmethod
-from typing import List, Callable, TypeVar, Generic, Optional, Dict, Union
+from collections.abc import Callable
+from functools import singledispatchmethod
+from typing import List, TypeVar, Generic, Optional, Dict, Union, Callable as CallableType
 
 from zepben.evolve import require
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition, QueueConditionWithContextValue
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction, StepActionWithContextValue
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
-from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition, StopConditionWithContextValue
+from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition, StopConditionWithContextValue, ShouldStop
 from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
@@ -178,7 +179,6 @@ class Traversal(Generic[T, D]):
         Returns this traversal instance.
         """
         if callable(condition): # Callable[[NetworkTraceStep[T], StepContext], None]
-            assert not isinstance(condition, TraversalCondition)
             if condition.__code__.co_argcount == 2:
                 return self.add_stop_condition(condition)
             elif condition.__code__.co_argcount == 4:
@@ -190,6 +190,7 @@ class Traversal(Generic[T, D]):
             raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: ' +
         "[QueueCondition | DirectionCondition | StopCondition | Callable[_,_] | Callable[_,_,_,_]]")
 
+    @singledispatchmethod
     @add_condition.register(StopCondition)
     def add_stop_condition(self, condition: Union[Callable, StopCondition[T], StopConditionWithContextValue[T, U]]) -> D:
         """
@@ -199,17 +200,19 @@ class Traversal(Generic[T, D]):
         `condition` The stop condition to add.
         Returns this traversal instance.
         """
-        if isinstance(condition, StopCondition):
-            self.stop_conditions.append(condition)
-            if issubclass(condition.__class__, StopConditionWithContextValue):
-                self.compute_next_context_funs[condition.key] = condition
-            return self
-
-        elif callable(condition):
-            assert not isinstance(condition, TraversalCondition)
-            return self.add_stop_condition(StopCondition(condition))
-
         raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: [StopCondition | StopConditionWithContextValue | Callable]')
+
+    @add_stop_condition.register
+    def _(self, condition: Callable):
+        return self.add_stop_condition(StopCondition(condition))
+
+    @add_stop_condition.register
+    def _(self, condition: StopCondition):
+        self.stop_conditions.append(condition)
+        if isinstance(condition, StopConditionWithContextValue):
+            self.compute_next_context_funs[condition.key] = condition
+        return self
+
 
     def copy_stop_conditions(self, other: Traversal[T, D]) -> D:
         """
@@ -229,6 +232,7 @@ class Traversal(Generic[T, D]):
         return False
 
     @add_condition.register(QueueCondition)
+    @singledispatchmethod
     def add_queue_condition(self, condition: Union[Callable, QueueCondition[T]]) -> D:
         """
         Adds a queue condition to the traversal. Queue conditions determine whether an item should be queued for traversal.
@@ -237,18 +241,18 @@ class Traversal(Generic[T, D]):
         :param condition: The queue condition to add.
         :returns: The current traversal instance.
         """
-        if isinstance(condition, QueueCondition):
-            self.queue_conditions.append(condition)
-            if isinstance(condition, QueueConditionWithContextValue):
-                self.compute_next_context_funs[condition.key] = condition
-            return self
-
-        elif callable(condition):
-            assert not isinstance(condition, TraversalCondition)
-            return self.add_queue_condition(QueueCondition(condition))
-
         raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: [QueueCondition | QueueConditionWithContextValue | Callable]')
 
+    @add_queue_condition.register
+    def _(self, condition: Callable):
+        return self.add_queue_condition(QueueCondition(condition))
+
+    @add_queue_condition.register
+    def _(self, condition: QueueCondition):
+        self.queue_conditions.append(condition)
+        if isinstance(condition, QueueConditionWithContextValue):
+            self.compute_next_context_funs[condition.key] = condition
+        return self
 
     def copy_queue_conditions(self, other: Traversal[T, D]) -> D:
         """
@@ -326,7 +330,7 @@ class Traversal(Generic[T, D]):
         `computer` The context value computer to add.
         Returns The current traversal instance.
         """
-        require(not isinstance(computer, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
+        #require(not isinstance(computer, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
         self.compute_next_context_funs[computer.key] = computer
         return self
 

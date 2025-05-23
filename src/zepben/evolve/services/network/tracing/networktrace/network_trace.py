@@ -4,6 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from collections.abc import Callable
+from functools import singledispatchmethod
 from typing import TypeVar, Union, Generic, Set, Type, Generator
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
@@ -117,6 +118,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                    parent,
                    action_type)
 
+    @singledispatchmethod
     def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T=None, phases: PhaseCode=None) -> "NetworkTrace[T]":
         """
         Depending on the type of `start`, adds either:
@@ -129,45 +131,46 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         :param data: The data associated with the start step.
         :param phases: Phases to trace; `None` to ignore phases.
         """
-        #if isinstance(start, NetworkTraceStep):
-        #    super().add_start_item(start)
-        #    return self
-
-        if isinstance(start, Terminal):
-            # We have a special case when starting specifically on a clamp terminal that we mark it as having traversed the segment such that it
-            # will only trace externally from the clamp terminal. This behaves differently to when the whole Clamp is added as a start item.
-            traversed_ac_line_segment = None
-            if isinstance(start.conducting_equipment, Clamp):
-                traversed_ac_line_segment = start.conducting_equipment.ac_line_segment
-            self._add_start_item(start, data, phases, traversed_ac_line_segment)
-            return self
-
-        elif issubclass(start.__class__, ConductingEquipment) or isinstance(start, ConductingEquipment):
-            # If we start on an AcLineSegment, we queue the segments terminals, and all its Cut and Clamp terminals as if we have traversed the segment,
-            # so the next steps will be external from all the terminals "belonging" to the segment.
-            if isinstance(start, AcLineSegment):
-                def start_terminals() -> Generator[Terminal, None, None]:
-                    for terminal in start.terminals:
-                        yield terminal
-                    for clamp in start.clamps:
-                        for terminal in clamp.terminals:
-                            yield terminal
-                            break
-                    for cut in start.cuts:
-                        for terminal in cut.terminals:
-                            yield terminal
-                for terminal in start_terminals():
-                    self._add_start_item(terminal, data, phases, start)
-
-            # We don't have a special case for Clamp here because we say if you start from the whole Clamp rather than its terminal specifically,
-            # we want to trace externally from it and traverse its segment.
-            else:
-                for it in start.terminals:
-                    self._add_start_item(it, data, phases, None)
-
-            return self
-
         raise Exception('INTERNAL ERROR:: unexpected add_start_item params')
+
+    @add_start_item.register
+    def _(self, start: ConductingEquipment, data=None, phases=None):
+        # We don't have a special case for Clamp here because we say if you start from the whole Clamp rather than its terminal specifically,
+        # we want to trace externally from it and traverse its segment.
+        for it in start.terminals:
+            self._add_start_item(it, data, phases, None)
+
+        return self
+
+    @add_start_item.register
+    def _(self, start: Terminal, data=None, phases=None):
+        # We have a special case when starting specifically on a clamp terminal that we mark it as having traversed the segment such that it
+        # will only trace externally from the clamp terminal. This behaves differently to when the whole Clamp is added as a start item.
+        traversed_ac_line_segment = None
+        if isinstance(start.conducting_equipment, Clamp):
+            traversed_ac_line_segment = start.conducting_equipment.ac_line_segment
+        self._add_start_item(start, data, phases, traversed_ac_line_segment)
+        return self
+
+    @add_start_item.register
+    def _(self, start: AcLineSegment, data=None, phases=None):
+        # If we start on an AcLineSegment, we queue the segments terminals, and all its Cut and Clamp terminals as if we have traversed the segment,
+        # so the next steps will be external from all the terminals "belonging" to the segment.
+        def start_terminals() -> Generator[Terminal, None, None]:
+            for terminal in start.terminals:
+                yield terminal
+            for clamp in start.clamps:
+                for terminal in clamp.terminals:
+                    yield terminal
+                    break
+            for cut in start.cuts:
+                for terminal in cut.terminals:
+                    yield terminal
+
+
+        for terminal in start_terminals():
+            self._add_start_item(terminal, data, phases, start)
+
 
     def _add_start_item(self,
                        start: Terminal=None,
@@ -199,14 +202,17 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         await super().run(can_stop_on_start_item=can_stop_on_start_item)
         return self
 
+    @singledispatchmethod
     def add_condition(self, condition: QueueCondition[T]) -> "NetworkTrace[T]":
+
         """
         Adds a traversal condition to the trace using the trace's [NetworkStateOperators] as the receiver.
 
         This overload primarily exists to enable a DSL-like syntax for adding predefined traversal conditions to the trace.
         For example, to configure the trace to stop at open points using the [Conditions.stopAtOpen] factory, you can use:
 
-        >>> NetworkTrace().add_condition(NetworkStateOperators.NORMAL.stop_at_open())
+        >>> from zepben.evolve import stop_at_open
+        >>> NetworkTrace().add_condition(stop_at_open())
 
         :param condition: A lambda function that returns a traversal condition.
         :returns: This [NetworkTrace] instance
@@ -214,14 +220,19 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         super().add_condition(condition)
         return self
 
-    def add_queue_condition(self, condition: Union[Callable, QueueCondition[NetworkTraceStep[T]]], step_type:NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
-        if callable(condition):
-            return self.add_queue_condition(QueueCondition(condition))
+    @add_condition.register
+    def _(self, condition: Callable):
+        if condition.__code__.co_argcount == 1:
+            return self.add_condition(condition(self.network_state_operators))
+        super().add_condition(condition)
 
-        if step_type is None:
-            return super().add_queue_condition(to_network_trace_queue_condition(condition, default_queue_condition_step_type(self._action_type), False))
-        else:
-            return super().add_queue_condition(to_network_trace_queue_condition(condition, step_type, True))
+    @singledispatchmethod
+    def add_queue_condition(self, condition: NetworkTraceQueueCondition[NetworkTraceStep[T]], step_type:NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
+        return super().add_queue_condition(condition)
+
+    @add_queue_condition.register
+    def _(self, condition: Callable, step_type: NetworkTraceStep.Type=None):
+        return self.add_queue_condition(NetworkTraceQueueCondition(default_queue_condition_step_type(step_type or self._action_type), condition))
 
     def can_action_item(self, item: T, context: StepContext) -> bool:
         return self._action_type(item, context, self.has_visited)
@@ -247,13 +258,6 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
     def visit(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
         return not (self.parent and self.parent.has_visited(terminal, phases)) and self._tracker.visit(terminal, phases)
-
-
-def to_network_trace_queue_condition(queue_condition: QueueCondition[NetworkTraceStep[T]], step_type: NetworkTraceStep.Type, override_step_type: bool):
-    if isinstance(queue_condition, NetworkTraceQueueCondition) and not override_step_type:
-        return queue_condition
-    else:
-        return NetworkTraceQueueCondition.delegate_to(step_type, queue_condition)
 
 
 def default_queue_condition_step_type(step_type):

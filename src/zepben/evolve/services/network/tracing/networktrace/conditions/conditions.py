@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeVar, Type
+from typing import TYPE_CHECKING, TypeVar, Type, Callable
 
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
@@ -18,44 +18,43 @@ if TYPE_CHECKING:
     from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
     from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
     from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition
-    from zepben.evolve import ConductingEquipment
+    from zepben.evolve import ConductingEquipment, NetworkStateOperators
 
     NetworkTraceQueueCondition = QueueCondition[NetworkTraceStep[T]]
     NetworkTraceStopCondition = StopCondition[NetworkTraceStep[T]]
-
+    DSLLambda = Callable[[NetworkStateOperators], NetworkTraceQueueCondition[T]]
 
 # FIXME: work out how to inject NetworkStateOperators into this from inside NetworkTrace
 class Conditions:
     @classmethod
-    def upstream(cls) -> NetworkTraceQueueCondition[T]:
+    def upstream(cls) -> DSLLambda:
         """
         Creates a [NetworkTrace] condition that will cause tracing a feeder upstream (towards the head terminal).
         This uses [FeederDirectionStateOperations.get_direction] receiver instance method within the condition.
 
         :return: [NetworkTraceQueueCondition] that results in upstream tracing.
         """
-        return cls.with_direction(FeederDirection.UPSTREAM)
+        return lambda state_operator: state_operator.with_direction(FeederDirection.UPSTREAM)
 
     @classmethod
-    def downstream(cls) -> NetworkTraceQueueCondition[T]:
+    def downstream(cls) -> DSLLambda:
         """
         Creates a [NetworkTrace] condition that will cause tracing a feeder downstream (away from the head terminal).
         This uses [FeederDirectionStateOperations.get_direction] receiver instance method within the condition.
 
         :return: [NetworkTraceQueueCondition] that results in downstream tracing.
         """
-        return cls.with_direction(FeederDirection.DOWNSTREAM)
+        return lambda state_operator: state_operator.with_direction(FeederDirection.DOWNSTREAM)
 
     @classmethod
-    def with_direction(cls, direction: FeederDirection) -> NetworkTraceQueueCondition[T]:
+    def with_direction(cls, direction: FeederDirection) -> DSLLambda:
         """
         Creates a [NetworkTrace] condition that will cause tracing only terminals with directions that match [direction].
         This uses [FeederDirectionStateOperations.get_direction] receiver instance method within the condition.
 
         :return: [NetworkTraceQueueCondition] that results in upstream tracing.
         """
-        return DirectionCondition(direction, cls)  # FIXME: cls should be NetworkStateOperators, somehow need
-                                                   #   to load these methods onto there after passing them to NetworkTrace
+        return lambda state_operator: DirectionCondition(direction, state_operator)
 
     @staticmethod
     def limit_equipment_steps(limit: int, equipment_type: Type[ConductingEquipment]=None) -> NetworkTraceStopCondition[T]:

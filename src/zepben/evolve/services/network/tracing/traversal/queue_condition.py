@@ -19,19 +19,17 @@ ShouldQueueStartItem = Callable[[T], bool]
 __all__ = ['QueueCondition', 'QueueConditionWithContextValue', 'ShouldQueue', 'ShouldQueueStartItem']
 
 
-@TraversalCondition.register
-class QueueCondition(Generic[T]):
+class QueueCondition(Generic[T], TraversalCondition[T]):
     """
     Functional interface representing a condition that determines whether a traversal should queue a next item.
 
     `T` The type of items being traversed.
     """
-    def __init__(self, should_queue: ShouldQueue=None):
-        self.should_queue = should_queue
 
-    @staticmethod
-    @abstractmethod
-    def should_queue(next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
+    def __init__(self, condition):
+        self.should_queue = condition
+
+    def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
         """
         Determines whether the [nextItem] should be queued for traversal.
 
