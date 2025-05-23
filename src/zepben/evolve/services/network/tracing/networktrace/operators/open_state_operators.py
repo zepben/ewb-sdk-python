@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 
     T = TypeVar('T')
 
+__all__ = ['OpenStateOperators', 'stop_at_open']
+
 
 class OpenStateOperators(StateOperator):
     """
@@ -95,6 +97,9 @@ class CurrentOpenStateOperators(OpenStateOperators):
     def set_open(switch: Switch, is_open: bool, phase: SinglePhaseKind = None) -> None:
         switch.set_open(is_open, phase)
 
+
+def stop_at_open():
+    return lambda state_operator: state_operator.stop_at_open()
 
 OpenStateOperators.NORMAL = NormalOpenStateOperators
 OpenStateOperators.CURRENT = CurrentOpenStateOperators

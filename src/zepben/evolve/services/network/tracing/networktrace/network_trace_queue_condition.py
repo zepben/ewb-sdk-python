@@ -6,7 +6,7 @@
 from typing import TypeVar, Generic
 
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
-from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
+from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition, ShouldQueue
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 T = TypeVar('T')
@@ -14,8 +14,14 @@ T = TypeVar('T')
 
 class NetworkTraceQueueCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]):
 
-    def __init__(self, step_type: NetworkTraceStep.Type):
-        super().__init__(self._should_queue_func_map[step_type])
+    def __init__(self, step_type: NetworkTraceStep.Type, condition: ShouldQueue=None):
+        super().__init__(self.should_queue)
+        if condition is not None:
+            self.should_queue_matched_step = condition
+        self._should_queue_func = self._should_queue_func_map[step_type]
+
+    def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
+        return self._should_queue_func(next_item, next_context, current_item, current_context)
 
     def should_queue_matched_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
         raise NotImplementedError()
@@ -37,23 +43,3 @@ class NetworkTraceQueueCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]
             NetworkTraceStep.Type.INTERNAL: self.should_queue_internal_step,
             NetworkTraceStep.Type.EXTERNAL: self.should_queue_external_step
         }
-
-    @staticmethod
-    def should_queue(next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
-        raise NotImplementedError()
-
-    @staticmethod
-    def delegate_to(step_type: NetworkTraceStep.Type, condition: QueueCondition[NetworkTraceStep[T]]) -> 'NetworkTraceQueueCondition[T]':
-        return DelegatedNetworkTraceQueueCondition(step_type, condition)
-
-
-class DelegatedNetworkTraceQueueCondition(NetworkTraceQueueCondition[T], Generic[T]):
-    def __init__(self, step_type: NetworkTraceStep.Type, delegate: QueueCondition[NetworkTraceStep[T]]):
-        super().__init__(step_type)
-        self.delegate = delegate
-
-    def should_queue_matched_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
-        return self.delegate.should_queue(next_item, next_context, current_item, current_context)
-
-    def should_queue_start_item(self, item: NetworkTraceStep[T]) -> bool:
-        return self.delegate.should_queue_start_item(item)

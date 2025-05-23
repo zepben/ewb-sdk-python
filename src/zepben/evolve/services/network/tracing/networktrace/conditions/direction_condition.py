@@ -13,7 +13,7 @@ from zepben.evolve.services.network.tracing.traversal.queue_condition import Que
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 if TYPE_CHECKING:
-    from zepben.evolve.services.network.tracing.networktrace.operators.feeder_direction_state_operations import FeederDirectionStateOperations
+    from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
     from zepben.evolve import StepContext
     from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 
@@ -24,7 +24,7 @@ __all__ = ['DirectionCondition']
 
 class DirectionCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]):
 
-    def __init__(self, direction: FeederDirection, state_operators: Type[FeederDirectionStateOperations]):
+    def __init__(self, direction: FeederDirection, state_operators: Type[NetworkStateOperators]):
         self.direction = direction
         self.state_operators = state_operators
         self.get_direction = self.state_operators.get_direction

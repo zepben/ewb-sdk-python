@@ -17,8 +17,7 @@ ShouldStop = Callable[[T, StepContext], bool]
 __all__ = ['StopCondition', 'StopConditionWithContextValue', 'ShouldStop']
 
 
-@TraversalCondition.register
-class StopCondition(Generic[T]):
+class StopCondition(Generic[T], TraversalCondition[T]):
     """
     Functional interface representing a condition that determines whether the traversal should stop at a given item.
 

@@ -35,6 +35,3 @@ class OpenCondition(NetworkTraceQueueCondition[T], Generic[T]):
             return not self._is_open(equip, self._phase)
         else:
             return True
-
-    def should_queue_start_item(self, item: T) -> bool:
-        return True

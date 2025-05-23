@@ -18,13 +18,14 @@ from zepben.evolve.services.network.tracing.networktrace.operators.feeder_direct
 from zepben.evolve.services.network.tracing.networktrace.operators.in_service_state_operators import InServiceStateOperators, NormalInServiceStateOperators, \
     CurrentInServiceStateOperators
 from zepben.evolve.services.network.tracing.networktrace.operators.open_state_operators import OpenStateOperators, NormalOpenStateOperators, \
-    CurrentOpenStateOperators
+    CurrentOpenStateOperators, stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.operators.phase_state_operators import PhaseStateOperators, NormalPhaseStateOperators, \
     CurrentPhaseStateOperators
 
 if TYPE_CHECKING:
     from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
+__all__ = ['NetworkStateOperators', 'stop_at_open']
 
 # noinspection PyPep8Naming
 class NetworkStateOperators(OpenStateOperators,
@@ -103,3 +104,4 @@ class CurrentNetworkStateOperators(NetworkStateOperators,
     @classmethod
     def next_paths(cls, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:
         yield from cls.network_trace_step_path_provider().next_paths(path)
+
