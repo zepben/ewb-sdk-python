@@ -2,10 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 [build-system]
     requires = [
         "setuptools",
-        "wheel"
+        "wheel",
+        "build>=1.2.0"
     ]
     build-backend = "setuptools.build_meta"
 
@@ -47,9 +49,6 @@
         "pylint==2.14.5",
         "six==1.16.0",
         "tox"
-    ]
-    build = [
-        "build>=1.2.0"
     ]
 
 [tool.setuptools.packages.find]
