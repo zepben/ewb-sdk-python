@@ -5,7 +5,7 @@
 from typing import Optional, Callable
 
 from zepben.evolve import NetworkStateOperators, FeederDirection, SinglePhaseKind, Switch, PowerTransformer
-from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import Conditions
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import limit_equipment_steps
 from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
 from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
 from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import EquipmentTypeStepLimitCondition
@@ -39,7 +39,6 @@ class TestCondition:
         state_operators = NetworkStateOperators.NORMAL
         condition = state_operators.stop_at_open(is_open, SinglePhaseKind.A)
         assert isinstance(condition, OpenCondition)
-        #assert condition._is_open == state_operators.is_open  # wont work because we're not actually getting that method directly
         assert condition._phase is SinglePhaseKind.A
 
     def test_open_operators_stop_at_open(self):
@@ -50,12 +49,12 @@ class TestCondition:
         assert condition._phase is SinglePhaseKind.A
 
     def test_limit_equipment_steps(self):
-        condition = Conditions.limit_equipment_steps(1)
+        condition = limit_equipment_steps(1)
         assert isinstance(condition, EquipmentStepLimitCondition)
         assert condition.limit == 1
 
     def test_limit_equipment_type_steps(self):
-        condition = Conditions.limit_equipment_steps(1, PowerTransformer)
+        condition = limit_equipment_steps(1, PowerTransformer)
         assert isinstance(condition, EquipmentTypeStepLimitCondition)
         assert condition.limit == 1
         assert condition.equipment_type is PowerTransformer
