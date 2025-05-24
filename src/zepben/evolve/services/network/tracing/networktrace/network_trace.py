@@ -5,6 +5,7 @@
 
 from collections.abc import Callable
 from functools import singledispatchmethod
+from os import MFD_ALLOW_SEALING
 from typing import TypeVar, Union, Generic, Set, Type, Generator
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
@@ -256,10 +257,16 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return {NominalPhasePath(it, it) for it in phases.single_phases} if phases and phases.single_phases else set()
 
     def has_visited(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
-        return self._tracker.has_visited(terminal, phases) or (self.parent and self.parent.has_visited(terminal, phases))
+        if self._tracker.has_visited(terminal, phases):
+            return True
+        if not self.parent:
+            return False
+        return self.parent.has_visited(terminal, phases)
 
     def visit(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
-        return not (self.parent and self.parent.has_visited(terminal, phases)) and self._tracker.visit(terminal, phases)
+        if self.parent and self.parent.has_visited(terminal, phases):
+                return False
+        return self._tracker.visit(terminal, phases)
 
 
 def default_queue_condition_step_type(step_type):

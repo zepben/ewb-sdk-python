@@ -6,10 +6,9 @@ from __future__ import annotations
 
 from typing import TypeVar, Optional, TYPE_CHECKING, Callable
 
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-
 from abc import abstractmethod
 
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
@@ -20,7 +19,7 @@ if TYPE_CHECKING:
 
     T = TypeVar('T')
 
-__all__ = ['OpenStateOperators', 'stop_at_open']
+__all__ = ['OpenStateOperators']
 
 
 class OpenStateOperators(StateOperator):
@@ -97,9 +96,6 @@ class CurrentOpenStateOperators(OpenStateOperators):
     def set_open(switch: Switch, is_open: bool, phase: SinglePhaseKind = None) -> None:
         switch.set_open(is_open, phase)
 
-
-def stop_at_open():
-    return lambda state_operator: state_operator.stop_at_open()
 
 OpenStateOperators.NORMAL = NormalOpenStateOperators
 OpenStateOperators.CURRENT = CurrentOpenStateOperators

@@ -175,7 +175,7 @@ from zepben.evolve.services.network.tracing.networktrace.conditions.direction_co
 from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
 from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import EquipmentTypeStepLimitCondition
 from zepben.evolve.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
-from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import Conditions
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import *
 from zepben.evolve.services.network.tracing.networktrace.compute_data import *
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import *
 from zepben.evolve.services.network.tracing.phases.phase_status import *
