@@ -222,7 +222,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
     @add_condition.register
     def _(self, condition: Callable):
-        if condition.__code__.co_argcount == 1:
+        if condition.__code__.co_argcount == 1:  # Catches DSL Style lambda conditions from zepben.evolve.Conditions
             return self.add_condition(condition(self.network_state_operators))
         super().add_condition(condition)
 

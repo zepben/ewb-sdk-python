@@ -5,6 +5,7 @@
 from collections import defaultdict
 from typing import TypeVar, Callable, Iterable
 
+from zepben.evolve import Traversal
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 
 T = TypeVar('T')
@@ -28,19 +29,13 @@ class WeightedPriorityQueue(TraversalQueue[T]):
 
     def __init__(self, queue_provider: Callable[[], TraversalQueue[T]], get_weight: Callable[[T], int]):
         self._queue_provider = queue_provider
-        self._get_weight = lambda a: 1# TODO: this is wrong but at 6am, its as good as its gonna get to remind me where to lookg
+        self._get_weight = get_weight
 
         self.queue: SortedDefaultDict[int, TraversalQueue[T]] = SortedDefaultDict(self._queue_provider)
 
     def __len__(self) -> int:
         """need to aggregate the lengths of all queues"""
         return sum(len(v) for v in self.queue.values())
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        yield self.pop()
 
     def pop(self):
         for weight in reversed(self.queue.keys()):
@@ -49,8 +44,6 @@ class WeightedPriorityQueue(TraversalQueue[T]):
 
     def append(self, item: T) -> bool:
         weight = self._get_weight(item)
-        if weight < 0:
-            raise Exception
         self.queue[weight].append(item)
         return True
 
@@ -65,11 +58,11 @@ class WeightedPriorityQueue(TraversalQueue[T]):
     @classmethod
     def branch_queue(cls, get_weight: Callable[[T], int]) -> TraversalQueue[T]:
         """Special priority queue that queues branch items with the largest weight on the starting item as the highest priority"""
-        def condition(traversal):
+        def condition(traversal: Traversal):
             items = traversal.start_items
             if len(items) == 0:
-                return None
-            return get_weight(items) or -1
+                return -1
+            return get_weight(items[0]) or -1
 
         return cls(TraversalQueue.breadth_first, condition)
 

@@ -7,7 +7,7 @@ from typing import Callable, TypeVar, Tuple, Any
 
 import pytest
 
-from zepben.evolve import StepContext, Traversal, TraversalQueue, NetworkTrace, ContextValueComputer
+from zepben.evolve import StepContext, Traversal, TraversalQueue, ContextValueComputer
 from zepben.evolve.services.network.tracing.traversal.traversal import D
 
 T = TypeVar('T')

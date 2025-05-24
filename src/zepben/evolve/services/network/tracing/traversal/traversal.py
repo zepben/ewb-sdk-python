@@ -9,26 +9,28 @@ from abc import abstractmethod
 from collections import deque
 from collections.abc import Callable
 from functools import singledispatchmethod
-from typing import List, TypeVar, Generic, Optional, Dict, Union, Callable as CallableType
+from typing import List, TypeVar, Generic, Optional, Dict, Union, TYPE_CHECKING
 
 from zepben.evolve import require
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
-from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition, QueueConditionWithContextValue
-from zepben.evolve.services.network.tracing.traversal.step_action import StepAction, StepActionWithContextValue
+from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition, QueueConditionWithContextValue, ShouldQueue
+from zepben.evolve.services.network.tracing.traversal.step_action import StepAction, StepActionWithContextValue, StepActionFunc
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition, StopConditionWithContextValue, ShouldStop
-from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 __all__ = ["Traversal"]
 
-from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 
 T = TypeVar('T')
 U = TypeVar('U')
 D = TypeVar('D', bound='Traversal')
 
+if TYPE_CHECKING:
+    QueueConditionTypes = Union[ShouldQueue, QueueCondition[T]]
+    StopConditionTypes = Union[Callable, StopCondition[T]]
+    ConditionTypes = Union[QueueConditionTypes, StopConditionTypes]
 
 
 class Traversal(Generic[T, D]):
@@ -109,18 +111,16 @@ class Traversal(Generic[T, D]):
         def branch_queue(self) -> Optional[TraversalQueue[D]]:
             return self.branch_queue_factory()
 
-
-    _queue_type: Union[BasicQueueType, BranchingQueueType] = None
+    _queue_type: Union[BasicQueueType, BranchingQueueType]
 
     def __init__(self, queue_type, parent: Optional[D] = None):
-        if self._queue_type is None:
-            self._queue_type = queue_type
+        self._queue_type = queue_type
         self._parent: D = parent
 
-        self._queue_next = {
-            Traversal.BasicQueueType: lambda current, context: self._queue_next_non_branching(current, context, self._queue_type.queue_next),
-            Traversal.BranchingQueueType: lambda  current, context: self._queue_next_branching(current, context, self._queue_type.queue_next),
-        }
+        if type(self._queue_type) == Traversal.BasicQueueType:
+            self.queue_next = lambda current, context: self._queue_next_non_branching(current, context, self._queue_type.queue_next)
+        elif type(self._queue_type) == Traversal.BranchingQueueType:
+            self.queue_next = lambda  current, context: self._queue_next_branching(current, context, self._queue_type.queue_next)
 
         self.queue: TraversalQueue[T] = self._queue_type.queue
         self.branch_queue: Optional[TraversalQueue[D]] = self._queue_type.branch_queue
@@ -135,9 +135,8 @@ class Traversal(Generic[T, D]):
         self.compute_next_context_funs: Dict[str, ContextValueComputer[T]] = {}
         self.contexts: Dict[T, StepContext] = {}
 
-    @property
-    def queue_next(self):
-        return self._queue_next[self._queue_type.__class__]
+    def queue_next(self, current_item: T, context: StepContext):
+        raise NotImplementedError
 
     @property
     def parent(self):
@@ -149,7 +148,7 @@ class Traversal(Generic[T, D]):
             self._parent = value
         raise Exception
 
-    def can_action_item(self, item: T, context: 'StepContext') -> bool:
+    def can_action_item(self, item: T, context: StepContext) -> bool:
         """
         Determines if the traversal can apply step actions and stop conditions on the specified item.
 
@@ -159,7 +158,7 @@ class Traversal(Generic[T, D]):
         """
         return True
 
-    def can_visit_item(self, item: T, context: 'StepContext') -> bool:
+    def can_visit_item(self, item: T, context: StepContext) -> bool:
         raise NotImplementedError
 
     def create_new_this(self) -> D:
@@ -171,12 +170,13 @@ class Traversal(Generic[T, D]):
         raise NotImplementedError
 
     @singledispatchmethod
-    def add_condition(self, condition: Union[QueueCondition, Callable[[NetworkTraceStep[T], StepContext], None]]) -> D:
+    def add_condition(self, condition: ConditionTypes) -> D:
         """
         Adds a traversal condition to the traversal.
 
-        `condition` The condition to add.
-        Returns this traversal instance.
+        :param condition: The condition to add.
+
+        :return: this traversal instance.
         """
         if callable(condition): # Callable[[NetworkTraceStep[T], StepContext], None]
             if condition.__code__.co_argcount == 2:
@@ -192,7 +192,7 @@ class Traversal(Generic[T, D]):
 
     @singledispatchmethod
     @add_condition.register(StopCondition)
-    def add_stop_condition(self, condition: Union[Callable, StopCondition[T], StopConditionWithContextValue[T, U]]) -> D:
+    def add_stop_condition(self, condition: StopConditionTypes) -> D:
         """
         Adds a stop condition to the traversal. If any stop condition returns `true`, the traversal
         will not call the callback to queue more items from the current item.
@@ -202,8 +202,8 @@ class Traversal(Generic[T, D]):
         """
         raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: [StopCondition | StopConditionWithContextValue | Callable]')
 
-    @add_stop_condition.register
-    def _(self, condition: Callable):
+    @add_stop_condition.register(Callable)
+    def _(self, condition: ShouldStop):
         return self.add_stop_condition(StopCondition(condition))
 
     @add_stop_condition.register
@@ -212,7 +212,6 @@ class Traversal(Generic[T, D]):
         if isinstance(condition, StopConditionWithContextValue):
             self.compute_next_context_funs[condition.key] = condition
         return self
-
 
     def copy_stop_conditions(self, other: Traversal[T, D]) -> D:
         """
@@ -233,7 +232,7 @@ class Traversal(Generic[T, D]):
 
     @add_condition.register(QueueCondition)
     @singledispatchmethod
-    def add_queue_condition(self, condition: Union[Callable, QueueCondition[T]]) -> D:
+    def add_queue_condition(self, condition: QueueConditionTypes) -> D:
         """
         Adds a queue condition to the traversal. Queue conditions determine whether an item should be queued for traversal.
         All registered queue conditions must return true for an item to be queued.
@@ -243,8 +242,8 @@ class Traversal(Generic[T, D]):
         """
         raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: [QueueCondition | QueueConditionWithContextValue | Callable]')
 
-    @add_queue_condition.register
-    def _(self, condition: Callable):
+    @add_queue_condition.register(Callable)
+    def _(self, condition: ShouldQueue):
         return self.add_queue_condition(QueueCondition(condition))
 
     @add_queue_condition.register
@@ -265,7 +264,7 @@ class Traversal(Generic[T, D]):
             self.add_queue_condition(it)
         return self
 
-    def add_step_action(self, action: Union[Callable, StepAction[T]]) -> D:
+    def add_step_action(self, action: Union[StepActionFunc, StepAction[T]]) -> D:
         """
         Adds an action to be performed on each item in the traversal, including the starting items.
 
@@ -330,7 +329,7 @@ class Traversal(Generic[T, D]):
         `computer` The context value computer to add.
         Returns The current traversal instance.
         """
-        #require(not isinstance(computer, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
+        #require(not issubclass(computer.__class__, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
         self.compute_next_context_funs[computer.key] = computer
         return self
 
@@ -469,11 +468,13 @@ class Traversal(Generic[T, D]):
             raise KeyError("INTERNAL ERROR: Traversal item should always have a context.")
 
     def _create_new_branch(self, start_item: T, context: StepContext) -> D:
-        it = self.create_new_this()
-        it.copy_queue_conditions(self)
-        it.copy_step_actions(self)
-        it.copy_stop_conditions(self)
-        it.copy_context_value_computer(self)
+        it = (
+            self.create_new_this()
+            .copy_queue_conditions(self)
+            .copy_step_actions(self)
+            .copy_stop_conditions(self)
+            .copy_context_value_computer(self)
+        )
 
         it.contexts[start_item] = context
         Traversal.add_start_item(it, start_item)

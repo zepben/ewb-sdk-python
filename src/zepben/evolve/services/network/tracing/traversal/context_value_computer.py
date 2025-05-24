@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import TypeVar, Generic
 
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
@@ -14,7 +14,7 @@ U = TypeVar('U')
 __all__ = ['ContextValueComputer', 'TypedContextValueComputer']
 
 
-class ContextValueComputer(ABC, Generic[T]):
+class ContextValueComputer(Generic[T]):
     """
     Interface representing a context value computer used to compute and store values in a [StepContext].
     This interface does not specify a generic return type because the [StepContext] stores its values as `Any?`.
