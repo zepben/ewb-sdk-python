@@ -83,4 +83,3 @@ class Branching(NetworkTraceQueueNext, Traversal.BranchingQueueNext[NetworkTrace
         else:
             for step in next_steps:
                 queue_branch(step)
-
