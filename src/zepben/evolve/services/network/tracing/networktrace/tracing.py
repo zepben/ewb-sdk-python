@@ -44,7 +44,6 @@ class Tracing:
                                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None
                                 ) -> NetworkTrace[T]:
 
-
         if not isinstance(compute_data, ComputeData):
             compute_data = ComputeData(compute_data or (lambda *args: None))
 
