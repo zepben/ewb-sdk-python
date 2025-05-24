@@ -77,6 +77,8 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                  action_type: NetworkTraceActionType=None
                  ):
 
+        if action_type is None:
+            raise ValueError('action_type can not be None')
         self._queue_type = queue_type
         self.network_state_operators = network_state_operators
         self._action_type = action_type

@@ -116,4 +116,3 @@ class NetworkTraceStep(Generic[T]):
 
     def next_num_terminal_steps(self):
         return self.num_terminal_steps + 1
-

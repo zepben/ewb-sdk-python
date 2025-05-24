@@ -48,7 +48,7 @@ class ContextValueComputer(Generic[T]):
         pass
 
     def is_standalone_computer(self):
-        return all(not isinstance(self, o) for o in (StepAction, StopCondition, QueueCondition))
+        return not isinstance(self, (StepAction, StopCondition, QueueCondition))
 
 class TypedContextValueComputer(ContextValueComputer, Generic[T, U]):
     """
