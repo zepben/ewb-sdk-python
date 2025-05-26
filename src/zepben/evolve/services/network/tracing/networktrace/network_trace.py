@@ -257,11 +257,12 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return {NominalPhasePath(it, it) for it in phases.single_phases} if phases and phases.single_phases else set()
 
     def has_visited(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
-        if self._tracker.has_visited(terminal, phases):
-            return True
-        if not self.parent:
-            return False
-        return self.parent.has_visited(terminal, phases)
+        parent = self.parent
+        while parent is not None:
+            if parent._tracker.has_visited(terminal, phases):
+                return True
+            parent = parent.parent
+        return self._tracker.has_visited(terminal, phases)
 
     def visit(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
         if self.parent and self.parent.has_visited(terminal, phases):

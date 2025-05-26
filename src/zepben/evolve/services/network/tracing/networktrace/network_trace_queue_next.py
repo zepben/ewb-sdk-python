@@ -4,13 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from abc import ABC
-from typing import TypeVar, Callable, Generator, Generic, List, Union
+from typing import TypeVar, Callable, Generator, Generic, List, Union, Type
 
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 
 T = TypeVar('T')
 
@@ -21,10 +21,10 @@ GetNextStepsBranching = Callable[[NetworkTraceStep[T], StepContext], List[Networ
 
 
 class NetworkTraceQueueNext(ABC):
-    path_provider = NetworkTraceStepPathProvider
+    state_operators = NetworkStateOperators
 
-    def __init__(self, path_provider: NetworkTraceStepPathProvider):
-        self.path_provider = path_provider
+    def __init__(self, state_operators: Type[NetworkStateOperators]):
+        self.state_operators = state_operators
 
 
     def next_trace_steps(self,
@@ -33,7 +33,7 @@ class NetworkTraceQueueNext(ABC):
                           compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
                           ) -> Generator[NetworkTraceStep[T], None, None]:
         """ Builds a list of next `NetworkTraceStep` to add to the `NetworkTrace` queue """
-        next_paths = self.path_provider.next_paths(current_step.path)
+        next_paths = self.state_operators.next_paths(current_step.path)
         if isinstance(compute_data, ComputeData):
             compute_next = lambda it: compute_data.compute_next(current_step, current_context, it)
         elif isinstance(compute_data, ComputeDataWithPaths):
@@ -48,17 +48,17 @@ class NetworkTraceQueueNext(ABC):
             yield NetworkTraceStep(it, next_num_terminal_steps, it.next_num_equipment_steps(current_step.num_equipment_steps), data)
 
     @staticmethod
-    def Basic(path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
-        return Basic(path_provider, compute_data)
+    def Basic(state_operators: Type[NetworkStateOperators], compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+        return Basic(state_operators, compute_data)
 
     @staticmethod
-    def Branching(path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
-        return Branching(path_provider, compute_data)
+    def Branching(state_operators: Type[NetworkStateOperators], compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+        return Branching(state_operators, compute_data)
 
 
 class Basic(NetworkTraceQueueNext, Traversal.QueueNext[NetworkTraceStep[T]], Generic[T]):
-    def __init__(self, path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
-        super().__init__(path_provider)
+    def __init__(self, state_operators: Type[NetworkStateOperators], compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+        super().__init__(state_operators)
 
         self._get_next_steps: GetNextSteps = lambda item, context: self.next_trace_steps(item, context, compute_data)
 
@@ -71,8 +71,8 @@ class Basic(NetworkTraceQueueNext, Traversal.QueueNext[NetworkTraceStep[T]], Gen
 
 
 class Branching(NetworkTraceQueueNext, Traversal.BranchingQueueNext[NetworkTraceStep[T]], Generic[T]):
-    def __init__(self, path_provider: NetworkTraceStepPathProvider, compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
-        super().__init__(path_provider)
+    def __init__(self, state_operators: Type[NetworkStateOperators], compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
+        super().__init__(state_operators)
         
         self._get_next_steps: GetNextStepsBranching = lambda item, context: list(self.next_trace_steps(item, context, compute_data))
 

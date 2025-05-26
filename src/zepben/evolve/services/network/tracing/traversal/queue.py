@@ -14,15 +14,10 @@ from abc import abstractmethod, ABCMeta
 from collections import deque
 from typing import TypeVar, Iterable, Generic, Deque, TYPE_CHECKING, Union
 
-__all__ = ["TraversalQueue"]
-
-if TYPE_CHECKING:
-    from zepben.evolve import NetworkTraceStep
-
-
-
 T = TypeVar('T')
 U = TypeVar('U')
+
+__all__ = ["TraversalQueue"]
 
 
 class FIFODeque(deque):
