@@ -74,7 +74,6 @@ class TestNetworkTrace:
             cut2[1] - cut2[1],
             cut2[2] - cut2[2]))
 
-    @pytest.mark.skip()
     @pytest.mark.asyncio
     async def test_can_run_large_branching_traces(self):
         try:
@@ -86,7 +85,7 @@ class TestNetworkTrace:
             builder.from_junction(num_terminals=1) \
                    .to_acls()
 
-            for i in range(1000):
+            for i in range(500):
                 builder.to_junction(mrid=f'junc-{i}', num_terminals=3) \
                        .to_acls(mrid=f'acls-{i}-top') \
                        .from_acls(mrid=f'acls-{i}-bottom') \

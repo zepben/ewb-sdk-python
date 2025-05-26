@@ -97,7 +97,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                       ) -> 'NetworkTrace[T]':
         return cls(network_state_operators,
                    Traversal.BasicQueueType(NetworkTraceQueueNext.Basic(
-                       NetworkTraceStepPathProvider(network_state_operators),
+                       network_state_operators,
                        compute_data_with_action_type(compute_data, action_type)
                    ), queue),
                    None,
@@ -115,7 +115,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
         return cls(network_state_operators,
                    Traversal.BranchingQueueType(NetworkTraceQueueNext.Branching(
-                       NetworkTraceStepPathProvider(network_state_operators),
+                       network_state_operators,
                        compute_data_with_action_type(compute_data, action_type)
                    ), queue_factory, branch_queue_factory),
                    parent,
