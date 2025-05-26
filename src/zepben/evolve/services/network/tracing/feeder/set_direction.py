@@ -10,6 +10,7 @@ from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feede
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
@@ -95,7 +96,7 @@ class SetDirection:
                 branch_queue_factory=lambda: WeightedPriorityQueue.branch_queue(lambda it: it.path.to_terminal.phases.num_phases),
                 compute_data=lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path)
             )
-            .add_condition(state_operators.stop_at_open())
+            .add_condition(stop_at_open())
             .add_stop_condition(stop_condition)
             .add_queue_condition(queue_condition)
             .add_step_action(step_action)

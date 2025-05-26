@@ -33,11 +33,10 @@ class NetworkTraceQueueNext(ABC):
                           compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
                           ) -> Generator[NetworkTraceStep[T], None, None]:
         """ Builds a list of next `NetworkTraceStep` to add to the `NetworkTrace` queue """
-        next_paths = self.state_operators.next_paths(current_step.path)
+        next_paths = list(self.state_operators.next_paths(current_step.path))
         if isinstance(compute_data, ComputeData):
             compute_next = lambda it: compute_data.compute_next(current_step, current_context, it)
         elif isinstance(compute_data, ComputeDataWithPaths):
-            next_paths = list(next_paths)
             compute_next = lambda it: compute_data.compute_next(current_step, current_context, it, next_paths)
         else:
             raise TypeError(f'ComputeData was not of a recognised class: {compute_data.__class__} not in [ComputeData, ComputeDataWithPaths]')

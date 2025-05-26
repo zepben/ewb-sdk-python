@@ -2,10 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from typing import TypeVar
 
 from zepben.evolve import ConductingEquipment, Tracing, Traversal
 
 __all__ = ["log_directions"]
+
+T = TypeVar('T')
+
 
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
@@ -26,6 +30,6 @@ async def log_directions(*conducting_equipment: ConductingEquipment):
         await trace.run(cond_equip, False)
 
 
-def _step(step: NetworkTraceStep, _: bool):
+def _step(step: NetworkTraceStep[T], _: None):
     for term in step.path.to_equipment.terminals:
         print(f"{step.path.to_terminal.conducting_equipment.mrid}-T{term.sequence_number}: {{n:{term.normal_feeder_direction}, c:{term.current_feeder_direction}}}")

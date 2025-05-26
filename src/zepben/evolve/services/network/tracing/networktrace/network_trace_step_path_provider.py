@@ -200,63 +200,64 @@ class NetworkTraceStepPathProvider:
         # Can do a simple return if we don't need to do any special cuts/clamps processing
         if not(any((list(acls.cuts), list(acls.clamps)))):
             yield from seq_term_map_to_path(from_terminal.other_terminals(), path_factory, acls)
+        else:
 
-        # We need to ignore cuts and clamps that are not "in service" because that means they do not exist!
-        # We also make sure we filter out the cut or the clamp we are starting at, so we don't compare it in our checks
-        filter_func = lambda it: it != from_terminal.conducting_equipment and self.state_operators.is_in_service(it)
-        cuts: List[Cut] = list(filter(filter_func, acls.cuts))
-        clamps: List[Clamp] = list(filter(filter_func, acls.clamps))
+            # We need to ignore cuts and clamps that are not "in service" because that means they do not exist!
+            # We also make sure we filter out the cut or the clamp we are starting at, so we don't compare it in our checks
+            filter_func = lambda it: it != from_terminal.conducting_equipment and self.state_operators.is_in_service(it)
+            cuts: List[Cut] = list(filter(filter_func, acls.cuts))
+            clamps: List[Clamp] = list(filter(filter_func, acls.clamps))
 
-        cuts_at_same_position = list(filter(lambda it: it.length_from_T1_or_0 == length_from_T1, cuts))
-        stop_at_cuts_at_same_position = bool(can_stop_at_cut_at_same_position and cuts_at_same_position)
+            cuts_at_same_position = list(filter(lambda it: it.length_from_T1_or_0 == length_from_T1, cuts))
+            stop_at_cuts_at_same_position = bool(can_stop_at_cut_at_same_position and cuts_at_same_position)
 
-        def next_cut_length_from_terminal_1_func():
-            if stop_at_cuts_at_same_position:
-                return length_from_T1
-            elif towards_segment_T2:
-                return min((it.length_from_T1_or_0 for it in cuts if it.length_from_T1_or_0 > length_from_T1), default=None)
-            else:
-                return max((it.length_from_T1_or_0 for it in cuts if it.length_from_T1_or_0 < length_from_T1), default=None)
+            def next_cut_length_from_terminal_1_func():
+                if stop_at_cuts_at_same_position:
+                    return length_from_T1
+                elif towards_segment_T2:
+                    return min((it.length_from_T1_or_0 for it in cuts if it.length_from_T1_or_0 > length_from_T1), default=None)
+                else:
+                    return max((it.length_from_T1_or_0 for it in cuts if it.length_from_T1_or_0 < length_from_T1), default=None)
 
-        next_cut_length_from_terminal_1 = next_cut_length_from_terminal_1_func()
+            next_cut_length_from_terminal_1 = next_cut_length_from_terminal_1_func()
 
-        next_cuts = [it for it in cuts if it.length_from_T1_or_0 == next_cut_length_from_terminal_1] if next_cut_length_from_terminal_1 is not None else []
+            next_cuts = [it for it in cuts if it.length_from_T1_or_0 == next_cut_length_from_terminal_1] if next_cut_length_from_terminal_1 is not None else []
 
-        def next_term_length_from_term_1_func():
-            if next_cut_length_from_terminal_1 is not None:
-                return next_cut_length_from_terminal_1
-            elif towards_segment_T2:
-                return acls_length_or_max(acls)
-            else:
-                return 0.0
+            def next_term_length_from_term_1_func():
+                if next_cut_length_from_terminal_1 is not None:
+                    return next_cut_length_from_terminal_1
+                elif towards_segment_T2:
+                    return acls_length_or_max(acls)
+                else:
+                    return 0.0
 
-        next_terminal_length_from_terminal_1 = next_term_length_from_term_1_func()
+            next_terminal_length_from_terminal_1 = next_term_length_from_term_1_func()
 
-        def clamps_before_next_terminal_filter() -> Callable[[Clamp], bool]:
-            if isinstance(from_terminal.conducting_equipment, AcLineSegment) and towards_segment_T2:
-                return lambda it: length_from_T1 <= it.length_from_T1_or_0 <= next_terminal_length_from_terminal_1
-            elif towards_segment_T2:
-                return lambda it: it.length_from_T1_or_0 > length_from_T1 and it.length_from_T1_or_0 <= next_terminal_length_from_terminal_1
-            elif (next_terminal_length_from_terminal_1 == 0.0) and len(next_cuts) == 0:
-                return lambda it: next_terminal_length_from_terminal_1 <= it.length_from_T1_or_0 <= length_from_T1
-            else:
-                return lambda it: it.length_from_T1_or_0 <= length_from_T1  and it.length_from_T1_or_0 > next_terminal_length_from_terminal_1
-        _filter = clamps_before_next_terminal_filter()
+            def clamps_before_next_terminal_filter() -> Callable[[Clamp], bool]:
+                if isinstance(from_terminal.conducting_equipment, AcLineSegment) and towards_segment_T2:
+                    return lambda it: length_from_T1 <= it.length_from_T1_or_0 <= next_terminal_length_from_terminal_1
+                elif towards_segment_T2:
+                    return lambda it: it.length_from_T1_or_0 > length_from_T1 and it.length_from_T1_or_0 <= next_terminal_length_from_terminal_1
+                elif (next_terminal_length_from_terminal_1 == 0.0) and len(next_cuts) == 0:
+                    return lambda it: next_terminal_length_from_terminal_1 <= it.length_from_T1_or_0 <= length_from_T1
+                else:
+                    return lambda it: it.length_from_T1_or_0 <= length_from_T1  and it.length_from_T1_or_0 > next_terminal_length_from_terminal_1
+            _filter = clamps_before_next_terminal_filter()
 
-        clamps_before_next_terminal = filter(_filter, clamps)
+            clamps_before_next_terminal = filter(_filter, clamps)
 
-        next_stop_terminals = [] if stop_at_cuts_at_same_position else (
-                it.get_terminal(1 if towards_segment_T2 else 2) for it in next_cuts
-        ) if next_cuts else [acls.get_terminal(2 if towards_segment_T2 else 1)]
+            next_stop_terminals = [] if stop_at_cuts_at_same_position else (
+                    it.get_terminal(1 if towards_segment_T2 else 2) for it in next_cuts
+            ) if next_cuts else [acls.get_terminal(2 if towards_segment_T2 else 1)]
 
-        next_terminals = (
-            (it.get_terminal(cut_at_same_position_from_terminal_number) for it in cuts_at_same_position),
-            (it.get_terminal(1) for it in clamps_before_next_terminal),
-            next_stop_terminals
-        )
+            next_terminals = (
+                (it.get_terminal(cut_at_same_position_from_terminal_number) for it in cuts_at_same_position),
+                (it.get_terminal(1) for it in clamps_before_next_terminal),
+                next_stop_terminals
+            )
 
-        for generator in next_terminals:
-            yield from seq_term_map_to_path(generator, path_factory, acls)
+            for generator in next_terminals:
+                yield from seq_term_map_to_path(generator, path_factory, acls)
 
 def seq_term_map_to_path(terms: Union[Terminal, Iterable[Terminal]], path_factory: PathFactory, traversed_acls: AcLineSegment=None
                          ) -> Generator[NetworkTraceStep.Path, None, None]:

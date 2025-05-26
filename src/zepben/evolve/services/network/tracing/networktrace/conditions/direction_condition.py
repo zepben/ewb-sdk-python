@@ -54,7 +54,7 @@ class DirectionCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]):
 
     def _should_queue_next_paths(self, path: NetworkTraceStep.Path) -> bool:
         for next_path in self.state_operators.next_paths(path):
-            if next_path.traced_internally and self.state_operators.is_open(path.to_equipment):
+            if not(next_path.traced_internally and self.state_operators.is_open(path.to_equipment)):
                 if self._should_queue(next_path):
                     return True
         return False
