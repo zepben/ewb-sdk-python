@@ -19,7 +19,8 @@
     license = "MPL-2.0"
     requires-python = '>=3.9,<3.13'
     authors = [
-        {name = "Kurt Greaves", email = "kurt.greaves@zepben.com"}
+        {name = "Kurt Greaves", email = "kurt.greaves@zepben.com"},
+        {name = "Max Chesterfield", email = "max.chesterfield@zepben.com"}
     ]
     dependencies = [
         "zepben.auth==0.12.1",
@@ -31,6 +32,7 @@
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Operating System :: OS Independent"
     ]
 
