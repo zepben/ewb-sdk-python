@@ -3,18 +3,18 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import deque
-from typing import Callable, TypeVar, Tuple, Any
+from typing import Callable, TypeVar, Tuple, Any, Optional
 
 import pytest
 
 from zepben.evolve import StepContext, Traversal, TraversalQueue, ContextValueComputer
-from zepben.evolve.services.network.tracing.traversal.traversal import D
 
 T = TypeVar('T')
+D = TypeVar('D')
 
 
-class TraversalTest(Traversal[T, 'TestTraversal[T]']):
-    def __init__(self, queue_type, parent,
+class TraversalTest(Traversal[T, D]):
+    def __init__(self, queue_type, parent: Optional["TraversalTest[T]"],
                  can_visit_item: Callable[[T, StepContext], bool],
                  can_action_item: Callable[[T, StepContext], bool],
                  on_reset: Callable[[], Any]):
@@ -32,13 +32,15 @@ class TraversalTest(Traversal[T, 'TestTraversal[T]']):
     def on_reset(self):
         return self._on_reset_impl()
 
-    def create_new_this(self) -> D:
+    def create_new_this(self) -> "TraversalTest[int]":
         return TraversalTest(self._queue_type, self, self._can_visit_item_impl, self._can_action_item_impl, self._on_reset_impl)
 
 
 def _create_traversal(can_visit_item: Callable[[int, StepContext], bool]=lambda x, y: True,
                       can_action_item: Callable[[int, StepContext], bool]=lambda x, y: True,
-                      on_reset: Callable[[], Any]=lambda: None) -> TraversalTest[int]:
+                      on_reset: Callable[[], Any]=lambda: None,
+                      queue: TraversalQueue[int]=TraversalQueue.depth_first()
+                      ) -> TraversalTest[int, D]:
 
     def queue_next(item, _, queue_item):
         if item < 0:
@@ -46,23 +48,24 @@ def _create_traversal(can_visit_item: Callable[[int, StepContext], bool]=lambda 
         else:
             queue_item(item + 1)
 
-    queue_type = Traversal.BasicQueueType[int, TraversalTest[int]](
+    queue_type = Traversal.BasicQueueType[int, TraversalTest[int, D]](
         queue_next=Traversal.QueueNext(queue_next),
-        queue=TraversalQueue.depth_first()
+        queue=queue
     )
 
     return TraversalTest(queue_type, None, can_visit_item, can_action_item, on_reset)
 
-def _create_branching_traversal() -> TraversalTest[int]:
+def _create_branching_traversal() -> TraversalTest[int, D]:
     def queue_next(item, _, queue_item, queue_branch):
-        if item == 100:
-            queue_branch(-100)
-        elif item % 10 == 0:
-            queue_branch(item + 1)
-        else:
+        if item == 0:
+            queue_branch(-10)
+            queue_branch(10)
+        elif item < 0:
             queue_item(item + 1)
+        else:
+            queue_item(item - 1)
 
-    queue_type = Traversal.BranchingQueueType[int, TraversalTest[int]](
+    queue_type = Traversal.BranchingQueueType[int, TraversalTest[int, D]](
         queue_next=Traversal.BranchingQueueNext(queue_next),
         queue_factory=lambda: TraversalQueue.depth_first(),
         branch_queue_factory=lambda: TraversalQueue.depth_first()
@@ -276,7 +279,6 @@ class TestTraversal:
         steps = []
 
         await (_create_traversal(can_action_item=lambda item, _: item % 2 == 1)
-               .add_stop_condition(lambda item, _: item == 2)
                .add_stop_condition(lambda item, _: item == 3)
                .add_step_action(lambda item, _: steps.append(item))
                .run(1))
@@ -307,31 +309,57 @@ class TestTraversal:
         def step_action(item, ctx):
             steps[item] = ctx
 
-        await(_create_branching_traversal()
-            .add_queue_condition(lambda  item, ctx, x, y: ctx.branch_depth <= 2)
-            .add_step_action(step_action)
-            .run(1))
+        trace =(_create_branching_traversal()
+              .add_queue_condition(lambda  item, ctx, x, y: (ctx.branch_depth <= 1) and (item != 0))
+              .add_step_action(step_action)
+              )
+        await trace.run(0, can_stop_on_start_item=False)
+
+
+        assert not steps[0].is_branch_start_item
+        assert steps[0].is_start_item
+        assert steps[0].branch_depth == 0
+
+        assert steps[10].is_branch_start_item
+        assert steps[10].branch_depth == 1
 
         assert not steps[1].is_branch_start_item
-        assert steps[1].is_start_item
-        assert steps[1].branch_depth == 0
+        assert not steps[1].is_start_item
+        assert steps[1].branch_depth == 1
 
-        assert not steps[10].is_branch_start_item
-        assert steps[10].branch_depth == 0
+        assert steps[-10].is_branch_start_item
+        assert steps[-10].branch_depth == 1
 
-        assert steps[11].is_branch_start_item
-        assert not steps[11].is_start_item
-        assert steps[11].branch_depth == 1
+        assert not steps[-1].is_branch_start_item
+        assert not steps[-1].is_start_item
+        assert steps[-1].branch_depth == 1
 
-        assert not steps[20].is_branch_start_item
-        assert steps[20].branch_depth == 1
+    @pytest.mark.asyncio
+    async def test_can_stop_on_start_item_is_not_assessed_on_branch_start_items(self):
+        stop_condition_triggered = []
 
-        assert steps[21].is_branch_start_item
-        assert not steps[21].is_start_item
-        assert steps[21].branch_depth == 2
+        def stop_condition(item: int, context):
+            if abs(item) == 10:
+                stop_condition_triggered.append(True)
+                return stop_condition_triggered
 
-        assert not steps[30].is_branch_start_item
-        assert steps[30].branch_depth == 2
+        await (_create_branching_traversal()
+               .add_stop_condition(stop_condition)
+               .add_queue_condition(lambda x, ctx, y, z: ctx.branch_depth < 2)
+               .add_start_item(1)
+               .add_start_item(-1)
+               ).run(can_stop_on_start_item=False)
 
-        with pytest.raises(KeyError):
-            assert not steps[31]
+        assert all(stop_condition_triggered)
+
+    @pytest.mark.asyncio
+    async def test_start_items_are_queued_before_traversal_starts_so_queue_type_is_honoured_for_start_items(self):
+        steps = []
+        await (_create_traversal(queue=TraversalQueue.breadth_first())
+               .add_stop_condition(lambda item, x: item >= 2 or item <= -2)
+               .add_step_action(lambda item, x: steps.append(item))
+               .add_start_item(-1)
+               .add_start_item(1)
+               ).run()
+
+        assert steps == [-1, 1, -2, 2]

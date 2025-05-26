@@ -11,19 +11,37 @@ from zepben.evolve.services.network.tracing.traversal.step_context import StepCo
 
 T = TypeVar('T')
 
+__all__ = ['NetworkTraceQueueCondition']
+
 
 class NetworkTraceQueueCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]):
+    """
+    A special queue condition implementation that allows only checking `should_queue` when a [NetworkTraceStep] matches a given
+    [NetworkTraceStep.Type]. When [step_type] is:
+    *[NetworkTraceStep.Type.ALL]: [should_queue] will be called for every step.
+    *[NetworkTraceStep.Type.INTERNAL]: [shouldQueue] will be called only when [NetworkTraceStep.type] is [NetworkTraceStep.Type.INTERNAL].
+    *[NetworkTraceStep.Type.EXTERNAL]: [shouldQueue] will be called only when [NetworkTraceStep.type] is [NetworkTraceStep.Type.EXTERNAL].
+
+    If the step does not match the given step type, `true` will always be returned.
+    """
 
     def __init__(self, step_type: NetworkTraceStep.Type, condition: ShouldQueue=None):
+        """
+        :param step_type: The step type to match to check `should_queue`.
+        :param condition: function with the signature of `ShouldQueue` to be called when step_type matches the current items step
+        """
         super().__init__(self.should_queue)
         if condition is not None:
             self.should_queue_matched_step = condition
-        self._should_queue_func = self._should_queue_func_map[step_type]
+        self.step_type = step_type
 
     def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
-        return self._should_queue_func(next_item, next_context, current_item, current_context)
+        return self._should_queue_func(self.step_type)(next_item, next_context, current_item, current_context)
 
     def should_queue_matched_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
+        """
+        The logic you would normally put in `should_queue`. However, this will only be called when a step matches the `step_type`
+        """
         raise NotImplementedError()
 
     def should_queue_internal_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
@@ -36,10 +54,11 @@ class NetworkTraceQueueCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]
             return self.should_queue_matched_step(next_item, next_context, current_item, current_context)
         return True
 
-    @property
-    def _should_queue_func_map(self):
-        return {
-            NetworkTraceStep.Type.ALL: self.should_queue_matched_step,
-            NetworkTraceStep.Type.INTERNAL: self.should_queue_internal_step,
-            NetworkTraceStep.Type.EXTERNAL: self.should_queue_external_step
-        }
+    def _should_queue_func(self, step_type: NetworkTraceStep.Type) -> ShouldQueue:
+        if step_type == NetworkTraceStep.Type.ALL:
+            return self.should_queue_matched_step
+        elif step_type == NetworkTraceStep.Type.INTERNAL:
+            return self.should_queue_internal_step
+        elif step_type == NetworkTraceStep.Type.EXTERNAL:
+            return self.should_queue_external_step
+        raise ValueError(f'INTERNAL ERROR: step type [{step_type}] didn\'t match expected')

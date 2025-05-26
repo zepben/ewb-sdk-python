@@ -3,6 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
+
+from functools import singledispatchmethod
 from typing import Optional, TYPE_CHECKING, Type
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
@@ -114,6 +116,7 @@ class SetDirection:
     def _is_normally_open_switch(conducting_equipment: Optional[ConductingEquipment]):
         return isinstance(conducting_equipment, Switch) and conducting_equipment.is_normally_open()
 
+    @singledispatchmethod
     async def run(self, network: NetworkService, network_state_operators: Type[NetworkStateOperators]):
         """
          Apply feeder directions from all feeder head terminals in the network.
@@ -128,6 +131,7 @@ class SetDirection:
                 if not network_state_operators.is_open(head_terminal, None):
                     await self.run_terminal(terminal, network_state_operators)
 
+    @run.register
     async def run_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
          Apply [FeederDirection.DOWNSTREAM] from the [terminal].

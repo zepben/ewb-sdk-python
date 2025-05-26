@@ -9,7 +9,7 @@ from abc import abstractmethod
 from collections import deque
 from collections.abc import Callable
 from functools import singledispatchmethod
-from typing import List, TypeVar, Generic, Optional, Dict, Union, TYPE_CHECKING
+from typing import List, TypeVar, Generic, Optional, Dict, Union
 
 from zepben.evolve import require
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
@@ -17,7 +17,6 @@ from zepben.evolve.services.network.tracing.traversal.queue_condition import Que
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction, StepActionWithContextValue, StepActionFunc
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition, StopConditionWithContextValue, ShouldStop
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 __all__ = ["Traversal"]
 
@@ -27,10 +26,9 @@ T = TypeVar('T')
 U = TypeVar('U')
 D = TypeVar('D', bound='Traversal')
 
-if TYPE_CHECKING:
-    QueueConditionTypes = Union[ShouldQueue, QueueCondition[T]]
-    StopConditionTypes = Union[Callable, StopCondition[T]]
-    ConditionTypes = Union[QueueConditionTypes, StopConditionTypes]
+QueueConditionTypes = Union[ShouldQueue, QueueCondition[T]]
+StopConditionTypes = Union[ShouldStop, StopCondition[T]]
+ConditionTypes = Union[QueueConditionTypes, StopConditionTypes]
 
 
 class Traversal(Generic[T, D]):
@@ -55,7 +53,7 @@ class Traversal(Generic[T, D]):
         """
         Defines the types of queues used in the traversal.
         """
-        queue_next:Traversal.QueueNext[T]
+        queue_next: Traversal.QueueNext[T]
 
         @property
         def queue(self) -> TraversalQueue[T]:
@@ -379,7 +377,7 @@ class Traversal(Generic[T, D]):
         `canStopOnStartItem` Indicates if the traversal should check stop conditions on the starting item.
         Returns The current traversal instance.
         """
-        if start_item:
+        if start_item is not None:
             self.start_items.append(start_item)
 
         require(not self.running, lambda: "Traversal is already running")
@@ -392,10 +390,13 @@ class Traversal(Generic[T, D]):
 
         if self._parent is None and isinstance(self._queue_type, Traversal.BranchingQueueType) and len(self.start_items) > 1:
             self._branch_start_items()
+            # Because we don't traverse anything at the top level parent, we need to pass can_stop_at_start item
+            # to the child branch only in this case because they are actually start items.
+            await self._traverse_branches(can_stop_on_start_item)
         else:
             await self._traverse(can_stop_on_start_item)
-
-        await self._traverse_branches(can_stop_on_start_item)
+            # Child branches should never stop at start items because a branch start item is not a whole trace start item.
+            await self._traverse_branches(True)
 
         self.running = False
         return self
@@ -435,8 +436,12 @@ class Traversal(Generic[T, D]):
 
     async def _traverse(self, can_stop_on_start_item: bool):
         while len(self.start_items) > 0:
-            start_item = self.start_items.pop()
+            start_item = self.start_items.popleft()
 
+            # If the traversal is not a branch we need to compute an initial context and check if it
+            # should even be queued to trace. If the traversal is a branch, the branch creators should
+            # have only created the branch if the item was eligible to be queued and added the item
+            # context as part of the branch creation.
             if self._parent is None:
                 if self._can_queue_start_item(start_item):
                     self.contexts[start_item] = self._compute_intial_context(start_item)
@@ -444,21 +449,22 @@ class Traversal(Generic[T, D]):
             else:
                 self.queue.append(start_item)
 
-            can_stop = can_stop_on_start_item
-            while len(self.queue) > 0:
-                current = self.queue.pop()
-                context = self._get_step_context(current)
-                if self.can_visit_item(current, context):
-                    context.is_actionable_item = self.can_action_item(current, context)
+        can_stop = can_stop_on_start_item
+        while self.queue.has_next():
+            current = self.queue.pop()
+            context = self._get_step_context(current)
+            if self.can_visit_item(current, context):
+                context.is_stopping = can_stop and self.matches_any_stop_condition(current, context)
 
-                    if context.is_actionable_item:
-                        context.is_stopping = can_stop and self.matches_any_stop_condition(current, context)
-                        await self.apply_step_actions(current, context)
+                context.is_actionable_item = self.can_action_item(current, context)
 
-                    if not context.is_stopping:
-                        self.queue_next(current, context)
+                if context.is_actionable_item:
+                    await self.apply_step_actions(current, context)
 
-                    can_stop = True
+                if not context.is_stopping:
+                    self.queue_next(current, context)
+
+                can_stop = True
 
     def _get_step_context(self, item: T) -> StepContext:
         try:

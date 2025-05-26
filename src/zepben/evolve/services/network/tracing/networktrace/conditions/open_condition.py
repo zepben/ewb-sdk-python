@@ -9,7 +9,7 @@ from typing import Generic, TYPE_CHECKING
 
 from typing_extensions import TypeVar
 
-from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
+from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 if TYPE_CHECKING:

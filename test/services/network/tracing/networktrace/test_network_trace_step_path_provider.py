@@ -2,10 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Generator, Tuple, Iterable, Optional, Union
+from typing import Generator, Iterable
 
 from pytest_subtests.plugin import subtests
 
+from services.network.test_data.cuts_and_clamps_network import _segment_with_clamp, _segment_with_cut, CutsAndClampsNetwork
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.network.network_service import NetworkService
@@ -183,7 +184,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (segment[2] - clamp2[1], segment[2] - clamp1[1], segment[2] - segment[1]))
 
     def test_non_traverse_step_to_segment_t1_traverses_towards_t2_stopping_at_cut(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         b0 = network['b0']
         segment = network['c1']
@@ -196,7 +197,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (segment[1] - clamp1[1], segment[1] - cut1[1]))
 
     def test_non_traverse_step_to_segment_t2_traverses_towards_t1_stopping_at_cut(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         b2 = network['b2']
         segment = network['c1']
@@ -209,7 +210,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (segment[2] - clamp4[1], segment[2] - cut2[2]))
 
     def test_traverse_step_to_cut_t1_steps_externally_and_across_cut(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
         cut1 = network['cut1']
@@ -221,7 +222,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (cut1[1] + cut1[2], cut1[1] + c4[1]))
 
     def test_traverse_step_to_cut_t2_steps_externally_and_across_cut(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
         cut2 = network['cut2']
@@ -233,7 +234,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (cut2[2] + cut2[1], cut2[2] + c9[1]))
 
     def test_non_traverse_step_to_cut_t1_traverses_segment_towards_t1_and_internally_through_cut_to_t2(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
         clamp1 = network['clamp1']
@@ -246,7 +247,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (cut1[1] - clamp1[1], cut1[1] - segment[1], cut1[1] + cut1[2]))
 
     def test_non_traverse_step_to_cut_t2_traverses_segment_towards_t2_and_internally_through_cut_to_t1(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
         clamp4 = network['clamp4']
@@ -259,7 +260,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (cut2[2] - clamp4[1], cut2[2] - segment[2], cut2[2] + cut2[1]))
 
     def test_non_traverse_step_to_clamp_traverses_segment_in_both_directions(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
         clamp1 = network['clamp1']
@@ -272,7 +273,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (clamp1[1] - segment[1], clamp1[1] - cut1[1]))
 
     def test_traverse_step_to_clamp_traces_externally_and_does_not_traverse_back_along_segment(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
         clamp1 = network['clamp1']
@@ -284,7 +285,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (clamp1[1] + c3[1], ))
 
     def test_non_traverse_step_to_clamp_between_cuts_traverses_segment_both_ways_stopping_at_cuts(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c6 = network['c6']
         clamp2 = network['clamp2']
@@ -298,7 +299,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (clamp2[1] - cut1[2], clamp2[1] - clamp3[1], clamp2[1] - cut2[1]))
 
     def test_non_traverse_external_step_to_cut_t2_between_cuts_traverses_segment_towards_t2_stopping_at_next_cut_and_steps_internally_to_cut_t1(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c5 = network['c5']
         clamp2 = network['clamp2']
@@ -312,7 +313,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (cut1[2] - clamp2[1], cut1[2] - clamp3[1], cut1[2] - cut2[1], cut1[2] + cut1[1]))
 
     def test_non_traverse_external_step_to_cut_t1_between_cuts_traverses_segment_towards_t1_stopping_at_next_cut_and_steps_internally_to_cut_t2(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c8 = network['c8']
         clamp2 = network['clamp2']
@@ -326,7 +327,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (cut2[1] - clamp3[1], cut2[1] - clamp2[1], cut2[1] - cut1[2], cut2[1] + cut2[2]))
 
     def test_internal_step_to_cut_t2_between_cuts_steps_externally_and_traverses_segment_towards_t2_stopping_at_the_next_cut(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c5 = network['c5']
         clamp2 = network['clamp2']
@@ -340,7 +341,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (cut1[2] - clamp2[1], cut1[2] - clamp3[1], cut1[2] - cut2[1], cut1[2] + c5[1]))
 
     def test_internal_step_to_cut_t1_between_cuts_steps_externally_and_traverses_segment_towards_t1_stopping_at_the_next_cut(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c8 = network['c8']
         clamp2 = network['clamp2']
@@ -354,7 +355,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (cut2[1] - clamp2[1], cut2[1] - clamp3[1], cut2[1] - cut1[2], cut2[1] + c8[1]))
 
     def test_starting_on_clamp_terminal_flagged_as_traversed_segment_only_steps_externally(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c3 = network['c3']
         clamp1 = network['clamp1']
@@ -363,7 +364,7 @@ class TestNetworkTraceStepPathProvider:
         _verify_paths(next_paths, (clamp1[1] + c3[1], ))
 
     def test_starting_on_clamp_terminal_that_flagged_as_not_traversed_segment_steps_externally_and_traverses(self):
-        network = self._acls_with_clamps_and_cuts_network()
+        network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c3 = network['c3']
         clamp1 = network['clamp1']
@@ -657,54 +658,6 @@ class TestNetworkTraceStepPathProvider:
 
         return network
 
-    def _acls_with_clamps_and_cuts_network(self) -> NetworkService:
-        #
-        #          2                     2
-        #          c3          2         c7          2
-        #          1           c5        1           c9
-        #          1 clamp1    1         1 clamp3    1
-        #          |           |         |           |
-        # 1 b0 21--*--*1 cut1 2*--*--c1--*--*1 cut2 2*--*--21 b2 2
-        #             |           |         |           |
-        #             1           1 clamp2  1           1 clamp4
-        #             c4          1         c8          1
-        #             2           c6        2           c10
-        #                         2                     2
-        #
-        network = (TestNetworkBuilder()
-                   .from_breaker()  # b0
-                   .to_acls()  # c1
-                   .to_breaker()  # b2
-                   .from_acls()  # c3
-                   .from_acls()  # c4
-                   .from_acls()  # c5
-                   .from_acls()  # c6
-                   .from_acls()  # c7
-                   .from_acls()  # c8
-                   .from_acls()  # c9
-                   .from_acls()  # c10
-                   ).network
-
-        segment: AcLineSegment = network['c1']
-
-        clamp1 = _segment_with_clamp(network, segment, 1.0)
-        cut1 = _segment_with_cut(network, segment, 2.0)
-        clamp2 = _segment_with_clamp(network, segment, 3.0)
-        clamp3 = _segment_with_clamp(network, segment, 4.0)
-        cut2 = _segment_with_cut(network, segment, 5.0)
-        clamp4 = _segment_with_clamp(network, segment, 6.0)
-
-        network.connect(clamp1[1], network.get('c3', ConductingEquipment)[1])
-        network.connect(cut1[1], network.get('c4', ConductingEquipment)[1])
-        network.connect(cut1[2], network.get('c5', ConductingEquipment)[1])
-        network.connect(clamp2[1], network.get('c6', ConductingEquipment)[1])
-        network.connect(clamp3[1], network.get('c7', ConductingEquipment)[1])
-        network.connect(cut2[1], network.get('c8', ConductingEquipment)[1])
-        network.connect(cut2[2], network.get('c9', ConductingEquipment)[1])
-        network.connect(clamp4[1], network.get('c10', ConductingEquipment)[1])
-
-        return network
-
     def _acls_with_clamps_and_cuts_at_same_position_network(self) -> NetworkService:
         # Drawing this is very messy, so it will be described in writing:
         # The network has 2 Breakers (b0, b2) with an AcLineSegment (c1) between them ( 1 b0 21--c1--21 b2 1 )
@@ -778,24 +731,6 @@ class TestNetworkTraceStepPathProvider:
         network.connect(cut6[2], network.get('c-cut6t2', ConductingEquipment)[1])
 
         return network
-
-def _segment_with_clamp(network: NetworkService, segment: AcLineSegment, length_from_terminal1: Optional[float]) -> Clamp:
-    clamp = Clamp(mrid=f'clamp{segment.num_clamps() + 1}')
-    clamp.add_terminal(Terminal(mrid=f'{clamp.mrid}-t1'))
-    clamp.length_from_terminal_1 = length_from_terminal1
-
-    segment.add_clamp(clamp)
-    network.add(clamp)
-    return clamp
-
-def _segment_with_cut(network: NetworkService, segment: AcLineSegment, length_from_terminal1: Optional[float]) -> Cut:
-    cut = Cut(mrid=f'cut{segment.num_cuts() + 1}', length_from_terminal_1=length_from_terminal1)
-    cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t1'))
-    cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t2'))
-
-    segment.add_cut(cut)
-    network.add(cut)
-    return cut
 
 
 def _verify_paths(in_paths: Generator[NetworkTraceStep.Path, None, None], in_expected: Iterable[NetworkTraceStep.Path], check_length=True):

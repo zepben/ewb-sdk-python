@@ -6,16 +6,18 @@ from __future__ import  annotations
 
 from typing import TypeVar, TYPE_CHECKING, Generic, Type
 
+from zepben.evolve import require
+
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 
+from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 if TYPE_CHECKING:
     from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
     from zepben.evolve import StepContext
-    from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 
 T = TypeVar('T')
 
@@ -25,6 +27,7 @@ __all__ = ['DirectionCondition']
 class DirectionCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]):
 
     def __init__(self, direction: FeederDirection, state_operators: Type[NetworkStateOperators]):
+        require(direction != FeederDirection.CONNECTOR, lambda: 'A direction of CONNECTOR is not currently supported')
         self.direction = direction
         self.state_operators = state_operators
         self.get_direction = self.state_operators.get_direction

@@ -5,13 +5,13 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Callable, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-    from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
+    from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_queue_condition import NetworkTraceQueueCondition
 
 __all__ = ['FeederDirectionStateOperations', 'NormalFeederDirectionStateOperations', 'CurrentFeederDirectionStateOperations']
 

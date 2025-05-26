@@ -105,7 +105,7 @@ class NetworkTraceStep(Generic[T]):
         self.num_equipment_steps = num_equipment_steps
         self.data = data
 
-    def type(self) -> Path:
+    def type(self) -> Type:
         """
         Returns the [Type] of the step. This will be [Type.INTERNAL] if [Path.tracedInternally] is true, [Type.EXTERNAL] when [Path.tracedExternally] is true
         and will never be [Type.ALL] which is used in other NetworkTrace functionality to determine if all steps should be used for that particular function.

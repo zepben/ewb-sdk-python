@@ -5,7 +5,6 @@
 
 from collections.abc import Callable
 from functools import singledispatchmethod
-from os import MFD_ALLOW_SEALING
 from typing import TypeVar, Union, Generic, Set, Type, Generator
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
@@ -17,15 +16,15 @@ from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import Single
 
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
-from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
+from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_stop_condition import NetworkTraceStopCondition, ShouldStop
+from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_next import NetworkTraceQueueNext
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider
 from zepben.evolve.services.network.tracing.networktrace.network_trace_tracker import NetworkTraceTracker
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
-from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal, StopConditionTypes
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
@@ -191,10 +190,10 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         Runs the network trace starting from `start`
 
         Depending on the type of `start`, this will either start from:
-          - A starting [Terminal] to the trace with the associated step data.
-          - All terminals of the given [ConductingEquipment] as starting points in the trace, with the associated data.
+          - A starting `Terminal` to the trace with the associated step data.
+          - All terminals of the given `ConductingEquipment` as starting points in the trace, with the associated data.
 
-        :param start: The starting [Terminal] or [ConductingEquipment] for the trace.
+        :param start: The starting `Terminal` or `ConductingEquipment` for the trace.
         :param data: The data associated with the start step.
         :param phases: Phases to trace; `None` to ignore phases.
         :param can_stop_on_start_item: indicates whether the trace should check stop conditions on start items.
@@ -209,33 +208,73 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     def add_condition(self, condition: QueueCondition[T]) -> "NetworkTrace[T]":
 
         """
-        Adds a traversal condition to the trace using the trace's [NetworkStateOperators] as the receiver.
+        Adds a traversal condition to the trace.
 
-        This overload primarily exists to enable a DSL-like syntax for adding predefined traversal conditions to the trace.
-        For example, to configure the trace to stop at open points using the [Conditions.stopAtOpen] factory, you can use:
-
-        >>> from zepben.evolve import stop_at_open
-        >>> NetworkTrace().add_condition(stop_at_open())
-
-        :param condition: A lambda function that returns a traversal condition.
-        :returns: This [NetworkTrace] instance
+        Valid types for `condition` are:
+          - A predefined traversal condition (eg: Conditions.stop_at_open())
+          - A function implementing ShouldQueue or ShouldStop signature.
+          - A class subclassing StopCondition or QueueCondition
+          
+        :param condition: The condition to be added
+        :returns: This `NetworkTrace` instance
         """
-        super().add_condition(condition)
-        return self
+        return super().add_condition(condition)
 
     @add_condition.register
     def _(self, condition: Callable):
+        """
+        Adds a traversal condition to the trace using the trace's [NetworkStateOperators] as the receiver.
+
+        This overload primarily exists to enable a DSL-like syntax for adding predefined traversal conditions to the trace.
+        For example, to configure the trace to stop at open points using the [Conditions.stop_at_open] factory, you can use:
+
+        >>> from zepben.evolve import stop_at_open
+        >>> NetworkTrace().add_condition(stop_at_open())
+        """
+
         if condition.__code__.co_argcount == 1:  # Catches DSL Style lambda conditions from zepben.evolve.Conditions
             return self.add_condition(condition(self.network_state_operators))
-        super().add_condition(condition)
+        return super().add_condition(condition)
 
     @singledispatchmethod
-    def add_queue_condition(self, condition: NetworkTraceQueueCondition[NetworkTraceStep[T]], step_type:NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
+    def add_queue_condition(self, condition: NetworkTraceQueueCondition[NetworkTraceStep[T]], step_type: NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
+        """
+        Adds a `QueueCondition` to the traversal. However, before registering it with the traversal, it will make sure that the queue condition
+        is only checked on step types relevant to the `NetworkTraceActionType` assigned to this instance. That is when:
+
+        - `action_type` is `NetworkTraceActionType.ALL_STEPS` the condition will be checked on all steps.
+        - `action_type` is `NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT` the condition will be checked on external steps.
+
+        However, if the `condition` is an instance of `NetworkTraceQueueCondition` the `NetworkTraceQueueCondition.step_type` will be honoured.
+
+        :param condition: The queue condition to add.
+        :returns: This `NetworkTrace` instance
+        """
         return super().add_queue_condition(condition)
 
     @add_queue_condition.register
     def _(self, condition: Callable, step_type: NetworkTraceStep.Type=None):
-        return self.add_queue_condition(NetworkTraceQueueCondition(default_queue_condition_step_type(step_type or self._action_type), condition))
+        return self.add_queue_condition(NetworkTraceQueueCondition(default_condition_step_type(self._action_type) or step_type, condition))
+
+    @singledispatchmethod
+    def add_stop_condition(self, condition: StopConditionTypes, step_type: NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
+        """
+        Adds a `StopCondition` to the traversal. However, before registering it with the traversal, it will make sure that the queue condition
+        is only checked on step types relevant to the `NetworkTraceActionType` assigned to this instance. That is when:
+
+        - `action_type` is `NetworkTraceActionType.ALL_STEPS` the condition will be checked on all steps.
+        - `action_type` is `NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT` the condition will be checked on external steps.
+
+        However, if the `condition` is an instance of `NetworkTraceStopCondition` the `NetworkTraceStopCondition.step_type` will be honoured.
+
+        :param condition: The stop condition to add.
+        :returns: This `NetworkTrace` instance
+        """
+        return super().add_stop_condition(condition)
+
+    @add_stop_condition.register(Callable)
+    def _(self, condition: ShouldStop, step_type=None):
+        return self.add_stop_condition(NetworkTraceStopCondition(default_condition_step_type(self._action_type) or step_type, condition))
 
     def can_action_item(self, item: T, context: StepContext) -> bool:
         return self._action_type(item, context, self.has_visited)
@@ -270,7 +309,9 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return self._tracker.visit(terminal, phases)
 
 
-def default_queue_condition_step_type(step_type):
+def default_condition_step_type(step_type):
+    if step_type is None:
+        return False
     if step_type == NetworkTraceActionType.ALL_STEPS:
         return NetworkTraceStep.Type.ALL
     elif step_type == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:

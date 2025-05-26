@@ -20,9 +20,7 @@ if TYPE_CHECKING:
     from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition
     from zepben.evolve import ConductingEquipment, NetworkStateOperators
 
-    NetworkTraceQueueCondition = QueueCondition[NetworkTraceStep[T]]
-    NetworkTraceStopCondition = StopCondition[NetworkTraceStep[T]]
-    DSLLambda = Callable[[NetworkStateOperators], NetworkTraceQueueCondition[T]]
+    DSLLambda = Callable[[NetworkStateOperators], QueueCondition[NetworkTraceStep[T]]]
 
 __all__ = ['upstream', 'downstream', 'with_direction', 'limit_equipment_steps', 'stop_at_open']
 
@@ -54,7 +52,7 @@ def with_direction(direction: FeederDirection) -> DSLLambda:
     """
     return lambda state_operator: DirectionCondition(direction, state_operator)
 
-def limit_equipment_steps(limit: int, equipment_type: Type[ConductingEquipment]=None) -> NetworkTraceStopCondition[T]:
+def limit_equipment_steps(limit: int, equipment_type: Type[ConductingEquipment]=None) -> StopCondition[NetworkTraceStep[T]]:
     """
     Creates a [NetworkTrace] condition that stops tracing a path once a specified number of equipment steps have been reached.
 
