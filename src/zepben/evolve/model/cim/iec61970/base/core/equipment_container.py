@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable
+from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable, Type
 
 if TYPE_CHECKING:
     from zepben.evolve import Equipment, Terminal, Substation, LvFeeder, NetworkStateOperators

@@ -2,6 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 try:
@@ -12,8 +13,7 @@ except ImportError:
 from typing import Optional, Callable, List, Union, Type
 
 from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
-    PowerTransformerEnd, PowerTransformer, EnergyConsumer, \
-    PowerElectronicsConnection, BusbarSection, Clamp, Cut
+    PowerTransformerEnd, PowerTransformer, EnergyConsumer, PowerElectronicsConnection, BusbarSection, Clamp, Cut, Site
 
 
 def null_action(_):
@@ -601,6 +601,25 @@ class TestNetworkBuilder:
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         self._create_lv_feeder(mrid, self.network.get(head_mrid, ConductingEquipment), sequence_number)
+        return self
+
+    def add_site(self, equipment_mrids: List[str], mrid: Optional[str] = None) -> 'TestNetworkBuilder':
+        """
+        Create a new Site containing the specified equipment.
+
+        :param equipment_mrids: The mRID's of the equipment to add to the site
+        :param mrid: Optional mRID for the new `Site`.
+        :return: This [TestNetworkBuilder] to allow for fluent use.
+        """
+
+        site = Site(mrid=self._next_id(mrid, 'site'))
+
+        for _id in equipment_mrids:
+            ce = self.network[_id]
+            site.add_equipment(ce)
+            ce.add_container(site)
+        self.network.add(site)
+        
         return self
 
     async def build(self, apply_directions_from_sources: bool = True, assign_feeders: bool = True) -> NetworkService:
