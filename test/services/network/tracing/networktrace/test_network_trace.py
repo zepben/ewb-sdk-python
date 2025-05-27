@@ -11,7 +11,7 @@ from typing import List, Set
 import pytest
 
 from services.network.tracing.networktrace.test_network_trace_step_path_provider import PathTerminal, _verify_paths
-from zepben.evolve import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen
+from zepben.evolve import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
 
@@ -178,8 +178,7 @@ class TestNetworkTrace:
         assert set(map(lambda it: (it.num_equipment_steps, it.path.to_equipment.mrid), steps)) \
                == {(0, 'b0')}
 
-    if 'TOX_ENV_NAME' not in os.environ:
-
+    if 'TOX_ENV_NAME' not in os.environ:  # Skips the test during tox runs as variable hardware will affect speed
         @pytest.mark.asyncio
         async def test_can_run_large_branching_traces(self):
             try:
@@ -202,3 +201,27 @@ class TestNetworkTrace:
             except Exception as e:
                 sys.setrecursionlimit(1000)  # back to default
                 raise e
+
+    @pytest.mark.asyncio
+    async def test_multiple_start_items_can_stop_on_start_doesnt_prevent_stop_checks_when_visiting_via_loop(self):
+        ns = (TestNetworkBuilder()
+              .from_acls()  # c0
+              .to_acls()  # c1
+              .to_acls()  # c2
+              .connect_to('c0')
+              ).network
+
+        stop_checks: List[str] = []
+        steps: List[str] = []
+
+        def stop_condition(item, _):
+            stop_checks.append(item.path.to_terminal.mrid)
+            return item.path.to_equipment.mrid == 'c1'
+
+        trace = Tracing.network_trace(action_step_type=NetworkTraceActionType.ALL_STEPS) \
+            .add_stop_condition(stop_condition) \
+            .if_not_stopping(lambda item, _: steps.append(item.path.to_terminal.mrid))
+        await trace.run(ns.get('c1', ConductingEquipment), can_stop_on_start_item=False)
+
+        assert stop_checks == ['c2-t1', 'c2-t2', 'c0-t1', 'c0-t2', 'c1-t1']
+        assert steps == ['c1-t2', 'c2-t1', 'c2-t2', 'c0-t1', 'c0-t2']

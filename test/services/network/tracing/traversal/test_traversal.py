@@ -363,3 +363,16 @@ class TestTraversal:
                ).run()
 
         assert steps == [-1, 1, -2, 2]
+
+    @pytest.mark.asyncio
+    async def test_multiple_start_items_respect_can_stop_on_start(self):
+        steps = []
+        traversal = (_create_traversal(queue=TraversalQueue.breadth_first())
+                    .add_stop_condition(lambda item, x: True)
+                    .add_step_action(lambda item, x: steps.append(item))
+                    .add_start_item(1)
+                    .add_start_item(11)
+                    )
+        await traversal.run(can_stop_on_start_item=False)
+
+        assert steps == [1, 11, 2, 12]

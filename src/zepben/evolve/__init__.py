@@ -436,6 +436,5 @@ from zepben.evolve.database.sqlite.network.network_service_reader import *
 from zepben.evolve.services.network.tracing.phases.set_phases import *
 
 from zepben.evolve.testing.test_network_builder import *
-from zepben.evolve.testing.test_traversal import *
 
 # @formatter:on

@@ -280,7 +280,7 @@ class Traversal(Generic[T, D]):
 
         raise RuntimeError(f'Condition [{action.__class__.__name__}] does not match expected: [StepAction | StepActionWithContextValue | Callable]')
 
-    def if_not_stopping(self, action: Callable) -> D:
+    def if_not_stopping(self, action: Callable[[T, StepContext], None]) -> D:
         """
         Adds an action to be performed on each item that does not match any stop condition.
 
@@ -291,7 +291,7 @@ class Traversal(Generic[T, D]):
         return self
 
 
-    def if_stopping(self, action: Callable) -> D:
+    def if_stopping(self, action: Callable[[T, StepContext], None]) -> D:
         """
         Adds an action to be performed on each item that matches a stop condition.
 
@@ -449,10 +449,10 @@ class Traversal(Generic[T, D]):
             else:
                 self.queue.append(start_item)
 
-        can_stop = can_stop_on_start_item
         while self.queue.has_next():
             current = self.queue.pop()
             context = self._get_step_context(current)
+            can_stop = can_stop_on_start_item or (not context.is_start_item)
             if self.can_visit_item(current, context):
                 context.is_stopping = can_stop and self.matches_any_stop_condition(current, context)
 
@@ -464,7 +464,6 @@ class Traversal(Generic[T, D]):
                 if not context.is_stopping:
                     self.queue_next(current, context)
 
-                can_stop = True
 
     def _get_step_context(self, item: T) -> StepContext:
         try:
