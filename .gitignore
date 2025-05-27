@@ -129,3 +129,5 @@ dmypy.json
 
 /todo.md
 test/resources/test-network-database.txt
+
+*.iml
