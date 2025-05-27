@@ -30,6 +30,9 @@
   * `NetworkTrace` now handles starting on `Cut` , `Clamp`, and `AcLineSegment` and their terminals in a explicit / sensible way.
   * `NetworkTracePathProvider` now correctly handles next paths when starting on a `Clamp` terminal.
 * `NetworkTrace`/`Traversal` now correctly respects `can_stop_on_start_item` when providing multiple start items.
+* `AssignToFeeders`/`AssignToLvFeeders` now finds back-fed equipment correctly
+* `AssignToFeeders` and `AssignToLvFeeders` will now associate `PowerElectronicUnits` with their `powerElectronicsConnection` `Feeder`/`LvFeeder`.
+
 
 
 ### Notes
