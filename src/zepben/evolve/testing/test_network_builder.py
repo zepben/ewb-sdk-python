@@ -446,13 +446,16 @@ class TestNetworkBuilder:
     def with_clamp(
         self,
         mrid: Optional[str] = None,
-        length_from_terminal_1: float = None
+        length_from_terminal_1: float = None,
+        action: Callable[[Clamp], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Create a clamp on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
 
         :param mrid: Optional mRID for the new `Clamp`
         :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being clamped
+        :param action: An action that accepts the new `Clamp` to allow for additional initialisation.
+
         :return: This `TestNetworkBuilder` to allow for fluent use
         """
         acls = self._current
@@ -463,6 +466,7 @@ class TestNetworkBuilder:
         clamp.add_terminal(Terminal(mrid=f'{clamp.mrid}-t1'))
 
         acls.add_clamp(clamp)
+        action(clamp)
         self.network.add(clamp)
         return self
 
@@ -471,7 +475,8 @@ class TestNetworkBuilder:
         mrid: Optional[str] = None,
         length_from_terminal_1: Optional[float] = None,
         is_normally_open: bool = True,
-        is_open: bool = None
+        is_open: bool = None,
+        action: Callable[[Cut], None] = null_action
         ) -> 'TestNetworkBuilder':
         """
         Create a cut on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
@@ -480,6 +485,8 @@ class TestNetworkBuilder:
         :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being cut
         :param is_normally_open: The normal state of the cut, defaults to True
         :param is_open: The current state of the cut. Defaults to `is_normally_open`
+        :param action: An action that accepts the new `Cut` to allow for additional initialisation.
+
         :return: This `TestNetworkBuilder` to allow for fluent use
         """
         acls = self._current
@@ -497,6 +504,7 @@ class TestNetworkBuilder:
             cut.set_open(is_open)
 
         acls.add_cut(cut)
+        action(cut)
         self.network.add(cut)
         return self
 
