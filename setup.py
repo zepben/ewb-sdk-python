@@ -18,7 +18,7 @@ test_deps = [
     "pytest-cov==2.10.1",
     "pytest-asyncio==0.19.0",
     "pytest-timeout==1.4.2",
-    'pytest-subtests==0.14.1',
+    'pytest-subtests',
     "hypothesis==6.56.3",
     "grpcio-testing==1.61.3",
     "pylint==2.14.5",
