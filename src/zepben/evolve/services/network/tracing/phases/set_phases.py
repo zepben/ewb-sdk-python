@@ -99,14 +99,14 @@ class SetPhases:
 
         await self._run_terminal(terminal, network_state_operators)
 
-    async def _run_spread_phases_and_flow(self,
-                                          seed_terminal: Terminal,
-                                          start_terminal: Terminal,
-                                          phases: List[SinglePhaseKind],
-                                          network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def run_spread_phases_and_flow(self,
+                                         seed_terminal: Terminal,
+                                         start_terminal: Terminal,
+                                         phases: List[SinglePhaseKind],
+                                         network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
 
         nominal_phase_paths = self._get_nominal_phase_paths(network_state_operators, seed_terminal, start_terminal, list(phases))
-        if self._flow_phases(network_state_operators, seed_terminal, start_terminal, nominal_phase_paths):
+        if await self._flow_phases(network_state_operators, seed_terminal, start_terminal, nominal_phase_paths):
             await self.run(start_terminal, network_state_operators=network_state_operators)
 
 
