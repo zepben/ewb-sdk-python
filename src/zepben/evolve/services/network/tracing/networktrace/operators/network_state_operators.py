@@ -25,7 +25,7 @@ from zepben.evolve.services.network.tracing.networktrace.operators.phase_state_o
 if TYPE_CHECKING:
     from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
-__all__ = ['NetworkStateOperators']
+__all__ = ['NetworkStateOperators', 'NormalNetworkStateOperators', 'CurrentNetworkStateOperators']
 
 # noinspection PyPep8Naming
 class NetworkStateOperators(OpenStateOperators,

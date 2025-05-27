@@ -7,12 +7,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from zepben.evolve import NetworkStateOperators, FeederDirection, NetworkTraceStep, Terminal, Junction
 from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
-from zepben.evolve import FeederDirection, NetworkTraceStep, Terminal, Junction, NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
 
 
 class TestDirectionCondition:
+
     def test_should_queue_for_non_cut_or_clamp_path(self):
         traced_internally = True
         _terminal_should_queue((FeederDirection.NONE, FeederDirection.NONE, traced_internally), True)
@@ -169,7 +170,7 @@ def _terminal_should_queue(condition: Tuple[FeederDirection, FeederDirection, bo
 
     next_item = NetworkTraceStep(next_path, 0, 0, None)
 
-    state_operators = NetworkStateOperators
+    state_operators = MagicMock(NetworkStateOperators.NORMAL)
     state_operators.get_direction = lambda t: to_direction
 
     result = DirectionCondition(direction, state_operators).should_queue(next_item, None, None, None)
@@ -187,9 +188,9 @@ def _start_terminal_should_queue(condition: Tuple[FeederDirection, FeederDirecti
     next_path.to_equipment = Junction()
     next_path.did_traverse_ac_line_segment = False
 
-    next_item = NetworkTraceStep(next_path(), 0, 0, None)
+    next_item = NetworkTraceStep(next_path, 0, 0, None)
 
-    state_operators = NetworkStateOperators
+    state_operators = MagicMock(NetworkStateOperators.NORMAL)
     state_operators.get_direction = lambda t: to_direction
 
     result = DirectionCondition(direction, state_operators).should_queue_start_item(next_item)
@@ -201,7 +202,7 @@ def _should_queue(condition: Tuple[FeederDirection, NetworkTraceStep.Path], expe
     next_step.configure_mock(
         path=path
     )
-    should_queue = DirectionCondition(direction, NetworkStateOperators.NORMAL).should_queue(next_step(), None, None, None)
+    should_queue = DirectionCondition(direction, NetworkStateOperators.NORMAL).should_queue(next_step, None, None, None)
     print(f'direction: {direction}')
     print(f'path:  internal: {path.traced_internally}\n  from: {path.from_terminal}\n  to:  {path.to_terminal}\n')
     assert should_queue == expected
