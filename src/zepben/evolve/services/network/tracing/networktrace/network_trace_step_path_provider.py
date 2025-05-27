@@ -198,15 +198,17 @@ class NetworkTraceStepPathProvider:
         :param towards_segment_T2: Use `true` if the segment should be traversed towards terminal 2, otherwise `False` to traverse towards terminal 1
         """
         # Can do a simple return if we don't need to do any special cuts/clamps processing
-        if not(any((list(acls.cuts), list(acls.clamps)))):
+        cuts, clamps = list(acls.cuts), list(acls.clamps)
+
+        if not any((cuts, clamps)):
             yield from seq_term_map_to_path(from_terminal.other_terminals(), path_factory, acls)
         else:
 
             # We need to ignore cuts and clamps that are not "in service" because that means they do not exist!
             # We also make sure we filter out the cut or the clamp we are starting at, so we don't compare it in our checks
             filter_func = lambda it: it != from_terminal.conducting_equipment and self.state_operators.is_in_service(it)
-            cuts: List[Cut] = list(filter(filter_func, acls.cuts))
-            clamps: List[Clamp] = list(filter(filter_func, acls.clamps))
+            cuts: List[Cut] = list(filter(filter_func, cuts))
+            clamps: List[Clamp] = list(filter(filter_func, clamps))
 
             cuts_at_same_position = list(filter(lambda it: it.length_from_T1_or_0 == length_from_T1, cuts))
             stop_at_cuts_at_same_position = bool(can_stop_at_cut_at_same_position and cuts_at_same_position)
