@@ -45,12 +45,12 @@ class NetworkTraceStopCondition(StopCondition[T], Generic[T]):
         raise NotImplemented
 
     def should_stop_internal_step(self, item: NetworkTraceStep[T], context: StepContext) -> bool:
-        if item.type == NetworkTraceStep.Type.INTERNAL:
+        if item.type() == NetworkTraceStep.Type.INTERNAL:
             return self.should_stop_matched_step(item, context)
         return False
 
     def should_stop_external_step(self, item: NetworkTraceStep[T], context: StepContext) -> bool:
-        if item.type == NetworkTraceStep.Type.EXTERNAL:
+        if item.type() == NetworkTraceStep.Type.EXTERNAL:
             return self.should_stop_matched_step(item, context)
         return False
 
