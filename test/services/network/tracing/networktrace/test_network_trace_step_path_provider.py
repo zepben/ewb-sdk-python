@@ -6,7 +6,7 @@ from typing import Generator, Iterable
 
 from pytest_subtests.plugin import subtests
 
-from services.network.test_data.cuts_and_clamps_network import _segment_with_clamp, _segment_with_cut, CutsAndClampsNetwork
+from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.network.network_service import NetworkService
@@ -162,8 +162,8 @@ class TestNetworkTraceStepPathProvider:
 
         breaker = network['b0']
         segment: AcLineSegment = network['c1']
-        clamp1 = network['clamp1']
-        clamp2 = network['clamp2']
+        clamp1 = network['c1-clamp1']
+        clamp2 = network['c1-clamp2']
 
         current_path = breaker[2] + segment[1]
         next_paths = self.path_provider.next_paths(current_path)
@@ -175,8 +175,8 @@ class TestNetworkTraceStepPathProvider:
 
         breaker = network['b2']
         segment: AcLineSegment = network['c1']
-        clamp1 = network['clamp1']
-        clamp2 = network['clamp2']
+        clamp1 = network['c1-clamp1']
+        clamp2 = network['c1-clamp2']
 
         current_path = breaker[1] + segment[2]
         next_paths = self.path_provider.next_paths(current_path)
@@ -188,8 +188,8 @@ class TestNetworkTraceStepPathProvider:
 
         b0 = network['b0']
         segment = network['c1']
-        clamp1 = network['clamp1']
-        cut1 = network['cut1']
+        clamp1 = network['c1-clamp1']
+        cut1 = network['c1-cut1']
 
         current_path = b0[2] + segment[1]
         next_paths = self.path_provider.next_paths(current_path)
@@ -201,8 +201,8 @@ class TestNetworkTraceStepPathProvider:
 
         b2 = network['b2']
         segment = network['c1']
-        clamp4 = network['clamp4']
-        cut2 = network['cut2']
+        clamp4 = network['c1-clamp4']
+        cut2 = network['c1-cut2']
 
         current_path = b2[1] + segment[2]
         next_paths = self.path_provider.next_paths(current_path)
@@ -213,7 +213,7 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
-        cut1 = network['cut1']
+        cut1 = network['c1-cut1']
         c4 = network['c4']
 
         current_path = segment[1] - cut1[1]
@@ -225,7 +225,7 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
-        cut2 = network['cut2']
+        cut2 = network['c1-cut2']
         c9 = network['c9']
 
         current_path = segment[2] - cut2[2]
@@ -237,8 +237,8 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
-        clamp1 = network['clamp1']
-        cut1 = network['cut1']
+        clamp1 = network['c1-clamp1']
+        cut1 = network['c1-cut1']
         c4 = network['c4']
 
         current_path = c4[1] + cut1[1]
@@ -250,8 +250,8 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
-        clamp4 = network['clamp4']
-        cut2 = network['cut2']
+        clamp4 = network['c1-clamp4']
+        cut2 = network['c1-cut2']
         c9 = network['c9']
 
         current_path = c9[1] + cut2[2]
@@ -263,8 +263,8 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
-        clamp1 = network['clamp1']
-        cut1 = network['cut1']
+        clamp1 = network['c1-clamp1']
+        cut1 = network['c1-cut1']
         c3 = network['c3']
 
         current_path = c3[1] + clamp1[1]
@@ -276,7 +276,7 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         segment = network['c1']
-        clamp1 = network['clamp1']
+        clamp1 = network['c1-clamp1']
         c3 = network['c3']
 
         current_path = segment[1] - clamp1[1]
@@ -288,10 +288,10 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c6 = network['c6']
-        clamp2 = network['clamp2']
-        clamp3 = network['clamp3']
-        cut1 = network['cut1']
-        cut2 = network['cut2']
+        clamp2 = network['c1-clamp2']
+        clamp3 = network['c1-clamp3']
+        cut1 = network['c1-cut1']
+        cut2 = network['c1-cut2']
 
         current_path = c6[1] + clamp2[1]
         next_paths = self.path_provider.next_paths(current_path)
@@ -302,10 +302,10 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c5 = network['c5']
-        clamp2 = network['clamp2']
-        clamp3 = network['clamp3']
-        cut1 = network['cut1']
-        cut2 = network['cut2']
+        clamp2 = network['c1-clamp2']
+        clamp3 = network['c1-clamp3']
+        cut1 = network['c1-cut1']
+        cut2 = network['c1-cut2']
 
         current_path = c5[1] + cut1[2]
         next_paths = self.path_provider.next_paths(current_path)
@@ -316,10 +316,10 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c8 = network['c8']
-        clamp2 = network['clamp2']
-        clamp3 = network['clamp3']
-        cut1 = network['cut1']
-        cut2 = network['cut2']
+        clamp2 = network['c1-clamp2']
+        clamp3 = network['c1-clamp3']
+        cut1 = network['c1-cut1']
+        cut2 = network['c1-cut2']
 
         current_path = c8[1] + cut2[1]
         next_paths = self.path_provider.next_paths(current_path)
@@ -330,10 +330,10 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c5 = network['c5']
-        clamp2 = network['clamp2']
-        clamp3 = network['clamp3']
-        cut1 = network['cut1']
-        cut2 = network['cut2']
+        clamp2 = network['c1-clamp2']
+        clamp3 = network['c1-clamp3']
+        cut1 = network['c1-cut1']
+        cut2 = network['c1-cut2']
 
         current_path = cut1[1] + cut1[2]
         next_paths = self.path_provider.next_paths(current_path)
@@ -344,10 +344,10 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c8 = network['c8']
-        clamp2 = network['clamp2']
-        clamp3 = network['clamp3']
-        cut1 = network['cut1']
-        cut2 = network['cut2']
+        clamp2 = network['c1-clamp2']
+        clamp3 = network['c1-clamp3']
+        cut1 = network['c1-cut1']
+        cut2 = network['c1-cut2']
 
         current_path = cut2[2] + cut2[1]
         next_paths = self.path_provider.next_paths(current_path)
@@ -358,7 +358,7 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c3 = network['c3']
-        clamp1 = network['clamp1']
+        clamp1 = network['c1-clamp1']
 
         next_paths = self.path_provider.next_paths(clamp1[1] - clamp1[1])
         _verify_paths(next_paths, (clamp1[1] + c3[1], ))
@@ -367,8 +367,8 @@ class TestNetworkTraceStepPathProvider:
         network = CutsAndClampsNetwork.multi_cut_and_clamp_network().network
 
         c3 = network['c3']
-        clamp1 = network['clamp1']
-        cut1 = network['cut1']
+        clamp1 = network['c1-clamp1']
+        cut1 = network['c1-cut1']
         c1 = network['c1']
 
         next_paths = self.path_provider.next_paths(clamp1[1] + clamp1[1])
@@ -384,15 +384,16 @@ class TestNetworkTraceStepPathProvider:
         network = (TestNetworkBuilder()
                    .from_breaker()  # b0
                    .to_acls()  # c1
+                   .with_clamp(length_from_terminal_1=1.0)  # c1-clamp1
+                   .with_cut()  # c1-cut1
                    .to_breaker()  # b2
                    ).network
 
         c1 = network['c1']
         b0 = network['b0']
         b2 = network['b2']
-
-        clamp = _segment_with_clamp(network, c1, 1.0)
-        cut = _segment_with_cut(network, c1, None)
+        clamp = network['c1-clamp1']
+        cut = network['c1-cut1']
 
         with subtests.test('Traverse from T1 towards T2'):
             current_path = b0[2] + c1[1]
@@ -412,15 +413,16 @@ class TestNetworkTraceStepPathProvider:
         network = (TestNetworkBuilder()
                    .from_breaker()  # b0
                    .to_acls()  # c1
+                   .with_cut(length_from_terminal_1=1.0)  # c1-cut1
+                   .with_cut(length_from_terminal_1=1.0)  # c1-cut2
                    .to_breaker()  # b2
                    ).network
 
         c1 = network['c1']
         b0 = network['b0']
         b2 = network['b2']
-
-        cut1 = _segment_with_cut(network, c1, 1.0)
-        cut2 = _segment_with_cut(network, c1, 1.0)
+        cut1 = network['c1-cut1']
+        cut2 = network['c1-cut2']
 
         with subtests.test('Traverse from T1 towards T2 should have both cuts t1'):
             current_path = b0[2] + c1[1]
@@ -451,15 +453,56 @@ class TestNetworkTraceStepPathProvider:
         network = (TestNetworkBuilder()
                    .from_breaker()  # b0
                    .to_acls()  # c1
+                   .with_clamp()  # c1-clamp1
+                   .with_cut()  # c1-cut1
                    .to_breaker()  # b2
                    ).network
 
         c1 = network['c1']
         b0 = network['b0']
         b2 = network['b2']
+        clamp = network['c1-clamp1']
+        cut = network['c1-cut1']
 
-        clamp = _segment_with_clamp(network, c1, None)
-        cut = _segment_with_cut(network, c1, None)
+        with subtests.test('Traverse from T1 towards T2'):
+            current_path = b0[2] + c1[1]
+            next_paths = self.path_provider.next_paths(current_path)
+            _verify_paths(next_paths, (c1[1] - cut[1], c1[1] - clamp[1]))
+
+        with subtests.test('Traverse from T2 towards T1'):
+            current_path = b2[1] + c1[2]
+            next_paths = self.path_provider.next_paths(current_path)
+            _verify_paths(next_paths, (c1[2] - cut[2], ))
+
+        with subtests.test('Internally stepped on cut T1 to T2, traverse towards c1.t2'):
+            current_path = cut[1] + cut[2]
+            next_paths = self.path_provider.next_paths(current_path)
+            _verify_paths(next_paths, (cut[2] - c1[2], ))
+
+        with subtests.test('Internally stepped on cut T2 to T2, traverse towards c1.t1'):
+            current_path =cut[2] + cut[1]
+            next_paths = self.path_provider.next_paths(current_path)
+            _verify_paths(next_paths, (cut[1] - c1[1], cut[1] - clamp[1]))
+
+    def test_cut_and_clamp_at_same_length_only_returns_clamp_on_T1_side_of_cut(self, subtests):
+        #
+        # 1 b0 21*1 cut1 2*-c1-*-21 b2 2
+        #        1
+        #        clamp1
+        #
+        network = (TestNetworkBuilder()
+                   .from_breaker()  # b0
+                   .to_acls()  # c1
+                   .with_clamp(length_from_terminal_1=1.0)  # c1-clamp1
+                   .with_cut(length_from_terminal_1=1.0)  # c1-cut1
+                   .to_breaker()  # b2
+                   ).network
+
+        c1 = network['c1']
+        b0 = network['b0']
+        b2 = network['b2']
+        clamp = network['c1-clamp1']
+        cut = network['c1-cut1']
 
         with subtests.test('Traverse from T1 towards T2'):
             current_path = b0[2] + c1[1]
@@ -492,14 +535,16 @@ class TestNetworkTraceStepPathProvider:
         network = (TestNetworkBuilder()
                    .from_breaker()  # b0
                    .to_acls()  # c1
+                   .with_clamp()  # c1-clamp1
+                   .with_clamp()  # c1-clamp2
+                   .with_cut()  # c1-cut1
                    .to_breaker()  # b2
                    ).network
 
         c1 = network['c1']
-
-        clamp1 = _segment_with_clamp(network, c1, None)
-        clamp2 = _segment_with_clamp(network, c1, None)
-        cut = _segment_with_cut(network, c1, None)
+        clamp1 = network['c1-clamp1']
+        clamp2 = network['c1-clamp2']
+        cut = network['c1-cut1']
 
         next_paths = self.path_provider.next_paths(clamp1[1] + clamp1[1])
         _verify_paths(next_paths, (clamp1[1] - c1[1], clamp1[1] - clamp2[1], clamp1[1] - cut[1]))
@@ -510,18 +555,18 @@ class TestNetworkTraceStepPathProvider:
         b0 = network['b0']
         b2 = network['b2']
         c1 = network['c1']
-        clamp1 = network['clamp1']
-        clamp2 = network['clamp2']
-        clamp3 = network['clamp3']
-        clamp4 = network['clamp4']
-        clamp5 = network['clamp5']
-        clamp6 = network['clamp6']
-        cut1 = network['cut1']
-        cut2 = network['cut2']
-        cut3 = network['cut3']
-        cut4 = network['cut4']
-        cut5 = network['cut5']
-        cut6 = network['cut6']
+        clamp1 = network['c1-clamp1']
+        clamp2 = network['c1-clamp2']
+        clamp3 = network['c1-clamp3']
+        clamp4 = network['c1-clamp4']
+        clamp5 = network['c1-clamp5']
+        clamp6 = network['c1-clamp6']
+        cut1 = network['c1-cut1']
+        cut2 = network['c1-cut2']
+        cut3 = network['c1-cut3']
+        cut4 = network['c1-cut4']
+        cut5 = network['c1-cut5']
+        cut6 = network['c1-cut6']
         cClamp1 = network['c-clamp1']
         cCut1t1 = network['c-cut1t1']
         cCut1t2 = network['c-cut1t2']
@@ -649,12 +694,11 @@ class TestNetworkTraceStepPathProvider:
         network = (TestNetworkBuilder()
                    .from_breaker()  # b0
                    .to_acls()  # c1
+                   .with_clamp(length_from_terminal_1=1.0)  # c1-clamp1
+                   .with_clamp(length_from_terminal_1=2.0)  # c1-clamp2
                    .to_breaker()  # b2
                    ).network
         segment: AcLineSegment = network['c1']
-
-        _segment_with_clamp(network, segment, 1.0)
-        _segment_with_clamp(network, segment, 2.0)
 
         return network
 
@@ -667,68 +711,70 @@ class TestNetworkTraceStepPathProvider:
         # * At the end (length 2.0) (clamp5, clamp6, cut5, cut6)
         # On each clamp terminal there is a separate AcLineSegment connected to it. (ids of c-clampX)
         # On each cut terminal (both 1 and 2) there is a separate AcLineSegment connected to it. (ids of c-cutXtN)
-        
+
+        segment_length = 2.0
+
         def acls_length(acls: AcLineSegment) -> None:
-            acls.length = 2.0
+            acls.length = segment_length
 
         network = (TestNetworkBuilder()
                    .from_breaker()  # b0
                    .to_acls(action=acls_length)  # c1
+                   # At start (combination of 0 and unknown).
+                   .with_clamp(length_from_terminal_1=0.0)  # c1-clamp1
+                   .with_clamp(length_from_terminal_1=None)  # c1-clamp2
+                   .with_cut(length_from_terminal_1=0.0)  # c1-cut1
+                   .with_cut(length_from_terminal_1=None)  # c1-cut2
+
+                   # At mid-point.
+                   .with_clamp(length_from_terminal_1=segment_length / 2)  # c1-clamp3
+                   .with_clamp(length_from_terminal_1=segment_length / 2)  # c1-clamp4
+                   .with_cut(length_from_terminal_1=segment_length / 2)  # c1-cut3
+                   .with_cut(length_from_terminal_1=segment_length / 2)  # c1-cut4
+
+                   # At end.
+                   .with_clamp(length_from_terminal_1=segment_length)  # c1-clamp5
+                   .with_clamp(length_from_terminal_1=segment_length)  # c1-clamp6
+                   .with_cut(length_from_terminal_1=segment_length)  # c1-cut5
+                   .with_cut(length_from_terminal_1=segment_length)  # c1-cut6
                    .to_breaker()  # b2
                    .from_acls(mrid='c-clamp1')
+                   .connect_to('c1-clamp1', 1, from_terminal=1)
                    .from_acls(mrid='c-clamp2')
+                   .connect_to('c1-clamp2', 1, from_terminal=1)
                    .from_acls(mrid='c-cut1t1')
+                   .connect_to('c1-cut1', 1, from_terminal=1)
                    .from_acls(mrid='c-cut1t2')
+                   .connect_to('c1-cut1', 2, from_terminal=1)
                    .from_acls(mrid='c-cut2t1')
+                   .connect_to('c1-cut2', 1, from_terminal=1)
                    .from_acls(mrid='c-cut2t2')
+                   .connect_to('c1-cut2', 2, from_terminal=1)
                    .from_acls(mrid='c-clamp3')
+                   .connect_to('c1-clamp3', 1, from_terminal=1)
                    .from_acls(mrid='c-clamp4')
+                   .connect_to('c1-clamp4', 1, from_terminal=1)
                    .from_acls(mrid='c-cut3t1')
+                   .connect_to('c1-cut3', 1, from_terminal=1)
                    .from_acls(mrid='c-cut3t2')
+                   .connect_to('c1-cut3', 2, from_terminal=1)
                    .from_acls(mrid='c-cut4t1')
+                   .connect_to('c1-cut4', 1, from_terminal=1)
                    .from_acls(mrid='c-cut4t2')
+                   .connect_to('c1-cut4', 2, from_terminal=1)
                    .from_acls(mrid='c-clamp5')
+                   .connect_to('c1-clamp5', 1, from_terminal=1)
                    .from_acls(mrid='c-clamp6')
+                   .connect_to('c1-clamp6', 1, from_terminal=1)
                    .from_acls(mrid='c-cut5t1')
+                   .connect_to('c1-cut5', 1, from_terminal=1)
                    .from_acls(mrid='c-cut5t2')
+                   .connect_to('c1-cut5', 2, from_terminal=1)
                    .from_acls(mrid='c-cut6t1')
+                   .connect_to('c1-cut6', 1, from_terminal=1)
                    .from_acls(mrid='c-cut6t2')
+                   .connect_to('c1-cut6', 2, from_terminal=1)
                    ).network
-
-        segment = network['c1']
-        assert segment.length is not None
-
-        clamp1 = _segment_with_clamp(network, segment, 0.0)
-        clamp2 = _segment_with_clamp(network, segment, None)
-        cut1 = _segment_with_cut(network, segment, 0.0)
-        cut2 = _segment_with_cut(network, segment, None)
-        clamp3 = _segment_with_clamp(network, segment, 1.0)
-        clamp4 = _segment_with_clamp(network, segment, 1.0)
-        cut3 = _segment_with_cut(network, segment, 1.0)
-        cut4 = _segment_with_cut(network, segment, 1.0)
-        clamp5 = _segment_with_clamp(network, segment, segment.length)
-        clamp6 = _segment_with_clamp(network, segment, segment.length)
-        cut5 = _segment_with_cut(network, segment, segment.length)
-        cut6 = _segment_with_cut(network, segment, segment.length)
-
-        network.connect(clamp1[1], network.get('c-clamp1', ConductingEquipment)[1])
-        network.connect(clamp2[1], network.get('c-clamp2', ConductingEquipment)[1])
-        network.connect(cut1[1], network.get('c-cut1t1', ConductingEquipment)[1])
-        network.connect(cut1[2], network.get('c-cut1t2', ConductingEquipment)[1])
-        network.connect(cut2[1], network.get('c-cut2t1', ConductingEquipment)[1])
-        network.connect(cut2[2], network.get('c-cut2t2', ConductingEquipment)[1])
-        network.connect(clamp3[1], network.get('c-clamp3', ConductingEquipment)[1])
-        network.connect(clamp4[1], network.get('c-clamp4', ConductingEquipment)[1])
-        network.connect(cut3[1], network.get('c-cut3t1', ConductingEquipment)[1])
-        network.connect(cut3[2], network.get('c-cut3t2', ConductingEquipment)[1])
-        network.connect(cut4[1], network.get('c-cut4t1', ConductingEquipment)[1])
-        network.connect(cut4[2], network.get('c-cut4t2', ConductingEquipment)[1])
-        network.connect(clamp5[1], network.get('c-clamp5', ConductingEquipment)[1])
-        network.connect(clamp6[1], network.get('c-clamp6', ConductingEquipment)[1])
-        network.connect(cut5[1], network.get('c-cut5t1', ConductingEquipment)[1])
-        network.connect(cut5[2], network.get('c-cut5t2', ConductingEquipment)[1])
-        network.connect(cut6[1], network.get('c-cut6t1', ConductingEquipment)[1])
-        network.connect(cut6[2], network.get('c-cut6t2', ConductingEquipment)[1])
 
         return network
 

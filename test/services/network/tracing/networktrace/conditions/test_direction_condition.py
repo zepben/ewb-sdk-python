@@ -97,7 +97,7 @@ class TestDirectionCondition:
                   .build()
 
         c1 = network['c1']
-        cut1 = network['cut1']
+        cut1 = network['c1-cut1']
         c4 = network['c4']
         c5 = network['c5']
 
@@ -119,8 +119,8 @@ class TestDirectionCondition:
             .build()
 
         c1 = network['c1']
-        clamp1 = network['clamp1']
-        cut1 = network['cut1']
+        clamp1 = network['c1-clamp1']
+        cut1 = network['c1-cut1']
         c4 = network['c4']
         c5 = network['c5']
 
@@ -141,7 +141,7 @@ class TestDirectionCondition:
             .add_feeder('c4', 1) \
             .build()
 
-        cut1 = network['cut1']
+        cut1 = network['c1-cut1']
         c4 = network['c4']
         c5 = network['c5']
 

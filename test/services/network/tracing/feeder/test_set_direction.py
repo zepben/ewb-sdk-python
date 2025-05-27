@@ -320,25 +320,25 @@ class TestSetDirection:
         #               |                   |
         #               \-c10-21 j11 21-c12-/
         #
-        n = TestNetworkBuilder() \
-            .from_junction(num_terminals=1) \
-            .to_acls() \
-            .to_junction(num_terminals=3) \
-            .to_acls() \
-            .to_junction() \
-            .to_acls() \
-            .to_junction(num_terminals=3) \
-            .to_acls() \
-            .to_junction(num_terminals=1) \
-            .from_acls() \
-            .from_acls() \
-            .to_junction() \
-            .to_acls() \
-            .connect("c9", "j6", 1, 2) \
-            .connect("c9", "j2", 2, 2) \
-            .connect("c10", "j2", 1, 2) \
-            .connect("c12", "j6", 2, 2) \
-            .network
+        n = (TestNetworkBuilder()
+             .from_junction(num_terminals=1)  #j0
+             .to_acls()  #c1
+             .to_junction(num_terminals=3)  #j2
+             .to_acls()  #c3
+             .to_junction()  #j4
+             .to_acls()  #c5
+             .to_junction(num_terminals=3)  #j6
+             .to_acls()  #c7
+             .to_junction(num_terminals=1)  #j8
+             .from_acls()  #c9
+             .from_acls()  #c10
+             .to_junction()  #c11
+             .to_acls()  #c12
+             .connect_to('j6', 2)
+             .connect("c9", "j6", 1, 2)
+             .connect("c9", "j2", 2, 2)
+             .connect("c10", "j2", 1, 2)
+             ).network
 
         await SetDirection().run_terminal(self._get_t(n, "j0", 1))
         await log_directions(n["j0"])
@@ -462,28 +462,28 @@ class TestSetDirection:
             .add_feeder('b0', 2) \
             .network
 
-        n.get('cut1', Cut).set_normally_open(False)
-        n.get('cut2', Cut).set_normally_open(True)
+        n.get('c1-cut1', Cut).set_normally_open(False)
+        n.get('c1-cut2', Cut).set_normally_open(True)
 
         await self._do_set_direction_trace(self._get_t(n, 'b0', 2))
 
         self._check_expected_direction(self._get_t(n, 'b0', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c1', 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp1', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp1', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut1', 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut1', 2), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c5', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c5', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp2', 1), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp3', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp2', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp3', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 2), NONE)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 2), NONE)
 
     @pytest.mark.asyncio
     async def test_sets_direction_on_acls_with_cuts_and_clamps_fed_from_clamp(self):
@@ -491,28 +491,28 @@ class TestSetDirection:
             .add_feeder('c6', 1) \
             .network
 
-        n.get('cut1', Cut).set_normally_open(False)
-        n.get('cut2', Cut).set_normally_open(True)
+        n.get('c1-cut1', Cut).set_normally_open(False)
+        n.get('c1-cut2', Cut).set_normally_open(True)
 
         await self._do_set_direction_trace(self._get_t(n, 'c6', 1))
 
         self._check_expected_direction(self._get_t(n, 'c6', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c6', 2), NONE)
-        self._check_expected_direction(self._get_t(n, 'clamp2', 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp3', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp2', 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp3', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 2), NONE)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 2), NONE)
         self._check_expected_direction(self._get_t(n, 'c5', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c5', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut1', 2), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut1', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 2), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp1', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp1', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c1', 1), DOWNSTREAM)
@@ -525,33 +525,33 @@ class TestSetDirection:
             .add_feeder('c5', 1) \
             .network
 
-        n.get('cut1', Cut).set_normally_open(False)
-        n.get('cut2', Cut).set_normally_open(True)
+        n.get('c1-cut1', Cut).set_normally_open(False)
+        n.get('c1-cut2', Cut).set_normally_open(True)
 
         await self._do_set_direction_trace(self._get_t(n, 'c5', 1))
 
         self._check_expected_direction(self._get_t(n, 'c5', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c5', 2), NONE)
-        self._check_expected_direction(self._get_t(n, 'cut1', 2), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut1', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 2), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp1', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp1', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c1', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'b0', 2), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'b0', 1), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp2', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp2', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c6', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c6', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp3', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp3', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 2), NONE)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 2), NONE)
 
     @pytest.mark.asyncio
     async def test_sets_direction_on_acls_with_cuts_and_clamps_fed_from_both_acls_ends(self):
@@ -560,8 +560,8 @@ class TestSetDirection:
             .add_feeder('b2', 1) \
             .network
 
-        n.get('cut1', Cut).set_normally_open(False)
-        n.get('cut2', Cut).set_normally_open(False)
+        n.get('c1-cut1', Cut).set_normally_open(False)
+        n.get('c1-cut2', Cut).set_normally_open(False)
 
         await self._do_set_direction_trace(self._get_t(n, 'b0', 2))
         await self._do_set_direction_trace(self._get_t(n, 'b2', 1))
@@ -569,28 +569,28 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, 'b0', 2), BOTH)
         self._check_expected_direction(self._get_t(n, 'b0', 1), NONE)
         self._check_expected_direction(self._get_t(n, 'c1', 1), BOTH)
-        self._check_expected_direction(self._get_t(n, 'clamp1', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp1', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut1', 2), BOTH)
-        self._check_expected_direction(self._get_t(n, 'cut1', 1), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 2), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 1), BOTH)
         self._check_expected_direction(self._get_t(n, 'c5', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c5', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp2', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp2', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c6', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c6', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp3', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp3', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 1), BOTH)
-        self._check_expected_direction(self._get_t(n, 'cut2', 2), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 1), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 2), BOTH)
         self._check_expected_direction(self._get_t(n, 'c9', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c9', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp4', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp4', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c10', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c10', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'b2', 1), BOTH)
@@ -603,8 +603,8 @@ class TestSetDirection:
             .add_feeder('c6', 1) \
             .network
 
-        n.get('cut1', Cut).set_normally_open(False)
-        n.get('cut2', Cut).set_normally_open(True)
+        n.get('c1-cut1', Cut).set_normally_open(False)
+        n.get('c1-cut2', Cut).set_normally_open(True)
 
         await self._do_set_direction_trace(self._get_t(n, 'b0', 2))
         await self._do_set_direction_trace(self._get_t(n, 'c6', 1))
@@ -612,25 +612,25 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, 'b0', 2), BOTH)
         self._check_expected_direction(self._get_t(n, 'b0', 1), NONE)
         self._check_expected_direction(self._get_t(n, 'c1', 1), BOTH)
-        self._check_expected_direction(self._get_t(n, 'clamp1', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp1', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c3', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut1', 2), BOTH)
-        self._check_expected_direction(self._get_t(n, 'cut1', 1), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 2), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 1), BOTH)
         self._check_expected_direction(self._get_t(n, 'c5', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c5', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp2', 1), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp2', 1), BOTH)
         self._check_expected_direction(self._get_t(n, 'c6', 1), BOTH)
         self._check_expected_direction(self._get_t(n, 'c6', 2), NONE)
-        self._check_expected_direction(self._get_t(n, 'clamp3', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp3', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 2), NONE)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 2), NONE)
 
     @pytest.mark.asyncio
     async def test_sets_direction_on_acls_with_cuts_and_clamps_fed_from_acls_clamp_and_cut(self):
@@ -639,8 +639,8 @@ class TestSetDirection:
             .add_feeder('c5', 1) \
             .network
 
-        n.get('cut1', Cut).set_normally_open(False)
-        n.get('cut2', Cut).set_normally_open(True)
+        n.get('c1-cut1', Cut).set_normally_open(False)
+        n.get('c1-cut2', Cut).set_normally_open(True)
 
         await self._do_set_direction_trace(self._get_t(n, 'c3', 1))
         await self._do_set_direction_trace(self._get_t(n, 'c5', 1))
@@ -648,25 +648,25 @@ class TestSetDirection:
         self._check_expected_direction(self._get_t(n, 'b0', 2), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'b0', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c1', 1), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp1', 1), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp1', 1), BOTH)
         self._check_expected_direction(self._get_t(n, 'c3', 1), BOTH)
         self._check_expected_direction(self._get_t(n, 'c3', 2), NONE)
         self._check_expected_direction(self._get_t(n, 'c4', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c4', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut1', 2), BOTH)
-        self._check_expected_direction(self._get_t(n, 'cut1', 1), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 2), BOTH)
+        self._check_expected_direction(self._get_t(n, 'c1-cut1', 1), BOTH)
         self._check_expected_direction(self._get_t(n, 'c5', 1), BOTH)
         self._check_expected_direction(self._get_t(n, 'c5', 2), NONE)
-        self._check_expected_direction(self._get_t(n, 'clamp2', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp2', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c6', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c6', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'clamp3', 1), DOWNSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-clamp3', 1), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c7', 2), DOWNSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 1), UPSTREAM)
         self._check_expected_direction(self._get_t(n, 'c8', 2), DOWNSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 1), UPSTREAM)
-        self._check_expected_direction(self._get_t(n, 'cut2', 2), NONE)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 1), UPSTREAM)
+        self._check_expected_direction(self._get_t(n, 'c1-cut2', 2), NONE)
 
 
     @staticmethod

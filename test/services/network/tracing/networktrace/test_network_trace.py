@@ -2,10 +2,11 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import os
 import sys
 DEFAULT_RECURSION_LIMIT = sys.getrecursionlimit()
 
-from typing import List
+from typing import List, Set
 
 import pytest
 
@@ -135,26 +136,69 @@ class TestNetworkTrace:
                 (2, 'c2'),
                 (3, 'j3')]
 
+    @pytest.mark.asyncio
+    async def test_can_stop_on_start_item_when_running_from_conducting_equipment(self):
+        #
+        # 1 b0 21--c1--2
+        #
+        ns = (TestNetworkBuilder()
+              .from_breaker()  # b0
+              .to_acls()  # c1
+              ).network
+
+        steps: List[NetworkTraceStep] = []
+        await Tracing.network_trace() \
+            .add_step_action(lambda step, _: steps.append(step)) \
+            .add_stop_condition(lambda step, _: True) \
+            .run(ns.get('b0', ConductingEquipment))
+
+        assert list(map(lambda it: (it.num_equipment_steps, it.path.to_equipment.mrid), steps)) \
+            == [(0, 'b0')]
 
     @pytest.mark.asyncio
-    async def test_can_run_large_branching_traces(self):
-        try:
-            sys.setrecursionlimit(100000)  # need to bump this for this test, we're going 1000+ recursive calls deep
+    async def test_can_Stop_on_start_item_when_running_from_conducting_equipment_branching(self):
+        #
+        # 1 b0 21--c1--2
+        #      1
+        #       \--c2--2
+        #
+        ns = (TestNetworkBuilder()
+              .from_breaker()  # b0
+              .to_acls()  # c1
+              .branch_from('b0')
+              .to_acls()  # c2
+              ).network
 
-            builder = TestNetworkBuilder()
-            network = builder.network
+        steps: Set[NetworkTraceStep] = set()
+        await Tracing.network_trace_branching() \
+            .add_step_action(lambda step, _: steps.add(step)) \
+            .add_stop_condition(lambda step, _: True) \
+            .run(ns.get('b0', ConductingEquipment))
 
-            builder.from_junction(num_terminals=1) \
-                   .to_acls()
+        assert set(map(lambda it: (it.num_equipment_steps, it.path.to_equipment.mrid), steps)) \
+               == {(0, 'b0')}
 
-            for i in range(500):
-                builder.to_junction(mrid=f'junc-{i}', num_terminals=3) \
-                       .to_acls(mrid=f'acls-{i}-top') \
-                       .from_acls(mrid=f'acls-{i}-bottom') \
-                       .connect(f'junc-{i}', f'acls-{i}-bottom', 2, 1)
+    if 'TOX_ENV_NAME' not in os.environ:
 
-            await Tracing.network_trace_branching().run(network['j0'].get_terminal_by_sn(1))
+        @pytest.mark.asyncio
+        async def test_can_run_large_branching_traces(self):
+            try:
+                sys.setrecursionlimit(100000)  # need to bump this for this test, we're going 1000+ recursive calls deep
 
-        except Exception as e:
-            sys.setrecursionlimit(1000)  # back to default
-            raise e
+                builder = TestNetworkBuilder()
+                network = builder.network
+
+                builder.from_junction(num_terminals=1) \
+                       .to_acls()
+
+                for i in range(500):
+                    builder.to_junction(mrid=f'junc-{i}', num_terminals=3) \
+                           .to_acls(mrid=f'acls-{i}-top') \
+                           .from_acls(mrid=f'acls-{i}-bottom') \
+                           .connect(f'junc-{i}', f'acls-{i}-bottom', 2, 1)
+
+                await Tracing.network_trace_branching().run(network['j0'].get_terminal_by_sn(1))
+
+            except Exception as e:
+                sys.setrecursionlimit(1000)  # back to default
+                raise e

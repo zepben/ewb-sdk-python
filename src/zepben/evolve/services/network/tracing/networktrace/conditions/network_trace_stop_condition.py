@@ -50,7 +50,8 @@ class NetworkTraceStopCondition(StopCondition[T], Generic[T]):
         return False
 
     def should_stop_external_step(self, item: NetworkTraceStep[T], context: StepContext) -> bool:
-        if item.type() == NetworkTraceStep.Type.EXTERNAL:
+        # We also need to check start items as they are always marked as internal, but we still want to be able to stop on them.
+        if (item.type() == NetworkTraceStep.Type.EXTERNAL) or context.is_start_item:
             return self.should_stop_matched_step(item, context)
         return False
 

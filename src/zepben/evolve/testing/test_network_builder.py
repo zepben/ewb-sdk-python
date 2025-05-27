@@ -13,7 +13,7 @@ from typing import Optional, Callable, List, Union, Type
 
 from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
     PowerTransformerEnd, PowerTransformer, EnergyConsumer, \
-    PowerElectronicsConnection, BusbarSection
+    PowerElectronicsConnection, BusbarSection, Clamp, Cut
 
 
 def null_action(_):
@@ -345,9 +345,9 @@ class TestNetworkBuilder:
 
     def from_busbar_section(
         self,
-        nominal_phases: PhaseCode=PhaseCode.ABC,
-        mrid: str=None,
-        action: Callable[[BusbarSection], None]=null_action
+        nominal_phases: PhaseCode = PhaseCode.ABC,
+        mrid: str = None,
+        action: Callable[[BusbarSection], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
         Start a new network island from a `BusbarSection`, updating the network pointer to the new `BusbarSection`.
@@ -443,6 +443,63 @@ class TestNetworkBuilder:
         self._current = it
         return self
 
+    def with_clamp(
+        self,
+        mrid: Optional[str] = None,
+        length_from_terminal_1: float = None
+    ) -> 'TestNetworkBuilder':
+        """
+        Create a clamp on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
+
+        :param mrid: Optional mRID for the new `Clamp`
+        :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being clamped
+        :return: This `TestNetworkBuilder` to allow for fluent use
+        """
+        acls = self._current
+        if not isinstance(acls, AcLineSegment):
+            raise ValueError("`with_clamp` can only be called when the last added item was an AcLineSegment")
+
+        clamp = Clamp(mrid=mrid or f'{acls.mrid}-clamp{acls.num_clamps() + 1}', length_from_terminal_1=length_from_terminal_1)
+        clamp.add_terminal(Terminal(mrid=f'{clamp.mrid}-t1'))
+
+        acls.add_clamp(clamp)
+        self.network.add(clamp)
+        return self
+
+    def with_cut(
+        self,
+        mrid: Optional[str] = None,
+        length_from_terminal_1: Optional[float] = None,
+        is_normally_open: bool = True,
+        is_open: bool = None
+        ) -> 'TestNetworkBuilder':
+        """
+        Create a cut on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
+
+        :param mrid: Optional mRID for the new `Cut`
+        :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being cut
+        :param is_normally_open: The normal state of the cut, defaults to True
+        :param is_open: The current state of the cut. Defaults to `is_normally_open`
+        :return: This `TestNetworkBuilder` to allow for fluent use
+        """
+        acls = self._current
+        if not isinstance(acls, AcLineSegment):
+            raise ValueError("`with_cut` can only be called when the last added item was an AcLineSegment")
+
+        cut = Cut(mrid=mrid or f'{acls.mrid}-cut{acls.num_cuts() + 1}', length_from_terminal_1=length_from_terminal_1)
+        cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t1'))
+        cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t2'))
+
+        cut.set_normally_open(is_normally_open)
+        if is_open is None:
+            cut.set_open(is_normally_open)
+        else:
+            cut.set_open(is_open)
+
+        acls.add_cut(cut)
+        self.network.add(cut)
+        return self
+
     def branch_from(self, from_: str, terminal: Optional[int] = None) -> 'TestNetworkBuilder':
         """
         Move the current network pointer to the specified `from` allowing branching of the network. This has the effect of changing the current network pointer.
@@ -454,6 +511,33 @@ class TestNetworkBuilder:
         """
         self._current = self.network.get(from_, ConductingEquipment)
         self._current_terminal = terminal
+        return self
+
+    def connect_to(
+        self,
+        to: str,
+        to_terminal: int = None,
+        from_terminal: int = None,
+        connectivity_node_mrid: Optional[str] = None
+    ) -> 'TestNetworkBuilder':
+        """
+        Connect to current network pointer to the specified `to` without moving the current network pointer.
+
+        :param to: The mRID of the second `ConductingEquipment` to be connected.
+        :param to_terminal: The sequence number or terminal on `to` which will be connected.
+        :param from_terminal: Optional sequence number of the terminal on current network pointer which will be connected.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect the terminals. Will only be used if both terminals are not already
+         connected.
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
+
+        self._connect(
+            self._current,
+            self.network.get(to, ConductingEquipment),
+            connectivity_node_mrid,
+            from_terminal,
+            to_terminal
+        )
         return self
 
     def connect(

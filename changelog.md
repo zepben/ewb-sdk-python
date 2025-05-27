@@ -13,9 +13,22 @@
 
 ### Enhancements
 * Tracing models with `Cut` and `Clamp` are now supported via the new tracing API.
+* Added support to `TestNetworkBuilder` for:
+  * `with_clamp` - Adds a clamp to the previously added `AcLineSegment`
+  * `with_cut` - Adds a cut to the previously added `AcLineSegment`
+  * `connect_to` - Connects the previously added item, rather than having to specify it again in `connect`.
+
+
 
 ### Fixes
- When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`
+* When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`
+* The follow fixes were added to Traversal and NetworkTrace:
+  * `canStopAtStartItem` now works for branching traversals.
+  * Traversal start items are added to the queue before traversal starts, so that the start items honour the queue type order.
+  * Stop conditions on the `NetworkTrace` now are checked based on a step type, like `QueueCondition` does, rather than by checking `canActionItem`.
+  * `Cut` and `Clamp` are now correctly supported in `SetDirection` and `DirectionCondition`.
+  * `NetworkTrace` now handles starting on `Cut` , `Clamp`, and `AcLineSegment` and their terminals in a explicit / sensible way.
+  * `NetworkTracePathProvider` now correctly handles next paths when starting on a `Clamp` terminal.
 
 ### Notes
 * None.
