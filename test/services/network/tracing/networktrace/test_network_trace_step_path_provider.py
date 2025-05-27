@@ -645,6 +645,43 @@ class TestNetworkTraceStepPathProvider:
             next_paths = self.path_provider.next_paths(b2[1] + c1[2])
             _verify_paths(next_paths, (c1[2] - cut5[2], c1[2] - cut6[2]))
 
+    def test_traverses_from_single_clamp_on_a_segment(self):
+        n = (TestNetworkBuilder()
+             .from_acls()  # c0
+             .with_clamp()  # c0-clamp1
+             .branch_from('c0-clamp1', 1)
+             .to_source()  # s1
+             ).network
+
+        source = n['s1']
+        clamp1 = n['c0-clamp1']
+        c0 = n['c0']
+
+        _verify_paths(self.path_provider.next_paths(source[1] + clamp1[1]),
+                      ((clamp1[1] - c0[1]), (clamp1[1] - c0[2])))
+
+    def test_traverses_from_both_sides_of_a_single_cut(self, subtests):
+        n = (TestNetworkBuilder()
+             .from_acls()  # c0
+             .with_cut()  # c0-cut1
+             .branch_from('c0-cut1', 1)
+             .to_source()  # s1
+             .branch_from('c0-cut1', 2)
+             .to_source()  # s2
+             ).network
+
+        source1 = n['s1']
+        source2 = n['s2']
+        cut1 = n['c0-cut1']
+        c0 = n['c0']
+
+        with subtests.test("goes from t1 side of cut and finds t1 side of segment"):
+            _verify_paths(self.path_provider.next_paths(source1[1] + cut1[1]),
+                          ((cut1[1] - c0[1]), (cut1[1] + cut1[2])))
+
+        with subtests.test("goes from t2 side of cut and finds t2 side of segment"):
+            _verify_paths(self.path_provider.next_paths(source2[1] + cut1[2]),
+                          ((cut1[2] - c0[2]), cut1[2] + cut1[1]))
 
     def _busbar_network(self) -> NetworkService:
         #        1
