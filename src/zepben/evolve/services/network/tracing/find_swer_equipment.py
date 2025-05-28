@@ -1,8 +1,10 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Set, Union, Generator, AsyncGenerator
+from __future__ import annotations
+
+from typing import Set, Union, AsyncGenerator, Type, TYPE_CHECKING
 
 from typing_extensions import TypeVar
 
@@ -11,19 +13,18 @@ from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
+from zepben.evolve.services.network.network_service import NetworkService
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
-from zepben.evolve import NetworkService
-
-__all__ = ["FindSwerEquipment"]
-
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+if TYPE_CHECKING:
+    from logging import Logger
 
 T = TypeVar
 
-from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
-
-from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
-from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+__all__ = ["FindSwerEquipment"]
 
 
 class FindSwerEquipment:
@@ -31,7 +32,10 @@ class FindSwerEquipment:
     A class which can be used for finding the SWER equipment in a [NetworkService] or [Feeder].
     """
 
-    async def find(self, to_process: Union[NetworkService, Feeder], network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
+    def __init__(self, debug_logger: Logger=None):
+        self._debug_logger = debug_logger
+
+    async def find(self, to_process: Union[NetworkService, Feeder], network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
         """
         Convenience method to call out to `find_all` or `find_on_feeder` based on the class type of `to_process`
 
@@ -44,8 +48,10 @@ class FindSwerEquipment:
             return set(await self.find_on_feeder(to_process, network_state_operators))
         elif isinstance(to_process, NetworkService):
             return set([item async for item in self.find_all(to_process, network_state_operators)])
+        else:
+            raise NotImplementedError
 
-    async def find_all(self, network_service: NetworkService, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> AsyncGenerator[ConductingEquipment, None]:
+    async def find_all(self, network_service: NetworkService, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> AsyncGenerator[ConductingEquipment, None]:
         """
         Find the `ConductingEquipment` on any `Feeder` in a `NetworkService` which is SWER. This will include any equipment on the LV network that is energised
         via SWER.
@@ -59,7 +65,7 @@ class FindSwerEquipment:
             for item in await self.find_on_feeder(feeder, network_state_operators):
                 yield item
 
-    async def find_on_feeder(self, feeder: Feeder, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
+    async def find_on_feeder(self, feeder: Feeder, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
         """
         Find the `ConductingEquipment` on a `Feeder` which is SWER. This will include any equipment on the LV network that is energised via SWER.
 
@@ -79,18 +85,20 @@ class FindSwerEquipment:
                     await self._trace_from(network_state_operators, equipment, swer_equipment)
         return swer_equipment
 
-    @staticmethod
-    def _create_trace(state_operators: NetworkStateOperators) -> NetworkTrace[T]:
-        return Tracing.network_trace(state_operators).add_condition(state_operators.stop_at_open())
+    def _create_trace(self, state_operators: Type[NetworkStateOperators]) -> NetworkTrace[T]:
+        return Tracing.network_trace(
+            network_state_operators=state_operators,
+            debug_logger=self._debug_logger
+        ).add_condition(stop_at_open())
 
-    async def _trace_from(self, state_operators: NetworkStateOperators, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
+    async def _trace_from(self, state_operators: Type[NetworkStateOperators], transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
         # Trace from any SWER terminals.
         await self._trace_swer_from(state_operators, transformer, swer_equipment)
 
         # Trace from any LV terminals.
         await self._trace_lv_from(state_operators, transformer, swer_equipment)
 
-    async def _trace_swer_from(self, state_operators: NetworkStateOperators, transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
+    async def _trace_swer_from(self, state_operators: Type[NetworkStateOperators], transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
 
         def condition(next_step, nctx, step, ctx):
             if _is_swer_terminal(next_step.path.to_terminal) or isinstance(next_step.path.to_equipment, Switch):
@@ -107,7 +115,7 @@ class FindSwerEquipment:
             await trace.run(it, None)
 
 
-    async def _trace_lv_from(self, state_operators: NetworkStateOperators,  transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
+    async def _trace_lv_from(self, state_operators: Type[NetworkStateOperators],  transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
 
         def condition(next_step, nctx, step, ctx):
             if 1 <= next_step.path.to_equipment.base_voltage_value <= 1000:

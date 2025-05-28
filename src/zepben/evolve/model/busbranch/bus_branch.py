@@ -2,13 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from __future__ import annotations
+
 import abc
 from collections import Counter
 from dataclasses import dataclass, field
 from functools import reduce
-from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable
+from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable, TYPE_CHECKING
 
-from zepben.evolve import Junction, BusbarSection, EquivalentBranch, Traversal, StepContext
+from zepben.evolve import Junction, BusbarSection, EquivalentBranch, Traversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
@@ -19,6 +21,9 @@ from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerT
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.busbranch_trace import BusBranchTrace, BusBranchTraceStep
+
+if TYPE_CHECKING:
+    from zepben.evolve import StepContext
 
 __all__ = [
     "BusBranchNetworkCreationValidator",

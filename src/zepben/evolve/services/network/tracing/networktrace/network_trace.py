@@ -5,6 +5,7 @@
 
 from collections.abc import Callable
 from functools import singledispatchmethod
+from logging import Logger
 from typing import TypeVar, Union, Generic, Set, Type, Generator, FrozenSet
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
@@ -74,25 +75,32 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                  network_state_operators: Type[NetworkStateOperators],
                  queue_type: Union[Traversal.BasicQueueType, Traversal.BranchingQueueType],
                  parent: 'NetworkTrace[T]'=None,
-                 action_type: NetworkTraceActionType=None
+                 action_type: NetworkTraceActionType=None,
+                 debug_logger: Logger=None,
+                 name: str=None
                  ):
-
+        if name is None:
+            raise ValueError('name can not be None')
+        self.name = name
         if action_type is None:
             raise ValueError('action_type can not be None')
+
         self._queue_type = queue_type
         self.network_state_operators = network_state_operators
         self._action_type = action_type
 
         self._tracker = NetworkTraceTracker()
 
-        super().__init__(self._queue_type, parent)
+        super().__init__(self._queue_type, parent=parent, debug_logger=debug_logger)
 
     @classmethod
     def non_branching(cls,
                       network_state_operators: Type[NetworkStateOperators],
                       queue: TraversalQueue[NetworkTraceStep[T]],
                       action_type: NetworkTraceActionType,
-                      compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
+                      name: str,
+                      compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]],
+                      debug_logger=None
                       ) -> 'NetworkTrace[T]':
         return cls(network_state_operators,
                    Traversal.BasicQueueType(NetworkTraceQueueNext.Basic(
@@ -100,7 +108,9 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                        compute_data_with_action_type(compute_data, action_type)
                    ), queue),
                    None,
-                   action_type)
+                   action_type,
+                   debug_logger,
+                   name)
 
     @classmethod
     def branching(cls,
@@ -108,8 +118,10 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                   queue_factory: Callable[[], TraversalQueue[T]],
                   branch_queue_factory: Callable[[], TraversalQueue['NetworkTrace[T]']],
                   action_type: NetworkTraceActionType,
+                  name: str,
                   parent: 'NetworkTrace[T]'=None,
                   compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None,
+                  debug_logger: Logger=None,
                   ) -> 'NetworkTrace[T]':
 
         return cls(network_state_operators,
@@ -118,7 +130,9 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                        compute_data_with_action_type(compute_data, action_type)
                    ), queue_factory, branch_queue_factory),
                    parent,
-                   action_type)
+                   action_type,
+                   debug_logger,
+                   name)
 
     @singledispatchmethod
     def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T=None, phases: PhaseCode=None) -> "NetworkTrace[T]":
@@ -289,7 +303,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return self
 
     def create_new_this(self) -> 'NetworkTrace[T]':
-        return NetworkTrace(self.network_state_operators, self._queue_type, self, self._action_type)
+        return NetworkTrace(self.network_state_operators, self._queue_type, self, self._action_type, debug_logger=None, name=self.name)
 
     @staticmethod
     def start_nominal_phase_path(phases: PhaseCode) -> Set[NominalPhasePath]:

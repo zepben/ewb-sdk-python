@@ -2,14 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from logging import Logger
 
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol
 
-from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
-    PowerTransformerEnd, PowerTransformer, EnergyConsumer, PowerElectronicsConnection, BusbarSection, Clamp, Cut, Site
+from zepben.evolve import (ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder,
+                           PowerTransformerEnd, PowerTransformer, EnergyConsumer, PowerElectronicsConnection, BusbarSection, Clamp, Cut, Site)
 
 SubclassesConductingEquipment = TypeVar('SubclassesConductingEquipment', bound=ConductingEquipment)
 
@@ -367,7 +368,7 @@ class TestNetworkBuilder:
         mrid: str = None,
         connectivity_node_mrid: Optional[str] = None,
         action: Callable[[BusbarSection], None] = null_action
-        ) -> 'TestNetworkBuilder':
+    ) -> 'TestNetworkBuilder':
         """
 
         Add a new `BusbarSection` to the network and connect it to the current network pointer, updating the network pointer to the new `BusbarSection`.
@@ -483,7 +484,7 @@ class TestNetworkBuilder:
         is_normally_open: bool = True,
         is_open: bool = None,
         action: Callable[[Cut], None] = null_action
-        ) -> 'TestNetworkBuilder':
+    ) -> 'TestNetworkBuilder':
         """
         Create a cut on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
 
@@ -625,10 +626,10 @@ class TestNetworkBuilder:
             site.add_equipment(ce)
             ce.add_container(site)
         self.network.add(site)
-        
+
         return self
 
-    async def build(self, apply_directions_from_sources: bool = True, assign_feeders: bool = True) -> NetworkService:
+    async def build(self, apply_directions_from_sources: bool = True, debug_logger: Logger = None) -> NetworkService:
         """
         Get the `NetworkService` after apply traced phasing and feeder directions.
 
@@ -636,22 +637,21 @@ class TestNetworkBuilder:
 
         :return: The `NetworkService` created by this `TestNetworkBuilder`
         """
-        await Tracing.set_direction().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
-        await Tracing.set_phases().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
-        await Tracing.set_direction().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
-        await Tracing.set_phases().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing.set_direction(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.set_direction(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing.set_phases(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.set_phases(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
 
         if apply_directions_from_sources:
             for es in self.network.objects(EnergySource):
                 for terminal in es.terminals:
-                    await Tracing.set_direction().run_terminal(terminal, network_state_operators=NetworkStateOperators.NORMAL)
-                    await Tracing.set_direction().run_terminal(terminal, network_state_operators=NetworkStateOperators.CURRENT)
+                    await Tracing.set_direction(debug_logger=debug_logger).run_terminal(terminal, network_state_operators=NetworkStateOperators.NORMAL)
+                    await Tracing.set_direction(debug_logger=debug_logger).run_terminal(terminal, network_state_operators=NetworkStateOperators.CURRENT)
 
-        if assign_feeders and (self.network.len_of(Feeder) != 0 or self.network.len_of(LvFeeder) != 0):
-            await Tracing.assign_equipment_to_feeders().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
-            await Tracing.assign_equipment_to_lv_feeders().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
-            await Tracing.assign_equipment_to_feeders().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
-            await Tracing.assign_equipment_to_lv_feeders().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing.assign_equipment_to_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.assign_equipment_to_lv_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.assign_equipment_to_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing.assign_equipment_to_lv_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
 
         return self.network
 
@@ -807,4 +807,3 @@ class TestNetworkBuilder:
         terminal = Terminal(mrid=f"{ce.mrid}-t{sn}", phases=nominal_phases)
         ce.add_terminal(terminal)
         self.network.add(terminal)
-

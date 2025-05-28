@@ -2,13 +2,12 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from functools import singledispatchmethod
-from typing import Collection, List, Generator, TypeVar, Dict, Set, Type
+from __future__ import annotations
 
-from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, PowerElectronicsConnection
-from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
+from functools import singledispatchmethod
+from typing import Collection, List, Generator, TypeVar, Dict, Set, Type, TYPE_CHECKING
+
+from zepben.evolve import Switch, ProtectedSwitch, PowerElectronicsConnection, Terminal, ConductingEquipment, AuxiliaryEquipment, LvFeeder
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import BaseFeedersInternal
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
@@ -19,28 +18,45 @@ from zepben.evolve.services.network.tracing.networktrace.conditions.conditions i
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
+if TYPE_CHECKING:
+    from logging import Logger
+
 T = TypeVar("T")
 
 __all__ = ["AssignToLvFeeders"]
 
 
 class AssignToLvFeeders:
+    def __init__(self, debug_logger: Logger=None):
+        self._debug_logger = debug_logger
+
     @singledispatchmethod
-    @staticmethod
-    async def run(network: NetworkService,
+    async def run(self,
+                  network: NetworkService,
                   network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
                   start_terminal: Terminal=None):
-        await AssignToLvFeedersInternal(network_state_operators).run(network, start_terminal)
+        await AssignToLvFeedersInternal(
+            network_state_operators,
+            self._debug_logger
+        ).run(network, start_terminal)
 
     @run.register
-    @staticmethod
-    async def _(terminal: Terminal,
+    async def _(self,
+                terminal: Terminal,
                 lv_feeder_start_points: Set[ConductingEquipment],
                 terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
                 lv_feeders_to_assign: List[LvFeeder],
                 network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
                 ):
-        await AssignToLvFeedersInternal(network_state_operators).run_with_feeders(terminal, lv_feeder_start_points, terminal_to_aux_equipment, lv_feeders_to_assign)
+        await AssignToLvFeedersInternal(
+            network_state_operators,
+            self._debug_logger
+        ).run_with_feeders(
+            terminal,
+            lv_feeder_start_points,
+            terminal_to_aux_equipment,
+            lv_feeders_to_assign
+        )
 
 class AssignToLvFeedersInternal(BaseFeedersInternal):
     """
@@ -109,10 +125,10 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                       lv_feeders_to_assign: List[LvFeeder]) -> NetworkTrace[T]:
 
         def _reached_hv(ce: ConductingEquipment):
-            return True if ce.base_voltage and ce.base_voltage.nominal_voltage >= 1000 else False
-
-        def queue_condition(next_step: NetworkTraceStep, nctx: StepContext, step: NetworkTraceStep, ctx: StepContext):
-            return next_step.data or not _reached_hv(next_step.path.to_equipment)
+            if ce.base_voltage and ce.base_voltage.nominal_voltage >= 1000:
+                return True
+            else:
+                return False
 
         async def step_action(nts: NetworkTraceStep, context):
             await self._process(nts.path, nts.data, context, terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
@@ -121,11 +137,15 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             Tracing.network_trace(
                 network_state_operators=self.network_state_operators,
                 action_step_type=NetworkTraceActionType.ALL_STEPS,
-                compute_data=(lambda _, __, next_path: next_path.to_equipment in lv_feeder_start_points)
+                debug_logger=self._debug_logger,
+                name=f'AssignToLvFeeders({self.network_state_operators.description})',
+                compute_data=(lambda x, y, next_path: next_path.to_equipment in lv_feeder_start_points)
             )
             .add_condition(stop_at_open())
             .add_stop_condition(lambda step, ctx: step.data)
-            .add_queue_condition(queue_condition)
+            .add_queue_condition(
+                lambda next_step, *args: next_step.data or not _reached_hv(next_step.path.to_equipment)
+            )
             .add_step_action(step_action)
         )
 
@@ -157,10 +177,11 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
         self._associate_equipment_with_containers(lv_feeders_to_assign, [step_path.to_equipment])
         self._associate_equipment_with_containers(lv_feeders_to_assign, aux_equip_for_this_terminal)
 
-        if isinstance(step_path.to_equipment, ProtectedSwitch):
-            self._associate_relay_systems_with_containers(lv_feeders_to_assign, step_path.to_equipment)
-        elif isinstance(step_path.to_equipment, PowerElectronicsConnection):
-            self._associate_power_electronic_units(lv_feeders_to_assign, step_path.to_equipment)
+        to_equip = step_path.to_equipment
+        if isinstance(to_equip, ProtectedSwitch):
+            self._associate_relay_systems_with_containers(lv_feeders_to_assign, to_equip)
+        elif isinstance(to_equip, PowerElectronicsConnection):
+            self._associate_power_electronic_units(lv_feeders_to_assign, to_equip)
 
     def _find_lv_feeders(self, ce: ConductingEquipment, lv_feeder_start_points: Set[ConductingEquipment]) -> Generator[LvFeeder, None, None]:
         sites = list(ce.sites)

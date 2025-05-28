@@ -1,11 +1,11 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
 
-from typing import Set, Union, Type
+from typing import Set, Union, Type, TYPE_CHECKING
 
 from zepben.evolve import NetworkService
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -16,8 +16,12 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace_action_ty
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
+
+if TYPE_CHECKING:
+    from logging import Logger
+    from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 
 class EbbPhases:
@@ -32,10 +36,24 @@ class RemovePhases(object):
     This class is backed by a `BranchRecursiveTraversal`.
     """
 
+    def __init__(self, debug_logger: Logger=None):
+        self._debug_logger = debug_logger
+
     async def run(self,
                   start: Union[NetworkService, Terminal],
                   nominal_phases_to_ebb: Union[PhaseCode, SinglePhaseKind]=None,
                   network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+        """
+        If nominal_phases_to_ebb is `None` this will remove all phases for all equipment connected
+        to `start`
+        If `start` is a:
+         - `NetworkService` - Remove traced phases from the specified network.
+         - `Terminal` - Allows the removal of phases from a terminal and the connected equipment chain
+         
+        :param start: NetworkService or Terminal to start phase removal 
+        :param nominal_phases_to_ebb: The nominal phases to remove traced phasing from. Defaults to all phases.
+        :param network_state_operators: The `NetworkStateOperators` to be used when removing phases.
+        """
         if nominal_phases_to_ebb is None:
 
             if isinstance(start, NetworkService):
@@ -47,17 +65,36 @@ class RemovePhases(object):
         return await self._run_with_phases_to_ebb(start, nominal_phases_to_ebb, network_state_operators)
 
     @staticmethod
-    async def _run_with_network(network_service: NetworkService, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def _run_with_network(network_service: NetworkService, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> None:
+        """
+        Remove all traced phases from the specified network.
+
+        :param network_service: The network service to remove traced phasing from.
+        :param network_state_operators: The `NetworkStateOperators` to be used when removing phases.
+        """
         for t in network_service.objects(Terminal):
             t.traced_phases.phase_status = 0
 
     async def _run_with_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+        """
+        Allows the removal of traced phases from a terminal and the connected equipment chain
+        
+        :param terminal: Removes all nominal phases a terminal traced phases and the connected equipment chain
+        :param network_state_operators: The `NetworkStateOperators` to be used when removing phases.
+        """
         return await self._run_with_phases_to_ebb(terminal, terminal.phases, network_state_operators)
 
     async def _run_with_phases_to_ebb(self,
                                 terminal: Terminal,
                                 nominal_phases_to_ebb: Union[PhaseCode, Set[SinglePhaseKind]],
                                 network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+        """
+        Allows the removal of traced phases from a terminal and the connected equipment chain
+
+        :param terminal: Terminal to start phase removal
+        :param nominal_phases_to_ebb: The nominal phases to remove traced phasing from. Defaults to all phases.
+        :param network_state_operators: The `NetworkStateOperators` to be used when removing phases.
+        """
 
         if isinstance(nominal_phases_to_ebb, PhaseCode):
             return await self._run_with_phases_to_ebb(terminal, set(nominal_phases_to_ebb.single_phases), network_state_operators)
@@ -83,9 +120,11 @@ class RemovePhases(object):
         return Tracing.network_trace(
             network_state_operators=state_operators,
             action_step_type=NetworkTraceActionType.ALL_STEPS,
+            debug_logger=self._debug_logger,
+            name=f'RemovePhases({state_operators.description})',
             queue=WeightedPriorityQueue.process_queue(lambda it: len(it.data.phases_to_ebb)),
             compute_data=compute_data
-        ).add_condition(state_operators.stop_at_open()) \
+        ).add_condition(stop_at_open()) \
         .add_step_action(step_action) \
         .add_queue_condition(queue_condition)
 

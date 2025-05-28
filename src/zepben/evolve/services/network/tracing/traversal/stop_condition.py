@@ -2,10 +2,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+from abc import abstractmethod
 from typing import TypeVar, Generic, Callable
 
-from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
+from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
 
@@ -38,10 +38,18 @@ class StopCondition(Generic[T], TraversalCondition[T]):
         """
 
 
-class StopConditionWithContextValue(StopCondition[T], TypedContextValueComputer[T, U]):
+class StopConditionWithContextValue(StopCondition[T], ContextValueComputer[T]):
     """
     Interface representing a stop condition that requires a value stored in the StepContext to determine if an item should be queued.
 
     T : The type of items being traversed.
     U : The type of the context value computed and used in the condition.
     """
+
+    @abstractmethod
+    def compute_initial_value(self, item: T):
+        raise NotImplemented
+
+    @abstractmethod
+    def compute_next_value(self, next_item: T, current_item: T, current_value):
+        raise NotImplemented

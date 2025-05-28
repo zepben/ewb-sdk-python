@@ -50,3 +50,6 @@ class StepContext(Generic[T]):
         @return The context value associated with the key, or `None` if not found.
         """
         return self._values.get(key)
+
+    def __str__(self) -> str:
+        return f"StepContext({', '.join('{}={}'.format(*i) for i in vars(self).items())})"
