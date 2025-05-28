@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve.database.sqlite.tables.column import Column, Nullable
+from zepben.evolve.database.sql.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production.table_power_electronics_units import TablePowerElectronicsUnits
 
 __all__ = ["TableBatteryUnits"]

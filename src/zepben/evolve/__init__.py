@@ -257,7 +257,7 @@ from zepben.evolve.services.network.network_service_comparator import NetworkSer
 from zepben.evolve.database.paths.database_type import *
 from zepben.evolve.database.paths.ewb_data_file_paths import *
 
-from zepben.evolve.database.sqlite.tables.column import *
+from zepben.evolve.database.sql.column import *
 from zepben.evolve.database.sqlite.tables.sqlite_table import *
 from zepben.evolve.database.sqlite.tables.table_metadata_data_sources import *
 from zepben.evolve.database.sqlite.tables.table_version import *
