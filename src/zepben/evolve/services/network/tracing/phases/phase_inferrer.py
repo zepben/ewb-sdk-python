@@ -13,8 +13,6 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 
 __all__ = ["PhaseInferrer"]
 
-logger = logging.getLogger(__name__)
-
 
 class PhaseInferrer:
     """
@@ -26,15 +24,15 @@ class PhaseInferrer:
         def __init__(self, conducting_equipment: ConductingEquipment, suspect: bool):
             self.conducting_equipment = conducting_equipment
             self.suspect = suspect
-            logger.warning(f'*** Action Required *** Inferred missing {self.description} due to a disconnected nominal phase because of an '
-                           f'upstream error in the source data. Phasing information for the upstream equipment should be fixed in the source system.')
 
         @property
         def description(self) -> str:
             if self.suspect:
-                return f"phases for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which may not be correct. The phases were inferred"
+                _inner_desc = f"phases for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which may not be correct. The phases were inferred"
             else:
-                return f"phase for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which should be correct. The phase was inferred"
+                _inner_desc = f"phase for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which should be correct. The phase was inferred"
+            return (f'Inferred missing {_inner_desc} due to a disconnected nominal phase because of an '
+                    f'upstream error in the source data. Phasing information for the upstream equipment should be fixed in the source system.')
 
     async def run(self, network: NetworkService, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> list[InferredPhase]:
         """
