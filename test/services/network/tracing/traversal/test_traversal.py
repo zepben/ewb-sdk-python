@@ -3,22 +3,30 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import deque
+from logging import Logger
 from typing import Callable, TypeVar, Tuple, Any, Optional
 
 import pytest
 
-from zepben.evolve import StepContext, Traversal, TraversalQueue, ContextValueComputer
+from zepben.evolve import StepContext, Traversal, TraversalQueue, ContextValueComputer, StepActionWithContextValue
 
 T = TypeVar('T')
 D = TypeVar('D')
 
 
 class TraversalTest(Traversal[T, D]):
-    def __init__(self, queue_type, parent: Optional["TraversalTest[T]"],
+
+    name = 'TestTraversal'
+
+    def __init__(self,
+                 queue_type,
+                 parent: Optional["TraversalTest[T, D]"],
                  can_visit_item: Callable[[T, StepContext], bool],
                  can_action_item: Callable[[T, StepContext], bool],
-                 on_reset: Callable[[], Any]):
-        super().__init__(queue_type, parent)
+                 on_reset: Callable[[], Any],
+                 debug_logger: Logger=None,
+                 ):
+        super().__init__(queue_type, parent, debug_logger=debug_logger)
         self._can_visit_item_impl = can_visit_item
         self._can_action_item_impl = can_action_item
         self._on_reset_impl = on_reset
@@ -32,7 +40,7 @@ class TraversalTest(Traversal[T, D]):
     def on_reset(self):
         return self._on_reset_impl()
 
-    def create_new_this(self) -> "TraversalTest[int]":
+    def create_new_this(self) -> "TraversalTest[T, D]":
         return TraversalTest(self._queue_type, self, self._can_visit_item_impl, self._can_action_item_impl, self._on_reset_impl)
 
 
@@ -376,3 +384,12 @@ class TestTraversal:
         await traversal.run(can_stop_on_start_item=False)
 
         assert steps == [1, 11, 2, 12]
+
+    @pytest.mark.asyncio
+    async def test_must_use_add_step_action_for_context_aware_actions(self):
+        action = StepActionWithContextValue[int](lambda step, ctx: None, key='123')
+        _create_traversal().add_step_action(action)
+
+        _create_traversal().if_stopping(action)
+
+        _create_traversal().if_not_stopping(action)

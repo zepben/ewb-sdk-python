@@ -1,4 +1,4 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Union, Set, Iterable, List, Type
+from typing import Union, Set, Iterable, List, Type, TYPE_CHECKING
 
 from zepben.evolve.exceptions import TracingException, PhaseException
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -24,6 +24,9 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 
+if TYPE_CHECKING:
+    from logging import Logger
+
 __all__ = ["SetPhases"]
 
 
@@ -33,10 +36,16 @@ class SetPhases:
     This class is backed by a `NetworkTrace`.
     """
 
+    def __init__(self, debug_logger: Logger=None):
+        self._debug_logger = debug_logger
+
     class PhasesToFlow:
         def __init__(self, nominal_phase_paths: Iterable[NominalPhasePath], step_flowed_phases: bool = False):
             self.nominal_phase_paths = nominal_phase_paths
             self.step_flowed_phases = step_flowed_phases
+
+        def __str__(self):
+            return f'PhasesToFlow(nominal_phase_paths={self.nominal_phase_paths}, step_flowed_phases={self.step_flowed_phases})'
 
 
     async def run(self,
@@ -62,7 +71,7 @@ class SetPhases:
         """
         Apply phases from all sources in the network.
 
-        @param network: The network in which to apply phases.
+        :param network: The network in which to apply phases.
         """
         trace = await self._create_network_trace(network_state_operators)
         for energy_source in network.objects(EnergySource):
@@ -71,14 +80,14 @@ class SetPhases:
                 await self._run_terminal(terminal, network_state_operators, trace)
 
     async def _run_with_phases(self,
-                                 terminal: Terminal,
-                                 phases: Union[PhaseCode, Iterable[SinglePhaseKind]],
-                                 network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+                               terminal: Terminal,
+                               phases: Union[PhaseCode, Iterable[SinglePhaseKind]],
+                               network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         Apply phases from the `terminal`.
 
-        @param terminal: The terminal to start applying phases from.
-        @param phases: The phases to apply. Must only contain ABCN.
+        :param terminal: The terminal to start applying phases from.
+        :param phases: The phases to apply. Must only contain ABCN.
         """
         def validate_phases(_phases):
             if len(_phases) != len(terminal.phases.single_phases):
@@ -141,27 +150,24 @@ class SetPhases:
 
     async def _create_network_trace(self, state_operators: Type[NetworkStateOperators]) -> NetworkTrace[PhasesToFlow]:
         async def step_action(nts, ctx):
-            path = nts.path
-            phases_to_flow = nts.data
+            path, phases_to_flow = nts
             #  We always assume the first step terminal already has the phases applied, so we don't do anything on the first step
             phases_to_flow.step_flowed_phases = True if ctx.is_start_item else (
                 await self._flow_phases(state_operators, path.from_terminal, path.to_terminal, phases_to_flow.nominal_phase_paths)
             )
 
-        def condition(next_step, nctx, step, ctx):
-            return len(next_step.data.nominal_phase_paths) > 0
-
-        def _get_weight(it) -> int:
-            return it.path.to_terminal.phases.num_phases
-
         return (
             Tracing.network_trace_branching(
                 network_state_operators=state_operators,
                 action_step_type=NetworkTraceActionType.ALL_STEPS,
-                queue_factory=lambda: WeightedPriorityQueue.process_queue(_get_weight),
+                debug_logger=self._debug_logger,
+                name=f'SetPhases({state_operators.description})',
+                queue_factory=lambda: WeightedPriorityQueue.process_queue(lambda it: it.path.to_terminal.phases.num_phases),
                 compute_data=self._compute_next_phases_to_flow(state_operators)
             )
-            .add_queue_condition(condition)
+            .add_queue_condition(
+                lambda next_step, *args: len(next_step.data.nominal_phase_paths) > 0
+            )
             .add_step_action(step_action)
         )
 

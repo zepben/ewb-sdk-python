@@ -18,6 +18,9 @@ if TYPE_CHECKING:
 
 T = TypeVar('T')
 
+__all__ = ['NetworkTraceStep']
+
+
 class NetworkTraceStep(Generic[T]):
     """
     Represents a single step in a network trace, containing information about the path taken and associated data.
@@ -116,3 +119,10 @@ class NetworkTraceStep(Generic[T]):
 
     def next_num_terminal_steps(self):
         return self.num_terminal_steps + 1
+
+    def __getitem__(self, item):
+        """Convenience method to access this NetworkTraceStep as a tuple of (self.path, self.data)"""
+        return (self.path, self.data)[item]
+
+    def __str__(self):
+        return f"NetworkTraceStep({', '.join('{}={}'.format(*i) for i in vars(self).items())})"

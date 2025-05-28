@@ -34,7 +34,9 @@ async def test_downstream_tree():
     start = n.get("j1", ConductingEquipment)
     assert start is not None
     tree_builder = EquipmentTreeBuilder()
-    trace = Tracing.network_trace_branching(network_state_operators=normal, action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT) \
+    trace = Tracing.network_trace_branching(
+        network_state_operators=normal,
+        action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT) \
         .add_condition(downstream()) \
         .add_step_action(tree_builder) \
         .add_step_action(lambda item, context: visited_ce.append(item.path.to_equipment.mrid))
