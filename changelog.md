@@ -8,10 +8,12 @@
 * `RemoveDirection` has been removed. It did not work reliably with dual fed networks with loops. You now need to clear direction using the new
 `ClearDirection` and reapply directions where appropriate using `SetDirection`.
 * `Cut` supports adding a maximum of 2 terminals.
+* `SqliteTable` now subclasses `SqlTable`.
 
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.
+* Created a new `SqlTable` that doesn't support creating schema creation statements by default.
 
 ### Enhancements
 * Tracing models with `Cut` and `Clamp` are now supported via the new tracing API.

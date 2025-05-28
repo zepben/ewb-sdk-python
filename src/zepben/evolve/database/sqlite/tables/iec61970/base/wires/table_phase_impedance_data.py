@@ -7,7 +7,7 @@ __all__ = ["TablePhaseImpedanceData"]
 from typing import List, Generator
 
 from zepben.evolve import SqliteTable
-from zepben.evolve.database.sqlite.tables.column import Column, Nullable
+from zepben.evolve.database.sql.column import Column, Nullable
 
 
 class TablePhaseImpedanceData(SqliteTable):

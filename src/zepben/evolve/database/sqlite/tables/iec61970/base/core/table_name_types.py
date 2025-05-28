@@ -7,7 +7,7 @@ from typing import List, Generator
 
 __all__ = ["TableNameTypes"]
 
-from zepben.evolve.database.sqlite.tables.column import Column, Nullable
+from zepben.evolve.database.sql.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
 
 

@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 __all__ = ["TableSynchronousMachines"]
 
-from zepben.evolve.database.sqlite.tables.column import Column, Nullable
+from zepben.evolve.database.sql.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_rotating_machines import TableRotatingMachines
 
 
