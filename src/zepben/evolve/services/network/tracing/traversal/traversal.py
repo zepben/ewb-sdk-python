@@ -9,10 +9,14 @@ from abc import abstractmethod
 from collections import deque
 from collections.abc import Callable
 from functools import singledispatchmethod
+from logging import Logger
 from typing import List, TypeVar, Generic, Optional, Dict, Union
+
+from typing_extensions import Required
 
 from zepben.evolve import require
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
+from zepben.evolve.services.network.tracing.traversal.debug_logging import DebugLoggingWrapper
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition, QueueConditionWithContextValue, ShouldQueue
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction, StepActionWithContextValue, StepActionFunc
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
@@ -35,27 +39,36 @@ class Traversal(Generic[T, D]):
     """
     A base traversal class allowing items in a connected graph to be traced.
     It provides the main interface and implementation for traversal logic.
-    This class manages conditions, actions, and context values that guide each traversal step.
+    This class manages conditions, actions, and context values that guide each
+    traversal step.
 
-    This class supports a concept of 'branching', whereby when a new branch is created a new child traversal instance is created. The child
-    inherits its parents conditions, actions and what it has tracked. However, it knows nothing about what its siblings have tracked. This
-    allows traversing both ways around loops in the graph.
+    This class supports a concept of 'branching', whereby when a new branch is
+    created a new child traversal instance is created. The child inherits its
+    parents conditions, actions and what it has tracked. However, it knows nothing
+    about what its siblings have tracked. This allows traversing both ways around
+    loops in the graph.
 
-    This class is abstract to allow for type-specific implementations for branching traversals and custom start item handling.
+    This class is abstract to allow for type-specific implementations for branching
+    traversals and custom start item handling.
 
     This class is **not thread safe**.
 
-    `T` The type of object to be traversed.
-    `D` The specific type of traversal, extending [Traversal].
+    - T: The type of object to be traversed.
+    - D: The specific type of traversal, extending [Traversal].
     """
 
     class QueueType(Generic[T, D]):
         """
         Defines the types of queues used in the traversal.
+
+        :var queue_next: Logic for queueing the next item in the traversal.
+        :var queue: The primary queue of items.
         """
         queue_next: Traversal.QueueNext[T]
+        queue: TraversalQueue[T]
 
         @property
+        @abstractmethod
         def queue(self) -> TraversalQueue[T]:
             raise NotImplementedError
 
@@ -64,12 +77,11 @@ class Traversal(Generic[T, D]):
             raise NotImplementedError
 
 
-    class BasicQueueType(QueueType[T, D], Generic[T, D]):
+    class BasicQueueType(QueueType[T, D]):
         """
         Basic queue type that handles non-branching item queuing.
 
-        `queueNext` Logic for queueing the next item in the traversal.
-        `queue` The primary queue of items.
+        :var queue_next: Logic for queueing the next item in the traversal.
         """
         def __init__(self, queue_next: Traversal.QueueNext[T], queue: TraversalQueue[T]):
             self.queue_next = queue_next
@@ -78,6 +90,9 @@ class Traversal(Generic[T, D]):
 
         @property
         def queue(self) -> TraversalQueue[T]:
+            """
+            The primary queue of items.
+            """
             return self._queue
 
         @property
@@ -85,9 +100,10 @@ class Traversal(Generic[T, D]):
             return self._branch_queue
 
 
-    class BranchingQueueType(QueueType[T, D], Generic[T, D]):
+    class BranchingQueueType(QueueType[T, D]):
         """
-        Branching queue type, supporting operations that may split into separate branches during traversal.
+        Branching queue type, supporting operations that may split into separate
+        branches during traversal.
 
         `queueNext` Logic for queueing the next item in a branching traversal.
         `queueFactory` Factory function to create the main queue.
@@ -109,19 +125,24 @@ class Traversal(Generic[T, D]):
         def branch_queue(self) -> Optional[TraversalQueue[D]]:
             return self.branch_queue_factory()
 
-    _queue_type: Union[BasicQueueType, BranchingQueueType]
+    name: str
+    """
+    The name of the traversal. Can be used for logging purposes and will 
+    be included in all debug logging.
+    """
 
-    def __init__(self, queue_type, parent: Optional[D] = None):
+    def __init__(self, queue_type, parent: Optional[D]=None, debug_logger: Logger=None):
         self._queue_type = queue_type
         self._parent: D = parent
+        self._debug_logger = DebugLoggingWrapper(self.name, debug_logger) if debug_logger else None
 
-        if type(self._queue_type) == Traversal.BasicQueueType:
+        if type(queue_type) == Traversal.BasicQueueType:
             self.queue_next = lambda current, context: self._queue_next_non_branching(current, context, self._queue_type.queue_next)
-        elif type(self._queue_type) == Traversal.BranchingQueueType:
+        elif type(queue_type) == Traversal.BranchingQueueType:
             self.queue_next = lambda  current, context: self._queue_next_branching(current, context, self._queue_type.queue_next)
 
-        self.queue: TraversalQueue[T] = self._queue_type.queue
-        self.branch_queue: Optional[TraversalQueue[D]] = self._queue_type.branch_queue
+        self.queue: TraversalQueue[T] = queue_type.queue
+        self.branch_queue: Optional[TraversalQueue[D]] = queue_type.branch_queue
         self.start_items: deque[T] = deque()
 
         self.running: bool = False
@@ -132,6 +153,15 @@ class Traversal(Generic[T, D]):
         self.step_actions: List[StepAction[T]] = []
         self.compute_next_context_funs: Dict[str, ContextValueComputer[T]] = {}
         self.contexts: Dict[T, StepContext] = {}
+
+    def with_logger(self, logger: Logger) -> D:
+        """
+        Method to set the debug_logger after Traversal.__init__() has ran
+        :param logger: the logger to use
+        :return: self
+        """
+        self._debug_logger = DebugLoggingWrapper(self.name, logger)
+        return self
 
     def queue_next(self, current_item: T, context: StepContext):
         raise NotImplementedError
@@ -148,7 +178,8 @@ class Traversal(Generic[T, D]):
 
     def can_action_item(self, item: T, context: StepContext) -> bool:
         """
-        Determines if the traversal can apply step actions and stop conditions on the specified item.
+        Determines if the traversal can apply step actions and stop conditions
+        on the specified item.
 
         `item` The item to check.
         `context` The context of the current traversal step.
@@ -162,6 +193,11 @@ class Traversal(Generic[T, D]):
     def create_new_this(self) -> D:
         """
         Creates a new instance of the traversal for branching purposes.
+
+         NOTE: Do NOT add the debug logger to this call, as all traces created for
+               branching will already have their actions wrapped, and passing the
+               debug logger through means you get duplicate wrappers that double,
+               triple etc. log the debug messages.
 
         Returns A new traversal instance.
         """
@@ -192,8 +228,9 @@ class Traversal(Generic[T, D]):
     @add_condition.register(StopCondition)
     def add_stop_condition(self, condition: StopConditionTypes) -> D:
         """
-        Adds a stop condition to the traversal. If any stop condition returns `true`, the traversal
-        will not call the callback to queue more items from the current item.
+        Adds a stop condition to the traversal. If any stop condition returns
+        `true`, the traversal will not call the callback to queue more items
+        from the current item.
 
         `condition` The stop condition to add.
         Returns this traversal instance.
@@ -206,6 +243,10 @@ class Traversal(Generic[T, D]):
 
     @add_stop_condition.register
     def _(self, condition: StopCondition):
+
+        if self._debug_logger is not None:
+            self._debug_logger.wrap(condition)
+
         self.stop_conditions.append(condition)
         if isinstance(condition, StopConditionWithContextValue):
             self.compute_next_context_funs[condition.key] = condition
@@ -232,7 +273,8 @@ class Traversal(Generic[T, D]):
     @singledispatchmethod
     def add_queue_condition(self, condition: QueueConditionTypes) -> D:
         """
-        Adds a queue condition to the traversal. Queue conditions determine whether an item should be queued for traversal.
+        Adds a queue condition to the traversal.
+        Queue conditions determine whether an item should be queued for traversal.
         All registered queue conditions must return true for an item to be queued.
 
         :param condition: The queue condition to add.
@@ -246,6 +288,10 @@ class Traversal(Generic[T, D]):
 
     @add_queue_condition.register
     def _(self, condition: QueueCondition):
+
+        if self._debug_logger is not None:
+            self._debug_logger.wrap(condition)
+
         self.queue_conditions.append(condition)
         if isinstance(condition, QueueConditionWithContextValue):
             self.compute_next_context_funs[condition.key] = condition
@@ -264,12 +310,17 @@ class Traversal(Generic[T, D]):
 
     def add_step_action(self, action: Union[StepActionFunc, StepAction[T]]) -> D:
         """
-        Adds an action to be performed on each item in the traversal, including the starting items.
+        Adds an action to be performed on each item in the traversal, including the
+        starting items.
 
         `action` The action to perform on each item.
         Returns The current traversal instance.
         """
         if isinstance(action, StepAction):
+
+            if self._debug_logger is not None:
+                self._debug_logger.wrap(action)
+
             self.step_actions.append(action)
             if isinstance(action, StepActionWithContextValue):
                 self.compute_next_context_funs[action.key] = action
@@ -287,7 +338,17 @@ class Traversal(Generic[T, D]):
         `action` The action to perform on each non-stopping item.
         Returns The current traversal instance.
         """
-        self.step_actions.append(StepAction(lambda it, context: action(it, context) if not context.is_stopping else None))
+        # TODO: at the moment were assuming a function being passed in, so we can turn it into
+        #  a step action here, this prevents StepActionWithContextValue being passed in, however
+        #  in future we want to allow passing step actions in here. the JVMSDK throws an error
+        #  if you pass context aware step actions into here, though why cant we just send this
+        #  on to `add_step_action`...
+        step_action = StepAction(lambda it, context: action(it, context) if not context.is_stopping else None)
+
+        if self._debug_logger is not None:
+            self._debug_logger.wrap(step_action)
+
+        self.step_actions.append(step_action)
         return self
 
 
@@ -298,7 +359,17 @@ class Traversal(Generic[T, D]):
         `action` The action to perform on each stopping item.
         Returns The current traversal instance.
         """
-        self.step_actions.append(StepAction(lambda it, context: action(it, context) if context.is_stopping else None))
+        # TODO: at the moment were assuming a function being passed in, so we can turn it into
+        #  a step action here, this prevents StepActionWithContextValue being passed in, however
+        #  in future we want to allow passing step actions in here. the JVMSDK throws an error
+        #  if you pass context aware step actions into here, though why cant we just send this
+        #  on to `add_step_action`...
+        step_action = StepAction(lambda it, context: action(it, context) if context.is_stopping else None)
+
+        if self._debug_logger is not None:
+            self._debug_logger.wrap(step_action)
+
+        self.step_actions.append(step_action)
         return self
 
     def copy_step_actions(self, other: Traversal[T, D]) -> D:
@@ -322,7 +393,8 @@ class Traversal(Generic[T, D]):
 
     def add_context_value_computer(self, computer: ContextValueComputer[T]) -> D:
         """
-        Adds a standalone context value computer to compute additional [StepContext] values during traversal.
+        Adds a standalone context value computer to compute additional [StepContext]
+        values during traversal.
 
         `computer` The context value computer to add.
         Returns The current traversal instance.
@@ -333,8 +405,10 @@ class Traversal(Generic[T, D]):
 
     def copy_context_value_computer(self, other: Traversal[T, D]) -> D:
         """
-        Copies all standalone context value computers from another traversal to this traversal.
-        That is, it does not copy any [TraversalCondition] registered that also implements [ContextValueComputer]
+        Copies all standalone context value computers from another traversal to this
+        traversal.
+        That is, it does not copy any [TraversalCondition] registered that also
+        implements [ContextValueComputer]
 
         `other` The other traversal from which to copy context value computers.
         Returns The current traversal instance.
@@ -362,8 +436,8 @@ class Traversal(Generic[T, D]):
         """
         Adds a starting item to the traversal.
 
-        `item` The item to add.
-        Returns The current traversal instance.
+        :param item: The item to add.
+        :return: The current traversal instance.
         """
         self.start_items.append(item)
         return self
@@ -373,9 +447,10 @@ class Traversal(Generic[T, D]):
         """
         Runs the traversal optionally adding [startItem] to the collection of start items.
 
-        `startItem` The item from which to start the traversal. (optional)
-        `canStopOnStartItem` Indicates if the traversal should check stop conditions on the starting item.
-        Returns The current traversal instance.
+        :param start_item: The item from which to start the traversal. (optional)
+        :param can_stop_on_start_item: Indicates if the traversal should check stop conditions
+            on the starting item.
+        :return: The current traversal instance.
         """
         if start_item is not None:
             self.start_items.append(start_item)
@@ -405,7 +480,7 @@ class Traversal(Generic[T, D]):
         """
         Resets the traversal to allow it to be reused.
 
-        Returns The current traversal instance.
+        :return: The current traversal instance.
         """
         require(not self.running, lambda: "Traversal is currently running.")
         self.has_run = False
@@ -420,7 +495,8 @@ class Traversal(Generic[T, D]):
     @abstractmethod
     def on_reset(self):
         """
-        Called when the traversal is reset. Derived classes can override this to reset additional state.
+        Called when the traversal is reset. Derived classes can override this to
+        reset additional state.
         """
         raise NotImplementedError()
 

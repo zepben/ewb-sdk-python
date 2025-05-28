@@ -39,7 +39,7 @@ class QueueCondition(Generic[T], TraversalCondition[T]):
         `currentContext` The context associated with the [currentItem].
         Returns `true` if the [nextItem] should be queued; `false` otherwise.
         """
-        raise NotImplementedError
+        raise NotImplemented
 
     @staticmethod
     def should_queue_start_item(item: T) -> bool:
@@ -52,12 +52,20 @@ class QueueCondition(Generic[T], TraversalCondition[T]):
         return True
 
 
-from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
+from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
 
-class QueueConditionWithContextValue(QueueCondition[T], TypedContextValueComputer[T, U], Generic[T, U]):
+class QueueConditionWithContextValue(QueueCondition[T], ContextValueComputer[T], Generic[T, U]):
     """
     Interface representing a queue condition that requires a value stored in the [StepContext] to determine if an item should be queued.
 
     `T` The type of items being traversed.
     `U` The type of the context value computed and used in the condition.
     """
+
+    @abstractmethod
+    def compute_initial_value(self, item: T):
+        raise NotImplemented
+
+    @abstractmethod
+    def compute_next_value(self, next_item: T, current_item: T, current_value):
+        raise NotImplemented

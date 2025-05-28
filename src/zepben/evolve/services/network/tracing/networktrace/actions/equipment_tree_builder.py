@@ -35,7 +35,7 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
     _roots: dict[ConductingEquipment, EquipmentTreeNode]={}
 
     def __init__(self):
-        self.key = str(uuid.uuid4())
+        super().__init__(_func=self.apply, key=str(uuid.uuid4()))
 
     @property
     def roots(self) -> Generator[TreeNode[ConductingEquipment], None, None]:
@@ -48,7 +48,7 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
             self._roots[item.path.to_equipment] = node
         return node
 
-    def compute_next_value_typed(self, next_item: NetworkTraceStep[Any], current_item: NetworkTraceStep[Any], current_value: EquipmentTreeNode) -> EquipmentTreeNode:
+    def compute_next_value(self, next_item: NetworkTraceStep[Any], current_item: NetworkTraceStep[Any], current_value: EquipmentTreeNode) -> EquipmentTreeNode:
         if next_item.path.traced_internally:
             return current_value
         else:

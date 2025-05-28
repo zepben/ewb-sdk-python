@@ -4,24 +4,31 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
+from logging import Logger
 from typing import TYPE_CHECKING, Any, TypeVar, Type
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
-from zepben.evolve import FeederDirection
+from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 
 if TYPE_CHECKING:
     from zepben.evolve import StepContext, NetworkTraceStep
 
 T = TypeVar('T')
 
+__all__ =['ClearDirection']
+
 
 class ClearDirection:
+
+    def __init__(self, debug_logger: Logger=None):
+        self._debug_logger = debug_logger
 
     #
     #NOTE: We used to try and remove directions in a single pass rather than clearing (and the reapplying where needed) to be more efficient.
@@ -29,9 +36,9 @@ class ClearDirection:
     #      We decided it is so much simpler to just clear the directions and reapply from other feeder heads even if its a bit more computationally expensive.
     #
     async def run(self,
-            terminal: Terminal,
-            network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL
-            ) -> list[Terminal]:
+                  terminal: Terminal,
+                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL
+                  ) -> list[Terminal]:
         """
         Clears the feeder direction from a terminal and the connected equipment chain.
         This clears directions even if equipment is dual fed. A set of feeder head terminals encountered while running will be returned and directions
@@ -48,12 +55,10 @@ class ClearDirection:
         await trace.run(terminal, can_stop_on_start_item=False)
         return feeder_head_terminals
 
-    @staticmethod
-    def _create_trace(state_operators: Type[NetworkStateOperators],
+    def _create_trace(self,
+                      state_operators: Type[NetworkStateOperators],
                       visited_feeder_head_terminals: list[Terminal]
                       ) -> NetworkTrace[Any]:
-        def queue_condition(step: NetworkTraceStep, context: StepContext, _, __):
-            return state_operators.get_direction(step.path.to_terminal) != FeederDirection.NONE
 
         def step_action(item: NetworkTraceStep, context: StepContext):
             state_operators.set_direction(item.path.to_terminal, FeederDirection.NONE)
@@ -63,10 +68,14 @@ class ClearDirection:
             Tracing.network_trace(
                 network_state_operators=state_operators,
                 action_step_type=NetworkTraceActionType.ALL_STEPS,
+                debug_logger=self._debug_logger,
+                name=f'ClearDirection({state_operators.description})',
                 queue=WeightedPriorityQueue.process_queue(
                     lambda it: it.path.to_terminal.phases.num_phases),
             )
-            .add_condition(state_operators.stop_at_open())
-            .add_queue_condition(queue_condition)
+            .add_condition(stop_at_open())
+            .add_queue_condition(
+                lambda step, *args: state_operators.get_direction(step.path.to_terminal) != FeederDirection.NONE
+            )
             .add_step_action(step_action)
         )

@@ -6,6 +6,9 @@ from typing import TypeVar, Generic
 
 T = TypeVar('T')
 
+__all__ = ['StepContext']
+
+
 class StepContext(Generic[T]):
     """
     Represents the context of a traversal step, holding information about the traversal state and the ability to store arbitrary values with the context.
@@ -47,3 +50,6 @@ class StepContext(Generic[T]):
         @return The context value associated with the key, or `None` if not found.
         """
         return self._values.get(key)
+
+    def __str__(self) -> str:
+        return f"StepContext({', '.join('{}={}'.format(*i) for i in vars(self).items())})"
