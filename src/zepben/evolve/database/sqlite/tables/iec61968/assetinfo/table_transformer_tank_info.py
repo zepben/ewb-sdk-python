@@ -5,7 +5,7 @@
 
 from typing import List, Generator
 
-from zepben.evolve.database.sqlite.tables.column import Column, Nullable
+from zepben.evolve.database.sql.column import Column, Nullable
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_info import TableAssetInfo
 
 __all__ = ["TableTransformerTankInfo"]

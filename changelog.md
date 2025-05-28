@@ -9,9 +9,11 @@
   and reapply directions where appropriate using `SetDirection`.
 * `Cut` supports adding a maximum of 2 terminals.
 * `NetworkTraceTracker` now uses a `set` to track visited objects, if you were using unhashable objects this will need to be addressed.
+* `SqliteTable` now subclasses `SqlTable`.
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.
+* Created a new `SqlTable` that doesn't support creating schema creation statements by default.
 
 ### Enhancements
 * Tracing models with `Cut` and `Clamp` are now supported via the new tracing API.
