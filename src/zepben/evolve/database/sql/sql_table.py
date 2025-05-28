@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from abc import abstractmethod, ABC, ABCMeta
+from abc import abstractmethod, ABCMeta
+from operator import attrgetter
 from typing import List, Optional, Type, Any, Generator
 
 from zepben.evolve.database.sql.column import Column, Nullable
@@ -60,7 +61,10 @@ class SqlTable(metaclass=ABCMeta):
         """
         The SQL statement that should be used with a `PreparedStatement` to insert entries into the table.
         """
-        return self._prepared_insert_sql if self._prepared_insert_sql else self._build_prepared_insert_sql()
+        if self._prepared_insert_sql is None:
+            self._prepared_insert_sql = (f"INSERT INTO {self.name} ({', '.join([c.name for c in self.column_set])}) " 
+                                        f"VALUES ({', '.join(['?' for _ in self.column_set])})")
+        return self._prepared_insert_sql
 
     @property
     @abstractmethod
@@ -76,38 +80,41 @@ class SqlTable(metaclass=ABCMeta):
         """
         The SQL statement that should be used to read the entries from the table in the database.
         """
-        return self._select_sql if self._select_sql else self._build_select_sql()
+        if self._select_sql is None:
+            self._select_sql = f"SELECT {', '.join([c.name for c in self.column_set])} FROM {self.name}"
+        return self._select_sql
 
     @property
     def prepared_update_sql(self):
         """
         The SQL statement that should be used with a `PreparedStatement` to update entries into the table.
         """
-        return self._prepared_update_sql if self._prepared_update_sql else self._build_prepared_update_sql()
+        if self._prepared_update_sql is None:
+            self._prepared_update_sql = f"UPDATE {self.name} SET {', '.join([f'{c.name} = ?' for c in self.column_set])}"
+        return self._prepared_update_sql
 
     @property
     def unique_index_columns(self) -> Generator[List[Column], None, None]:
         """
         A list of column groups that require a unique index in the database
         """
-        # To make this a generator we need to `yield`, but we have nothing to yield by default, so trick it by yielding from an empty for-loop.
-        for it in []:
-            yield it
+        yield from []
 
     @property
     def non_unique_index_columns(self) -> Generator[List[Column], None, None]:
         """
         A list of column groups that require a non-unique index in the database
         """
-        # To make this a generator we need to `yield`, but we have nothing to yield by default, so trick it by yielding from an empty for-loop.
-        for it in []:
-            yield it
+        yield from []
 
     @property
     def column_set(self) -> List[Column]:
-        return self._column_set if self._column_set else self._build_column_set(self.__class__, self)
+        if self._column_set is None:
+            self._column_set = list(self._build_column_set(self.__class__, self))
+        return self._column_set
 
-    def _build_column_set(self, clazz: Type[Any], instance: SqlTable) -> List[Column]:
+    @staticmethod
+    def _build_column_set(clazz: Type[Any], instance: SqlTable) -> Generator[Column, None, None]:
         """
         Builds the list of columns for use in DDL statements for this table.
 
@@ -127,35 +134,7 @@ class SqlTable(metaclass=ABCMeta):
         if len(set([c.name for c in cols])) != len(cols):
             raise ValueError("You have a duplicate column names, go fix that.")
 
-        self._column_set = sorted(cols, key=lambda it: it.query_index)
-        return self._column_set
-
-    def _build_prepared_insert_sql(self) -> str:
-        self._prepared_insert_sql = f"INSERT INTO {self.name} ({', '.join([c.name for c in self.column_set])}) " \
-                                    f"VALUES ({', '.join(['?' for _ in self.column_set])})"
-        return self._prepared_insert_sql
-
-    def _build_indexes_sql(self) -> List[str]:
-        statements = []
-        for index_col in self.unique_index_columns:
-            statements.append(self._build_index_sql(index_col, True))
-        for index_col in self.non_unique_index_columns:
-            statements.append(self._build_index_sql(index_col, False))
-        self._create_indexes_sql = statements
-        return self._create_indexes_sql
-
-    def _build_index_sql(self, index_col: List[Column], is_unique: bool):
-        id_string = f"{self.name}_{'_'.join(map(lambda c: c.name, index_col))}"
-        col_string = ', '.join(map(lambda c: c.name, index_col))
-        return f"CREATE {'UNIQUE ' if is_unique else ''}INDEX {id_string} ON {self.name} ({col_string})"
-
-    def _build_select_sql(self) -> str:
-        self._select_sql = f"SELECT {', '.join([c.name for c in self.column_set])} FROM {self.name}"
-        return self._select_sql
-
-    def _build_prepared_update_sql(self) -> str:
-        self._prepared_update_sql = f"UPDATE {self.name} SET {', '.join([f'{c.name} = ?' for c in self.column_set])}"
-        return self._prepared_update_sql
+        yield from sorted(cols, key=attrgetter('query_index'))
 
     def _create_column(self, name: str, type_: str, nullable: Nullable = Nullable.NONE) -> Column:
         self.column_index += 1
