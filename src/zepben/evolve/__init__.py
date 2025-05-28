@@ -156,6 +156,8 @@ from zepben.evolve.services.network.translator.network_proto2cim import *
 from zepben.evolve.services.network.translator.network_cim2proto import *
 from zepben.evolve.services.network.network_service import *
 
+from zepben.evolve.services.network.tracing.traversal.step_context import *
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import *
 from zepben.evolve.services.network.tracing.connectivity.connectivity_result import *
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import *
 from zepben.evolve.services.network.tracing.connectivity.phase_paths import *

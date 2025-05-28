@@ -11,7 +11,7 @@ from zepben.evolve.services.network.tracing.traversal.step_context import StepCo
 T = TypeVar('T')
 U = TypeVar('U')
 
-__all__ = ['ContextValueComputer', 'TypedContextValueComputer']
+__all__ = ['ContextValueComputer']
 
 
 class ContextValueComputer(Generic[T]):
@@ -30,62 +30,31 @@ class ContextValueComputer(Generic[T]):
         """
         Computes the initial context value for the given starting item.
 
-        `item` The starting item for which to compute the initial context value.
-        Returns The initial context value associated with the starting item.
+        :param item: The starting item for which to compute the initial context value.
+        :return: The initial context value associated with the starting item.
         """
-        pass
+        raise NotImplemented
 
     @abstractmethod
     def compute_next_value(self, next_item: T, current_item: T, current_value):
         """
         Computes the next context value based on the current item, next item, and the current context value.
 
-        `nextItem` The next item in the traversal.
-        `currentItem` The current item of the traversal.
-        `currentValue` The current context value associated with the current item.
-        Returns The updated context value for the next item.
+        :param next_item: The next item in the traversal.
+        :param current_item: The current item of the traversal.
+        :param current_value: The current context value associated with the current item.
+        :return: The updated context value for the next item.
         """
-        pass
+        raise NotImplemented
 
-    def is_standalone_computer(self):
-        return not isinstance(self, (StepAction, StopCondition, QueueCondition))
-
-class TypedContextValueComputer(ContextValueComputer, Generic[T, U]):
-    """
-    A typed version of [ContextValueComputer] that avoids unchecked casts by specifying the type of context value.
-    This interface allows for type-safe computation of context values in implementations.
-
-    `T` The type of items being traversed.
-    `U` The type of the context value computed and stored.
-    """
-    def compute_initial_value(self, item: T):
-        """
-        Computes the initial context value of type [U] for the given starting item.
-
-        `item` The starting item for which to compute the initial context value.
-        Returns The initial context value associated with the starting item.
-        """
-        pass
-
-    def compute_next_value(self, next_item: T, current_item: T, current_value) -> U:
-        return self.compute_next_value_typed(next_item, current_item, current_value)
-
-    def compute_next_value_typed(self, next_item: T, current_item: T, current_value) -> U:
-        """
-        Computes the next context value of type [U] based on the current item, next item, and the current context value.
-
-        `nextItem` The next item in the traversal.
-        `currentItem` The current item being processed.
-        `currentValue` The current context value associated with the current item cast to type [U].
-        Returns The updated context value of type for the next item.
-        """
-        pass
-    
     def get_context_value(self, context: StepContext):
         """
         Gets the computed value from the context cast to type [U].
         """
         return context.get_value(self.key)
+
+    def is_standalone_computer(self):
+        return not isinstance(self, (StepAction, StopCondition, QueueCondition))
 
 
 # these imports are here to stop circular imports

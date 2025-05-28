@@ -47,6 +47,8 @@ class NetworkStateOperators(OpenStateOperators,
     or creating redundant trace implementations for different network states.
     """
 
+    description: str
+
     @classproperty
     def NORMAL(cls) -> Type['NormalNetworkStateOperators']:
         return NormalNetworkStateOperators
@@ -71,6 +73,8 @@ class NormalNetworkStateOperators(NetworkStateOperators,
     Instance that operates on the normal state of network objects.
     """
 
+    description = 'normal'
+
     CURRENT = False
     NORMAL = True
 
@@ -92,6 +96,8 @@ class CurrentNetworkStateOperators(NetworkStateOperators,
     """
     Instance that operates on the current state of network objects.
     """
+
+    description = 'current'
 
     CURRENT = True
     NORMAL = False
