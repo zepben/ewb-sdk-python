@@ -49,8 +49,8 @@ class Tracing:
     @staticmethod
     def network_trace_branching(network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
                                 action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
-                                debug_logger: Logger = None,
-                                name: str = 'NetworkTrace',
+                                debug_logger: Logger=None,
+                                name: str='NetworkTrace',
                                 queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]]=lambda: TraversalQueue.depth_first(),
                                 branch_queue_factory: Callable[[], TraversalQueue[NetworkTrace[NetworkTraceStep[T]]]]=lambda: TraversalQueue.breadth_first(),
                                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None
@@ -69,41 +69,41 @@ class Tracing:
                                       debug_logger=debug_logger)
 
     @staticmethod
-    def set_direction(debug_logger: Logger = None):
+    def set_direction(debug_logger: Logger=None):
         from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
         return SetDirection(debug_logger=debug_logger)
 
     @staticmethod
-    def clear_direction(debug_logger: Logger = None):
+    def clear_direction(debug_logger: Logger=None):
         from zepben.evolve.services.network.tracing.feeder.clear_direction import ClearDirection
         return ClearDirection(debug_logger=debug_logger)
 
     @staticmethod
-    def assign_equipment_to_feeders(debug_logger: Logger = None):
+    def assign_equipment_to_feeders(debug_logger: Logger=None):
         from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
         return AssignToFeeders(debug_logger=debug_logger)
 
     @staticmethod
-    def assign_equipment_to_lv_feeders(debug_logger: Logger = None):
+    def assign_equipment_to_lv_feeders(debug_logger: Logger=None):
         from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import AssignToLvFeeders
         return AssignToLvFeeders(debug_logger=debug_logger)
 
     @staticmethod
-    def set_phases(debug_logger: Logger = None):
+    def set_phases(debug_logger: Logger=None):
         from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
         return SetPhases(debug_logger=debug_logger)
 
     @staticmethod
-    def remove_phases(debug_logger: Logger = None):
+    def remove_phases(debug_logger: Logger=None):
         from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
         return RemovePhases(debug_logger=debug_logger)
 
     @staticmethod
-    def phase_inferrer(debug_logger: Logger = None):
+    def phase_inferrer(debug_logger: Logger=None):
         from zepben.evolve.services.network.tracing.phases.phase_inferrer import PhaseInferrer
         return PhaseInferrer(debug_logger=debug_logger)
 
     @staticmethod
-    def find_swer_equipment(debug_logger: Logger = None):
+    def find_swer_equipment(debug_logger: Logger=None):
         from zepben.evolve.services.network.tracing.find_swer_equipment import FindSwerEquipment
         return FindSwerEquipment(debug_logger=debug_logger)
