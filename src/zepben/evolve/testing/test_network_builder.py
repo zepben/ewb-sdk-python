@@ -394,7 +394,8 @@ class TestNetworkBuilder:
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
-        action: Callable[[ConductingEquipment], None] = null_action
+        action: Callable[[ConductingEquipment], None] = null_action,
+        default_mrid_prefix: Optional[str] = None
     ) -> 'TestNetworkBuilder':
         """
         Start a new network island from a `ConductingEquipment` created by `creator`, updating the network pointer to the new `ConductingEquipment`.
@@ -405,10 +406,13 @@ class TestNetworkBuilder:
         :param num_terminals: The number of terminals to create on the new `ConductingEquipment`. Defaults to 2.
         :param mrid: Optional mRID for the new `ConductingEquipment`.
         :param action: An action that accepts the new `ConductingEquipment` to allow for additional initialisation.
+        :param default_mrid_prefix:  mRID prefix to use for the new `ConductingEquipment`
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
-        it = self._create_other(mrid, creator, nominal_phases, num_terminals)
+        if mrid and default_mrid_prefix:
+            raise ValueError('cant specify both mrid and default_mrid_prefix as your intention is unclear')
+        it = self._create_other(mrid, creator, nominal_phases, num_terminals, default_mrid_prefix=default_mrid_prefix)
         action(it)
         self._current = it
         return self
@@ -420,7 +424,8 @@ class TestNetworkBuilder:
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[ConductingEquipment], None] = null_action
+        action: Callable[[ConductingEquipment], None] = null_action,
+        default_mrid_prefix: Optional[str] = None
     ) -> 'TestNetworkBuilder':
         """
         Add a new `ConductingEquipment` to the network and connect it to the current network pointer, updating the network pointer to the new
@@ -434,10 +439,13 @@ class TestNetworkBuilder:
         :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `ConductingEquipment` to the previous item. Will only be used
          if the previous item is not already connected.
         :param action: An action that accepts the new `ConductingEquipment` to allow for additional initialisation.
+        :param default_mrid_prefix:  mRID prefix to use for the new `ConductingEquipment`
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
-        it = self._create_other(mrid, creator, nominal_phases, num_terminals)
+        if mrid and default_mrid_prefix:
+            raise ValueError('cant specify both mrid and default_mrid_prefix as your intention is unclear')
+        it = self._create_other(mrid, creator, nominal_phases, num_terminals, default_mrid_prefix=default_mrid_prefix)
         self._connect(self._current, it, connectivity_node_mrid)
         action(it)
         self._current = it
@@ -759,9 +767,10 @@ class TestNetworkBuilder:
         mrid: Optional[str],
         creator: Union[OtherCreator, Type[ConductingEquipment]],
         nominal_phases: PhaseCode,
-        num_terminals: Optional[int]
+        num_terminals: Optional[int],
+        default_mrid_prefix: Optional[str] = None
     ) -> ConductingEquipment:
-        o = creator(mrid=self._next_id(mrid, "o"))
+        o = creator(mrid=self._next_id(mrid, default_mrid_prefix or "o"))
         for i in range(1, (num_terminals if num_terminals is not None else 2) + 1):
             self._add_terminal(o, i, nominal_phases)
 

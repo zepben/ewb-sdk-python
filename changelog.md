@@ -21,6 +21,7 @@
   * `connect_to` - Connects the previously added item, rather than having to specify it again in `connect`.
   * You can now add sites to the `TestNetworkBuilder` via `addSite`.
   * You can now add busbar sections natively with `from_busbar_section` and `to_busbar_section`
+  * The prefix for generated mRIDs for "other" equipment can be specified with the `default_mrid_prefix` argument in `from_other` and `to_other`.
 * When processing feeder assignments, all LV feeders belonging to a dist substation site will now be considered energized when the site is energized by a feeder.
 
 
