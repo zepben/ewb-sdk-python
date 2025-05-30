@@ -33,16 +33,16 @@ class NetworkTraceStopCondition(StopCondition[T], Generic[T]):
         super().__init__(self.should_stop)
         if condition is not None:
             self.should_stop_matched_step = condition
-        self.step_type = step_type
+        self.should_stop = self._should_stop_func(step_type)
 
     def should_stop(self, item: NetworkTraceStep[T], context: StepContext) -> bool:
-        return self._should_stop_func(self.step_type)(item, context)
+        raise NotImplementedError()
 
     def should_stop_matched_step(self, item: NetworkTraceStep[T], context: StepContext) -> bool:
         """
         The logic you would normally put in `should_stop`. However, this will only be called when a step matches the `step_type`
         """
-        raise NotImplemented
+        raise NotImplementedError()
 
     def should_stop_internal_step(self, item: NetworkTraceStep[T], context: StepContext) -> bool:
         if item.type() == NetworkTraceStep.Type.INTERNAL:
@@ -62,4 +62,4 @@ class NetworkTraceStopCondition(StopCondition[T], Generic[T]):
             return self.should_stop_internal_step
         elif step_type == NetworkTraceStep.Type.EXTERNAL:
             return self.should_stop_external_step
-        raise ValueError(f'INTERNAL ERROR: step type [{step_type}] didn\'t match expected')
+        raise ValueError(f"INTERNAL ERROR: step type [{step_type}] didn't match expected")

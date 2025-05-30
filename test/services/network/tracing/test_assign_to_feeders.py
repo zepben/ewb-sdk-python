@@ -256,5 +256,3 @@ class TestAssignToFeeders:
 
         feeder = network['fdr2']
         validate_equipment(feeder.equipment, 'b0')
-
-

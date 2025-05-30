@@ -42,11 +42,10 @@ class NetworkTraceStepPathProvider:
                 return self._next_paths_from_clamp(to_equipment, path, path_factory)
             elif isinstance(to_equipment, Cut):
                 return self._next_paths_from_cut(to_equipment, path, path_factory)
+            elif path.traced_internally:
+                return self._next_external_paths(path, path_factory)
             else:
-                if path.traced_internally:
-                    return self._next_external_paths(path, path_factory)
-                else:
-                    return seq_term_map_to_path(path.to_terminal.other_terminals(), path_factory)
+                return seq_term_map_to_path(path.to_terminal.other_terminals(), path_factory)
 
         return (p for p in _get_next_paths() if p and self.state_operators.is_in_service(p.to_terminal.conducting_equipment))
 

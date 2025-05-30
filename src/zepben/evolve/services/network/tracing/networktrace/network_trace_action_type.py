@@ -17,7 +17,7 @@ def _all_steps(item: NetworkTraceStep, context: StepContext, has_tracked: HasTra
     return True
 
 
-def _first_step_on_equipment(item: NetworkTraceStep[Any], context: StepContext, has_tracked: Callable[[Terminal, Set[SinglePhaseKind]], bool]) -> bool:
+def _first_step_on_equipment(item: NetworkTraceStep[Any], context: StepContext, has_tracked: HasTracked) -> bool:
     phases = item.path.to_phases_set()
     return not any(has_tracked(it, phases) for it in item.path.to_terminal.other_terminals())
 

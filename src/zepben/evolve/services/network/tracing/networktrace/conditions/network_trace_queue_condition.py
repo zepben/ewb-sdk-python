@@ -33,10 +33,10 @@ class NetworkTraceQueueCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]
         super().__init__(self.should_queue)
         if condition is not None:
             self.should_queue_matched_step = condition
-        self.step_type = step_type
+        self.should_queue = self._should_queue_func(step_type)
 
     def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
-        return self._should_queue_func(self.step_type)(next_item, next_context, current_item, current_context)
+        raise NotImplementedError()
 
     def should_queue_matched_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
         """
@@ -61,4 +61,4 @@ class NetworkTraceQueueCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]
             return self.should_queue_internal_step
         elif step_type == NetworkTraceStep.Type.EXTERNAL:
             return self.should_queue_external_step
-        raise ValueError(f'INTERNAL ERROR: step type [{step_type}] didn\'t match expected')
+        raise ValueError(f"INTERNAL ERROR: step type [{step_type}] didn't match expected")

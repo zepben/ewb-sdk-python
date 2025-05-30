@@ -18,8 +18,6 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 if TYPE_CHECKING:
     from zepben.evolve import StepContext, NetworkTraceStep
 
-T = TypeVar('T')
-
 
 class ClearDirection:
 
