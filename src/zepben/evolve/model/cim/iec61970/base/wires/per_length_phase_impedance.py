@@ -41,7 +41,7 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
         """
         Get only the diagonal elements of the matrix, i.e toPhase == fromPhase.
         """
-        return ngen([pid for pid in self._data if pid.from_phase == pid.to_phase])
+        return ngen(pid for pid in self._data if pid.from_phase == pid.to_phase)
 
     def num_data(self):
         """Return the number of :class:`PhaseImpedanceData` associated with this :class:`PerLengthPhaseImpedance`."""
