@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import itertools
 import sys
 from typing import Generator, Optional, Callable, Iterable, List, Union, Type, TYPE_CHECKING
 
@@ -311,11 +310,12 @@ class NetworkTraceStepPathProvider:
             if isinstance(from_terminal.conducting_equipment, AcLineSegment) and towards_segment_t2:
                 return lambda it: length_from_t1 <= it.length_from_T1_or_0 <= next_terminal_length_from_terminal_1
             elif towards_segment_t2:
-                return lambda it: it.length_from_T1_or_0 > length_from_t1 and it.length_from_T1_or_0 <= next_terminal_length_from_terminal_1
+                return lambda it: length_from_t1 < it.length_from_T1_or_0 <= next_terminal_length_from_terminal_1
             elif (next_terminal_length_from_terminal_1 == 0.0) and len(next_cuts) == 0:
                 return lambda it: next_terminal_length_from_terminal_1 <= it.length_from_T1_or_0 <= length_from_t1
             else:
-                return lambda it: it.length_from_T1_or_0 <= length_from_t1 and it.length_from_T1_or_0 > next_terminal_length_from_terminal_1
+                return lambda it: length_from_t1 >= it.length_from_T1_or_0 > next_terminal_length_from_terminal_1
+
         _filter = clamps_before_next_terminal_filter()
 
         clamps_before_next_terminal = (c for c in clamps if _filter(c))
@@ -338,7 +338,7 @@ def seq_term_map_to_path(
     path_factory: PathFactory,
     traversed_acls: AcLineSegment=None
 ) -> Generator[NetworkTraceStep.Path, None, None]:
-    
+
     if isinstance(terms, Iterable):
         for terminal in terms:
             if terminal is not None:
