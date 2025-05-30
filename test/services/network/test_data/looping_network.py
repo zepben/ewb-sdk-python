@@ -12,77 +12,77 @@ def create_looping_network():
     :return: An example network with loops.
     """
     #
-    # j0   c1    j2   c13   j14  c15   j16
+    # j0   ac0   j1   ac1   j2   ac2   j3
     # *11------21*21------21*21------21*
     #            3                     2
     #            1                     1
-    #         c3 |                     | c17
+    #        ac3 |                     | ac4
     #            2                     2
-    #            1    c20              1
-    #         j4 *21------21* j21      * b18 (open)
+    #            1  ac5                1
+    #         j4 *21------21* j5       * j6 (open)
     #            3                     2
     #            1                     1
-    #         c5 |                     | c19
+    #        ac6 |                     | ac7
     #            2                     2
-    #            1    c22  j23   c24   2
-    #         j6 *21------21*21------21* j25
+    #            1    ac8   j8   ac9   2
+    #         j7 *21------21*21------21* j9
     #            3
-    #            1     c29
-    #            |      /--21* j30
-    #         c7 |     /     2
+    #            1    ac11
+    #            |      /--21* j11
+    #       ac10 |     /     2
     #            |    /      1
-    #            2   /       | c31
+    #            2   /       | ac13
     #            1  /        2
-    #         j8 *21   c9    2    c11
-    #            31--------21*31------21* j12
-    #             1        2 j10
+    #        j10 *21 ac12    2   ac14
+    #            31--------21*31------21* j13
+    #             1        2 j12
     #              \       |
-    #               \      1 c28
+    #               \      1 ac16
     #                \     2
-    #                 \--21* j27
-    #                c26
+    #                 \--21* j14
+    #               ac15
     #
     return (
         TestNetworkBuilder()
-        .from_junction(nominal_phases=PhaseCode.ABCN, num_terminals=1)  # j0
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c1
-        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3)  # j2
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c3
-        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3)  # j4
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c5
-        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3)  # j6
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c7
-        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3)  # j8
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c9
-        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3)  # j10
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c11
-        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=1)  # j12
-        .branch_from("j2", 2)
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c13
-        .to_junction(nominal_phases=PhaseCode.ABCN)  # j14
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c15
-        .to_junction(nominal_phases=PhaseCode.ABCN)  # j16
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c17
-        .to_breaker(nominal_phases=PhaseCode.ABCN, is_normally_open=True)  # b18
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c19
+        .from_junction(nominal_phases=PhaseCode.ABCN, num_terminals=1, mrid='j0')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac0')
+        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3, mrid='j1')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac3')
+        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3, mrid='j4')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac6')
+        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3, mrid='j7')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac10')
+        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3, mrid='j10')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac12')
+        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=3, mrid='j12')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac14')
+        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=1, mrid='j13')
+        .branch_from("j1", 2)
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac1')
+        .to_junction(nominal_phases=PhaseCode.ABCN, mrid='j2')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac2')
+        .to_junction(nominal_phases=PhaseCode.ABCN, mrid='j3')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac4')
+        .to_breaker(nominal_phases=PhaseCode.ABCN, is_normally_open=True, is_open=True, mrid='j6')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac7')
         .branch_from("j4", 2)
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c20
-        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=1)  # j21
-        .branch_from("j6", 2)
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c22
-        .to_junction(nominal_phases=PhaseCode.ABCN)  # j23
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c24
-        .to_junction(nominal_phases=PhaseCode.ABCN)  # j25
-        .connect("c19", "j25", 2, 2)
-        .branch_from("j8", 3)
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c26
-        .to_junction(nominal_phases=PhaseCode.ABCN)  # j27
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c28
-        .connect("c28", "j10", 2, 1)
-        .branch_from("j8", 2)
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c29
-        .to_junction(nominal_phases=PhaseCode.ABCN)  # j30
-        .to_acls(nominal_phases=PhaseCode.ABCN)  # c31
-        .connect("c31", "j10", 2, 2)
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac5')
+        .to_junction(nominal_phases=PhaseCode.ABCN, num_terminals=1, mrid='j5')
+        .branch_from("j7", 2)
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac8')
+        .to_junction(nominal_phases=PhaseCode.ABCN, mrid='j8')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac9')
+        .to_junction(nominal_phases=PhaseCode.ABCN, mrid='j9')
+        .connect("ac7", "j9", 2, 2)
+        .branch_from("j10", 3)
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac15')
+        .to_junction(nominal_phases=PhaseCode.ABCN, mrid='j14')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac16')
+        .connect("ac16", "j12", 2, 1)
+        .branch_from("j10", 2)
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac11')
+        .to_junction(nominal_phases=PhaseCode.ABCN, mrid='j11')
+        .to_acls(nominal_phases=PhaseCode.ABCN, mrid='ac13')
+        .connect("ac13", "j12", 2, 2)
         .network
     )

@@ -8,7 +8,11 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from zepben.evolve import Switch, ConductingEquipment, SinglePhaseKind, Traversal
+
+from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 
 __all__ = ["normally_open", "currently_open", "ignore_open", "phase_log"]
 phase_logger = logging.getLogger("phase_logger")

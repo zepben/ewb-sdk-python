@@ -3,20 +3,23 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
-from typing import Optional, TYPE_CHECKING
+
+from functools import singledispatchmethod
+from typing import Optional, TYPE_CHECKING, Type
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
-
-from zepben.evolve import Feeder, Traversal
-from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
+from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 
 
 if TYPE_CHECKING:
@@ -33,20 +36,26 @@ class SetDirection:
 
     @staticmethod
     def _compute_data(reprocessed_loop_terminals: list[Terminal],
-                      state_operators: NetworkStateOperators,
+                      state_operators: Type[NetworkStateOperators],
                       step: NetworkTraceStep[FeederDirection],
                       next_path: NetworkTraceStep.Path) -> FeederDirection:
 
         if next_path.to_equipment is BusbarSection:
             return FeederDirection.CONNECTOR
 
-        direction_applied = step.data
+        def next_direction_func():
+            if step.data == FeederDirection.NONE:
+                return FeederDirection.NONE
+            elif next_path.traced_internally:
+                return FeederDirection.DOWNSTREAM
+            elif isinstance(next_path.to_equipment, Cut):
+                return FeederDirection.UPSTREAM
+            elif next_path.did_traverse_ac_line_segment:
+                return FeederDirection.DOWNSTREAM
+            else:
+                return FeederDirection.UPSTREAM
 
-        next_direction = FeederDirection.NONE
-        if direction_applied == FeederDirection.UPSTREAM:
-            next_direction = FeederDirection.DOWNSTREAM
-        elif direction_applied in (FeederDirection.DOWNSTREAM, FeederDirection.CONNECTOR):
-            next_direction = FeederDirection.UPSTREAM
+        next_direction = next_direction_func()
 
         #
         # NOTE: Stopping / short-circuiting by checking that the next direction is already present in the toTerminal,
@@ -68,7 +77,7 @@ class SetDirection:
             return next_direction
         return FeederDirection.NONE
 
-    async def _create_traversal(self, state_operators: NetworkStateOperators) -> NetworkTrace[FeederDirection]:
+    async def _create_traversal(self, state_operators: Type[NetworkStateOperators]) -> NetworkTrace[FeederDirection]:
         reprocessed_loop_terminals: list[Terminal] = []
 
         def queue_condition(nts: NetworkTraceStep, *args):
@@ -85,9 +94,11 @@ class SetDirection:
             Tracing.network_trace_branching(
                 network_state_operators=state_operators,
                 action_step_type=NetworkTraceActionType.ALL_STEPS,
+                queue_factory=lambda: WeightedPriorityQueue.process_queue(lambda it: it.path.to_terminal.phases.num_phases),
+                branch_queue_factory=lambda: WeightedPriorityQueue.branch_queue(lambda it: it.path.to_terminal.phases.num_phases),
                 compute_data=lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path)
             )
-            .add_condition(state_operators.stop_at_open())
+            .add_condition(stop_at_open())
             .add_stop_condition(stop_condition)
             .add_queue_condition(queue_condition)
             .add_step_action(step_action)
@@ -105,7 +116,8 @@ class SetDirection:
     def _is_normally_open_switch(conducting_equipment: Optional[ConductingEquipment]):
         return isinstance(conducting_equipment, Switch) and conducting_equipment.is_normally_open()
 
-    async def run(self, network: NetworkService, network_state_operators: NetworkStateOperators):
+    @singledispatchmethod
+    async def run(self, network: NetworkService, network_state_operators: Type[NetworkStateOperators]):
         """
          Apply feeder directions from all feeder head terminals in the network.
 
@@ -119,7 +131,8 @@ class SetDirection:
                 if not network_state_operators.is_open(head_terminal, None):
                     await self.run_terminal(terminal, network_state_operators)
 
-    async def run_terminal(self, terminal: Terminal, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+    @run.register
+    async def run_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
          Apply [FeederDirection.DOWNSTREAM] from the [terminal].
 

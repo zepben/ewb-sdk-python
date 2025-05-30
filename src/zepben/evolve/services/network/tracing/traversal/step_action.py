@@ -3,14 +3,17 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Callable
 
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 T = TypeVar('T')
 U = TypeVar('U')
+
+__all__ = ['StepAction', 'StepActionWithContextValue', 'StepActionFunc']
+
+StepActionFunc = Callable[[T, StepContext], None]
 
 
 class StepAction(Generic[T]):
@@ -20,7 +23,7 @@ class StepAction(Generic[T]):
 
     `T` The type of items being traversed.
     """
-    def __init__(self, _func):
+    def __init__(self, _func: StepActionFunc):
         self._func = _func
 
     def apply(self, item: T, context: StepContext):

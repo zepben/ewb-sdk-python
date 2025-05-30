@@ -2,12 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import logging
 from typing import List, Optional
 from unittest.mock import patch
 
 import pytest
 
 from services.network.tracing.phases.util import validate_phases_from_term_or_equip
+from zepben.evolve.database.sqlite.network.network_database_reader import NetworkDatabaseReader
 from zepben.evolve import TestNetworkBuilder, PhaseCode, SinglePhaseKind, PhaseInferrer, Terminal, NetworkService, NetworkStateOperators
 
 A = SinglePhaseKind.A
@@ -16,17 +18,11 @@ C = SinglePhaseKind.C
 N = SinglePhaseKind.N
 NONE = SinglePhaseKind.NONE
 
-async def run_phase_inferrer(network: NetworkService, do_current=True) -> tuple[List[PhaseInferrer.InferredPhase], List[PhaseInferrer.InferredPhase]]:
-    normal = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.NORMAL)
-    current = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.CURRENT) if do_current else []
-    return normal, current
-
 class TestPhaseInferrer:
     """
     Test the `PhaseInferrer`
     """
 
-    @pytest.mark.skip()  ## FIXME:
     @pytest.mark.asyncio
     async def test_ab_to_bc_to_xy_to_abc(self, caplog):
         """
@@ -49,16 +45,15 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", [B, NONE])
         validate_phases_from_term_or_equip(network, "c3", [NONE, B, NONE])
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.BC)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.BC)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.ABC)
 
         self._validate_returned_phases(network, changes, ['c1', 'c3'])
-        self._validate_log(caplog, correct=["c1", "c3", 'c1', 'c3'])
+        self._validate_log(caplog, correct=["c1", "c3"])
 
-    @pytest.mark.skip()  # FIXME:
     @pytest.mark.asyncio
     async def test_abn_to_bcn_to_xyn_to_abcn(self, caplog):
         """
@@ -81,16 +76,15 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", [B, NONE, N])
         validate_phases_from_term_or_equip(network, "c3", [NONE, B, NONE, N])
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.BCN)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.BCN)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.ABCN)
 
         self._validate_returned_phases(network, changes, ['c1', 'c3'])
-        self._validate_log(caplog, correct=["c1", "c3", 'c1', 'c3'])
+        self._validate_log(caplog, correct=["c1", "c3"])
 
-    @pytest.mark.skip()  # FIXME:
     @pytest.mark.asyncio
     async def test_bc_to_ac_to_xy_to_abc(self, caplog):
         """
@@ -113,14 +107,14 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", [NONE, C])
         validate_phases_from_term_or_equip(network, "c3", [NONE, NONE, C])
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.AC)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.AC)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.ABC)
 
         self._validate_returned_phases(network, changes, ['c1', 'c3'])
-        self._validate_log(caplog, correct=["c1", "c3", 'c1', 'c3'])
+        self._validate_log(caplog, correct=["c1", "c3"])
 
     @pytest.mark.asyncio
     async def test_abc_to_xyn_to_xy_to_bc(self, caplog):
@@ -144,13 +138,13 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.BC)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.BC)
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.BCN)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.BC)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.BC)
 
-        self._validate_log(caplog, correct=["c1", 'c1'])
+        self._validate_log(caplog, correct=["c1"])
         self._validate_returned_phases(network, changes, ['c1'])
 
     @pytest.mark.asyncio
@@ -175,14 +169,14 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", [B, C, NONE])
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.BC)
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.BC)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.BCN)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.BC)
 
         self._validate_returned_phases(network, changes, ['c2'])
-        self._validate_log(caplog, correct=["c2", 'c2'])
+        self._validate_log(caplog, correct=["c2"])
 
     @pytest.mark.asyncio
     async def test_abc_to_n_to_abcn(self, caplog):
@@ -206,14 +200,14 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.NONE)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.NONE)
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.ABC)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.N)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.ABCN)
 
         self._validate_returned_phases(network, changes, ['c2', 'c3'])
-        self._validate_log(caplog, correct=["c2", "c3", 'c2', 'c3'])
+        self._validate_log(caplog, correct=["c2", "c3"])
 
     @pytest.mark.asyncio
     async def test_abc_to_b_to_xyn(self, caplog):
@@ -239,14 +233,14 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.B)
         validate_phases_from_term_or_equip(network, "c3", [B, NONE, NONE])
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.ABC)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.B)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.BCN)
 
         self._validate_returned_phases(network, changes, ['c3'])
-        self._validate_log(caplog, suspect=["c3", 'c3'])
+        self._validate_log(caplog, suspect=["c3"])
 
     @pytest.mark.asyncio
     async def test_abc_to_c_to_xyn(self, caplog):
@@ -272,14 +266,14 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.C)
         validate_phases_from_term_or_equip(network, "c3", [C, NONE, NONE])
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.ABC)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.C)
         validate_phases_from_term_or_equip(network, "c3", [C, NONE, N])
 
         self._validate_returned_phases(network, changes, ['c3'])
-        self._validate_log(caplog, suspect=["c3", 'c3'])
+        self._validate_log(caplog, suspect=["c3"])
 
     @pytest.mark.asyncio
     async def test_abc_to_a_to_xn(self, caplog):
@@ -303,14 +297,14 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.A)
         validate_phases_from_term_or_equip(network, "c3", [A, NONE])
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.ABC)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.A)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.AN)
 
         self._validate_returned_phases(network, changes, ['c3'])
-        self._validate_log(caplog, correct=["c3", 'c3'])
+        self._validate_log(caplog, correct=["c3"])
 
     @pytest.mark.asyncio
     async def test_dual_feed_an_to_abcn(self, caplog):
@@ -333,16 +327,15 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c1", [A, NONE, NONE, N])
         validate_phases_from_term_or_equip(network, "s2", PhaseCode.AN)
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "s0", PhaseCode.AN)
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.ABCN)
         validate_phases_from_term_or_equip(network, "s2", PhaseCode.AN)
 
         self._validate_returned_phases(network, changes, ['c1'])
-        self._validate_log(caplog, correct=["c1", 'c1'])
+        self._validate_log(caplog, correct=["c1"])
 
-    @pytest.mark.skip()  # FIXME:
     @pytest.mark.asyncio
     async def test_abcn_to_n_to_ab_to_xy(self, caplog):
         """
@@ -367,7 +360,7 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.NONE)
         validate_phases_from_term_or_equip(network, "c4", PhaseCode.NONE)
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.ABCN)
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.N)
@@ -375,7 +368,7 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c4", PhaseCode.AB)
 
         self._validate_returned_phases(network, changes, ['c3'])
-        self._validate_log(caplog, correct=["c3", 'c3'])
+        self._validate_log(caplog, correct=["c3"])
 
     @pytest.mark.asyncio
     async def test_with_open_switch(self, caplog):
@@ -399,7 +392,7 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "b2", PhaseCode.ABC, PhaseCode.NONE)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.NONE)
 
-        changes = await run_phase_inferrer(network)
+        changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c1", PhaseCode.ABC)
         validate_phases_from_term_or_equip(network, "b2", PhaseCode.ABC, PhaseCode.NONE)
@@ -408,7 +401,6 @@ class TestPhaseInferrer:
         self._validate_returned_phases(network, changes, [])
         self._validate_log(caplog)
 
-    @pytest.mark.skip()  # #FIXME:
     @pytest.mark.asyncio
     async def test_validate_directions_with_dropped_direction_loop(self, caplog):
         """
@@ -440,7 +432,7 @@ class TestPhaseInferrer:
 
         terminals = [network.get("c6-t2", Terminal)] + [t for t in network.objects(Terminal) if t.mrid != "c6-t2"]
         with patch.object(NetworkService, 'objects', wraps=lambda _: terminals):
-            changes = await run_phase_inferrer(network)
+            changes = await self.run_phase_inferrer(network)
 
         validate_phases_from_term_or_equip(network, "c2", PhaseCode.AC, PhaseCode.AC)
         validate_phases_from_term_or_equip(network, "c3", PhaseCode.ABC, PhaseCode.ABC)
@@ -452,7 +444,22 @@ class TestPhaseInferrer:
         validate_phases_from_term_or_equip(network, "c9", PhaseCode.ABC, PhaseCode.ABC)
 
         self._validate_returned_phases(network, changes, ['c6'])
-        self._validate_log(caplog, correct=["c6", 'c6'])
+        self._validate_log(caplog, correct=["c6"])
+
+
+    class LoggerOnly:
+        _logger = logging.getLogger(__name__)
+
+    async def run_phase_inferrer(self, network: NetworkService, do_current=True) -> tuple[List[PhaseInferrer.InferredPhase], List[PhaseInferrer.InferredPhase]]:
+        normal = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.NORMAL)
+        current = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.CURRENT) if do_current else []
+
+        # This has to be called manually as we don't actually use the NetworkDatabaseReader
+        #  and copy pasting the logging code in here didn't make any sense.
+        # noinspection PyTypeChecker
+        NetworkDatabaseReader._log_inferred_phases(self.LoggerOnly, normal, current)
+
+        return normal, current
 
     @staticmethod
     def _validate_returned_phases(network: NetworkService,
@@ -468,8 +475,11 @@ class TestPhaseInferrer:
         if current_phases:
             check_phases(current_phases)
 
-
     def _validate_log(self, caplog, correct: Optional[List[str]] = None, suspect: Optional[List[str]] = None):
+        """
+        This test is removed from the kotlin SDK, kept it in here as it caught some bugs that otherwise would have
+        slipped through, remove whenever it seems logical.
+        """
         correct = correct or []
         suspect = suspect or []
 

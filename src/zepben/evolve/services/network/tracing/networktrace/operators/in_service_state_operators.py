@@ -14,6 +14,8 @@ from zepben.evolve.services.network.tracing.networktrace.operators import StateO
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 
+__all__ = ['InServiceStateOperators', 'NormalInServiceStateOperators', 'CurrentInServiceStateOperators']
+
 
 class InServiceStateOperators(StateOperator):
     """
@@ -52,7 +54,7 @@ class NormalInServiceStateOperators(InServiceStateOperators):
         return equipment.normally_in_service
 
     @staticmethod
-    def set_in_service(equipment: Equipment, in_service: bool) -> bool:
+    def set_in_service(equipment: Equipment, in_service: bool) -> None:
         equipment.normally_in_service = in_service
 
 
@@ -65,8 +67,8 @@ class CurrentInServiceStateOperators(InServiceStateOperators):
         return equipment.in_service
 
     @staticmethod
-    def set_in_service(equipment: Equipment, in_service: bool) -> bool:
+    def set_in_service(equipment: Equipment, in_service: bool) -> None:
         equipment.in_service = in_service
 
-InServiceStateOperators.NORMAL = NormalInServiceStateOperators()
-InServiceStateOperators.CURRENT = CurrentInServiceStateOperators()
+InServiceStateOperators.NORMAL = NormalInServiceStateOperators
+InServiceStateOperators.CURRENT = CurrentInServiceStateOperators

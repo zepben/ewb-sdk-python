@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Set, Any
 
-from zepben.evolve import Terminal, SinglePhaseKind
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 
 class NetworkTraceTracker:
@@ -32,7 +33,7 @@ class NetworkTraceTracker:
 
     @staticmethod
     def _get_key(terminal: Terminal, phases: Set[SinglePhaseKind]) -> Any:
-        if phases and len(phases) < 1:
-            return terminal
-        else:
+        if phases:
             return terminal, phases
+        else:
+            return terminal

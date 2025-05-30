@@ -9,7 +9,7 @@ import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
 if TYPE_CHECKING:
-    from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction
+    from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction, NetworkStateOperators
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
@@ -17,10 +17,8 @@ from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import Pow
 from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
-from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 
 __all__ = ['Equipment']
-
 
 
 class Equipment(PowerSystemResource):
@@ -64,11 +62,11 @@ class Equipment(PowerSystemResource):
         """
         return ngen(_of_type(self._equipment_containers, Site))
 
-    def feeders(self, network_state_operators: NetworkStateOperators) -> Generator[Feeder, None, None]:
+    def feeders(self, network_state_operators: Type[NetworkStateOperators]) -> Generator[Feeder, None, None]:
         """
         The `Feeder` this equipment belongs too based on `NetworkStateOperators`
         """
-        if network_state_operators == NetworkStateOperators.NORMAL:
+        if network_state_operators.NORMAL:
             return self.normal_feeders
         else:
             return self.current_feeders
@@ -80,11 +78,11 @@ class Equipment(PowerSystemResource):
         """
         return ngen(_of_type(self._equipment_containers, Feeder))
 
-    def lv_feeders(self, network_state_operators: NetworkStateOperators) -> Generator[LvFeeder, None, None]:
+    def lv_feeders(self, network_state_operators: Type[NetworkStateOperators]) -> Generator[LvFeeder, None, None]:
         """
         The `LvFeeder` this equipment belongs too based on `NetworkStateOperators`
         """
-        if network_state_operators == NetworkStateOperators.NORMAL:
+        if network_state_operators.NORMAL:
             return self.normal_lv_feeders
         else:
             return self.current_lv_feeders

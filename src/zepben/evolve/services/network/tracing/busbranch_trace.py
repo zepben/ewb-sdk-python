@@ -25,7 +25,7 @@ class BusBranchTrace(Traversal):
         )
         super().__init__(queue_type)
 
-    def on_reset(self):
+    def on_reset(self) -> None:
         self._tracker.clear()
 
     def can_visit_item(self, item: BusBranchTraceStep, context: StepContext) -> bool:

@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TypeVar, Generic
+from abc import abstractmethod
+from typing import TypeVar, Generic, Callable
 
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import TraversalCondition
@@ -12,13 +13,21 @@ from zepben.evolve.services.network.tracing.traversal.traversal_condition import
 T = TypeVar('T')
 U = TypeVar('U')
 
+ShouldQueue = Callable[[T, StepContext, T, StepContext], bool]
+ShouldQueueStartItem = Callable[[T], bool]
 
-class QueueCondition(TraversalCondition[T], Generic[T]):
+__all__ = ['QueueCondition', 'QueueConditionWithContextValue', 'ShouldQueue', 'ShouldQueueStartItem']
+
+
+class QueueCondition(Generic[T], TraversalCondition[T]):
     """
     Functional interface representing a condition that determines whether a traversal should queue a next item.
 
     `T` The type of items being traversed.
     """
+
+    def __init__(self, condition):
+        self.should_queue = condition
 
     def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
         """
@@ -30,22 +39,17 @@ class QueueCondition(TraversalCondition[T], Generic[T]):
         `currentContext` The context associated with the [currentItem].
         Returns `true` if the [nextItem] should be queued; `false` otherwise.
         """
-        return self._func(next_item, next_context, current_item, current_context)
+        raise NotImplementedError
 
-    def should_queue_start_item(self, item: T) -> bool:
+    @staticmethod
+    def should_queue_start_item(item: T) -> bool:
         """
         Determines whether a traversal startItem should be queued when running a [Traversal].
 
         `item` The item to be potentially queued.
         Returns `true` if the [item] should be queued; `false` otherwise. Defaults to `true`.
         """
-        try:  # this is a filthy hack to avoid this being called on a queue condition function that doesnt match this signature
-              # TODO: this absolute hack of a method to use this as a functional interface needs to go..
-            return self._func(item)
-        except TypeError as e:
-            if self._func.__code__.co_argcount == 4:
-                return True
-            raise e
+        return True
 
 
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import TypedContextValueComputer
@@ -57,4 +61,3 @@ class QueueConditionWithContextValue(QueueCondition[T], TypedContextValueCompute
     `T` The type of items being traversed.
     `U` The type of the context value computed and used in the condition.
     """
-    pass

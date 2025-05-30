@@ -9,7 +9,7 @@ from typing import Generic, TYPE_CHECKING
 
 from typing_extensions import TypeVar
 
-from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
+from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 if TYPE_CHECKING:
@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 T = TypeVar('T')
+
+__all__ = ['OpenCondition']
 
 
 class OpenCondition(NetworkTraceQueueCondition[T], Generic[T]):
@@ -33,6 +35,3 @@ class OpenCondition(NetworkTraceQueueCondition[T], Generic[T]):
             return not self._is_open(equip, self._phase)
         else:
             return True
-
-    def should_queue_start_item(self, item: T) -> bool:
-        return True

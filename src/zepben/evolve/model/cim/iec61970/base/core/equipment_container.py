@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable
+from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable, Type
 
 if TYPE_CHECKING:
     from zepben.evolve import Equipment, Terminal, Substation, LvFeeder, NetworkStateOperators
@@ -446,7 +446,7 @@ class Site(EquipmentContainer):
     Note this is not a CIM concept - however represents an `EquipmentContainer` in CIM. This is to avoid the use of `EquipmentContainer` as a concrete class.
     """
 
-    def find_lv_feeders(self, lv_feeder_start_points: Iterable[ConductingEquipment], state_operators: NetworkStateOperators) -> Generator[LvFeeder, None, None]:
+    def find_lv_feeders(self, lv_feeder_start_points: Iterable[ConductingEquipment], state_operators: Type[NetworkStateOperators]) -> Generator[LvFeeder, None, None]:
         from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
         for ce in state_operators.get_equipment(self):
             if isinstance(ce, ConductingEquipment):

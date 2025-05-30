@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from abc import ABC
+from abc import abstractmethod
 from typing import TypeVar, Generic
 
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
@@ -11,8 +11,10 @@ from zepben.evolve.services.network.tracing.traversal.step_context import StepCo
 T = TypeVar('T')
 U = TypeVar('U')
 
+__all__ = ['ContextValueComputer', 'TypedContextValueComputer']
 
-class ContextValueComputer(ABC, Generic[T]):
+
+class ContextValueComputer(Generic[T]):
     """
     Interface representing a context value computer used to compute and store values in a [StepContext].
     This interface does not specify a generic return type because the [StepContext] stores its values as `Any?`.
@@ -23,6 +25,7 @@ class ContextValueComputer(ABC, Generic[T]):
     def __init__(self, key: str):
         self.key = key  # A unique key identifying the context value computed by this computer.
 
+    @abstractmethod
     def compute_initial_value(self, item: T):
         """
         Computes the initial context value for the given starting item.
@@ -32,6 +35,7 @@ class ContextValueComputer(ABC, Generic[T]):
         """
         pass
 
+    @abstractmethod
     def compute_next_value(self, next_item: T, current_item: T, current_value):
         """
         Computes the next context value based on the current item, next item, and the current context value.
@@ -44,7 +48,7 @@ class ContextValueComputer(ABC, Generic[T]):
         pass
 
     def is_standalone_computer(self):
-        return all(not isinstance(self, o) for o in (StepAction, StopCondition, QueueCondition))
+        return not isinstance(self, (StepAction, StopCondition, QueueCondition))
 
 class TypedContextValueComputer(ContextValueComputer, Generic[T, U]):
     """

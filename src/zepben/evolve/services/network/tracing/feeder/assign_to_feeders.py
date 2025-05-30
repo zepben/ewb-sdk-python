@@ -3,9 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import Collection
-from typing import Iterable, Generator, Union, List, Dict, Any, Set
+from typing import Iterable, Union, List, Dict, Any, Set, Type, Generator
 
-from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Equipment, LvFeeder
+from zepben.evolve import Switch, AuxiliaryEquipment, ProtectedSwitch, Equipment, LvFeeder, PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, EquipmentContainer
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
@@ -18,6 +18,7 @@ from zepben.evolve.services.network.tracing.networktrace.network_trace import Ne
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
@@ -32,7 +33,7 @@ class AssignToFeeders:
 
     @staticmethod
     async def run(network: NetworkService,
-                  network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
+                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
                   start_terminal: Terminal=None):
         """
         Assign equipment to feeders in the specified network, given an optional start terminal.
@@ -47,10 +48,10 @@ class AssignToFeeders:
 
 
 class BaseFeedersInternal:
-    def __init__(self, network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL):
+    def __init__(self, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         self.network_state_operators = network_state_operators
 
-    def _feeders_from_terminal(self, terminal: Terminal):
+    def _feeders_from_terminal(self, terminal: Terminal) -> Generator[Feeder, None, None]:
         return terminal.conducting_equipment.feeders(self.network_state_operators)
 
     def _associate_equipment_with_containers(self, equipment_containers: Iterable[EquipmentContainer], equipment: Iterable[Equipment]):
@@ -65,7 +66,10 @@ class BaseFeedersInternal:
             for relayFunction in to_equipment.relay_functions
             for scheme in relayFunction.schemes
             if scheme.system is not None]
-                                                  )
+        )
+
+    def _associate_power_electronic_units(self, equipment_containers: Iterable[EquipmentContainer], to_equipment: PowerElectronicsConnection):
+        self._associate_equipment_with_containers(equipment_containers, to_equipment.units)
 
     def _feeder_energizes(self, feeders: Iterable[Union[LvFeeder, Feeder]], lv_feeders: Iterable[LvFeeder]):
         for feeder in feeders:
@@ -73,14 +77,13 @@ class BaseFeedersInternal:
                 self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
 
     def _feeder_try_energize_lv_feeders(self, feeders: Iterable[Feeder], lv_feeder_start_points: Set[ConductingEquipment], to_equipment: PowerTransformer):
-        sites = []
-        for eq in to_equipment:
-            sites.extend(eq.sites)
+        sites = list(to_equipment.sites)
 
+        lv_feeders = []
         if len(sites) > 0:
-            lv_feeders = [s.find_lv_feeders(lv_feeder_start_points, self.network_state_operators) for s in sites]
+            for s in sites:
+                lv_feeders.extend(lv_f for lv_f in s.find_lv_feeders(lv_feeder_start_points, self.network_state_operators))
         else:
-            lv_feeders = []
             for eq in to_equipment:
                 lv_feeders.extend(eq.lv_feeders(self.network_state_operators))
 
@@ -110,7 +113,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                                         feeder_start_points,
                                         lv_feeder_start_points,
                                         terminal_to_aux_equipment,
-                                        self._feeders_from_terminal(start_terminal))
+                                        list(self._feeders_from_terminal(start_terminal)))
 
     async def run_with_feeders(self,
                                terminal: Terminal,
@@ -148,7 +151,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
 
         return (
             Tracing.network_trace(self.network_state_operators, NetworkTraceActionType.ALL_STEPS)
-                .add_condition(self.network_state_operators.stop_at_open())
+                .add_condition(stop_at_open())
                 .add_stop_condition(lambda step, ctx: step.path.to_equipment in feeder_start_points)
                 .add_queue_condition(lambda step, ctx, _, __: not _reached_substation_transformer(step.path.to_equipment))
                 .add_queue_condition(lambda step, ctx, _, __: not _reached_lv(step.path.to_equipment))
@@ -165,13 +168,15 @@ class AssignToFeedersInternal(BaseFeedersInternal):
         if step_path.traced_internally and not step_context.is_start_item:
             return
 
-        for equip_group in (terminal_to_aux_equipment.get(step_path.to_terminal, {}), [step_path.to_equipment]):
-            self._associate_equipment_with_containers(feeders_to_assign, equip_group)
+        self._associate_equipment_with_containers(feeders_to_assign, terminal_to_aux_equipment.get(step_path.to_terminal, {}))
+        self._associate_equipment_with_containers(feeders_to_assign, [step_path.to_equipment])
 
         if isinstance(step_path.to_equipment, PowerTransformer):
             self._feeder_try_energize_lv_feeders(feeders_to_assign, lv_feeder_start_points, step_path.to_equipment)
         elif isinstance(step_path.to_equipment, ProtectedSwitch):
             self._associate_relay_systems_with_containers(feeders_to_assign, step_path.to_equipment)
+        elif isinstance(step_path.to_equipment, PowerElectronicsConnection):
+            self._associate_power_electronic_units(feeders_to_assign, step_path.to_equipment)
 
 
 

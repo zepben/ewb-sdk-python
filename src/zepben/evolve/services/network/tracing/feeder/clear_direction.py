@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Type
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
-from zepben.evolve import FeederDirection, Traversal
+from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
@@ -17,6 +17,8 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 
 if TYPE_CHECKING:
     from zepben.evolve import StepContext, NetworkTraceStep
+
+__all__ = ['ClearDirection']
 
 
 class ClearDirection:
@@ -28,7 +30,7 @@ class ClearDirection:
     #
     async def run(self,
             terminal: Terminal,
-            network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL
+            network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL
             ) -> list[Terminal]:
         """
         Clears the feeder direction from a terminal and the connected equipment chain.
@@ -47,13 +49,13 @@ class ClearDirection:
         return feeder_head_terminals
 
     @staticmethod
-    def _create_trace(state_operators: NetworkStateOperators,
+    def _create_trace(state_operators: Type[NetworkStateOperators],
                       visited_feeder_head_terminals: list[Terminal]
                       ) -> NetworkTrace[Any]:
         def queue_condition(step: NetworkTraceStep, context: StepContext, _, __):
             return state_operators.get_direction(step.path.to_terminal) != FeederDirection.NONE
 
-        def step_action(item, context):
+        def step_action(item: NetworkTraceStep, context: StepContext):
             state_operators.set_direction(item.path.to_terminal, FeederDirection.NONE)
             visited_feeder_head_terminals.append(item.path.to_terminal) if item.path.to_terminal.is_feeder_head_terminal() else None
 
