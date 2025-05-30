@@ -76,7 +76,7 @@ class Branching(NetworkTraceQueueNext, Traversal.BranchingQueueNext[NetworkTrace
         self._get_next_steps: GetNextStepsBranching = lambda item, context: list(self.next_trace_steps(item, context, compute_data))
 
     def accept(self, item: NetworkTraceStep[T], context: StepContext, queue_item: QueueItem, queue_branch: QueueBranch):
-        next_steps = list(self._get_next_steps(item, context))
+        next_steps = self._get_next_steps(item, context)
         if len(next_steps) == 1:
             queue_item(next_steps[0])
         else:

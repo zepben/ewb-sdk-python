@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Set, Generic, TypeVar, TYPE_CHECKING, Optional
+from typing import Set, Generic, TypeVar, TYPE_CHECKING, Optional, List
 
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 

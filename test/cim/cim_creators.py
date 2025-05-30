@@ -1027,7 +1027,7 @@ def create_power_electronics_wind_unit(include_runtime: bool = True):
 
 def create_ac_line_segment(include_runtime: bool = True):
     args = create_conductor(include_runtime)
-    args["terminals"] = lists(builds(Terminal, **create_identified_object(include_runtime)), min_size=1, max_size=1)
+    args["terminals"] = lists(builds(Terminal, **create_identified_object(include_runtime)), min_size=1, max_size=2)
     return builds(
         AcLineSegment,
         **args,

@@ -48,7 +48,7 @@ def test_terminal_constructor_kwargs(conducting_equipment, phases, sequence_numb
                  sequence_number=sequence_number,
                  normal_feeder_direction=normal_feeder_direction,
                  current_feeder_direction=current_feeder_direction,
-                 traced_phases= traced_phases,
+                 traced_phases=traced_phases,
                  connectivity_node=connectivity_node,
                  **kwargs)
 
