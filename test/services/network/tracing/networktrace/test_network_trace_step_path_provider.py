@@ -4,6 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Generator, Iterable
 
+import pytest
 from pytest_subtests.plugin import subtests
 
 from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
@@ -34,12 +35,23 @@ class PathTerminal(Terminal):
                 raise TypeError('Did not traverse')
         return NetworkTraceStep.Path(self, other, traversed_ce(self.conducting_equipment))
 
-Terminal.__add__ = PathTerminal.__add__
-Terminal.__sub__ = PathTerminal.__sub__
+
+@pytest.fixture(scope="function", autouse=True)
+def setup_class():
+    """override `Terminal.__add__` to make test writing more convenient"""
+    Terminal.__add__ = PathTerminal.__add__
+    Terminal.__sub__ = PathTerminal.__sub__
+    yield
+
+    # delete the methods when were done, so we don't modify global state between tests
+    delattr(Terminal, '__add__')
+    delattr(Terminal, '__sub__')
+
 
 SPK = SinglePhaseKind
 
 class TestNetworkTraceStepPathProvider:
+
     path_provider = NetworkTraceStepPathProvider(NetworkStateOperators.NORMAL)
 
     def test_current_external_path_steps_internally(self):
