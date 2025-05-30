@@ -14,6 +14,8 @@ from zepben.evolve.services.network.tracing.traversal.step_context import StepCo
 
 EquipmentTreeNode = TreeNode[ConductingEquipment]
 
+__all__ = ['EquipmentTreeBuilder']
+
 
 class EquipmentTreeBuilder(StepActionWithContextValue):
     """

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
     T = TypeVar('T')
 
-__all__ = ['OpenStateOperators']
+__all__ = ['OpenStateOperators', 'NormalOpenStateOperators', 'CurrentOpenStateOperators']
 
 
 class OpenStateOperators(StateOperator):

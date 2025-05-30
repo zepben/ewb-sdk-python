@@ -167,17 +167,28 @@ from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_i
 from zepben.evolve.services.network.tracing.connectivity.transformer_phase_paths import *
 from zepben.evolve.services.network.tracing.connectivity.xy_candidate_phase_paths import *
 from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import *
+
 from zepben.evolve.services.network.tracing.feeder.direction_status import *
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import *
 from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import *
-from zepben.evolve.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
-from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
-from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
-from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import EquipmentTypeStepLimitCondition
-from zepben.evolve.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
+
+from zepben.evolve.services.network.tracing.networktrace.actions.equipment_tree_builder import *
+from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import *
 from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import *
-from zepben.evolve.services.network.tracing.networktrace.compute_data import *
+from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import *
+from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import *
+from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import *
+from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_stop_condition import *
+from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_queue_condition import *
+from zepben.evolve.services.network.tracing.networktrace.conditions.open_condition import *
+from zepben.evolve.services.network.tracing.networktrace.operators.equipment_container_state_operators import *
+from zepben.evolve.services.network.tracing.networktrace.operators.feeder_direction_state_operations import *
+from zepben.evolve.services.network.tracing.networktrace.operators.in_service_state_operators import *
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import *
+from zepben.evolve.services.network.tracing.networktrace.operators.open_state_operators import *
+from zepben.evolve.services.network.tracing.networktrace.operators.phase_state_operators import *
+from zepben.evolve.services.network.tracing.networktrace.compute_data import *
+
 from zepben.evolve.services.network.tracing.phases.phase_status import *
 from zepben.evolve.services.network.tracing.phases.phase_inferrer import *
 from zepben.evolve.services.network.tracing.phases.remove_phases import *
