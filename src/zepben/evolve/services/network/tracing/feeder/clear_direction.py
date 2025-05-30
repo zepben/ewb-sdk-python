@@ -4,11 +4,11 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypeVar, Type
+from typing import TYPE_CHECKING, Any, Type
 
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
-from zepben.evolve import FeederDirection
+from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
@@ -17,6 +17,8 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 
 if TYPE_CHECKING:
     from zepben.evolve import StepContext, NetworkTraceStep
+
+__all__ = ['ClearDirection']
 
 
 class ClearDirection:

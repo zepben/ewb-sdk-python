@@ -5,11 +5,14 @@
 from collections import defaultdict
 from typing import TypeVar, Callable, Iterable
 
-from zepben.evolve import Traversal
+from zepben.evolve.services.network.tracing.traversal.traversal import Traversal
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 
 T = TypeVar('T')
 U = TypeVar('U')
+
+__all__ = ['WeightedPriorityQueue']
+
 
 class SortedDefaultDict(defaultdict):
     def keys(self):
