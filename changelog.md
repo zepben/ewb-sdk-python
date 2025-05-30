@@ -5,7 +5,9 @@
 * `AcLineSegment` supports adding a maximum of 2 terminals. Mid-span terminals are no longer supported and models should migrate to using `Clamp`.
 * `Clamp` supports only adding a single terminal.
 * `FeederDirectionStateOperations` have been reworked to take `NetworkStateOperators` as a parameter.
-
+* `RemoveDirection` has been removed. It did not work reliably with dual fed networks with loops. You now need to clear direction using the new
+`ClearDirection` and reapply directions where appropriate using `SetDirection`.
+* `Cut` supports adding a maximum of 2 terminals.
 
 
 ### New Features
@@ -17,11 +19,15 @@
   * `with_clamp` - Adds a clamp to the previously added `AcLineSegment`
   * `with_cut` - Adds a cut to the previously added `AcLineSegment`
   * `connect_to` - Connects the previously added item, rather than having to specify it again in `connect`.
+  * You can now add sites to the `TestNetworkBuilder` via `addSite`.
+  * You can now add busbar sections natively with `from_busbar_section` and `to_busbar_section`
+* When processing feeder assignments, all LV feeders belonging to a dist substation site will now be considered energized when the site is energized by a feeder.
 
 
 
 ### Fixes
 * When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`
+* `AssignToFeeder` and `AssignToLvFeeder` will no longer trace from start terminals that belong to open switches
 * The follow fixes were added to Traversal and NetworkTrace:
   * `can_stop_on_start_item` now works for branching traversals.
   * Traversal start items are added to the queue before traversal starts, so that the start items honour the queue type order.
