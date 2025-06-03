@@ -111,7 +111,7 @@ def nlen(sized: Optional[Sized]) -> int:
 
 
 def ngen(collection: Optional[Iterable[T]]) -> Generator[T, None, None]:
-    yield from collection if collection is not None else {}
+    yield from collection or {}
 
 
 def is_none_or_empty(sized: Optional[Sized]) -> bool:
