@@ -5,13 +5,13 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Callable, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-    from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
+    from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_queue_condition import NetworkTraceQueueCondition
 
 __all__ = ['FeederDirectionStateOperations', 'NormalFeederDirectionStateOperations', 'CurrentFeederDirectionStateOperations']
 
@@ -31,8 +31,9 @@ class FeederDirectionStateOperations(StateOperator):
         """
         Retrieves the feeder direction for the specified terminal.
 
-        `terminal` The terminal for which to retrieve the feeder direction.
-        Returns The current feeder direction associated with the specified terminal.
+        :param terminal: The terminal for which to retrieve the feeder direction.
+
+        :return: The current feeder direction associated with the specified terminal.
         """
         pass
 
@@ -42,9 +43,10 @@ class FeederDirectionStateOperations(StateOperator):
         """
         Sets the feeder direction for the specified terminal.
 
-        `terminal` The terminal for which to set the feeder direction.
-        `direction` The new feeder direction to assign to the terminal.
-        Returns `true` if the direction was changed; `false` if the direction was already set to the specified value.
+        :param terminal: The terminal for which to set the feeder direction.
+        :param direction: The new feeder direction to assign to the terminal.
+
+        :return: `True` if the direction was changed; `false` if the direction was already set to the specified value.
         """
         pass
 
@@ -54,9 +56,10 @@ class FeederDirectionStateOperations(StateOperator):
         """
         Adds the specified feeder direction to the terminal, preserving existing directions.
 
-        `terminal` The terminal for which to add the feeder direction.
-        `direction` The feeder direction to add.
-        Returns `true` if the direction was added successfully; `false` if the direction was already present.
+        :param terminal: The terminal for which to add the feeder direction.
+        :param direction: The feeder direction to add.
+
+        :return: `True` if the direction was added successfully; `false` if the direction was already present.
         """
         pass
 
@@ -67,23 +70,42 @@ class FeederDirectionStateOperations(StateOperator):
         """
         Removes the specified feeder direction from the terminal.
 
-        `terminal` The terminal for which to remove the feeder direction.
-        `direction` The feeder direction to remove.
-        Returns `true` if the direction was removed; `false` if the direction was not present.
+        :param terminal: The terminal for which to remove the feeder direction.
+        :param direction: The feeder direction to remove.
+
+        :return: `true` if the direction was removed; `false` if the direction was not present.
         """
         pass
 
     @classmethod
     def upstream(cls) -> NetworkTraceQueueCondition[T]:
-        return cls.with_direction(FeederDirection.UPSTREAM, cls.get_direction)
+        """
+        Creates a [NetworkTrace] condition that will cause tracing a feeder upstream (towards the head terminal).
+        This uses [FeederDirectionStateOperations.get_direction] receiver instance method within the condition.
+
+        :return: [NetworkTraceQueueCondition] that results in upstream tracing.
+        """
+        return cls.with_direction(FeederDirection.UPSTREAM)
 
     @classmethod
     def downstream(cls) -> NetworkTraceQueueCondition[T]:
-        return cls.with_direction(FeederDirection.DOWNSTREAM, cls.get_direction)
+        """
+        Creates a [NetworkTrace] condition that will cause tracing a feeder downstream (away from the head terminal).
+        This uses [FeederDirectionStateOperations.get_direction] receiver instance method within the condition.
 
-    @staticmethod
-    def with_direction(direction: FeederDirection, get_direction: Callable[[Terminal], FeederDirection]) -> NetworkTraceQueueCondition[T]:
-        return DirectionCondition(direction, get_direction)
+        :return: [NetworkTraceQueueCondition] that results in downstream tracing.
+        """
+        return cls.with_direction(FeederDirection.DOWNSTREAM)
+
+    @classmethod
+    def with_direction(cls, direction: FeederDirection) -> NetworkTraceQueueCondition[T]:
+        """
+        Creates a [NetworkTrace] condition that will cause tracing only terminals with directions that match [direction].
+        This uses [FeederDirectionStateOperations.get_direction] receiver instance method within the condition.
+
+        :return: [NetworkTraceQueueCondition] that results in upstream tracing.
+        """
+        return DirectionCondition(direction, cls)
 
 class NormalFeederDirectionStateOperations(FeederDirectionStateOperations):
     @staticmethod
@@ -152,5 +174,5 @@ class CurrentFeederDirectionStateOperations(FeederDirectionStateOperations):
         terminal.current_feeder_direction = new
         return True
 
-FeederDirectionStateOperations.NORMAL = NormalFeederDirectionStateOperations()
-FeederDirectionStateOperations.CURRENT = CurrentFeederDirectionStateOperations()
+FeederDirectionStateOperations.NORMAL = NormalFeederDirectionStateOperations
+FeederDirectionStateOperations.CURRENT = CurrentFeederDirectionStateOperations

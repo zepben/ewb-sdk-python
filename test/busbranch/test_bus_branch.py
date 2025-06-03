@@ -239,9 +239,10 @@ async def test_group_negligible_impedance_terminals_multi_branch():
     await _validate_term_grouping(has_neg_imp, nb_network, "a6_a7", set(), set(), {get_term(a6, 2), *a7.terminals})
 
 
-@pytest.mark.skip()  # FIXME:
 @pytest.mark.asyncio
-@given(nie_constructor=sampled_from([Junction, Disconnector, BusbarSection]))
+@given(nie_constructor=sampled_from([Junction, Disconnector]))  # BusbarSection used to be included in this test, but having 1 terminal breaks the logic
+                                                                #  and it got really messy making it uniform, suggest reworking this test using
+#                                                               #  TestNetworkBuilder, and some less verbose logic.
 async def test_group_negligible_impedance_terminals_groups_negligible_impedance_equipment(nie_constructor):
     nb_network = negligible_impedance_equipment_basic_network(lambda mrid: nie_constructor(mrid=mrid))
 

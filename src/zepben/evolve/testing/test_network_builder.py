@@ -2,18 +2,16 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-try:
-    from typing import Protocol, Any
-except ImportError:
-    Protocol = object
 
-from typing import Optional, Callable, List, Union, Type
+from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol
 
 from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
-    PowerTransformerEnd, PowerTransformer, EnergyConsumer, \
-    PowerElectronicsConnection
+    PowerTransformerEnd, PowerTransformer, EnergyConsumer, PowerElectronicsConnection, BusbarSection, Clamp, Cut, Site
+
+SubclassesConductingEquipment = TypeVar('SubclassesConductingEquipment', bound=ConductingEquipment)
 
 
 def null_action(_):
@@ -27,7 +25,7 @@ def null_action(_):
 class OtherCreator(Protocol):
     """Type hint class"""
 
-    def __call__(self, mrid: str, *args, **kwargs) -> ConductingEquipment: Any
+    def __call__(self, mrid: str, *args, **kwargs) -> ConductingEquipment: ...
 
 
 class TestNetworkBuilder:
@@ -343,13 +341,59 @@ class TestNetworkBuilder:
         self._current = it
         return self
 
+    def from_busbar_section(
+        self,
+        nominal_phases: PhaseCode = PhaseCode.ABC,
+        mrid: str = None,
+        action: Callable[[BusbarSection], None] = null_action
+    ) -> 'TestNetworkBuilder':
+        """
+        Start a new network island from a `BusbarSection`, updating the network pointer to the new `BusbarSection`.
+
+        :param nominal_phases: The nominal phases for the new `BusbarSection`.
+        :param mrid: Optional mRID for the new `BusbarSection`.
+        :param action: An action that accepts the new `BusbarSection` to allow for additional initialisation.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
+        it = self._create_busbar_section(mrid, nominal_phases)
+        action(it)
+        self._current = it
+        return self
+
+    def to_busbar_section(
+        self,
+        nominal_phases: PhaseCode = PhaseCode.ABC,
+        mrid: str = None,
+        connectivity_node_mrid: Optional[str] = None,
+        action: Callable[[BusbarSection], None] = null_action
+        ) -> 'TestNetworkBuilder':
+        """
+
+        Add a new `BusbarSection` to the network and connect it to the current network pointer, updating the network pointer to the new `BusbarSection`.
+
+        :param nominal_phases: The nominal phases for the new `BusbarSection`.
+        :param mrid: Optional mRID for the new `BusbarSection`.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `BusbarSection` to the previous item. Will only be used
+         if the previous item is not already connected.
+        :param action: An action that accepts the new `BusbarSection` to allow for additional initialisation.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
+        it = self._create_busbar_section(mrid, nominal_phases)
+        self._connect(self._current, it, connectivity_node_mrid)
+        action(it)
+        self._current = it
+        return self
+
     def from_other(
         self,
-        creator: Union[OtherCreator, Type[ConductingEquipment]],
+        creator: Union[OtherCreator, Type[SubclassesConductingEquipment]],
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
-        action: Callable[[ConductingEquipment], None] = null_action
+        action: Callable[[SubclassesConductingEquipment], None] = null_action,
+        default_mrid_prefix: Optional[str] = None
     ) -> 'TestNetworkBuilder':
         """
         Start a new network island from a `ConductingEquipment` created by `creator`, updating the network pointer to the new `ConductingEquipment`.
@@ -360,22 +404,26 @@ class TestNetworkBuilder:
         :param num_terminals: The number of terminals to create on the new `ConductingEquipment`. Defaults to 2.
         :param mrid: Optional mRID for the new `ConductingEquipment`.
         :param action: An action that accepts the new `ConductingEquipment` to allow for additional initialisation.
+        :param default_mrid_prefix:  mRID prefix to use for the new `ConductingEquipment`
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
-        it = self._create_other(mrid, creator, nominal_phases, num_terminals)
+        if mrid and default_mrid_prefix:
+            raise ValueError('cant specify both mrid and default_mrid_prefix as your intention is unclear')
+        it = self._create_other(mrid, creator, nominal_phases, num_terminals, default_mrid_prefix=default_mrid_prefix)
         action(it)
         self._current = it
         return self
 
     def to_other(
         self,
-        creator: Union[OtherCreator, Type[ConductingEquipment]],
+        creator: Union[OtherCreator, Type[SubclassesConductingEquipment]],
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[ConductingEquipment], None] = null_action
+        action: Callable[[SubclassesConductingEquipment], None] = null_action,
+        default_mrid_prefix: Optional[str] = None
     ) -> 'TestNetworkBuilder':
         """
         Add a new `ConductingEquipment` to the network and connect it to the current network pointer, updating the network pointer to the new
@@ -389,13 +437,81 @@ class TestNetworkBuilder:
         :param connectivity_node_mrid: Optional id of the connectivity node used to connect this `ConductingEquipment` to the previous item. Will only be used
          if the previous item is not already connected.
         :param action: An action that accepts the new `ConductingEquipment` to allow for additional initialisation.
+        :param default_mrid_prefix:  mRID prefix to use for the new `ConductingEquipment`
 
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
-        it = self._create_other(mrid, creator, nominal_phases, num_terminals)
+        if mrid and default_mrid_prefix:
+            raise ValueError('cant specify both mrid and default_mrid_prefix as your intention is unclear')
+        it = self._create_other(mrid, creator, nominal_phases, num_terminals, default_mrid_prefix=default_mrid_prefix)
         self._connect(self._current, it, connectivity_node_mrid)
         action(it)
         self._current = it
+        return self
+
+    def with_clamp(
+        self,
+        mrid: Optional[str] = None,
+        length_from_terminal_1: float = None,
+        action: Callable[[Clamp], None] = null_action
+    ) -> 'TestNetworkBuilder':
+        """
+        Create a clamp on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
+
+        :param mrid: Optional mRID for the new `Clamp`
+        :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being clamped
+        :param action: An action that accepts the new `Clamp` to allow for additional initialisation.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use
+        """
+        acls = self._current
+        if not isinstance(acls, AcLineSegment):
+            raise ValueError("`with_clamp` can only be called when the last added item was an AcLineSegment")
+
+        clamp = Clamp(mrid=mrid or f'{acls.mrid}-clamp{acls.num_clamps() + 1}', length_from_terminal_1=length_from_terminal_1)
+        clamp.add_terminal(Terminal(mrid=f'{clamp.mrid}-t1'))
+
+        acls.add_clamp(clamp)
+        action(clamp)
+        self.network.add(clamp)
+        return self
+
+    def with_cut(
+        self,
+        mrid: Optional[str] = None,
+        length_from_terminal_1: Optional[float] = None,
+        is_normally_open: bool = True,
+        is_open: bool = None,
+        action: Callable[[Cut], None] = null_action
+        ) -> 'TestNetworkBuilder':
+        """
+        Create a cut on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
+
+        :param mrid: Optional mRID for the new `Cut`
+        :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being cut
+        :param is_normally_open: The normal state of the cut, defaults to True
+        :param is_open: The current state of the cut. Defaults to `is_normally_open`
+        :param action: An action that accepts the new `Cut` to allow for additional initialisation.
+
+        :return: This `TestNetworkBuilder` to allow for fluent use
+        """
+        acls = self._current
+        if not isinstance(acls, AcLineSegment):
+            raise ValueError("`with_cut` can only be called when the last added item was an AcLineSegment")
+
+        cut = Cut(mrid=mrid or f'{acls.mrid}-cut{acls.num_cuts() + 1}', length_from_terminal_1=length_from_terminal_1)
+        cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t1'))
+        cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t2'))
+
+        cut.set_normally_open(is_normally_open)
+        if is_open is None:
+            cut.set_open(is_normally_open)
+        else:
+            cut.set_open(is_open)
+
+        acls.add_cut(cut)
+        action(cut)
+        self.network.add(cut)
         return self
 
     def branch_from(self, from_: str, terminal: Optional[int] = None) -> 'TestNetworkBuilder':
@@ -409,6 +525,33 @@ class TestNetworkBuilder:
         """
         self._current = self.network.get(from_, ConductingEquipment)
         self._current_terminal = terminal
+        return self
+
+    def connect_to(
+        self,
+        to: str,
+        to_terminal: int = None,
+        from_terminal: int = None,
+        connectivity_node_mrid: Optional[str] = None
+    ) -> 'TestNetworkBuilder':
+        """
+        Connect to current network pointer to the specified `to` without moving the current network pointer.
+
+        :param to: The mRID of the second `ConductingEquipment` to be connected.
+        :param to_terminal: The sequence number or terminal on `to` which will be connected.
+        :param from_terminal: Optional sequence number of the terminal on current network pointer which will be connected.
+        :param connectivity_node_mrid: Optional id of the connectivity node used to connect the terminals. Will only be used if both terminals are not already
+         connected.
+        :return: This `TestNetworkBuilder` to allow for fluent use.
+        """
+
+        self._connect(
+            self._current,
+            self.network.get(to, ConductingEquipment),
+            connectivity_node_mrid,
+            from_terminal,
+            to_terminal
+        )
         return self
 
     def connect(
@@ -464,6 +607,25 @@ class TestNetworkBuilder:
         :return: This `TestNetworkBuilder` to allow for fluent use.
         """
         self._create_lv_feeder(mrid, self.network.get(head_mrid, ConductingEquipment), sequence_number)
+        return self
+
+    def add_site(self, equipment_mrids: List[str], mrid: Optional[str] = None) -> 'TestNetworkBuilder':
+        """
+        Create a new Site containing the specified equipment.
+
+        :param equipment_mrids: The mRID's of the equipment to add to the site
+        :param mrid: Optional mRID for the new `Site`.
+        :return: This [TestNetworkBuilder] to allow for fluent use.
+        """
+
+        site = Site(mrid=self._next_id(mrid, 'site'))
+
+        for _id in equipment_mrids:
+            ce = self.network[_id]
+            site.add_equipment(ce)
+            ce.add_container(site)
+        self.network.add(site)
+        
         return self
 
     async def build(self, apply_directions_from_sources: bool = True, assign_feeders: bool = True) -> NetworkService:
@@ -555,6 +717,13 @@ class TestNetworkBuilder:
         self.network.add(j)
         return j
 
+    def _create_busbar_section(self, mrid: Optional[str], nominal_phases: PhaseCode) -> BusbarSection:
+        b = BusbarSection(mrid=self._next_id(mrid, 'bbs'))
+        self._add_terminal(b, 1, nominal_phases)
+
+        self.network.add(b)
+        return b
+
     def _create_power_electronics_connection(self, mrid: Optional[str], nominal_phases: PhaseCode, num_terminals: Optional[int]) -> PowerElectronicsConnection:
         pec = PowerElectronicsConnection(mrid=self._next_id(mrid, "pec"))
         for i in range(1, (num_terminals if num_terminals is not None else 2) + 1):
@@ -594,11 +763,12 @@ class TestNetworkBuilder:
     def _create_other(
         self,
         mrid: Optional[str],
-        creator: Union[OtherCreator, Type[ConductingEquipment]],
+        creator: Union[OtherCreator, Type[SubclassesConductingEquipment]],
         nominal_phases: PhaseCode,
-        num_terminals: Optional[int]
-    ) -> ConductingEquipment:
-        o = creator(mrid=self._next_id(mrid, "o"))
+        num_terminals: Optional[int],
+        default_mrid_prefix: Optional[str] = None
+    ) -> SubclassesConductingEquipment:
+        o = creator(mrid=self._next_id(mrid, default_mrid_prefix or "o"))
         for i in range(1, (num_terminals if num_terminals is not None else 2) + 1):
             self._add_terminal(o, i, nominal_phases)
 

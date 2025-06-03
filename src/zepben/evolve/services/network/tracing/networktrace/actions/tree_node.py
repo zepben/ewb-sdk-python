@@ -9,6 +9,8 @@ from zepben.evolve import IdentifiedObject
 
 T = TypeVar('T')
 
+__all__ = ['TreeNode']
+
 
 class TreeNode(Generic[T]):
     """

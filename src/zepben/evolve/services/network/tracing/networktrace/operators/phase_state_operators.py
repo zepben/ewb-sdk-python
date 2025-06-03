@@ -12,14 +12,17 @@ from abc import abstractmethod
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
+__all__ = ['PhaseStateOperators', 'NormalPhaseStateOperators', 'CurrentPhaseStateOperators']
+
 
 class PhaseStateOperators(StateOperator):
     """
     Interface for accessing the phase status of a terminal.
     """
 
+    @staticmethod
     @abstractmethod
-    def phase_status(self, terminal: 'Terminal') -> PhaseStatus:
+    def phase_status(terminal: 'Terminal') -> PhaseStatus:
         """
         Retrieves the phase status of the specified terminal.
 
@@ -33,7 +36,8 @@ class NormalPhaseStateOperators(PhaseStateOperators):
     """
     Operates on the normal state of the `Phase`
     """
-    def phase_status(self, terminal: 'Terminal') -> PhaseStatus:
+    @staticmethod
+    def phase_status(terminal: 'Terminal') -> PhaseStatus:
         return terminal.normal_phases
 
 
@@ -41,9 +45,10 @@ class CurrentPhaseStateOperators(PhaseStateOperators):
     """
     Operates on the current state of the `Phase`
     """
-    def phase_status(self, terminal: 'Terminal') -> PhaseStatus:
+    @staticmethod
+    def phase_status(terminal: 'Terminal') -> PhaseStatus:
         return terminal.current_phases
 
 
-PhaseStateOperators.NORMAL = NormalPhaseStateOperators()
-PhaseStateOperators.CURRENT = CurrentPhaseStateOperators()
+PhaseStateOperators.NORMAL = NormalPhaseStateOperators
+PhaseStateOperators.CURRENT = CurrentPhaseStateOperators

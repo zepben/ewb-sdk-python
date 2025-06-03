@@ -497,7 +497,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
         # Need to apply phases to match after the database load.
         network_service = SchemaNetworks().network_services_of(EnergySource, energy_source)
-        await Tracing.set_phases().run(network_service, NetworkStateOperators)
+        await Tracing.set_phases().run(network_service)
 
         await self._validate_schema(network_service)
 

@@ -11,13 +11,12 @@ import itertools
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Generator, Set
-
-from zepben.evolve.util import ngen
+from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Set
 
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
@@ -26,7 +25,7 @@ from zepben.evolve.services.common.meta.metadata_collection import MetadataColle
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 
 if TYPE_CHECKING:
-    from zepben.evolve import Terminal, SinglePhaseKind, ConnectivityResult, Measurement, ConductingEquipment
+    from zepben.evolve import SinglePhaseKind, ConnectivityResult, Measurement, ConductingEquipment
 
 logger = logging.getLogger(__name__)
 TRACED_NETWORK_FILE = str(Path.home().joinpath(Path("traced.json")))
@@ -153,13 +152,26 @@ class NetworkService(BaseService):
         self._remove_measurement_index(measurement)
         return self.remove(measurement)
 
+    def connect(self, terminal: Terminal, to: Union[str, Terminal]) -> bool:
+        """
+        Connect a `Terminal` to either a `Terminal` or `ConnectivityNode` depending on the type of `to`
+
+        :return: the boolean result of the action
+        """
+        if isinstance(to, Terminal):
+            return self.connect_terminals(terminal, to)
+        elif isinstance(to, str):
+            return self.connect_by_mrid(terminal, to)
+        else:
+            raise TypeError(f'to parameter not a recognised type: {type(to)}')
+
     def connect_by_mrid(self, terminal: Terminal, connectivity_node_mrid: str) -> bool:
         """
         Connect a `Terminal` to the `ConnectivityNode` with mRID `connectivity_node_mrid`
         `terminal` The `Terminal` to connect.
         `connectivity_node_mrid` The mRID of the `ConnectivityNode`. Will be created in the `Network` if it
         doesn't already exist.
-        Returns True if the connection was made or already existed, False if `Terminal` was already connected to a
+        :return: `True` if the connection was made or already existed, `False` if `Terminal` was already connected to a
         different `ConnectivityNode`
         """
         if not connectivity_node_mrid:
@@ -175,7 +187,7 @@ class NetworkService(BaseService):
     def connect_terminals(self, terminal1: Terminal, terminal2: Terminal) -> bool:
         """
         Connect two `Terminal`s
-        Returns True if the `Terminal`s could be connected, False otherwise.
+        :return: `True` if the `Terminal` could be connected, `False` otherwise.
         """
         status = _attempt_to_reuse_connection(terminal1, terminal2)
         if status == ProcessStatus.PROCESSED:
@@ -200,7 +212,7 @@ class NetworkService(BaseService):
         """
         Disconnect a `Terminal`` from its `ConnectivityNode`. Will also remove the `ConnectivityNode` from this
         `Network` if it no longer has any terminals.
-        `terminal` The `Terminal` to disconnect.
+        :param terminal: The `Terminal` to disconnect.
         """
         cn = terminal.connectivity_node
         if cn is None:
@@ -214,7 +226,8 @@ class NetworkService(BaseService):
         """
         Disconnect a `ConnectivityNode` from this `Network`. Will disconnect all ``Terminal`s from the
         `ConnectivityNode`
-        `connectivity_node_mrid` The mRID of the `ConnectivityNode` to disconnect.
+        :param connectivity_node_mrid: The mRID of the `ConnectivityNode` to disconnect.
+
         Raises `KeyError` if there is no `ConnectivityNode` for `connectivity_node_mrid`
         """
         cn = self._connectivity_nodes[connectivity_node_mrid]

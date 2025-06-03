@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar, Union, Callable
+from typing import TypeVar, Union, Callable, Type
 
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
@@ -16,7 +16,7 @@ T = TypeVar('T')
 
 class Tracing:
     @staticmethod
-    def network_trace(network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
+    def network_trace(network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
                       action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
                       queue: TraversalQueue[NetworkTraceStep[T]]=TraversalQueue.depth_first(),
                       compute_data: Union[ComputeData[T], Callable]=None
@@ -37,13 +37,12 @@ class Tracing:
         return NetworkTrace.non_branching(network_state_operators, queue, action_step_type, compute_data)
 
     @staticmethod
-    def network_trace_branching(network_state_operators: NetworkStateOperators=NetworkStateOperators.NORMAL,
+    def network_trace_branching(network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
                                 action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
                                 queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]]=lambda: TraversalQueue.depth_first(),
                                 branch_queue_factory: Callable[[], TraversalQueue[NetworkTrace[NetworkTraceStep[T]]]]=lambda: TraversalQueue.breadth_first(),
                                 compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None
                                 ) -> NetworkTrace[T]:
-
 
         if not isinstance(compute_data, ComputeData):
             compute_data = ComputeData(compute_data or (lambda *args: None))

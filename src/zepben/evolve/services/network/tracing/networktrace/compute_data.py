@@ -2,12 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypeVar, Generic, Any
+from typing import TypeVar, Generic
 
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 T = TypeVar('T')
+
+__all__ = ['ComputeData', 'ComputeDataWithPaths']
 
 
 class ComputeData(Generic[T]):
@@ -38,7 +40,7 @@ class ComputeDataWithPaths(Generic[T]):
     def __init__(self, func):
         self._func = func or (lambda *args: None)
 
-    def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path, next_paths: list[NetworkTraceStep.Path, Any]) -> T:
+    def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path, next_paths: list[NetworkTraceStep.Path]) -> T:
         """
         Called for each new NetworkTraceStep in a NetworkTrace. The value returned from this function
         will be stored against the next step within NetworkTraceStep. data.

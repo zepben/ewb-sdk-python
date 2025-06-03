@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from queue import Queue
+
 from typing import List, Iterable, Optional, Set, Dict, Callable
 
 from zepben.evolve.services.network.tracing.connectivity.connectivity_result import ConnectivityResult
@@ -10,10 +10,12 @@ from zepben.evolve.services.network.tracing.connectivity.xy_candidate_phase_path
 from zepben.evolve.services.network.tracing.connectivity.xy_phase_step import XyPhaseStep
 from zepben.evolve.services.network.tracing.connectivity.phase_paths import viable_inferred_phase_connectivity, straight_phase_connectivity
 
-from zepben.evolve import Terminal, PhaseCode, SinglePhaseKind, Switch, LifoQueue
+from zepben.evolve import Terminal, PhaseCode, SinglePhaseKind, Switch
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
 __all__ = ["TerminalConnectivityConnected"]
+
+from zepben.evolve.services.network.tracing.traversal.queue import LIFODeque
 
 
 class TerminalConnectivityConnected:
@@ -123,7 +125,7 @@ class TerminalConnectivityConnected:
                 add_path(from_phase, to_phase)
 
     def _find_xy_candidate_phases(self, xy_phases: Dict[Terminal, PhaseCode], primary_phases: Dict[Terminal, PhaseCode]) -> XyCandidatePhasePaths:
-        queue = LifoQueue[XyPhaseStep]()
+        queue = LIFODeque[XyPhaseStep]()
         visited = set()
         candidate_phases = self._create_candidate_phases()
 
@@ -135,7 +137,7 @@ class TerminalConnectivityConnected:
             # noinspection PyArgumentList
             self._find_more_xy_candidate_phases(XyPhaseStep(terminal, xy_phase_code), visited, queue, candidate_phases)
 
-        while not queue.empty():
+        while len(queue) > 0:
             self._find_more_xy_candidate_phases(queue.pop(), visited, queue, candidate_phases)
 
         return candidate_phases
@@ -144,7 +146,7 @@ class TerminalConnectivityConnected:
         self,
         step: XyPhaseStep,
         visited: Set[XyPhaseStep],
-        queue: Queue[XyPhaseStep],
+        queue: LIFODeque[XyPhaseStep],
         candidate_phases: XyCandidatePhasePaths
     ):
         if step in visited:
@@ -176,7 +178,7 @@ class TerminalConnectivityConnected:
         return found_traced
 
     @staticmethod
-    def _queue_next(terminal: Terminal, phase_code: PhaseCode, queue: Queue[XyPhaseStep]):
+    def _queue_next(terminal: Terminal, phase_code: PhaseCode, queue: LIFODeque[XyPhaseStep]):
         ce = terminal.conducting_equipment
         if not ce:
             return
@@ -187,7 +189,7 @@ class TerminalConnectivityConnected:
                     for connected in other.connectivity_node.terminals:
                         if connected.conducting_equipment != ce:
                             # noinspection PyArgumentList
-                            queue.put(XyPhaseStep(connected, phase_code))
+                            queue.append(XyPhaseStep(connected, phase_code))
 
 
 def _find_xy_phases(terminal: Terminal):

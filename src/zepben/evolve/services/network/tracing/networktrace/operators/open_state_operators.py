@@ -4,14 +4,13 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import TypeVar, Optional, TYPE_CHECKING
-
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from typing import TypeVar, Optional, TYPE_CHECKING, Callable
 
 from abc import abstractmethod
 
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
-from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_condition import NetworkTraceQueueCondition
+from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_queue_condition import NetworkTraceQueueCondition
 from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
 if TYPE_CHECKING:
@@ -19,6 +18,8 @@ if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
     T = TypeVar('T')
+
+__all__ = ['OpenStateOperators', 'NormalOpenStateOperators', 'CurrentOpenStateOperators']
 
 
 class OpenStateOperators(StateOperator):
@@ -66,8 +67,8 @@ class OpenStateOperators(StateOperator):
         raise NotImplementedError()
 
     @classmethod
-    def stop_at_open(cls) -> NetworkTraceQueueCondition[T]:
-        return OpenCondition(cls.is_open)
+    def stop_at_open(cls, open_test: Optional[Callable[[Switch, Optional[SinglePhaseKind]], bool]]=None, phase: Optional[SinglePhaseKind]=None) -> NetworkTraceQueueCondition[T]:
+        return OpenCondition(open_test or cls.is_open, phase)
 
 
 class NormalOpenStateOperators(OpenStateOperators):
@@ -96,5 +97,5 @@ class CurrentOpenStateOperators(OpenStateOperators):
         switch.set_open(is_open, phase)
 
 
-OpenStateOperators.NORMAL = NormalOpenStateOperators()
-OpenStateOperators.CURRENT = CurrentOpenStateOperators()
+OpenStateOperators.NORMAL = NormalOpenStateOperators
+OpenStateOperators.CURRENT = CurrentOpenStateOperators

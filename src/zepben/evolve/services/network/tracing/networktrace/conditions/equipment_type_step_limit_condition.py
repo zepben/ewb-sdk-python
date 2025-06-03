@@ -13,11 +13,14 @@ if TYPE_CHECKING:
     from zepben.evolve import ConductingEquipment, StepContext, NetworkTraceStep
 
 T = TypeVar('T')
+U = TypeVar('U')
+
+__all__ = ['EquipmentTypeStepLimitCondition']
 
 
-class EquipmentTypeStepLimitCondition(StopConditionWithContextValue, Generic[T]):
+class EquipmentTypeStepLimitCondition(StopConditionWithContextValue[T, U], Generic[T, U]):
     def __init__(self, limit: int, equipment_type: Type[ConductingEquipment]):
-        StopConditionWithContextValue.__init__(self, _func=self.should_stop)
+        StopConditionWithContextValue.__init__(self, self.should_stop)
         TypedContextValueComputer.__init__(self, f'sdk:{equipment_type.name}Count')
         self.limit = limit
         self.equipment_type = equipment_type

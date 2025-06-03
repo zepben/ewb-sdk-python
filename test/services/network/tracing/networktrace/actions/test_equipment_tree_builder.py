@@ -2,12 +2,16 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from collections import deque
+import pprint
+from collections import deque, defaultdict
 from typing import Optional, List
 
 import pytest
 
+from zepben.evolve import downstream, NetworkTraceActionType
+
 from services.network.test_data.looping_network import create_looping_network
+from services.network.tracing.feeder.direction_logger import log_directions
 from zepben.evolve import ConductingEquipment, Tracing, NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
@@ -16,114 +20,130 @@ from zepben.evolve.services.network.tracing.networktrace.actions.tree_node impor
 @pytest.mark.asyncio
 async def test_downstream_tree():
     n = create_looping_network()
+    normal = NetworkStateOperators.NORMAL
+    current = NetworkStateOperators.CURRENT
 
     await Tracing.set_phases().run(n)
     feeder_head = n.get("j0", ConductingEquipment)
-    await Tracing.set_direction().run_terminal(feeder_head.get_terminal_by_sn(1))
+    await Tracing.set_direction().run_terminal(feeder_head, network_state_operators=normal)
+    await Tracing.set_direction().run_terminal(feeder_head, network_state_operators=current)
+    await log_directions(n.get('j0', ConductingEquipment))
 
-    start = n.get("j2", ConductingEquipment)
+    visited_ce = []
+
+    start = n.get("j1", ConductingEquipment)
     assert start is not None
     tree_builder = EquipmentTreeBuilder()
-    state_operators = NetworkStateOperators.NORMAL
-    await Tracing.network_trace_branching(network_state_operators=state_operators) \
-        .add_condition(state_operators.downstream()) \
+    trace = Tracing.network_trace_branching(network_state_operators=normal, action_step_type=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT) \
+        .add_condition(downstream()) \
         .add_step_action(tree_builder) \
-        .run(start)
+        .add_step_action(lambda item, context: visited_ce.append(item.path.to_equipment.mrid))
+
+    await trace.run(start)
+
+    visit_counts = {}
+    for ce in visited_ce:
+        if visit_counts.get(ce):
+            visit_counts[ce] += 1
+        else:
+            visit_counts[ce] = 1
+
+    pprint.pprint(visit_counts)
 
     root = list(tree_builder.roots)[0]
 
     assert root is not None
-    _verify_tree_asset(root, n["j2"], None, [n["c3"], n["c13"]])
+    _verify_tree_asset(root, n["j1"], None, [n["ac1"], n["ac3"]])
 
-    test_node = next(iter(root.children))
-    _verify_tree_asset(test_node, n["c13"], n["j2"], [n["j14"]])
+    test_node = root.children[0]
+    _verify_tree_asset(test_node, n["ac1"], n["j1"], [n["j2"]])
 
-    test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["j14"], n["c13"], [n["c15"]])
+    test_node = test_node.children[0]
+    _verify_tree_asset(test_node, n["j2"], n["ac1"], [n["ac2"]])
 
-    test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["c15"], n["j14"], [n["j16"]])
-
-    test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["j16"], n["c15"], [n["c17"]])
+    test_node = test_node.children[0]
+    _verify_tree_asset(test_node, n["ac2"], n["j2"], [n["j3"]])
 
     test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["c17"], n["j16"], [n["b18"]])
+    _verify_tree_asset(test_node, n["j3"], n["ac2"], [n["ac4"]])
 
     test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["b18"], n["c17"], [])
+    _verify_tree_asset(test_node, n["ac4"], n["j3"], [n["j6"]])
+
+    test_node = next(iter(test_node.children))
+    _verify_tree_asset(test_node, n["j6"], n["ac4"], [])
 
     test_node = list(root.children)[1]
-    _verify_tree_asset(test_node, n["c3"], n["j2"], [n["j4"]])
+    _verify_tree_asset(test_node, n["ac3"], n["j1"], [n["j4"]])
 
     test_node = next(iter(test_node.children))
-    _verify_tree_asset(test_node, n["j4"], n["c3"], [n["c20"], n["c5"]])
+    _verify_tree_asset(test_node, n["j4"], n["ac3"], [n["ac5"], n["ac6"]])
 
     assert len(_find_nodes(root, "j0")) == 0
-    assert len(_find_nodes(root, "c1")) == 0
+    assert len(_find_nodes(root, "ac0")) == 0
+    assert len(_find_nodes(root, "j1")) == 1
+    assert len(_find_nodes(root, "ac1")) == 1
     assert len(_find_nodes(root, "j2")) == 1
-    assert len(_find_nodes(root, "c13")) == 1
-    assert len(_find_nodes(root, "j14")) == 1
-    assert len(_find_nodes(root, "c15")) == 1
-    assert len(_find_nodes(root, "j16")) == 1
-    assert len(_find_nodes(root, "c3")) == 1
+    assert len(_find_nodes(root, "ac2")) == 1
+    assert len(_find_nodes(root, "j3")) == 1
+    assert len(_find_nodes(root, "ac3")) == 1
     assert len(_find_nodes(root, "j4")) == 1
-    assert len(_find_nodes(root, "c17")) == 1
-    assert len(_find_nodes(root, "j21")) == 1
-    assert len(_find_nodes(root, "c20")) == 1
-    assert len(_find_nodes(root, "b18")) == 2
-    assert len(_find_nodes(root, "c5")) == 1
-    assert len(_find_nodes(root, "j6")) == 1
-    assert len(_find_nodes(root, "c19")) == 1
-    assert len(_find_nodes(root, "j23")) == 1
-    assert len(_find_nodes(root, "c22")) == 1
-    assert len(_find_nodes(root, "j25")) == 1
-    assert len(_find_nodes(root, "c24")) == 1
+    assert len(_find_nodes(root, "ac4")) == 1
+    assert len(_find_nodes(root, "j5")) == 1
+    assert len(_find_nodes(root, "ac5")) == 1
+    assert len(_find_nodes(root, "j6")) == 2
+    assert len(_find_nodes(root, "ac6")) == 1
+    assert len(_find_nodes(root, "j7")) == 1
+    assert len(_find_nodes(root, "ac7")) == 1
     assert len(_find_nodes(root, "j8")) == 1
-    assert len(_find_nodes(root, "c7")) == 1
-    assert len(_find_nodes(root, "j30")) == 3  # j11 java sdk
-    assert len(_find_nodes(root, "c29")) == 3  # acLineSegment11 java sdk
-    assert len(_find_nodes(root, "j10")) == 3
-    assert len(_find_nodes(root, "c9")) == 4
+    assert len(_find_nodes(root, "ac8")) == 1
+    assert len(_find_nodes(root, "j9")) == 1
+    assert len(_find_nodes(root, "ac9")) == 1
+    assert len(_find_nodes(root, "j10")) == 1
+    assert len(_find_nodes(root, "ac10")) == 1
+    assert len(_find_nodes(root, "j11")) == 3  # j11 java sdk
+    assert len(_find_nodes(root, "ac11")) == 3  # acLineSegment11 java sdk
     assert len(_find_nodes(root, "j12")) == 3
-    assert len(_find_nodes(root, "c31")) == 3  # acLineSegment13 java jdk
-    assert len(_find_nodes(root, "j27")) == 4
-    assert len(_find_nodes(root, "c11")) == 3
-    assert len(_find_nodes(root, "c26")) == 4
-    assert len(_find_nodes(root, "c28")) == 4
+    assert len(_find_nodes(root, "ac12")) == 4
+    assert len(_find_nodes(root, "j13")) == 3
+    assert len(_find_nodes(root, "ac13")) == 3  # acLineSegment13 java jdk
+    assert len(_find_nodes(root, "j14")) == 4
+    assert len(_find_nodes(root, "ac14")) == 3
+    assert len(_find_nodes(root, "ac15")) == 4
+    assert len(_find_nodes(root, "ac16")) == 4
 
     assert _find_node_depths(root, "j0") == []
-    assert _find_node_depths(root, "c1") == []
-    assert _find_node_depths(root, "j2") == [0]
-    assert _find_node_depths(root, "c13") == [1]
-    assert _find_node_depths(root, "j14") == [2]
-    assert _find_node_depths(root, "c15") == [3]
-    assert _find_node_depths(root, "j16") == [4]
-    assert _find_node_depths(root, "c3") == [1]
+    assert _find_node_depths(root, "ac0") == []
+    assert _find_node_depths(root, "j1") == [0]
+    assert _find_node_depths(root, "ac1") == [1]
+    assert _find_node_depths(root, "j2") == [2]
+    assert _find_node_depths(root, "ac2") == [3]
+    assert _find_node_depths(root, "j3") == [4]
+    assert _find_node_depths(root, "ac3") == [1]
     assert _find_node_depths(root, "j4") == [2]
-    assert _find_node_depths(root, "c17") == [5]
-    assert _find_node_depths(root, "j21") == [4]
-    assert _find_node_depths(root, "c20") == [3]
-    assert _find_node_depths(root, "b18") == [6, 10]
-    assert _find_node_depths(root, "c5") == [3]
-    assert _find_node_depths(root, "j6") == [4]
-    assert _find_node_depths(root, "c19") == [9]
-    assert _find_node_depths(root, "j23") == [6]
-    assert _find_node_depths(root, "c22") == [5]
-    assert _find_node_depths(root, "j25") == [8]
-    assert _find_node_depths(root, "c24") == [7]
+    assert _find_node_depths(root, "ac4") == [5]
+    assert _find_node_depths(root, "j5") == [4]
+    assert _find_node_depths(root, "ac5") == [3]
+    assert _find_node_depths(root, "j6") == [6, 10]
+    assert _find_node_depths(root, "ac6") == [3]
+    assert _find_node_depths(root, "j7") == [4]
+    assert _find_node_depths(root, "ac7") == [9]
     assert _find_node_depths(root, "j8") == [6]
-    assert _find_node_depths(root, "c7") == [5]
-    assert _find_node_depths(root, "j30") == [8, 10, 12]
-    assert _find_node_depths(root, "c29") == [7, 11, 13]
-    assert _find_node_depths(root, "j10") == [8, 10, 10]
-    assert _find_node_depths(root, "c9") == [7, 10, 11, 14]
-    assert _find_node_depths(root, "j12") == [10, 12, 12]
-    assert _find_node_depths(root, "c31") == [9, 9, 11]
-    assert _find_node_depths(root, "j27") == [8, 9, 12, 13]
-    assert _find_node_depths(root, "c11") == [9, 11, 11]
-    assert _find_node_depths(root, "c26") == [7, 10, 12, 13]
-    assert _find_node_depths(root, "c28") == [8, 9, 11, 14]
+    assert _find_node_depths(root, "ac8") == [5]
+    assert _find_node_depths(root, "j9") == [8]
+    assert _find_node_depths(root, "ac9") == [7]
+    assert _find_node_depths(root, "j10") == [6]
+    assert _find_node_depths(root, "ac10") == [5]
+    assert _find_node_depths(root, "j11") == [8, 10, 12]
+    assert _find_node_depths(root, "ac11") == [7, 11, 13]
+    assert _find_node_depths(root, "j12") == [8, 10, 10]
+    assert _find_node_depths(root, "ac12") == [7, 10, 11, 14]
+    assert _find_node_depths(root, "j13") == [10, 12, 12]
+    assert _find_node_depths(root, "ac13") == [9, 9, 11]
+    assert _find_node_depths(root, "j14") == [8, 9, 12, 13]
+    assert _find_node_depths(root, "ac14") == [9, 11, 11]
+    assert _find_node_depths(root, "ac15") == [7, 10, 12, 13]
+    assert _find_node_depths(root, "ac16") == [8, 9, 11, 14]
 
 
 def _verify_tree_asset(
@@ -141,11 +161,8 @@ def _verify_tree_asset(
     else:
         assert tree_node.parent is None
 
-    children_nodes = list(tree_node.children)
-    assert len(children_nodes) == len(expected_children)
-
-    for child in children_nodes:
-        assert child.identified_object in expected_children
+    children_nodes = list(c.identified_object for c in tree_node.children)
+    assert children_nodes == expected_children
 
 
 def _find_nodes(root: TreeNode[ConductingEquipment], asset_id: str) -> List[TreeNode[ConductingEquipment]]:
