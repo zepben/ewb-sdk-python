@@ -5,15 +5,13 @@
 
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-try:
-    from typing import Protocol, Any
-except ImportError:
-    Protocol = object
 
-from typing import Optional, Callable, List, Union, Type
+from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol
 
 from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
     PowerTransformerEnd, PowerTransformer, EnergyConsumer, PowerElectronicsConnection, BusbarSection, Clamp, Cut, Site
+
+SubclassesConductingEquipment = TypeVar('SubclassesConductingEquipment', bound=ConductingEquipment)
 
 
 def null_action(_):
@@ -27,7 +25,7 @@ def null_action(_):
 class OtherCreator(Protocol):
     """Type hint class"""
 
-    def __call__(self, mrid: str, *args, **kwargs) -> ConductingEquipment: Any
+    def __call__(self, mrid: str, *args, **kwargs) -> ConductingEquipment: ...
 
 
 class TestNetworkBuilder:
@@ -390,11 +388,11 @@ class TestNetworkBuilder:
 
     def from_other(
         self,
-        creator: Union[OtherCreator, Type[ConductingEquipment]],
+        creator: Union[OtherCreator, Type[SubclassesConductingEquipment]],
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
-        action: Callable[[ConductingEquipment], None] = null_action,
+        action: Callable[[SubclassesConductingEquipment], None] = null_action,
         default_mrid_prefix: Optional[str] = None
     ) -> 'TestNetworkBuilder':
         """
@@ -419,12 +417,12 @@ class TestNetworkBuilder:
 
     def to_other(
         self,
-        creator: Union[OtherCreator, Type[ConductingEquipment]],
+        creator: Union[OtherCreator, Type[SubclassesConductingEquipment]],
         nominal_phases: PhaseCode = PhaseCode.ABC,
         num_terminals: Optional[int] = None,
         mrid: Optional[str] = None,
         connectivity_node_mrid: Optional[str] = None,
-        action: Callable[[ConductingEquipment], None] = null_action,
+        action: Callable[[SubclassesConductingEquipment], None] = null_action,
         default_mrid_prefix: Optional[str] = None
     ) -> 'TestNetworkBuilder':
         """
@@ -765,11 +763,11 @@ class TestNetworkBuilder:
     def _create_other(
         self,
         mrid: Optional[str],
-        creator: Union[OtherCreator, Type[ConductingEquipment]],
+        creator: Union[OtherCreator, Type[SubclassesConductingEquipment]],
         nominal_phases: PhaseCode,
         num_terminals: Optional[int],
         default_mrid_prefix: Optional[str] = None
-    ) -> ConductingEquipment:
+    ) -> SubclassesConductingEquipment:
         o = creator(mrid=self._next_id(mrid, default_mrid_prefix or "o"))
         for i in range(1, (num_terminals if num_terminals is not None else 2) + 1):
             self._add_terminal(o, i, nominal_phases)
