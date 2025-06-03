@@ -18,7 +18,7 @@ terminal_kwargs = {
     "sequence_number": integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
     "normal_feeder_direction": sampled_from(FeederDirection),
     "current_feeder_direction": sampled_from(FeederDirection),
-    "traced_phases": builds(TracedPhases),
+    "traced_phases": builds(TracedPhases, phase_status=integers(min_value=0, max_value=15)),
     "connectivity_node": builds(ConnectivityNode)
 }
 
@@ -58,7 +58,7 @@ def test_terminal_constructor_kwargs(conducting_equipment, phases, sequence_numb
     assert t.sequence_number == sequence_number
     assert t.normal_feeder_direction == normal_feeder_direction
     assert t.current_feeder_direction == current_feeder_direction
-    assert t.traced_phases == TracedPhases()
+    assert t.traced_phases == traced_phases
     assert t.connectivity_node == connectivity_node
 
 
