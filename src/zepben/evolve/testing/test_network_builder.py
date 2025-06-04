@@ -470,7 +470,9 @@ class TestNetworkBuilder:
             raise ValueError("`with_clamp` can only be called when the last added item was an AcLineSegment")
 
         clamp = Clamp(mrid=mrid or f'{acls.mrid}-clamp{acls.num_clamps() + 1}', length_from_terminal_1=length_from_terminal_1)
-        clamp.add_terminal(Terminal(mrid=f'{clamp.mrid}-t1'))
+        terminal = Terminal(mrid=f'{clamp.mrid}-t1')
+        self.network.add(terminal)
+        clamp.add_terminal(terminal)
 
         acls.add_clamp(clamp)
         action(clamp)
@@ -501,8 +503,10 @@ class TestNetworkBuilder:
             raise ValueError("`with_cut` can only be called when the last added item was an AcLineSegment")
 
         cut = Cut(mrid=mrid or f'{acls.mrid}-cut{acls.num_cuts() + 1}', length_from_terminal_1=length_from_terminal_1)
-        cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t1'))
-        cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t2'))
+        for i in [1, 2]:
+            t = Terminal(mrid=f'{cut.mrid}-t{i}')
+            self.network.add(t)
+            cut.add_terminal(t)
 
         cut.set_normally_open(is_normally_open)
         if is_open is None:

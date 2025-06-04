@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
+import inspect
 from collections.abc import Callable
 from functools import singledispatchmethod
 from logging import Logger
@@ -144,56 +144,94 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     @singledispatchmethod
     def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T=None, phases: PhaseCode=None) -> "NetworkTrace[T]":
         """
-        Depending on the type of `start`, adds either:
-          - A starting [Terminal] to the trace with the associated step data.
-          - All terminals of the given [ConductingEquipment] as starting points in the trace, with the associated data.
+        Depending on the type of `start` adds one of the following as starting points in the trace, along
+        with the associated data:
+          - A starting `Terminal`
+          - All terminals of the given `ConductingEquipment`.
+          - All terminals of the given `AcLineSegment`.
 
         Tracing will be only external from this terminal and not trace internally back through its conducting equipment.
 
-        :param start: The starting [Terminal] or [ConductingEquipment] for the trace.
+        :param start: The starting item for the trace.
         :param data: The data associated with the start step.
         :param phases: Phases to trace; `None` to ignore phases.
+
+        :returns: This `NetworkTrace` instance
         """
 
         raise Exception('INTERNAL ERROR:: unexpected add_start_item params')
 
     @add_start_item.register
     def _(self, start: ConductingEquipment, data=None, phases=None):
+        """
+        Adds all terminals of the given `ConductingEquipment` as starting points in the trace, with the associated data.
+        Tracing will be only external from each terminal and not trace internally back through the conducting equipment.
+
+        :param start: The starting equipment whose terminals will be added to the trace
+        :param data: The data associated with the start step.
+        :param phases: Phases to trace; `None` to ignore phases.
+
+        :returns: This `NetworkTrace` instance
+        """
+
         # We don't have a special case for Clamp here because we say if you start from the whole Clamp rather than its terminal specifically,
         # we want to trace externally from it and traverse its segment.
         for it in start.terminals:
-            self._add_start_item(it, data, phases, None)
+            self._add_start_item(it, data=data, phases=phases)
 
         return self
 
     @add_start_item.register
     def _(self, start: Terminal, data=None, phases=None):
+        """
+        Adds a starting `Terminal` to the trace with the associated step data. Tracing will be only external from this
+        terminal and not trace internally back through its conducting equipment.
+
+        :param start: The starting `Terminal` for the trace.
+        :param data: The data associated with the start step.
+        :param phases: Phases to trace; `None` to ignore phases.
+        
+        :returns: This `NetworkTrace` instance
+        """
+
         # We have a special case when starting specifically on a clamp terminal that we mark it as having traversed the segment such that it
         # will only trace externally from the clamp terminal. This behaves differently to when the whole Clamp is added as a start item.
         traversed_ac_line_segment = None
         if isinstance(start.conducting_equipment, Clamp):
             traversed_ac_line_segment = start.conducting_equipment.ac_line_segment
-        self._add_start_item(start, data, phases, traversed_ac_line_segment)
+        self._add_start_item(start, data=data, phases=phases, traversed_ac_line_segment=traversed_ac_line_segment)
         return self
 
     @add_start_item.register
     def _(self, start: AcLineSegment, data=None, phases=None):
+        """
+        Adds all terminals of the given `AcLineSegment` as starting points in the trace, with the associated data.
+        Tracing will be only external from each terminal and not trace internally back through the AcLineSegment.
+
+        :param start: The starting AcLineSegment whose terminals will be added to the trace
+        :param data: The data associated with the start step.
+        :param phases: Phases to trace; `None` to ignore phases.
+
+        :returns: This `NetworkTrace` instance
+        """
+
         # If we start on an AcLineSegment, we queue the segments terminals, and all its Cut and Clamp terminals as if we have traversed the segment,
         # so the next steps will be external from all the terminals "belonging" to the segment.
         def start_terminals() -> Generator[Terminal, None, None]:
-            for terminal in start.terminals:
-                yield terminal
+            for _terminal in start.terminals:
+                yield _terminal
             for clamp in start.clamps:
-                for terminal in clamp.terminals:
-                    yield terminal
+                for _terminal in clamp.terminals:
+                    yield _terminal
                     break
             for cut in start.cuts:
-                for terminal in cut.terminals:
-                    yield terminal
+                for _terminal in cut.terminals:
+                    yield _terminal
 
 
         for terminal in start_terminals():
-            self._add_start_item(terminal, data, phases, start)
+            self._add_start_item(terminal, data=data, phases=phases, traversed_ac_line_segment=start)
+        return self
 
     def _add_start_item(self,
                        start: Terminal=None,
@@ -260,7 +298,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         >>> NetworkTrace().add_condition(stop_at_open())
         """
 
-        if condition.__code__.co_argcount == 1:  # Catches DSL Style lambda conditions from zepben.evolve.Conditions
+        if len(inspect.getfullargspec(condition).args) == 1:  # Catches DSL Style lambda conditions from zepben.evolve.Conditions
             return self.add_condition(condition(self.network_state_operators))
         return super().add_condition(condition)
 

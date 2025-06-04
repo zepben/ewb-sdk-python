@@ -125,7 +125,7 @@ class SetDirection:
          """
 
         for terminal in (f.normal_head_terminal for f in network.objects(Feeder) if f.normal_head_terminal):
-            if head_terminal := terminal.conducting_equipment is not None:
+            if (head_terminal := terminal.conducting_equipment) is not None:
                 if not network_state_operators.is_open(head_terminal, None):
                     await self.run_terminal(terminal, network_state_operators)
 
