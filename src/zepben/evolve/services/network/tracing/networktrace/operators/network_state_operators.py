@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 __all__ = ['NetworkStateOperators', 'NormalNetworkStateOperators', 'CurrentNetworkStateOperators']
 
+
 # noinspection PyPep8Naming
 class NetworkStateOperators(OpenStateOperators,
                             FeederDirectionStateOperations,
@@ -110,4 +111,3 @@ class CurrentNetworkStateOperators(NetworkStateOperators,
     @classmethod
     def next_paths(cls, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:
         yield from cls.network_trace_step_path_provider().next_paths(path)
-

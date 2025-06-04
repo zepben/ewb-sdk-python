@@ -48,12 +48,12 @@ class PhaseInferrer:
         :param network: The `NetworkService` to infer phases on.
         :param network_state_operators: The `NetworkStateOperators` to be used when inferring phases
         """
+
         tracking: Dict[ConductingEquipment, bool] = {}
 
         await self.PhaseInferrerInternal(network_state_operators, self._debug_logger).infer_missing_phases(network, tracking)
 
         return [self.InferredPhase(k, v) for k, v in tracking.items()]
-
 
     class PhaseInferrerInternal:
         def __init__(self, state_operators: Type[NetworkStateOperators], debug_logger: Logger=None):
@@ -190,7 +190,6 @@ class PhaseInferrer:
             await self._continue_phases(terminal)
             return had_changes
 
-
         async def _continue_phases(self, terminal: Terminal):
             set_phases_trace = Tracing.set_phases(debug_logger=self._debug_logger)
             for other in terminal.other_terminals():
@@ -203,4 +202,3 @@ class PhaseInferrer:
                     return phase
 
             return SinglePhaseKind.NONE
-

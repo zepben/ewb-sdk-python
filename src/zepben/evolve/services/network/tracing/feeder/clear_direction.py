@@ -29,15 +29,16 @@ class ClearDirection:
     def __init__(self, debug_logger: Logger=None):
         self._debug_logger = debug_logger
 
+    # NOTE: We used to try and remove directions in a single pass rather than clearing (and the reapplying where needed) to be more efficient.
+    #       However, this caused all sorts of pain when trying to determine which directions to remove from dual fed equipment that contains inner loops.
+    #       We decided it is so much simpler to just clear the directions and reapply from other feeder heads even if its a bit more computationally expensive.
     #
-    #NOTE: We used to try and remove directions in a single pass rather than clearing (and the reapplying where needed) to be more efficient.
-    #      However, this caused all sorts of pain when trying to determine which directions to remove from dual fed equipment that contains inner loops.
-    #      We decided it is so much simpler to just clear the directions and reapply from other feeder heads even if its a bit more computationally expensive.
-    #
-    async def run(self,
-                  terminal: Terminal,
-                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL
-                  ) -> list[Terminal]:
+
+    async def run(
+        self,
+        terminal: Terminal,
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL
+    ) -> list[Terminal]:
         """
         Clears the feeder direction from a terminal and the connected equipment chain.
         This clears directions even if equipment is dual fed. A set of feeder head terminals encountered while running will be returned and directions
@@ -48,14 +49,16 @@ class ClearDirection:
         :param network_state_operators: The `NetworkStateOperators` to be used when removing directions.
         :return : A set of feeder head `Terminal`s encountered when clearing directions
         """
+        
         trace = self._create_trace(network_state_operators, feeder_head_terminals := [])
         await trace.run(terminal, can_stop_on_start_item=False)
         return feeder_head_terminals
 
-    def _create_trace(self,
-                      state_operators: Type[NetworkStateOperators],
-                      visited_feeder_head_terminals: list[Terminal]
-                      ) -> NetworkTrace[Any]:
+    def _create_trace(
+        self,
+        state_operators: Type[NetworkStateOperators],
+        visited_feeder_head_terminals: list[Terminal]
+    ) -> NetworkTrace[Any]:
 
         def step_action(item: NetworkTraceStep, context: StepContext):
             state_operators.set_direction(item.path.to_terminal, FeederDirection.NONE)
