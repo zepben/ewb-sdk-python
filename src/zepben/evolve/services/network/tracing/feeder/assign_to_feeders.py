@@ -27,14 +27,14 @@ __all__ = ["AssignToFeeders", "BaseFeedersInternal"]
 
 
 class AssignToFeeders:
-    def __init__(self, debug_logger: Logger = None):
-        self._debug_logger = debug_logger
-
     """
     Convenience class that provides methods for assigning HV/MV feeders on a `NetworkService`.
     Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
     This class is backed by a `NetworkTrace`.
     """
+
+    def __init__(self, debug_logger: Logger = None):
+        self._debug_logger = debug_logger
 
     async def run(self,
                   network: NetworkService,
@@ -49,6 +49,7 @@ class AssignToFeeders:
         * When a start terminal is provided, the trace will assign all feeders associated with the terminals equipment to all connected equipment.
         * If no start terminal is provided, all feeder head terminals in the network will be used instead, assigning their associated feeder.
         """
+
         await AssignToFeedersInternal(
             network_state_operators,
             self._debug_logger
@@ -86,10 +87,9 @@ class BaseFeedersInternal:
                 self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)
 
     def _feeder_try_energize_lv_feeders(self, feeders: Iterable[Feeder], lv_feeder_start_points: Set[ConductingEquipment], to_equipment: PowerTransformer):
-        sites = list(to_equipment.sites)
 
         lv_feeders = []
-        if len(sites) > 0:
+        if len(sites := list(to_equipment.sites)) > 0:
             for s in sites:
                 lv_feeders.extend(lv_f for lv_f in s.find_lv_feeders(lv_feeder_start_points, self.network_state_operators))
         else:
@@ -134,9 +134,7 @@ class AssignToFeedersInternal(BaseFeedersInternal):
         if terminal is None or len(feeders_to_assign) == 0:
             return
 
-        start_ce = terminal.conducting_equipment
-
-        if isinstance(start_ce, Switch) and self.network_state_operators.is_open(start_ce):
+        if isinstance(start_ce := terminal.conducting_equipment, Switch) and self.network_state_operators.is_open(start_ce):
             self._associate_equipment_with_containers(feeders_to_assign, [start_ce])
         else:
             traversal = await self._create_trace(terminal_to_aux_equipment, feeder_start_points, lv_feeder_start_points, feeders_to_assign)
@@ -146,7 +144,8 @@ class AssignToFeedersInternal(BaseFeedersInternal):
                             terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
                             feeder_start_points: Set[ConductingEquipment],
                             lv_feeder_start_points: Set[ConductingEquipment],
-                            feeders_to_assign: List[Feeder]) -> NetworkTrace[Any]:
+                            feeders_to_assign: List[Feeder]
+                            ) -> NetworkTrace[Any]:
 
         def _reached_lv(ce: ConductingEquipment):
             return True if ce.base_voltage and ce.base_voltage.nominal_voltage < 1000 else False

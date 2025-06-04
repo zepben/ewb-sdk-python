@@ -22,10 +22,9 @@ if TYPE_CHECKING:
 
 __all__ = ['ClearDirection']
 
-__all__ =['ClearDirection']
-
 
 class ClearDirection:
+    """Convenience class that provides methods for clearing feeder direction on a `NetworkService`"""
 
     def __init__(self, debug_logger: Logger=None):
         self._debug_logger = debug_logger
@@ -47,11 +46,9 @@ class ClearDirection:
 
         :param terminal: The `Terminal` from which to start the direction removal.
         :param network_state_operators: The `NetworkStateOperators` to be used when removing directions.
-        :return : A set of feeder head `terminals` encountered when clearing directions
+        :return : A set of feeder head `Terminal`s encountered when clearing directions
         """
-        feeder_head_terminals: list[Terminal] = []
-
-        trace = self._create_trace(network_state_operators, feeder_head_terminals)
+        trace = self._create_trace(network_state_operators, feeder_head_terminals := [])
         await trace.run(terminal, can_stop_on_start_item=False)
         return feeder_head_terminals
 

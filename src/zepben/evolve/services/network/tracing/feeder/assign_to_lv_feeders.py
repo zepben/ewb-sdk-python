@@ -27,6 +27,12 @@ __all__ = ["AssignToLvFeeders"]
 
 
 class AssignToLvFeeders:
+    """
+    Convenience class that provides methods for assigning LV feeders on a `NetworkService`.
+    Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
+    This class is backed by a `BasicTraversal`.
+    """
+    
     def __init__(self, debug_logger: Logger=None):
         self._debug_logger = debug_logger
 
@@ -35,6 +41,14 @@ class AssignToLvFeeders:
                   network: NetworkService,
                   network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
                   start_terminal: Terminal=None):
+        """
+        Assign equipment to each feeder in the specified network.
+
+        :param network: The network containing the feeders to process.
+        :param network_state_operators: `NetworkStateOperators` to use for stateful operations.
+        :param start_terminal: get the lv feeders for this `Terminal`s `ConductingEquipment`.
+        """
+
         await AssignToLvFeedersInternal(
             network_state_operators,
             self._debug_logger
@@ -48,6 +62,7 @@ class AssignToLvFeeders:
                 lv_feeders_to_assign: List[LvFeeder],
                 network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
                 ):
+
         await AssignToLvFeedersInternal(
             network_state_operators,
             self._debug_logger
@@ -59,21 +74,10 @@ class AssignToLvFeeders:
         )
 
 class AssignToLvFeedersInternal(BaseFeedersInternal):
-    """
-    Convenience class that provides methods for assigning LV feeders on a `NetworkService`.
-    Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
-    This class is backed by a `BasicTraversal`.
-    """
 
     async def run(self,
                   network: NetworkService,
                   start_terminal: Terminal=None):
-        """
-        Assign equipment to each feeder in the specified network.
-
-        :param network: The network containing the feeders to process
-        :param start_terminal: get the lv feeders for this `Terminal`s `ConductingEquipment`
-        """
 
         lv_feeder_start_points = network.lv_feeder_start_points
         terminal_to_aux_equipment = network.aux_equipment_by_terminal
@@ -111,9 +115,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
         if terminal is None or len(lv_feeders_to_assign) == 0:
             return
 
-        start_ce = terminal.conducting_equipment
-
-        if isinstance(start_ce, Switch) and self.network_state_operators.is_open(start_ce):
+        if isinstance(start_ce := terminal.conducting_equipment, Switch) and self.network_state_operators.is_open(start_ce):
             self._associate_equipment_with_containers(lv_feeders_to_assign, [start_ce])
         else:
             traversal = self._create_trace(terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
@@ -125,10 +127,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                       lv_feeders_to_assign: List[LvFeeder]) -> NetworkTrace[T]:
 
         def _reached_hv(ce: ConductingEquipment):
-            if ce.base_voltage and ce.base_voltage.nominal_voltage >= 1000:
-                return True
-            else:
-                return False
+            return True if ce.base_voltage and ce.base_voltage.nominal_voltage >= 1000 else False
 
         async def step_action(nts: NetworkTraceStep, context):
             await self._process(nts.path, nts.data, context, terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
@@ -162,9 +161,8 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
 
         # It might be tempting to check `stepContext.isStopping`, but that would also pick up open points between LV feeders which is not good.
         if found_lv_feeder:
-            found_lv_feeders = list(self._find_lv_feeders(step_path.to_equipment, lv_feeder_start_points))
 
-            for it in found_lv_feeders:
+            for it in (found_lv_feeders := list(self._find_lv_feeders(step_path.to_equipment, lv_feeder_start_points))):
                 # Energize the LV feeders that we are processing by the energizing feeders of what we found
                 self._feeder_energizes(self.network_state_operators.get_energizing_feeders(it), lv_feeders_to_assign)
 
@@ -184,8 +182,7 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             self._associate_power_electronic_units(lv_feeders_to_assign, to_equip)
 
     def _find_lv_feeders(self, ce: ConductingEquipment, lv_feeder_start_points: Set[ConductingEquipment]) -> Generator[LvFeeder, None, None]:
-        sites = list(ce.sites)
-        if sites:
+        if sites := list(ce.sites):
             for site in sites:
                 for feeder in site.find_lv_feeders(lv_feeder_start_points, self.network_state_operators):
                     yield feeder
