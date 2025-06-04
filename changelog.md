@@ -8,8 +8,8 @@
 * `RemoveDirection` has been removed. It did not work reliably with dual fed networks with loops. You now need to clear direction using the new
 `ClearDirection` and reapply directions where appropriate using `SetDirection`.
 * `Cut` supports adding a maximum of 2 terminals.
-* Added a new `debugLogging` and `name` parameters to the constructor of the following traces. The helper functions in `Tracing` also have these parameters,
-  which defaults to `null` and `networkTrace`, meaning anyone using these wrappers will be unaffected by the change:
+* Added a new `debug_logging` and `name` parameters to the constructor of the following traces. The helper functions in `Tracing` also have these parameters,
+  which defaults to `None` and `network_trace`, meaning anyone using these wrappers will be unaffected by the change:
   * `AssignToFeeders`
   * `AssignToLvFeeders`
   * `ClearDirection`
