@@ -9,6 +9,17 @@
   and reapply directions where appropriate using `SetDirection`.
 * `Cut` supports adding a maximum of 2 terminals.
 * `NetworkTraceTracker` now uses a `set` to track visited objects, if you were using unhashable objects this will need to be addressed.
+* Added a new `debugLogging` and `name` parameters to the constructor of the following traces. The helper functions in `Tracing` also have these parameters,
+  which defaults to `null` and `networkTrace`, meaning anyone using these wrappers will be unaffected by the change:
+  * `AssignToFeeders`
+  * `AssignToLvFeeders`
+  * `ClearDirection`
+  * `FindSwerEquipment`
+  * `PhaseInferrer`
+  * `RemovePhases`
+  * `SetDirection`
+  * `SetPhases`
+* `NetworkStateOperators` has a new abstract `description`. If you are creating custom operators you will need to add it.
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.
