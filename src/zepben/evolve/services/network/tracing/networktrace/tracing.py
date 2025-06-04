@@ -7,7 +7,7 @@ from typing import TypeVar, Union, Callable, Type
 
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
-from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
+from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType, CanActionItem
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
@@ -18,7 +18,7 @@ T = TypeVar('T')
 class Tracing:
     @staticmethod
     def network_trace(network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
-                      action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
+                      action_step_type: CanActionItem=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
                       debug_logger: Logger=None,
                       name: str='NetworkTrace',
                       queue: TraversalQueue[NetworkTraceStep[T]]=TraversalQueue.depth_first(),

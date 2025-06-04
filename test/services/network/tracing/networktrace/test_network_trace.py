@@ -11,8 +11,7 @@ from typing import List, Set
 import pytest
 
 from services.network.tracing.networktrace.test_network_trace_step_path_provider import PathTerminal, _verify_paths
-from zepben.evolve import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType
-from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType, Tracing
 from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
 
 Terminal.__add__ = PathTerminal.__add__
