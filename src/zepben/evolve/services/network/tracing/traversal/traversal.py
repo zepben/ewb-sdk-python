@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import inspect
 from abc import abstractmethod
 from collections import deque
 from collections.abc import Callable
@@ -29,6 +30,8 @@ from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueu
 T = TypeVar('T')
 U = TypeVar('U')
 D = TypeVar('D', bound='Traversal')
+QT = TypeVar('QT')
+QD = TypeVar('QD')
 
 QueueConditionTypes = Union[ShouldQueue, QueueCondition[T]]
 StopConditionTypes = Union[ShouldStop, StopCondition[T]]
@@ -54,12 +57,15 @@ class Traversal(Generic[T, D]):
     This class is **not thread safe**.
 
     `T` The type of object to be traversed.
-    `D` The specific type of traversal, extending [Traversal].
+    `D` The specific type of traversal, extending `Traversal`.
 
     :var name: The name of the traversal. Can be used for logging purposes and will be included in all debug logging.
+    :var _queue_type: The type of queue to use for processing this traversal.
+    :var _parent: The parent traversal, or None if this is a root level traversal. Primarily used to track branching traversals.
+    :var _debug_logger: An optional logger to add information about how the trace is processing items.
     """
 
-    class QueueType(Generic[T, D]):
+    class QueueType(Generic[QT, QD]):
         """
         Defines the types of queues used in the traversal.
 
@@ -67,20 +73,20 @@ class Traversal(Generic[T, D]):
         :var queue: The primary queue of items.
         """
 
-        queue_next: Traversal.QueueNext[T]
-        queue: TraversalQueue[T]
+        queue_next: Traversal.QueueNext[QT]
+        queue: TraversalQueue[QT]
 
         @property
         @abstractmethod
-        def queue(self) -> TraversalQueue[T]:
+        def queue(self) -> TraversalQueue[QT]:
             raise NotImplementedError
 
         @property
-        def branch_queue(self) -> Optional[TraversalQueue[D]]:
+        def branch_queue(self) -> Optional[TraversalQueue[QD]]:
             raise NotImplementedError
 
 
-    class BasicQueueType(QueueType[T, D]):
+    class BasicQueueType(QueueType[QT, QD]):
         """
         Basic queue type that handles non-branching item queuing.
 
@@ -88,22 +94,22 @@ class Traversal(Generic[T, D]):
         :param queue: The primary queue of items.
         """
 
-        def __init__(self, queue_next: Traversal.QueueNext[T], queue: TraversalQueue[T]):
+        def __init__(self, queue_next: Traversal.QueueNext[QT], queue: TraversalQueue[QT]):
             self.queue_next = queue_next
             self._queue = queue
             self._branch_queue = None
 
         @property
-        def queue(self) -> TraversalQueue[T]:
+        def queue(self) -> TraversalQueue[QT]:
             """The primary queue of items."""
             return self._queue
 
         @property
-        def branch_queue(self) -> Optional[TraversalQueue[D]]:
+        def branch_queue(self) -> Optional[TraversalQueue[QD]]:
             return self._branch_queue
 
 
-    class BranchingQueueType(QueueType[T, D]):
+    class BranchingQueueType(QueueType[QT, QD]):
         """
         Branching queue type, supporting operations that may split into separate
         branches during traversal.
@@ -114,19 +120,19 @@ class Traversal(Generic[T, D]):
         """
 
         def __init__(self,
-                     queue_next: Traversal.BranchingQueueNext[T],
-                     queue_factory: Callable[[], TraversalQueue[T]],
-                     branch_queue_factory: Callable[[], TraversalQueue[D]]):
-            self.queue_next: Traversal.BranchingQueueNext[T] = queue_next
+                     queue_next: Traversal.BranchingQueueNext[QT],
+                     queue_factory: Callable[[], TraversalQueue[QT]],
+                     branch_queue_factory: Callable[[], TraversalQueue[QD]]):
+            self.queue_next: Traversal.BranchingQueueNext[QT] = queue_next
             self.queue_factory = queue_factory
             self.branch_queue_factory = branch_queue_factory
 
         @property
-        def queue(self) -> TraversalQueue[T]:
+        def queue(self) -> TraversalQueue[QT]:
             return self.queue_factory()
 
         @property
-        def branch_queue(self) -> Optional[TraversalQueue[D]]:
+        def branch_queue(self) -> Optional[TraversalQueue[QD]]:
             return self.branch_queue_factory()
 
     name: str
@@ -217,9 +223,9 @@ class Traversal(Generic[T, D]):
         """
 
         if callable(condition): # Callable[[NetworkTraceStep[T], StepContext], None]
-            if condition.__code__.co_argcount == 2:
+            if len(inspect.getfullargspec(condition).args) == 2:
                 return self.add_stop_condition(condition)
-            elif condition.__code__.co_argcount == 4:
+            elif len(inspect.getfullargspec(condition).args) == 4:
                 return self.add_queue_condition(condition)
             else:
                 raise RuntimeError(f'Condition does not match expected: Number of args is not 2(Stop Condition) or 4(QueueCondition)')
