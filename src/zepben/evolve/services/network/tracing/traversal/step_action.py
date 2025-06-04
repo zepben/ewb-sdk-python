@@ -23,25 +23,28 @@ class StepAction(Generic[T]):
 
     `T` The type of items being traversed.
     """
+
     def __init__(self, _func: StepActionFunc):
         self._func = _func
 
     def apply(self, item: T, context: StepContext):
         """
-        Applies the action to the specified [item].
+        Applies the action to the specified `item`.
 
         :param item: The current item in the traversal.
         :param context: The context associated with the current traversal step.
         """
+
         return self._func(item, context)
 
 class StepActionWithContextValue(StepAction[T], ContextValueComputer[T]):
     """
-    Interface representing a step action that utilises a value stored in the [StepContext].
+    Interface representing a step action that utilises a value stored in the `StepContext`.
 
     `T` The type of items being traversed.
     `U` The type of the context value computed and used in the action.
     """
+
     def __init__(self, _func: StepActionFunc, key: str):
         StepAction.__init__(self, _func)
         ContextValueComputer.__init__(self, key)

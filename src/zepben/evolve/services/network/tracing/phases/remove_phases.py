@@ -39,10 +39,11 @@ class RemovePhases(object):
     def __init__(self, debug_logger: Logger=None):
         self._debug_logger = debug_logger
 
-    async def run(self,
-                  start: Union[NetworkService, Terminal],
-                  nominal_phases_to_ebb: Union[PhaseCode, SinglePhaseKind]=None,
-                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def run(
+        self,
+        start: Union[NetworkService, Terminal],
+        nominal_phases_to_ebb: Union[PhaseCode, SinglePhaseKind]=None,
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         If nominal_phases_to_ebb is `None` this will remove all phases for all equipment connected
         to `start`
@@ -54,6 +55,7 @@ class RemovePhases(object):
         :param nominal_phases_to_ebb: The nominal phases to remove traced phasing from. Defaults to all phases.
         :param network_state_operators: The `NetworkStateOperators` to be used when removing phases.
         """
+
         if nominal_phases_to_ebb is None:
 
             if isinstance(start, NetworkService):
@@ -72,6 +74,7 @@ class RemovePhases(object):
         :param network_service: The network service to remove traced phasing from.
         :param network_state_operators: The `NetworkStateOperators` to be used when removing phases.
         """
+
         for t in network_service.objects(Terminal):
             t.traced_phases.phase_status = 0
 
@@ -82,12 +85,14 @@ class RemovePhases(object):
         :param terminal: Removes all nominal phases a terminal traced phases and the connected equipment chain
         :param network_state_operators: The `NetworkStateOperators` to be used when removing phases.
         """
+
         return await self._run_with_phases_to_ebb(terminal, terminal.phases, network_state_operators)
 
-    async def _run_with_phases_to_ebb(self,
-                                terminal: Terminal,
-                                nominal_phases_to_ebb: Union[PhaseCode, Set[SinglePhaseKind]],
-                                network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def _run_with_phases_to_ebb(
+        self,
+        terminal: Terminal,
+        nominal_phases_to_ebb: Union[PhaseCode, Set[SinglePhaseKind]],
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         Allows the removal of traced phases from a terminal and the connected equipment chain
 

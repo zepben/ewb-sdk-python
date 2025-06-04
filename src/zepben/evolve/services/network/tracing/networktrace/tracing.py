@@ -17,13 +17,14 @@ T = TypeVar('T')
 
 class Tracing:
     @staticmethod
-    def network_trace(network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
-                      action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
-                      debug_logger: Logger=None,
-                      name: str='NetworkTrace',
-                      queue: TraversalQueue[NetworkTraceStep[T]]=TraversalQueue.depth_first(),
-                      compute_data: Union[ComputeData[T], Callable]=None
-                      ) -> NetworkTrace[T]:
+    def network_trace(
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
+        action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
+        debug_logger: Logger=None,
+        name: str='NetworkTrace',
+        queue: TraversalQueue[NetworkTraceStep[T]]=TraversalQueue.depth_first(),
+        compute_data: Union[ComputeData[T], Callable]=None
+    ) -> NetworkTrace[T]:
         """
         Creates a `NetworkTrace` that computes contextual data for every step.
 
@@ -32,10 +33,11 @@ class Tracing:
         :param queue: The traversal queue the trace is backed by. Defaults to a depth first queue.
         :param debug_logger: An optional logger to add information about how the trace is processing items.
         :param name: An optional name for your trace that can be used for logging purposes.
-        :param compute_data: The computer that provides the [NetworkTraceStep.data] contextual step data for each step in the trace.
+        :param compute_data: The computer that provides the `NetworkTraceStep.data` contextual step data for each step in the trace.
 
         :returns: a new `NetworkTrace`
         """
+
         if not isinstance(compute_data, ComputeData):
             compute_data = ComputeData(compute_data or (lambda *args: None))
 
@@ -47,14 +49,31 @@ class Tracing:
                                           debug_logger=debug_logger)
 
     @staticmethod
-    def network_trace_branching(network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
-                                action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
-                                debug_logger: Logger=None,
-                                name: str='NetworkTrace',
-                                queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]]=lambda: TraversalQueue.depth_first(),
-                                branch_queue_factory: Callable[[], TraversalQueue[NetworkTrace[NetworkTraceStep[T]]]]=lambda: TraversalQueue.breadth_first(),
-                                compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None
-                                ) -> NetworkTrace[T]:
+    def network_trace_branching(
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
+        action_step_type: NetworkTraceActionType=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
+        debug_logger: Logger=None,
+        name: str='NetworkTrace',
+        queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]]=lambda: TraversalQueue.depth_first(),
+        branch_queue_factory: Callable[[], TraversalQueue[NetworkTrace[NetworkTraceStep[T]]]]=lambda: TraversalQueue.breadth_first(),
+        compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None
+    ) -> NetworkTrace[T]:
+        """
+        Creates a branching `NetworkTrace` that computes contextual data for every step. A new 'branch' will be created for each terminal
+        where the current terminal in the trace will step to two or more terminals.
+
+        :param network_state_operators: The state operators to make the NetworkTrace state aware. Defaults to `NetworkStateOperators.NORMAL`.
+        :param action_step_type: The action step type to be applied when the trace steps. Defaults to `NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT`.
+        :param queue_factory: A factory that will produce [TraversalQueue]s used by each branch in the trace to queue steps. Defaults to a factory
+          the creates depth first queues.
+        :param branch_queue_factory: A factory that will produce `TraversalQueue`s used by each branch in the trace to queue branches. Defaults
+          to a factory that creates breadth first queues.
+        :param debug_logger: An optional logger to add information about how the trace is processing items.
+        :param name: An optional name for your trace that can be used for logging purposes.
+        :param compute_data: The computer that provides the `NetworkTraceStep.data` contextual step data for each step in the trace.
+
+        :returns: a new `NetworkTrace`
+        """
 
         if not isinstance(compute_data, ComputeData):
             compute_data = ComputeData(compute_data or (lambda *args: None))

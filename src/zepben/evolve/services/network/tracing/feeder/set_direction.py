@@ -33,14 +33,17 @@ class SetDirection:
     Convenience class that provides methods for setting feeder direction on a [NetworkService]
     This class is backed by a [BranchRecursiveTraversal].
     """
+    
     def __init__(self, debug_logger: Logger=None):
         self._debug_logger = debug_logger
 
     @staticmethod
-    def _compute_data(reprocessed_loop_terminals: list[Terminal],
-                      state_operators: Type[NetworkStateOperators],
-                      step: NetworkTraceStep[FeederDirection],
-                      next_path: NetworkTraceStep.Path) -> FeederDirection:
+    def _compute_data(
+        reprocessed_loop_terminals: list[Terminal],
+        state_operators: Type[NetworkStateOperators],
+        step: NetworkTraceStep[FeederDirection],
+        next_path: NetworkTraceStep.Path
+    ) -> FeederDirection:
 
         if next_path.to_equipment is BusbarSection:
             return FeederDirection.CONNECTOR
@@ -59,7 +62,6 @@ class SetDirection:
 
         next_direction = next_direction_func()
 
-        #
         # NOTE: Stopping / short-circuiting by checking that the next direction is already present in the toTerminal,
         #       causes certain looping network configurations not to be reprocessed. This means that some parts of
         #       loops do not end up with BOTH directions. This is done to stop massive computational blowout on
@@ -79,7 +81,7 @@ class SetDirection:
             return next_direction
         return FeederDirection.NONE
 
-    async def _create_traversal(self, state_operators: Type[NetworkStateOperators]) -> NetworkTrace[FeederDirection]:
+    def _create_traversal(self, state_operators: Type[NetworkStateOperators]) -> NetworkTrace[FeederDirection]:
         reprocessed_loop_terminals: list[Terminal] = []
 
         return (
@@ -105,11 +107,9 @@ class SetDirection:
 
     @staticmethod
     def _reached_substation_transformer(terminal: Terminal) -> bool:
-        ce = terminal.conducting_equipment
-        if not ce:
-            return False
-
-        return isinstance(ce, PowerTransformer) and ce.num_substations() > 0
+        if ce := terminal.conducting_equipment:
+            return isinstance(ce, PowerTransformer) and ce.num_substations() > 0
+        return False
 
     @staticmethod
     def _is_normally_open_switch(conducting_equipment: Optional[ConductingEquipment]):
@@ -123,10 +123,9 @@ class SetDirection:
          :param network: The network in which to apply feeder directions.
          :param network_state_operators: The `NetworkStateOperators` to be used when setting feeder direction
          """
-        for terminal in (f.normal_head_terminal for f in network.objects(Feeder) if f.normal_head_terminal):
-            head_terminal = terminal.conducting_equipment
 
-            if head_terminal is not None:
+        for terminal in (f.normal_head_terminal for f in network.objects(Feeder) if f.normal_head_terminal):
+            if head_terminal := terminal.conducting_equipment is not None:
                 if not network_state_operators.is_open(head_terminal, None):
                     await self.run_terminal(terminal, network_state_operators)
 
@@ -138,6 +137,7 @@ class SetDirection:
          :param terminal: The terminal to start applying feeder direction from.
          :param network_state_operators: The `NetworkStateOperators` to be used when setting feeder direction
          """
-        trav = await self._create_traversal(network_state_operators)
-        return await trav.run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False)
+
+        return await (self._create_traversal(network_state_operators)
+                      .run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False))
 

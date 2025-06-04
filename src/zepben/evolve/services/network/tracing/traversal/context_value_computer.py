@@ -16,12 +16,12 @@ __all__ = ['ContextValueComputer']
 
 class ContextValueComputer(Generic[T]):
     """
-    Interface representing a context value computer used to compute and store values in a [StepContext].
-    This interface does not specify a generic return type because the [StepContext] stores its values as `Any?`.
+    Interface representing a context value computer used to compute and store values in a `StepContext`.
     Implementations compute initial and subsequent context values during traversal steps.
 
     `T` The type of items being traversed.
     """
+
     def __init__(self, key: str):
         self.key = key  # A unique key identifying the context value computed by this computer.
 
