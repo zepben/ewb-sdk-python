@@ -37,7 +37,7 @@ __all__ = ['NetworkTrace']
 
 class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]):
     """
-    A [Traversal] implementation specifically designed to trace connected [Terminal]s of [ConductingEquipment] in a network.
+    A `Traversal` implementation specifically designed to trace connected `Terminal`s of `ConductingEquipment` in a network.
 
     This trace manages the complexity of network connectivity, especially in cases where connectivity is not straightforward,
     such as with `BusbarSection`s and `Clamp`s. It checks the in service flag of equipment and only steps to equipment that is marked as in service.
@@ -289,10 +289,10 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     @add_condition.register
     def _(self, condition: Callable):
         """
-        Adds a traversal condition to the trace using the trace's [NetworkStateOperators] as the receiver.
+        Adds a traversal condition to the trace using the trace's `NetworkStateOperators` as the receiver.
 
         This overload primarily exists to enable a DSL-like syntax for adding predefined traversal conditions to the trace.
-        For example, to configure the trace to stop at open points using the [Conditions.stop_at_open] factory, you can use:
+        For example, to configure the trace to stop at open points using the `Conditions.stop_at_open` factory, you can use:
 
         >>> from zepben.evolve import stop_at_open
         >>> NetworkTrace().add_condition(stop_at_open())
