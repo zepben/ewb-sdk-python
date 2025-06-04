@@ -142,13 +142,14 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                    name)
 
     @singledispatchmethod
-    def add_start_item(self, start: Union[Terminal, ConductingEquipment], data: T=None, phases: PhaseCode=None) -> "NetworkTrace[T]":
+    def add_start_item(self, start: Union[Terminal, ConductingEquipment, NetworkTraceStep.Path], data: T=None, phases: PhaseCode=None) -> "NetworkTrace[T]":
         """
         Depending on the type of `start` adds one of the following as starting points in the trace, along
         with the associated data:
           - A starting `Terminal`
           - All terminals of the given `ConductingEquipment`.
           - All terminals of the given `AcLineSegment`.
+          - The `NetworkTraceStep.Path` passed in.
 
         Tracing will be only external from this terminal and not trace internally back through its conducting equipment.
 
@@ -178,7 +179,6 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         # we want to trace externally from it and traverse its segment.
         for it in start.terminals:
             self._add_start_item(it, data=data, phases=phases)
-
         return self
 
     @add_start_item.register
@@ -233,20 +233,47 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
             self._add_start_item(terminal, data=data, phases=phases, traversed_ac_line_segment=start)
         return self
 
+    @add_start_item.register
+    def _(self, start: NetworkTraceStep.Path, data: T, phases=None):
+        if phases:
+            raise ValueError('starting from a NetworkTraceStep.Path does not support specifying phases')
+        self._add_start_item(start, data=data)
+        return self
+
     def _add_start_item(self,
-                       start: Terminal=None,
-                       data: T=None,
-                       phases: PhaseCode=None,
-                       traversed_ac_line_segment: AcLineSegment=None):
+                        start: Union[Terminal, NetworkTraceStep.Path]=None,
+                        data: T=None,
+                        phases: PhaseCode=None,
+                        traversed_ac_line_segment: AcLineSegment=None):
+        """
+        To be called by self.add_start_item(), this method builds the start `NetworkTraceStep.Path`s for the start item
+        and adds it to the `Traversal`
+
+        If `start` is a `NetworkTraceStep.Path`, [`phases`, `traversed_ac_line_segment`] will all be ignored.
+
+        :param start: The starting `Terminal` or `NetworkTraceStep.Path` to be added to the trace
+        :param data: The data associated with the start `Terminal`.
+        :param phases: Phases to trace; `None` to ignore phases.
+        :param traversed_ac_line_segment: The AcLineSegment that was just traversed
+
+        :returns: This `NetworkTrace` instance
+        """
 
         if start is None:
-            return
-        start_path = NetworkTraceStep.Path(start, start, traversed_ac_line_segment, self.start_nominal_phase_path(phases))
+            raise ValueError('path and start must not both be None.')
+
+        if isinstance(start, NetworkTraceStep.Path):
+            if any([phases, traversed_ac_line_segment]):
+                raise ValueError('phases and traversed_ac_line_segment are all ignored when start is a NetworkTraceStep.Path')
+            start_path = start
+        else:
+            start_path = NetworkTraceStep.Path(start, start, traversed_ac_line_segment, self.start_nominal_phase_path(phases))
+
         super().add_start_item(NetworkTraceStep(start_path, 0, 0, data))
 
     async def run(
         self,
-        start: Union[ConductingEquipment, Terminal]=None,
+        start: Union[ConductingEquipment, Terminal, NetworkTraceStep.Path]=None,
         data: T=None,
         phases: PhaseCode=None,
         can_stop_on_start_item: bool=True

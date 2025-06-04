@@ -35,8 +35,9 @@
   * You can now add sites to the `TestNetworkBuilder` via `addSite`.
   * You can now add busbar sections natively with `from_busbar_section` and `to_busbar_section`
   * The prefix for generated mRIDs for "other" equipment can be specified with the `default_mrid_prefix` argument in `from_other` and `to_other`.
-* When processing feeder assignments, all LV feeders belonging to a dist substation site will now be considered energized when the site is energized by a
-  feeder.
+* When processing feeder assignments, all LV feeders belonging to a dist substation site will now be considered energized when the site is energized by a feeder.
+* `NetworkTrace` now supports starting from a known `NetworkTraceStep.Path`. This allows you to force a trace to start in a particular direction, or to continue
+  a follow-up trace from a detected stop point.
 
 ### Fixes
 * When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`
