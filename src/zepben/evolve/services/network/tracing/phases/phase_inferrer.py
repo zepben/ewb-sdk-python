@@ -193,7 +193,7 @@ class PhaseInferrer:
         async def _continue_phases(self, terminal: Terminal):
             set_phases_trace = Tracing.set_phases(debug_logger=self._debug_logger)
             for other in terminal.other_terminals():
-                await set_phases_trace.run_spread_phases_and_flow(terminal, other, terminal.phases.single_phases, network_state_operators=self.state_operators)
+                await set_phases_trace.run(other, terminal.phases.single_phases, network_state_operators=self.state_operators, seed_terminal=terminal)
 
         @staticmethod
         def _first_unused(phases: List[SinglePhaseKind], used_phases: Set[SinglePhaseKind], validate: Callable[[SinglePhaseKind], bool]) -> SinglePhaseKind:

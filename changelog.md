@@ -52,6 +52,8 @@
 * `NetworkTrace`/`Traversal` now correctly respects `can_stop_on_start_item` when providing multiple start items.
 * `AssignToFeeders`/`AssignToLvFeeders` now finds back-fed equipment correctly
 * `AssignToFeeders` and `AssignToLvFeeders` will now associate `PowerElectronicUnits` with their `powerElectronicsConnection` `Feeder`/`LvFeeder`.
+* Phases are now correctly assigned to the LV side of an LV2 transformer that is in parallel with a previously energised LV1 transformer.
+
 
 ### Notes
 * None.

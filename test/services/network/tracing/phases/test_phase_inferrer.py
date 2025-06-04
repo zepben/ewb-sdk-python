@@ -452,7 +452,10 @@ class TestPhaseInferrer:
 
     async def run_phase_inferrer(self, network: NetworkService, do_current=True) -> tuple[List[PhaseInferrer.InferredPhase], List[PhaseInferrer.InferredPhase]]:
         normal = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.NORMAL)
-        current = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.CURRENT) if do_current else []
+
+        current = []
+        if do_current:
+            current = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.CURRENT)
 
         # This has to be called manually as we don't actually use the NetworkDatabaseReader
         #  and copy pasting the logging code in here didn't make any sense.
