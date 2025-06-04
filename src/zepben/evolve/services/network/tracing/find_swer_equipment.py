@@ -44,6 +44,7 @@ class FindSwerEquipment:
 
         :return: A `Set` of `ConductingEquipment` on `Feeder` that is SWER, or energised via SWER.
         """
+
         if isinstance(to_process, Feeder):
             return set(await self.find_on_feeder(to_process, network_state_operators))
         elif isinstance(to_process, NetworkService):
@@ -61,6 +62,7 @@ class FindSwerEquipment:
 
         :return: A `Set` of `ConductingEquipment` on `Feeder` that is SWER, or energised via SWER.
         """
+
         for feeder in network_service.objects(Feeder):
             for item in await self.find_on_feeder(feeder, network_state_operators):
                 yield item
@@ -74,10 +76,11 @@ class FindSwerEquipment:
 
         :return: A `Set` of `ConductingEquipment` on `feeder` that is SWER, or energised via SWER.
         """
+
         swer_equipment: Set[ConductingEquipment] = set()
 
         # We will add all the SWER transformers to the swer_equipment list before starting any traces to prevent tracing though them by accident. In
-        # order to do this, we collect the sequence to a list to change the iteration order.
+        #  order to do this, we collect the sequence to a list to change the iteration order.
         for equipment in network_state_operators.get_equipment(feeder):
             if isinstance(equipment, PowerTransformer):
                 if _has_swer_terminal(equipment) and _has_non_swer_terminal(equipment):
@@ -98,7 +101,12 @@ class FindSwerEquipment:
         # Trace from any LV terminals.
         await self._trace_lv_from(state_operators, transformer, swer_equipment)
 
-    async def _trace_swer_from(self, state_operators: Type[NetworkStateOperators], transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
+    async def _trace_swer_from(
+        self,
+        state_operators: Type[NetworkStateOperators],
+        transformer: PowerTransformer,
+        swer_equipment: Set[ConductingEquipment]
+    ):
 
         def condition(next_step, nctx, step, ctx):
             if _is_swer_terminal(next_step.path.to_terminal) or isinstance(next_step.path.to_equipment, Switch):
@@ -115,7 +123,12 @@ class FindSwerEquipment:
             await trace.run(it, None)
 
 
-    async def _trace_lv_from(self, state_operators: Type[NetworkStateOperators],  transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
+    async def _trace_lv_from(
+        self,
+        state_operators: Type[NetworkStateOperators],
+        transformer: PowerTransformer,
+        swer_equipment: Set[ConductingEquipment]
+    ):
 
         def condition(next_step, nctx, step, ctx):
             if 1 <= next_step.path.to_equipment.base_voltage_value <= 1000:

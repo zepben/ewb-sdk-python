@@ -48,10 +48,11 @@ class SetPhases:
             return f'PhasesToFlow(nominal_phase_paths={self.nominal_phase_paths}, step_flowed_phases={self.step_flowed_phases})'
 
 
-    async def run(self,
-                  apply_to: Union[NetworkService, Terminal],
-                  phases: Union[PhaseCode, Iterable[SinglePhaseKind]]=None,
-                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def run(
+        self,
+        apply_to: Union[NetworkService, Terminal],
+        phases: Union[PhaseCode, Iterable[SinglePhaseKind]]=None,
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
 
         if isinstance(apply_to, NetworkService):
             return await self._run(apply_to, network_state_operators)
@@ -65,30 +66,34 @@ class SetPhases:
         else:
             raise Exception('INTERNAL ERROR: incorrect params')
 
-    async def _run(self,
-                   network: NetworkService,
-                   network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def _run(
+        self,
+        network: NetworkService,
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         Apply phases from all sources in the network.
 
         :param network: The network in which to apply phases.
         """
+
         trace = await self._create_network_trace(network_state_operators)
         for energy_source in network.objects(EnergySource):
             for terminal in energy_source.terminals:
                 self._apply_phases(network_state_operators, terminal, terminal.phases.single_phases)
                 await self._run_terminal(terminal, network_state_operators, trace)
 
-    async def _run_with_phases(self,
-                               terminal: Terminal,
-                               phases: Union[PhaseCode, Iterable[SinglePhaseKind]],
-                               network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def _run_with_phases(
+        self,
+        terminal: Terminal,
+        phases: Union[PhaseCode, Iterable[SinglePhaseKind]],
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         Apply phases from the `terminal`.
 
         :param terminal: The terminal to start applying phases from.
         :param phases: The phases to apply. Must only contain ABCN.
         """
+
         def validate_phases(_phases):
             if len(_phases) != len(terminal.phases.single_phases):
                 raise TracingException(
@@ -108,11 +113,12 @@ class SetPhases:
 
         await self._run_terminal(terminal, network_state_operators)
 
-    async def run_spread_phases_and_flow(self,
-                                         seed_terminal: Terminal,
-                                         start_terminal: Terminal,
-                                         phases: List[SinglePhaseKind],
-                                         network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def run_spread_phases_and_flow(
+        self,
+        seed_terminal: Terminal,
+        start_terminal: Terminal,
+        phases: List[SinglePhaseKind],
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
 
         nominal_phase_paths = self._get_nominal_phase_paths(network_state_operators, seed_terminal, start_terminal, list(phases))
         if await self._flow_phases(network_state_operators, seed_terminal, start_terminal, nominal_phase_paths):
@@ -134,6 +140,7 @@ class SetPhases:
         :param phases: The nominal phases on which to spread phases.
         :param network_state_operators: The `NetworkStateOperators` to be used when setting phases.
         """
+
         if phases is None:
             return await self.spread_phases(from_terminal, to_terminal, from_terminal.phases.single_phases, network_state_operators)
         else:
@@ -182,19 +189,23 @@ class SetPhases:
         return ComputeData(inner)
 
     @staticmethod
-    def _apply_phases(state_operators: Type[NetworkStateOperators],
-                      terminal: Terminal,
-                      phases: List[SinglePhaseKind]):
+    def _apply_phases(
+        state_operators: Type[NetworkStateOperators],
+        terminal: Terminal,
+        phases: List[SinglePhaseKind]):
 
         traced_phases = state_operators.phase_status(terminal)
         for i, nominal_phase in enumerate(terminal.phases.single_phases):
             traced_phases[nominal_phase] = phases[i] if phases[i] not in PhaseCode.XY else SinglePhaseKind.NONE
 
-    def _get_nominal_phase_paths(self, state_operators: Type[NetworkStateOperators],
-                                       from_terminal: Terminal,
-                                       to_terminal: Terminal,
-                                       phases: Sequence[SinglePhaseKind]
-                                       ) -> tuple[NominalPhasePath]:
+    def _get_nominal_phase_paths(
+        self,
+        state_operators: Type[NetworkStateOperators],
+        from_terminal: Terminal,
+        to_terminal: Terminal,
+        phases: Sequence[SinglePhaseKind]
+    ) -> tuple[NominalPhasePath]:
+
         traced_internally = from_terminal.conducting_equipment == to_terminal.conducting_equipment
         phases_to_flow = self._get_phases_to_flow(state_operators, from_terminal, phases, traced_internally)
 
@@ -204,11 +215,12 @@ class SetPhases:
             return TerminalConnectivityConnected().terminal_connectivity(from_terminal, to_terminal, phases_to_flow).nominal_phase_paths
 
     @staticmethod
-    async def _flow_phases(state_operators: Type[NetworkStateOperators],
-                           from_terminal: Terminal,
-                           to_terminal: Terminal,
-                           nominal_phase_paths: Iterable[NominalPhasePath]
-                           ) -> bool:
+    async def _flow_phases(
+        state_operators: Type[NetworkStateOperators],
+        from_terminal: Terminal,
+        to_terminal: Terminal,
+        nominal_phase_paths: Iterable[NominalPhasePath]
+    ) -> bool:
 
         from_phases = state_operators.phase_status(from_terminal)
         to_phases = state_operators.phase_status(to_terminal)

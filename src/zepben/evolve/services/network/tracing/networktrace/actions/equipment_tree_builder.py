@@ -50,7 +50,13 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
             self._roots[item.path.to_equipment] = node
         return node
 
-    def compute_next_value(self, next_item: NetworkTraceStep[Any], current_item: NetworkTraceStep[Any], current_value: EquipmentTreeNode) -> EquipmentTreeNode:
+    def compute_next_value(
+        self,
+        next_item: NetworkTraceStep[Any],
+        current_item: NetworkTraceStep[Any],
+        current_value: EquipmentTreeNode
+    ) -> EquipmentTreeNode:
+
         if next_item.path.traced_internally:
             return current_value
         else:

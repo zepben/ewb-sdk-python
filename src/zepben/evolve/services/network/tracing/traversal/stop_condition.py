@@ -21,8 +21,9 @@ class StopCondition(Generic[T], TraversalCondition[T]):
     """
     Functional interface representing a condition that determines whether the traversal should stop at a given item.
 
-    T : The type of items being traversed.
+    `T` The type of items being traversed.
     """
+
     def __init__(self, stop_function: ShouldStop=None):
         if stop_function is not None:
             self.should_stop = stop_function
@@ -42,8 +43,8 @@ class StopConditionWithContextValue(StopCondition[T], ContextValueComputer[T]):
     """
     Interface representing a stop condition that requires a value stored in the StepContext to determine if an item should be queued.
 
-    T : The type of items being traversed.
-    U : The type of the context value computed and used in the condition.
+    `T` The type of items being traversed.
+    `U` The type of the context value computed and used in the condition.
     """
 
     @abstractmethod

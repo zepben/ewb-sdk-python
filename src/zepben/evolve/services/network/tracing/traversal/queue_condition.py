@@ -31,24 +31,26 @@ class QueueCondition(Generic[T], TraversalCondition[T]):
 
     def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
         """
-        Determines whether the [nextItem] should be queued for traversal.
+        Determines whether the `next_item` should be queued for traversal.
 
-        `nextItem` The next item to be potentially queued.
-        `nextContext` The context associated with the [nextItem].
-        `currentItem` The current item being processed in the traversal.
-        `currentContext` The context associated with the [currentItem].
-        Returns `true` if the [nextItem] should be queued; `false` otherwise.
+        `next_item` The next item to be potentially queued.
+        `next_context` The context associated with the `next_iItem`.
+        `current_item` The current item being processed in the traversal.
+        `current_context` The context associated with the `current_item`.
+        Returns `True` if the `next_tem` should be queued; `False` otherwise.
         """
+
         raise NotImplemented
 
     @staticmethod
     def should_queue_start_item(item: T) -> bool:
         """
-        Determines whether a traversal startItem should be queued when running a [Traversal].
+        Determines whether a traversal start_item should be queued when running a `Traversal`.
 
-        `item` The item to be potentially queued.
-        Returns `true` if the [item] should be queued; `false` otherwise. Defaults to `true`.
+        :param item: The item to be potentially queued.
+        :eturn: `True` if the `item` should be queued; `False` otherwise. Defaults to `True`.
         """
+
         return True
 
 
@@ -56,7 +58,7 @@ from zepben.evolve.services.network.tracing.traversal.context_value_computer imp
 
 class QueueConditionWithContextValue(QueueCondition[T], ContextValueComputer[T], Generic[T, U]):
     """
-    Interface representing a queue condition that requires a value stored in the [StepContext] to determine if an item should be queued.
+    Interface representing a queue condition that requires a value stored in the `StepContext` to determine if an item should be queued.
 
     `T` The type of items being traversed.
     `U` The type of the context value computed and used in the condition.

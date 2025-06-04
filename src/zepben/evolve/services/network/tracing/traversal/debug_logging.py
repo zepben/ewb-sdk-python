@@ -22,6 +22,7 @@ class DebugLoggingWrapper:
         StopCondition: [],
         QueueCondition: []
     }
+
     def __init__(self, description: str, logger: Logger):
         self.description: str = description
         self._logger: Logger = logger
@@ -50,6 +51,7 @@ class DebugLoggingWrapper:
             based on their basic classification without requiring any information in the
             object aside from what it inherits from
             """
+
             self._wrapped[clazz].append(obj)
             if count is not None:
                 return count
@@ -65,12 +67,14 @@ class DebugLoggingWrapper:
                         args/kwargs passed to the function are passed to `str.format()`,
                         as is `result` which is the result of the function itself
             """
+
             setattr(obj, attr, self._log_method_call(getattr(obj, attr), msg))
 
         # FIXME: when we drop 3.9 support, this can be replaced with a match case statement based
         #  on the below one-liner, and multiple calls to _count can be dropped as we will know the
         #  class before hitting any of the case blocks.
         #  _subtype = [t for t in (StepAction, StopCondition, QueueCondition) if t in type(obj).mro()].pop() or None
+
         if isinstance(obj, clazz := StepAction):
             _count = wrapobj(clazz)
             wrapattr('apply', f'{self.description}: stepping_on({_count})' + ' [item={args[0]}, context={args[1]}]')
@@ -97,6 +101,7 @@ class DebugLoggingWrapper:
         :param func: any callable
         :param log_string: any string supported by `str.format()`
         """
+
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
             msg = f"{self._logger.name}: {log_string.format(result=result, args=args, kwargs=kwargs)}"
