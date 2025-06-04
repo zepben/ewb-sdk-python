@@ -1,4 +1,4 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -132,19 +132,19 @@ class Equipment(PowerSystemResource):
         """
         Returns The number of `zepben.evolve.cim.iec61970.base.core.substation.Substation`s associated with this `Equipment`
         """
-        return len(_of_type(self._equipment_containers, Substation))
+        return len(list(_of_type(self._equipment_containers, Substation)))
 
     def num_sites(self) -> int:
         """
         Returns The number of `Site`s associated with this `Equipment`
         """
-        return len(_of_type(self._equipment_containers, Site))
+        return len(list(_of_type(self._equipment_containers, Site)))
 
     def num_normal_feeders(self) -> int:
         """
         Returns The number of normal `Feeder`s associated with this `Equipment`
         """
-        return len(_of_type(self._equipment_containers, Feeder))
+        return len(list(_of_type(self._equipment_containers, Feeder)))
 
     def num_usage_points(self) -> int:
         """
@@ -358,9 +358,6 @@ class Equipment(PowerSystemResource):
         return self
 
 
-def _of_type(containers: Optional[List[EquipmentContainer]], ectype: Type[TEquipmentContainer]) -> List[TEquipmentContainer]:
-    if containers:
-        return [ec for ec in containers if isinstance(ec, ectype)]
-    else:
-        return []
+def _of_type(containers: Optional[List[EquipmentContainer]], ectype: Type[TEquipmentContainer]) -> Generator[TEquipmentContainer, None, None]:
+    yield from (ec for ec in containers if isinstance(ec, ectype)) if containers is not None else {}
 
