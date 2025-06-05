@@ -18,6 +18,9 @@ if TYPE_CHECKING:
 
 T = TypeVar('T')
 
+__all__ = ['NetworkTraceStep']
+
+
 class NetworkTraceStep(Generic[T]):
     """
     Represents a single step in a network trace, containing information about the path taken and associated data.
@@ -45,6 +48,7 @@ class NetworkTraceStep(Generic[T]):
         :param traversed_ac_line_segment: If the from_terminal and to_terminal path was via an `AcLineSegment`, this is the segment that was traversed
         :param nominal_phase_paths: A list of nominal phase paths traced in this step. If this is empty, phases have been ignored.
         """
+
         from_terminal: Terminal
         to_terminal: Terminal
         traversed_ac_line_segment: Optional[AcLineSegment] = field(default=None)
@@ -57,9 +61,7 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def from_equipment(self) -> ConductingEquipment:
-            """
-            The conducting equipment associated with `self.from_terminal`.
-            """
+            """The conducting equipment associated with `self.from_terminal`."""
             ce = self.from_terminal.conducting_equipment
             if not ce:
                 raise AttributeError("Network trace does not support terminals that do not have conducting equipment")
@@ -67,9 +69,7 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def to_equipment(self) -> ConductingEquipment:
-            """
-            The conducting equipment associated with `self.to_terminal`.
-            """
+            """The conducting equipment associated with `self.to_terminal`."""
             ce = self.to_terminal.conducting_equipment
             if not ce:
                 raise AttributeError("Network trace does not support terminals that do not have conducting equipment")
@@ -77,16 +77,12 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def traced_internally(self) -> bool:
-            """
-            `True` if the from and to terminals belong to the same equipment; `False` otherwise.
-            """
+            """`True` if the from and to terminals belong to the same equipment; `False` otherwise."""
             return self.from_equipment == self.to_equipment
 
         @property
         def traced_externally(self) -> bool:
-            """
-            `True` if the from and to terminals belong to different equipment; `False` otherwise.
-            """
+            """`True` if the from and to terminals belong to different equipment; `False` otherwise."""
             return not self.traced_internally
 
         @property
@@ -107,12 +103,20 @@ class NetworkTraceStep(Generic[T]):
 
     def type(self) -> Type:
         """
-        Returns the [Type] of the step. This will be [Type.INTERNAL] if [Path.tracedInternally] is true, [Type.EXTERNAL] when [Path.tracedExternally] is true
-        and will never be [Type.ALL] which is used in other NetworkTrace functionality to determine if all steps should be used for that particular function.
+        Returns the `Type` of the step. This will be `Type.INTERNAL` if `Path.tracedInternally` is true, `Type.EXTERNAL` when `Path.tracedExternally` is true
+        and will never be `Type.ALL` which is used in other NetworkTrace functionality to determine if all steps should be used for that particular function.
 
-        Returns [Type.INTERNAL] with [Path.tracedInternally] is true, [Type.EXTERNAL] when [Path.tracedExternally] is true
+        Returns `Type.INTERNAL` with `Path.tracedInternally` is true, `Type.EXTERNAL` when `Path.tracedExternally` is true
         """
+
         return self.Type.INTERNAL if self.path.traced_internally else self.Type.EXTERNAL
 
     def next_num_terminal_steps(self):
         return self.num_terminal_steps + 1
+
+    def __getitem__(self, item):
+        """Convenience method to access this NetworkTraceStep as a tuple of (self.path, self.data)"""
+        return (self.path, self.data)[item]
+
+    def __str__(self):
+        return f"NetworkTraceStep({', '.join('{}={}'.format(*i) for i in vars(self).items())})"
