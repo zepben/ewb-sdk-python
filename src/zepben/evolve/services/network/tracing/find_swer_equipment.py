@@ -91,7 +91,8 @@ class FindSwerEquipment:
     def _create_trace(self, state_operators: Type[NetworkStateOperators]) -> NetworkTrace[T]:
         return Tracing.network_trace(
             network_state_operators=state_operators,
-            debug_logger=self._debug_logger
+            debug_logger=self._debug_logger,
+            name=f'FindSwerEquipment({state_operators.description})'
         ).add_condition(stop_at_open())
 
     async def _trace_from(self, state_operators: Type[NetworkStateOperators], transformer: PowerTransformer, swer_equipment: Set[ConductingEquipment]):
