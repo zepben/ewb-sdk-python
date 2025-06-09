@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 __all__ = ['NetworkStateOperators', 'NormalNetworkStateOperators', 'CurrentNetworkStateOperators']
 
+
 # noinspection PyPep8Naming
 class NetworkStateOperators(OpenStateOperators,
                             FeederDirectionStateOperations,
@@ -46,6 +47,8 @@ class NetworkStateOperators(OpenStateOperators,
     By using this interface, you can apply identical conditions and steps without needing to track which state is active
     or creating redundant trace implementations for different network states.
     """
+
+    description: str
 
     @classproperty
     def NORMAL(cls) -> Type['NormalNetworkStateOperators']:
@@ -71,6 +74,8 @@ class NormalNetworkStateOperators(NetworkStateOperators,
     Instance that operates on the normal state of network objects.
     """
 
+    description = 'normal'
+
     CURRENT = False
     NORMAL = True
 
@@ -93,6 +98,8 @@ class CurrentNetworkStateOperators(NetworkStateOperators,
     Instance that operates on the current state of network objects.
     """
 
+    description = 'current'
+
     CURRENT = True
     NORMAL = False
 
@@ -104,4 +111,3 @@ class CurrentNetworkStateOperators(NetworkStateOperators,
     @classmethod
     def next_paths(cls, path: NetworkTraceStep.Path) -> Generator[NetworkTraceStep.Path, None, None]:
         yield from cls.network_trace_step_path_provider().next_paths(path)
-
