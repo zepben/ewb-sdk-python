@@ -26,6 +26,7 @@ from zepben.evolve.services.network.tracing.traversal.stop_condition import Stop
 __all__ = ["Traversal"]
 
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
+from zepben.evolve.util import extra_kwargs_not_allowed
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -36,6 +37,7 @@ QD = TypeVar('QD')
 QueueConditionTypes = Union[ShouldQueue, QueueCondition[T]]
 StopConditionTypes = Union[ShouldStop, StopCondition[T]]
 ConditionTypes = Union[QueueConditionTypes, StopConditionTypes]
+StepActionTypes = Union[StepActionFunc, StepAction]
 
 
 class Traversal(Generic[T, D]):
@@ -57,7 +59,7 @@ class Traversal(Generic[T, D]):
     This class is **not thread safe**.
 
     `T` The type of object to be traversed.
-    `D` The specific type of traversal, extending `Traversal`.
+    `D` The specific type of traversal, extending :class:`Traversal`.
 
     :var name: The name of the traversal. Can be used for logging purposes and will be included in all debug logging.
     :var _queue_type: The type of queue to use for processing this traversal.
@@ -85,7 +87,6 @@ class Traversal(Generic[T, D]):
         def branch_queue(self) -> Optional[TraversalQueue[QD]]:
             raise NotImplementedError
 
-
     class BasicQueueType(QueueType[QT, QD]):
         """
         Basic queue type that handles non-branching item queuing.
@@ -108,7 +109,6 @@ class Traversal(Generic[T, D]):
         def branch_queue(self) -> Optional[TraversalQueue[QD]]:
             return self._branch_queue
 
-
     class BranchingQueueType(QueueType[QT, QD]):
         """
         Branching queue type, supporting operations that may split into separate
@@ -119,10 +119,12 @@ class Traversal(Generic[T, D]):
         :param branch_queue_factory: Factory function to create the branch queue.
         """
 
-        def __init__(self,
-                     queue_next: Traversal.BranchingQueueNext[QT],
-                     queue_factory: Callable[[], TraversalQueue[QT]],
-                     branch_queue_factory: Callable[[], TraversalQueue[QD]]):
+        def __init__(
+            self,
+            queue_next: Traversal.BranchingQueueNext[QT],
+            queue_factory: Callable[[], TraversalQueue[QT]],
+            branch_queue_factory: Callable[[], TraversalQueue[QD]],
+        ):
             self.queue_next: Traversal.BranchingQueueNext[QT] = queue_next
             self.queue_factory = queue_factory
             self.branch_queue_factory = branch_queue_factory
@@ -137,7 +139,7 @@ class Traversal(Generic[T, D]):
 
     name: str
 
-    def __init__(self, queue_type, parent: Optional[D]=None, debug_logger: Logger=None):
+    def __init__(self, queue_type, parent: Optional[D] = None, debug_logger: Logger = None):
         self._queue_type = queue_type
         self._parent: D = parent
         self._debug_logger = DebugLoggingWrapper(self.name, debug_logger) if debug_logger else None
@@ -145,7 +147,7 @@ class Traversal(Generic[T, D]):
         if type(queue_type) == Traversal.BasicQueueType:
             self.queue_next = lambda current, context: self._queue_next_non_branching(current, context, self._queue_type.queue_next)
         elif type(queue_type) == Traversal.BranchingQueueType:
-            self.queue_next = lambda  current, context: self._queue_next_branching(current, context, self._queue_type.queue_next)
+            self.queue_next = lambda current, context: self._queue_next_branching(current, context, self._queue_type.queue_next)
 
         self.queue: TraversalQueue[T] = queue_type.queue
         self.branch_queue: Optional[TraversalQueue[D]] = queue_type.branch_queue
@@ -159,16 +161,6 @@ class Traversal(Generic[T, D]):
         self.step_actions: List[StepAction[T]] = []
         self.compute_next_context_funs: Dict[str, ContextValueComputer[T]] = {}
         self.contexts: Dict[T, StepContext] = {}
-
-    def with_logger(self, logger: Logger) -> D:
-        """
-        Method to set the debug_logger after Traversal.__init__() has ran
-        :param logger: the logger to use
-        :return: self
-        """
-
-        self._debug_logger = DebugLoggingWrapper(self.name, logger)
-        return self
 
     def queue_next(self, current_item: T, context: StepContext):
         raise NotImplementedError
@@ -188,9 +180,9 @@ class Traversal(Generic[T, D]):
         Determines if the traversal can apply step actions and stop conditions
         on the specified item.
 
-        `item` The item to check.
-        `context` The context of the current traversal step.
-        Returns `True` if the item can be acted upon; `False` otherwise.
+        :param item: The item to check.
+        :param context: The context of the current traversal step.
+        :returns: ``True`` if the item can be acted upon; ``False`` otherwise.
         """
 
         return True
@@ -207,56 +199,62 @@ class Traversal(Generic[T, D]):
                   debug logger through means you get duplicate wrappers that double,
                   triple etc. log the debug messages.
 
-        Returns A new traversal instance.
+        :returns: A new traversal instance.
         """
 
         raise NotImplementedError
 
     @singledispatchmethod
-    def add_condition(self, condition: ConditionTypes) -> D:
+    def add_condition(self, condition: ConditionTypes, **kwargs) -> D:
         """
         Adds a traversal condition to the traversal.
 
         :param condition: The condition to add.
+        :keyword allow_re_wrapping: Allow rewrapping of :class:`StopConditions` with debug logging
 
         :return: this traversal instance.
         """
 
-        if callable(condition): # Callable[[NetworkTraceStep[T], StepContext], None]
+        if callable(condition):  # Callable[[NetworkTraceStep[T], StepContext], None]
             if len(inspect.getfullargspec(condition).args) == 2:
-                return self.add_stop_condition(condition)
+                return self.add_stop_condition(condition, **kwargs)
             elif len(inspect.getfullargspec(condition).args) == 4:
-                return self.add_queue_condition(condition)
+                return self.add_queue_condition(condition, **kwargs)
             else:
                 raise RuntimeError(f'Condition does not match expected: Number of args is not 2(Stop Condition) or 4(QueueCondition)')
 
         else:
-            raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: ' +
-        "[QueueCondition | DirectionCondition | StopCondition | Callable[_,_] | Callable[_,_,_,_]]")
+            raise RuntimeError(
+                f'Condition [{condition.__class__.__name__}] does not match expected: '
+                + "[QueueCondition | DirectionCondition | StopCondition | Callable[_,_] | Callable[_,_,_,_]]"
+            )
 
     @singledispatchmethod
     @add_condition.register(StopCondition)
-    def add_stop_condition(self, condition: StopConditionTypes) -> D:
+    def add_stop_condition(self, condition: StopConditionTypes, **kwargs) -> D:
         """
         Adds a stop condition to the traversal. If any stop condition returns
-        `True`, the traversal will not call the callback to queue more items
+        ``True``, the traversal will not call the callback to queue more items
         from the current item.
 
         :param condition: The stop condition to add.
+        :keyword allow_re_wrapping: Allow rewrapping of :class:`StopCondition`s with debug logging
         :return: this traversal instance.
         """
 
         raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: [StopCondition | StopConditionWithContextValue | Callable]')
 
     @add_stop_condition.register(Callable)
-    def _(self, condition: ShouldStop):
-        return self.add_stop_condition(StopCondition(condition))
+    def _(self, condition: ShouldStop, **kwargs):
+        return self.add_stop_condition(StopCondition(condition), **kwargs)
 
     @add_stop_condition.register
-    def _(self, condition: StopCondition):
+    def _(self, condition: StopCondition, **kwargs):
 
         if self._debug_logger is not None:
-            self._debug_logger.wrap(condition)
+            self._debug_logger.wrap(condition, kwargs.pop('allow_re_wrapping', False))
+
+        extra_kwargs_not_allowed(kwargs, 'add_stop_condition')
 
         self.stop_conditions.append(condition)
         if isinstance(condition, StopConditionWithContextValue):
@@ -283,27 +281,30 @@ class Traversal(Generic[T, D]):
 
     @add_condition.register(QueueCondition)
     @singledispatchmethod
-    def add_queue_condition(self, condition: QueueConditionTypes) -> D:
+    def add_queue_condition(self, condition: QueueConditionTypes, **kwargs) -> D:
         """
         Adds a queue condition to the traversal.
         Queue conditions determine whether an item should be queued for traversal.
         All registered queue conditions must return true for an item to be queued.
 
         :param condition: The queue condition to add.
+        :keyword allow_re_wrapping: Allow rewrapping of :class:`QueueCondition`s with debug logging
         :returns: The current traversal instance.
         """
 
         raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: [QueueCondition | QueueConditionWithContextValue | Callable]')
 
     @add_queue_condition.register(Callable)
-    def _(self, condition: ShouldQueue):
-        return self.add_queue_condition(QueueCondition(condition))
+    def _(self, condition: ShouldQueue, **kwargs):
+        return self.add_queue_condition(QueueCondition(condition), **kwargs)
 
     @add_queue_condition.register
-    def _(self, condition: QueueCondition):
+    def _(self, condition: QueueCondition, **kwargs):
 
         if self._debug_logger is not None:
-            self._debug_logger.wrap(condition)
+            self._debug_logger.wrap(condition, kwargs.pop('allow_re_wrapping', False))
+
+        extra_kwargs_not_allowed(kwargs, 'add_queue_condition')
 
         self.queue_conditions.append(condition)
         if isinstance(condition, QueueConditionWithContextValue):
@@ -322,74 +323,74 @@ class Traversal(Generic[T, D]):
             self.add_queue_condition(it)
         return self
 
-    def add_step_action(self, action: Union[StepActionFunc, StepAction[T]]) -> D:
+    @singledispatchmethod
+    def add_step_action(self, action: StepActionTypes, **kwargs) -> D:
         """
         Adds an action to be performed on each item in the traversal, including the
         starting items.
 
         :param action: The action to perform on each item.
+        :keyword allow_re_wrapping: Allow rewrapping of :class:`StepAction`s with debug logging
         :return: The current traversal instance.
         """
 
-        if isinstance(action, StepAction):
+        raise RuntimeError(f'StepAction [{action.__class__.__name__}] does not match expected: [StepAction | StepActionWithContextValue | Callable]')
 
-            if self._debug_logger is not None:
-                self._debug_logger.wrap(action)
+    @add_step_action.register
+    def _(self, action: StepAction, **kwargs):
+        if self._debug_logger is not None:
+            self._debug_logger.wrap(action, kwargs.pop('allow_re_wrapping', False))
 
-            self.step_actions.append(action)
-            if isinstance(action, StepActionWithContextValue):
-                self.compute_next_context_funs[action.key] = action
-            return self
+        extra_kwargs_not_allowed(kwargs, 'add_step_action')
 
-        elif callable(action):
-            return self.add_step_action(StepAction(action))
+        self.step_actions.append(action)
+        if isinstance(action, StepActionWithContextValue):
+            self.compute_next_context_funs[action.key] = action
+        return self
 
-        raise RuntimeError(f'Condition [{action.__class__.__name__}] does not match expected: [StepAction | StepActionWithContextValue | Callable]')
+    @add_step_action.register(Callable)
+    def _(self, action: StepActionFunc, **kwargs):
+        return self.add_step_action(StepAction(action), **kwargs)
 
-    def if_not_stopping(self, action: Callable[[T, StepContext], None]) -> D:
+    @singledispatchmethod
+    def if_not_stopping(self, action: StepActionTypes, **kwargs) -> D:
         """
         Adds an action to be performed on each item that does not match any stop condition.
 
         :param action: The action to perform on each non-stopping item.
+        :keyword allow_re_wrapping: Allow rewrapping of :class:`StepAction`s with debug logging
         :return: The current traversal instance.
         """
+        raise RuntimeError(f'StepAction [{action}] does not match expected: [StepAction | StepActionWithContextValue | Callable]')
 
-        # TODO: at the moment were assuming a function being passed in, so we can turn it into
-        #  a step action here, this prevents StepActionWithContextValue being passed in, however
-        #  in future we want to allow passing step actions in here. the JVMSDK throws an error
-        #  if you pass context aware step actions into here, though why cant we just send this
-        #  on to `add_step_action`...
+    @if_not_stopping.register(Callable)
+    def _(self, action: StepActionFunc, **kwargs) -> D:
+        return self.add_step_action(lambda it, context: action(it, context) if not context.is_stopping else None, **kwargs)
 
-        step_action = StepAction(lambda it, context: action(it, context) if not context.is_stopping else None)
+    @if_not_stopping.register
+    def _(self, action: StepAction, **kwargs) -> D:
+        action.apply = lambda it, context: action._func(it, context) if not context.is_stopping else None
+        return self.add_step_action(action, **kwargs)
 
-        if self._debug_logger is not None:
-            self._debug_logger.wrap(step_action)
-
-        self.step_actions.append(step_action)
-        return self
-
-
-    def if_stopping(self, action: Callable[[T, StepContext], None]) -> D:
+    @singledispatchmethod
+    def if_stopping(self, action: StepActionTypes, **kwargs) -> D:
         """
         Adds an action to be performed on each item that matches a stop condition.
 
         :param action: The action to perform on each stopping item.
+        :keyword allow_re_wrapping: Allow rewrapping of :class:`StepActions`s with debug logging
         :return: The current traversal instance.
         """
+        raise RuntimeError(f'StepAction [{action}] does not match expected: [StepAction | StepActionWithContextValue | Callable]')
 
-        # TODO: at the moment were assuming a function being passed in, so we can turn it into
-        #  a step action here, this prevents StepActionWithContextValue being passed in, however
-        #  in future we want to allow passing step actions in here. the JVMSDK throws an error
-        #  if you pass context aware step actions into here, though why cant we just send this
-        #  on to `add_step_action`...
+    @if_stopping.register(Callable)
+    def _(self, action: StepActionFunc, **kwargs) -> D:
+        return self.add_step_action(lambda it, context: action(it, context) if context.is_stopping else None, **kwargs)
 
-        step_action = StepAction(lambda it, context: action(it, context) if context.is_stopping else None)
-
-        if self._debug_logger is not None:
-            self._debug_logger.wrap(step_action)
-
-        self.step_actions.append(step_action)
-        return self
+    @if_stopping.register
+    def _(self, action: StepAction, **kwargs) -> D:
+        action.apply = lambda it, context: action._func(it, context) if context.is_stopping else None
+        return self.add_step_action(action, **kwargs)
 
     def copy_step_actions(self, other: Traversal[T, D]) -> D:
         """
@@ -420,7 +421,7 @@ class Traversal(Generic[T, D]):
         :return: The current traversal instance.
         """
 
-        #require(not issubclass(computer.__class__, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
+        # require(not issubclass(computer.__class__, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
         self.compute_next_context_funs[computer.key] = computer
         return self
 
@@ -451,7 +452,7 @@ class Traversal(Generic[T, D]):
         for key, computer in self.compute_next_context_funs.items():
             new_context_data[key] = computer.compute_next_value(next_step, current_item, context.get_value(key))
 
-        branch_depth = context.branch_depth +1 if is_branch_start else context.branch_depth
+        branch_depth = context.branch_depth + 1 if is_branch_start else context.branch_depth
         return StepContext(False, is_branch_start, context.step_number + 1, branch_depth, new_context_data)
 
     def add_start_item(self, item: T) -> D:
@@ -465,8 +466,7 @@ class Traversal(Generic[T, D]):
         self.start_items.append(item)
         return self
 
-
-    async def run(self, start_item: T=None, can_stop_on_start_item: bool=True) -> D:
+    async def run(self, start_item: T = None, can_stop_on_start_item: bool = True) -> D:
         """
         Runs the traversal optionally adding [startItem] to the collection of start items.
 
@@ -574,6 +574,7 @@ class Traversal(Generic[T, D]):
             raise KeyError("INTERNAL ERROR: Traversal item should always have a context.")
 
     def _create_new_branch(self, start_item: T, context: StepContext) -> D:
+        # fmt: off
         it = (
             self.create_new_this()
             .copy_queue_conditions(self)
@@ -581,6 +582,7 @@ class Traversal(Generic[T, D]):
             .copy_stop_conditions(self)
             .copy_context_value_computer(self)
         )
+        # fmt: on
 
         it.contexts[start_item] = context
         Traversal.add_start_item(it, start_item)
@@ -633,14 +635,12 @@ class Traversal(Generic[T, D]):
                 return False
         return True
 
-
     class QueueNext(Generic[T]):
         def __init__(self, func):
             self._func = func
 
         def accept(self, item: T, context: StepContext, queue_item: Callable[[T], bool]) -> bool:
             return self._func(item, context, queue_item)
-
 
     class BranchingQueueNext(Generic[T]):
         def __init__(self, func):

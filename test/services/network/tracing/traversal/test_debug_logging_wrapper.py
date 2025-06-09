@@ -199,7 +199,7 @@ class TestDebugLoggingWrappers:
         with pytest.raises(AttributeError):
             logging_wrapper.wrap(condition)
 
-        # ensure rewrapping conditions already wrapped by another logger requires explicit approval
+        # Ensure rewrapping conditions already wrapped by another logger requires explicit approval
         logging_wrapper2 = DebugLoggingWrapper('my desc', self.logger)
         with pytest.raises(AttributeError):
             logging_wrapper2.wrap(condition)
@@ -219,7 +219,7 @@ class TestDebugLoggingWrappers:
         # Make sure we didn't double add it.
         assert len(logging_wrapper._wrapped[StopCondition]) == 1
 
-        # ensure rewrapping conditions already wrapped by another logger works when specified
+        # Ensure rewrapping conditions already wrapped by another logger works when specified
         logging_wrapper2 = DebugLoggingWrapper('my desc', self.logger)
         logging_wrapper2.wrap(condition, allow_re_wrapping=True)
 
@@ -229,7 +229,7 @@ class TestDebugLoggingWrappers:
         condition = StopCondition(lambda item, context: True)
         logging_wrapper.wrap(condition)
 
-        # check count starts at 1, and double adding the same condition doesnt increment count
+        # Check count starts at 1, and double adding the same condition doesn't increment count
         with self._log_handler() as handler:
             condition.should_stop(False, False)
             assert handler.log_list.get() == f"root: my desc: should_stop(1)=True [item=False, context=False]"
