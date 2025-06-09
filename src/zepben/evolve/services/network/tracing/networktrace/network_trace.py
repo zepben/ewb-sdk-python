@@ -243,7 +243,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return self
 
     def _add_start_item(
-        self, start: Union[Terminal, NetworkTraceStep.Path] = None, data: T = None, phases: PhaseCode = None, traversed_ac_line_segment: AcLineSegment = None
+        self, start: Union[Terminal, NetworkTraceStep.Path], data: T = None, phases: PhaseCode = None, traversed_ac_line_segment: AcLineSegment = None
     ):
         """
         To be called by self.add_start_item(), this method builds the start :class:`NetworkTraceStep.Path`s for the start item
@@ -258,9 +258,6 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
         :returns: This `NetworkTrace` instance
         """
-
-        if start is None:
-            raise ValueError('path and start must not both be None.')
 
         if isinstance(start, NetworkTraceStep.Path):
             if any([phases, traversed_ac_line_segment]):
