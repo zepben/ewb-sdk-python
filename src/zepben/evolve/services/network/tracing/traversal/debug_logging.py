@@ -5,7 +5,7 @@
 import functools
 from logging import Logger
 from types import FunctionType
-from typing import TypeVar, Union, cast, Optional, Type
+from typing import TypeVar, Union, Optional, Type
 
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
@@ -39,19 +39,20 @@ class DebugLoggingWrapper:
         """
         Wrap, in place, supported methods of the object passed in.
 
-        Supported object.methods:
+        Supported methods by object class::
 
-        - StepAction.action
-        - StopCondition.should_stop
-        - QueueCondition
+            - :method:`StepAction.action`
+            - :method:`StopCondition.should_stop`
+            - :class:`QueueCondition`
+              - :method:`should_queue`
+              - :method:`should_queue_start_item`
 
-          - should_queue
-          - should_queue_start_item
-
-        :param obj: Instantiated object representing a condition or action in a `Traversal`
-        :param count: (optional) Set the `count` in the log message
+        :param obj: Instantiated object representing a condition or action in a :class:`zepben.evolve.Traversal`.
+        :param count: (optional) Set the ``count`` in the log message.
         :param allow_re_wrapping: (optional) Replace the existing logging wrapper, if it exists.
-        :return: the object passed in for fluent use
+        :return: the object passed in for fluent use.
+
+        :raises AttributeError: If wrapping the passed in object type is not supported.
         """
 
         def get_logger_index(_clazz: Type[Wrappable], _attr: str) -> int:
@@ -61,21 +62,23 @@ class DebugLoggingWrapper:
             object aside from what it inherits from
             """
 
-            # We need to check if the object has already been wrapped with logging so we can determine the
-            #  count number we should use.
-            if hasattr(getattr(obj, _attr), '__wrapped__'):
-                # It has been, now we need to decide whether to use the previously assigned count by this class
-                #  or - if it was wrapped with another class, we need to generate a new one.
-                if obj in self._wrapped[clazz]:
-                    # if it was wrapped by this class, return the original count
-                    return self._wrapped[clazz].index(obj) + 1
-
-            if obj not in self._wrapped[clazz]:
-                self._wrapped[clazz].append(obj)
-
-            # if we had a requested count number passed in, use it
+            # if we had a requested count number passed in, we can skip the auto-indexing logic.
             if count is not None:
                 return count
+
+            # We need to check if the object has already been wrapped with logging so we can determine the
+            #  index number we should use.
+            if hasattr(obj, '__wrapped__'):
+                # Check to see if it's in our `_wrapped` registry - if so this class wrapped it.
+                if obj in self._wrapped[clazz]:
+                    # if it was wrapped by this class, return the original index. (list index +1)
+                    return self._wrapped[clazz].index(obj) + 1
+
+            # If the object has not been wrapped by this specific class instance, we generate a new index.
+            if obj not in self._wrapped[clazz]:
+                self._wrapped[clazz].append(obj)
+            else:  # This code path should NEVER be reached as we should never have an object at this point that is not in our `_wrapped` registry
+                raise IndexError(f'INTERNAL ERROR: {obj} not found in self._wrapped(\n{self._wrapped}\n)')
 
             return len(self._wrapped[clazz])
 
@@ -85,17 +88,19 @@ class DebugLoggingWrapper:
             logging.
 
             :param _attr: Method/Function name.
+            :raises AttributeError: if the ``Wrappable`` cannot be rewrapped
             """
 
             # wrapped methods will have `__wrapped__` set to the original method that was wrapped - if it exists on
             #  the methods were interested in wrapping, the object has already been wrapped. We will re-wrap it, but
-            #  only if we have been explicitly told its ok, otherwise we want to catch the bug.
+            #  only if we have been explicitly told it's ok, otherwise we want to catch the bug.
             if (to_wrap := getattr(obj, _attr)) and hasattr(to_wrap, '__wrapped__'):
                 if not allow_re_wrapping:
                     raise AttributeError(f'Wrappable cannot be rewrapped without explicitly specifying you would like to replace the logging wrapper')
                 to_wrap = getattr(to_wrap, '__wrapped__')
 
             setattr(obj, _attr, self._log_method_call(to_wrap, f'{self.description}: {_attr}({get_logger_index(clazz, _attr)})' + msg))
+            setattr(obj, '__wrapped__', True)
 
         for clazz in (StepAction, StopCondition, QueueCondition):
             if isinstance(obj, clazz):
@@ -107,12 +112,12 @@ class DebugLoggingWrapper:
 
     def _log_method_call(self, func: FunctionType, log_string: str):
         """
-        returns `func` wrapped with call to `self._logger` using `log_string` as the format
+        returns ``func`` wrapped with call to ``self._logger`` using ``log_string`` as the format
 
         :param func: any callable
-        :param log_string: Log message format string to output when `attr` is called.
-                    args/kwargs passed to the function are passed to `str.format()`,
-                    as well as is `result` which is the result of the function itself
+        :param log_string: Log message format string to output when ``attr`` is called, args/kwargs
+         passed to the function are passed to :code:`str.format()`, as well as is ``result`` which is the
+         result of the function itself
         """
 
         @functools.wraps(func)

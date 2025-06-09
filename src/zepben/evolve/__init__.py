@@ -205,6 +205,8 @@ from zepben.evolve.services.network.tracing.traversal.traversal import *
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import *
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import *
 
+from zepben.evolve.services.network.tracing.traversal.debug_logging import DebugLoggingWrapper
+
 from zepben.evolve.services.network.tracing.find_swer_equipment import *
 
 from zepben.evolve.services.common.meta.data_source import *

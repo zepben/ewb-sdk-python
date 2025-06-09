@@ -8,7 +8,7 @@ from typing import Callable, TypeVar, Tuple, Any, Optional
 
 import pytest
 
-from zepben.evolve import StepContext, Traversal, TraversalQueue, ContextValueComputer, StepActionWithContextValue
+from zepben.evolve import StepContext, Traversal, TraversalQueue, ContextValueComputer, StepActionWithContextValue, StepAction
 
 T = TypeVar('T')
 D = TypeVar('D')
@@ -18,14 +18,15 @@ class TraversalTest(Traversal[T, D]):
 
     name = 'TestTraversal'
 
-    def __init__(self,
-                 queue_type,
-                 parent: Optional["TraversalTest[T, D]"],
-                 can_visit_item: Callable[[T, StepContext], bool],
-                 can_action_item: Callable[[T, StepContext], bool],
-                 on_reset: Callable[[], Any],
-                 debug_logger: Logger=None,
-                 ):
+    def __init__(
+        self,
+        queue_type,
+        parent: Optional["TraversalTest[T, D]"],
+        can_visit_item: Callable[[T, StepContext], bool],
+        can_action_item: Callable[[T, StepContext], bool],
+        on_reset: Callable[[], Any],
+        debug_logger: Logger = None,
+    ):
         super().__init__(queue_type, parent, debug_logger=debug_logger)
         self._can_visit_item_impl = can_visit_item
         self._can_action_item_impl = can_action_item
@@ -44,11 +45,12 @@ class TraversalTest(Traversal[T, D]):
         return TraversalTest(self._queue_type, self, self._can_visit_item_impl, self._can_action_item_impl, self._on_reset_impl)
 
 
-def _create_traversal(can_visit_item: Callable[[int, StepContext], bool]=lambda x, y: True,
-                      can_action_item: Callable[[int, StepContext], bool]=lambda x, y: True,
-                      on_reset: Callable[[], Any]=lambda: None,
-                      queue: TraversalQueue[int]=TraversalQueue.depth_first()
-                      ) -> TraversalTest[int, D]:
+def _create_traversal(
+    can_visit_item: Callable[[int, StepContext], bool] = lambda x, y: True,
+    can_action_item: Callable[[int, StepContext], bool] = lambda x, y: True,
+    on_reset: Callable[[], Any] = lambda: None,
+    queue: TraversalQueue[int] = TraversalQueue.depth_first(),
+) -> TraversalTest[int, D]:
 
     def queue_next(item, _, queue_item):
         if item < 0:
@@ -56,12 +58,10 @@ def _create_traversal(can_visit_item: Callable[[int, StepContext], bool]=lambda 
         else:
             queue_item(item + 1)
 
-    queue_type = Traversal.BasicQueueType[int, TraversalTest[int, D]](
-        queue_next=Traversal.QueueNext(queue_next),
-        queue=queue
-    )
+    queue_type = Traversal.BasicQueueType[int, TraversalTest[int, D]](queue_next=Traversal.QueueNext(queue_next), queue=queue)
 
     return TraversalTest(queue_type, None, can_visit_item, can_action_item, on_reset)
+
 
 def _create_branching_traversal() -> TraversalTest[int, D]:
     def queue_next(item, _, queue_item, queue_branch):
@@ -76,7 +76,7 @@ def _create_branching_traversal() -> TraversalTest[int, D]:
     queue_type = Traversal.BranchingQueueType[int, TraversalTest[int, D]](
         queue_next=Traversal.BranchingQueueNext(queue_next),
         queue_factory=lambda: TraversalQueue.depth_first(),
-        branch_queue_factory=lambda: TraversalQueue.depth_first()
+        branch_queue_factory=lambda: TraversalQueue.depth_first(),
     )
 
     return TraversalTest(queue_type, None,
@@ -98,7 +98,8 @@ class TestTraversal:
         await (_create_traversal()
             .add_condition(lambda item, _: item == 2)
             .add_step_action(step_action)
-            .run(1))
+            .run(1)
+        )
 
         assert self.last_num == 2
 
@@ -110,7 +111,8 @@ class TestTraversal:
         await (_create_traversal()
             .add_condition(lambda item, x, y, z: item < 3)
             .add_step_action(step_action)
-            .run(1))
+            .run(1)
+        )
 
         assert self.last_num == 2
 
@@ -121,7 +123,8 @@ class TestTraversal:
         await (_create_traversal()
             .add_stop_condition(lambda item, _: item == 3)
             .add_step_action(lambda item, ctx: steps.append((item, ctx)))
-            .run(1))
+            .run(1)
+        )
 
         def check_item_ctx(step: Tuple[int, StepContext], item_val: int, ctx_stopping=False):
             return step[0] == item_val and step[1].is_stopping == ctx_stopping
@@ -135,11 +138,13 @@ class TestTraversal:
         def step_action(item, _):
             self.last_num = item
 
-        await (_create_traversal()
+        await (
+            _create_traversal()
             .add_stop_condition(lambda item, _: item == 3)
             .add_stop_condition(lambda item, _: item % 2 == 0)
             .add_step_action(step_action)
-            .run(1))
+            .run(1)
+        )
 
         assert self.last_num == 2
 
@@ -148,11 +153,13 @@ class TestTraversal:
         def step_action(item, _):
             self.last_num = item
 
-        await (_create_traversal()
+        await (
+            _create_traversal()
             .add_stop_condition(lambda item, _: item == 1)
             .add_stop_condition(lambda item, _: item == 2)
             .add_step_action(step_action)
-            .run(1, can_stop_on_start_item=True))
+            .run(1, can_stop_on_start_item=True)
+        )
 
         assert self.last_num == 1
 
@@ -161,11 +168,13 @@ class TestTraversal:
         def step_action(item, _):
             self.last_num = item
 
-        await (_create_traversal()
-               .add_stop_condition(lambda item, _: item == 1)
-               .add_stop_condition(lambda item, _: item == 2)
-               .add_step_action(step_action)
-               .run(1, can_stop_on_start_item=False))
+        await (
+            _create_traversal()
+            .add_stop_condition(lambda item, _: item == 1)
+            .add_stop_condition(lambda item, _: item == 2)
+            .add_step_action(step_action)
+            .run(1, can_stop_on_start_item=False)
+        )
 
         assert self.last_num == 2
 
@@ -177,7 +186,8 @@ class TestTraversal:
         await (_create_traversal()
             .add_queue_condition(lambda next_item, x, y, z: next_item < 3)
             .add_step_action(step_action)
-            .run(1))
+            .run(1)
+        )
 
         assert self.last_num == 2
 
@@ -186,11 +196,13 @@ class TestTraversal:
         def step_action(item, _):
             self.last_num = item
 
-        await (_create_traversal()
-               .add_queue_condition(lambda next_item, x, y, z: next_item < 3)
-               .add_queue_condition(lambda next_item, x, y, z: next_item > 3)
-               .add_step_action(step_action)
-               .run(1))
+        await (
+            _create_traversal()
+            .add_queue_condition(lambda next_item, x, y, z: next_item < 3)
+            .add_queue_condition(lambda next_item, x, y, z: next_item > 3)
+            .add_step_action(step_action)
+            .run(1)
+        )
 
         assert self.last_num == 1
 
@@ -199,11 +211,13 @@ class TestTraversal:
         called1 = []
         called2 = []
 
-        await (_create_traversal()
+        await (
+            _create_traversal()
             .add_stop_condition(lambda item, _: item == 2)
             .add_step_action(lambda x, y: called1.append(True))
             .add_step_action(lambda x, y: called2.append(True))
-            .run(1))
+            .run(1)
+        )
 
         assert len(called1) == 2
         assert len(called2) == 2
@@ -211,33 +225,111 @@ class TestTraversal:
     @pytest.mark.asyncio
     async def test_if_not_stopping_helper_only_calls_when_not_stopping(self):
         steps = []
-        await (_create_traversal()
+        await (
+            _create_traversal()
             .add_stop_condition(lambda item, _: item == 3)
             .if_not_stopping(lambda item, _: steps.append(item))
-            .run(1))
+            .run(1)
+        )
+
+        assert steps == [1, 2]
+
+    @pytest.mark.asyncio
+    async def test_if_not_stopping_helper_accepts_step_actions(self):
+        steps = []
+        await (
+            _create_traversal()
+            .add_stop_condition(lambda item, _: item == 3)
+            .if_not_stopping(StepAction(lambda item, _: steps.append(item)))
+            .run(1)
+        )
 
         assert steps == [1, 2]
 
     @pytest.mark.asyncio
     async def test_if_stopping_helper_only_calls_when_stopping(self):
         steps = []
-        await (_create_traversal()
-               .add_stop_condition(lambda item, _: item == 3)
-               .if_stopping(lambda item, _: steps.append(item))
-               .run(1))
+        await (
+            _create_traversal()
+            .add_stop_condition(lambda item, _: item == 3)
+            .if_stopping(lambda item, _: steps.append(item))
+            .run(1)
+        )
 
         assert steps == [3]
 
     @pytest.mark.asyncio
-    async def test_context_value_computer_adds_value_to_context(self):
+    async def test_if_stopping_helper_accepts_step_actions(self):
+        steps = []
+        await (
+            _create_traversal()
+            .add_stop_condition(lambda item, _: item == 3)
+            .if_stopping(StepAction(lambda item, _: steps.append(item)))
+            .run(1)
+        )
+
+        assert steps == [3]
+
+    @pytest.mark.asyncio
+    async def test_if_not_stopping_helper_accepts_step_action_with_context_value_and_context_is_computed(self):
         data_capture: dict[int, str] = {}
+
+        class TestSAWCV(StepActionWithContextValue[int]):
+            def compute_next_value(self, next_item: int, current_item: int, current_value):
+                return f'{current_value} : {next_item + current_item}'
+
+            def compute_initial_value(self, item: int):
+                return f'{item}'
+
         def step_action(item, ctx: StepContext):
             data_capture[item] = ctx.get_value('test')
 
+        await (
+            _create_traversal()
+            .add_stop_condition(lambda item, _: item == 3)
+            .if_not_stopping(TestSAWCV(_func=step_action, key='test'))
+            .run(1)
+        )
+
+        assert len(data_capture) == 2
+        assert data_capture[1] == '1'
+        assert data_capture[2] == '1 : 3'
+
+    @pytest.mark.asyncio
+    async def test_if_stopping_helper_accepts_step_action_with_context_value_and_context_is_computed(self):
+        data_capture: dict[int, str] = {}
+
+        class TestSAWCV(StepActionWithContextValue[int]):
+            def compute_next_value(self, next_item: int, current_item: int, current_value):
+                return f'{current_value} : {next_item + current_item}'
+
+            def compute_initial_value(self, item: int):
+                return f'{item}'
+
+        def step_action(item, ctx: StepContext):
+            data_capture[item] = ctx.get_value('test')
+
+        await (
+            _create_traversal()
+            .add_stop_condition(lambda item, _: item == 3)
+            .if_stopping(TestSAWCV(_func=step_action, key='test'))
+            .run(1)
+        )
+
+        assert len(data_capture) == 1
+        assert data_capture[3] == '1 : 3 : 5'
+
+    @pytest.mark.asyncio
+    async def test_context_value_computer_adds_value_to_context(self):
+        data_capture: dict[int, str] = {}
+
+        def step_action(item, ctx: StepContext):
+            data_capture[item] = ctx.get_value('test')
 
         class TestCVC(ContextValueComputer[int]):
             def compute_next_value(self, next_item: int, current_item: int, current_value):
                 return f'{current_value} : {next_item + current_item}'
+
             def compute_initial_value(self, item: int):
                 return f'{item}'
 
@@ -245,7 +337,8 @@ class TestTraversal:
             .add_context_value_computer(TestCVC('test'))
             .add_step_action(step_action)
             .add_stop_condition(lambda item, _: item == 2)
-            .run(1))
+            .run(1)
+        )
 
         assert data_capture[1] == '1'
         assert data_capture[2] == '1 : 3'
@@ -253,14 +346,17 @@ class TestTraversal:
     @pytest.mark.asyncio
     async def test_start_items(self):
         steps: dict[int, StepContext] = {}
+
         def step_action(item, ctx: StepContext):
             steps[item] = ctx
 
-        traversal = (_create_traversal()
-                     .add_start_item(1)
-                     .add_start_item(-1)
-                     .add_stop_condition(lambda item, _: abs(item) == 2)
-                     .add_step_action(step_action))
+        traversal = (
+            _create_traversal()
+            .add_start_item(1)
+            .add_start_item(-1)
+            .add_stop_condition(lambda item, _: abs(item) == 2)
+            .add_step_action(step_action)
+        )
 
         assert traversal.start_items == deque([1, -1])
         await traversal.run()
@@ -272,37 +368,43 @@ class TestTraversal:
     async def test_only_visits_items_that_can_be_visited(self):
         steps = []
 
-        await (_create_traversal(can_visit_item=lambda item, _: item < 0)
+        await (
+            _create_traversal(can_visit_item=lambda item, _: item < 0)
             .add_stop_condition(lambda item, _: item == -2)
             .add_step_action(lambda item, _: steps.append(item))
             .add_start_item(1)
             .add_start_item(-1)
-            .run())
+            .run()
+        )
 
         assert steps == [-1, -2]
-
 
     @pytest.mark.asyncio
     async def test_only_actions_items_that_can_be_actioned(self):
         steps = []
 
-        await (_create_traversal(can_action_item=lambda item, _: item % 2 == 1)
-               .add_stop_condition(lambda item, _: item == 3)
-               .add_step_action(lambda item, _: steps.append(item))
-               .run(1))
+        await (
+            _create_traversal(can_action_item=lambda item, _: item % 2 == 1)
+            .add_stop_condition(lambda item, _: item == 3)
+            .add_step_action(lambda item, _: steps.append(item))
+            .run(1)
+        )
 
         assert steps == [1, 3]
 
     @pytest.mark.asyncio
     async def test_can_be_rerun(self):
         steps: dict[int, int] = {}
+
         def step_action(item, _):
             steps[item] = steps.get(item, 0) + 1
 
         reset_called = []
-        traversal = (_create_traversal(on_reset=lambda: reset_called.append(True))
-                     .add_stop_condition(lambda item, _: item == 2)
-                     .add_step_action(step_action))
+        traversal = (
+            _create_traversal(on_reset=lambda: reset_called.append(True))
+            .add_stop_condition(lambda item, _: item == 2)
+            .add_step_action(step_action)
+        )
 
         await traversal.run(1)
         await traversal.run(2)
@@ -314,15 +416,16 @@ class TestTraversal:
     @pytest.mark.asyncio
     async def test_supports_branching_traversals(self):
         steps: dict[int, StepContext] = {}
+
         def step_action(item, ctx):
             steps[item] = ctx
 
-        trace =(_create_branching_traversal()
-              .add_queue_condition(lambda  item, ctx, x, y: (ctx.branch_depth <= 1) and (item != 0))
-              .add_step_action(step_action)
-              )
+        trace =(
+            _create_branching_traversal()
+            .add_queue_condition(lambda  item, ctx, x, y: (ctx.branch_depth <= 1) and (item != 0))
+            .add_step_action(step_action)
+        )
         await trace.run(0, can_stop_on_start_item=False)
-
 
         assert not steps[0].is_branch_start_item
         assert steps[0].is_start_item
@@ -351,45 +454,39 @@ class TestTraversal:
                 stop_condition_triggered.append(True)
                 return stop_condition_triggered
 
-        await (_create_branching_traversal()
-               .add_stop_condition(stop_condition)
-               .add_queue_condition(lambda x, ctx, y, z: ctx.branch_depth < 2)
-               .add_start_item(1)
-               .add_start_item(-1)
-               ).run(can_stop_on_start_item=False)
+        await (
+            _create_branching_traversal()
+            .add_stop_condition(stop_condition)
+            .add_queue_condition(lambda x, ctx, y, z: ctx.branch_depth < 2)
+            .add_start_item(1)
+            .add_start_item(-1)
+        ).run(can_stop_on_start_item=False)
 
         assert all(stop_condition_triggered)
 
     @pytest.mark.asyncio
     async def test_start_items_are_queued_before_traversal_starts_so_queue_type_is_honoured_for_start_items(self):
         steps = []
-        await (_create_traversal(queue=TraversalQueue.breadth_first())
-               .add_stop_condition(lambda item, x: item >= 2 or item <= -2)
-               .add_step_action(lambda item, x: steps.append(item))
-               .add_start_item(-1)
-               .add_start_item(1)
-               ).run()
+        await (
+            _create_traversal(queue=TraversalQueue.breadth_first())
+            .add_stop_condition(lambda item, x: item >= 2 or item <= -2)
+            .add_step_action(lambda item, x: steps.append(item))
+            .add_start_item(-1)
+            .add_start_item(1)
+        ).run()
 
         assert steps == [-1, 1, -2, 2]
 
     @pytest.mark.asyncio
     async def test_multiple_start_items_respect_can_stop_on_start(self):
         steps = []
-        traversal = (_create_traversal(queue=TraversalQueue.breadth_first())
-                    .add_stop_condition(lambda item, x: True)
-                    .add_step_action(lambda item, x: steps.append(item))
-                    .add_start_item(1)
-                    .add_start_item(11)
-                    )
+        traversal = (
+            _create_traversal(queue=TraversalQueue.breadth_first())
+            .add_stop_condition(lambda item, x: True)
+            .add_step_action(lambda item, x: steps.append(item))
+            .add_start_item(1)
+            .add_start_item(11)
+        )
         await traversal.run(can_stop_on_start_item=False)
 
         assert steps == [1, 11, 2, 12]
-
-    @pytest.mark.asyncio
-    async def test_must_use_add_step_action_for_context_aware_actions(self):
-        action = StepActionWithContextValue[int](lambda step, ctx: None, key='123')
-        _create_traversal().add_step_action(action)
-
-        _create_traversal().if_stopping(action)
-
-        _create_traversal().if_not_stopping(action)

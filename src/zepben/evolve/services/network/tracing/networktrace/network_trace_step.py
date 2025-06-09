@@ -26,10 +26,10 @@ class NetworkTraceStep(Generic[T]):
     Represents a single step in a network trace, containing information about the path taken and associated data.
 
     `T` The type of additional data associated with the trace step.
-    :param path: The path representing the transition from one terminal to another.
-    :param num_terminal_steps: The count of terminals stepped on along this path.
-    :param num_equipment_steps: The count of equipment stepped on along this path.
-    :param data: Additional data associated with this step in the trace.
+    :var path: The path representing the transition from one terminal to another.
+    :var num_terminal_steps: The count of terminals stepped on along this path.
+    :var num_equipment_steps: The count of equipment stepped on along this path.
+    :var data: Additional data associated with this step in the trace.
     """
 
     @dataclass
@@ -37,16 +37,18 @@ class NetworkTraceStep(Generic[T]):
         """
         Represents the path taken in a network trace step, detailing the transition from one terminal to another.
 
-        A limitation of the network trace is that all terminals must have associated conducting equipment. This means that if the `from_terminal`
-        or `to_terminal` have `None` conducting equipment an [IllegalStateException] will be thrown.
+        A limitation of the network trace is that all terminals must have associated conducting equipment. This means that if the ``from_terminal``
+        or ``to_terminal`` have ``None`` conducting equipment an `IllegalStateException` will be thrown.
 
-        No validation is done on the `traversed_ac_line_segment` against the `from_terminal` and `to_terminal`. It assumes the creator knows what they are doing
-        and thus avoids the overhead of validation as this class will have lots if instances created as part of a [NetworkTrace].
+        No validation is done on the ``traversed_ac_line_segment`` against the ``from_terminal`` and ``to_terminal``. It assumes the creator
+        knows what they are doing and thus avoids the overhead of validation as this class will have lots if instances created as part of
+        a :class:`NetworkTrace`.
 
-        :param from_terminal: The terminal that was stepped from.
-        :param to_terminal: The terminal that was stepped to.
-        :param traversed_ac_line_segment: If the from_terminal and to_terminal path was via an `AcLineSegment`, this is the segment that was traversed
-        :param nominal_phase_paths: A list of nominal phase paths traced in this step. If this is empty, phases have been ignored.
+        :var from_terminal: The terminal that was stepped from.
+        :var to_terminal: The terminal that was stepped to.
+        :var traversed_ac_line_segment: If the ``from_terminal`` and ``to_terminal`` path was via an :class:`AcLineSegment`, this is
+          the segment that was traversed
+        :var nominal_phase_paths: A list of nominal phase paths traced in this step. If this is empty, phases have been ignored.
         """
 
         from_terminal: Terminal
@@ -61,7 +63,7 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def from_equipment(self) -> ConductingEquipment:
-            """The conducting equipment associated with `self.from_terminal`."""
+            """The conducting equipment associated with ``self.from_terminal``."""
             ce = self.from_terminal.conducting_equipment
             if not ce:
                 raise AttributeError("Network trace does not support terminals that do not have conducting equipment")
@@ -69,7 +71,7 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def to_equipment(self) -> ConductingEquipment:
-            """The conducting equipment associated with `self.to_terminal`."""
+            """The conducting equipment associated with ``self.to_terminal``."""
             ce = self.to_terminal.conducting_equipment
             if not ce:
                 raise AttributeError("Network trace does not support terminals that do not have conducting equipment")
@@ -77,12 +79,12 @@ class NetworkTraceStep(Generic[T]):
 
         @property
         def traced_internally(self) -> bool:
-            """`True` if the from and to terminals belong to the same equipment; `False` otherwise."""
+            """``True`` if the from and to terminals belong to the same equipment; ``False`` otherwise."""
             return self.from_equipment == self.to_equipment
 
         @property
         def traced_externally(self) -> bool:
-            """`True` if the from and to terminals belong to different equipment; `False` otherwise."""
+            """``True`` if the from and to terminals belong to different equipment; ``False`` otherwise."""
             return not self.traced_internally
 
         @property
@@ -103,10 +105,11 @@ class NetworkTraceStep(Generic[T]):
 
     def type(self) -> Type:
         """
-        Returns the `Type` of the step. This will be `Type.INTERNAL` if `Path.tracedInternally` is true, `Type.EXTERNAL` when `Path.tracedExternally` is true
-        and will never be `Type.ALL` which is used in other NetworkTrace functionality to determine if all steps should be used for that particular function.
+        Returns the ``Type`` of the step. This will be ``Type.INTERNAL`` if ``Path.tracedInternally`` is true, ``Type.EXTERNAL``
+        when ``Path.tracedExternally`` is true and will never be ``Type.ALL`` which is used in other NetworkTrace functionality to
+        determine if all steps should be used for that particular function.
 
-        Returns `Type.INTERNAL` with `Path.tracedInternally` is true, `Type.EXTERNAL` when `Path.tracedExternally` is true
+        Returns ``Type.INTERNAL`` with ``Path.tracedInternally`` is true, ``Type.EXTERNAL`` when ``Path.tracedExternally`` is true
         """
 
         return self.Type.INTERNAL if self.path.traced_internally else self.Type.EXTERNAL
@@ -115,7 +118,7 @@ class NetworkTraceStep(Generic[T]):
         return self.num_terminal_steps + 1
 
     def __getitem__(self, item):
-        """Convenience method to access this NetworkTraceStep as a tuple of (self.path, self.data)"""
+        """Convenience method to access this ``NetworkTraceStep`` as a tuple of (self.path, self.data)"""
         return (self.path, self.data)[item]
 
     def __str__(self):

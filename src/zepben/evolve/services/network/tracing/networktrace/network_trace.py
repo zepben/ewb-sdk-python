@@ -37,31 +37,31 @@ __all__ = ['NetworkTrace']
 
 class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]):
     """
-    A `Traversal` implementation specifically designed to trace connected `Terminal`s of `ConductingEquipment` in a network.
+    A :class:`Traversal` implementation specifically designed to trace connected :class:`Terminal`s of :class:`ConductingEquipment` in a network.
 
     This trace manages the complexity of network connectivity, especially in cases where connectivity is not straightforward,
-    such as with `BusbarSection`s and `Clamp`s. It checks the in service flag of equipment and only steps to equipment that is marked as in service.
+    such as with :class:`BusbarSection`s and :class:`Clamp`s. It checks the in service flag of equipment and only steps to equipment that is marked as in service.
     It also provides the optional ability to trace only specific phases.
 
-    Steps are represented by a `NetworkTraceStep`, which contains a `NetworkTraceStep.Path` and allows associating arbitrary data with each step.
-    The arbitrary data for each step is computed via a `ComputeData` or `ComputeDataWithPaths` function provided at construction.
+    Steps are represented by a :class:`NetworkTraceStep`, which contains a :class:`NetworkTraceStep.Path` and allows associating arbitrary data with each step.
+    The arbitrary data for each step is computed via a :class:`ComputeData` or :class:`ComputeDataWithPaths` function provided at construction.
     The trace invokes these functions when queueing each item and stores the result with the next step.
 
     When traversing, this trace will step on every connected terminal, as long as they match all the traversal conditions.
     Each step is classified as either an external step or an internal step:
 
-    - **External Step**: Moves from one terminal to another with different `Terminal.conductingEquipment`.
-    - **Internal Step**: Moves between terminals within the same `Terminal.conductingEquipment`.
+        - **External Step**: Moves from one terminal to another with different ``Terminal.conducting_equipment``.
+        - **Internal Step**: Moves between terminals within the same ``Terminal.conducting_equipment``.
 
-    Often, you may want to act upon a `ConductingEquipment` only once, rather than multiple times for each internal and external terminal step.
-    To achieve this, set `actionType` to `NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT`. With this type, the trace will only call step actions and
-    conditions once for each `ConductingEquipment`, regardless of how many terminals it has. However, queue conditions can be configured to be called
+    Often, you may want to act upon a :class:`ConductingEquipment` only once, rather than multiple times for each internal and external terminal step.
+    To achieve this, set ``action_type`` to ``NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT``. With this type, the trace will only call step actions and
+    conditions once for each :class:`ConductingEquipment`, regardless of how many terminals it has. However, queue conditions can be configured to be called
     differently for each condition as continuing the trace can rely on different conditions based on an external or internal step. For example, not
-    queuing past open switches should happen on an internal step, thus if the trace is configured with `FIRST_STEP_ON_EQUIPMENT`, it will by default only
+    queuing past open switches should happen on an internal step, thus if the trace is configured with ``FIRST_STEP_ON_EQUIPMENT``, it will by default only
     action the first external step to each equipment, and thus the provided `Conditions.stopAtOpen` condition overrides the default behaviour such that
     it is called on all internal steps.
 
-    The network trace is state-aware by requiring an instance of `NetworkStateOperators`.
+    The network trace is state-aware by requiring an instance of :class:`NetworkStateOperators`.
     This allows traversal conditions and step actions to query and act upon state-based properties and functions of equipment in the network when required.
 
     'Branching' traversals are also supported allowing tracing both ways around loops in the network. When using a branching instance, a new 'branch'
@@ -70,17 +70,17 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     a branch will be created for each terminal.
     If you do not need to trace loops both ways or have no loops, do not use a branching instance as it is less efficient than the non-branching one.
 
-    To create instances of this class, use the factory methods provided in the `Tracing` object.
+    To create instances of this class, use the factory methods provided in the :class:`Tracing` object.
     """
 
     def __init__(
         self,
         network_state_operators: Type[NetworkStateOperators],
         queue_type: Union[Traversal.BasicQueueType, Traversal.BranchingQueueType],
-        parent: 'NetworkTrace[T]'=None,
-        action_type: NetworkTraceActionType=None,
-        debug_logger: Logger=None,
-        name: str=None
+        parent: 'NetworkTrace[T]' = None,
+        action_type: NetworkTraceActionType = None,
+        debug_logger: Logger = None,
+        name: str = None,
     ):
 
         if name is None:
@@ -105,18 +105,17 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         action_type: CanActionItem,
         name: str,
         compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]],
-        debug_logger=None
+        debug_logger=None,
     ) -> 'NetworkTrace[T]':
 
-        return cls(network_state_operators,
-                   Traversal.BasicQueueType(NetworkTraceQueueNext.Basic(
-                       network_state_operators,
-                       compute_data_with_action_type(compute_data, action_type)
-                   ), queue),
-                   None,
-                   action_type,
-                   debug_logger,
-                   name)
+        return cls(
+            network_state_operators,
+            Traversal.BasicQueueType(NetworkTraceQueueNext.Basic(network_state_operators, compute_data_with_action_type(compute_data, action_type)), queue),
+            None,
+            action_type,
+            debug_logger,
+            name,
+        )
 
     @classmethod
     def branching(
@@ -126,30 +125,34 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         branch_queue_factory: Callable[[], TraversalQueue['NetworkTrace[T]']],
         action_type: CanActionItem,
         name: str,
-        parent: 'NetworkTrace[T]'=None,
-        compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None,
-        debug_logger: Logger=None,
+        parent: 'NetworkTrace[T]' = None,
+        compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]] = None,
+        debug_logger: Logger = None,
     ) -> 'NetworkTrace[T]':
 
-        return cls(network_state_operators,
-                   Traversal.BranchingQueueType(NetworkTraceQueueNext.Branching(
-                       network_state_operators,
-                       compute_data_with_action_type(compute_data, action_type)
-                   ), queue_factory, branch_queue_factory),
-                   parent,
-                   action_type,
-                   debug_logger,
-                   name)
+        return cls(
+            network_state_operators,
+            Traversal.BranchingQueueType(
+                NetworkTraceQueueNext.Branching(network_state_operators, compute_data_with_action_type(compute_data, action_type)),
+                queue_factory,
+                branch_queue_factory,
+            ),
+            parent,
+            action_type,
+            debug_logger,
+            name,
+        )
 
     @singledispatchmethod
-    def add_start_item(self, start: Union[Terminal, ConductingEquipment, NetworkTraceStep.Path], data: T=None, phases: PhaseCode=None) -> "NetworkTrace[T]":
+    def add_start_item(self, start: Union[Terminal, ConductingEquipment, NetworkTraceStep.Path], data: T = None, phases: PhaseCode = None) -> "NetworkTrace[T]":
         """
         Depending on the type of `start` adds one of the following as starting points in the trace, along
         with the associated data:
+
           - A starting `Terminal`
-          - All terminals of the given `ConductingEquipment`.
-          - All terminals of the given `AcLineSegment`.
-          - The `NetworkTraceStep.Path` passed in.
+          - All terminals of the given :class:`ConductingEquipment`.
+          - All terminals of the given :class:`AcLineSegment`.
+          - The :class:`NetworkTraceStep.Path` passed in.
 
         Tracing will be only external from this terminal and not trace internally back through its conducting equipment.
 
@@ -165,14 +168,14 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     @add_start_item.register
     def _(self, start: ConductingEquipment, data=None, phases=None):
         """
-        Adds all terminals of the given `ConductingEquipment` as starting points in the trace, with the associated data.
+        Adds all terminals of the given :class:`ConductingEquipment` as starting points in the trace, with the associated data.
         Tracing will be only external from each terminal and not trace internally back through the conducting equipment.
 
         :param start: The starting equipment whose terminals will be added to the trace
         :param data: The data associated with the start step.
         :param phases: Phases to trace; `None` to ignore phases.
 
-        :returns: This `NetworkTrace` instance
+        :returns: This :class:`NetworkTrace` instance
         """
 
         # We don't have a special case for Clamp here because we say if you start from the whole Clamp rather than its terminal specifically,
@@ -184,14 +187,14 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     @add_start_item.register
     def _(self, start: Terminal, data=None, phases=None):
         """
-        Adds a starting `Terminal` to the trace with the associated step data. Tracing will be only external from this
+        Adds a starting :class:`Terminal` to the trace with the associated step data. Tracing will be only external from this
         terminal and not trace internally back through its conducting equipment.
 
         :param start: The starting `Terminal` for the trace.
         :param data: The data associated with the start step.
         :param phases: Phases to trace; `None` to ignore phases.
-        
-        :returns: This `NetworkTrace` instance
+
+        :returns: This :class:`NetworkTrace` instance
         """
 
         # We have a special case when starting specifically on a clamp terminal that we mark it as having traversed the segment such that it
@@ -205,14 +208,14 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     @add_start_item.register
     def _(self, start: AcLineSegment, data=None, phases=None):
         """
-        Adds all terminals of the given `AcLineSegment` as starting points in the trace, with the associated data.
-        Tracing will be only external from each terminal and not trace internally back through the AcLineSegment.
+        Adds all terminals of the given :class:`AcLineSegment` as starting points in the trace, with the associated data.
+        Tracing will be only external from each terminal and not trace internally back through the `AcLineSegment`.
 
-        :param start: The starting AcLineSegment whose terminals will be added to the trace
+        :param start: The starting `AcLineSegment` whose terminals will be added to the trace
         :param data: The data associated with the start step.
         :param phases: Phases to trace; `None` to ignore phases.
 
-        :returns: This `NetworkTrace` instance
+        :returns: This :class:`NetworkTrace` instance
         """
 
         # If we start on an AcLineSegment, we queue the segments terminals, and all its Cut and Clamp terminals as if we have traversed the segment,
@@ -228,7 +231,6 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
                 for _terminal in cut.terminals:
                     yield _terminal
 
-
         for terminal in start_terminals():
             self._add_start_item(terminal, data=data, phases=phases, traversed_ac_line_segment=start)
         return self
@@ -240,21 +242,19 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         self._add_start_item(start, data=data)
         return self
 
-    def _add_start_item(self,
-                        start: Union[Terminal, NetworkTraceStep.Path]=None,
-                        data: T=None,
-                        phases: PhaseCode=None,
-                        traversed_ac_line_segment: AcLineSegment=None):
+    def _add_start_item(
+        self, start: Union[Terminal, NetworkTraceStep.Path] = None, data: T = None, phases: PhaseCode = None, traversed_ac_line_segment: AcLineSegment = None
+    ):
         """
-        To be called by self.add_start_item(), this method builds the start `NetworkTraceStep.Path`s for the start item
-        and adds it to the `Traversal`
+        To be called by self.add_start_item(), this method builds the start :class:`NetworkTraceStep.Path`s for the start item
+        and adds it to the :class:`Traversal`
 
         If `start` is a `NetworkTraceStep.Path`, [`phases`, `traversed_ac_line_segment`] will all be ignored.
 
-        :param start: The starting `Terminal` or `NetworkTraceStep.Path` to be added to the trace
+        :param start: The starting :class:`Terminal` or `NetworkTraceStep.Path` to be added to the trace
         :param data: The data associated with the start `Terminal`.
         :param phases: Phases to trace; `None` to ignore phases.
-        :param traversed_ac_line_segment: The AcLineSegment that was just traversed
+        :param traversed_ac_line_segment: The :class:`AcLineSegment` that was just traversed
 
         :returns: This `NetworkTrace` instance
         """
@@ -273,21 +273,22 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
     async def run(
         self,
-        start: Union[ConductingEquipment, Terminal, NetworkTraceStep.Path]=None,
-        data: T=None,
-        phases: PhaseCode=None,
-        can_stop_on_start_item: bool=True
+        start: Union[ConductingEquipment, Terminal, NetworkTraceStep.Path] = None,
+        data: T = None,
+        phases: PhaseCode = None,
+        can_stop_on_start_item: bool = True,
     ) -> "NetworkTrace[T]":
         """
-        Runs the network trace starting from `start`
+        Runs the network trace starting from ``start``
 
-        Depending on the type of `start`, this will either start from:
-          - A starting `Terminal` to the trace with the associated step data.
-          - All terminals of the given `ConductingEquipment` as starting points in the trace, with the associated data.
+        Depending on the type of ``start``, this will either start from::
 
-        :param start: The starting `Terminal` or `ConductingEquipment` for the trace.
+            - A starting Terminal to the trace with the associated step data.
+            - All terminals of the given ConductingEquipment as starting points in the trace, with the associated data.
+
+        :param start: The starting :class:`Terminal` or :class:`ConductingEquipment` for the trace.
         :param data: The data associated with the start step.
-        :param phases: Phases to trace; `None` to ignore phases.
+        :param phases: Phases to trace; ``None`` to ignore phases.
         :param can_stop_on_start_item: indicates whether the trace should check stop conditions on start items.
         """
 
@@ -298,82 +299,86 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return self
 
     @singledispatchmethod
-    def add_condition(self, condition: QueueCondition[T]) -> "NetworkTrace[T]":
+    def add_condition(self, condition: QueueCondition[T], **kwargs) -> "NetworkTrace[T]":
         """
         Adds a traversal condition to the trace.
 
-        Valid types for `condition` are:
-          - A predefined traversal condition (eg: Conditions.stop_at_open())
-          - A function implementing ShouldQueue or ShouldStop signature.
-          - A class subclassing StopCondition or QueueCondition
-          
+        Valid types for ``condition`` are::
+
+            - A predefined traversal condition (eg: Conditions.stop_at_open())
+            - A function implementing ShouldQueue or ShouldStop signature.
+            - A class subclassing StopCondition or QueueCondition
+
         :param condition: The condition to be added
-        :returns: This `NetworkTrace` instance
+        :keyword allow_re_wrapping: Allow rewrapping of :class:`StopCondition`s with debug logging
+        :returns: This :class:`NetworkTrace` instance
         """
 
-        return super().add_condition(condition)
+        return super().add_condition(condition, **kwargs)
 
     @add_condition.register
-    def _(self, condition: Callable):
+    def _(self, condition: Callable, **kwargs):
         """
-        Adds a traversal condition to the trace using the trace's `NetworkStateOperators` as the receiver.
+        Adds a traversal condition to the trace using the trace's :class:`NetworkStateOperators` as the receiver.
 
         This overload primarily exists to enable a DSL-like syntax for adding predefined traversal conditions to the trace.
-        For example, to configure the trace to stop at open points using the `Conditions.stop_at_open` factory, you can use:
+        For example, to configure the trace to stop at open points using the :meth:`Conditions.stop_at_open` factory, you can use:
 
-        >>> from zepben.evolve import stop_at_open
-        >>> NetworkTrace().add_condition(stop_at_open())
+        .. code-block::
+
+            from zepben.evolve import stop_at_open
+            NetworkTrace().add_condition(stop_at_open())
         """
 
         if len(inspect.getfullargspec(condition).args) == 1:  # Catches DSL Style lambda conditions from zepben.evolve.Conditions
-            return self.add_condition(condition(self.network_state_operators))
-        return super().add_condition(condition)
+            return self.add_condition(condition(self.network_state_operators), **kwargs)
+        return super().add_condition(condition, **kwargs)
 
     @singledispatchmethod
     def add_queue_condition(
-        self,
-        condition: NetworkTraceQueueCondition[NetworkTraceStep[T]],
-        step_type: NetworkTraceStep.Type=None
+        self, condition: NetworkTraceQueueCondition[NetworkTraceStep[T]], step_type: NetworkTraceStep.Type = None, **kwargs
     ) -> "NetworkTrace[T]":
         """
-        Adds a `QueueCondition` to the traversal. However, before registering it with the traversal, it will make sure that the queue condition
+        Adds a :class:`QueueCondition` to the traversal. However, before registering it with the traversal, it will make sure that the queue condition
         is only checked on step types relevant to the `NetworkTraceActionType` assigned to this instance. That is when:
 
-        - `action_type` is `NetworkTraceActionType.ALL_STEPS` the condition will be checked on all steps.
-        - `action_type` is `NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT` the condition will be checked on external steps.
+            - ``action_type`` is ``NetworkTraceActionType.ALL_STEPS`` the condition will be checked on all steps.
+            - ``action_type`` is ``NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT`` the condition will be checked on external steps.
 
-        However, if the `condition` is an instance of `NetworkTraceQueueCondition` the `NetworkTraceQueueCondition.step_type` will be honoured.
+        However, if the `condition` is an instance of :class:`NetworkTraceQueueCondition` the ``NetworkTraceQueueCondition.step_type`` will be honoured.
 
         :param condition: The queue condition to add.
-        :returns: This `NetworkTrace` instance
+        :keyword allow_re_wrapping: Allow rewrapping of :class:`QueueCondition`s with debug logging
+        :returns: This :class:`NetworkTrace` instance
         """
 
-        return super().add_queue_condition(condition)
+        return super().add_queue_condition(condition, **kwargs)
 
     @add_queue_condition.register
-    def _(self, condition: Callable, step_type: NetworkTraceStep.Type=None):
-        return self.add_queue_condition(NetworkTraceQueueCondition(default_condition_step_type(self._action_type) or step_type, condition))
+    def _(self, condition: Callable, step_type: NetworkTraceStep.Type = None, **kwargs):
+        return self.add_queue_condition(NetworkTraceQueueCondition(default_condition_step_type(self._action_type) or step_type, condition), **kwargs)
 
     @singledispatchmethod
-    def add_stop_condition(self, condition: StopConditionTypes, step_type: NetworkTraceStep.Type=None) -> "NetworkTrace[T]":
+    def add_stop_condition(self, condition: StopConditionTypes, step_type: NetworkTraceStep.Type = None, **kwargs) -> "NetworkTrace[T]":
         """
-        Adds a `StopCondition` to the traversal. However, before registering it with the traversal, it will make sure that the queue condition
+        Adds a :class:`StopCondition` to the traversal. However, before registering it with the traversal, it will make sure that the queue condition
         is only checked on step types relevant to the `NetworkTraceActionType` assigned to this instance. That is when:
 
-        - `action_type` is `NetworkTraceActionType.ALL_STEPS` the condition will be checked on all steps.
-        - `action_type` is `NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT` the condition will be checked on external steps.
+            - ``action_type`` is ``NetworkTraceActionType.ALL_STEPS`` the condition will be checked on all steps.
+            - ``action_type`` is ``NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT`` the condition will be checked on external steps.
 
-        However, if the `condition` is an instance of `NetworkTraceStopCondition` the `NetworkTraceStopCondition.step_type` will be honoured.
+        However, if the `condition` is an instance of :class:`NetworkTraceStopCondition` the ``NetworkTraceStopCondition.step_type`` will be honoured.
 
         :param condition: The stop condition to add.
-        :returns: This `NetworkTrace` instance
+        :keyword allow_re_wrapping: Allow rewrapping of :class:`StopCondition`s with debug logging
+        :returns: This :class:`NetworkTrace` instance
         """
 
-        return super().add_stop_condition(condition)
+        return super().add_stop_condition(condition, **kwargs)
 
     @add_stop_condition.register(Callable)
-    def _(self, condition: ShouldStop, step_type=None):
-        return self.add_stop_condition(NetworkTraceStopCondition(default_condition_step_type(self._action_type) or step_type, condition))
+    def _(self, condition: ShouldStop, step_type=None, **kwargs):
+        return self.add_stop_condition(NetworkTraceStopCondition(default_condition_step_type(self._action_type) or step_type, condition), **kwargs)
 
     def can_action_item(self, item: T, context: StepContext) -> bool:
         return self._action_type(item, context, self.has_visited)
@@ -404,7 +409,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
     def visit(self, terminal: Terminal, phases: FrozenSet[SinglePhaseKind]) -> bool:
         if self.parent and self.parent.has_visited(terminal, phases):
-                return False
+            return False
         return self._tracker.visit(terminal, phases)
 
 
@@ -422,18 +427,24 @@ def compute_data_with_action_type(compute_data: ComputeData[T], action_type: Can
     if action_type == NetworkTraceActionType.ALL_STEPS:
         return compute_data
     elif action_type == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:
-        return ComputeData(lambda current_step, current_context, next_path: 
-            current_step.data if next_path.traced_internally else compute_data.compute_next(current_step, current_context, next_path)
+        return ComputeData(
+            lambda current_step, current_context, next_path: (
+                current_step.data if next_path.traced_internally else compute_data.compute_next(current_step, current_context, next_path)
+            )
         )
     raise Exception(f'{action_type.__class__}: step doesnt match expected types')
+
 
 def with_paths_with_action_type(self, action_type: NetworkTraceActionType) -> ComputeDataWithPaths[T]:
     if action_type == NetworkTraceActionType.ALL_STEPS:
         return self
     elif action_type == NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT:
-        return ComputeDataWithPaths(lambda current_step, current_context, next_path, next_paths:
-            current_step.data if next_path.traced_internally else self.compute_next(current_step, current_context, next_path, next_paths)
+        return ComputeDataWithPaths(
+            lambda current_step, current_context, next_path, next_paths: (
+                current_step.data if next_path.traced_internally else self.compute_next(current_step, current_context, next_path, next_paths)
+            )
         )
     raise Exception('step doesnt match expected types')
+
 
 ComputeDataWithPaths[T].with_action_type = with_paths_with_action_type

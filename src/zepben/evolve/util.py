@@ -5,8 +5,21 @@
 
 from __future__ import annotations
 
-__all__ = ["get_by_mrid", "contains_mrid", "safe_remove", "safe_remove_by_id", "nlen", "ngen", "is_none_or_empty", "require", "pb_or_none", "CopyableUUID",
-           "datetime_to_timestamp", "none", "classproperty"]
+__all__ = [
+    "get_by_mrid",
+    "contains_mrid",
+    "safe_remove",
+    "safe_remove_by_id",
+    "nlen",
+    "ngen",
+    "is_none_or_empty",
+    "require",
+    "pb_or_none",
+    "CopyableUUID",
+    "datetime_to_timestamp",
+    "none",
+    "classproperty",
+]
 
 import os
 import re
@@ -133,7 +146,7 @@ def require(condition: bool, lazy_message: Callable[[], Any]):
 
 
 def pb_or_none(cim: Optional[Any]):
-    """ Convert to a protobuf type or return None if cim was None """
+    """Convert to a protobuf type or return None if cim was None"""
     return cim.to_pb() if cim is not None else None
 
 
@@ -168,6 +181,11 @@ class CopyableUUID(UUID):
 class classproperty(property):
     def __get__(self, cls, owner: T) -> T:
         return classmethod(self.fget).__get__(None, owner)()
+
+
+def extra_kwargs_not_allowed(kwargs, function_name):
+    if kwargs:
+        raise TypeError(f"'{kwargs.pop()}' is an invalid keyword argument for {function_name}()")
 
 
 def datetime_to_timestamp(date_time: datetime) -> PBTimestamp:
