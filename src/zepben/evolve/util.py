@@ -52,7 +52,7 @@ def iter_but_not_str(obj: Any):
     return isinstance(obj, Iterable) and not isinstance(obj, (str, bytes, bytearray, dict))
 
 
-def get_by_mrid(collection: Optional[Iterable[TIdentifiedObject]], mrid: str) -> TIdentifiedObject:
+def get_by_mrid(collection: Iterable[TIdentifiedObject] | None, mrid: str) -> TIdentifiedObject:
     """
     Get an `IdentifiedObject` from `collection` based on
     its mRID.
@@ -69,7 +69,7 @@ def get_by_mrid(collection: Optional[Iterable[TIdentifiedObject]], mrid: str) ->
     raise KeyError(mrid)
 
 
-def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -> bool:
+def contains_mrid(collection: Iterable[IdentifiedObject] | None, mrid: str) -> bool:
     """
     Check if a collection of `IdentifiedObject` contains an
     object with a specified mRID.
@@ -86,7 +86,7 @@ def contains_mrid(collection: Optional[Iterable[IdentifiedObject]], mrid: str) -
         return False
 
 
-def safe_remove(collection: Optional[List[T]], obj: T) -> Optional[List[T]]:
+def safe_remove(collection: List[T] | None, obj: T) -> List[T] | None:
     """
     Remove an IdentifiedObject from a collection safely.
     Raises `ValueError` if `obj` is not in the collection.
@@ -100,7 +100,7 @@ def safe_remove(collection: Optional[List[T]], obj: T) -> Optional[List[T]]:
     return collection if collection else None
 
 
-def safe_remove_by_id(collection: Optional[Dict[str, IdentifiedObject]], obj: IdentifiedObject) -> {Optional[Dict[str, IdentifiedObject]]}:
+def safe_remove_by_id(collection: Dict[str, IdentifiedObject] | None, obj: IdentifiedObject) -> {Dict[str, IdentifiedObject] | None}:
     """
     Remove an IdentifiedObject from a collection safely.
     Raises `KeyError` if `obj` is not in the collection.
@@ -114,7 +114,7 @@ def safe_remove_by_id(collection: Optional[Dict[str, IdentifiedObject]], obj: Id
     return collection if collection else None
 
 
-def nlen(sized: Optional[Sized]) -> int:
+def nlen(sized: Sized | None) -> int:
     """
     Get the len of a nullable sized type.
     `sized` The object to get length of
@@ -123,11 +123,11 @@ def nlen(sized: Optional[Sized]) -> int:
     return 0 if sized is None else len(sized)
 
 
-def ngen(collection: Optional[Iterable[T]]) -> Generator[T, None, None]:
+def ngen(collection: Iterable[T] | None) -> Generator[T, None, None]:
     yield from collection or {}
 
 
-def is_none_or_empty(sized: Optional[Sized]) -> bool:
+def is_none_or_empty(sized: Sized | None) -> bool:
     """
     Check if a given object is empty and return None if it is.
     `sized` Any type implementing `__len__`
@@ -145,7 +145,7 @@ def require(condition: bool, lazy_message: Callable[[], Any]):
         raise ValueError(str(lazy_message()))
 
 
-def pb_or_none(cim: Optional[Any]):
+def pb_or_none(cim: Any | None):
     """Convert to a protobuf type or return None if cim was None"""
     return cim.to_pb() if cim is not None else None
 

@@ -48,13 +48,13 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
 
         self.__service = DiagramService()
 
-    async def get_diagram_objects(self, mrids: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
+    async def get_diagram_objects(self, mrids: str | Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return await self._get_diagram_objects(mrids)
 
     async def _run_get_metadata(self, request: GetMetadataRequest) -> GetMetadataResponse:
         return await self._stub.getMetadata(request, timeout=self.timeout)
 
-    async def _get_diagram_objects(self, mrids: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
+    async def _get_diagram_objects(self, mrids: str | Iterable[str]) -> GrpcResult[MultiObjectResult]:
         async def rpc():
             if isinstance(mrids, str):
                 return await self._process_extract_results(None, self._process_diagram_objects({mrids}))
@@ -63,7 +63,7 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
 
         return await self.try_rpc(rpc)
 
-    async def _process_diagram_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_diagram_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         if not mrids:
             return
 
@@ -72,7 +72,7 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
             for dio in response.identifiedObjects:
                 yield self._extract_identified_object("diagram", dio, _dio_type_to_cim)
 
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         if not mrids:
             return
 
@@ -84,13 +84,13 @@ class DiagramConsumerClient(CimConsumerClient[DiagramService]):
 
 class SyncDiagramConsumerClient(DiagramConsumerClient):
 
-    def get_identified_object(self, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject | None]:
         return get_event_loop().run_until_complete(super()._get_identified_objects(mrid))
 
     def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_identified_objects(mrids))
 
-    def get_diagram_objects(self, mrid: Union[str, Iterable[str]]) -> GrpcResult[MultiObjectResult]:
+    def get_diagram_objects(self, mrid: str | Iterable[str]) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(super()._get_diagram_objects(mrid))
 
     def get_metadata(self) -> GrpcResult[ServiceInfo]:

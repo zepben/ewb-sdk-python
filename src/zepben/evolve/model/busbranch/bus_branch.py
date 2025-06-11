@@ -77,7 +77,7 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
     def is_valid_topological_node_data(
         self,
         bus_branch_network: BBN,
-        base_voltage: Optional[int],
+        base_voltage: int | None,
         collapsed_conducting_equipment: FrozenSet[ConductingEquipment],
         border_terminals: FrozenSet[Terminal],
         inner_terminals: FrozenSet[Terminal],
@@ -96,7 +96,7 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
         self,
         bus_branch_network: BBN,
         connected_topological_nodes: Tuple[TN, TN],
-        length: Optional[float],
+        length: float | None,
         collapsed_ac_line_segments: FrozenSet[AcLineSegment],
         border_terminals: FrozenSet[Terminal],
         inner_terminals: FrozenSet[Terminal],
@@ -131,7 +131,7 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
         self,
         bus_branch_network: BBN,
         power_transformer: PowerTransformer,
-        ends_to_topological_nodes: List[Tuple[PowerTransformerEnd, Optional[TN]]],
+        ends_to_topological_nodes: List[Tuple[PowerTransformerEnd, TN | None]],
         node_breaker_network: NetworkService
     ) -> bool:
         """
@@ -239,7 +239,7 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
     def topological_node_creator(
         self,
         bus_branch_network: BBN,
-        base_voltage: Optional[int],
+        base_voltage: int | None,
         collapsed_conducting_equipment: FrozenSet[ConductingEquipment],
         border_terminals: FrozenSet[Terminal],
         inner_terminals: FrozenSet[Terminal],
@@ -265,7 +265,7 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
         self,
         bus_branch_network: BBN,
         connected_topological_nodes: Tuple[TN, TN],
-        length: Optional[float],
+        length: float | None,
         collapsed_ac_line_segments: FrozenSet[AcLineSegment],
         border_terminals: FrozenSet[Terminal],
         inner_terminals: FrozenSet[Terminal],
@@ -312,7 +312,7 @@ class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], me
         self,
         bus_branch_network: BBN,
         power_transformer: PowerTransformer,
-        ends_to_topological_nodes: List[Tuple[PowerTransformerEnd, Optional[TN]]],
+        ends_to_topological_nodes: List[Tuple[PowerTransformerEnd, TN | None]],
         node_breaker_network: NetworkService
     ) -> Dict[Any, PT]:
         """
@@ -845,7 +845,7 @@ async def _create_power_electronics_connections(
     return True
 
 
-def _get_base_voltage(border_terminals: FrozenSet[Terminal]) -> Union[int, None]:
+def _get_base_voltage(border_terminals: FrozenSet[Terminal]) -> int | None:
     voltages = set()
     for t in border_terminals:
         ce = t.conducting_equipment
@@ -916,7 +916,7 @@ async def _group_negligible_impedance_terminals(
     await trace.run()
     return tg
 
-def _create_traversal_step_object(next_item: Union[Terminal, AcLineSegment]) -> BusBranchTraceStep:
+def _create_traversal_step_object(next_item: Terminal | AcLineSegment) -> BusBranchTraceStep:
     return BusBranchTraceStep(next_item)
 
 def _process_terminal(

@@ -41,13 +41,13 @@ class Measurement(IdentifiedObject):
     association is never used alone.
     """
 
-    power_system_resource_mrid: Optional[str] = None
+    power_system_resource_mrid: str | None = None
     """The MRID of the power system resource that contains the measurement."""
 
-    remote_source: Optional[RemoteSource] = None
+    remote_source: RemoteSource | None = None
     """The `zepben.evolve.cim.iec61970.base.scada.remote_source.RemoteSource` taking the `Measurement`"""
 
-    terminal_mrid: Optional[str] = None
+    terminal_mrid: str | None = None
     """A measurement may be associated with a terminal in the network."""
 
     phases: PhaseCode = PhaseCode.ABC

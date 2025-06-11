@@ -19,9 +19,9 @@ from zepben.evolve.util import safe_remove, ngen, nlen, get_by_mrid
 class Loop(IdentifiedObject):
     """Missing description"""
 
-    _circuits: Optional[List[Circuit]] = None
-    _substations: Optional[List[Substation]] = None
-    _energizing_substations: Optional[List[Substation]] = None
+    _circuits: List[Circuit] | None = None
+    _substations: List[Substation] | None = None
+    _energizing_substations: List[Substation] | None = None
 
     def __init__(self, circuits: List[Circuit] = None, substations: List[Substation] = None, energizing_substations: List[Substation] = None, **kwargs):
         super(Loop, self).__init__(**kwargs)

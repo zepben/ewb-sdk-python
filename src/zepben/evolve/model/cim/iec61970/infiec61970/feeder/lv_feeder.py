@@ -22,16 +22,16 @@ class LvFeeder(EquipmentContainer):
     A branch of LV network starting at a distribution substation and continuing until the end of the LV network.
     """
 
-    _normal_head_terminal: Optional[Terminal] = None
+    _normal_head_terminal: Terminal | None = None
     """The normal head terminal or terminals of this LvFeeder"""
 
-    _normal_energizing_feeders: Optional[Dict[str, Feeder]] = None
+    _normal_energizing_feeders: Dict[str, Feeder] | None = None
     """The feeders that energize this LV feeder in the normal state of the network."""
 
-    _current_equipment: Optional[Dict[str, Equipment]] = None
+    _current_equipment: Dict[str, Equipment] | None = None
     """The equipment contained in this LvFeeder in the current state of the network."""
 
-    _current_energizing_feeders: Optional[Dict[str, Feeder]] = None
+    _current_energizing_feeders: Dict[str, Feeder] | None = None
     """The feeders that energize this LV feeder in the current state of the network."""
 
     def __init__(
@@ -56,14 +56,14 @@ class LvFeeder(EquipmentContainer):
                 self.add_current_energizing_feeder(feeder)
 
     @property
-    def normal_head_terminal(self) -> Optional[Terminal]:
+    def normal_head_terminal(self) -> Terminal | None:
         """
         The normal head terminal or terminals of the feeder.
         """
         return self._normal_head_terminal
 
     @normal_head_terminal.setter
-    def normal_head_terminal(self, term: Optional[Terminal]):
+    def normal_head_terminal(self, term: Terminal | None):
         if self._normal_head_terminal is None or self._normal_head_terminal is term:
             self._normal_head_terminal = term
         else:

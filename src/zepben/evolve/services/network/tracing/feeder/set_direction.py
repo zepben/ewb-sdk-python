@@ -112,7 +112,7 @@ class SetDirection:
         return False
 
     @staticmethod
-    def _is_normally_open_switch(conducting_equipment: Optional[ConductingEquipment]):
+    def _is_normally_open_switch(conducting_equipment: ConductingEquipment | None):
         return isinstance(conducting_equipment, Switch) and conducting_equipment.is_normally_open()
 
     @singledispatchmethod

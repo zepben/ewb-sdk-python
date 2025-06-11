@@ -15,10 +15,10 @@ __all__ = ["ResistanceReactance"]
 
 @dataclass
 class ResistanceReactance(object):
-    r: Optional[float] = None
-    x: Optional[float] = None
-    r0: Optional[float] = None
-    x0: Optional[float] = None
+    r: float | None = None
+    x: float | None = None
+    r0: float | None = None
+    x0: float | None = None
 
     def is_complete(self) -> bool:
         return self.r is not None and self.x is not None and self.r0 is not None and self.x0 is not None
@@ -26,7 +26,7 @@ class ResistanceReactance(object):
     def is_empty(self) -> bool:
         return self.r is None and self.x is None and self.r0 is None and self.x0 is None
 
-    def merge_if_incomplete(self, to_merge: Callable[[], Optional[ResistanceReactance]]) -> ResistanceReactance:
+    def merge_if_incomplete(self, to_merge: Callable[[], ResistanceReactance | None]) -> ResistanceReactance:
         if self.is_complete():
             return self
         else:

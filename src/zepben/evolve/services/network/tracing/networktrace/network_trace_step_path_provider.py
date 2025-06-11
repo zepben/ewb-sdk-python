@@ -334,7 +334,7 @@ class NetworkTraceStepPathProvider:
             yield from seq_term_map_to_path(generator, path_factory, acls)
 
 def seq_term_map_to_path(
-    terms: Union[Terminal, Iterable[Terminal]],
+    terms: Terminal | Iterable[Terminal],
     path_factory: PathFactory,
     traversed_acls: AcLineSegment=None
 ) -> Generator[NetworkTraceStep.Path, None, None]:

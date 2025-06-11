@@ -16,7 +16,7 @@ T = TypeVar("T")
 
 @dataclass(slots=True)
 class GrpcResult(Generic[T]):
-    result: Union[T, Exception]
+    result: T | Exception
     was_error_handled: bool = False
 
     @property

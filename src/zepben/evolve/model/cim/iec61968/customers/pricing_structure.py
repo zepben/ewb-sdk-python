@@ -23,7 +23,7 @@ class PricingStructure(Document):
     customer classification, site characteristics, classification (i.e. fee price structure, deposit price
     structure, electric service price structure, etc.) and accounting requirements.
     """
-    _tariffs: Optional[List[Tariff]] = None
+    _tariffs: List[Tariff] | None = None
 
     def __init__(self, tariffs: List[Tariff] = None, **kwargs):
         super(PricingStructure, self).__init__(**kwargs)

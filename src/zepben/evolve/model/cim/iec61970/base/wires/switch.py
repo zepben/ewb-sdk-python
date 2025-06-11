@@ -45,7 +45,7 @@ class Switch(ConductingEquipment):
       value for each phase of the switch.
     """
 
-    rated_current: Optional[float] = None
+    rated_current: float | None = None
     """The maximum continuous current carrying capacity in amps governed by the device material and construction. The attribute shall be a positive value."""
 
     _open: int = 0
@@ -56,12 +56,12 @@ class Switch(ConductingEquipment):
     is expected to match with the Switch.normalOpen."""
 
     @property
-    def switch_info(self) -> Optional[SwitchInfo]:
+    def switch_info(self) -> SwitchInfo | None:
         """Datasheet information for this Switch."""
         return self.asset_info
 
     @switch_info.setter
-    def switch_info(self, si: Optional[SwitchInfo]):
+    def switch_info(self, si: SwitchInfo | None):
         """
         Set the :class:`SwitchInfo` for this :class:`Switch`
         :param si: The SwitchInfo for this Switch

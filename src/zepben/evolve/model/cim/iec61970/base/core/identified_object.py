@@ -40,9 +40,9 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     description: str = ""
     """a free human readable text describing or naming the object. It may be non unique and may not correlate to a naming hierarchy."""
 
-    _names: Optional[List[Name]] = None
+    _names: List[Name] | None = None
 
-    def __init__(self, names: Optional[List[Name]] = None, **kwargs):
+    def __init__(self, names: List[Name] | None = None, **kwargs):
         super(IdentifiedObject, self).__init__(**kwargs)
         if names:
             for name in names:

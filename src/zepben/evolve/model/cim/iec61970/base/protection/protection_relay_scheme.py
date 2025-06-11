@@ -19,12 +19,12 @@ __all__ = ["ProtectionRelayScheme"]
 class ProtectionRelayScheme(IdentifiedObject):
     """A scheme that a group of relay functions implement. For example, typically schemes are primary and secondary, or main and failsafe."""
 
-    system: Optional[ProtectionRelaySystem] = None
+    system: ProtectionRelaySystem | None = None
     """The system this scheme belongs to."""
 
-    _functions: Optional[List[ProtectionRelayFunction]] = None
+    _functions: List[ProtectionRelayFunction] | None = None
 
-    def __init__(self, functions: Optional[List[ProtectionRelayFunction]] = None, **kwargs):
+    def __init__(self, functions: List[ProtectionRelayFunction] | None = None, **kwargs):
         super(ProtectionRelayScheme, self).__init__(**kwargs)
         if functions is not None:
             for function in functions:
@@ -70,7 +70,7 @@ class ProtectionRelayScheme(IdentifiedObject):
         """
         return nlen(self._functions)
 
-    def remove_function(self, function: Optional[ProtectionRelayFunction]) -> ProtectionRelayScheme:
+    def remove_function(self, function: ProtectionRelayFunction | None) -> ProtectionRelayScheme:
         """
         Disassociate this :class:`ProtectionRelayScheme` from a :class:`ProtectionRelayFunction`.
 

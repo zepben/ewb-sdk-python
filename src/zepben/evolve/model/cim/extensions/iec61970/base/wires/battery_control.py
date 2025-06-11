@@ -23,13 +23,13 @@ class BatteryControl(RegulatingControl):
     [ZBEX] Describes behaviour specific to controlling batteries.
     """
 
-    charging_rate: Optional[float] = None
+    charging_rate: float | None = None
     """[ZBEX] Charging rate (input power) in percentage of maxP. (Unit: PerCent)"""
 
-    discharging_rate: Optional[float] = None
+    discharging_rate: float | None = None
     """[ZBEX] Discharge rate (output power) in percentage of maxP. (Unit: PerCent)"""
 
-    reserve_percent: Optional[float] = None
+    reserve_percent: float | None = None
     """
     [ZBEX] 
     Percentage of the rated storage capacity that should be reserved during normal operations. This reserve acts as a safeguard, preventing the energy level 

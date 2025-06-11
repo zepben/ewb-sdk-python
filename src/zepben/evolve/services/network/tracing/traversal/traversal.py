@@ -84,7 +84,7 @@ class Traversal(Generic[T, D]):
             raise NotImplementedError
 
         @property
-        def branch_queue(self) -> Optional[TraversalQueue[QD]]:
+        def branch_queue(self) -> TraversalQueue[QD] | None:
             raise NotImplementedError
 
     class BasicQueueType(QueueType[QT, QD]):
@@ -106,7 +106,7 @@ class Traversal(Generic[T, D]):
             return self._queue
 
         @property
-        def branch_queue(self) -> Optional[TraversalQueue[QD]]:
+        def branch_queue(self) -> TraversalQueue[QD] | None:
             return self._branch_queue
 
     class BranchingQueueType(QueueType[QT, QD]):
@@ -134,12 +134,12 @@ class Traversal(Generic[T, D]):
             return self.queue_factory()
 
         @property
-        def branch_queue(self) -> Optional[TraversalQueue[QD]]:
+        def branch_queue(self) -> TraversalQueue[QD] | None:
             return self.branch_queue_factory()
 
     name: str
 
-    def __init__(self, queue_type, parent: Optional[D] = None, debug_logger: Logger = None):
+    def __init__(self, queue_type, parent: D | None = None, debug_logger: Logger = None):
         self._queue_type = queue_type
         self._parent: D = parent
         self._debug_logger = DebugLoggingWrapper(self.name, debug_logger) if debug_logger else None
@@ -150,7 +150,7 @@ class Traversal(Generic[T, D]):
             self.queue_next = lambda current, context: self._queue_next_branching(current, context, self._queue_type.queue_next)
 
         self.queue: TraversalQueue[T] = queue_type.queue
-        self.branch_queue: Optional[TraversalQueue[D]] = queue_type.branch_queue
+        self.branch_queue: TraversalQueue[D] | None = queue_type.branch_queue
         self.start_items: deque[T] = deque()
 
         self.running: bool = False

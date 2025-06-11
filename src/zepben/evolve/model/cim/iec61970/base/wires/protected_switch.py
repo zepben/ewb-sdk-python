@@ -21,10 +21,10 @@ class ProtectedSwitch(Switch):
     A ProtectedSwitch is a switching device that can be operated by :class:`ProtectionRelayFunction`.
     """
 
-    breaking_capacity: Optional[int] = None
+    breaking_capacity: int | None = None
     """The maximum fault current in amps a breaking device can break safely under prescribed conditions of use."""
 
-    _relay_functions: Optional[List[ProtectionRelayFunction]] = None
+    _relay_functions: List[ProtectionRelayFunction] | None = None
 
     def __init__(
         self,
@@ -78,7 +78,7 @@ class ProtectedSwitch(Switch):
         self._relay_functions.append(relay_function)
         return self
 
-    def remove_relay_function(self, relay_function: Optional[ProtectionRelayFunction]) -> ProtectedSwitch:
+    def remove_relay_function(self, relay_function: ProtectionRelayFunction | None) -> ProtectedSwitch:
         """
         Disassociate this :class:`ProtectedSwitch` from a :class:`ProtectionRelayFunction`.
         :param relay_function: The :class:`ProtectionRelayFunction` to disassociate from this :class:`ProtectedSwitch`.

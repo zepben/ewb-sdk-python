@@ -23,16 +23,16 @@ class Substation(EquipmentContainer):
     is passed for the purposes of switching or modifying its characteristics.
     """
 
-    sub_geographical_region: Optional[SubGeographicalRegion] = None
+    sub_geographical_region: SubGeographicalRegion | None = None
     """The SubGeographicalRegion containing the substation."""
 
-    _normal_energized_feeders: Optional[List[Feeder]] = None
+    _normal_energized_feeders: List[Feeder] | None = None
 
-    _loops: Optional[List[Loop]] = None
+    _loops: List[Loop] | None = None
 
-    _energized_loops: Optional[List[Loop]] = None
+    _energized_loops: List[Loop] | None = None
 
-    _circuits: Optional[List[Circuit]] = None
+    _circuits: List[Circuit] | None = None
 
     def __init__(self, normal_energized_feeders: List[Feeder] = None, loops: List[Loop] = None, energized_loops: List[Loop] = None,
                  circuits: List[Circuit] = None, **kwargs):

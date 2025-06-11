@@ -124,7 +124,7 @@ class ReferenceResolver(object):
 class BoundReferenceResolver(object):
     from_obj: IdentifiedObject
     resolver: ReferenceResolver
-    reverse_resolver: Optional[ReferenceResolver]
+    reverse_resolver: ReferenceResolver | None
 
     def __eq__(self, other):
         """ We only do a reference check for `from_obj` to avoid expensive equality checks on `IdentifiedObjects`. """
@@ -156,7 +156,7 @@ class UnresolvedReference(object):
     from_ref: IdentifiedObject
     to_mrid: str
     resolver: ReferenceResolver
-    reverse_resolver: Optional[ReferenceResolver] = None
+    reverse_resolver: ReferenceResolver | None = None
 
     def __eq__(self, other: UnresolvedReference):
         # we don't check reverse resolver for equality, as it doesn't make sense to have a reverse resolver that is not the reverse of resolver

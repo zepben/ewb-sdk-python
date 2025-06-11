@@ -36,17 +36,17 @@ class TapChanger(PowerSystemResource):
     control_enabled: bool = True
     """Specifies the regulation status of the equipment.  True is regulating, false is not regulating."""
 
-    neutral_u: Optional[int] = None
+    neutral_u: int | None = None
     """Voltage at which the winding operates at the neutral tap setting."""
 
-    tap_changer_control: Optional[TapChangerControl] = None
+    tap_changer_control: TapChangerControl | None = None
     """The regulating control scheme in which this tap changer participates."""
 
-    _high_step: Optional[int] = None
-    _low_step: Optional[int] = None
-    _neutral_step: Optional[int] = None
-    _normal_step: Optional[int] = None
-    _step: Optional[float] = None
+    _high_step: int | None = None
+    _low_step: int | None = None
+    _neutral_step: int | None = None
+    _normal_step: int | None = None
+    _step: float | None = None
 
     def __init__(self, high_step: int = None, low_step: int = None, neutral_step: int = None, normal_step: int = None, step: float = None, **kwargs):
         super(TapChanger, self).__init__(**kwargs)
@@ -172,10 +172,10 @@ class RatioTapChanger(TapChanger):
     (for a two-winding transformer).
     """
 
-    transformer_end: Optional[TransformerEnd] = None
+    transformer_end: TransformerEnd | None = None
     """`TransformerEnd` to which this ratio tap changer belongs."""
 
-    step_voltage_increment: Optional[float] = None
+    step_voltage_increment: float | None = None
     """Tap step increment, in per cent of neutral voltage, per step position."""
 
 
@@ -188,19 +188,19 @@ class TransformerEnd(IdentifiedObject):
     grounded: bool = False
     """(for Yn and Zn connections) True if the neutral is solidly grounded."""
 
-    r_ground: Optional[float] = None
+    r_ground: float | None = None
     """(for Yn and Zn connections) Resistance part of neutral impedance where 'grounded' is true"""
 
-    x_ground: Optional[float] = None
+    x_ground: float | None = None
     """(for Yn and Zn connections) Reactive part of neutral impedance where 'grounded' is true"""
 
-    ratio_tap_changer: Optional[RatioTapChanger] = None
+    ratio_tap_changer: RatioTapChanger | None = None
     """Ratio tap changer associated with this transformer end."""
 
-    _terminal: Optional[Terminal] = None
+    _terminal: Terminal | None = None
     """The terminal of the transformer that this end is associated with"""
 
-    base_voltage: Optional[BaseVoltage] = None
+    base_voltage: BaseVoltage | None = None
     """Base voltage of the transformer end.  This is essential for PU calculation."""
 
     end_number: int = 0
@@ -208,24 +208,24 @@ class TransformerEnd(IdentifiedObject):
     Highest voltage winding should be 1. Each end within a power transformer should have a unique subsequent end number. 
     Note the transformer end number need not match the terminal sequence number."""
 
-    star_impedance: Optional[TransformerStarImpedance] = None
+    star_impedance: TransformerStarImpedance | None = None
     """(accurate for 2- or 3-winding transformers only) Pi-model impedances of this transformer end. By convention, for a two winding transformer, the full
      values of the transformer should be entered on the high voltage end (endNumber=1)."""
 
-    def __init__(self, terminal: Optional[Terminal] = None, **kwargs):
+    def __init__(self, terminal: Terminal | None = None, **kwargs):
         super(TransformerEnd, self).__init__(**kwargs)
         if terminal is not None:
             self.terminal = terminal
 
     @property
-    def terminal(self) -> Optional[Terminal]:
+    def terminal(self) -> Terminal | None:
         """
         The terminal of the transformer that this end is associated with
         """
         return self._terminal
 
     @terminal.setter
-    def terminal(self, value: Optional[Terminal]):
+    def terminal(self, value: Terminal | None):
         if value is not None:
             require(value.conducting_equipment is None or isinstance(value.conducting_equipment, PowerTransformer),
                     lambda: f"Cannot assign {self.__class__.__name__}[{self.mrid}] to {value.__class__.__name__}[{value.mrid}], which is connected to a " +
@@ -256,47 +256,47 @@ class PowerTransformerEnd(TransformerEnd):
     Instead use the TransformerMeshImpedance or split the transformer into multiple PowerTransformers.
     """
 
-    _power_transformer: Optional[PowerTransformer] = None
+    _power_transformer: PowerTransformer | None = None
     """The power transformer of this power transformer end."""
-    _rated_s: Optional[int] = None
+    _rated_s: int | None = None
 
-    rated_u: Optional[int] = None
+    rated_u: int | None = None
     """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings. A high voltage side, as given by 
     TransformerEnd.endNumber, shall have a ratedU that is greater or equal than ratedU for the lower voltage sides."""
 
-    r: Optional[float] = None
+    r: float | None = None
     """Resistance (star-phases) of the transformer end. The attribute shall be equal or greater than zero for non-equivalent transformers."""
 
-    x: Optional[float] = None
+    x: float | None = None
     """Positive sequence series reactance (star-phases) of the transformer end."""
 
-    r0: Optional[float] = None
+    r0: float | None = None
     """Zero sequence series resistance (star-phases) of the transformer end."""
 
-    x0: Optional[float] = None
+    x0: float | None = None
     """Zero sequence series reactance of the transformer end."""
 
-    g: Optional[float] = None
+    g: float | None = None
     """Magnetizing branch conductance."""
 
-    g0: Optional[float] = None
+    g0: float | None = None
     """Zero sequence magnetizing branch conductance (star-phases)."""
 
-    b: Optional[float] = None
+    b: float | None = None
     """Magnetizing branch susceptance (B mag).  The value can be positive or negative."""
 
-    b0: Optional[float] = None
+    b0: float | None = None
     """Zero sequence magnetizing branch susceptance."""
 
     connection_kind: WindingConnection = WindingConnection.UNKNOWN_WINDING
     """Kind of `zepben.protobuf.cim.iec61970.base.wires.winding_connection.WindingConnection` for this end."""
 
-    phase_angle_clock: Optional[int] = None
+    phase_angle_clock: int | None = None
     """Terminal voltage phase angle displacement where 360 degrees are represented with clock hours. The valid values are 0 to 11. For example, for the 
     secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the 
     clock as 11. The clock value of the transformer end number specified as 1, is assumed to be zero."""
 
-    _s_ratings: Optional[List[TransformerEndRatedS]] = None
+    _s_ratings: List[TransformerEndRatedS] | None = None
     """
     Backing list for storing transformer ratings. Placed here to not mess with __init__ param order. Must always be placed at the end.
     Should not be used directly, instead use add_rating and get_rating functions. 
@@ -338,7 +338,7 @@ class PowerTransformerEnd(TransformerEnd):
         return self.base_voltage.nominal_voltage if self.base_voltage else self.rated_u
 
     @property
-    def rated_s(self) -> Optional[int]:
+    def rated_s(self) -> int | None:
         """
         Normal apparent power rating. The attribute shall be a positive value. For a two-winding transformer the values for the high and low voltage sides
         shall be identical.
@@ -348,7 +348,7 @@ class PowerTransformerEnd(TransformerEnd):
         return None
 
     @rated_s.setter
-    def rated_s(self, rated_s: Optional[int]):
+    def rated_s(self, rated_s: int | None):
         warnings.warn(
             "`rated_s` has been replaced by `s_ratings` and is only for backward compatibility. Setting `rated_s`, will clear any other ratings.",
             DeprecationWarning,
@@ -465,9 +465,9 @@ class PowerTransformer(ConductingEquipment):
     numerical sequence if they are numbered: the phasors are assumed to rotate in a counter-clockwise sense.
     """
 
-    _power_transformer_ends: Optional[List[PowerTransformerEnd]] = None
+    _power_transformer_ends: List[PowerTransformerEnd] | None = None
 
-    transformer_utilisation: Optional[float] = None
+    transformer_utilisation: float | None = None
     """
     The fraction of the transformer’s normal capacity (nameplate rating) that is in use. It may be expressed as the
     result of the calculation S/Sn, where S = Load on Transformer (in VA), Sn = Transformer Nameplate Rating (in VA).
@@ -503,12 +503,12 @@ class PowerTransformer(ConductingEquipment):
         return ngen(self._power_transformer_ends)
 
     @property
-    def power_transformer_info(self) -> Optional[PowerTransformerInfo]:
+    def power_transformer_info(self) -> PowerTransformerInfo | None:
         """The `PowerTransformerInfo` for this `PowerTransformer`"""
         return self.asset_info
 
     @power_transformer_info.setter
-    def power_transformer_info(self, pti: Optional[PowerTransformerInfo]):
+    def power_transformer_info(self, pti: PowerTransformerInfo | None):
         """
         Set the `PowerTransformerInfo` for this `PowerTransformer`
         `pti` The `PowerTransformerInfo` to associate with this `PowerTransformer`

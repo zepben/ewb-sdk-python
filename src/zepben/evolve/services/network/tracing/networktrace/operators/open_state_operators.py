@@ -67,7 +67,7 @@ class OpenStateOperators(StateOperator):
         raise NotImplementedError()
 
     @classmethod
-    def stop_at_open(cls, open_test: Optional[Callable[[Switch, Optional[SinglePhaseKind]], bool]]=None, phase: Optional[SinglePhaseKind]=None) -> NetworkTraceQueueCondition[T]:
+    def stop_at_open(cls, open_test: Callable[[Switch, SinglePhaseKind | None], bool] | None=None, phase: SinglePhaseKind | None=None) -> NetworkTraceQueueCondition[T]:
         return OpenCondition(open_test or cls.is_open, phase)
 
 
@@ -76,7 +76,7 @@ class NormalOpenStateOperators(OpenStateOperators):
     Operates on the normal state of the `Switch`
     """
     @staticmethod
-    def is_open_switch(switch: Switch, phase:SinglePhaseKind=None) -> Optional[bool]:
+    def is_open_switch(switch: Switch, phase:SinglePhaseKind=None) -> bool | None:
         return switch.is_normally_open(phase)
 
     @staticmethod
@@ -89,7 +89,7 @@ class CurrentOpenStateOperators(OpenStateOperators):
     Operates on the current state of the `Switch`
     """
     @staticmethod
-    def is_open_switch(switch: Switch, phase: SinglePhaseKind = None) -> Optional[bool]:
+    def is_open_switch(switch: Switch, phase: SinglePhaseKind = None) -> bool | None:
         return switch.is_open(phase)
 
     @staticmethod

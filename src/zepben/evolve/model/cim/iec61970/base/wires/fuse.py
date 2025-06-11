@@ -20,5 +20,5 @@ class Fuse(Switch):
     overcurrent through it. A fuse is considered a switching device because it breaks current.
     """
 
-    function: Optional[ProtectionRelayFunction] = None
+    function: ProtectionRelayFunction | None = None
     """The function implemented by this Fuse"""

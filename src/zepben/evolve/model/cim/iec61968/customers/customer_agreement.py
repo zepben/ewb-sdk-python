@@ -23,10 +23,10 @@ class CustomerAgreement(Agreement):
     during charge creation to determine the type of service.
     """
 
-    _customer: Optional[Customer] = None
+    _customer: Customer | None = None
     """The `zepben.evolve.cim.iec61968.customers.customer.Customer` that has this `CustomerAgreement`."""
 
-    _pricing_structures: Optional[List[PricingStructure]] = None
+    _pricing_structures: List[PricingStructure] | None = None
 
     def __init__(self, customer: Customer = None, pricing_structures: List[PricingStructure] = None, **kwargs):
         super(CustomerAgreement, self).__init__(**kwargs)

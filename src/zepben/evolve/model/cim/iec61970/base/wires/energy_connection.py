@@ -28,9 +28,9 @@ class RegulatingCondEq(EnergyConnection):
     control_enabled: bool = True
     """Specifies the regulation status of the equipment.  True is regulating, false is not regulating."""
 
-    _regulating_control: Optional[RegulatingControl] = None
+    _regulating_control: RegulatingControl | None = None
 
-    def __init__(self, regulating_control: Optional[RegulatingControl] = None, **kwargs):
+    def __init__(self, regulating_control: RegulatingControl | None = None, **kwargs):
         super(RegulatingCondEq, self).__init__(**kwargs)
         self.regulating_control = regulating_control
 

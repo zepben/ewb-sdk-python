@@ -54,9 +54,9 @@ class TownDetail(object):
     Town details, in the context of address.
     """
 
-    name: Optional[str] = None
+    name: str | None = None
     """Town name."""
-    state_or_province: Optional[str] = None
+    state_or_province: str | None = None
     """Name of the state or province."""
 
     def all_fields_null_or_empty(self):
@@ -109,11 +109,11 @@ class StreetAddress(object):
 
     postal_code: str = ""
     """Postal code for the address."""
-    town_detail: Optional[TownDetail] = None
+    town_detail: TownDetail | None = None
     """Optional `TownDetail` for this address."""
     po_box: str = ""
     """Post office box for the address."""
-    street_detail: Optional[StreetDetail] = None
+    street_detail: StreetDetail | None = None
     """Optional `StreetDetail` for this address."""
 
 
@@ -122,10 +122,10 @@ class Location(IdentifiedObject):
     The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment in time.
     It can be defined with one or more `PositionPoint`'s.
     """
-    main_address: Optional[StreetAddress] = None
+    main_address: StreetAddress | None = None
     """Main address of the location."""
 
-    _position_points: Optional[List[PositionPoint]] = None
+    _position_points: List[PositionPoint] | None = None
 
     def __init__(self, position_points: List[PositionPoint] = None, **kwargs):
         """

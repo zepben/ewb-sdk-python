@@ -33,7 +33,7 @@ def agreement_to_cim(pb: PBAgreement, cim: Agreement, service: BaseService):
     document_to_cim(pb.doc, cim, service)
 
 
-def customer_to_cim(pb: PBCustomer, service: CustomerService) -> Optional[Customer]:
+def customer_to_cim(pb: PBCustomer, service: CustomerService) -> Customer | None:
     cim = Customer(
         mrid=pb.mrid(),
         kind=CustomerKind(pb.kind),
@@ -47,7 +47,7 @@ def customer_to_cim(pb: PBCustomer, service: CustomerService) -> Optional[Custom
     return cim if service.add(cim) else None
 
 
-def customer_agreement_to_cim(pb: PBCustomerAgreement, service: CustomerService) -> Optional[CustomerAgreement]:
+def customer_agreement_to_cim(pb: PBCustomerAgreement, service: CustomerService) -> CustomerAgreement | None:
     cim = CustomerAgreement(mrid=pb.mrid())
 
     service.resolve_or_defer_reference(resolver.customer(cim), pb.customerMRID)
@@ -58,7 +58,7 @@ def customer_agreement_to_cim(pb: PBCustomerAgreement, service: CustomerService)
     return cim if service.add(cim) else None
 
 
-def pricing_structure_to_cim(pb: PBPricingStructure, service: CustomerService) -> Optional[PricingStructure]:
+def pricing_structure_to_cim(pb: PBPricingStructure, service: CustomerService) -> PricingStructure | None:
     cim = PricingStructure(mrid=pb.mrid())
 
     for mrid in pb.tariffMRIDs:
@@ -68,7 +68,7 @@ def pricing_structure_to_cim(pb: PBPricingStructure, service: CustomerService) -
     return cim if service.add(cim) else None
 
 
-def tariff_to_cim(pb: PBTariff, service: CustomerService) -> Optional[Tariff]:
+def tariff_to_cim(pb: PBTariff, service: CustomerService) -> Tariff | None:
     # noinspection PyArgumentList
     cim = Tariff(mrid=pb.mrid())
 

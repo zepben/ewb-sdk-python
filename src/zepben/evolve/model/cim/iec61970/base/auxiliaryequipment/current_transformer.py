@@ -21,16 +21,16 @@ class CurrentTransformer(Sensor):
     A typical secondary current rating would be 5A.
     """
 
-    core_burden: Optional[int] = None
+    core_burden: int | None = None
     """Power burden of the CT core in watts."""
 
     @property
-    def current_transformer_info(self) -> Optional[CurrentTransformerInfo]:
+    def current_transformer_info(self) -> CurrentTransformerInfo | None:
         """The `CurrentTransformerInfo` for this `CurrentTransformer`"""
         return self.asset_info
 
     @current_transformer_info.setter
-    def current_transformer_info(self, cti: Optional[CurrentTransformerInfo]):
+    def current_transformer_info(self, cti: CurrentTransformerInfo | None):
         """
         Set the `CurrentTransformerInfo` for this `CurrentTransformer`
         `cti` The `CurrentTransformerInfo` for this `CurrentTransformer`

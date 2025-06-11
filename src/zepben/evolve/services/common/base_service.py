@@ -24,7 +24,7 @@ class BaseService(ABC):
     def __init__(
         self,
         name: str,
-        metadata: Optional[MetadataCollection] = None
+        metadata: MetadataCollection | None = None
     ):
         super().__init__()
 
@@ -277,7 +277,7 @@ class BaseService(ABC):
             return False
 
     def get_unresolved_reference_mrids_by_resolver(self,
-                                                   bound_resolvers: Union[BoundReferenceResolver, Sized[BoundReferenceResolver]]) -> Generator[str, None, None]:
+                                                   bound_resolvers: BoundReferenceResolver | Sized[BoundReferenceResolver]) -> Generator[str, None, None]:
         """
         Gets a set of MRIDs that are referenced by the from_obj held by `bound_resolver` that are unresolved.
         `bound_resolver` The `BoundReferenceResolver` to retrieve unresolved references for.
@@ -328,7 +328,7 @@ class BaseService(ABC):
         del self._objects_by_type[identified_object.__class__][identified_object.mrid]
         return True
 
-    def objects(self, obj_type: Optional[Type[TIdentifiedObject]] = None, exc_types: Optional[List[type]] = None) -> Generator[TIdentifiedObject, None, None]:
+    def objects(self, obj_type: Type[TIdentifiedObject] | None = None, exc_types: List[type] | None = None) -> Generator[TIdentifiedObject, None, None]:
         """
         Generator for the objects in this service of type `obj_type`.
         `obj_type` The type of object to yield. If this is a base class it will yield all subclasses.

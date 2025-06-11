@@ -26,10 +26,10 @@ class Cut(Switch):
 
     max_terminals = 2
 
-    length_from_terminal_1: Optional[float] = None
+    length_from_terminal_1: float | None = None
     """The length to the place where the cut is located starting from side one of the cut line segment, i.e. the line segment Terminal with sequenceNumber equal to 1."""
 
-    ac_line_segment: Optional[AcLineSegment] = None
+    ac_line_segment: AcLineSegment | None = None
     """The line segment to which the cut is applied."""
 
     @property

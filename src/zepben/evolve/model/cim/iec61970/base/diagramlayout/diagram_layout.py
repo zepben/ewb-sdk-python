@@ -40,19 +40,19 @@ class DiagramObject(IdentifiedObject):
     analog values, breakers, disconnectors, power transformers, and transmission lines.
     """
 
-    _diagram: Optional[Diagram] = None
+    _diagram: Diagram | None = None
     """A diagram object is part of a diagram."""
 
-    identified_object_mrid: Optional[str] = None
+    identified_object_mrid: str | None = None
     """The domain object to which this diagram object is associated."""
 
-    style: Optional[str] = None
+    style: str | None = None
     """A diagram object has a style associated that provides a reference for the style used in the originating system."""
 
     rotation: float = 0.0
     """Sets the angle of rotation of the diagram object.  Zero degrees is pointing to the top of the diagram. Rotation is clockwise."""
 
-    _diagram_object_points: Optional[List[DiagramObjectPoint]] = None
+    _diagram_object_points: List[DiagramObjectPoint] | None = None
 
     def __init__(self, diagram: Diagram = None, diagram_object_points: List[DiagramObjectPoint] = None, **kwargs):
         super(DiagramObject, self).__init__(**kwargs)
@@ -189,7 +189,7 @@ class Diagram(IdentifiedObject):
     orientation_kind: OrientationKind = OrientationKind.POSITIVE
     """Coordinate system orientation of the diagram."""
 
-    _diagram_objects: Optional[Dict[str, DiagramObject]] = None
+    _diagram_objects: Dict[str, DiagramObject] | None = None
 
     def __init__(self, diagram_objects: List[DiagramObject] = None, **kwargs):
         super(Diagram, self).__init__(**kwargs)

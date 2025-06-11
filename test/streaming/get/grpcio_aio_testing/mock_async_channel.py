@@ -22,7 +22,6 @@ import abc
 import asyncio
 
 import grpc
-import six
 from grpc_testing._channel import _channel_rpc, _channel_state
 from grpc_testing._channel._channel_state import State
 
@@ -31,7 +30,7 @@ from streaming.get.grpcio_aio_testing.mock_async_multi_callable import UnaryUnar
 __all__ = ["async_testing_channel"]
 
 
-class AsyncChannel(six.with_metaclass(abc.ABCMeta, grpc.aio.Channel)):
+class AsyncChannel(grpc.aio.Channel, abc.ABC):
     """A grpc.aio.Channel double with which to test a system that invokes RPCs."""
 
     @abc.abstractmethod

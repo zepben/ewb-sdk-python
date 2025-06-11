@@ -20,5 +20,5 @@ class OrganisationRole(IdentifiedObject):
     Identifies a way in which an organisation may participate in the utility enterprise (e.g., customer, manufacturer, etc).
     """
 
-    organisation: Optional[Organisation] = None
+    organisation: Organisation | None = None
     """The `zepben.evolve.cim.iec61968.common.organisation.Organisation` having this role."""

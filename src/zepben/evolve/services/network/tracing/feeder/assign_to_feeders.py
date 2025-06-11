@@ -81,7 +81,7 @@ class BaseFeedersInternal:
     def _associate_power_electronic_units(self, equipment_containers: Iterable[EquipmentContainer], to_equipment: PowerElectronicsConnection):
         self._associate_equipment_with_containers(equipment_containers, to_equipment.units)
 
-    def _feeder_energizes(self, feeders: Iterable[Union[LvFeeder, Feeder]], lv_feeders: Iterable[LvFeeder]):
+    def _feeder_energizes(self, feeders: Iterable[LvFeeder | Feeder], lv_feeders: Iterable[LvFeeder]):
         for feeder in feeders:
             for lv_feeder in lv_feeders:
                 self.network_state_operators.associate_energizing_feeder(feeder, lv_feeder)

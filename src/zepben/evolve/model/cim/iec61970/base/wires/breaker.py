@@ -19,7 +19,7 @@ class Breaker(ProtectedSwitch):
     e.g. those of short circuit.
     """
 
-    in_transit_time: Optional[float] = None
+    in_transit_time: float | None = None
     """The transition time from open to close in seconds."""
 
     @property

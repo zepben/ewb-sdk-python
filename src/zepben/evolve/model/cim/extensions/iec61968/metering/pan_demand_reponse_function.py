@@ -28,15 +28,15 @@ class PanDemandResponseFunction(EndDeviceFunction):
     kind: EndDeviceFunctionKind = EndDeviceFunctionKind.UNKNOWN
     """[ZBEX] `zepben.evolve.model.cim.iec61968.metering.metering.EndDeviceFunctionKind` of this `PanDemandResponseFunction`"""
 
-    _appliance_bitmask: Optional[int] = None
+    _appliance_bitmask: int | None = None
 
-    def __init__(self, appliances: Union[int, ControlledAppliance] = None, **kwargs):
+    def __init__(self, appliances: int | ControlledAppliance = None, **kwargs):
         super(PanDemandResponseFunction, self).__init__(**kwargs)
         if appliances is not None:
             self.appliance = appliances
 
     @property
-    def appliance(self) -> Optional[ControlledAppliance]:
+    def appliance(self) -> ControlledAppliance | None:
         """
         [ZBEX]
         The `ControlledAppliance`s being controlled by this `PanDemandResponseFunction`.
@@ -47,7 +47,7 @@ class PanDemandResponseFunction(EndDeviceFunction):
             return ControlledAppliance(self._appliance_bitmask)
 
     @appliance.setter
-    def appliance(self, appliance: Optional[Union[int, ControlledAppliance]]):
+    def appliance(self, appliance: int | ControlledAppliance | None):
         if isinstance(appliance, int):
             self._appliance_bitmask = appliance
         elif isinstance(appliance, ControlledAppliance):

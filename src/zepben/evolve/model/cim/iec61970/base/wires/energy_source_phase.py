@@ -21,7 +21,7 @@ class EnergySourcePhase(PowerSystemResource):
     A single phase of an energy source.
     """
 
-    _energy_source: Optional[EnergySource] = None
+    _energy_source: EnergySource | None = None
     """The `zepben.evolve.cim.iec61970.wires.EnergySource` with this `EnergySourcePhase`"""
 
     phase: SinglePhaseKind = SinglePhaseKind.NONE

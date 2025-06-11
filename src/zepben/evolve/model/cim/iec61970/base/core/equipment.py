@@ -31,13 +31,13 @@ class Equipment(PowerSystemResource):
     """If True, the equipment is in service."""
     normally_in_service: bool = True
     """If True, the equipment is _normally_ in service."""
-    commissioned_date: Optional[datetime.datetime] = None
+    commissioned_date: datetime.datetime | None = None
     """The date this equipment was commissioned into service."""
 
-    _usage_points: Optional[List[UsagePoint]] = None
-    _equipment_containers: Optional[List[EquipmentContainer]] = None
-    _operational_restrictions: Optional[List[OperationalRestriction]] = None
-    _current_containers: Optional[List[EquipmentContainer]] = None
+    _usage_points: List[UsagePoint] | None = None
+    _equipment_containers: List[EquipmentContainer] | None = None
+    _operational_restrictions: List[OperationalRestriction] | None = None
+    _current_containers: List[EquipmentContainer] | None = None
 
     def __init__(self, usage_points: List[UsagePoint] = None, equipment_containers: List[EquipmentContainer] = None,
                  operational_restrictions: List[OperationalRestriction] = None, current_containers: List[EquipmentContainer] = None, **kwargs):
@@ -358,6 +358,6 @@ class Equipment(PowerSystemResource):
         return self
 
 
-def _of_type(containers: Optional[List[EquipmentContainer]], ectype: Type[TEquipmentContainer]) -> Generator[TEquipmentContainer, None, None]:
+def _of_type(containers: List[EquipmentContainer] | None, ectype: Type[TEquipmentContainer]) -> Generator[TEquipmentContainer, None, None]:
     yield from (ec for ec in containers if isinstance(ec, ectype)) if containers is not None else {}
 

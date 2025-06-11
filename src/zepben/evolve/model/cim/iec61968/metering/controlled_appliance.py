@@ -45,7 +45,7 @@ class ControlledAppliance:
 
     _bitmask: int
 
-    def __init__(self, appliances: Union[int, Appliance, List[Appliance]]):
+    def __init__(self, appliances: int | Appliance | List[Appliance]):
         if isinstance(appliances, int):
             self._bitmask = appliances
         elif isinstance(appliances, Appliance):

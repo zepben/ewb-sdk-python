@@ -26,16 +26,16 @@ class PowerSystemResource(IdentifiedObject):
     can have measurements associated.
     """
 
-    location: Optional[Location] = None
+    location: Location | None = None
     """A `zepben.evolve.iec61968.common.location.Location` for this resource."""
 
-    asset_info: Optional[AssetInfo] = None
+    asset_info: AssetInfo | None = None
     """A subclass of `zepben.evolve.iec61968.assets.asset_info.AssetInfo` providing information about the asset associated with this PowerSystemResource."""
 
     num_controls: int = 0
     """Number of Control's known to associate with this [PowerSystemResource]"""
 
-    _assets: Optional[List[Asset]] = None
+    _assets: List[Asset] | None = None
 
     def __init__(self, assets: Iterable[Asset] = None, **kwargs):
         super(PowerSystemResource, self).__init__(**kwargs)

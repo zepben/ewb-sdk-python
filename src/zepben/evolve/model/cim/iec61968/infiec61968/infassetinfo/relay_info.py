@@ -14,15 +14,15 @@ __all__ = ["RelayInfo"]
 class RelayInfo(AssetInfo):
     """Relay Datasheet Information."""
 
-    curve_setting: Optional[str] = None
+    curve_setting: str | None = None
     """The type of curve used for the Relay."""
 
-    reclose_fast: Optional[bool] = None
+    reclose_fast: bool | None = None
     """True if reclose_delays are associated with a fast Curve, false otherwise."""
 
-    _reclose_delays: Optional[List[float]] = None
+    _reclose_delays: List[float] | None = None
 
-    def __init__(self, reclose_delays: Optional[List[float]] = None, **kwargs):
+    def __init__(self, reclose_delays: List[float] | None = None, **kwargs):
         super(RelayInfo, self).__init__(**kwargs)
         if reclose_delays:
             for index, delay in enumerate(reclose_delays):

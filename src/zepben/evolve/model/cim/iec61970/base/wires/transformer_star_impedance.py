@@ -22,19 +22,19 @@ class TransformerStarImpedance(IdentifiedObject):
     For transmission networks use PowerTransformerEnd impedances (r, r0, x, x0, b, b0, g and g0).
     """
 
-    r: Optional[float] = 0.0
+    r: float | None = 0.0
     """ r : Resistance of the transformer end. Unit: Ohms  """
 
-    r0: Optional[float] = 0.0
+    r0: float | None = 0.0
     """ r0 : Zero sequence series resistance of the transformer end. Unit: Ohms"""
 
-    x: Optional[float] = 0.0
+    x: float | None = 0.0
     """ x : Positive sequence series reactance  of the transformer end. Unit: Ohms"""
 
-    x0: Optional[float] = 0.0
+    x0: float | None = 0.0
     """ x0 : Zero sequence series reactance of the transformer end. Unit: Ohms"""
 
-    transformer_end_info: Optional[TransformerEndInfo] = None
+    transformer_end_info: TransformerEndInfo | None = None
     """Transformer end datasheet used to calculate this transformer star impedance."""
 
     def resistance_reactance(self) -> ResistanceReactance:

@@ -14,14 +14,14 @@ __all__ = ["ShuntCompensatorInfo"]
 class ShuntCompensatorInfo(AssetInfo):
     """Properties of shunt capacitor, shunt reactor or switchable bank of shunt capacitor or reactor assets."""
 
-    max_power_loss: Optional[int] = None
+    max_power_loss: int | None = None
     """Maximum allowed apparent power loss in watts."""
 
-    rated_current: Optional[int] = None
+    rated_current: int | None = None
     """Rated current in amperes."""
 
-    rated_reactive_power: Optional[int] = None
+    rated_reactive_power: int | None = None
     """Rated reactive power in volt-amperes reactive."""
 
-    rated_voltage: Optional[int] = None
+    rated_voltage: int | None = None
     """Rated voltage in volts."""

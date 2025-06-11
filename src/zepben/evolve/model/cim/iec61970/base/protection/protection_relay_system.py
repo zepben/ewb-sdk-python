@@ -19,9 +19,9 @@ class ProtectionRelaySystem(Equipment):
     protection_kind: ProtectionKind = ProtectionKind.UNKNOWN
     """The kind of protection being provided by this protection equipment."""
 
-    _schemes: Optional[List[ProtectionRelayScheme]] = None
+    _schemes: List[ProtectionRelayScheme] | None = None
 
-    def __init__(self, schemes: Optional[List[ProtectionRelayScheme]] = None, **kwargs):
+    def __init__(self, schemes: List[ProtectionRelayScheme] | None = None, **kwargs):
         super(ProtectionRelaySystem, self).__init__(**kwargs)
         if schemes is not None:
             for scheme in schemes:
@@ -67,7 +67,7 @@ class ProtectionRelaySystem(Equipment):
         """
         return nlen(self._schemes)
 
-    def remove_scheme(self, scheme: Optional[ProtectionRelayScheme]) -> ProtectionRelaySystem:
+    def remove_scheme(self, scheme: ProtectionRelayScheme | None) -> ProtectionRelaySystem:
         """
         Remove a :class:`ProtectionRelayScheme` from this :class:`ProtectionRelaySystem`.
 

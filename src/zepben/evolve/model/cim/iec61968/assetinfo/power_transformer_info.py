@@ -17,7 +17,7 @@ __all__ = ["PowerTransformerInfo"]
 class PowerTransformerInfo(AssetInfo):
     """Set of power transformer data, from an equipment library."""
 
-    _transformer_tank_infos: Optional[List[TransformerTankInfo]] = None
+    _transformer_tank_infos: List[TransformerTankInfo] | None = None
     """Data for all the tanks described by this power transformer data."""
 
     def __init__(self, transformer_tank_infos: List[TransformerTankInfo] = None, **kwargs):
@@ -86,7 +86,7 @@ class PowerTransformerInfo(AssetInfo):
         self._transformer_tank_infos = None
         return self
 
-    def resistance_reactance(self, end_number: int) -> Optional[ResistanceReactance]:
+    def resistance_reactance(self, end_number: int) -> ResistanceReactance | None:
         """
         Get the `ResistanceReactance` for the specified `end_number` from the datasheet information.
         `end_number` The number of the end to fetch the ResistanceReactance for.

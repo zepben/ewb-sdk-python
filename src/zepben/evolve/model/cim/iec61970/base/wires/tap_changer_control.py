@@ -16,34 +16,34 @@ class TapChangerControl(RegulatingControl):
     Describes behaviour specific to tap changers, e.g. how the voltage at the end of a line varies with the load level and compensation of the voltage drop by
     tap adjustment.
     """
-    limit_voltage: Optional[int] = None
+    limit_voltage: int | None = None
     """Maximum allowed regulated voltage on the PT secondary, regardless of line drop compensation. Sometimes referred to as first-house protection."""
 
-    line_drop_compensation: Optional[bool] = None
+    line_drop_compensation: bool | None = None
     """If true, then line drop compensation is to be applied. """
 
-    line_drop_r: Optional[float] = None
+    line_drop_r: float | None = None
     """Line drop compensator resistance setting for normal (forward) power flow in Ohms."""
 
-    line_drop_x: Optional[float] = None
+    line_drop_x: float | None = None
     """Line drop compensator reactance setting for normal (forward) power flow in Ohms."""
 
-    reverse_line_drop_r: Optional[float] = None
+    reverse_line_drop_r: float | None = None
     """Line drop compensator resistance setting for reverse power flow in Ohms."""
 
-    reverse_line_drop_x: Optional[float] = None
+    reverse_line_drop_x: float | None = None
     """Line drop compensator reactance setting for reverse power flow in Ohms."""
 
-    forward_ldc_blocking: Optional[bool] = None
+    forward_ldc_blocking: bool | None = None
     """
     True implies this tap changer turns off/ignores reverse current flows for line drop compensation when power flow is reversed and no reverse line drop 
     is set.
     """
 
-    time_delay: Optional[float] = None
+    time_delay: float | None = None
     """The time delay for the tap changer in seconds."""
 
-    co_generation_enabled: Optional[bool] = None
+    co_generation_enabled: bool | None = None
     """
     True implies cogeneration mode is enabled and that the control will regulate to the new source bushing (downline bushing), keeping locations downline 
     from experiencing overvoltage situations.

@@ -88,7 +88,7 @@ class TraversalQueue(Generic[T], metaclass=ABCMeta):
 
 class BasicQueue(TraversalQueue, Generic[T]):
 
-    def __init__(self, queue: Union[FIFODeque, LIFODeque]):
+    def __init__(self, queue: FIFODeque | LIFODeque):
         self.queue = queue
 
     def __iter__(self):

@@ -19,52 +19,52 @@ class EnergySource(EnergyConnection):
     A generic equivalent for an energy supplier on a transmission or distribution voltage level.
     """
 
-    _energy_source_phases: Optional[List[EnergySourcePhase]] = None
+    _energy_source_phases: List[EnergySourcePhase] | None = None
 
-    active_power: Optional[float] = None
+    active_power: float | None = None
     """
     High voltage source active injection. Load sign convention is used, i.e. positive sign means flow out from a node. Starting value
     for steady state solutions
     """
 
-    reactive_power: Optional[float] = None
+    reactive_power: float | None = None
     """High voltage source reactive injection. Load sign convention is used, i.e. positive sign means flow out from a node. 
     Starting value for steady state solutions."""
 
-    voltage_angle: Optional[float] = None
+    voltage_angle: float | None = None
     """Phase angle of a-phase open circuit."""
 
-    voltage_magnitude: Optional[float] = None
+    voltage_magnitude: float | None = None
     """Phase-to-phase open circuit voltage magnitude."""
 
-    p_max: Optional[float] = None
+    p_max: float | None = None
     """
     This is the maximum active power that can be produced by the source. Load sign convention is used, i.e. positive sign means flow out from a
     TopologicalNode (bus) into the conducting equipment.
     """
 
-    p_min: Optional[float] = None
+    p_min: float | None = None
     """
     This is the minimum active power that can be produced by the source. Load sign convention is used, i.e. positive sign means flow out from a
     TopologicalNode (bus) into the conducting equipment.
     """
 
-    r: Optional[float] = None
+    r: float | None = None
     """Positive sequence Thevenin resistance."""
 
-    r0: Optional[float] = None
+    r0: float | None = None
     """Zero sequence Thevenin resistance."""
 
-    rn: Optional[float] = None
+    rn: float | None = None
     """Negative sequence Thevenin resistance."""
 
-    x: Optional[float] = None
+    x: float | None = None
     """Positive sequence Thevenin reactance."""
 
-    x0: Optional[float] = None
+    x0: float | None = None
     """Zero sequence Thevenin reactance."""
 
-    xn: Optional[float] = None
+    xn: float | None = None
     """Negative sequence Thevenin reactance."""
 
     is_external_grid: bool = False
@@ -73,40 +73,40 @@ class EnergySource(EnergyConnection):
     that normally is modelled as the slack bus for power flow calculations.
     """
 
-    r_min: Optional[float] = None
+    r_min: float | None = None
     """Minimum positive sequence Thevenin resistance."""
 
-    rn_min: Optional[float] = None
+    rn_min: float | None = None
     """Minimum negative sequence Thevenin resistance."""
 
-    r0_min: Optional[float] = None
+    r0_min: float | None = None
     """Minimum zero sequence Thevenin resistance."""
 
-    x_min: Optional[float] = None
+    x_min: float | None = None
     """Minimum positive sequence Thevenin reactance."""
 
-    xn_min: Optional[float] = None
+    xn_min: float | None = None
     """Minimum negative sequence Thevenin reactance."""
 
-    x0_min: Optional[float] = None
+    x0_min: float | None = None
     """Minimum zero sequence Thevenin reactance."""
 
-    r_max: Optional[float] = None
+    r_max: float | None = None
     """Maximum positive sequence Thevenin resistance."""
 
-    rn_max: Optional[float] = None
+    rn_max: float | None = None
     """Maximum negative sequence Thevenin resistance."""
 
-    r0_max: Optional[float] = None
+    r0_max: float | None = None
     """Maximum zero sequence Thevenin resistance."""
 
-    x_max: Optional[float] = None
+    x_max: float | None = None
     """Maximum positive sequence Thevenin reactance."""
 
-    xn_max: Optional[float] = None
+    xn_max: float | None = None
     """Maximum negative sequence Thevenin reactance."""
 
-    x0_max: Optional[float] = None
+    x0_max: float | None = None
     """Maximum zero sequence Thevenin reactance."""
 
     def __init__(self, energy_source_phases: List[EnergySourcePhase] = None, **kwargs):

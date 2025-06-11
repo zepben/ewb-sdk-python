@@ -20,25 +20,25 @@ from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
 class EnergyConsumerPhase(PowerSystemResource):
     """A single phase of an energy consumer."""
 
-    _energy_consumer: Optional[EnergyConsumer] = None
+    _energy_consumer: EnergyConsumer | None = None
 
     phase: SinglePhaseKind = SinglePhaseKind.X
     """Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or 
     neutral point. If the energy consumer is delta connected, the phase indicates an energy consumer connected from the indicated phase to the next
     logical non-neutral phase. """
 
-    p: Optional[float] = None
+    p: float | None = None
     """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
     rated voltage. Starting value for a steady state solution."""
 
-    q: Optional[float] = None
+    q: float | None = None
     """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
     rated voltage. Starting value for a steady state solution."""
 
-    p_fixed: Optional[float] = None
+    p_fixed: float | None = None
     """Active power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    q_fixed: Optional[float] = None
+    q_fixed: float | None = None
     """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
     def __init__(self, energy_consumer: EnergyConsumer = None, **kwargs):
@@ -62,10 +62,10 @@ class EnergyConsumerPhase(PowerSystemResource):
 class EnergyConsumer(EnergyConnection):
     """Generic user of energy - a point of consumption on the power system phases. May also represent a pro-sumer with negative p/q values. """
 
-    _energy_consumer_phases: Optional[List[EnergyConsumerPhase]] = None
+    _energy_consumer_phases: List[EnergyConsumerPhase] | None = None
     """The individual phase models for this energy consumer."""
 
-    customer_count: Optional[int] = None
+    customer_count: int | None = None
     """Number of individual customers represented by this demand."""
 
     grounded: bool = False
@@ -75,18 +75,18 @@ class EnergyConsumer(EnergyConnection):
     """`zepben.protobuf.cim.iec61970.base.wires.phase_shunt_connection_kind.PhaseShuntConnectionKind` - The type of phase connection, 
     such as wye, delta, I (single phase)."""
 
-    p: Optional[float] = None
+    p: float | None = None
     """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
     rated voltage. Starting value for a steady state solution."""
 
-    p_fixed: Optional[float] = None
+    p_fixed: float | None = None
     """Active power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    q: Optional[float] = None
+    q: float | None = None
     """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
     rated voltage. Starting value for a steady state solution."""
 
-    q_fixed: Optional[float] = None
+    q_fixed: float | None = None
     """Power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
     def __init__(self, energy_consumer_phases: List[EnergyConsumerPhase] = None, **kwargs):

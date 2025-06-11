@@ -19,7 +19,7 @@ phase_logger = logging.getLogger("phase_logger")
 tracing_logger = logging.getLogger("queue_next")
 
 
-def normally_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] = None) -> bool:
+def normally_open(equip: ConductingEquipment, phase: SinglePhaseKind | None = None) -> bool:
     """
     Test if a given phase on an equipment is normally open.
     `equip` The equipment to test
@@ -33,7 +33,7 @@ def normally_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] =
         return not equip.normally_in_service
 
 
-def currently_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] = None) -> bool:
+def currently_open(equip: ConductingEquipment, phase: SinglePhaseKind | None = None) -> bool:
     """
     Test if a given phase on an equipment is open.
     `equip` The equipment to test
@@ -47,7 +47,7 @@ def currently_open(equip: ConductingEquipment, phase: Optional[SinglePhaseKind] 
         return not equip.in_service
 
 
-def ignore_open(_ce: ConductingEquipment, _phase: Optional[SinglePhaseKind] = None) -> bool:
+def ignore_open(_ce: ConductingEquipment, _phase: SinglePhaseKind | None = None) -> bool:
     """
     Test that always returns that the phase is closed.
     `equip` The equipment to test

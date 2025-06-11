@@ -20,10 +20,10 @@ class Clamp(ConductingEquipment):
     and has one Terminal with an associated ConnectivityNode. Any other ConductingEquipment can be connected to the Clamp ConnectivityNode.
     """
 
-    length_from_terminal_1: Optional[float] = None
+    length_from_terminal_1: float | None = None
     """The length to the place where the clamp is located starting from side one of the line segment, i.e. the line segment terminal with sequence number equal to 1."""
 
-    ac_line_segment: Optional[AcLineSegment] = None
+    ac_line_segment: AcLineSegment | None = None
     """The line segment to which the clamp is connected."""
 
     max_terminals = 1

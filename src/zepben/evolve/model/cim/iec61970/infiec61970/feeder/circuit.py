@@ -17,9 +17,9 @@ __all__ = ["Circuit"]
 class Circuit(Line):
     """Missing description"""
 
-    loop: Optional[Loop] = None
-    _end_terminals: Optional[List[Terminal]] = None
-    _end_substations: Optional[List[Substation]] = None
+    loop: Loop | None = None
+    _end_terminals: List[Terminal] | None = None
+    _end_substations: List[Substation] | None = None
 
     def __init__(self, end_terminals: List[Terminal] = None, end_substations: List[Substation] = None, **kwargs):
         super(Circuit, self).__init__(**kwargs)

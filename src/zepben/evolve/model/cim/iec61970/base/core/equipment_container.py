@@ -25,7 +25,7 @@ class EquipmentContainer(ConnectivityNodeContainer):
     Unless overridden, all functions operating on currentEquipment simply operate on the equipment collection. i.e. currentEquipment = equipment
     """
 
-    _equipment: Optional[Dict[str, Equipment]] = None
+    _equipment: Dict[str, Equipment] | None = None
     """Map of Equipment in this EquipmentContainer by their mRID"""
 
     def __init__(self, equipment: List[Equipment] = None, **kwargs):
@@ -204,19 +204,19 @@ class Feeder(EquipmentContainer):
     The organization of a feeder does not necessarily reflect connectivity or current operation state.
     """
 
-    _normal_head_terminal: Optional[Terminal] = None
+    _normal_head_terminal: Terminal | None = None
     """The normal head terminal or terminals of the feeder."""
 
-    normal_energizing_substation: Optional[Substation] = None
+    normal_energizing_substation: Substation | None = None
     """The substation that nominally energizes the feeder. Also used for naming purposes."""
 
-    _current_equipment: Optional[Dict[str, Equipment]] = None
+    _current_equipment: Dict[str, Equipment] | None = None
     """The equipment contained in this feeder in the current state of the network."""
 
-    _normal_energized_lv_feeders: Optional[Dict[str, LvFeeder]] = None
+    _normal_energized_lv_feeders: Dict[str, LvFeeder] | None = None
     """The LV feeders that are energized by this feeder in the normal state of the network."""
 
-    _current_energized_lv_feeders: Optional[Dict[str, LvFeeder]] = None
+    _current_energized_lv_feeders: Dict[str, LvFeeder] | None = None
     """The LV feeders that are energized by this feeder in the current state of the network."""
 
     def __init__(
@@ -244,12 +244,12 @@ class Feeder(EquipmentContainer):
                 self.add_current_energized_lv_feeder(lv_feeder)
 
     @property
-    def normal_head_terminal(self) -> Optional[Terminal]:
+    def normal_head_terminal(self) -> Terminal | None:
         """The normal head terminal or terminals of the feeder."""
         return self._normal_head_terminal
 
     @normal_head_terminal.setter
-    def normal_head_terminal(self, term: Optional[Terminal]):
+    def normal_head_terminal(self, term: Terminal | None):
         if self._normal_head_terminal is None or self._normal_head_terminal is term or (self.num_equipment() == 0 and self.num_current_equipment() == 0):
             self._normal_head_terminal = term
         else:

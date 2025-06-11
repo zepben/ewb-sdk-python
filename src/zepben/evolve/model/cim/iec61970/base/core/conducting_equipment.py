@@ -29,7 +29,7 @@ class ConductingEquipment(Equipment):
     _exactly one_ `ConnectivityNode`, and through that `ConnectivityNode` can be linked with many other `Terminals` and `ConductingEquipment`.
     """
 
-    base_voltage: Optional[BaseVoltage] = None
+    base_voltage: BaseVoltage | None = None
     """
     `BaseVoltage` of this `ConductingEquipment`. Use only when there is no voltage level container used and only one base voltage applies. For example, not
     used for transformers.
@@ -80,7 +80,7 @@ class ConductingEquipment(Equipment):
         """
         return len(self._terminals)
 
-    def get_terminal(self, identifier: Union[int, str]):
+    def get_terminal(self, identifier: int | str):
         """
         Get the `Terminal` for this `ConductingEquipment` identified by `mrid` or `sequence_number`
 

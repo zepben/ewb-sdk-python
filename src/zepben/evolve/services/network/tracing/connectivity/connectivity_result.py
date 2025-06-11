@@ -86,12 +86,12 @@ class ConnectivityResult:
         return res
 
     @property
-    def from_equip(self) -> Optional[ConductingEquipment]:
+    def from_equip(self) -> ConductingEquipment | None:
         """The conducting equipment that owns the `from_terminal."""
         return self.from_terminal.conducting_equipment
 
     @property
-    def to_equip(self) -> Optional[ConductingEquipment]:
+    def to_equip(self) -> ConductingEquipment | None:
         """The conducting equipment that owns the `to_terminal`."""
         return self.to_terminal.conducting_equipment
 

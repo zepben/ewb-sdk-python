@@ -20,10 +20,10 @@ __all__ = ["PowerElectronicsConnection", "PowerElectronicsConnectionPhase"]
 class PowerElectronicsConnectionPhase(PowerSystemResource):
     """A single phase of a power electronics connection."""
 
-    power_electronics_connection: Optional[PowerElectronicsConnection] = None
+    power_electronics_connection: PowerElectronicsConnection | None = None
     """The power electronics connection to which the phase belongs."""
 
-    p: Optional[float] = None
+    p: float | None = None
     """Active power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""
 
     phase: SinglePhaseKind = SinglePhaseKind.X
@@ -33,7 +33,7 @@ class PowerElectronicsConnectionPhase(PowerSystemResource):
     logical non-neutral phase.
     """
 
-    q: Optional[float] = None
+    q: float | None = None
     """Reactive power injection. Load sign convention is used, i.e. positive sign means flow into the equipment from the network."""
 
 
@@ -42,122 +42,122 @@ class PowerElectronicsConnection(RegulatingCondEq):
     A connection to the AC network for energy production or consumption that uses power electronics rather than rotating machines.
     """
 
-    max_i_fault: Optional[int] = None
+    max_i_fault: int | None = None
     """Maximum fault current this device will contribute, in per-unit of rated current, before the converter protection will trip or bypass."""
 
-    p: Optional[float] = None
+    p: float | None = None
     """Active power injection. Load sign convention is used, i.e. positive sign means flow out from a node. Starting value for a steady state solution."""
 
-    q: Optional[float] = None
+    q: float | None = None
     """Reactive power injection. Load sign convention is used, i.e. positive sign means flow out from a node. Starting value for a steady state solution."""
 
-    max_q: Optional[float] = None
+    max_q: float | None = None
     """Maximum reactive power limit. This is the maximum (nameplate) limit for the unit."""
 
-    min_q: Optional[float] = None
+    min_q: float | None = None
     """Minimum reactive power limit for the unit. This is the minimum (nameplate) limit for the unit."""
 
-    rated_s: Optional[int] = None
+    rated_s: int | None = None
     """Nameplate apparent power rating for the unit. The attribute shall have a positive value."""
 
-    rated_u: Optional[int] = None
+    rated_u: int | None = None
     """Rated voltage (nameplate data, Ur in IEC 60909-0). It is primarily used for short circuit data exchange according to IEC 60909. 
     The attribute shall be a positive value."""
 
-    inverter_standard: Optional[str] = None
+    inverter_standard: str | None = None
     """The standard this inverter follows, such as AS4777.2:2020"""
 
-    sustain_op_overvolt_limit: Optional[int] = None
+    sustain_op_overvolt_limit: int | None = None
     """Indicates the sustained operation overvoltage limit in volts, when the average voltage for a 10-minute period exceeds the V¬nom-max."""
 
-    stop_at_over_freq: Optional[float] = None
+    stop_at_over_freq: float | None = None
     """Over frequency (stop) in Hz. Permitted range is between 51 and 52 (inclusive)"""
 
-    stop_at_under_freq: Optional[float] = None
+    stop_at_under_freq: float | None = None
     """Under frequency (stop) in Hz Permitted range is between 47 and 49 (inclusive)"""
 
-    inv_volt_watt_resp_mode: Optional[bool] = None
+    inv_volt_watt_resp_mode: bool | None = None
     """
     Volt-Watt response mode allows an inverter to reduce is real power output depending on the measured voltage.
     This mode is further described in AS4777.2:2015, section 6.3.2.2. True implies the mode is enabled.
     """
 
-    _inv_watt_resp_v1: Optional[int] = None
+    _inv_watt_resp_v1: int | None = None
     """Set point 1 in volts for inverter Volt-Watt response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    _inv_watt_resp_v2: Optional[int] = None
+    _inv_watt_resp_v2: int | None = None
     """Set point 2 in volts for inverter Volt-Watt response mode. Permitted range is between 216 and 230 (inclusive)."""
 
-    _inv_watt_resp_v3: Optional[int] = None
+    _inv_watt_resp_v3: int | None = None
     """Set point 3 in volts for inverter Volt-Watt response mode. Permitted range is between 235 and 255 (inclusive)."""
 
-    _inv_watt_resp_v4: Optional[int] = None
+    _inv_watt_resp_v4: int | None = None
     """Set point 4 in volts for inverter Volt-Watt response mode. Permitted range is between 244 and 265 (inclusive)."""
 
-    _inv_watt_resp_p_at_v1: Optional[float] = None
+    _inv_watt_resp_p_at_v1: float | None = None
     """Power output set point 1 as a percentage of rated output for inverter Volt-Watt response mode. Permitted range is between 0 and 1 (inclusive)."""
 
-    _inv_watt_resp_p_at_v2: Optional[float] = None
+    _inv_watt_resp_p_at_v2: float | None = None
     """Power output set point 2 as a percentage of rated output for inverter Volt-Watt response mode. Permitted range is between 0 and 1 (inclusive)."""
 
-    _inv_watt_resp_p_at_v3: Optional[float] = None
+    _inv_watt_resp_p_at_v3: float | None = None
     """Power output set point 3 as a percentage of rated output for inverter Volt-Watt response mode. Permitted range is between 0 and 1 (inclusive)."""
 
-    _inv_watt_resp_p_at_v4: Optional[float] = None
+    _inv_watt_resp_p_at_v4: float | None = None
     """Power output set point 4 as a percentage of rated output for inverter Volt-Watt response mode. Permitted range is between 0 and 0.2 (inclusive)."""
 
-    inv_volt_var_resp_mode: Optional[bool] = None
+    inv_volt_var_resp_mode: bool | None = None
     """
     Volt-VAr response mode allows an inverter to consume (sink) or produce (source) reactive power depending on the measured voltage.
     This mode is further described in AS4777.2:2015, section 6.3.2.3. True implies the mode is enabled.
     """
 
-    _inv_var_resp_v1: Optional[int] = None
+    _inv_var_resp_v1: int | None = None
     """Set point 1 in volts for inverter Volt-VAr response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    _inv_var_resp_v2: Optional[int] = None
+    _inv_var_resp_v2: int | None = None
     """Set point 2 in volts for inverter Volt-VAr response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    _inv_var_resp_v3: Optional[int] = None
+    _inv_var_resp_v3: int | None = None
     """Set point 3 in volts for inverter Volt-VAr response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    _inv_var_resp_v4: Optional[int] = None
+    _inv_var_resp_v4: int | None = None
     """Set point 4 in volts for inverter Volt-VAr response mode. Permitted range is between 200 and 300 (inclusive)."""
 
-    _inv_var_resp_q_at_v1: Optional[float] = None
+    _inv_var_resp_q_at_v1: float | None = None
     """Power output set point 1 as a percentage of rated output for inverter Volt-VAr response mode. Permitted range is between 0 and 0.6 (inclusive)."""
 
-    _inv_var_resp_q_at_v2: Optional[float] = None
+    _inv_var_resp_q_at_v2: float | None = None
     """
     Power output set point 2 as a percentage of rated output for inverter Volt-VAr response mode.
     Permitted range is between -1 and 1 (inclusive) with a negative number referring to a sink.
     """
 
-    _inv_var_resp_q_at_v3: Optional[float] = None
+    _inv_var_resp_q_at_v3: float | None = None
     """
     Power output set point 3 as a percentage of rated output for inverter Volt-VAr response mode.
     Permitted range is between -1 and 1 (inclusive) with a negative number referring to a sink.
     """
 
-    _inv_var_resp_q_at_v4: Optional[float] = None
+    _inv_var_resp_q_at_v4: float | None = None
     """
     Power output set point 4 as a percentage of rated output for inverter Volt-VAr response mode.
     Permitted range is between -0.6 and 0 (inclusive) with a negative number referring to a sink.
     """
 
-    inv_reactive_power_mode: Optional[bool] = None
+    inv_reactive_power_mode: bool | None = None
     """If true, enables Static Reactive Power mode on the inverter. Note: It must be false if invVoltVarRespMode or InvVoltWattRespMode is true."""
 
-    inv_fix_reactive_power: Optional[float] = None
+    inv_fix_reactive_power: float | None = None
     """
     Static Reactive Power, specified in a percentage output of the system.
     Permitted range is between -1.0 and 1.0 (inclusive), with a negative sign referring to “sink”.
     """
 
-    _power_electronics_units: Optional[List[PowerElectronicsUnit]] = None
+    _power_electronics_units: List[PowerElectronicsUnit] | None = None
     """An AC network connection may have several power electronics units connecting through it."""
 
-    _power_electronics_connection_phases: Optional[List[PowerElectronicsConnectionPhase]] = None
+    _power_electronics_connection_phases: List[PowerElectronicsConnectionPhase] | None = None
     """The individual units models for the power electronics connection."""
 
     def __init__(self, power_electronics_units: List[PowerElectronicsUnit] = None,

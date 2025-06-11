@@ -29,6 +29,6 @@ class MeasurementService:
     def len_of(self, t: type = None) -> int:
         return len([m for m in self._measurements if isinstance(m, t)]) if t is not None else len(self._measurements)
 
-    def objects(self, obj_type: Optional[type] = None, exc_types: Optional[List[type]] = None) -> Generator[IdentifiedObject, None, None]:
+    def objects(self, obj_type: type | None = None, exc_types: List[type] | None = None) -> Generator[IdentifiedObject, None, None]:
         for m in self._measurements:
             yield m

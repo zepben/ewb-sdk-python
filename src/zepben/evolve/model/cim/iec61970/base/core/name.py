@@ -32,5 +32,5 @@ class Name:
     type: NameType
     """Type of this name."""
 
-    identified_object: Optional[IdentifiedObject] = None
+    identified_object: IdentifiedObject | None = None
     """Identified object that this name designates."""

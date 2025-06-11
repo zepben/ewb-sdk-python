@@ -40,15 +40,15 @@ class EndDevice(AssetContainer):
     Some devices may use an optical port that conforms to the ANSI C12.18 standard for communications.
     """
 
-    customer_mrid: Optional[str] = None
+    customer_mrid: str | None = None
     """The `zepben.evolve.cim.iec61968.customers.customer.Customer` owning this `EndDevice`."""
 
-    service_location: Optional[Location] = None
+    service_location: Location | None = None
     """Service `zepben.evolve.cim.iec61968.common.location.Location` whose service delivery is measured by this `EndDevice`."""
 
-    _usage_points: Optional[List[UsagePoint]] = None
+    _usage_points: List[UsagePoint] | None = None
 
-    _functions: Optional[List[EndDeviceFunction]] = None
+    _functions: List[EndDeviceFunction] | None = None
 
     def __init__(self, usage_points: List[UsagePoint] = None, functions: List[EndDeviceFunction] = None, **kwargs):
         super(EndDevice, self).__init__(**kwargs)
@@ -178,7 +178,7 @@ class UsagePoint(IdentifiedObject):
     Used at the place where a physical or virtual meter may be located; however, it is not required that a meter be present.
     """
 
-    usage_point_location: Optional[Location] = None
+    usage_point_location: Location | None = None
     """Service `zepben.evolve.cim.iec61968.common.location.Location` where the service delivered by this `UsagePoint` is consumed."""
 
     is_virtual: bool = False
@@ -189,15 +189,15 @@ class UsagePoint(IdentifiedObject):
     i.e., there is a logical point in the network where a meter could be located to collect meter readings.
     """
 
-    connection_category: Optional[str] = None
+    connection_category: str | None = None
     """
     A code used to specify the connection category, e.g., low voltage or low pressure, where the usage point is defined.
     """
 
-    rated_power: Optional[int] = None
+    rated_power: int | None = None
     """Active power that this usage point is configured to deliver in watts."""
 
-    approved_inverter_capacity: Optional[int] = None
+    approved_inverter_capacity: int | None = None
     """The approved inverter capacity at this UsagePoint in volt-amperes."""
 
     phase_code: PhaseCode = PhaseCode.NONE
@@ -206,8 +206,8 @@ class UsagePoint(IdentifiedObject):
     four-wire, s12n (splitSecondary12N) is single-phase, three-wire, and s1n and s2n are single-phase, two-wire.
     """
 
-    _equipment: Optional[List[Equipment]] = None
-    _end_devices: Optional[List[EndDevice]] = None
+    _equipment: List[Equipment] | None = None
+    _end_devices: List[EndDevice] | None = None
 
     def __init__(self, equipment: List[Equipment] = None, end_devices: List[EndDevice] = None, **kwargs):
         super(UsagePoint, self).__init__(**kwargs)

@@ -22,33 +22,33 @@ __all__ = ["ProtectionRelayFunction"]
 class ProtectionRelayFunction(PowerSystemResource):
     """A function that a relay implements to protect equipment."""
 
-    model: Optional[str] = None
+    model: str | None = None
     """The protection equipment type name(manufacturer information)."""
 
-    reclosing: Optional[bool] = None
+    reclosing: bool | None = None
     """True if the protection equipment is reclosing or False otherwise."""
 
-    relay_delay_time: Optional[float] = None
+    relay_delay_time: float | None = None
     """The time delay from detection of abnormal conditions to relay operation in seconds."""
 
     protection_kind: ProtectionKind = ProtectionKind.UNKNOWN
     """The kind of protection being provided by this ProtectionRelayFunction."""
 
-    directable: Optional[bool] = None
+    directable: bool | None = None
     """Whether this ProtectionRelayFunction responds to power flow in a given direction."""
 
     power_direction: PowerDirectionKind = PowerDirectionKind.UNKNOWN_DIRECTION
     """The flow of the power direction used by this ProtectionRelayFunction."""
 
-    _sensors: Optional[List[Sensor]] = None
+    _sensors: List[Sensor] | None = None
 
-    _protected_switches: Optional[List[ProtectedSwitch]] = None
+    _protected_switches: List[ProtectedSwitch] | None = None
 
-    _schemes: Optional[List[ProtectionRelayScheme]] = None
+    _schemes: List[ProtectionRelayScheme] | None = None
 
-    _time_limits: Optional[List[float]] = None
+    _time_limits: List[float] | None = None
 
-    _thresholds: Optional[List[RelaySetting]] = None
+    _thresholds: List[RelaySetting] | None = None
 
     def __init__(self,
                  sensors: Iterable[Sensor] = None,
@@ -83,7 +83,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         return self.asset_info
 
     @relay_info.setter
-    def relay_info(self, relay_info: Optional[RelayInfo]):
+    def relay_info(self, relay_info: RelayInfo | None):
         self.asset_info = relay_info
 
     @property
@@ -299,7 +299,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return nlen(self._sensors)
 
-    def remove_sensor(self, sensor: Optional[Sensor]) -> ProtectionRelayFunction:
+    def remove_sensor(self, sensor: Sensor | None) -> ProtectionRelayFunction:
         """
         Disassociate this :class:`ProtectionRelayFunction` from a :class:`Sensor`.
 
@@ -359,7 +359,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return nlen(self._protected_switches)
 
-    def remove_protected_switch(self, protected_switch: Optional[ProtectedSwitch]) -> ProtectionRelayFunction:
+    def remove_protected_switch(self, protected_switch: ProtectedSwitch | None) -> ProtectionRelayFunction:
         """
         Disassociate this :class:`ProtectionRelayFunction` from a :class:`ProtectedSwitch`.
 
@@ -419,7 +419,7 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         return nlen(self._schemes)
 
-    def remove_scheme(self, scheme: Optional[ProtectionRelayScheme]) -> ProtectionRelayFunction:
+    def remove_scheme(self, scheme: ProtectionRelayScheme | None) -> ProtectionRelayFunction:
         """
         Disassociate this :class:`ProtectionRelayFunction` from a :class:`ProtectionRelayScheme`.
 

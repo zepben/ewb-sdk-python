@@ -22,7 +22,7 @@ class WireInfo(AssetInfo):
         rated_current : Current carrying capacity of the wire under stated thermal conditions in amperes.
         material : `zepben.protobuf.cim.iec61968.assetinfo.WireMaterialKind` - Conductor material.
     """
-    rated_current: Optional[int] = None
+    rated_current: int | None = None
     material: WireMaterialKind = WireMaterialKind.UNKNOWN
 
 

@@ -53,8 +53,8 @@ class SetPhases:
     @singledispatchmethod
     async def run(
         self,
-        target: Union[NetworkService, Terminal],
-        phases: Union[PhaseCode, Iterable[SinglePhaseKind]]=None,
+        target: NetworkService | Terminal,
+        phases: PhaseCode | Iterable[SinglePhaseKind]=None,
         network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
 
@@ -90,7 +90,7 @@ class SetPhases:
     async def _(
         self,
         start_terminal: Terminal,
-        phases: Union[PhaseCode, List[SinglePhaseKind]]=None,
+        phases: PhaseCode | List[SinglePhaseKind]=None,
         network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
         seed_terminal: Terminal=None):
         """
@@ -457,7 +457,7 @@ def _not_fully_energised(network_state_operators: Type[NetworkStateOperators], t
     phase_status = network_state_operators.phase_status(terminal)
     return any(phase_status[it] == SinglePhaseKind.NONE for it in terminal.phases.single_phases)
 
-def _unless_none(single_phase_kind: SinglePhaseKind, default: SinglePhaseKind) -> Optional[SinglePhaseKind]:
+def _unless_none(single_phase_kind: SinglePhaseKind, default: SinglePhaseKind) -> SinglePhaseKind | None:
     if single_phase_kind == SinglePhaseKind.NONE:
         return default
     return single_phase_kind

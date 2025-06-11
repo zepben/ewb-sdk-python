@@ -22,7 +22,7 @@ class Pole(Structure):
     classification: str = ""
     """Pole class: 1, 2, 3, 4, 5, 6, 7, H1, H2, Other, Unknown."""
 
-    _streetlights: Optional[List[Streetlight]] = None
+    _streetlights: List[Streetlight] | None = None
 
     def __init__(self, streetlights: List[Streetlight] = None, **kwargs):
         super(Pole, self).__init__(**kwargs)

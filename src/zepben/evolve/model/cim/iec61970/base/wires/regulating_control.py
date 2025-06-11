@@ -43,7 +43,7 @@ class RegulatingControl(PowerSystemResource):
     attributes minAllowedTargetValue and maxAllowedTargetValue.
     """
 
-    discrete: Optional[bool] = None
+    discrete: bool | None = None
     """The regulation is performed in a discrete mode. This applies to equipment with discrete controls, e.g. tap changers and shunt compensators."""
 
     mode: [RegulatingControlModeKind] = RegulatingControlModeKind.UNKNOWN_CONTROL_MODE
@@ -55,7 +55,7 @@ class RegulatingControl(PowerSystemResource):
     monitored_phase: [PhaseCode] = PhaseCode.NONE
     """Phase voltage controlling this regulator, measured at regulator location."""
 
-    target_deadband: Optional[float] = None
+    target_deadband: float | None = None
     """
     This is a deadband used with discrete control to avoid excessive update of controls like tap changers and shunt compensator banks while regulating. 
     The units are the base units appropriate for the mode. The attribute shall be a positive value or zero. If RegulatingControl.discrete is set to "false",
@@ -63,32 +63,32 @@ class RegulatingControl(PowerSystemResource):
     from 99 to 101 kV.
     """
 
-    target_value: Optional[float] = None
+    target_value: float | None = None
     """
     The target value specified for case input. This value can be used for the target value without the use of schedules. The value has the units appropriate 
     to the mode attribute.
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool | None = None
     """The flag tells if regulation is enabled."""
 
-    max_allowed_target_value: Optional[float] = None
+    max_allowed_target_value: float | None = None
     """Maximum allowed target value (RegulatingControl.targetValue)."""
 
-    min_allowed_target_value: Optional[float] = None
+    min_allowed_target_value: float | None = None
     """Minimum allowed target value (RegulatingControl.targetValue)."""
 
-    rated_current: Optional[float] = None
+    rated_current: float | None = None
     """The rated current of associated CT in amps for this RegulatingControl. Forms the base used to convert Line Drop Compensation settings from ohms to 
     voltage."""
 
-    terminal: Optional[Terminal] = None
+    terminal: Terminal | None = None
     """
     The terminal associated with this regulating control. The terminal is associated instead of a node, since the terminal could connect into either a 
     topological node or a connectivity node. Sometimes it is useful to model regulation at a terminal of a bus bar object.
     """
 
-    ct_primary: Optional[float] = None
+    ct_primary: float | None = None
     """
     [ZBEX]
     Current rating of the CT, expressed in terms of the current (in Amperes) that flows in the Primary where the 'Primary' is the conductor
@@ -96,7 +96,7 @@ class RegulatingControl(PowerSystemResource):
     effect of this current value is that it also defines the current value at which the full LDC R and X voltages are applied by the controller, where enabled.
     """
 
-    min_target_deadband: Optional[float] = None
+    min_target_deadband: float | None = None
     """
     [ZBEX]
     This is the minimum allowable range for discrete control in regulating devices, used to prevent frequent control actions and
@@ -104,10 +104,10 @@ class RegulatingControl(PowerSystemResource):
     regulators, shunt compensators, or battery units.
     """
 
-    _regulating_cond_eq: Optional[List[RegulatingCondEq]] = None
+    _regulating_cond_eq: List[RegulatingCondEq] | None = None
     """The [RegulatingCondEq] that are controlled by this regulating control scheme."""
 
-    def __init__(self, regulating_conducting_equipment: Optional[Iterable[RegulatingCondEq]] = None, **kwargs):
+    def __init__(self, regulating_conducting_equipment: Iterable[RegulatingCondEq] | None = None, **kwargs):
         super(RegulatingControl, self).__init__(**kwargs)
         if regulating_conducting_equipment is not None:
             for eq in regulating_conducting_equipment:
@@ -154,7 +154,7 @@ class RegulatingControl(PowerSystemResource):
         self._regulating_cond_eq.append(regulating_cond_eq)
         return self
 
-    def remove_regulating_cond_eq(self, regulating_cond_eq: Optional[RegulatingCondEq]) -> RegulatingControl:
+    def remove_regulating_cond_eq(self, regulating_cond_eq: RegulatingCondEq | None) -> RegulatingControl:
         """
         Disassociate this :class:`RegulatingControl` from a :class:`RegulatingCondEq`.
 

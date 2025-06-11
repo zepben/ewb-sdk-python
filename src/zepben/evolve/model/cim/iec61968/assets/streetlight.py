@@ -37,10 +37,10 @@ class Streetlight(Asset):
     A Streetlight asset.
     """
 
-    pole: Optional[Pole] = None
+    pole: Pole | None = None
     """The `zepben.evolve.cim.iec61968.assets.pole.Pole` this Streetlight is attached to."""
 
-    light_rating: Optional[int] = None
+    light_rating: int | None = None
     """The power rating of the light in watts."""
 
     lamp_kind: StreetlightLampKind = StreetlightLampKind.UNKNOWN

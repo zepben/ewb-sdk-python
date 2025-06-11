@@ -26,12 +26,12 @@ class PotentialTransformer(Sensor):
     """Potential transformer construction type."""
 
     @property
-    def potential_transformer_info(self) -> Optional[PotentialTransformerInfo]:
+    def potential_transformer_info(self) -> PotentialTransformerInfo | None:
         """The `PotentialTransformerInfo` for this `PotentialTransformer`"""
         return self.asset_info
 
     @potential_transformer_info.setter
-    def potential_transformer_info(self, vti: Optional[PotentialTransformerInfo]):
+    def potential_transformer_info(self, vti: PotentialTransformerInfo | None):
         """
         Set the `PotentialTransformerInfo` for this `PotentialTransformer`
         `vti` The `PotentialTransformerInfo` for this `PotentialTransformer`

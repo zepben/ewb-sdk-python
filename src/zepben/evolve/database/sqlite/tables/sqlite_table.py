@@ -25,12 +25,12 @@ class SqliteTable(object):
     column_index: int = 0
     """Used to specify index of the column in the table during initialisation. Always increment BEFORE creating a Column. Indices start from 1."""
 
-    _column_set: Optional[List[Column]] = None
-    _create_table_sql: Optional[str] = None
-    _prepared_insert_sql: Optional[str] = None
-    _prepared_update_sql: Optional[str] = None
-    _create_indexes_sql: Optional[List[str]] = None
-    _select_sql: Optional[str] = None
+    _column_set: List[Column] | None = None
+    _create_table_sql: str | None = None
+    _prepared_insert_sql: str | None = None
+    _prepared_update_sql: str | None = None
+    _create_indexes_sql: List[str] | None = None
+    _select_sql: str | None = None
 
     @property
     @abstractmethod

@@ -37,7 +37,7 @@ class Terminal(AcDcTerminal):
     An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes.
     """
 
-    _conducting_equipment: Optional[ConductingEquipment] = None
+    _conducting_equipment: ConductingEquipment | None = None
     """The conducting equipment of the terminal. Conducting equipment have terminals that may be connected to other conducting equipment terminals via
     connectivity nodes."""
 
@@ -60,7 +60,7 @@ class Terminal(AcDcTerminal):
     """ Stores the direction of the feeder head relative to this [Terminal] in the current state of the network.
     """
 
-    _cn: Optional[ReferenceType] = None
+    _cn: ReferenceType | None = None
     """This is a weak reference to the connectivity node so if a Network object goes out of scope, holding a single conducting equipment
     reference does not cause everything connected to it in the network to stay in memory."""
 
@@ -101,14 +101,14 @@ class Terminal(AcDcTerminal):
             raise ValueError(f"conducting_equipment for {str(self)} has already been set to {self._conducting_equipment}, cannot reset this field to {ce}")
 
     @property
-    def connectivity_node(self) -> Optional[ConnectivityNode]:
+    def connectivity_node(self) -> ConnectivityNode | None:
         if self._cn:
             return self._cn()
         else:
             return None
 
     @connectivity_node.setter
-    def connectivity_node(self, cn: Optional[ConnectivityNode]):
+    def connectivity_node(self, cn: ConnectivityNode | None):
         if cn:
             self._cn = ref(cn)
         else:

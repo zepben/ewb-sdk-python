@@ -19,7 +19,7 @@ class Sensor(AuxiliaryEquipment):
     used in control or be recorded.
     """
 
-    _relay_functions: Optional[List[ProtectionRelayFunction]] = None
+    _relay_functions: List[ProtectionRelayFunction] | None = None
     """The relay functions influenced by this [Sensor]."""
 
     def __init__(self, relay_functions: Iterable[ProtectionRelayFunction] = None, **kwargs):

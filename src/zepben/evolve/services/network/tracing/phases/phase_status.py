@@ -56,7 +56,7 @@ class PhaseStatus(ABC):
         """
         raise NotImplementedError()
 
-    def as_phase_code(self) -> Optional[PhaseCode]:
+    def as_phase_code(self) -> PhaseCode | None:
         """
         Get the traced phase for each nominal phase as a `PhaseCode`.
 

@@ -35,7 +35,7 @@ class FindSwerEquipment:
     def __init__(self, debug_logger: Logger=None):
         self._debug_logger = debug_logger
 
-    async def find(self, to_process: Union[NetworkService, Feeder], network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
+    async def find(self, to_process: NetworkService | Feeder, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
         """
         Convenience method to call out to `find_all` or `find_on_feeder` based on the class type of `to_process`
 

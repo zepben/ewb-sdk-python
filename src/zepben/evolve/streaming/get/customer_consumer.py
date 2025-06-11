@@ -64,7 +64,7 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
 
         return await self.try_rpc(rpc)
 
-    async def _process_customers_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_customers_for_containers(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         if not mrids:
             return
 
@@ -73,7 +73,7 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
             for cio in response.identifiedObjects:
                 yield self._extract_identified_object("customer", cio, _cio_type_to_cim)
 
-    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[Optional[IdentifiedObject], str], None]:
+    async def _process_identified_objects(self, mrids: Iterable[str]) -> AsyncGenerator[Tuple[IdentifiedObject | None, str], None]:
         if not mrids:
             return
 
@@ -85,7 +85,7 @@ class CustomerConsumerClient(CimConsumerClient[CustomerService]):
 
 class SyncCustomerConsumerClient(CustomerConsumerClient):
 
-    def get_identified_object(self, mrid: str) -> GrpcResult[Optional[IdentifiedObject]]:
+    def get_identified_object(self, mrid: str) -> GrpcResult[IdentifiedObject | None]:
         return get_event_loop().run_until_complete(super()._get_identified_objects(mrid))
 
     def get_identified_objects(self, mrids: Iterable[str]) -> GrpcResult[MultiObjectResult]:

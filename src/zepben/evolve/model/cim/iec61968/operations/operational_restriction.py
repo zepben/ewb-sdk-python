@@ -27,7 +27,7 @@ class OperationalRestriction(Document):
     They then apply operational restrictions in the operational systems to warn operators of potential problems.
     After appropriate inspection and maintenance, the operational restrictions may be removed.
     """
-    _equipment: Optional[List[Equipment]] = None
+    _equipment: List[Equipment] | None = None
 
     def __init__(self, equipment: List[Equipment] = None, **kwargs):
         super(OperationalRestriction, self).__init__(**kwargs)

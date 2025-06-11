@@ -41,8 +41,8 @@ class RemovePhases(object):
 
     async def run(
         self,
-        start: Union[NetworkService, Terminal],
-        nominal_phases_to_ebb: Union[PhaseCode, SinglePhaseKind]=None,
+        start: NetworkService | Terminal,
+        nominal_phases_to_ebb: PhaseCode | SinglePhaseKind=None,
         network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         If nominal_phases_to_ebb is `None` this will remove all phases for all equipment connected
@@ -91,7 +91,7 @@ class RemovePhases(object):
     async def _run_with_phases_to_ebb(
         self,
         terminal: Terminal,
-        nominal_phases_to_ebb: Union[PhaseCode, Set[SinglePhaseKind]],
+        nominal_phases_to_ebb: PhaseCode | Set[SinglePhaseKind],
         network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         Allows the removal of traced phases from a terminal and the connected equipment chain

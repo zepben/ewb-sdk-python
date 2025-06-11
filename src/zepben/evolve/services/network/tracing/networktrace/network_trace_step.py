@@ -53,8 +53,8 @@ class NetworkTraceStep(Generic[T]):
 
         from_terminal: Terminal
         to_terminal: Terminal
-        traversed_ac_line_segment: Optional[AcLineSegment] = field(default=None)
-        nominal_phase_paths: Optional[Set[NominalPhasePath]] = field(default_factory=set)
+        traversed_ac_line_segment: AcLineSegment | None = field(default=None)
+        nominal_phase_paths: Set[NominalPhasePath] | None = field(default_factory=set)
 
         def to_phases_set(self) -> Set[SinglePhaseKind]:
             if len(self.nominal_phase_paths) == 0:

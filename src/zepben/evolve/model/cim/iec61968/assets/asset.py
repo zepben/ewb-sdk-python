@@ -26,12 +26,12 @@ class Asset(IdentifiedObject):
     description places emphasis on the physical characteristics of the equipment fulfilling that role.
     """
 
-    location: Optional[Location] = None
+    location: Location | None = None
     """`zepben.evolve.cim.iec61968.common.location.Location` of this asset"""
 
-    _organisation_roles: Optional[List[AssetOrganisationRole]] = None
+    _organisation_roles: List[AssetOrganisationRole] | None = None
 
-    _power_system_resources: Optional[List[PowerSystemResource]] = None
+    _power_system_resources: List[PowerSystemResource] | None = None
 
     def __init__(self, organisation_roles: List[AssetOrganisationRole] = None, power_system_resources: List[PowerSystemResource] = None, **kwargs):
         super(Asset, self).__init__(**kwargs)

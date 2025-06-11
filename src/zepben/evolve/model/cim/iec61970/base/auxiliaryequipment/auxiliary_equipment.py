@@ -22,7 +22,7 @@ class AuxiliaryEquipment(Equipment):
 
     `AuxiliaryEquipment` is attached to primary equipment via an association with `Terminal`.
     """
-    terminal: Optional[Terminal] = None
+    terminal: Terminal | None = None
     """The `zepben.evolve.iec61970.base.core.terminal.Terminal`` at the `Equipment` where the `AuxiliaryEquipment` is attached."""
 
 

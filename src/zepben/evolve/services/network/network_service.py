@@ -47,7 +47,7 @@ def connect(terminal: Terminal, connectivity_node: ConnectivityNode):
     connectivity_node.add_terminal(terminal)
 
 
-def connected_terminals(terminal: Terminal, phases: Union[None, PhaseCode, Iterable[SinglePhaseKind]] = None) -> List[ConnectivityResult]:
+def connected_terminals(terminal: Terminal, phases: None | PhaseCode | Iterable[SinglePhaseKind] = None) -> List[ConnectivityResult]:
     """
     Find the connected `Terminal`s for the specified `terminal` using only the phases of the specified `phaseCode`.
 
@@ -63,7 +63,7 @@ def connected_terminals(terminal: Terminal, phases: Union[None, PhaseCode, Itera
 
 
 def connected_equipment(conducting_equipment: ConductingEquipment,
-                        phases: Union[None, PhaseCode, Iterable[SinglePhaseKind]] = None) -> List[ConnectivityResult]:
+                        phases: None | PhaseCode | Iterable[SinglePhaseKind] = None) -> List[ConnectivityResult]:
     """
     Find the connected `ConductingEquipment` for each `Terminal` of `conductingEquipment` using only the specified `phases`.
 
@@ -111,7 +111,7 @@ class NetworkService(BaseService):
 
     def __init__(
         self,
-        metadata: Optional[MetadataCollection] = None
+        metadata: MetadataCollection | None = None
     ):
         super().__init__("network", metadata)
 
@@ -152,7 +152,7 @@ class NetworkService(BaseService):
         self._remove_measurement_index(measurement)
         return self.remove(measurement)
 
-    def connect(self, terminal: Terminal, to: Union[str, Terminal]) -> bool:
+    def connect(self, terminal: Terminal, to: str | Terminal) -> bool:
         """
         Connect a `Terminal` to either a `Terminal` or `ConnectivityNode` depending on the type of `to`
 

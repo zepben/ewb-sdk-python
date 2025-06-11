@@ -21,8 +21,8 @@ class Control(IoPoint):
     process, e.g. close or open breaker, a set point value or a raise lower command.
     """
 
-    power_system_resource_mrid: Optional[str] = None
+    power_system_resource_mrid: str | None = None
     """AnalogValue represents an analog MeasurementValue."""
     
-    remote_control: Optional[RemoteControl] = None
+    remote_control: RemoteControl | None = None
     """AnalogValue represents an analog MeasurementValue."""

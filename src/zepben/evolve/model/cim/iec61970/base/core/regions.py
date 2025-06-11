@@ -20,7 +20,7 @@ class GeographicalRegion(IdentifiedObject):
     """
     A geographical region of a power system network phases.
     """
-    _sub_geographical_regions: Optional[List[SubGeographicalRegion]] = None
+    _sub_geographical_regions: List[SubGeographicalRegion] | None = None
 
     def __init__(self, sub_geographical_regions: List[SubGeographicalRegion] = None, **kwargs):
         super(GeographicalRegion, self).__init__(**kwargs)
@@ -89,10 +89,10 @@ class SubGeographicalRegion(IdentifiedObject):
     A subset of a geographical region of a power system network model.
     """
 
-    geographical_region: Optional[GeographicalRegion] = None
+    geographical_region: GeographicalRegion | None = None
     """The geographical region to which this sub-geographical region is within."""
 
-    _substations: Optional[List[Substation]] = None
+    _substations: List[Substation] | None = None
 
     def __init__(self, substations: List[Substation] = None, **kwargs):
         super(SubGeographicalRegion, self).__init__(**kwargs)

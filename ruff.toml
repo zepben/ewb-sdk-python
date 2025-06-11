@@ -1,0 +1,7 @@
+line-length = 160
+indent-width = 4
+
+[tool.ruff.lint]
+select =[
+    "UP007"  # Use of 'Union[type, type]' instead of 'type | type'
+]

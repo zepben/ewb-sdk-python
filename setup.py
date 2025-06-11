@@ -39,14 +39,15 @@ setup(
     classifiers=[
         "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Operating System :: OS Independent"
     ],
     package_dir={"": "src"},
     packages=find_namespace_packages(where="src"),
-    python_requires='>=3.9,<3.13',
+    python_requires='>=3.10,<3.14',
     install_requires=deps,
     extras_require={
         "test": test_deps,

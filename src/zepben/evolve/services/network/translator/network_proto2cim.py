@@ -346,14 +346,14 @@ PBBatteryControl.to_cim = battery_control_to_cim
 #######################
 
 
-def cable_info_to_cim(pb: PBCableInfo, network_service: NetworkService) -> Optional[CableInfo]:
+def cable_info_to_cim(pb: PBCableInfo, network_service: NetworkService) -> CableInfo | None:
     cim = CableInfo(mrid=pb.mrid())
 
     wire_info_to_cim(pb.wi, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def no_load_test_to_cim(pb: PBNoLoadTest, network_service: NetworkService) -> Optional[NoLoadTest]:
+def no_load_test_to_cim(pb: PBNoLoadTest, network_service: NetworkService) -> NoLoadTest | None:
     cim = NoLoadTest(
         mrid=pb.mrid(),
         energised_end_voltage=int_or_none(pb.energisedEndVoltage),
@@ -367,7 +367,7 @@ def no_load_test_to_cim(pb: PBNoLoadTest, network_service: NetworkService) -> Op
     return cim if network_service.add(cim) else None
 
 
-def open_circuit_test_to_cim(pb: PBOpenCircuitTest, network_service: NetworkService) -> Optional[OpenCircuitTest]:
+def open_circuit_test_to_cim(pb: PBOpenCircuitTest, network_service: NetworkService) -> OpenCircuitTest | None:
     cim = OpenCircuitTest(
         mrid=pb.mrid(),
         energised_end_step=int_or_none(pb.energisedEndStep),
@@ -381,14 +381,14 @@ def open_circuit_test_to_cim(pb: PBOpenCircuitTest, network_service: NetworkServ
     return cim if network_service.add(cim) else None
 
 
-def overhead_wire_info_to_cim(pb: PBOverheadWireInfo, network_service: NetworkService) -> Optional[OverheadWireInfo]:
+def overhead_wire_info_to_cim(pb: PBOverheadWireInfo, network_service: NetworkService) -> OverheadWireInfo | None:
     cim = OverheadWireInfo(mrid=pb.mrid())
 
     wire_info_to_cim(pb.wi, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def power_transformer_info_to_cim(pb: PBPowerTransformerInfo, network_service: NetworkService) -> Optional[PowerTransformerInfo]:
+def power_transformer_info_to_cim(pb: PBPowerTransformerInfo, network_service: NetworkService) -> PowerTransformerInfo | None:
     cim = PowerTransformerInfo(mrid=pb.mrid())
 
     for mrid in pb.transformerTankInfoMRIDs:
@@ -398,7 +398,7 @@ def power_transformer_info_to_cim(pb: PBPowerTransformerInfo, network_service: N
     return cim if network_service.add(cim) else None
 
 
-def short_circuit_test_to_cim(pb: PBShortCircuitTest, network_service: NetworkService) -> Optional[ShortCircuitTest]:
+def short_circuit_test_to_cim(pb: PBShortCircuitTest, network_service: NetworkService) -> ShortCircuitTest | None:
     cim = ShortCircuitTest(
         mrid=pb.mrid(),
         current=float_or_none(pb.current),
@@ -417,7 +417,7 @@ def short_circuit_test_to_cim(pb: PBShortCircuitTest, network_service: NetworkSe
     return cim if network_service.add(cim) else None
 
 
-def shunt_compensator_info_to_cim(pb: PBShuntCompensatorInfo, network_service: NetworkService) -> Optional[ShuntCompensatorInfo]:
+def shunt_compensator_info_to_cim(pb: PBShuntCompensatorInfo, network_service: NetworkService) -> ShuntCompensatorInfo | None:
     cim = ShuntCompensatorInfo(
         mrid=pb.mrid(),
         max_power_loss=int_or_none(pb.maxPowerLoss),
@@ -430,7 +430,7 @@ def shunt_compensator_info_to_cim(pb: PBShuntCompensatorInfo, network_service: N
     return cim if network_service.add(cim) else None
 
 
-def switch_info_to_cim(pb: PBSwitchInfo, network_service: NetworkService) -> Optional[SwitchInfo]:
+def switch_info_to_cim(pb: PBSwitchInfo, network_service: NetworkService) -> SwitchInfo | None:
     cim = SwitchInfo(
         mrid=pb.mrid(),
         rated_interrupting_time=float_or_none(pb.ratedInterruptingTime)
@@ -440,7 +440,7 @@ def switch_info_to_cim(pb: PBSwitchInfo, network_service: NetworkService) -> Opt
     return cim if network_service.add(cim) else None
 
 
-def transformer_end_info_to_cim(pb: PBTransformerEndInfo, network_service: NetworkService) -> Optional[TransformerEndInfo]:
+def transformer_end_info_to_cim(pb: PBTransformerEndInfo, network_service: NetworkService) -> TransformerEndInfo | None:
     cim = TransformerEndInfo(
         mrid=pb.mrid(),
         connection_kind=WindingConnection(pb.connectionKind),
@@ -466,7 +466,7 @@ def transformer_end_info_to_cim(pb: PBTransformerEndInfo, network_service: Netwo
     return cim if network_service.add(cim) else None
 
 
-def transformer_tank_info_to_cim(pb: PBTransformerTankInfo, network_service: NetworkService) -> Optional[TransformerTankInfo]:
+def transformer_tank_info_to_cim(pb: PBTransformerTankInfo, network_service: NetworkService) -> TransformerTankInfo | None:
     cim = TransformerTankInfo(mrid=pb.mrid())
 
     for mrid in pb.transformerEndInfoMRIDs:
@@ -544,14 +544,14 @@ def asset_organisation_role_to_cim(pb: PBAssetOrganisationRole, cim: AssetOrgani
     organisation_role_to_cim(getattr(pb, "or"), cim, network_service)
 
 
-def asset_owner_to_cim(pb: PBAssetOwner, network_service: NetworkService) -> Optional[AssetOwner]:
+def asset_owner_to_cim(pb: PBAssetOwner, network_service: NetworkService) -> AssetOwner | None:
     cim = AssetOwner(mrid=pb.mrid())
 
     asset_organisation_role_to_cim(pb.aor, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def pole_to_cim(pb: PBPole, network_service: NetworkService) -> Optional[Pole]:
+def pole_to_cim(pb: PBPole, network_service: NetworkService) -> Pole | None:
     cim = Pole(mrid=pb.mrid(), classification=pb.classification)
 
     for mrid in pb.streetlightMRIDs:
@@ -561,7 +561,7 @@ def pole_to_cim(pb: PBPole, network_service: NetworkService) -> Optional[Pole]:
     return cim if network_service.add(cim) else None
 
 
-def streetlight_to_cim(pb: PBStreetlight, network_service: NetworkService) -> Optional[Streetlight]:
+def streetlight_to_cim(pb: PBStreetlight, network_service: NetworkService) -> Streetlight | None:
     cim = Streetlight(
         mrid=pb.mrid(),
         light_rating=uint_or_none(pb.lightRating),
@@ -592,7 +592,7 @@ PBStructure.to_cim = structure_to_cim
 # IEC61968 COMMON #
 ###################
 
-def location_to_cim(pb: PBLocation, network_service: NetworkService) -> Optional[Location]:
+def location_to_cim(pb: PBLocation, network_service: NetworkService) -> Location | None:
     cim = Location(mrid=pb.mrid(), main_address=street_address_to_cim(pb.mainAddress) if pb.HasField("mainAddress") else None)
 
     for point in pb.positionPoints:
@@ -602,11 +602,11 @@ def location_to_cim(pb: PBLocation, network_service: NetworkService) -> Optional
     return cim if network_service.add(cim) else None
 
 
-def position_point_to_cim(pb: PBPositionPoint) -> Optional[PositionPoint]:
+def position_point_to_cim(pb: PBPositionPoint) -> PositionPoint | None:
     return PositionPoint(pb.xPosition, pb.yPosition)
 
 
-def street_address_to_cim(pb: PBStreetAddress) -> Optional[StreetAddress]:
+def street_address_to_cim(pb: PBStreetAddress) -> StreetAddress | None:
     return StreetAddress(
         postal_code=pb.postalCode,
         town_detail=town_detail_to_cim(pb.townDetail) if pb.HasField("townDetail") else None,
@@ -615,7 +615,7 @@ def street_address_to_cim(pb: PBStreetAddress) -> Optional[StreetAddress]:
     )
 
 
-def street_detail_to_cim(pb: PBStreetDetail) -> Optional[StreetDetail]:
+def street_detail_to_cim(pb: PBStreetDetail) -> StreetDetail | None:
     return StreetDetail(
         building_name=pb.buildingName,
         floor_identification=pb.floorIdentification,
@@ -627,7 +627,7 @@ def street_detail_to_cim(pb: PBStreetDetail) -> Optional[StreetDetail]:
     )
 
 
-def town_detail_to_cim(pb: PBTownDetail) -> Optional[TownDetail]:
+def town_detail_to_cim(pb: PBTownDetail) -> TownDetail | None:
     return TownDetail(name=pb.name, state_or_province=pb.stateOrProvince)
 
 
@@ -642,7 +642,7 @@ PBTownDetail.to_cim = town_detail_to_cim
 # IEC61968 infIEC61968 InfAssetInfo #
 #####################################
 
-def relay_info_to_cim(pb: PBRelayInfo, network_service: NetworkService) -> Optional[RelayInfo]:
+def relay_info_to_cim(pb: PBRelayInfo, network_service: NetworkService) -> RelayInfo | None:
     cim = RelayInfo(
         mrid=pb.mrid(),
         curve_setting=str_or_none(pb.curveSetting),
@@ -654,7 +654,7 @@ def relay_info_to_cim(pb: PBRelayInfo, network_service: NetworkService) -> Optio
     return cim if network_service.add(cim) else None
 
 
-def current_transformer_info_to_cim(pb: PBCurrentTransformerInfo, network_service: NetworkService) -> Optional[CurrentTransformerInfo]:
+def current_transformer_info_to_cim(pb: PBCurrentTransformerInfo, network_service: NetworkService) -> CurrentTransformerInfo | None:
     cim = CurrentTransformerInfo(
         mrid=pb.mrid(),
         accuracy_class=str_or_none(pb.accuracyClass),
@@ -675,7 +675,7 @@ def current_transformer_info_to_cim(pb: PBCurrentTransformerInfo, network_servic
     return cim if network_service.add(cim) else None
 
 
-def potential_transformer_info_to_cim(pb: PBPotentialTransformerInfo, network_service: NetworkService) -> Optional[PotentialTransformerInfo]:
+def potential_transformer_info_to_cim(pb: PBPotentialTransformerInfo, network_service: NetworkService) -> PotentialTransformerInfo | None:
     cim = PotentialTransformerInfo(
         mrid=pb.mrid(),
         accuracy_class=str_or_none(pb.accuracyClass),
@@ -743,14 +743,14 @@ def end_device_function_to_cim(pb: PBEndDeviceFunction, cim: EndDeviceFunction, 
     asset_function_to_cim(pb.af, cim, network_service)
 
 
-def meter_to_cim(pb: PBMeter, network_service: NetworkService) -> Optional[Meter]:
+def meter_to_cim(pb: PBMeter, network_service: NetworkService) -> Meter | None:
     cim = Meter(mrid=pb.mrid())
 
     end_device_to_cim(pb.ed, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def usage_point_to_cim(pb: PBUsagePoint, network_service: NetworkService) -> Optional[UsagePoint]:
+def usage_point_to_cim(pb: PBUsagePoint, network_service: NetworkService) -> UsagePoint | None:
     cim = UsagePoint(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.usage_point_location(cim), pb.usagePointLocationMRID)
@@ -778,7 +778,7 @@ PBUsagePoint.to_cim = usage_point_to_cim
 # IEC61968 OPERATIONS #
 #######################
 
-def operational_restriction_to_cim(pb: PBOperationalRestriction, network_service: NetworkService) -> Optional[OperationalRestriction]:
+def operational_restriction_to_cim(pb: PBOperationalRestriction, network_service: NetworkService) -> OperationalRestriction | None:
     cim = OperationalRestriction(mrid=pb.mrid())
     document_to_cim(pb.doc, cim, network_service)
     return cim if network_service.add(cim) else None
@@ -797,7 +797,7 @@ def auxiliary_equipment_to_cim(pb: PBAuxiliaryEquipment, cim: AuxiliaryEquipment
     equipment_to_cim(pb.eq, cim, network_service)
 
 
-def current_transformer_to_cim(pb: PBCurrentTransformer, network_service: NetworkService) -> Optional[CurrentTransformer]:
+def current_transformer_to_cim(pb: PBCurrentTransformer, network_service: NetworkService) -> CurrentTransformer | None:
     cim = CurrentTransformer(mrid=pb.mrid(), core_burden=int_or_none(pb.coreBurden))
 
     network_service.resolve_or_defer_reference(resolver.current_transformer_info(cim), pb.asset_info_mrid())
@@ -806,14 +806,14 @@ def current_transformer_to_cim(pb: PBCurrentTransformer, network_service: Networ
     return cim if network_service.add(cim) else None
 
 
-def fault_indicator_to_cim(pb: PBFaultIndicator, network_service: NetworkService) -> Optional[FaultIndicator]:
+def fault_indicator_to_cim(pb: PBFaultIndicator, network_service: NetworkService) -> FaultIndicator | None:
     cim = FaultIndicator(mrid=pb.mrid())
 
     auxiliary_equipment_to_cim(pb.ae, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def potential_transformer_to_cim(pb: PBPotentialTransformer, network_service: NetworkService) -> Optional[PotentialTransformer]:
+def potential_transformer_to_cim(pb: PBPotentialTransformer, network_service: NetworkService) -> PotentialTransformer | None:
     cim = PotentialTransformer(mrid=pb.mrid(), type=PotentialTransformerKind(pb.type))
 
     network_service.resolve_or_defer_reference(resolver.potential_transformer_info(cim), pb.asset_info_mrid())
@@ -842,7 +842,7 @@ def ac_dc_terminal_to_cim(pb: PBAcDcTerminal, cim: AcDcTerminal, network_service
     identified_object_to_cim(pb.io, cim, network_service)
 
 
-def base_voltage_to_cim(pb: PBBaseVoltage, network_service: NetworkService) -> Optional[BaseVoltage]:
+def base_voltage_to_cim(pb: PBBaseVoltage, network_service: NetworkService) -> BaseVoltage | None:
     cim = BaseVoltage(mrid=pb.mrid(), nominal_voltage=pb.nominalVoltage)
 
     identified_object_to_cim(pb.io, cim, network_service)
@@ -857,7 +857,7 @@ def conducting_equipment_to_cim(pb: PBConductingEquipment, cim: ConductingEquipm
     equipment_to_cim(pb.eq, cim, network_service)
 
 
-def connectivity_node_to_cim(pb: PBConnectivityNode, network_service: NetworkService) -> Optional[ConnectivityNode]:
+def connectivity_node_to_cim(pb: PBConnectivityNode, network_service: NetworkService) -> ConnectivityNode | None:
     cim = ConnectivityNode(mrid=pb.mrid())
 
     identified_object_to_cim(pb.io, cim, network_service)
@@ -875,7 +875,7 @@ def curve_to_cim(pb: PBCurve, cim: Curve, network_service: NetworkService):
     identified_object_to_cim(pb.io, cim, network_service)
 
 
-def curve_data_to_cim(pb: PBCurveData) -> Optional[CurveData]:
+def curve_data_to_cim(pb: PBCurveData) -> CurveData | None:
     return CurveData(pb.xValue, pb.y1Value, float_or_none(pb.y2Value), float_or_none(pb.y3Value))
 
 
@@ -900,7 +900,7 @@ def equipment_container_to_cim(pb: PBEquipmentContainer, cim: EquipmentContainer
     connectivity_node_container_to_cim(pb.cnc, cim, network_service)
 
 
-def feeder_to_cim(pb: PBFeeder, network_service: NetworkService) -> Optional[Feeder]:
+def feeder_to_cim(pb: PBFeeder, network_service: NetworkService) -> Feeder | None:
     cim = Feeder(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.normal_head_terminal(cim), pb.normalHeadTerminalMRID)
@@ -914,7 +914,7 @@ def feeder_to_cim(pb: PBFeeder, network_service: NetworkService) -> Optional[Fee
     return cim if network_service.add(cim) else None
 
 
-def geographical_region_to_cim(pb: PBGeographicalRegion, network_service: NetworkService) -> Optional[GeographicalRegion]:
+def geographical_region_to_cim(pb: PBGeographicalRegion, network_service: NetworkService) -> GeographicalRegion | None:
     cim = GeographicalRegion(mrid=pb.mrid())
 
     for mrid in pb.subGeographicalRegionMRIDs:
@@ -933,14 +933,14 @@ def power_system_resource_to_cim(pb: PBPowerSystemResource, cim: PowerSystemReso
     identified_object_to_cim(pb.io, cim, network_service)
 
 
-def site_to_cim(pb: PBSite, network_service: NetworkService) -> Optional[Site]:
+def site_to_cim(pb: PBSite, network_service: NetworkService) -> Site | None:
     cim = Site(mrid=pb.mrid())
 
     equipment_container_to_cim(pb.ec, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def sub_geographical_region_to_cim(pb: PBSubGeographicalRegion, network_service: NetworkService) -> Optional[SubGeographicalRegion]:
+def sub_geographical_region_to_cim(pb: PBSubGeographicalRegion, network_service: NetworkService) -> SubGeographicalRegion | None:
     cim = SubGeographicalRegion(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.geographical_region(cim), pb.geographicalRegionMRID)
@@ -951,7 +951,7 @@ def sub_geographical_region_to_cim(pb: PBSubGeographicalRegion, network_service:
     return cim if network_service.add(cim) else None
 
 
-def substation_to_cim(pb: PBSubstation, network_service: NetworkService) -> Optional[Substation]:
+def substation_to_cim(pb: PBSubstation, network_service: NetworkService) -> Substation | None:
     cim = Substation(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.sub_geographical_region(cim), pb.subGeographicalRegionMRID)
@@ -968,7 +968,7 @@ def substation_to_cim(pb: PBSubstation, network_service: NetworkService) -> Opti
     return cim if network_service.add(cim) else None
 
 
-def terminal_to_cim(pb: PBTerminal, network_service: NetworkService) -> Optional[Terminal]:
+def terminal_to_cim(pb: PBTerminal, network_service: NetworkService) -> Terminal | None:
     cim = Terminal(
         mrid=pb.mrid(),
         phases=phase_code_by_id(pb.phases),
@@ -1004,7 +1004,7 @@ PBTerminal.to_cim = terminal_to_cim
 # IEC61970 BASE EQUIVALENTS #
 #############################
 
-def equivalent_branch_to_cim(pb: PBEquivalentBranch, network_service: NetworkService) -> Optional[EquivalentBranch]:
+def equivalent_branch_to_cim(pb: PBEquivalentBranch, network_service: NetworkService) -> EquivalentBranch | None:
     cim = EquivalentBranch(
         mrid=pb.mrid(),
         negative_r12=float_or_none(pb.negativeR12),
@@ -1041,21 +1041,21 @@ PBEquivalentBranch.to_cim = equivalent_branch_to_cim
 # IEC61970 BASE MEAS #
 ######################
 
-def accumulator_to_cim(pb: PBAccumulator, network_service: NetworkService) -> Optional[Accumulator]:
+def accumulator_to_cim(pb: PBAccumulator, network_service: NetworkService) -> Accumulator | None:
     cim = Accumulator(mrid=pb.mrid())
 
     measurement_to_cim(pb.measurement, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def analog_to_cim(pb: PBAnalog, network_service: NetworkService) -> Optional[Analog]:
+def analog_to_cim(pb: PBAnalog, network_service: NetworkService) -> Analog | None:
     cim = Analog(mrid=pb.mrid(), positive_flow_in=pb.positiveFlowIn)
 
     measurement_to_cim(pb.measurement, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def control_to_cim(pb: PBControl, network_service: NetworkService) -> Optional[Control]:
+def control_to_cim(pb: PBControl, network_service: NetworkService) -> Control | None:
     cim = Control(
         mrid=pb.mrid(),
         power_system_resource_mrid=pb.powerSystemResourceMRID if pb.powerSystemResourceMRID else None
@@ -1067,7 +1067,7 @@ def control_to_cim(pb: PBControl, network_service: NetworkService) -> Optional[C
     return cim if network_service.add(cim) else None
 
 
-def discrete_to_cim(pb: PBDiscrete, network_service: NetworkService) -> Optional[Discrete]:
+def discrete_to_cim(pb: PBDiscrete, network_service: NetworkService) -> Discrete | None:
     cim = Discrete(mrid=pb.mrid())
 
     measurement_to_cim(pb.measurement, cim, network_service)
@@ -1102,7 +1102,7 @@ PBMeasurement.to_cim = measurement_to_cim
 ############################
 
 
-def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) -> Optional[CurrentRelay]:
+def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) -> CurrentRelay | None:
     cim = CurrentRelay(
         mrid=pb.mrid(),
         current_limit_1=float_or_none(pb.currentLimit1),
@@ -1114,7 +1114,7 @@ def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) ->
     return cim if network_service.add(cim) else None
 
 
-def distance_relay_to_cim(pb: PBDistanceRelay, network_service: NetworkService) -> Optional[DistanceRelay]:
+def distance_relay_to_cim(pb: PBDistanceRelay, network_service: NetworkService) -> DistanceRelay | None:
     cim = DistanceRelay(
         mrid=pb.mrid(),
         backward_blind=float_or_none(pb.backwardBlind),
@@ -1154,7 +1154,7 @@ def protection_relay_function_to_cim(pb: PBProtectionRelayFunction, cim: Protect
     power_system_resource_to_cim(pb.psr, cim, network_service)
 
 
-def protection_relay_scheme_to_cim(pb: PBProtectionRelayScheme, network_service: NetworkService) -> Optional[ProtectionRelayScheme]:
+def protection_relay_scheme_to_cim(pb: PBProtectionRelayScheme, network_service: NetworkService) -> ProtectionRelayScheme | None:
     cim = ProtectionRelayScheme(
         mrid=pb.mrid()
     )
@@ -1169,7 +1169,7 @@ def protection_relay_scheme_to_cim(pb: PBProtectionRelayScheme, network_service:
     return cim if network_service.add(cim) else None
 
 
-def protection_relay_system_to_cim(pb: PBProtectionRelaySystem, network_service: NetworkService) -> Optional[ProtectionRelaySystem]:
+def protection_relay_system_to_cim(pb: PBProtectionRelaySystem, network_service: NetworkService) -> ProtectionRelaySystem | None:
     cim = ProtectionRelaySystem(
         mrid=pb.mrid(),
         protection_kind=ProtectionKind(pb.protectionKind)
@@ -1182,7 +1182,7 @@ def protection_relay_system_to_cim(pb: PBProtectionRelaySystem, network_service:
     return cim if network_service.add(cim) else None
 
 
-def relay_setting_to_cim(pb: PBRelaySetting) -> Optional[RelaySetting]:
+def relay_setting_to_cim(pb: PBRelaySetting) -> RelaySetting | None:
     return RelaySetting(
         name=pb.name,
         unit_symbol=unit_symbol_from_id(pb.unitSymbol),
@@ -1190,7 +1190,7 @@ def relay_setting_to_cim(pb: PBRelaySetting) -> Optional[RelaySetting]:
     )
 
 
-def voltage_relay_to_cim(pb: PBVoltageRelay, network_service: NetworkService) -> Optional[VoltageRelay]:
+def voltage_relay_to_cim(pb: PBVoltageRelay, network_service: NetworkService) -> VoltageRelay | None:
     cim = VoltageRelay(pb.mrid())
 
     protection_relay_function_to_cim(pb.prf, cim, network_service)
@@ -1208,7 +1208,7 @@ PBVoltageRelay.to_cim = voltage_relay_to_cim
 # IEC61970 BASE SCADA #
 #######################
 
-def remote_control_to_cim(pb: PBRemoteControl, network_service: NetworkService) -> Optional[RemoteControl]:
+def remote_control_to_cim(pb: PBRemoteControl, network_service: NetworkService) -> RemoteControl | None:
     cim = RemoteControl(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.control(cim), pb.controlMRID)
@@ -1221,7 +1221,7 @@ def remote_point_to_cim(pb: PBRemotePoint, cim: RemotePoint, service: NetworkSer
     identified_object_to_cim(pb.io, cim, service)
 
 
-def remote_source_to_cim(pb: PBRemoteSource, network_service: NetworkService) -> Optional[RemoteSource]:
+def remote_source_to_cim(pb: PBRemoteSource, network_service: NetworkService) -> RemoteSource | None:
     cim = RemoteSource(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.measurement(cim), pb.measurementMRID)
@@ -1239,7 +1239,7 @@ PBRemoteSource.to_cim = remote_source_to_cim
 # IEC61970 BASE WIRES GENERATION PRODUCTION #
 #############################################
 
-def battery_unit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> Optional[BatteryUnit]:
+def battery_unit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> BatteryUnit | None:
     """
     Convert the protobuf :class:`PBBatteryUnit` into its CIM counterpart.
     :param pb: The protobuf :class:`PBBatteryUnit` to convert.
@@ -1260,7 +1260,7 @@ def battery_unit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> O
     return cim if network_service.add(cim) else None
 
 
-def photo_voltaic_unit_to_cim(pb: PBPhotoVoltaicUnit, network_service: NetworkService) -> Optional[PhotoVoltaicUnit]:
+def photo_voltaic_unit_to_cim(pb: PBPhotoVoltaicUnit, network_service: NetworkService) -> PhotoVoltaicUnit | None:
     cim = PhotoVoltaicUnit(mrid=pb.mrid())
 
     power_electronics_unit_to_cim(pb.peu, cim, network_service)
@@ -1276,7 +1276,7 @@ def power_electronics_unit_to_cim(pb: PBPowerElectronicsUnit, cim: PowerElectron
     equipment_to_cim(pb.eq, cim, network_service)
 
 
-def power_electronics_wind_unit_to_cim(pb: PBPowerElectronicsWindUnit, network_service: NetworkService) -> Optional[PowerElectronicsWindUnit]:
+def power_electronics_wind_unit_to_cim(pb: PBPowerElectronicsWindUnit, network_service: NetworkService) -> PowerElectronicsWindUnit | None:
     cim = PowerElectronicsWindUnit(mrid=pb.mrid())
 
     power_electronics_unit_to_cim(pb.peu, cim, network_service)
@@ -1293,7 +1293,7 @@ PBPowerElectronicsWindUnit.to_cim = power_electronics_wind_unit_to_cim
 # IEC61970 BASE WIRES #
 #######################
 
-def ac_line_segment_to_cim(pb: PBAcLineSegment, network_service: NetworkService) -> Optional[AcLineSegment]:
+def ac_line_segment_to_cim(pb: PBAcLineSegment, network_service: NetworkService) -> AcLineSegment | None:
     """
     Convert the protobuf :class:`PBAcLineSegment` into its CIM counterpart.
     :param pb: The protobuf :class:`PBAcLineSegment` to convert.
@@ -1312,7 +1312,7 @@ def ac_line_segment_to_cim(pb: PBAcLineSegment, network_service: NetworkService)
     return cim if network_service.add(cim) else None
 
 
-def breaker_to_cim(pb: PBBreaker, network_service: NetworkService) -> Optional[Breaker]:
+def breaker_to_cim(pb: PBBreaker, network_service: NetworkService) -> Breaker | None:
     cim = Breaker(
         mrid=pb.mrid(),
         in_transit_time=float_or_none(pb.inTransitTime)
@@ -1322,14 +1322,14 @@ def breaker_to_cim(pb: PBBreaker, network_service: NetworkService) -> Optional[B
     return cim if network_service.add(cim) else None
 
 
-def busbar_section_to_cim(pb: PBBusbarSection, network_service: NetworkService) -> Optional[BusbarSection]:
+def busbar_section_to_cim(pb: PBBusbarSection, network_service: NetworkService) -> BusbarSection | None:
     cim = BusbarSection(mrid=pb.mrid())
 
     connector_to_cim(pb.cn, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def clamp_to_cim(pb: PBClamp, network_service: NetworkService) -> Optional[Clamp]:
+def clamp_to_cim(pb: PBClamp, network_service: NetworkService) -> Clamp | None:
     cim = Clamp(mrid=pb.mrid())
 
     cim.length_from_terminal_1 = float_or_none(pb.lengthFromTerminal1)
@@ -1353,7 +1353,7 @@ def connector_to_cim(pb: PBConnector, cim: Connector, network_service: NetworkSe
     conducting_equipment_to_cim(pb.ce, cim, network_service)
 
 
-def cut_to_cim(pb: PBCut, network_service: NetworkService) -> Optional[Cut]:
+def cut_to_cim(pb: PBCut, network_service: NetworkService) -> Cut | None:
     cim = Cut(mrid=pb.mrid())
 
     cim.length_from_terminal_1 = float_or_none(pb.lengthFromTerminal1)
@@ -1363,7 +1363,7 @@ def cut_to_cim(pb: PBCut, network_service: NetworkService) -> Optional[Cut]:
     return cim if network_service.add(cim) else None
 
 
-def disconnector_to_cim(pb: PBDisconnector, network_service: NetworkService) -> Optional[Disconnector]:
+def disconnector_to_cim(pb: PBDisconnector, network_service: NetworkService) -> Disconnector | None:
     cim = Disconnector(mrid=pb.mrid())
 
     switch_to_cim(pb.sw, cim, network_service)
@@ -1380,7 +1380,7 @@ def energy_connection_to_cim(pb: PBEnergyConnection, cim: EnergyConnection, netw
     conducting_equipment_to_cim(pb.ce, cim, network_service)
 
 
-def energy_consumer_to_cim(pb: PBEnergyConsumer, network_service: NetworkService) -> Optional[EnergyConsumer]:
+def energy_consumer_to_cim(pb: PBEnergyConsumer, network_service: NetworkService) -> EnergyConsumer | None:
     cim = EnergyConsumer(
         mrid=pb.mrid(),
         customer_count=int_or_none(pb.customerCount),
@@ -1399,7 +1399,7 @@ def energy_consumer_to_cim(pb: PBEnergyConsumer, network_service: NetworkService
     return cim if network_service.add(cim) else None
 
 
-def energy_consumer_phase_to_cim(pb: PBEnergyConsumerPhase, network_service: NetworkService) -> Optional[EnergyConsumerPhase]:
+def energy_consumer_phase_to_cim(pb: PBEnergyConsumerPhase, network_service: NetworkService) -> EnergyConsumerPhase | None:
     cim = EnergyConsumerPhase(
         mrid=pb.mrid(),
         phase=single_phase_kind_by_id(pb.phase),
@@ -1415,7 +1415,7 @@ def energy_consumer_phase_to_cim(pb: PBEnergyConsumerPhase, network_service: Net
     return cim if network_service.add(cim) else None
 
 
-def energy_source_to_cim(pb: PBEnergySource, network_service: NetworkService) -> Optional[EnergySource]:
+def energy_source_to_cim(pb: PBEnergySource, network_service: NetworkService) -> EnergySource | None:
     cim = EnergySource(
         mrid=pb.mrid(),
         active_power=float_or_none(pb.activePower),
@@ -1452,7 +1452,7 @@ def energy_source_to_cim(pb: PBEnergySource, network_service: NetworkService) ->
     return cim if network_service.add(cim) else None
 
 
-def energy_source_phase_to_cim(pb: PBEnergySourcePhase, network_service: NetworkService) -> Optional[EnergySourcePhase]:
+def energy_source_phase_to_cim(pb: PBEnergySourcePhase, network_service: NetworkService) -> EnergySourcePhase | None:
     cim = EnergySourcePhase(mrid=pb.mrid(), phase=single_phase_kind_by_id(pb.phase))
 
     network_service.resolve_or_defer_reference(resolver.energy_source(cim), pb.energySourceMRID)
@@ -1461,7 +1461,7 @@ def energy_source_phase_to_cim(pb: PBEnergySourcePhase, network_service: Network
     return cim if network_service.add(cim) else None
 
 
-def fuse_to_cim(pb: PBFuse, network_service: NetworkService) -> Optional[Fuse]:
+def fuse_to_cim(pb: PBFuse, network_service: NetworkService) -> Fuse | None:
     cim = Fuse(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.fuse_function(cim), pb.functionMRID)
@@ -1470,35 +1470,35 @@ def fuse_to_cim(pb: PBFuse, network_service: NetworkService) -> Optional[Fuse]:
     return cim if network_service.add(cim) else None
 
 
-def ground_to_cim(pb: PBGround, network_service: NetworkService) -> Optional[Ground]:
+def ground_to_cim(pb: PBGround, network_service: NetworkService) -> Ground | None:
     cim = Ground(mrid=pb.mrid())
 
     conducting_equipment_to_cim(pb.ce, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def ground_disconnector_to_cim(pb: PBGroundDisconnector, network_service: NetworkService) -> Optional[GroundDisconnector]:
+def ground_disconnector_to_cim(pb: PBGroundDisconnector, network_service: NetworkService) -> GroundDisconnector | None:
     cim = GroundDisconnector(mrid=pb.mrid())
 
     switch_to_cim(pb.sw, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def grounding_impedance_to_cim(pb: PBGroundingImpedance, network_service: NetworkService) -> Optional[GroundingImpedance]:
+def grounding_impedance_to_cim(pb: PBGroundingImpedance, network_service: NetworkService) -> GroundingImpedance | None:
     cim = GroundingImpedance(mrid=pb.mrid(), x=float_or_none(pb.x))
 
     earth_fault_compensator_to_cim(pb.efc, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def jumper_to_cim(pb: PBJumper, network_service: NetworkService) -> Optional[Jumper]:
+def jumper_to_cim(pb: PBJumper, network_service: NetworkService) -> Jumper | None:
     cim = Jumper(mrid=pb.mrid())
 
     switch_to_cim(pb.sw, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def junction_to_cim(pb: PBJunction, network_service: NetworkService) -> Optional[Junction]:
+def junction_to_cim(pb: PBJunction, network_service: NetworkService) -> Junction | None:
     cim = Junction(mrid=pb.mrid())
 
     connector_to_cim(pb.cn, cim, network_service)
@@ -1509,7 +1509,7 @@ def line_to_cim(pb: PBLine, cim: Line, network_service: NetworkService):
     equipment_container_to_cim(pb.ec, cim, network_service)
 
 
-def linear_shunt_compensator_to_cim(pb: PBLinearShuntCompensator, network_service: NetworkService) -> Optional[LinearShuntCompensator]:
+def linear_shunt_compensator_to_cim(pb: PBLinearShuntCompensator, network_service: NetworkService) -> LinearShuntCompensator | None:
     cim = LinearShuntCompensator(
         mrid=pb.mrid(),
         b0_per_section=float_or_none(pb.b0PerSection),
@@ -1522,7 +1522,7 @@ def linear_shunt_compensator_to_cim(pb: PBLinearShuntCompensator, network_servic
     return cim if network_service.add(cim) else None
 
 
-def load_break_switch_to_cim(pb: PBLoadBreakSwitch, network_service: NetworkService) -> Optional[LoadBreakSwitch]:
+def load_break_switch_to_cim(pb: PBLoadBreakSwitch, network_service: NetworkService) -> LoadBreakSwitch | None:
     cim = LoadBreakSwitch(mrid=pb.mrid())
 
     protected_switch_to_cim(pb.ps, cim, network_service)
@@ -1537,7 +1537,7 @@ def per_length_impedance_to_cim(pb: PBPerLengthImpedance, cim: PerLengthImpedanc
     per_length_line_parameter_to_cim(pb.lp, cim, network_service)
 
 
-def phase_impedance_data_to_cim(pb: PBPhaseImpedanceData) -> Optional[PhaseImpedanceData]:
+def phase_impedance_data_to_cim(pb: PBPhaseImpedanceData) -> PhaseImpedanceData | None:
     """
     Convert the protobuf :class:`PBPhaseImpedanceData` into its CIM counterpart.
     :param pb: The protobuf :class:`PBPhaseImpedanceData` to convert.
@@ -1553,7 +1553,7 @@ def phase_impedance_data_to_cim(pb: PBPhaseImpedanceData) -> Optional[PhaseImped
     )
 
 
-def per_length_phase_impedance_to_cim(pb: PBPerLengthPhaseImpedance, network_service: NetworkService) -> Optional[PerLengthPhaseImpedance]:
+def per_length_phase_impedance_to_cim(pb: PBPerLengthPhaseImpedance, network_service: NetworkService) -> PerLengthPhaseImpedance | None:
     """
     Convert the protobuf :class:`PBPerLengthPhaseImpedance` into its CIM counterpart.
     :param pb: The protobuf :class:`PBPerLengthPhaseImpedance` to convert.
@@ -1569,7 +1569,7 @@ def per_length_phase_impedance_to_cim(pb: PBPerLengthPhaseImpedance, network_ser
     return cim if network_service.add(cim) else None
 
 
-def per_length_sequence_impedance_to_cim(pb: PBPerLengthSequenceImpedance, network_service: NetworkService) -> Optional[PerLengthSequenceImpedance]:
+def per_length_sequence_impedance_to_cim(pb: PBPerLengthSequenceImpedance, network_service: NetworkService) -> PerLengthSequenceImpedance | None:
     cim = PerLengthSequenceImpedance(
         mrid=pb.mrid(),
         r=float_or_none(pb.r),
@@ -1586,14 +1586,14 @@ def per_length_sequence_impedance_to_cim(pb: PBPerLengthSequenceImpedance, netwo
     return cim if network_service.add(cim) else None
 
 
-def petersen_coil_to_cim(pb: PBPetersenCoil, network_service: NetworkService) -> Optional[PetersenCoil]:
+def petersen_coil_to_cim(pb: PBPetersenCoil, network_service: NetworkService) -> PetersenCoil | None:
     cim = PetersenCoil(mrid=pb.mrid(), x_ground_nominal=float_or_none(pb.xGroundNominal))
 
     earth_fault_compensator_to_cim(pb.efc, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def power_electronics_connection_to_cim(pb: PBPowerElectronicsConnection, network_service: NetworkService) -> Optional[PowerElectronicsConnection]:
+def power_electronics_connection_to_cim(pb: PBPowerElectronicsConnection, network_service: NetworkService) -> PowerElectronicsConnection | None:
     cim = PowerElectronicsConnection(
         mrid=pb.mrid(),
         max_i_fault=int_or_none(pb.maxIFault),
@@ -1641,7 +1641,7 @@ def power_electronics_connection_to_cim(pb: PBPowerElectronicsConnection, networ
 def power_electronics_connection_phase_to_cim(
     pb: PBPowerElectronicsConnectionPhase,
     network_service: NetworkService
-) -> Optional[PowerElectronicsConnectionPhase]:
+) -> PowerElectronicsConnectionPhase | None:
     cim = PowerElectronicsConnectionPhase(
         mrid=pb.mrid(),
         p=float_or_none(pb.p),
@@ -1655,7 +1655,7 @@ def power_electronics_connection_phase_to_cim(
     return cim if network_service.add(cim) else None
 
 
-def power_transformer_to_cim(pb: PBPowerTransformer, network_service: NetworkService) -> Optional[PowerTransformer]:
+def power_transformer_to_cim(pb: PBPowerTransformer, network_service: NetworkService) -> PowerTransformer | None:
     cim = PowerTransformer(
         mrid=pb.mrid(),
         vector_group=VectorGroup(pb.vectorGroup),
@@ -1672,7 +1672,7 @@ def power_transformer_to_cim(pb: PBPowerTransformer, network_service: NetworkSer
     return cim if network_service.add(cim) else None
 
 
-def power_transformer_end_to_cim(pb: PBPowerTransformerEnd, network_service: NetworkService) -> Optional[PowerTransformerEnd]:
+def power_transformer_end_to_cim(pb: PBPowerTransformerEnd, network_service: NetworkService) -> PowerTransformerEnd | None:
     cim = PowerTransformerEnd(
         mrid=pb.mrid(),
         rated_u=int_or_none(pb.ratedU),
@@ -1707,7 +1707,7 @@ def protected_switch_to_cim(pb: PBProtectedSwitch, cim: ProtectedSwitch, network
     switch_to_cim(pb.sw, cim, network_service)
 
 
-def ratio_tap_changer_to_cim(pb: PBRatioTapChanger, network_service: NetworkService) -> Optional[RatioTapChanger]:
+def ratio_tap_changer_to_cim(pb: PBRatioTapChanger, network_service: NetworkService) -> RatioTapChanger | None:
     cim = RatioTapChanger(
         mrid=pb.mrid(),
         step_voltage_increment=float_or_none(pb.stepVoltageIncrement)
@@ -1719,14 +1719,14 @@ def ratio_tap_changer_to_cim(pb: PBRatioTapChanger, network_service: NetworkServ
     return cim if network_service.add(cim) else None
 
 
-def reactive_capability_curve_to_cim(pb: PBReactiveCapabilityCurve, network_service: NetworkService) -> Optional[ReactiveCapabilityCurve]:
+def reactive_capability_curve_to_cim(pb: PBReactiveCapabilityCurve, network_service: NetworkService) -> ReactiveCapabilityCurve | None:
     cim = ReactiveCapabilityCurve(mrid=pb.mrid())
 
     curve_to_cim(pb.c, cim, network_service)
     return cim if network_service.add(cim) else None
 
 
-def recloser_to_cim(pb: PBRecloser, network_service: NetworkService) -> Optional[Recloser]:
+def recloser_to_cim(pb: PBRecloser, network_service: NetworkService) -> Recloser | None:
     cim = Recloser(mrid=pb.mrid())
 
     protected_switch_to_cim(pb.sw, cim, network_service)
@@ -1769,7 +1769,7 @@ def rotating_machine_to_cim(pb: PBRotatingMachine, cim: RotatingMachine, network
     regulating_cond_eq_to_cim(pb.rce, cim, network_service)
 
 
-def series_compensator_to_cim(pb: PBSeriesCompensator, network_service: NetworkService) -> Optional[SeriesCompensator]:
+def series_compensator_to_cim(pb: PBSeriesCompensator, network_service: NetworkService) -> SeriesCompensator | None:
     cim = SeriesCompensator(
         mrid=pb.mrid(),
         r=float_or_none(pb.r),
@@ -1823,7 +1823,7 @@ def switch_to_cim(pb: PBSwitch, cim: Switch, network_service: NetworkService):
     conducting_equipment_to_cim(pb.ce, cim, network_service)
 
 
-def synchronous_machine_to_cim(pb: PBSynchronousMachine, network_service: NetworkService) -> Optional[SynchronousMachine]:
+def synchronous_machine_to_cim(pb: PBSynchronousMachine, network_service: NetworkService) -> SynchronousMachine | None:
     cim = SynchronousMachine(
         mrid=pb.mrid(),
         base_q=float_or_none(pb.baseQ),
@@ -1869,7 +1869,7 @@ def tap_changer_to_cim(pb: PBTapChanger, cim: TapChanger, network_service: Netwo
     power_system_resource_to_cim(pb.psr, cim, network_service)
 
 
-def tap_changer_control_to_cim(pb: PBTapChangerControl, network_service: NetworkService) -> Optional[TapChangerControl]:
+def tap_changer_control_to_cim(pb: PBTapChangerControl, network_service: NetworkService) -> TapChangerControl | None:
     cim = TapChangerControl(
         mrid=pb.mrid(),
         limit_voltage=int_or_none(pb.limitVoltage),
@@ -1901,11 +1901,11 @@ def transformer_end_to_cim(pb: PBTransformerEnd, cim: TransformerEnd, network_se
     identified_object_to_cim(pb.io, cim, network_service)
 
 
-def transformer_end_rated_s_to_cim(pb: PBTransformerEndRatedS) -> Optional[TransformerEndRatedS]:
+def transformer_end_rated_s_to_cim(pb: PBTransformerEndRatedS) -> TransformerEndRatedS | None:
     return TransformerEndRatedS(cooling_type=TransformerCoolingType(pb.coolingType), rated_s=pb.ratedS)
 
 
-def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_service: NetworkService) -> Optional[TransformerStarImpedance]:
+def transformer_star_impedance_to_cim(pb: PBTransformerStarImpedance, network_service: NetworkService) -> TransformerStarImpedance | None:
     cim = TransformerStarImpedance(mrid=pb.mrid(), r=pb.r, r0=pb.r0, x=pb.x, x0=pb.x0)
 
     network_service.resolve_or_defer_reference(resolver.star_impedance_transformer_end_info(cim), pb.transformerEndInfoMRID)
@@ -1967,7 +1967,7 @@ PBTransformerStarImpedance.to_cim = transformer_star_impedance_to_cim
 # IEC61970 INFIEC61970 FEEDER #
 ###############################
 
-def circuit_to_cim(pb: PBCircuit, network_service: NetworkService) -> Optional[Circuit]:
+def circuit_to_cim(pb: PBCircuit, network_service: NetworkService) -> Circuit | None:
     cim = Circuit(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.loop(cim), pb.loopMRID)
@@ -1980,7 +1980,7 @@ def circuit_to_cim(pb: PBCircuit, network_service: NetworkService) -> Optional[C
     return cim if network_service.add(cim) else None
 
 
-def loop_to_cim(pb: PBLoop, network_service: NetworkService) -> Optional[Loop]:
+def loop_to_cim(pb: PBLoop, network_service: NetworkService) -> Loop | None:
     cim = Loop(mrid=pb.mrid())
 
     for mrid in pb.circuitMRIDs:
@@ -1994,7 +1994,7 @@ def loop_to_cim(pb: PBLoop, network_service: NetworkService) -> Optional[Loop]:
     return cim if network_service.add(cim) else None
 
 
-def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> Optional[LvFeeder]:
+def lv_feeder_to_cim(pb: PBLvFeeder, network_service: NetworkService) -> LvFeeder | None:
     cim = LvFeeder(mrid=pb.mrid())
 
     network_service.resolve_or_defer_reference(resolver.lv_feeder_normal_head_terminal(cim), pb.normalHeadTerminalMRID)
@@ -2016,7 +2016,7 @@ PBLvFeeder.to_cim = lv_feeder_to_cim
 # IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
 ####################################################
 
-def ev_charging_unit_to_cim(pb: PBEvChargingUnit, network_service: NetworkService) -> Optional[EvChargingUnit]:
+def ev_charging_unit_to_cim(pb: PBEvChargingUnit, network_service: NetworkService) -> EvChargingUnit | None:
     cim = EvChargingUnit(mrid=pb.mrid())
     power_electronics_unit_to_cim(pb.peu, cim, network_service)
     return cim if network_service.add(cim) else None
