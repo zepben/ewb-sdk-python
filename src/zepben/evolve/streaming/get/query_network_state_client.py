@@ -40,12 +40,11 @@ class QueryNetworkStateClient(GrpcClient):
         Asynchronously retrieves a collection containing CurrentStateEvent objects, representing the network states
         within a specified time range.
 
-        Args:
-            query_id: A unique identifier for the query being processed.
-            from_datetime: The start time, as a datetime, for the query range.
-            to_datetime: The end time, as a datetime, for the query range.
+        :param query_id: A unique identifier for the query being processed.
+        :param from_datetime: The start time, as a datetime, for the query range.
+        :param to_datetime: The end time, as a datetime, for the query range.
 
-        Returns:
+        Yields:
             A stream of batched network state events in the specified time range.
         """
         request = GetCurrentStatesRequest(

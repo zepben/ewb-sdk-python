@@ -39,13 +39,11 @@ class UpdateNetworkStateClient(GrpcClient):
 
         This method allows for sending a single batch of current state events to the gRPC service using the gRPC stub provided in the constructor.
 
-        Args:
-            batch_id: A unique identifier for the batch of events being processed.
-            batch: A collection of CurrentStateEvent objects representing a single batch of events
+        :param batch_id: A unique identifier for the batch of events being processed.
+        :param batch: A collection of CurrentStateEvent objects representing a single batch of events
                                              to be processed by the gRPC service.
 
-        Returns:
-            A SetCurrentStatesStatus object representing the status of the batch after being processed by the service.
+        :yield: A SetCurrentStatesStatus object representing the status of the batch after being processed by the service.
         """
 
         async def request_generator() -> AsyncGenerator[CurrentStateEventBatch, None]:
@@ -64,11 +62,10 @@ class UpdateNetworkStateClient(GrpcClient):
 
         This method is responsible for streaming a batch of current state events to the gRPC service using the gRPC stub provided in the constructor.
 
-        Args:
-            batches: A stream of CurrentStateEventBatch objects, where each request contains a
-                     collection of CurrentStateEvent objects to be processed by the gRPC service.
+        :param batches: A stream of CurrentStateEventBatch objects, where each request contains a collection of
+            CurrentStateEvent objects to be processed by the gRPC service.
 
-        Returns:
+        Yields:
             A stream of SetCurrentStatesResponse objects representing the status of each batch after being processed by the gRPC service.
         """
 

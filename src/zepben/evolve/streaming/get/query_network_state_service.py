@@ -55,7 +55,8 @@ class QueryNetworkStateService(QueryNetworkStateServiceServicer):
         :param request: The request object containing parameters for fetching current state events, including the time range for the query.
         :param context: The gRPC context.
 
-        :return: A stream of gRPC response messages
+        Yields:
+            A stream of gRPC response messages
         """
         async for batch in self.on_get_current_states(request.fromTimestamp.ToDatetime(), request.toTimestamp.ToDatetime()):
             yield GetCurrentStatesResponse(messageId=batch.batch_id, event=[event.to_pb() for event in batch.events])

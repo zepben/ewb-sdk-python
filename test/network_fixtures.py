@@ -351,6 +351,9 @@ async def feeder_with_current():
                 c1       c2      c3       c4
     source-fcb------fsp------tx------sw--------tx2
                                    (open)
+
+    Yields:
+        NetworkService
     """
     network_service = NetworkService()
 

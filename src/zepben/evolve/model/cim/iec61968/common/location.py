@@ -147,6 +147,9 @@ class Location(IdentifiedObject):
     def points(self) -> Generator[PositionPoint, None, None]:
         """
         Returns Generator over the `PositionPoint`s of this `Location`.
+
+        Yields:
+            Generator object of PositionPoints
         """
         yield from ngen(self._position_points)
 

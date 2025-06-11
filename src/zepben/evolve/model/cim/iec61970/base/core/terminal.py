@@ -143,7 +143,8 @@ class Terminal(AcDcTerminal):
         """
         Get the terminals that are connected to this `Terminal`.
 
-        :return: A `Generator` of terminals that are connected to this `Terminal`.
+        Yields:
+            A `Generator` of terminals that are connected to this `Terminal`.
         """
         for t in self.connectivity_node.terminals if self.connectivity_node else []:
             if t is not self:
@@ -151,9 +152,10 @@ class Terminal(AcDcTerminal):
 
     def other_terminals(self) -> Generator[Terminal]:
         """
-        * Get the terminals that share the same `ConductingEquipment` as this `Terminal`.
-        *
-        :return: A `Generator` of terminals that share the same `ConductingEquipment` as this `Terminal`.
+        Get the terminals that share the same `ConductingEquipment` as this `Terminal`.
+
+        Yields:
+            A `Generator` of terminals that share the same `ConductingEquipment` as this `Terminal`.
         """
         for t in self.conducting_equipment.terminals:
             if t is not self:

@@ -33,7 +33,12 @@ class NetworkTraceQueueNext(ABC):
                           current_context: StepContext,
                           compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]
                           ) -> Generator[NetworkTraceStep[T], None, None]:
-        """ Builds a list of next `NetworkTraceStep` to add to the `NetworkTrace` queue """
+        """
+        Builds a list of next `NetworkTraceStep` to add to the `NetworkTrace` queue
+
+        Yields:
+            Generator of NetworkTraceStep objects
+        """
         next_paths = list(self.state_operators.next_paths(current_step.path))
         if isinstance(compute_data, ComputeData):
             compute_next = lambda _it: compute_data.compute_next(current_step, current_context, _it)

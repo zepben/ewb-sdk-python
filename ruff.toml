@@ -10,6 +10,9 @@ select = [
     'UP032',  # Use f-string instead of `format` call
     'UP034',  # Avoid extraneous parentheses
 
+    'DOC202', # docstring states a return value the function doesnt return
+    'DOC403', # docstring states a yield the function doesnt yield
+
     'W',      # warnings, mostly niggly pep8 annoyances
     'E3',     # blank lines before function/class definition
     'E4',     # imports

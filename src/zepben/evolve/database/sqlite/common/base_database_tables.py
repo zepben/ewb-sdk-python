@@ -35,6 +35,9 @@ class BaseDatabaseTables(ABC):
     def tables(self) -> Generator[SqliteTable, None, None]:
         """
         The tables that are available in this database, keyed on the table class. You should use `get_table` to access individual tables.
+
+        Yields:
+            SqLiteTable's
         """
         self._ensure_tables()
         yield from self._tables.values()
@@ -43,6 +46,9 @@ class BaseDatabaseTables(ABC):
     def insert_statements(self) -> Generator[PreparedStatement, None, None]:
         """
         A collection of `PreparedStatement` for each table. You should use `get_insert` to access individual inserts.
+
+        Yields:
+            collection of prepared statements for each table
         """
         if self._insert_statements is not None:
             yield from self._insert_statements.values()
@@ -53,6 +59,9 @@ class BaseDatabaseTables(ABC):
         A sequence of `SqliteTable` indicating which tables are included in this database, which will be consumed to build the `tables` collection.
 
         NOTE: You should always append your tables to `super()._included_tables` when overriding.
+
+        Yields:
+            Tables included in this database
         """
         yield TableMetadataDataSources()
         yield TableVersion()

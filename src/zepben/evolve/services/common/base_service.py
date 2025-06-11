@@ -79,8 +79,8 @@ class BaseService(ABC):
         """
         Check if `mrid` has any associated object.
 
-        `mrid` The mRID to search for.
-        Returns True if there is an object associated with the specified `mrid`, False otherwise.
+        :param mrid: The mRID to search for.
+        :return: True if there is an object associated with the specified `mrid`, False otherwise.
         """
         for type_map in self._objects_by_type.values():
             if mrid in type_map:
@@ -94,9 +94,9 @@ class BaseService(ABC):
         """
         Check if there are `UnresolvedReference`s in the service
 
-        `mrid` The mRID to check for `UnresolvedReference`s. If None, will check if any unresolved references exist in the service.
+        :param mrid: The mRID to check for `UnresolvedReference`s. If None, will check if any unresolved references exist in the service.
 
-        Returns True if at least one reference exists.
+        :return: True if at least one reference exists.
         """
         return len(self._unresolved_references_to) > 0 if mrid is None else mrid in self._unresolved_references_to
 
@@ -124,7 +124,7 @@ class BaseService(ABC):
         """
         Get the total number of unresolved references in this service.
         `mRID` The mRID to check the number of [UnresolvedReference]s for. If None, will default to number of all unresolved references in the service.
-        Returns The number of `UnresolvedReference`s.
+        :return: The number of `UnresolvedReference`s.
         """
         if mrid is None:
             return sum([len(r) for r in self._unresolved_references_to.copy().values()])
@@ -135,8 +135,9 @@ class BaseService(ABC):
 
     def unresolved_references(self) -> Generator[UnresolvedReference, None, None]:
         """
-        Returns a generator over all the `UnresolvedReferences` that are known to this service. This should typically be avoided when resolving references in
-        favour of `get_unresolved_reference_mrids_by_resolver()`, `get_unresolved_reference_mrids_from()`, and `get_unresolved_reference_mrids_to()`
+        Yields:
+            a generator over all the `UnresolvedReferences` that are known to this service. This should typically be avoided when resolving references in
+            favour of `get_unresolved_reference_mrids_by_resolver()`, `get_unresolved_reference_mrids_from()`, and `get_unresolved_reference_mrids_to()`
         """
         for unresolved_refs in self._unresolved_references_to.copy().values():
             yield from unresolved_refs
@@ -146,14 +147,14 @@ class BaseService(ABC):
         """
         Get an object associated with this service.
 
-        `mrid` The mRID of the `iec61970.base.core.identified_object.IdentifiedObject` to retrieve.
-        `type_` The `iec61970.base.core.identified_object.IdentifiedObject` subclass type of the object
-                      with `mrid`. If None, will check all types stored in the service.
-        `default` The default to return if `mrid` can't be found in the service.
-        `generate_error` Function to call for an error message. Will be passed the mrid and _type (if set).
-        Returns The `iec61970.base.core.identified_object.IdentifiedObject` associated with `mrid`, or default
+        :param mrid: The mRID of the `iec61970.base.core.identified_object.IdentifiedObject` to retrieve.
+        :param type_: The `iec61970.base.core.identified_object.IdentifiedObject` subclass type of the object
+            with `mrid`. If None, will check all types stored in the service.
+        :param default: The default to return if `mrid` can't be found in the service.
+        :param generate_error: Function to call for an error message. Will be passed the mrid and _type (if set).
+        :return: The `iec61970.base.core.identified_object.IdentifiedObject` associated with `mrid`, or default
                  if it is set.
-        Raises `KeyError` if `mrid` was not found in the service with `type_`, if no objects of `type_` are
+        :raise KeyError: if `mrid` was not found in the service with `type_`, if no objects of `type_` are
                  stored by the service and default was not set, or if an empty mRID is provided.
         """
         if not mrid:
@@ -184,17 +185,17 @@ class BaseService(ABC):
         """
         Get an object associated with this service.
         Note that you should use `get` directly where the type of the desired object is known.
-        `mrid` The mRID of the `iec61970.base.core.identified_object.IdentifiedObject` to retrieve.
-        Returns The `iec61970.base.core.identified_object.IdentifiedObject` associated with `mrid`.
-        Raises `KeyError` if `mrid` was not found in the service with `type`.
+        :param mrid: The mRID of the `iec61970.base.core.identified_object.IdentifiedObject` to retrieve.
+        :return: The `iec61970.base.core.identified_object.IdentifiedObject` associated with `mrid`.
+        :raise KeyError: if `mrid` was not found in the service with `type`.
         """
         return self.get(mrid)
 
     def add(self, identified_object: IdentifiedObject) -> bool:
         """
         Associate an object with this service.
-        `identified_object` The object to associate with this service.
-        Returns True if the object is associated with this service, False otherwise.
+        :param identified_object: The object to associate with this service.
+        :return: True if the object is associated with this service, False otherwise.
         """
         mrid = identified_object.mrid
         if not mrid:
@@ -235,9 +236,9 @@ class BaseService(ABC):
         time to resolve the reference relationship.
 
 
-        `bound_resolver`
-        `to_mrid` The MRID of an object that is the subclass of the to_class of `bound_resolver`.
-        Returns true if the reference was resolved, otherwise false if it has been deferred.
+        :param bound_resolver:
+        :param to_mrid: The MRID of an object that is the subclass of the to_class of `bound_resolver`.
+        :return: true if the reference was resolved, otherwise false if it has been deferred.
         """
         if not to_mrid:
             return True
@@ -281,8 +282,9 @@ class BaseService(ABC):
                                                    bound_resolvers: BoundReferenceResolver | Sized[BoundReferenceResolver]) -> Generator[str, None, None]:
         """
         Gets a set of MRIDs that are referenced by the from_obj held by `bound_resolver` that are unresolved.
-        `bound_resolver` The `BoundReferenceResolver` to retrieve unresolved references for.
-        Returns Set of mRIDs that have unresolved references.
+        :param bound_resolver: The `BoundReferenceResolver` to retrieve unresolved references for.
+        Yields:
+            Set of mRIDs that have unresolved references.
         """
         seen = set()
         try:
@@ -302,8 +304,9 @@ class BaseService(ABC):
     def get_unresolved_references_from(self, mrid: str) -> Generator[UnresolvedReference, None, None]:
         """
         Get the `UnresolvedReference`s that `mrid` has to other objects.
-        `mrid` The mRID to get unresolved references for.
-        Returns a generator over the `UnresolvedReference`s that need to be resolved for `mrid`.
+        :param mrid: The mRID to get unresolved references for.
+        Yields:
+            a generator over the `UnresolvedReference`s that need to be resolved for `mrid`.
         """
         if mrid in self._unresolved_references_from:
             yield from self._unresolved_references_from[mrid]
@@ -311,8 +314,9 @@ class BaseService(ABC):
     def get_unresolved_references_to(self, mrid: str) -> Generator[UnresolvedReference, None, None]:
         """
         Get the UnresolvedReferences that other objects have to `mrid`.
-        `mrid` The mRID to fetch unresolved references for that are pointing to it.
-        Returns a generator over the `UnresolvedReference`s that need to be resolved for `mrid`.
+        :param mrid: The mRID to fetch unresolved references for that are pointing to it.
+        Yields:
+            a generator over the `UnresolvedReference`s that need to be resolved for `mrid`.
         """
         if mrid in self._unresolved_references_to:
             yield from self._unresolved_references_to[mrid]
@@ -321,8 +325,8 @@ class BaseService(ABC):
         """
         Disassociate an object from this service.
 
-        `identified_object` THe object to disassociate from the service.
-        Raises `KeyError` if `identified_object` or its type was not present in the service.
+        :param identified_object: THe object to disassociate from the service.
+        :raises KeyError: if `identified_object` or its type was not present in the service.
         """
         del self._objects_by_type[identified_object.__class__][identified_object.mrid]
         return True
@@ -330,8 +334,10 @@ class BaseService(ABC):
     def objects(self, obj_type: Type[TIdentifiedObject] | None = None, exc_types: List[type] | None = None) -> Generator[TIdentifiedObject, None, None]:
         """
         Generator for the objects in this service of type `obj_type`.
-        `obj_type` The type of object to yield. If this is a base class it will yield all subclasses.
-        Returns Generator over
+        :param obj_type: The type of object to yield. If this is a base class it will yield all subclasses.
+
+        Yields:
+            Generator over
         """
         if obj_type is None:
             for typ, obj_map in self._objects_by_type.items():
@@ -353,7 +359,12 @@ class BaseService(ABC):
 
     @property
     def name_types(self) -> Generator[NameType, None, None]:
-        """Associates the provided [nameType] with this service."""
+        """
+        Associates the provided `name_type` with this service.
+
+        Yields:
+            Generator of `NameType`s
+        """
         yield from self._name_types.values()
 
     def add_name_type(self, name_type: NameType) -> bool:

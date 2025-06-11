@@ -42,7 +42,12 @@ class NameType:
 
     @property
     def names(self) -> Generator[Name, None, None]:
-        """All names of this type."""
+        """
+        All names of this type.
+
+        Yields:
+            Name
+        """
         for names_ in self._names_multi_index.values():
             yield from names_
 
@@ -73,7 +78,8 @@ class NameType:
     def get_names(self, name_or_io) -> Generator[Name, None, None]:
         """Get all the :class:`Name` instances for the provided `name` or `IdentifiedObject`.
 
-        :return: A `Generator` of `Name`
+        Yields:
+            A `Generator` of `Name`
         """
         if isinstance(name_or_io, str):
             try:

@@ -154,6 +154,9 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         Convenience function to find all of the current feeders of the equipment associated with this equipment container.
         Returns the current feeders for all associated feeders
+
+        Yields:
+            A Generator object of feeders
         """
         seen = set()
         for equip in self._equipment.values():
@@ -166,6 +169,9 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         Convenience function to find all of the normal feeders of the equipment associated with this equipment container.
         Returns the normal feeders for all associated feeders
+
+        Yields:
+            A Generator object of feeders
         """
         seen = set()
         for equip in self._equipment.values():
@@ -178,6 +184,9 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         Convenience function to find all of the normal LV feeders of the equipment associated with this equipment container.
         Returns the normal LV feeders for all associated LV feeders
+
+        Yields:
+            A Generator object of LvFeeders
         """
         seen = set()
         for equip in self._equipment.values():
@@ -190,6 +199,9 @@ class EquipmentContainer(ConnectivityNodeContainer):
         """
         Convenience function to find all the normal LV feeders of the equipment associated with this equipment container.
         Returns the normal LV feeders for all associated LV feeders
+
+        Yields:
+            A generator object of LvFeeders
         """
         seen = set()
         for equip in self._equipment.values():

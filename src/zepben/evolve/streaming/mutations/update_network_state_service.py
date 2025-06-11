@@ -23,18 +23,21 @@ class UpdateNetworkStateService(UpdateNetworkStateServiceServicer):
     This class serves as a wrapper around the gRPC-generated service implementation,
     allowing users to update the network state using a more convenient function type.
 
-    Attributes:
-        on_set_current_states: A function that takes CurrentStateEvent objects asynchronously and returns a
-                               SetCurrentStatesStatus asynchronously that reflects the success or failure of the batch
-                               update process.
+    :var on_set_current_states: A function that takes CurrentStateEvent objects asynchronously and returns a
+        SetCurrentStatesStatus asynchronously that reflects the success or failure of the batch update process.
     """
 
-    def __init__(self, on_set_current_states: Callable[
-        [AsyncGenerator[Tuple[int, Tuple[CurrentStateEvent, Any]], None]], AsyncGenerator[SetCurrentStatesStatus, None]]):
+    def __init__(
+        self,
+        on_set_current_states: Callable[[AsyncGenerator[Tuple[int, Tuple[CurrentStateEvent, Any]], None]], AsyncGenerator[SetCurrentStatesStatus, None]]
+    ):
         self.on_set_current_states = on_set_current_states
 
-    async def setCurrentStates(self, request_iterator: AsyncGenerator[PBSetCurrentStatesRequest, None], context) -> AsyncGenerator[
-        PBSetCurrentStatesResponse, None]:
+    async def setCurrentStates(
+        self,
+        request_iterator: AsyncGenerator[PBSetCurrentStatesRequest, None],
+        context
+    ) -> AsyncGenerator[PBSetCurrentStatesResponse, None]:
         """
         Handles streaming requests for setting current state events and responds with the result of the operation.
 
@@ -45,11 +48,10 @@ class UpdateNetworkStateService(UpdateNetworkStateServiceServicer):
         It allows clients to stream multiple state events for asynchronous processing. As each event is processed,
         the service responds with the status of the operation in real-time, without waiting for all events to be received.
 
-        Args:
-            request_iterator: The stream of protobuf requests to process.
-            context: The gRPC context.
+        :param request_iterator: The stream of protobuf requests to process.
+        :param context: The gRPC context.
 
-        Returns:
+        Yields:
             A stream of protobuf SetCurrentStatesResponse sent back.
         """
 

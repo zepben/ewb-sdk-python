@@ -271,6 +271,9 @@ class NetworkTraceStepPathProvider:
             from any cut or clamp on the segment.
         :param length_from_t1: The length from terminal 1 the fromTerminal is.
         :param towards_segment_t2: Use `true` if the segment should be traversed towards terminal 2, otherwise `False` to traverse towards terminal 1
+
+        Yields:
+            Generator of NetworkTraceStep.Path objects
         """
 
         cuts, clamps = list(acls.cuts), list(acls.clamps)

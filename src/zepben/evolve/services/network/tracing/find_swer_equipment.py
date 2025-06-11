@@ -69,7 +69,8 @@ class FindSwerEquipment:
         :param network_service: The `NetworkService` to process.
         :param network_state_operators: The `NetworkStateOperators` to be used when finding SWER equipment
 
-        :return: A `Set` of `ConductingEquipment` on `Feeder` that is SWER, or energised via SWER.
+        Yields:
+            A `Set` of `ConductingEquipment` on `Feeder` that is SWER, or energised via SWER.
         """
 
         for feeder in network_service.objects(Feeder):
