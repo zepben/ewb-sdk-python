@@ -33,7 +33,7 @@ class SetDirection:
     Convenience class that provides methods for setting feeder direction on a [NetworkService]
     This class is backed by a [BranchRecursiveTraversal].
     """
-    
+
     def __init__(self, debug_logger: Logger=None):
         self._debug_logger = debug_logger
 

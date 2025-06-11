@@ -26,7 +26,7 @@ class Document(IdentifiedObject):
     """Name of the author of this document."""
 
     type: str = ""
-    """Utility-specific classification of this document, according to its corporate standards, practices, 
+    """Utility-specific classification of this document, according to its corporate standards, practices,
     and existing IT systems (e.g., for management of assets, maintenance, work, outage, customers, etc.)."""
 
     status: str = ""

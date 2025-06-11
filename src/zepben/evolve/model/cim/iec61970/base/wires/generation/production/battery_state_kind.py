@@ -9,7 +9,7 @@ __all__ = ["BatteryStateKind"]
 
 class BatteryStateKind(Enum):
     """Battery state"""
-    
+
     UNKNOWN = 0
     """Battery state is not known."""
 

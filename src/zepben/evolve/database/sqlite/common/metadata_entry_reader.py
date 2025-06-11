@@ -27,12 +27,12 @@ class MetadataEntryReader:
     def load_metadata(self, table: TableMetadataDataSources, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
         Populate the `DataSource` fields from `TableMetadataDataSources`.
-    
+
         :param table: The database table to read the `DataSource` fields from.
         :param result_set: The record in the database table containing the fields for this `DataSource`.
         :param set_identifier: A callback to set the identifier of the current row for logging purposes, which returns a copy of the provided string for
           fluent use.
-    
+
         :return: True if the `DataSource` is successfully loaded from the database, otherwise False.
         """
         data_source = DataSource(

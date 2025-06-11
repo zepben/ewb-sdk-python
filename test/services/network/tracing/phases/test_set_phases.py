@@ -540,7 +540,7 @@ async def test_can_back_trace_through_xn_xy_transformer_spur():
     # NOTE: This is impacted on the XY -> X issue as described elsewhere. If this is fixed you should replace the following test with
     #       `validate_phases_from_term_or_equip(network_service, "tx3", PhaseCode.AN, PhaseCode.AC)`
     #
-    
+
     validate_phases_from_term_or_equip(network_service, "tx3", PhaseCode.AN, PhaseCode.AB)
 
 
@@ -616,7 +616,13 @@ async def test_energises_around_dropped_phase_dual_transformer_loop():
     validate_phases_from_term_or_equip(ns, 'c10', PhaseCode.ABN, PhaseCode.ABN)
     validate_phases_from_term_or_equip(ns, 'c11', PhaseCode.ABN, PhaseCode.ABN)
 
-async def _validate_tx_phases(source_phases: PhaseCode, tx_phase_1: PhaseCode, tx_phase_2: PhaseCode, expected_phases_1: PhaseCode, expected_phases_2: Union[PhaseCode, List[SPK]]):
+async def _validate_tx_phases(
+    source_phases: PhaseCode,
+    tx_phase_1: PhaseCode,
+    tx_phase_2: PhaseCode,
+    expected_phases_1: PhaseCode,
+    expected_phases_2: PhaseCode | List[SPK]
+):
     if isinstance(expected_phases_2, PhaseCode):
         expected_phases_2 = expected_phases_2.single_phases
 

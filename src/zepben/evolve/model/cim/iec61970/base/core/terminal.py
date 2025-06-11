@@ -46,7 +46,7 @@ class Terminal(AcDcTerminal):
     """Represents the normal network phasing condition. If the attribute is missing three phases (ABC) shall be assumed."""
 
     traced_phases: TracedPhases = TracedPhases()
-    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases 
+    """the phase object representing the traced phases in both the normal and current network. If properly configured you would expect the normal state phases
     to match those in `phases`"""
 
     sequence_number: int = 0

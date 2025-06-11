@@ -73,8 +73,8 @@ class UnitSymbol(Enum):
     """Radioactivity in becquerels (1/s)."""
 
     DEGC = (13, "degC")
-    """Relative temperature in degrees Celsius.In the SI unit system the symbol is °C. Electric charge is measured in coulomb that has the unit symbol C. 
-    To distinguish degree Celsius from coulomb the symbol used in the UML is degC. The reason for not using °C is that the special character ° is difficult to 
+    """Relative temperature in degrees Celsius.In the SI unit system the symbol is °C. Electric charge is measured in coulomb that has the unit symbol C.
+    To distinguish degree Celsius from coulomb the symbol used in the UML is degC. The reason for not using °C is that the special character ° is difficult to
     manage in software."""" """
 
     SV = (14, "Sv")
@@ -120,7 +120,7 @@ class UnitSymbol(Enum):
     """Magnetic flux density in teslas (Wb/m2)."""
 
     W = (28, "W")
-    """Real power in watts (J/s). Electrical power may have real and reactive components. The real portion of electrical power (I²R or VIcos(phi)), 
+    """Real power in watts (J/s). Electrical power may have real and reactive components. The real portion of electrical power (I²R or VIcos(phi)),
     is expressed in Watts. See also apparent power and reactive power."""
 
     PA = (29, "Pa")
@@ -145,7 +145,7 @@ class UnitSymbol(Enum):
     """Fuel efficiency in metres per cubic metres (m/m³)."""
 
     KGM = (36, "kgm")
-    """Moment of mass in kilogram metres (kg·m) (first moment of mass). 
+    """Moment of mass in kilogram metres (kg·m) (first moment of mass).
     Note: multiplier “k” is included in this unit symbol for compatibility with IEC 61850-7-3."""
 
     KGPERM3 = (37, "kgPerm3")
@@ -192,15 +192,15 @@ class UnitSymbol(Enum):
 
     VAR = (51, "VAr")
     """
-    Reactive power in volt amperes reactive. The “reactive” or “imaginary” component of electrical power (VIsin(phi)). (See also real power and apparent power). 
-    Note: Different meter designs use different methods to arrive at their results. Some meters may compute reactive power as an arithmetic value, while others 
+    Reactive power in volt amperes reactive. The “reactive” or “imaginary” component of electrical power (VIsin(phi)). (See also real power and apparent power).
+    Note: Different meter designs use different methods to arrive at their results. Some meters may compute reactive power as an arithmetic value, while others
     compute the value vectorially. The data consumer should determine the method in use and the suitability of the measurement for the intended purpose.
     """
 
     COSPHI = (52, "cosPhi")
-    """Power factor, dimensionless. 
-    Note 1: This definition of power factor only holds for balanced systems. See the alternative definition under code 153. 
-    Note 2 : Beware of differing sign conventions in use between the IEC and EEI. It is assumed that the data consumer understands the type of meter in use 
+    """Power factor, dimensionless.
+    Note 1: This definition of power factor only holds for balanced systems. See the alternative definition under code 153.
+    Note 2 : Beware of differing sign conventions in use between the IEC and EEI. It is assumed that the data consumer understands the type of meter in use
     and the sign convention in use by the utility."""
 
     VS = (53, "Vs")
@@ -240,7 +240,7 @@ class UnitSymbol(Enum):
     """Data rate (baud) in characters per second."""
 
     KGM2 = (65, "kgm2")
-    """Moment of mass in kilogram square metres (kg·m²) (Second moment of mass, commonly called the moment of inertia). Note: multiplier “k” is included in 
+    """Moment of mass in kilogram square metres (kg·m²) (Second moment of mass, commonly called the moment of inertia). Note: multiplier “k” is included in
     this unit symbol for compatibility with IEC 61850-7-3."""
 
     DB = (66, "dB")
@@ -253,7 +253,7 @@ class UnitSymbol(Enum):
     """Volumetric flow rate in litres per second."""
 
     DBM = (69, "dBm")
-    """Power level (logarithmic ratio of signal strength , Bel-mW), normalized to 1mW. 
+    """Power level (logarithmic ratio of signal strength , Bel-mW), normalized to 1mW.
     Note: multiplier “d” is included in this unit symbol for compatibility with IEC 61850-7-3."""
 
     HOURS = (70, "h")
@@ -305,11 +305,11 @@ class UnitSymbol(Enum):
     """Volumetric flow rate, litres per hour."""
 
     LPERL = (86, "lPerl")
-    """Concentration, The ratio of the volume of a solute divided by the volume of the solution. 
+    """Concentration, The ratio of the volume of a solute divided by the volume of the solution.
     Note: Users may need use a prefix such a ‘µ’ to express a quantity such as ‘µL/L’."""
 
     GPERG = (87, "gPerg")
-    """Concentration, The ratio of the mass of a solute divided by the mass of the solution. 
+    """Concentration, The ratio of the mass of a solute divided by the mass of the solution.
     Note: Users may need use a prefix such a ‘µ’ to express a quantity such as ‘µg/g’."""
 
     MOLPERM3 = (88, "molPerm3")
@@ -334,8 +334,8 @@ class UnitSymbol(Enum):
     """Current, ratio of amperages. Note: Users may need to supply a prefix such as ‘m’ to show rates such as ‘mA/A’."""
 
     VPERVA = (95, "VPerVA")
-    """Power factor, PF, the ratio of the active power to the apparent power. 
-    Note: The sign convention used for power factor will differ between IEC meters and EEI (ANSI) meters. 
+    """Power factor, PF, the ratio of the active power to the apparent power.
+    Note: The sign convention used for power factor will differ between IEC meters and EEI (ANSI) meters.
     It is assumed that the data consumers understand the type of meter being used and agree on the sign convention in use at any given utility."""
 
     REV = (96, "rev")
@@ -462,8 +462,8 @@ class UnitSymbol(Enum):
     """Reciprocal of frequency (1/Hz)."""
 
     VPERVAR = (137, "VPerVAr")
-    """Power factor, PF, the ratio of the active power to the apparent power. 
-    Note: The sign convention used for power factor will differ between IEC meters and EEI (ANSI) meters. 
+    """Power factor, PF, the ratio of the active power to the apparent power.
+    Note: The sign convention used for power factor will differ between IEC meters and EEI (ANSI) meters.
     It is assumed that the data consumers understand the type of meter being used and agree on the sign convention in use at any given utility."""
 
     OHMPERM = (138, "ohmPerm")

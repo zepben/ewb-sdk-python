@@ -27,13 +27,13 @@ class SeriesCompensator(ConductingEquipment):
 
     varistor_rated_current: Optional[int] = None
     """
-    The maximum current in amps the varistor is designed to handle at specified duration. It is used for short circuit calculations. The attribute shall 
+    The maximum current in amps the varistor is designed to handle at specified duration. It is used for short circuit calculations. The attribute shall
     be a positive value. If null and varistorVoltageThreshold is null, a varistor is not present.
     """
 
     varistor_voltage_threshold: Optional[int] = None
     """
-    The dc voltage in volts at which the varistor starts conducting. It is used for short circuit calculations. If null and varistorRatedCurrent is null, 
+    The dc voltage in volts at which the varistor starts conducting. It is used for short circuit calculations. If null and varistorRatedCurrent is null,
     a varistor is not present.
     """
 

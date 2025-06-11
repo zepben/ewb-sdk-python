@@ -174,7 +174,7 @@ class TestAssignToLvFeeders:
                    .to_acls()  # c1
                    .add_lv_feeder('b0')
                    ).network
-        
+
         a1 = CurrentTransformer(mrid='a1')
         a1.terminal = network.get('c1-t1')
         network.add(a1)
@@ -280,7 +280,8 @@ class TestAssignToLvFeeders:
         #                1--c4--21 b5 21--c6--21 b7 2
         #
         network = (TestNetworkBuilder()
-                   .from_power_transformer(end_actions=[lambda t: setattr(t, 'rated_u', self.bv_hv.nominal_voltage), lambda t: setattr(t, 'rated_u', self.bv_lv.nominal_voltage)])  # tx0
+                   .from_power_transformer(end_actions=[lambda t: setattr(t, 'rated_u', self.bv_hv.nominal_voltage),
+                                                        lambda t: setattr(t, 'rated_u', self.bv_lv.nominal_voltage)])  # tx0
                    .to_acls(action=self._make_lv)  # c1
                    .to_acls(action=self._make_lv)  # c2
                    .to_breaker(action=self._make_lv)  # b3
@@ -306,7 +307,7 @@ class TestAssignToLvFeeders:
         operators.associate_energizing_feeder(feeder, lv_feeder9)
         lv_feeder10 = network['lvf10']
         operators.associate_energizing_feeder(feeder, lv_feeder10)
-        
+
         # We create an LV feeder to assign from b7 with its associated energizing feeder, which we will test is assigned to all LV feeders
         # in the dist substation site, not just the one on b5.
         back_feed = Feeder()
@@ -373,4 +374,3 @@ class TestAssignToLvFeeders:
 
         feeder = network['lvf2']
         validate_equipment(feeder.equipment, 'b0')
-    

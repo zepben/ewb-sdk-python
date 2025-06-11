@@ -48,11 +48,11 @@ class BaseServiceWriter(BaseCollectionWriter, ABC):
 
     """
     Save each object of the specified type using the provided `saver`.
-    
+
     @param T The type of object to save to the database.
     @param saver The callback used to save the objects to the database. Will be called once for each object and should return True if the object is
       successfully saved to the database.
-    
+
     :return: True if all objects are successfully saved to the database, otherwise False.
     """
 
@@ -65,11 +65,11 @@ class BaseServiceWriter(BaseCollectionWriter, ABC):
 
     """
     Validate that an object is actually saved to the database, logging an error if anything goes wrong.
-    
+
     @param T The type of object being saved.
     @param it The object being saved.
     @param saver The callback actually saving the object to the database.
-    
+
     :return: True if the object is successfully saved to the database, otherwise False.
     """
 

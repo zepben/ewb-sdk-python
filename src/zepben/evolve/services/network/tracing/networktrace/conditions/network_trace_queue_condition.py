@@ -38,18 +38,39 @@ class NetworkTraceQueueCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]
     def should_queue(self, next_item: T, next_context: StepContext, current_item: T, current_context: StepContext) -> bool:
         raise NotImplementedError()
 
-    def should_queue_matched_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
+    def should_queue_matched_step(
+        self,
+        next_item: NetworkTraceStep[T],
+        next_context: StepContext,
+        current_item: NetworkTraceStep[T],
+        current_context: StepContext
+    ) -> bool:
+
         """
         The logic you would normally put in `should_queue`. However, this will only be called when a step matches the `step_type`
         """
         raise NotImplementedError()
 
-    def should_queue_internal_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
+    def should_queue_internal_step(
+        self,
+        next_item: NetworkTraceStep[T],
+        next_context: StepContext,
+        current_item: NetworkTraceStep[T],
+        current_context: StepContext
+    ) -> bool:
+
         if next_item.type() == NetworkTraceStep.Type.INTERNAL:
             return self.should_queue_matched_step(next_item, next_context, current_item, current_context)
         return True
 
-    def should_queue_external_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
+    def should_queue_external_step(
+        self,
+        next_item: NetworkTraceStep[T],
+        next_context: StepContext,
+        current_item: NetworkTraceStep[T],
+        current_context: StepContext
+    ) -> bool:
+
         if next_item.type() == NetworkTraceStep.Type.EXTERNAL:
             return self.should_queue_matched_step(next_item, next_context, current_item, current_context)
         return True

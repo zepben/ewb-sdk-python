@@ -28,7 +28,14 @@ class OpenCondition(NetworkTraceQueueCondition[T], Generic[T]):
         self._is_open = is_open
         self._phase = phase
 
-    def should_queue_matched_step(self, next_item: NetworkTraceStep[T], next_context: StepContext, current_item: NetworkTraceStep[T], current_context: StepContext) -> bool:
+    def should_queue_matched_step(
+        self,
+        next_item: NetworkTraceStep[T],
+        next_context: StepContext,
+        current_item: NetworkTraceStep[T],
+        current_context: StepContext
+    ) -> bool:
+
         from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
         equip = next_item.path.to_equipment
         if isinstance(equip, Switch):

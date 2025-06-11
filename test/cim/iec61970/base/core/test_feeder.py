@@ -35,7 +35,14 @@ def test_feeder_constructor_default():
 
 
 @given(**feeder_kwargs)
-def test_feeder_constructor_kwargs(normal_head_terminal, normal_energizing_substation, normal_energized_lv_feeders, current_equipment, current_energized_lv_feeders, **kwargs):
+def test_feeder_constructor_kwargs(
+    normal_head_terminal,
+    normal_energizing_substation,
+    normal_energized_lv_feeders,
+    current_equipment,
+    current_energized_lv_feeders,
+    **kwargs
+):
     f = Feeder(normal_head_terminal=normal_head_terminal,
                normal_energizing_substation=normal_energizing_substation,
                normal_energized_lv_feeders=normal_energized_lv_feeders,

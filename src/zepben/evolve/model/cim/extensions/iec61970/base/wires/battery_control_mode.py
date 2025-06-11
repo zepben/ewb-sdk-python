@@ -29,7 +29,7 @@ class BatteryControlMode(Enum):
     """
     [ZBEX]
     This mode directs the BatteryUnit to discharge as needed to maintain the power level of the monitored element within a defined range
-    (specified by target_deadband) or to keep it at or below the value specified by max_allowed_target_value. This mode helps prevent power spikes by 
+    (specified by target_deadband) or to keep it at or below the value specified by max_allowed_target_value. This mode helps prevent power spikes by
     discharging the BatteryUnit to manage peak demand effectively.
     """
 
@@ -45,7 +45,7 @@ class BatteryControlMode(Enum):
     """[ZBEX] The control is triggered by time and resets the targetValue property to the present monitored element power."""
 
     support = 4
-    """[ZBEX] 
+    """[ZBEX]
     This is essentially the opposite of peakShave modes. The fleet is dispatched to keep the power in the monitored terminal at or above target_value.
     """
 
@@ -59,7 +59,7 @@ class BatteryControlMode(Enum):
     peakShaveCharge = 6
     """
     [ZBEX]
-    This mode directs the BatteryUnit to initiate charging when the power level at a monitored element falls below a specified threshold 
+    This mode directs the BatteryUnit to initiate charging when the power level at a monitored element falls below a specified threshold
     (min_allowed_target_value). This mode supports demand leveling by charging the BatteryUnit during low-demand periods, optimizing overall power management.
     """
 
@@ -73,7 +73,7 @@ class BatteryControlMode(Enum):
 
     time = 8
     """
-    [ZBEX] 
+    [ZBEX]
     In Time mode all storage elements are set to discharge when in the course of simulation the time of day passes the specified hour of day by the
     TimeDisChargeTrigger property (hour is a decimal value, e.g., 10.5 = 1030)
     """

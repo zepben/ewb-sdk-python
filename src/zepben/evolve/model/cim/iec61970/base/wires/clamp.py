@@ -21,7 +21,10 @@ class Clamp(ConductingEquipment):
     """
 
     length_from_terminal_1: float | None = None
-    """The length to the place where the clamp is located starting from side one of the line segment, i.e. the line segment terminal with sequence number equal to 1."""
+    """
+    The length to the place where the clamp is located starting from side one of the line segment, i.e. the line segment terminal
+    with sequence number equal to 1.
+    """
 
     ac_line_segment: AcLineSegment | None = None
     """The line segment to which the clamp is connected."""

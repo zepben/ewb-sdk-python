@@ -9,7 +9,13 @@ select = [
     # UP008 Use `super()` instead of `super(__class__, self)`
     'UP032',  # Use f-string instead of `format` call
     'UP034',  # Avoid extraneous parentheses
-    'E4', 'E7', 'E9',
+
+    'W',      # warnings, mostly niggly pep8 annoyances
+    'E3',     # blank lines before function/class definition
+    'E4',     # imports
+    'E5',     # line too long, redundant backslash
+    'E7',     # comparisons
+    'E9',
 ]
 ignore = [
     'E731',  # dont assign lambda's, use a function def

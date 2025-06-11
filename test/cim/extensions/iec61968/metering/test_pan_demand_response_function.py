@@ -6,8 +6,9 @@ from pytest import raises
 from hypothesis import given
 from hypothesis.strategies import sampled_from, integers
 
-from cim.iec61968.metering.test_end_device_function import end_device_function_kwargs, end_device_function_args, verify_end_device_function_constructor_default, \
-    verify_end_device_function_constructor_args
+from cim.iec61968.metering.test_end_device_function import (
+    end_device_function_kwargs, end_device_function_args, verify_end_device_function_constructor_default, verify_end_device_function_constructor_args
+)
 from test.cim.iec61968.metering.test_end_device_function import verify_end_device_function_constructor_kwargs
 from zepben.evolve import EndDeviceFunctionKind, PanDemandResponseFunction, ControlledAppliance, Appliance
 

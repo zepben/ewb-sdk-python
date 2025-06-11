@@ -62,7 +62,7 @@ class PowerElectronicsConnection(RegulatingCondEq):
     """Nameplate apparent power rating for the unit. The attribute shall have a positive value."""
 
     rated_u: int | None = None
-    """Rated voltage (nameplate data, Ur in IEC 60909-0). It is primarily used for short circuit data exchange according to IEC 60909. 
+    """Rated voltage (nameplate data, Ur in IEC 60909-0). It is primarily used for short circuit data exchange according to IEC 60909.
     The attribute shall be a positive value."""
 
     inverter_standard: str | None = None

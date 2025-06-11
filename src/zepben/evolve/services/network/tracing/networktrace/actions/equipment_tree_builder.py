@@ -20,10 +20,10 @@ __all__ = ['EquipmentTreeBuilder']
 
 class EquipmentTreeBuilder(StepActionWithContextValue):
     """
-    
+
     A `StepAction` that can be added to a `NetworkTrace` to build a tree structure representing the paths taken during a trace.
     The `_roots` are the start items of the trace and the children of a tree node represent the next step paths from a given step in the trace.
-    
+
     eg:
 
     >>> from zepben.evolve import Tracing, NetworkStateOperators

@@ -73,7 +73,7 @@ class StreetDetail(object):
 
     building_name: str = ""
     """
-    (if applicable) In certain cases the physical location of the place of interest does not have a direct point of entry from the street, 
+    (if applicable) In certain cases the physical location of the place of interest does not have a direct point of entry from the street,
     but may be located inside a larger structure such as a building, complex, office block, apartment, etc.
     """
     floor_identification: str = ""

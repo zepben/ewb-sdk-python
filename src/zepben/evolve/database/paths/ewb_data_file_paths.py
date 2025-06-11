@@ -182,7 +182,8 @@ class EwbDataFilePaths:
         :param max_days_to_search: The maximum number of days to search for a valid database.
         :param target_date: The target :class:`date`. Defaults to today.
         :param search_forwards: Indicates the search should also look forwards in time from `start_date` for a valid file. Defaults to reverse search only.
-        :return: The closest :class:`date` to `database_date` with a valid database of `database_type` within the search parameters, or `None` if no valid database was found.
+        :return: The closest :class:`date` to `database_date` with a valid database of `database_type` within the search parameters,
+            or `None` if no valid database was found.
         """
         if not database_type.per_date:
             return None

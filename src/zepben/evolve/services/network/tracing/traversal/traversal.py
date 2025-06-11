@@ -421,7 +421,6 @@ class Traversal(Generic[T, D]):
         :return: The current traversal instance.
         """
 
-        # require(not issubclass(computer.__class__, TraversalCondition), lambda: "`computer` must not be a TraversalCondition. Use `addCondition` to add conditions that also compute context values")
         self.compute_next_context_funs[computer.key] = computer
         return self
 

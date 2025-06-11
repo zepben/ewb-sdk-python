@@ -588,7 +588,7 @@ class TestNetworkTraceStepPathProvider:
         cClamp5 = network['c-clamp5']
         cCut5t1 = network['c-cut5t1']
         cCut5t2 = network['c-cut5t2']
-        
+
         with subtests.test("traverse from c1.t1 should get clamps at start and stop at both cuts at start"):
             next_paths = self.path_provider.next_paths(b0[2] + c1[1])
             _verify_paths(next_paths, (c1[1] - clamp1[1], c1[1] - clamp2[1], c1[1] - cut1[1], c1[1] - cut2[1]))

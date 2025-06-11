@@ -121,8 +121,9 @@ class SetPhases:
             else:
                 if len(phases) != len(start_terminal.phases.single_phases):
                     raise TracingException(
-                        f"Attempted to apply phases [{', '.join(phase.name for phase in phases)}] to {start_terminal} with nominal phases {start_terminal.phases.name}. "
-                        f"Number of phases to apply must match the number of nominal phases. Found {len(phases)}, expected {len(start_terminal.phases.single_phases)}"
+                        f"Attempted to apply phases [{', '.join(phase.name for phase in phases)}] to {start_terminal} "
+                        f"with nominal phases {start_terminal.phases.name}. Number of phases to apply must match the number"
+                        f" of nominal phases. Found {len(phases)}, expected {len(start_terminal.phases.single_phases)}"
                     )
                 self._apply_phases(phases, start_terminal, network_state_operators)
                 await self._run_terminals([start_terminal], network_state_operators=network_state_operators)

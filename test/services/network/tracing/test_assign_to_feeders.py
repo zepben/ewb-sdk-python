@@ -221,7 +221,8 @@ class TestAssignToFeeders:
         network = (TestNetworkBuilder()
                    .from_breaker(action=self._make_hv)  # b0
                    .to_acls(action=self._make_hv)  # c1
-                   .to_power_transformer(end_actions=[lambda t: setattr(t, 'rated_u', self.bv_hv.nominal_voltage), lambda t: setattr(t, 'rated_u', self.bv_lv.nominal_voltage)])  # tx2
+                   .to_power_transformer(end_actions=[lambda t: setattr(t, 'rated_u', self.bv_hv.nominal_voltage),
+                                                      lambda t: setattr(t, 'rated_u', self.bv_lv.nominal_voltage)])  # tx2
                    .to_acls(action=self._make_lv)  # c3
                    .to_acls(action=self._make_lv)  # c4
                    .to_breaker(action=self._make_lv)  # b5
@@ -236,7 +237,7 @@ class TestAssignToFeeders:
                    ).network
 
         feeder = network['fdr8']
-        
+
         await Tracing.assign_equipment_to_feeders().run(network, NetworkStateOperators.NORMAL)
 
         # We ensure the HV trace stopped at the transformer, but the additional LV feeders from b5 and b7 are still

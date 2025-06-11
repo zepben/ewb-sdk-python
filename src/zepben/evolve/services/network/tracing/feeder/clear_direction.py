@@ -49,7 +49,7 @@ class ClearDirection:
         :param network_state_operators: The `NetworkStateOperators` to be used when removing directions.
         :return : A set of feeder head `Terminal`s encountered when clearing directions
         """
-        
+
         trace = self._create_trace(network_state_operators, feeder_head_terminals := [])
         await trace.run(terminal, can_stop_on_start_item=False)
         return feeder_head_terminals

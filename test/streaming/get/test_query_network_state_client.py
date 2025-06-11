@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime, timedelta
-from typing import List, Callable
+from typing import Callable
 from collections.abc import Generator
 
 import grpc_testing
@@ -41,7 +41,7 @@ class TestQueryNetworkStateClient:
         to_datetime = datetime.now() + timedelta(days=1)
         responses = [_current_state_batch_to_pb(it) for it in self.batches]
 
-        def mock_service() -> List[Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]]:
+        def mock_service() -> list[Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]]:
             def process(request: GrpcRequest) -> Generator[GrpcResponse, None, None]:
                 assert request.messageId == query_id
                 assert request.fromTimestamp == datetime_to_timestamp(from_datetime)
@@ -61,7 +61,7 @@ class TestQueryNetworkStateClient:
     async def test_can_report_batch_status(self):
         status = BatchSuccessful(1234)
 
-        def mock_service() -> List[Callable[[GrpcRequest], None]]:
+        def mock_service() -> list[Callable[[GrpcRequest], None]]:
             def validate_request(request: GrpcRequest):
                 assert request.messageId == status.batch_id
 

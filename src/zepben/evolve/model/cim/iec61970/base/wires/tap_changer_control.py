@@ -36,7 +36,7 @@ class TapChangerControl(RegulatingControl):
 
     forward_ldc_blocking: bool | None = None
     """
-    True implies this tap changer turns off/ignores reverse current flows for line drop compensation when power flow is reversed and no reverse line drop 
+    True implies this tap changer turns off/ignores reverse current flows for line drop compensation when power flow is reversed and no reverse line drop
     is set.
     """
 
@@ -45,6 +45,6 @@ class TapChangerControl(RegulatingControl):
 
     co_generation_enabled: bool | None = None
     """
-    True implies cogeneration mode is enabled and that the control will regulate to the new source bushing (downline bushing), keeping locations downline 
+    True implies cogeneration mode is enabled and that the control will regulate to the new source bushing (downline bushing), keeping locations downline
     from experiencing overvoltage situations.
     """

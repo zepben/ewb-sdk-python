@@ -115,12 +115,14 @@ def _do_phase_validation(terminal: Terminal, phase_status: PhaseStatus, expected
     if list(expected_phases) == [Phase.NONE]:
         for nominal_phase in terminal.phases.single_phases:
             assert phase_status[nominal_phase] == Phase.NONE, \
-                f"{phase_status.__class__.__name__} :: {terminal.mrid}: nominal phase {nominal_phase}. expected SinglePhaseKind.NONE, found {phase_status[nominal_phase]}"
+                (f"{phase_status.__class__.__name__} :: {terminal.mrid}: nominal phase {nominal_phase}. "
+                 f"expected SinglePhaseKind.NONE, found {phase_status[nominal_phase]}")
 
     else:
         count = -1
         for (count, (nominal_phase, expected_phase)) in enumerate(zip(terminal.phases.single_phases, expected_phases)):
             assert phase_status[nominal_phase] == expected_phase, \
-                f"{phase_status.__class__.__name__}  ::  {terminal.mrid}: nominal phase {nominal_phase}. expected {expected_phase}, found {phase_status[nominal_phase]}"
+                (f"{phase_status.__class__.__name__}  ::  {terminal.mrid}: nominal phase {nominal_phase}. "
+                 f"expected {expected_phase}, found {phase_status[nominal_phase]}")
 
         assert len(terminal.phases.single_phases) == count + 1, f"{terminal.phases.single_phases} should be of length {count + 1}"

@@ -24,11 +24,11 @@ class ComputeData(Generic[T]):
         Called for each new NetworkTraceStep in a NetworkTrace. The value returned from this function
         will be stored against the next step within NetworkTraceStep. data.
 
-        `currentStep` - The current step of the trace.
-        `currentContext` - The context of teh current step in the trace.
-        `nextPath` - The next path of the next NetworkTraceStep that the data will be associated with.
+        :param current_step: The current step of the trace.
+        :param current_context: The context of teh current step in the trace.
+        :param next_path: The next path of the next NetworkTraceStep that the data will be associated with.
 
-        Returns The data to associate with the next NetworkTraceStep.
+        :return: The data to associate with the next NetworkTraceStep.
         """
         return self._func(current_step, current_context, next_path)
 
@@ -40,16 +40,22 @@ class ComputeDataWithPaths(Generic[T]):
     def __init__(self, func):
         self._func = func or (lambda *args: None)
 
-    def compute_next(self, current_step: NetworkTraceStep[T], current_context: StepContext, next_path: NetworkTraceStep.Path, next_paths: list[NetworkTraceStep.Path]) -> T:
+    def compute_next(
+        self,
+        current_step: NetworkTraceStep[T],
+        current_context: StepContext,
+        next_path: NetworkTraceStep.Path,
+        next_paths: list[NetworkTraceStep.Path]
+    ) -> T:
         """
         Called for each new NetworkTraceStep in a NetworkTrace. The value returned from this function
         will be stored against the next step within NetworkTraceStep. data.
 
-        `currentStep` - The current step of the trace.
-        `currentContext` - The context of teh current step in the trace.
-        `nextPath` - The next path of the next NetworkTraceStep that the data will be associated with.
-        `nextPaths` - A list of all the next paths that the current step can trace to.
+        :param current_step: The current step of the trace.
+        :param current_context: The context of teh current step in the trace.
+        :param next_path: The next path of the next NetworkTraceStep that the data will be associated with.
+        :param next_paths: A list of all the next paths that the current step can trace to.
 
-        Returns The data to associate with the next NetworkTraceStep.
+        :return The data to associate with the next NetworkTraceStep.
         """
         return self._func(current_step, current_context, next_path, next_paths)

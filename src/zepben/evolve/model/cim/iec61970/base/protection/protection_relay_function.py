@@ -90,9 +90,10 @@ class ProtectionRelayFunction(PowerSystemResource):
     @property
     def thresholds(self) -> Generator[RelaySetting, None, None]:
         """
-        Yields all the thresholds[:class:`RelaySettings<RelaySetting>`] for this :class:`ProtectionRelayFunction`. The order of thresholds corresponds to the order of time limits.
+        Yields all the thresholds :class:`RelaySettings` for this :class:`ProtectionRelayFunction`. The order of
+        thresholds corresponds to the order of time limits.
 
-        :return: A generator that iterates over all thresholds[:class:`RelaySettings<RelaySetting>`] for this relay function.
+        :return: A generator that iterates over all thresholds :class:`RelaySettings` for this relay function.
         """
         return ngen(self._thresholds)
 
@@ -100,7 +101,8 @@ class ProtectionRelayFunction(PowerSystemResource):
         """
         Call the `action` on each :class:`RelaySetting` in the `thresholds` collection
 
-        :param action: An action to apply to each :class:`RelaySetting` in the `thresholds` collection, taking the index of the threshold, and the threshold itself.
+        :param action: An action to apply to each :class:`RelaySetting` in the `thresholds` collection, taking the index of the
+            threshold, and the threshold itself.
         """
         for index, point in enumerate(self.thresholds):
             action(index, point)

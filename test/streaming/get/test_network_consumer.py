@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from time import sleep
-from typing import Dict, TypeVar, Callable, Optional
+from typing import TypeVar, Callable, Optional
 from collections.abc import Iterable, Generator
 from unittest.mock import MagicMock
 
@@ -310,7 +310,11 @@ class TestNetworkConsumer:
 
             assert self.service.len_of() == 11
             assert len(mor.objects) == 11
-            assert len({"lvf2", "tx0", "p2", "c1", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "generated_cn_0"}.difference(mor.objects.keys())) == 0
+            assert len(
+                {
+                    "lvf2", "tx0", "p2", "c1", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "generated_cn_0"
+                }.difference(mor.objects.keys())
+            ) == 0
             assert self.service.get("tx0") == mor.objects["tx0"]
             received_pole: Pole = mor.objects["p2"]
             assert self.service.get("p2") == received_pole
@@ -620,7 +624,7 @@ def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[It
                                           expected_include_energized_containers: Optional[int] = None,
                                           network_state: NetworkState = None) \
       -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
-    valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
+    valid: dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForContainersRequest):
         if expected_include_energizing_containers is not None:
@@ -642,7 +646,7 @@ def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[It
 
 def _create_restriction_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
       -> Callable[[GetEquipmentForRestrictionRequest], Generator[GetEquipmentForRestrictionResponse, None, None]]:
-    valid: Dict[str, OperationalRestriction] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
+    valid: dict[str, OperationalRestriction] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForRestrictionRequest) -> Generator[GetEquipmentForRestrictionResponse, None, None]:
         or1 = valid[request.mrid]
@@ -657,7 +661,7 @@ def _create_restriction_equipment_responses(ns: NetworkService, mrids: Optional[
 
 def _create_cn_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
       -> Callable[[GetTerminalsForNodeRequest], Generator[GetTerminalsForNodeResponse, None, None]]:
-    valid: Dict[str, ConnectivityNode] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
+    valid: dict[str, ConnectivityNode] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetTerminalsForNodeRequest) -> Generator[GetTerminalsForNodeResponse, None, None]:
         cn = valid[request.mrid]
@@ -700,7 +704,7 @@ def _validate_hierarchy(hierarchy, service):
 
 def _create_object_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
       -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
-    valid: Dict[str, IdentifiedObject] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
+    valid: dict[str, IdentifiedObject] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetIdentifiedObjectsRequest) -> Generator[GetIdentifiedObjectsResponse, None, None]:
         for mrid in request.mrids:
@@ -720,7 +724,7 @@ def _create_container_responses(
     expected_include_energized_containers: Optional[int] = None,
     network_state: Optional[int] = None
 ) -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
-    valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
+    valid: dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForContainersRequest) -> Generator[GetEquipmentForContainersResponse, None, None]:
         if expected_include_energizing_containers is not None:

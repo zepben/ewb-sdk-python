@@ -55,7 +55,10 @@ class TableSynchronousMachines(TableRotatingMachines):
         """Minimum voltage limit for the unit in volts."""
 
         self.mu: Column = self._create_column("mu", "NUMBER", Nullable.NULL)
-        """Factor to calculate the breaking current (Section 4.5.2.1 in IEC 60909-0). Used only for single fed short circuit on a generator (Section 4.3.4.2. in IEC 60909-0)."""
+        """
+        Factor to calculate the breaking current (Section 4.5.2.1 in IEC 60909-0). Used only for single fed short circuit on a generator
+        (Section 4.3.4.2. in IEC 60909-0).
+        """
 
         self.r: Column = self._create_column("r", "NUMBER", Nullable.NULL)
         """

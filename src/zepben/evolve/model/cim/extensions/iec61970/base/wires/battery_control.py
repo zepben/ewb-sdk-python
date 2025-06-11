@@ -31,8 +31,8 @@ class BatteryControl(RegulatingControl):
 
     reserve_percent: float | None = None
     """
-    [ZBEX] 
-    Percentage of the rated storage capacity that should be reserved during normal operations. This reserve acts as a safeguard, preventing the energy level 
+    [ZBEX]
+    Percentage of the rated storage capacity that should be reserved during normal operations. This reserve acts as a safeguard, preventing the energy level
     from dropping below this threshold under standard conditions. The field must be set to a non-negative value between 0 and 1. (Unit: PerCent)
     """
 

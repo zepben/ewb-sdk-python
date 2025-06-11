@@ -34,7 +34,11 @@ def test_constructor_with_bitmask():
     validate_bitmask_constructor(Appliance.WATER_HEATER.bitmask, expect_is_water_heater=True)
 
     # Can combine more than one
-    validate_bitmask_constructor(Appliance.ELECTRIC_VEHICLE.bitmask | Appliance.EXTERIOR_LIGHTING.bitmask, expect_is_electric_vehicle=True, expect_is_exterior_lighting=True)
+    validate_bitmask_constructor(
+        Appliance.ELECTRIC_VEHICLE.bitmask | Appliance.EXTERIOR_LIGHTING.bitmask,
+        expect_is_electric_vehicle=True,
+        expect_is_exterior_lighting=True
+    )
 
 
 def validate_bitmask_constructor(bitmask: int,

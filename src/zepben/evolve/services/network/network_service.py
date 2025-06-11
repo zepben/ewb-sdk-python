@@ -125,7 +125,7 @@ class NetworkService(BaseService):
     def get_measurements(self, mrid: str, t: type) -> List[Measurement]:
         """
         Get all measurements of type `t` associated with the given `mrid`.
-                                                                                                              
+
         The `mrid` should be either a `PowerSystemResource` or a
         `Terminal` MRID that is assigned to the corresponding fields on the measurements.
         Returns all `Measurement`s indexed by `mrid` in this service.

@@ -69,11 +69,14 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
 
         :param phase_impedance_data: The :class:`PhaseImpedanceData` to add.
         :returns: A reference to this :class:`PerLengthPhaseImpedance` to allow fluent use.
-        :raises ValueError: If another :class:`PhaseImpedanceData` with the same `from_phase` and `to_phase` already exists for this :class:`PerLengthPhaseImpedance`.
+        :raises ValueError: If another :class:`PhaseImpedanceData` with the same `from_phase` and `to_phase` already exists for
+            this :class:`PerLengthPhaseImpedance`.
         """
 
         require(none([it.from_phase == phase_impedance_data.from_phase and it.to_phase == phase_impedance_data.to_phase for it in self.data]),
-                lambda: f"""Unable to add PhaseImpedanceData to {self}. A PhaseImpedanceData with from_phase {phase_impedance_data.from_phase} and to_phase {phase_impedance_data.to_phase} already exists in this PerLengthPhaseImpedance.""")
+                lambda: f"Unable to add PhaseImpedanceData to {self}. "
+                        f"A PhaseImpedanceData with from_phase {phase_impedance_data.from_phase} "
+                        f"and to_phase {phase_impedance_data.to_phase} already exists in this PerLengthPhaseImpedance.")
 
         self._data = self._data or []
         self._data.append(phase_impedance_data)

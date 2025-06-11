@@ -18,7 +18,8 @@ class TestConnectivityResult:
             NominalPhasePath(SinglePhaseKind.A, SinglePhaseKind.A),
             NominalPhasePath(SinglePhaseKind.B, SinglePhaseKind.X)
         }
-        cr = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal21, nominal_phase_paths=expected_phase_map)
+        cr = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal21,
+                                nominal_phase_paths=expected_phase_map)
 
         assert cr.from_equip is self.asset1
         assert cr.from_terminal is self.terminal11
@@ -29,11 +30,16 @@ class TestConnectivityResult:
         assert Counter(cr.nominal_phase_paths) == Counter(expected_phase_map)
 
     def test_dunder_methods(self):
-        cr1 = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal21, nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.A, SinglePhaseKind.A)])
-        cr1Dup = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal21, nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.A, SinglePhaseKind.A)])
-        cr2 = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal21, nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.B, SinglePhaseKind.B)])
-        cr3 = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal12, nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.A, SinglePhaseKind.A)])
-        cr4 = ConnectivityResult(from_terminal=self.terminal21, to_terminal=self.terminal11, nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.A, SinglePhaseKind.A)])
+        cr1 = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal21,
+                                 nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.A, SinglePhaseKind.A)])
+        cr1Dup = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal21,
+                                    nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.A, SinglePhaseKind.A)])
+        cr2 = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal21,
+                                 nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.B, SinglePhaseKind.B)])
+        cr3 = ConnectivityResult(from_terminal=self.terminal11, to_terminal=self.terminal12,
+                                 nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.A, SinglePhaseKind.A)])
+        cr4 = ConnectivityResult(from_terminal=self.terminal21, to_terminal=self.terminal11,
+                                 nominal_phase_paths=[NominalPhasePath(SinglePhaseKind.A, SinglePhaseKind.A)])
 
         assert cr1 == cr1
         assert cr1 == cr1Dup

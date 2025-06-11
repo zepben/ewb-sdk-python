@@ -35,12 +35,13 @@ class PhaseInferrer:
 
         @property
         def description(self) -> str:
+            _name_mrid = f"'{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}]"
             if self.suspect:
-                _inner_desc = f"phases for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which may not be correct. The phases were inferred"
+                _inner_desc = f"phases for {_name_mrid} which may not be correct. The phases were inferred"
             else:
-                _inner_desc = f"phase for '{self.conducting_equipment.name}' [{self.conducting_equipment.mrid}] which should be correct. The phase was inferred"
-            return (f'Inferred missing {_inner_desc} due to a disconnected nominal phase because of an '
-                    f'upstream error in the source data. Phasing information for the upstream equipment should be fixed in the source system.')
+                _inner_desc = f"phase for {_name_mrid} which should be correct. The phase was inferred"
+            return (f'Inferred missing {_inner_desc} due to a disconnected nominal phase because of an upstream error in the '
+                    f'source data. Phasing information for the upstream equipment should be fixed in the source system.')
 
     async def run(self, network: NetworkService, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> list[InferredPhase]:
         """

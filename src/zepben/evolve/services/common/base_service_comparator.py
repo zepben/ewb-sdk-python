@@ -349,7 +349,13 @@ class BaseServiceComparator:
 
         return self._none_if_empty(differences)
 
-    def _calculate_unordered_value_collection_diff(self, prop: property, key_selector: Callable[[R], K], diff: ObjectDifference) -> Optional[CollectionDifference]:
+    def _calculate_unordered_value_collection_diff(
+        self,
+        prop: property,
+        key_selector: Callable[[R], K],
+        diff: ObjectDifference
+    ) -> Optional[CollectionDifference]:
+
         differences = CollectionDifference()
         source_list = sorted(list(getattr(diff.source, prop.fget.__name__)), key=key_selector)
         target_list = sorted(list(getattr(diff.target, prop.fget.__name__)), key=key_selector)

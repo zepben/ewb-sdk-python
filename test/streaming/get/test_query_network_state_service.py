@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections.abc import AsyncGenerator
 from datetime import datetime, timedelta
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import grpc
 import pytest
@@ -33,11 +33,11 @@ class TestQueryNetworkStateService:
     error = RuntimeError("TEST ERROR!")
 
     @pytest.fixture
-    def capture_statuses(self) -> List[SetCurrentStatesStatus]:
+    def capture_statuses(self) -> list[SetCurrentStatesStatus]:
         return []
 
     @pytest.fixture
-    def capture_errors(self) -> List[Tuple[str, Optional[Exception]]]:
+    def capture_errors(self) -> list[tuple[str, Optional[Exception]]]:
         return []
 
     @pytest.fixture

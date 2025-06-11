@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
-from typing import Callable, List
+from typing import Callable
 
 import pytest
 from pytest import raises
@@ -336,13 +336,13 @@ class TestTestNetworkBuilder:
         self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_source(mrid=mrid, connectivity_node_mrid=cn_mrid))
         self._validate_connectivity_node_override(lambda b, mrid, cn_mrid: b.to_other(Fuse, mrid=mrid, connectivity_node_mrid=cn_mrid))
 
-    def _validate_connections(self, n: NetworkService, mrid: str, expected_terms: List[List[str]]):
+    def _validate_connections(self, n: NetworkService, mrid: str, expected_terms: list[list[str]]):
         assert n.get(mrid, ConductingEquipment).num_terminals() == len(expected_terms)
         for i, expected in enumerate(expected_terms):
             self._validate_terminal_connections(n.get(f"{mrid}-t{i + 1}"), expected)
 
     @staticmethod
-    def _validate_terminal_connections(terminal: Terminal, expected_terms: List[str]):
+    def _validate_terminal_connections(terminal: Terminal, expected_terms: list[str]):
         if expected_terms:
             diff = {it.to_terminal.mrid for it in connected_terminals(terminal)} ^ set(expected_terms)
             if diff:
@@ -365,7 +365,7 @@ class TestTestNetworkBuilder:
         assert n.get(mrid, LvFeeder).normal_head_terminal == n.get(head_terminal, Terminal)
 
     @staticmethod
-    def _validate_ends(n: NetworkService, mrid: str, expected_ends: List[PhaseCode]):
+    def _validate_ends(n: NetworkService, mrid: str, expected_ends: list[PhaseCode]):
         tx = n.get(mrid, PowerTransformer)
         assert tx.num_terminals() == len(expected_ends)
         assert tx.num_ends() == len(expected_ends)

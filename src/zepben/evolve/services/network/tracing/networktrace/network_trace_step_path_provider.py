@@ -234,7 +234,10 @@ class NetworkTraceStepPathProvider:
         if isinstance(path.to_equipment, BusbarSection):
             yield from self._next_paths_from_busbar(path, path_factory)
         elif path.to_terminal.has_connected_busbars():
-            yield from seq_term_map_to_path((t for t in path.to_terminal.connected_terminals() if isinstance(t.conducting_equipment, BusbarSection)), path_factory)
+            yield from seq_term_map_to_path(
+                (t for t in path.to_terminal.connected_terminals() if isinstance(t.conducting_equipment, BusbarSection)),
+                path_factory
+            )
         else:
             yield from seq_term_map_to_path(path.to_terminal.connected_terminals(), path_factory)
 
@@ -259,12 +262,13 @@ class NetworkTraceStepPathProvider:
 
         This algorithm assumes AcLineSegments have exactly 2 terminals, cuts have exactly 2 terminals and clamps have exactly 1 terminal.
 
-        If there is a cut and a clamp at the exact same length on the segment, it is assumed the clamp is on the terminal 1 side of the cut. This is so you do not
-        get the clamp twice when traversing a segment from one end to the other. As a clamp can't technically be in the exact same spot as a cut, you should
+        If there is a cut and a clamp at the exact same length on the segment, it is assumed the clamp is on the terminal 1 side of the cut. This is so you do
+        not get the clamp twice when traversing a segment from one end to the other. As a clamp can't technically be in the exact same spot as a cut, you should
         realistically model this either attaching the equipment attached by the clamp to the appropriate cut terminal, or, place a clamp at a length that is
         not exactly the same as the cut. This would yield more accurate and deterministic behaviour.
 
-        :param from_terminal: The terminal on the segment to traverse from. This could either be a segment terminal, or a terminal from any cut or clamp on the segment.
+        :param from_terminal: The terminal on the segment to traverse from. This could either be a segment terminal, or a terminal
+            from any cut or clamp on the segment.
         :param length_from_t1: The length from terminal 1 the fromTerminal is.
         :param towards_segment_t2: Use `true` if the segment should be traversed towards terminal 2, otherwise `False` to traverse towards terminal 1
         """

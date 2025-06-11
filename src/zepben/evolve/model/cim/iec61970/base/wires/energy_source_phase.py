@@ -25,8 +25,8 @@ class EnergySourcePhase(PowerSystemResource):
     """The `zepben.evolve.cim.iec61970.wires.EnergySource` with this `EnergySourcePhase`"""
 
     phase: SinglePhaseKind = SinglePhaseKind.NONE
-    """A `zepben.evolve.iec61970.base.wires.single_phase_kind.SinglePhaseKind` Phase of this energy source component. If the energy source is wye connected, 
-    the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy 
+    """A `zepben.evolve.iec61970.base.wires.single_phase_kind.SinglePhaseKind` Phase of this energy source component. If the energy source is wye connected,
+    the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy
     source connected from the indicated phase to the next logical non-neutral phase."""
 
     def __init__(self, energy_source: EnergySource = None, **kwargs):

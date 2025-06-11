@@ -256,7 +256,8 @@ def _validate_ordered(
 
     expected_duplicate_errors = {
         other_duplicate_id: rf"An? (current )?{other1.__class__.__name__} with mRID {other1.mrid} already exists in {re.escape(str(it))}",
-        other_duplicate_index: rf"Unable to add {re.escape(str(other_duplicate_index))} to {re.escape(str(it))}. A {re.escape(str(other1))} already exists with \w+ 1."
+        other_duplicate_index: (rf"Unable to add {re.escape(str(other_duplicate_index))} to {re.escape(str(it))}. "
+                                  r"A {re.escape(str(other1))} already exists with \w+ 1.")
     }
 
     def validate_before_removal():

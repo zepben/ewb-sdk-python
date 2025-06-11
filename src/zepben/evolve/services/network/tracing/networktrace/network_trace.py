@@ -41,7 +41,9 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     A :class:`Traversal` implementation specifically designed to trace connected :class:`Terminal`s of :class:`ConductingEquipment` in a network.
 
     This trace manages the complexity of network connectivity, especially in cases where connectivity is not straightforward,
-    such as with :class:`BusbarSection`s and :class:`Clamp`s. It checks the in service flag of equipment and only steps to equipment that is marked as in service.
+    such as with :class:`BusbarSection`s and :class:`Clamp`s. It checks the in service flag of equipment and only steps to equipment that is marked as in
+    service.
+
     It also provides the optional ability to trace only specific phases.
 
     Steps are represented by a :class:`NetworkTraceStep`, which contains a :class:`NetworkTraceStep.Path` and allows associating arbitrary data with each step.

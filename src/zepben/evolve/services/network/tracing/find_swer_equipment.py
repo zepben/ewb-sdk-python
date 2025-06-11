@@ -30,13 +30,17 @@ __all__ = ["FindSwerEquipment"]
 
 class FindSwerEquipment:
     """
-    A class which can be used for finding the SWER equipment in a [NetworkService] or [Feeder].
+    A class which can be used for finding the SWER equipment in a :class:`NetworkService` or :class:`Feeder`.
     """
 
     def __init__(self, debug_logger: Logger=None):
         self._debug_logger = debug_logger
 
-    async def find(self, to_process: NetworkService | Feeder, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
+    async def find(
+        self,
+        to_process: NetworkService | Feeder,
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL
+    ) -> Set[ConductingEquipment]:
         """
         Convenience method to call out to `find_all` or `find_on_feeder` based on the class type of `to_process`
 
@@ -53,7 +57,11 @@ class FindSwerEquipment:
         else:
             raise NotImplementedError
 
-    async def find_all(self, network_service: NetworkService, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> AsyncGenerator[ConductingEquipment, None]:
+    async def find_all(
+        self,
+        network_service: NetworkService,
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL
+    ) -> AsyncGenerator[ConductingEquipment, None]:
         """
         Find the `ConductingEquipment` on any `Feeder` in a `NetworkService` which is SWER. This will include any equipment on the LV network that is energised
         via SWER.
@@ -68,7 +76,11 @@ class FindSwerEquipment:
             for item in await self.find_on_feeder(feeder, network_state_operators):
                 yield item
 
-    async def find_on_feeder(self, feeder: Feeder, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
+    async def find_on_feeder(
+        self,
+        feeder: Feeder,
+        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL
+    ) -> Set[ConductingEquipment]:
         """
         Find the `ConductingEquipment` on a `Feeder` which is SWER. This will include any equipment on the LV network that is energised via SWER.
 

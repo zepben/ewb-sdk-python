@@ -15,8 +15,9 @@ from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransforme
     TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableLoopsSubstations, \
     TableProtectionRelayFunctionsProtectedSwitches, TableProtectionRelaySchemesProtectionRelayFunctions, TableUsagePointsEndDevices, \
     TableLocationStreetAddresses, TablePositionPoints, TablePowerTransformerEndRatings, TableProtectionRelayFunctionThresholds, \
-    TableProtectionRelayFunctionTimeLimits, TableProtectionRelayFunctionsSensors, TableRecloseDelays, TablePhaseImpedanceData, TableBatteryUnitsBatteryControls, \
-    TableEndDevicesEndDeviceFunctions, TableAssetsPowerSystemResources, TableSynchronousMachinesReactiveCapabilityCurves, TableCurveData
+    TableProtectionRelayFunctionTimeLimits, TableProtectionRelayFunctionsSensors, TableRecloseDelays, TablePhaseImpedanceData, \
+    TableBatteryUnitsBatteryControls, TableEndDevicesEndDeviceFunctions, TableAssetsPowerSystemResources, TableSynchronousMachinesReactiveCapabilityCurves, \
+    TableCurveData
 
 T = TypeVar("T", bound=IdentifiedObject)
 

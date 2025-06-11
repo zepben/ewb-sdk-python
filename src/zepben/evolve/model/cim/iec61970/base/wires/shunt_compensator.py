@@ -18,11 +18,11 @@ class ShuntCompensator(RegulatingCondEq):
     a reactor. ShuntCompensator is a single terminal device.  Ground is implied.
     """
     grounded: bool = False
-    """Used for Yn and Zn connections. True if the neutral is solidly grounded. nom_u : The voltage at which the nominal reactive power may be calculated. 
+    """Used for Yn and Zn connections. True if the neutral is solidly grounded. nom_u : The voltage at which the nominal reactive power may be calculated.
     This should normally be within 10% of the voltage at which the capacitor is connected to the network."""
 
     nom_u: Optional[int] = None
-    """The voltage at which the nominal reactive power may be calculated. This should normally be within 10% of the voltage at which the capacitor is connected 
+    """The voltage at which the nominal reactive power may be calculated. This should normally be within 10% of the voltage at which the capacitor is connected
     to the network."""
 
     phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.UNKNOWN
@@ -30,15 +30,15 @@ class ShuntCompensator(RegulatingCondEq):
 
     sections: Optional[float] = None
     """
-    Shunt compensator sections in use. Starting value for steady state solution. Non integer values are allowed to support continuous variables. The 
-    reasons for continuous value are to support study cases where no discrete shunt compensator's has yet been designed, a solutions where a narrow voltage 
-    band force the sections to oscillate or accommodate for a continuous solution as input. 
-    
-    For `LinearShuntCompensator` the value shall be between zero and `ShuntCompensator.maximumSections`. At value zero the shunt compensator conductance and 
-    admittance is zero. Linear interpolation of conductance and admittance between the previous and next integer section is applied in case of non-integer 
-    values. 
-    
-    For `NonlinearShuntCompensator`s shall only be set to one of the NonlinearShuntCompensatorPoint.sectionNumber. There is no interpolation between 
+    Shunt compensator sections in use. Starting value for steady state solution. Non integer values are allowed to support continuous variables. The
+    reasons for continuous value are to support study cases where no discrete shunt compensator's has yet been designed, a solutions where a narrow voltage
+    band force the sections to oscillate or accommodate for a continuous solution as input.
+
+    For `LinearShuntCompensator` the value shall be between zero and `ShuntCompensator.maximumSections`. At value zero the shunt compensator conductance and
+    admittance is zero. Linear interpolation of conductance and admittance between the previous and next integer section is applied in case of non-integer
+    values.
+
+    For `NonlinearShuntCompensator`s shall only be set to one of the NonlinearShuntCompensatorPoint.sectionNumber. There is no interpolation between
     NonlinearShuntCompensatorPoint-s.
     """
 

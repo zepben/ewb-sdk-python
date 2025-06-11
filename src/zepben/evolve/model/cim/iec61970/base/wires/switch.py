@@ -52,7 +52,7 @@ class Switch(ConductingEquipment):
     """Tells if the switch is considered open when used as input to topology processing."""
 
     _normally_open: int = 0
-    """The attribute is used in cases when no Measurement for the status value is present. If the Switch has a status measurement the Discrete.normalValue 
+    """The attribute is used in cases when no Measurement for the status value is present. If the Switch has a status measurement the Discrete.normalValue
     is expected to match with the Switch.normalOpen."""
 
     @property

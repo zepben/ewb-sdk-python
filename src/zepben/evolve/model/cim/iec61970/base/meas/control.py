@@ -23,6 +23,6 @@ class Control(IoPoint):
 
     power_system_resource_mrid: str | None = None
     """AnalogValue represents an analog MeasurementValue."""
-    
+
     remote_control: RemoteControl | None = None
     """AnalogValue represents an analog MeasurementValue."""

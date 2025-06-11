@@ -13,7 +13,7 @@ class StepContext(Generic[T]):
     """
     Represents the context of a traversal step, holding information about the traversal state and the ability to store arbitrary values with the context.
     This context is passed to conditions and actions during a traversal to provide additional information about each step.
-    
+
     Any `ContextValueComputer` registered with the traversal will put the computed value into this context with the given `ContextValueComputer.key` which can
     be retrieved by using `get_value`.
 

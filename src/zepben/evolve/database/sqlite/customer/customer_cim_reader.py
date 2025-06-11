@@ -120,7 +120,12 @@ class CustomerCimReader(BaseCimReader):
     # Associations #
     ################
 
-    def load_customer_agreements_pricing_structures(self, table: TableCustomerAgreementsPricingStructures, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
+    def load_customer_agreements_pricing_structures(
+        self,
+        table: TableCustomerAgreementsPricingStructures,
+        result_set: ResultSet,
+        set_identifier: Callable[[str], str]
+    ) -> bool:
         """
         Create a `CustomerAgreement` to `PricingStructure` association from `TableCustomerAgreementsPricingStructures`.
 

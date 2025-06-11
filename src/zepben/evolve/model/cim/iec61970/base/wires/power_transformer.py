@@ -205,8 +205,8 @@ class TransformerEnd(IdentifiedObject):
     """Base voltage of the transformer end.  This is essential for PU calculation."""
 
     end_number: int = 0
-    """Number for this transformer end, corresponding to the end’s order in the power transformer vector group or phase angle clock number. 
-    Highest voltage winding should be 1. Each end within a power transformer should have a unique subsequent end number. 
+    """Number for this transformer end, corresponding to the end’s order in the power transformer vector group or phase angle clock number.
+    Highest voltage winding should be 1. Each end within a power transformer should have a unique subsequent end number.
     Note the transformer end number need not match the terminal sequence number."""
 
     star_impedance: TransformerStarImpedance | None = None
@@ -262,7 +262,7 @@ class PowerTransformerEnd(TransformerEnd):
     _rated_s: int | None = None
 
     rated_u: int | None = None
-    """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings. A high voltage side, as given by 
+    """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings. A high voltage side, as given by
     TransformerEnd.endNumber, shall have a ratedU that is greater or equal than ratedU for the lower voltage sides."""
 
     r: float | None = None
@@ -293,14 +293,14 @@ class PowerTransformerEnd(TransformerEnd):
     """Kind of `zepben.protobuf.cim.iec61970.base.wires.winding_connection.WindingConnection` for this end."""
 
     phase_angle_clock: int | None = None
-    """Terminal voltage phase angle displacement where 360 degrees are represented with clock hours. The valid values are 0 to 11. For example, for the 
-    secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the 
+    """Terminal voltage phase angle displacement where 360 degrees are represented with clock hours. The valid values are 0 to 11. For example, for the
+    secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the
     clock as 11. The clock value of the transformer end number specified as 1, is assumed to be zero."""
 
     _s_ratings: List[TransformerEndRatedS] | None = None
     """
     Backing list for storing transformer ratings. Placed here to not mess with __init__ param order. Must always be placed at the end.
-    Should not be used directly, instead use add_rating and get_rating functions. 
+    Should not be used directly, instead use add_rating and get_rating functions.
     """
 
     def __init__(self, power_transformer: PowerTransformer = None, rated_s: int = None, **kwargs):
@@ -442,15 +442,15 @@ class PowerTransformer(ConductingEquipment):
 
     Attributes -
         vector_group : `zepben.protobuf.cim.iec61970.base.wires.VectorGroup` of the transformer for protective relaying.
-        power_transformer_ends : 
-                                 
-                                 
+        power_transformer_ends :
+
+
     """
     vector_group: VectorGroup = VectorGroup.UNKNOWN
     """
     Vector group of the transformer for protective relaying, e.g., Dyn1. For unbalanced transformers, this may not be simply
     determined from the constituent winding connections and phase angle displacements.
-                                                                                                                            
+
     The vectorGroup string consists of the following components in the order listed: high voltage winding connection, mid
     voltage winding connection(for three winding transformers), phase displacement clock number from 0 to 11,  low voltage
     winding connection phase displacement clock number from 0 to 11.   The winding connections are D(delta), Y(wye),
@@ -459,7 +459,7 @@ class PowerTransformer(ConductingEquipment):
     string.  Some examples: YNy0(two winding wye to wye with no phase displacement), YNd11(two winding wye to delta with
     330 degrees phase displacement), YNyn0d5(three winding transformer wye with neutral high voltage, wye with neutral mid
     voltage and no phase displacement, delta low voltage with 150 degrees displacement).
-                                                                                                                            
+
     Phase displacement is defined as the angular difference between the phasors representing the voltages between the
     neutral point(real or imaginary) and the corresponding terminals of two windings, a positive sequence voltage system
     being applied to the high-voltage terminals, following each other in alphabetical sequence if they are lettered, or in

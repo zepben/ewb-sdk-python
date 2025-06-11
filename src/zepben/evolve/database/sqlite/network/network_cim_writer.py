@@ -266,7 +266,7 @@ __all__ = ["NetworkCimWriter"]
 class NetworkCimWriter(BaseCimWriter):
     """
      A class for writing the :class:`NetworkService` tables to the database.
-    
+
      :param database_tables: The tables available in the database.
     """
 

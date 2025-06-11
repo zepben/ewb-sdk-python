@@ -21,7 +21,8 @@ class MissingReferenceException(Exception):
             else:
                 self.referrer_type = type(self.referrer).__name__
                 self.referrer_mrid = self.referrer.mrid
-        return f"{self.TYPE} {self.referenced_mrid} was not found in the network. It must be created before {self.referrer_type}[{self.referrer_mrid}] can reference it."
+        return (f"{self.TYPE} {self.referenced_mrid} was not found in the network. "
+                f"It must be created before {self.referrer_type}[{self.referrer_mrid}] can reference it.")
 
 
 class NetworkException(Exception):

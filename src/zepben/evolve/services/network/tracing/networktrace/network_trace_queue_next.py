@@ -73,7 +73,7 @@ class Basic(NetworkTraceQueueNext, Traversal.QueueNext[NetworkTraceStep[T]], Gen
 class Branching(NetworkTraceQueueNext, Traversal.BranchingQueueNext[NetworkTraceStep[T]], Generic[T]):
     def __init__(self, state_operators: Type[NetworkStateOperators], compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]):
         super().__init__(state_operators)
-        
+
         self._get_next_steps: GetNextStepsBranching = lambda item, context: list(self.next_trace_steps(item, context, compute_data))
 
     def accept(self, item: NetworkTraceStep[T], context: StepContext, queue_item: QueueItem, queue_branch: QueueBranch):

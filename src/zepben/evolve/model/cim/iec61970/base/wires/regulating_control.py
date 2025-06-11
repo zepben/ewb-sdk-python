@@ -49,7 +49,7 @@ class RegulatingControl(PowerSystemResource):
 
     mode: [RegulatingControlModeKind] = RegulatingControlModeKind.UNKNOWN_CONTROL_MODE
     """
-    The regulating control mode presently available. This specification allows for determining the kind of regulation without need for obtaining the 
+    The regulating control mode presently available. This specification allows for determining the kind of regulation without need for obtaining the
     units from a schedule.
     """
 
@@ -58,15 +58,15 @@ class RegulatingControl(PowerSystemResource):
 
     target_deadband: float | None = None
     """
-    This is a deadband used with discrete control to avoid excessive update of controls like tap changers and shunt compensator banks while regulating. 
+    This is a deadband used with discrete control to avoid excessive update of controls like tap changers and shunt compensator banks while regulating.
     The units are the base units appropriate for the mode. The attribute shall be a positive value or zero. If RegulatingControl.discrete is set to "false",
-    the RegulatingControl.target_deadband is to be ignored. Note that for instance, if the targetValue is 100 kV and the targetDeadband is 2 kV the range is 
+    the RegulatingControl.target_deadband is to be ignored. Note that for instance, if the targetValue is 100 kV and the targetDeadband is 2 kV the range is
     from 99 to 101 kV.
     """
 
     target_value: float | None = None
     """
-    The target value specified for case input. This value can be used for the target value without the use of schedules. The value has the units appropriate 
+    The target value specified for case input. This value can be used for the target value without the use of schedules. The value has the units appropriate
     to the mode attribute.
     """
 
@@ -80,12 +80,12 @@ class RegulatingControl(PowerSystemResource):
     """Minimum allowed target value (RegulatingControl.targetValue)."""
 
     rated_current: float | None = None
-    """The rated current of associated CT in amps for this RegulatingControl. Forms the base used to convert Line Drop Compensation settings from ohms to 
+    """The rated current of associated CT in amps for this RegulatingControl. Forms the base used to convert Line Drop Compensation settings from ohms to
     voltage."""
 
     terminal: Terminal | None = None
     """
-    The terminal associated with this regulating control. The terminal is associated instead of a node, since the terminal could connect into either a 
+    The terminal associated with this regulating control. The terminal is associated instead of a node, since the terminal could connect into either a
     topological node or a connectivity node. Sometimes it is useful to model regulation at a terminal of a bus bar object.
     """
 
@@ -93,8 +93,9 @@ class RegulatingControl(PowerSystemResource):
     """
     [ZBEX]
     Current rating of the CT, expressed in terms of the current (in Amperes) that flows in the Primary where the 'Primary' is the conductor
-    being monitored. It ensures proper operation of the regulating equipment by providing the necessary current references for control actions. An important side
-    effect of this current value is that it also defines the current value at which the full LDC R and X voltages are applied by the controller, where enabled.
+    being monitored. It ensures proper operation of the regulating equipment by providing the necessary current references for control actions. An important
+    side effect of this current value is that it also defines the current value at which the full LDC R and X voltages are applied by the controller, where
+    enabled.
     """
 
     min_target_deadband: float | None = None

@@ -52,7 +52,7 @@ def ignore_open(_ce: ConductingEquipment, _phase: SinglePhaseKind | None = None)
     Test that always returns that the phase is closed.
     `equip` The equipment to test
     `phase` The phase to test. If None tests all cores.
-    Returns False 
+    Returns False
     """
     return False
 

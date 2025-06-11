@@ -295,7 +295,7 @@ from zepben.evolve.services.network.network_service import NetworkService
 class NetworkCimReader(BaseCimReader):
     """
     A class for reading the :class:`NetworkService` tables from the database.
-    
+
     :param service: The :class:`NetworkService` to populate from the database.
     """
 
@@ -3032,7 +3032,8 @@ class NetworkCimReader(BaseCimReader):
         set_identifier: Callable[[str], str]
     ) -> bool:
         """
-        Create a :class:`ProtectionRelayScheme` to :class:`ProtectionRelayFunction` association from :class:`TableProtectionRelaySchemesProtectionRelayFunctions`.
+        Create a :class:`ProtectionRelayScheme` to :class:`ProtectionRelayFunction` association from
+        :class:`TableProtectionRelaySchemesProtectionRelayFunctions`.
 
         :param table: The database table to read the association from.
         :param result_set: The record in the database table containing the fields for this association.

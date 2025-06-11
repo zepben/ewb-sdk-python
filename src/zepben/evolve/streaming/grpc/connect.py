@@ -117,15 +117,16 @@ def connect_with_token(
     **kwargs
 ) -> grpc.aio.Channel:
     """
-    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and a personal access token generated from Evolve App Server or Evolve Web Client.
+    Create a :class:`grpc.aio.Channel` that communicates with the gRPC service using SSL/TLS transport security and a personal
+    access token generated from Evolve App Server or Evolve Web Client.
 
     :param access_token: The token string of the client generated using Evolve App
     :param host: The hostname where the gRPC service is hosted
     :param rpc_port: The port of the gRPC service
     :param ca_filename: The filename of a truststore containing additional trusted root certificates. This parameter is optional
-                        and defaults to null, in which case only the system CAs are used to verify certificates.
-    :return: An authenticated, encrypted connection to the gRPC service based on OAuth2 flows. If the authentication configuration specifies that no
-             authentication is required, a non-authenticated, encrypted connection is returned instead.
+        and defaults to null, in which case only the system CAs are used to verify certificates.
+    :return: An authenticated, encrypted connection to the gRPC service based on OAuth2 flows. If the authentication configuration
+        specifies that no authentication is required, a non-authenticated, encrypted connection is returned instead.
     """
 
     return GrpcChannelBuilder().for_address(host, rpc_port).make_secure(root_certificates=ca_filename).with_client_token(access_token).build(**kwargs)

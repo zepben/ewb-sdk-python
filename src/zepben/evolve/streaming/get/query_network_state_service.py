@@ -52,13 +52,10 @@ class QueryNetworkStateService(QueryNetworkStateServiceServicer):
 
         It acts as a bridge between the gRPC request and the business logic that fetches the current state events.
 
-        Args:
-            request: The request object containing parameters for fetching current state events,
-              including the time range for the query.
-            context: The gRPC context.
+        :param request: The request object containing parameters for fetching current state events, including the time range for the query.
+        :param context: The gRPC context.
 
-        Returns:
-           A stream of gRPC response messages
+        :return: A stream of gRPC response messages
         """
         async for batch in self.on_get_current_states(request.fromTimestamp.ToDatetime(), request.toTimestamp.ToDatetime()):
             yield GetCurrentStatesResponse(messageId=batch.batch_id, event=[event.to_pb() for event in batch.events])
@@ -75,9 +72,9 @@ class QueryNetworkStateService(QueryNetworkStateServiceServicer):
         handling. Any errors in this handling, or unexpected status message will trigger the `on_processing_error`
         callback function passed in the constructor.
 
-        Args:
-            status_responses: The request object stream (yes you read that correctly that the request is a response...) containing the response to our current state batch.
-            context: The gRPC context.
+        :param status_responses: The request object stream (yes you read that correctly that the request is a response...)
+            containing the response to our current state batch.
+        :param context: The gRPC context.
         """
         async for status_response in status_responses:
             status = SetCurrentStatesStatus.from_pb(status_response)
@@ -88,7 +85,8 @@ class QueryNetworkStateService(QueryNetworkStateServiceServicer):
                     message = f"Exception thrown in status response handler for batch `{status_response.messageId}`: {str(e)}"
                     self.on_processing_error(message, e)
             else:
-                self.on_processing_error(f"Failed to decode status response for batch `{status_response.messageId}`: Unsupported type {status_response.WhichOneof('status')}", None)
+                self.on_processing_error(f"Failed to decode status response for batch `{status_response.messageId}`: "
+                                         f"Unsupported type {status_response.WhichOneof('status')}", None)
 
         # noinspection PyUnresolvedReferences
         return empty_pb2.Empty()

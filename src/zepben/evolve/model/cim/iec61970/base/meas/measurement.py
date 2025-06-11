@@ -51,14 +51,14 @@ class Measurement(IdentifiedObject):
     """A measurement may be associated with a terminal in the network."""
 
     phases: PhaseCode = PhaseCode.ABC
-    """Indicates to which phases the measurement applies and avoids the need to use 'measurementType' to also encode phase information 
-    (which would explode the types). The phase information in Measurement, along with 'measurementType' and 'phases' uniquely defines a Measurement for a 
-    device, based on normal network phase. Their meaning will not change when the computed energizing phasing is changed due to jumpers or other reasons. 
+    """Indicates to which phases the measurement applies and avoids the need to use 'measurementType' to also encode phase information
+    (which would explode the types). The phase information in Measurement, along with 'measurementType' and 'phases' uniquely defines a Measurement for a
+    device, based on normal network phase. Their meaning will not change when the computed energizing phasing is changed due to jumpers or other reasons.
     If the attribute is missing three phases (ABC) shall be assumed."""
 
     unit_symbol: UnitSymbol = UnitSymbol.NONE
-    """Specifies the type of measurement.  For example, this specifies if the measurement represents an indoor temperature, outdoor temperature, bus voltage, 
-    line flow, etc. When the measurementType is set to "Specialization", the type of Measurement is defined in more detail by the specialized class which 
+    """Specifies the type of measurement.  For example, this specifies if the measurement represents an indoor temperature, outdoor temperature, bus voltage,
+    line flow, etc. When the measurementType is set to "Specialization", the type of Measurement is defined in more detail by the specialized class which
     inherits from Measurement."""
 
 
@@ -71,7 +71,7 @@ class Analog(Measurement):
     """Analog represents an analog Measurement."""
 
     positive_flow_in: bool = False
-    """If true then this measurement is an active power, reactive power or current with the convention that a positive value measured at the 
+    """If true then this measurement is an active power, reactive power or current with the convention that a positive value measured at the
     Terminal means power is flowing into the related PowerSystemResource."""
 
 

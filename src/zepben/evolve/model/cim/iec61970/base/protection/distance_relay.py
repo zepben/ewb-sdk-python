@@ -19,22 +19,22 @@ class DistanceRelay(ProtectionRelayFunction):
     """The reverse blind impedance (in ohms) that defines the area to be blinded in the opposite direction of the power flow."""
 
     backward_reach: Optional[float] = None
-    """The reverse reach impedance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for 
+    """The reverse reach impedance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for
     which the relay will provide protection."""
 
     backward_reactance: Optional[float] = None
-    """The reverse reactance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for which the 
+    """The reverse reactance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for which the
     relay will provide protection."""
 
     forward_blind: Optional[float] = None
     """The forward blind impedance (in ohms) that defines the area to be blinded in the opposite direction of the power flow."""
 
     forward_reach: Optional[float] = None
-    """The forward reach impedance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for 
+    """The forward reach impedance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for
     which the relay will provide protection."""
 
     forward_reactance: Optional[float] = None
-    """The forward reactance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for which the 
+    """The forward reactance (in ohms) that determines the maximum distance along the transmission line in the opposite direction of power flow for which the
     relay will provide protection."""
 
     operation_phase_angle1: Optional[float] = None

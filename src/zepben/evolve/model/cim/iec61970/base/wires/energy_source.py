@@ -29,7 +29,7 @@ class EnergySource(EnergyConnection):
     """
 
     reactive_power: float | None = None
-    """High voltage source reactive injection. Load sign convention is used, i.e. positive sign means flow out from a node. 
+    """High voltage source reactive injection. Load sign convention is used, i.e. positive sign means flow out from a node.
     Starting value for steady state solutions."""
 
     voltage_angle: float | None = None

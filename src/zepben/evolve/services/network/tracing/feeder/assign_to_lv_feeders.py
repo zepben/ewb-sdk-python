@@ -33,7 +33,7 @@ class AssignToLvFeeders:
     Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
     This class is backed by a `BasicTraversal`.
     """
-    
+
     def __init__(self, debug_logger: Logger=None):
         self._debug_logger = debug_logger
 

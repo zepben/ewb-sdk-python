@@ -5,7 +5,7 @@
 
 import zepben.evolve.streaming as streaming
 import asyncio
-import grpc 
+import grpc
 
 
 class TestStreaming(object):

@@ -24,16 +24,16 @@ class EnergyConsumerPhase(PowerSystemResource):
     _energy_consumer: EnergyConsumer | None = None
 
     phase: SinglePhaseKind = SinglePhaseKind.X
-    """Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or 
+    """Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or
     neutral point. If the energy consumer is delta connected, the phase indicates an energy consumer connected from the indicated phase to the next
     logical non-neutral phase. """
 
     p: float | None = None
-    """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
+    """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at
     rated voltage. Starting value for a steady state solution."""
 
     q: float | None = None
-    """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
+    """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at
     rated voltage. Starting value for a steady state solution."""
 
     p_fixed: float | None = None
@@ -73,18 +73,18 @@ class EnergyConsumer(EnergyConnection):
     """Used for Yn and Zn connections. True if the neutral is solidly grounded."""
 
     phase_connection: PhaseShuntConnectionKind = PhaseShuntConnectionKind.D
-    """`zepben.protobuf.cim.iec61970.base.wires.phase_shunt_connection_kind.PhaseShuntConnectionKind` - The type of phase connection, 
+    """`zepben.protobuf.cim.iec61970.base.wires.phase_shunt_connection_kind.PhaseShuntConnectionKind` - The type of phase connection,
     such as wye, delta, I (single phase)."""
 
     p: float | None = None
-    """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
+    """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at
     rated voltage. Starting value for a steady state solution."""
 
     p_fixed: float | None = None
     """Active power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
     q: float | None = None
-    """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
+    """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at
     rated voltage. Starting value for a steady state solution."""
 
     q_fixed: float | None = None

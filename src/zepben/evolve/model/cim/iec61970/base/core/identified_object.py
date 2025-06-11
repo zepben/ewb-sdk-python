@@ -32,7 +32,7 @@ class IdentifiedObject(object, metaclass=ABCMeta):
     """
 
     mrid: str = CopyableUUID()
-    """Master resource identifier issued by a model authority. The mRID is unique within an exchange context. 
+    """Master resource identifier issued by a model authority. The mRID is unique within an exchange context.
     Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID. The use of UUID is strongly recommended."""
 
     name: str = ""

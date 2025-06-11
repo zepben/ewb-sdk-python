@@ -3,7 +3,6 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime
-from typing import Tuple
 from collections.abc import AsyncGenerator
 
 import grpc
@@ -31,7 +30,7 @@ class TestUpdateNetworkStateService:
 
     @pytest.fixture
     async def grpc_stub(self):
-        async def on_set_current_states(batches: AsyncGenerator[Tuple[int, Tuple[CurrentStateEvent, ...]], None]) -> AsyncGenerator[
+        async def on_set_current_states(batches: AsyncGenerator[tuple[int, tuple[CurrentStateEvent, ...]], None]) -> AsyncGenerator[
             SetCurrentStatesStatus, None]:
             async for batch_id, events in batches:
                 assert events == self.current_state_events[batch_id - 1]

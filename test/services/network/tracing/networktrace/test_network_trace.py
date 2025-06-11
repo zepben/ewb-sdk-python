@@ -10,7 +10,9 @@ from typing import List, Set, Tuple
 
 
 from services.network.tracing.networktrace.test_network_trace_step_path_provider import PathTerminal, _verify_paths
-from zepben.evolve import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType, Tracing
+from zepben.evolve import (
+    AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType, Tracing
+)
 from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
 
 DEFAULT_RECURSION_LIMIT = sys.getrecursionlimit()

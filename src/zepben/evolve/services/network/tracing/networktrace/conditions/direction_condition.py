@@ -32,7 +32,14 @@ class DirectionCondition(QueueCondition[NetworkTraceStep[T]], Generic[T]):
         self.state_operators = state_operators
         self.get_direction = self.state_operators.get_direction
 
-    def should_queue(self, next_item: NetworkTraceStep[T], next_context: StepContext[T], current_item: NetworkTraceStep[T], current_context: StepContext[T]) -> bool:
+    def should_queue(
+        self,
+        next_item: NetworkTraceStep[T],
+        next_context: StepContext[T],
+        current_item: NetworkTraceStep[T],
+        current_context: StepContext[T]
+    ) -> bool:
+
         return self._should_queue(next_item.path)
 
     def _should_queue(self, path: NetworkTraceStep.Path) -> bool:

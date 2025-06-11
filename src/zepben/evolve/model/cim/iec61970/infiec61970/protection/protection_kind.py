@@ -83,10 +83,16 @@ class ProtectionKind(Enum):
     """A device used to detect contact accidents between an electric path and ground caused by arc ground faults"""
 
     NETWORK_PROTECTOR = 24
-    """Is a special self-contained air breaker or switching unit having a full complement of current, potential and control transformers, as well as relay functionality."""
+    """
+    Is a special self-contained air breaker or switching unit having a full complement of current, potential
+    and control transformers, as well as relay functionality.
+    """
 
     DISTANCE = 25
-    """A device used to detect faults on long-distance lines, pinpointing not only the fault condition but also measuring the distance between the current sensing mechanism and the fault location in the wire."""
+    """
+    A device used to detect faults on long-distance lines, pinpointing not only the fault condition but also
+    measuring the distance between the current sensing mechanism and the fault location in the wire.
+    """
 
     NEGATIVE_OVERCURRENT = 26
     """A device used to protect generators from the unbalanced load by detecting negative sequence current."""

@@ -50,8 +50,8 @@ class RemovePhases(object):
         If `start` is a:
          - `NetworkService` - Remove traced phases from the specified network.
          - `Terminal` - Allows the removal of phases from a terminal and the connected equipment chain
-         
-        :param start: NetworkService or Terminal to start phase removal 
+
+        :param start: NetworkService or Terminal to start phase removal
         :param nominal_phases_to_ebb: The nominal phases to remove traced phasing from. Defaults to all phases.
         :param network_state_operators: The `NetworkStateOperators` to be used when removing phases.
         """
@@ -81,7 +81,7 @@ class RemovePhases(object):
     async def _run_with_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
         """
         Allows the removal of traced phases from a terminal and the connected equipment chain
-        
+
         :param terminal: Removes all nominal phases a terminal traced phases and the connected equipment chain
         :param network_state_operators: The `NetworkStateOperators` to be used when removing phases.
         """

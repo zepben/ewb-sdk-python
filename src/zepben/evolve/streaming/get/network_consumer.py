@@ -528,7 +528,8 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
             to_resolve = set()
             for obj in res.objects:
                 for ref in self.service.get_unresolved_references_from(obj):
-                    # Skip any reference trying to resolve from an EquipmentContainer on subsequent passes - e.g a PowerTransformer trying to pull in its LvFeeder.
+                    # Skip any reference trying to resolve from an EquipmentContainer on subsequent passes
+                    #  e.g a PowerTransformer trying to pull in its LvFeeder.
                     # EquipmentContainers should be retrieved explicitly or via a hierarchy call.
                     if subsequent and EquipmentContainer in ref.resolver.from_class.__bases__:
                         continue

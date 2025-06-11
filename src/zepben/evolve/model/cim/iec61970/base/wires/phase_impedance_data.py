@@ -19,10 +19,10 @@ class PhaseImpedanceData(object):
 
     from_phase: SinglePhaseKind
     """Refer to the class description."""
-    
+
     to_phase: SinglePhaseKind
     """Refer to the class description."""
-    
+
     b: Optional[float] = None
     """Susceptance matrix element value, per length of unit."""
 
