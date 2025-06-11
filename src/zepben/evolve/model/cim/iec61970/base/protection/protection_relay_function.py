@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Optional, List, Generator, Iterable, Callable
+from typing import Optional, List, Callable
+from collections.abc import Generator, Iterable
 
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor

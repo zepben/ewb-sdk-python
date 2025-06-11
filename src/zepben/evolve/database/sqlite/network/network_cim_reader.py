@@ -7,6 +7,15 @@ __all__ = ["NetworkCimReader"]
 import sys
 from typing import Callable, Optional
 
+# `assert_never` changed packages with the release of 3.11, so import it from the old spot while we still support 3.9 and 3.10.
+# ruff: noqa: E402
+v = sys.version_info
+if v.major == 3 and v.minor < 11:
+    from typing_extensions import assert_never
+else:
+    from typing import assert_never
+
+
 from zepben.evolve.database.sqlite.tables.associations.table_battery_units_battery_controls import TableBatteryUnitsBatteryControls
 from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
@@ -43,14 +52,6 @@ from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import S
 from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import SynchronousMachine
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
-
-# `assert_never` changed packages with the release of 3.11, so import it from the old spot while we still support 3.9 and 3.10.
-v = sys.version_info
-if v.major == 3 and v.minor < 11:
-    from typing_extensions import assert_never
-else:
-    from typing import assert_never
-
 from zepben.evolve.database.sqlite.common.base_cim_reader import BaseCimReader
 from zepben.evolve.database.sqlite.extensions.result_set import ResultSet
 from zepben.evolve.database.sqlite.tables.associations.loop_substation_relationship import LoopSubstationRelationship

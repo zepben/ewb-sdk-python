@@ -5,7 +5,8 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import List, Optional, Type, Any, Generator
+from typing import List, Optional, Type, Any
+from collections.abc import Generator
 
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
 
@@ -67,14 +68,12 @@ class SqliteTable(object):
     @property
     def unique_index_columns(self) -> Generator[List[Column], None, None]:
         # To make this a generator we need to `yield`, but we have nothing to yield by default, so trick it by yielding from an empty for-loop.
-        for it in []:
-            yield it
+        yield from []
 
     @property
     def non_unique_index_columns(self) -> Generator[List[Column], None, None]:
         # To make this a generator we need to `yield`, but we have nothing to yield by default, so trick it by yielding from an empty for-loop.
-        for it in []:
-            yield it
+        yield from []
 
     @property
     def column_set(self) -> List[Column]:

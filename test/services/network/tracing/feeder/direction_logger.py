@@ -4,14 +4,14 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import TypeVar
 
-from zepben.evolve import ConductingEquipment, Tracing, Traversal
+from zepben.evolve import ConductingEquipment, Tracing
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 __all__ = ["log_directions"]
 
 T = TypeVar('T')
 
 
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 
 async def log_directions(*conducting_equipment: ConductingEquipment):

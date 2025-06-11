@@ -19,7 +19,8 @@
 
 #  Modifications Copyright Zeppelin Bend Pty Ltd as stated above
 from abc import ABC
-from typing import TypeVar, Union, AsyncIterable, Optional
+from typing import TypeVar, Union, Optional
+from collections.abc import AsyncIterable
 
 import grpc
 from grpc.aio import UnaryUnaryCall, StreamUnaryCall, UnaryStreamCall, StreamStreamCall, Metadata

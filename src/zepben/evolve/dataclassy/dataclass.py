@@ -12,7 +12,8 @@
  https://github.com/biqqles/dataclassy/commit/ec9273ca02e5caefc08c923112fa9eeecf517246
 """
 from types import FunctionType as Function
-from typing import Any, Dict, Generic, Hashable, TypeVar
+from typing import Any, Dict, Generic, TypeVar
+from collections.abc import Hashable
 from reprlib import recursive_repr
 
 DataClass = Any  # type hint for variables that should be data class instances
@@ -160,7 +161,7 @@ def _generate_new(annotations: Dict, defaults: Dict, user_init: bool, gen_kwargs
 
 # generic method implementations common to all data classes
 # these are currently relatively inefficient - it would be better to cache an expression for a class' tuple
-from .functions import values, fields
+from .functions import values, fields  # noqa: E402
 
 
 def __eq__(self: DataClass, other: DataClass):

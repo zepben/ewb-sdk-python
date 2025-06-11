@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
 from itertools import takewhile
-from typing import List, Dict, Tuple, Optional, Counter as CounterType
+from typing import List, Dict, Tuple, Optional
+from collections import Counter as CounterType
 
 from zepben.evolve.dataclassy import dataclass
 

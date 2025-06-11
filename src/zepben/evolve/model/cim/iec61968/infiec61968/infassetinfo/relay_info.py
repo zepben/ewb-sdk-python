@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
-from typing import Optional, List, Generator, Callable
+from typing import Optional, List, Callable
+from collections.abc import Generator
 
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.util import ngen, nlen, safe_remove, require

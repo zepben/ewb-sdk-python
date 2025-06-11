@@ -6,7 +6,8 @@
 from __future__ import annotations
 
 import sys
-from typing import List, Optional, Generator, TYPE_CHECKING, Union
+from typing import List, Optional, TYPE_CHECKING, Union
+from collections.abc import Generator
 
 from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment

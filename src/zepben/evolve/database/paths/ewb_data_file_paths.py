@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Callable, Iterator, Optional, List
+from typing import Callable, Optional, List
+from collections.abc import Iterator
 
 from zepben.evolve import require
 from zepben.evolve.database.paths.database_type import DatabaseType

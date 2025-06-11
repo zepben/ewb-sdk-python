@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Generator, List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
+from collections.abc import Generator
 
 if TYPE_CHECKING:
     from zepben.evolve import Terminal

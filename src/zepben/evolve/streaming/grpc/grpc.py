@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import TypeVar, Generic, Callable, List, Union, Coroutine
+from typing import TypeVar, Generic, Callable, List, Union
+from collections.abc import Coroutine
 
 from zepben.evolve.dataclassy import dataclass
 

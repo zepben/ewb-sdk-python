@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import Optional, List, Generator
+from typing import Optional, List
+from collections.abc import Generator
 
 from zepben.evolve import nlen, ngen, get_by_mrid, safe_remove, require
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import CableInfo, WireInfo

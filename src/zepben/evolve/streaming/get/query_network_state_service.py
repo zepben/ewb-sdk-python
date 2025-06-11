@@ -5,7 +5,8 @@
 __all__ = ["QueryNetworkStateService"]
 
 from datetime import datetime
-from typing import Callable, AsyncGenerator, Optional
+from typing import Callable, Optional
+from collections.abc import AsyncGenerator
 
 from google.protobuf import empty_pb2
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceServicer

@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from abc import ABC
-from typing import TypeVar, Callable, Generator, Generic, List, Union, Type
+from typing import TypeVar, Callable, Generic, List, Union, Type
+from collections.abc import Generator
 
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep

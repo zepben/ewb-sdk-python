@@ -22,7 +22,7 @@ class PhaseShuntConnectionKind(Enum):
     Yn = 3
     """Wye, with neutral brought out for grounding."""
 
-    I = 4
+    I = 4  # noqa: E741
     """Independent winding, for single-phase connections."""
 
     G = 5

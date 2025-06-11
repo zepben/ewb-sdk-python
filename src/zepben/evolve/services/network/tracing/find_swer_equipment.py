@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import Set, Union, AsyncGenerator, Type, TYPE_CHECKING
+from typing import Set, Union, Type, TYPE_CHECKING
+from collections.abc import AsyncGenerator
 
 from typing_extensions import TypeVar
 

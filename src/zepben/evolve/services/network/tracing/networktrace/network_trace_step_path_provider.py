@@ -6,7 +6,8 @@
 from __future__ import annotations
 
 import sys
-from typing import Generator, Optional, Callable, Iterable, List, Union, Type, TYPE_CHECKING
+from typing import Optional, Callable, List, Union, Type, TYPE_CHECKING
+from collections.abc import Generator, Iterable
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection

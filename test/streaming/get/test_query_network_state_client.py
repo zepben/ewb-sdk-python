@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from datetime import datetime, timedelta
-from typing import List, Callable, Generator
+from typing import List, Callable
+from collections.abc import Generator
 
 import grpc_testing
 import pytest
@@ -46,8 +47,7 @@ class TestQueryNetworkStateClient:
                 assert request.fromTimestamp == datetime_to_timestamp(from_datetime)
                 assert request.toTimestamp == datetime_to_timestamp(to_datetime)
 
-                for response in responses:
-                    yield response
+                yield from responses
 
             return [process]
 

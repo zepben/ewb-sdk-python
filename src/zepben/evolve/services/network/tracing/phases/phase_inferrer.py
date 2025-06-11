@@ -5,7 +5,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Callable, List, Set, Awaitable, Type, TYPE_CHECKING
+from typing import Dict, Callable, List, Set, Type, TYPE_CHECKING
+from collections.abc import Awaitable
 
 from zepben.evolve import Terminal, SinglePhaseKind, ConductingEquipment, NetworkService, \
     FeederDirection, X_PRIORITY, Y_PRIORITY, is_before, is_after

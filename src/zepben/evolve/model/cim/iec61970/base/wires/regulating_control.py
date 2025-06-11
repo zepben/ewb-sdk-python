@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import Optional, List, Generator, Iterable, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
+from collections.abc import Generator, Iterable
 
 if TYPE_CHECKING:
     from zepben.evolve import RegulatingCondEq

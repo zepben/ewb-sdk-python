@@ -5,7 +5,8 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Iterable, Dict, Set, TypeVar, Generic, Tuple, Optional, AsyncGenerator, Type, Generator
+from typing import Dict, Set, TypeVar, Generic, Tuple, Optional, Type
+from collections.abc import Iterable, AsyncGenerator, Generator
 
 from zepben.evolve.dataclassy import dataclass
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse

@@ -5,7 +5,8 @@
 __all__ = ["QueryNetworkStateClient"]
 
 from datetime import datetime
-from typing import List, Callable, AsyncGenerator
+from typing import List, Callable
+from collections.abc import AsyncGenerator
 
 from zepben.protobuf.ns.network_state_pb2_grpc import QueryNetworkStateServiceStub
 from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesRequest

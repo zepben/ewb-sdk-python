@@ -7,7 +7,8 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from functools import singledispatchmethod
-from typing import Union, Set, Iterable, List, Type, TYPE_CHECKING, Optional, Callable
+from typing import Union, Set, List, Type, TYPE_CHECKING, Optional, Callable
+from collections.abc import Iterable
 
 from zepben.evolve import PhaseStatus, add_neutral
 from zepben.evolve.exceptions import TracingException, PhaseException

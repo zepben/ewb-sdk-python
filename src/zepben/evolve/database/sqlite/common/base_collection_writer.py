@@ -6,7 +6,8 @@ __all__ = ["BaseCollectionWriter"]
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Callable, TypeVar, Iterable
+from typing import Callable, TypeVar
+from collections.abc import Iterable
 
 from zepben.evolve.database.sqlite.extensions.prepared_statement import SqlException
 

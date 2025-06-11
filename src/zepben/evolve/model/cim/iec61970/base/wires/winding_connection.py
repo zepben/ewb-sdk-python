@@ -31,7 +31,7 @@ class WindingConnection(Enum):
     A = 6
     """Autotransformer common winding"""
 
-    I = 7
+    I = 7  # noqa: E741
     """Independent winding, for single-phase connections"""
 
     @property

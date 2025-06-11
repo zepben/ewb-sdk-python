@@ -2,7 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Generator
+from collections.abc import Generator
 
 from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.evolve.database.sqlite.tables.associations.table_asset_organisation_roles_assets import *
@@ -127,8 +127,7 @@ class NetworkDatabaseTables(BaseDatabaseTables):
 
     @property
     def _included_tables(self) -> Generator[SqliteTable, None, None]:
-        for table in super()._included_tables:
-            yield table
+        yield from super()._included_tables
 
         yield TableAcLineSegments()
         yield TableAccumulators()

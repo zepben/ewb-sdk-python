@@ -7,7 +7,8 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from functools import lru_cache
-from typing import Type, Generator, TYPE_CHECKING
+from typing import Type, TYPE_CHECKING
+from collections.abc import Generator
 
 from zepben.evolve.util import classproperty
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step_path_provider import NetworkTraceStepPathProvider

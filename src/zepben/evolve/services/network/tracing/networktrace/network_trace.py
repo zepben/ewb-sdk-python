@@ -6,7 +6,8 @@ import inspect
 from collections.abc import Callable
 from functools import singledispatchmethod
 from logging import Logger
-from typing import TypeVar, Union, Generic, Set, Type, Generator
+from typing import TypeVar, Union, Generic, Set, Type
+from collections.abc import Generator
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment

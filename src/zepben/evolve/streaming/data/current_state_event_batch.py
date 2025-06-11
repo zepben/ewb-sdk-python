@@ -5,7 +5,7 @@
 __all__ = ["CurrentStateEventBatch"]
 
 from dataclasses import dataclass
-from typing import Iterable
+from collections.abc import Iterable
 
 from zepben.evolve.streaming.data.current_state_event import CurrentStateEvent
 

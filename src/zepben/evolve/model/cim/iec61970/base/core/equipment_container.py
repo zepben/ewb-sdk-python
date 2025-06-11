@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar, Iterable, Type
+from typing import Optional, Dict, List, TYPE_CHECKING, TypeVar, Type
+from collections.abc import Generator, Iterable
 
 if TYPE_CHECKING:
     from zepben.evolve import Equipment, Terminal, Substation, LvFeeder, NetworkStateOperators
@@ -452,5 +453,4 @@ class Site(EquipmentContainer):
             if isinstance(ce, ConductingEquipment):
                 if ce in lv_feeder_start_points:
                     if not state_operators.is_open(ce):  # Exclude any open switch that might be energised by a different feeder on the other side
-                        for lv_feeder in ce.lv_feeders(state_operators):
-                            yield lv_feeder
+                        yield from ce.lv_feeders(state_operators)

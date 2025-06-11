@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import Generator, Optional, List, TYPE_CHECKING, Iterable
+from typing import Optional, List, TYPE_CHECKING
+from collections.abc import Generator, Iterable
 from zepben.evolve.util import ngen, nlen, get_by_mrid, safe_remove
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction

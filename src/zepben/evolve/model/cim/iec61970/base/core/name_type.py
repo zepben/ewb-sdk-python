@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable
+from typing import Dict, List, overload, TYPE_CHECKING, Callable
+from collections.abc import Generator
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
@@ -43,11 +44,9 @@ class NameType:
     def names(self) -> Generator[Name, None, None]:
         """All names of this type."""
         for names_ in self._names_multi_index.values():
-            for name in names_:
-                yield name
+            yield from names_
 
-        for name_ in self._names_index.values():
-            yield name_
+        yield from self._names_index.values()
 
     @overload
     def has_name(self, name: str):

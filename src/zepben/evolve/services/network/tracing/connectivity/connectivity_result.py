@@ -6,7 +6,8 @@
 from __future__ import annotations
 
 from operator import attrgetter
-from typing import List, Optional, Tuple, TYPE_CHECKING, Iterable
+from typing import List, Optional, Tuple, TYPE_CHECKING
+from collections.abc import Iterable
 
 from zepben.evolve.dataclassy import dataclass
 

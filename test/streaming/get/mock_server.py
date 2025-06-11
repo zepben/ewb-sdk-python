@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from dataclasses import dataclass
-from typing import Awaitable, Callable, List, TypeVar, Union, Optional, Iterable, Generator
+from typing import Callable, List, TypeVar, Union, Optional
+from collections.abc import Awaitable, Iterable, Generator
 
 # noinspection PyPackageRequirements
 import grpc
@@ -74,8 +75,7 @@ class UnaryStreamGrpc:
 
 def stream_from_fixed(expected_requests: List[str], responses: Iterable[GrpcResponse]) -> List[Callable[[GrpcRequest], Generator[GrpcResponse, None, None]]]:
     def process(request: GrpcRequest) -> Generator[GrpcResponse, None, None]:
-        for response in responses:
-            yield response
+        yield from responses
 
         assert len(request.mrids) == len(expected_requests)
         assert set(request.mrids) == set(expected_requests)

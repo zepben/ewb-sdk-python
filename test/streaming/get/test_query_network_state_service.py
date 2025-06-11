@@ -112,8 +112,8 @@ class TestQueryNetworkStateService:
     @pytest.mark.parametrize('on_get_current_states_error', [error])
     async def test_get_current_states_handles_error(self, grpc_stub):
         with pytest.raises(AioRpcError) as e_info:
-            # noinspection PyUnusedLocal
-            responses = [response async for response in grpc_stub.getCurrentStates(GetCurrentStatesRequest())]
+            async for response in grpc_stub.getCurrentStates(GetCurrentStatesRequest()):
+                response
 
         assert e_info.value.code() == grpc.StatusCode.UNKNOWN
         assert str(self.error) in str(e_info.value)

@@ -8,7 +8,8 @@ from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Equip
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 
 from abc import abstractmethod
-from typing import Generator, TYPE_CHECKING
+from typing import TYPE_CHECKING
+from collections.abc import Generator
 
 from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 

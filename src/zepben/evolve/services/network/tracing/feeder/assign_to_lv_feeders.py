@@ -5,7 +5,8 @@
 from __future__ import annotations
 
 from functools import singledispatchmethod
-from typing import Collection, List, Generator, TypeVar, Dict, Set, Type, TYPE_CHECKING
+from typing import List, TypeVar, Dict, Set, Type, TYPE_CHECKING
+from collections.abc import Collection, Generator
 
 from zepben.evolve import Switch, ProtectedSwitch, PowerElectronicsConnection, Terminal, ConductingEquipment, AuxiliaryEquipment, LvFeeder
 from zepben.evolve.services.network.network_service import NetworkService

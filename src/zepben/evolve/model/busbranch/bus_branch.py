@@ -8,7 +8,8 @@ import abc
 from collections import Counter
 from dataclasses import dataclass, field
 from functools import reduce
-from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable, TYPE_CHECKING
+from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, TYPE_CHECKING
+from collections.abc import Iterable
 
 from zepben.evolve import Junction, BusbarSection, EquivalentBranch, Traversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -46,7 +47,7 @@ PEC = TypeVar('PEC')  # Power Electronics Connection
 D = TypeVar('D')
 
 
-class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC], metaclass=abc.ABCMeta):
+class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC], abc.ABC):
     """
     Validator used to determine if node-breaker network data is fit for the creation of a bus-branch network.
     """
@@ -194,7 +195,7 @@ class BusBranchNetworkCreationValidator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC
 BNV = TypeVar('BNV', bound=BusBranchNetworkCreationValidator)  # Subtype of BusBranchNetworkCreationValidator
 
 
-class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], metaclass=abc.ABCMeta):
+class BusBranchNetworkCreator(Generic[BBN, TN, TB, EB, PT, ES, EC, PEC, BNV], abc.ABC):
     """Contains the logic needed to generate a target bus-branch network from a source `NetworkService`.
 
     NOTE: All bus-branch network elements returned from the creators must have a uuid (universally unique identifier). This is needed to prevent collisions
@@ -633,7 +634,7 @@ async def _create_topological_branches(
                     return False
                 acls_tns.append(tn)
 
-            total_length = reduce(lambda s, l: l.length + s, (common_acl for common_acl in common_acls), 0.0)
+            total_length = reduce(lambda s, l: l.length + s, (common_acl for common_acl in common_acls), 0.0)  # noqa: E741
 
             # create topological branch
             if not validator.is_valid_topological_branch_data(bus_branch_network,
@@ -762,7 +763,7 @@ async def _create_energy_sources(
     validator: BNV
 ) -> bool:
     for es in node_breaker_network.objects(EnergySource):
-        es_terminal = next((t for t in es.terminals))
+        es_terminal = next(t for t in es.terminals)
         tn_creation_success, tn = await _get_or_create_topological_node(es_terminal, terminals_to_tns,
                                                                         node_breaker_network,
                                                                         bus_branch_network, bus_branch_network_creator,
@@ -792,7 +793,7 @@ async def _create_energy_consumers(
     validator: BNV
 ):
     for ec in node_breaker_network.objects(EnergyConsumer):
-        ec_terminal = next((t for t in ec.terminals))
+        ec_terminal = next(t for t in ec.terminals)
         tn_creation_success, tn = await _get_or_create_topological_node(ec_terminal, terminals_to_tns,
                                                                         node_breaker_network,
                                                                         bus_branch_network, bus_branch_network_creator,
@@ -823,7 +824,7 @@ async def _create_power_electronics_connections(
     validator: BNV
 ):
     for pec in node_breaker_network.objects(PowerElectronicsConnection):
-        pec_terminal = next((t for t in pec.terminals))
+        pec_terminal = next(t for t in pec.terminals)
         tn_creation_success, tn = await _get_or_create_topological_node(pec_terminal, terminals_to_tns,
                                                                         node_breaker_network,
                                                                         bus_branch_network, bus_branch_network_creator,
@@ -993,7 +994,7 @@ def _process_acls(
 
         common_acls.conducting_equipment_group.add(acls)
         connectivity_node_counter.update(
-            (t.connectivity_node for t in acls.terminals if t.connectivity_node is not None))
+            t.connectivity_node for t in acls.terminals if t.connectivity_node is not None)
 
     return add_to_group
 

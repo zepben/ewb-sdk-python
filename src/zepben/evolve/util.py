@@ -25,7 +25,8 @@ import os
 import re
 from collections.abc import Sized
 from datetime import datetime
-from typing import List, Optional, Iterable, Callable, Any, TypeVar, Generator, Dict, Collection
+from typing import List, Optional, Callable, Any, TypeVar, Dict
+from collections.abc import Iterable, Generator, Collection
 from typing import TYPE_CHECKING
 from uuid import UUID
 

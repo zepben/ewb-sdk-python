@@ -6,7 +6,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional, Generator, Callable
+from typing import List, Optional, Callable
+from collections.abc import Generator
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import require, nlen, ngen, safe_remove
@@ -147,8 +148,7 @@ class Location(IdentifiedObject):
         """
         Returns Generator over the `PositionPoint`s of this `Location`.
         """
-        for point in ngen(self._position_points):
-            yield point
+        yield from ngen(self._position_points)
 
     def get_point(self, sequence_number: int) -> PositionPoint:
         """

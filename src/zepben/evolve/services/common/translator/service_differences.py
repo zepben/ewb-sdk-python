@@ -2,7 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Callable, Optional, Set, Dict, Generator, Tuple, Any, Iterable
+from typing import Callable, Optional, Set, Dict, Tuple, Any
+from collections.abc import Generator, Iterable
 
 from zepben.evolve import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
@@ -29,16 +30,13 @@ class ServiceDifferences(object):
         self._modifications: Dict[str, ObjectDifference] = {}
 
     def missing_from_target(self) -> Generator[str, None, None]:
-        for it in self._missing_from_target:
-            yield it
+        yield from self._missing_from_target
 
     def missing_from_source(self) -> Generator[str, None, None]:
-        for it in self._missing_from_source:
-            yield it
+        yield from self._missing_from_source
 
     def modifications(self) -> Generator[Tuple[str, ObjectDifference], None, None]:
-        for k, v in self._modifications.items():
-            yield k, v
+        yield from self._modifications.items()
 
     def add_to_missing_from_target(self, mrid: str):
         self._missing_from_target.add(mrid)
@@ -52,7 +50,7 @@ class ServiceDifferences(object):
     def __str__(self) -> str:
         return "Missing From Target:" + _indent_each(self._missing_from_target, self._source_lookup, self._source_name_type_lookup) + \
                "\nMissing From Source:" + _indent_each(self._missing_from_source, self._target_lookup, self._target_name_type_lookup) + \
-               "\nModifications:" + ''.join(_indented_line("{!r}: {!r},".format(k, v)) for k, v in self._modifications.items())
+               "\nModifications:" + ''.join(_indented_line("{!r}: {!r},".format(k, v)) for k, v in self._modifications.items())  # noqa: UP032
 
 
 def _indent_each(items: Iterable, obj_lookup, name_lookup) -> str:

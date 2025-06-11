@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import List, Iterable, Optional, Set, Dict, Callable
+from typing import List, Optional, Set, Dict, Callable
+from collections.abc import Iterable
 
 from zepben.evolve.services.network.tracing.connectivity.connectivity_result import ConnectivityResult
 from zepben.evolve.services.network.tracing.connectivity.xy_candidate_phase_paths import XyCandidatePhasePaths

@@ -10,9 +10,10 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod, ABCMeta
+from abc import abstractmethod, ABCMeta, ABC
 from collections import deque
-from typing import TypeVar, Iterable, Generic, Deque, TYPE_CHECKING, Union
+from typing import TypeVar, Generic, Deque, TYPE_CHECKING, Union
+from collections.abc import Iterable
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -33,7 +34,7 @@ class LIFODeque(deque):
         return self[0]
 
 
-class TraversalQueue(Generic[T], metaclass=ABCMeta):
+class TraversalQueue(Generic[T], ABC):
     """
     Basic queue object, implementing some methods to align it with the kotlin sdk syntax,
     """

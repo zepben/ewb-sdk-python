@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import re
 from collections import Counter
-from typing import TypeVar, Callable, Generator, List, Dict, Union, Type, Tuple
+from typing import TypeVar, Callable, List, Dict, Union, Type, Tuple
+from collections.abc import Generator
 
 import pytest
 

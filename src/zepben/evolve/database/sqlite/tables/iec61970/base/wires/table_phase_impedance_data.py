@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 __all__ = ["TablePhaseImpedanceData"]
 
-from typing import List, Generator
+from typing import List
+from collections.abc import Generator
 
 from zepben.evolve import SqliteTable
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable

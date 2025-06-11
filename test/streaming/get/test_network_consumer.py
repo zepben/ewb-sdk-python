@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from time import sleep
-from typing import Dict, Iterable, TypeVar, Generator, Callable, Optional
+from typing import Dict, TypeVar, Callable, Optional
+from collections.abc import Iterable, Generator
 from unittest.mock import MagicMock
 
 import grpc_testing

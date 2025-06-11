@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Optional, List, Generator, TYPE_CHECKING, Iterable
+from typing import Optional, List, TYPE_CHECKING
+from collections.abc import Generator, Iterable
 
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.util import get_by_mrid, ngen, nlen, safe_remove

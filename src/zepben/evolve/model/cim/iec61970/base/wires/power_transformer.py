@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import List, Optional, Generator
+from typing import List, Optional
+from collections.abc import Generator
 
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind

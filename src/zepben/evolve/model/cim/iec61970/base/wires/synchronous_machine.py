@@ -2,7 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Optional, List, Generator
+from typing import Optional, List
+from collections.abc import Generator
 
 from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
 from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine

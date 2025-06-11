@@ -6,7 +6,8 @@
 from __future__ import annotations
 
 import datetime
-from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
+from typing import Optional, List, TYPE_CHECKING, TypeVar, Type
+from collections.abc import Generator
 
 if TYPE_CHECKING:
     from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction, NetworkStateOperators

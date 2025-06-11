@@ -1,7 +1,17 @@
 line-length = 160
 indent-width = 4
 
-[tool.ruff.lint]
-select =[
-    "UP007"  # Use of 'Union[type, type]' instead of 'type | type'
+[lint]
+select = [
+    "UP007",  # Use of 'Union[type, type]' instead of 'type | type'
+    'E721',   # Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
+    'UP028',  # Replace `yield` over `for` loop with `yield from`
+    # UP008 Use `super()` instead of `super(__class__, self)`
+    'UP032',  # Use f-string instead of `format` call
+    'UP034',  # Avoid extraneous parentheses
+    'E4', 'E7', 'E9',
+]
+ignore = [
+    'E731',  # dont assign lambda's, use a function def
+    'E722',  # dont use a bare except
 ]

@@ -6,7 +6,8 @@
 from __future__ import annotations
 
 import typing
-from typing import Generator, Optional, Dict, List
+from typing import Optional, Dict, List
+from collections.abc import Generator
 
 if typing.TYPE_CHECKING:
     from zepben.evolve import Equipment, Terminal, Feeder

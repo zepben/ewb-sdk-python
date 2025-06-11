@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from typing import List, Optional, Generator
+from typing import List, Optional
+from collections.abc import Generator
 
 from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo

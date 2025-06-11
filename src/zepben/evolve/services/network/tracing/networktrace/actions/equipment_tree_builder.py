@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import uuid
-from typing import Any, Generator
+from typing import Any
+from collections.abc import Generator
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode

@@ -53,8 +53,7 @@ class QueueCondition(Generic[T], TraversalCondition[T]):
 
         return True
 
-
-from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
+from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer  # noqa: E402
 
 class QueueConditionWithContextValue(QueueCondition[T], ContextValueComputer[T], Generic[T, U]):
     """

@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 __all__ = ["TableSynchronousMachinesReactiveCapabilityCurves"]
 
-from typing import Generator, List
+from typing import List
+from collections.abc import Generator
 
 from zepben.evolve import SqliteTable, Column, Nullable
 

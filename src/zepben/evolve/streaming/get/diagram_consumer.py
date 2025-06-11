@@ -5,7 +5,8 @@
 from __future__ import annotations
 
 from asyncio import get_event_loop
-from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, Union
+from typing import Optional, List, Callable, Tuple, Union
+from collections.abc import Iterable, AsyncGenerator
 
 from zepben.evolve import DiagramService, IdentifiedObject, Diagram, DiagramObject, ServiceInfo
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult

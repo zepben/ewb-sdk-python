@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 __all__ = ["UpdateNetworkStateService"]
 
-from typing import Tuple, Callable, AsyncGenerator, Any
+from typing import Tuple, Callable, Any
+from collections.abc import AsyncGenerator
 
 from zepben.protobuf.ns.network_state_pb2_grpc import UpdateNetworkStateServiceServicer
 from zepben.protobuf.ns.network_state_requests_pb2 import SetCurrentStatesRequest as PBSetCurrentStatesRequest

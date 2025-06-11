@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator
+from typing import Optional
+from collections.abc import Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
@@ -174,6 +175,6 @@ class Terminal(AcDcTerminal):
 
     def has_connected_busbars(self):
         try:
-            return any(it != self and isinstance(it.conducting_equipment, BusbarSection) for it in self.connectivity_node.terminals) == True
+            return any(it != self and isinstance(it.conducting_equipment, BusbarSection) for it in self.connectivity_node.terminals)
         except AttributeError:
             return False

@@ -58,6 +58,6 @@ class ContextValueComputer(Generic[T]):
 
 
 # these imports are here to stop circular imports
-from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition
-from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
-from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
+from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition  # noqa: E402
+from zepben.evolve.services.network.tracing.traversal.step_action import StepAction  # noqa: E402
+from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition  # noqa: E402

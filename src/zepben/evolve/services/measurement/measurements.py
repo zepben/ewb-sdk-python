@@ -6,7 +6,8 @@ from __future__ import annotations
 
 __all__ = ["MeasurementService"]
 
-from typing import List, Optional, Generator, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
+from collections.abc import Generator
 
 from zepben.evolve import MeasurementValue
 
@@ -30,5 +31,4 @@ class MeasurementService:
         return len([m for m in self._measurements if isinstance(m, t)]) if t is not None else len(self._measurements)
 
     def objects(self, obj_type: type | None = None, exc_types: List[type] | None = None) -> Generator[IdentifiedObject, None, None]:
-        for m in self._measurements:
-            yield m
+        yield from self._measurements

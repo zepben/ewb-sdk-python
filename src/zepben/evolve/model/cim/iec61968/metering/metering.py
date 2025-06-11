@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from typing import Optional, Generator, List, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
+from collections.abc import Generator
 
 from zepben.evolve.model.cim.iec61968.assets.asset_function import AssetFunction
 

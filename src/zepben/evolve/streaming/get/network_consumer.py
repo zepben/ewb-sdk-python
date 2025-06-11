@@ -7,7 +7,8 @@ from __future__ import annotations
 import warnings
 from asyncio import get_event_loop
 from itertools import chain
-from typing import Iterable, Dict, Optional, AsyncGenerator, Union, List, Callable, Set, Tuple, Generic, TypeVar, Awaitable, cast
+from typing import Dict, Optional, Union, List, Callable, Set, Tuple, Generic, TypeVar, cast
+from collections.abc import Iterable, AsyncGenerator, Awaitable
 
 from zepben.evolve.dataclassy import dataclass
 from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest

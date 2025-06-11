@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import Optional, List, Generator
+from typing import Optional, List
+from collections.abc import Generator
 
 from zepben.evolve.util import require, ngen, nlen, safe_remove, none
 from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthImpedance

@@ -6,7 +6,8 @@ from __future__ import annotations
 
 from collections.abc import Collection
 from logging import Logger
-from typing import Iterable, Union, List, Dict, Any, Set, Type, Generator, TYPE_CHECKING
+from typing import Union, List, Dict, Any, Set, Type, TYPE_CHECKING
+from collections.abc import Iterable, Generator
 
 from zepben.evolve import Switch, ProtectedSwitch, PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder

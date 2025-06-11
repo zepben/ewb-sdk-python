@@ -6,7 +6,8 @@ __all__ = ["TSqliteTable", "BaseDatabaseTables"]
 
 from abc import ABC
 from sqlite3 import Connection, Cursor, ProgrammingError
-from typing import Dict, TypeVar, Type, Generator, Callable, Optional
+from typing import Dict, TypeVar, Type, Callable, Optional
+from collections.abc import Generator
 
 from zepben.evolve.database.sqlite.extensions.prepared_statement import PreparedStatement
 from zepben.evolve.database.sqlite.tables.exceptions import MissingTableConfigException
@@ -36,8 +37,7 @@ class BaseDatabaseTables(ABC):
         The tables that are available in this database, keyed on the table class. You should use `get_table` to access individual tables.
         """
         self._ensure_tables()
-        for t in self._tables.values():
-            yield t
+        yield from self._tables.values()
 
     @property
     def insert_statements(self) -> Generator[PreparedStatement, None, None]:
@@ -45,8 +45,7 @@ class BaseDatabaseTables(ABC):
         A collection of `PreparedStatement` for each table. You should use `get_insert` to access individual inserts.
         """
         if self._insert_statements is not None:
-            for s in self._insert_statements.values():
-                yield s
+            yield from self._insert_statements.values()
 
     @property
     def _included_tables(self) -> Generator[SqliteTable, None, None]:

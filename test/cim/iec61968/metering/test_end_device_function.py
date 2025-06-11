@@ -19,7 +19,7 @@ end_device_function_args = [*asset_function_args, False]
 
 def verify_end_device_function_constructor_default(edf: EndDeviceFunction):
     verify_asset_function_constructor_default(edf)
-    assert edf.enabled == True
+    assert edf.enabled
 
 
 def verify_end_device_function_constructor_kwargs(edf: EndDeviceFunction, enabled, **kwargs):

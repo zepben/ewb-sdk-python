@@ -8,7 +8,8 @@ __all__ = ["BaseService", "TBaseService"]
 
 from abc import ABC
 from collections import OrderedDict
-from typing import Dict, Generator, Callable, Optional, List, Union, Sized, Set, TypeVar
+from typing import Dict, Callable, Optional, List, Union, Set, TypeVar
+from collections.abc import Generator, Sized
 from typing import Type
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject, TIdentifiedObject
@@ -137,8 +138,7 @@ class BaseService(ABC):
         favour of `get_unresolved_reference_mrids_by_resolver()`, `get_unresolved_reference_mrids_from()`, and `get_unresolved_reference_mrids_to()`
         """
         for unresolved_refs in self._unresolved_references_to.copy().values():
-            for ur in unresolved_refs:
-                yield ur
+            yield from unresolved_refs
 
     def get(self, mrid: str, type_: Type[TIdentifiedObject] = IdentifiedObject, default=_GET_DEFAULT,
             generate_error: Callable[[str, str], str] = lambda mrid, typ: f"Failed to find {typ}[{mrid}]") -> TIdentifiedObject:
@@ -305,8 +305,7 @@ class BaseService(ABC):
         Returns a generator over the `UnresolvedReference`s that need to be resolved for `mrid`.
         """
         if mrid in self._unresolved_references_from:
-            for ref in self._unresolved_references_from[mrid]:
-                yield ref
+            yield from self._unresolved_references_from[mrid]
 
     def get_unresolved_references_to(self, mrid: str) -> Generator[UnresolvedReference, None, None]:
         """
@@ -315,8 +314,7 @@ class BaseService(ABC):
         Returns a generator over the `UnresolvedReference`s that need to be resolved for `mrid`.
         """
         if mrid in self._unresolved_references_to:
-            for ref in self._unresolved_references_to[mrid]:
-                yield ref
+            yield from self._unresolved_references_to[mrid]
 
     def remove(self, identified_object: IdentifiedObject) -> bool:
         """
@@ -355,8 +353,7 @@ class BaseService(ABC):
     @property
     def name_types(self) -> Generator[NameType, None, None]:
         """Associates the provided [nameType] with this service."""
-        for name_type in self._name_types.values():
-            yield name_type
+        yield from self._name_types.values()
 
     def add_name_type(self, name_type: NameType) -> bool:
         """

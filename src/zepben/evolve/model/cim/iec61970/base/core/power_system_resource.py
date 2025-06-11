@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING, List, Generator, Iterable
+from typing import Optional, TYPE_CHECKING, List
+from collections.abc import Generator, Iterable
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo

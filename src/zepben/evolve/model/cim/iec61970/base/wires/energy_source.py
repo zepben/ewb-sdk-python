@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, Generator
+from typing import List, Optional
+from collections.abc import Generator
 
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase

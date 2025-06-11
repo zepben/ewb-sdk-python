@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from dataclasses import field, dataclass
-from typing import Set, FrozenSet, Tuple, List, Iterable, Optional, Dict, TypeVar
+from typing import Set, FrozenSet, Tuple, List, Optional, Dict, TypeVar
+from collections.abc import Iterable
 
 from zepben.evolve import Terminal, NetworkService, AcLineSegment, PowerTransformer, EnergySource, EnergyConsumer, ConductingEquipment, \
     PowerElectronicsConnection, BusBranchNetworkCreator, \

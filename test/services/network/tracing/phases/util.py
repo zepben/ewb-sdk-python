@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import logging
-from typing import Iterable, Optional, Union
+from typing import Optional, Union
+from collections.abc import Iterable
 
 from zepben.evolve import ConductingEquipment, NetworkService, SinglePhaseKind as Phase, Terminal, PhaseStatus, PhaseCode, Tracing, Traversal
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep

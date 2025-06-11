@@ -11,7 +11,8 @@ import itertools
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Set
+from typing import TYPE_CHECKING, Dict, List, Union, Optional, Set
+from collections.abc import Iterable
 
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder

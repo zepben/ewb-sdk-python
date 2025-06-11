@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Optional, Generator, List, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
+from collections.abc import Generator
 
 if TYPE_CHECKING:
     from zepben.evolve import AssetOrganisationRole
