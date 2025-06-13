@@ -1,13 +1,24 @@
 [
   {
-    "id": "query-style",
-    "name": "style-name",
+    "id": "query-style-line",
+    "name": "lines",
     "type": "line",
     "minzoom": 8,
     "paint": {
       "line-color": "rgb(53, 175, 109)",
       "line-width": 6,
       "line-opacity": 0.5
+    }
+  },
+  {
+    "id": "query-style-point",
+    "name": "points",
+    "type": "circle",
+    "minzoom": 8,
+    "paint": {
+      "circle-color": "rgb(53, 175, 109)",
+      "circle-radius": 6,
+      "circle-opacity": 0.5
     }
   }
 ]
