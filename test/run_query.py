@@ -23,9 +23,9 @@ async def run_queries():
         await run_query(client, "with FNS022 select where name like A")
         await run_query(client, "with FNS022 select where length < 10")
 
-        await run_query(client, "with FNS022 trace from 19404384")
         await run_query(client, "with FNS022 trace downstream from 19404384")
         await run_query(client, "with FNS022 trace upstream from 19404384")
+        await run_query(client, "with FNS022 trace from 19404384 stopping at is switch")
 
 
 async def run_query(client: NetworkConsumerClient, query: str):
@@ -77,6 +77,10 @@ class BaseCommand:
         except:
             return False
 
+    @staticmethod
+    def has_class(obj: Any, class_name: str):
+        return any(cls.__name__.lower() == class_name.lower() for cls in obj.__class__.__mro__)
+
 
 class SelectCommand(BaseCommand):
 
@@ -91,8 +95,8 @@ class SelectCommand(BaseCommand):
         condition_check = self.additional_args.pop(0)
 
         if condition_check.lower() == "is":
-            class_check = self.additional_args.pop(0).lower()
-            print([it.mrid for it in service.objects() if it.__class__.__name__.lower() == class_check])
+            class_check = self.additional_args.pop(0)
+            print([it.mrid for it in service.objects() if self.has_class(it, class_check)])
         else:
             # assume it is an attribute name
             comparison = self.additional_args.pop(0).lower()
@@ -150,6 +154,49 @@ class TraceCommand(BaseCommand):
             raise ValueError(f"unknown trace '{trace_type}'")
 
         start_point = self.additional_args.pop(0)
+
+        if self.additional_args:
+            stopping_check = self.additional_args.pop(0).lower()
+            remaining_condition = " ".join(self.additional_args)
+            assert stopping_check == "stopping", f"unexpected remaining tokens: '{stopping_check} {remaining_condition}'"
+
+            at_check = self.additional_args.pop(0).lower()
+            assert at_check == "at", "missing keyword 'AT' after 'STOPPING'"
+
+            condition_check = self.additional_args.pop(0)
+
+            if condition_check.lower() == "is":
+                class_check = self.additional_args.pop(0)
+                trace.add_stop_condition(lambda step, context: self.has_class(step.path.to_equipment, class_check))
+            else:
+                # assume it is an attribute name
+                comparison = self.additional_args.pop(0).lower()
+                value = self.additional_args.pop(0)
+                if comparison == "<":
+                    trace.add_stop_condition(
+                        lambda step, context: self._check_attr(step.path.to_equipment, condition_check, lambda attr: float(attr) < float(value)))
+                    pass
+                elif comparison == "<=":
+                    trace.add_stop_condition(
+                        lambda step, context: self._check_attr(step.path.to_equipment, condition_check, lambda attr: float(attr) <= float(value)))
+                    pass
+                elif comparison == "=" or comparison == "==":
+                    trace.add_stop_condition(lambda step, context: self._check_attr(step.path.to_equipment, condition_check, lambda attr: attr == value))
+                    pass
+                elif comparison == ">=":
+                    trace.add_stop_condition(
+                        lambda step, context: self._check_attr(step.path.to_equipment, condition_check, lambda attr: float(attr) >= float(value)))
+                    pass
+                elif comparison == ">":
+                    trace.add_stop_condition(
+                        lambda step, context: self._check_attr(step.path.to_equipment, condition_check, lambda attr: float(attr) > float(value)))
+                    pass
+                elif comparison.lower() == "like":
+                    trace.add_stop_condition(lambda step, context: self._check_attr(step.path.to_equipment, condition_check, lambda attr: value in attr))
+                    pass
+                else:
+                    raise ValueError(f"unknown select condition operator '{comparison}'")
+
         await trace.run(service[start_point])
         print([it.mrid for it in traced])
 
