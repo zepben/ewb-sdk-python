@@ -3,32 +3,53 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import asyncio
+import json
 import platform
 import shlex
-from typing import List, Callable, Any
+from typing import List, Callable, Any, Optional
 
-from zepben.evolve import connect_insecure, NetworkService, IdentifiedObject, Tracing, downstream, upstream, stop_at_open, NetworkTrace
+from geojson import FeatureCollection, Feature, LineString, Point
+from zepben.eas import EasClient, Study, Result, GeoJsonOverlay
+
+from zepben.evolve import connect_insecure, NetworkService, Equipment, Tracing, downstream, upstream, stop_at_open, NetworkTrace, IdentifiedObject
 from zepben.evolve.streaming.get.network_consumer import NetworkConsumerClient
 
 rpc_port = 9100
+eas_port = 7654
 
 
 async def run_queries():
     async with connect_insecure(rpc_port=rpc_port) as channel:
-        print("created channel.")
-        client = NetworkConsumerClient(channel=channel)
-        print("created client.")
+        ewb_client = NetworkConsumerClient(channel=channel)
+        print("created EWB client.")
+        eas_client = EasClient(
+            host="localhost",
+            port=eas_port,
+            # username=args.username,
+            # password=args.password,
+            # client_id=args.client_id,
+            verify_certificate=False,
+            # client_secret=args.client_secret
+        )
+        print("created EAS client.")
+        try:
+            query = "with FNS022 select where is powertransformer"
+            await upload_study(eas_client, "select is PowerTransformer", query, await run_query(ewb_client, query))
+            query = "with FNS022 select where name like [BC]"
+            await upload_study(eas_client, "select like [BC]", query, await run_query(ewb_client, query))
+            query = "with FNS022 select where length < 10"
+            await upload_study(eas_client, "select length < 10", query, await run_query(ewb_client, query))
 
-        await run_query(client, "with FNS022 select where is powertransformer")
-        await run_query(client, "with FNS022 select where name like A")
-        await run_query(client, "with FNS022 select where length < 10")
+            query = "with FNS022 trace downstream from 19404384"
+            await upload_study(eas_client, "trace downstream", query, await run_query(ewb_client, query))
+            query = "with FNS022 trace upstream from 19404384"
+            await upload_study(eas_client, "trace upstream", query, await run_query(ewb_client, query))
+            query = "with FNS022 trace from 19404384 stopping at is switch"
+            await upload_study(eas_client, "trace between switches", query, await run_query(ewb_client, query))
+        finally:
+            await eas_client.aclose()
 
-        await run_query(client, "with FNS022 trace downstream from 19404384")
-        await run_query(client, "with FNS022 trace upstream from 19404384")
-        await run_query(client, "with FNS022 trace from 19404384 stopping at is switch")
-
-
-async def run_query(client: NetworkConsumerClient, query: str):
+async def run_query(client: NetworkConsumerClient, query: str) -> Optional[List[IdentifiedObject]]:
     print()
     print(f"running query: {query}...")
     try:
@@ -36,12 +57,60 @@ async def run_query(client: NetworkConsumerClient, query: str):
         command = tokens.pop(0).lower()
 
         if command == "with":
-            await EquipmentContainerCommand(tokens.pop(0), tokens).run(client)
+            return await EquipmentContainerCommand(tokens.pop(0), tokens).run(client)
         else:
             raise ValueError(f"unknown command '{command}'")
 
     except Exception as ex:
         show_help(ex)
+        return None
+
+
+async def upload_study(client: EasClient, name: str, query: str, objects: Optional[List[Equipment]]):
+    if not objects:
+        print(f"No results for {name}, skipping study creation: {query}")
+        return
+
+    print("Uploading Study")
+    with open(f"study_style.json", "r") as file:
+        json_style = json.load(file)
+    await client.async_upload_study(
+        Study(
+            name=name,
+            description=query,
+            tags=["FNS022"],
+            results=[
+                *[
+                    Result(
+                        name=f"test",
+                        geo_json_overlay=GeoJsonOverlay(
+                            data=as_features(objects),
+                            styles=["query-style"]
+                        )
+                    )
+                ]
+            ],
+            styles=json_style
+        )
+    )
+    print('Upload Complete')
+
+
+def as_features(objects: List[IdentifiedObject]) -> FeatureCollection:
+    features = []
+    for it in objects:
+        if isinstance(it, Equipment):
+            points = list(it.location.points)
+            geometry = None
+            if len(points) == 1:
+                geometry = Point((points[0].x_position, points[0].y_position))
+            elif len(points) > 1:
+                geometry = LineString([(pp.x_position, pp.y_position) for pp in points])
+
+            if geometry:
+                features.append(Feature(id=it.mrid, geometry=geometry))
+
+    return FeatureCollection(features)
 
 
 def show_help(ex: Exception):
@@ -55,15 +124,15 @@ class EquipmentContainerCommand:
         self.name_or_mrid = name_or_mrid
         self.additional_args = additional_args
 
-    async def run(self, client: NetworkConsumerClient):
+    async def run(self, client: NetworkConsumerClient) -> Optional[List[IdentifiedObject]]:
         result = await client.get_equipment_container(self.name_or_mrid)
         result.throw_on_error()
 
         sub_command = self.additional_args.pop(0).lower()
         if sub_command == "select":
-            await SelectCommand(self.additional_args).run(client.service)
+            return await SelectCommand(self.additional_args).run(client.service)
         elif sub_command == "trace":
-            await TraceCommand(self.additional_args).run(client.service)
+            return await TraceCommand(self.additional_args).run(client.service)
         else:
             raise ValueError(f"unknown sub-command '{sub_command}'")
 
@@ -71,7 +140,7 @@ class EquipmentContainerCommand:
 class BaseCommand:
 
     @staticmethod
-    def _check_attr(io: IdentifiedObject, attr: str, compare: Callable[[Any], bool]) -> bool:
+    def _check_attr(io: Equipment, attr: str, compare: Callable[[Any], bool]) -> bool:
         try:
             return compare(getattr(io, attr))
         except:
@@ -88,7 +157,7 @@ class SelectCommand(BaseCommand):
         super().__init__()
         self.additional_args = additional_args
 
-    async def run(self, service: NetworkService):
+    async def run(self, service: NetworkService) -> Optional[List[IdentifiedObject]]:
         where_check = self.additional_args.pop(0).lower()
         assert where_check == "where", "missing keyword 'WHERE' after 'SELECT'"
 
@@ -96,35 +165,39 @@ class SelectCommand(BaseCommand):
 
         if condition_check.lower() == "is":
             class_check = self.additional_args.pop(0)
-            print([it.mrid for it in service.objects() if self.has_class(it, class_check)])
+            selected = [it for it in service.objects() if self.has_class(it, class_check)]
         else:
             # assume it is an attribute name
             comparison = self.additional_args.pop(0).lower()
             value = self.additional_args.pop(0)
             if comparison == "<":
-                print([it.mrid for it in service.objects() if self._check_attr(it, condition_check, lambda attr: float(attr) < float(value))])
+                selected = [it for it in service.objects() if self._check_attr(it, condition_check, lambda attr: float(attr) < float(value))]
                 pass
             elif comparison == "<=":
-                print([it.mrid for it in service.objects() if self._check_attr(it, condition_check, lambda attr: float(attr) <= float(value))])
+                selected = [it for it in service.objects() if self._check_attr(it, condition_check, lambda attr: float(attr) <= float(value))]
                 pass
             elif comparison == "=" or comparison == "==":
-                print([it.mrid for it in service.objects() if self._check_attr(it, condition_check, lambda attr: attr == value)])
+                selected = [it for it in service.objects() if self._check_attr(it, condition_check, lambda attr: attr == value)]
                 pass
             elif comparison == ">=":
-                print([it.mrid for it in service.objects() if self._check_attr(it, condition_check, lambda attr: float(attr) >= float(value))])
+                selected = [it for it in service.objects() if self._check_attr(it, condition_check, lambda attr: float(attr) >= float(value))]
                 pass
             elif comparison == ">":
-                print([it.mrid for it in service.objects() if self._check_attr(it, condition_check, lambda attr: float(attr) > float(value))])
+                selected = [it for it in service.objects() if self._check_attr(it, condition_check, lambda attr: float(attr) > float(value))]
                 pass
             elif comparison.lower() == "like":
-                print([it.mrid for it in service.objects() if self._check_attr(it, condition_check, lambda attr: value in attr)])
+                selected = [it for it in service.objects() if self._check_attr(it, condition_check, lambda attr: value in attr)]
                 pass
             else:
                 raise ValueError(f"unknown select condition operator '{comparison}'")
 
+        print([it.mrid for it in selected])
+
         if self.additional_args:
             remaining_condition = " ".join(self.additional_args)
             raise ValueError(f"unexpected remaining tokens: '{remaining_condition}'")
+
+        return selected
 
 
 class TraceCommand(BaseCommand):
@@ -133,7 +206,7 @@ class TraceCommand(BaseCommand):
         super().__init__()
         self.additional_args = additional_args
 
-    async def run(self, service: NetworkService):
+    async def run(self, service: NetworkService) -> Optional[List[Equipment]]:
         trace_type = self.additional_args.pop(0).lower()
 
         traced = []
@@ -203,6 +276,8 @@ class TraceCommand(BaseCommand):
         if self.additional_args:
             remaining_condition = " ".join(self.additional_args)
             raise ValueError(f"unexpected remaining tokens: '{remaining_condition}'")
+
+        return traced
 
 
 if __name__ == "__main__":
