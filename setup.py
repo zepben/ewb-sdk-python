@@ -23,6 +23,7 @@ test_deps = [
     "grpcio-testing==1.61.3",
     "pylint==2.14.5",
     "six==1.16.0",
+    "zepben.eas==0.17.1",
     "tox"
 ]
 
