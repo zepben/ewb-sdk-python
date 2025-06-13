@@ -85,7 +85,7 @@ async def upload_study(client: EasClient, name: str, query: str, objects: Option
                         name=f"test",
                         geo_json_overlay=GeoJsonOverlay(
                             data=as_features(objects),
-                            styles=["query-style"]
+                            styles=["query-style-line", "query-style-point"]
                         )
                     )
                 ]
