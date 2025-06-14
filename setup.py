@@ -11,6 +11,7 @@ deps = [
     "zepben.auth==0.12.1",
     "zepben-protobuf==0.37.0",
     "typing_extensions==4.12.2",
+    "lark-parser==0.12.0"
 ]
 
 test_deps = [

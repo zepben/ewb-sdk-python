@@ -26,6 +26,7 @@
 * Added `ClearDirection` that clears feeder directions.
 * You can now pass a logger to all `Tracing` methods and `TestNetworkBuilder.build` to enable debug logging for the traces it runs. The debug logging will
   include the results of all queue and stop condition checks, and each item that is stepped on.
+* Added `MaxQLRunner`. maxql is a highly experimental query language designed to query EWB servers. Expect changes.
 
 ### Enhancements
 * Tracing models with `Cut` and `Clamp` are now supported via the new tracing API.
