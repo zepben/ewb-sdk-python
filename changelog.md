@@ -12,6 +12,7 @@
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.
+* Added `MaxQLRunner`. maxql is a highly experimental query language designed to query EWB servers. Expect changes.
 
 ### Enhancements
 * Tracing models with `Cut` and `Clamp` are now supported via the new tracing API.

@@ -1,0 +1,35 @@
+//  Copyright 2025 Zeppelin Bend Pty Ltd
+//  This Source Code Form is subject to the terms of the Mozilla Public
+//  License, v. 2.0. If a copy of the MPL was not distributed with this
+//  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+start: "with" FEEDER ("trace" trace|"select" select)
+
+trace: [DIRECTION] "from" TRACE_START ["stopping at" condition]
+
+select: "where" condition
+
+
+condition: IS OBJECT_TYPE
+         | ATTR LIKE ALPHANUMERIC
+         | ATTR NUMBER_COMPARATOR INT+
+
+NUMBER_COMPARATOR: "<"|"<="|"=="|">="|">"
+
+DIRECTION: "upstream"|"downstream"
+IS: "is"
+LIKE: "like"
+
+STRING: LETTER+
+
+TRACE_START: ALPHANUMERIC
+
+ALPHANUMERIC: ("a".."z"|"0".."9"|"A".."Z")+
+FEEDER: ALPHANUMERIC
+OBJECT_TYPE: STRING
+ATTR: ALPHANUMERIC
+
+%import common.LETTER
+%import common.INT
+%import common.WS
+%ignore WS
