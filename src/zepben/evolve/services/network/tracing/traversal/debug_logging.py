@@ -2,6 +2,9 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+__all__ = ['DebugLoggingWrapper']
+
+import copy
 import functools
 from logging import Logger
 from types import FunctionType
@@ -13,12 +16,10 @@ from zepben.evolve.services.network.tracing.traversal.stop_condition import Stop
 
 T = TypeVar('T')
 
-__all__ = ['DebugLoggingWrapper']
-
 
 Wrappable = Union[StepAction[T], QueueCondition[T], StopCondition[T]]
 
-data = {
+_data = {
     StepAction: [('apply', ' [item={args[0]}, context={args[1]}]')],
     StopCondition: [('should_stop', '={result} [item={args[0]}, context={args[1]}]')],
     QueueCondition: [
@@ -35,78 +36,79 @@ class DebugLoggingWrapper:
         self._logger: Logger = logger
         self._wrapped = {StepAction: [], StopCondition: [], QueueCondition: []}
 
-    def wrap(self, obj: Wrappable, count: Optional[int] = None, allow_re_wrapping: bool = False):
+    def wrap(self, obj: Wrappable, count: Optional[int] = None):
         """
-        Wrap, in place, supported methods of the object passed in.
+        Return a new object with debug logging wrappers applied to supported methods of the object.
 
         Supported methods by object class::
 
-            - :method:`StepAction.action`
-            - :method:`StopCondition.should_stop`
+            - :meth:`StepAction.action`
+            - :meth:`StopCondition.should_stop`
             - :class:`QueueCondition`
-              - :method:`should_queue`
-              - :method:`should_queue_start_item`
+              - :meth:`should_queue`
+              - :meth:`should_queue_start_item`
 
         :param obj: Instantiated object representing a condition or action in a :class:`zepben.evolve.Traversal`.
         :param count: (optional) Set the ``count`` in the log message.
-        :param allow_re_wrapping: (optional) Replace the existing logging wrapper, if it exists.
-        :return: the object passed in for fluent use.
+        :return: new copy of the object passed in for fluent use.
 
         :raises AttributeError: If wrapping the passed in object type is not supported.
         """
 
-        def get_logger_index(_clazz: Type[Wrappable], _attr: str) -> int:
+        # Create a shallow copy of the object as early as possible to avoid accidentally modifying the original.
+        w_obj = copy.copy(obj)
+
+        def _get_logger_index(_clazz: Type[Wrappable], _attr: str) -> int:
             """
             This is just a very lazy way of auto counting the number of objects wrapped
             based on their basic classification without requiring any information in the
             object aside from what it inherits from
             """
 
-            # if we had a requested count number passed in, we can skip the auto-indexing logic.
+            # If we had a requested count number passed in, we can skip the auto-indexing logic.
             if count is not None:
                 return count
 
-            # We need to check if the object has already been wrapped with logging so we can determine the
-            #  index number we should use.
-            if hasattr(obj, '__wrapped__'):
-                # Check to see if it's in our `_wrapped` registry - if so this class wrapped it.
-                if obj in self._wrapped[clazz]:
-                    # if it was wrapped by this class, return the original index. (list index +1)
-                    return self._wrapped[clazz].index(obj) + 1
+            # We need to check if we have already wrapped another method on the object.
+            if hasattr(w_obj, '__wrapped__'):
+                # Ensure it's in our `_wrapped` registry - if so this is another method on the same object in the same `wrap` call.
+                if w_obj not in self._wrapped[clazz]:
+                    # If this code path is reached, someone has done some wild internal hacking
+                    raise AttributeError(f'Wrapped objects cannot be rewrapped, pass in the original object instead.')
+                # if it was wrapped by this class, return the original index. (list index +1)
+                return self._wrapped[clazz].index(w_obj) + 1
 
-            # If the object has not been wrapped by this specific class instance, we generate a new index.
-            if obj not in self._wrapped[clazz]:
-                self._wrapped[clazz].append(obj)
-            else:  # This code path should NEVER be reached as we should never have an object at this point that is not in our `_wrapped` registry
-                raise IndexError(f'INTERNAL ERROR: {obj} not found in self._wrapped(\n{self._wrapped}\n)')
+            # If the object has not been wrapped we generate a new index.
+            if w_obj not in self._wrapped[clazz]:
+                self._wrapped[clazz].append(w_obj)
+            else:
+                # This code path should NEVER be reached as we should never have an object at this point that is not in our `_wrapped` registry
+                raise IndexError(f'INTERNAL ERROR: {w_obj} not found in self._wrapped(\n{self._wrapped}\n)')
 
             return len(self._wrapped[clazz])
 
-        def wrap_attr(_attr: str) -> None:
+        def _wrap_attr(_attr: str) -> None:
             """
             Replaces the specified attr with a wrapper around the same attr to inject
             logging.
 
             :param _attr: Method/Function name.
-            :raises AttributeError: if the ``Wrappable`` cannot be rewrapped
+            :raises AttributeError: if ``wrappable`` is already wrapped
             """
 
-            # wrapped methods will have `__wrapped__` set to the original method that was wrapped - if it exists on
-            #  the methods were interested in wrapping, the object has already been wrapped. We will re-wrap it, but
-            #  only if we have been explicitly told it's ok, otherwise we want to catch the bug.
-            if (to_wrap := getattr(obj, _attr)) and hasattr(to_wrap, '__wrapped__'):
-                if not allow_re_wrapping:
-                    raise AttributeError(f'Wrappable cannot be rewrapped without explicitly specifying you would like to replace the logging wrapper')
-                to_wrap = getattr(to_wrap, '__wrapped__')
+            # Wrapped classes will have __wrapped__ == True - if it exists on the obj passed in, the user is attempting to wrap an
+            # already wrapped object. This can lead to unexpected outcomes so we do not support it
+            if (to_wrap := getattr(w_obj, _attr)) and hasattr(to_wrap, '__wrapped__'):
+                    raise AttributeError(f'Wrapped objects cannot be rewrapped, pass in the original object instead.')
 
-            setattr(obj, _attr, self._log_method_call(to_wrap, f'{self.description}: {_attr}({get_logger_index(clazz, _attr)})' + msg))
-            setattr(obj, '__wrapped__', True)
+            setattr(w_obj, _attr, self._log_method_call(to_wrap, f'{self.description}: {_attr}({_get_logger_index(clazz, _attr)})' + msg))
+            setattr(w_obj, '__wrapped__', True)
 
         for clazz in (StepAction, StopCondition, QueueCondition):
-            if isinstance(obj, clazz):
-                for attr, msg in data.get(clazz):
-                    wrap_attr(attr)
-                return obj
+            if isinstance(w_obj, clazz):
+                for attr, msg in _data.get(clazz):
+                    _wrap_attr(attr)
+                return w_obj
         else:
             raise AttributeError(f'{type(self).__name__} does not support wrapping {obj}')
 
