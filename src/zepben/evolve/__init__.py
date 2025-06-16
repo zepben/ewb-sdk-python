@@ -182,6 +182,7 @@ from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_ty
 from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_stop_condition import *
 from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_queue_condition import *
 from zepben.evolve.services.network.tracing.networktrace.conditions.open_condition import *
+from zepben.evolve.services.network.tracing.networktrace.maxql.parser import *
 from zepben.evolve.services.network.tracing.networktrace.operators.equipment_container_state_operators import *
 from zepben.evolve.services.network.tracing.networktrace.operators.feeder_direction_state_operations import *
 from zepben.evolve.services.network.tracing.networktrace.operators.in_service_state_operators import *

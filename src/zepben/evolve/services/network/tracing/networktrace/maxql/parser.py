@@ -2,13 +2,29 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import TypedDict, Tuple, Any, Callable, Union, Literal
+from __future__ import annotations
+
+__all__ = ['MaxQLRunner']
+
+import os
+import pathlib
+from typing import TypedDict, Tuple, Any, Callable, Union, Literal, TYPE_CHECKING
 from lark import Lark, Tree, Token
 
-from zepben.evolve import Tracing, downstream, upstream, NetworkConsumerClient, NetworkTrace, Equipment, IdentifiedObject
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import downstream, upstream
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
+
+if TYPE_CHECKING:
+    from zepben.evolve.streaming.get.network_consumer import NetworkConsumerClient
+    from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
+    from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
 ComparisonType = Literal['<', '<=', '=', '>', '>=', 'like']
+_THIS_DIR = pathlib.Path(__file__).parent.resolve()
+GRAMMAR_FILE_PATH = os.path.join(_THIS_DIR, 'grammar.lark')
+
 
 class VarsType(TypedDict):
     trace: NetworkTrace
@@ -17,9 +33,9 @@ class VarsType(TypedDict):
 
 class MaxQLRunner:
 
-    def __init__(self, ewb_server_client: NetworkConsumerClient):
+    def __init__(self, ewb_server_client: 'NetworkConsumerClient'):
         self.ewb_client = ewb_server_client
-        with open('grammar.lark') as file:
+        with open(GRAMMAR_FILE_PATH) as file:
             self.parser = Lark(file)
 
     async def run(self, query_string: str):
