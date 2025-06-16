@@ -73,7 +73,7 @@ class MaxQLRunner:
 
             if child_type == 'FEEDER':
                 # Load the network under `FEEDER`
-                del (await self.ewb_client.get_equipment_container(child.value)).result
+                (await self.ewb_client.get_equipment_container(child.value)).result
             elif child_type == 'DIRECTION':
                 trace.add_condition(self._parse_direction_condition(child))
             elif child_type == 'TRACE_START':
@@ -96,6 +96,7 @@ class MaxQLRunner:
 
                 for trace_child in child.children:
                     if isinstance(trace_child, Tree):  # Following the pattern here, this should call _process... it doesn't, there's reasons
+
                         # as NetworkTrace supports multiple stop conditions, this will already support multiple OR conditions
                         # to implement AND, we will need to build a function that builds functions, lol...
                         condition_func = self._parse_condition_type(trace_child)

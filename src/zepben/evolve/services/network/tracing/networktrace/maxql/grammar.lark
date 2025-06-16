@@ -4,21 +4,26 @@
 //  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 start: "with" FEEDER ("trace" trace|"select" select)
+// TODO: Allow passing of multiple feeders
 
 trace: [DIRECTION] "from" TRACE_START ["stopping at" condition]
+// TODO: TRACE_START should accept multiple
 
 select: "where" condition
-
+// TODO: allow where attributes to reference mrid or name of referenced objects? i think this is done.1
 
 condition: IS OBJECT_TYPE
          | ATTR LIKE ALPHANUMERIC
          | ATTR NUMBER_COMPARATOR INT+
+// TODO: allow condition chaining. AND conditions should be under the same tree, OR conditions should be a new condition tree
+// TODO: allow use of brackets to alter order preference
 
-NUMBER_COMPARATOR: "<"|"<="|"=="|">="|">"
-
-DIRECTION: "upstream"|"downstream"
 IS: "is"
 LIKE: "like"
+// TODO: "in" [ListOfVars]
+NUMBER_COMPARATOR: "<"|"<="|"=="|">="|">" // TODO: allow chaining. e.g: 2 < attr < 10
+
+DIRECTION: "upstream"|"downstream"
 
 STRING: LETTER+
 
@@ -26,8 +31,8 @@ TRACE_START: ALPHANUMERIC
 
 ALPHANUMERIC: ("a".."z"|"0".."9"|"A".."Z")+
 FEEDER: ALPHANUMERIC
-OBJECT_TYPE: STRING
-ATTR: ALPHANUMERIC
+OBJECT_TYPE: STRING  // TODO: allow multiples passed as list
+ATTR: ALPHANUMERIC  // TODO: Allow nested attr reference. e.g: attr.nested.attr = 2
 
 %import common.LETTER
 %import common.INT
