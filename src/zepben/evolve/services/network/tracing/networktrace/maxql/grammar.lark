@@ -27,10 +27,10 @@ DIRECTION: "upstream"|"downstream"
 
 STRING: LETTER+
 
-TRACE_START: ALPHANUMERIC
+TRACE_START: ALPHANUMERIC  // TODO: allow "-/_"
 
 ALPHANUMERIC: ("a".."z"|"0".."9"|"A".."Z")+
-FEEDER: ALPHANUMERIC
+FEEDER: ALPHANUMERIC // TODO: allow "-/_"
 OBJECT_TYPE: STRING  // TODO: allow multiples passed as list
 ATTR: ALPHANUMERIC  // TODO: Allow nested attr reference. e.g: attr.nested.attr = 2
 
