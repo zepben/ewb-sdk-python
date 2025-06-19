@@ -128,7 +128,6 @@ class TestDebugLoggingWrappers:
         wrapped_action = logging_wrapper.wrap(action)
 
         assert isinstance(wrapped_action, StepAction)
-        assert wrapped_action in logging_wrapper._wrapped[StepAction]
 
         with pytest.raises(AttributeError):
             logging_wrapper.wrap(wrapped_action)
@@ -142,7 +141,6 @@ class TestDebugLoggingWrappers:
         wrapped_condition = logging_wrapper.wrap(condition)
 
         assert isinstance(wrapped_condition, QueueCondition)
-        assert wrapped_condition in logging_wrapper._wrapped[QueueCondition]
 
         with pytest.raises(AttributeError):
             logging_wrapper.wrap(wrapped_condition)
@@ -154,7 +152,6 @@ class TestDebugLoggingWrappers:
         wrapped_condition = logging_wrapper.wrap(condition)
 
         assert isinstance(wrapped_condition, StopCondition)
-        assert wrapped_condition in logging_wrapper._wrapped[StopCondition]
 
         with pytest.raises(AttributeError):
             logging_wrapper.wrap(wrapped_condition)

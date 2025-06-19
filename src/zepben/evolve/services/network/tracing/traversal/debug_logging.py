@@ -34,7 +34,11 @@ class DebugLoggingWrapper:
     def __init__(self, description: str, logger: Logger):
         self.description: str = description
         self._logger: Logger = logger
-        self._wrapped = {StepAction: [], StopCondition: [], QueueCondition: []}
+        self._wrapped = {
+            StepAction: 0,
+            StopCondition: 0,
+            QueueCondition: 0
+        }
 
     def wrap(self, obj: Wrappable):
         """
@@ -49,7 +53,6 @@ class DebugLoggingWrapper:
               - :meth:`should_queue_start_item`
 
         :param obj: Instantiated object representing a condition or action in a :class:`zepben.evolve.Traversal`.
-        :param count: (optional) Set the ``count`` in the log message.
         :return: new copy of the object passed in for fluent use.
 
         :raises AttributeError: If wrapping the passed in object type is not supported.
@@ -58,32 +61,18 @@ class DebugLoggingWrapper:
         # Create a shallow copy of the object as early as possible to avoid accidentally modifying the original.
         w_obj = copy.copy(obj)
 
-        def _get_logger_index(_clazz: Type[Wrappable], _attr: str) -> int:
+        def _get_logger_index(_clazz: Type[Wrappable]) -> int:
             """
             This is just a very lazy way of auto counting the number of objects wrapped
             based on their basic classification without requiring any information in the
-            object aside from what it inherits from
+            object aside from what it inherits from.
+
             """
+            
+            self._wrapped[clazz] += 1
+            return self._wrapped[clazz]
 
-            # We need to check if we have already wrapped another method on the object.
-            if hasattr(w_obj, '__wrapped__'):
-                # Ensure it's in our `_wrapped` registry - if so this is another method on the same object in the same `wrap` call.
-                if w_obj not in self._wrapped[clazz]:
-                    # If this code path is reached, someone has done some wild internal hacking
-                    raise AttributeError(f'Wrapped objects cannot be rewrapped, pass in the original object instead.')
-                # if it was wrapped by this class, return the original index. (list index +1)
-                return self._wrapped[clazz].index(w_obj) + 1
-
-            # If the object has not been wrapped we generate a new index.
-            if w_obj not in self._wrapped[clazz]:
-                self._wrapped[clazz].append(w_obj)
-            else:
-                # This code path should NEVER be reached as we should never have an object at this point that is not in our `_wrapped` registry
-                raise IndexError(f'INTERNAL ERROR: {w_obj} not found in self._wrapped(\n{self._wrapped}\n)')
-
-            return len(self._wrapped[clazz])
-
-        def _wrap_attr(_attr: str, _msg: str) -> None:
+        def _wrap_attr(_index: int, _attr: str, _msg: str) -> None:
             """
             Replaces the specified attr with a wrapper around the same attr to inject
             logging.
@@ -97,16 +86,17 @@ class DebugLoggingWrapper:
             if (to_wrap := getattr(w_obj, _attr)) and hasattr(to_wrap, '__wrapped__'):
                     raise AttributeError(f'Wrapped objects cannot be rewrapped, pass in the original object instead.')
 
-            setattr(w_obj, _attr, self._log_method_call(to_wrap, f'{self.description}: {_attr}({_get_logger_index(clazz, _attr)})' + _msg))
+            setattr(w_obj, _attr, self._log_method_call(to_wrap, f'{self.description}: {_attr}({_index})' + _msg))
             setattr(w_obj, '__wrapped__', True)
 
         for clazz in (StepAction, StopCondition, QueueCondition):
             if isinstance(w_obj, clazz):
+                index = _get_logger_index(clazz)
                 for attr, msg in _data.get(clazz):
-                    _wrap_attr(attr, msg)
+                    _wrap_attr(index, attr, msg)
                 return w_obj
         else:
-            raise AttributeError(f'{type(self).__name__} does not support wrapping {obj}')
+            raise NotImplementedError(f'{type(self).__name__} does not support wrapping {obj}')
 
     def _log_method_call(self, func: FunctionType, log_string: str):
         """
