@@ -13,7 +13,7 @@ class NetworkTraceTracker:
     Internal class that tracks visited state of a Terminal's Phase in a Network Trace
     """
     def __init__(self):
-        self._visited = list()
+        self._visited = set()
 
     def has_visited(self, terminal: Terminal, phases: Set[SinglePhaseKind]=None) -> bool:
         """Returns True if this Terminal's Phase has been visited, False otherwise"""
@@ -23,7 +23,7 @@ class NetworkTraceTracker:
         """Marks this Terminal's Phase as visited"""
         key = self._get_key(terminal, phases)
         if key not in self._visited:
-            self._visited.append(self._get_key(terminal, phases))
+            self._visited.add(self._get_key(terminal, phases))
             return True
         return False
 
@@ -34,6 +34,6 @@ class NetworkTraceTracker:
     @staticmethod
     def _get_key(terminal: Terminal, phases: Set[SinglePhaseKind]) -> Any:
         if phases:
-            return terminal, phases
+            return terminal.mrid, phases
         else:
-            return terminal
+            return terminal.mrid
