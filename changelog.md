@@ -27,7 +27,6 @@
 * You can now pass a logger to all `Tracing` methods and `TestNetworkBuilder.build` to enable debug logging for the traces it runs. The debug logging will
   include the results of all queue and stop condition checks, and each item that is stepped on.
 
-
 ### Enhancements
 * Tracing models with `Cut` and `Clamp` are now supported via the new tracing API.
 * Added support to `TestNetworkBuilder` for:
@@ -41,7 +40,6 @@
 * `NetworkTrace` now supports starting from a known `NetworkTraceStep.Path`. This allows you to force a trace to start in a particular direction, or to continue
   a follow-up trace from a detected stop point.
 * `Traversal.is_stopping`/`Traversal.is_not_stopping` now accept `StepAction` and any child classes, including those subclassing `StepActionWithContextValue`
-
 
 ### Fixes
 * When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`
