@@ -48,51 +48,48 @@ class TestDebugLoggingWrappers:
     item_1 = (1, 1.1)
     item_2 = (2, 2.2)
 
-    def _wrap(self, condition, count=None):
-        return DebugLoggingWrapper('my desc', self.logger).wrap(condition, count)
+    def _wrap(self, condition):
+        return DebugLoggingWrapper('my desc', self.logger).wrap(condition)
 
     def test_wrapped_object_is_original_object(self):
         should_stop = bool_generator()
 
         stop_condition = StopCondition(lambda item, ctx: next(should_stop))
-        wrapped = self._wrap(stop_condition, 100)
-        assert isinstance(wrapped, type(stop_condition))
+        wrapped = self._wrap(stop_condition)
+
         assert isinstance(wrapped, StopCondition)
-        assert not isinstance(wrapped, QueueCondition)
-        assert not isinstance(wrapped, StepAction)
+        assert not isinstance(wrapped, (QueueCondition, StepAction))
 
         queue_condition = QueueCondition(lambda nitem, nctx, item, ctx: next(should_stop))
-        wrapped = self._wrap(queue_condition, 20)
-        assert isinstance(wrapped, type(queue_condition))
-        assert not isinstance(wrapped, StopCondition)
+        wrapped = self._wrap(queue_condition)
+
+        assert not isinstance(wrapped, (StopCondition, StepAction))
         assert isinstance(wrapped, QueueCondition)
-        assert not isinstance(wrapped, StepAction)
 
         action = StepAction(lambda item, context: None)
-        wrapped = self._wrap(action, 20)
-        assert isinstance(wrapped, type(action))
-        assert not isinstance(wrapped, StopCondition)
-        assert not isinstance(wrapped, QueueCondition)
+        wrapped = self._wrap(action)
+
+        assert not isinstance(wrapped, (StopCondition, QueueCondition))
         assert isinstance(wrapped, StepAction)
 
     def test_can_wrap_stop_condition(self):
         should_stop = bool_generator()
 
-        wrapped = self._wrap(StopCondition(lambda item, ctx: next(should_stop)), 100)
+        wrapped = self._wrap(StopCondition(lambda item, ctx: next(should_stop)))
 
         with self._log_handler() as handler:
             assert wrapped.should_stop(self.item_1, self.context_1)
             assert not wrapped.should_stop(self.item_2, self.context_2)
 
-            assert handler.log_list.get() == f"root: my desc: should_stop(100)=True [item={self.item_1}, context={self.context_1}]"
-            assert handler.log_list.get() == f"root: my desc: should_stop(100)=False [item={self.item_2}, context={self.context_2}]"
+            assert handler.log_list.get() == f"root: my desc: should_stop(1)=True [item={self.item_1}, context={self.context_1}]"
+            assert handler.log_list.get() == f"root: my desc: should_stop(1)=False [item={self.item_2}, context={self.context_2}]"
 
     def test_can_wrap_queue_conditions(self):
         should_stop = bool_generator()
 
         condition = QueueCondition(lambda nitem, nctx, item, ctx: next(should_stop))
         condition.should_queue_start_item = lambda item: next(should_stop)
-        condition = self._wrap(condition, 50)
+        condition = self._wrap(condition)
 
         with self._log_handler() as handler:
             assert condition.should_queue(self.item_1, self.context_1, self.item_2, self.context_2)
@@ -104,18 +101,18 @@ class TestDebugLoggingWrappers:
             assert condition.should_queue_start_item(self.item_2)
 
             assert handler.log_list.get() == (
-                f"root: my desc: should_queue(50)=True ["
+                f"root: my desc: should_queue(1)=True ["
                 f"next_item={self.item_1}, next_context={self.context_1}, current_item={self.item_2}, current_context={self.context_2}]"
             )
             assert handler.log_list.get() == (
-                f"root: my desc: should_queue(50)=False ["
+                f"root: my desc: should_queue(1)=False ["
                 f"next_item={self.item_2}, next_context={self.context_2}, current_item={self.item_1}, current_context={self.context_1}]"
             )
-            assert handler.log_list.get() == f"root: my desc: should_queue_start_item(50)=False [item={self.item_1}]"
-            assert handler.log_list.get() == f"root: my desc: should_queue_start_item(50)=True [item={self.item_2}]"
+            assert handler.log_list.get() == f"root: my desc: should_queue_start_item(1)=False [item={self.item_1}]"
+            assert handler.log_list.get() == f"root: my desc: should_queue_start_item(1)=True [item={self.item_2}]"
 
     def test_can_wrap_step_actions(self):
-        action = self._wrap(StepAction(lambda item, context: None), 1)
+        action = self._wrap(StepAction(lambda item, context: None))
 
         with self._log_handler() as handler:
             action.apply(self.item_1, self.context_1)

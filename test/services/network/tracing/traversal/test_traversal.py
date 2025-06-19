@@ -276,7 +276,7 @@ class TestTraversal:
 
         class TestSAWCV(StepActionWithContextValue[int]):
             def compute_next_value(self, next_item: int, current_item: int, current_value):
-                return f'{current_value} : {next_item + current_item}'
+                return f'data={current_value} : (next_item={next_item}, current_item={current_item})'
 
             def compute_initial_value(self, item: int):
                 return f'{item}'
@@ -293,7 +293,7 @@ class TestTraversal:
 
         assert len(data_capture) == 2
         assert data_capture[1] == '1'
-        assert data_capture[2] == '1 : 3'
+        assert data_capture[2] == 'data=1 : (next_item=2, current_item=1)'
 
     @pytest.mark.asyncio
     async def test_if_stopping_helper_accepts_step_action_with_context_value_and_context_is_computed(self):

@@ -14,22 +14,6 @@ from zepben.evolve.exceptions import TracingException, PhaseException
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
-"""
-class LoggingSetPhases(SetPhases) :
-    def __init__(self):
-        super().__init__()
-        self.step_count = 0
-
-    def _create_network_trace(self, state_operators: NetworkStateOperators, partially_energised_transformers) -> NetworkTrace[SetPhases.PhasesToFlow]:
-
-        def log_step(nts: NetworkTraceStep, context: StepContext):
-            print(f'{nts.path.from_terminal}->{nts.path.to_terminal}  :: {nts.path.from_terminal.phases} >< {nts.path.to_terminal.phases}')
-
-        return (super()._create_network_trace(state_operators, partially_energised_transformers)) \
-            .add_step_action(log_step)
-
-SetPhases = LoggingSetPhases
-"""
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('phase_swap_loop_network', [(False,)], indirect=True)

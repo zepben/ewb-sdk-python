@@ -454,6 +454,7 @@ class TestNetworkBuilder:
         self,
         mrid: Optional[str] = None,
         length_from_terminal_1: float = None,
+        nominal_phases: PhaseCode = PhaseCode.ABC,
         action: Callable[[Clamp], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -461,6 +462,7 @@ class TestNetworkBuilder:
 
         :param mrid: Optional mRID for the new `Clamp`
         :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being clamped
+        :param nominal_phases: The nominal phases for the new `BusbarSection`.
         :param action: An action that accepts the new `Clamp` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use
@@ -470,9 +472,7 @@ class TestNetworkBuilder:
             raise ValueError("`with_clamp` can only be called when the last added item was an AcLineSegment")
 
         clamp = Clamp(mrid=mrid or f'{acls.mrid}-clamp{acls.num_clamps() + 1}', length_from_terminal_1=length_from_terminal_1)
-        terminal = Terminal(mrid=f'{clamp.mrid}-t1')
-        self.network.add(terminal)
-        clamp.add_terminal(terminal)
+        self._add_terminal(clamp, 1 , nominal_phases)
 
         acls.add_clamp(clamp)
         action(clamp)
@@ -485,6 +485,7 @@ class TestNetworkBuilder:
         length_from_terminal_1: Optional[float] = None,
         is_normally_open: bool = True,
         is_open: bool = None,
+        nominal_phases: PhaseCode = PhaseCode.ABC,
         action: Callable[[Cut], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -494,6 +495,7 @@ class TestNetworkBuilder:
         :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being cut
         :param is_normally_open: The normal state of the cut, defaults to True
         :param is_open: The current state of the cut. Defaults to `is_normally_open`
+        :param nominal_phases: The nominal phases for the new `BusbarSection`.
         :param action: An action that accepts the new `Cut` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use
@@ -504,9 +506,7 @@ class TestNetworkBuilder:
 
         cut = Cut(mrid=mrid or f'{acls.mrid}-cut{acls.num_cuts() + 1}', length_from_terminal_1=length_from_terminal_1)
         for i in [1, 2]:
-            t = Terminal(mrid=f'{cut.mrid}-t{i}')
-            self.network.add(t)
-            cut.add_terminal(t)
+            self._add_terminal(cut, i, nominal_phases)
 
         cut.set_normally_open(is_normally_open)
         if is_open is None:

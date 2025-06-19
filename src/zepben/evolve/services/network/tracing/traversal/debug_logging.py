@@ -36,7 +36,7 @@ class DebugLoggingWrapper:
         self._logger: Logger = logger
         self._wrapped = {StepAction: [], StopCondition: [], QueueCondition: []}
 
-    def wrap(self, obj: Wrappable, count: Optional[int] = None):
+    def wrap(self, obj: Wrappable):
         """
         Return a new object with debug logging wrappers applied to supported methods of the object.
 
@@ -65,10 +65,6 @@ class DebugLoggingWrapper:
             object aside from what it inherits from
             """
 
-            # If we had a requested count number passed in, we can skip the auto-indexing logic.
-            if count is not None:
-                return count
-
             # We need to check if we have already wrapped another method on the object.
             if hasattr(w_obj, '__wrapped__'):
                 # Ensure it's in our `_wrapped` registry - if so this is another method on the same object in the same `wrap` call.
@@ -87,7 +83,7 @@ class DebugLoggingWrapper:
 
             return len(self._wrapped[clazz])
 
-        def _wrap_attr(_attr: str) -> None:
+        def _wrap_attr(_attr: str, _msg: str) -> None:
             """
             Replaces the specified attr with a wrapper around the same attr to inject
             logging.
@@ -101,13 +97,13 @@ class DebugLoggingWrapper:
             if (to_wrap := getattr(w_obj, _attr)) and hasattr(to_wrap, '__wrapped__'):
                     raise AttributeError(f'Wrapped objects cannot be rewrapped, pass in the original object instead.')
 
-            setattr(w_obj, _attr, self._log_method_call(to_wrap, f'{self.description}: {_attr}({_get_logger_index(clazz, _attr)})' + msg))
+            setattr(w_obj, _attr, self._log_method_call(to_wrap, f'{self.description}: {_attr}({_get_logger_index(clazz, _attr)})' + _msg))
             setattr(w_obj, '__wrapped__', True)
 
         for clazz in (StepAction, StopCondition, QueueCondition):
             if isinstance(w_obj, clazz):
                 for attr, msg in _data.get(clazz):
-                    _wrap_attr(attr)
+                    _wrap_attr(attr, msg)
                 return w_obj
         else:
             raise AttributeError(f'{type(self).__name__} does not support wrapping {obj}')
