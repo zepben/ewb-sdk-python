@@ -5,12 +5,10 @@
 * `AcLineSegment` supports adding a maximum of 2 terminals. Mid-span terminals are no longer supported and models should migrate to using `Clamp`.
 * `Clamp` supports only adding a single terminal.
 * `FeederDirectionStateOperations` have been reworked to take `NetworkStateOperators` as a parameter.
-* `RemoveDirection` has been removed. It did not work reliably with dual fed networks with loops. You now need to clear direction using the new
-`ClearDirection` and reapply directions where appropriate using `SetDirection`.
+* `RemoveDirection` has been removed. It did not work reliably with dual fed networks with loops. You now need to clear direction using the new `ClearDirection`
+  and reapply directions where appropriate using `SetDirection`.
 * `Cut` supports adding a maximum of 2 terminals.
 * `NetworkTraceTracker` now uses a `set` to track visited objects, if you were using unhashable objects this will need to be addressed.
-
-
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.
@@ -24,9 +22,8 @@
   * You can now add sites to the `TestNetworkBuilder` via `addSite`.
   * You can now add busbar sections natively with `from_busbar_section` and `to_busbar_section`
   * The prefix for generated mRIDs for "other" equipment can be specified with the `default_mrid_prefix` argument in `from_other` and `to_other`.
-* When processing feeder assignments, all LV feeders belonging to a dist substation site will now be considered energized when the site is energized by a feeder.
-
-
+* When processing feeder assignments, all LV feeders belonging to a dist substation site will now be considered energized when the site is energized by a
+  feeder.
 
 ### Fixes
 * When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`
@@ -41,10 +38,6 @@
 * `NetworkTrace`/`Traversal` now correctly respects `can_stop_on_start_item` when providing multiple start items.
 * `AssignToFeeders`/`AssignToLvFeeders` now finds back-fed equipment correctly
 * `AssignToFeeders` and `AssignToLvFeeders` will now associate `PowerElectronicUnits` with their `powerElectronicsConnection` `Feeder`/`LvFeeder`.
-* `NetworkTrace` no longer hashes the entire terminal object passed in, and will only reference the mRID in `self.tracker`, Exponentially large execution
-  times should now be fixed.
-
-
 
 ### Notes
 * None.
@@ -99,7 +92,8 @@
 
 ## [0.44.0] - 2025-01-24
 ### Breaking Changes
-* `GrpcChannelBuilder.build()` now accepts a `timeout_seconds` argument. This is the timeout used for each connection attempt so the total amount of time the connection test may take to fail can be greater than `timeout_seconds`.
+* `GrpcChannelBuilder.build()` now accepts a `timeout_seconds` argument. This is the timeout used for each connection attempt so the total amount of time the
+  connection test may take to fail can be greater than `timeout_seconds`.
 
 ### New Features
 * Added the following new CIM classes:
@@ -135,9 +129,10 @@
 * Removed `ProcessingPaused` current state response message as this functionality won't be supported.
 * `QueryNetworkStateClient.get_current_states` now returns a `CurrentStateEventBatch` rather than just the events themselves.
 * `QueryNetworkStateService.on_get_current_states` must now return a stream of `CurrentStateEventBatch` rather than just the events themselves.
-* `AcLineSegment.per_length_sequence_impedance` has been corrected to `per_length_impedance`. This has been done in a non-breaking way, however the public 
+* `AcLineSegment.per_length_sequence_impedance` has been corrected to `per_length_impedance`. This has been done in a non-breaking way, however the public
   resolver `Resolvers.per_length_sequence_impedance` is now `Resolvers.per_length_impedance`, correctly reflecting the CIM relationship.
-* Removed `get_current_equipment_for_feeder` implementation for `NetworkConsumerClient` as its functionality is now incorporated in `get_equipment_for_container`.
+* Removed `get_current_equipment_for_feeder` implementation for `NetworkConsumerClient` as its functionality is now incorporated in
+  `get_equipment_for_container`.
 
 ### New Features
 * Added `BatchNotProcessed` current state response. This is used to indicate a batch has been ignored, rather than just returning a `BatchSuccessful`.
