@@ -78,7 +78,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         network_state_operators: Type[NetworkStateOperators],
         queue_type: Union[Traversal.BasicQueueType, Traversal.BranchingQueueType],
         parent: 'NetworkTrace[T]' = None,
-        action_type: NetworkTraceActionType = None,
+        action_type: CanActionItem = None,
         debug_logger: Logger = None,
         name: str = None,
     ):
@@ -339,12 +339,13 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         Adds a :class:`QueueCondition` to the traversal. However, before registering it with the traversal, it will make sure that the queue condition
         is only checked on step types relevant to the `NetworkTraceActionType` assigned to this instance. That is when:
 
-            - ``action_type`` is ``NetworkTraceActionType.ALL_STEPS`` the condition will be checked on all steps.
-            - ``action_type`` is ``NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT`` the condition will be checked on external steps.
+            - ``step_type`` is ``NetworkTraceActionType.ALL_STEPS`` the condition will be checked on all steps.
+            - ``step_type`` is ``NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT`` the condition will be checked on external steps.
 
         However, if the `condition` is an instance of :class:`NetworkTraceQueueCondition` the ``NetworkTraceQueueCondition.step_type`` will be honoured.
 
         :param condition: The queue condition to add.
+        :param step_type: `NetworkTraceStepType` value.
         :keyword allow_re_wrapping: Allow rewrapping of :class:`QueueCondition`s with debug logging
         :returns: This :class:`NetworkTrace` instance
         """
@@ -361,12 +362,13 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         Adds a :class:`StopCondition` to the traversal. However, before registering it with the traversal, it will make sure that the queue condition
         is only checked on step types relevant to the `NetworkTraceActionType` assigned to this instance. That is when:
 
-            - ``action_type`` is ``NetworkTraceActionType.ALL_STEPS`` the condition will be checked on all steps.
-            - ``action_type`` is ``NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT`` the condition will be checked on external steps.
+            - ``step_type`` is ``NetworkTraceActionType.ALL_STEPS`` the condition will be checked on all steps.
+            - ``step_type`` is ``NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT`` the condition will be checked on external steps.
 
         However, if the `condition` is an instance of :class:`NetworkTraceStopCondition` the ``NetworkTraceStopCondition.step_type`` will be honoured.
 
         :param condition: The stop condition to add.
+        :param step_type: `NetworkTraceStepType` value.
         :keyword allow_re_wrapping: Allow rewrapping of :class:`StopCondition`s with debug logging
         :returns: This :class:`NetworkTrace` instance
         """
@@ -410,7 +412,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
         return self._tracker.visit(terminal, phases)
 
 
-def default_condition_step_type(step_type):
+def default_condition_step_type(step_type: CanActionItem):
     if step_type is None:
         return False
     if step_type == NetworkTraceActionType.ALL_STEPS:
