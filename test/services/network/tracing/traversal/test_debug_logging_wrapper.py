@@ -118,8 +118,8 @@ class TestDebugLoggingWrappers:
             action.apply(self.item_1, self.context_1)
             action.apply(self.item_2, self.context_2)
 
-            assert handler.log_list.get() == f"root: my desc: apply(1) [item={self.item_1}, context={self.context_1}]"
-            assert handler.log_list.get() == f"root: my desc: apply(1) [item={self.item_2}, context={self.context_2}]"
+            assert handler.log_list.get() == f"root: my desc: stepped_on(1) [item={self.item_1}, context={self.context_1}]"
+            assert handler.log_list.get() == f"root: my desc: stepped_on(1) [item={self.item_2}, context={self.context_2}]"
 
     def test_rewrapping_step_action_throws_attribute_error_when_allow_re_wrapping_is_false(self):
         logging_wrapper = DebugLoggingWrapper('my desc', self.logger)

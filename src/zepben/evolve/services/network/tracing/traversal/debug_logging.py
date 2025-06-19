@@ -8,7 +8,7 @@ import copy
 import functools
 from logging import Logger
 from types import FunctionType
-from typing import TypeVar, Union, Optional, Type
+from typing import TypeVar, Union, Optional, Type, TypedDict, List, Tuple, Dict
 
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
@@ -19,8 +19,13 @@ T = TypeVar('T')
 
 Wrappable = Union[StepAction[T], QueueCondition[T], StopCondition[T]]
 
-_data = {
-    StepAction: [('apply', ' [item={args[0]}, context={args[1]}]')],
+DebugLoggingDataParam = List[Tuple[Union[Tuple[str, str], str], str]]
+
+# class_to_wrap:
+#       - attr_name: 'attr_name=(log_msg)'
+#       - (attr_name, log_name): 'log_name=(log_msg)'
+_data: Dict[Type[Wrappable], DebugLoggingDataParam] = {
+    StepAction: [(('apply', 'stepped_on'), ' [item={args[0]}, context={args[1]}]')],
     StopCondition: [('should_stop', '={result} [item={args[0]}, context={args[1]}]')],
     QueueCondition: [
         ('should_queue', '={result} [next_item={args[0]}, next_context={args[1]}, current_item={args[2]}, current_context={args[3]}]'),
@@ -68,7 +73,7 @@ class DebugLoggingWrapper:
             object aside from what it inherits from.
 
             """
-            
+
             self._wrapped[clazz] += 1
             return self._wrapped[clazz]
 
@@ -80,13 +85,17 @@ class DebugLoggingWrapper:
             :param _attr: Method/Function name.
             :raises AttributeError: if ``wrappable`` is already wrapped
             """
+            if isinstance(_attr, tuple):
+                _attr_name, _log_attr_name = _attr
+            else:
+                _attr_name = _log_attr_name = _attr
 
             # Wrapped classes will have __wrapped__ == True - if it exists on the obj passed in, the user is attempting to wrap an
             # already wrapped object. This can lead to unexpected outcomes so we do not support it
-            if (to_wrap := getattr(w_obj, _attr)) and hasattr(to_wrap, '__wrapped__'):
+            if (to_wrap := getattr(w_obj, _attr_name)) and hasattr(to_wrap, '__wrapped__'):
                     raise AttributeError(f'Wrapped objects cannot be rewrapped, pass in the original object instead.')
 
-            setattr(w_obj, _attr, self._log_method_call(to_wrap, f'{self.description}: {_attr}({_index})' + _msg))
+            setattr(w_obj, _attr_name, self._log_method_call(to_wrap, f'{self.description}: {_log_attr_name}({_index})' + _msg))
             setattr(w_obj, '__wrapped__', True)
 
         for clazz in (StepAction, StopCondition, QueueCondition):
