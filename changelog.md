@@ -8,6 +8,8 @@
 * `RemoveDirection` has been removed. It did not work reliably with dual fed networks with loops. You now need to clear direction using the new
 `ClearDirection` and reapply directions where appropriate using `SetDirection`.
 * `Cut` supports adding a maximum of 2 terminals.
+* `NetworkTraceTracker` now uses a `set` to track visited objects, if you were using unhashable objects this will need to be addressed.
+
 
 
 ### New Features
@@ -39,6 +41,8 @@
 * `NetworkTrace`/`Traversal` now correctly respects `can_stop_on_start_item` when providing multiple start items.
 * `AssignToFeeders`/`AssignToLvFeeders` now finds back-fed equipment correctly
 * `AssignToFeeders` and `AssignToLvFeeders` will now associate `PowerElectronicUnits` with their `powerElectronicsConnection` `Feeder`/`LvFeeder`.
+* `NetworkTrace` no longer hashes the entire terminal object passed in, and will only reference the mRID in `self.tracker`, Exponentially large execution
+  times should now be fixed.
 
 
 
