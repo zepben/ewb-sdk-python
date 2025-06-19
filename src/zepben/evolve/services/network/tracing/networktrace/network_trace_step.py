@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Set, Generic, TypeVar, TYPE_CHECKING, Optional, List
+from typing import Set, Generic, TypeVar, TYPE_CHECKING, Optional, List, FrozenSet
 
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 
@@ -50,10 +50,10 @@ class NetworkTraceStep(Generic[T]):
         traversed_ac_line_segment: Optional[AcLineSegment] = field(default=None)
         nominal_phase_paths: Optional[Set[NominalPhasePath]] = field(default_factory=set)
 
-        def to_phases_set(self) -> Set[SinglePhaseKind]:
+        def to_phases_set(self) -> FrozenSet[SinglePhaseKind]:
             if len(self.nominal_phase_paths) == 0:
-                return set()
-            return set(map(lambda it: it.to_phase, self.nominal_phase_paths))
+                return frozenset()
+            return frozenset(map(lambda it: it.to_phase, self.nominal_phase_paths))
 
         @property
         def from_equipment(self) -> ConductingEquipment:
