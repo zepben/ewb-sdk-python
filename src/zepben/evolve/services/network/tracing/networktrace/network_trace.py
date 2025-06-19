@@ -5,7 +5,7 @@
 
 from collections.abc import Callable
 from functools import singledispatchmethod
-from typing import TypeVar, Union, Generic, Set, Type, Generator
+from typing import TypeVar, Union, Generic, Set, Type, Generator, FrozenSet
 
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
@@ -295,7 +295,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
     def start_nominal_phase_path(phases: PhaseCode) -> Set[NominalPhasePath]:
         return {NominalPhasePath(it, it) for it in phases.single_phases} if phases and phases.single_phases else set()
 
-    def has_visited(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
+    def has_visited(self, terminal: Terminal, phases: FrozenSet[SinglePhaseKind]) -> bool:
         parent = self.parent
         while parent is not None:
             if parent._tracker.has_visited(terminal, phases):
@@ -303,7 +303,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
             parent = parent.parent
         return self._tracker.has_visited(terminal, phases)
 
-    def visit(self, terminal: Terminal, phases: set[SinglePhaseKind]) -> bool:
+    def visit(self, terminal: Terminal, phases: FrozenSet[SinglePhaseKind]) -> bool:
         if self.parent and self.parent.has_visited(terminal, phases):
                 return False
         return self._tracker.visit(terminal, phases)
