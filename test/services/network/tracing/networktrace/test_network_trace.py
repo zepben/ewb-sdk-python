@@ -190,7 +190,7 @@ class TestNetworkTrace:
                 builder.from_junction(num_terminals=1) \
                        .to_acls()
 
-                for i in range(500):
+                for i in range(1000):
                     builder.to_junction(mrid=f'junc-{i}', num_terminals=3) \
                            .to_acls(mrid=f'acls-{i}-top') \
                            .from_acls(mrid=f'acls-{i}-bottom') \
