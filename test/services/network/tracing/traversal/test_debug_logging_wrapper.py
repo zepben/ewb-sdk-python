@@ -121,7 +121,7 @@ class TestDebugLoggingWrappers:
             assert handler.log_list.get() == f"root: my desc: stepped_on(1) [item={self.item_1}, context={self.context_1}]"
             assert handler.log_list.get() == f"root: my desc: stepped_on(1) [item={self.item_2}, context={self.context_2}]"
 
-    def test_rewrapping_step_action_throws_attribute_error_when_allow_re_wrapping_is_false(self):
+    def test_rewrapping_step_action_throws_attribute_error(self):
         logging_wrapper = DebugLoggingWrapper('my desc', self.logger)
 
         action = StepAction(lambda item, context: None)
@@ -132,7 +132,7 @@ class TestDebugLoggingWrappers:
         with pytest.raises(AttributeError):
             logging_wrapper.wrap(wrapped_action)
 
-    def test_rewrapping_queue_condition_throws_attribute_error_when_allow_re_wrapping_is_false(self):
+    def test_rewrapping_queue_condition_throws_attribute_error(self):
         logging_wrapper = DebugLoggingWrapper('my desc', self.logger)
 
         should_stop = bool_generator()
@@ -145,7 +145,7 @@ class TestDebugLoggingWrappers:
         with pytest.raises(AttributeError):
             logging_wrapper.wrap(wrapped_condition)
 
-    def test_rewrapping_stop_condition_throws_attribute_error_when_allow_re_wrapping_is_false(self):
+    def test_rewrapping_stop_condition_throws_attribute_error(self):
         logging_wrapper = DebugLoggingWrapper('my desc', self.logger)
 
         condition = StopCondition(lambda item, context: True)
