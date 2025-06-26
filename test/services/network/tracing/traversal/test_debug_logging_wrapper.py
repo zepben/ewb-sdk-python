@@ -121,46 +121,6 @@ class TestDebugLoggingWrappers:
             assert handler.log_list.get() == f"root: my desc: stepped_on(1) [item={self.item_1}, context={self.context_1}]"
             assert handler.log_list.get() == f"root: my desc: stepped_on(1) [item={self.item_2}, context={self.context_2}]"
 
-    def test_rewrapping_step_action_throws_attribute_error(self):
-        logging_wrapper = DebugLoggingWrapper('my desc', self.logger)
-
-        action = StepAction(lambda item, context: None)
-        wrapped_action = logging_wrapper.wrap(action)
-
-        assert isinstance(wrapped_action, StepAction)
-
-        with pytest.raises(AttributeError):
-            logging_wrapper.wrap(wrapped_action)
-
-    def test_rewrapping_queue_condition_throws_attribute_error(self):
-        logging_wrapper = DebugLoggingWrapper('my desc', self.logger)
-
-        should_stop = bool_generator()
-        condition = QueueCondition(lambda nitem, nctx, item, ctx: next(should_stop))
-
-        wrapped_condition = logging_wrapper.wrap(condition)
-
-        assert isinstance(wrapped_condition, QueueCondition)
-
-        with pytest.raises(AttributeError):
-            logging_wrapper.wrap(wrapped_condition)
-
-    def test_rewrapping_stop_condition_throws_attribute_error(self):
-        logging_wrapper = DebugLoggingWrapper('my desc', self.logger)
-
-        condition = StopCondition(lambda item, context: True)
-        wrapped_condition = logging_wrapper.wrap(condition)
-
-        assert isinstance(wrapped_condition, StopCondition)
-
-        with pytest.raises(AttributeError):
-            logging_wrapper.wrap(wrapped_condition)
-
-        # Ensure rewrapping conditions already wrapped by another logger requires explicit approval
-        logging_wrapper2 = DebugLoggingWrapper('my desc', self.logger)
-        with pytest.raises(AttributeError):
-            logging_wrapper2.wrap(wrapped_condition)
-
     def test_adding_to_debug_logging_wrapper_increments_count_as_expected(self):
         logging_wrapper = DebugLoggingWrapper('my desc', self.logger)
 
@@ -197,3 +157,23 @@ class TestDebugLoggingWrappers:
             # check the new condition is marked as "2"
             wrapped_original_condition2.should_stop(False, False)
             assert handler.log_list.get() == f"root: my desc: should_stop(2)=True [item=False, context=False]"
+
+    def test_wrapping(self):
+        wrapper = DebugLoggingWrapper("hmmm", self.logger)
+
+        step_action = StepAction(lambda it, ctx: self.logger.debug(f"{it} {ctx}"))
+        step_action.apply(1, 2)
+
+        wrapped_1 = wrapper.wrap(step_action)
+        wrapped_1.apply(1, 2)
+
+        wrapped_2 = wrapper.wrap(wrapped_1)
+        wrapped_2.apply(1, 2)
+
+        wrapper_2 = DebugLoggingWrapper("hmmm", self.logger)
+
+        wrapped_2_1 = wrapper_2.wrap(step_action)
+        wrapped_2_1.apply(1, 2)
+
+        wrapped_2_2 = wrapper_2.wrap(wrapped_1)
+        wrapped_2_2.apply(1, 2)

@@ -273,12 +273,16 @@ class TestTraversal:
     @pytest.mark.asyncio
     async def test_if_not_stopping_helper_accepts_step_action_with_context_value_and_context_is_computed(self):
         data_capture: dict[int, str] = {}
+        contex_data_capture = list()
 
         class TestSAWCV(StepActionWithContextValue[int]):
+            """We append to `context_data_capture` on every step to ensure that the context is computed on every step."""
             def compute_next_value(self, next_item: int, current_item: int, current_value):
-                return f'data={current_value} : (next_item={next_item}, current_item={current_item})'
+                contex_data_capture.append(True)
+                return f'{current_value} : (next_item={next_item}, current_item={current_item})'
 
             def compute_initial_value(self, item: int):
+                contex_data_capture.append(True)
                 return f'{item}'
 
         def step_action(item, ctx: StepContext):
@@ -293,17 +297,24 @@ class TestTraversal:
 
         assert len(data_capture) == 2
         assert data_capture[1] == '1'
-        assert data_capture[2] == 'data=1 : (next_item=2, current_item=1)'
+        assert data_capture[2] == '1 : (next_item=2, current_item=1)'
+
+        # If this fails, either the number of steps changed, or context wasn't computed every step
+        assert len(contex_data_capture) == 3
 
     @pytest.mark.asyncio
     async def test_if_stopping_helper_accepts_step_action_with_context_value_and_context_is_computed(self):
         data_capture: dict[int, str] = {}
+        contex_data_capture = list()
 
         class TestSAWCV(StepActionWithContextValue[int]):
+            """We append to `context_data_capture` on every step to ensure that the context is computed on every step."""
             def compute_next_value(self, next_item: int, current_item: int, current_value):
-                return f'{current_value} : {next_item + current_item}'
+                contex_data_capture.append(True)
+                return f'{current_value} : (next_item={next_item}, current_item={current_item})'
 
             def compute_initial_value(self, item: int):
+                contex_data_capture.append(True)
                 return f'{item}'
 
         def step_action(item, ctx: StepContext):
@@ -317,7 +328,10 @@ class TestTraversal:
         )
 
         assert len(data_capture) == 1
-        assert data_capture[3] == '1 : 3 : 5'
+        assert data_capture[3] == '1 : (next_item=2, current_item=1) : (next_item=3, current_item=2)'
+
+        # If this fails, either the number of steps changed, or context wasn't computed every step
+        assert len(contex_data_capture) == 3
 
     @pytest.mark.asyncio
     async def test_context_value_computer_adds_value_to_context(self):
@@ -328,7 +342,7 @@ class TestTraversal:
 
         class TestCVC(ContextValueComputer[int]):
             def compute_next_value(self, next_item: int, current_item: int, current_value):
-                return f'{current_value} : {next_item + current_item}'
+                return f'{current_value} : (next_item={next_item}, current_item={current_item})'
 
             def compute_initial_value(self, item: int):
                 return f'{item}'
@@ -341,7 +355,7 @@ class TestTraversal:
         )
 
         assert data_capture[1] == '1'
-        assert data_capture[2] == '1 : 3'
+        assert data_capture[2] == '1 : (next_item=2, current_item=1)'
 
     @pytest.mark.asyncio
     async def test_start_items(self):

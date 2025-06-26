@@ -25,7 +25,7 @@ class StepAction(Generic[T]):
     """
 
     def __init__(self, _func: StepActionFunc = None):
-        self._func = _func
+        self._func = _func or self._apply
 
     def __init_subclass__(cls):
         """
@@ -50,18 +50,6 @@ class StepAction(Generic[T]):
 
         return self._func(item, context)
 
-class StepActionWithContextValue(StepAction[T], ContextValueComputer[T]):
-    """
-    Interface representing a step action that utilises a value stored in the :class:`StepContext`.
-
-    `T` The type of items being traversed.
-    `U` The type of the context value computed and used in the action.
-    """
-
-    def __init__(self, key: str, _func: StepActionFunc = None):
-        StepAction.__init__(self, _func or self._apply)
-        ContextValueComputer.__init__(self, key)
-
     @abstractmethod
     def _apply(self, item: T, context: StepContext):
         """
@@ -71,6 +59,19 @@ class StepActionWithContextValue(StepAction[T], ContextValueComputer[T]):
         :param context: The context associated with the current traversal step.
         """
         raise NotImplementedError()
+
+
+class StepActionWithContextValue(StepAction[T], ContextValueComputer[T]):
+    """
+    Interface representing a step action that utilises a value stored in the :class:`StepContext`.
+
+    `T` The type of items being traversed.
+    `U` The type of the context value computed and used in the action.
+    """
+
+    def __init__(self, key: str, _func: StepActionFunc = None):
+        StepAction.__init__(self, _func)
+        ContextValueComputer.__init__(self, key)
 
     @abstractmethod
     def compute_initial_value(self, item: T):

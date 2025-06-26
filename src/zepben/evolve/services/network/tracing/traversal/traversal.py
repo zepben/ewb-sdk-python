@@ -26,7 +26,6 @@ from zepben.evolve.services.network.tracing.traversal.stop_condition import Stop
 __all__ = ["Traversal"]
 
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
-from zepben.evolve.util import extra_kwargs_not_allowed
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -205,21 +204,20 @@ class Traversal(Generic[T, D]):
         raise NotImplementedError
 
     @singledispatchmethod
-    def add_condition(self, condition: ConditionTypes, **kwargs) -> D:
+    def add_condition(self, condition: ConditionTypes) -> D:
         """
         Adds a traversal condition to the traversal.
 
         :param condition: The condition to add.
-        :keyword allow_re_wrapping: Allow rewrapping of :class:`StopConditions` with debug logging
 
         :return: this traversal instance.
         """
 
         if callable(condition):  # Callable[[NetworkTraceStep[T], StepContext], None]
             if len(inspect.getfullargspec(condition).args) == 2:
-                return self.add_stop_condition(condition, **kwargs)
+                return self.add_stop_condition(condition)
             elif len(inspect.getfullargspec(condition).args) == 4:
-                return self.add_queue_condition(condition, **kwargs)
+                return self.add_queue_condition(condition)
             else:
                 raise RuntimeError(f'Condition does not match expected: Number of args is not 2(Stop Condition) or 4(QueueCondition)')
 
@@ -231,30 +229,27 @@ class Traversal(Generic[T, D]):
 
     @singledispatchmethod
     @add_condition.register(StopCondition)
-    def add_stop_condition(self, condition: StopConditionTypes, **kwargs) -> D:
+    def add_stop_condition(self, condition: StopConditionTypes) -> D:
         """
         Adds a stop condition to the traversal. If any stop condition returns
         ``True``, the traversal will not call the callback to queue more items
         from the current item.
 
         :param condition: The stop condition to add.
-        :keyword allow_re_wrapping: Allow rewrapping of :class:`StopCondition`s with debug logging
         :return: this traversal instance.
         """
 
         raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: [StopCondition | StopConditionWithContextValue | Callable]')
 
     @add_stop_condition.register(Callable)
-    def _(self, condition: ShouldStop, **kwargs):
-        return self.add_stop_condition(StopCondition(condition), **kwargs)
+    def _(self, condition: ShouldStop):
+        return self.add_stop_condition(StopCondition(condition))
 
     @add_stop_condition.register
-    def _(self, condition: StopCondition, **kwargs):
+    def _(self, condition: StopCondition):
 
         if self._debug_logger is not None:
-            self._debug_logger.wrap(condition, kwargs.pop('allow_re_wrapping', False))
-
-        extra_kwargs_not_allowed(kwargs, 'add_stop_condition')
+            self._debug_logger.wrap(condition)
 
         self.stop_conditions.append(condition)
         if isinstance(condition, StopConditionWithContextValue):
@@ -281,30 +276,27 @@ class Traversal(Generic[T, D]):
 
     @add_condition.register(QueueCondition)
     @singledispatchmethod
-    def add_queue_condition(self, condition: QueueConditionTypes, **kwargs) -> D:
+    def add_queue_condition(self, condition: QueueConditionTypes) -> D:
         """
         Adds a queue condition to the traversal.
         Queue conditions determine whether an item should be queued for traversal.
         All registered queue conditions must return true for an item to be queued.
 
         :param condition: The queue condition to add.
-        :keyword allow_re_wrapping: Allow rewrapping of :class:`QueueCondition`s with debug logging
         :returns: The current traversal instance.
         """
 
         raise RuntimeError(f'Condition [{condition.__class__.__name__}] does not match expected: [QueueCondition | QueueConditionWithContextValue | Callable]')
 
     @add_queue_condition.register(Callable)
-    def _(self, condition: ShouldQueue, **kwargs):
-        return self.add_queue_condition(QueueCondition(condition), **kwargs)
+    def _(self, condition: ShouldQueue):
+        return self.add_queue_condition(QueueCondition(condition))
 
     @add_queue_condition.register
-    def _(self, condition: QueueCondition, **kwargs):
+    def _(self, condition: QueueCondition):
 
         if self._debug_logger is not None:
-            self._debug_logger.wrap(condition, kwargs.pop('allow_re_wrapping', False))
-
-        extra_kwargs_not_allowed(kwargs, 'add_queue_condition')
+            self._debug_logger.wrap(condition)
 
         self.queue_conditions.append(condition)
         if isinstance(condition, QueueConditionWithContextValue):
@@ -324,24 +316,21 @@ class Traversal(Generic[T, D]):
         return self
 
     @singledispatchmethod
-    def add_step_action(self, action: StepActionTypes, **kwargs) -> D:
+    def add_step_action(self, action: StepActionTypes) -> D:
         """
         Adds an action to be performed on each item in the traversal, including the
         starting items.
 
         :param action: The action to perform on each item.
-        :keyword allow_re_wrapping: Allow rewrapping of :class:`StepAction`s with debug logging
         :return: The current traversal instance.
         """
 
         raise RuntimeError(f'StepAction [{action.__class__.__name__}] does not match expected: [StepAction | StepActionWithContextValue | Callable]')
 
     @add_step_action.register
-    def _(self, action: StepAction, **kwargs):
+    def _(self, action: StepAction):
         if self._debug_logger is not None:
-            self._debug_logger.wrap(action, kwargs.pop('allow_re_wrapping', False))
-
-        extra_kwargs_not_allowed(kwargs, 'add_step_action')
+            self._debug_logger.wrap(action)
 
         self.step_actions.append(action)
         if isinstance(action, StepActionWithContextValue):
@@ -350,47 +339,45 @@ class Traversal(Generic[T, D]):
 
     @add_step_action.register(Callable)
     def _(self, action: StepActionFunc, **kwargs):
-        return self.add_step_action(StepAction(action), **kwargs)
+        return self.add_step_action(StepAction(action))
 
     @singledispatchmethod
-    def if_not_stopping(self, action: StepActionTypes, **kwargs) -> D:
+    def if_not_stopping(self, action: StepActionTypes) -> D:
         """
         Adds an action to be performed on each item that does not match any stop condition.
 
         :param action: The action to perform on each non-stopping item.
-        :keyword allow_re_wrapping: Allow rewrapping of :class:`StepAction`s with debug logging
         :return: The current traversal instance.
         """
         raise RuntimeError(f'StepAction [{action}] does not match expected: [StepAction | StepActionWithContextValue | Callable]')
 
     @if_not_stopping.register(Callable)
-    def _(self, action: StepActionFunc, **kwargs) -> D:
-        return self.add_step_action(lambda it, context: action(it, context) if not context.is_stopping else None, **kwargs)
+    def _(self, action: StepActionFunc) -> D:
+        return self.add_step_action(lambda it, context: action(it, context) if not context.is_stopping else None)
 
     @if_not_stopping.register
-    def _(self, action: StepAction, **kwargs) -> D:
+    def _(self, action: StepAction) -> D:
         action.apply = lambda it, context: action._func(it, context) if not context.is_stopping else None
-        return self.add_step_action(action, **kwargs)
+        return self.add_step_action(action)
 
     @singledispatchmethod
-    def if_stopping(self, action: StepActionTypes, **kwargs) -> D:
+    def if_stopping(self, action: StepActionTypes) -> D:
         """
         Adds an action to be performed on each item that matches a stop condition.
 
         :param action: The action to perform on each stopping item.
-        :keyword allow_re_wrapping: Allow rewrapping of :class:`StepActions`s with debug logging
         :return: The current traversal instance.
         """
         raise RuntimeError(f'StepAction [{action}] does not match expected: [StepAction | StepActionWithContextValue | Callable]')
 
     @if_stopping.register(Callable)
-    def _(self, action: StepActionFunc, **kwargs) -> D:
-        return self.add_step_action(lambda it, context: action(it, context) if context.is_stopping else None, **kwargs)
+    def _(self, action: StepActionFunc) -> D:
+        return self.add_step_action(lambda it, context: action(it, context) if context.is_stopping else None)
 
     @if_stopping.register
-    def _(self, action: StepAction, **kwargs) -> D:
+    def _(self, action: StepAction) -> D:
         action.apply = lambda it, context: action._func(it, context) if context.is_stopping else None
-        return self.add_step_action(action, **kwargs)
+        return self.add_step_action(action)
 
     def copy_step_actions(self, other: Traversal[T, D]) -> D:
         """

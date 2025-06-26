@@ -254,42 +254,56 @@ async def test_applies_unknown_phases_through_transformers():
 @pytest.mark.asyncio
 async def test_energises_transformer_phases_straight():
     # Without neutral.
-    for phase_code in (PhaseCode.ABC, PhaseCode.AB, PhaseCode.BC, PhaseCode.AC):
-        await _validate_tx_phases(*[phase_code]*5)
+    await _validate_tx_phases(*[PhaseCode.ABC] * 5)
+    await _validate_tx_phases(*[PhaseCode.AB] * 5)
+    await _validate_tx_phases(*[PhaseCode.BC] * 5)
+    await _validate_tx_phases(*[PhaseCode.AC] * 5)
 
-    for phase_code in (PhaseCode.AB, PhaseCode.BC, PhaseCode.AC):
-        await _validate_tx_phases(phase_code, phase_code, PhaseCode.XY, phase_code, phase_code)
+    await _validate_tx_phases(PhaseCode.AB, PhaseCode.AB, PhaseCode.XY, PhaseCode.AB, PhaseCode.AB)
+    await _validate_tx_phases(PhaseCode.BC, PhaseCode.BC, PhaseCode.XY, PhaseCode.BC, PhaseCode.BC)
+    await _validate_tx_phases(PhaseCode.AC, PhaseCode.AC, PhaseCode.XY, PhaseCode.AC, PhaseCode.AC)
 
-    for phase_code in (PhaseCode.AB, PhaseCode.BC, PhaseCode.AC):
-        await _validate_tx_phases(phase_code, PhaseCode.XY, PhaseCode.XY, phase_code, phase_code)
+    await _validate_tx_phases(PhaseCode.AB, PhaseCode.XY, PhaseCode.XY, PhaseCode.AB, PhaseCode.AB)
+    await _validate_tx_phases(PhaseCode.BC, PhaseCode.XY, PhaseCode.XY, PhaseCode.BC, PhaseCode.BC)
+    await _validate_tx_phases(PhaseCode.AC, PhaseCode.XY, PhaseCode.XY, PhaseCode.AC, PhaseCode.AC)
 
-    for phase_code in (PhaseCode.A, PhaseCode.B, PhaseCode.C):
-        await _validate_tx_phases(*[phase_code]*5)
+    await _validate_tx_phases(*[PhaseCode.A] * 5)
+    await _validate_tx_phases(*[PhaseCode.B] * 5)
+    await _validate_tx_phases(*[PhaseCode.C] * 5)
 
-    for phase_code in (PhaseCode.A, PhaseCode.B, PhaseCode.C):
-        await _validate_tx_phases(phase_code, phase_code, PhaseCode.X, phase_code, phase_code)
+    await _validate_tx_phases(PhaseCode.A, PhaseCode.A, PhaseCode.X, PhaseCode.A, PhaseCode.A)
+    await _validate_tx_phases(PhaseCode.B, PhaseCode.B, PhaseCode.X, PhaseCode.B, PhaseCode.B)
+    await _validate_tx_phases(PhaseCode.C, PhaseCode.C, PhaseCode.X, PhaseCode.C, PhaseCode.C)
 
-    for phase_code in (PhaseCode.A, PhaseCode.B, PhaseCode.C):
-        await _validate_tx_phases(phase_code, PhaseCode.X, PhaseCode.X, phase_code, phase_code)
+    await _validate_tx_phases(PhaseCode.A, PhaseCode.X, PhaseCode.X, PhaseCode.A, PhaseCode.A)
+    await _validate_tx_phases(PhaseCode.B, PhaseCode.X, PhaseCode.X, PhaseCode.B, PhaseCode.B)
+    await _validate_tx_phases(PhaseCode.C, PhaseCode.X, PhaseCode.X, PhaseCode.C, PhaseCode.C)
 
     # With neutral.
-    for phase_code in (PhaseCode.ABC, PhaseCode.AB, PhaseCode.BC, PhaseCode.AC):
-        await _validate_tx_phases(phase_code, phase_code, phase_code + PhaseCode.N, phase_code, phase_code + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.ABC, PhaseCode.ABC, PhaseCode.ABC + PhaseCode.N, PhaseCode.ABC, PhaseCode.ABC + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.AB, PhaseCode.AB, PhaseCode.AB + PhaseCode.N, PhaseCode.AB, PhaseCode.AB + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.BC, PhaseCode.BC, PhaseCode.BC + PhaseCode.N, PhaseCode.BC, PhaseCode.BC + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.AC, PhaseCode.AC, PhaseCode.AC + PhaseCode.N, PhaseCode.AC, PhaseCode.AC + PhaseCode.N)
 
-    for phase_code in (PhaseCode.AB, PhaseCode.BC, PhaseCode.AC):
-        await _validate_tx_phases(phase_code, phase_code, PhaseCode.XYN, phase_code, phase_code + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.AB, PhaseCode.AB, PhaseCode.XYN, PhaseCode.AB, PhaseCode.AB + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.BC, PhaseCode.BC, PhaseCode.XYN, PhaseCode.BC, PhaseCode.BC + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.AC, PhaseCode.AC, PhaseCode.XYN, PhaseCode.AC, PhaseCode.AC + PhaseCode.N)
 
-    for phase_code in (PhaseCode.AB, PhaseCode.BC, PhaseCode.AC):
-        await _validate_tx_phases(phase_code, PhaseCode.XY, PhaseCode.XYN, phase_code, phase_code + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.AB, PhaseCode.XY, PhaseCode.XYN, PhaseCode.AB, PhaseCode.AB + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.BC, PhaseCode.XY, PhaseCode.XYN, PhaseCode.BC, PhaseCode.BC + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.AC, PhaseCode.XY, PhaseCode.XYN, PhaseCode.AC, PhaseCode.AC + PhaseCode.N)
 
-    for phase_code in (PhaseCode.A, PhaseCode.B, PhaseCode.C):
-        await _validate_tx_phases(phase_code, phase_code, phase_code + PhaseCode.N, phase_code, phase_code + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.A, PhaseCode.A, PhaseCode.A + PhaseCode.N, PhaseCode.A, PhaseCode.A + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.B, PhaseCode.B, PhaseCode.B + PhaseCode.N, PhaseCode.B, PhaseCode.B + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.C, PhaseCode.C, PhaseCode.C + PhaseCode.N, PhaseCode.C, PhaseCode.C + PhaseCode.N)
 
-    for phase_code in (PhaseCode.A, PhaseCode.B, PhaseCode.C):
-        await _validate_tx_phases(phase_code, phase_code, PhaseCode.XN, phase_code, phase_code + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.A, PhaseCode.A, PhaseCode.XN, PhaseCode.A, PhaseCode.A + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.B, PhaseCode.B, PhaseCode.XN, PhaseCode.B, PhaseCode.B + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.C, PhaseCode.C, PhaseCode.XN, PhaseCode.C, PhaseCode.C + PhaseCode.N)
 
-    for phase_code in (PhaseCode.A, PhaseCode.B, PhaseCode.C):
-        await _validate_tx_phases(phase_code, PhaseCode.X, PhaseCode.XN, phase_code, phase_code + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.A, PhaseCode.X, PhaseCode.XN, PhaseCode.A, PhaseCode.A + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.B, PhaseCode.X, PhaseCode.XN, PhaseCode.B, PhaseCode.B + PhaseCode.N)
+    await _validate_tx_phases(PhaseCode.C, PhaseCode.X, PhaseCode.XN, PhaseCode.C, PhaseCode.C + PhaseCode.N)
 
 @pytest.mark.asyncio
 async def test_energises_transformer_phases_added():

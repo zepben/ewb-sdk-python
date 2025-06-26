@@ -90,7 +90,7 @@ class SetPhases:
     async def _(
         self,
         start_terminal: Terminal,
-        phases: Union[PhaseCode, List[SinglePhaseKind]]=None,
+        phases: Union[PhaseCode, List[SinglePhaseKind], Set[SinglePhaseKind]]=None,
         network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
         seed_terminal: Terminal=None):
         """
@@ -144,11 +144,8 @@ class SetPhases:
         :param network_state_operators: The `NetworkStateOperators` to be used when setting phases.
         """
 
-        if phases is None:
-            self.spread_phases(from_terminal, to_terminal, from_terminal.phases.single_phases, network_state_operators)
-        else:
-            paths = self._get_nominal_phase_paths(network_state_operators, from_terminal, to_terminal, phases)
-            self._flow_phases(network_state_operators, from_terminal, to_terminal, paths)
+        paths = self._get_nominal_phase_paths(network_state_operators, from_terminal, to_terminal, phases or from_terminal.phases.single_phases)
+        self._flow_phases(network_state_operators, from_terminal, to_terminal, paths)
 
     async def _run_terminals(self, terminals: Iterable[Terminal], network_state_operators: Type[NetworkStateOperators]):
 
@@ -356,14 +353,15 @@ class SetPhases:
         # Split the phases into ones we need to flow directly, and ones that have been added by a transformer. In
         #  the case of an added Y phase (SWER -> LV2 transformer) we need to flow the phases before we can calculate
         #  the missing phase.
+        flow_phases = (p for p in paths if p.from_phase == SinglePhaseKind.NONE)
+        add_phases = (p for p in paths if p.from_phase != SinglePhaseKind.NONE)
+        for p in flow_phases:
+            self._try_add_phase(from_terminal, from_phases, to_terminal, to_phases, p.to_phase, allow_suspect_flow,
+                                lambda: updated_phases.append(True))
 
-        for path in paths:
-            if path.from_phase == SinglePhaseKind.NONE:
-                self._try_add_phase(from_terminal, from_phases, to_terminal, to_phases, path.to_phase, allow_suspect_flow,
-                                    lambda: updated_phases.append(True))
-            else:
-                self._try_set_phase(from_phases[path.from_phase], from_terminal, from_phases, path.from_phase,
-                                    to_terminal, to_phases, path.to_phase, lambda: updated_phases.append(True))
+        for p in add_phases:
+            self._try_set_phase(from_phases[p.from_phase], from_terminal, from_phases, p.from_phase,
+                                to_terminal, to_phases, p.to_phase, lambda: updated_phases.append(True))
 
         return any(updated_phases)
 
@@ -399,8 +397,7 @@ class SetPhases:
         on_success: Callable[[], None]):
 
         try:
-            if phase != SinglePhaseKind.NONE:
-                to_phases[to_] = phase
+            if phase != SinglePhaseKind.NONE and to_phases.__setitem__(to_, phase):
                 if self._debug_logger:
                     self._debug_logger.info(f'   {from_terminal.mrid}[{from_}] -> {to_terminal.mrid}[{to_}]: set to {phase}')
                 on_success()

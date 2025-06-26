@@ -183,11 +183,6 @@ class classproperty(property):
         return classmethod(self.fget).__get__(None, owner)()
 
 
-def extra_kwargs_not_allowed(kwargs, function_name):
-    if kwargs:
-        raise TypeError(f"'{kwargs.pop()}' is an invalid keyword argument for {function_name}()")
-
-
 def datetime_to_timestamp(date_time: datetime) -> PBTimestamp:
     timestamp = PBTimestamp()
     timestamp.FromDatetime(date_time)

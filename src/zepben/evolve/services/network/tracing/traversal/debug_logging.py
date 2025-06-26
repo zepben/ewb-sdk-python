@@ -85,18 +85,15 @@ class DebugLoggingWrapper:
             :param _attr: Method/Function name.
             :raises AttributeError: if ``wrappable`` is already wrapped
             """
+
             if isinstance(_attr, tuple):
                 _attr_name, _log_attr_name = _attr
             else:
                 _attr_name = _log_attr_name = _attr
 
-            # Wrapped classes will have __wrapped__ == True - if it exists on the obj passed in, the user is attempting to wrap an
-            # already wrapped object. This can lead to unexpected outcomes so we do not support it
-            if (to_wrap := getattr(w_obj, _attr_name)) and hasattr(to_wrap, '__wrapped__'):
-                    raise AttributeError(f'Wrapped objects cannot be rewrapped, pass in the original object instead.')
+            to_wrap = getattr(w_obj, _attr_name)
 
             setattr(w_obj, _attr_name, self._log_method_call(to_wrap, f'{self.description}: {_log_attr_name}({_index})' + _msg))
-            setattr(w_obj, '__wrapped__', True)
 
         for clazz in (StepAction, StopCondition, QueueCondition):
             if isinstance(w_obj, clazz):
