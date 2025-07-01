@@ -2,13 +2,15 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+from __future__ import annotations
+
 import abc
 from collections import Counter
 from dataclasses import dataclass, field
 from functools import reduce
-from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable
+from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable, TYPE_CHECKING
 
-from zepben.evolve import Junction, BusbarSection, EquivalentBranch, Traversal, StepContext
+from zepben.evolve import Junction, BusbarSection, EquivalentBranch, Traversal
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
@@ -20,6 +22,9 @@ from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.busbranch_trace import BusBranchTrace, BusBranchTraceStep
 
+if TYPE_CHECKING:
+    from zepben.evolve import StepContext
+
 __all__ = [
     "BusBranchNetworkCreationValidator",
     "BusBranchNetworkCreator",
@@ -27,7 +32,6 @@ __all__ = [
     "BusBranchNetworkCreationResult",
     "TerminalGrouping"
 ]
-
 
 BBN = TypeVar('BBN')  # Bus-Branch Network
 TN = TypeVar('TN')  # Topological Node
@@ -911,8 +915,10 @@ async def _group_negligible_impedance_terminals(
     await trace.run()
     return tg
 
+
 def _create_traversal_step_object(next_item: Union[Terminal, AcLineSegment]) -> BusBranchTraceStep:
     return BusBranchTraceStep(next_item)
+
 
 def _process_terminal(
     tg: TerminalGrouping[ConductingEquipment],
@@ -1015,9 +1021,9 @@ def _next_common_acls(
 
     def can_process_ac_line(o: Terminal) -> bool:
         return o not in acls_terminals \
-               and isinstance(o.conducting_equipment, AcLineSegment) \
-               and has_common_impedance(o.conducting_equipment) \
-               and o.conducting_equipment not in common_acls.conducting_equipment_group
+            and isinstance(o.conducting_equipment, AcLineSegment) \
+            and has_common_impedance(o.conducting_equipment) \
+            and o.conducting_equipment not in common_acls.conducting_equipment_group
 
     def is_non_forking_ac_line(t: Terminal) -> bool:
         return t.connectivity_node is not None and len(list(t.connectivity_node.terminals)) == 2

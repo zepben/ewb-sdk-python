@@ -156,6 +156,7 @@ from zepben.evolve.services.network.translator.network_proto2cim import *
 from zepben.evolve.services.network.translator.network_cim2proto import *
 from zepben.evolve.services.network.network_service import *
 
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import *
 from zepben.evolve.services.network.tracing.connectivity.connectivity_result import *
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import *
 from zepben.evolve.services.network.tracing.connectivity.phase_paths import *
@@ -203,6 +204,8 @@ from zepben.evolve.services.network.tracing.traversal.stop_condition import *
 from zepben.evolve.services.network.tracing.traversal.traversal import *
 from zepben.evolve.services.network.tracing.traversal.traversal_condition import *
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import *
+
+from zepben.evolve.services.network.tracing.traversal.debug_logging import DebugLoggingWrapper
 
 from zepben.evolve.services.network.tracing.find_swer_equipment import *
 
@@ -449,8 +452,6 @@ from zepben.evolve.database.sqlite.diagram.diagram_service_reader import *
 from zepben.evolve.database.sqlite.network.network_cim_reader import *
 from zepben.evolve.database.sqlite.network.network_database_reader import *
 from zepben.evolve.database.sqlite.network.network_service_reader import *
-
-from zepben.evolve.services.network.tracing.phases.set_phases import *
 
 from zepben.evolve.testing.test_network_builder import *
 

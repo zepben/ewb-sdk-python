@@ -9,14 +9,15 @@ from unittest.mock import patch
 import pytest
 
 from services.network.tracing.phases.util import validate_phases_from_term_or_equip
-from zepben.evolve.database.sqlite.network.network_database_reader import NetworkDatabaseReader
 from zepben.evolve import TestNetworkBuilder, PhaseCode, SinglePhaseKind, PhaseInferrer, Terminal, NetworkService, NetworkStateOperators
+from zepben.evolve.database.sqlite.network.network_database_reader import NetworkDatabaseReader
 
 A = SinglePhaseKind.A
 B = SinglePhaseKind.B
 C = SinglePhaseKind.C
 N = SinglePhaseKind.N
 NONE = SinglePhaseKind.NONE
+
 
 class TestPhaseInferrer:
     """
@@ -446,13 +447,15 @@ class TestPhaseInferrer:
         self._validate_returned_phases(network, changes, ['c6'])
         self._validate_log(caplog, correct=["c6"])
 
-
     class LoggerOnly:
         _logger = logging.getLogger(__name__)
 
     async def run_phase_inferrer(self, network: NetworkService, do_current=True) -> tuple[List[PhaseInferrer.InferredPhase], List[PhaseInferrer.InferredPhase]]:
         normal = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.NORMAL)
-        current = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.CURRENT) if do_current else []
+
+        current = []
+        if do_current:
+            current = await PhaseInferrer().run(network, network_state_operators=NetworkStateOperators.CURRENT)
 
         # This has to be called manually as we don't actually use the NetworkDatabaseReader
         #  and copy pasting the logging code in here didn't make any sense.

@@ -6,13 +6,13 @@ import os
 import sys
 DEFAULT_RECURSION_LIMIT = sys.getrecursionlimit()
 
-from typing import List, Set
+from typing import List, Set, Tuple
 
 import pytest
 
 from services.network.tracing.networktrace.test_network_trace_step_path_provider import PathTerminal, _verify_paths
-from zepben.evolve import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType
-from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
+from zepben.evolve import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType, \
+    Tracing
 from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
 
 Terminal.__add__ = PathTerminal.__add__
@@ -39,7 +39,7 @@ class TestNetworkTrace:
         segment.add_clamp(clamp)
 
         trace.add_start_item(clamp)
-        _verify_paths(ngen([trace.start_items[0].path]), (clamp[1] + clamp[1], ))
+        _verify_paths(ngen([trace.start_items[0].path]), (clamp[1] + clamp[1],))
 
     @pytest.mark.asyncio
     def test_adds_start_AcLineSegment_terminals_cut_terminals_and_clamp_terminals_as_traversed_segment(self):
@@ -129,12 +129,12 @@ class TestNetworkTrace:
             .run(ns.get('j0', Junction))
 
         assert list(map(lambda it: (it.num_equipment_steps, it.path.to_equipment.mrid), steps)) \
-            == [(0, 'j0'),
-                (1, 'c5'),
-                (1, 'c1'),
-                (2, 'c4'),
-                (2, 'c2'),
-                (3, 'j3')]
+               == [(0, 'j0'),
+                   (1, 'c5'),
+                   (1, 'c1'),
+                   (2, 'c4'),
+                   (2, 'c2'),
+                   (3, 'j3')]
 
     @pytest.mark.asyncio
     async def test_can_stop_on_start_item_when_running_from_conducting_equipment(self):
@@ -153,10 +153,10 @@ class TestNetworkTrace:
             .run(ns.get('b0', ConductingEquipment))
 
         assert list(map(lambda it: (it.num_equipment_steps, it.path.to_equipment.mrid), steps)) \
-            == [(0, 'b0')]
+               == [(0, 'b0')]
 
     @pytest.mark.asyncio
-    async def test_can_Stop_on_start_item_when_running_from_conducting_equipment_branching(self):
+    async def test_can_stop_on_start_item_when_running_from_conducting_equipment_branching(self):
         #
         # 1 b0 21--c1--2
         #      1
@@ -188,13 +188,13 @@ class TestNetworkTrace:
                 network = builder.network
 
                 builder.from_junction(num_terminals=1) \
-                       .to_acls()
+                    .to_acls()
 
                 for i in range(1000):
                     builder.to_junction(mrid=f'junc-{i}', num_terminals=3) \
-                           .to_acls(mrid=f'acls-{i}-top') \
-                           .from_acls(mrid=f'acls-{i}-bottom') \
-                           .connect(f'junc-{i}', f'acls-{i}-bottom', 2, 1)
+                        .to_acls(mrid=f'acls-{i}-top') \
+                        .from_acls(mrid=f'acls-{i}-bottom') \
+                        .connect(f'junc-{i}', f'acls-{i}-bottom', 2, 1)
 
                 await Tracing.network_trace_branching().run(network['j0'].get_terminal_by_sn(1))
 
@@ -225,3 +225,61 @@ class TestNetworkTrace:
 
         assert stop_checks == ['c2-t1', 'c2-t2', 'c0-t1', 'c0-t2', 'c1-t1']
         assert steps == ['c1-t2', 'c2-t1', 'c2-t2', 'c0-t1', 'c0-t2']
+
+    @pytest.mark.asyncio
+    async def test_can_provide_a_path_to_force_the_trace_to_traverse_in_a_given_direction(self):
+        #
+        # 1--c0--21--c1-*-21--c2--2
+        #         1
+        #         1--c3--2
+        #
+
+        def create_start_path(start: Tuple[str, str]):
+
+            _from_ce = (_from := ns.get(start[0], Terminal)).conducting_equipment
+            _to_ce = (_to := ns.get(start[1], Terminal)).conducting_equipment
+
+            def traversed():
+                if (_to_ce == _from_ce) and isinstance(_to_ce, AcLineSegment):
+                    return _to_ce
+                elif isinstance(_to_ce, Clamp) and _to_ce.ac_line_segment == _from_ce:
+                    return _to_ce.ac_line_segment
+                elif isinstance(_from_ce, Clamp) and _from_ce.ac_line_segment == _to_ce:
+                    return _from_ce.ac_line_segment
+                return None
+
+            return NetworkTraceStep.Path(_from, _to, traversed())
+
+        async def validate(start: Tuple[str, str], action_step_type: NetworkTraceActionType, expected: List[str]):
+            stepped_on: List[NetworkTraceStep] = []
+
+            await (Tracing.network_trace(action_step_type=action_step_type)
+                   .add_step_action(lambda item, ctx: stepped_on.append(item))
+                   ).run(create_start_path(start))
+
+            assert [it.path.to_terminal.mrid for it in stepped_on] == expected
+
+        ns = (TestNetworkBuilder()
+              .from_acls()  # c0
+              .to_acls()  # c1
+              .with_clamp()  # c1-clamp1
+              .to_acls()  # c2
+              .branch_from('c1-clamp1')
+              .to_acls()  # c3
+              ).network
+
+        await validate(('c0-t1', 'c0-t2'), NetworkTraceActionType.ALL_STEPS, ["c0-t2", "c1-t1", "c1-t2", "c2-t1", "c2-t2", "c1-clamp1-t1", "c3-t1", "c3-t2"])
+        await validate(('c0-t2', 'c0-t1'), NetworkTraceActionType.ALL_STEPS, ["c0-t1"])
+        await validate(('c1-t2', 'c2-t1'), NetworkTraceActionType.ALL_STEPS, ["c2-t1", "c2-t2"])
+        await validate(('c1-t1', 'c1-clamp1-t1'), NetworkTraceActionType.ALL_STEPS, ["c1-clamp1-t1", "c3-t1", "c3-t2"])
+        await validate(('c1-clamp1-t1', 'c1-t2'), NetworkTraceActionType.ALL_STEPS, ["c1-t2", "c2-t1", "c2-t2"])
+
+        await validate(('c0-t1', 'c0-t2'), NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT, ["c0-t2", "c1-t1", "c2-t1", "c1-clamp1-t1", "c3-t1"])
+        await validate(('c0-t2', 'c0-t1'), NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT, ["c0-t1"])
+        await validate(('c1-t2', 'c2-t1'), NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT, ["c2-t1"])
+        await validate(('c1-t1', 'c1-clamp1-t1'), NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT, ["c1-clamp1-t1", "c3-t1"])
+        await validate(('c1-clamp1-t1', 'c1-t2'), NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT, ["c1-t2", "c2-t1"])
+
+        # Can even use bizarre paths, they are just the same as any other external path.
+        await validate(('c0-t1', 'c2-t1'), NetworkTraceActionType.ALL_STEPS, ["c2-t1", "c2-t2"])
+        await validate(('c0-t1', 'c2-t1'), NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT, ["c2-t1"])

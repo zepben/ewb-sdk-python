@@ -9,9 +9,23 @@
   and reapply directions where appropriate using `SetDirection`.
 * `Cut` supports adding a maximum of 2 terminals.
 * `NetworkTraceTracker` now uses a `set` to track visited objects, if you were using unhashable objects this will need to be addressed.
+* Added a new `debug_logging` and `name` parameters to the constructor of the following traces. The helper functions in `Tracing` also have these parameters,
+  which defaults to `None` and `network_trace`, meaning anyone using these wrappers will be unaffected by the change:
+  * `AssignToFeeders`
+  * `AssignToLvFeeders`
+  * `ClearDirection`
+  * `FindSwerEquipment`
+  * `PhaseInferrer`
+  * `RemovePhases`
+  * `SetDirection`
+  * `SetPhases`
+* `NetworkStateOperators` has a new abstract `description`. If you are creating custom operators you will need to add it.
+* `StepAction` will now raise an exception if `apply` is overridden. override `_apply` instead, or pass the function to `__init__`
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.
+* You can now pass a logger to all `Tracing` methods and `TestNetworkBuilder.build` to enable debug logging for the traces it runs. The debug logging will
+  include the results of all queue and stop condition checks, and each item that is stepped on.
 
 ### Enhancements
 * Tracing models with `Cut` and `Clamp` are now supported via the new tracing API.
@@ -24,6 +38,9 @@
   * The prefix for generated mRIDs for "other" equipment can be specified with the `default_mrid_prefix` argument in `from_other` and `to_other`.
 * When processing feeder assignments, all LV feeders belonging to a dist substation site will now be considered energized when the site is energized by a
   feeder.
+* `NetworkTrace` now supports starting from a known `NetworkTraceStep.Path`. This allows you to force a trace to start in a particular direction, or to continue
+  a follow-up trace from a detected stop point.
+* `Traversal.is_stopping`/`Traversal.is_not_stopping` now accept `StepAction` and any child classes, including those subclassing `StepActionWithContextValue`
 
 ### Fixes
 * When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`
@@ -38,6 +55,8 @@
 * `NetworkTrace`/`Traversal` now correctly respects `can_stop_on_start_item` when providing multiple start items.
 * `AssignToFeeders`/`AssignToLvFeeders` now finds back-fed equipment correctly
 * `AssignToFeeders` and `AssignToLvFeeders` will now associate `PowerElectronicUnits` with their `powerElectronicsConnection` `Feeder`/`LvFeeder`.
+* Phases are now correctly assigned to the LV side of an LV2 transformer that is in parallel with a previously energised LV1 transformer.
+
 
 ### Notes
 * None.

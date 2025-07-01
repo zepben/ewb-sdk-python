@@ -2,14 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
-from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
-from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-
+from logging import Logger
 from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol
 
-from zepben.evolve import ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder, \
-    PowerTransformerEnd, PowerTransformer, EnergyConsumer, PowerElectronicsConnection, BusbarSection, Clamp, Cut, Site
+from zepben.evolve import (ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder,
+                           PowerTransformerEnd, PowerTransformer, EnergyConsumer, PowerElectronicsConnection, BusbarSection, Clamp, Cut, Site)
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 SubclassesConductingEquipment = TypeVar('SubclassesConductingEquipment', bound=ConductingEquipment)
 
@@ -367,7 +366,7 @@ class TestNetworkBuilder:
         mrid: str = None,
         connectivity_node_mrid: Optional[str] = None,
         action: Callable[[BusbarSection], None] = null_action
-        ) -> 'TestNetworkBuilder':
+    ) -> 'TestNetworkBuilder':
         """
 
         Add a new `BusbarSection` to the network and connect it to the current network pointer, updating the network pointer to the new `BusbarSection`.
@@ -453,6 +452,7 @@ class TestNetworkBuilder:
         self,
         mrid: Optional[str] = None,
         length_from_terminal_1: float = None,
+        nominal_phases: PhaseCode = PhaseCode.ABC,
         action: Callable[[Clamp], None] = null_action
     ) -> 'TestNetworkBuilder':
         """
@@ -460,6 +460,7 @@ class TestNetworkBuilder:
 
         :param mrid: Optional mRID for the new `Clamp`
         :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being clamped
+        :param nominal_phases: The nominal phases for the new `BusbarSection`.
         :param action: An action that accepts the new `Clamp` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use
@@ -469,7 +470,7 @@ class TestNetworkBuilder:
             raise ValueError("`with_clamp` can only be called when the last added item was an AcLineSegment")
 
         clamp = Clamp(mrid=mrid or f'{acls.mrid}-clamp{acls.num_clamps() + 1}', length_from_terminal_1=length_from_terminal_1)
-        clamp.add_terminal(Terminal(mrid=f'{clamp.mrid}-t1'))
+        self._add_terminal(clamp, 1, nominal_phases)
 
         acls.add_clamp(clamp)
         action(clamp)
@@ -482,8 +483,9 @@ class TestNetworkBuilder:
         length_from_terminal_1: Optional[float] = None,
         is_normally_open: bool = True,
         is_open: bool = None,
+        nominal_phases: PhaseCode = PhaseCode.ABC,
         action: Callable[[Cut], None] = null_action
-        ) -> 'TestNetworkBuilder':
+    ) -> 'TestNetworkBuilder':
         """
         Create a cut on the current network pointer (must be an `AcLineSegment`) without moving the current network pointer.
 
@@ -491,6 +493,7 @@ class TestNetworkBuilder:
         :param length_from_terminal_1: The length from terminal 1 of the `AcLineSegment` being cut
         :param is_normally_open: The normal state of the cut, defaults to True
         :param is_open: The current state of the cut. Defaults to `is_normally_open`
+        :param nominal_phases: The nominal phases for the new `BusbarSection`.
         :param action: An action that accepts the new `Cut` to allow for additional initialisation.
 
         :return: This `TestNetworkBuilder` to allow for fluent use
@@ -500,8 +503,8 @@ class TestNetworkBuilder:
             raise ValueError("`with_cut` can only be called when the last added item was an AcLineSegment")
 
         cut = Cut(mrid=mrid or f'{acls.mrid}-cut{acls.num_cuts() + 1}', length_from_terminal_1=length_from_terminal_1)
-        cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t1'))
-        cut.add_terminal(Terminal(mrid=f'{cut.mrid}-t2'))
+        for i in [1, 2]:
+            self._add_terminal(cut, i, nominal_phases)
 
         cut.set_normally_open(is_normally_open)
         if is_open is None:
@@ -625,10 +628,10 @@ class TestNetworkBuilder:
             site.add_equipment(ce)
             ce.add_container(site)
         self.network.add(site)
-        
+
         return self
 
-    async def build(self, apply_directions_from_sources: bool = True, assign_feeders: bool = True) -> NetworkService:
+    async def build(self, apply_directions_from_sources: bool = True, debug_logger: Logger = None) -> NetworkService:
         """
         Get the `NetworkService` after apply traced phasing and feeder directions.
 
@@ -636,22 +639,21 @@ class TestNetworkBuilder:
 
         :return: The `NetworkService` created by this `TestNetworkBuilder`
         """
-        await Tracing.set_direction().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
-        await Tracing.set_phases().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
-        await Tracing.set_direction().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
-        await Tracing.set_phases().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing.set_direction(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.set_direction(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing.set_phases(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.set_phases(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
 
         if apply_directions_from_sources:
             for es in self.network.objects(EnergySource):
                 for terminal in es.terminals:
-                    await Tracing.set_direction().run_terminal(terminal, network_state_operators=NetworkStateOperators.NORMAL)
-                    await Tracing.set_direction().run_terminal(terminal, network_state_operators=NetworkStateOperators.CURRENT)
+                    await Tracing.set_direction(debug_logger=debug_logger).run_terminal(terminal, network_state_operators=NetworkStateOperators.NORMAL)
+                    await Tracing.set_direction(debug_logger=debug_logger).run_terminal(terminal, network_state_operators=NetworkStateOperators.CURRENT)
 
-        if assign_feeders and (self.network.len_of(Feeder) != 0 or self.network.len_of(LvFeeder) != 0):
-            await Tracing.assign_equipment_to_feeders().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
-            await Tracing.assign_equipment_to_lv_feeders().run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
-            await Tracing.assign_equipment_to_feeders().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
-            await Tracing.assign_equipment_to_lv_feeders().run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing.assign_equipment_to_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.assign_equipment_to_lv_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing.assign_equipment_to_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
+        await Tracing.assign_equipment_to_lv_feeders(debug_logger=debug_logger).run(self.network, network_state_operators=NetworkStateOperators.CURRENT)
 
         return self.network
 
@@ -807,4 +809,3 @@ class TestNetworkBuilder:
         terminal = Terminal(mrid=f"{ce.mrid}-t{sn}", phases=nominal_phases)
         ce.add_terminal(terminal)
         self.network.add(terminal)
-
