@@ -10,11 +10,11 @@ from typing import Collection, List, Generator, TypeVar, Dict, Set, Type, TYPE_C
 from zepben.evolve import Switch, ProtectedSwitch, PowerElectronicsConnection, Terminal, ConductingEquipment, AuxiliaryEquipment, LvFeeder
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import BaseFeedersInternal
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
-from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
@@ -32,15 +32,17 @@ class AssignToLvFeeders:
     Requires that a Feeder have a normalHeadTerminal with associated ConductingEquipment.
     This class is backed by a `BasicTraversal`.
     """
-    
-    def __init__(self, debug_logger: Logger=None):
+
+    def __init__(self, debug_logger: Logger = None):
         self._debug_logger = debug_logger
 
     @singledispatchmethod
-    async def run(self,
-                  network: NetworkService,
-                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
-                  start_terminal: Terminal=None):
+    async def run(
+        self,
+        network: NetworkService,
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL,
+        start_terminal: Terminal = None
+    ):
         """
         Assign equipment to each feeder in the specified network.
 
@@ -55,14 +57,14 @@ class AssignToLvFeeders:
         ).run(network, start_terminal)
 
     @run.register
-    async def _(self,
-                terminal: Terminal,
-                lv_feeder_start_points: Set[ConductingEquipment],
-                terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
-                lv_feeders_to_assign: List[LvFeeder],
-                network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
-                ):
-
+    async def _(
+        self,
+        terminal: Terminal,
+        lv_feeder_start_points: Set[ConductingEquipment],
+        terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
+        lv_feeders_to_assign: List[LvFeeder],
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+    ):
         await AssignToLvFeedersInternal(
             network_state_operators,
             self._debug_logger
@@ -73,12 +75,14 @@ class AssignToLvFeeders:
             lv_feeders_to_assign
         )
 
+
 class AssignToLvFeedersInternal(BaseFeedersInternal):
 
-    async def run(self,
-                  network: NetworkService,
-                  start_terminal: Terminal=None):
-
+    async def run(
+        self,
+        network: NetworkService,
+        start_terminal: Terminal = None
+    ):
         lv_feeder_start_points = network.lv_feeder_start_points
         terminal_to_aux_equipment = network.aux_equipment_by_terminal
 
@@ -106,12 +110,13 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
                                         terminal_to_aux_equipment,
                                         self._lv_feeders_from_terminal(start_terminal))
 
-    async def run_with_feeders(self,
-                               terminal: Terminal,
-                               lv_feeder_start_points: Set[ConductingEquipment],
-                               terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
-                               lv_feeders_to_assign: List[LvFeeder]):
-
+    async def run_with_feeders(
+        self,
+        terminal: Terminal,
+        lv_feeder_start_points: Set[ConductingEquipment],
+        terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
+        lv_feeders_to_assign: List[LvFeeder]
+    ):
         if terminal is None or len(lv_feeders_to_assign) == 0:
             return
 
@@ -121,11 +126,12 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             traversal = self._create_trace(terminal_to_aux_equipment, lv_feeder_start_points, lv_feeders_to_assign)
             await traversal.run(terminal, False)
 
-    def _create_trace(self,
-                      terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
-                      lv_feeder_start_points: Set[ConductingEquipment],
-                      lv_feeders_to_assign: List[LvFeeder]) -> NetworkTrace[T]:
-
+    def _create_trace(
+        self,
+        terminal_to_aux_equipment: Dict[Terminal, List[AuxiliaryEquipment]],
+        lv_feeder_start_points: Set[ConductingEquipment],
+        lv_feeders_to_assign: List[LvFeeder]
+    ) -> NetworkTrace[T]:
         def _reached_hv(ce: ConductingEquipment):
             return True if ce.base_voltage and ce.base_voltage.nominal_voltage >= 1000 else False
 
@@ -148,14 +154,15 @@ class AssignToLvFeedersInternal(BaseFeedersInternal):
             .add_step_action(step_action)
         )
 
-    async def _process(self,
-                       step_path: NetworkTraceStep.Path,
-                       found_lv_feeder: bool,
-                       step_context: StepContext,
-                       terminal_to_aux_equipment: Dict[Terminal, Collection[AuxiliaryEquipment]],
-                       lv_feeder_start_points: Set[ConductingEquipment],
-                       lv_feeders_to_assign: List[LvFeeder]):
-
+    async def _process(
+        self,
+        step_path: NetworkTraceStep.Path,
+        found_lv_feeder: bool,
+        step_context: StepContext,
+        terminal_to_aux_equipment: Dict[Terminal, Collection[AuxiliaryEquipment]],
+        lv_feeder_start_points: Set[ConductingEquipment],
+        lv_feeders_to_assign: List[LvFeeder]
+    ):
         if step_path.traced_internally and not step_context.is_start_item:
             return
 

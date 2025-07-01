@@ -3,14 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from logging import Logger
-
-from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
-from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-
 from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol
 
 from zepben.evolve import (ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder,
                            PowerTransformerEnd, PowerTransformer, EnergyConsumer, PowerElectronicsConnection, BusbarSection, Clamp, Cut, Site)
+from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 SubclassesConductingEquipment = TypeVar('SubclassesConductingEquipment', bound=ConductingEquipment)
 
@@ -472,7 +470,7 @@ class TestNetworkBuilder:
             raise ValueError("`with_clamp` can only be called when the last added item was an AcLineSegment")
 
         clamp = Clamp(mrid=mrid or f'{acls.mrid}-clamp{acls.num_clamps() + 1}', length_from_terminal_1=length_from_terminal_1)
-        self._add_terminal(clamp, 1 , nominal_phases)
+        self._add_terminal(clamp, 1, nominal_phases)
 
         acls.add_clamp(clamp)
         action(clamp)

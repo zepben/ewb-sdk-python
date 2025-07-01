@@ -12,12 +12,12 @@ from zepben.evolve import Switch, ProtectedSwitch, PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.services.network.network_service import NetworkService
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
-from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
+from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
 
 if TYPE_CHECKING:
@@ -36,10 +36,12 @@ class AssignToFeeders:
     def __init__(self, debug_logger: Logger = None):
         self._debug_logger = debug_logger
 
-    async def run(self,
-                  network: NetworkService,
-                  network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
-                  start_terminal: Terminal=None):
+    async def run(
+        self,
+        network: NetworkService,
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL,
+        start_terminal: Terminal = None
+    ):
         """
         Assign equipment to feeders in the specified network, given an optional start terminal.
 
@@ -57,7 +59,7 @@ class AssignToFeeders:
 
 
 class BaseFeedersInternal:
-    def __init__(self, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL, debug_logger: Logger=None):
+    def __init__(self, network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL, debug_logger: Logger = None):
         self.network_state_operators = network_state_operators
         self._debug_logger = debug_logger
 
@@ -71,11 +73,9 @@ class BaseFeedersInternal:
                     self.network_state_operators.associate_equipment_and_container(it, feeder)
 
     def _associate_relay_systems_with_containers(self, equipment_containers: Iterable[EquipmentContainer], to_equipment: ProtectedSwitch):
-        self._associate_equipment_with_containers(equipment_containers, [
-            scheme.system
-            for relayFunction in to_equipment.relay_functions
-            for scheme in relayFunction.schemes
-            if scheme.system is not None]
+        self._associate_equipment_with_containers(
+            equipment_containers,
+            [scheme.system for relayFunction in to_equipment.relay_functions for scheme in relayFunction.schemes if scheme.system is not None]
         )
 
     def _associate_power_electronic_units(self, equipment_containers: Iterable[EquipmentContainer], to_equipment: PowerElectronicsConnection):
@@ -101,10 +101,11 @@ class BaseFeedersInternal:
 
 class AssignToFeedersInternal(BaseFeedersInternal):
 
-    async def run(self,
-                  network: NetworkService,
-                  start_terminal: Terminal=None):
-
+    async def run(
+        self,
+        network: NetworkService,
+        start_terminal: Terminal = None
+    ):
         feeder_start_points = network.feeder_start_points
         lv_feeder_start_points = network.lv_feeder_start_points
         terminal_to_aux_equipment = network.aux_equipment_by_terminal

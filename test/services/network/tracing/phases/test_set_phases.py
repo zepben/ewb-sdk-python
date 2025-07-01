@@ -8,11 +8,8 @@ import pytest
 
 from network_fixtures import phase_swap_loop_network  # noqa (Fixtures)
 from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases, validate_phases_from_term_or_equip, get_t
-from zepben.evolve import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators, \
-    Traversal, StepContext
+from zepben.evolve import SetPhases, EnergySource, ConductingEquipment, SinglePhaseKind as SPK, TestNetworkBuilder, PhaseCode, Breaker, NetworkStateOperators
 from zepben.evolve.exceptions import TracingException, PhaseException
-from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
 
 @pytest.mark.asyncio
@@ -221,20 +218,22 @@ async def test_detects_cross_phasing_connected():
                                    f"{list(c1.terminals)[1]} on {c1} and {list(c2.terminals)[0]} on {c2}. This is often caused by " \
                                    f"missing open points, or incorrect phases in upstream equipment that should be corrected in the source data."
 
+
 @pytest.mark.asyncio
 async def test_adds_neutral_through_transformers():
     #
     # s0 11--tx1--21--c2--2
     #
     n = await (TestNetworkBuilder()
-         .from_source(PhaseCode.ABC)  # s0
-         .to_power_transformer([PhaseCode.ABC, PhaseCode.ABCN])  # tx1
-         .to_acls(PhaseCode.ABCN)  # c2
-         ).build()
+               .from_source(PhaseCode.ABC)  # s0
+               .to_power_transformer([PhaseCode.ABC, PhaseCode.ABCN])  # tx1
+               .to_acls(PhaseCode.ABCN)  # c2
+               ).build()
 
     validate_phases_from_term_or_equip(n, 's0', PhaseCode.ABC)
     validate_phases_from_term_or_equip(n, 'tx1', PhaseCode.ABC, PhaseCode.ABCN)
     validate_phases_from_term_or_equip(n, 'c2', PhaseCode.ABCN, PhaseCode.ABCN)
+
 
 @pytest.mark.asyncio
 async def test_applies_unknown_phases_through_transformers():
@@ -250,6 +249,7 @@ async def test_applies_unknown_phases_through_transformers():
     validate_phases_from_term_or_equip(n, 's0', PhaseCode.BC)
     validate_phases_from_term_or_equip(n, 'tx1', PhaseCode.BC, PhaseCode.BN)
     validate_phases_from_term_or_equip(n, 'c2', PhaseCode.BN, PhaseCode.BN)
+
 
 @pytest.mark.asyncio
 async def test_energises_transformer_phases_straight():
@@ -306,6 +306,7 @@ async def test_energises_transformer_phases_straight():
     await _validate_tx_phases(PhaseCode.A, PhaseCode.X, PhaseCode.XN, PhaseCode.A, PhaseCode.AN)
     await _validate_tx_phases(PhaseCode.B, PhaseCode.X, PhaseCode.XN, PhaseCode.B, PhaseCode.BN)
     await _validate_tx_phases(PhaseCode.C, PhaseCode.X, PhaseCode.XN, PhaseCode.C, PhaseCode.CN)
+
 
 @pytest.mark.asyncio
 async def test_energises_transformer_phases_added():
@@ -409,6 +410,7 @@ async def test_energises_transformer_phases_dropped():
     # `await _validate_tx_phases(PhaseCode.ACN, PhaseCode.XYN, PhaseCode.X, PhaseCode.ACN, PhaseCode.C)`.
     await _validate_tx_phases(PhaseCode.ACN, PhaseCode.XYN, PhaseCode.X, PhaseCode.ACN, PhaseCode.A)
 
+
 @pytest.mark.asyncio
 async def test_applies_phases_to_unknown_hv():
     #
@@ -423,6 +425,7 @@ async def test_applies_phases_to_unknown_hv():
     validate_phases_from_term_or_equip(n, 's0', PhaseCode.BC)
     validate_phases_from_term_or_equip(n, 'c1', PhaseCode.BC, PhaseCode.BC)
     validate_phases_from_term_or_equip(n, 'c2', PhaseCode.BC, PhaseCode.BC)
+
 
 @pytest.mark.asyncio
 async def test_applies_phases_to_unknown_lv():
@@ -439,6 +442,7 @@ async def test_applies_phases_to_unknown_lv():
     validate_phases_from_term_or_equip(n, 'c1', PhaseCode.CN, PhaseCode.CN)
     validate_phases_from_term_or_equip(n, 'c2', PhaseCode.CN, PhaseCode.CN)
 
+
 @pytest.mark.asyncio
 async def test_applies_phases_on_to_swerv():
     #
@@ -454,6 +458,7 @@ async def test_applies_phases_on_to_swerv():
     validate_phases_from_term_or_equip(n, 'tx1', PhaseCode.AC, PhaseCode.C)
     validate_phases_from_term_or_equip(n, 'c2', PhaseCode.C, PhaseCode.C)
 
+
 @pytest.mark.asyncio
 async def test_uses_transformer_paths():
     #
@@ -468,6 +473,7 @@ async def test_uses_transformer_paths():
     validate_phases_from_term_or_equip(n, 's0', PhaseCode.AC)
     validate_phases_from_term_or_equip(n, 'tx1', PhaseCode.AC, PhaseCode.CN)
     validate_phases_from_term_or_equip(n, 'c2', PhaseCode.CN, PhaseCode.CN)
+
 
 @pytest.mark.asyncio
 async def test_does_not_remove_phase_when_applying_subset_out_of_loop():
@@ -494,6 +500,7 @@ async def test_does_not_remove_phase_when_applying_subset_out_of_loop():
     validate_phases_from_term_or_equip(n, 'c3', PhaseCode.CN, PhaseCode.CN)
     validate_phases_from_term_or_equip(n, 'tx4', PhaseCode.CN, PhaseCode.AC)
     validate_phases_from_term_or_equip(n, 'c5', PhaseCode.ABC, PhaseCode.ABC)
+
 
 @pytest.mark.asyncio
 async def test_can_back_trace_through_xn_xy_transformer_loop():
@@ -540,7 +547,7 @@ async def test_can_back_trace_through_xn_xy_transformer_spur():
     # NOTE: This is impacted on the XY -> X issue as described elsewhere. If this is fixed you should replace the following test with
     #       `validate_phases_from_term_or_equip(network_service, "tx3", PhaseCode.AN, PhaseCode.AC)`
     #
-    
+
     validate_phases_from_term_or_equip(network_service, "tx3", PhaseCode.AN, PhaseCode.AB)
 
 
@@ -549,6 +556,7 @@ def _set_normal_phase(terminal_index, from_phase: SPK, to_phase: SPK):
         list(ce.terminals)[terminal_index].normal_phases[from_phase] = to_phase
 
     return action
+
 
 @pytest.mark.asyncio
 async def test_can_set_phases_from_an_unknown_nominal_phase():
@@ -570,6 +578,7 @@ async def test_can_set_phases_from_an_unknown_nominal_phase():
 
     validate_phases_from_term_or_equip(n, 'c0', PhaseCode.NONE, PhaseCode.A)
     validate_phases_from_term_or_equip(n, 'c1', [SPK.A, SPK.NONE, SPK.NONE], [SPK.A, SPK.NONE, SPK.NONE])
+
 
 @pytest.mark.asyncio
 async def test_energises_around_dropped_phase_dual_transformer_loop():
@@ -616,7 +625,14 @@ async def test_energises_around_dropped_phase_dual_transformer_loop():
     validate_phases_from_term_or_equip(ns, 'c10', PhaseCode.ABN, PhaseCode.ABN)
     validate_phases_from_term_or_equip(ns, 'c11', PhaseCode.ABN, PhaseCode.ABN)
 
-async def _validate_tx_phases(source_phases: PhaseCode, tx_phase_1: PhaseCode, tx_phase_2: PhaseCode, expected_phases_1: PhaseCode, expected_phases_2: Union[PhaseCode, List[SPK]]):
+
+async def _validate_tx_phases(
+    source_phases: PhaseCode,
+    tx_phase_1: PhaseCode,
+    tx_phase_2: PhaseCode,
+    expected_phases_1: PhaseCode,
+    expected_phases_2: Union[PhaseCode, List[SPK]]
+):
     if isinstance(expected_phases_2, PhaseCode):
         expected_phases_2 = expected_phases_2.single_phases
 

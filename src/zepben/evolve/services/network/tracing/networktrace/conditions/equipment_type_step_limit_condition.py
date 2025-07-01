@@ -6,8 +6,8 @@ from __future__ import annotations
 
 from typing import Generic, TypeVar, TYPE_CHECKING, Type
 
-from zepben.evolve.services.network.tracing.traversal.stop_condition import StopConditionWithContextValue
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
+from zepben.evolve.services.network.tracing.traversal.stop_condition import StopConditionWithContextValue
 
 if TYPE_CHECKING:
     from zepben.evolve import ConductingEquipment, StepContext, NetworkTraceStep

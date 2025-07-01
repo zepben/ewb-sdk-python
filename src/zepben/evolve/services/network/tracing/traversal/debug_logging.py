@@ -8,14 +8,13 @@ import copy
 import functools
 from logging import Logger
 from types import FunctionType
-from typing import TypeVar, Union, Optional, Type, TypedDict, List, Tuple, Dict
+from typing import TypeVar, Union, Type, List, Tuple, Dict
 
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.traversal.step_action import StepAction
 from zepben.evolve.services.network.tracing.traversal.stop_condition import StopCondition
 
 T = TypeVar('T')
-
 
 Wrappable = Union[StepAction[T], QueueCondition[T], StopCondition[T]]
 

@@ -11,12 +11,12 @@ from zepben.evolve import NetworkService
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 
 if TYPE_CHECKING:
@@ -36,14 +36,15 @@ class RemovePhases(object):
     This class is backed by a `BranchRecursiveTraversal`.
     """
 
-    def __init__(self, debug_logger: Logger=None):
+    def __init__(self, debug_logger: Logger = None):
         self._debug_logger = debug_logger
 
     async def run(
         self,
         start: Union[NetworkService, Terminal],
-        nominal_phases_to_ebb: Union[PhaseCode, SinglePhaseKind]=None,
-        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+        nominal_phases_to_ebb: Union[PhaseCode, SinglePhaseKind] = None,
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+    ):
         """
         If nominal_phases_to_ebb is `None` this will remove all phases for all equipment connected
         to `start`
@@ -67,7 +68,7 @@ class RemovePhases(object):
         return await self._run_with_phases_to_ebb(start, nominal_phases_to_ebb, network_state_operators)
 
     @staticmethod
-    async def _run_with_network(network_service: NetworkService, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> None:
+    async def _run_with_network(network_service: NetworkService, network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL) -> None:
         """
         Remove all traced phases from the specified network.
 
@@ -78,7 +79,7 @@ class RemovePhases(object):
         for t in network_service.objects(Terminal):
             t.traced_phases.phase_status = 0
 
-    async def _run_with_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def _run_with_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL):
         """
         Allows the removal of traced phases from a terminal and the connected equipment chain
         
@@ -92,7 +93,7 @@ class RemovePhases(object):
         self,
         terminal: Terminal,
         nominal_phases_to_ebb: Union[PhaseCode, Set[SinglePhaseKind]],
-        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL):
         """
         Allows the removal of traced phases from a terminal and the connected equipment chain
 
@@ -119,7 +120,7 @@ class RemovePhases(object):
         async def step_action(nts: NetworkTraceStep, ctx: StepContext):
             nts.data.ebbed_phases = await self._ebb(state_operators, nts.path.to_terminal, nts.data.phases_to_ebb)
 
-        def queue_condition(next_step: NetworkTraceStep, next_ctx: StepContext=None, step: NetworkTraceStep=None, ctx: StepContext=None):
+        def queue_condition(next_step: NetworkTraceStep, next_ctx: StepContext = None, step: NetworkTraceStep = None, ctx: StepContext = None):
             return len(next_step.data.phases_to_ebb) > 0 and (step is None or len(step.data.ebbed_phases) > 0)
 
         return Tracing.network_trace(
@@ -130,8 +131,8 @@ class RemovePhases(object):
             queue=WeightedPriorityQueue.process_queue(lambda it: len(it.data.phases_to_ebb)),
             compute_data=compute_data
         ).add_condition(stop_at_open()) \
-        .add_step_action(step_action) \
-        .add_queue_condition(queue_condition)
+            .add_step_action(step_action) \
+            .add_queue_condition(queue_condition)
 
     @staticmethod
     async def _ebb(state_operators: Type[NetworkStateOperators], terminal: Terminal, phases_to_ebb: Set[SinglePhaseKind]) -> Set[SinglePhaseKind]:

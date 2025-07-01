@@ -24,7 +24,7 @@ class StopCondition(Generic[T], TraversalCondition[T]):
     `T` The type of items being traversed.
     """
 
-    def __init__(self, stop_function: ShouldStop=None):
+    def __init__(self, stop_function: ShouldStop = None):
         if stop_function is not None:
             self.should_stop = stop_function
 

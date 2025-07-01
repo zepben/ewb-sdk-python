@@ -24,7 +24,7 @@ class StepContext(Generic[T]):
     :var is_stopping: Indicates whether the traversal is stopping at the current item due to a stop condition.
     """
 
-    def __init__(self, is_start_item: bool, is_branch_start_item: bool, step_number: int=0, branch_depth: int=0, values: dict=None):
+    def __init__(self, is_start_item: bool, is_branch_start_item: bool, step_number: int = 0, branch_depth: int = 0, values: dict = None):
         self.is_start_item = is_start_item
         self.is_branch_start_item = is_branch_start_item
         self.step_number = step_number

@@ -13,8 +13,6 @@ from functools import singledispatchmethod
 from logging import Logger
 from typing import List, TypeVar, Generic, Optional, Dict, Union
 
-from typing_extensions import Required
-
 from zepben.evolve import require
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
 from zepben.evolve.services.network.tracing.traversal.debug_logging import DebugLoggingWrapper

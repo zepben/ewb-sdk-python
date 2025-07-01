@@ -56,6 +56,7 @@ class QueueCondition(Generic[T], TraversalCondition[T]):
 
 from zepben.evolve.services.network.tracing.traversal.context_value_computer import ContextValueComputer
 
+
 class QueueConditionWithContextValue(QueueCondition[T], ContextValueComputer[T], Generic[T, U]):
     """
     Interface representing a queue condition that requires a value stored in the `StepContext` to determine if an item should be queued.

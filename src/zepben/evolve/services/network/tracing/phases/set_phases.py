@@ -39,7 +39,7 @@ class SetPhases:
     This class is backed by a `NetworkTrace`.
     """
 
-    def __init__(self, debug_logger: Logger=None):
+    def __init__(self, debug_logger: Logger = None):
         self._debug_logger = debug_logger
 
     class PhasesToFlow:
@@ -54,8 +54,9 @@ class SetPhases:
     async def run(
         self,
         target: Union[NetworkService, Terminal],
-        phases: Union[PhaseCode, Iterable[SinglePhaseKind]]=None,
-        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+        phases: Union[PhaseCode, Iterable[SinglePhaseKind]] = None,
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+    ):
         """
 
         :param target:
@@ -69,7 +70,8 @@ class SetPhases:
     async def _(
         self,
         network: NetworkService,
-        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+    ):
         """
         Apply phases and flow from all energy sources in the network.
         This will apply `Terminal.phases` to all terminals on each `EnergySource` and then flow along the connected network.
@@ -90,9 +92,10 @@ class SetPhases:
     async def _(
         self,
         start_terminal: Terminal,
-        phases: Union[PhaseCode, List[SinglePhaseKind], Set[SinglePhaseKind]]=None,
-        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
-        seed_terminal: Terminal=None):
+        phases: Union[PhaseCode, List[SinglePhaseKind], Set[SinglePhaseKind]] = None,
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL,
+        seed_terminal: Terminal = None
+    ):
         """
         Apply phases to the `start_terminal` and flow, optionally specifying a `seed_terminal`. If specified, the `seed_terminal`
         and `start_terminal` must have the same `Terminal.conducting_equipment`
@@ -133,8 +136,9 @@ class SetPhases:
         self,
         from_terminal: Terminal,
         to_terminal: Terminal,
-        phases: List[SinglePhaseKind]=None,
-        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+        phases: List[SinglePhaseKind] = None,
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+    ):
         """
         Apply nominal phases from the `from_terminal` to the `to_terminal`.
 
@@ -249,14 +253,15 @@ class SetPhases:
                     self._nominal_phase_path_to_phases(step.data.nominal_phase_paths)
                 )
             )
+
         return ComputeData(inner)
 
     @staticmethod
     def _apply_phases(
         phases: List[SinglePhaseKind],
         terminal: Terminal,
-        state_operators: Type[NetworkStateOperators]):
-
+        state_operators: Type[NetworkStateOperators]
+    ):
         traced_phases = state_operators.phase_status(terminal)
         for i, nominal_phase in enumerate(terminal.phases.single_phases):
             traced_phases[nominal_phase] = phases[i] if phases[i] not in PhaseCode.XY else SinglePhaseKind.NONE
@@ -266,7 +271,7 @@ class SetPhases:
         state_operators: Type[NetworkStateOperators],
         from_terminal: Terminal,
         to_terminal: Terminal,
-        phases: Sequence[SinglePhaseKind]=None
+        phases: Sequence[SinglePhaseKind] = None
     ) -> List[NominalPhasePath]:
 
         if phases is None:
@@ -332,8 +337,8 @@ class SetPhases:
         state_operators: Type[NetworkStateOperators],
         from_terminal: Terminal,
         to_terminal: Terminal,
-        nominal_phase_paths: List[NominalPhasePath]=None,
-        allow_suspect_flow: bool=False
+        nominal_phase_paths: List[NominalPhasePath] = None,
+        allow_suspect_flow: bool = False
     ) -> bool:
 
         paths = nominal_phase_paths or self._get_nominal_phase_paths(state_operators, from_terminal, to_terminal)
@@ -394,8 +399,8 @@ class SetPhases:
         to_terminal: Terminal,
         to_phases: PhaseStatus,
         to_: SinglePhaseKind,
-        on_success: Callable[[], None]):
-
+        on_success: Callable[[], None]
+    ):
         try:
             if phase != SinglePhaseKind.NONE and to_phases.__setitem__(to_, phase):
                 if self._debug_logger:
@@ -412,8 +417,8 @@ class SetPhases:
         to_phases: PhaseStatus,
         to_: SinglePhaseKind,
         allow_suspect_flow: bool,
-        on_success: Callable[[], None]):
-
+        on_success: Callable[[], None]
+    ):
         # The phases that can be added are ABCN and Y, so for all cases other than Y we can just use the added phase. For
         #   Y we need to look at what the phases on the other side of the transformer are to determine what has been added.
 
@@ -430,8 +435,8 @@ class SetPhases:
         from_: SinglePhaseKind,
         to_terminal: Terminal,
         to_phases: PhaseStatus,
-        to_: SinglePhaseKind):
-
+        to_: SinglePhaseKind
+    ):
         phase_desc = f'{from_.name}' if from_ == to_ else f'path {from_.name} to {to_.name}'
 
         def get_ce_details(terminal: Terminal):
@@ -450,17 +455,19 @@ class SetPhases:
             "corrected in the source data."
         )
 
+
 def _not_fully_energised(network_state_operators: Type[NetworkStateOperators], terminal: Terminal) -> bool:
     phase_status = network_state_operators.phase_status(terminal)
     return any(phase_status[it] == SinglePhaseKind.NONE for it in terminal.phases.single_phases)
+
 
 def _unless_none(single_phase_kind: SinglePhaseKind, default: SinglePhaseKind) -> Optional[SinglePhaseKind]:
     if single_phase_kind == SinglePhaseKind.NONE:
         return default
     return single_phase_kind
 
-def _to_y_phase(phase: SinglePhaseKind, allow_suspect_flow: bool) -> SinglePhaseKind:
 
+def _to_y_phase(phase: SinglePhaseKind, allow_suspect_flow: bool) -> SinglePhaseKind:
     # NOTE: If we are adding Y to a C <-> XYN transformer we will leave it de-energised to prevent cross-phase energisation
     #       when there is a parallel C to XN transformer. This can be changed if the entire way XY mappings are reworked to
     #       use traced phases instead of the X and Y, which includes in straight paths to prevent cross-phase wiring.

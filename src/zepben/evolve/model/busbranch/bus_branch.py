@@ -33,7 +33,6 @@ __all__ = [
     "TerminalGrouping"
 ]
 
-
 BBN = TypeVar('BBN')  # Bus-Branch Network
 TN = TypeVar('TN')  # Topological Node
 TB = TypeVar('TB')  # Topological Branch
@@ -916,8 +915,10 @@ async def _group_negligible_impedance_terminals(
     await trace.run()
     return tg
 
+
 def _create_traversal_step_object(next_item: Union[Terminal, AcLineSegment]) -> BusBranchTraceStep:
     return BusBranchTraceStep(next_item)
+
 
 def _process_terminal(
     tg: TerminalGrouping[ConductingEquipment],
@@ -1020,9 +1021,9 @@ def _next_common_acls(
 
     def can_process_ac_line(o: Terminal) -> bool:
         return o not in acls_terminals \
-               and isinstance(o.conducting_equipment, AcLineSegment) \
-               and has_common_impedance(o.conducting_equipment) \
-               and o.conducting_equipment not in common_acls.conducting_equipment_group
+            and isinstance(o.conducting_equipment, AcLineSegment) \
+            and has_common_impedance(o.conducting_equipment) \
+            and o.conducting_equipment not in common_acls.conducting_equipment_group
 
     def is_non_forking_ac_line(t: Terminal) -> bool:
         return t.connectivity_node is not None and len(list(t.connectivity_node.terminals)) == 2

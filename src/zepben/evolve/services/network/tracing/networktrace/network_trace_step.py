@@ -94,7 +94,6 @@ class NetworkTraceStep(Generic[T]):
         def next_num_equipment_steps(self, current_num: int) -> int:
             return current_num + 1 if self.traced_externally else current_num
 
-
     Type = Enum('Type', ('ALL', 'INTERNAL', 'EXTERNAL'))
 
     def __init__(self, path: Path, num_terminal_steps: int, num_equipment_steps: int, data: T):

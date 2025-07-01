@@ -9,14 +9,15 @@ from unittest.mock import patch
 import pytest
 
 from services.network.tracing.phases.util import validate_phases_from_term_or_equip
-from zepben.evolve.database.sqlite.network.network_database_reader import NetworkDatabaseReader
 from zepben.evolve import TestNetworkBuilder, PhaseCode, SinglePhaseKind, PhaseInferrer, Terminal, NetworkService, NetworkStateOperators
+from zepben.evolve.database.sqlite.network.network_database_reader import NetworkDatabaseReader
 
 A = SinglePhaseKind.A
 B = SinglePhaseKind.B
 C = SinglePhaseKind.C
 N = SinglePhaseKind.N
 NONE = SinglePhaseKind.NONE
+
 
 class TestPhaseInferrer:
     """
@@ -445,7 +446,6 @@ class TestPhaseInferrer:
 
         self._validate_returned_phases(network, changes, ['c6'])
         self._validate_log(caplog, correct=["c6"])
-
 
     class LoggerOnly:
         _logger = logging.getLogger(__name__)

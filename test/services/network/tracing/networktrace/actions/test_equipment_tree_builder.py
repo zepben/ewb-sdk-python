@@ -3,16 +3,15 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pprint
-from collections import deque, defaultdict
+from collections import deque
 from typing import Optional, List
 
 import pytest
 
-from zepben.evolve import downstream, NetworkTraceActionType
-
 from services.network.test_data.looping_network import create_looping_network
 from services.network.tracing.feeder.direction_logger import log_directions
 from zepben.evolve import ConductingEquipment, Tracing, NetworkStateOperators
+from zepben.evolve import downstream, NetworkTraceActionType
 from zepben.evolve.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
 from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
 

@@ -8,18 +8,18 @@ from functools import singledispatchmethod
 from logging import Logger
 from typing import Optional, TYPE_CHECKING, Type
 
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
+from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
+from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType
+from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
-from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
-from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
-from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 from zepben.evolve.services.network.tracing.traversal.weighted_priority_queue import WeightedPriorityQueue
 
 if TYPE_CHECKING:
@@ -33,8 +33,8 @@ class SetDirection:
     Convenience class that provides methods for setting feeder direction on a [NetworkService]
     This class is backed by a [BranchRecursiveTraversal].
     """
-    
-    def __init__(self, debug_logger: Logger=None):
+
+    def __init__(self, debug_logger: Logger = None):
         self._debug_logger = debug_logger
 
     @staticmethod
@@ -89,7 +89,7 @@ class SetDirection:
                 network_state_operators=state_operators,
                 action_step_type=NetworkTraceActionType.ALL_STEPS,
                 debug_logger=self._debug_logger,
-                name= f'SetDirection({state_operators.description})',
+                name=f'SetDirection({state_operators.description})',
                 queue_factory=lambda: WeightedPriorityQueue.process_queue(lambda it: it.path.to_terminal.phases.num_phases),
                 branch_queue_factory=lambda: WeightedPriorityQueue.branch_queue(lambda it: it.path.to_terminal.phases.num_phases),
                 compute_data=lambda step, _, next_path: self._compute_data(reprocessed_loop_terminals, state_operators, step, next_path)
@@ -130,7 +130,7 @@ class SetDirection:
                     await self.run_terminal(terminal, network_state_operators)
 
     @run.register
-    async def run_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL):
+    async def run_terminal(self, terminal: Terminal, network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL):
         """
          Apply [FeederDirection.DOWNSTREAM] from the [terminal].
 
@@ -140,4 +140,3 @@ class SetDirection:
 
         return await (self._create_traversal(network_state_operators)
                       .run(terminal, FeederDirection.DOWNSTREAM, can_stop_on_start_item=False))
-

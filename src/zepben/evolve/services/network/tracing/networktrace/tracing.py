@@ -18,12 +18,12 @@ T = TypeVar('T')
 class Tracing:
     @staticmethod
     def network_trace(
-        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
-        action_step_type: CanActionItem=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
-        debug_logger: Logger=None,
-        name: str='NetworkTrace',
-        queue: TraversalQueue[NetworkTraceStep[T]]=TraversalQueue.depth_first(),
-        compute_data: Union[ComputeData[T], Callable]=None
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL,
+        action_step_type: CanActionItem = NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
+        debug_logger: Logger = None,
+        name: str = 'NetworkTrace',
+        queue: TraversalQueue[NetworkTraceStep[T]] = TraversalQueue.depth_first(),
+        compute_data: Union[ComputeData[T], Callable] = None
     ) -> NetworkTrace[T]:
         """
         Creates a `NetworkTrace` that computes contextual data for every step.
@@ -41,22 +41,24 @@ class Tracing:
         if not isinstance(compute_data, ComputeData):
             compute_data = ComputeData(compute_data or (lambda *args: None))
 
-        return NetworkTrace.non_branching(network_state_operators,
-                                          queue,
-                                          action_step_type,
-                                          name,
-                                          compute_data,
-                                          debug_logger=debug_logger)
+        return NetworkTrace.non_branching(
+            network_state_operators,
+            queue,
+            action_step_type,
+            name,
+            compute_data,
+            debug_logger=debug_logger
+        )
 
     @staticmethod
     def network_trace_branching(
-        network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL,
-        action_step_type: CanActionItem=NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
-        debug_logger: Logger=None,
-        name: str='NetworkTrace',
-        queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]]=lambda: TraversalQueue.depth_first(),
-        branch_queue_factory: Callable[[], TraversalQueue[NetworkTrace[NetworkTraceStep[T]]]]=lambda: TraversalQueue.breadth_first(),
-        compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]]=None
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL,
+        action_step_type: CanActionItem = NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT,
+        debug_logger: Logger = None,
+        name: str = 'NetworkTrace',
+        queue_factory: Callable[[], TraversalQueue[NetworkTraceStep[T]]] = lambda: TraversalQueue.depth_first(),
+        branch_queue_factory: Callable[[], TraversalQueue[NetworkTrace[NetworkTraceStep[T]]]] = lambda: TraversalQueue.breadth_first(),
+        compute_data: Union[ComputeData[T], ComputeDataWithPaths[T]] = None
     ) -> NetworkTrace[T]:
         """
         Creates a branching `NetworkTrace` that computes contextual data for every step. A new 'branch' will be created for each terminal
@@ -78,51 +80,53 @@ class Tracing:
         if not isinstance(compute_data, ComputeData):
             compute_data = ComputeData(compute_data or (lambda *args: None))
 
-        return NetworkTrace.branching(network_state_operators,
-                                      queue_factory,
-                                      branch_queue_factory,
-                                      action_step_type,
-                                      name,
-                                      None,
-                                      compute_data,
-                                      debug_logger=debug_logger)
+        return NetworkTrace.branching(
+            network_state_operators,
+            queue_factory,
+            branch_queue_factory,
+            action_step_type,
+            name,
+            None,
+            compute_data,
+            debug_logger=debug_logger
+        )
 
     @staticmethod
-    def set_direction(debug_logger: Logger=None):
+    def set_direction(debug_logger: Logger = None):
         from zepben.evolve.services.network.tracing.feeder.set_direction import SetDirection
         return SetDirection(debug_logger=debug_logger)
 
     @staticmethod
-    def clear_direction(debug_logger: Logger=None):
+    def clear_direction(debug_logger: Logger = None):
         from zepben.evolve.services.network.tracing.feeder.clear_direction import ClearDirection
         return ClearDirection(debug_logger=debug_logger)
 
     @staticmethod
-    def assign_equipment_to_feeders(debug_logger: Logger=None):
+    def assign_equipment_to_feeders(debug_logger: Logger = None):
         from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
         return AssignToFeeders(debug_logger=debug_logger)
 
     @staticmethod
-    def assign_equipment_to_lv_feeders(debug_logger: Logger=None):
+    def assign_equipment_to_lv_feeders(debug_logger: Logger = None):
         from zepben.evolve.services.network.tracing.feeder.assign_to_lv_feeders import AssignToLvFeeders
         return AssignToLvFeeders(debug_logger=debug_logger)
 
     @staticmethod
-    def set_phases(debug_logger: Logger=None):
+    def set_phases(debug_logger: Logger = None):
         from zepben.evolve.services.network.tracing.phases.set_phases import SetPhases
         return SetPhases(debug_logger=debug_logger)
 
     @staticmethod
-    def remove_phases(debug_logger: Logger=None):
+    def remove_phases(debug_logger: Logger = None):
         from zepben.evolve.services.network.tracing.phases.remove_phases import RemovePhases
         return RemovePhases(debug_logger=debug_logger)
 
     @staticmethod
-    def phase_inferrer(debug_logger: Logger=None):
+    def phase_inferrer(debug_logger: Logger = None):
         from zepben.evolve.services.network.tracing.phases.phase_inferrer import PhaseInferrer
         return PhaseInferrer(debug_logger=debug_logger)
 
     @staticmethod
-    def find_swer_equipment(debug_logger: Logger=None):
+    def find_swer_equipment(debug_logger: Logger = None):
         from zepben.evolve.services.network.tracing.find_swer_equipment import FindSwerEquipment
         return FindSwerEquipment(debug_logger=debug_logger)

@@ -15,7 +15,6 @@ D = TypeVar('D')
 
 
 class TraversalTest(Traversal[T, D]):
-
     name = 'TestTraversal'
 
     def __init__(
@@ -51,7 +50,6 @@ def _create_traversal(
     on_reset: Callable[[], Any] = lambda: None,
     queue: TraversalQueue[int] = TraversalQueue.depth_first(),
 ) -> TraversalTest[int, D]:
-
     def queue_next(item, _, queue_item):
         if item < 0:
             queue_item(item - 1)
@@ -84,6 +82,7 @@ def _create_branching_traversal() -> TraversalTest[int, D]:
                          can_action_item=lambda x, y: True,
                          on_reset=lambda: None)
 
+
 class TestTraversal:
 
     def setup_method(self, test_method) -> None:
@@ -95,7 +94,8 @@ class TestTraversal:
         def step_action(item, _):
             self.last_num = item
 
-        await (_create_traversal()
+        await (
+            _create_traversal()
             .add_condition(lambda item, _: item == 2)
             .add_step_action(step_action)
             .run(1)
@@ -108,7 +108,8 @@ class TestTraversal:
         def step_action(item, _):
             self.last_num = item
 
-        await (_create_traversal()
+        await (
+            _create_traversal()
             .add_condition(lambda item, x, y, z: item < 3)
             .add_step_action(step_action)
             .run(1)
@@ -120,7 +121,8 @@ class TestTraversal:
     async def test_stop_conditions(self):
         steps = []
 
-        await (_create_traversal()
+        await (
+            _create_traversal()
             .add_stop_condition(lambda item, _: item == 3)
             .add_step_action(lambda item, ctx: steps.append((item, ctx)))
             .run(1)
@@ -183,7 +185,8 @@ class TestTraversal:
         def step_action(item, _):
             self.last_num = item
 
-        await (_create_traversal()
+        await (
+            _create_traversal()
             .add_queue_condition(lambda next_item, x, y, z: next_item < 3)
             .add_step_action(step_action)
             .run(1)
@@ -277,6 +280,7 @@ class TestTraversal:
 
         class TestSAWCV(StepActionWithContextValue[int]):
             """We append to `context_data_capture` on every step to ensure that the context is computed on every step."""
+
             def compute_next_value(self, next_item: int, current_item: int, current_value):
                 contex_data_capture.append(True)
                 return f'{current_value} : (next_item={next_item}, current_item={current_item})'
@@ -309,6 +313,7 @@ class TestTraversal:
 
         class TestSAWCV(StepActionWithContextValue[int]):
             """We append to `context_data_capture` on every step to ensure that the context is computed on every step."""
+
             def compute_next_value(self, next_item: int, current_item: int, current_value):
                 contex_data_capture.append(True)
                 return f'{current_value} : (next_item={next_item}, current_item={current_item})'
@@ -347,7 +352,8 @@ class TestTraversal:
             def compute_initial_value(self, item: int):
                 return f'{item}'
 
-        await (_create_traversal()
+        await (
+            _create_traversal()
             .add_context_value_computer(TestCVC('test'))
             .add_step_action(step_action)
             .add_stop_condition(lambda item, _: item == 2)
@@ -434,9 +440,9 @@ class TestTraversal:
         def step_action(item, ctx):
             steps[item] = ctx
 
-        trace =(
+        trace = (
             _create_branching_traversal()
-            .add_queue_condition(lambda  item, ctx, x, y: (ctx.branch_depth <= 1) and (item != 0))
+            .add_queue_condition(lambda item, ctx, x, y: (ctx.branch_depth <= 1) and (item != 0))
             .add_step_action(step_action)
         )
         await trace.run(0, can_stop_on_start_item=False)

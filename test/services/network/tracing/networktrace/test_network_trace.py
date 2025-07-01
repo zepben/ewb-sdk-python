@@ -11,7 +11,8 @@ from typing import List, Set, Tuple
 import pytest
 
 from services.network.tracing.networktrace.test_network_trace_step_path_provider import PathTerminal, _verify_paths
-from zepben.evolve import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType, Tracing
+from zepben.evolve import AcLineSegment, Clamp, Terminal, NetworkTraceStep, Cut, ConductingEquipment, TraversalQueue, Junction, ngen, NetworkTraceActionType, \
+    Tracing
 from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
 
 Terminal.__add__ = PathTerminal.__add__
@@ -38,7 +39,7 @@ class TestNetworkTrace:
         segment.add_clamp(clamp)
 
         trace.add_start_item(clamp)
-        _verify_paths(ngen([trace.start_items[0].path]), (clamp[1] + clamp[1], ))
+        _verify_paths(ngen([trace.start_items[0].path]), (clamp[1] + clamp[1],))
 
     @pytest.mark.asyncio
     def test_adds_start_AcLineSegment_terminals_cut_terminals_and_clamp_terminals_as_traversed_segment(self):
@@ -128,12 +129,12 @@ class TestNetworkTrace:
             .run(ns.get('j0', Junction))
 
         assert list(map(lambda it: (it.num_equipment_steps, it.path.to_equipment.mrid), steps)) \
-            == [(0, 'j0'),
-                (1, 'c5'),
-                (1, 'c1'),
-                (2, 'c4'),
-                (2, 'c2'),
-                (3, 'j3')]
+               == [(0, 'j0'),
+                   (1, 'c5'),
+                   (1, 'c1'),
+                   (2, 'c4'),
+                   (2, 'c2'),
+                   (3, 'j3')]
 
     @pytest.mark.asyncio
     async def test_can_stop_on_start_item_when_running_from_conducting_equipment(self):
@@ -152,7 +153,7 @@ class TestNetworkTrace:
             .run(ns.get('b0', ConductingEquipment))
 
         assert list(map(lambda it: (it.num_equipment_steps, it.path.to_equipment.mrid), steps)) \
-            == [(0, 'b0')]
+               == [(0, 'b0')]
 
     @pytest.mark.asyncio
     async def test_can_stop_on_start_item_when_running_from_conducting_equipment_branching(self):
@@ -187,13 +188,13 @@ class TestNetworkTrace:
                 network = builder.network
 
                 builder.from_junction(num_terminals=1) \
-                       .to_acls()
+                    .to_acls()
 
                 for i in range(1000):
                     builder.to_junction(mrid=f'junc-{i}', num_terminals=3) \
-                           .to_acls(mrid=f'acls-{i}-top') \
-                           .from_acls(mrid=f'acls-{i}-bottom') \
-                           .connect(f'junc-{i}', f'acls-{i}-bottom', 2, 1)
+                        .to_acls(mrid=f'acls-{i}-top') \
+                        .from_acls(mrid=f'acls-{i}-bottom') \
+                        .connect(f'junc-{i}', f'acls-{i}-bottom', 2, 1)
 
                 await Tracing.network_trace_branching().run(network['j0'].get_terminal_by_sn(1))
 
@@ -282,5 +283,3 @@ class TestNetworkTrace:
         # Can even use bizarre paths, they are just the same as any other external path.
         await validate(('c0-t1', 'c2-t1'), NetworkTraceActionType.ALL_STEPS, ["c2-t1", "c2-t2"])
         await validate(('c0-t1', 'c2-t1'), NetworkTraceActionType.FIRST_STEP_ON_EQUIPMENT, ["c2-t1"])
-
-

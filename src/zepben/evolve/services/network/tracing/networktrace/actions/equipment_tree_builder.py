@@ -34,7 +34,7 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
     >>>     .add_step_action(tree_builder)).run()
     """
 
-    _roots: dict[ConductingEquipment, EquipmentTreeNode]={}
+    _roots: dict[ConductingEquipment, EquipmentTreeNode] = {}
 
     def __init__(self):
         super().__init__(key=str(uuid.uuid4()))

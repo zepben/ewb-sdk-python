@@ -6,8 +6,6 @@ import logging
 import queue
 from contextlib import contextmanager
 
-import pytest
-
 from zepben.evolve import StepContext, StopCondition, QueueCondition, StepAction
 from zepben.evolve.services.network.tracing.traversal.debug_logging import DebugLoggingWrapper
 

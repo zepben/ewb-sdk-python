@@ -9,14 +9,14 @@ from typing import Set, Union, AsyncGenerator, Type, TYPE_CHECKING
 from typing_extensions import TypeVar
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.services.network.network_service import NetworkService
+from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.network_trace import NetworkTrace
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
-from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 if TYPE_CHECKING:
@@ -32,10 +32,14 @@ class FindSwerEquipment:
     A class which can be used for finding the SWER equipment in a [NetworkService] or [Feeder].
     """
 
-    def __init__(self, debug_logger: Logger=None):
+    def __init__(self, debug_logger: Logger = None):
         self._debug_logger = debug_logger
 
-    async def find(self, to_process: Union[NetworkService, Feeder], network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
+    async def find(
+        self,
+        to_process: Union[NetworkService, Feeder],
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+    ) -> Set[ConductingEquipment]:
         """
         Convenience method to call out to `find_all` or `find_on_feeder` based on the class type of `to_process`
 
@@ -52,7 +56,11 @@ class FindSwerEquipment:
         else:
             raise NotImplementedError
 
-    async def find_all(self, network_service: NetworkService, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> AsyncGenerator[ConductingEquipment, None]:
+    async def find_all(
+        self,
+        network_service: NetworkService,
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+    ) -> AsyncGenerator[ConductingEquipment, None]:
         """
         Find the `ConductingEquipment` on any `Feeder` in a `NetworkService` which is SWER. This will include any equipment on the LV network that is energised
         via SWER.
@@ -67,7 +75,11 @@ class FindSwerEquipment:
             for item in await self.find_on_feeder(feeder, network_state_operators):
                 yield item
 
-    async def find_on_feeder(self, feeder: Feeder, network_state_operators: Type[NetworkStateOperators]=NetworkStateOperators.NORMAL) -> Set[ConductingEquipment]:
+    async def find_on_feeder(
+        self,
+        feeder: Feeder,
+        network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL
+    ) -> Set[ConductingEquipment]:
         """
         Find the `ConductingEquipment` on a `Feeder` which is SWER. This will include any equipment on the LV network that is energised via SWER.
 
@@ -123,7 +135,6 @@ class FindSwerEquipment:
             trace.reset()
             await trace.run(it, None)
 
-
     async def _trace_lv_from(
         self,
         state_operators: Type[NetworkStateOperators],
@@ -146,14 +157,18 @@ class FindSwerEquipment:
                 trace.reset()
                 await trace.run(terminal, None)
 
+
 def _is_swer_terminal(terminal: Terminal) -> bool:
     return terminal.phases.num_phases == 1
+
 
 def _is_non_swer_terminal(terminal: Terminal) -> bool:
     return terminal.phases.num_phases > 1
 
+
 def _has_swer_terminal(ce: ConductingEquipment) -> bool:
     return any(_is_swer_terminal(it) for it in ce.terminals)
+
 
 def _has_non_swer_terminal(ce: ConductingEquipment) -> bool:
     return any(_is_non_swer_terminal(it) for it in ce.terminals)
