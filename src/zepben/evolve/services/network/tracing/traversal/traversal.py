@@ -338,7 +338,7 @@ class Traversal(Generic[T, D]):
         return self
 
     @add_step_action.register(Callable)
-    def _(self, action: StepActionFunc, **kwargs):
+    def _(self, action: StepActionFunc):
         return self.add_step_action(StepAction(action))
 
     @singledispatchmethod
