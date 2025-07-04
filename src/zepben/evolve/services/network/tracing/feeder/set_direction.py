@@ -116,7 +116,7 @@ class SetDirection:
         return isinstance(conducting_equipment, Switch) and conducting_equipment.is_normally_open()
 
     @singledispatchmethod
-    async def run(self, network: NetworkService, network_state_operators: Type[NetworkStateOperators]):
+    async def run(self, network: NetworkService, network_state_operators: Type[NetworkStateOperators] = NetworkStateOperators.NORMAL):
         """
          Apply feeder directions from all feeder head terminals in the network.
 
