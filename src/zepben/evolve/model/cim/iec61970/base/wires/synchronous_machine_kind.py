@@ -8,7 +8,6 @@ __all__ = ["SynchronousMachineKind"]
 from enum import unique, Enum
 
 
-# todo add to all enums
 @unique
 class SynchronousMachineKind(Enum):
     """

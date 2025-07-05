@@ -5,11 +5,14 @@
 
 __all__ = ["RegulatingControlModeKind"]
 
-from enum import Enum
+from enum import Enum, unique
 
 
+@unique
 class RegulatingControlModeKind(Enum):
-    """The kind of regulation model. For example regulating voltage, reactive power, active power, etc."""
+    """
+    The kind of regulation model. For example regulating voltage, reactive power, active power, etc.
+    """
 
     UNKNOWN_CONTROL_MODE = 0
     """Default, unknown."""

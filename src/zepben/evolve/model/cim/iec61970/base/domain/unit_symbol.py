@@ -5,7 +5,7 @@
 
 __all__ = ["UnitSymbol", "unit_symbol_from_id", "unit_symbol_from_cim_name"]
 
-from enum import Enum
+from enum import Enum, unique
 
 
 def unit_symbol_from_cim_name(value: str):
@@ -16,6 +16,7 @@ def unit_symbol_from_id(value: int):
     return _unitsymbol_members_by_id[value]
 
 
+@unique
 class UnitSymbol(Enum):
     """
     The derived units defined for usage in the CIM. In some cases, the derived unit is equal to an SI unit. Whenever possible, the standard derived symbol is

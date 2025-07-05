@@ -5,10 +5,15 @@
 
 __all__ = ["WireMaterialKind"]
 
-from enum import Enum
+from enum import Enum, unique
 
 
+@unique
 class WireMaterialKind(Enum):
+    """
+    Kind of wire material.
+    """
+
     UNKNOWN = 0
     """UNKNOWN"""
 

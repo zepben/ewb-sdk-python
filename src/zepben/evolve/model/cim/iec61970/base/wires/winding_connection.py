@@ -5,11 +5,14 @@
 
 __all__ = ["WindingConnection"]
 
-from enum import Enum
+from enum import Enum, unique
 
 
+@unique
 class WindingConnection(Enum):
-    """Winding connection type."""
+    """
+    Winding connection type.
+    """
 
     UNKNOWN_WINDING = 0
     """Default"""

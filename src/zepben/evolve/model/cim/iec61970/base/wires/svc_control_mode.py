@@ -5,9 +5,10 @@
 
 __all__ = ["SVCControlMode"]
 
-from enum import Enum
+from enum import Enum, unique
 
 
+@unique
 class SVCControlMode(Enum):
     """
     Static VAr Compensator control mode.
