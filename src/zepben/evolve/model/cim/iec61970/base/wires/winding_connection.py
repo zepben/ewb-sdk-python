@@ -3,12 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from enum import Enum
-
 __all__ = ["WindingConnection"]
+
+from enum import Enum
 
 
 class WindingConnection(Enum):
+    """Winding connection type."""
 
     UNKNOWN_WINDING = 0
     """Default"""

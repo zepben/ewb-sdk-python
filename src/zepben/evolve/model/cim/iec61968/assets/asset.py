@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+__all__ = ["Asset"]
+
 from typing import Optional, Generator, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -14,8 +16,6 @@ if TYPE_CHECKING:
 from zepben.evolve.model.cim.iec61968.common.location import Location
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import get_by_mrid, nlen, ngen, safe_remove
-
-__all__ = ["Asset", "AssetContainer"]
 
 
 class Asset(IdentifiedObject):
@@ -152,11 +152,3 @@ class Asset(IdentifiedObject):
         """
         self._power_system_resources = None
         return self
-
-
-class AssetContainer(Asset):
-    """
-    Asset that is aggregation of other assets such as conductors, transformers, switchgear, land, fences, buildings,
-    equipment, vehicles, etc.
-    """
-    pass

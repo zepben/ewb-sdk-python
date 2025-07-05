@@ -3,11 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
-
-from zepben.evolve.model.cim.iec61968.assets.asset import AssetContainer
-
 __all__ = ["Structure"]
+
+from zepben.evolve.model.cim.iec61968.assets.asset_container import AssetContainer
 
 
 class Structure(AssetContainer):

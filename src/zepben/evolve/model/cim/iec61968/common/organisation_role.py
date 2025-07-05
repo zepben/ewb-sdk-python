@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["OrganisationRole"]
 
 from typing import Optional, TYPE_CHECKING
 
@@ -11,8 +11,6 @@ if TYPE_CHECKING:
     from zepben.evolve import Organisation
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-
-__all__ = ["OrganisationRole"]
 
 
 class OrganisationRole(IdentifiedObject):

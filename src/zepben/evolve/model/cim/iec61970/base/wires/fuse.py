@@ -3,15 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["Fuse"]
 
 from typing import Optional
 
-from zepben.evolve import Switch
-
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
-
-__all__ = ["Fuse"]
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
+from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 
 
 class Fuse(Switch):

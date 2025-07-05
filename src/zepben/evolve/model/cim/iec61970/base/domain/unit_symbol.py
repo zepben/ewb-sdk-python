@@ -3,9 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from enum import Enum
-
 __all__ = ["UnitSymbol", "unit_symbol_from_id", "unit_symbol_from_cim_name"]
+
+from enum import Enum
 
 
 def unit_symbol_from_cim_name(value: str):

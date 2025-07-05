@@ -8,7 +8,8 @@ from typing import Set, FrozenSet, Tuple, List, Iterable, Optional, Dict, TypeVa
 
 from zepben.evolve import Terminal, NetworkService, AcLineSegment, PowerTransformer, EnergySource, EnergyConsumer, ConductingEquipment, \
     PowerElectronicsConnection, BusBranchNetworkCreator, \
-    BusBranchNetworkCreationValidator, PowerTransformerEnd, EquivalentBranch
+    BusBranchNetworkCreationValidator, EquivalentBranch
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 BBN = TypeVar('BBN')
 TN = Tuple[int, FrozenSet[ConductingEquipment], FrozenSet[Terminal], FrozenSet[Terminal], NetworkService, BusBranchNetworkCreationValidator]

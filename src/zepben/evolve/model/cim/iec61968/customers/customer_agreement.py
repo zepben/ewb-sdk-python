@@ -5,15 +5,15 @@
 
 from __future__ import annotations
 
+__all__ = ["CustomerAgreement"]
+
 from typing import Optional, Generator, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from zepben.evolve import PricingStructure, Customer
 
-from zepben.evolve.model.cim.iec61968.common.document import Agreement
+from zepben.evolve.model.cim.iec61968.common.agreement import Agreement
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
-
-__all__ = ["CustomerAgreement"]
 
 
 class CustomerAgreement(Agreement):

@@ -2,15 +2,18 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from __future__ import annotations
 
-from typing import Generator, Optional, List, TYPE_CHECKING, Iterable
-from zepben.evolve.util import ngen, nlen, get_by_mrid, safe_remove
-if TYPE_CHECKING:
-    from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
-from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
-
 __all__ = ["Sensor"]
+
+from typing import Generator, Optional, List, TYPE_CHECKING, Iterable
+
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
+from zepben.evolve.util import ngen, nlen, get_by_mrid, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
 class Sensor(AuxiliaryEquipment):

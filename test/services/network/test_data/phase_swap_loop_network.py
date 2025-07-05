@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from network_fixtures import create_source_for_connecting, create_junction_for_connecting, create_switch_for_connecting, create_acls_for_connecting
-from zepben.evolve import NetworkService, PhaseCode, Feeder
+from zepben.evolve import NetworkService, PhaseCode
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 
 
 def create_phase_swap_loop_network() -> NetworkService:

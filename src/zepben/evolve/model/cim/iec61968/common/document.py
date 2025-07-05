@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+__all__ = ["Document"]
+
 from datetime import datetime
 from typing import Optional
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-
-__all__ = ["Document", "Agreement"]
 
 
 class Document(IdentifiedObject):
@@ -34,11 +34,3 @@ class Document(IdentifiedObject):
 
     comment: str = ""
     """Free text comment"""
-
-
-class Agreement(Document):
-    """
-    Formal agreement between two parties defining the terms and conditions for a set of services. The specifics of
-    the services are, in turn, defined via one or more service agreements.
-    """
-    pass

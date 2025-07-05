@@ -3,16 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["Control"]
 
 from typing import Optional, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import RemoteControl
-
 from zepben.evolve.model.cim.iec61970.base.meas.iopoint import IoPoint
 
-__all__ = ["Control"]
+if TYPE_CHECKING:
+    from zepben.evolve import RemoteControl
 
 
 class Control(IoPoint):
@@ -23,6 +21,6 @@ class Control(IoPoint):
 
     power_system_resource_mrid: Optional[str] = None
     """AnalogValue represents an analog MeasurementValue."""
-    
+
     remote_control: Optional[RemoteControl] = None
     """AnalogValue represents an analog MeasurementValue."""

@@ -8,7 +8,7 @@ __all__ = ["MeasurementService"]
 
 from typing import List, Optional, Generator, TYPE_CHECKING
 
-from zepben.evolve import MeasurementValue
+from zepben.evolve.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
 
 if TYPE_CHECKING:
     from zepben.evolve import IdentifiedObject

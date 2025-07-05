@@ -3,7 +3,6 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
 __all__ = ["Clamp"]
 
 from typing import Optional, TYPE_CHECKING
@@ -29,5 +28,5 @@ class Clamp(ConductingEquipment):
     max_terminals = 1
 
     @property
-    def length_from_T1_or_0(self) -> float:
+    def length_from_t1_or_0(self) -> float:
         return self.length_from_terminal_1 or 0.0

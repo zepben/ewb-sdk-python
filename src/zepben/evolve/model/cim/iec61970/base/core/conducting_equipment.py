@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+__all__ = ['ConductingEquipment']
+
 import sys
 from typing import List, Optional, Generator, TYPE_CHECKING, Union
 
@@ -14,8 +16,6 @@ from zepben.evolve.util import get_by_mrid, require, ngen
 
 if TYPE_CHECKING:
     from zepben.evolve import Terminal
-
-__all__ = ['ConductingEquipment']
 
 
 class ConductingEquipment(Equipment):
@@ -140,9 +140,8 @@ class ConductingEquipment(Equipment):
         if self._validate_terminal(terminal):
             return self
 
-        require (self.num_terminals() < self.max_terminals,
-            lambda: f"Unable to add {terminal} to {str(self)}. This conducting equipment already has the maximum number of terminals ({self.max_terminals}).")
-
+        require(self.num_terminals() < self.max_terminals,
+                lambda: f"Unable to add {terminal} to {str(self)}. This conducting equipment already has the maximum number of terminals ({self.max_terminals}).")
 
         if terminal.sequence_number == 0:
             terminal.sequence_number = self.num_terminals() + 1

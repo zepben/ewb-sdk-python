@@ -5,10 +5,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Callable, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
+from typing import Optional, Callable
 
 __all__ = ["ResistanceReactance"]
 

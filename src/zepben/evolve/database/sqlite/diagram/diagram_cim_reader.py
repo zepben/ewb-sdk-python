@@ -11,7 +11,9 @@ from zepben.evolve.database.sqlite.extensions.result_set import ResultSet
 from zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout.table_diagram_object_points import TableDiagramObjectPoints
 from zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout.table_diagram_objects import TableDiagramObjects
 from zepben.evolve.database.sqlite.tables.iec61970.base.diagramlayout.table_diagrams import TableDiagrams
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject, DiagramObjectPoint
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
 from zepben.evolve.services.diagram.diagrams import DiagramService

@@ -2,16 +2,18 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from __future__ import annotations
+
+__all__ = ["Circuit"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import Substation, Terminal, Loop
 from zepben.evolve.model.cim.iec61970.base.wires.line import Line
 from zepben.evolve.util import ngen, get_by_mrid, safe_remove, nlen
 
-__all__ = ["Circuit"]
+if TYPE_CHECKING:
+    from zepben.evolve import Substation, Terminal, Loop
 
 
 class Circuit(Line):

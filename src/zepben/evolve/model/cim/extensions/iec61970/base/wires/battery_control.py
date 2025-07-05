@@ -3,24 +3,20 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["BatteryControl"]
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control_mode import BatteryControlMode
 from zepben.evolve.model.cim.extensions.zbex import zbex
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
 
-if TYPE_CHECKING:
-    pass
-
-__all__ = ["BatteryControl", "BatteryControlMode"]
-
 
 @zbex
 class BatteryControl(RegulatingControl):
     """
-    [ZBEX] Describes behaviour specific to controlling batteries.
+    [ZBEX]
+    Describes behaviour specific to controlling batteries.
     """
 
     charging_rate: Optional[float] = None

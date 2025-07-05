@@ -6,7 +6,7 @@ __all__ = ["DiagramService"]
 
 from typing import Dict, List, Optional
 
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import DiagramObject
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.evolve.services.common.base_service import BaseService
 from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 

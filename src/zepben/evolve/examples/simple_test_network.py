@@ -6,9 +6,12 @@ __all__ = ["simple_test_network"]
 
 from typing import List
 
-from zepben.evolve import NetworkService, BaseVoltage, PerLengthSequenceImpedance, OverheadWireInfo, \
-    PowerTransformerInfo, PhaseCode, EnergySourcePhase, EnergySource, PowerTransformer, PowerTransformerEnd, Terminal, \
-    ConductingEquipment, EnergyConsumer, AcLineSegment, PositionPoint, Location
+from zepben.evolve import NetworkService, BaseVoltage, PowerTransformerInfo, PhaseCode, EnergySourcePhase, EnergySource, PowerTransformer, Terminal, \
+    ConductingEquipment, EnergyConsumer, AcLineSegment, Location
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 
 async def simple_test_network() -> NetworkService:

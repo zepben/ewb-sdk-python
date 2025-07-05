@@ -3,17 +3,15 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["EnergySourcePhase"]
 
 from typing import Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from zepben.evolve import EnergySource
 
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
-__all__ = ["EnergySourcePhase"]
+if TYPE_CHECKING:
+    from zepben.evolve import EnergySource
 
 
 class EnergySourcePhase(PowerSystemResource):

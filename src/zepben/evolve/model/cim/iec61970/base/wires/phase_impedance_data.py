@@ -3,11 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import Optional
-from dataclasses import dataclass
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-
 __all__ = ["PhaseImpedanceData"]
+
+from dataclasses import dataclass
+from typing import Optional
+
+from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 
 @dataclass(frozen=True)
@@ -19,10 +20,10 @@ class PhaseImpedanceData(object):
 
     from_phase: SinglePhaseKind
     """Refer to the class description."""
-    
+
     to_phase: SinglePhaseKind
     """Refer to the class description."""
-    
+
     b: Optional[float] = None
     """Susceptance matrix element value, per length of unit."""
 

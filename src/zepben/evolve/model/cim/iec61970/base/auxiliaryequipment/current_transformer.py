@@ -2,7 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from __future__ import annotations
+
+__all__ = ["CurrentTransformer"]
 
 from typing import Optional, TYPE_CHECKING
 
@@ -10,8 +11,6 @@ from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sens
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
-
-__all__ = ["CurrentTransformer"]
 
 
 class CurrentTransformer(Sensor):

@@ -5,7 +5,10 @@
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
 from services.common.test_base_service_comparator import TestBaseServiceComparator
-from zepben.evolve import DiagramService, Diagram, DiagramObject, DiagramObjectPoint, DiagramStyle, OrientationKind
+from zepben.evolve import DiagramService, DiagramStyle, OrientationKind
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
 

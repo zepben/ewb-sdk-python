@@ -30,18 +30,36 @@ from cim.cim_creators import create_cable_info, create_no_load_test, create_open
     create_pan_demand_response_function, create_battery_control, create_static_var_compensator, create_clamp, create_cut
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
-from zepben.evolve import IdentifiedObject, AcLineSegment, CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, \
-    ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, AssetOwner, Pole, Streetlight, Meter, UsagePoint, Location, Organisation, \
-    OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, Feeder, GeographicalRegion, Site, SubGeographicalRegion, Substation, Terminal, \
-    EquivalentBranch, Accumulator, Analog, Control, Discrete, RemoteControl, RemoteSource, BatteryUnit, PhotoVoltaicUnit, \
-    PowerElectronicsConnection, PowerElectronicsConnectionPhase, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, EnergyConsumer, \
-    EnergyConsumerPhase, EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LinearShuntCompensator, LoadBreakSwitch, PerLengthSequenceImpedance, \
-    PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, TransformerStarImpedance, Circuit, Loop, NetworkDatabaseWriter, \
+from zepben.evolve import IdentifiedObject, AcLineSegment, NoLoadTest, OpenCircuitTest, PowerTransformerInfo, \
+    ShortCircuitTest, ShuntCompensatorInfo, TransformerEndInfo, TransformerTankInfo, Pole, Streetlight, Location, Organisation, \
+    OperationalRestriction, BaseVoltage, ConnectivityNode, Feeder, Site, Substation, Terminal, \
+    EquivalentBranch, Control, RemoteControl, RemoteSource, BatteryUnit, PhotoVoltaicUnit, \
+    PowerElectronicsConnection, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, EnergyConsumer, \
+    EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LoadBreakSwitch, PowerTransformer, PowerTransformerEnd, Recloser, TransformerStarImpedance, Circuit, Loop, NetworkDatabaseWriter, \
     NetworkDatabaseReader, NetworkServiceComparator, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, \
     PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
-    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, StreetAddress, TownDetail, StreetDetail, GroundingImpedance, \
+    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, GroundingImpedance, \
     PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators, \
     NetworkTraceStep
+from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
+from zepben.evolve.model.cim.iec61970.base.meas.discrete import Discrete
+from zepben.evolve.model.cim.iec61970.base.meas.analog import Analog
+from zepben.evolve.model.cim.iec61970.base.meas.accumulator import Accumulator
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
+from zepben.evolve.model.cim.iec61968.metering.meter import Meter
+from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
+from zepben.evolve.model.cim.iec61968.common.street_detail import StreetDetail
+from zepben.evolve.model.cim.iec61968.common.town_detail import TownDetail
+from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
+from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance

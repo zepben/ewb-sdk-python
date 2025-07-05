@@ -3,12 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+__all__ = ["PhaseCode", "phase_code_by_id", "phase_code_from_single_phases"]
+
 from enum import Enum, unique
 from typing import List, Set, Union
 
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-
-__all__ = ["PhaseCode", "phase_code_by_id", "phase_code_from_single_phases"]
 
 
 def phase_code_by_id(value: int):
@@ -33,7 +33,6 @@ class PhaseCode(Enum):
     transformer connections, these secondary circuits may be served from one or two of the primary phases A, B, and C. For three-phase
     loads, use the A, B, C phase codes instead of s12N.
     """
-
 
     NONE = (0, [SinglePhaseKind.NONE])
     """No phases specified"""
@@ -119,7 +118,6 @@ class PhaseCode(Enum):
 
     s2N = (27, [SinglePhaseKind.s2, SinglePhaseKind.N])
     """Secondary phase 2 plus neutral"""
-
 
     # pylint: enable=invalid-name
 

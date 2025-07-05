@@ -5,9 +5,12 @@
 from typing import Iterable
 
 import pytest
-from zepben.evolve import Equipment, TestNetworkBuilder, Feeder, BaseVoltage, Tracing, NetworkStateOperators, CurrentTransformer, FaultIndicator, \
-    ProtectedSwitch, CurrentRelay, ProtectionRelayScheme, ProtectionRelaySystem, PhotoVoltaicUnit, PowerElectronicsConnection, Junction, ConductingEquipment, \
-    PowerTransformerEnd
+from zepben.evolve import Equipment, TestNetworkBuilder, BaseVoltage, Tracing, NetworkStateOperators, CurrentTransformer, ProtectedSwitch, CurrentRelay, ProtectionRelayScheme, ProtectionRelaySystem, PhotoVoltaicUnit, PowerElectronicsConnection, \
+    ConductingEquipment
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 
 
 def validate_equipment(equipment: Iterable[Equipment], *expected_mrids: str):

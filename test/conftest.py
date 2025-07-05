@@ -11,7 +11,9 @@ from zepben.evolve.dataclassy import dataclass
 from hypothesis import settings, Verbosity
 from pytest import fixture
 
-from zepben.evolve import Terminal, ConnectivityNode, IdentifiedObject, PowerTransformerEnd, RatioTapChanger
+from zepben.evolve import Terminal, ConnectivityNode, IdentifiedObject
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 from zepben.evolve.services.network.network_service import NetworkService
 # noinspection PyUnresolvedReferences
 from .network_fixtures import *

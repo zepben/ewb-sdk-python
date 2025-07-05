@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+__all__ = ["ProtectedSwitch"]
+
 from typing import Optional, List, Generator, TYPE_CHECKING, Iterable
 
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
@@ -12,8 +14,6 @@ from zepben.evolve.util import get_by_mrid, ngen, nlen, safe_remove
 
 if TYPE_CHECKING:
     from zepben.evolve import ProtectionRelayFunction
-
-__all__ = ["ProtectedSwitch"]
 
 
 class ProtectedSwitch(Switch):

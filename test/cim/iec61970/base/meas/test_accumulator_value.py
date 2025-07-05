@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers, text
-from zepben.evolve import AccumulatorValue
+from zepben.evolve.model.cim.iec61970.base.meas.accumulator_value import AccumulatorValue
 
 from cim.cim_creators import MAX_32_BIT_INTEGER, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.meas.test_measurement_value import measurement_value_kwargs, verify_measurement_value_constructor_default, \

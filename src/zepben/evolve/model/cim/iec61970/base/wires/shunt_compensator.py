@@ -2,13 +2,14 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+__all__ = ["ShuntCompensator"]
+
 from typing import Optional
 
-from zepben.evolve import ShuntCompensatorInfo
-from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
+from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import ShuntCompensatorInfo
 from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
-
-__all__ = ["ShuntCompensator", "LinearShuntCompensator"]
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 
 
 class ShuntCompensator(RegulatingCondEq):
@@ -54,19 +55,3 @@ class ShuntCompensator(RegulatingCondEq):
         `sci` The `ShuntCompensatorInfo` for this `ShuntCompensator`
         """
         self.asset_info = sci
-
-
-class LinearShuntCompensator(ShuntCompensator):
-    """A linear shunt compensator has banks or sections with equal admittance values."""
-
-    b0_per_section: Optional[float] = None
-    """Zero sequence shunt (charging) susceptance per section"""
-
-    b_per_section: Optional[float] = None
-    """Positive sequence shunt (charging) susceptance per section"""
-
-    g0_per_section: Optional[float] = None
-    """Zero sequence shunt (charging) conductance per section"""
-
-    g_per_section: Optional[float] = None
-    """Positive sequence shunt (charging) conductance per section"""

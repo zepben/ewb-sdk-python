@@ -9,7 +9,7 @@ from logging import Logger
 from typing import Iterable, Union, List, Dict, Any, Set, Type, Generator, TYPE_CHECKING
 
 from zepben.evolve import Switch, ProtectedSwitch, PowerElectronicsConnection
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import stop_at_open

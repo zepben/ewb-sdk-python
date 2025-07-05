@@ -3,14 +3,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["WireInfo"]
 
 from typing import Optional
 
 from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import WireMaterialKind
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
-
-__all__ = ["WireInfo", "CableInfo", "OverheadWireInfo"]
 
 
 class WireInfo(AssetInfo):
@@ -24,17 +22,3 @@ class WireInfo(AssetInfo):
     """
     rated_current: Optional[int] = None
     material: WireMaterialKind = WireMaterialKind.UNKNOWN
-
-
-class CableInfo(WireInfo):
-    """
-    Cable data. A cable is an underground conductor.
-    """
-    pass
-
-
-class OverheadWireInfo(WireInfo):
-    """
-    Overhead wire data. A "wire" is an above ground conductor.
-    """
-    pass

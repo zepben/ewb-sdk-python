@@ -5,58 +5,14 @@
 
 from __future__ import annotations
 
+__all__ = ["EnergyConsumer"]
+
 from typing import Optional, Generator, List
 
-from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
-from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-
-__all__ = ["EnergyConsumer", "EnergyConsumerPhase"]
-
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
-
-
-class EnergyConsumerPhase(PowerSystemResource):
-    """A single phase of an energy consumer."""
-
-    _energy_consumer: Optional[EnergyConsumer] = None
-
-    phase: SinglePhaseKind = SinglePhaseKind.X
-    """Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or 
-    neutral point. If the energy consumer is delta connected, the phase indicates an energy consumer connected from the indicated phase to the next
-    logical non-neutral phase. """
-
-    p: Optional[float] = None
-    """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
-    rated voltage. Starting value for a steady state solution."""
-
-    q: Optional[float] = None
-    """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node. For voltage dependent loads the value is at 
-    rated voltage. Starting value for a steady state solution."""
-
-    p_fixed: Optional[float] = None
-    """Active power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
-
-    q_fixed: Optional[float] = None
-    """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
-
-    def __init__(self, energy_consumer: EnergyConsumer = None, **kwargs):
-        super(EnergyConsumerPhase, self).__init__(**kwargs)
-        if energy_consumer:
-            self.energy_consumer = energy_consumer
-
-    @property
-    def energy_consumer(self):
-        """The `EnergyConsumer` that has this phase."""
-        return self._energy_consumer
-
-    @energy_consumer.setter
-    def energy_consumer(self, ec):
-        if self._energy_consumer is None or self._energy_consumer is ec:
-            self._energy_consumer = ec
-        else:
-            raise ValueError(f"energy_consumer for {str(self)} has already been set to {self._energy_consumer}, cannot reset this field to {ec}")
 
 
 class EnergyConsumer(EnergyConnection):

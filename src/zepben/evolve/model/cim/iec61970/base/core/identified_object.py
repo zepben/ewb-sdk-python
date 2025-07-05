@@ -4,6 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from __future__ import annotations
+
 __all__ = ["IdentifiedObject", "TIdentifiedObject"]
 
 import logging
@@ -11,7 +12,6 @@ from abc import ABCMeta
 from typing import Callable, Any, List, Generator, Optional, overload, TypeVar
 
 from zepben.evolve.dataclassy import dataclass
-
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 from zepben.evolve.util import require, CopyableUUID, nlen, ngen, safe_remove

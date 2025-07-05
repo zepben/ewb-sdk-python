@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+__all__ = ["Switch"]
+
 from typing import Optional, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
@@ -13,8 +15,6 @@ from zepben.evolve.util import require
 
 if TYPE_CHECKING:
     from zepben.evolve import SwitchInfo
-
-__all__ = ["Switch"]
 
 
 def _calculate_open_state(current_state: int, is_open: bool, phase: SinglePhaseKind = None) -> int:

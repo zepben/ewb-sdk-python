@@ -3,11 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
-
-from zepben.evolve import Switch
-
 __all__ = ["Disconnector"]
+
+from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 
 
 class Disconnector(Switch):

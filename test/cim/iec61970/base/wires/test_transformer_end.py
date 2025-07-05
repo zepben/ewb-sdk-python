@@ -4,7 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from _pytest.python_api import raises
 from hypothesis.strategies import floats, booleans, builds, integers
-from zepben.evolve import TransformerEnd, RatioTapChanger, Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse
+from zepben.evolve import Terminal, BaseVoltage, TransformerStarImpedance, PowerTransformer, Fuse
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \

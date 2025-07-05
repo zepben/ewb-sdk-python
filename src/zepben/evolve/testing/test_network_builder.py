@@ -5,8 +5,13 @@
 from logging import Logger
 from typing import Optional, Callable, List, Union, Type, TypeVar, Protocol
 
-from zepben.evolve import (ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Junction, Terminal, Feeder, LvFeeder,
-                           PowerTransformerEnd, PowerTransformer, EnergyConsumer, PowerElectronicsConnection, BusbarSection, Clamp, Cut, Site)
+from zepben.evolve import (ConductingEquipment, NetworkService, PhaseCode, EnergySource, AcLineSegment, Breaker, Terminal, LvFeeder,
+                           PowerTransformer, EnergyConsumer, PowerElectronicsConnection, Clamp, Cut)
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.evolve.model.cim.iec61970.base.core.site import Site
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 

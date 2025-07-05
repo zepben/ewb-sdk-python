@@ -9,7 +9,8 @@ from hypothesis.strategies import sampled_from, integers
 from cim.iec61968.metering.test_end_device_function import end_device_function_kwargs, end_device_function_args, verify_end_device_function_constructor_default, \
     verify_end_device_function_constructor_args
 from test.cim.iec61968.metering.test_end_device_function import verify_end_device_function_constructor_kwargs
-from zepben.evolve import EndDeviceFunctionKind, PanDemandResponseFunction, ControlledAppliance, Appliance
+from zepben.evolve import PanDemandResponseFunction, ControlledAppliance, Appliance
+from zepben.evolve.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
 
 pan_demand_response_function_kwargs = {
     **end_device_function_kwargs,

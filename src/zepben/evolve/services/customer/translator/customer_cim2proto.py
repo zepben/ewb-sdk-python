@@ -10,7 +10,7 @@ from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer as PBCu
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure as PBPricingStructure
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
 
-from zepben.evolve.model.cim.iec61968.common.document import Agreement
+from zepben.evolve.model.cim.iec61968.common.agreement import Agreement
 from zepben.evolve.model.cim.iec61968.customers.customer import Customer
 from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure

@@ -3,18 +3,16 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["Measurement"]
 
 from typing import Optional, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import RemoteSource
-
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.domain.unit_symbol import UnitSymbol
 
-__all__ = ["Measurement", "Accumulator", "Analog", "Discrete"]
+if TYPE_CHECKING:
+    from zepben.evolve import RemoteSource
 
 
 class Measurement(IdentifiedObject):
@@ -60,21 +58,3 @@ class Measurement(IdentifiedObject):
     """Specifies the type of measurement.  For example, this specifies if the measurement represents an indoor temperature, outdoor temperature, bus voltage, 
     line flow, etc. When the measurementType is set to "Specialization", the type of Measurement is defined in more detail by the specialized class which 
     inherits from Measurement."""
-
-
-class Accumulator(Measurement):
-    """Accumulator represents an accumulated (counted) Measurement, e.g. an energy value."""
-    pass
-
-
-class Analog(Measurement):
-    """Analog represents an analog Measurement."""
-
-    positive_flow_in: bool = False
-    """If true then this measurement is an active power, reactive power or current with the convention that a positive value measured at the 
-    Terminal means power is flowing into the related PowerSystemResource."""
-
-
-class Discrete(Measurement):
-    """Discrete represents a discrete Measurement, i.e. a Measurement representing discrete values, e.g. a Breaker position."""
-    pass

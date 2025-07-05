@@ -5,20 +5,22 @@
 
 from __future__ import annotations
 
+__all__ = ['Equipment']
+
 import datetime
 from typing import Optional, Generator, List, TYPE_CHECKING, TypeVar, Type
 
-if TYPE_CHECKING:
-    from zepben.evolve import UsagePoint, EquipmentContainer, OperationalRestriction, NetworkStateOperators
-    TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
-
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder, Site
+from zepben.evolve.model.cim.extensions.iec61970.base.core.site import Site
+from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
 
-__all__ = ['Equipment']
+if TYPE_CHECKING:
+    from zepben.evolve import EquipmentContainer, OperationalRestriction, NetworkStateOperators
+    from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+    TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
 
 class Equipment(PowerSystemResource):
@@ -360,4 +362,3 @@ class Equipment(PowerSystemResource):
 
 def _of_type(containers: Optional[List[EquipmentContainer]], ectype: Type[TEquipmentContainer]) -> Generator[TEquipmentContainer, None, None]:
     yield from (ec for ec in containers if isinstance(ec, ectype)) if containers is not None else {}
-

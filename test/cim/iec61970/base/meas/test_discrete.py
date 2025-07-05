@@ -6,7 +6,7 @@ from hypothesis import given
 
 from cim.iec61970.base.meas.test_measurement import measurement_kwargs, verify_measurement_constructor_default, \
     verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
-from zepben.evolve import Discrete
+from zepben.evolve.model.cim.iec61970.base.meas.discrete import Discrete
 
 discrete_kwargs = measurement_kwargs
 discrete_args = measurement_args

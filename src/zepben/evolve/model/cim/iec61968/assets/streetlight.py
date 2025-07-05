@@ -3,33 +3,16 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["Streetlight"]
 
-from enum import Enum
 from typing import Optional, TYPE_CHECKING
+
+from zepben.evolve.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
 
 if TYPE_CHECKING:
     from zepben.evolve import Pole
 
 from zepben.evolve.model.cim.iec61968.assets.asset import Asset
-
-__all__ = ["Streetlight", "StreetlightLampKind"]
-
-
-class StreetlightLampKind(Enum):
-    """
-    Kind of lamp for a `Streetlight`
-    """
-
-    UNKNOWN = 0
-    HIGH_PRESSURE_SODIUM = 1
-    MERCURY_VAPOR = 2
-    METAL_HALIDE = 3
-    OTHER = 4
-
-    @property
-    def short_name(self):
-        return str(self)[20:]
 
 
 class Streetlight(Asset):

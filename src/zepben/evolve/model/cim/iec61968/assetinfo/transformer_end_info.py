@@ -2,7 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from __future__ import annotations
+
+__all__ = ["TransformerEndInfo"]
 
 import math
 from typing import Optional, TYPE_CHECKING, Tuple
@@ -13,8 +14,6 @@ from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import WindingConnection
-
-__all__ = ["TransformerEndInfo"]
 
 
 class TransformerEndInfo(AssetInfo):

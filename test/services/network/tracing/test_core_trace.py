@@ -2,7 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-import dataclasses
+
+from dataclasses import dataclass
 from collections import Counter
 from typing import List
 
@@ -13,7 +14,7 @@ from zepben.evolve import ConductingEquipment, PhaseCode, SinglePhaseKind, Netwo
     NetworkTrace
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class TrackedPhases:
     equipment: ConductingEquipment
     phases: frozenset[SinglePhaseKind]
