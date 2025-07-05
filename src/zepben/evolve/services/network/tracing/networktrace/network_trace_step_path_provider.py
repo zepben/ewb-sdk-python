@@ -8,11 +8,11 @@ from __future__ import annotations
 import sys
 from typing import Generator, Optional, Callable, Iterable, List, Union, Type, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
-from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
-from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
+from zepben.evolve.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
+from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
+from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
 
@@ -64,6 +64,7 @@ class NetworkTraceStepPathProvider:
 
         def path_factory(next_terminal: Terminal, traversed: AcLineSegment) -> NetworkTraceStep.Path:
             return NetworkTraceStep.Path(path.to_terminal, next_terminal, traversed)
+
         return path_factory
 
     @staticmethod
@@ -165,27 +166,27 @@ class NetworkTraceStepPathProvider:
             return _path
 
         yield from (
-                _mark(path) for path in self._acls_traverse_from_terminal(
-                clamp.ac_line_segment,
-                path.to_terminal,
-                length_from_t1=clamp.length_from_t1_or_0,
-                towards_segment_t2=False,
-                can_stop_at_cut_at_same_position=False,
-                cut_at_same_position_from_terminal_number=1,
-                path_factory=path_factory
-            )
+            _mark(path) for path in self._acls_traverse_from_terminal(
+            clamp.ac_line_segment,
+            path.to_terminal,
+            length_from_t1=clamp.length_from_t1_or_0,
+            towards_segment_t2=False,
+            can_stop_at_cut_at_same_position=False,
+            cut_at_same_position_from_terminal_number=1,
+            path_factory=path_factory
+        )
         )
 
         yield from (
-                _mark(path) for path in self._acls_traverse_from_terminal(
-                clamp.ac_line_segment,
-                path.to_terminal,
-                length_from_t1=clamp.length_from_t1_or_0,
-                towards_segment_t2=True,
-                can_stop_at_cut_at_same_position=True,
-                cut_at_same_position_from_terminal_number=1,
-                path_factory=path_factory
-            ) if path.to_terminal not in _yielded_paths
+            _mark(path) for path in self._acls_traverse_from_terminal(
+            clamp.ac_line_segment,
+            path.to_terminal,
+            length_from_t1=clamp.length_from_t1_or_0,
+            towards_segment_t2=True,
+            can_stop_at_cut_at_same_position=True,
+            cut_at_same_position_from_terminal_number=1,
+            path_factory=path_factory
+        ) if path.to_terminal not in _yielded_paths
         )
 
     def _next_paths_from_cut(
@@ -219,21 +220,21 @@ class NetworkTraceStepPathProvider:
             other_terminal = cut.get_terminal_by_sn(2 if path.to_terminal.sequence_number == 1 else 1)
             yield from seq_term_map_to_path(other_terminal, path_factory)
 
-
     def _next_external_paths(
         self,
         path: NetworkTraceStep.Path,
         path_factory: PathFactory
     ) -> Generator[NetworkTraceStep.Path, None, None]:
 
-        #Busbars are only modelled with a single terminal. So if we find any we need to step to them before the
-        #other (non busbar) equipment connected to the same connectivity node. Once the busbar has been
-        #visited we then step to the other non busbar terminals connected to the same connectivity node.
-        #If there are no busbars we can just step to all other connected terminals.
+        # Busbars are only modelled with a single terminal. So if we find any we need to step to them before the
+        # other (non busbar) equipment connected to the same connectivity node. Once the busbar has been
+        # visited we then step to the other non busbar terminals connected to the same connectivity node.
+        # If there are no busbars we can just step to all other connected terminals.
         if isinstance(path.to_equipment, BusbarSection):
             yield from self._next_paths_from_busbar(path, path_factory)
         elif path.to_terminal.has_connected_busbars():
-            yield from seq_term_map_to_path((t for t in path.to_terminal.connected_terminals() if isinstance(t.conducting_equipment, BusbarSection)), path_factory)
+            yield from seq_term_map_to_path((t for t in path.to_terminal.connected_terminals() if isinstance(t.conducting_equipment, BusbarSection)),
+                                            path_factory)
         else:
             yield from seq_term_map_to_path(path.to_terminal.connected_terminals(), path_factory)
 
@@ -321,7 +322,7 @@ class NetworkTraceStepPathProvider:
         clamps_before_next_terminal = (c for c in clamps if _filter(c))
 
         next_stop_terminals = [] if stop_at_cuts_at_same_position else (
-                it.get_terminal(1 if towards_segment_t2 else 2) for it in next_cuts
+            it.get_terminal(1 if towards_segment_t2 else 2) for it in next_cuts
         ) if next_cuts else [acls.get_terminal(2 if towards_segment_t2 else 1)]
 
         next_terminals = (
@@ -333,17 +334,18 @@ class NetworkTraceStepPathProvider:
         for generator in next_terminals:
             yield from seq_term_map_to_path(generator, path_factory, acls)
 
+
 def seq_term_map_to_path(
     terms: Union[Terminal, Iterable[Terminal]],
     path_factory: PathFactory,
-    traversed_acls: AcLineSegment=None
+    traversed_acls: AcLineSegment = None
 ) -> Generator[NetworkTraceStep.Path, None, None]:
-
     if isinstance(terms, Iterable):
         for terminal in terms:
             if terminal is not None:
                 yield path_factory(terminal, traversed_acls)
     else:
         yield path_factory(terms, traversed_acls)
+
 
 acls_length_or_max = lambda acls: acls.length or sys.float_info.max

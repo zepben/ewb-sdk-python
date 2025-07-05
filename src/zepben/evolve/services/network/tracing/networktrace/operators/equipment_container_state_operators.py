@@ -4,13 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
-
 from abc import abstractmethod
 from typing import Generator, TYPE_CHECKING
 
+from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.services.network.tracing.networktrace.operators import StateOperator
 
 if TYPE_CHECKING:
@@ -48,7 +47,7 @@ class EquipmentContainerStateOperators(StateOperator):
 
     @staticmethod
     @abstractmethod
-    def get_energizing_feeders(lv_feeder:  LvFeeder) -> Generator[Feeder, None, None]:
+    def get_energizing_feeders(lv_feeder: LvFeeder) -> Generator[Feeder, None, None]:
         """
         Retrieves a collection of feeders that energize the given LV feeder.
 
@@ -172,6 +171,7 @@ class NormalEquipmentContainerStateOperators(EquipmentContainerStateOperators):
     """
     Operates on the normal network state equipment-container relationships
     """
+
     @staticmethod
     def get_equipment(container: EquipmentContainer) -> Generator[Equipment, None, None]:
         return container.equipment
@@ -181,7 +181,7 @@ class NormalEquipmentContainerStateOperators(EquipmentContainerStateOperators):
         return equipment.containers
 
     @staticmethod
-    def get_energizing_feeders(lv_feeder:  LvFeeder) -> Generator[Feeder, None, None]:
+    def get_energizing_feeders(lv_feeder: LvFeeder) -> Generator[Feeder, None, None]:
         return lv_feeder.normal_energizing_feeders
 
     @staticmethod
@@ -217,6 +217,7 @@ class CurrentEquipmentContainerStateOperators(EquipmentContainerStateOperators):
     """
     Operates on the current network state equipment-container relationships
     """
+
     @staticmethod
     def get_equipment(container: EquipmentContainer) -> Generator[Equipment, None, None]:
         return container.current_equipment
@@ -256,6 +257,7 @@ class CurrentEquipmentContainerStateOperators(EquipmentContainerStateOperators):
     @staticmethod
     def add_energizing_lv_feeder_to_feeder(lv_feeder: LvFeeder, feeder: Feeder):
         feeder.add_current_energized_lv_feeder(lv_feeder)
+
 
 EquipmentContainerStateOperators.NORMAL = NormalEquipmentContainerStateOperators
 EquipmentContainerStateOperators.CURRENT = CurrentEquipmentContainerStateOperators

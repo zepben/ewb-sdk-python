@@ -25,7 +25,7 @@ class TapChanger(PowerSystemResource):
     neutral_u: Optional[int] = None
     """Voltage at which the winding operates at the neutral tap setting."""
 
-    tap_changer_control: Optional[TapChangerControl] = None
+    tap_changer_control: Optional['TapChangerControl'] = None
     """The regulating control scheme in which this tap changer participates."""
 
     _high_step: Optional[int] = None

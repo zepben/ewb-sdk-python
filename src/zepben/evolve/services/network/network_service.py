@@ -13,13 +13,12 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Set
 
+from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
-from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.services.common.base_service import BaseService
 from zepben.evolve.services.common.meta.metadata_collection import MetadataCollection
 from zepben.evolve.services.network.tracing.connectivity.terminal_connectivity_connected import TerminalConnectivityConnected

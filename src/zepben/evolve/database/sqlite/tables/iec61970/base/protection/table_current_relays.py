@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from zepben.evolve.database.sqlite.tables.column import Column, Nullable
-from zepben.evolve.database.sqlite.tables.iec61970.base.protection.table_protection_relay_functions import TableProtectionRelayFunctions
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_functions import TableProtectionRelayFunctions
 
 __all__ = ["TableCurrentRelays"]
 

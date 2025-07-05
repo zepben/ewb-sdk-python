@@ -3,13 +3,13 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production.table_power_electronics_units import TablePowerElectronicsUnits
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_functions import TableProtectionRelayFunctions
 
-__all__ = ["TableEvChargingUnits"]
+__all__ = ["TableVoltageRelays"]
 
 
-class TableEvChargingUnits(TablePowerElectronicsUnits):
+class TableVoltageRelays(TableProtectionRelayFunctions):
 
     @property
     def name(self) -> str:
-        return "ev_charging_units"
+        return "voltage_relays"

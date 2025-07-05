@@ -3,18 +3,18 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+from zepben.evolve.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
+from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
-from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
-from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
-from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
+from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.util import CopyableUUID
 
 __all__ = ["create_ac_line_segment", "create_two_winding_power_transformer", "create_energy_consumer",
