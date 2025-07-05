@@ -5,11 +5,14 @@
 
 __all__ = ["BatteryStateKind"]
 
-from enum import Enum
+from enum import Enum, unique
 
 
+@unique
 class BatteryStateKind(Enum):
-    """Battery state"""
+    """
+    Battery state.
+    """
 
     UNKNOWN = 0
     """Battery state is not known."""

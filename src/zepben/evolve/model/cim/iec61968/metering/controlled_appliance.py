@@ -8,23 +8,51 @@ from __future__ import annotations
 __all__ = ["ControlledAppliance", "Appliance"]
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, unique
 from typing import List, Union
 
 
+@unique
 class Appliance(Enum):
+    """
+    The type of appliance.
+    """
+
     ELECTRIC_VEHICLE = 0
+    """An electric vehicle."""
+
     EXTERIOR_LIGHTING = 1
+    """Exterior lighting."""
+
     GENERATION_SYSTEM = 2
+    """A generation system."""
+
     HVAC_COMPRESSOR_OR_FURNACE = 3
+    """HVAC compressor or furnace."""
+
     INTERIOR_LIGHTING = 4
+    """Interior lighting."""
+
     IRRIGATION_PUMP = 5
+    """An irrigation pump."""
+
     MANAGED_COMMERCIAL_INDUSTRIAL_LOAD = 6
+    """Managed commercial or industrial load."""
+
     POOL_PUMP_SPA_JACUZZI = 7
+    """A pool, pump, spa or jacuzzi."""
+
     SIMPLE_MISC_LOAD = 8
+    """A simple miscellaneous load."""
+
     SMART_APPLIANCE = 9
+    """A smart appliance."""
+
     STRIP_AND_BASEBOARD_HEATER = 10
+    """A strip or baseboard heater."""
+
     WATER_HEATER = 11
+    """A water heater."""
 
     @property
     def bitmask(self):

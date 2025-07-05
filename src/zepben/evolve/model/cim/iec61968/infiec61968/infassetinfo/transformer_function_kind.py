@@ -5,12 +5,17 @@
 
 __all__ = ["TransformerFunctionKind"]
 
-from enum import Enum
+from enum import Enum, unique
 
 
+@unique
 class TransformerFunctionKind(Enum):
-    other = 0
-    """ Another type of transformer. """
+    """
+    Function of a transformer.
+    """
+
+    UNKNOWN = 0
+    """Unknown type of transformer."""
 
     voltageRegulator = 1
     """ A transformer that changes the voltage magnitude at a certain point in the power system. """
@@ -29,6 +34,9 @@ class TransformerFunctionKind(Enum):
 
     secondaryTransformer = 6
     """"""
+
+    other = 7
+    """ Another type of transformer. """
 
     @property
     def short_name(self):
