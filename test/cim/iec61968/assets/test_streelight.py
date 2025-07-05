@@ -5,7 +5,7 @@
 from hypothesis import given
 from hypothesis.strategies import builds, sampled_from, integers
 from zepben.evolve import Streetlight, Pole
-from zepben.evolve.model.cim.iec61968.assets.streetlight_lamp_kind import StreetlightLampKind
+from zepben.evolve.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61968.assets.test_asset import asset_kwargs, verify_asset_constructor_default, \

@@ -11,8 +11,8 @@ from zepben.evolve.database.sqlite.tables.associations.table_battery_units_batte
 from zepben.evolve.database.sqlite.tables.associations.table_end_devices_end_device_functions import TableEndDevicesEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.associations.table_synchronous_machines_reactive_capability_curves import \
     TableSynchronousMachinesReactiveCapabilityCurves
-from zepben.evolve.database.sqlite.tables.extensions.iec61968.table_pan_demand_response_functions import TablePanDemandResponseFunctions
-from zepben.evolve.database.sqlite.tables.extensions.iec61970.table_battery_controls import TableBatteryControls
+from zepben.evolve.database.sqlite.tables.extensions.iec61968.metering.table_pan_demand_response_functions import TablePanDemandResponseFunctions
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.wires.table_battery_controls import TableBatteryControls
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_functions import TableAssetFunctions
 from zepben.evolve.database.sqlite.tables.iec61968.metering.table_end_device_functions import TableEndDeviceFunctions
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_curve_data import TableCurveData
@@ -84,7 +84,7 @@ from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_info impor
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_organisation_roles import TableAssetOrganisationRoles
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_asset_owners import TableAssetOwners
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_assets import TableAssets
-from zepben.evolve.database.sqlite.tables.iec61968.assets.table_poles import TablePoles
+from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassets.table_poles import TablePoles
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_streetlights import TableStreetlights
 from zepben.evolve.database.sqlite.tables.iec61968.assets.table_structures import TableStructures
 from zepben.evolve.database.sqlite.tables.iec61968.common.table_location_street_address_field import TableLocationStreetAddressField
@@ -95,8 +95,8 @@ from zepben.evolve.database.sqlite.tables.iec61968.common.table_street_addresses
 from zepben.evolve.database.sqlite.tables.iec61968.common.table_town_details import TableTownDetails
 from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_current_transformer_info import TableCurrentTransformerInfo
 from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_potential_transformer_info import TablePotentialTransformerInfo
-from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_reclose_delays import TableRecloseDelays
-from zepben.evolve.database.sqlite.tables.iec61968.infiec61968.infassetinfo.table_relay_info import TableRelayInfo
+from zepben.evolve.database.sqlite.tables.extensions.iec61968.assetinfo.table_reclose_delays import TableRecloseDelays
+from zepben.evolve.database.sqlite.tables.extensions.iec61968.assetinfo.table_relay_info import TableRelayInfo
 from zepben.evolve.database.sqlite.tables.iec61968.metering.table_end_devices import TableEndDevices
 from zepben.evolve.database.sqlite.tables.iec61968.metering.table_meters import TableMeters
 from zepben.evolve.database.sqlite.tables.iec61968.metering.table_usage_points import TableUsagePoints
@@ -116,7 +116,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_equipment_con
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_feeders import TableFeeders
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_geographical_regions import TableGeographicalRegions
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_power_system_resources import TablePowerSystemResources
-from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_sites import TableSites
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.core.table_sites import TableSites
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_sub_geographical_regions import TableSubGeographicalRegions
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_substations import TableSubstations
 from zepben.evolve.database.sqlite.tables.iec61970.base.core.table_terminals import TableTerminals
@@ -129,20 +129,22 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.meas.table_discretes imp
 from zepben.evolve.database.sqlite.tables.iec61970.base.meas.table_io_points import TableIoPoints
 from zepben.evolve.database.sqlite.tables.iec61970.base.meas.table_measurements import TableMeasurements
 from zepben.evolve.database.sqlite.tables.iec61970.base.protection.table_current_relays import TableCurrentRelays
-from zepben.evolve.database.sqlite.tables.iec61970.base.protection.table_distance_relays import TableDistanceRelays
-from zepben.evolve.database.sqlite.tables.iec61970.base.protection.table_protection_relay_function_thresholds import TableProtectionRelayFunctionThresholds
-from zepben.evolve.database.sqlite.tables.iec61970.base.protection.table_protection_relay_function_time_limits import TableProtectionRelayFunctionTimeLimits
-from zepben.evolve.database.sqlite.tables.iec61970.base.protection.table_protection_relay_functions import TableProtectionRelayFunctions
-from zepben.evolve.database.sqlite.tables.iec61970.base.protection.table_protection_relay_schemes import TableProtectionRelaySchemes
-from zepben.evolve.database.sqlite.tables.iec61970.base.protection.table_protection_relay_systems import TableProtectionRelaySystems
-from zepben.evolve.database.sqlite.tables.iec61970.base.protection.table_voltage_relays import TableVoltageRelays
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.protection.table_distance_relays import TableDistanceRelays
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_thresholds import \
+    TableProtectionRelayFunctionThresholds
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_function_time_limits import \
+    TableProtectionRelayFunctionTimeLimits
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_functions import TableProtectionRelayFunctions
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_schemes import TableProtectionRelaySchemes
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.protection.table_protection_relay_systems import TableProtectionRelaySystems
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.protection.table_voltage_relays import TableVoltageRelays
 from zepben.evolve.database.sqlite.tables.iec61970.base.scada.table_remote_controls import TableRemoteControls
 from zepben.evolve.database.sqlite.tables.iec61970.base.scada.table_remote_points import TableRemotePoints
 from zepben.evolve.database.sqlite.tables.iec61970.base.scada.table_remote_sources import TableRemoteSources
-from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production.table_battery_units import TableBatteryUnits
-from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production.table_photo_voltaic_units import TablePhotoVoltaicUnits
-from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production.table_power_electronics_units import TablePowerElectronicsUnits
-from zepben.evolve.database.sqlite.tables.iec61970.base.wires.generation.production.table_power_electronics_wind_units import TablePowerElectronicsWindUnits
+from zepben.evolve.database.sqlite.tables.iec61970.base.generation.production.table_battery_units import TableBatteryUnits
+from zepben.evolve.database.sqlite.tables.iec61970.base.generation.production.table_photo_voltaic_units import TablePhotoVoltaicUnits
+from zepben.evolve.database.sqlite.tables.iec61970.base.generation.production.table_power_electronics_units import TablePowerElectronicsUnits
+from zepben.evolve.database.sqlite.tables.iec61970.base.generation.production.table_power_electronics_wind_units import TablePowerElectronicsWindUnits
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_ac_line_segments import TableAcLineSegments
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_breakers import TableBreakers
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_busbar_sections import TableBusbarSections
@@ -169,7 +171,7 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_l
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_per_length_sequence_impedances import TablePerLengthSequenceImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connection_phases import TablePowerElectronicsConnectionPhases
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_electronics_connections import TablePowerElectronicsConnections
-from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_end_ratings import TablePowerTransformerEndRatings
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.wires.table_power_transformer_end_ratings import TablePowerTransformerEndRatings
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformer_ends import TablePowerTransformerEnds
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_power_transformers import TablePowerTransformers
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_protected_switches import TableProtectedSwitches
@@ -185,9 +187,9 @@ from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_tap_changers
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_transformer_ends import TableTransformerEnds
 from zepben.evolve.database.sqlite.tables.iec61970.base.wires.table_transformer_star_impedances import TableTransformerStarImpedances
 from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder.table_circuits import TableCircuits
-from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder.table_loops import TableLoops
-from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.feeder.table_lv_feeders import TableLvFeeders
-from zepben.evolve.database.sqlite.tables.iec61970.infiec61970.wires.generation.production.table_ev_charging_units import TableEvChargingUnits
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.feeder.table_loops import TableLoops
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.feeder.table_lv_feeders import TableLvFeeders
+from zepben.evolve.database.sqlite.tables.extensions.iec61970.base.generation.production.table_ev_charging_units import TableEvChargingUnits
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
 from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
@@ -206,9 +208,9 @@ from zepben.evolve.model.cim.iec61968.assets.asset_container import AssetContain
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole
 from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
-from zepben.evolve.model.cim.iec61968.assets.pole import Pole
+from zepben.evolve.model.cim.iec61968.infiec61968.infassets.pole import Pole
 from zepben.evolve.model.cim.iec61968.assets.streetlight import Streetlight
-from zepben.evolve.model.cim.iec61968.assets.streetlight_lamp_kind import StreetlightLampKind
+from zepben.evolve.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
 from zepben.evolve.model.cim.iec61968.assets.structure import Structure
 from zepben.evolve.model.cim.iec61968.common.location import Location
 from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
@@ -217,7 +219,7 @@ from zepben.evolve.model.cim.iec61968.common.town_detail import TownDetail
 from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import CurrentTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import PotentialTransformerInfo
-from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import RelayInfo
+from zepben.evolve.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
 from zepben.evolve.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
@@ -237,7 +239,7 @@ from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import Connect
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.evolve.model.cim.iec61970.base.core.site import Site
+from zepben.evolve.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
@@ -256,19 +258,19 @@ from zepben.evolve.model.cim.iec61970.base.meas.discrete import Discrete
 from zepben.evolve.model.cim.iec61970.base.meas.analog import Analog
 from zepben.evolve.model.cim.iec61970.base.meas.accumulator import Accumulator
 from zepben.evolve.model.cim.iec61970.base.protection.current_relay import CurrentRelay
-from zepben.evolve.model.cim.iec61970.base.protection.distance_relay import DistanceRelay
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
-from zepben.evolve.model.cim.iec61970.base.protection.relay_setting import RelaySetting
-from zepben.evolve.model.cim.iec61970.base.protection.voltage_relay import VoltageRelay
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.distance_relay import DistanceRelay
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_system import ProtectionRelaySystem
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.relay_setting import RelaySetting
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.voltage_relay import VoltageRelay
 from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
 from zepben.evolve.model.cim.iec61970.base.scada.remote_point import RemotePoint
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
-from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
+from zepben.evolve.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 from zepben.evolve.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import Breaker
-from zepben.evolve.model.cim.iec61970.base.wires.connectors import Connector
+from zepben.evolve.model.cim.iec61970.base.wires.connector import Connector
 from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
 from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
@@ -281,9 +283,11 @@ from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import En
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import EnergySourcePhase
 from zepben.evolve.model.cim.iec61970.base.wires.fuse import Fuse
-from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_state_kind import BatteryStateKind
-from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import BatteryUnit, PhotoVoltaicUnit, PowerElectronicsUnit, \
-    PowerElectronicsWindUnit
+from zepben.evolve.model.cim.iec61970.base.generation.production.battery_state_kind import BatteryStateKind
+from zepben.evolve.model.cim.iec61970.base.generation.production.battery_unit import BatteryUnit
+from zepben.evolve.model.cim.iec61970.base.generation.production.photo_voltaic_unit import PhotoVoltaicUnit
+from zepben.evolve.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
+from zepben.evolve.model.cim.iec61970.base.generation.production.power_electronics_wind_unit import PowerElectronicsWindUnit
 from zepben.evolve.model.cim.iec61970.base.wires.ground import Ground
 from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import GroundDisconnector
 from zepben.evolve.model.cim.iec61970.base.wires.jumper import Jumper
@@ -310,16 +314,16 @@ from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.vector_group import VectorGroup
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import WindingConnection
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import Loop
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
-from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import PowerDirectionKind
-from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import ProtectionKind
-from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import EvChargingUnit
+from zepben.evolve.model.cim.extensions.iec61970.base.feeder.loop import Loop
+from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
+from zepben.evolve.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import EvChargingUnit
 from zepben.evolve.services.common import resolver
 from zepben.evolve.services.network.network_service import NetworkService
 

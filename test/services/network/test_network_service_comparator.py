@@ -47,12 +47,12 @@ from zepben.evolve.model.cim.iec61968.metering.end_device import EndDevice
 from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.evolve.model.cim.iec61968.common.town_detail import TownDetail
 from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
-from zepben.evolve.model.cim.iec61968.assets.streetlight_lamp_kind import StreetlightLampKind
+from zepben.evolve.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
 from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
 from zepben.evolve.model.cim.iec61968.assets.asset_container import AssetContainer
 from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer import TapChanger

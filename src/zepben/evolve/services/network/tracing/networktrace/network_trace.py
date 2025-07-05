@@ -11,13 +11,13 @@ from typing import TypeVar, Union, Generic, Set, Type, Generator, FrozenSet
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
+from zepben.evolve.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 from zepben.evolve.services.network.tracing.connectivity.nominal_phase_path import NominalPhasePath
 from zepben.evolve.services.network.tracing.networktrace.compute_data import ComputeData, ComputeDataWithPaths
 from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_queue_condition import NetworkTraceQueueCondition
-from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_stop_condition import NetworkTraceStopCondition, ShouldStop
+from zepben.evolve.services.network.tracing.networktrace.conditions.network_trace_stop_condition import NetworkTraceStopCondition
 from zepben.evolve.services.network.tracing.networktrace.network_trace_action_type import NetworkTraceActionType, CanActionItem
 from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_next import NetworkTraceQueueNext
 from zepben.evolve.services.network.tracing.networktrace.network_trace_step import NetworkTraceStep
@@ -26,6 +26,7 @@ from zepben.evolve.services.network.tracing.networktrace.operators.network_state
 from zepben.evolve.services.network.tracing.traversal.queue import TraversalQueue
 from zepben.evolve.services.network.tracing.traversal.queue_condition import QueueCondition
 from zepben.evolve.services.network.tracing.traversal.step_context import StepContext
+from zepben.evolve.services.network.tracing.traversal.stop_condition import ShouldStop
 from zepben.evolve.services.network.tracing.traversal.traversal import Traversal, StopConditionTypes
 
 T = TypeVar('T')

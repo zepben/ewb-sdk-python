@@ -40,7 +40,7 @@ from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import Overhe
 from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
-from zepben.evolve.model.cim.iec61970.base.core.site import Site
+from zepben.evolve.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 
 

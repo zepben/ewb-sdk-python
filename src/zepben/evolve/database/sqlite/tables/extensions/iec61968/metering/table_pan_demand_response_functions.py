@@ -1,11 +1,12 @@
-#  Copyright 2024 Zeppelin Bend Pty Ltd
+#  Copyright 2025 Zeppelin Bend Pty Ltd
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.evolve import Column, Nullable
-from zepben.evolve.database.sqlite.tables.iec61968.metering.table_end_device_functions import TableEndDeviceFunctions
 
 __all__ = ["TablePanDemandResponseFunctions"]
+
+from zepben.evolve.database.sqlite.tables.column import Column, Nullable
+from zepben.evolve.database.sqlite.tables.iec61968.metering.table_end_device_functions import TableEndDeviceFunctions
 
 
 class TablePanDemandResponseFunctions(TableEndDeviceFunctions):
