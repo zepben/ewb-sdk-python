@@ -7,13 +7,15 @@ from __future__ import annotations
 
 __all__ = ["ProtectionRelaySystem"]
 
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, TYPE_CHECKING
 
 from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
-from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
 from zepben.evolve.model.cim.extensions.zbex import zbex
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.evolve.util import ngen, get_by_mrid, nlen, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
 
 
 @zbex

@@ -5,11 +5,13 @@
 
 __all__ = ["TapChanger"]
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 from zepben.evolve.util import require
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import TapChangerControl
 
 
 class TapChanger(PowerSystemResource):

@@ -13,7 +13,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.util import get_by_mrid, ngen, nlen, safe_remove
 
 if TYPE_CHECKING:
-    from zepben.evolve import ProtectionRelayFunction
+    from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
 class ProtectedSwitch(Switch):

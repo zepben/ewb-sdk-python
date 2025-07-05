@@ -5,12 +5,10 @@
 
 __all__ = ["CurrentTransformerInfo"]
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
-
-if TYPE_CHECKING:
-    from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import Ratio
+from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import Ratio
 
 
 class CurrentTransformerInfo(AssetInfo):

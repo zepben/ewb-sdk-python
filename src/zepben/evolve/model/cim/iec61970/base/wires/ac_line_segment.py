@@ -5,15 +5,17 @@
 
 __all__ = ["AcLineSegment"]
 
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.conductor import Conductor
-from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove, require
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+    from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
+    from zepben.evolve.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
+    from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
+    from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 
 class AcLineSegment(Conductor):
@@ -31,14 +33,14 @@ class AcLineSegment(Conductor):
     """
     max_terminals = 2
 
-    per_length_impedance: Optional[PerLengthImpedance] = None
+    per_length_impedance: Optional['PerLengthImpedance'] = None
     """A `zepben.evolve.PerLengthImpedance` describing this AcLineSegment"""
 
-    _cuts: Optional[List[Cut]] = None
-    _clamps: Optional[List[Clamp]] = None
+    _cuts: Optional[List['Cut']] = None
+    _clamps: Optional[List['Clamp']] = None
 
     @property
-    def per_length_sequence_impedance(self) -> Optional[PerLengthSequenceImpedance]:
+    def per_length_sequence_impedance(self) -> Optional['PerLengthSequenceImpedance']:
         """
         Per-length sequence impedance of this line segment.
         :return: A PerLengthSequenceImpedance if one is set, otherwise None.
@@ -49,11 +51,11 @@ class AcLineSegment(Conductor):
         return None
 
     @per_length_sequence_impedance.setter
-    def per_length_sequence_impedance(self, value: Optional[PerLengthSequenceImpedance]):
+    def per_length_sequence_impedance(self, value: Optional['PerLengthSequenceImpedance']):
         self.per_length_impedance = value
 
     @property
-    def per_length_phase_impedance(self) -> Optional[PerLengthPhaseImpedance]:
+    def per_length_phase_impedance(self) -> Optional['PerLengthPhaseImpedance']:
         """
         Per-length phase impedance of this line segment.
         :return: A PerLengthPhaseImpedance if one is set, otherwise None.
@@ -64,11 +66,11 @@ class AcLineSegment(Conductor):
         return None
 
     @per_length_phase_impedance.setter
-    def per_length_phase_impedance(self, value: Optional[PerLengthPhaseImpedance]):
+    def per_length_phase_impedance(self, value: Optional['PerLengthPhaseImpedance']):
         self.per_length_impedance = value
 
     @property
-    def cuts(self) -> Generator[Cut, None, None]:
+    def cuts(self) -> Generator['Cut', None, None]:
         """The `Cut`s for this `AcLineSegment`."""
         return ngen(self._cuts)
 
@@ -78,7 +80,7 @@ class AcLineSegment(Conductor):
         """
         return nlen(self._cuts)
 
-    def get_cut(self, mrid: str) -> Cut:
+    def get_cut(self, mrid: str) -> 'Cut':
         """
         Get the `Cut` for this `AcLineSegment` identified by `mrid`
 
@@ -88,7 +90,7 @@ class AcLineSegment(Conductor):
         """
         return get_by_mrid(self._cuts, mrid)
 
-    def add_cut(self, cut: Cut) -> 'AcLineSegment':
+    def add_cut(self, cut: 'Cut') -> 'AcLineSegment':
         """
         Associate a `Cut` with this `AcLineSegment`.
 
@@ -103,7 +105,7 @@ class AcLineSegment(Conductor):
         self._cuts.append(cut)
         return self
 
-    def remove_cut(self, cut: Cut) -> 'AcLineSegment':
+    def remove_cut(self, cut: 'Cut') -> 'AcLineSegment':
         """
         :param cut: The `Cut` to disassociate from this `AcLineSegment`.
         :raise ValueError: If `cut` was not associated with this `AcLineSegment`.
@@ -121,7 +123,7 @@ class AcLineSegment(Conductor):
         return self
 
     @property
-    def clamps(self) -> Generator[Clamp, None, None]:
+    def clamps(self) -> Generator['Clamp', None, None]:
         """The `Clamp`s for this `AcLineSegment`."""
         return ngen(self._clamps)
 
@@ -131,7 +133,7 @@ class AcLineSegment(Conductor):
         """
         return nlen(self._clamps)
 
-    def get_clamp(self, mrid: str) -> Clamp:
+    def get_clamp(self, mrid: str) -> 'Clamp':
         """
         Get the `Clamp` for this `AcLineSegment` identified by `mrid`
 
@@ -141,7 +143,7 @@ class AcLineSegment(Conductor):
         """
         return get_by_mrid(self._clamps, mrid)
 
-    def add_clamp(self, clamp: Clamp) -> 'AcLineSegment':
+    def add_clamp(self, clamp: 'Clamp') -> 'AcLineSegment':
         """
         Associate a `Clamp` with this `AcLineSegment`.
 
@@ -156,7 +158,7 @@ class AcLineSegment(Conductor):
         self._clamps.append(clamp)
         return self
 
-    def remove_clamp(self, clamp: Clamp) -> 'AcLineSegment':
+    def remove_clamp(self, clamp: 'Clamp') -> 'AcLineSegment':
         """
         :param clamp: The `Clamp` to disassociate from this `AcLineSegment`.
         :raise ValueError: If `clamp` was not associated with this `AcLineSegment`.
@@ -173,7 +175,7 @@ class AcLineSegment(Conductor):
         self._clamps.clear()
         return self
 
-    def _validate_cut(self, cut: Cut) -> bool:
+    def _validate_cut(self, cut: 'Cut') -> bool:
         """
         Validate a cut against this `AcLineSegment`'s `Cut`s.
 
@@ -191,7 +193,7 @@ class AcLineSegment(Conductor):
                 lambda: f"Cut {cut} references another AcLineSegment {cut.ac_line_segment}, expected {str(self)}.")
         return False
 
-    def _validate_clamp(self, clamp: Clamp) -> bool:
+    def _validate_clamp(self, clamp: 'Clamp') -> bool:
         """
         Validate a clamp against this `AcLineSegment`'s `Clamp`s.
 

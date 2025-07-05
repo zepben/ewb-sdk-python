@@ -5,17 +5,19 @@
 
 __all__ = ["EnergyConsumerPhase"]
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
 
 
 class EnergyConsumerPhase(PowerSystemResource):
     """A single phase of an energy consumer."""
 
-    _energy_consumer: Optional[EnergyConsumer] = None
+    _energy_consumer: Optional['EnergyConsumer'] = None
 
     phase: SinglePhaseKind = SinglePhaseKind.X
     """Phase of this energy consumer component. If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or 
@@ -36,7 +38,7 @@ class EnergyConsumerPhase(PowerSystemResource):
     q_fixed: Optional[float] = None
     """Reactive power of the load that is a fixed quantity. Load sign convention is used, i.e. positive sign means flow out from a node."""
 
-    def __init__(self, energy_consumer: EnergyConsumer = None, **kwargs):
+    def __init__(self, energy_consumer: 'EnergyConsumer' = None, **kwargs):
         super(EnergyConsumerPhase, self).__init__(**kwargs)
         if energy_consumer:
             self.energy_consumer = energy_consumer

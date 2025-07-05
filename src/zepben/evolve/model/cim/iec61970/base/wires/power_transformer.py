@@ -7,16 +7,18 @@ from __future__ import annotations
 
 __all__ = ["PowerTransformer"]
 
-from typing import List, Optional, Generator
+from typing import List, Optional, Generator, TYPE_CHECKING
 
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.vector_group import VectorGroup
-from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import TransformerConstructionKind
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import TransformerFunctionKind
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.evolve.util import require, nlen, get_by_mrid, ngen, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+    from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 
 class PowerTransformer(ConductingEquipment):

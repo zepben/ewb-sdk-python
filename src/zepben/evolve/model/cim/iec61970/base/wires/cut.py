@@ -10,7 +10,7 @@ from typing import Optional, TYPE_CHECKING
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 
 if TYPE_CHECKING:
-    from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
+    from zepben.evolve.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 
 
 class Cut(Switch):
@@ -28,7 +28,7 @@ class Cut(Switch):
     length_from_terminal_1: Optional[float] = None
     """The length to the place where the cut is located starting from side one of the cut line segment, i.e. the line segment Terminal with sequenceNumber equal to 1."""
 
-    ac_line_segment: Optional[AcLineSegment] = None
+    ac_line_segment: Optional['AcLineSegment'] = None
     """The line segment to which the cut is applied."""
 
     @property

@@ -7,14 +7,16 @@ from __future__ import annotations
 
 __all__ = ["Feeder"]
 
-from typing import Optional, Dict, List, Generator
+from typing import Optional, Dict, List, Generator, TYPE_CHECKING
 
-from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
-from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
-from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.util import ngen, nlen, safe_remove_by_id
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+    from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
+    from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 
 class Feeder(EquipmentContainer):

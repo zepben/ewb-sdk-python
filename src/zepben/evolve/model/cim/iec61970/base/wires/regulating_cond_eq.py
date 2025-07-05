@@ -7,9 +7,12 @@ from __future__ import annotations
 
 __all__ = ["RegulatingCondEq"]
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from zepben.evolve import EnergyConnection, RegulatingControl
+from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import RegulatingControl
 
 
 class RegulatingCondEq(EnergyConnection):

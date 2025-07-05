@@ -18,8 +18,10 @@ from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
 
 if TYPE_CHECKING:
-    from zepben.evolve import EquipmentContainer, OperationalRestriction, NetworkStateOperators
     from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+    from zepben.evolve.model.cim.iec61968.operations.operational_restriction import OperationalRestriction
+    from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
+    from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
     TEquipmentContainer = TypeVar("TEquipmentContainer", bound=EquipmentContainer)
 
 

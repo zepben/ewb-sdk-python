@@ -5,13 +5,15 @@
 
 __all__ = ["Site"]
 
-from typing import Iterable, Type, Generator
+from typing import Iterable, Type, Generator, TYPE_CHECKING
 
-#todo import from explicit package
-from zepben.evolve import EquipmentContainer, ConductingEquipment, NetworkStateOperators
-from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 from zepben.evolve.model.cim.extensions.zbex import zbex
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+    from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
+    from zepben.evolve.services.network.tracing.networktrace.operators.network_state_operators import NetworkStateOperators
 
 @zbex
 class Site(EquipmentContainer):
@@ -23,9 +25,9 @@ class Site(EquipmentContainer):
 
     def find_lv_feeders(
         self,
-        lv_feeder_start_points: Iterable[ConductingEquipment],
-        state_operators: Type[NetworkStateOperators]
-    ) -> Generator[LvFeeder, None, None]:
+        lv_feeder_start_points: Iterable['ConductingEquipment'],
+        state_operators: Type['NetworkStateOperators']
+    ) -> Generator['LvFeeder', None, None]:
         from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
         for ce in state_operators.get_equipment(self):
             if isinstance(ce, ConductingEquipment):

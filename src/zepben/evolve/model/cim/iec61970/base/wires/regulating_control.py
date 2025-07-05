@@ -15,8 +15,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.regulating_control_mode_kind im
 from zepben.evolve.util import nlen, get_by_mrid, safe_remove, ngen
 
 if TYPE_CHECKING:
-    from zepben.evolve.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
     from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
+    from zepben.evolve.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 
 
 class RegulatingControl(PowerSystemResource):

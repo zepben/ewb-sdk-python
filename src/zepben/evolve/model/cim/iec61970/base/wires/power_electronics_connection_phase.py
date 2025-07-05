@@ -5,17 +5,19 @@
 
 __all__ = ["PowerElectronicsConnectionPhase"]
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection
 
 
 class PowerElectronicsConnectionPhase(PowerSystemResource):
     """A single phase of a power electronics connection."""
 
-    power_electronics_connection: Optional[PowerElectronicsConnection] = None
+    power_electronics_connection: Optional['PowerElectronicsConnection'] = None
     """The power electronics connection to which the phase belongs."""
 
     p: Optional[float] = None

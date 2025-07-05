@@ -18,8 +18,7 @@ class PowerDirectionKind(Enum):
     The flow of power direction used by a ProtectionEquipment.
     """
 
-    # todo rename
-    UNKNOWN_DIRECTION = 0
+    UNKNOWN = 0
     """[ZBEX] Unknown power direction flow."""
 
     UNDIRECTED = 1

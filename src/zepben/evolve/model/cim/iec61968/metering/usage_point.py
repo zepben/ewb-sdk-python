@@ -7,14 +7,16 @@ from __future__ import annotations
 
 __all__ = ["UsagePoint"]
 
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61968.common.location import Location
-from zepben.evolve.model.cim.iec61968.metering.end_device import EndDevice
-from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.common.location import Location
+    from zepben.evolve.model.cim.iec61968.metering.end_device import EndDevice
+    from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 
 
 class UsagePoint(IdentifiedObject):

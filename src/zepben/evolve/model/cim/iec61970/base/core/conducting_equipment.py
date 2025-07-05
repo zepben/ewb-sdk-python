@@ -10,12 +10,12 @@ __all__ = ['ConductingEquipment']
 import sys
 from typing import List, Optional, Generator, TYPE_CHECKING, Union
 
-from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
 from zepben.evolve.util import get_by_mrid, require, ngen
 
 if TYPE_CHECKING:
-    from zepben.evolve import Terminal
+    from zepben.evolve.model.cim.iec61970.base.core.base_voltage import BaseVoltage
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 
 class ConductingEquipment(Equipment):

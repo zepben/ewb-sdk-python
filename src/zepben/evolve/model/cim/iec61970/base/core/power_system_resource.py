@@ -13,9 +13,9 @@ from zepben.evolve.model.cim.iec61970.base.core.identified_object import Identif
 from zepben.evolve.util import get_by_mrid, nlen, ngen, safe_remove
 
 if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assets.asset import Asset
     from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
     from zepben.evolve.model.cim.iec61968.common.location import Location
-    from zepben.evolve.model.cim.iec61968.assets.asset import Asset
 
 
 class PowerSystemResource(IdentifiedObject):

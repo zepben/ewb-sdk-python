@@ -5,12 +5,14 @@
 
 __all__ = ["SynchronousMachine"]
 
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
 from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import RotatingMachine
 from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine_kind import SynchronousMachineKind
 from zepben.evolve.util import ngen, nlen, get_by_mrid, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import ReactiveCapabilityCurve
 
 
 class SynchronousMachine(RotatingMachine):
@@ -19,7 +21,7 @@ class SynchronousMachine(RotatingMachine):
     synchronous condenser or pump.
     """
 
-    _reactive_capability_curves: Optional[List[ReactiveCapabilityCurve]] = None
+    _reactive_capability_curves: Optional[List['ReactiveCapabilityCurve']] = None
 
     base_q: Optional[float] = None
     """Default base reactive power value in VAr. This value represents the initial reactive power that can be used by any application function."""
@@ -102,7 +104,7 @@ class SynchronousMachine(RotatingMachine):
     operating_mode: SynchronousMachineKind = SynchronousMachineKind.UNKNOWN
     """Current mode of operation."""
 
-    def __init__(self, curves: List[ReactiveCapabilityCurve] = None, **kwargs):
+    def __init__(self, curves: List['ReactiveCapabilityCurve'] = None, **kwargs):
         """
         `reactive_capability_curves` A list of `ReactiveCapabilityCurve`s to associate with this `SynchronousMachine`.
         """
@@ -112,7 +114,7 @@ class SynchronousMachine(RotatingMachine):
                 self.add_curve(rcc)
 
     @property
-    def curves(self) -> Generator[ReactiveCapabilityCurve, None, None]:
+    def curves(self) -> Generator['ReactiveCapabilityCurve', None, None]:
         """
         The available reactive capability curves for this synchronous machine. The first shall be the default for this :class:`SynchronousMachine`.
         """
@@ -122,7 +124,7 @@ class SynchronousMachine(RotatingMachine):
         """Return the number of :class:`ReactiveCapabilityCurve`s associated with this :class:`SynchronousMachine`."""
         return nlen(self._reactive_capability_curves)
 
-    def get_curve(self, mrid: str) -> ReactiveCapabilityCurve:
+    def get_curve(self, mrid: str) -> 'ReactiveCapabilityCurve':
         """
         Get the :class:`ReactiveCapabilityCurve` for this :class:`SynchronousMachine` identified by `mrid`
 
@@ -132,7 +134,7 @@ class SynchronousMachine(RotatingMachine):
         """
         return get_by_mrid(self._reactive_capability_curves, mrid)
 
-    def add_curve(self, curve: ReactiveCapabilityCurve) -> "SynchronousMachine":
+    def add_curve(self, curve: 'ReactiveCapabilityCurve') -> 'SynchronousMachine':
         """
         Associate a :class:`ReactiveCapabilityCurve` with this :class:`SynchronousMachine`.
 
@@ -146,7 +148,7 @@ class SynchronousMachine(RotatingMachine):
         self._reactive_capability_curves.append(curve)
         return self
 
-    def remove_curve(self, curve: ReactiveCapabilityCurve) -> "SynchronousMachine":
+    def remove_curve(self, curve: 'ReactiveCapabilityCurve') -> 'SynchronousMachine':
         """
         Disassociate a :class:`ReactiveCapabilityCurve` from this :class:`SynchronousMachine`.
 
@@ -157,7 +159,7 @@ class SynchronousMachine(RotatingMachine):
         self._reactive_capability_curves = safe_remove(self._reactive_capability_curves, curve)
         return self
 
-    def clear_curves(self) -> "SynchronousMachine":
+    def clear_curves(self) -> 'SynchronousMachine':
         """
         Clear all :class:`ReactiveCapabilityCurve` associated with this :class:`SynchronousMachine`.
         :returns: A reference to this :class:`SynchronousMachine` to allow fluent use.

@@ -8,11 +8,17 @@ from __future__ import annotations
 __all__ = ["PowerTransformerEnd"]
 
 import warnings
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, TYPE_CHECKING
 
-from zepben.evolve import PowerTransformer, WindingConnection, ngen, nlen, safe_remove, ResistanceReactance
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import TransformerCoolingType
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import WindingConnection
+from zepben.evolve.model.resistance_reactance import ResistanceReactance
+from zepben.evolve.util import ngen, nlen, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 
 
 class PowerTransformerEnd(TransformerEnd):

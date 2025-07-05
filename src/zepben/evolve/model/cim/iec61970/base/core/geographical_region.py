@@ -9,8 +9,9 @@ __all__ = ["GeographicalRegion"]
 
 from typing import Optional, List, Generator
 
-from zepben.evolve import IdentifiedObject, nlen, ngen, get_by_mrid, safe_remove
+from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove
 
 
 class GeographicalRegion(IdentifiedObject):

@@ -7,12 +7,11 @@ __all__ = ["Streetlight"]
 
 from typing import Optional, TYPE_CHECKING
 
+from zepben.evolve.model.cim.iec61968.assets.asset import Asset
 from zepben.evolve.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
 
 if TYPE_CHECKING:
-    from zepben.evolve import Pole
-
-from zepben.evolve.model.cim.iec61968.assets.asset import Asset
+    from zepben.evolve.model.cim.iec61968.infiec61968.infassets.pole import Pole
 
 
 class Streetlight(Asset):
@@ -20,7 +19,7 @@ class Streetlight(Asset):
     A Streetlight asset.
     """
 
-    pole: Optional[Pole] = None
+    pole: Optional['Pole'] = None
     """The `zepben.evolve.cim.iec61968.assets.pole.Pole` this Streetlight is attached to."""
 
     light_rating: Optional[int] = None

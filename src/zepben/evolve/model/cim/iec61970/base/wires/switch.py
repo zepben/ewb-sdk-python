@@ -14,7 +14,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import Single
 from zepben.evolve.util import require
 
 if TYPE_CHECKING:
-    from zepben.evolve import SwitchInfo
+    from zepben.evolve.model.cim.iec61968.assetinfo.switch_info import SwitchInfo
 
 
 def _calculate_open_state(current_state: int, is_open: bool, phase: SinglePhaseKind = None) -> int:

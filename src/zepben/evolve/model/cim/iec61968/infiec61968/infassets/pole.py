@@ -9,11 +9,11 @@ __all__ = ["Pole"]
 
 from typing import List, Optional, Generator, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import Streetlight
-
 from zepben.evolve.model.cim.iec61968.assets.structure import Structure
 from zepben.evolve.util import get_by_mrid, ngen, nlen, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assets.streetlight import Streetlight
 
 
 class Pole(Structure):

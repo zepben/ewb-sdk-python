@@ -5,11 +5,13 @@
 
 __all__ = ["ShuntCompensator"]
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import ShuntCompensatorInfo
 from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import ShuntCompensatorInfo
 
 
 class ShuntCompensator(RegulatingCondEq):
@@ -44,12 +46,12 @@ class ShuntCompensator(RegulatingCondEq):
     """
 
     @property
-    def shunt_compensator_info(self) -> Optional[ShuntCompensatorInfo]:
+    def shunt_compensator_info(self) -> Optional['ShuntCompensatorInfo']:
         """The `ShuntCompensatorInfo` for this `ShuntCompensator`"""
         return self.asset_info
 
     @shunt_compensator_info.setter
-    def shunt_compensator_info(self, sci: Optional[ShuntCompensatorInfo]):
+    def shunt_compensator_info(self, sci: Optional['ShuntCompensatorInfo']):
         """
         Set the `ShuntCompensatorInfo` for this `ShuntCompensator`
         `sci` The `ShuntCompensatorInfo` for this `ShuntCompensator`

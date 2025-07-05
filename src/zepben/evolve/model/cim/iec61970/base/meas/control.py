@@ -10,7 +10,7 @@ from typing import Optional, TYPE_CHECKING
 from zepben.evolve.model.cim.iec61970.base.meas.iopoint import IoPoint
 
 if TYPE_CHECKING:
-    from zepben.evolve import RemoteControl
+    from zepben.evolve.model.cim.iec61970.base.scada.remote_control import RemoteControl
 
 
 class Control(IoPoint):
@@ -22,5 +22,5 @@ class Control(IoPoint):
     power_system_resource_mrid: Optional[str] = None
     """AnalogValue represents an analog MeasurementValue."""
 
-    remote_control: Optional[RemoteControl] = None
+    remote_control: Optional['RemoteControl'] = None
     """AnalogValue represents an analog MeasurementValue."""

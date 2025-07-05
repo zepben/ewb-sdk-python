@@ -10,12 +10,13 @@ __all__ = ["Substation"]
 from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
-from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
 
 if TYPE_CHECKING:
-    from zepben.evolve import Loop, Circuit
+    from zepben.evolve.model.cim.extensions.iec61970.base.feeder.loop import Loop
     from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
+    from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+    from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 
 class Substation(EquipmentContainer):

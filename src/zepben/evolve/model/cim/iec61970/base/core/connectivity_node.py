@@ -14,7 +14,7 @@ from zepben.evolve.model.cim.iec61970.base.core.identified_object import Identif
 from zepben.evolve.util import get_by_mrid, ngen
 
 if TYPE_CHECKING:
-    from zepben.evolve import Terminal
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 
 @dataclass(slots=False)

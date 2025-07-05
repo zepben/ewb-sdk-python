@@ -7,12 +7,14 @@ from __future__ import annotations
 
 __all__ = ["EnergyConsumer"]
 
-from typing import Optional, Generator, List
+from typing import Optional, Generator, List, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import EnergyConnection
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import PhaseShuntConnectionKind
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 
 
 class EnergyConsumer(EnergyConnection):

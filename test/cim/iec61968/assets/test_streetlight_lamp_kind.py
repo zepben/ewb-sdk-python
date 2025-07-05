@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.iec61968.assets.StreetlightLampKind_pb2 import StreetlightLampKind as PBStreetlightLampKind
 
 from cim.enum_validator import validate_enum
-from zepben.evolve.model.cim.iec61968.assets.streetlight_lamp_kind import StreetlightLampKind
+from zepben.evolve.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
 
 
 def test_streetlight_lamp_kind_enum():

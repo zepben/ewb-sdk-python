@@ -7,13 +7,14 @@ from __future__ import annotations
 
 __all__ = ["DiagramObject"]
 
-from typing import Optional, List, Generator, Callable
+from typing import Optional, List, Generator, Callable, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.evolve.util import nlen, ngen, require, safe_remove
 
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 
 class DiagramObject(IdentifiedObject):
     """

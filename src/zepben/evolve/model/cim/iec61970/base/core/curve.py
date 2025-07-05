@@ -63,7 +63,7 @@ class Curve(IdentifiedObject):
         """
         return self.get_data(x)
 
-    def add_data(self, x: float, y1: float, y2: Optional[float], y3: Optional[float]) -> "Curve":
+    def add_data(self, x: float, y1: float, y2: Optional[float], y3: Optional[float]) -> 'Curve':
         """
         Add a data point to this :class:`Curve`.
 
@@ -82,7 +82,7 @@ class Curve(IdentifiedObject):
 
         return self
 
-    def add_curve_data(self, curve_data: CurveData) -> "Curve":
+    def add_curve_data(self, curve_data: CurveData) -> 'Curve':
         """
         Associate a :class:`CurveData` with this :class:`Curve`.
 
@@ -92,7 +92,7 @@ class Curve(IdentifiedObject):
         """
         return self.add_data(curve_data.x_value, curve_data.y1_value, curve_data.y2_value, curve_data.y3_value)
 
-    def remove_data(self, curve_data: CurveData) -> "Curve":
+    def remove_data(self, curve_data: CurveData) -> 'Curve':
         """
         Disassociate a :class:`CurveData` from this :class:`Curve`.
 
@@ -115,7 +115,7 @@ class Curve(IdentifiedObject):
         self._data = safe_remove(self._data, data)
         return data
 
-    def clear_data(self) -> "Curve":
+    def clear_data(self) -> 'Curve':
         """
         Clear all :class:`CurveData` associated with this :class:`Curve`.
         :returns: A reference to this :class:`Curve` to allow fluent use.

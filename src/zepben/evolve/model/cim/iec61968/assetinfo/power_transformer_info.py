@@ -7,12 +7,14 @@ from __future__ import annotations
 
 __all__ = ["PowerTransformerInfo"]
 
-from typing import List, Optional, Generator
+from typing import List, Optional, Generator, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
 
 
 class PowerTransformerInfo(AssetInfo):
