@@ -10,7 +10,10 @@ from zepben.evolve.dataclassy import dataclass
 
 __all__ = ["NetworkHierarchy"]
 
-from zepben.evolve import Circuit, Feeder, GeographicalRegion, Loop, SubGeographicalRegion, Substation
+from zepben.evolve import Circuit, Loop, Substation
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 
 
 @dataclass(slots=True)

@@ -15,7 +15,7 @@ from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
 
 import zepben.evolve.services.common.resolver as resolver
 from zepben.evolve import organisation_role_to_cim, document_to_cim, BaseService, CustomerKind
-from zepben.evolve.model.cim.iec61968.common.document import Agreement
+from zepben.evolve.model.cim.iec61968.common.agreement import Agreement
 from zepben.evolve.model.cim.iec61968.customers.customer import Customer
 from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.evolve.model.cim.iec61968.customers.pricing_structure import PricingStructure

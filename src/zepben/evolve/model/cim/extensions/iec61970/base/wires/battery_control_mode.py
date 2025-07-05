@@ -3,23 +3,18 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["BatteryControlMode"]
 
 from enum import Enum
-from typing import TYPE_CHECKING
 
 from zepben.evolve.model.cim.extensions.zbex import zbex
-
-if TYPE_CHECKING:
-    pass
-
-__all__ = ["BatteryControlMode"]
 
 
 @zbex
 class BatteryControlMode(Enum):
     """
-    [ZBEX] Mode of operation for the dispatch (charging/discharging) function of BatteryControl.
+    [ZBEX]
+    Mode of operation for the dispatch (charging/discharging) function of BatteryControl.
     """
 
     UNKNOWN = 0

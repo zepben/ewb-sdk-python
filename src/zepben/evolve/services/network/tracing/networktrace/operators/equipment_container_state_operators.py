@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from __future__ import annotations
 
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer, Feeder
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
 
 from abc import abstractmethod
@@ -258,4 +259,3 @@ class CurrentEquipmentContainerStateOperators(EquipmentContainerStateOperators):
 
 EquipmentContainerStateOperators.NORMAL = NormalEquipmentContainerStateOperators
 EquipmentContainerStateOperators.CURRENT = CurrentEquipmentContainerStateOperators
-

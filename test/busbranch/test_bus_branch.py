@@ -17,8 +17,10 @@ from busbranch.data.simple_node_breaker_network import simple_node_breaker_netwo
 from busbranch.data.single_branch_common_lines_network import single_branch_common_lines_network
 from busbranch.data.three_common_lines_network import three_common_lines_network
 from busbranch.test_bus_branch_creator import TestBusBranchCreator, create_terminal_based_id
-from zepben.evolve import ConnectivityNode, Junction, Disconnector, BusbarSection, Switch, ConductingEquipment, AcLineSegment, Terminal, NetworkService, \
+from zepben.evolve import ConnectivityNode, Disconnector, Switch, ConductingEquipment, AcLineSegment, Terminal, NetworkService, \
     BusBranchNetworkCreationMappings
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 # noinspection PyProtectedMember
 from zepben.evolve.model.busbranch.bus_branch import _group_negligible_impedance_terminals, _group_common_ac_line_segment_terminals
 

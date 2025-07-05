@@ -10,14 +10,17 @@ from dataclasses import dataclass, field
 from functools import reduce
 from typing import Set, Tuple, FrozenSet, Dict, Callable, Union, TypeVar, Any, List, Generic, Optional, Iterable, TYPE_CHECKING
 
-from zepben.evolve import Junction, BusbarSection, EquivalentBranch, Traversal
+from zepben.evolve import EquivalentBranch, Traversal
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
 from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import EnergyConsumer
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import PowerElectronicsConnection
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer, PowerTransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
 from zepben.evolve.services.network.network_service import NetworkService
 from zepben.evolve.services.network.tracing.busbranch_trace import BusBranchTrace, BusBranchTraceStep

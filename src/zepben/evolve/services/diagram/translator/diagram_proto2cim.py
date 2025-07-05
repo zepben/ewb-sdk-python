@@ -9,7 +9,9 @@ from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram 
 
 import zepben.evolve.services.common.resolver as resolver
 from zepben.evolve import identified_object_to_cim, OrientationKind, DiagramStyle
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject, DiagramObjectPoint
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.evolve.services.diagram.diagrams import DiagramService
 
 __all__ = ["diagram_object_point_to_cim", "diagram_to_cim", "diagram_object_to_cim"]

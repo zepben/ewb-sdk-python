@@ -6,10 +6,20 @@ from typing import Dict, List, Optional
 
 from pytest import fixture
 
-from zepben.evolve import NetworkService, Feeder, PhaseCode, EnergySource, EnergySourcePhase, Junction, ConductingEquipment, Breaker, PowerTransformer, \
-    UsagePoint, Terminal, PowerTransformerEnd, Meter, AssetOwner, CustomerService, Organisation, AcLineSegment, \
-    PerLengthSequenceImpedance, WireInfo, EnergyConsumer, GeographicalRegion, SubGeographicalRegion, Substation, PowerSystemResource, Location, PositionPoint, \
-    SetPhases, OverheadWireInfo, OperationalRestriction, Equipment, ConnectivityNode, LvFeeder
+from zepben.evolve import NetworkService, PhaseCode, EnergySource, EnergySourcePhase, ConductingEquipment, Breaker, PowerTransformer, \
+    Terminal, CustomerService, Organisation, AcLineSegment, \
+    WireInfo, EnergyConsumer, Substation, PowerSystemResource, Location, SetPhases, OperationalRestriction, Equipment, ConnectivityNode, LvFeeder
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61968.metering.meter import Meter
+from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
+from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",

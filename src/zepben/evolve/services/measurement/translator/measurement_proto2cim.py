@@ -7,7 +7,10 @@ from zepben.protobuf.cim.iec61970.base.meas.MeasurementValue_pb2 import Measurem
 from zepben.protobuf.cim.iec61970.base.meas.AccumulatorValue_pb2 import AccumulatorValue as PBAccumulatorValue
 from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue as PBAnalogValue
 from zepben.protobuf.cim.iec61970.base.meas.DiscreteValue_pb2 import DiscreteValue as PBDiscreteValue
-from zepben.evolve.model.cim.iec61970.base.meas.value import AnalogValue, AccumulatorValue, DiscreteValue, MeasurementValue
+from zepben.evolve.model.cim.iec61970.base.meas.discrete_value import DiscreteValue
+from zepben.evolve.model.cim.iec61970.base.meas.analog_value import AnalogValue
+from zepben.evolve.model.cim.iec61970.base.meas.accumulator_value import AccumulatorValue
+from zepben.evolve.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
 
 from zepben.evolve.services.measurement.measurements import MeasurementService
 

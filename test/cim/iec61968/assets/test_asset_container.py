@@ -5,7 +5,7 @@
 
 from cim.iec61968.assets.test_asset import asset_kwargs, verify_asset_constructor_default, \
     verify_asset_constructor_kwargs, verify_asset_constructor_args, asset_args
-from zepben.evolve import AssetContainer
+from zepben.evolve.model.cim.iec61968.assets.asset_container import AssetContainer
 
 asset_container_kwargs = asset_kwargs
 asset_container_args = asset_args

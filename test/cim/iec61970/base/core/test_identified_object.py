@@ -7,7 +7,8 @@ from typing import Tuple
 
 import pytest
 from hypothesis.strategies import uuids, text, lists, builds
-from zepben.evolve import IdentifiedObject, Junction
+from zepben.evolve import IdentifiedObject
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
 #       1. verify...default verifies the constructor with no args.

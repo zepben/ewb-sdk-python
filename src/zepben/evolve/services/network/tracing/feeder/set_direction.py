@@ -8,9 +8,9 @@ from functools import singledispatchmethod
 from logging import Logger
 from typing import Optional, TYPE_CHECKING, Type
 
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
+from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection

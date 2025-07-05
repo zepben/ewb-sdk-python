@@ -8,8 +8,9 @@ from typing import Type, List, Optional
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
 
-from zepben.evolve import IdentifiedObject, Document, OrganisationRole, Organisation, Junction, ObjectDifference, ValueDifference, CollectionDifference, \
+from zepben.evolve import IdentifiedObject, Document, OrganisationRole, Organisation, ObjectDifference, ValueDifference, CollectionDifference, \
     BaseService, BaseServiceComparator
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 
 

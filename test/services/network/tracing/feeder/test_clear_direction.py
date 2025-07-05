@@ -5,7 +5,8 @@
 import pytest
 
 from services.network.tracing.feeder.test_set_direction import DOWNSTREAM, UPSTREAM, BOTH, NONE
-from zepben.evolve import TestNetworkBuilder, NetworkStateOperators, NetworkService, Terminal, ConductingEquipment, FeederDirection, BusbarSection, Tracing
+from zepben.evolve import TestNetworkBuilder, NetworkStateOperators, NetworkService, Terminal, ConductingEquipment, FeederDirection, Tracing
+from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
 from zepben.evolve.services.network.tracing.feeder.clear_direction import ClearDirection
 
 

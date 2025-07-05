@@ -9,24 +9,53 @@ import pytest
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
 from services.common.test_base_service_comparator import TestBaseServiceComparator
-from zepben.evolve import CableInfo, NoLoadTest, OpenCircuitTest, OverheadWireInfo, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
-    TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, AssetOwner, Location, AssetContainer, AssetInfo, \
-    AssetOrganisationRole, Pole, Streetlight, WindingConnection, StreetlightLampKind, Structure, StreetAddress, TownDetail, PositionPoint, EndDevice, \
-    UsagePoint, Meter, Junction, OperationalRestriction, AuxiliaryEquipment, Terminal, FaultIndicator, AcDcTerminal, BaseVoltage, ConductingEquipment, \
-    ConnectivityNode, ConnectivityNodeContainer, Equipment, Site, EquipmentContainer, Feeder, Substation, GeographicalRegion, SubGeographicalRegion, \
-    PowerSystemResource, EquivalentBranch, EquivalentEquipment, Accumulator, Analog, Discrete, Measurement, RemoteSource, PhaseCode, UnitSymbol, \
+from zepben.evolve import NoLoadTest, OpenCircuitTest, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
+    TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, Location, AssetInfo, \
+    AssetOrganisationRole, Pole, Streetlight, WindingConnection, Structure, Junction, OperationalRestriction, AuxiliaryEquipment, Terminal, BaseVoltage, ConductingEquipment, \
+    ConnectivityNode, ConnectivityNodeContainer, Equipment, Site, EquipmentContainer, Feeder, Substation, PowerSystemResource, EquivalentBranch, EquivalentEquipment, \
+    Measurement, RemoteSource, PhaseCode, UnitSymbol, \
     RemoteControl, Control, RemotePoint, BatteryUnit, BatteryStateKind, PhotoVoltaicUnit, PowerElectronicsUnit, PowerElectronicsConnection, \
-    PowerElectronicsWindUnit, AcLineSegment, PerLengthSequenceImpedance, Breaker, BusbarSection, Conductor, Connector, Disconnector, EnergyConnection, \
-    EnergyConsumer, PhaseShuntConnectionKind, EnergyConsumerPhase, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
-    LinearShuntCompensator, PerLengthImpedance, PerLengthLineParameter, PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, VectorGroup, \
-    ProtectedSwitch, RatioTapChanger, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, TapChanger, TransformerEnd, \
-    Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
+    PowerElectronicsWindUnit, AcLineSegment, Breaker, BusbarSection, Connector, Disconnector, EnergyConnection, \
+    EnergyConsumer, PhaseShuntConnectionKind, SinglePhaseKind, EnergySource, EnergySourcePhase, Fuse, Jumper, Line, \
+    PowerTransformer, PowerTransformerEnd, VectorGroup, \
+    ProtectedSwitch, Recloser, RegulatingCondEq, ShuntCompensator, Switch, ObjectDifference, ValueDifference, Circuit, Loop, NetworkService, TracedPhases, FeederDirection, ShuntCompensatorInfo, TransformerConstructionKind, TransformerFunctionKind, LvFeeder, Sensor, \
     CurrentTransformer, PotentialTransformer, CurrentTransformerInfo, PotentialTransformerInfo, PotentialTransformerKind, Ratio, SwitchInfo, RelayInfo, \
     CurrentRelay, EvChargingUnit, PowerDirectionKind, RegulatingControl, TapChangerControl, RegulatingControlModeKind, \
-    TransformerEndRatedS, TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
-    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, EndDeviceFunction, \
-    PanDemandResponseFunction, EndDeviceFunctionKind, StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
+    TransformerCoolingType, ProtectionRelayFunction, ProtectionRelayScheme, RelaySetting, DistanceRelay, VoltageRelay, ProtectionKind, \
+    ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, PanDemandResponseFunction, \
+    StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
     PhaseImpedanceData
+from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_line_parameter import PerLengthLineParameter
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
+from zepben.evolve.model.cim.iec61970.base.wires.conductor import Conductor
+from zepben.evolve.model.cim.iec61970.base.meas.discrete import Discrete
+from zepben.evolve.model.cim.iec61970.base.meas.analog import Analog
+from zepben.evolve.model.cim.iec61970.base.meas.accumulator import Accumulator
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
+from zepben.evolve.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
+from zepben.evolve.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
+from zepben.evolve.model.cim.iec61968.metering.meter import Meter
+from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.evolve.model.cim.iec61968.metering.end_device import EndDevice
+from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
+from zepben.evolve.model.cim.iec61968.common.town_detail import TownDetail
+from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.evolve.model.cim.iec61968.assets.streetlight_lamp_kind import StreetlightLampKind
+from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
+from zepben.evolve.model.cim.iec61968.assets.asset_container import AssetContainer
+from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.evolve.model.cim.iec61970.base.wires.tap_changer import TapChanger
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator

@@ -5,14 +5,14 @@
 
 from __future__ import annotations
 
+__all__ = ["Name"]
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
     from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
-
-__all__ = ["Name"]
 
 
 #

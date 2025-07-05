@@ -9,7 +9,9 @@ from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramStyle_pb2 import Dia
 from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
 from zepben.protobuf.cim.iec61970.base.diagramlayout.OrientationKind_pb2 import OrientationKind as PBOrientationKind
 
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import Diagram, DiagramObject, DiagramObjectPoint
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.evolve.services.common.translator.base_cim2proto import identified_object_to_pb
 from zepben.evolve.services.common.translator.util import mrid_or_empty
 

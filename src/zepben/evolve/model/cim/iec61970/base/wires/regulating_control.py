@@ -2,21 +2,21 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from __future__ import annotations
+
+__all__ = ["RegulatingControl"]
 
 from typing import Optional, List, Generator, Iterable, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import RegulatingCondEq
-    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
-
-from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_control_mode_kind import RegulatingControlModeKind
-
 from zepben.evolve.util import nlen, get_by_mrid, safe_remove, ngen
 
-__all__ = ["RegulatingControl"]
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 
 class RegulatingControl(PowerSystemResource):

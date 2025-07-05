@@ -3,11 +3,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["ConnectivityNodeContainer"]
 
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-
-__all__ = ["ConnectivityNodeContainer"]
 
 
 class ConnectivityNodeContainer(PowerSystemResource):

@@ -4,7 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists, integers, booleans, sampled_from, floats
-from zepben.evolve import EnergyConsumer, EnergyConsumerPhase, PhaseShuntConnectionKind
+from zepben.evolve import EnergyConsumer, PhaseShuntConnectionKind
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_energy_connection import verify_energy_connection_constructor_default, \

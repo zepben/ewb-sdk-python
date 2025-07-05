@@ -37,6 +37,7 @@
   * `SetPhases`
 * `NetworkStateOperators` has a new abstract `description`. If you are creating custom operators you will need to add it.
 * `StepAction` will now raise an exception if `apply` is overridden. override `_apply` instead, or pass the function to `__init__`
+* Renamed `length_from_t1_or_0` to `length_from_t1_or_0`.
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.

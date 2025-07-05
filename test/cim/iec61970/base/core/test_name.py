@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import text, builds
-from zepben.evolve import Junction
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
 

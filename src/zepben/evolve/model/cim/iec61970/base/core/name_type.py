@@ -5,15 +5,15 @@
 
 from __future__ import annotations
 
+__all__ = ["NameType"]
+
 from typing import Dict, List, Generator, overload, TYPE_CHECKING, Callable
-if TYPE_CHECKING:
-    from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 from zepben.evolve.dataclassy import dataclass
-
 from zepben.evolve.model.cim.iec61970.base.core.name import Name
 
-__all__ = ["NameType"]
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 
 
 @dataclass(slots=True)

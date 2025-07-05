@@ -25,11 +25,16 @@ from streaming.get.data.metadata import create_metadata, create_metadata_respons
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
 from streaming.get.pb_creators import network_identified_objects, ac_line_segment
-from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, CableInfo, AcLineSegment, Breaker, EnergySource, \
-    EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, OverheadWireInfo, PerLengthSequenceImpedance, \
-    Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, GeographicalRegion, \
-    SubGeographicalRegion, Circuit, Loop, Diagram, UnsupportedOperationException, LvFeeder, TestNetworkBuilder, PerLengthPhaseImpedance, BatteryControl, \
+from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, AcLineSegment, Breaker, EnergySource, \
+    EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, Circuit, Loop, \
+    UnsupportedOperationException, LvFeeder, TestNetworkBuilder, PerLengthPhaseImpedance, BatteryControl, \
     PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')

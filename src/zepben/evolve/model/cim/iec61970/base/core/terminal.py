@@ -9,27 +9,18 @@ from typing import Optional, Generator
 from typing import TYPE_CHECKING
 from weakref import ref, ReferenceType
 
+from zepben.evolve.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
+from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
+from zepben.evolve.model.phases import TracedPhases
 from zepben.evolve.services.network.tracing.feeder.feeder_direction import FeederDirection
 from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus, NormalPhases, CurrentPhases
 
 if TYPE_CHECKING:
     from zepben.evolve import ConnectivityNode, ConductingEquipment
 
-from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
-from zepben.evolve.model.cim.iec61970.base.wires.connectors import BusbarSection
-from zepben.evolve.model.phases import TracedPhases
-
-__all__ = ["AcDcTerminal", "Terminal"]
-
-
-class AcDcTerminal(IdentifiedObject):
-    """
-    An electrical connection point (AC or DC) to a piece of conducting equipment. Terminals are connected at physical
-    connection points called connectivity nodes.
-    """
-    pass
+__all__ = ["Terminal"]
 
 
 class Terminal(AcDcTerminal):

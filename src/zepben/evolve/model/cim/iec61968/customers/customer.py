@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+__all__ = ["Customer"]
+
 from typing import Optional, Generator, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -13,8 +15,6 @@ if TYPE_CHECKING:
 from zepben.evolve.model.cim.iec61968.common.organisation_role import OrganisationRole
 from zepben.evolve.model.cim.iec61968.customers.customer_kind import CustomerKind
 from zepben.evolve.util import nlen, get_by_mrid, ngen, safe_remove
-
-__all__ = ["Customer"]
 
 
 class Customer(OrganisationRole):

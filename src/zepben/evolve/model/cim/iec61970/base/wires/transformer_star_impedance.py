@@ -2,17 +2,16 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from __future__ import annotations
+
+__all__ = ["TransformerStarImpedance"]
 
 from typing import Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.model.resistance_reactance import ResistanceReactance
 
-__all__ = ["TransformerStarImpedance"]
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 
 
 class TransformerStarImpedance(IdentifiedObject):

@@ -15,7 +15,7 @@ from zepben.evolve.database.sqlite.tables.iec61968.customers.table_customer_agre
 from zepben.evolve.database.sqlite.tables.iec61968.customers.table_customers import TableCustomers
 from zepben.evolve.database.sqlite.tables.iec61968.customers.table_pricing_structures import TablePricingStructures
 from zepben.evolve.database.sqlite.tables.iec61968.customers.table_tariffs import TableTariffs
-from zepben.evolve.model.cim.iec61968.common.document import Agreement
+from zepben.evolve.model.cim.iec61968.common.agreement import Agreement
 from zepben.evolve.model.cim.iec61968.customers.customer import Customer
 from zepben.evolve.model.cim.iec61968.customers.customer_agreement import CustomerAgreement
 from zepben.evolve.model.cim.iec61968.customers.customer_kind import CustomerKind

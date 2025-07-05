@@ -5,7 +5,8 @@
 from unittest.mock import create_autospec, call
 
 from capture_mock_sequence import CaptureMockSequence
-from zepben.evolve import DiagramService, DiagramCimWriter, Diagram, DiagramServiceWriter, DiagramDatabaseTables
+from zepben.evolve import DiagramService, DiagramCimWriter, DiagramServiceWriter, DiagramDatabaseTables
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 
 
 class TestDiagramServiceWriter:

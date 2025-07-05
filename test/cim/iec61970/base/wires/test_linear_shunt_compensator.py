@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import floats
-from zepben.evolve import LinearShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_shunt_compensator import verify_shunt_compensator_constructor_default, \

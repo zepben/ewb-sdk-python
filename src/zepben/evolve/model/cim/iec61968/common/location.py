@@ -5,116 +5,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+__all__ = ["Location"]
+
 from typing import List, Optional, Generator, Callable
 
+from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import require, nlen, ngen, safe_remove
-
-__all__ = ["PositionPoint", "Location", "StreetAddress", "TownDetail", "StreetDetail"]
-
-
-@dataclass(frozen=True)
-class PositionPoint(object):
-    """
-    Set of spatial coordinates that determine a point, defined in WGS84 (latitudes and longitudes).
-
-    Use a single position point instance to describe a point-oriented location.
-    Use a sequence of position points to describe a line-oriented object (physical location of non-point oriented
-    objects like cables or lines), or area of an object (like a substation or a geographical zone - in this case,
-    have first and last position point with the same values).
-    """
-
-    x_position: float
-    """X axis position - longitude"""
-    y_position: float
-    """Y axis position - latitude"""
-
-    def __post_init__(self):
-        require(-90.0 <= self.y_position <= 90.0,
-                lambda: f"Latitude is out of range. Expected -90 to 90, got {self.y_position}.")
-        require(-180.0 <= self.x_position <= 180.0,
-                lambda: f"Longitude is out of range. Expected -180 to 180, got {self.x_position}.")
-
-    def __str__(self):
-        return f"{self.x_position}:{self.y_position}"
-
-    @property
-    def longitude(self):
-        return self.x_position
-
-    @property
-    def latitude(self):
-        return self.y_position
-
-
-@dataclass
-class TownDetail(object):
-    """
-    Town details, in the context of address.
-    """
-
-    name: Optional[str] = None
-    """Town name."""
-    state_or_province: Optional[str] = None
-    """Name of the state or province."""
-
-    def all_fields_null_or_empty(self):
-        """Check to see if all fields of this `TownDetail` are null or empty."""
-        return not (self.name or self.state_or_province)
-
-
-@dataclass
-class StreetDetail(object):
-    """
-    Street details, in the context of address.
-    """
-
-    building_name: str = ""
-    """
-    (if applicable) In certain cases the physical location of the place of interest does not have a direct point of entry from the street, 
-    but may be located inside a larger structure such as a building, complex, office block, apartment, etc.
-    """
-    floor_identification: str = ""
-    """The identification by name or number, expressed as text, of the floor in the building as part of this address."""
-    name: str = ""
-    """Name of the street."""
-    number: str = ""
-    """Designator of the specific location on the street."""
-    suite_number: str = ""
-    """Number of the apartment or suite."""
-    type: str = ""
-    """Type of street. Examples include: street, circle, boulevard, avenue, road, drive, etc."""
-    display_address: str = ""
-    """The address as it should be displayed to a user."""
-
-    def all_fields_empty(self):
-        """Check to see if all fields of this `StreetDetail` are empty."""
-        return not (
-            self.building_name or
-            self.floor_identification or
-            self.name or
-            self.number or
-            self.suite_number or
-            self.type or
-            self.display_address
-        )
-
-
-@dataclass
-class StreetAddress(object):
-    """
-    General purpose street and postal address information.
-    """
-
-    postal_code: str = ""
-    """Postal code for the address."""
-    town_detail: Optional[TownDetail] = None
-    """Optional `TownDetail` for this address."""
-    po_box: str = ""
-    """Post office box for the address."""
-    street_detail: Optional[StreetDetail] = None
-    """Optional `StreetDetail` for this address."""
 
 
 class Location(IdentifiedObject):

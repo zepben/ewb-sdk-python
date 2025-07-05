@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Dict, List, Union, Iterable, Optional, Set
 
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import AuxiliaryEquipment
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import LvFeeder
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode

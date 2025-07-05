@@ -3,7 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import NetworkService, PerLengthSequenceImpedance, AcLineSegment, Pole, Streetlight, PowerTransformerInfo, PowerTransformer
+from zepben.evolve import NetworkService, AcLineSegment, Pole, Streetlight, PowerTransformerInfo, PowerTransformer
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 from zepben.evolve import resolver
 
 

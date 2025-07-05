@@ -10,7 +10,10 @@ from zepben.protobuf.cim.iec61970.base.meas.AnalogValue_pb2 import AnalogValue a
 from zepben.protobuf.cim.iec61970.base.meas.DiscreteValue_pb2 import DiscreteValue as PBDiscreteValue
 from zepben.protobuf.cim.iec61970.base.meas.MeasurementValue_pb2 import MeasurementValue as PBMeasurementValue
 
-from zepben.evolve.model.cim.iec61970.base.meas.value import AnalogValue, AccumulatorValue, DiscreteValue, MeasurementValue
+from zepben.evolve.model.cim.iec61970.base.meas.discrete_value import DiscreteValue
+from zepben.evolve.model.cim.iec61970.base.meas.analog_value import AnalogValue
+from zepben.evolve.model.cim.iec61970.base.meas.accumulator_value import AccumulatorValue
+from zepben.evolve.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
 
 __all__ = ["analogvalue_to_pb", "accumulatorvalue_to_pb", "discretevalue_to_pb", "measurementvalue_to_pb"]
 

@@ -12,7 +12,7 @@ from zepben.evolve.database.sqlite.network.network_database_tables import Networ
 from zepben.evolve.database.sqlite.network.network_service_reader import NetworkServiceReader
 from zepben.evolve.database.sqlite.tables.table_version import TableVersion
 from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 from zepben.evolve.services.network.network_service import NetworkService, connected_equipment
 

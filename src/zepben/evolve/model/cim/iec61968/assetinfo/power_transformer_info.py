@@ -2,16 +2,17 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from __future__ import annotations
+
+__all__ = ["PowerTransformerInfo"]
 
 from typing import List, Optional, Generator
 
-from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
+from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove
-
-__all__ = ["PowerTransformerInfo"]
 
 
 class PowerTransformerInfo(AssetInfo):

@@ -7,14 +7,27 @@ from typing import TypeVar, Type, Optional
 
 from hypothesis import assume
 
-from zepben.evolve import MetadataCollection, NetworkService, DiagramService, CustomerService, NameType, DataSource, IdentifiedObject, EnergyConsumerPhase, \
-    EnergyConsumer, EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, TransformerTankInfo, Asset, Pole, Streetlight, \
-    OrganisationRole, Customer, CustomerAgreement, PricingStructure, EndDevice, UsagePoint, OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, \
-    ConnectivityNode, Equipment, EquipmentContainer, Feeder, GeographicalRegion, Name, PowerSystemResource, SubGeographicalRegion, Substation, Terminal, \
-    Diagram, DiagramObject, Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, AcLineSegment, Conductor, PowerElectronicsConnection, \
-    PowerElectronicsConnectionPhase, PowerTransformer, PowerTransformerEnd, RatioTapChanger, ShuntCompensator, TransformerEnd, TransformerStarImpedance, \
-    Circuit, Loop, StreetAddress, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
+from zepben.evolve import MetadataCollection, NetworkService, DiagramService, CustomerService, NameType, DataSource, IdentifiedObject, EnergyConsumer, EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, TransformerTankInfo, Asset, Pole, Streetlight, \
+    OrganisationRole, Customer, CustomerAgreement, PricingStructure, OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, \
+    ConnectivityNode, Equipment, EquipmentContainer, Name, PowerSystemResource, Substation, Terminal, \
+    Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, AcLineSegment, PowerElectronicsConnection, \
+    PowerTransformer, ShuntCompensator, TransformerStarImpedance, \
+    Circuit, Loop, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
     ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
+from zepben.evolve.model.cim.iec61970.base.wires.conductor import Conductor
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.evolve.model.cim.iec61968.metering.end_device import EndDevice
+from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 

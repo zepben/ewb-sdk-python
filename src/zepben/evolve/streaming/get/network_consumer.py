@@ -17,17 +17,37 @@ from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetN
     GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, IncludedEnergizedContainers, \
     NetworkState
 
-from zepben.evolve import NetworkService, Feeder, IdentifiedObject, CableInfo, OverheadWireInfo, AssetOwner, \
-    Organisation, Location, Meter, UsagePoint, OperationalRestriction, FaultIndicator, BaseVoltage, ConnectivityNode, GeographicalRegion, Site, \
-    SubGeographicalRegion, Substation, Terminal, AcLineSegment, Breaker, Disconnector, EnergyConsumer, EnergyConsumerPhase, EnergySource, EnergySourcePhase, \
-    Fuse, Jumper, Junction, LinearShuntCompensator, PerLengthSequenceImpedance, PowerTransformer, PowerTransformerEnd, RatioTapChanger, Recloser, Circuit, \
-    Loop, Pole, Streetlight, Accumulator, Analog, Discrete, Control, RemoteControl, RemoteSource, PowerTransformerInfo, PowerElectronicsConnection, \
-    PowerElectronicsConnectionPhase, BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, BusbarSection, LoadBreakSwitch, TransformerTankInfo, \
+from zepben.evolve import NetworkService, IdentifiedObject, Organisation, Location, OperationalRestriction, BaseVoltage, ConnectivityNode, Substation, Terminal, AcLineSegment, Breaker, Disconnector, EnergyConsumer, \
+    EnergySource, EnergySourcePhase, \
+    Fuse, Jumper, PowerTransformer, Recloser, Circuit, \
+    Loop, Pole, Streetlight, Control, RemoteControl, RemoteSource, PowerTransformerInfo, PowerElectronicsConnection, \
+    BatteryUnit, PhotoVoltaicUnit, PowerElectronicsWindUnit, LoadBreakSwitch, TransformerTankInfo, \
     TransformerEndInfo, TransformerStarImpedance, EquipmentContainer, NetworkHierarchy, MultiObjectResult, CimConsumerClient, NoLoadTest, OpenCircuitTest, \
     ShortCircuitTest, EquivalentBranch, ShuntCompensatorInfo, LvFeeder, CurrentRelay, CurrentTransformer, RelayInfo, SwitchInfo, \
     CurrentTransformerInfo, EvChargingUnit, TapChangerControl, ServiceInfo, PotentialTransformer, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, GroundDisconnector, Ground, SeriesCompensator, PotentialTransformerInfo, PanDemandResponseFunction, BatteryControl, \
     StaticVarCompensator, PerLengthPhaseImpedance, GroundingImpedance, PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PowerSystemResource, Asset
+from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
+from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
+from zepben.evolve.model.cim.iec61970.base.meas.discrete import Discrete
+from zepben.evolve.model.cim.iec61970.base.meas.analog import Analog
+from zepben.evolve.model.cim.iec61970.base.meas.accumulator import Accumulator
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
+from zepben.evolve.model.cim.iec61968.metering.meter import Meter
+from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
+from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.evolve.model.cim.iec61970.base.core.site import Site
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
 from zepben.evolve.streaming.grpc.grpc import GrpcResult

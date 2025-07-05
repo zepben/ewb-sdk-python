@@ -5,8 +5,9 @@
 from typing import Iterable
 
 import pytest
-from zepben.evolve import Equipment, TestNetworkBuilder, Feeder, BaseVoltage, LvFeeder, NetworkStateOperators, CurrentTransformer, FaultIndicator, \
-    ProtectedSwitch, CurrentRelay, ProtectionRelayScheme, ProtectionRelaySystem, PhotoVoltaicUnit, PowerElectronicsConnection, ConductingEquipment, Breaker
+from zepben.evolve import Equipment, TestNetworkBuilder, BaseVoltage, LvFeeder, NetworkStateOperators, CurrentTransformer, ProtectedSwitch, CurrentRelay, ProtectionRelayScheme, ProtectionRelaySystem, PhotoVoltaicUnit, PowerElectronicsConnection, ConductingEquipment, Breaker
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.services.network.tracing.networktrace.tracing import Tracing
 
 
@@ -373,4 +374,3 @@ class TestAssignToLvFeeders:
 
         feeder = network['lvf2']
         validate_equipment(feeder.equipment, 'b0')
-    

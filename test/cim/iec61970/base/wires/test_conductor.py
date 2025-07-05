@@ -8,7 +8,8 @@ from cim.iec61970.base.core.test_conducting_equipment import conducting_equipmen
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
 from cim.property_validator import validate_property_accessor
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
-from zepben.evolve import Conductor, WireInfo
+from zepben.evolve import WireInfo
+from zepben.evolve.model.cim.iec61970.base.wires.conductor import Conductor
 
 conductor_kwargs = {
     **conducting_equipment_kwargs,

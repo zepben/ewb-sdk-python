@@ -7,7 +7,9 @@ from __future__ import annotations
 from asyncio import get_event_loop
 from typing import Optional, Iterable, AsyncGenerator, List, Callable, Tuple, Union
 
-from zepben.evolve import DiagramService, IdentifiedObject, Diagram, DiagramObject, ServiceInfo
+from zepben.evolve import DiagramService, IdentifiedObject, ServiceInfo
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.evolve.streaming.get.consumer import CimConsumerClient, MultiObjectResult
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub

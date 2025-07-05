@@ -3,14 +3,14 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+__all__ = ["PerLengthPhaseImpedance"]
+
 from typing import Optional, List, Generator
 
-from zepben.evolve.util import require, ngen, nlen, safe_remove, none
-from zepben.evolve.model.cim.iec61970.base.wires.per_length import PerLengthImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
 from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
-
-__all__ = ["PerLengthPhaseImpedance"]
+from zepben.evolve.util import require, ngen, nlen, safe_remove, none
 
 
 class PerLengthPhaseImpedance(PerLengthImpedance):

@@ -3,16 +3,17 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+__all__ = ["SinglePhaseKind", "single_phase_kind_by_id", "SINGLE_PHASE_KIND_VALUES"]
+
 from enum import Enum
 from typing import Union
+
 
 #
 # NOTE: The following import is actually at the bottom of this file to avoid cyclic imports.
 #
 # from zepben.evolve.model.cim.iec61970.base.core.phase_code import phase_code_from_single_phases, PhaseCode
-
-__all__ = ["SinglePhaseKind", "single_phase_kind_by_id", "SINGLE_PHASE_KIND_VALUES"]
-
+#
 
 def single_phase_kind_by_id(value):
     """

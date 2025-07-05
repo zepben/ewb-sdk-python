@@ -5,17 +5,11 @@
 
 from __future__ import annotations
 
-import logging
-from dataclasses import dataclass
-from enum import Enum
-from typing import List, TYPE_CHECKING, Union
-
-if TYPE_CHECKING:
-    pass
-
 __all__ = ["ControlledAppliance", "Appliance"]
 
-logger = logging.getLogger(__name__)
+from dataclasses import dataclass
+from enum import Enum
+from typing import List, Union
 
 
 class Appliance(Enum):

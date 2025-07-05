@@ -2,7 +2,10 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from __future__ import annotations
+
+__all__ = ["TransformerTankInfo"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
@@ -12,8 +15,6 @@ if TYPE_CHECKING:
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
 from zepben.evolve.util import nlen, ngen, safe_remove, get_by_mrid
-
-__all__ = ["TransformerTankInfo"]
 
 
 class TransformerTankInfo(AssetInfo):

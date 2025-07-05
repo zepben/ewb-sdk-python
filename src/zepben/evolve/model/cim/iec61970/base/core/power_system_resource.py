@@ -5,17 +5,17 @@
 
 from __future__ import annotations
 
+__all__ = ['PowerSystemResource']
+
 from typing import Optional, TYPE_CHECKING, List, Generator, Iterable
+
+from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
+from zepben.evolve.util import get_by_mrid, nlen, ngen, safe_remove
 
 if TYPE_CHECKING:
     from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
     from zepben.evolve.model.cim.iec61968.common.location import Location
-    from zepben.evolve import Asset
-
-from zepben.evolve.util import get_by_mrid, nlen, ngen, safe_remove
-from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-
-__all__ = ['PowerSystemResource']
+    from zepben.evolve.model.cim.iec61968.assets.asset import Asset
 
 
 class PowerSystemResource(IdentifiedObject):

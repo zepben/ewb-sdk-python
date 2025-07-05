@@ -2,12 +2,13 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Optional
-
-from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import RegulatingCondEq
-from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 
 __all__ = ["StaticVarCompensator"]
+
+from typing import Optional
+
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
+from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import SVCControlMode
 
 
 class StaticVarCompensator(RegulatingCondEq):

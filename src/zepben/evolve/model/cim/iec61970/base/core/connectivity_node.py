@@ -5,17 +5,16 @@
 
 from __future__ import annotations
 
+__all__ = ["ConnectivityNode"]
+
 from typing import Generator, List, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import Terminal
-
 from zepben.evolve.dataclassy import dataclass
-
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import get_by_mrid, ngen
 
-__all__ = ["ConnectivityNode"]
+if TYPE_CHECKING:
+    from zepben.evolve import Terminal
 
 
 @dataclass(slots=False)

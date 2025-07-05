@@ -7,7 +7,8 @@ __all__ = ["DiagramServiceWriter"]
 from zepben.evolve.database.sqlite.common.base_service_writer import BaseServiceWriter
 from zepben.evolve.database.sqlite.diagram.diagram_cim_writer import DiagramCimWriter
 from zepben.evolve.database.sqlite.diagram.diagram_database_tables import DiagramDatabaseTables
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import DiagramObject, Diagram
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.evolve.services.diagram.diagrams import DiagramService
 
 

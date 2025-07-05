@@ -3,20 +3,15 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
+__all__ = ["PanDemandResponseFunction"]
 
-from typing import Optional, TYPE_CHECKING, List, Union
+from typing import Optional, List, Union
 
 from zepben.evolve.model.cim.extensions.zbex import zbex
 from zepben.evolve.model.cim.iec61968.metering.controlled_appliance import ControlledAppliance, Appliance
-from zepben.evolve.model.cim.iec61968.metering.metering import EndDeviceFunction, EndDeviceFunctionKind
-
-if TYPE_CHECKING:
-    pass
-
+from zepben.evolve.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
+from zepben.evolve.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
 from zepben.evolve.util import require
-
-__all__ = ["PanDemandResponseFunction"]
 
 
 @zbex
@@ -70,7 +65,7 @@ class PanDemandResponseFunction(EndDeviceFunction):
         self._appliance_bitmask = bm | appliance.bitmask
         return self._appliance_bitmask != previous
 
-    def add_appliances(self, appliances: List[Appliance]):
+    def add_appliances(self, appliances: List[Appliance]) -> bool:
         """
         Add appliances to the appliances being controlled.
         :param appliances: The appliances to add.
@@ -98,7 +93,7 @@ class PanDemandResponseFunction(EndDeviceFunction):
         self._appliance_bitmask = bm & ~appliance.bitmask
         return self._appliance_bitmask != previous
 
-    def remove_appliances(self, appliances: List[Appliance]):
+    def remove_appliances(self, appliances: List[Appliance]) -> bool:
         """
         Remove appliances from the appliances being controlled.
         :param appliances: Additional appliances to remove.
