@@ -12,143 +12,220 @@ from __future__ import annotations
 
 from zepben.evolve.util import *
 
+#############
+# CIM MODEL #
+#############
 
 # We need to import SinglePhaseKind before anything uses PhaseCode to prevent cyclic dependencies.
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
 
+from zepben.evolve.model.cim.extensions.iec61968.assetinfo.relay_info import *
+
 from zepben.evolve.model.cim.extensions.iec61968.metering.pan_demand_reponse_function import *
+
+from zepben.evolve.model.cim.extensions.iec61970.base.core.site import *
+
+from zepben.evolve.model.cim.extensions.iec61970.base.feeder.loop import *
+from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import *
+
+from zepben.evolve.model.cim.extensions.iec61970.base.generation.production.ev_charging_unit import *
+
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.distance_relay import *
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.power_direction_kind import *
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_kind import *
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_function import *
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import *
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_system import *
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.relay_setting import *
+from zepben.evolve.model.cim.extensions.iec61970.base.protection.voltage_relay import *
+
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control import *
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.battery_control_mode import *
-from zepben.evolve.model.cim.iec61968.customers.pricing_structure import *
-from zepben.evolve.model.cim.iec61968.customers.customer_agreement import *
-from zepben.evolve.model.cim.iec61968.customers.customer_kind import *
-from zepben.evolve.model.cim.iec61968.customers.customer import *
-from zepben.evolve.model.cim.iec61968.customers.tariff import *
-from zepben.evolve.model.cim.iec61968.assets.structure import *
-from zepben.evolve.model.cim.iec61968.assets.asset import *
-from zepben.evolve.model.cim.iec61968.assets.asset_function import *
-from zepben.evolve.model.cim.iec61968.assets.pole import *
-from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import *
-from zepben.evolve.model.cim.iec61968.assets.asset_info import *
-from zepben.evolve.model.cim.iec61968.assets.streetlight import *
-from zepben.evolve.model.cim.iec61968.operations.operational_restriction import *
-from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
-from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
-from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
-from zepben.evolve.model.cim.iec61968.assetinfo.transformer_test import *
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_cooling_type import *
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import *
+from zepben.evolve.model.cim.extensions.iec61970.base.wires.vector_group import *
+
+from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import *
+from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.short_circuit_test import *
 from zepben.evolve.model.cim.iec61968.assetinfo.shunt_compensator_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.switch_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import *
 from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import *
-from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.relay_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.transformer_test import *
+from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import *
+from zepben.evolve.model.cim.iec61968.assetinfo.wire_material_kind import *
+
+from zepben.evolve.model.cim.iec61968.assets.asset import *
+from zepben.evolve.model.cim.iec61968.assets.asset_container import *
+from zepben.evolve.model.cim.iec61968.assets.asset_function import *
+from zepben.evolve.model.cim.iec61968.assets.asset_info import *
+from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import *
+from zepben.evolve.model.cim.iec61968.assets.asset_owner import *
+from zepben.evolve.model.cim.iec61968.assets.streetlight import *
+from zepben.evolve.model.cim.iec61968.assets.structure import *
+
+from zepben.evolve.model.cim.iec61968.common.agreement import *
+from zepben.evolve.model.cim.iec61968.common.document import *
+from zepben.evolve.model.cim.iec61968.common.location import *
+from zepben.evolve.model.cim.iec61968.common.organisation import *
+from zepben.evolve.model.cim.iec61968.common.organisation_role import *
+from zepben.evolve.model.cim.iec61968.common.position_point import *
+from zepben.evolve.model.cim.iec61968.common.street_address import *
+from zepben.evolve.model.cim.iec61968.common.street_detail import *
+from zepben.evolve.model.cim.iec61968.common.town_detail import *
+
+from zepben.evolve.model.cim.iec61968.customers.customer import *
+from zepben.evolve.model.cim.iec61968.customers.customer_agreement import *
+from zepben.evolve.model.cim.iec61968.customers.customer_kind import *
+from zepben.evolve.model.cim.iec61968.customers.pricing_structure import *
+from zepben.evolve.model.cim.iec61968.customers.tariff import *
+
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.current_transformer_info import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.potential_transformer_info import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_construction_kind import *
 from zepben.evolve.model.cim.iec61968.infiec61968.infassetinfo.transformer_function_kind import *
+
+from zepben.evolve.model.cim.iec61968.infiec61968.infassets.pole import *
+from zepben.evolve.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import *
+
 from zepben.evolve.model.cim.iec61968.infiec61968.infcommon.ratio import *
-from zepben.evolve.model.cim.iec61968.metering.metering import *
+
 from zepben.evolve.model.cim.iec61968.metering.controlled_appliance import *
-from zepben.evolve.model.cim.iec61968.common.organisation import *
-from zepben.evolve.model.cim.iec61968.common.document import *
-from zepben.evolve.model.cim.iec61968.common.organisation_role import *
-from zepben.evolve.model.cim.iec61968.common.location import *
+from zepben.evolve.model.cim.iec61968.metering.end_device import *
+from zepben.evolve.model.cim.iec61968.metering.end_device_function import *
+from zepben.evolve.model.cim.iec61968.metering.end_device_function_kind import *
+from zepben.evolve.model.cim.iec61968.metering.meter import *
+from zepben.evolve.model.cim.iec61968.metering.usage_point import *
+
+from zepben.evolve.model.cim.iec61968.operations.operational_restriction import *
+
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.current_transformer import *
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import *
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.potential_transformer import *
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.potential_transformer_kind import *
 from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import *
+
+from zepben.evolve.model.cim.iec61970.base.core.ac_dc_terminal import *
+from zepben.evolve.model.cim.iec61970.base.core.base_voltage import *
+from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import *
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import *
+from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import *
+from zepben.evolve.model.cim.iec61970.base.core.curve import *
+from zepben.evolve.model.cim.iec61970.base.core.curve_data import *
+from zepben.evolve.model.cim.iec61970.base.core.equipment import *
+from zepben.evolve.model.cim.iec61970.base.core.equipment_container import *
+from zepben.evolve.model.cim.iec61970.base.core.feeder import *
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import *
+from zepben.evolve.model.cim.iec61970.base.core.identified_object import *
+from zepben.evolve.model.cim.iec61970.base.core.name import *
+from zepben.evolve.model.cim.iec61970.base.core.name_type import *
+from zepben.evolve.model.cim.iec61970.base.core.phase_code import *
+from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import *
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import *
+from zepben.evolve.model.cim.iec61970.base.core.substation import *
+from zepben.evolve.model.cim.iec61970.base.core.terminal import *
+
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import *
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import *
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_point import *
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import *
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import *
+
+from zepben.evolve.model.cim.iec61970.base.domain.unit_symbol import *
+
 from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_branch import *
 from zepben.evolve.model.cim.iec61970.base.equivalents.equivalent_equipment import *
+
+from zepben.evolve.model.cim.iec61970.base.generation.production.battery_state_kind import *
+from zepben.evolve.model.cim.iec61970.base.generation.production.battery_unit import *
+from zepben.evolve.model.cim.iec61970.base.generation.production.photo_voltaic_unit import *
+from zepben.evolve.model.cim.iec61970.base.generation.production.power_electronics_unit import *
+from zepben.evolve.model.cim.iec61970.base.generation.production.power_electronics_wind_unit import *
+
+from zepben.evolve.model.cim.iec61970.base.meas.accumulator import *
+from zepben.evolve.model.cim.iec61970.base.meas.accumulator_value import *
+from zepben.evolve.model.cim.iec61970.base.meas.analog import *
+from zepben.evolve.model.cim.iec61970.base.meas.analog_value import *
 from zepben.evolve.model.cim.iec61970.base.meas.control import *
-from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
-from zepben.evolve.model.cim.iec61970.base.meas.value import *
+from zepben.evolve.model.cim.iec61970.base.meas.discrete import *
+from zepben.evolve.model.cim.iec61970.base.meas.discrete_value import *
 from zepben.evolve.model.cim.iec61970.base.meas.iopoint import *
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_layout import *
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import *
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import *
+from zepben.evolve.model.cim.iec61970.base.meas.measurement import *
+from zepben.evolve.model.cim.iec61970.base.meas.measurement_value import *
+
+from zepben.evolve.model.cim.iec61970.base.protection.current_relay import *
+
+from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_point import *
 from zepben.evolve.model.cim.iec61970.base.scada.remote_source import *
-from zepben.evolve.model.cim.iec61970.base.scada.remote_control import *
-from zepben.evolve.model.cim.iec61970.base.domain.unit_symbol import *
-from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.auxiliary_equipment import *
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_function import *
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_scheme import *
-from zepben.evolve.model.cim.iec61970.base.protection.protection_relay_system import *
-from zepben.evolve.model.cim.iec61970.base.protection.current_relay import *
-from zepben.evolve.model.cim.iec61970.base.protection.distance_relay import *
-from zepben.evolve.model.cim.iec61970.base.protection.voltage_relay import *
-from zepben.evolve.model.cim.iec61970.base.protection.relay_setting import *
-from zepben.evolve.model.cim.iec61970.base.wires.ground import *
-from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import *
-from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import *
-from zepben.evolve.model.cim.iec61970.base.wires.generation.production.power_electronics_unit import *
-from zepben.evolve.model.cim.iec61970.base.wires.generation.production.battery_state_kind import *
-from zepben.evolve.model.cim.iec61970.base.wires.line import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import *
-from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import *
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import *
-from zepben.evolve.model.cim.iec61970.base.wires.per_length import *
-from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import *
-from zepben.evolve.model.cim.iec61970.base.wires.vector_group import *
-from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
-from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import *
-from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
-from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import *
-from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import *
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
-from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
-from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import *
-from zepben.evolve.model.cim.iec61970.base.wires.connectors import *
-from zepben.evolve.model.cim.iec61970.base.wires.switch import *
-from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import *
-from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import *
+
+from zepben.evolve.model.cim.iec61970.base.wires.ac_line_segment import *
 from zepben.evolve.model.cim.iec61970.base.wires.breaker import *
+from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import *
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import *
+from zepben.evolve.model.cim.iec61970.base.wires.conductor import *
+from zepben.evolve.model.cim.iec61970.base.wires.connector import *
 from zepben.evolve.model.cim.iec61970.base.wires.cut import *
 from zepben.evolve.model.cim.iec61970.base.wires.disconnector import *
 from zepben.evolve.model.cim.iec61970.base.wires.earth_fault_compensator import *
-from zepben.evolve.model.cim.iec61970.base.wires.fuse import *
-from zepben.evolve.model.cim.iec61970.base.wires.jumper import *
-from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import *
-from zepben.evolve.model.cim.iec61970.base.wires.recloser import *
-from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
 from zepben.evolve.model.cim.iec61970.base.wires.energy_connection import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source import *
+from zepben.evolve.model.cim.iec61970.base.wires.energy_source_phase import *
+from zepben.evolve.model.cim.iec61970.base.wires.fuse import *
+from zepben.evolve.model.cim.iec61970.base.wires.ground import *
+from zepben.evolve.model.cim.iec61970.base.wires.ground_disconnector import *
+from zepben.evolve.model.cim.iec61970.base.wires.grounding_impedance import *
+from zepben.evolve.model.cim.iec61970.base.wires.jumper import *
+from zepben.evolve.model.cim.iec61970.base.wires.junction import *
+from zepben.evolve.model.cim.iec61970.base.wires.line import *
+from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.load_break_switch import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_impedance import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_line_parameter import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import *
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import *
+from zepben.evolve.model.cim.iec61970.base.wires.petersen_coil import *
+from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import *
+from zepben.evolve.model.cim.iec61970.base.wires.phase_shunt_connection_kind import *
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection import *
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import *
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import *
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import *
+from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import *
 from zepben.evolve.model.cim.iec61970.base.wires.reactive_capability_curve import *
-from zepben.evolve.model.cim.iec61970.base.wires.regulating_control_mode_kind import *
+from zepben.evolve.model.cim.iec61970.base.wires.recloser import *
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_cond_eq import *
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_control import *
+from zepben.evolve.model.cim.iec61970.base.wires.regulating_control_mode_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.rotating_machine import *
+from zepben.evolve.model.cim.iec61970.base.wires.series_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.shunt_compensator import *
+# This is at the top, see note there: from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import *
+from zepben.evolve.model.cim.iec61970.base.wires.static_var_compensator import *
+from zepben.evolve.model.cim.iec61970.base.wires.svc_control_mode import *
+from zepben.evolve.model.cim.iec61970.base.wires.switch import *
+from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine import *
+from zepben.evolve.model.cim.iec61970.base.wires.synchronous_machine_kind import *
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer_control import *
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import *
 from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import *
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_cooling_type import *
-from zepben.evolve.model.cim.iec61970.base.core.substation import *
-from zepben.evolve.model.cim.iec61970.base.core.terminal import *
-from zepben.evolve.model.cim.iec61970.base.core.equipment import *
-from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import *
-from zepben.evolve.model.cim.iec61970.base.core.identified_object import *
-from zepben.evolve.model.cim.iec61970.base.core.base_voltage import *
-from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import *
-from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import *
-from zepben.evolve.model.cim.iec61970.base.core.regions import *
-from zepben.evolve.model.cim.iec61970.base.core.phase_code import *
-from zepben.evolve.model.cim.iec61970.base.core.equipment_container import *
-from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import *
-from zepben.evolve.model.cim.iec61970.base.core.curve import *
-from zepben.evolve.model.cim.iec61970.base.core.curve_data import *
-from zepben.evolve.model.cim.iec61970.base.core.name import *
-from zepben.evolve.model.cim.iec61970.base.core.name_type import *
+from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import *
+
 from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import *
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.loop import *
-from zepben.evolve.model.cim.iec61970.infiec61970.feeder.lv_feeder import *
-from zepben.evolve.model.cim.iec61970.infiec61970.protection.protection_kind import *
-from zepben.evolve.model.cim.iec61970.infiec61970.protection.power_direction_kind import *
-from zepben.evolve.model.cim.iec61970.infiec61970.wires.generation.production.ev_charging_unit import *
+
+#################
+# END CIM MODEL #
+#################
+
 from zepben.evolve.model.phases import *
 from zepben.evolve.model.resistance_reactance import *
-
 
 from zepben.evolve.services.network.tracing.util import *
 

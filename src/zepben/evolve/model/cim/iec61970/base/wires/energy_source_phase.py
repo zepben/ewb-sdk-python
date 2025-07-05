@@ -11,7 +11,7 @@ from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import Pow
 from zepben.evolve.model.cim.iec61970.base.wires.single_phase_kind import SinglePhaseKind
 
 if TYPE_CHECKING:
-    from zepben.evolve import EnergySource
+    from zepben.evolve.model.cim.iec61970.base.wires.energy_source import EnergySource
 
 
 class EnergySourcePhase(PowerSystemResource):
@@ -19,7 +19,7 @@ class EnergySourcePhase(PowerSystemResource):
     A single phase of an energy source.
     """
 
-    _energy_source: Optional[EnergySource] = None
+    _energy_source: Optional['EnergySource'] = None
     """The `zepben.evolve.cim.iec61970.wires.EnergySource` with this `EnergySourcePhase`"""
 
     phase: SinglePhaseKind = SinglePhaseKind.NONE
@@ -27,7 +27,7 @@ class EnergySourcePhase(PowerSystemResource):
     the connection is from the indicated phase to the central ground or neutral point. If the energy source is delta connected, the phase indicates an energy 
     source connected from the indicated phase to the next logical non-neutral phase."""
 
-    def __init__(self, energy_source: EnergySource = None, **kwargs):
+    def __init__(self, energy_source: 'EnergySource' = None, **kwargs):
         super(EnergySourcePhase, self).__init__(**kwargs)
         if energy_source:
             self.energy_source = energy_source

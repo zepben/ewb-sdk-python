@@ -18,7 +18,8 @@ from zepben.evolve.services.network.tracing.feeder.feeder_direction import Feede
 from zepben.evolve.services.network.tracing.phases.phase_status import PhaseStatus, NormalPhases, CurrentPhases
 
 if TYPE_CHECKING:
-    from zepben.evolve import ConnectivityNode, ConductingEquipment
+    from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+    from zepben.evolve.model.cim.iec61970.base.core.connectivity_node import ConnectivityNode
 
 __all__ = ["Terminal"]
 

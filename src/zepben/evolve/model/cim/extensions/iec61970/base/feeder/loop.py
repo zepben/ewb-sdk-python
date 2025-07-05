@@ -9,12 +9,13 @@ __all__ = ["Loop"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import Circuit, Substation
-
+from zepben.evolve.model.cim.extensions.zbex import zbex
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import safe_remove, ngen, nlen, get_by_mrid
-from zepben.evolve.model.cim.extensions.zbex import zbex
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
+    from zepben.evolve.model.cim.iec61970.infiec61970.feeder.circuit import Circuit
 
 
 @zbex

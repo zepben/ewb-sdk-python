@@ -5,10 +5,12 @@
 
 __all__ = ["RemoteControl"]
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61970.base.meas.control import Control
 from zepben.evolve.model.cim.iec61970.base.scada.remote_point import RemotePoint
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.meas.control import Control
 
 
 class RemoteControl(RemotePoint):
@@ -16,5 +18,5 @@ class RemoteControl(RemotePoint):
     Remote controls are outputs that are sent by the remote unit to actuators in the process.
     """
 
-    control: Optional[Control] = None
+    control: Optional['Control'] = None
     """The `zepben.evolve.iec61970.base.meas.control.Control` for the `RemoteControl` point."""

@@ -7,13 +7,15 @@ from __future__ import annotations
 
 __all__ = ["EndDevice"]
 
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61968.assets.asset_container import AssetContainer
-from zepben.evolve.model.cim.iec61968.common.location import Location
-from zepben.evolve.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
-from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
 from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.common.location import Location
+    from zepben.evolve.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
+    from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
 
 
 class EndDevice(AssetContainer):

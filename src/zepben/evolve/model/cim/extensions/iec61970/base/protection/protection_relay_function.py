@@ -7,18 +7,20 @@ from __future__ import annotations
 
 __all__ = ["ProtectionRelayFunction"]
 
-from typing import Optional, List, Generator, Iterable, Callable
+from typing import Optional, List, Generator, Iterable, Callable, TYPE_CHECKING
 
-from zepben.evolve.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
 from zepben.evolve.model.cim.extensions.iec61970.base.protection.power_direction_kind import PowerDirectionKind
 from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_kind import ProtectionKind
-from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
-from zepben.evolve.model.cim.extensions.iec61970.base.protection.relay_setting import RelaySetting
 from zepben.evolve.model.cim.extensions.zbex import zbex
-from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
 from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
-from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 from zepben.evolve.util import require, nlen, ngen, safe_remove, get_by_mrid
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.extensions.iec61968.assetinfo.relay_info import RelayInfo
+    from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_scheme import ProtectionRelayScheme
+    from zepben.evolve.model.cim.extensions.iec61970.base.protection.relay_setting import RelaySetting
+    from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.sensor import Sensor
+    from zepben.evolve.model.cim.iec61970.base.wires.protected_switch import ProtectedSwitch
 
 
 @zbex
@@ -43,7 +45,7 @@ class ProtectionRelayFunction(PowerSystemResource):
     directable: Optional[bool] = None
     """[ZBEX] Whether this ProtectionRelayFunction responds to power flow in a given direction."""
 
-    power_direction: PowerDirectionKind = PowerDirectionKind.UNKNOWN_DIRECTION
+    power_direction: PowerDirectionKind = PowerDirectionKind.UNKNOWN
     """[ZBEX] The flow of the power direction used by this ProtectionRelayFunction."""
 
     _sensors: Optional[List[Sensor]] = None

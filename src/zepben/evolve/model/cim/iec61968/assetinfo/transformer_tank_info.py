@@ -9,12 +9,13 @@ __all__ = ["TransformerTankInfo"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import PowerTransformerInfo, ResistanceReactance
-
-from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
+from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.util import nlen, ngen, safe_remove, get_by_mrid
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assetinfo.power_transformer_info import PowerTransformerInfo
+    from zepben.evolve.model.cim.iec61968.assetinfo.transformer_end_info import TransformerEndInfo
 
 
 class TransformerTankInfo(AssetInfo):

@@ -9,13 +9,13 @@ __all__ = ["Asset"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import AssetOrganisationRole
-    from zepben.evolve import PowerSystemResource
-
-from zepben.evolve.model.cim.iec61968.common.location import Location
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
 from zepben.evolve.util import get_by_mrid, nlen, ngen, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assets.asset_organisation_role import AssetOrganisationRole
+    from zepben.evolve.model.cim.iec61968.common.location import Location
+    from zepben.evolve.model.cim.iec61970.base.core.power_system_resource import PowerSystemResource
 
 
 class Asset(IdentifiedObject):

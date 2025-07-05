@@ -10,13 +10,14 @@ __all__ = ["LvFeeder"]
 import typing
 from typing import Generator, Optional, Dict, List
 
-if typing.TYPE_CHECKING:
-    from zepben.evolve import Equipment, Terminal
-    from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
-
+from zepben.evolve.model.cim.extensions.zbex import zbex
 from zepben.evolve.model.cim.iec61970.base.core.equipment_container import EquipmentContainer
 from zepben.evolve.util import safe_remove_by_id, nlen, ngen
-from zepben.evolve.model.cim.extensions.zbex import zbex
+
+if typing.TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
+    from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 
 @zbex

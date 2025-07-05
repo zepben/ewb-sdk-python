@@ -7,12 +7,14 @@ from __future__ import annotations
 
 __all__ = ["SubGeographicalRegion"]
 
-from typing import Optional, List, Generator
+from typing import Optional, List, Generator, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
 from zepben.evolve.util import nlen, ngen, get_by_mrid, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+    from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
 
 
 class SubGeographicalRegion(IdentifiedObject):

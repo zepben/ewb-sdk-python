@@ -33,7 +33,7 @@ class TransformerStarImpedance(IdentifiedObject):
     x0: Optional[float] = 0.0
     """ x0 : Zero sequence series reactance of the transformer end. Unit: Ohms"""
 
-    transformer_end_info: Optional[TransformerEndInfo] = None
+    transformer_end_info: Optional['TransformerEndInfo'] = None
     """Transformer end datasheet used to calculate this transformer star impedance."""
 
     def resistance_reactance(self) -> ResistanceReactance:

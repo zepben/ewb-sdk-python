@@ -9,11 +9,11 @@ __all__ = ["PricingStructure"]
 
 from typing import Optional, Generator, List, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from zepben.evolve import Tariff
-
 from zepben.evolve.model.cim.iec61968.common.document import Document
 from zepben.evolve.util import get_by_mrid, nlen, ngen, safe_remove
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.customers.tariff import Tariff
 
 
 class PricingStructure(Document):

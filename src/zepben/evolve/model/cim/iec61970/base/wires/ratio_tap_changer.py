@@ -7,10 +7,12 @@ from __future__ import annotations
 
 __all__ = ["RatioTapChanger"]
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.wires.tap_changer import TapChanger
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 
 
 class RatioTapChanger(TapChanger):

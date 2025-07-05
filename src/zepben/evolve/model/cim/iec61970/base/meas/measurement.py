@@ -12,7 +12,7 @@ from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode
 from zepben.evolve.model.cim.iec61970.base.domain.unit_symbol import UnitSymbol
 
 if TYPE_CHECKING:
-    from zepben.evolve import RemoteSource
+    from zepben.evolve.model.cim.iec61970.base.scada.remote_source import RemoteSource
 
 
 class Measurement(IdentifiedObject):
@@ -42,7 +42,7 @@ class Measurement(IdentifiedObject):
     power_system_resource_mrid: Optional[str] = None
     """The MRID of the power system resource that contains the measurement."""
 
-    remote_source: Optional[RemoteSource] = None
+    remote_source: Optional['RemoteSource'] = None
     """The `zepben.evolve.cim.iec61970.base.scada.remote_source.RemoteSource` taking the `Measurement`"""
 
     terminal_mrid: Optional[str] = None

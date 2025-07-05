@@ -9,12 +9,12 @@ __all__ = ["PowerElectronicsConnection"]
 
 from typing import Optional, List, Generator, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.regulating_cond_eq import RegulatingCondEq
 from zepben.evolve.util import ngen, nlen, get_by_mrid, safe_remove, require
 
 if TYPE_CHECKING:
-    from zepben.evolve import PowerElectronicsUnit
+    from zepben.evolve.model.cim.iec61970.base.generation.production.power_electronics_unit import PowerElectronicsUnit
+    from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 
 
 class PowerElectronicsConnection(RegulatingCondEq):

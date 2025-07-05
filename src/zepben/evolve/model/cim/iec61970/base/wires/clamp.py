@@ -10,7 +10,7 @@ from typing import Optional, TYPE_CHECKING
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
 
 if TYPE_CHECKING:
-    from zepben.evolve.model.cim.iec61970.base.wires.aclinesegment import AcLineSegment
+    from zepben.evolve.model.cim.iec61970.base.wires.ac_line_segment import AcLineSegment
 
 
 class Clamp(ConductingEquipment):
@@ -22,7 +22,7 @@ class Clamp(ConductingEquipment):
     length_from_terminal_1: Optional[float] = None
     """The length to the place where the clamp is located starting from side one of the line segment, i.e. the line segment terminal with sequence number equal to 1."""
 
-    ac_line_segment: Optional[AcLineSegment] = None
+    ac_line_segment: Optional['AcLineSegment'] = None
     """The line segment to which the clamp is connected."""
 
     max_terminals = 1

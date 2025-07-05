@@ -5,11 +5,13 @@
 
 __all__ = ["Conductor"]
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
-from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
 from zepben.evolve.model.cim.iec61970.base.core.conducting_equipment import ConductingEquipment
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
+    from zepben.evolve.model.cim.iec61968.assetinfo.wire_info import WireInfo
 
 
 class Conductor(ConductingEquipment):
@@ -33,7 +35,7 @@ class Conductor(ConductingEquipment):
         return self.asset_info
 
     @wire_info.setter
-    def wire_info(self, wi: Optional[WireInfo]):
+    def wire_info(self, wi: Optional['WireInfo']):
         """
         Set the `WireInfo` for this `Conductor`
         :param wi: The `WireInfo` for this `Conductor`

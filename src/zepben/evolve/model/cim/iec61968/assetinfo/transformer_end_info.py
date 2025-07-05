@@ -8,12 +8,16 @@ __all__ = ["TransformerEndInfo"]
 import math
 from typing import Optional, TYPE_CHECKING, Tuple
 
-if TYPE_CHECKING:
-    from zepben.evolve import TransformerTankInfo, NoLoadTest, OpenCircuitTest, ShortCircuitTest
 from zepben.evolve.model.cim.iec61968.assets.asset_info import AssetInfo
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
-from zepben.evolve.model.resistance_reactance import ResistanceReactance
 from zepben.evolve.model.cim.iec61970.base.wires.winding_connection import WindingConnection
+from zepben.evolve.model.resistance_reactance import ResistanceReactance
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61968.assetinfo.no_load_test import NoLoadTest
+    from zepben.evolve.model.cim.iec61968.assetinfo.open_circuit_test import OpenCircuitTest
+    from zepben.evolve.model.cim.iec61968.assetinfo.short_circuit_test import ShortCircuitTest
+    from zepben.evolve.model.cim.iec61968.assetinfo.transformer_tank_info import TransformerTankInfo
+    from zepben.evolve.model.cim.iec61970.base.wires.transformer_star_impedance import TransformerStarImpedance
 
 
 class TransformerEndInfo(AssetInfo):
@@ -48,33 +52,33 @@ class TransformerEndInfo(AssetInfo):
     short_term_s: Optional[int] = None
     """Apparent power that this winding can carry for a short period of time (in emergency). Unit: VA"""
 
-    transformer_tank_info: Optional[TransformerTankInfo] = None
+    transformer_tank_info: Optional['TransformerTankInfo'] = None
     """Transformer tank data that this end description is part of."""
 
-    transformer_star_impedance: Optional[TransformerStarImpedance] = None
+    transformer_star_impedance: Optional['TransformerStarImpedance'] = None
     """Transformer star impedance calculated from this transformer end datasheet."""
 
-    energised_end_no_load_tests: Optional[NoLoadTest] = None
+    energised_end_no_load_tests: Optional['NoLoadTest'] = None
     """
     All no-load test measurements in which this transformer end was energised.
     """
 
-    energised_end_short_circuit_tests: Optional[ShortCircuitTest] = None
+    energised_end_short_circuit_tests: Optional['ShortCircuitTest'] = None
     """
     All short-circuit test measurements in which this transformer end was short-circuited.
     """
 
-    grounded_end_short_circuit_tests: Optional[ShortCircuitTest] = None
+    grounded_end_short_circuit_tests: Optional['ShortCircuitTest'] = None
     """
     All short-circuit test measurements in which this transformer end was energised.
     """
 
-    open_end_open_circuit_tests: Optional[OpenCircuitTest] = None
+    open_end_open_circuit_tests: Optional['OpenCircuitTest'] = None
     """
     All open-circuit test measurements in which this transformer end was not excited.
     """
 
-    energised_end_open_circuit_tests: Optional[OpenCircuitTest] = None
+    energised_end_open_circuit_tests: Optional['OpenCircuitTest'] = None
     """
     All open-circuit test measurements in which this transformer end was excited.
     """

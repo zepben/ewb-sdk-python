@@ -62,7 +62,7 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
                 return phase_impedance_data
         raise KeyError((from_phase, to_phase))
 
-    def add_data(self, phase_impedance_data: PhaseImpedanceData) -> "PerLengthPhaseImpedance":
+    def add_data(self, phase_impedance_data: PhaseImpedanceData) -> 'PerLengthPhaseImpedance':
         """
         Add a :class:`PhaseImpedanceData` to this :class:`PerLengthPhaseImpedance`.
 
@@ -79,7 +79,7 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
 
         return self
 
-    def remove_data(self, phase_impedance_data: PhaseImpedanceData) -> "PerLengthPhaseImpedance":
+    def remove_data(self, phase_impedance_data: PhaseImpedanceData) -> 'PerLengthPhaseImpedance':
         """
         Remove a :class:`PhaseImpedanceData` from this :class:`PerLengthPhaseImpedance`.
 
@@ -90,7 +90,7 @@ class PerLengthPhaseImpedance(PerLengthImpedance):
         self._data = safe_remove(self._data, phase_impedance_data)
         return self
 
-    def clear_data(self) -> "PerLengthPhaseImpedance":
+    def clear_data(self) -> 'PerLengthPhaseImpedance':
         """
         Clear all :class:`PhaseImpedanceData` associated with this :class:`PerLengthPhaseImpedance`.
         :returns: A reference to this :class:`PerLengthPhaseImpedance` to allow fluent use.

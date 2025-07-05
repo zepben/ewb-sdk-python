@@ -13,7 +13,9 @@ from zepben.evolve.model.cim.iec61970.base.wires.line import Line
 from zepben.evolve.util import ngen, get_by_mrid, safe_remove, nlen
 
 if TYPE_CHECKING:
-    from zepben.evolve import Substation, Terminal, Loop
+    from zepben.evolve.model.cim.extensions.iec61970.base.feeder.loop import Loop
+    from zepben.evolve.model.cim.iec61970.base.core.substation import Substation
+    from zepben.evolve.model.cim.iec61970.base.core.terminal import Terminal
 
 
 class Circuit(Line):

@@ -7,13 +7,15 @@ from __future__ import annotations
 
 __all__ = ["Diagram"]
 
-from typing import Optional, Dict, List, Generator
+from typing import Optional, Dict, List, Generator, TYPE_CHECKING
 
 from zepben.evolve.model.cim.iec61970.base.core.identified_object import IdentifiedObject
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_style import DiagramStyle
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.orientation_kind import OrientationKind
 from zepben.evolve.util import nlen, ngen, require, safe_remove_by_id
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 
 
 class Diagram(IdentifiedObject):

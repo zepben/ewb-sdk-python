@@ -5,10 +5,12 @@
 
 __all__ = ["Fuse"]
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 from zepben.evolve.model.cim.iec61970.base.wires.switch import Switch
+
+if TYPE_CHECKING:
+    from zepben.evolve.model.cim.extensions.iec61970.base.protection.protection_relay_function import ProtectionRelayFunction
 
 
 class Fuse(Switch):
@@ -17,5 +19,5 @@ class Fuse(Switch):
     overcurrent through it. A fuse is considered a switching device because it breaks current.
     """
 
-    function: Optional[ProtectionRelayFunction] = None
+    function: Optional['ProtectionRelayFunction'] = None
     """The function implemented by this Fuse"""

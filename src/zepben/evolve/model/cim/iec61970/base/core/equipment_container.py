@@ -10,11 +10,12 @@ __all__ = ['EquipmentContainer']
 from typing import Optional, Dict, Generator, List, TYPE_CHECKING, TypeVar
 
 from zepben.evolve.model.cim.iec61970.base.core.connectivity_node_container import ConnectivityNodeContainer
-from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.util import nlen, ngen, safe_remove_by_id
 
 if TYPE_CHECKING:
-    from zepben.evolve import Equipment, LvFeeder
+    from zepben.evolve.model.cim.iec61970.base.core.equipment import Equipment
+    from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
+    from zepben.evolve.model.cim.extensions.iec61970.base.feeder.lv_feeder import LvFeeder
 
 T = TypeVar("T")
 
