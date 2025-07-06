@@ -290,7 +290,7 @@ class TestTestNetworkBuilder:
 
         n = await (TestNetworkBuilder()
                    .from_power_transformer([PhaseCode.ABC, PhaseCode.ABC], [init_rated_u(1), init_rated_u(2)])  # tx0
-                   .to_power_transformer([PhaseCode.ABC], [init_s_rating(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 3)])  # tx1
+                   .to_power_transformer([PhaseCode.ABC], [init_s_rating(TransformerCoolingType.UNKNOWN, 3)])  # tx1
                    .from_power_transformer([PhaseCode.AB, PhaseCode.AB, PhaseCode.AN], [init_b(4.0), init_b(5.0), init_b(6.0)])  # tx2
                    .build())
         print(hex(id(n)))

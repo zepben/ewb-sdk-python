@@ -14,7 +14,7 @@ class WindingConnection(Enum):
     Winding connection type.
     """
 
-    UNKNOWN_WINDING = 0
+    UNKNOWN = 0
     """Default"""
 
     D = 1

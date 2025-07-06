@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 class TransformerEndInfo(AssetInfo):
     """Transformer end data."""
 
-    connection_kind: WindingConnection = WindingConnection.UNKNOWN_WINDING
+    connection_kind: WindingConnection = WindingConnection.UNKNOWN
     """Kind of connection."""
 
     emergency_s: Optional[int] = None
@@ -113,7 +113,7 @@ class TransformerEndInfo(AssetInfo):
 
             return round(math.sqrt((((voltage / 100) * (self.rated_u ** 2) / self.rated_s) ** 2) - (r ** 2)), 2)
 
-        def calculate_r_x_from_test(short_circuit_test: ShortCircuitTest) -> Optional[Tuple[float, float]]:
+        def calculate_r_x_from_test(short_circuit_test: 'ShortCircuitTest') -> Optional[Tuple[float, float]]:
             if short_circuit_test is None:
                 return None
             elif short_circuit_test.voltage_ohmic_part is not None:

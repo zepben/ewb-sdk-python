@@ -34,7 +34,7 @@ transformer_end_info_kwargs = {
     "energised_end_open_circuit_tests": create_open_circuit_test(),
 }
 
-transformer_end_info_args = [*asset_info_args, WindingConnection.UNKNOWN_WINDING, 1, 2, 3, 4, 5.0, 6, 7, 8, TransformerTankInfo(), TransformerStarImpedance(),
+transformer_end_info_args = [*asset_info_args, WindingConnection.UNKNOWN, 1, 2, 3, 4, 5.0, 6, 7, 8, TransformerTankInfo(), TransformerStarImpedance(),
                              NoLoadTest(), ShortCircuitTest(), ShortCircuitTest(), OpenCircuitTest(), OpenCircuitTest()]
 
 
@@ -42,7 +42,7 @@ def test_transformer_end_info_constructor_default():
     tei = TransformerEndInfo()
 
     verify_asset_info_constructor_default(tei)
-    assert tei.connection_kind == WindingConnection.UNKNOWN_WINDING
+    assert tei.connection_kind == WindingConnection.UNKNOWN
     assert tei.emergency_s is None
     assert tei.end_number == 0
     assert tei.insulation_u is None

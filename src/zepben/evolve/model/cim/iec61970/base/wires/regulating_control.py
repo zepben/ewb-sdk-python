@@ -46,7 +46,7 @@ class RegulatingControl(PowerSystemResource):
     discrete: Optional[bool] = None
     """The regulation is performed in a discrete mode. This applies to equipment with discrete controls, e.g. tap changers and shunt compensators."""
 
-    mode: [RegulatingControlModeKind] = RegulatingControlModeKind.UNKNOWN_CONTROL_MODE
+    mode: [RegulatingControlModeKind] = RegulatingControlModeKind.UNKNOWN
     """
     The regulating control mode presently available. This specification allows for determining the kind of regulation without need for obtaining the 
     units from a schedule.

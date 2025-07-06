@@ -9,4 +9,4 @@ from zepben.protobuf.cim.iec61970.base.wires.SVCControlMode_pb2 import SVCContro
 
 
 def test_versus_pb():
-    validate_enum(SVCControlMode, PBSVCControlMode.Enum)
+    validate_enum(SVCControlMode, PBSVCControlMode)

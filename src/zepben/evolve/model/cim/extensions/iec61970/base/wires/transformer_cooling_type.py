@@ -18,7 +18,7 @@ class TransformerCoolingType(Enum):
     Transformer cooling types.
     """
 
-    UNKNOWN_COOLING_TYPE = 0
+    UNKNOWN = 0
     """[ZBEX] Default"""
 
     ONAN = 1

@@ -10,4 +10,4 @@ from zepben.evolve import SynchronousMachineKind
 
 
 def test_synchronous_machine_kind_enum():
-    validate_enum(SynchronousMachineKind, PBSynchronousMachineKind.Enum)
+    validate_enum(SynchronousMachineKind, PBSynchronousMachineKind)

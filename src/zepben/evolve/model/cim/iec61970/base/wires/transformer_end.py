@@ -66,6 +66,7 @@ class TransformerEnd(IdentifiedObject):
     @terminal.setter
     def terminal(self, value: Optional['Terminal']):
         if value is not None:
+            from zepben.evolve.model.cim.iec61970.base.wires.power_transformer import PowerTransformer
             require(value.conducting_equipment is None or isinstance(value.conducting_equipment, PowerTransformer),
                     lambda: f"Cannot assign {self.__class__.__name__}[{self.mrid}] to {value.__class__.__name__}[{value.mrid}], which is connected to a " +
                             f"{value.conducting_equipment.__class__.__name__}[{value.conducting_equipment.mrid}] rather than a PowerTransformer.")

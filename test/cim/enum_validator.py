@@ -8,6 +8,9 @@ from typing import Type, Tuple
 # noinspection PyPackageRequirements
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
 
+# noinspection PyProtectedMember
+from zepben.evolve.services.common.enum_mapper import EnumMapper
+
 
 def validate_enum(cim_enum: Type[Enum], pb_enum: EnumTypeWrapper):
     if len(cim_enum) != len(pb_enum.items()):
@@ -17,10 +20,16 @@ def validate_enum(cim_enum: Type[Enum], pb_enum: EnumTypeWrapper):
         print(f"pb {pb_enum.items()}.")
     assert len(cim_enum) == len(pb_enum.items()), f"mismatch in number of entries. cim '{len(cim_enum)}' vs pb '{len(pb_enum.items())}'"
 
+    mapper = EnumMapper(cim_enum, pb_enum)
+
     for cim in cim_enum:
-        if isinstance(cim.value, Tuple):
-            assert pb_enum.Value(cim.short_name) == cim.value[0], f"invalid name mapping for cim '{cim.value[0]}' vs pb '{pb_enum.Value(cim.short_name)}'"
-            assert pb_enum.Name(cim.value[0]) == cim.short_name, f"invalid value mapping for cim '{cim.short_name}' vs pb '{pb_enum.Name(cim.value[0])}'"
-        else:
-            assert pb_enum.Value(cim.short_name) == cim.value, f"invalid name mapping for cim '{cim.value}' vs pb '{pb_enum.Value(cim.short_name)}'"
-            assert pb_enum.Name(cim.value) == cim.short_name, f"invalid value mapping for cim '{cim.short_name}' vs pb '{pb_enum.Name(cim.value)}'"
+        # We use the calculated `short_name` for the CIM enum, rather than just the `name`, for cases where we override the name. e.g. UnitSymbol.
+        # we use the first value if the enum has multiple (i.e. PhaseCode) as this is the ordinal value.
+        pb = pb_enum.DESCRIPTOR.values_by_number[cim.value[0] if isinstance(cim.value, Tuple) else cim.value]
+
+        # noinspection PyUnresolvedReferences
+        assert pb.name.upper().replace("_", "").endswith(cim.short_name.upper().replace("_", "")),\
+            f"invalid value mapping for {cim.value}: cim '{cim.name}' vs pb '{pb.name}'"
+
+        assert mapper.to_cim(mapper.to_pb(cim)) is cim
+        assert mapper.to_pb(mapper.to_cim(pb)) is pb

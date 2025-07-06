@@ -1263,8 +1263,8 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             PowerTransformerEnd.s_ratings,
             PowerTransformerEnd.add_transformer_end_rated_s,
             PowerTransformerEnd,
-            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 1),
-            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 2),
+            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 1),
+            lambda _: TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 2),
             expected_differences={"rated_s"}
         )
 

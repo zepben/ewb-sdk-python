@@ -9,4 +9,4 @@ from zepben.evolve import PhaseShuntConnectionKind
 
 
 def test_phase_shunt_connection_kind_enum():
-    validate_enum(PhaseShuntConnectionKind, PBPhaseShuntConnectionKind.Enum)
+    validate_enum(PhaseShuntConnectionKind, PBPhaseShuntConnectionKind)

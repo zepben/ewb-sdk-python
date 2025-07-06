@@ -35,7 +35,7 @@ regulating_control_args = [*power_system_resource_args, False, RegulatingControl
 def verify_regulating_control_constructor_default(rc: RegulatingControl):
     verify_power_system_resource_constructor_default(rc)
     assert rc.discrete is None
-    assert rc.mode == RegulatingControlModeKind.UNKNOWN_CONTROL_MODE
+    assert rc.mode == RegulatingControlModeKind.UNKNOWN
     assert rc.monitored_phase == PhaseCode.NONE
     assert rc.target_deadband is None
     assert rc.target_value is None

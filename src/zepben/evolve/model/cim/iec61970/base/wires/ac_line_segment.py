@@ -46,6 +46,7 @@ class AcLineSegment(Conductor):
         :return: A PerLengthSequenceImpedance if one is set, otherwise None.
         """
         if self.per_length_impedance:
+            from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
             if isinstance(self.per_length_impedance, PerLengthSequenceImpedance):
                 return self.per_length_impedance
         return None
@@ -61,6 +62,7 @@ class AcLineSegment(Conductor):
         :return: A PerLengthPhaseImpedance if one is set, otherwise None.
         """
         if self.per_length_impedance:
+            from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
             if isinstance(self.per_length_impedance, PerLengthPhaseImpedance):
                 return self.per_length_impedance
         return None

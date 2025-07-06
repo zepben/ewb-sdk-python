@@ -41,7 +41,7 @@ def verify_protection_relay_function_constructor_default(prf: ProtectionRelayFun
     assert prf.relay_delay_time is None
     assert prf.protection_kind is ProtectionKind.UNKNOWN
     assert prf.directable is None
-    assert prf.power_direction == PowerDirectionKind.UNKNOWN_DIRECTION
+    assert prf.power_direction == PowerDirectionKind.UNKNOWN
     assert len(list(prf.sensors)) == 0
     assert len(list(prf.protected_switches)) == 0
     assert len(list(prf.time_limits)) == 0

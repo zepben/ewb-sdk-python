@@ -52,7 +52,7 @@ def test_power_transformer_end_constructor_default():
     assert pte.g0 is None
     assert pte.b is None
     assert pte.b0 is None
-    assert pte.connection_kind == WindingConnection.UNKNOWN_WINDING
+    assert pte.connection_kind == WindingConnection.UNKNOWN
     assert pte.phase_angle_clock is None
 
 
@@ -80,7 +80,7 @@ def test_power_transformer_end_constructor_kwargs(power_transformer, rated_s, ra
     assert pte.power_transformer == power_transformer
     assert pte.rated_s == rated_s
     # noinspection PyArgumentList
-    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, rated_s)]
+    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN, rated_s)]
     assert pte.rated_u == rated_u
     assert pte.r == r
     assert pte.x == x
@@ -103,7 +103,7 @@ def test_power_transformer_end_constructor_args():
         pte.rated_s
     ]
     # We use a different style of matching here as the passed in arg for rated_s is translated to a TransformerEndRatedS.
-    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, power_transformer_end_args[-12])]
+    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN, power_transformer_end_args[-12])]
     assert power_transformer_end_args[-11:] == [
         pte.rated_u,
         pte.r,
@@ -162,7 +162,7 @@ def test_power_transformer_rated_s_backwards_compatibility():
     pte = PowerTransformerEnd()
     pte.rated_s = 1
     assert pte.rated_s == 1
-    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 1)]
+    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 1)]
     assert pte.num_ratings() == 1
     pte.rated_s = None
     assert pte.rated_s is None
@@ -174,11 +174,11 @@ def test_power_transformer_rated_s_backwards_compatibility():
     pte.add_rating(333, TransformerCoolingType.KNAF)
     assert pte.num_ratings() == 2
     pte.rated_s = 4
-    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 4)]
+    assert list(pte.s_ratings) == [TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 4)]
     assert pte.num_ratings() == 1
     assert pte.rated_s == 4
 
 
 def test_power_transformer_s_ratings_backing_field_cant_through_the_constructor():
     with raises(ValueError, match="Do not directly set s_ratings through the constructor. You have one more constructor parameter than expected."):
-        PowerTransformerEnd(_s_ratings=[TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, 4)])
+        PowerTransformerEnd(_s_ratings=[TransformerEndRatedS(TransformerCoolingType.UNKNOWN, 4)])

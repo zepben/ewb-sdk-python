@@ -14,7 +14,7 @@ class RegulatingControlModeKind(Enum):
     The kind of regulation model. For example regulating voltage, reactive power, active power, etc.
     """
 
-    UNKNOWN_CONTROL_MODE = 0
+    UNKNOWN = 0
     """Default, unknown."""
 
     voltage = 1

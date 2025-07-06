@@ -70,7 +70,7 @@ class PowerTransformerEnd(TransformerEnd):
     b0: Optional[float] = None
     """Zero sequence magnetizing branch susceptance."""
 
-    connection_kind: WindingConnection = WindingConnection.UNKNOWN_WINDING
+    connection_kind: WindingConnection = WindingConnection.UNKNOWN
     """Kind of `zepben.protobuf.cim.iec61970.base.wires.winding_connection.WindingConnection` for this end."""
 
     phase_angle_clock: Optional[int] = None
@@ -138,7 +138,7 @@ class PowerTransformerEnd(TransformerEnd):
         )
         self.clear_ratings()
         if rated_s is not None:
-            self.add_transformer_end_rated_s(TransformerEndRatedS(TransformerCoolingType.UNKNOWN_COOLING_TYPE, rated_s))
+            self.add_transformer_end_rated_s(TransformerEndRatedS(TransformerCoolingType.UNKNOWN, rated_s))
 
     @property
     def s_ratings(self) -> Generator[TransformerEndRatedS, None, None]:
@@ -154,7 +154,7 @@ class PowerTransformerEnd(TransformerEnd):
                     return s_rating
         raise KeyError(cooling_type)
 
-    def add_rating(self, rated_s: int, cooling_type: TransformerCoolingType = TransformerCoolingType.UNKNOWN_COOLING_TYPE) -> PowerTransformerEnd:
+    def add_rating(self, rated_s: int, cooling_type: TransformerCoolingType = TransformerCoolingType.UNKNOWN) -> PowerTransformerEnd:
         self._s_ratings = self._s_ratings if self._s_ratings else list()
 
         for s_rating in self._s_ratings:
