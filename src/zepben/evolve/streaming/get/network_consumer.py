@@ -712,9 +712,9 @@ _nio_type_to_cim = {
 
     "operationalRestriction": OperationalRestriction,
 
-    ###################################
-    # IEC61968 InfIEC61968 Asset Info #
-    ###################################
+    #####################################
+    # IEC61968 InfIEC61968 InfAssetInfo #
+    #####################################
 
     "currentTransformerInfo": CurrentTransformerInfo,
     "potentialTransformerInfo": PotentialTransformerInfo,
