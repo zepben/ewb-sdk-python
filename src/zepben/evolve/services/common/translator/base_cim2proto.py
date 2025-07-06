@@ -24,7 +24,7 @@ __all__ = ["identified_object_to_pb", "document_to_pb", "organisation_role_to_pb
 
 
 ###################
-# IEC61968 COMMON #
+# IEC61968 Common #
 ###################
 
 def document_to_pb(cim: Document) -> PBDocument:
@@ -61,7 +61,7 @@ OrganisationRole.to_pb = organisation_role_to_pb
 
 
 ######################
-# IEC61970 BASE CORE #
+# IEC61970 Base Core #
 ######################
 
 def identified_object_to_pb(cim: IdentifiedObject) -> PBIdentifiedObject:

@@ -706,7 +706,7 @@ class NetworkCimWriter(BaseCimWriter):
         return self._try_execute_single_update(insert, description)
 
     #####################################
-    # IEC61968 infIEC61968 InfAssetInfo #
+    # IEC61968 InfIEC61968 InfAssetInfo #
     #####################################
 
     def save_relay_info(self, relay_info: RelayInfo) -> bool:
@@ -1391,9 +1391,9 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_protection_relay_function(table, insert, voltage_relay, "voltage relay")
 
-    ############################
+    #######################
     # IEC61970 Base SCADA #
-    ############################
+    #######################
 
     def save_remote_control(self, remote_control: RemoteControl) -> bool:
         """
@@ -1428,9 +1428,9 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_remote_point(table, insert, remote_source, "remote source")
 
-    #############################################
-    # IEC61970 Base Wires Generation Production #
-    #############################################
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
 
     def save_battery_unit(self, battery_unit: BatteryUnit) -> bool:
         """
@@ -2366,9 +2366,9 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_equipment_container(table, insert, lv_feeder, "lv feeder")
 
-    ####################################################
-    # IEC61970 infIEC61970 Wires Generation Production #
-    ####################################################
+    ##############################################
+    # IEC61970 InfIEC61970 Generation Production #
+    ##############################################
 
     def save_ev_charging_unit(self, ev_charging_unit: EvChargingUnit) -> bool:
         """

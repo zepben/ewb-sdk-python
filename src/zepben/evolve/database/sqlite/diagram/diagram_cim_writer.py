@@ -24,9 +24,9 @@ class DiagramCimWriter(BaseCimWriter):
     def __init__(self, database_tables: DiagramDatabaseTables):
         super().__init__(database_tables)
 
-    ###########################
-    # IEC61970 Diagram Layout #
-    ###########################
+    ################################
+    # IEC61970 Base Diagram Layout #
+    ################################
 
     def save_diagram(self, diagram: Diagram) -> bool:
         """

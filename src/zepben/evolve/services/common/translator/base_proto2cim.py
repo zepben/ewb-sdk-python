@@ -23,7 +23,7 @@ __all__ = ["identified_object_to_cim", "document_to_cim", "organisation_to_cim",
 
 
 ###################
-# IEC61968 COMMON #
+# IEC61968 Common #
 ###################
 
 def document_to_cim(pb: PBDocument, cim: Document, service: BaseService):
@@ -56,7 +56,7 @@ PBOrganisationRole.to_cim = organisation_role_to_cim
 
 
 ######################
-# IEC61970 BASE CORE #
+# IEC61970 Base Core #
 ######################
 
 def identified_object_to_cim(pb: PBIdentifiedObject, cim: IdentifiedObject, service: BaseService):

@@ -7,29 +7,30 @@ from typing import TypeVar, Type, Optional
 
 from hypothesis import assume
 
-from zepben.evolve import MetadataCollection, NetworkService, DiagramService, CustomerService, NameType, DataSource, IdentifiedObject, EnergyConsumer, EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, TransformerTankInfo, Asset, Pole, Streetlight, \
+from zepben.evolve import MetadataCollection, NetworkService, DiagramService, CustomerService, NameType, DataSource, IdentifiedObject, EnergyConsumer, \
+    EnergySourcePhase, EnergySource, BaseService, PowerTransformerInfo, TransformerEndInfo, TransformerTankInfo, Asset, Pole, Streetlight, \
     OrganisationRole, Customer, CustomerAgreement, PricingStructure, OperationalRestriction, AuxiliaryEquipment, ConductingEquipment, \
     ConnectivityNode, Equipment, EquipmentContainer, Name, PowerSystemResource, Substation, Terminal, \
     Control, Measurement, RemoteControl, RemoteSource, PowerElectronicsUnit, AcLineSegment, PowerElectronicsConnection, \
     PowerTransformer, ShuntCompensator, TransformerStarImpedance, \
     Circuit, Loop, LvFeeder, ProtectedSwitch, CurrentTransformer, PotentialTransformer, RegulatingCondEq, RegulatingControl, \
     ProtectionRelayFunction, Sensor, ProtectionRelayScheme, ProtectionRelaySystem, Fuse, TBaseService, TIdentifiedObject, SynchronousMachine, BatteryUnit
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
-from zepben.evolve.model.cim.iec61970.base.wires.conductor import Conductor
+from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
+from zepben.evolve.model.cim.iec61968.metering.end_device import EndDevice
+from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
-from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
-from zepben.evolve.model.cim.iec61968.metering.end_device import EndDevice
-from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
-from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
-from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.evolve.model.cim.iec61970.base.wires.conductor import Conductor
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
 
 T = TypeVar("T", bound=IdentifiedObject)
 
@@ -117,12 +118,11 @@ class SchemaNetworks:
         service.add(filled)
 
         ################################
-        # EXTENSIONS IEC61968 METERING #
+        # Extensions IEC61968 Metering #
         ################################
 
-
         #######################
-        # IEC61968 ASSET INFO #
+        # IEC61968 Asset Info #
         #######################
 
         if isinstance(filled, PowerTransformerInfo):
@@ -149,7 +149,7 @@ class SchemaNetworks:
                 service.add(it)
 
         ###################
-        # IEC61968 ASSETS #
+        # IEC61968 Assets #
         ###################
 
         if isinstance(filled, Asset):
@@ -170,14 +170,14 @@ class SchemaNetworks:
             service.add(filled.pole)
 
         ###################
-        # IEC61968 COMMON #
+        # IEC61968 Common #
         ###################
 
         if isinstance(filled, OrganisationRole):
             service.add(filled.organisation)
 
         ######################
-        # IEC61968 CUSTOMERS #
+        # IEC61968 Customers #
         ######################
 
         if isinstance(filled, Customer):
@@ -196,7 +196,7 @@ class SchemaNetworks:
                 service.add(it)
 
         #####################
-        # IEC61968 METERING #
+        # IEC61968 Metering #
         #####################
 
         if isinstance(filled, EndDevice):
@@ -217,7 +217,7 @@ class SchemaNetworks:
                 service.add(it)
 
         #######################
-        # IEC61968 OPERATIONS #
+        # IEC61968 Operations #
         #######################
 
         if isinstance(filled, OperationalRestriction):
@@ -226,7 +226,7 @@ class SchemaNetworks:
                 service.add(it)
 
         #####################################
-        # IEC61970 BASE AUXILIARY EQUIPMENT #
+        # IEC61970 Base Auxiliary Equipment #
         #####################################
 
         if isinstance(filled, AuxiliaryEquipment):
@@ -239,7 +239,7 @@ class SchemaNetworks:
             service.add(filled.asset_info)
 
         ######################
-        # IEC61970 BASE CORE #
+        # IEC61970 Base Core #
         ######################
 
         if isinstance(filled, ConductingEquipment):
@@ -323,7 +323,7 @@ class SchemaNetworks:
                 service.add(filled.connectivity_node)
 
         ################################
-        # IEC61970 BASE DIAGRAM LAYOUT #
+        # IEC61970 Base Diagram Layout #
         ################################
 
         if isinstance(filled, Diagram):
@@ -336,7 +336,7 @@ class SchemaNetworks:
             service.add(filled.diagram)
 
         ######################
-        # IEC61970 BASE MEAS #
+        # IEC61970 Base Meas #
         ######################
 
         if isinstance(filled, Control):
@@ -350,6 +350,7 @@ class SchemaNetworks:
         ############################
         # IEC61970 Base Protection #
         ############################
+
         if isinstance(filled, ProtectionRelayFunction):
             for it in filled.protected_switches:
                 it.add_relay_function(filled)
@@ -381,7 +382,7 @@ class SchemaNetworks:
                 service.add(it)
 
         #######################
-        # IEC61970 BASE SCADA #
+        # IEC61970 Base Scada #
         #######################
 
         if isinstance(filled, RemoteControl):
@@ -392,9 +393,9 @@ class SchemaNetworks:
             filled.measurement.remote_source = filled
             service.add(filled.measurement)
 
-        #############################################
-        # IEC61970 BASE WIRES GENERATION PRODUCTION #
-        #############################################
+        #######################################
+        # IEC61970 Base Generation Production #
+        #######################################
 
         if isinstance(filled, PowerElectronicsUnit):
             filled.power_electronics_connection.add_unit(filled)
@@ -405,7 +406,7 @@ class SchemaNetworks:
                 service.add(it)
 
         #######################
-        # IEC61970 BASE WIRES #
+        # IEC61970 Base Wires #
         #######################
 
         if isinstance(filled, AcLineSegment):
@@ -510,9 +511,9 @@ class SchemaNetworks:
             filled.transformer_end_info.transformer_star_impedance = filled
             service.add(filled.transformer_end_info)
 
-        #########################
-        # IEC61970 INF IEC61970 #
-        #########################
+        ###############################
+        # IEC61970 InfIEC61970 Feeder #
+        ###############################
 
         if isinstance(filled, Circuit):
             filled.loop.add_circuit(filled)

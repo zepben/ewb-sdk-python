@@ -809,7 +809,7 @@ class NetworkCimReader(BaseCimReader):
         return td if not td.all_fields_null_or_empty() else None
 
     #####################################
-    # IEC61968 infIEC61968 InfAssetInfo #
+    # IEC61968 InfIEC61968 InfAssetInfo #
     #####################################
 
     def load_relay_info(self, table: TableRelayInfo, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
@@ -1643,9 +1643,9 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_remote_point(remote_source, table, result_set) and self._add_or_throw(remote_source)
 
-    #############################################
-    # IEC61970 Base Wires Generation Production #
-    #############################################
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
 
     def load_battery_unit(self, table: TableBatteryUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """
@@ -2704,9 +2704,9 @@ class NetworkCimReader(BaseCimReader):
 
         return self._load_equipment_container(lv_feeder, table, result_set) and self._add_or_throw(lv_feeder)
 
-    ####################################################
-    # IEC61970 InfIEC61970 Wires Generation Production #
-    ####################################################
+    ##############################################
+    # IEC61970 InfIEC61970 Generation Production #
+    ##############################################
 
     def load_ev_charging_unit(self, table: TableEvChargingUnits, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """

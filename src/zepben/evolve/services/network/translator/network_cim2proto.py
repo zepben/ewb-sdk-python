@@ -335,7 +335,7 @@ class CimTranslationException(Exception):
 
 
 ################################
-# EXTENSIONS IEC61968 METERING #
+# Extensions IEC61968 Metering #
 ################################
 
 def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanDemandResponseFunction:
@@ -356,7 +356,7 @@ PanDemandResponseFunction.to_pb = pan_demand_response_function_to_pb
 
 
 ##################################
-# EXTENSIONS IEC61970 BASE WIRES #
+# Extensions IEC61970 Base Wires #
 ##################################
 
 def battery_control_to_pb(cim: BatteryControl) -> PBBatteryControl:
@@ -379,7 +379,7 @@ BatteryControl.to_pb = battery_control_to_pb
 
 
 #######################
-# IEC61968 ASSET INFO #
+# IEC61968 Asset Info #
 #######################
 
 def cable_info_to_pb(cim: CableInfo) -> PBCableInfo:
@@ -510,7 +510,7 @@ TransformerTankInfo.to_pb = transformer_tank_info_to_pb
 
 
 ###################
-# IEC61968 ASSETS #
+# IEC61968 Assets #
 ###################
 
 def asset_to_pb(cim: Asset) -> PBAsset:
@@ -576,7 +576,7 @@ Streetlight.to_pb = streetlight_to_pb
 
 
 ###################
-# IEC61968 COMMON #
+# IEC61968 Common #
 ###################
 
 def location_to_pb(cim: Location) -> PBLocation:
@@ -620,7 +620,7 @@ Location.to_pb = location_to_pb
 
 
 #####################################
-# IEC61968 infIEC61968 InfAssetInfo #
+# IEC61968 InfIEC61968 InfAssetInfo #
 #####################################
 
 def current_transformer_info_to_pb(cim: CurrentTransformerInfo) -> PBCurrentTransformerInfo:
@@ -668,7 +668,7 @@ PotentialTransformerInfo.to_pb = potential_transformer_info_to_pb
 
 
 ##################################
-# IEC61968 infIEC61968 InfCommon #
+# IEC61968 InfIEC61968 InfCommon #
 ##################################
 
 def ratio_to_pb(cim: Ratio) -> PBRatio:
@@ -676,7 +676,7 @@ def ratio_to_pb(cim: Ratio) -> PBRatio:
 
 
 #####################
-# IEC61968 METERING #
+# IEC61968 Metering #
 #####################
 
 def end_device_to_pb(cim: EndDevice) -> PBEndDevice:
@@ -729,7 +729,7 @@ UsagePoint.to_pb = usage_point_to_pb
 
 
 #######################
-# IEC61968 OPERATIONS #
+# IEC61968 Operations #
 #######################
 
 def operational_restriction_to_pb(cim: OperationalRestriction) -> PBOperationalRestriction:
@@ -740,7 +740,7 @@ OperationalRestriction.to_pb = operational_restriction_to_pb
 
 
 #####################################
-# IEC61970 BASE AUXILIARY EQUIPMENT #
+# IEC61970 Base Auxiliary Equipment #
 #####################################
 
 def auxiliary_equipment_to_pb(cim: AuxiliaryEquipment, include_asset_info: bool = False) -> PBAuxiliaryEquipment:
@@ -781,7 +781,7 @@ PotentialTransformer.to_pb = potential_transformer_to_pb
 
 
 ######################
-# IEC61970 BASE CORE #
+# IEC61970 Base Core #
 ######################
 
 def ac_dc_terminal_to_pb(cim: AcDcTerminal) -> PBAcDcTerminal:
@@ -923,7 +923,7 @@ Terminal.to_pb = terminal_to_pb
 
 
 #############################
-# IEC61970 BASE EQUIVALENTS #
+# IEC61970 Base Equivalents #
 #############################
 
 def equivalent_branch_to_pb(cim: EquivalentBranch) -> PBEquivalentBranch:
@@ -956,7 +956,7 @@ EquivalentBranch.to_pb = equivalent_branch_to_pb
 
 
 ######################
-# IEC61970 BASE MEAS #
+# IEC61970 Base Meas #
 ######################
 
 def accumulator_to_pb(cim: Accumulator) -> PBAccumulator:
@@ -1086,7 +1086,7 @@ VoltageRelay.to_pb = voltage_relay_to_pb
 
 
 #######################
-# IEC61970 BASE SCADA #
+# IEC61970 Base Scada #
 #######################
 
 def remote_control_to_pb(cim: RemoteControl) -> PBRemoteControl:
@@ -1111,9 +1111,9 @@ RemoteControl.to_pb = remote_control_to_pb
 RemoteSource.to_pb = remote_source_to_pb
 
 
-#############################################
-# IEC61970 BASE WIRES GENERATION PRODUCTION #
-#############################################
+#######################################
+# IEC61970 Base Generation Production #
+#######################################
 
 def battery_unit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
     """
@@ -1153,7 +1153,7 @@ PowerElectronicsWindUnit.to_pb = power_electronics_wind_unit_to_pb
 
 
 #######################
-# IEC61970 BASE WIRES #
+# IEC61970 Base Wires #
 #######################
 
 def ac_line_segment_to_pb(cim: AcLineSegment) -> PBAcLineSegment:
@@ -1721,7 +1721,7 @@ TransformerStarImpedance.to_pb = transformer_star_impedance_to_pb
 
 
 ###############################
-# IEC61970 INFIEC61970 FEEDER #
+# IEC61970 InfIEC61970 Feeder #
 ###############################
 
 
@@ -1757,9 +1757,9 @@ Loop.to_pb = loop_to_pb
 LvFeeder.to_pb = lv_feeder_to_pb
 
 
-####################################################
-# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
-####################################################
+##############################################
+# IEC61970 InfIEC61970 Generation Production #
+##############################################
 
 
 def ev_charging_unit(cim: EvChargingUnit) -> PBEvChargingUnit:

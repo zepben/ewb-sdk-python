@@ -107,7 +107,7 @@ ALPHANUM = "abcdefghijbklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
 
 ################################
-# EXTENSIONS IEC61968 METERING #
+# Extensions IEC61968 Metering #
 ################################
 
 def create_pan_demand_response_function(include_runtime: bool = True):
@@ -120,7 +120,7 @@ def create_pan_demand_response_function(include_runtime: bool = True):
 
 
 ##################################
-# EXTENSIONS IEC61970 BASE WIRES #
+# Extensions IEC61970 Base Wires #
 ##################################
 
 def create_battery_control(include_runtime: bool = True):
@@ -135,7 +135,7 @@ def create_battery_control(include_runtime: bool = True):
 
 
 #######################
-# IEC61968 ASSET INFO #
+# IEC61968 Asset Info #
 #######################
 
 
@@ -268,7 +268,7 @@ def sampled_wire_material_kind():
 
 
 ###################
-# IEC61968 ASSETS #
+# IEC61968 Assets #
 ###################
 
 
@@ -329,7 +329,7 @@ def create_structure(include_runtime: bool):
 
 
 ###################
-# IEC61968 COMMON #
+# IEC61968 Common #
 ###################
 
 
@@ -409,7 +409,7 @@ def create_town_detail():
 
 
 ######################
-# IEC61968 CUSTOMERS #
+# IEC61968 Customers #
 ######################
 
 
@@ -450,7 +450,7 @@ def create_tariffs(include_runtime: bool = True):
 
 
 #####################################
-# IEC61968 infIEC61968 InfAssetInfo #
+# IEC61968 InfIEC61968 InfAssetInfo #
 #####################################
 
 
@@ -497,7 +497,7 @@ def create_potential_transformer_info(include_runtime: bool = True):
 
 
 ##################################
-# IEC61968 infIEC61968 InfCommon #
+# IEC61968 InfIEC61968 InfCommon #
 ##################################
 
 
@@ -510,7 +510,7 @@ def create_ratio():
 
 
 #####################
-# IEC61968 METERING #
+# IEC61968 Metering #
 #####################
 
 
@@ -550,7 +550,7 @@ def create_usage_point(include_runtime: bool = True):
 
 
 #######################
-# IEC61968 OPERATIONS #
+# IEC61968 Operations #
 #######################
 
 
@@ -563,7 +563,7 @@ def create_operational_restriction(include_runtime: bool = True):
 
 
 #####################################
-# IEC61970 BASE AUXILIARY EQUIPMENT #
+# IEC61970 Base Auxiliary Equipment #
 #####################################
 
 
@@ -604,7 +604,7 @@ def create_sensor(include_runtime: bool = True):
 
 
 ######################
-# IEC61970 BASE CORE #
+# IEC61970 Base Core #
 ######################
 
 
@@ -793,7 +793,7 @@ def create_terminal(include_runtime: bool = True):
 
 
 #############################
-# IEC61970 BASE EQUIVALENTS #
+# IEC61970 Base Equivalents #
 #############################
 
 
@@ -825,7 +825,7 @@ def create_equivalent_equipment(include_runtime: bool):
 
 
 ################################
-# IEC61970 BASE DIAGRAM LAYOUT #
+# IEC61970 Base Diagram Layout #
 ################################
 
 
@@ -860,7 +860,7 @@ def create_diagram_object_point():
 
 
 ######################
-# IEC61970 BASE MEAS #
+# IEC61970 Base Meas #
 ######################
 
 
@@ -1000,7 +1000,7 @@ def create_protection_relay_system(include_runtime: bool = True):
 
 
 #######################
-# IEC61970 BASE SCADA #
+# IEC61970 Base Scada #
 #######################
 
 def create_remote_control(include_runtime: bool = True):
@@ -1023,9 +1023,9 @@ def create_remote_source(include_runtime: bool = True):
     )
 
 
-#############################################
-# IEC61970 BASE WIRES GENERATION PRODUCTION #
-#############################################
+#######################################
+# IEC61970 Base Generation Production #
+#######################################
 
 
 def sampled_battery_state_kind():
@@ -1061,7 +1061,7 @@ def create_power_electronics_wind_unit(include_runtime: bool = True):
 
 
 #######################
-# IEC61970 BASE WIRES #
+# IEC61970 Base Wires #
 #######################
 
 
@@ -1645,9 +1645,9 @@ def sampled_winding_connection_kind():
     return sampled_from(WindingConnection)
 
 
-#########################
-# IEC61970 INF IEC61970 #
-#########################
+###############################
+# IEC61970 InfIEC61970 Feeder #
+###############################
 
 
 def create_circuit(include_runtime: bool = True):
@@ -1686,9 +1686,9 @@ def create_lv_feeder(include_runtime: bool = True):
     )
 
 
-#####################################################
-# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
-#####################################################
+##############################################
+# IEC61970 InfIEC61970 Generation Production #
+##############################################
 
 def create_ev_charging_unit(include_runtime: bool = True):
     return builds(EvChargingUnit, **create_power_electronics_unit(include_runtime))

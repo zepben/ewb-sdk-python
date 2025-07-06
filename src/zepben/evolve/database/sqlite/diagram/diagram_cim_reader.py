@@ -29,9 +29,9 @@ class DiagramCimReader(BaseCimReader):
     def __init__(self, service: DiagramService):
         super().__init__(service)
 
-    ###########################
-    # IEC61970 Diagram Layout #
-    ###########################
+    ################################
+    # IEC61970 Base Diagram Layout #
+    ################################
 
     def load_diagrams(self, table: TableDiagrams, result_set: ResultSet, set_identifier: Callable[[str], str]) -> bool:
         """

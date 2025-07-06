@@ -207,7 +207,7 @@ __all__ = ['cable_info', 'no_load_test', 'open_circuit_test', 'overhead_wire_inf
 
 
 ################################
-# EXTENSIONS IEC61968 METERING #
+# Extensions IEC61968 Metering #
 ################################
 
 def pan_demand_response_function():
@@ -220,7 +220,7 @@ def pan_demand_response_function():
 
 
 ##################################
-# EXTENSIONS IEC61970 BASE WIRES #
+# Extensions IEC61970 Base Wires #
 ##################################
 
 def battery_control():
@@ -235,7 +235,7 @@ def battery_control():
 
 
 #######################
-# IEC61968 ASSET INFO #
+# IEC61968 Asset Info #
 #######################
 
 def cable_info():
@@ -358,7 +358,7 @@ def wire_info():
 
 
 ###################
-# IEC61968 ASSETS #
+# IEC61968 Assets #
 ###################
 
 def asset():
@@ -416,7 +416,7 @@ def streetlight():
 
 
 ###################
-# IEC61968 COMMON #
+# IEC61968 Common #
 ###################
 
 def document():
@@ -480,7 +480,7 @@ def town_detail():
 
 
 ######################
-# IEC61968 CUSTOMERS #
+# IEC61968 Customers #
 ######################
 
 
@@ -519,7 +519,7 @@ def tariff():
 
 
 #####################################
-# IEC61968 infIEC61968 InfAssetInfo #
+# IEC61968 InfIEC61968 InfAssetInfo #
 #####################################
 
 
@@ -566,7 +566,7 @@ def potential_transformer_info():
 
 
 ##################################
-# IEC61968 infIEC61968 InfCommon #
+# IEC61968 InfIEC61968 InfCommon #
 ##################################
 
 def ratio():
@@ -574,7 +574,7 @@ def ratio():
 
 
 #####################
-# IEC61968 METERING #
+# IEC61968 Metering #
 #####################
 
 def end_device():
@@ -615,7 +615,7 @@ def usage_point():
 
 
 #######################
-# IEC61968 OPERATIONS #
+# IEC61968 Operations #
 #######################
 
 def operational_restriction():
@@ -623,7 +623,7 @@ def operational_restriction():
 
 
 #####################################
-# IEC61970 BASE AUXILIARY EQUIPMENT #
+# IEC61970 Base Auxiliary Equipment #
 #####################################
 
 def auxiliary_equipment():
@@ -647,7 +647,7 @@ def sensor():
 
 
 ######################
-# IEC61970 BASE CORE #
+# IEC61970 Base Core #
 ######################
 
 def ac_dc_terminal():
@@ -763,9 +763,9 @@ def terminal():
     )
 
 
-###############################
-# IEC61970 BASE DIAGRAMLAYOUT #
-###############################
+################################
+# IEC61970 Base Diagram Layout #
+################################
 
 
 def diagram():
@@ -799,7 +799,7 @@ def diagram_object_point():
 
 
 #############################
-# IEC61970 BASE EQUIVALENTS #
+# IEC61970 Base Equivalents #
 #############################
 
 def equivalent_branch():
@@ -830,7 +830,7 @@ def equivalent_equipment():
 
 
 ######################
-# IEC61970 BASE MEAS #
+# IEC61970 Base Meas #
 ######################
 
 def accumulator():
@@ -953,7 +953,7 @@ def protection_relay_system():
 
 
 #######################
-# IEC61970 BASE SCADA #
+# IEC61970 Base Scada #
 #######################
 
 def remote_control():
@@ -968,9 +968,9 @@ def remote_source():
     return builds(PBRemoteSource, rp=remote_point(), measurementMRID=text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))
 
 
-#############################################
-# IEC61970 BASE WIRES GENERATION PRODUCTION #
-#############################################
+#######################################
+# IEC61970 Base Generation Production #
+#######################################
 
 def battery_unit():
     return builds(
@@ -1002,7 +1002,7 @@ def power_electronics_wind_unit():
 
 
 #######################
-# IEC61970 BASE WIRES #
+# IEC61970 Base Wires #
 #######################
 
 def ac_line_segment():
@@ -1442,7 +1442,7 @@ def transformer_star_impedance():
 
 
 ###############################
-# IEC61970 INFIEC61970 FEEDER #
+# IEC61970 InfIEC61970 Feeder #
 ###############################
 
 def circuit():
@@ -1474,9 +1474,9 @@ def lv_feeder():
     )
 
 
-####################################################
-# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
-####################################################
+##############################################
+# IEC61970 InfIEC61970 Generation Production #
+##############################################
 
 def ev_charging_unit():
     return builds(PBEvChargingUnit, peu=power_electronics_unit())
@@ -1507,13 +1507,22 @@ def timestamp():
 @composite
 def network_identified_objects(draw):
     nios = [
-        # EXTENSIONS IEC61968 METERING #
+        ################################
+        # Extensions IEC61968 Metering #
+        ################################
+
         draw(builds(NetworkIdentifiedObject, panDemandResponseFunction=pan_demand_response_function())),
 
-        # EXTENSIONS IEC61970 BASE WIRES #
+        ##################################
+        # Extensions IEC61970 Base Wires #
+        ##################################
+
         draw(builds(NetworkIdentifiedObject, batteryControl=battery_control())),
 
-        # IEC61968 ASSET INFO #
+        #######################
+        # IEC61968 Asset Info #
+        #######################
+
         draw(builds(NetworkIdentifiedObject, cableInfo=cable_info())),
         draw(builds(NetworkIdentifiedObject, noLoadTest=no_load_test())),
         draw(builds(NetworkIdentifiedObject, openCircuitTest=open_circuit_test())),
@@ -1524,33 +1533,54 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, transformerEndInfo=transformer_end_info())),
         draw(builds(NetworkIdentifiedObject, transformerTankInfo=transformer_tank_info())),
 
-        # IEC61968 ASSETS #
+        ###################
+        # IEC61968 Assets #
+        ###################
+
         draw(builds(NetworkIdentifiedObject, assetOwner=asset_owner())),
         draw(builds(NetworkIdentifiedObject, pole=pole())),
         draw(builds(NetworkIdentifiedObject, streetlight=streetlight())),
 
-        # IEC61968 COMMON #
+        ###################
+        # IEC61968 Common #
+        ###################
+
         draw(builds(NetworkIdentifiedObject, location=location())),
         draw(builds(NetworkIdentifiedObject, organisation=organisation())),
 
-        # IEC61968 METERING #
+        #####################
+        # IEC61968 Metering #
+        #####################
+
         draw(builds(NetworkIdentifiedObject, meter=meter())),
         draw(builds(NetworkIdentifiedObject, usagePoint=usage_point())),
 
-        # IEC61968 OPERATIONS #
+        #######################
+        # IEC61968 Operations #
+        #######################
+
         draw(builds(NetworkIdentifiedObject, operationalRestriction=operational_restriction())),
 
-        # IEC61968 InfIEC61968 ASSET INFO #
+        ###################################
+        # IEC61968 InfIEC61968 Asset Info #
+        ###################################
+
         draw(builds(NetworkIdentifiedObject, currentTransformerInfo=current_transformer_info())),
         draw(builds(NetworkIdentifiedObject, potentialTransformerInfo=potential_transformer_info())),
         draw(builds(NetworkIdentifiedObject, relayInfo=relay_info())),
 
-        # IEC61970 BASE AUXILIARY EQUIPMENT #
+        #####################################
+        # IEC61970 Base Auxiliary Equipment #
+        #####################################
+
         draw(builds(NetworkIdentifiedObject, currentTransformer=current_transformer())),
         draw(builds(NetworkIdentifiedObject, faultIndicator=fault_indicator())),
         draw(builds(NetworkIdentifiedObject, potentialTransformer=potential_transformer())),
 
-        # IEC61970 BASE CORE #
+        ######################
+        # IEC61970 Base Core #
+        ######################
+
         draw(builds(NetworkIdentifiedObject, baseVoltage=base_voltage())),
         draw(builds(NetworkIdentifiedObject, connectivityNode=connectivity_node())),
         draw(builds(NetworkIdentifiedObject, feeder=feeder())),
@@ -1561,32 +1591,50 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, terminal=terminal())),
         draw(builds(NetworkIdentifiedObject, reactiveCapabilityCurve=reactive_capability_curve())),
 
-        # IEC61970 BASE EQUIVALENTS #
+        #############################
+        # IEC61970 Base Equivalents #
+        #############################
+
         draw(builds(NetworkIdentifiedObject, equivalentBranch=equivalent_branch())),
 
-        # IEC61970 BASE MEAS #
+        ######################
+        # IEC61970 Base Meas #
+        ######################
+
         draw(builds(NetworkIdentifiedObject, accumulator=accumulator())),
         draw(builds(NetworkIdentifiedObject, analog=analog())),
         draw(builds(NetworkIdentifiedObject, control=control())),
         draw(builds(NetworkIdentifiedObject, discrete=discrete())),
 
-        # IEC61970 BASE PROTECTION #
+        ############################
+        # IEC61970 Base Protection #
+        ############################
+
         draw(builds(NetworkIdentifiedObject, currentRelay=current_relay())),
         draw(builds(NetworkIdentifiedObject, distanceRelay=distance_relay())),
         draw(builds(NetworkIdentifiedObject, protectionRelayScheme=protection_relay_scheme())),
         draw(builds(NetworkIdentifiedObject, protectionRelaySystem=protection_relay_system())),
         draw(builds(NetworkIdentifiedObject, voltageRelay=voltage_relay())),
 
-        # IEC61970 BASE SCADA #
+        #######################
+        # IEC61970 Base Scada #
+        #######################
+
         draw(builds(NetworkIdentifiedObject, remoteControl=remote_control())),
         draw(builds(NetworkIdentifiedObject, remoteSource=remote_source())),
 
-        # IEC61970 BASE WIRES GENERATION PRODUCTION #
+        #######################################
+        # IEC61970 Base Generation Production #
+        #######################################
+
         draw(builds(NetworkIdentifiedObject, batteryUnit=battery_unit())),
         draw(builds(NetworkIdentifiedObject, photoVoltaicUnit=photo_voltaic_unit())),
         draw(builds(NetworkIdentifiedObject, powerElectronicsWindUnit=power_electronics_wind_unit())),
 
-        # IEC61970 BASE WIRES #
+        #######################
+        # IEC61970 Base Wires #
+        #######################
+
         draw(builds(NetworkIdentifiedObject, acLineSegment=ac_line_segment())),
         draw(builds(NetworkIdentifiedObject, breaker=breaker())),
         draw(builds(NetworkIdentifiedObject, busbarSection=busbar_section())),
@@ -1616,12 +1664,18 @@ def network_identified_objects(draw):
         draw(builds(NetworkIdentifiedObject, staticVarCompensator=static_var_compensator())),
         draw(builds(NetworkIdentifiedObject, reactiveCapabilityCurve=reactive_capability_curve())),
 
-        # IEC61970 INFIEC61970 FEEDER #
+        ###############################
+        # IEC61970 InfIEC61970 Feeder #
+        ###############################
+
         draw(builds(NetworkIdentifiedObject, circuit=circuit())),
         draw(builds(NetworkIdentifiedObject, loop=loop())),
         draw(builds(NetworkIdentifiedObject, lvFeeder=lv_feeder())),
 
-        # IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
+        ##############################################
+        # IEC61970 InfIEC61970 Generation Production #
+        ##############################################
+
         draw(builds(NetworkIdentifiedObject, evChargingUnit=ev_charging_unit()))
     ]
     return nios

@@ -18,7 +18,7 @@ __all__ = ["diagram_object_point_to_cim", "diagram_to_cim", "diagram_object_to_c
 
 
 ################################
-# IEC61970 BASE DIAGRAM LAYOUT #
+# IEC61970 Base Diagram Layout #
 ################################
 
 def diagram_to_cim(pb: PBDiagram, service: DiagramService):

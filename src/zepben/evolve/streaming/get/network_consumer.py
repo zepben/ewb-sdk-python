@@ -658,13 +658,22 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
 
 
 _nio_type_to_cim = {
-    # EXTENSIONS IEC61968 METERING #
+    ################################
+    # Extensions IEC61968 Metering #
+    ################################
+
     "panDemandResponseFunction": PanDemandResponseFunction,
 
-    # EXTENSIONS IEC61970 BASE WIRES #
+    ##################################
+    # Extensions IEC61970 Base Wires #
+    ##################################
+
     "batteryControl": BatteryControl,
 
-    # IEC61968 ASSET INFO #
+    #######################
+    # IEC61968 Asset Info #
+    #######################
+
     "cableInfo": CableInfo,
     "noLoadTest": NoLoadTest,
     "openCircuitTest": OpenCircuitTest,
@@ -675,33 +684,54 @@ _nio_type_to_cim = {
     "transformerEndInfo": TransformerEndInfo,
     "transformerTankInfo": TransformerTankInfo,
 
-    # IEC61968 ASSETS #
+    ###################
+    # IEC61968 Assets #
+    ###################
+
     "assetOwner": AssetOwner,
 
-    # IEC61968 COMMON #
+    ###################
+    # IEC61968 Common #
+    ###################
+
     "organisation": Organisation,
     "location": Location,
     "pole": Pole,
     "streetlight": Streetlight,
 
-    # IEC61968 METERING #
+    #####################
+    # IEC61968 Metering #
+    #####################
+
     "meter": Meter,
     "usagePoint": UsagePoint,
 
-    # IEC61968 OPERATIONS #
+    #######################
+    # IEC61968 Operations #
+    #######################
+
     "operationalRestriction": OperationalRestriction,
 
-    # IEC61968 InfIEC61968 ASSET INFO #
+    ###################################
+    # IEC61968 InfIEC61968 Asset Info #
+    ###################################
+
     "currentTransformerInfo": CurrentTransformerInfo,
     "potentialTransformerInfo": PotentialTransformerInfo,
     "relayInfo": RelayInfo,
 
-    # IEC61970 BASE AUXILIARY EQUIPMENT #
+    #####################################
+    # IEC61970 Base Auxiliary Equipment #
+    #####################################
+
     "currentTransformer": CurrentTransformer,
     "faultIndicator": FaultIndicator,
     "potentialTransformer": PotentialTransformer,
 
-    # IEC61970 BASE CORE #
+    ######################
+    # IEC61970 Base Core #
+    ######################
+
     "baseVoltage": BaseVoltage,
     "connectivityNode": ConnectivityNode,
     "feeder": Feeder,
@@ -711,32 +741,50 @@ _nio_type_to_cim = {
     "substation": Substation,
     "terminal": Terminal,
 
-    # IEC61970 BASE EQUIVALENTS #
+    #############################
+    # IEC61970 Base Equivalents #
+    #############################
+
     "equivalentBranch": EquivalentBranch,
 
-    # IEC61970 BASE MEAS #
+    ######################
+    # IEC61970 Base Meas #
+    ######################
+
     "accumulator": Accumulator,
     "analog": Analog,
     "control": Control,
     "discrete": Discrete,
 
-    # IEC61970 BASE PROTECTION #
+    ############################
+    # IEC61970 Base Protection #
+    ############################
+
     "currentRelay": CurrentRelay,
     "distanceRelay": DistanceRelay,
     "protectionRelayScheme": ProtectionRelayScheme,
     "protectionRelaySystem": ProtectionRelaySystem,
     "voltageRelay": VoltageRelay,
 
-    # IEC61970 BASE SCADA #
+    #######################
+    # IEC61970 Base Scada #
+    #######################
+
     "remoteControl": RemoteControl,
     "remoteSource": RemoteSource,
 
-    # IEC61970 BASE WIRES GENERATION PRODUCTION #
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
+
     "batteryUnit": BatteryUnit,
     "photoVoltaicUnit": PhotoVoltaicUnit,
     "powerElectronicsWindUnit": PowerElectronicsWindUnit,
 
-    # IEC61970 BASE WIRES #
+    #######################
+    # IEC61970 Base Wires #
+    #######################
+
     "acLineSegment": AcLineSegment,
     "breaker": Breaker,
     "busbarSection": BusbarSection,
@@ -771,12 +819,18 @@ _nio_type_to_cim = {
     "tapChangerControl": TapChangerControl,
     "transformerStarImpedance": TransformerStarImpedance,
 
-    # IEC61970 InfIEC61970 FEEDER #
+    ###############################
+    # IEC61970 InfIEC61970 Feeder #
+    ###############################
+
     "circuit": Circuit,
     "loop": Loop,
     "lvFeeder": LvFeeder,
     "switchInfo": SwitchInfo,
 
-    # IEC61970 InfIEC61970 WIRES GENERATION PRODUCTION #
+    ##############################################
+    # IEC61970 InfIEC61970 Generation Production #
+    ##############################################
+
     "evChargingUnit": EvChargingUnit
 }

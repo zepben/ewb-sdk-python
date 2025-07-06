@@ -17,13 +17,13 @@ T = TypeVar("T", bound=IdentifiedObject)
 types_to_test = {
 
     ###################
-    # IEC61968 COMMON #
+    # IEC61968 Common #
     ###################
 
     "create_organisation": create_organisation(),
 
     ######################
-    # IEC61968 CUSTOMERS #
+    # IEC61968 Customers #
     ######################
 
     "create_customer": create_customer(),

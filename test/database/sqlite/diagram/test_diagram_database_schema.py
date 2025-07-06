@@ -37,7 +37,7 @@ class TestDiagramDatabaseSchema(CimDatabaseSchemaCommonTests[DiagramService, Dia
         return DiagramObject()
 
     ################################
-    # IEC61970 BASE DIAGRAM LAYOUT #
+    # IEC61970 Base Diagram Layout #
     ################################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])

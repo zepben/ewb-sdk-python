@@ -36,7 +36,7 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
         return Customer()
 
     ######################
-    # IEC61968 CUSTOMERS #
+    # IEC61968 Customers #
     ######################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -60,7 +60,7 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
         await self._validate_schema(SchemaNetworks().customer_services_of(Tariff, tariffs))
 
     ###################
-    # IEC61968 COMMON #
+    # IEC61968 Common #
     ###################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])

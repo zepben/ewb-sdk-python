@@ -22,7 +22,7 @@ __all__ = ["agreement_to_pb", "customer_to_pb", "customer_agreement_to_pb", "pri
 
 
 ###################
-# IEC61968 COMMON #
+# IEC61968 Common #
 ###################
 
 def agreement_to_pb(cim: Agreement) -> PBAgreement:
@@ -30,7 +30,7 @@ def agreement_to_pb(cim: Agreement) -> PBAgreement:
 
 
 ######################
-# IEC61968 CUSTOMERS #
+# IEC61968 Customers #
 ######################
 
 def customer_to_pb(cim: Customer) -> PBCustomer:

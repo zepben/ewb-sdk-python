@@ -65,7 +65,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     validator = ServiceComparatorValidator(lambda: NetworkService(), lambda options: NetworkServiceComparator(options))
 
     ################################
-    # EXTENSIONS IEC61968 METERING #
+    # Extensions IEC61968 Metering #
     ################################
 
     def test_pan_demand_response_function(self):
@@ -80,7 +80,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(PanDemandResponseFunction._appliance_bitmask, PanDemandResponseFunction, lambda _: 1, lambda _: 2)
 
     ##################################
-    # EXTENSIONS IEC61970 BASE WIRES #
+    # Extensions IEC61970 Base Wires #
     ##################################
 
     def test_compare_battery_control(self):
@@ -93,7 +93,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
                                          lambda _: BatteryControlMode.peakShaveDischarge)
 
     #######################
-    # IEC61968 ASSET INFO #
+    # IEC61968 Asset Info #
     #######################
 
     def test_compare_cable_info(self):
@@ -200,7 +200,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(WireInfo.material, creator, lambda _: WireMaterialKind.aluminum, lambda _: WireMaterialKind.copperCadmium)
 
     ###################
-    # IEC61968 ASSETS #
+    # IEC61968 Assets #
     ###################
 
     def _compare_asset(self, creator: Type[Asset]):
@@ -258,7 +258,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_asset_container(creator)
 
     ###################
-    # IEC61968 COMMON #
+    # IEC61968 Common #
     ###################
 
     def test_compare_location(self):
@@ -281,7 +281,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         )
 
     #####################################
-    # IEC61968 infIEC61968 InfAssetInfo #
+    # IEC61968 InfIEC61968 InfAssetInfo #
     #####################################
 
     def test_compare_relay_info(self):
@@ -326,7 +326,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(PotentialTransformerInfo.secondary_ratio, PotentialTransformerInfo, lambda _: 1.1, lambda _: 2.2)
 
     #####################
-    # IEC61968 METERING #
+    # IEC61968 Metering #
     #####################
 
     def _compare_end_device(self, creator: Type[EndDevice]):
@@ -388,7 +388,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         )
 
     #######################
-    # IEC61968 OPERATIONS #
+    # IEC61968 Operations #
     #######################
 
     def test_compare_operational_restriction(self):
@@ -403,7 +403,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         )
 
     #####################################
-    # IEC61970 BASE AUXILIARY EQUIPMENT #
+    # IEC61970 Base Auxiliary Equipment #
     #####################################
 
     def _compare_auxiliary_equipment(self, creator: Type[AuxiliaryEquipment]):
@@ -475,7 +475,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_auxiliary_equipment(creator)
 
     ######################
-    # IEC61970 BASE CORE #
+    # IEC61970 Base Core #
     ######################
 
     def _compare_ac_dc_terminal(self, creator: Type[AcDcTerminal]):
@@ -683,7 +683,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self.validator.validate_property(Terminal.conducting_equipment, Terminal, lambda _: Junction(mrid="j1"), lambda _: Junction(mrid="j2"))
 
     #############################
-    # IEC61970 BASE EQUIVALENTS #
+    # IEC61970 Base Equivalents #
     #############################
 
     def test_compare_equivalent_branch(self):
@@ -710,7 +710,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_conducting_equipment(creator)
 
     ######################
-    # IEC61970 BASE MEAS #
+    # IEC61970 Base Meas #
     ######################
 
     def test_compare_accumulator(self):
@@ -735,6 +735,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     ############################
     # IEC61970 Base Protection #
     ############################
+
     def test_compare_current_relay(self):
         self._compare_protection_relay_function(CurrentRelay)
 
@@ -869,7 +870,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         )
 
     #######################
-    # IEC61970 BASE SCADA #
+    # IEC61970 Base Scada #
     #######################
 
     def test_compare_remote_control(self):
@@ -890,9 +891,9 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: Measurement(mrid="m2")
         )
 
-    #############################################
-    # IEC61970 BASE WIRES GENERATION PRODUCTION #
-    #############################################
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
 
     def test_compare_battery_unit(self):
         self._compare_power_electronics_unit(BatteryUnit)
@@ -920,7 +921,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
         self._compare_power_electronics_unit(PowerElectronicsWindUnit)
 
     #######################
-    # IEC61970 BASE WIRES #
+    # IEC61970 Base Wires #
     #######################
 
     def test_compare_ac_line_segment(self):
@@ -1454,15 +1455,15 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
             lambda _: TransformerStarImpedance(mrid="tsi2")
         )
 
-    ####################################################
-    # IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
-    ####################################################
+    ##############################################
+    # IEC61970 InfIEC61970 Generation Production #
+    ##############################################
 
     def test_compare_ev_charging_unit(self):
         self._compare_power_electronics_unit(EvChargingUnit)
 
     ###############################
-    # IEC61970 INFIEC61970 FEEDER #
+    # IEC61970 InfIEC61970 Feeder #
     ###############################
 
     def test_compare_circuit(self):

@@ -26,7 +26,7 @@ __all__ = ["agreement_to_cim", "customer_to_cim", "customer_agreement_to_cim", "
 
 
 ######################
-# IEC61968 CUSTOMERS #
+# IEC61968 Customers #
 ######################
 
 def agreement_to_cim(pb: PBAgreement, cim: Agreement, service: BaseService):

@@ -35,34 +35,35 @@ from zepben.evolve import IdentifiedObject, AcLineSegment, NoLoadTest, OpenCircu
     OperationalRestriction, BaseVoltage, ConnectivityNode, Feeder, Site, Substation, Terminal, \
     EquivalentBranch, Control, RemoteControl, RemoteSource, BatteryUnit, PhotoVoltaicUnit, \
     PowerElectronicsConnection, PowerElectronicsWindUnit, Breaker, BusbarSection, Disconnector, EnergyConsumer, \
-    EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LoadBreakSwitch, PowerTransformer, PowerTransformerEnd, Recloser, TransformerStarImpedance, Circuit, Loop, NetworkDatabaseWriter, \
+    EnergySource, EnergySourcePhase, Fuse, Jumper, Junction, LoadBreakSwitch, PowerTransformer, PowerTransformerEnd, Recloser, TransformerStarImpedance, \
+    Circuit, Loop, NetworkDatabaseWriter, \
     NetworkDatabaseReader, NetworkServiceComparator, LvFeeder, CurrentTransformerInfo, PotentialTransformerInfo, CurrentTransformer, \
     PotentialTransformer, SwitchInfo, RelayInfo, CurrentRelay, EvChargingUnit, TapChangerControl, DistanceRelay, VoltageRelay, ProtectionRelayScheme, \
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, NetworkService, GroundingImpedance, \
     PetersenCoil, ReactiveCapabilityCurve, SynchronousMachine, PanDemandResponseFunction, BatteryControl, StaticVarCompensator, Tracing, NetworkStateOperators, \
     NetworkTraceStep
-from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
-from zepben.evolve.model.cim.iec61970.base.meas.discrete import Discrete
-from zepben.evolve.model.cim.iec61970.base.meas.analog import Analog
-from zepben.evolve.model.cim.iec61970.base.meas.accumulator import Accumulator
-from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
-from zepben.evolve.model.cim.iec61968.metering.meter import Meter
-from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
 from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
 from zepben.evolve.model.cim.iec61968.common.street_detail import StreetDetail
 from zepben.evolve.model.cim.iec61968.common.town_detail import TownDetail
-from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
-from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
-from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
-from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.evolve.model.cim.iec61968.metering.meter import Meter
+from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.meas.accumulator import Accumulator
+from zepben.evolve.model.cim.iec61970.base.meas.analog import Analog
+from zepben.evolve.model.cim.iec61970.base.meas.discrete import Discrete
 from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
 from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
+from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
+from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
 from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 from zepben.evolve.services.common import resolver
 
 
@@ -83,7 +84,9 @@ class PatchedNetworkTraceStepPath(NetworkTraceStep.Path):
         except AttributeError:
             return
 
+
 NetworkTraceStep.Path = PatchedNetworkTraceStepPath
+
 
 # pylint: disable=too-many-public-methods
 class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, NetworkDatabaseWriter, NetworkDatabaseReader, NetworkServiceComparator]):
@@ -129,26 +132,26 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         except KeyboardInterrupt:
             pass
 
-    #######################
-    # EXTENSIONS IEC61968 METERING #
-    #######################
+    ################################
+    # Extensions IEC61968 Metering #
+    ################################
+
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(pan_demand_response_function=create_pan_demand_response_function(False))
     async def test_schema_pan_demand_response_function(self, pan_demand_response_function):
         await self._validate_schema(SchemaNetworks().network_services_of(PanDemandResponseFunction, pan_demand_response_function))
 
-    #######################
-    # EXTENSIONS IEC61968 METERING #
-    #######################
+    ##################################
+    # Extensions IEC61970 Base Wires #
+    ##################################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(battery_control=create_battery_control(False))
     async def test_schema_battery_control(self, battery_control):
         await self._validate_schema(SchemaNetworks().network_services_of(BatteryControl, battery_control))
 
-
     #######################
-    # IEC61968 ASSET INFO #
+    # IEC61968 Asset Info #
     #######################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -202,7 +205,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(TransformerTankInfo, transformer_tank_info))
 
     ###################
-    # IEC61968 ASSETS #
+    # IEC61968 Assets #
     ###################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -221,7 +224,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(Streetlight, streetlight))
 
     #####################################
-    # IEC61968 infIEC61968 InfAssetInfo #
+    # IEC61968 InfIEC61968 InfAssetInfo #
     #####################################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -240,7 +243,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(PotentialTransformerInfo, potential_transformer_info))
 
     #####################
-    # IEC61968 METERING #
+    # IEC61968 Metering #
     #####################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -254,7 +257,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(UsagePoint, usage_point))
 
     ###################
-    # IEC61968 COMMON #
+    # IEC61968 Common #
     ###################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -268,7 +271,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(Organisation, organisation))
 
     #######################
-    # IEC61968 OPERATIONS #
+    # IEC61968 Operations #
     #######################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -277,7 +280,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(OperationalRestriction, operational_restriction))
 
     #####################################
-    # IEC61970 BASE AUXILIARY EQUIPMENT #
+    # IEC61970 Base Auxiliary Equipment #
     #####################################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -296,7 +299,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(PotentialTransformer, potential_transformer))
 
     ######################
-    # IEC61970 BASE CORE #
+    # IEC61970 Base Core #
     ######################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -357,7 +360,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(Terminal, terminal))
 
     #############################
-    # IEC61970 BASE EQUIVALENTS #
+    # IEC61970 Base Equivalents #
     #############################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -366,7 +369,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(EquivalentBranch, equivalent_branch))
 
     ######################
-    # IEC61970 BASE MEAS #
+    # IEC61970 Base Meas #
     ######################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -419,7 +422,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(VoltageRelay, voltage_relay))
 
     #######################
-    # IEC61970 BASE SCADA #
+    # IEC61970 Base Scada #
     #######################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -432,9 +435,9 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     async def test_schema_remote_source(self, remote_source: RemoteSource):
         await self._validate_schema(SchemaNetworks().network_services_of(RemoteSource, remote_source))
 
-    #############################################
-    # IEC61970 BASE WIRES GENERATION PRODUCTION #
-    #############################################
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(battery_unit=create_battery_unit(False))
@@ -462,7 +465,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsWindUnit, power_electronics_wind_unit))
 
     #######################
-    # IEC61970 BASE WIRES #
+    # IEC61970 Base Wires #
     #######################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -629,9 +632,9 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     async def test_schema_transformer_star_impedance(self, transformer_star_impedance):
         await self._validate_schema(SchemaNetworks().network_services_of(TransformerStarImpedance, transformer_star_impedance))
 
-    #########################################################
-    # IEC61970 InfIEC61970 BASE WIRES GENERATION PRODUCTION #
-    #########################################################
+    ###################################################
+    # IEC61970 InfIEC61970 Base Generation Production #
+    ###################################################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(ev_charging_unit=create_ev_charging_unit(False))

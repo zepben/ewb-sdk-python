@@ -330,7 +330,7 @@ __all__ = [
 
 
 ################################
-# EXTENSIONS IEC61968 METERING #
+# Extensions IEC61968 Metering #
 ################################
 
 def pan_demand_response_function_to_cim(pb: PBPanDemandResponseFunction, network_service: NetworkService) -> PanDemandResponseFunction:
@@ -352,7 +352,7 @@ PBPanDemandResponseFunction.to_cim = pan_demand_response_function_to_cim
 
 
 ##################################
-# EXTENSIONS IEC61970 BASE WIRES #
+# Extensions IEC61970 Base Wires #
 ##################################
 
 def battery_control_to_cim(pb: PBBatteryControl, network_service: NetworkService) -> BatteryControl:
@@ -379,7 +379,7 @@ PBBatteryControl.to_cim = battery_control_to_cim
 
 
 #######################
-# IEC61968 ASSET INFO #
+# IEC61968 Asset Info #
 #######################
 
 
@@ -542,7 +542,7 @@ PBWireInfo.to_cim = wire_info_to_cim
 
 
 ###################
-# IEC61968 ASSETS #
+# IEC61968 Assets #
 ###################
 
 def asset_to_cim(pb: PBAsset, cim: Asset, network_service: NetworkService):
@@ -626,7 +626,7 @@ PBStructure.to_cim = structure_to_cim
 
 
 ###################
-# IEC61968 COMMON #
+# IEC61968 Common #
 ###################
 
 def location_to_cim(pb: PBLocation, network_service: NetworkService) -> Optional[Location]:
@@ -676,7 +676,7 @@ PBTownDetail.to_cim = town_detail_to_cim
 
 
 #####################################
-# IEC61968 infIEC61968 InfAssetInfo #
+# IEC61968 InfIEC61968 InfAssetInfo #
 #####################################
 
 def relay_info_to_cim(pb: PBRelayInfo, network_service: NetworkService) -> Optional[RelayInfo]:
@@ -733,7 +733,7 @@ PBPotentialTransformerInfo.to_cim = potential_transformer_info_to_cim
 
 
 ##################################
-# IEC61968 infIEC61968 InfCommon #
+# IEC61968 InfIEC61968 InfCommon #
 ##################################
 
 def ratio_to_cim(pb: PBRatio) -> Ratio:
@@ -744,7 +744,7 @@ PBRatio.to_cim = ratio_to_cim
 
 
 #####################
-# IEC61968 METERING #
+# IEC61968 Metering #
 #####################
 
 
@@ -812,7 +812,7 @@ PBUsagePoint.to_cim = usage_point_to_cim
 
 
 #######################
-# IEC61968 OPERATIONS #
+# IEC61968 Operations #
 #######################
 
 def operational_restriction_to_cim(pb: PBOperationalRestriction, network_service: NetworkService) -> Optional[OperationalRestriction]:
@@ -825,7 +825,7 @@ PBOperationalRestriction.to_cim = operational_restriction_to_cim
 
 
 #####################################
-# IEC61970 BASE AUXILIARY EQUIPMENT #
+# IEC61970 Base Auxiliary Equipment #
 #####################################
 
 def auxiliary_equipment_to_cim(pb: PBAuxiliaryEquipment, cim: AuxiliaryEquipment, network_service: NetworkService):
@@ -872,7 +872,7 @@ PBPotentialTransformer.to_cim = potential_transformer_to_cim
 
 
 ######################
-# IEC61970 BASE CORE #
+# IEC61970 Base Core #
 ######################
 
 def ac_dc_terminal_to_cim(pb: PBAcDcTerminal, cim: AcDcTerminal, network_service: NetworkService):
@@ -1038,7 +1038,7 @@ PBTerminal.to_cim = terminal_to_cim
 
 
 #############################
-# IEC61970 BASE EQUIVALENTS #
+# IEC61970 Base Equivalents #
 #############################
 
 def equivalent_branch_to_cim(pb: PBEquivalentBranch, network_service: NetworkService) -> Optional[EquivalentBranch]:
@@ -1075,7 +1075,7 @@ PBEquivalentBranch.to_cim = equivalent_branch_to_cim
 
 
 ######################
-# IEC61970 BASE MEAS #
+# IEC61970 Base Meas #
 ######################
 
 def accumulator_to_cim(pb: PBAccumulator, network_service: NetworkService) -> Optional[Accumulator]:
@@ -1137,7 +1137,6 @@ PBMeasurement.to_cim = measurement_to_cim
 ############################
 # IEC61970 Base Protection #
 ############################
-
 
 def current_relay_to_cim(pb: PBCurrentRelay, network_service: NetworkService) -> Optional[CurrentRelay]:
     cim = CurrentRelay(
@@ -1242,7 +1241,7 @@ PBVoltageRelay.to_cim = voltage_relay_to_cim
 
 
 #######################
-# IEC61970 BASE SCADA #
+# IEC61970 Base Scada #
 #######################
 
 def remote_control_to_cim(pb: PBRemoteControl, network_service: NetworkService) -> Optional[RemoteControl]:
@@ -1272,9 +1271,9 @@ PBRemotePoint.to_cim = remote_point_to_cim
 PBRemoteSource.to_cim = remote_source_to_cim
 
 
-#############################################
-# IEC61970 BASE WIRES GENERATION PRODUCTION #
-#############################################
+#######################################
+# IEC61970 Base Generation Production #
+#######################################
 
 def battery_unit_to_cim(pb: PBBatteryUnit, network_service: NetworkService) -> Optional[BatteryUnit]:
     """
@@ -1327,7 +1326,7 @@ PBPowerElectronicsWindUnit.to_cim = power_electronics_wind_unit_to_cim
 
 
 #######################
-# IEC61970 BASE WIRES #
+# IEC61970 Base Wires #
 #######################
 
 def ac_line_segment_to_cim(pb: PBAcLineSegment, network_service: NetworkService) -> Optional[AcLineSegment]:
@@ -2001,7 +2000,7 @@ PBTransformerStarImpedance.to_cim = transformer_star_impedance_to_cim
 
 
 ###############################
-# IEC61970 INFIEC61970 FEEDER #
+# IEC61970 InfIEC61970 Feeder #
 ###############################
 
 def circuit_to_cim(pb: PBCircuit, network_service: NetworkService) -> Optional[Circuit]:
@@ -2049,9 +2048,9 @@ PBLoop.to_cim = loop_to_cim
 PBLvFeeder.to_cim = lv_feeder_to_cim
 
 
-####################################################
-# IEC61970 INFIEC61970 WIRES GENERATION PRODUCTION #
-####################################################
+##############################################
+# IEC61970 InfIEC61970 Generation Production #
+##############################################
 
 def ev_charging_unit_to_cim(pb: PBEvChargingUnit, network_service: NetworkService) -> Optional[EvChargingUnit]:
     cim = EvChargingUnit(mrid=pb.mrid())

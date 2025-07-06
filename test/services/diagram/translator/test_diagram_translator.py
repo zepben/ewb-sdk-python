@@ -16,7 +16,7 @@ T = TypeVar("T", bound=IdentifiedObject)
 types_to_test = {
 
     ################################
-    # IEC61970 BASE DIAGRAM LAYOUT #
+    # IEC61970 Base Diagram Layout #
     ################################
 
     "create_diagram": create_diagram(),

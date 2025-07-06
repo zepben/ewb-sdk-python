@@ -148,7 +148,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._options = options
 
     ################################
-    # EXTENSIONS IEC61968 METERING #
+    # Extensions IEC61968 Metering #
     ################################
 
     def _compare_pan_demand_response_function(self, source: PanDemandResponseFunction, target: PanDemandResponseFunction) -> ObjectDifference:
@@ -159,7 +159,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_end_device_function(diff)
 
     ##################################
-    # EXTENSIONS IEC61970 BASE WIRES #
+    # Extensions IEC61970 Base Wires #
     ##################################
 
     def _compare_battery_control(self, source: BatteryControl, target: BatteryControl) -> ObjectDifference:
@@ -171,7 +171,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_regulating_control(diff)
 
     #######################
-    # IEC61968 ASSET INFO #
+    # IEC61968 Asset Info #
     #######################
 
     def _compare_cable_info(self, source: CableInfo, target: CableInfo) -> ObjectDifference:
@@ -296,7 +296,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_asset_info(diff)
 
     ###################
-    # IEC61968 ASSETS #
+    # IEC61968 Assets #
     ###################
 
     def _compare_asset(self, diff: ObjectDifference) -> ObjectDifference:
@@ -341,7 +341,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_asset_container(diff)
 
     ###################
-    # IEC61968 COMMON #
+    # IEC61968 Common #
     ###################
 
     def _compare_location(self, source: Location, target: Location) -> ObjectDifference:
@@ -353,7 +353,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_identified_object(diff)
 
     #####################################
-    # IEC61968 infIEC61968 InfAssetInfo #
+    # IEC61968 InfIEC61968 InfAssetInfo #
     #####################################
 
     def _compare_current_transformer_info(self, source: CurrentTransformerInfo, target: CurrentTransformerInfo) -> ObjectDifference:
@@ -407,7 +407,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_asset_info(diff)
 
     #####################
-    # IEC61968 METERING #
+    # IEC61968 Metering #
     #####################
 
     def _compare_end_device(self, diff: ObjectDifference) -> ObjectDifference:
@@ -447,7 +447,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_identified_object(diff)
 
     #######################
-    # IEC61968 OPERATIONS #
+    # IEC61968 Operations #
     #######################
 
     def _compare_operational_restriction(self, source: OperationalRestriction, target: OperationalRestriction) -> ObjectDifference:
@@ -458,7 +458,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_document(diff)
 
     #####################################
-    # IEC61970 BASE AUXILIARY EQUIPMENT #
+    # IEC61970 Base Auxiliary Equipment #
     #####################################
 
     def _compare_auxiliary_equipment(self, diff: ObjectDifference) -> ObjectDifference:
@@ -492,7 +492,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_auxiliary_equipment(diff)
 
     ######################
-    # IEC61970 BASE CORE #
+    # IEC61970 Base Core #
     ######################
 
     def _compare_ac_dc_terminal(self, diff: ObjectDifference) -> ObjectDifference:
@@ -605,7 +605,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_ac_dc_terminal(diff)
 
     #############################
-    # IEC61970 BASE EQUIVALENTS #
+    # IEC61970 Base Equivalents #
     #############################
 
     def _compare_equivalent_branch(self, source: EquivalentBranch, target: EquivalentBranch) -> ObjectDifference:
@@ -637,7 +637,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_conducting_equipment(diff)
 
     ######################
-    # IEC61970 BASE MEAS #
+    # IEC61970 Base Meas #
     ######################
 
     def _compare_accumulator(self, source: Accumulator, target: Accumulator) -> ObjectDifference:
@@ -746,7 +746,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_equipment(diff)
 
     #######################
-    # IEC61970 BASE SCADA #
+    # IEC61970 Base Scada #
     #######################
 
     def _compare_remote_control(self, source: RemoteControl, target: RemoteControl) -> ObjectDifference:
@@ -766,9 +766,9 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_remote_point(diff)
 
-    #############################################
-    # IEC61970 BASE WIRES GENERATION PRODUCTION #
-    #############################################
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
 
     def _compare_battery_unit(self, source: BatteryUnit, target: BatteryUnit) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -791,7 +791,7 @@ class NetworkServiceComparator(BaseServiceComparator):
         return self._compare_power_electronics_unit(ObjectDifference(source, target))
 
     #######################
-    # IEC61970 BASE WIRES #
+    # IEC61970 Base Wires #
     #######################
 
     def _compare_ac_line_segment(self, source: AcLineSegment, target: AcLineSegment) -> ObjectDifference:
@@ -1254,9 +1254,9 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_identified_object(diff)
 
-    #########################
-    # IEC61970 INF IEC61970 #
-    #########################
+    ###############################
+    # IEC61970 InfIEC61970 Feeder #
+    ###############################
 
     def _compare_circuit(self, source: Circuit, target: Circuit) -> ObjectDifference:
         diff = ObjectDifference(source, target)
@@ -1284,9 +1284,9 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_equipment_container(diff)
 
-    #####################################################
-    # IEC61970 INF IEC61970 WIRES GENERATION PRODUCTION #
-    #####################################################
+    ##############################################
+    # IEC61970 InfIEC61970 Generation Production #
+    ##############################################
 
     def _compare_ev_charging_unit(self, source: EvChargingUnit, target: EvChargingUnit) -> ObjectDifference:
         diff = ObjectDifference(source, target)
