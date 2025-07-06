@@ -21,11 +21,45 @@ from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransforme
 T = TypeVar("T", bound=IdentifiedObject)
 
 types_to_test = {
+    ##################################
+    # Extensions IEC61968 Asset Info #
+    ##################################
+
+    "create_relay_info": create_relay_info(),
+
     ################################
     # Extensions IEC61968 Metering #
     ################################
 
     "create_pan_demand_response_function": create_pan_demand_response_function(),
+
+    #################################
+    # Extensions IEC61970 Base Core #
+    #################################
+
+    "create_site": create_site(),
+
+    ###################################
+    # Extensions IEC61970 Base Feeder #
+    ###################################
+
+    "create_loop": create_loop(),
+    "create_lv_feeder": create_lv_feeder(),
+
+    ##################################################
+    # Extensions IEC61970 Base Generation Production #
+    ##################################################
+
+    "create_ev_charging_unit": create_ev_charging_unit(),
+
+    #######################################
+    # Extensions IEC61970 Base Protection #
+    #######################################
+
+    "create_distance_relay": create_distance_relay(),
+    "create_protection_relay_scheme": create_protection_relay_scheme(),
+    "create_protection_relay_system": create_protection_relay_system(),
+    "create_voltage_relay": create_voltage_relay(),
 
     ##################################
     # Extensions IEC61970 Base Wires #
@@ -53,7 +87,6 @@ types_to_test = {
     ###################
 
     "create_asset_owner": create_asset_owner(),
-    "create_pole": create_pole(),
     "create_streetlight": create_streetlight(),
 
     ###################
@@ -68,9 +101,14 @@ types_to_test = {
     # IEC61968 InfIEC61968 InfAssetInfo #
     #####################################
 
-    "create_relay_info": create_relay_info(),
     "create_current_transformer_info": create_current_transformer_info(),
     "create_potential_transformer_info": create_potential_transformer_info(),
+
+    ##################################
+    # IEC61968 InfIEC61968 InfAssets #
+    ##################################
+
+    "create_pole": create_pole(),
 
     #####################
     # IEC61968 Metering #
@@ -101,7 +139,6 @@ types_to_test = {
     "create_connectivity_node": create_connectivity_node(),
     "create_feeder": create_feeder(),
     "create_geographical_region": create_geographical_region(),
-    "create_site": create_site(),
     "create_sub_geographical_region": create_sub_geographical_region(),
     "create_substation": create_substation(),
     "create_terminal": create_terminal(),
@@ -111,6 +148,14 @@ types_to_test = {
     #############################
 
     "create_equivalent_branch": create_equivalent_branch(),
+
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
+
+    "create_battery_unit": create_battery_unit(),
+    "create_photo_voltaic_unit": create_photo_voltaic_unit(),
+    "create_power_electronics_wind_unit": create_power_electronics_wind_unit(),
 
     ######################
     # IEC61970 Base Meas #
@@ -126,10 +171,6 @@ types_to_test = {
     ############################
 
     "create_current_relay": create_current_relay(),
-    "create_distance_relay": create_distance_relay(),
-    "create_voltage_relay": create_voltage_relay(),
-    "create_protection_relay_scheme": create_protection_relay_scheme(),
-    "create_protection_relay_system": create_protection_relay_system(),
 
     #######################
     # IEC61970 Base Scada #
@@ -137,16 +178,6 @@ types_to_test = {
 
     "create_remote_control": create_remote_control(),
     "create_remote_source": create_remote_source(),
-
-    #######################################
-    # IEC61970 Base Generation Production #
-    #######################################
-
-    "create_battery_unit": create_battery_unit(),
-    "create_photo_voltaic_unit": create_photo_voltaic_unit(),
-    "create_power_electronics_connection": create_power_electronics_connection(),
-    "create_power_electronics_connection_phase": create_power_electronics_connection_phase(),
-    "create_power_electronics_wind_unit": create_power_electronics_wind_unit(),
 
     #######################
     # IEC61970 Base Wires #
@@ -173,6 +204,8 @@ types_to_test = {
     "create_per_length_phase_impedance": create_per_length_phase_impedance(),
     "create_per_length_sequence_impedance": create_per_length_sequence_impedance(),
     "create_petersen_coil": create_petersen_coil(),
+    "create_power_electronics_connection": create_power_electronics_connection(),
+    "create_power_electronics_connection_phase": create_power_electronics_connection_phase(),
     "create_power_transformer": create_power_transformer(),
     "create_power_transformer_end": create_power_transformer_end(),
     "create_ratio_tap_changer": create_ratio_tap_changer(),
@@ -181,22 +214,14 @@ types_to_test = {
     "create_series_compensator": create_series_compensator(),
     "create_static_var_compensator": create_static_var_compensator(),
     "create_synchronous_machine": create_synchronous_machine(),
-    "create_transformer_star_impedance": create_transformer_star_impedance(),
     "create_tap_changer_control": create_tap_changer_control(),
+    "create_transformer_star_impedance": create_transformer_star_impedance(),
 
     ###############################
     # IEC61970 InfIEC61970 Feeder #
     ###############################
 
     "create_circuit": create_circuit(),
-    "create_loop": create_loop(),
-    "create_lv_feeder": create_lv_feeder(),
-
-    ##############################################
-    # IEC61970 InfIEC61970 Generation Production #
-    ##############################################
-
-    "create_ev_charging_unit": create_ev_charging_unit(),
 }
 
 

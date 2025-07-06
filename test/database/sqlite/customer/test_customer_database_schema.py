@@ -35,6 +35,15 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
     def create_identified_object(self) -> IdentifiedObject:
         return Customer()
 
+    ###################
+    # IEC61968 Common #
+    ###################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(organisation=create_organisation(False))
+    async def test_schema_organisation_customer(self, organisation):
+        await self._validate_schema(SchemaNetworks().customer_services_of(Organisation, organisation))
+
     ######################
     # IEC61968 Customers #
     ######################
@@ -58,12 +67,3 @@ class TestCustomerDatabaseSchema(CimDatabaseSchemaCommonTests[CustomerService, C
     @given(tariffs=create_tariffs(False))
     async def test_schema_tariffs(self, tariffs):
         await self._validate_schema(SchemaNetworks().customer_services_of(Tariff, tariffs))
-
-    ###################
-    # IEC61968 Common #
-    ###################
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(organisation=create_organisation(False))
-    async def test_schema_organisation_customer(self, organisation):
-        await self._validate_schema(SchemaNetworks().customer_services_of(Organisation, organisation))

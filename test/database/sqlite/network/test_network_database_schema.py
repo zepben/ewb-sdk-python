@@ -132,14 +132,83 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
         except KeyboardInterrupt:
             pass
 
+    ##################################
+    # Extensions IEC61968 Asset Info #
+    ##################################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(relay_info=create_relay_info(False))
+    async def test_schema_relay_info(self, relay_info: RelayInfo):
+        await self._validate_schema(SchemaNetworks().network_services_of(RelayInfo, relay_info))
+
     ################################
     # Extensions IEC61968 Metering #
     ################################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(pan_demand_response_function=create_pan_demand_response_function(False))
-    async def test_schema_pan_demand_response_function(self, pan_demand_response_function):
+    async def test_schema_pan_demand_response_function(self, pan_demand_response_function: PanDemandResponseFunction):
         await self._validate_schema(SchemaNetworks().network_services_of(PanDemandResponseFunction, pan_demand_response_function))
+
+    #################################
+    # Extensions IEC61970 Base Core #
+    #################################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(site=create_site(False))
+    async def test_schema_site(self, site: Site):
+        await self._validate_schema(SchemaNetworks().network_services_of(Site, site))
+
+    ###################################
+    # Extensions IEC61970 Base Feeder #
+    ###################################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(loop=create_loop(False))
+    async def test_schema_loop(self, loop: Loop):
+        await self._validate_schema(SchemaNetworks().network_services_of(Loop, loop))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(lv_feeder=create_lv_feeder(False))
+    async def test_schema_lv_feeder(self, lv_feeder: LvFeeder):
+        network = SchemaNetworks().network_services_of(LvFeeder, lv_feeder)
+        await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.NORMAL)
+        await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.CURRENT)
+        await self._validate_schema(network)
+        # TODO: NetworkDatabaseTestSchema 238
+
+    ##################################################
+    # Extensions IEC61970 Base Generation Production #
+    ##################################################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(ev_charging_unit=create_ev_charging_unit(False))
+    async def test_schema_ev_charging_unit(self, ev_charging_unit: EvChargingUnit):
+        await self._validate_schema(SchemaNetworks().network_services_of(EvChargingUnit, ev_charging_unit))
+
+    #######################################
+    # Extensions IEC61970 Base Protection #
+    #######################################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(distance_relay=create_distance_relay(False))
+    async def test_schema_distance_relay(self, distance_relay: DistanceRelay):
+        await self._validate_schema(SchemaNetworks().network_services_of(DistanceRelay, distance_relay))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(protection_relay_scheme=create_protection_relay_scheme(False))
+    async def test_schema_protection_relay_scheme(self, protection_relay_scheme: ProtectionRelayScheme):
+        await self._validate_schema(SchemaNetworks().network_services_of(ProtectionRelayScheme, protection_relay_scheme))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(protection_relay_system=create_protection_relay_system(False))
+    async def test_schema_protection_relay_system(self, protection_relay_system: ProtectionRelaySystem):
+        await self._validate_schema(SchemaNetworks().network_services_of(ProtectionRelaySystem, protection_relay_system))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(voltage_relay=create_voltage_relay(False))
+    async def test_schema_voltage_relay(self, voltage_relay: VoltageRelay):
+        await self._validate_schema(SchemaNetworks().network_services_of(VoltageRelay, voltage_relay))
 
     ##################################
     # Extensions IEC61970 Base Wires #
@@ -147,7 +216,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(battery_control=create_battery_control(False))
-    async def test_schema_battery_control(self, battery_control):
+    async def test_schema_battery_control(self, battery_control: BatteryControl):
         await self._validate_schema(SchemaNetworks().network_services_of(BatteryControl, battery_control))
 
     #######################
@@ -156,52 +225,52 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(cable_info=create_cable_info(False))
-    async def test_schema_cable_info(self, cable_info):
+    async def test_schema_cable_info(self, cable_info: CableInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(CableInfo, cable_info))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(no_load_test=create_no_load_test(False))
-    async def test_schema_no_load_test(self, no_load_test):
+    async def test_schema_no_load_test(self, no_load_test: NoLoadTest):
         await self._validate_schema(SchemaNetworks().network_services_of(NoLoadTest, no_load_test))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(open_circuit_test=create_open_circuit_test(False))
-    async def test_schema_open_circuit_test(self, open_circuit_test):
+    async def test_schema_open_circuit_test(self, open_circuit_test: OpenCircuitTest):
         await self._validate_schema(SchemaNetworks().network_services_of(OpenCircuitTest, open_circuit_test))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(overhead_wire_info=create_overhead_wire_info(False))
-    async def test_schema_overhead_wire_info(self, overhead_wire_info):
+    async def test_schema_overhead_wire_info(self, overhead_wire_info: OverheadWireInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(OverheadWireInfo, overhead_wire_info))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(power_transformer_info=create_power_transformer_info(False))
-    async def test_schema_power_transformer_info(self, power_transformer_info):
+    async def test_schema_power_transformer_info(self, power_transformer_info: PowerTransformerInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerInfo, power_transformer_info))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(short_circuit_test=create_short_circuit_test(False))
-    async def test_schema_short_circuit_test(self, short_circuit_test):
+    async def test_schema_short_circuit_test(self, short_circuit_test: ShortCircuitTest):
         await self._validate_schema(SchemaNetworks().network_services_of(ShortCircuitTest, short_circuit_test))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(shunt_compensator_info=create_shunt_compensator_info(False))
-    async def test_schema_shunt_compensator_info(self, shunt_compensator_info):
+    async def test_schema_shunt_compensator_info(self, shunt_compensator_info: ShuntCompensatorInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(ShuntCompensatorInfo, shunt_compensator_info))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(switch_info=create_switch_info(False))
-    async def test_schema_switch_info(self, switch_info):
+    async def test_schema_switch_info(self, switch_info: SwitchInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(SwitchInfo, switch_info))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(transformer_end_info=create_transformer_end_info(False))
-    async def test_schema_transformer_end_info(self, transformer_end_info):
+    async def test_schema_transformer_end_info(self, transformer_end_info: TransformerEndInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(TransformerEndInfo, transformer_end_info))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(transformer_tank_info=create_transformer_tank_info(False))
-    async def test_schema_transformer_tank_info(self, transformer_tank_info):
+    async def test_schema_transformer_tank_info(self, transformer_tank_info: TransformerTankInfo):
         await self._validate_schema(SchemaNetworks().network_services_of(TransformerTankInfo, transformer_tank_info))
 
     ###################
@@ -210,51 +279,13 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(asset_owner=create_asset_owner(False))
-    async def test_schema_asset_owner(self, asset_owner):
+    async def test_schema_asset_owner(self, asset_owner: AssetOwner):
         await self._validate_schema(SchemaNetworks().network_services_of(AssetOwner, asset_owner))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(pole=create_pole(False))
-    async def test_schema_pole(self, pole):
-        await self._validate_schema(SchemaNetworks().network_services_of(Pole, pole))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(streetlight=create_streetlight(False))
-    async def test_schema_streetlight(self, streetlight):
+    async def test_schema_streetlight(self, streetlight: Streetlight):
         await self._validate_schema(SchemaNetworks().network_services_of(Streetlight, streetlight))
-
-    #####################################
-    # IEC61968 InfIEC61968 InfAssetInfo #
-    #####################################
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(relay_info=create_relay_info(False))
-    async def test_schema_relay_info(self, relay_info):
-        await self._validate_schema(SchemaNetworks().network_services_of(RelayInfo, relay_info))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(current_transformer_info=create_current_transformer_info(False))
-    async def test_schema_current_transformer_info(self, current_transformer_info):
-        await self._validate_schema(SchemaNetworks().network_services_of(CurrentTransformerInfo, current_transformer_info))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(potential_transformer_info=create_potential_transformer_info(False))
-    async def test_schema_potential_transformer_info(self, potential_transformer_info):
-        await self._validate_schema(SchemaNetworks().network_services_of(PotentialTransformerInfo, potential_transformer_info))
-
-    #####################
-    # IEC61968 Metering #
-    #####################
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(meter=create_meter(False))
-    async def test_schema_meter(self, meter):
-        await self._validate_schema(SchemaNetworks().network_services_of(Meter, meter))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(usage_point=create_usage_point(False))
-    async def test_schema_usage_point(self, usage_point):
-        await self._validate_schema(SchemaNetworks().network_services_of(UsagePoint, usage_point))
 
     ###################
     # IEC61968 Common #
@@ -262,13 +293,50 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(location=create_location(False))
-    async def test_schema_location(self, location):
+    async def test_schema_location(self, location: Location):
         await self._validate_schema(SchemaNetworks().network_services_of(Location, location))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(organisation=create_organisation(False))
-    async def test_schema_organisation(self, organisation):
+    async def test_schema_organisation(self, organisation: Organisation):
         await self._validate_schema(SchemaNetworks().network_services_of(Organisation, organisation))
+
+    #####################################
+    # IEC61968 InfIEC61968 InfAssetInfo #
+    #####################################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(current_transformer_info=create_current_transformer_info(False))
+    async def test_schema_current_transformer_info(self, current_transformer_info: CurrentTransformerInfo):
+        await self._validate_schema(SchemaNetworks().network_services_of(CurrentTransformerInfo, current_transformer_info))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(potential_transformer_info=create_potential_transformer_info(False))
+    async def test_schema_potential_transformer_info(self, potential_transformer_info: PotentialTransformerInfo):
+        await self._validate_schema(SchemaNetworks().network_services_of(PotentialTransformerInfo, potential_transformer_info))
+
+    ##################################
+    # IEC61968 InfIEC61968 InfAssets #
+    ##################################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(pole=create_pole(False))
+    async def test_schema_pole(self, pole: Pole):
+        await self._validate_schema(SchemaNetworks().network_services_of(Pole, pole))
+
+    #####################
+    # IEC61968 Metering #
+    #####################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(meter=create_meter(False))
+    async def test_schema_meter(self, meter: Meter):
+        await self._validate_schema(SchemaNetworks().network_services_of(Meter, meter))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(usage_point=create_usage_point(False))
+    async def test_schema_usage_point(self, usage_point: UsagePoint):
+        await self._validate_schema(SchemaNetworks().network_services_of(UsagePoint, usage_point))
 
     #######################
     # IEC61968 Operations #
@@ -276,7 +344,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(operational_restriction=create_operational_restriction(False))
-    async def test_schema_operational_restriction(self, operational_restriction):
+    async def test_schema_operational_restriction(self, operational_restriction: OperationalRestriction):
         await self._validate_schema(SchemaNetworks().network_services_of(OperationalRestriction, operational_restriction))
 
     #####################################
@@ -285,17 +353,17 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(current_transformer=create_current_transformer(False))
-    async def test_schema_current_transformer(self, current_transformer):
+    async def test_schema_current_transformer(self, current_transformer: CurrentTransformer):
         await self._validate_schema(SchemaNetworks().network_services_of(CurrentTransformer, current_transformer))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(fault_indicator=create_fault_indicator(False))
-    async def test_schema_fault_indicator(self, fault_indicator):
+    async def test_schema_fault_indicator(self, fault_indicator: FaultIndicator):
         await self._validate_schema(SchemaNetworks().network_services_of(FaultIndicator, fault_indicator))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(potential_transformer=create_potential_transformer(False))
-    async def test_schema_potential_transformer(self, potential_transformer):
+    async def test_schema_potential_transformer(self, potential_transformer: PotentialTransformer):
         await self._validate_schema(SchemaNetworks().network_services_of(PotentialTransformer, potential_transformer))
 
     ######################
@@ -304,17 +372,17 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(base_voltage=create_base_voltage(False))
-    async def test_schema_base_voltage(self, base_voltage):
+    async def test_schema_base_voltage(self, base_voltage: BaseVoltage):
         await self._validate_schema(SchemaNetworks().network_services_of(BaseVoltage, base_voltage))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(connectivity_node=create_connectivity_node(False))
-    async def test_schema_connectivity_node(self, connectivity_node):
+    async def test_schema_connectivity_node(self, connectivity_node: ConnectivityNode):
         await self._validate_schema(SchemaNetworks().network_services_of(ConnectivityNode, connectivity_node))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(feeder=create_feeder(False))
-    async def test_schema_feeder(self, feeder):
+    async def test_schema_feeder(self, feeder: Feeder):
         # Need to set feeder directions to match database load.
         network_service = SchemaNetworks().network_services_of(Feeder, feeder)
         await Tracing().assign_equipment_to_feeders().run(network_service, network_state_operators=NetworkStateOperators.NORMAL)
@@ -336,27 +404,22 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(geographical_region=create_geographical_region(False))
-    async def test_schema_geographical_region(self, geographical_region):
+    async def test_schema_geographical_region(self, geographical_region: GeographicalRegion):
         await self._validate_schema(SchemaNetworks().network_services_of(GeographicalRegion, geographical_region))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(site=create_site(False))
-    async def test_schema_site(self, site):
-        await self._validate_schema(SchemaNetworks().network_services_of(Site, site))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(sub_geographical_region=create_sub_geographical_region(False))
-    async def test_schema_sub_geographical_region(self, sub_geographical_region):
+    async def test_schema_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion):
         await self._validate_schema(SchemaNetworks().network_services_of(SubGeographicalRegion, sub_geographical_region))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(substation=create_substation(False))
-    async def test_schema_substation(self, substation):
+    async def test_schema_substation(self, substation: Substation):
         await self._validate_schema(SchemaNetworks().network_services_of(Substation, substation))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(terminal=create_terminal(False))
-    async def test_schema_terminal(self, terminal):
+    async def test_schema_terminal(self, terminal: Terminal):
         await self._validate_schema(SchemaNetworks().network_services_of(Terminal, terminal))
 
     #############################
@@ -365,8 +428,27 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(equivalent_branch=create_equivalent_branch(False))
-    async def test_schema_equivalent_branch(self, equivalent_branch):
+    async def test_schema_equivalent_branch(self, equivalent_branch: EquivalentBranch):
         await self._validate_schema(SchemaNetworks().network_services_of(EquivalentBranch, equivalent_branch))
+
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(battery_unit=create_battery_unit(False))
+    async def test_schema_battery_unit(self, battery_unit: BatteryUnit):
+        await self._validate_schema(SchemaNetworks().network_services_of(BatteryUnit, battery_unit))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(photo_voltaic_unit=create_photo_voltaic_unit(False))
+    async def test_schema_photo_voltaic_unit(self, photo_voltaic_unit: PhotoVoltaicUnit):
+        await self._validate_schema(SchemaNetworks().network_services_of(PhotoVoltaicUnit, photo_voltaic_unit))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(power_electronics_wind_unit=create_power_electronics_wind_unit(False))
+    async def test_schema_power_electronics_wind_unit(self, power_electronics_wind_unit: PowerElectronicsWindUnit):
+        await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsWindUnit, power_electronics_wind_unit))
 
     ######################
     # IEC61970 Base Meas #
@@ -384,7 +466,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(control=create_control(False))
-    async def test_schema_control(self, control):
+    async def test_schema_control(self, control: Control):
         await self._validate_schema(SchemaNetworks().network_services_of(Control, control))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -398,28 +480,8 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(current_relay=create_current_relay(False))
-    async def test_schema_current_relay(self, current_relay):
+    async def test_schema_current_relay(self, current_relay: CurrentRelay):
         await self._validate_schema(SchemaNetworks().network_services_of(CurrentRelay, current_relay))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(distance_relay=create_distance_relay(False))
-    async def test_schema_distance_relay(self, distance_relay):
-        await self._validate_schema(SchemaNetworks().network_services_of(DistanceRelay, distance_relay))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(protection_relay_scheme=create_protection_relay_scheme(False))
-    async def test_schema_protection_relay_scheme(self, protection_relay_scheme):
-        await self._validate_schema(SchemaNetworks().network_services_of(ProtectionRelayScheme, protection_relay_scheme))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(protection_relay_system=create_protection_relay_system(False))
-    async def test_schema_protection_relay_system(self, protection_relay_system):
-        await self._validate_schema(SchemaNetworks().network_services_of(ProtectionRelaySystem, protection_relay_system))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(voltage_relay=create_voltage_relay(False))
-    async def test_schema_voltage_relay(self, voltage_relay):
-        await self._validate_schema(SchemaNetworks().network_services_of(VoltageRelay, voltage_relay))
 
     #######################
     # IEC61970 Base Scada #
@@ -427,7 +489,7 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(remote_control=create_remote_control(False))
-    async def test_schema_remote_control(self, remote_control):
+    async def test_schema_remote_control(self, remote_control: RemoteControl):
         await self._validate_schema(SchemaNetworks().network_services_of(RemoteControl, remote_control))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
@@ -435,84 +497,55 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
     async def test_schema_remote_source(self, remote_source: RemoteSource):
         await self._validate_schema(SchemaNetworks().network_services_of(RemoteSource, remote_source))
 
-    #######################################
-    # IEC61970 Base Generation Production #
-    #######################################
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(battery_unit=create_battery_unit(False))
-    async def test_schema_battery_unit(self, battery_unit):
-        await self._validate_schema(SchemaNetworks().network_services_of(BatteryUnit, battery_unit))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(photo_voltaic_unit=create_photo_voltaic_unit(False))
-    async def test_schema_photo_voltaic_unit(self, photo_voltaic_unit):
-        await self._validate_schema(SchemaNetworks().network_services_of(PhotoVoltaicUnit, photo_voltaic_unit))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(power_electronics_connection=create_power_electronics_connection(False))
-    async def test_schema_power_electronics_connection(self, power_electronics_connection):
-        await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnection, power_electronics_connection))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(power_electronics_connection_phase=create_power_electronics_connection_phase(False))
-    async def test_schema_power_electronics_connection_phase(self, power_electronics_connection_phase):
-        await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnectionPhase, power_electronics_connection_phase))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(power_electronics_wind_unit=create_power_electronics_wind_unit(False))
-    async def test_schema_power_electronics_wind_unit(self, power_electronics_wind_unit):
-        await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsWindUnit, power_electronics_wind_unit))
-
     #######################
     # IEC61970 Base Wires #
     #######################
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(ac_line_segment=create_ac_line_segment(False))
-    async def test_schema_ac_line_segment(self, ac_line_segment):
+    async def test_schema_ac_line_segment(self, ac_line_segment: AcLineSegment):
         await self._validate_schema(SchemaNetworks().network_services_of(AcLineSegment, ac_line_segment))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(breaker=create_breaker(False))
-    async def test_schema_breaker(self, breaker):
+    async def test_schema_breaker(self, breaker: Breaker):
         await self._validate_schema(SchemaNetworks().network_services_of(Breaker, breaker))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(busbar_section=create_busbar_section(False))
-    async def test_schema_busbar_section(self, busbar_section):
+    async def test_schema_busbar_section(self, busbar_section: BusbarSection):
         await self._validate_schema(SchemaNetworks().network_services_of(BusbarSection, busbar_section))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(clamp=create_clamp(False))
-    async def test_schema_clamp(self, clamp):
+    async def test_schema_clamp(self, clamp: Clamp):
         await self._validate_schema(SchemaNetworks().network_services_of(Clamp, clamp))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(cut=create_cut(False))
-    async def test_schema_cut(self, cut):
+    async def test_schema_cut(self, cut: Cut):
         await self._validate_schema(SchemaNetworks().network_services_of(Cut, cut))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(disconnector=create_disconnector(False))
-    async def test_schema_disconnector(self, disconnector):
+    async def test_schema_disconnector(self, disconnector: Disconnector):
         await self._validate_schema(SchemaNetworks().network_services_of(Disconnector, disconnector))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(energy_consumer=create_energy_consumer(False))
-    async def test_schema_energy_consumer(self, energy_consumer):
+    async def test_schema_energy_consumer(self, energy_consumer: EnergyConsumer):
         # Need to assure the correct number of phases to prevent errors.
         assume(len(Counter(map(lambda it: it.phase, energy_consumer.phases))) == len(list(energy_consumer.phases)))
         await self._validate_schema(SchemaNetworks().network_services_of(EnergyConsumer, energy_consumer))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(energy_consumer_phase=create_energy_consumer_phase(False))
-    async def test_schema_energy_consumer_phase(self, energy_consumer_phase):
+    async def test_schema_energy_consumer_phase(self, energy_consumer_phase: EnergyConsumerPhase):
         await self._validate_schema(SchemaNetworks().network_services_of(EnergyConsumerPhase, energy_consumer_phase))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(energy_source=create_energy_source(False))
-    async def test_schema_energy_source(self, energy_source):
+    async def test_schema_energy_source(self, energy_source: EnergySource):
         # Need to assure the correct number of phases to prevent errors.
         assume(len(Counter(map(lambda it: it.phase, energy_source.phases))) == len(list(energy_source.phases)))
 
@@ -524,122 +557,123 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(energy_source_phase=create_energy_source_phase(False))
-    async def test_schema_energy_source_phase(self, energy_source_phase):
+    async def test_schema_energy_source_phase(self, energy_source_phase: EnergyConsumerPhase):
         await self._validate_schema(SchemaNetworks().network_services_of(EnergySourcePhase, energy_source_phase))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(fuse=create_fuse(False))
-    async def test_schema_fuse(self, fuse):
+    async def test_schema_fuse(self, fuse: Fuse):
         await self._validate_schema(SchemaNetworks().network_services_of(Fuse, fuse))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(ground=create_ground(False))
-    async def test_schema_ground(self, ground):
+    async def test_schema_ground(self, ground: Ground):
         await self._validate_schema(SchemaNetworks().network_services_of(Ground, ground))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(ground_disconnector=create_ground_disconnector(False))
-    async def test_schema_ground_disconnector(self, ground_disconnector):
+    async def test_schema_ground_disconnector(self, ground_disconnector: GroundDisconnector):
         await self._validate_schema(SchemaNetworks().network_services_of(GroundDisconnector, ground_disconnector))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(grounding_impedance=create_grounding_impedance(False))
-    async def test_schema_grounding_impedance(self, grounding_impedance):
+    async def test_schema_grounding_impedance(self, grounding_impedance: GroundingImpedance):
         await self._validate_schema(SchemaNetworks().network_services_of(GroundingImpedance, grounding_impedance))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(jumper=create_jumper(False))
-    async def test_schema_jumper(self, jumper):
+    async def test_schema_jumper(self, jumper: Jumper):
         await self._validate_schema(SchemaNetworks().network_services_of(Jumper, jumper))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(junction=create_junction(False))
-    async def test_schema_junction(self, junction):
+    async def test_schema_junction(self, junction: Junction):
         await self._validate_schema(SchemaNetworks().network_services_of(Junction, junction))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(linear_shunt_compensator=create_linear_shunt_compensator(False))
-    async def test_schema_linear_shunt_compensator(self, linear_shunt_compensator):
+    async def test_schema_linear_shunt_compensator(self, linear_shunt_compensator: LinearShuntCompensator):
         await self._validate_schema(SchemaNetworks().network_services_of(LinearShuntCompensator, linear_shunt_compensator))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(load_break_switch=create_load_break_switch(False))
-    async def test_schema_load_break_switch(self, load_break_switch):
+    async def test_schema_load_break_switch(self, load_break_switch: LoadBreakSwitch):
         await self._validate_schema(SchemaNetworks().network_services_of(LoadBreakSwitch, load_break_switch))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(per_length_phase_impedance=create_per_length_phase_impedance(False))
-    async def test_schema_per_length_phase_impedance(self, per_length_phase_impedance):
+    async def test_schema_per_length_phase_impedance(self, per_length_phase_impedance: PerLengthPhaseImpedance):
         await self._validate_schema(SchemaNetworks().network_services_of(PerLengthPhaseImpedance, per_length_phase_impedance))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(per_length_sequence_impedance=create_per_length_sequence_impedance(False))
-    async def test_schema_per_length_sequence_impedance(self, per_length_sequence_impedance):
+    async def test_schema_per_length_sequence_impedance(self, per_length_sequence_impedance: PerLengthSequenceImpedance):
         await self._validate_schema(SchemaNetworks().network_services_of(PerLengthSequenceImpedance, per_length_sequence_impedance))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(petersen_coil=create_petersen_coil(False))
-    async def test_schema_petersen_coil(self, petersen_coil):
+    async def test_schema_petersen_coil(self, petersen_coil: PetersenCoil):
         await self._validate_schema(SchemaNetworks().network_services_of(PetersenCoil, petersen_coil))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(power_electronics_connection=create_power_electronics_connection(False))
+    async def test_schema_power_electronics_connection(self, power_electronics_connection: PowerElectronicsConnection):
+        await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnection, power_electronics_connection))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
+    @given(power_electronics_connection_phase=create_power_electronics_connection_phase(False))
+    async def test_schema_power_electronics_connection_phase(self, power_electronics_connection_phase: PowerElectronicsConnectionPhase):
+        await self._validate_schema(SchemaNetworks().network_services_of(PowerElectronicsConnectionPhase, power_electronics_connection_phase))
+
+    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(power_transformer=create_power_transformer(False))
-    async def test_schema_power_transformer(self, power_transformer):
+    async def test_schema_power_transformer(self, power_transformer: PowerTransformer):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerTransformer, power_transformer))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(power_transformer_end=create_power_transformer_end(False))
-    async def test_schema_power_transformer_end(self, power_transformer_end):
+    async def test_schema_power_transformer_end(self, power_transformer_end: PowerTransformerEnd):
         await self._validate_schema(SchemaNetworks().network_services_of(PowerTransformerEnd, power_transformer_end))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(ratio_tap_changer=create_ratio_tap_changer(False))
-    async def test_schema_ratio_tap_changer(self, ratio_tap_changer):
+    async def test_schema_ratio_tap_changer(self, ratio_tap_changer: RatioTapChanger):
         await self._validate_schema(SchemaNetworks().network_services_of(RatioTapChanger, ratio_tap_changer))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(reactive_capability_curve=create_reactive_capability_curve(False))
-    async def test_schema_reactive_capability_curve(self, reactive_capability_curve):
+    async def test_schema_reactive_capability_curve(self, reactive_capability_curve: ReactiveCapabilityCurve):
         await self._validate_schema(SchemaNetworks().network_services_of(ReactiveCapabilityCurve, reactive_capability_curve))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(recloser=create_recloser(False))
-    async def test_schema_recloser(self, recloser):
+    async def test_schema_recloser(self, recloser: Recloser):
         await self._validate_schema(SchemaNetworks().network_services_of(Recloser, recloser))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(series_compensator=create_series_compensator(False))
-    async def test_schema_series_compensator(self, series_compensator):
+    async def test_schema_series_compensator(self, series_compensator: SeriesCompensator):
         await self._validate_schema(SchemaNetworks().network_services_of(SeriesCompensator, series_compensator))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(static_var_compensator=create_static_var_compensator(False))
-    async def test_schema_static_var_compensator(self, static_var_compensator):
+    async def test_schema_static_var_compensator(self, static_var_compensator: StaticVarCompensator):
         await self._validate_schema(SchemaNetworks().network_services_of(StaticVarCompensator, static_var_compensator))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(synchronous_machine=create_synchronous_machine(False))
-    async def test_schema_synchronous_machine(self, synchronous_machine):
+    async def test_schema_synchronous_machine(self, synchronous_machine: SynchronousMachine):
         await self._validate_schema(SchemaNetworks().network_services_of(SynchronousMachine, synchronous_machine))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(tap_changer_control=create_tap_changer_control(False))
-    async def test_schema_tap_changer_control(self, tap_changer_control):
+    async def test_schema_tap_changer_control(self, tap_changer_control: TapChangerControl):
         await self._validate_schema(SchemaNetworks().network_services_of(TapChangerControl, tap_changer_control))
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(transformer_star_impedance=create_transformer_star_impedance(False))
-    async def test_schema_transformer_star_impedance(self, transformer_star_impedance):
+    async def test_schema_transformer_star_impedance(self, transformer_star_impedance: TransformerStarImpedance):
         await self._validate_schema(SchemaNetworks().network_services_of(TransformerStarImpedance, transformer_star_impedance))
-
-    ###################################################
-    # IEC61970 InfIEC61970 Base Generation Production #
-    ###################################################
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(ev_charging_unit=create_ev_charging_unit(False))
-    async def test_schema_ev_charging_unit(self, ev_charging_unit):
-        await self._validate_schema(SchemaNetworks().network_services_of(EvChargingUnit, ev_charging_unit))
 
     ###############################
     # IEC61970 InfIEC61970 Feeder #
@@ -647,22 +681,8 @@ class TestNetworkDatabaseSchema(CimDatabaseSchemaCommonTests[NetworkService, Net
 
     @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
     @given(circuit=create_circuit(False))
-    async def test_schema_circuit(self, circuit):
+    async def test_schema_circuit(self, circuit: Circuit):
         await self._validate_schema(SchemaNetworks().network_services_of(Circuit, circuit))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(loop=create_loop(False))
-    async def test_schema_loop(self, loop):
-        await self._validate_schema(SchemaNetworks().network_services_of(Loop, loop))
-
-    @settings(deadline=2000, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
-    @given(lv_feeder=create_lv_feeder(False))
-    async def test_schema_lv_feeder(self, lv_feeder):
-        network = SchemaNetworks().network_services_of(LvFeeder, lv_feeder)
-        await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.NORMAL)
-        await Tracing().assign_equipment_to_lv_feeders().run(network, network_state_operators=NetworkStateOperators.CURRENT)
-        await self._validate_schema(network)
-        # TODO: NetworkDatabaseTestSchema 238
 
     # ************ Services ************
 

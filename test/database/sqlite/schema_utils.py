@@ -117,9 +117,75 @@ class SchemaNetworks:
     def _add_with_references(filled: T, service: BaseService):
         service.add(filled)
 
+        ##################################
+        # Extensions IEC61968 Asset Info #
+        ##################################
+
         ################################
         # Extensions IEC61968 Metering #
         ################################
+
+        #################################
+        # Extensions IEC61970 Base Core #
+        #################################
+
+        ###################################
+        # Extensions IEC61970 Base Feeder #
+        ###################################
+
+        if isinstance(filled, Loop):
+            for it in filled.circuits:
+                it.loop = filled
+                service.add(it)
+            for it in filled.substations:
+                it.add_loop(filled)
+                service.add(it)
+            for it in filled.energizing_substations:
+                it.add_energized_loop(filled)
+                service.add(it)
+
+        if isinstance(filled, LvFeeder):
+            service.add(filled.normal_head_terminal)
+            for it in filled.normal_energizing_feeders:
+                it.add_normal_energized_lv_feeder(filled)
+                service.add(it)
+
+        ##################################################
+        # Extensions IEC61970 Base Generation Production #
+        ##################################################
+
+        #######################################
+        # Extensions IEC61970 Base Protection #
+        #######################################
+
+        if isinstance(filled, ProtectionRelayFunction):
+            for it in filled.protected_switches:
+                it.add_relay_function(filled)
+                service.add(it)
+            for it in filled.sensors:
+                it.add_relay_function(filled)
+                service.add(it)
+            for it in filled.schemes:
+                it.add_function(filled)
+                service.add(it)
+            service.add(filled.relay_info)
+
+        if isinstance(filled, ProtectionRelayScheme):
+            if filled.system is not None:
+                filled.system.add_scheme(filled)
+                service.add(filled.system)
+            for it in filled.functions:
+                it.add_scheme(filled)
+                service.add(it)
+
+        if isinstance(filled, ProtectionRelaySystem):
+            for it in filled.schemes:
+                it.system = filled
+                service.add(it)
+
+        ##################################
+        # Extensions IEC61970 Base Wires #
+        ##################################
 
         #######################
         # IEC61968 Asset Info #
@@ -160,11 +226,6 @@ class SchemaNetworks:
                 service.add(it)
                 it.add_asset(filled)
 
-        if isinstance(filled, Pole):
-            for it in filled.streetlights:
-                it.pole = filled
-                service.add(it)
-
         if isinstance(filled, Streetlight):
             filled.pole.add_streetlight(filled)
             service.add(filled.pole)
@@ -194,6 +255,23 @@ class SchemaNetworks:
         if isinstance(filled, PricingStructure):
             for it in filled.tariffs:
                 service.add(it)
+
+        #####################################
+        # IEC61968 InfIEC61968 InfAssetInfo #
+        #####################################
+
+        ##################################
+        # IEC61968 InfIEC61968 InfAssets #
+        ##################################
+
+        if isinstance(filled, Pole):
+            for it in filled.streetlights:
+                it.pole = filled
+                service.add(it)
+
+        ##################################
+        # IEC61968 InfIEC61968 InfCommon #
+        ##################################
 
         #####################
         # IEC61968 Metering #
@@ -335,6 +413,26 @@ class SchemaNetworks:
             filled.diagram.add_diagram_object(filled)
             service.add(filled.diagram)
 
+        ########################
+        # IEC61970 Base Domain #
+        ########################
+
+        #############################
+        # IEC61970 Base Equivalents #
+        #############################
+
+        #######################################
+        # IEC61970 Base Generation Production #
+        #######################################
+
+        if isinstance(filled, PowerElectronicsUnit):
+            filled.power_electronics_connection.add_unit(filled)
+            service.add(filled.power_electronics_connection)
+
+        if isinstance(filled, BatteryUnit):
+            for it in filled.controls:
+                service.add(it)
+
         ######################
         # IEC61970 Base Meas #
         ######################
@@ -351,34 +449,9 @@ class SchemaNetworks:
         # IEC61970 Base Protection #
         ############################
 
-        if isinstance(filled, ProtectionRelayFunction):
-            for it in filled.protected_switches:
-                it.add_relay_function(filled)
-                service.add(it)
-            for it in filled.sensors:
-                it.add_relay_function(filled)
-                service.add(it)
-            for it in filled.schemes:
-                it.add_function(filled)
-                service.add(it)
-            service.add(filled.relay_info)
-
         if isinstance(filled, Sensor):
             for it in filled.relay_functions:
                 it.add_sensor(filled)
-                service.add(it)
-
-        if isinstance(filled, ProtectionRelayScheme):
-            if filled.system is not None:
-                filled.system.add_scheme(filled)
-                service.add(filled.system)
-            for it in filled.functions:
-                it.add_scheme(filled)
-                service.add(it)
-
-        if isinstance(filled, ProtectionRelaySystem):
-            for it in filled.schemes:
-                it.system = filled
                 service.add(it)
 
         #######################
@@ -392,18 +465,6 @@ class SchemaNetworks:
         if isinstance(filled, RemoteSource):
             filled.measurement.remote_source = filled
             service.add(filled.measurement)
-
-        #######################################
-        # IEC61970 Base Generation Production #
-        #######################################
-
-        if isinstance(filled, PowerElectronicsUnit):
-            filled.power_electronics_connection.add_unit(filled)
-            service.add(filled.power_electronics_connection)
-
-        if isinstance(filled, BatteryUnit):
-            for it in filled.controls:
-                service.add(it)
 
         #######################
         # IEC61970 Base Wires #
@@ -524,23 +585,7 @@ class SchemaNetworks:
                 it.add_circuit(filled)  # could also be add_energized_loop
                 service.add(it)
 
-        if isinstance(filled, Loop):
-            for it in filled.circuits:
-                it.loop = filled
-                service.add(it)
-            for it in filled.substations:
-                it.add_loop(filled)
-                service.add(it)
-            for it in filled.energizing_substations:
-                it.add_energized_loop(filled)
-                service.add(it)
-
-        if isinstance(filled, LvFeeder):
-            service.add(filled.normal_head_terminal)
-            for it in filled.normal_energizing_feeders:
-                it.add_normal_energized_lv_feeder(filled)
-                service.add(it)
-
+        # This is done last to ensure any created object above are also processed.
         for io in service.objects():
             for name in io.names:
                 service.add_name_type(name.type)
