@@ -641,7 +641,6 @@ def tariff():
 # IEC61968 InfIEC61968 InfAssetInfo #
 #####################################
 
-
 def current_transformer_info():
     return builds(
         PBCurrentTransformerInfo,

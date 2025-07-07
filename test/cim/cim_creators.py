@@ -595,7 +595,6 @@ def create_tariffs(include_runtime: bool = True):
 # IEC61968 InfIEC61968 InfAssetInfo #
 #####################################
 
-
 def create_current_transformer_info(include_runtime: bool = True):
     return builds(
         CurrentTransformerInfo,
@@ -734,7 +733,6 @@ def create_operational_restriction(include_runtime: bool = True):
 #####################################
 # IEC61970 Base Auxiliary Equipment #
 #####################################
-
 
 def create_auxiliary_equipment(include_runtime: bool):
     return {
@@ -1047,7 +1045,6 @@ def create_equivalent_equipment(include_runtime: bool):
 #######################################
 # IEC61970 Base Generation Production #
 #######################################
-
 
 def sampled_battery_state_kind():
     return sampled_from(BatteryStateKind)

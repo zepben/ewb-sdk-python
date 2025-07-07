@@ -334,6 +334,22 @@ class CimTranslationException(Exception):
     pass
 
 
+##################################
+# Extensions IEC61968 Asset Info #
+##################################
+
+def relay_info_to_pb(cim: RelayInfo) -> PBRelayInfo:
+    return PBRelayInfo(
+        ai=asset_info_to_pb(cim),
+        curveSetting=cim.curve_setting,
+        **nullable_bool_settings("recloseFast", cim.reclose_fast),
+        recloseDelays=cim.reclose_delays
+    )
+
+
+RelayInfo.to_pb = relay_info_to_pb
+
+
 ################################
 # Extensions IEC61968 Metering #
 ################################
@@ -353,6 +369,126 @@ def pan_demand_response_function_to_pb(cim: PanDemandResponseFunction) -> PBPanD
 
 
 PanDemandResponseFunction.to_pb = pan_demand_response_function_to_pb
+
+
+#################################
+# Extensions IEC61970 Base Core #
+#################################
+
+def site_to_pb(cim: Site) -> PBSite:
+    return PBSite(ec=equipment_container_to_pb(cim))
+
+
+Site.to_pb = site_to_pb
+
+
+###################################
+# Extensions IEC61970 Base Feeder #
+###################################
+
+def loop_to_pb(cim: Loop) -> PBLoop:
+    return PBLoop(
+        io=identified_object_to_pb(cim),
+        circuitMRIDs=[str(io.mrid) for io in cim.circuits],
+        substationMRIDs=[str(io.mrid) for io in cim.substations],
+        normalEnergizingSubstationMRIDs=[str(io.mrid) for io in cim.energizing_substations]
+    )
+
+
+def lv_feeder_to_pb(cim: LvFeeder) -> PBLvFeeder:
+    return PBLvFeeder(
+        ec=equipment_container_to_pb(cim),
+        normalHeadTerminalMRID=mrid_or_empty(cim.normal_head_terminal),
+        normalEnergizingFeederMRIDs=[str(io.mrid) for io in cim.normal_energizing_feeders],
+        currentlyEnergizingFeederMRIDs=[str(io.mrid) for io in cim.current_energizing_feeders]
+    )
+
+
+Loop.to_pb = loop_to_pb
+LvFeeder.to_pb = lv_feeder_to_pb
+
+
+##################################################
+# Extensions IEC61970 Base Generation Production #
+##################################################
+
+def ev_charging_unit(cim: EvChargingUnit) -> PBEvChargingUnit:
+    return PBEvChargingUnit(peu=power_electronics_unit_to_pb(cim))
+
+
+EvChargingUnit.to_pb = ev_charging_unit
+
+
+#######################################
+# Extensions IEC61970 Base Protection #
+#######################################
+
+def distance_relay_to_pb(cim: DistanceRelay) -> PBDistanceRelay:
+    return PBDistanceRelay(
+        prf=protection_relay_function_to_pb(cim, True),
+        backwardBlind=from_nullable_float(cim.backward_blind),
+        backwardReach=from_nullable_float(cim.backward_reach),
+        backwardReactance=from_nullable_float(cim.backward_reactance),
+        forwardBlind=from_nullable_float(cim.forward_blind),
+        forwardReach=from_nullable_float(cim.forward_reach),
+        forwardReactance=from_nullable_float(cim.forward_reactance),
+        operationPhaseAngle1=from_nullable_float(cim.operation_phase_angle1),
+        operationPhaseAngle2=from_nullable_float(cim.operation_phase_angle2),
+        operationPhaseAngle3=from_nullable_float(cim.operation_phase_angle3)
+    )
+
+
+def protection_relay_function_to_pb(cim: ProtectionRelayFunction, include_asset_info: bool = False) -> PBProtectionRelayFunction:
+    return PBProtectionRelayFunction(
+        psr=power_system_resource_to_pb(cim, include_asset_info),
+        model=cim.model,
+        **nullable_bool_settings("reclosing", cim.reclosing),
+        timeLimits=cim.time_limits,
+        thresholds=[relay_setting_to_pb(rs) for rs in cim.thresholds],
+        relayDelayTime=from_nullable_float(cim.relay_delay_time),
+        protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name),
+        protectedSwitchMRIDs=[str(io.mrid) for io in cim.protected_switches],
+        **nullable_bool_settings("directable", cim.directable),
+        powerDirection=PBPowerDirectionKind.Value(cim.power_direction.short_name),
+        sensorMRIDs=[str(io.mrid) for io in cim.sensors],
+        schemeMRIDs=[str(io.mrid) for io in cim.schemes],
+    )
+
+
+def protection_relay_scheme_to_pb(cim: ProtectionRelayScheme) -> PBProtectionRelayScheme:
+    return PBProtectionRelayScheme(
+        io=identified_object_to_pb(cim),
+        systemMRID=mrid_or_empty(cim.system),
+        functionMRIDs=[str(io.mrid) for io in cim.functions]
+    )
+
+
+def protection_relay_system_to_pb(cim: ProtectionRelaySystem) -> PBProtectionRelaySystem:
+    return PBProtectionRelaySystem(
+        eq=equipment_to_pb(cim),
+        protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name),
+        schemeMRIDs=[str(io.mrid) for io in cim.schemes],
+    )
+
+
+def relay_setting_to_pb(cim: RelaySetting) -> PBRelaySetting:
+    return PBRelaySetting(
+        name=cim.name,
+        unitSymbol=PBUnitSymbol.Value(cim.unit_symbol.short_name),
+        value=from_nullable_float(cim.value)
+    )
+
+
+def voltage_relay_to_pb(cim: VoltageRelay) -> PBVoltageRelay:
+    return PBVoltageRelay(
+        prf=protection_relay_function_to_pb(cim, True),
+    )
+
+
+DistanceRelay.to_pb = distance_relay_to_pb
+ProtectionRelayScheme.to_pb = protection_relay_scheme_to_pb
+ProtectionRelaySystem.to_pb = protection_relay_system_to_pb
+VoltageRelay.to_pb = voltage_relay_to_pb
 
 
 ##################################
@@ -549,14 +685,6 @@ def asset_owner_to_pb(cim: AssetOwner) -> PBAssetOwner:
     return PBAssetOwner(aor=asset_organisation_role_to_pb(cim))
 
 
-def pole_to_pb(cim: Pole) -> PBPole:
-    return PBPole(
-        st=structure_to_pb(cim),
-        streetlightMRIDs=[str(io.mrid) for io in cim.streetlights],
-        classification=cim.classification
-    )
-
-
 def streetlight_to_pb(cim: Streetlight) -> PBStreetlight:
     return PBStreetlight(
         at=asset_to_pb(cim),
@@ -571,7 +699,6 @@ def structure_to_pb(cim: Structure) -> PBStructure:
 
 
 AssetOwner.to_pb = asset_owner_to_pb
-Pole.to_pb = pole_to_pb
 Streetlight.to_pb = streetlight_to_pb
 
 
@@ -653,18 +780,23 @@ def potential_transformer_info_to_pb(cim: PotentialTransformerInfo) -> PBPotenti
     )
 
 
-def relay_info_to_pb(cim: RelayInfo) -> PBRelayInfo:
-    return PBRelayInfo(
-        ai=asset_info_to_pb(cim),
-        curveSetting=cim.curve_setting,
-        **nullable_bool_settings("recloseFast", cim.reclose_fast),
-        recloseDelays=cim.reclose_delays
+CurrentTransformerInfo.to_pb = current_transformer_info_to_pb
+PotentialTransformerInfo.to_pb = potential_transformer_info_to_pb
+
+
+##################################
+# IEC61968 InfIEC61968 InfAssets #
+##################################
+
+def pole_to_pb(cim: Pole) -> PBPole:
+    return PBPole(
+        st=structure_to_pb(cim),
+        streetlightMRIDs=[str(io.mrid) for io in cim.streetlights],
+        classification=cim.classification
     )
 
 
-RelayInfo.to_pb = relay_info_to_pb
-CurrentTransformerInfo.to_pb = current_transformer_info_to_pb
-PotentialTransformerInfo.to_pb = potential_transformer_info_to_pb
+Pole.to_pb = pole_to_pb
 
 
 ##################################
@@ -874,10 +1006,6 @@ def power_system_resource_to_pb(cim: PowerSystemResource, include_asset_info: bo
     )
 
 
-def site_to_pb(cim: Site) -> PBSite:
-    return PBSite(ec=equipment_container_to_pb(cim))
-
-
 def sub_geographical_region_to_pb(cim: SubGeographicalRegion) -> PBSubGeographicalRegion:
     return PBSubGeographicalRegion(
         io=identified_object_to_pb(cim),
@@ -913,10 +1041,8 @@ def terminal_to_pb(cim: Terminal) -> PBTerminal:
 
 BaseVoltage.to_pb = base_voltage_to_pb
 ConnectivityNode.to_pb = connectivity_node_to_pb
-CurveData.to_pb = curve_to_pb
 Feeder.to_pb = feeder_to_pb
 GeographicalRegion.to_pb = geographical_region_to_pb
-Site.to_pb = site_to_pb
 SubGeographicalRegion.to_pb = sub_geographical_region_to_pb
 Substation.to_pb = substation_to_pb
 Terminal.to_pb = terminal_to_pb
@@ -953,6 +1079,47 @@ def equivalent_equipment_to_pb(cim: EquivalentEquipment) -> PBEquivalentEquipmen
 
 
 EquivalentBranch.to_pb = equivalent_branch_to_pb
+
+
+#######################################
+# IEC61970 Base Generation Production #
+#######################################
+
+def battery_unit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
+    """
+    Convert the :class:`BatteryUnit` into its protobuf counterpart.
+    :param cim: The :class:`BatteryUnit` to convert.
+    :return: The protobuf builder.
+    """
+    return PBBatteryUnit(
+        peu=power_electronics_unit_to_pb(cim),
+        batteryControlMRIDs=[str(io.mrid) for io in cim.controls],
+        ratedE=from_nullable_long(cim.rated_e),
+        storedE=from_nullable_long(cim.stored_e),
+        batteryState=PBBatteryStateKind.Value(cim.battery_state.short_name)
+    )
+
+
+def photo_voltaic_unit_to_pb(cim: PhotoVoltaicUnit) -> PBPhotoVoltaicUnit:
+    return PBPhotoVoltaicUnit(peu=power_electronics_unit_to_pb(cim))
+
+
+def power_electronics_unit_to_pb(cim: PowerElectronicsUnit) -> PBPowerElectronicsUnit:
+    return PBPowerElectronicsUnit(
+        eq=equipment_to_pb(cim),
+        maxP=from_nullable_int(cim.max_p),
+        minP=from_nullable_int(cim.min_p),
+        powerElectronicsConnectionMRID=mrid_or_empty(cim.power_electronics_connection)
+    )
+
+
+def power_electronics_wind_unit_to_pb(cim: PowerElectronicsWindUnit) -> PBPowerElectronicsWindUnit:
+    return PBPowerElectronicsWindUnit(peu=power_electronics_unit_to_pb(cim))
+
+
+BatteryUnit.to_pb = battery_unit_to_pb
+PhotoVoltaicUnit.to_pb = photo_voltaic_unit_to_pb
+PowerElectronicsWindUnit.to_pb = power_electronics_wind_unit_to_pb
 
 
 ######################
@@ -1016,73 +1183,7 @@ def current_relay_to_pb(cim: CurrentRelay) -> PBCurrentRelay:
     )
 
 
-def distance_relay_to_pb(cim: DistanceRelay) -> PBDistanceRelay:
-    return PBDistanceRelay(
-        prf=protection_relay_function_to_pb(cim, True),
-        backwardBlind=from_nullable_float(cim.backward_blind),
-        backwardReach=from_nullable_float(cim.backward_reach),
-        backwardReactance=from_nullable_float(cim.backward_reactance),
-        forwardBlind=from_nullable_float(cim.forward_blind),
-        forwardReach=from_nullable_float(cim.forward_reach),
-        forwardReactance=from_nullable_float(cim.forward_reactance),
-        operationPhaseAngle1=from_nullable_float(cim.operation_phase_angle1),
-        operationPhaseAngle2=from_nullable_float(cim.operation_phase_angle2),
-        operationPhaseAngle3=from_nullable_float(cim.operation_phase_angle3)
-    )
-
-
-def protection_relay_function_to_pb(cim: ProtectionRelayFunction, include_asset_info: bool = False) -> PBProtectionRelayFunction:
-    return PBProtectionRelayFunction(
-        psr=power_system_resource_to_pb(cim, include_asset_info),
-        model=cim.model,
-        **nullable_bool_settings("reclosing", cim.reclosing),
-        timeLimits=cim.time_limits,
-        thresholds=[relay_setting_to_pb(rs) for rs in cim.thresholds],
-        relayDelayTime=from_nullable_float(cim.relay_delay_time),
-        protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name),
-        protectedSwitchMRIDs=[str(io.mrid) for io in cim.protected_switches],
-        **nullable_bool_settings("directable", cim.directable),
-        powerDirection=PBPowerDirectionKind.Value(cim.power_direction.short_name),
-        sensorMRIDs=[str(io.mrid) for io in cim.sensors],
-        schemeMRIDs=[str(io.mrid) for io in cim.schemes],
-    )
-
-
-def protection_relay_scheme_to_pb(cim: ProtectionRelayScheme) -> PBProtectionRelayScheme:
-    return PBProtectionRelayScheme(
-        io=identified_object_to_pb(cim),
-        systemMRID=mrid_or_empty(cim.system),
-        functionMRIDs=[str(io.mrid) for io in cim.functions]
-    )
-
-
-def protection_relay_system_to_pb(cim: ProtectionRelaySystem) -> PBProtectionRelaySystem:
-    return PBProtectionRelaySystem(
-        eq=equipment_to_pb(cim),
-        protectionKind=PBProtectionKind.Value(cim.protection_kind.short_name),
-        schemeMRIDs=[str(io.mrid) for io in cim.schemes],
-    )
-
-
-def relay_setting_to_pb(cim: RelaySetting) -> PBRelaySetting:
-    return PBRelaySetting(
-        name=cim.name,
-        unitSymbol=PBUnitSymbol.Value(cim.unit_symbol.short_name),
-        value=from_nullable_float(cim.value)
-    )
-
-
-def voltage_relay_to_pb(cim: VoltageRelay) -> PBVoltageRelay:
-    return PBVoltageRelay(
-        prf=protection_relay_function_to_pb(cim, True),
-    )
-
-
 CurrentRelay.to_pb = current_relay_to_pb
-DistanceRelay.to_pb = distance_relay_to_pb
-ProtectionRelayScheme.to_pb = protection_relay_scheme_to_pb
-ProtectionRelaySystem.to_pb = protection_relay_system_to_pb
-VoltageRelay.to_pb = voltage_relay_to_pb
 
 
 #######################
@@ -1109,47 +1210,6 @@ def remote_source_to_pb(cim: RemoteSource) -> PBRemoteSource:
 
 RemoteControl.to_pb = remote_control_to_pb
 RemoteSource.to_pb = remote_source_to_pb
-
-
-#######################################
-# IEC61970 Base Generation Production #
-#######################################
-
-def battery_unit_to_pb(cim: BatteryUnit) -> PBBatteryUnit:
-    """
-    Convert the :class:`BatteryUnit` into its protobuf counterpart.
-    :param cim: The :class:`BatteryUnit` to convert.
-    :return: The protobuf builder.
-    """
-    return PBBatteryUnit(
-        peu=power_electronics_unit_to_pb(cim),
-        batteryControlMRIDs=[str(io.mrid) for io in cim.controls],
-        ratedE=from_nullable_long(cim.rated_e),
-        storedE=from_nullable_long(cim.stored_e),
-        batteryState=PBBatteryStateKind.Value(cim.battery_state.short_name)
-    )
-
-
-def photo_voltaic_unit_to_pb(cim: PhotoVoltaicUnit) -> PBPhotoVoltaicUnit:
-    return PBPhotoVoltaicUnit(peu=power_electronics_unit_to_pb(cim))
-
-
-def power_electronics_unit_to_pb(cim: PowerElectronicsUnit) -> PBPowerElectronicsUnit:
-    return PBPowerElectronicsUnit(
-        eq=equipment_to_pb(cim),
-        maxP=from_nullable_int(cim.max_p),
-        minP=from_nullable_int(cim.min_p),
-        powerElectronicsConnectionMRID=mrid_or_empty(cim.power_electronics_connection)
-    )
-
-
-def power_electronics_wind_unit_to_pb(cim: PowerElectronicsWindUnit) -> PBPowerElectronicsWindUnit:
-    return PBPowerElectronicsWindUnit(peu=power_electronics_unit_to_pb(cim))
-
-
-BatteryUnit.to_pb = battery_unit_to_pb
-PhotoVoltaicUnit.to_pb = photo_voltaic_unit_to_pb
-PowerElectronicsWindUnit.to_pb = power_electronics_wind_unit_to_pb
 
 
 #######################
@@ -1351,22 +1411,6 @@ def per_length_line_parameter_to_pb(cim: PerLengthLineParameter) -> PBPerLengthL
     return PBPerLengthLineParameter(io=identified_object_to_pb(cim))
 
 
-def phase_impedance_data_to_pb(cim: PhaseImpedanceData) -> PBPhaseImpedanceData:
-    """
-    Convert the :class:`PhaseImpedanceData` into its protobuf counterpart.
-    :param cim: The :class:`PhaseImpedanceData` to convert.
-    :return: The protobuf builder.
-    """
-    return PBPhaseImpedanceData(
-        fromPhase=PBSinglePhaseKind.Value(cim.from_phase.short_name),
-        toPhase=PBSinglePhaseKind.Value(cim.to_phase.short_name),
-        b=from_nullable_float(cim.b),
-        g=from_nullable_float(cim.g),
-        r=from_nullable_float(cim.r),
-        x=from_nullable_float(cim.x),
-    )
-
-
 def per_length_phase_impedance_to_pb(cim: PerLengthPhaseImpedance) -> PBPerLengthPhaseImpedance:
     """
     Convert the :class:`PerLengthPhaseImpedance` into its protobuf counterpart.
@@ -1397,6 +1441,22 @@ def petersen_coil_to_pb(cim: PetersenCoil) -> PBPetersenCoil:
     return PBPetersenCoil(
         efc=earth_fault_compensator_to_pb(cim),
         xGroundNominal=from_nullable_float(cim.x_ground_nominal)
+    )
+
+
+def phase_impedance_data_to_pb(cim: PhaseImpedanceData) -> PBPhaseImpedanceData:
+    """
+    Convert the :class:`PhaseImpedanceData` into its protobuf counterpart.
+    :param cim: The :class:`PhaseImpedanceData` to convert.
+    :return: The protobuf builder.
+    """
+    return PBPhaseImpedanceData(
+        fromPhase=PBSinglePhaseKind.Value(cim.from_phase.short_name),
+        toPhase=PBSinglePhaseKind.Value(cim.to_phase.short_name),
+        b=from_nullable_float(cim.b),
+        g=from_nullable_float(cim.g),
+        r=from_nullable_float(cim.r),
+        x=from_nullable_float(cim.x),
     )
 
 
@@ -1704,7 +1764,6 @@ LinearShuntCompensator.to_pb = linear_shunt_compensator_to_pb
 LoadBreakSwitch.to_pb = load_break_switch_to_pb
 PerLengthPhaseImpedance.to_pb = per_length_phase_impedance_to_pb
 PerLengthSequenceImpedance.to_pb = per_length_sequence_impedance_to_pb
-PhaseImpedanceData.to_pb = phase_impedance_data_to_pb
 PetersenCoil.to_pb = petersen_coil_to_pb
 PowerElectronicsConnection.to_pb = power_electronics_connection_to_pb
 PowerElectronicsConnectionPhase.to_pb = power_electronics_connection_phase_to_pb
@@ -1734,36 +1793,4 @@ def circuit_to_pb(cim: Circuit) -> PBCircuit:
     )
 
 
-def loop_to_pb(cim: Loop) -> PBLoop:
-    return PBLoop(
-        io=identified_object_to_pb(cim),
-        circuitMRIDs=[str(io.mrid) for io in cim.circuits],
-        substationMRIDs=[str(io.mrid) for io in cim.substations],
-        normalEnergizingSubstationMRIDs=[str(io.mrid) for io in cim.energizing_substations]
-    )
-
-
-def lv_feeder_to_pb(cim: LvFeeder) -> PBLvFeeder:
-    return PBLvFeeder(
-        ec=equipment_container_to_pb(cim),
-        normalHeadTerminalMRID=mrid_or_empty(cim.normal_head_terminal),
-        normalEnergizingFeederMRIDs=[str(io.mrid) for io in cim.normal_energizing_feeders],
-        currentlyEnergizingFeederMRIDs=[str(io.mrid) for io in cim.current_energizing_feeders]
-    )
-
-
 Circuit.to_pb = circuit_to_pb
-Loop.to_pb = loop_to_pb
-LvFeeder.to_pb = lv_feeder_to_pb
-
-
-##############################################
-# IEC61970 InfIEC61970 Generation Production #
-##############################################
-
-
-def ev_charging_unit(cim: EvChargingUnit) -> PBEvChargingUnit:
-    return PBEvChargingUnit(peu=power_electronics_unit_to_pb(cim))
-
-
-EvChargingUnit.to_pb = ev_charging_unit

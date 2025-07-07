@@ -658,11 +658,45 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
 
 
 _nio_type_to_cim = {
+    ##################################
+    # Extensions IEC61968 Asset Info #
+    ##################################
+
+    "relayInfo": RelayInfo,
+
     ################################
     # Extensions IEC61968 Metering #
     ################################
 
     "panDemandResponseFunction": PanDemandResponseFunction,
+
+    #################################
+    # Extensions IEC61970 Base Core #
+    #################################
+
+    "site": Site,
+
+    ###################################
+    # Extensions IEC61970 Base Feeder #
+    ###################################
+
+    "loop": Loop,
+    "lvFeeder": LvFeeder,
+
+    ##################################################
+    # Extensions IEC61970 Base Generation Production #
+    ##################################################
+
+    "evChargingUnit": EvChargingUnit,
+
+    #######################################
+    # Extensions IEC61970 Base Protection #
+    #######################################
+
+    "distanceRelay": DistanceRelay,
+    "protectionRelayScheme": ProtectionRelayScheme,
+    "protectionRelaySystem": ProtectionRelaySystem,
+    "voltageRelay": VoltageRelay,
 
     ##################################
     # Extensions IEC61970 Base Wires #
@@ -681,6 +715,7 @@ _nio_type_to_cim = {
     "powerTransformerInfo": PowerTransformerInfo,
     "shortCircuitTest": ShortCircuitTest,
     "shuntCompensatorInfo": ShuntCompensatorInfo,
+    "switchInfo": SwitchInfo,
     "transformerEndInfo": TransformerEndInfo,
     "transformerTankInfo": TransformerTankInfo,
 
@@ -696,8 +731,20 @@ _nio_type_to_cim = {
 
     "organisation": Organisation,
     "location": Location,
-    "pole": Pole,
     "streetlight": Streetlight,
+
+    #####################################
+    # IEC61968 InfIEC61968 InfAssetInfo #
+    #####################################
+
+    "currentTransformerInfo": CurrentTransformerInfo,
+    "potentialTransformerInfo": PotentialTransformerInfo,
+
+    ##################################
+    # IEC61968 InfIEC61968 InfAssets #
+    ##################################
+
+    "pole": Pole,
 
     #####################
     # IEC61968 Metering #
@@ -711,14 +758,6 @@ _nio_type_to_cim = {
     #######################
 
     "operationalRestriction": OperationalRestriction,
-
-    #####################################
-    # IEC61968 InfIEC61968 InfAssetInfo #
-    #####################################
-
-    "currentTransformerInfo": CurrentTransformerInfo,
-    "potentialTransformerInfo": PotentialTransformerInfo,
-    "relayInfo": RelayInfo,
 
     #####################################
     # IEC61970 Base Auxiliary Equipment #
@@ -736,7 +775,6 @@ _nio_type_to_cim = {
     "connectivityNode": ConnectivityNode,
     "feeder": Feeder,
     "geographicalRegion": GeographicalRegion,
-    "site": Site,
     "subGeographicalRegion": SubGeographicalRegion,
     "substation": Substation,
     "terminal": Terminal,
@@ -746,6 +784,14 @@ _nio_type_to_cim = {
     #############################
 
     "equivalentBranch": EquivalentBranch,
+
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
+
+    "batteryUnit": BatteryUnit,
+    "photoVoltaicUnit": PhotoVoltaicUnit,
+    "powerElectronicsWindUnit": PowerElectronicsWindUnit,
 
     ######################
     # IEC61970 Base Meas #
@@ -761,10 +807,6 @@ _nio_type_to_cim = {
     ############################
 
     "currentRelay": CurrentRelay,
-    "distanceRelay": DistanceRelay,
-    "protectionRelayScheme": ProtectionRelayScheme,
-    "protectionRelaySystem": ProtectionRelaySystem,
-    "voltageRelay": VoltageRelay,
 
     #######################
     # IEC61970 Base Scada #
@@ -772,14 +814,6 @@ _nio_type_to_cim = {
 
     "remoteControl": RemoteControl,
     "remoteSource": RemoteSource,
-
-    #######################################
-    # IEC61970 Base Generation Production #
-    #######################################
-
-    "batteryUnit": BatteryUnit,
-    "photoVoltaicUnit": PhotoVoltaicUnit,
-    "powerElectronicsWindUnit": PowerElectronicsWindUnit,
 
     #######################
     # IEC61970 Base Wires #
@@ -824,13 +858,4 @@ _nio_type_to_cim = {
     ###############################
 
     "circuit": Circuit,
-    "loop": Loop,
-    "lvFeeder": LvFeeder,
-    "switchInfo": SwitchInfo,
-
-    ##############################################
-    # IEC61970 InfIEC61970 Generation Production #
-    ##############################################
-
-    "evChargingUnit": EvChargingUnit
 }
