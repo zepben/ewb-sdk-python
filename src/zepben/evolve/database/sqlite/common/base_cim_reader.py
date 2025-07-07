@@ -76,47 +76,6 @@ class BaseCimReader(ABC):
 
         return self._load_identified_object(organisation, table, result_set) and self._add_or_throw(organisation)
 
-    def load_name_types(self, table: TableNameTypes, result_set: ResultSet, set_last_name_type: Callable[[str], str]) -> bool:
-        """
-        Create a `NameType` and populate its fields from `TableNameTypes`.
-
-        :param table: The database table to read the `NameType` fields from.
-        :param result_set: The record in the database table containing the fields for this `NameType`.
-        :param set_last_name_type: A callback to register the name of this `NameType` for logging purposes.
-
-        :return: True if the `NameType` was successfully read from the database and added to the service.
-        :raises SQLException: For any errors encountered reading from the database.
-        """
-        # noinspection PyArgumentList
-        name_type = NameType(set_last_name_type(result_set.get_string(table.name_.query_index)))
-        name_type.description = result_set.get_string(table.description.query_index)
-
-        return self._add_or_throw_name_type(name_type)
-
-    def load_names(self, table: TableNames, result_set: ResultSet, set_last_name: Callable[[str], str]) -> bool:
-        """
-        Create a `Name` and populate its fields from `TableNames`.
-
-        :param table: The database table to read the `Name` fields from.
-        :param result_set: The record in the database table containing the fields for this `Name`.
-        :param set_last_name: A callback to register the name of this `Name` for logging purposes.
-
-        :return: True if the `Name` was successfully read from the database and added to the service.
-        :raises SQLException: For any errors encountered reading from the database.
-        """
-        name_type_name = result_set.get_string(table.name_type_name.query_index)
-        name_name = result_set.get_string(table.name_.query_index)
-        set_last_name(f"{name_type_name}:{name_name}")
-
-        name_type = self._service.get_name_type(name_type_name)
-        self._service.get(
-            result_set.get_string(table.identified_object_mrid.query_index),
-            IdentifiedObject,
-            generate_error=lambda mrid, typ: f"Failed to find {typ} with mRID {mrid} for Name {name_name} [{name_type_name}]"
-        ).add_name(name_type, name_name)
-
-        return True
-
     def _load_organisation_role(self, organisation_role: OrganisationRole, table: TableOrganisationRoles, result_set: ResultSet) -> bool:
         """
         Populate the `OrganisationRole` fields from `TableOrganisationRoles`.
@@ -157,6 +116,47 @@ class BaseCimReader(ABC):
         # identified_object.num_diagram_objects = result_set.get_int(table.num_diagram_objects.query_index)
 
         return True
+
+    def load_names(self, table: TableNames, result_set: ResultSet, set_last_name: Callable[[str], str]) -> bool:
+        """
+        Create a `Name` and populate its fields from `TableNames`.
+
+        :param table: The database table to read the `Name` fields from.
+        :param result_set: The record in the database table containing the fields for this `Name`.
+        :param set_last_name: A callback to register the name of this `Name` for logging purposes.
+
+        :return: True if the `Name` was successfully read from the database and added to the service.
+        :raises SQLException: For any errors encountered reading from the database.
+        """
+        name_type_name = result_set.get_string(table.name_type_name.query_index)
+        name_name = result_set.get_string(table.name_.query_index)
+        set_last_name(f"{name_type_name}:{name_name}")
+
+        name_type = self._service.get_name_type(name_type_name)
+        self._service.get(
+            result_set.get_string(table.identified_object_mrid.query_index),
+            IdentifiedObject,
+            generate_error=lambda mrid, typ: f"Failed to find {typ} with mRID {mrid} for Name {name_name} [{name_type_name}]"
+        ).add_name(name_type, name_name)
+
+        return True
+
+    def load_name_types(self, table: TableNameTypes, result_set: ResultSet, set_last_name_type: Callable[[str], str]) -> bool:
+        """
+        Create a `NameType` and populate its fields from `TableNameTypes`.
+
+        :param table: The database table to read the `NameType` fields from.
+        :param result_set: The record in the database table containing the fields for this `NameType`.
+        :param set_last_name_type: A callback to register the name of this `NameType` for logging purposes.
+
+        :return: True if the `NameType` was successfully read from the database and added to the service.
+        :raises SQLException: For any errors encountered reading from the database.
+        """
+        # noinspection PyArgumentList
+        name_type = NameType(set_last_name_type(result_set.get_string(table.name_.query_index)))
+        name_type.description = result_set.get_string(table.description.query_index)
+
+        return self._add_or_throw_name_type(name_type)
 
     def _add_or_throw(self, identified_object: IdentifiedObject) -> bool:
         """

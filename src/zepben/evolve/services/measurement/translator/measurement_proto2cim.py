@@ -14,36 +14,39 @@ from zepben.evolve.model.cim.iec61970.base.meas.measurement_value import Measure
 
 from zepben.evolve.services.measurement.measurements import MeasurementService
 
-__all__ = ["measurement_value_to_cim", "analogvalue_to_cim", "accumulatorvalue_to_cim", "discretevalue_to_cim"]
+__all__ = ["measurement_value_to_cim", "analog_value_to_cim", "accumulator_value_to_cim", "discrete_value_to_cim"]
 
 
 ######################
 # IEC61970 Base Meas #
 ######################
 
-def measurement_value_to_cim(pb: PBMeasurementValue, cim: MeasurementValue):
-    cim.time_stamp = pb.timeStamp.ToDatetime()
-
-
-def analogvalue_to_cim(pb: PBAnalogValue, service: MeasurementService):
-    cim = AnalogValue(analog_mrid=pb.analogMRID, value=pb.value)
-    measurement_value_to_cim(pb.mv, cim)
-    service.add(cim)
-
-
-def accumulatorvalue_to_cim(pb: PBAccumulatorValue, service: MeasurementService):
+def accumulator_value_to_cim(pb: PBAccumulatorValue, service: MeasurementService):
+    # noinspection PyArgumentList
     cim = AccumulatorValue(accumulator_mrid=pb.accumulatorMRID, value=pb.value)
     measurement_value_to_cim(pb.mv, cim)
     service.add(cim)
 
 
-def discretevalue_to_cim(pb: PBDiscreteValue, service: MeasurementService):
+def analog_value_to_cim(pb: PBAnalogValue, service: MeasurementService):
+    # noinspection PyArgumentList
+    cim = AnalogValue(analog_mrid=pb.analogMRID, value=pb.value)
+    measurement_value_to_cim(pb.mv, cim)
+    service.add(cim)
+
+
+def discrete_value_to_cim(pb: PBDiscreteValue, service: MeasurementService):
+    # noinspection PyArgumentList
     cim = DiscreteValue(discrete_mrid=pb.discreteMRID, value=pb.value)
     measurement_value_to_cim(pb.mv, cim)
     service.add(cim)
 
 
-PBAccumulatorValue.to_cim = accumulatorvalue_to_cim
-PBAnalogValue.to_cim = analogvalue_to_cim
-PBDiscreteValue.to_cim = discretevalue_to_cim
+def measurement_value_to_cim(pb: PBMeasurementValue, cim: MeasurementValue):
+    cim.time_stamp = pb.timeStamp.ToDatetime()
+
+
+PBAccumulatorValue.to_cim = accumulator_value_to_cim
+PBAnalogValue.to_cim = analog_value_to_cim
+PBDiscreteValue.to_cim = discrete_value_to_cim
 PBMeasurementValue.to_cim = measurement_value_to_cim

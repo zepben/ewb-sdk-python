@@ -25,13 +25,17 @@ from zepben.evolve.services.customer.customers import CustomerService
 __all__ = ["agreement_to_cim", "customer_to_cim", "customer_agreement_to_cim", "pricing_structure_to_cim", "tariff_to_cim"]
 
 
-######################
-# IEC61968 Customers #
-######################
+###################
+# IEC61968 Common #
+###################
 
 def agreement_to_cim(pb: PBAgreement, cim: Agreement, service: BaseService):
     document_to_cim(pb.doc, cim, service)
 
+
+######################
+# IEC61968 Customers #
+######################
 
 def customer_to_cim(pb: PBCustomer, service: CustomerService) -> Optional[Customer]:
     cim = Customer(

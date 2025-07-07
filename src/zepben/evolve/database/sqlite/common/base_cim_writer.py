@@ -73,34 +73,6 @@ class BaseCimWriter(BaseEntryWriter, ABC):
 
         return self._save_identified_object(table, insert, organisation, "organisation")
 
-    def save_name_type(self, name_type: NameType) -> bool:
-        """
-        Save the `NameType` fields to `TableNameTypes`.
-
-        :param name_type: The `NameType` instance to write to the database.
-
-        :return: True if the `NameType` was successfully written to the database, otherwise false.
-        :raises SQLException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableNameTypes)
-        insert = self._database_tables.get_insert(TableNameTypes)
-
-        return self._save_name_type(table, insert, name_type)
-
-    def save_name(self, name: Name) -> bool:
-        """
-        Save the `Name` fields to `TableNames`.
-
-        :param name: The `Name` instance to write to the database.
-
-        :return: True if the `Name` was successfully written to the database, otherwise false.
-        :raises SQLException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableNames)
-        insert = self._database_tables.get_insert(TableNames)
-
-        return self._save_name(table, insert, name)
-
     def _save_organisation_role(self, table: TableOrganisationRoles, insert: PreparedStatement, organisation_role: OrganisationRole, description: str) -> bool:
         """
         Save the `OrganisationRole` fields to `TableOrganisationRoles`.
@@ -146,13 +118,35 @@ class BaseCimWriter(BaseEntryWriter, ABC):
 
         return self._try_execute_single_update(insert, description)
 
-    def _save_name_type(self, table: TableNameTypes, insert: PreparedStatement, name_type: NameType) -> bool:
+    def save_name_type(self, name_type: NameType) -> bool:
+        """
+        Save the `NameType` fields to `TableNameTypes`.
+
+        :param name_type: The `NameType` instance to write to the database.
+
+        :return: True if the `NameType` was successfully written to the database, otherwise false.
+        :raises SQLException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableNameTypes)
+        insert = self._database_tables.get_insert(TableNameTypes)
+
         insert.add_value(table.name_.query_index, name_type.name)
         insert.add_value(table.description.query_index, name_type.description)
 
         return self._try_execute_single_update(insert, "name type")
 
-    def _save_name(self, table: TableNames, insert: PreparedStatement, name: Name) -> bool:
+    def save_name(self, name: Name) -> bool:
+        """
+        Save the `Name` fields to `TableNames`.
+
+        :param name: The `Name` instance to write to the database.
+
+        :return: True if the `Name` was successfully written to the database, otherwise false.
+        :raises SQLException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableNames)
+        insert = self._database_tables.get_insert(TableNames)
+
         insert.add_value(table.name_.query_index, name.name)
         insert.add_value(table.name_type_name.query_index, name.type.name)
         insert.add_value(table.identified_object_mrid.query_index, name.identified_object.mrid)

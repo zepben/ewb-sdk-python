@@ -309,6 +309,34 @@ class NetworkCimWriter(BaseCimWriter):
     def __init__(self, database_tables: NetworkDatabaseTables):
         super().__init__(database_tables)
 
+    #################################
+    # Extension IEC61968 Asset Info #
+    #################################
+
+    def save_relay_info(self, relay_info: RelayInfo) -> bool:
+        """
+        Save the :class:`RelayInfo` fields to :class:`TableRelayInfo`.
+
+        :param relay_info: The :class:`RelayInfo` instance to write to the database.
+        :return: True if the :class:`RelayInfo` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableRelayInfo)
+        insert = self._database_tables.get_insert(TableRelayInfo)
+
+        reclose_delay_table = self._database_tables.get_table(TableRecloseDelays)
+        reclose_delay_insert = self._database_tables.get_insert(TableRecloseDelays)
+        for idx, delay in enumerate(relay_info.reclose_delays):
+            reclose_delay_insert.add_value(reclose_delay_table.relay_info_mrid.query_index, relay_info.mrid)
+            reclose_delay_insert.add_value(reclose_delay_table.sequence_number.query_index, idx)
+            reclose_delay_insert.add_value(reclose_delay_table.reclose_delay.query_index, delay)
+            self._try_execute_single_update(reclose_delay_insert, "reclose delay")
+
+        insert.add_value(table.curve_setting.query_index, relay_info.curve_setting)
+        insert.add_value(table.reclose_fast.query_index, relay_info.reclose_fast)
+
+        return self._save_asset_info(table, insert, relay_info, "relay info")
+
     ###############################
     # Extension IEC61968 Metering #
     ###############################
@@ -328,6 +356,206 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.appliance.query_index, pan_demand_response_function._appliance_bitmask)
 
         return self._save_end_device_function(table, insert, pan_demand_response_function, "pan demand response function")
+
+    ################################
+    # Extension IEC61970 Base Core #
+    ################################
+
+    def save_site(self, site: Site) -> bool:
+        """
+        Save the :class:`Site` fields to :class:`TableSites`.
+
+        :param site: The :class:`Site` instance to write to the database.
+        :return: True if the :class:`Site` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableSites)
+        insert = self._database_tables.get_insert(TableSites)
+
+        return self._save_equipment_container(table, insert, site, "site")
+
+    ##################################
+    # Extension IEC61970 Base Feeder #
+    ##################################
+
+    def save_loop(self, loop: Loop) -> bool:
+        """
+        Save the :class:`Loop` fields to :class:`TableLoops`.
+
+        :param loop: The :class:`Loop` instance to write to the database.
+        :return: True if the :class:`Loop` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableLoops)
+        insert = self._database_tables.get_insert(TableLoops)
+
+        status = True
+        for it in loop.energizing_substations:
+            status = status and self._save_loop_to_substation_association(loop, it, LoopSubstationRelationship.SUBSTATION_ENERGIZES_LOOP)
+        for it in loop.substations:
+            status = status and self._save_loop_to_substation_association(loop, it, LoopSubstationRelationship.LOOP_ENERGIZES_SUBSTATION)
+
+        return status and self._save_identified_object(table, insert, loop, "loop")
+
+    def save_lv_feeder(self, lv_feeder: LvFeeder) -> bool:
+        """
+        Save the :class:`LvFeeder` fields to :class:`TableLvFeeders`.
+
+        :param lv_feeder: The :class:`LvFeeder` instance to write to the database.
+        :return: True if the :class:`LvFeeder` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableLvFeeders)
+        insert = self._database_tables.get_insert(TableLvFeeders)
+
+        insert.add_value(table.normal_head_terminal_mrid.query_index, self._mrid_or_none(lv_feeder.normal_head_terminal))
+
+        return self._save_equipment_container(table, insert, lv_feeder, "lv feeder")
+
+    #################################################
+    # Extension IEC61970 Base Generation Production #
+    #################################################
+
+    def save_ev_charging_unit(self, ev_charging_unit: EvChargingUnit) -> bool:
+        """
+        Save the :class:`EvChargingUnit` fields to :class:`TableEvChargingUnits`.
+
+        :param ev_charging_unit: The :class:`EvChargingUnit` instance to write to the database.
+        :return: True if the :class:`EvChargingUnit` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableEvChargingUnits)
+        insert = self._database_tables.get_insert(TableEvChargingUnits)
+
+        return self._save_power_electronics_unit(table, insert, ev_charging_unit, "ev charging unit")
+
+    ######################################
+    # Extension IEC61970 Base Protection #
+    ######################################
+
+    def save_distance_relay(self, distance_relay: DistanceRelay) -> bool:
+        """
+        Save the :class:`DistanceRelay` fields to :class:`TableDistanceRelays`.
+
+        :param distance_relay: The :class:`DistanceRelay` instance to write to the database.
+        :return: True if the :class:`DistanceRelay` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableDistanceRelays)
+        insert = self._database_tables.get_insert(TableDistanceRelays)
+
+        insert.add_value(table.backward_blind.query_index, distance_relay.backward_blind)
+        insert.add_value(table.backward_reach.query_index, distance_relay.backward_reach)
+        insert.add_value(table.backward_reactance.query_index, distance_relay.backward_reactance)
+        insert.add_value(table.forward_blind.query_index, distance_relay.forward_blind)
+        insert.add_value(table.forward_reach.query_index, distance_relay.forward_reach)
+        insert.add_value(table.forward_reactance.query_index, distance_relay.forward_reactance)
+        insert.add_value(table.operation_phase_angle1.query_index, distance_relay.operation_phase_angle1)
+        insert.add_value(table.operation_phase_angle2.query_index, distance_relay.operation_phase_angle2)
+        insert.add_value(table.operation_phase_angle3.query_index, distance_relay.operation_phase_angle3)
+
+        return self._save_protection_relay_function(table, insert, distance_relay, "distance relay")
+
+    def _save_protection_relay_function(
+        self,
+        table: TableProtectionRelayFunctions,
+        insert: PreparedStatement,
+        protection_relay_function: ProtectionRelayFunction,
+        description: str
+    ) -> bool:
+        insert.add_value(table.model.query_index, protection_relay_function.model)
+        insert.add_value(table.reclosing.query_index, protection_relay_function.reclosing)
+        insert.add_value(table.relay_delay_time.query_index, protection_relay_function.relay_delay_time)
+        insert.add_value(table.protection_kind.query_index, protection_relay_function.protection_kind.short_name)
+        insert.add_value(table.directable.query_index, protection_relay_function.directable)
+        insert.add_value(table.power_direction.query_index, protection_relay_function.power_direction.short_name)
+        insert.add_value(table.relay_info_mrid.query_index, self._mrid_or_none(protection_relay_function.asset_info))
+
+        status = True
+        for it in protection_relay_function.protected_switches:
+            status = status and self._save_protection_relay_function_to_protected_switch_association(protection_relay_function, it)
+        for it in protection_relay_function.sensors:
+            status = status and self._save_protection_relay_function_to_sensor_association(protection_relay_function, it)
+        for sequence_number, threshold in enumerate(protection_relay_function.thresholds):
+            status = status and self._save_protection_relay_function_threshold(protection_relay_function, sequence_number, threshold)
+        for sequence_number, time_limit in enumerate(protection_relay_function.time_limits):
+            status = status and self._save_protection_relay_function_time_limit(protection_relay_function, sequence_number, time_limit)
+
+        return status and self._save_power_system_resource(table, insert, protection_relay_function, description)
+
+    def _save_protection_relay_function_threshold(
+        self,
+        protection_relay_function: ProtectionRelayFunction,
+        sequence_number: int,
+        threshold: RelaySetting
+    ) -> bool:
+        table = self._database_tables.get_table(TableProtectionRelayFunctionThresholds)
+        insert = self._database_tables.get_insert(TableProtectionRelayFunctionThresholds)
+
+        insert.add_value(table.protection_relay_function_mrid.query_index, protection_relay_function.mrid)
+        insert.add_value(table.sequence_number.query_index, sequence_number)
+        insert.add_value(table.unit_symbol.query_index, threshold.unit_symbol.short_name)
+        insert.add_value(table.value.query_index, threshold.value)
+        insert.add_value(table.name_.query_index, threshold.name)
+
+        return self._try_execute_single_update(insert, "protection relay function threshold")
+
+    def _save_protection_relay_function_time_limit(self, protection_relay_function: ProtectionRelayFunction, sequence_number: int, time_limit: float) -> bool:
+        table = self._database_tables.get_table(TableProtectionRelayFunctionTimeLimits)
+        insert = self._database_tables.get_insert(TableProtectionRelayFunctionTimeLimits)
+
+        insert.add_value(table.protection_relay_function_mrid.query_index, protection_relay_function.mrid)
+        insert.add_value(table.sequence_number.query_index, sequence_number)
+        insert.add_value(table.time_limit.query_index, time_limit)
+
+        return self._try_execute_single_update(insert, "protection relay function time limit")
+
+    def save_protection_relay_scheme(self, protection_relay_scheme: ProtectionRelayScheme) -> bool:
+        """
+        Save the :class:`ProtectionRelayScheme` fields to :class:`TableProtectionRelaySchemes`.
+
+        :param protection_relay_scheme: The :class:`ProtectionRelayScheme` instance to write to the database.
+        :return: True if the :class:`ProtectionRelayScheme` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableProtectionRelaySchemes)
+        insert = self._database_tables.get_insert(TableProtectionRelaySchemes)
+
+        insert.add_value(table.system_mrid.query_index, self._mrid_or_none(protection_relay_scheme.system))
+
+        status = True
+        for it in protection_relay_scheme.functions:
+            status and self._save_protection_relay_scheme_to_protection_relay_function_association(protection_relay_scheme, it)
+
+        return status and self._save_identified_object(table, insert, protection_relay_scheme, "protection relay scheme")
+
+    def save_protection_relay_system(self, protection_relay_system: ProtectionRelaySystem) -> bool:
+        """
+        Save the :class:`ProtectionRelaySystem` fields to :class:`TableProtectionRelaySystems`.
+
+        :param protection_relay_system: The :class:`ProtectionRelaySystem` instance to write to the database.
+        :return: True if the :class:`ProtectionRelaySystem` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableProtectionRelaySystems)
+        insert = self._database_tables.get_insert(TableProtectionRelaySystems)
+
+        insert.add_value(table.protection_kind.query_index, protection_relay_system.protection_kind.short_name)
+
+        return self._save_equipment(table, insert, protection_relay_system, "protection relay system")
+
+    def save_voltage_relay(self, voltage_relay: VoltageRelay) -> bool:
+        """
+        Save the :class:`VoltageRelay` fields to :class:`TableVoltageRelays`.
+
+        :param voltage_relay: The :class:`VoltageRelay` instance to write to the database.
+        :return: True if the :class:`VoltageRelay` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableVoltageRelays)
+        insert = self._database_tables.get_insert(TableVoltageRelays)
+
+        return self._save_protection_relay_function(table, insert, voltage_relay, "voltage relay")
 
     #################################
     # Extension IEC61970 Base Wires #
@@ -591,24 +819,6 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_asset_organisation_role(table, insert, asset_owner, "asset owner")
 
-    def _save_structure(self, table: TableStructures, insert: PreparedStatement, structure: Structure, description: str) -> bool:
-        return self._save_asset_container(table, insert, structure, description)
-
-    def save_pole(self, pole: Pole) -> bool:
-        """
-        Save the :class:`Pole` fields to :class:`TablePoles`.
-
-        :param pole: The :class:`Pole` instance to write to the database.
-        :return: True if the :class:`Pole` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TablePoles)
-        insert = self._database_tables.get_insert(TablePoles)
-
-        insert.add_value(table.classification.query_index, pole.classification)
-
-        return self._save_structure(table, insert, pole, "pole")
-
     def save_streetlight(self, streetlight: Streetlight) -> bool:
         """
         Save the :class:`Streetlight` fields to :class:`TableStreetlights`.
@@ -625,24 +835,12 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.lamp_kind.query_index, streetlight.lamp_kind.short_name)
         return self._save_asset(table, insert, streetlight, "streetlight")
 
+    def _save_structure(self, table: TableStructures, insert: PreparedStatement, structure: Structure, description: str) -> bool:
+        return self._save_asset_container(table, insert, structure, description)
+
     ###################
     # IEC61968 Common #
     ###################
-
-    @staticmethod
-    def _insert_street_detail(table: TableStreetAddresses, insert: PreparedStatement, street_detail: Optional[StreetDetail]):
-        insert.add_value(table.building_name.query_index, street_detail.building_name if street_detail else None)
-        insert.add_value(table.floor_identification.query_index, street_detail.floor_identification if street_detail else None)
-        insert.add_value(table.street_name.query_index, street_detail.name if street_detail else None)
-        insert.add_value(table.number.query_index, street_detail.number if street_detail else None)
-        insert.add_value(table.suite_number.query_index, street_detail.suite_number if street_detail else None)
-        insert.add_value(table.type.query_index, street_detail.type if street_detail else None)
-        insert.add_value(table.display_address.query_index, street_detail.display_address if street_detail else None)
-
-    @staticmethod
-    def _insert_town_detail(table: TableTownDetails, insert: PreparedStatement, town_detail: Optional[TownDetail]):
-        insert.add_value(table.town_name.query_index, town_detail.name if town_detail else None)
-        insert.add_value(table.state_or_province.query_index, town_detail.state_or_province if town_detail else None)
 
     def save_location(self, location: Location) -> bool:
         """
@@ -705,33 +903,24 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._try_execute_single_update(insert, description)
 
+    @staticmethod
+    def _insert_street_detail(table: TableStreetAddresses, insert: PreparedStatement, street_detail: Optional[StreetDetail]):
+        insert.add_value(table.building_name.query_index, street_detail.building_name if street_detail else None)
+        insert.add_value(table.floor_identification.query_index, street_detail.floor_identification if street_detail else None)
+        insert.add_value(table.street_name.query_index, street_detail.name if street_detail else None)
+        insert.add_value(table.number.query_index, street_detail.number if street_detail else None)
+        insert.add_value(table.suite_number.query_index, street_detail.suite_number if street_detail else None)
+        insert.add_value(table.type.query_index, street_detail.type if street_detail else None)
+        insert.add_value(table.display_address.query_index, street_detail.display_address if street_detail else None)
+
+    @staticmethod
+    def _insert_town_detail(table: TableTownDetails, insert: PreparedStatement, town_detail: Optional[TownDetail]):
+        insert.add_value(table.town_name.query_index, town_detail.name if town_detail else None)
+        insert.add_value(table.state_or_province.query_index, town_detail.state_or_province if town_detail else None)
+
     #####################################
     # IEC61968 InfIEC61968 InfAssetInfo #
     #####################################
-
-    def save_relay_info(self, relay_info: RelayInfo) -> bool:
-        """
-        Save the :class:`RelayInfo` fields to :class:`TableRelayInfo`.
-
-        :param relay_info: The :class:`RelayInfo` instance to write to the database.
-        :return: True if the :class:`RelayInfo` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableRelayInfo)
-        insert = self._database_tables.get_insert(TableRelayInfo)
-
-        reclose_delay_table = self._database_tables.get_table(TableRecloseDelays)
-        reclose_delay_insert = self._database_tables.get_insert(TableRecloseDelays)
-        for idx, delay in enumerate(relay_info.reclose_delays):
-            reclose_delay_insert.add_value(reclose_delay_table.relay_info_mrid.query_index, relay_info.mrid)
-            reclose_delay_insert.add_value(reclose_delay_table.sequence_number.query_index, idx)
-            reclose_delay_insert.add_value(reclose_delay_table.reclose_delay.query_index, delay)
-            self._try_execute_single_update(reclose_delay_insert, "reclose delay")
-
-        insert.add_value(table.curve_setting.query_index, relay_info.curve_setting)
-        insert.add_value(table.reclose_fast.query_index, relay_info.reclose_fast)
-
-        return self._save_asset_info(table, insert, relay_info, "relay info")
 
     def save_current_transformer_info(self, current_transformer_info: CurrentTransformerInfo) -> bool:
         """
@@ -778,6 +967,25 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.secondary_ratio.query_index, potential_transformer_info.secondary_ratio)
 
         return self._save_asset_info(table, insert, potential_transformer_info, "potential transformer info")
+
+    ##################################
+    # IEC61968 InfIEC61968 InfAssets #
+    ##################################
+
+    def save_pole(self, pole: Pole) -> bool:
+        """
+        Save the :class:`Pole` fields to :class:`TablePoles`.
+
+        :param pole: The :class:`Pole` instance to write to the database.
+        :return: True if the :class:`Pole` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TablePoles)
+        insert = self._database_tables.get_insert(TablePoles)
+
+        insert.add_value(table.classification.query_index, pole.classification)
+
+        return self._save_structure(table, insert, pole, "pole")
 
     #####################
     # IEC61968 Metering #
@@ -1061,19 +1269,6 @@ class NetworkCimWriter(BaseCimWriter):
 
         return self._save_identified_object(table, insert, power_system_resource, description)
 
-    def save_site(self, site: Site) -> bool:
-        """
-        Save the :class:`Site` fields to :class:`TableSites`.
-
-        :param site: The :class:`Site` instance to write to the database.
-        :return: True if the :class:`Site` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableSites)
-        insert = self._database_tables.get_insert(TableSites)
-
-        return self._save_equipment_container(table, insert, site, "site")
-
     def save_sub_geographical_region(self, sub_geographical_region: SubGeographicalRegion) -> bool:
         """
         Save the :class:`SubGeographicalRegion` fields to :class:`TableSubGeographicalRegions`.
@@ -1168,266 +1363,6 @@ class NetworkCimWriter(BaseCimWriter):
     ) -> bool:
         return self._save_conducting_equipment(table, insert, equivalent_equipment, description)
 
-    ######################
-    # IEC61970 Base Meas #
-    ######################
-
-    def _save_measurement(
-        self,
-        table: TableMeasurements,
-        insert: PreparedStatement,
-        measurement: Measurement,
-        description: str
-    ) -> bool:
-        insert.add_value(table.power_system_resource_mrid.query_index, measurement.power_system_resource_mrid)
-        insert.add_value(table.remote_source_mrid.query_index, self._mrid_or_none(measurement.remote_source))
-        insert.add_value(table.terminal_mrid.query_index, measurement.terminal_mrid)
-        insert.add_value(table.phases.query_index, measurement.phases.short_name)
-        insert.add_value(table.unit_symbol.query_index, measurement.unit_symbol.short_name)
-
-        return self._save_identified_object(table, insert, measurement, description)
-
-    def save_analog(self, analog: Analog) -> bool:
-        """
-        Save the :class:`Analog` fields to :class:`TableAnalogs`.
-
-        :param analog: The :class:`Analog` instance to write to the database.
-        :return: True if the :class:`Analog` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableAnalogs)
-        insert = self._database_tables.get_insert(TableAnalogs)
-
-        insert.add_value(table.positive_flow_in.query_index, analog.positive_flow_in)
-
-        return self._save_measurement(table, insert, analog, "analog")
-
-    def save_accumulator(self, accumulator: Accumulator) -> bool:
-        """
-        Save the :class:`Accumulator` fields to :class:`TableAccumulators`.
-
-        :param accumulator: The :class:`Accumulator` instance to write to the database.
-        :return: True if the :class:`Accumulator` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableAccumulators)
-        insert = self._database_tables.get_insert(TableAccumulators)
-
-        return self._save_measurement(table, insert, accumulator, "accumulator")
-
-    def save_discrete(self, discrete: Discrete) -> bool:
-        """
-        Save the :class:`Discrete` fields to :class:`TableDiscretes`.
-
-        :param discrete: The :class:`Discrete` instance to write to the database.
-        :return: True if the :class:`Discrete` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableDiscretes)
-        insert = self._database_tables.get_insert(TableDiscretes)
-
-        return self._save_measurement(table, insert, discrete, "discrete")
-
-    def save_control(self, control: Control) -> bool:
-        """
-        Save the :class:`Control` fields to :class:`TableControls`.
-
-        :param control: The :class:`Control` instance to write to the database.
-        :return: True if the :class:`Control` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableControls)
-        insert = self._database_tables.get_insert(TableControls)
-
-        insert.add_value(table.power_system_resource_mrid.query_index, control.power_system_resource_mrid)
-
-        return self._save_io_point(table, insert, control, "control")
-
-    def _save_io_point(self, table: TableIoPoints, insert: PreparedStatement, io_point: IoPoint, description: str) -> bool:
-        return self._save_identified_object(table, insert, io_point, description)
-
-    ############################
-    # IEC61970 Base Protection #
-    ############################
-
-    def save_current_relay(self, current_relay: CurrentRelay) -> bool:
-        """
-        Save the :class:`CurrentRelay` fields to :class:`TableCurrentRelays`.
-
-        :param current_relay: The :class:`CurrentRelay` instance to write to the database.
-        :return: True if the :class:`CurrentRelay` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableCurrentRelays)
-        insert = self._database_tables.get_insert(TableCurrentRelays)
-
-        insert.add_value(table.current_limit_1.query_index, current_relay.current_limit_1)
-        insert.add_value(table.inverse_time_flag.query_index, current_relay.inverse_time_flag)
-        insert.add_value(table.time_delay_1.query_index, current_relay.time_delay_1)
-
-        return self._save_protection_relay_function(table, insert, current_relay, "current relay")
-
-    def save_distance_relay(self, distance_relay: DistanceRelay) -> bool:
-        """
-        Save the :class:`DistanceRelay` fields to :class:`TableDistanceRelays`.
-
-        :param distance_relay: The :class:`DistanceRelay` instance to write to the database.
-        :return: True if the :class:`DistanceRelay` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableDistanceRelays)
-        insert = self._database_tables.get_insert(TableDistanceRelays)
-
-        insert.add_value(table.backward_blind.query_index, distance_relay.backward_blind)
-        insert.add_value(table.backward_reach.query_index, distance_relay.backward_reach)
-        insert.add_value(table.backward_reactance.query_index, distance_relay.backward_reactance)
-        insert.add_value(table.forward_blind.query_index, distance_relay.forward_blind)
-        insert.add_value(table.forward_reach.query_index, distance_relay.forward_reach)
-        insert.add_value(table.forward_reactance.query_index, distance_relay.forward_reactance)
-        insert.add_value(table.operation_phase_angle1.query_index, distance_relay.operation_phase_angle1)
-        insert.add_value(table.operation_phase_angle2.query_index, distance_relay.operation_phase_angle2)
-        insert.add_value(table.operation_phase_angle3.query_index, distance_relay.operation_phase_angle3)
-
-        return self._save_protection_relay_function(table, insert, distance_relay, "distance relay")
-
-    def _save_protection_relay_function(
-        self,
-        table: TableProtectionRelayFunctions,
-        insert: PreparedStatement,
-        protection_relay_function: ProtectionRelayFunction,
-        description: str
-    ) -> bool:
-        insert.add_value(table.model.query_index, protection_relay_function.model)
-        insert.add_value(table.reclosing.query_index, protection_relay_function.reclosing)
-        insert.add_value(table.relay_delay_time.query_index, protection_relay_function.relay_delay_time)
-        insert.add_value(table.protection_kind.query_index, protection_relay_function.protection_kind.short_name)
-        insert.add_value(table.directable.query_index, protection_relay_function.directable)
-        insert.add_value(table.power_direction.query_index, protection_relay_function.power_direction.short_name)
-        insert.add_value(table.relay_info_mrid.query_index, self._mrid_or_none(protection_relay_function.asset_info))
-
-        status = True
-        for it in protection_relay_function.protected_switches:
-            status = status and self._save_protection_relay_function_to_protected_switch_association(protection_relay_function, it)
-        for it in protection_relay_function.sensors:
-            status = status and self._save_protection_relay_function_to_sensor_association(protection_relay_function, it)
-        for sequence_number, threshold in enumerate(protection_relay_function.thresholds):
-            status = status and self._save_protection_relay_function_threshold(protection_relay_function, sequence_number, threshold)
-        for sequence_number, time_limit in enumerate(protection_relay_function.time_limits):
-            status = status and self._save_protection_relay_function_time_limit(protection_relay_function, sequence_number, time_limit)
-
-        return status and self._save_power_system_resource(table, insert, protection_relay_function, description)
-
-    def _save_protection_relay_function_threshold(
-        self,
-        protection_relay_function: ProtectionRelayFunction,
-        sequence_number: int,
-        threshold: RelaySetting
-    ) -> bool:
-        table = self._database_tables.get_table(TableProtectionRelayFunctionThresholds)
-        insert = self._database_tables.get_insert(TableProtectionRelayFunctionThresholds)
-
-        insert.add_value(table.protection_relay_function_mrid.query_index, protection_relay_function.mrid)
-        insert.add_value(table.sequence_number.query_index, sequence_number)
-        insert.add_value(table.unit_symbol.query_index, threshold.unit_symbol.short_name)
-        insert.add_value(table.value.query_index, threshold.value)
-        insert.add_value(table.name_.query_index, threshold.name)
-
-        return self._try_execute_single_update(insert, "protection relay function threshold")
-
-    def _save_protection_relay_function_time_limit(self, protection_relay_function: ProtectionRelayFunction, sequence_number: int, time_limit: float) -> bool:
-        table = self._database_tables.get_table(TableProtectionRelayFunctionTimeLimits)
-        insert = self._database_tables.get_insert(TableProtectionRelayFunctionTimeLimits)
-
-        insert.add_value(table.protection_relay_function_mrid.query_index, protection_relay_function.mrid)
-        insert.add_value(table.sequence_number.query_index, sequence_number)
-        insert.add_value(table.time_limit.query_index, time_limit)
-
-        return self._try_execute_single_update(insert, "protection relay function time limit")
-
-    def save_protection_relay_scheme(self, protection_relay_scheme: ProtectionRelayScheme) -> bool:
-        """
-        Save the :class:`ProtectionRelayScheme` fields to :class:`TableProtectionRelaySchemes`.
-
-        :param protection_relay_scheme: The :class:`ProtectionRelayScheme` instance to write to the database.
-        :return: True if the :class:`ProtectionRelayScheme` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableProtectionRelaySchemes)
-        insert = self._database_tables.get_insert(TableProtectionRelaySchemes)
-
-        insert.add_value(table.system_mrid.query_index, self._mrid_or_none(protection_relay_scheme.system))
-
-        status = True
-        for it in protection_relay_scheme.functions:
-            status and self._save_protection_relay_scheme_to_protection_relay_function_association(protection_relay_scheme, it)
-
-        return status and self._save_identified_object(table, insert, protection_relay_scheme, "protection relay scheme")
-
-    def save_protection_relay_system(self, protection_relay_system: ProtectionRelaySystem) -> bool:
-        """
-        Save the :class:`ProtectionRelaySystem` fields to :class:`TableProtectionRelaySystems`.
-
-        :param protection_relay_system: The :class:`ProtectionRelaySystem` instance to write to the database.
-        :return: True if the :class:`ProtectionRelaySystem` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableProtectionRelaySystems)
-        insert = self._database_tables.get_insert(TableProtectionRelaySystems)
-
-        insert.add_value(table.protection_kind.query_index, protection_relay_system.protection_kind.short_name)
-
-        return self._save_equipment(table, insert, protection_relay_system, "protection relay system")
-
-    def save_voltage_relay(self, voltage_relay: VoltageRelay) -> bool:
-        """
-        Save the :class:`VoltageRelay` fields to :class:`TableVoltageRelays`.
-
-        :param voltage_relay: The :class:`VoltageRelay` instance to write to the database.
-        :return: True if the :class:`VoltageRelay` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableVoltageRelays)
-        insert = self._database_tables.get_insert(TableVoltageRelays)
-
-        return self._save_protection_relay_function(table, insert, voltage_relay, "voltage relay")
-
-    #######################
-    # IEC61970 Base SCADA #
-    #######################
-
-    def save_remote_control(self, remote_control: RemoteControl) -> bool:
-        """
-        Save the :class:`RemoteControl` fields to :class:`TableRemoteControls`.
-
-        :param remote_control: The :class:`RemoteControl` instance to write to the database.
-        :return: True if the :class:`RemoteControl` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableRemoteControls)
-        insert = self._database_tables.get_insert(TableRemoteControls)
-
-        insert.add_value(table.control_mrid.query_index, self._mrid_or_none(remote_control.control))
-
-        return self._save_remote_point(table, insert, remote_control, "remote control")
-
-    def _save_remote_point(self, table: TableRemotePoints, insert: PreparedStatement, remote_point: RemotePoint, description: str) -> bool:
-        return self._save_identified_object(table, insert, remote_point, description)
-
-    def save_remote_source(self, remote_source: RemoteSource) -> bool:
-        """
-        Save the :class:`RemoteSource` fields to :class:`TableRemoteSources`.
-
-        :param remote_source: The :class:`RemoteSource` instance to write to the database.
-        :return: True if the :class:`RemoteSource` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableRemoteSources)
-        insert = self._database_tables.get_insert(TableRemoteSources)
-
-        insert.add_value(table.measurement_mrid.query_index, self._mrid_or_none(remote_source.measurement))
-
-        return self._save_remote_point(table, insert, remote_source, "remote source")
-
     #######################################
     # IEC61970 Base Generation Production #
     #######################################
@@ -1490,6 +1425,142 @@ class NetworkCimWriter(BaseCimWriter):
         insert = self._database_tables.get_insert(TablePowerElectronicsWindUnits)
 
         return self._save_power_electronics_unit(table, insert, power_electronics_wind_unit, "power electronics wind unit")
+
+    ######################
+    # IEC61970 Base Meas #
+    ######################
+
+    def save_accumulator(self, accumulator: Accumulator) -> bool:
+        """
+        Save the :class:`Accumulator` fields to :class:`TableAccumulators`.
+
+        :param accumulator: The :class:`Accumulator` instance to write to the database.
+        :return: True if the :class:`Accumulator` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableAccumulators)
+        insert = self._database_tables.get_insert(TableAccumulators)
+
+        return self._save_measurement(table, insert, accumulator, "accumulator")
+
+    def save_analog(self, analog: Analog) -> bool:
+        """
+        Save the :class:`Analog` fields to :class:`TableAnalogs`.
+
+        :param analog: The :class:`Analog` instance to write to the database.
+        :return: True if the :class:`Analog` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableAnalogs)
+        insert = self._database_tables.get_insert(TableAnalogs)
+
+        insert.add_value(table.positive_flow_in.query_index, analog.positive_flow_in)
+
+        return self._save_measurement(table, insert, analog, "analog")
+
+    def save_discrete(self, discrete: Discrete) -> bool:
+        """
+        Save the :class:`Discrete` fields to :class:`TableDiscretes`.
+
+        :param discrete: The :class:`Discrete` instance to write to the database.
+        :return: True if the :class:`Discrete` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableDiscretes)
+        insert = self._database_tables.get_insert(TableDiscretes)
+
+        return self._save_measurement(table, insert, discrete, "discrete")
+
+    def save_control(self, control: Control) -> bool:
+        """
+        Save the :class:`Control` fields to :class:`TableControls`.
+
+        :param control: The :class:`Control` instance to write to the database.
+        :return: True if the :class:`Control` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableControls)
+        insert = self._database_tables.get_insert(TableControls)
+
+        insert.add_value(table.power_system_resource_mrid.query_index, control.power_system_resource_mrid)
+
+        return self._save_io_point(table, insert, control, "control")
+
+    def _save_io_point(self, table: TableIoPoints, insert: PreparedStatement, io_point: IoPoint, description: str) -> bool:
+        return self._save_identified_object(table, insert, io_point, description)
+
+    def _save_measurement(
+        self,
+        table: TableMeasurements,
+        insert: PreparedStatement,
+        measurement: Measurement,
+        description: str
+    ) -> bool:
+        insert.add_value(table.power_system_resource_mrid.query_index, measurement.power_system_resource_mrid)
+        insert.add_value(table.remote_source_mrid.query_index, self._mrid_or_none(measurement.remote_source))
+        insert.add_value(table.terminal_mrid.query_index, measurement.terminal_mrid)
+        insert.add_value(table.phases.query_index, measurement.phases.short_name)
+        insert.add_value(table.unit_symbol.query_index, measurement.unit_symbol.short_name)
+
+        return self._save_identified_object(table, insert, measurement, description)
+
+    ############################
+    # IEC61970 Base Protection #
+    ############################
+
+    def save_current_relay(self, current_relay: CurrentRelay) -> bool:
+        """
+        Save the :class:`CurrentRelay` fields to :class:`TableCurrentRelays`.
+
+        :param current_relay: The :class:`CurrentRelay` instance to write to the database.
+        :return: True if the :class:`CurrentRelay` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableCurrentRelays)
+        insert = self._database_tables.get_insert(TableCurrentRelays)
+
+        insert.add_value(table.current_limit_1.query_index, current_relay.current_limit_1)
+        insert.add_value(table.inverse_time_flag.query_index, current_relay.inverse_time_flag)
+        insert.add_value(table.time_delay_1.query_index, current_relay.time_delay_1)
+
+        return self._save_protection_relay_function(table, insert, current_relay, "current relay")
+
+    #######################
+    # IEC61970 Base Scada #
+    #######################
+
+    def save_remote_control(self, remote_control: RemoteControl) -> bool:
+        """
+        Save the :class:`RemoteControl` fields to :class:`TableRemoteControls`.
+
+        :param remote_control: The :class:`RemoteControl` instance to write to the database.
+        :return: True if the :class:`RemoteControl` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableRemoteControls)
+        insert = self._database_tables.get_insert(TableRemoteControls)
+
+        insert.add_value(table.control_mrid.query_index, self._mrid_or_none(remote_control.control))
+
+        return self._save_remote_point(table, insert, remote_control, "remote control")
+
+    def _save_remote_point(self, table: TableRemotePoints, insert: PreparedStatement, remote_point: RemotePoint, description: str) -> bool:
+        return self._save_identified_object(table, insert, remote_point, description)
+
+    def save_remote_source(self, remote_source: RemoteSource) -> bool:
+        """
+        Save the :class:`RemoteSource` fields to :class:`TableRemoteSources`.
+
+        :param remote_source: The :class:`RemoteSource` instance to write to the database.
+        :return: True if the :class:`RemoteSource` was successfully written to the database, otherwise False.
+        :raises SqlException: For any errors encountered writing to the database.
+        """
+        table = self._database_tables.get_table(TableRemoteSources)
+        insert = self._database_tables.get_insert(TableRemoteSources)
+
+        insert.add_value(table.measurement_mrid.query_index, self._mrid_or_none(remote_source.measurement))
+
+        return self._save_remote_point(table, insert, remote_source, "remote source")
 
     #######################
     # IEC61970 Base Wires #
@@ -1845,20 +1916,6 @@ class NetworkCimWriter(BaseCimWriter):
     ) -> bool:
         return self._save_identified_object(table, insert, per_length_line_parameter, description)
 
-    def _save_phase_impedance_data(self, per_length_phase_impedance: PerLengthPhaseImpedance, phase_impedance_data: PhaseImpedanceData) -> bool:
-        table = self._database_tables.get_table(TablePhaseImpedanceData)
-        insert = self._database_tables.get_insert(TablePhaseImpedanceData)
-
-        insert.add_value(table.per_length_phase_impedance_mrid.query_index, per_length_phase_impedance.mrid)
-        insert.add_value(table.from_phase.query_index, phase_impedance_data.from_phase.short_name)
-        insert.add_value(table.to_phase.query_index, phase_impedance_data.to_phase.short_name)
-        insert.add_value(table.b.query_index, phase_impedance_data.b)
-        insert.add_value(table.g.query_index, phase_impedance_data.g)
-        insert.add_value(table.r.query_index, phase_impedance_data.r)
-        insert.add_value(table.x.query_index, phase_impedance_data.x)
-
-        return self._try_execute_single_update(insert, "phase impedance data")
-
     def save_per_length_phase_impedance(self, per_length_phase_impedance: PerLengthPhaseImpedance) -> bool:
         """
         Save the :class:`PerLengthPhaseImpedance` fields to :class:`TablePerLengthPhaseImpedances`.
@@ -1914,6 +1971,20 @@ class NetworkCimWriter(BaseCimWriter):
         insert.add_value(table.x_ground_nominal.query_index, petersen_coil.x_ground_nominal)
 
         return self._save_earth_fault_compensator(table, insert, petersen_coil, "petersen coil")
+
+    def _save_phase_impedance_data(self, per_length_phase_impedance: PerLengthPhaseImpedance, phase_impedance_data: PhaseImpedanceData) -> bool:
+        table = self._database_tables.get_table(TablePhaseImpedanceData)
+        insert = self._database_tables.get_insert(TablePhaseImpedanceData)
+
+        insert.add_value(table.per_length_phase_impedance_mrid.query_index, per_length_phase_impedance.mrid)
+        insert.add_value(table.from_phase.query_index, phase_impedance_data.from_phase.short_name)
+        insert.add_value(table.to_phase.query_index, phase_impedance_data.to_phase.short_name)
+        insert.add_value(table.b.query_index, phase_impedance_data.b)
+        insert.add_value(table.g.query_index, phase_impedance_data.g)
+        insert.add_value(table.r.query_index, phase_impedance_data.r)
+        insert.add_value(table.x.query_index, phase_impedance_data.x)
+
+        return self._try_execute_single_update(insert, "phase impedance data")
 
     def save_power_electronics_connection(self, power_electronics_connection: PowerElectronicsConnection) -> bool:
         """
@@ -2331,57 +2402,6 @@ class NetworkCimWriter(BaseCimWriter):
             status = status and self._save_circuit_to_terminal_association(circuit, it)
 
         return status and self._save_line(table, insert, circuit, "circuit")
-
-    def save_loop(self, loop: Loop) -> bool:
-        """
-        Save the :class:`Loop` fields to :class:`TableLoops`.
-
-        :param loop: The :class:`Loop` instance to write to the database.
-        :return: True if the :class:`Loop` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableLoops)
-        insert = self._database_tables.get_insert(TableLoops)
-
-        status = True
-        for it in loop.energizing_substations:
-            status = status and self._save_loop_to_substation_association(loop, it, LoopSubstationRelationship.SUBSTATION_ENERGIZES_LOOP)
-        for it in loop.substations:
-            status = status and self._save_loop_to_substation_association(loop, it, LoopSubstationRelationship.LOOP_ENERGIZES_SUBSTATION)
-
-        return status and self._save_identified_object(table, insert, loop, "loop")
-
-    def save_lv_feeder(self, lv_feeder: LvFeeder) -> bool:
-        """
-        Save the :class:`LvFeeder` fields to :class:`TableLvFeeders`.
-
-        :param lv_feeder: The :class:`LvFeeder` instance to write to the database.
-        :return: True if the :class:`LvFeeder` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableLvFeeders)
-        insert = self._database_tables.get_insert(TableLvFeeders)
-
-        insert.add_value(table.normal_head_terminal_mrid.query_index, self._mrid_or_none(lv_feeder.normal_head_terminal))
-
-        return self._save_equipment_container(table, insert, lv_feeder, "lv feeder")
-
-    ##############################################
-    # IEC61970 InfIEC61970 Generation Production #
-    ##############################################
-
-    def save_ev_charging_unit(self, ev_charging_unit: EvChargingUnit) -> bool:
-        """
-        Save the :class:`EvChargingUnit` fields to :class:`TableEvChargingUnits`.
-
-        :param ev_charging_unit: The :class:`EvChargingUnit` instance to write to the database.
-        :return: True if the :class:`EvChargingUnit` was successfully written to the database, otherwise False.
-        :raises SqlException: For any errors encountered writing to the database.
-        """
-        table = self._database_tables.get_table(TableEvChargingUnits)
-        insert = self._database_tables.get_insert(TableEvChargingUnits)
-
-        return self._save_power_electronics_unit(table, insert, ev_charging_unit, "ev charging unit")
 
     ################
     # ASSOCIATIONS #

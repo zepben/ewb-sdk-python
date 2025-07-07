@@ -147,6 +147,18 @@ class NetworkServiceComparator(BaseServiceComparator):
         super().__init__()
         self._options = options
 
+    ##################################
+    # Extensions IEC61968 Asset Info #
+    ##################################
+
+    def _compare_relay_info(self, source: RelayInfo, target: RelayInfo) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, RelayInfo.curve_setting, RelayInfo.reclose_fast)
+        self._compare_indexed_value_collections(diff, RelayInfo.reclose_delays)
+
+        return self._compare_asset_info(diff)
+
     ################################
     # Extensions IEC61968 Metering #
     ################################
@@ -154,9 +166,114 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_pan_demand_response_function(self, source: PanDemandResponseFunction, target: PanDemandResponseFunction) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
+        # noinspection PyProtectedMember
         self._compare_values(diff, PanDemandResponseFunction.kind, PanDemandResponseFunction._appliance_bitmask)
 
         return self._compare_end_device_function(diff)
+
+    #################################
+    # Extensions IEC61970 Base Core #
+    #################################
+
+    def _compare_site(self, source: Site, target: Site) -> ObjectDifference:
+        return self._compare_equipment_container(ObjectDifference(source, target))
+
+    ###################################
+    # Extensions IEC61970 Base Feeder #
+    ###################################
+
+    def _compare_loop(self, source: Loop, target: Loop) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_id_reference_collections(diff, Loop.circuits, Loop.substations, Loop.energizing_substations)
+
+        return self._compare_identified_object(diff)
+
+    def _compare_lv_feeder(self, source: LvFeeder, target: LvFeeder) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_id_references(diff, LvFeeder.normal_head_terminal)
+        self._compare_id_reference_collections(diff, LvFeeder.normal_energizing_feeders)
+        if self._options.compare_feeder_equipment:
+            self._compare_id_reference_collections(diff, LvFeeder.current_equipment)
+        self._compare_id_reference_collections(diff, LvFeeder.current_energizing_feeders)
+
+        return self._compare_equipment_container(diff)
+
+    ##################################################
+    # Extensions IEC61970 Base Generation Production #
+    ##################################################
+
+    def _compare_ev_charging_unit(self, source: EvChargingUnit, target: EvChargingUnit) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        return self._compare_power_electronics_unit(diff)
+
+    #######################################
+    # Extensions IEC61970 Base Protection #
+    #######################################
+
+    def _compare_distance_relay(self, source: DistanceRelay, target: DistanceRelay) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_floats(
+            diff,
+            DistanceRelay.backward_blind,
+            DistanceRelay.backward_reach,
+            DistanceRelay.backward_reactance,
+            DistanceRelay.forward_blind,
+            DistanceRelay.forward_reach,
+            DistanceRelay.forward_reactance,
+            DistanceRelay.operation_phase_angle1,
+            DistanceRelay.operation_phase_angle2,
+            DistanceRelay.operation_phase_angle3,
+        )
+
+        return self._compare_protection_relay_function(diff)
+
+    def _compare_protection_relay_function(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_values(
+            diff,
+            ProtectionRelayFunction.model,
+            ProtectionRelayFunction.reclosing,
+            ProtectionRelayFunction.protection_kind,
+            ProtectionRelayFunction.directable,
+            ProtectionRelayFunction.power_direction
+        )
+        self._compare_floats(diff, ProtectionRelayFunction.relay_delay_time)
+        self._compare_indexed_value_collections(
+            diff,
+            ProtectionRelayFunction.time_limits,
+            ProtectionRelayFunction.thresholds
+        )
+        self._compare_id_reference_collections(
+            diff,
+            ProtectionRelayFunction.protected_switches,
+            ProtectionRelayFunction.sensors,
+            ProtectionRelayFunction.schemes,
+        )
+        self._compare_id_references(diff, ProtectionRelayFunction.relay_info)
+
+        return self._compare_power_system_resource(diff)
+
+    def _compare_protection_relay_scheme(self, source: ProtectionRelayScheme, target: ProtectionRelayScheme) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+        self._compare_id_references(diff, ProtectionRelayScheme.system)
+        self._compare_id_reference_collections(diff, ProtectionRelayScheme.functions)
+
+        return self._compare_identified_object(diff)
+
+    def _compare_protection_relay_system(self, source: ProtectionRelaySystem, target: ProtectionRelaySystem) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, ProtectionRelaySystem.protection_kind)
+        self._compare_id_reference_collections(diff, ProtectionRelaySystem.schemes)
+
+        return self._compare_equipment(diff)
+
+    def _compare_voltage_relay(self, source: VoltageRelay, target: VoltageRelay) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        return self._compare_protection_relay_function(diff)
 
     ##################################
     # Extensions IEC61970 Base Wires #
@@ -321,14 +438,6 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_asset_owner(self, source: AssetOwner, target: AssetOwner) -> ObjectDifference:
         return self._compare_asset_organisation_role(ObjectDifference(source, target))
 
-    def _compare_pole(self, source: Pole, target: Pole) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_values(diff, Pole.classification)
-        self._compare_id_reference_collections(diff, Pole.streetlights)
-
-        return self._compare_structure(diff)
-
     def _compare_streetlight(self, source: Streetlight, target: Streetlight) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
@@ -398,13 +507,17 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_asset_info(diff)
 
-    def _compare_relay_info(self, source: RelayInfo, target: RelayInfo) -> ObjectDifference:
+    ##################################
+    # IEC61968 InfIEC61968 InfAssets #
+    ##################################
+
+    def _compare_pole(self, source: Pole, target: Pole) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
-        self._compare_values(diff, RelayInfo.curve_setting, RelayInfo.reclose_fast)
-        self._compare_indexed_value_collections(diff, RelayInfo.reclose_delays)
+        self._compare_values(diff, Pole.classification)
+        self._compare_id_reference_collections(diff, Pole.streetlights)
 
-        return self._compare_asset_info(diff)
+        return self._compare_structure(diff)
 
     #####################
     # IEC61968 Metering #
@@ -570,9 +683,6 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_identified_object(diff)
 
-    def _compare_site(self, source: Site, target: Site) -> ObjectDifference:
-        return self._compare_equipment_container(ObjectDifference(source, target))
-
     def _compare_sub_geographical_region(self, source: SubGeographicalRegion, target: SubGeographicalRegion) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 
@@ -636,6 +746,30 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_equivalent_equipment(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_conducting_equipment(diff)
 
+    #######################################
+    # IEC61970 Base Generation Production #
+    #######################################
+
+    def _compare_battery_unit(self, source: BatteryUnit, target: BatteryUnit) -> ObjectDifference:
+        diff = ObjectDifference(source, target)
+
+        self._compare_values(diff, BatteryUnit.battery_state, BatteryUnit.rated_e, BatteryUnit.stored_e)
+        self._compare_id_reference_collections(diff, BatteryUnit.controls)
+
+        return self._compare_power_electronics_unit(diff)
+
+    def _compare_photo_voltaic_unit(self, source: PhotoVoltaicUnit, target: PhotoVoltaicUnit) -> ObjectDifference:
+        return self._compare_power_electronics_unit(ObjectDifference(source, target))
+
+    def _compare_power_electronics_unit(self, diff: ObjectDifference) -> ObjectDifference:
+        self._compare_id_references(diff, PowerElectronicsUnit.power_electronics_connection)
+        self._compare_values(diff, PowerElectronicsUnit.max_p, PowerElectronicsUnit.min_p)
+
+        return self._compare_equipment(diff)
+
+    def _compare_power_electronics_wind_unit(self, source: PowerElectronicsWindUnit, target: PowerElectronicsWindUnit) -> ObjectDifference:
+        return self._compare_power_electronics_unit(ObjectDifference(source, target))
+
     ######################
     # IEC61970 Base Meas #
     ######################
@@ -682,69 +816,6 @@ class NetworkServiceComparator(BaseServiceComparator):
 
         return self._compare_protection_relay_function(diff)
 
-    def _compare_distance_relay(self, source: DistanceRelay, target: DistanceRelay) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_floats(
-            diff,
-            DistanceRelay.backward_blind,
-            DistanceRelay.backward_reach,
-            DistanceRelay.backward_reactance,
-            DistanceRelay.forward_blind,
-            DistanceRelay.forward_reach,
-            DistanceRelay.forward_reactance,
-            DistanceRelay.operation_phase_angle1,
-            DistanceRelay.operation_phase_angle2,
-            DistanceRelay.operation_phase_angle3,
-        )
-
-        return self._compare_protection_relay_function(diff)
-
-    def _compare_voltage_relay(self, source: VoltageRelay, target: VoltageRelay) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        return self._compare_protection_relay_function(diff)
-
-    def _compare_protection_relay_function(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_values(
-            diff,
-            ProtectionRelayFunction.model,
-            ProtectionRelayFunction.reclosing,
-            ProtectionRelayFunction.protection_kind,
-            ProtectionRelayFunction.directable,
-            ProtectionRelayFunction.power_direction
-        )
-        self._compare_floats(diff, ProtectionRelayFunction.relay_delay_time)
-        self._compare_indexed_value_collections(
-            diff,
-            ProtectionRelayFunction.time_limits,
-            ProtectionRelayFunction.thresholds
-        )
-        self._compare_id_reference_collections(
-            diff,
-            ProtectionRelayFunction.protected_switches,
-            ProtectionRelayFunction.sensors,
-            ProtectionRelayFunction.schemes,
-        )
-        self._compare_id_references(diff, ProtectionRelayFunction.relay_info)
-
-        return self._compare_power_system_resource(diff)
-
-    def _compare_protection_relay_scheme(self, source: ProtectionRelayScheme, target: ProtectionRelayScheme) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-        self._compare_id_references(diff, ProtectionRelayScheme.system)
-        self._compare_id_reference_collections(diff, ProtectionRelayScheme.functions)
-
-        return self._compare_identified_object(diff)
-
-    def _compare_protection_relay_system(self, source: ProtectionRelaySystem, target: ProtectionRelaySystem) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_values(diff, ProtectionRelaySystem.protection_kind)
-        self._compare_id_reference_collections(diff, ProtectionRelaySystem.schemes)
-
-        return self._compare_equipment(diff)
-
     #######################
     # IEC61970 Base Scada #
     #######################
@@ -765,30 +836,6 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_id_references(diff, RemoteSource.measurement)
 
         return self._compare_remote_point(diff)
-
-    #######################################
-    # IEC61970 Base Generation Production #
-    #######################################
-
-    def _compare_battery_unit(self, source: BatteryUnit, target: BatteryUnit) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_values(diff, BatteryUnit.battery_state, BatteryUnit.rated_e, BatteryUnit.stored_e)
-        self._compare_id_reference_collections(diff, BatteryUnit.controls)
-
-        return self._compare_power_electronics_unit(diff)
-
-    def _compare_photo_voltaic_unit(self, source: PhotoVoltaicUnit, target: PhotoVoltaicUnit) -> ObjectDifference:
-        return self._compare_power_electronics_unit(ObjectDifference(source, target))
-
-    def _compare_power_electronics_unit(self, diff: ObjectDifference) -> ObjectDifference:
-        self._compare_id_references(diff, PowerElectronicsUnit.power_electronics_connection)
-        self._compare_values(diff, PowerElectronicsUnit.max_p, PowerElectronicsUnit.min_p)
-
-        return self._compare_equipment(diff)
-
-    def _compare_power_electronics_wind_unit(self, source: PowerElectronicsWindUnit, target: PowerElectronicsWindUnit) -> ObjectDifference:
-        return self._compare_power_electronics_unit(ObjectDifference(source, target))
 
     #######################
     # IEC61970 Base Wires #
@@ -922,10 +969,10 @@ class NetworkServiceComparator(BaseServiceComparator):
     def _compare_ground(self, source: Ground, target: Ground) -> ObjectDifference:
         return self._compare_conducting_equipment(ObjectDifference(source, target))
 
-    def _compare_compare_ground_disconnector(self, source: GroundDisconnector, target: GroundDisconnector) -> ObjectDifference:
+    def _compare_ground_disconnector(self, source: GroundDisconnector, target: GroundDisconnector) -> ObjectDifference:
         return self._compare_switch(ObjectDifference(source, target))
 
-    def _compare_compare_grounding_impedance(self, source: GroundingImpedance, target: GroundingImpedance) -> ObjectDifference:
+    def _compare_grounding_impedance(self, source: GroundingImpedance, target: GroundingImpedance) -> ObjectDifference:
         diff = ObjectDifference(source, target)
         self._compare_floats(diff, GroundingImpedance.x)
         return self._compare_earth_fault_compensator(diff)
@@ -1265,32 +1312,6 @@ class NetworkServiceComparator(BaseServiceComparator):
         self._compare_id_reference_collections(diff, Circuit.end_terminals, Circuit.end_substations)
 
         return self._compare_line(diff)
-
-    def _compare_loop(self, source: Loop, target: Loop) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_id_reference_collections(diff, Loop.circuits, Loop.substations, Loop.energizing_substations)
-
-        return self._compare_identified_object(diff)
-
-    def _compare_lv_feeder(self, source: LvFeeder, target: LvFeeder) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-
-        self._compare_id_references(diff, LvFeeder.normal_head_terminal)
-        self._compare_id_reference_collections(diff, LvFeeder.normal_energizing_feeders)
-        if self._options.compare_feeder_equipment:
-            self._compare_id_reference_collections(diff, LvFeeder.current_equipment)
-        self._compare_id_reference_collections(diff, LvFeeder.current_energizing_feeders)
-
-        return self._compare_equipment_container(diff)
-
-    ##############################################
-    # IEC61970 InfIEC61970 Generation Production #
-    ##############################################
-
-    def _compare_ev_charging_unit(self, source: EvChargingUnit, target: EvChargingUnit) -> ObjectDifference:
-        diff = ObjectDifference(source, target)
-        return self._compare_power_electronics_unit(diff)
 
     @staticmethod
     # NOTE: Should be Callable[[Switch, SinglePhaseKind], bool], but type inference does not work correctly.
