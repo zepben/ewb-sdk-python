@@ -5,7 +5,6 @@
 
 from zepben.protobuf.cim.iec61968.common.Agreement_pb2 import Agreement as PBAgreement
 from zepben.protobuf.cim.iec61968.customers.CustomerAgreement_pb2 import CustomerAgreement as PBCustomerAgreement
-from zepben.protobuf.cim.iec61968.customers.CustomerKind_pb2 import CustomerKind as PBCustomerKind
 from zepben.protobuf.cim.iec61968.customers.Customer_pb2 import Customer as PBCustomer
 from zepben.protobuf.cim.iec61968.customers.PricingStructure_pb2 import PricingStructure as PBPricingStructure
 from zepben.protobuf.cim.iec61968.customers.Tariff_pb2 import Tariff as PBTariff
@@ -19,6 +18,8 @@ from zepben.evolve.services.common.translator.base_cim2proto import document_to_
 from zepben.evolve.services.common.translator.util import mrid_or_empty
 
 __all__ = ["agreement_to_pb", "customer_to_pb", "customer_agreement_to_pb", "pricing_structure_to_pb", "tariff_to_pb"]
+
+from zepben.evolve.services.customer.translator.customer_enum_mappers import map_customer_kind
 
 
 ###################
@@ -35,7 +36,7 @@ def agreement_to_pb(cim: Agreement) -> PBAgreement:
 
 def customer_to_pb(cim: Customer) -> PBCustomer:
     customer = PBCustomer(
-        kind=PBCustomerKind.Value(cim.kind.short_name),
+        kind=map_customer_kind.to_pb(cim.kind),
         specialNeed=cim.special_need,
         customerAgreementMRIDs=[str(io.mrid) for io in cim.agreements]
     )

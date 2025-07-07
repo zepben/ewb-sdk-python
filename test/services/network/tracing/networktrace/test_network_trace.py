@@ -158,7 +158,6 @@ class TestNetworkTrace:
 
     @pytest.mark.asyncio
     async def test_can_stop_on_start_item_when_running_from_conducting_equipment_branching(self):
-        return
         #
         # 1 b0 21--c1--2
         #      1

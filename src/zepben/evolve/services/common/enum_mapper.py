@@ -28,18 +28,18 @@ class EnumMapper:
         pb_by_key = {self._extract_key_from_pb(it, pb_common_key): it for it in pb_enum.DESCRIPTOR.values}
 
         # todo requireNotNull(pb_by_key[key]) { "$cim: CIM key '$key' wasn't found in the protobuf enum mappings $pb_by_key" }
-        self.cim_to_proto = {cim: pb_by_key[key] for key, cim in cim_by_key.items()}
+        self._cim_to_proto = {cim: pb_by_key[key] for key, cim in cim_by_key.items()}
 
         # todo requireNotNull(cim_by_key[key]) { "$pb: Protobuf key '$key' wasn't found in the CIM enum mappings $cim_by_key" }
-        self.proto_to_cim = {pb: cim_by_key[key] for key, pb in pb_by_key.items()}
+        self._proto_to_cim = {pb: cim_by_key[key] for key, pb in pb_by_key.items()}
 
     def to_pb(self, cim: Enum) -> EnumDescriptor:
         """Convert the CIM enum value to the equivalent protobuf variant."""
-        return self.cim_to_proto[cim]
+        return self._cim_to_proto[cim].number
 
     def to_cim(self, pb: EnumDescriptor) -> Enum:
         """Convert the protobuf enum value to the equivalent CIM variant."""
-        return self.proto_to_cim[pb]
+        return self._proto_to_cim[pb]
 
     @staticmethod
     def _extract_key(name: str) -> str:
