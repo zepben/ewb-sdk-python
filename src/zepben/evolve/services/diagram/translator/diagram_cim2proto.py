@@ -25,8 +25,8 @@ from zepben.evolve.services.diagram.translator.diagram_enum_mappers import _map_
 def diagram_to_pb(cim: Diagram) -> PBDiagram:
     return PBDiagram(
         io=identified_object_to_pb(cim),
-        diagramStyle=_map_diagram_style.to_pb(cim.diagram_style).number,
-        orientationKind=_map_orientation_kind.to_pb(cim.orientation_kind).number,
+        diagramStyle=_map_diagram_style.to_pb(cim.diagram_style),
+        orientationKind=_map_orientation_kind.to_pb(cim.orientation_kind),
         diagramObjectMRIDs=[str(io.mrid) for io in cim.diagram_objects]
     )
 

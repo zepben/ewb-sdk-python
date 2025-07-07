@@ -37,7 +37,7 @@ def agreement_to_pb(cim: Agreement) -> PBAgreement:
 
 def customer_to_pb(cim: Customer) -> PBCustomer:
     customer = PBCustomer(
-        kind=_map_customer_kind.to_pb(cim.kind).number,
+        kind=_map_customer_kind.to_pb(cim.kind),
         specialNeed=cim.special_need,
         customerAgreementMRIDs=[str(io.mrid) for io in cim.agreements]
     )

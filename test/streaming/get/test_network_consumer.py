@@ -26,15 +26,16 @@ from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_ch
 from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
 from streaming.get.pb_creators import network_identified_objects, ac_line_segment
 from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, AcLineSegment, Breaker, EnergySource, \
-    EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, Substation, Terminal, EquipmentContainer, Equipment, BaseService, OperationalRestriction, TransformerStarImpedance, Circuit, Loop, \
+    EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, Substation, Terminal, EquipmentContainer, Equipment, \
+    BaseService, OperationalRestriction, TransformerStarImpedance, Circuit, Loop, \
     UnsupportedOperationException, LvFeeder, TestNetworkBuilder, PerLengthPhaseImpedance, BatteryControl, \
     PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
-from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
 from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')
@@ -314,7 +315,8 @@ class TestNetworkConsumer:
 
             assert self.service.len_of() == 11
             assert len(mor.objects) == 11
-            assert len({"lvf2", "tx0", "p2", "c1", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "generated_cn_0"}.difference(mor.objects.keys())) == 0
+            assert len(
+                {"lvf2", "tx0", "p2", "c1", "tx0-t2", "tx0-e1", "tx0-e2", "tx0-t1", "c1-t1", "c1-t2", "generated_cn_0"}.difference(mor.objects.keys())) == 0
             assert self.service.get("tx0") == mor.objects["tx0"]
             received_pole: Pole = mor.objects["p2"]
             assert self.service.get("p2") == received_pole
@@ -352,9 +354,9 @@ class TestNetworkConsumer:
             await self.client.get_equipment_container(
                 feeder_mrid,
                 Feeder,
-                IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
-                IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS,
-                NetworkState.ALL_NETWORK_STATE
+                IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_SUBSTATIONS,
+                IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_LV_FEEDERS,
+                NetworkState.NETWORK_STATE_ALL
             )
 
         object_responses = _create_object_responses(feeder_network)
@@ -365,9 +367,9 @@ class TestNetworkConsumer:
                                             StreamGrpc('getEquipmentForContainers', [
                                                 _create_container_responses(
                                                     feeder_network,
-                                                    expected_include_energizing_containers=IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS,
-                                                    expected_include_energized_containers=IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS,
-                                                    network_state=NetworkState.ALL_NETWORK_STATE
+                                                    expected_include_energizing_containers=IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_SUBSTATIONS,
+                                                    expected_include_energized_containers=IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_LV_FEEDERS,
+                                                    network_state=NetworkState.NETWORK_STATE_ALL
                                                 )
                                             ]),
                                             StreamGrpc('getIdentifiedObjects', [object_responses]),
@@ -386,9 +388,9 @@ class TestNetworkConsumer:
 
     @pytest.mark.asyncio
     async def test_get_equipment_for_container_sends_options(self, feeder_network: NetworkService):
-        include_energizing_containers = IncludedEnergizingContainers.INCLUDE_ENERGIZING_SUBSTATIONS
-        include_energized_containers = IncludedEnergizedContainers.INCLUDE_ENERGIZED_LV_FEEDERS
-        network_state = NetworkState.ALL_NETWORK_STATE
+        include_energizing_containers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_SUBSTATIONS
+        include_energized_containers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_LV_FEEDERS
+        network_state = NetworkState.NETWORK_STATE_ALL
 
         async def client_test():
             await self.client.get_equipment_for_containers(
@@ -454,7 +456,7 @@ class TestNetworkConsumer:
 
     @pytest.mark.asyncio
     async def test_get_equipment_for_loop(self):
-        network_state = NetworkState.ALL_NETWORK_STATE
+        network_state = NetworkState.NETWORK_STATE_ALL
         ns = create_loops_network()
         loop = "loop1"
         loop_containers = ["cir1", "cir2", "cir3", "sub1", "sub2", "sub3"]
@@ -478,7 +480,7 @@ class TestNetworkConsumer:
 
     @pytest.mark.asyncio
     async def test_get_all_loops(self):
-        network_state = NetworkState.ALL_NETWORK_STATE
+        network_state = NetworkState.NETWORK_STATE_ALL
         ns = create_loops_network()
         loops = ["loop1", "loop2"]
         loop_containers = ["cir1", "cir2", "cir3", "cir4", "sub1", "sub2", "sub3", "sub4"]
@@ -623,7 +625,7 @@ def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[It
                                           expected_include_energizing_containers: Optional[int] = None,
                                           expected_include_energized_containers: Optional[int] = None,
                                           network_state: NetworkState = None) \
-      -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
+    -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForContainersRequest):
@@ -645,7 +647,7 @@ def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[It
 
 
 def _create_restriction_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
-      -> Callable[[GetEquipmentForRestrictionRequest], Generator[GetEquipmentForRestrictionResponse, None, None]]:
+    -> Callable[[GetEquipmentForRestrictionRequest], Generator[GetEquipmentForRestrictionResponse, None, None]]:
     valid: Dict[str, OperationalRestriction] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForRestrictionRequest) -> Generator[GetEquipmentForRestrictionResponse, None, None]:
@@ -660,7 +662,7 @@ def _create_restriction_equipment_responses(ns: NetworkService, mrids: Optional[
 
 
 def _create_cn_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
-      -> Callable[[GetTerminalsForNodeRequest], Generator[GetTerminalsForNodeResponse, None, None]]:
+    -> Callable[[GetTerminalsForNodeRequest], Generator[GetTerminalsForNodeResponse, None, None]]:
     valid: Dict[str, ConnectivityNode] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetTerminalsForNodeRequest) -> Generator[GetTerminalsForNodeResponse, None, None]:
@@ -703,7 +705,7 @@ def _validate_hierarchy(hierarchy, service):
 
 
 def _create_object_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None) \
-      -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
+    -> Callable[[GetIdentifiedObjectsRequest], Generator[GetIdentifiedObjectsResponse, None, None]]:
     valid: Dict[str, IdentifiedObject] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetIdentifiedObjectsRequest) -> Generator[GetIdentifiedObjectsResponse, None, None]:

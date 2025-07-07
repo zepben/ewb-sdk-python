@@ -11,9 +11,13 @@ from enum import Enum
 
 from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCurrentStateEvent, SwitchStateEvent as PBSwitchStateEvent, \
     AddCutEvent as PBAddCutEvent, RemoveCutEvent as PBRemoveCutEvent, AddJumperEvent as PBAddJumperEvent, RemoveJumperEvent as PBRemoveJumperEvent, \
-    JumperConnection as PBJumperConnection
+    JumperConnection as PBJumperConnection, SwitchAction as PBSwitchAction
 
 from zepben.evolve.model.cim.iec61970.base.core.phase_code import PhaseCode, phase_code_by_id
+# noinspection PyProtectedMember
+from zepben.evolve.services.common.enum_mapper import EnumMapper
+# noinspection PyProtectedMember
+from zepben.evolve.services.network.translator.network_enum_mappers import _map_phase_code
 from zepben.evolve.util import datetime_to_timestamp
 
 
@@ -99,7 +103,7 @@ class SwitchStateEvent(CurrentStateEvent):
         return PBCurrentStateEvent(
             eventId=self.event_id,
             timestamp=datetime_to_timestamp(self.timestamp),
-            switch=PBSwitchStateEvent(mRID=self.mrid, action=self.action.name, phases=self.phases.name)
+            switch=PBSwitchStateEvent(mRID=self.mrid, action=_map_switch_action.to_pb(self.action), phases=_map_phase_code.to_pb(self.phases))
         )
 
 
@@ -271,6 +275,13 @@ class SwitchAction(Enum):
     UNKNOWN = 0  # The specified action was unknown, or was not set.
     OPEN = 1  # A request to open a switch.
     CLOSE = 2  # A request to close a switch.
+
+    @property
+    def short_name(self):
+        return str(self)[13:]
+
+
+_map_switch_action = EnumMapper(SwitchAction, PBSwitchAction)
 
 
 class JumperConnection:
