@@ -31,5 +31,17 @@ def validate_enum(cim_enum: Type[Enum], pb_enum: EnumTypeWrapper):
         assert pb.name.upper().replace("_", "").endswith(cim.short_name.upper().replace("_", "")),\
             f"invalid value mapping for {cim.value}: cim '{cim.name}' vs pb '{pb.name}'"
 
-        assert mapper.to_cim(mapper.to_pb(cim)) is cim
-        assert mapper.to_pb(mapper.to_cim(pb)) is pb
+        try:
+            as_pb = mapper.to_pb(cim)
+        except Exception as ex:
+            print(f"Failed to lookup cim {cim.name}")
+            raise ex
+
+        try:
+            as_cim = mapper.to_cim(pb)
+        except Exception as ex:
+            print(f"Failed to lookup proto {pb.name}")
+            raise ex
+
+        assert as_pb is pb, f"{cim.name}: Expected {pb.name}, found {as_pb}"
+        assert as_cim is cim, f"{pb.name}: Expected {cim.name}, found {as_cim.name}"

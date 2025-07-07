@@ -1135,7 +1135,7 @@ def energy_consumer():
         customerCount=integers(min_value=0, max_value=MAX_32_BIT_INTEGER),
         grounded=booleans(), p=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         pFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.Enum.values()),
+        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.values()),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         qFixed=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)
     )
@@ -1409,9 +1409,9 @@ def rotating_machine():
     return builds(
         PBRotatingMachine,
         rce=regulating_cond_eq(),
-        rated_power_factor=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        rated_s=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        rated_u=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        ratedPowerFactor=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        ratedS=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        ratedU=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
         p=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX))
     )
@@ -1437,7 +1437,7 @@ def shunt_compensator():
         sections=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         grounded=booleans(),
         nomU=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER),
-        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.Enum.values())
+        phaseConnection=sampled_from(PBPhaseShuntConnectionKind.values())
     )
 
 
@@ -1448,7 +1448,7 @@ def static_var_compensator():
         capacitiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         inductiveRating=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
         q=floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX),
-        svcControlMode=sampled_from(PBSVCControlMode.Enum.values()),
+        svcControlMode=sampled_from(PBSVCControlMode.values()),
         voltageSetPoint=integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)
     )
 
@@ -1467,28 +1467,28 @@ def synchronous_machine():
     return builds(
         PBSynchronousMachine,
         rm=rotating_machine(),
-        base_q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        condenser_p=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        baseQ=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        condenserP=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
         earthing=booleans(),
-        earthing_star_point_r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        earthing_star_point_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        earthingStarPointR=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        earthingStarPointX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         ikk=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        max_q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        max_u=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
-        min_q=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        min_u=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        maxQ=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        maxU=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
+        minQ=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        minU=one_of(none(), integers(min_value=MIN_32_BIT_INTEGER, max_value=MAX_32_BIT_INTEGER)),
         mu=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         r=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         r0=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         r2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        sat_direct_subtrans_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        sat_direct_sync_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
-        sat_direct_trans_x=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        satDirectSubtransX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        satDirectSyncX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
+        satDirectTransX=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         x0=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         x2=one_of(none(), floats(min_value=FLOAT_MIN, max_value=FLOAT_MAX)),
         type=sampled_from(PBSynchronousMachineKind.values()),
-        operating_mode=sampled_from(PBSynchronousMachineKind.values()),
-        curveMRIDs=one_of(none(), text(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))),
+        operatingMode=sampled_from(PBSynchronousMachineKind.values()),
+        reactiveCapabilityCurveMRIDs=one_of(none(), text(text(alphabet=ALPHANUM, max_size=TEXT_MAX_SIZE))),
     )
 
 

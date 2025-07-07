@@ -14,8 +14,16 @@ class CustomerServiceComparator(BaseServiceComparator):
     Compare the objects supported by the customer service.
     """
 
+    ###################
+    # IEC61968 Common #
+    ###################
+
     def _compare_agreement(self, diff: ObjectDifference) -> ObjectDifference:
         return self._compare_document(diff)
+
+    ######################
+    # IEC61968 Customers #
+    ######################
 
     def _compare_customer(self, source: Customer, target: Customer) -> ObjectDifference:
         diff = ObjectDifference(source, target)

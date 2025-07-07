@@ -44,10 +44,15 @@ __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test
 from datetime import datetime
 from random import choice
 
-from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
+# @formatter:off
 
 # This must be above hypothesis.strategies to avoid conflicting import with zepben.evolve.util.none
 from zepben.evolve import *
+
+from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
+
+# @formatter:on
+
 from zepben.evolve.model.cim.extensions.iec61970.base.core.site import Site
 from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
@@ -84,6 +89,8 @@ from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import Pha
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+
+
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
 
 MIN_32_BIT_INTEGER = -2147483647  # _UNKNOWN_INT = -2147483648

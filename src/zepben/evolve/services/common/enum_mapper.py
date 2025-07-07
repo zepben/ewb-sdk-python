@@ -35,7 +35,7 @@ class EnumMapper:
 
     def to_pb(self, cim: Enum) -> EnumDescriptor:
         """Convert the CIM enum value to the equivalent protobuf variant."""
-        return self._cim_to_proto[cim].number
+        return self._cim_to_proto[cim]
 
     def to_cim(self, pb: EnumDescriptor) -> Enum:
         """Convert the protobuf enum value to the equivalent CIM variant."""

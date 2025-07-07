@@ -3,19 +3,20 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+__all__ = ["diagram_to_pb", "diagram_object_to_pb", "diagram_object_point_to_pb"]
+
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObjectPoint_pb2 import DiagramObjectPoint as PBDiagramObjectPoint
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramObject_pb2 import DiagramObject as PBDiagramObject
-from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramStyle_pb2 import DiagramStyle as PBDiagramStyle
 from zepben.protobuf.cim.iec61970.base.diagramlayout.Diagram_pb2 import Diagram as PBDiagram
-from zepben.protobuf.cim.iec61970.base.diagramlayout.OrientationKind_pb2 import OrientationKind as PBOrientationKind
 
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
 from zepben.evolve.services.common.translator.base_cim2proto import identified_object_to_pb
 from zepben.evolve.services.common.translator.util import mrid_or_empty
+# noinspection PyProtectedMember
+from zepben.evolve.services.diagram.translator.diagram_enum_mappers import _map_diagram_style, _map_orientation_kind
 
-__all__ = ["diagram_to_pb", "diagram_object_to_pb", "diagram_object_point_to_pb"]
 
 ################################
 # IEC61970 Base Diagram Layout #
@@ -24,8 +25,8 @@ __all__ = ["diagram_to_pb", "diagram_object_to_pb", "diagram_object_point_to_pb"
 def diagram_to_pb(cim: Diagram) -> PBDiagram:
     return PBDiagram(
         io=identified_object_to_pb(cim),
-        diagramStyle=PBDiagramStyle.Value(cim.diagram_style.short_name),
-        orientationKind=PBOrientationKind.Value(cim.orientation_kind.short_name),
+        diagramStyle=_map_diagram_style.to_pb(cim.diagram_style).number,
+        orientationKind=_map_orientation_kind.to_pb(cim.orientation_kind).number,
         diagramObjectMRIDs=[str(io.mrid) for io in cim.diagram_objects]
     )
 

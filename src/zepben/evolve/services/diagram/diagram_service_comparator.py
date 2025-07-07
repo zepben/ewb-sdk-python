@@ -16,6 +16,10 @@ class DiagramServiceComparator(BaseServiceComparator):
     Compare the objects supported by the diagram service.
     """
 
+    ################################
+    # IEC61970 Base Diagram Layout #
+    ################################
+
     def _compare_diagram(self, source: Diagram, target: Diagram) -> ObjectDifference:
         diff = ObjectDifference(source, target)
 

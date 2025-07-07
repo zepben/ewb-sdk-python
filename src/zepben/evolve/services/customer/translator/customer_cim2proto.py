@@ -19,7 +19,8 @@ from zepben.evolve.services.common.translator.util import mrid_or_empty
 
 __all__ = ["agreement_to_pb", "customer_to_pb", "customer_agreement_to_pb", "pricing_structure_to_pb", "tariff_to_pb"]
 
-from zepben.evolve.services.customer.translator.customer_enum_mappers import map_customer_kind
+# noinspection PyProtectedMember
+from zepben.evolve.services.customer.translator.customer_enum_mappers import _map_customer_kind
 
 
 ###################
@@ -36,7 +37,7 @@ def agreement_to_pb(cim: Agreement) -> PBAgreement:
 
 def customer_to_pb(cim: Customer) -> PBCustomer:
     customer = PBCustomer(
-        kind=map_customer_kind.to_pb(cim.kind),
+        kind=_map_customer_kind.to_pb(cim.kind).number,
         specialNeed=cim.special_need,
         customerAgreementMRIDs=[str(io.mrid) for io in cim.agreements]
     )

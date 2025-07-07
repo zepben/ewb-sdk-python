@@ -41,7 +41,7 @@ class TestCurrentStateEvent:
         pb_event = PBCurrentStateEvent(
             eventId="event1",
             timestamp=datetime_to_timestamp(datetime.now()),
-            switch=PBSwitchStateEvent(mRID="switch-1", action=PBSwitchAction.OPEN, phases=PBPhaseCode.ABCN)
+            switch=PBSwitchStateEvent(mRID="switch-1", action=PBSwitchAction.SWITCH_ACTION_OPEN, phases=PBPhaseCode.PHASE_CODE_ABCN)
         )
 
         event = SwitchStateEvent.from_pb(pb_event)

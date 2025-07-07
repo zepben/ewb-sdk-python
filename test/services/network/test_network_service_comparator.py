@@ -1056,7 +1056,7 @@ class TestNetworkServiceComparator(TestBaseServiceComparator):
     def _compare_earth_fault_compensator(self, creator: Type[EarthFaultCompensator]):
         self._compare_conducting_equipment(creator)
 
-        self.validator.validate_property(EarthFaultCompensator.r, EarthFaultCompensator, lambda _: 1.0, lambda _: 2.0)
+        self.validator.validate_property(EarthFaultCompensator.r, creator, lambda _: 1.0, lambda _: 2.0)
 
     def _compare_energy_connection(self, creator: Type[EnergyConnection]):
         self._compare_conducting_equipment(creator)
