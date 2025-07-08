@@ -7,7 +7,7 @@ __all__ = [""]
 
 import os.path
 from enum import Enum
-from typing import Type, TypeVar, Generic, Dict
+from typing import Type, TypeVar, Generic
 
 from google.protobuf.descriptor import EnumValueDescriptor
 # noinspection PyPackageRequirements
