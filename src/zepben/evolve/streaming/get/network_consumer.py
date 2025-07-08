@@ -13,8 +13,8 @@ from zepben.protobuf.metadata.metadata_requests_pb2 import GetMetadataRequest
 from zepben.protobuf.metadata.metadata_responses_pb2 import GetMetadataResponse
 from zepben.protobuf.nc.nc_pb2_grpc import NetworkConsumerStub
 from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetNetworkHierarchyRequest, GetEquipmentForContainersRequest, \
-    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, IncludedEnergizedContainers, \
-    NetworkState
+    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers as PBIncludedEnergizingContainers, \
+    IncludedEnergizedContainers as PBIncludedEnergizedContainers, NetworkState as PBNetworkState
 
 from zepben.evolve import NetworkService, IdentifiedObject, Organisation, Location, OperationalRestriction, BaseVoltage, ConnectivityNode, Substation, Terminal, \
     AcLineSegment, Breaker, Disconnector, EnergyConsumer, \
@@ -51,6 +51,11 @@ from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance i
 from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+# noinspection PyProtectedMember
+from zepben.evolve.services.common.enum_mapper import EnumMapper
+from zepben.evolve.services.network.network_state import NetworkState
+from zepben.evolve.streaming.get.included_energized_containers import IncludedEnergizedContainers
+from zepben.evolve.streaming.get.included_energizing_containers import IncludedEnergizingContainers
 from zepben.evolve.streaming.grpc.grpc import GrpcResult
 
 __all__ = ["NetworkConsumerClient", "SyncNetworkConsumerClient"]
@@ -62,6 +67,11 @@ MAX_64_BIT_INTEGER = 9223372036854775807
 class NetworkResult(object):
     network_service: Optional[NetworkService]
     failed: Set[str] = set()
+
+
+_map_include_energizing_containers = EnumMapper(IncludedEnergizingContainers, PBIncludedEnergizingContainers)
+_map_include_energized_containers = EnumMapper(IncludedEnergizedContainers, PBIncludedEnergizedContainers)
+_map_network_state = EnumMapper(NetworkState, PBNetworkState)
 
 
 class NetworkConsumerClient(CimConsumerClient[NetworkService]):
@@ -107,9 +117,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def get_equipment_for_container(
         self,
         container: Union[str, EquipmentContainer],
-        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_EXCLUDE,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_EXCLUDE,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`EquipmentContainer` represented by `container`
@@ -135,9 +145,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def get_equipment_for_containers(
         self,
         containers: Iterable[str],
-        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_EXCLUDE,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_EXCLUDE,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
+        network_state: NetworkState = NetworkState.NORMAL
     ):
         """
         Retrieve the :class:`Equipment` for the :class:`EquipmentContainer`'s represented in `containers`
@@ -218,9 +228,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         self,
         mrid: str,
         expected_class: type = EquipmentContainer,
-        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_EXCLUDE,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_EXCLUDE,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the equipment container network for the specified `mrid` and store the results in the `service`.
@@ -244,7 +254,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers, network_state)
 
-    async def get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL) -> GrpcResult[
+    async def get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NORMAL) -> GrpcResult[
         MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for the :class:`Loop` represented by `mRID`
@@ -266,7 +276,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         """
         return await self._get_equipment_for_loop(loop, network_state)
 
-    async def get_all_loops(self, network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL) -> GrpcResult[MultiObjectResult]:
+    async def get_all_loops(self, network_state: NetworkState = NetworkState.NORMAL) -> GrpcResult[MultiObjectResult]:
         """
         Retrieve the :class:`Equipment` for all :class:`Loop` instances in `service`.
 
@@ -296,9 +306,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _get_equipment_for_container(
         self,
         container: Union[str, EquipmentContainer],
-        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_EXCLUDE,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_EXCLUDE,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> GrpcResult[MultiObjectResult]:
         return await self._handle_multi_object_rpc(
             lambda: self._process_equipment_for_container(container, include_energizing_containers, include_energized_containers, network_state)
@@ -307,9 +317,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
     async def _get_equipment_for_containers(
         self,
         containers: Iterable[str],
-        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_EXCLUDE,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_EXCLUDE,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> GrpcResult[MultiObjectResult]:
         return await self._handle_multi_object_rpc(
             lambda: self._process_equipment_for_containers(containers, include_energizing_containers, include_energized_containers, network_state)
@@ -331,9 +341,9 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         self,
         mrid: str,
         expected_class: type = EquipmentContainer,
-        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_EXCLUDE,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_EXCLUDE,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> GrpcResult[MultiObjectResult]:
         async def get_additional(it: EquipmentContainer, mor: MultiObjectResult) -> Optional[GrpcResult[MultiObjectResult]]:
             result = await self._get_equipment_for_container(it, include_energizing_containers, include_energized_containers, network_state)
@@ -347,7 +357,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         return await self._get_with_references(mrid, expected_class, get_additional)
 
-    async def _get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL) -> GrpcResult[
+    async def _get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NORMAL) -> GrpcResult[
         MultiObjectResult]:
         mrid = loop.mrid if isinstance(loop, Loop) else loop
 
@@ -371,7 +381,7 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
 
         return await self._get_with_references(mrid, Loop, get_additional)
 
-    async def _get_all_loops(self, network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL) -> GrpcResult[MultiObjectResult]:
+    async def _get_all_loops(self, network_state: NetworkState = NetworkState.NORMAL) -> GrpcResult[MultiObjectResult]:
         response = await self._get_network_hierarchy()
         if response.was_failure:
             # noinspection PyArgumentList
@@ -422,29 +432,27 @@ class NetworkConsumerClient(CimConsumerClient[NetworkService]):
         self, it: Union[str, EquipmentContainer],
         include_energizing_containers: IncludedEnergizingContainers,
         include_energized_containers: IncludedEnergizedContainers,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> AsyncGenerator[IdentifiedObject, None]:
-        mrid = it.mrid if isinstance(it, EquipmentContainer) else it
-        request = GetEquipmentForContainersRequest()
-        request.includeEnergizingContainers = include_energizing_containers
-        request.includeEnergizedContainers = include_energized_containers
-        request.networkState = network_state
-        responses = self._stub.getEquipmentForContainers(self._batch_send(request, [mrid]), timeout=self.timeout)
-        async for response in responses:
-            for nio in response.identifiedObjects:
-                yield self._extract_identified_object("network", nio, _nio_type_to_cim)
+        async for response in self._process_equipment_for_containers(
+            [it.mrid if isinstance(it, EquipmentContainer) else it],
+            include_energizing_containers,
+            include_energized_containers,
+            network_state
+        ):
+            yield response
 
     async def _process_equipment_for_containers(
         self,
         mrids: Iterable[str],
         include_energizing_containers: IncludedEnergizingContainers,
         include_energized_containers: IncludedEnergizedContainers,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> AsyncGenerator[IdentifiedObject, None]:
         request = GetEquipmentForContainersRequest()
-        request.includeEnergizingContainers = include_energizing_containers
-        request.includeEnergizedContainers = include_energized_containers
-        request.networkState = network_state
+        request.includeEnergizingContainers = _map_include_energizing_containers.to_pb(include_energizing_containers)
+        request.includeEnergizedContainers = _map_include_energized_containers.to_pb(include_energized_containers)
+        request.networkState = _map_network_state.to_pb(network_state)
         responses = self._stub.getEquipmentForContainers(self._batch_send(request, mrids), timeout=self.timeout)
         async for response in responses:
             for nio in response.identifiedObjects:
@@ -598,9 +606,9 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
     def get_equipment_for_container(
         self,
         container: Union[str, EquipmentContainer],
-        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_EXCLUDE,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_EXCLUDE,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(
             super().get_equipment_for_container(container, include_energizing_containers, include_energized_containers, network_state)
@@ -609,9 +617,9 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
     def get_equipment_for_containers(
         self,
         containers: Iterable[str],
-        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_EXCLUDE,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_EXCLUDE,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(
             super().get_equipment_for_containers(containers, include_energizing_containers, include_energized_containers, network_state)
@@ -634,19 +642,19 @@ class SyncNetworkConsumerClient(NetworkConsumerClient):
         self,
         mrid: str,
         expected_class: type = EquipmentContainer,
-        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_EXCLUDE,
-        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_EXCLUDE,
-        network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL
+        include_energizing_containers: IncludedEnergizingContainers = IncludedEnergizingContainers.NONE,
+        include_energized_containers: IncludedEnergizedContainers = IncludedEnergizedContainers.NONE,
+        network_state: NetworkState = NetworkState.NORMAL
     ) -> GrpcResult[MultiObjectResult]:
         return get_event_loop().run_until_complete(
             super().get_equipment_container(mrid, expected_class, include_energizing_containers, include_energized_containers, network_state)
         )
 
-    def get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL) -> GrpcResult[MultiObjectResult]:
+    def get_equipment_for_loop(self, loop: Union[str, Loop], network_state: NetworkState = NetworkState.NORMAL) -> GrpcResult[MultiObjectResult]:
         # noinspection PyArgumentList
         return get_event_loop().run_until_complete(super().get_equipment_for_loop(self, loop, network_state))
 
-    def get_all_loops(self, network_state: NetworkState = NetworkState.NETWORK_STATE_NORMAL) -> GrpcResult[MultiObjectResult]:
+    def get_all_loops(self, network_state: NetworkState = NetworkState.NORMAL) -> GrpcResult[MultiObjectResult]:
         # noinspection PyArgumentList
         return get_event_loop().run_until_complete(super().get_all_loops(self, network_state))
 

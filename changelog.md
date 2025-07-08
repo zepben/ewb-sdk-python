@@ -38,6 +38,21 @@
 * `NetworkStateOperators` has a new abstract `description`. If you are creating custom operators you will need to add it.
 * `StepAction` will now raise an exception if `apply` is overridden. override `_apply` instead, or pass the function to `__init__`
 * Renamed `length_from_t1_or_0` to `length_from_t1_or_0`.
+* `NetworkConsumerClient` and `SyncNetworkConsumerClient` no longer use the protobuf `IncludedEnergizedContainers`, `IncludedEnergizingContainers` and
+  `NetworkState` enums directly, it now use SDK versions of these enums. To use these enums you will need to update your imports, and use the simplified
+  versions of the enum values:
+  * `IncludedEnergizedContainers` from package `com.zepben.evolve.streaming.get`.
+    * `EXCLUDE_ENERGIZED_CONTAINERS` -> `NONE`.
+    * `INCLUDE_ENERGIZED_FEEDERS` -> `FEEDERS`.
+    * `INCLUDE_ENERGIZED_LV_FEEDERS` -> `LV_FEEDERS`.
+  * `IncludedEnergizingContainers` from package `com.zepben.evolve.streaming.get`.
+    * `EXCLUDE_ENERGIZING_CONTAINERS` -> `NONE`.
+    * `INCLUDE_ENERGIZING_FEEDERS` -> `FEEDERS`.
+    * `INCLUDE_ENERGIZING_SUBSTATIONS` -> `SUBSTATIONS`.
+  * `NetworkState` from package `com.zepben.evolve.services.network`.
+    * `ALL_NETWORK_STATE` -> `ALL`.
+    * `NORMAL_NETWORK_STATE` -> `NORMAL`.
+    * `CURRENT_NETWORK_STATE` -> `CURRENT`.
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.

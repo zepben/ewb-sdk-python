@@ -13,9 +13,9 @@ from google.protobuf.any_pb2 import Any
 from hypothesis import given, settings, Phase
 from zepben.protobuf.nc import nc_pb2
 from zepben.protobuf.nc.nc_data_pb2 import NetworkIdentifiedObject
-from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, \
-    GetEquipmentForRestrictionRequest, GetTerminalsForNodeRequest, IncludedEnergizingContainers, IncludedEnergizedContainers, \
-    NetworkState
+from zepben.protobuf.nc.nc_requests_pb2 import GetIdentifiedObjectsRequest, GetEquipmentForContainersRequest, GetEquipmentForRestrictionRequest, \
+    GetTerminalsForNodeRequest, IncludedEnergizingContainers as PBIncludedEnergizingContainers, IncludedEnergizedContainers as PBIncludedEnergizedContainers, \
+    NetworkState as PBNetworkState
 from zepben.protobuf.nc.nc_responses_pb2 import GetIdentifiedObjectsResponse, GetEquipmentForContainersResponse, \
     GetEquipmentForRestrictionResponse, GetTerminalsForNodeResponse, GetNetworkHierarchyResponse
 
@@ -36,6 +36,9 @@ from zepben.evolve.model.cim.iec61970.base.core.geographical_region import Geogr
 from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
 from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
 from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.evolve.services.network.network_state import NetworkState
+from zepben.evolve.streaming.get.included_energized_containers import IncludedEnergizedContainers
+from zepben.evolve.streaming.get.included_energizing_containers import IncludedEnergizingContainers
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')
@@ -119,6 +122,36 @@ class TestNetworkConsumer:
 
         response = GetIdentifiedObjectsResponse(identifiedObjects=[NetworkIdentifiedObject(acLineSegment=acls)])
         await self.mock_server.validate(client_test, [StreamGrpc('getIdentifiedObjects', stream_from_fixed([mrid], [response]))])
+
+    @pytest.mark.asyncio
+    async def test_get_equipment_container(self, feeder_network: NetworkService):
+        async def client_test():
+            mor = (await self.client.get_equipment_for_container(
+                container="f001",
+                include_energizing_containers=IncludedEnergizingContainers.SUBSTATIONS,
+                include_energized_containers=IncludedEnergizedContainers.LV_FEEDERS,
+                network_state=NetworkState.CURRENT
+            )).throw_on_error().value
+
+            assert len(mor.objects) == self.service.len_of(Equipment) == 3
+            _assert_contains_mrids(self.service, "fsp", "c2", "tx")
+
+        await self.mock_server.validate(
+            client_test,
+            [
+                StreamGrpc(
+                    'getEquipmentForContainers',
+                    [
+                        _create_container_equipment_responses(
+                            ns=feeder_network,
+                            expected_include_energizing_containers=PBIncludedEnergizingContainers.INCLUDED_ENERGIZING_CONTAINERS_SUBSTATIONS,
+                            expected_include_energized_containers=PBIncludedEnergizedContainers.INCLUDED_ENERGIZED_CONTAINERS_LV_FEEDERS,
+                            network_state=PBNetworkState.NETWORK_STATE_CURRENT
+                        )
+                    ]
+                )
+            ]
+        )
 
     @pytest.mark.asyncio
     async def test_get_identified_object_not_found(self):
@@ -621,11 +654,13 @@ def _to_network_identified_object(obj) -> NetworkIdentifiedObject:
     return nio
 
 
-def _create_container_equipment_responses(ns: NetworkService, mrids: Optional[Iterable[str]] = None,
-                                          expected_include_energizing_containers: Optional[int] = None,
-                                          expected_include_energized_containers: Optional[int] = None,
-                                          network_state: NetworkState = None) \
-    -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
+def _create_container_equipment_responses(
+    ns: NetworkService,
+    mrids: Optional[Iterable[str]] = None,
+    expected_include_energizing_containers: Optional[int] = None,
+    expected_include_energized_containers: Optional[int] = None,
+    network_state: NetworkState = None
+) -> Callable[[GetEquipmentForContainersRequest], Generator[GetEquipmentForContainersResponse, None, None]]:
     valid: Dict[str, EquipmentContainer] = {mrid: ns[mrid] for mrid in mrids} if mrids else ns
 
     def responses(request: GetEquipmentForContainersRequest):
