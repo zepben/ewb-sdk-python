@@ -8,7 +8,7 @@ __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_
            "create_geographical_region", "create_subgeographical_region", "create_asset_owner", "create_meter", "create_power_transformer_end",
            "feeder_network", "feeder_start_point_between_conductors_network", "feeder_start_point_to_open_point_network",
            "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals",
-           "single_connectivitynode_network", "create_terminal", "phase_swap_loop_network", "loop_under_feeder_head_network", "network_service"]
+           "single_connectivity_node_network", "create_terminal", "phase_swap_loop_network", "loop_under_feeder_head_network", "network_service"]
 
 from typing import Dict, List, Optional
 
@@ -449,7 +449,7 @@ def operational_restriction_with_equipment():
 
 
 @fixture()
-def single_connectivitynode_network():
+def single_connectivity_node_network():
     network_service = NetworkService()
     create_connectivitynode_with_terminals(network_service, "cn1", PhaseCode.A, PhaseCode.B, PhaseCode.C)
     return network_service
