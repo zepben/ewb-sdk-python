@@ -7,8 +7,8 @@ import re
 from _pytest.python_api import raises
 from hypothesis import given
 from hypothesis.strategies import integers, builds, lists, floats, text, booleans
-from zepben.evolve import PowerElectronicsUnit, BatteryUnit, PowerElectronicsConnection
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.ewb import PowerElectronicsUnit, BatteryUnit, PowerElectronicsConnection
+from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.wires.test_regulating_cond_eq import verify_regulating_cond_eq_constructor_default, \

@@ -7,8 +7,8 @@ import re
 from hypothesis import assume
 from hypothesis.strategies import floats, booleans, integers, builds
 from pytest import raises
-from zepben.evolve import TapChangerControl
-from zepben.evolve.model.cim.iec61970.base.wires.tap_changer import TapChanger
+from zepben.ewb import TapChangerControl
+from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_kwargs, verify_power_system_resource_constructor_default, \

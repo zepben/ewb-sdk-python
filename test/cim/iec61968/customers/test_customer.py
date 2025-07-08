@@ -7,7 +7,7 @@ from hypothesis import given
 from hypothesis.strategies import lists, builds, sampled_from, text
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
-from zepben.evolve import Customer, CustomerKind, CustomerAgreement
+from zepben.ewb import Customer, CustomerKind, CustomerAgreement
 
 from cim.iec61968.common.test_organisation_role import organisation_role_kwargs, verify_organisation_role_constructor_default, \
     verify_organisation_role_constructor_kwargs, \

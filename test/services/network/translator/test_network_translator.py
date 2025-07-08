@@ -10,7 +10,7 @@ from hypothesis import given, HealthCheck, settings
 from database.sqlite.schema_utils import assume_non_blank_street_address_details
 from services.common.translator.base_test_translator import validate_service_translations
 from test.cim.cim_creators import *
-from zepben.evolve import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, Location, NetworkServiceComparator, NameType, \
+from zepben.ewb import IdentifiedObject, PowerTransformerEnd, PowerTransformer, NetworkService, Location, NetworkServiceComparator, NameType, \
     NetworkDatabaseTables, TableLocations, TableAssetOrganisationRolesAssets, TableCircuitsSubstations, TableCircuitsTerminals, \
     TableEquipmentEquipmentContainers, TableEquipmentOperationalRestrictions, TableEquipmentUsagePoints, TableLoopsSubstations, \
     TableProtectionRelayFunctionsProtectedSwitches, TableProtectionRelaySchemesProtectionRelayFunctions, TableUsagePointsEndDevices, \

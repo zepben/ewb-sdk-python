@@ -15,7 +15,7 @@ from zepben.protobuf.cc.cc_responses_pb2 import GetIdentifiedObjectsResponse, Ge
 
 from streaming.get.data.metadata import create_metadata, create_metadata_response
 from streaming.get.pb_creators import customer_identified_objects, customer
-from zepben.evolve import CustomerConsumerClient, BaseService, IdentifiedObject, Customer
+from zepben.ewb import CustomerConsumerClient, BaseService, IdentifiedObject, Customer
 
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.mock_server import MockServer, StreamGrpc, stream_from_fixed, UnaryGrpc, unary_from_fixed

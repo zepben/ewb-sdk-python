@@ -5,7 +5,7 @@
 
 from cim.iec61970.base.wires.test_per_length_line_parameter import per_length_line_parameter_kwargs, verify_per_length_line_parameter_constructor_default, \
     verify_per_length_line_parameter_constructor_kwargs, verify_per_length_line_parameter_constructor_args, per_length_line_parameter_args
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
 
 per_length_impedance_kwargs = per_length_line_parameter_kwargs
 per_length_impedance_args = per_length_line_parameter_args

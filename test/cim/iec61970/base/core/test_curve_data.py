@@ -5,7 +5,7 @@
 from hypothesis import given
 from hypothesis.strategies import floats, one_of, none
 from pytest import raises
-from zepben.evolve import CurveData
+from zepben.ewb import CurveData
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 

@@ -6,7 +6,7 @@ from hypothesis import given
 
 from cim.iec61970.base.wires.test_connector import verify_connector_constructor_default, \
     verify_connector_constructor_kwargs, verify_connector_constructor_args, connector_kwargs, connector_args
-from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
 junction_kwargs = connector_kwargs
 junction_args = connector_args

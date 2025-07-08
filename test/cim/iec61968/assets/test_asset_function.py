@@ -5,7 +5,7 @@
 
 from test.cim.iec61970.base.core.test_identified_object import verify_identified_object_constructor_default, verify_identified_object_constructor_kwargs, \
     verify_identified_object_constructor_args, identified_object_kwargs, identified_object_args
-from zepben.evolve.model.cim.iec61968.assets.asset_function import AssetFunction
+from zepben.ewb.model.cim.iec61968.assets.asset_function import AssetFunction
 
 asset_function_kwargs = identified_object_kwargs
 asset_function_args = identified_object_args

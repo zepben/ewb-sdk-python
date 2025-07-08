@@ -9,7 +9,7 @@ from unittest.mock import Mock, create_autospec, call
 import pytest
 
 from capture_mock_sequence import CaptureMockSequence
-from zepben.evolve import DiagramDatabaseReader, DiagramService, MetadataCollectionReader, DiagramServiceReader, TableVersion
+from zepben.ewb import DiagramDatabaseReader, DiagramService, MetadataCollectionReader, DiagramServiceReader, TableVersion
 
 
 class TestDiagramDatabaseReader:

@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import pytest
 
-from zepben.evolve import TracedPhases, SinglePhaseKind as SPK
-from zepben.evolve.exceptions import PhaseException
+from zepben.ewb import TracedPhases, SinglePhaseKind as SPK
+from zepben.ewb.exceptions import PhaseException
 
 traced_phases = TracedPhases()
 

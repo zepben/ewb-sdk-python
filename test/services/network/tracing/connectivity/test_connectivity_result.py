@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from collections import Counter
 
-from zepben.evolve import Terminal, PhaseCode, SinglePhaseKind, NominalPhasePath, ConnectivityResult
-from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.ewb import Terminal, PhaseCode, SinglePhaseKind, NominalPhasePath, ConnectivityResult
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 
 
 class TestConnectivityResult:

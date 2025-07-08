@@ -8,7 +8,7 @@ from cim.cim_creators import sampled_phase_code, FLOAT_MAX, FLOAT_MIN
 from cim.iec61970.base.core.test_power_system_resource import power_system_resource_args, verify_power_system_resource_constructor_default, \
     verify_power_system_resource_constructor_kwargs, power_system_resource_kwargs, verify_power_system_resource_constructor_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq
+from zepben.ewb import RegulatingControlModeKind, Terminal, PowerElectronicsConnection, PhaseCode, RegulatingControl, RegulatingCondEq
 
 regulating_control_kwargs = {
     **power_system_resource_kwargs,

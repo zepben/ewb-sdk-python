@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats
-from zepben.evolve import SwitchInfo
+from zepben.ewb import SwitchInfo
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \

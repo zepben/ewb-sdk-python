@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, text
-from zepben.evolve import Control, RemoteControl
+from zepben.ewb import Control, RemoteControl
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61970.base.meas.test_io_point import io_point_kwargs, verify_io_point_constructor_default, \

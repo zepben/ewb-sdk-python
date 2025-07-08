@@ -5,7 +5,7 @@
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from zepben.evolve import RemotePoint
+from zepben.ewb import RemotePoint
 
 remote_point_kwargs = identified_object_kwargs
 remote_point_args = identified_object_args

@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.evolve import PricingStructure, Tariff
+from zepben.ewb import PricingStructure, Tariff
 
 from cim.iec61968.common.test_document import document_kwargs, verify_document_constructor_default, verify_document_constructor_kwargs, \
     verify_document_constructor_args, document_args

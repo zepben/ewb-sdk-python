@@ -4,12 +4,12 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional, Callable
 
-from zepben.evolve import NetworkStateOperators, FeederDirection, SinglePhaseKind, Switch, PowerTransformer
-from zepben.evolve.services.network.tracing.networktrace.conditions.conditions import limit_equipment_steps
-from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
-from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
-from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import EquipmentTypeStepLimitCondition
-from zepben.evolve.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
+from zepben.ewb import NetworkStateOperators, FeederDirection, SinglePhaseKind, Switch, PowerTransformer
+from zepben.ewb.services.network.tracing.networktrace.conditions.conditions import limit_equipment_steps
+from zepben.ewb.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
+from zepben.ewb.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
+from zepben.ewb.services.network.tracing.networktrace.conditions.equipment_type_step_limit_condition import EquipmentTypeStepLimitCondition
+from zepben.ewb.services.network.tracing.networktrace.conditions.open_condition import OpenCondition
 
 
 class TestCondition:

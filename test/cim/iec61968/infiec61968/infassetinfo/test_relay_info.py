@@ -9,7 +9,7 @@ from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, FLOAT_MIN, FLOAT_MAX
 from cim.iec61968.assets.test_asset_info import asset_info_kwargs, asset_info_args, verify_asset_info_constructor_default, verify_asset_info_constructor_kwargs, \
     verify_asset_info_constructor_args
 from cim.private_collection_validator import validate_ordered_other_1234567890
-from zepben.evolve import RelayInfo
+from zepben.ewb import RelayInfo
 
 relay_info_kwargs = {
     **asset_info_kwargs,

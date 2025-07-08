@@ -10,10 +10,10 @@ from hypothesis import given, settings, HealthCheck
 from cim.cim_creators import create_diagram, create_diagram_object
 from database.sqlite.common.cim_database_schema_common_tests import CimDatabaseSchemaCommonTests, TComparator, TService, TReader, TWriter
 from database.sqlite.schema_utils import SchemaNetworks
-from zepben.evolve import IdentifiedObject, DiagramDatabaseReader, DiagramDatabaseWriter, DiagramService
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
-from zepben.evolve.services.diagram.diagram_service_comparator import DiagramServiceComparator
+from zepben.ewb import IdentifiedObject, DiagramDatabaseReader, DiagramDatabaseWriter, DiagramService
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
+from zepben.ewb.services.diagram.diagram_service_comparator import DiagramServiceComparator
 
 T = TypeVar("T", bound=IdentifiedObject)
 

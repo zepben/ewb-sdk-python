@@ -5,7 +5,7 @@
 
 import pytest
 
-from zepben.evolve import CimConsumerClient
+from zepben.ewb import CimConsumerClient
 
 
 @pytest.mark.asyncio

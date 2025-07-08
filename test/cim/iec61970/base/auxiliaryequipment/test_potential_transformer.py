@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import sampled_from
-from zepben.evolve import PotentialTransformer, PotentialTransformerInfo, PotentialTransformerKind
+from zepben.ewb import PotentialTransformer, PotentialTransformerInfo, PotentialTransformerKind
 
 from cim.iec61970.base.auxiliaryequipment.test_sensor import sensor_kwargs, verify_sensor_constructor_default, \
     verify_sensor_constructor_kwargs, verify_sensor_constructor_args, sensor_args

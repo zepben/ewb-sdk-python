@@ -2,24 +2,6 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from typing import Dict, List, Optional
-
-from pytest import fixture
-
-from zepben.evolve import NetworkService, PhaseCode, EnergySource, EnergySourcePhase, ConductingEquipment, Breaker, PowerTransformer, \
-    Terminal, CustomerService, Organisation, AcLineSegment, \
-    WireInfo, EnergyConsumer, Substation, PowerSystemResource, Location, SetPhases, OperationalRestriction, Equipment, ConnectivityNode, LvFeeder
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
-from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-from zepben.evolve.model.cim.iec61968.metering.meter import Meter
-from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
-from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
-from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
-from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
-from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
 
 __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_for_connecting", "create_switch_for_connecting", "create_acls_for_connecting",
            "create_energy_consumer_for_connecting", "create_feeder", "create_substation", "create_power_transformer_for_connecting", "create_terminals",
@@ -28,9 +10,27 @@ __all__ = ["create_terminals", "create_junction_for_connecting", "create_source_
            "feeder_with_current", "operational_restriction_with_equipment", "create_connectivitynode_with_terminals",
            "single_connectivitynode_network", "create_terminal", "phase_swap_loop_network", "loop_under_feeder_head_network", "network_service"]
 
-from zepben.evolve.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
-from zepben.evolve.testing.test_network_builder import TestNetworkBuilder
-from zepben.evolve.util import CopyableUUID
+from typing import Dict, List, Optional
+
+from pytest import fixture
+
+from zepben.ewb import NetworkService, PhaseCode, EnergySource, EnergySourcePhase, ConductingEquipment, Breaker, PowerTransformer, Terminal, CustomerService, \
+    Organisation, AcLineSegment, WireInfo, EnergyConsumer, Substation, PowerSystemResource, Location, SetPhases, OperationalRestriction, Equipment, \
+    ConnectivityNode, LvFeeder
+from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
+from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.ewb.model.cim.iec61968.metering.meter import Meter
+from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
+from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.ewb.services.network.tracing.feeder.assign_to_feeders import AssignToFeeders
+from zepben.ewb.testing.test_network_builder import TestNetworkBuilder
+from zepben.ewb.util import CopyableUUID
 
 
 def create_terminals(network: NetworkService, ce: ConductingEquipment, num_terms: int, phases: PhaseCode = PhaseCode.ABCN) -> List[Terminal]:

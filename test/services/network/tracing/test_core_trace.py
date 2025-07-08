@@ -10,7 +10,7 @@ from typing import List
 import pytest
 
 from services.network.test_data.phase_swap_loop_network import create_phase_swap_loop_network
-from zepben.evolve import ConductingEquipment, PhaseCode, SinglePhaseKind, NetworkService, Tracing, NetworkStateOperators, stop_at_open, downstream, upstream, \
+from zepben.ewb import ConductingEquipment, PhaseCode, SinglePhaseKind, NetworkService, Tracing, NetworkStateOperators, stop_at_open, downstream, upstream, \
     NetworkTrace
 
 

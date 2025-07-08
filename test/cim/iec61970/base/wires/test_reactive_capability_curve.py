@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
-from zepben.evolve import ReactiveCapabilityCurve
+from zepben.ewb import ReactiveCapabilityCurve
 
 from cim.iec61970.base.core.test_curve import curve_kwargs, curve_args, verify_curve_constructor_default, verify_curve_constructor_kwargs, \
     verify_curve_constructor_args

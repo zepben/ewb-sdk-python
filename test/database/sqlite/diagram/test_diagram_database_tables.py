@@ -3,8 +3,8 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from zepben.evolve import DiagramDatabaseTables
-from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
+from zepben.ewb import DiagramDatabaseTables
+from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
 
 
 def test_contains_base_tables():

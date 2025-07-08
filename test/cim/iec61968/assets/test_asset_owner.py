@@ -6,7 +6,7 @@ from hypothesis import given
 
 from cim.iec61968.assets.test_asset_organisation_role import asset_organisation_role_kwargs, verify_asset_organisation_role_constructor_default, \
     verify_asset_organisation_role_constructor_kwargs, verify_asset_organisation_role_constructor_args, asset_organisation_role_args
-from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
+from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
 
 asset_owner_kwargs = asset_organisation_role_kwargs
 asset_owner_args = asset_organisation_role_args

@@ -6,7 +6,7 @@ from hypothesis import given
 
 from cim.iec61970.base.meas.test_measurement import measurement_kwargs, verify_measurement_constructor_default, \
     verify_measurement_constructor_kwargs, verify_measurement_constructor_args, measurement_args
-from zepben.evolve.model.cim.iec61970.base.meas.accumulator import Accumulator
+from zepben.ewb.model.cim.iec61970.base.meas.accumulator import Accumulator
 
 accumulator_kwargs = measurement_kwargs
 accumulator_args = measurement_args

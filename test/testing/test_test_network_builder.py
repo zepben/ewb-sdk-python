@@ -8,9 +8,9 @@ from typing import Callable, List
 import pytest
 from pytest import raises
 
-from zepben.evolve import PhaseCode, PowerTransformerEnd, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, \
+from zepben.ewb import PhaseCode, PowerTransformerEnd, Terminal, NetworkService, ConductingEquipment, Breaker, Feeder, PowerTransformer, \
     connected_terminals, TestNetworkBuilder, Fuse, LvFeeder, ConnectivityNode, TransformerCoolingType
-from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
+from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
 
 
 class TestTestNetworkBuilder:

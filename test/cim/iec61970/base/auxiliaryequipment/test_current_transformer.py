@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import integers
-from zepben.evolve import CurrentTransformer, CurrentTransformerInfo
+from zepben.ewb import CurrentTransformer, CurrentTransformerInfo
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.auxiliaryequipment.test_sensor import sensor_kwargs, verify_sensor_constructor_default, \

@@ -5,7 +5,7 @@
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_line_parameter import PerLengthLineParameter
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_line_parameter import PerLengthLineParameter
 
 per_length_line_parameter_kwargs = identified_object_kwargs
 per_length_line_parameter_args = identified_object_args

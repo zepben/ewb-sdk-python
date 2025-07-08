@@ -5,10 +5,10 @@
 from types import MemberDescriptorType
 from typing import Optional, Any, Callable, TypeVar, Union, Type, Set
 
-from zepben.evolve import (IdentifiedObject, TIdentifiedObject, ObjectDifference, BaseService, CollectionDifference,
-                           Difference, ReferenceDifference, ValueDifference, IndexedDifference)
-from zepben.evolve.model.cim.iec61970.base.core.name_type import NameType
-from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions
+from zepben.ewb import (IdentifiedObject, TIdentifiedObject, ObjectDifference, BaseService, CollectionDifference,
+                        Difference, ReferenceDifference, ValueDifference, IndexedDifference)
+from zepben.ewb.model.cim.iec61970.base.core.name_type import NameType
+from zepben.ewb.services.network.network_service_comparator import NetworkServiceComparatorOptions
 
 TService = TypeVar("TService", bound=BaseService)
 C = TypeVar("C")

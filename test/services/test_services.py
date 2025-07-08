@@ -2,8 +2,8 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
-from zepben.evolve import NetworkService, DiagramService, CustomerService
-from zepben.evolve.services.services import Services
+from zepben.ewb import NetworkService, DiagramService, CustomerService
+from zepben.ewb.services.services import Services
 
 expected_ns = NetworkService()
 expected_ds = DiagramService()

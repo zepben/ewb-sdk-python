@@ -6,8 +6,8 @@ import logging
 import queue
 from contextlib import contextmanager
 
-from zepben.evolve import StepContext, StopCondition, QueueCondition, StepAction
-from zepben.evolve.services.network.tracing.traversal.debug_logging import DebugLoggingWrapper
+from zepben.ewb import StepContext, StopCondition, QueueCondition, StepAction
+from zepben.ewb.services.network.tracing.traversal.debug_logging import DebugLoggingWrapper
 
 
 def bool_generator():

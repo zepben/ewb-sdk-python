@@ -5,9 +5,9 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, text
-from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
-from zepben.evolve.model.cim.iec61968.common.street_detail import StreetDetail
-from zepben.evolve.model.cim.iec61968.common.town_detail import TownDetail
+from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
+from zepben.ewb.model.cim.iec61968.common.street_detail import StreetDetail
+from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 

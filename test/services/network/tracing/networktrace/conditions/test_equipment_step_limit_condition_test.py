@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from unittest.mock import MagicMock
 
-from zepben.evolve import NetworkTraceStep
-from zepben.evolve.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
+from zepben.ewb import NetworkTraceStep
+from zepben.ewb.services.network.tracing.networktrace.conditions.equipment_step_limit_condition import EquipmentStepLimitCondition
 
 
 def mock_nts(num_terminal_steps=0, num_equipment_steps=0):

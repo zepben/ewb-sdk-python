@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.extensions.iec61970.base.protection.ProtectionKind_pb2 import ProtectionKind as PBProtectionKind
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import ProtectionKind
+from zepben.ewb import ProtectionKind
 
 
 def test_protection_kind_enum():

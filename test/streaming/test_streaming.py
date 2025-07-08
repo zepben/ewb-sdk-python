@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import zepben.evolve.streaming as streaming
+import zepben.ewb.streaming as streaming
 import asyncio
 import grpc 
 

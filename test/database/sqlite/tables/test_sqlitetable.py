@@ -8,8 +8,8 @@ from typing import List
 
 from pytest import raises
 
-from zepben.evolve.database.sqlite.tables.column import Column, Nullable
-from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
+from zepben.ewb.database.sqlite.tables.column import Column, Nullable
+from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
 
 
 def test_create_column_set():

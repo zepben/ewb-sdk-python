@@ -10,10 +10,10 @@ import pytest
 
 from services.network.test_data.looping_network import create_looping_network
 from services.network.tracing.feeder.direction_logger import log_directions
-from zepben.evolve import ConductingEquipment, Tracing, NetworkStateOperators
-from zepben.evolve import downstream, NetworkTraceActionType
-from zepben.evolve.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
-from zepben.evolve.services.network.tracing.networktrace.actions.tree_node import TreeNode
+from zepben.ewb import ConductingEquipment, Tracing, NetworkStateOperators
+from zepben.ewb import downstream, NetworkTraceActionType
+from zepben.ewb.services.network.tracing.networktrace.actions.equipment_tree_builder import EquipmentTreeBuilder
+from zepben.ewb.services.network.tracing.networktrace.actions.tree_node import TreeNode
 
 
 @pytest.mark.asyncio

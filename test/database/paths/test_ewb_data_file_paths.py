@@ -9,7 +9,7 @@ from unittest.mock import Mock
 
 from _pytest.python_api import raises
 
-from zepben.evolve import EwbDataFilePaths, DatabaseType
+from zepben.ewb import EwbDataFilePaths, DatabaseType
 
 base_dir = Path("/not/real/path/")
 

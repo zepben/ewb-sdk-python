@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from typing import Optional
 
-from zepben.evolve import NetworkService, TestNetworkBuilder, AcLineSegment, Clamp, Terminal, ConductingEquipment, Cut
+from zepben.ewb import NetworkService, TestNetworkBuilder, AcLineSegment, Clamp, Terminal, ConductingEquipment, Cut
 
 
 class CutsAndClampsNetwork:
@@ -52,5 +52,3 @@ class CutsAndClampsNetwork:
                    )
 
         return builder
-
-

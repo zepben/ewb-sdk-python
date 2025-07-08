@@ -9,8 +9,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from services.network.tracing.networktrace.util import mock_nts_path, mock_nts, mock_ctx
-from zepben.evolve import ComputeData, NetworkTraceStep, ngen, NetworkStateOperators
-from zepben.evolve.services.network.tracing.networktrace.network_trace_queue_next import NetworkTraceQueueNext
+from zepben.ewb import ComputeData, NetworkTraceStep, ngen, NetworkStateOperators
+from zepben.ewb.services.network.tracing.networktrace.network_trace_queue_next import NetworkTraceQueueNext
 
 T = TypeVar('T')
 

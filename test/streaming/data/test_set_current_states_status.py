@@ -5,9 +5,9 @@
 
 from zepben.protobuf.ns.data.change_status_pb2 import StateEventFailure as PBStateEventFailure, StateEventInvalidMrid as PBStateEventInvalidMrid
 
-from zepben.evolve import BatchSuccessful, BatchFailure, StateEventInvalidMrid, StateEventFailure, \
+from zepben.ewb import BatchSuccessful, BatchFailure, StateEventInvalidMrid, StateEventFailure, \
     StateEventUnknownMrid, StateEventDuplicateMrid, StateEventUnsupportedPhasing, SetCurrentStatesStatus, BatchNotProcessed
-from zepben.evolve.streaming.data.set_current_states_status import StateEventUnsupportedMrid
+from zepben.ewb.streaming.data.set_current_states_status import StateEventUnsupportedMrid
 
 
 class TestSetCurrentStatesStatus:

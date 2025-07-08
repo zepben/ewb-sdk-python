@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.iec61970.base.diagramlayout.DiagramStyle_pb2 import DiagramStyle as PBDiagramStyle
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import DiagramStyle
+from zepben.ewb import DiagramStyle
 
 
 def test_diagram_style_enum():

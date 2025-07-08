@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats
-from zepben.evolve import Breaker, Substation, Terminal
-from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
+from zepben.ewb import Breaker, Substation, Terminal
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_protected_switch import verify_protected_switch_constructor_default, \

@@ -8,8 +8,8 @@ from cim.iec61970.base.core.test_connectivity_node_container import connectivity
     verify_connectivity_node_container_constructor_default, verify_connectivity_node_container_constructor_kwargs, \
     verify_connectivity_node_container_constructor_args, connectivity_node_container_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import EquipmentContainer, Equipment, LvFeeder, Substation
-from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
+from zepben.ewb import EquipmentContainer, Equipment, LvFeeder, Substation
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 
 equipment_container_kwargs = {
     **connectivity_node_container_kwargs,

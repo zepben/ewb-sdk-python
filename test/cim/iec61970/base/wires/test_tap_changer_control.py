@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import integers, floats
-from zepben.evolve import TapChangerControl
+from zepben.ewb import TapChangerControl
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, boolean_or_none
 from cim.iec61970.base.wires.test_regulating_control import regulating_control_kwargs, regulating_control_args, verify_regulating_control_constructor_default, \

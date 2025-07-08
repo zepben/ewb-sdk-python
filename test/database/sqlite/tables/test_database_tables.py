@@ -10,32 +10,32 @@ from unittest.mock import create_autospec
 from pytest import raises
 
 from util import import_submodules, all_subclasses
-from zepben.evolve import CustomerDatabaseTables, DiagramDatabaseTables, NetworkDatabaseTables
-from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
-from zepben.evolve.database.sqlite.tables.exceptions import MissingTableConfigException
-from zepben.evolve.database.sqlite.tables.sqlite_table import SqliteTable
+from zepben.ewb import CustomerDatabaseTables, DiagramDatabaseTables, NetworkDatabaseTables
+from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
+from zepben.ewb.database.sqlite.tables.exceptions import MissingTableConfigException
+from zepben.ewb.database.sqlite.tables.sqlite_table import SqliteTable
 
 
 def test_has_all_tables():
     """
-    This test detects if a Table class has been added under zepben.evolve.database.sqlite.tables however hasn't been added to
+    This test detects if a Table class has been added under zepben.ewb.database.sqlite.tables however hasn't been added to
     DatabaseTables
     """
-    _ = import_submodules('zepben.evolve.database.sqlite.tables')
-    all_final_tables = all_subclasses(SqliteTable, 'zepben.evolve.database.sqlite.tables')
+    _ = import_submodules('zepben.ewb.database.sqlite.tables')
+    all_final_tables = all_subclasses(SqliteTable, 'zepben.ewb.database.sqlite.tables')
 
     table_collections = [CustomerDatabaseTables(), DiagramDatabaseTables(), NetworkDatabaseTables()]
     used_tables = {type(it) for collection in table_collections for it in collection.tables}
 
     misplaced = used_tables.difference(all_final_tables)
     assert not misplaced, (
-        "Using tables that aren't defined under `zepben.evolve.database.sqlite.tables`: "
+        "Using tables that aren't defined under `zepben.ewb.database.sqlite.tables`: "
         f"{', '.join([it.__name__ for it in misplaced])}"
     )
 
     unused = all_final_tables.difference(used_tables)
     assert not unused, (
-        "Not using tables defined under `zepben.evolve.database.sqlite.tables`: "
+        "Not using tables defined under `zepben.ewb.database.sqlite.tables`: "
         f"{', '.join([it.__name__ for it in unused])}"
     )
 

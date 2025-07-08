@@ -6,7 +6,7 @@ from unittest.mock import call, patch
 
 import pytest
 
-from zepben.evolve import FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, ConductingEquipment, NetworkStateOperators
+from zepben.ewb import FindSwerEquipment, TestNetworkBuilder, PhaseCode, BaseVoltage, ConductingEquipment, NetworkStateOperators
 
 
 class TestFindSwerEquipment:

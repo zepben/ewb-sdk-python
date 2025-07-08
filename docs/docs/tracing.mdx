@@ -21,8 +21,7 @@ So, let's start at the absolute basic use case. "What is directly connected to t
 Obviously we provide a function to let you to find out. Let's see it in code:
 
 ```python
-from zepben.evolve import Junction
-from zepben.evolve.tracing import ConnectivityResult, connected_equipment
+from zepben.ewb import Junction, ConnectivityResult, connected_equipment
 
 switch: Breaker = network.get("aSwitch")
 connectivity: List<ConnectivityResult> = switch.connected_equipment(PhaseCode.ABCN)
@@ -38,8 +37,7 @@ Sometimes you want to be a bit more specific about your connectivity, such as "w
 equipment?". You can do this by using specific terminals:
 
 ```python
-from zepben.evolve import Breaker
-from zepben.evolve.tracing import ConnectivityResult, connected_terminals
+from zepben.ewb import Breaker, ConnectivityResult, connected_terminals
 
 switch: Breaker = network.get("aSwitch")
 connectivity: List<ConnectivityResult> = switch.connected_terminals(PhaseCode.ABCN)
@@ -90,8 +88,7 @@ identify the nearest circuit breakers to a piece of equipment, capturing all equ
 that with the following:
 
 ```python
-from zepben.evolve import NetworkService, AcLineSegment, Breaker, ConductingEquipment
-from zepben.evolve.tracing import connected_equipment_trace
+from zepben.ewb import NetworkService, AcLineSegment, Breaker, ConductingEquipment, connected_equipment_trace
 network = NetworkService()
 
 # Populate network service with your network
@@ -126,7 +123,7 @@ provide an easy way to instantiate them.
 
 #### Set Phases Trace
 
-`traces.set_phases()` returns a `zepben.evolve.tracing.phasing.SetPhases` instance. This provides a way to dynamically set phases at runtime based
+`traces.set_phases()` returns a `zepben.ewb.tracing.phasing.SetPhases` instance. This provides a way to dynamically set phases at runtime based
 on a network's energy sources and the nominal phase connectivity within the network.
 
 #### Phase Traces

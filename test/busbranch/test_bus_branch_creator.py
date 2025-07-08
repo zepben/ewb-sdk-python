@@ -6,10 +6,10 @@
 from dataclasses import field, dataclass
 from typing import Set, FrozenSet, Tuple, List, Iterable, Optional, Dict, TypeVar
 
-from zepben.evolve import Terminal, NetworkService, AcLineSegment, PowerTransformer, EnergySource, EnergyConsumer, ConductingEquipment, \
+from zepben.ewb import Terminal, NetworkService, AcLineSegment, PowerTransformer, EnergySource, EnergyConsumer, ConductingEquipment, \
     PowerElectronicsConnection, BusBranchNetworkCreator, \
     BusBranchNetworkCreationValidator, EquivalentBranch
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 BBN = TypeVar('BBN')
 TN = Tuple[int, FrozenSet[ConductingEquipment], FrozenSet[Terminal], FrozenSet[Terminal], NetworkService, BusBranchNetworkCreationValidator]

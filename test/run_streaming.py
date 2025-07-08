@@ -7,9 +7,9 @@ import platform
 from time import perf_counter, process_time
 from typing import Callable
 
-from zepben.evolve import connect_insecure
-from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
-from zepben.evolve.streaming.get.network_consumer import SyncNetworkConsumerClient
+from zepben.ewb import connect_insecure
+from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
+from zepben.ewb.streaming.get.network_consumer import SyncNetworkConsumerClient
 
 rpc_port = 9001
 indent_level = 0

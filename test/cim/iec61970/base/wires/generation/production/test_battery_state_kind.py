@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.iec61970.base.generation.production.BatteryStateKind_pb2 import BatteryStateKind as PBBatteryStateKind
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import BatteryStateKind
+from zepben.ewb import BatteryStateKind
 
 
 def test_battery_state_kind_eum():

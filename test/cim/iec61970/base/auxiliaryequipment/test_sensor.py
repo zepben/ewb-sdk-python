@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import lists, builds
-from zepben.evolve import Sensor, ProtectionRelayFunction
+from zepben.ewb import Sensor, ProtectionRelayFunction
 
 from cim.iec61970.base.auxiliaryequipment.test_auxiliary_equipment import auxiliary_equipment_kwargs, verify_auxiliary_equipment_constructor_default, \
     verify_auxiliary_equipment_constructor_kwargs, verify_auxiliary_equipment_constructor_args, auxiliary_equipment_args

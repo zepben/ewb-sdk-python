@@ -5,9 +5,9 @@
 from typing import TypeVar
 
 from hypothesis import given
-from zepben.evolve import IdentifiedObject, CustomerService, NameType, CustomerDatabaseTables, TableCustomerAgreementsPricingStructures, \
+from zepben.ewb import IdentifiedObject, CustomerService, NameType, CustomerDatabaseTables, TableCustomerAgreementsPricingStructures, \
     TablePricingStructuresTariffs
-from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
+from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator
 
 from cim.cim_creators import *
 from services.common.translator.base_test_translator import validate_service_translations

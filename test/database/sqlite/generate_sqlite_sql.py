@@ -7,7 +7,7 @@ Helpers to simply print the database SQL statements
 """
 from typing import Callable
 
-from zepben.evolve import SqliteTable, CustomerDatabaseTables, DiagramDatabaseTables, NetworkDatabaseTables
+from zepben.ewb import SqliteTable, CustomerDatabaseTables, DiagramDatabaseTables, NetworkDatabaseTables
 
 
 def print_database_create_statements(table: SqliteTable):

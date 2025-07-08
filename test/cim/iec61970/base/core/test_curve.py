@@ -5,7 +5,7 @@
 from typing import Callable
 
 from pytest import raises
-from zepben.evolve import Curve, CurveData
+from zepben.ewb import Curve, CurveData
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, identified_object_args, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args

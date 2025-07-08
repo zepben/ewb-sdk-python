@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from hypothesis import given
 from hypothesis.strategies import integers, floats
-from zepben.evolve import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
+from zepben.ewb import TransformerEndInfo, WindingConnection, TransformerStarImpedance, TransformerTankInfo, ResistanceReactance, NoLoadTest, \
     ShortCircuitTest, OpenCircuitTest
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER, FLOAT_MIN, FLOAT_MAX, sampled_winding_connection, create_transformer_tank_info, \

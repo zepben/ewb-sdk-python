@@ -8,7 +8,7 @@ from unittest.mock import Mock, create_autospec, call
 import pytest
 
 from capture_mock_sequence import CaptureMockSequence
-from zepben.evolve import NetworkDatabaseReader, NetworkService, MetadataCollectionReader, NetworkServiceReader, TableVersion, SetDirection, SetPhases, \
+from zepben.ewb import NetworkDatabaseReader, NetworkService, MetadataCollectionReader, NetworkServiceReader, TableVersion, SetDirection, SetPhases, \
     PhaseInferrer, AssignToFeeders, AssignToLvFeeders, Equipment, Feeder, EnergySource
 
 

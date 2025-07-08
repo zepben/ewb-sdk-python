@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from hypothesis.strategies import floats, booleans, integers, sampled_from
-from zepben.evolve import ShuntCompensator, PhaseShuntConnectionKind, ShuntCompensatorInfo
+from zepben.ewb import ShuntCompensator, PhaseShuntConnectionKind, ShuntCompensatorInfo
 
 from cim.cim_creators import MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.test_regulating_cond_eq import regulating_cond_eq_kwargs, verify_regulating_cond_eq_constructor_default, \

@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import text
-from zepben.evolve.model.cim.iec61968.common.town_detail import TownDetail
+from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 

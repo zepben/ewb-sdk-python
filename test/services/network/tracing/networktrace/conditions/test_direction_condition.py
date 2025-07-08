@@ -7,10 +7,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from zepben.evolve import NetworkStateOperators, FeederDirection, NetworkTraceStep, Terminal
-from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.ewb import NetworkStateOperators, FeederDirection, NetworkTraceStep, Terminal
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 from services.network.test_data.cuts_and_clamps_network import CutsAndClampsNetwork
-from zepben.evolve.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
+from zepben.ewb.services.network.tracing.networktrace.conditions.direction_condition import DirectionCondition
 
 
 class TestDirectionCondition:

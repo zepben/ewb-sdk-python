@@ -9,10 +9,10 @@ from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE
 from cim.iec61968.assets.test_asset_container import asset_container_kwargs, verify_asset_container_constructor_default, \
     verify_asset_container_constructor_kwargs, verify_asset_container_constructor_args, asset_container_args
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import Location
-from zepben.evolve.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
-from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
-from zepben.evolve.model.cim.iec61968.metering.end_device import EndDevice
+from zepben.ewb import Location
+from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
+from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
 
 end_device_kwargs = {
     **asset_container_kwargs,

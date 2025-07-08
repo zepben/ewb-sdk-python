@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from busbranch.data.creators import _create_per_length_sequence_impedance
 from network_fixtures import create_terminal, create_terminals
-from zepben.evolve import NetworkService, AcLineSegment, PowerTransformer, EquivalentBranch, EnergyConsumer, PowerElectronicsConnection
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
+from zepben.ewb import NetworkService, AcLineSegment, PowerTransformer, EquivalentBranch, EnergyConsumer, PowerElectronicsConnection
+from zepben.ewb.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
 
 
 def lv_equivalent_branch_network(has_equivalent_branch_impedance: bool) -> NetworkService:

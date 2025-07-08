@@ -6,7 +6,7 @@ import sys
 
 import pytest
 from hypothesis.strategies import lists, builds
-from zepben.evolve import ConductingEquipment, BaseVoltage, Terminal
+from zepben.ewb import ConductingEquipment, BaseVoltage, Terminal
 
 from cim.iec61970.base.core.test_equipment import equipment_kwargs, verify_equipment_constructor_default, \
     verify_equipment_constructor_kwargs, verify_equipment_constructor_args, equipment_args

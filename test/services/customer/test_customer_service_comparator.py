@@ -6,9 +6,9 @@ from typing import Type
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
 from services.common.test_base_service_comparator import TestBaseServiceComparator
-from zepben.evolve import CustomerService, Customer, CustomerKind, CustomerAgreement, PricingStructure, Tariff
-from zepben.evolve.model.cim.iec61968.common.agreement import Agreement
-from zepben.evolve.services.customer.customer_service_comparator import CustomerServiceComparator
+from zepben.ewb import CustomerService, Customer, CustomerKind, CustomerAgreement, PricingStructure, Tariff
+from zepben.ewb.model.cim.iec61968.common.agreement import Agreement
+from zepben.ewb.services.customer.customer_service_comparator import CustomerServiceComparator
 
 
 class TestCustomerServiceComparator(TestBaseServiceComparator):

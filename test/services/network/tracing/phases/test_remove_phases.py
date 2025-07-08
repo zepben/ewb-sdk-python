@@ -5,7 +5,7 @@
 import pytest
 
 from services.network.tracing.phases.util import connected_equipment_trace_with_logging, validate_phases_from_term_or_equip, get_t
-from zepben.evolve import TestNetworkBuilder, PhaseCode, EnergySource, RemovePhases, SinglePhaseKind as SPK, NetworkStateOperators
+from zepben.ewb import TestNetworkBuilder, PhaseCode, EnergySource, RemovePhases, SinglePhaseKind as SPK, NetworkStateOperators
 
 
 @pytest.fixture()

@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis.strategies import floats, sampled_from, booleans, lists, builds, text
-from zepben.evolve import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
+from zepben.ewb import ProtectionKind, PowerDirectionKind, ProtectedSwitch, ProtectionRelayFunction, RelayInfo, ProtectionRelayScheme, RelaySetting, Sensor, \
     UnitSymbol, unit_symbol_from_id
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, ALPHANUM, TEXT_MAX_SIZE, boolean_or_none

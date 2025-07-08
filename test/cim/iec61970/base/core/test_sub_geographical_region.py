@@ -4,9 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.evolve import Substation
-from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.ewb import Substation
+from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args, identified_object_args

@@ -5,7 +5,7 @@
 from datetime import datetime
 
 from hypothesis.strategies import datetimes
-from zepben.evolve.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
+from zepben.ewb.model.cim.iec61970.base.meas.measurement_value import MeasurementValue
 
 measurement_value_kwargs = {"time_stamp": datetimes()}
 measurement_value_args = [datetime(2021, 1, 1)]

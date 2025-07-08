@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats, one_of, none, booleans, integers, sampled_from, lists, builds
-from zepben.evolve import SynchronousMachine, SynchronousMachineKind, ReactiveCapabilityCurve
+from zepben.ewb import SynchronousMachine, SynchronousMachineKind, ReactiveCapabilityCurve
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.wires.test_rotating_machine import rotating_machine_kwargs, rotating_machine_args, \

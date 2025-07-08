@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, lists
-from zepben.evolve import ProtectionRelaySystem, ProtectionRelayFunction, ProtectionRelayScheme
+from zepben.ewb import ProtectionRelaySystem, ProtectionRelayFunction, ProtectionRelayScheme
 
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, identified_object_args, verify_identified_object_constructor_default, \
     verify_identified_object_constructor_kwargs, verify_identified_object_constructor_args

@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.iec61970.base.diagramlayout.OrientationKind_pb2 import OrientationKind as PBOrientationKind
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import OrientationKind
+from zepben.ewb import OrientationKind
 
 
 def test_orientation_kind_enum():

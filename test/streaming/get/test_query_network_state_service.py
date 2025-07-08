@@ -14,7 +14,7 @@ from zepben.protobuf.ns.network_state_requests_pb2 import GetCurrentStatesReques
 from zepben.protobuf.ns.network_state_responses_pb2 import GetCurrentStatesResponse, SetCurrentStatesResponse
 
 from util import grpc_aio_server
-from zepben.evolve import datetime_to_timestamp, SwitchStateEvent, SwitchAction, QueryNetworkStateService, PhaseCode, CurrentStateEventBatch, \
+from zepben.ewb import datetime_to_timestamp, SwitchStateEvent, SwitchAction, QueryNetworkStateService, PhaseCode, CurrentStateEventBatch, \
     SetCurrentStatesStatus, BatchNotProcessed, BatchSuccessful
 
 

@@ -25,20 +25,20 @@ from streaming.get.data.metadata import create_metadata, create_metadata_respons
 from streaming.get.grpcio_aio_testing.mock_async_channel import async_testing_channel
 from streaming.get.mock_server import MockServer, StreamGrpc, UnaryGrpc, stream_from_fixed, unary_from_fixed
 from streaming.get.pb_creators import network_identified_objects, ac_line_segment
-from zepben.evolve import NetworkConsumerClient, NetworkService, IdentifiedObject, AcLineSegment, Breaker, EnergySource, \
+from zepben.ewb import NetworkConsumerClient, NetworkService, IdentifiedObject, AcLineSegment, Breaker, EnergySource, \
     EnergySourcePhase, Junction, PowerTransformer, PowerTransformerEnd, ConnectivityNode, Feeder, Location, Substation, Terminal, EquipmentContainer, Equipment, \
     BaseService, OperationalRestriction, TransformerStarImpedance, Circuit, Loop, \
     UnsupportedOperationException, LvFeeder, TestNetworkBuilder, PerLengthPhaseImpedance, BatteryControl, \
     PanDemandResponseFunction, BatteryUnit, StaticVarCompensator, Pole
-from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
-from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
-from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-from zepben.evolve.services.network.network_state import NetworkState
-from zepben.evolve.streaming.get.included_energized_containers import IncludedEnergizedContainers
-from zepben.evolve.streaming.get.included_energizing_containers import IncludedEnergizingContainers
+from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.diagramlayout.diagram import Diagram
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.ewb.services.network.network_state import NetworkState
+from zepben.ewb.streaming.get.included_energized_containers import IncludedEnergizedContainers
+from zepben.ewb.streaming.get.included_energizing_containers import IncludedEnergizingContainers
 
 PBRequest = TypeVar('PBRequest')
 GrpcResponse = TypeVar('GrpcResponse')

@@ -4,8 +4,8 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import builds, floats
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
-from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
+from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_tap_changer import verify_tap_changer_constructor_default, \

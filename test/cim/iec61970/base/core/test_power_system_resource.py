@@ -5,7 +5,7 @@
 from hypothesis.strategies import builds, integers, lists
 
 from cim.private_collection_validator import validate_unordered_1234567890
-from zepben.evolve import PowerSystemResource, Location, PowerTransformerInfo, Asset
+from zepben.ewb import PowerSystemResource, Location, PowerTransformerInfo, Asset
 
 from cim.cim_creators import sampled_wire_info, MIN_32_BIT_INTEGER, MAX_32_BIT_INTEGER
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \

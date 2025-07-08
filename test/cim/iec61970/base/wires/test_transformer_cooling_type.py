@@ -6,7 +6,7 @@
 from zepben.protobuf.cim.extensions.iec61970.base.wires.TransformerCoolingType_pb2 import TransformerCoolingType as PBTransformerCoolingType
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import TransformerCoolingType
+from zepben.ewb import TransformerCoolingType
 
 
 def test_transformer_cooling_type_enum():

@@ -27,9 +27,9 @@ test_deps = [
 ]
 
 setup(
-    name="zepben.evolve",
-    version="0.49.0b1",
-    description="Python SDK for interacting with the Evolve platform",
+    name="zepben.ewb",
+    version="1.0.0b1",
+    description="Python SDK for interacting with the Energy Workbench platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/zepben/evolve-sdk-python",

@@ -5,7 +5,7 @@
 
 from cim.iec61970.base.core.test_conducting_equipment import conducting_equipment_kwargs, verify_conducting_equipment_constructor_default, \
     verify_conducting_equipment_constructor_kwargs, verify_conducting_equipment_constructor_args, conducting_equipment_args
-from zepben.evolve import EquivalentEquipment
+from zepben.ewb import EquivalentEquipment
 
 equivalent_equipment_kwargs = conducting_equipment_kwargs
 equivalent_equipment_args = conducting_equipment_args

@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.extensions.iec61970.base.wires.VectorGroup_pb2 import VectorGroup as PBVectorGroup
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import VectorGroup
+from zepben.ewb import VectorGroup
 
 
 def test_vector_group_enum():

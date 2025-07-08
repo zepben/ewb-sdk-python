@@ -14,10 +14,10 @@ from typing import TypeVar, Optional, Callable, Generic
 import pytest
 
 from database.sqlite.schema_utils import SchemaNetworks, assume_non_blank_street_address_details
-from zepben.evolve import MetadataCollection, IdentifiedObject, Location, BaseService, BaseServiceComparator
-from zepben.evolve.database.sqlite.common.base_database_reader import BaseDatabaseReader
-from zepben.evolve.database.sqlite.common.base_database_writer import BaseDatabaseWriter
-from zepben.evolve.database.sqlite.tables.table_version import TableVersion
+from zepben.ewb import MetadataCollection, IdentifiedObject, Location, BaseService, BaseServiceComparator
+from zepben.ewb.database.sqlite.common.base_database_reader import BaseDatabaseReader
+from zepben.ewb.database.sqlite.common.base_database_writer import BaseDatabaseWriter
+from zepben.ewb.database.sqlite.tables.table_version import TableVersion
 
 TService = TypeVar("TService", bound=BaseService)
 TWriter = TypeVar("TWriter", bound=BaseDatabaseWriter)

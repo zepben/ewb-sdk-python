@@ -4,9 +4,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import lists, builds
-from zepben.evolve import Location
-from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
-from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.ewb import Location
+from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
+from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
 from cim.cim_creators import create_position_point
 from cim.iec61970.base.core.test_identified_object import identified_object_kwargs, verify_identified_object_constructor_default, \

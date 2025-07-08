@@ -8,7 +8,7 @@ from hypothesis.strategies import floats, sampled_from
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_regulating_control import regulating_control_kwargs, regulating_control_args, verify_regulating_control_constructor_default, \
     verify_regulating_control_constructor_kwargs, verify_regulating_control_constructor_args
-from zepben.evolve import BatteryControl, BatteryControlMode
+from zepben.ewb import BatteryControl, BatteryControlMode
 
 battery_control_kwargs = {
     **regulating_control_kwargs,

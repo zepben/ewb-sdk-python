@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from hypothesis import given
 from hypothesis.strategies import floats, one_of, none
-from zepben.evolve import PetersenCoil
+from zepben.ewb import PetersenCoil
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
 from cim.iec61970.base.wires.test_earth_fault_compensator import earth_fault_compensator_kwargs, earth_fault_compensator_args, \

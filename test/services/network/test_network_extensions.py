@@ -6,10 +6,10 @@ from collections import namedtuple
 
 from pytest import fixture
 
-from zepben.evolve import NetworkService, BaseVoltage, Terminal, EnergySource, \
+from zepben.ewb import NetworkService, BaseVoltage, Terminal, EnergySource, \
     PowerTransformer, AcLineSegment, EnergyConsumer, PowerTransformerInfo, Location, \
     ConnectivityNode, Breaker
-from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
 
 NetworkCreator = namedtuple("TestNetworkCreator", ["net", "bv", "cn1", "cn2", "pt_info", "loc1", "loc2", "loc3"])
 

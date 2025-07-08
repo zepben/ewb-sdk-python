@@ -8,7 +8,7 @@ from cim.iec61970.base.wires.test_switch import verify_switch_constructor_defaul
     switch_kwargs, switch_args
 from hypothesis.strategies import builds
 
-from zepben.evolve import Fuse, ProtectionRelayFunction
+from zepben.ewb import Fuse, ProtectionRelayFunction
 
 fuse_kwargs = {
     **switch_kwargs,

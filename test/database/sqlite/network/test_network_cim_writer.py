@@ -6,7 +6,7 @@ from sqlite3 import Connection
 from unittest.mock import create_autospec
 
 from util import import_submodules, all_subclasses
-from zepben.evolve import TableEquipmentEquipmentContainers, PreparedStatement, NetworkDatabaseTables, NetworkCimWriter, EquipmentContainer, Site, Substation, \
+from zepben.ewb import TableEquipmentEquipmentContainers, PreparedStatement, NetworkDatabaseTables, NetworkCimWriter, EquipmentContainer, Site, Substation, \
     Circuit, Feeder, LvFeeder, Junction
 
 
@@ -23,8 +23,8 @@ def test_only_exports_equipment_for_expected_equipment_containers():
 
     writer = NetworkCimWriter(database_tables)
 
-    _ = import_submodules('zepben.evolve.model.cim')
-    all_equipment_container_classes = all_subclasses(EquipmentContainer, 'zepben.evolve.model.cim')
+    _ = import_submodules('zepben.ewb.model.cim')
+    all_equipment_container_classes = all_subclasses(EquipmentContainer, 'zepben.ewb.model.cim')
 
     should_export = [Site(mrid="site"), Substation(mrid="substation"), Circuit(mrid="circuit")]
     should_ignore = [Feeder(mrid="feeder"), LvFeeder(mrid="lv_feeder")]

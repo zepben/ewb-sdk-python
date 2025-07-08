@@ -9,7 +9,7 @@ from typing import Type, Tuple
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
 
 # noinspection PyProtectedMember
-from zepben.evolve.services.common.enum_mapper import EnumMapper
+from zepben.ewb.services.common.enum_mapper import EnumMapper
 
 
 def validate_enum(cim_enum: Type[Enum], pb_enum: EnumTypeWrapper):

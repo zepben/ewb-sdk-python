@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from unittest.mock import Mock
 
-from zepben.evolve import AuthTokenPlugin
+from zepben.ewb import AuthTokenPlugin
 
 
 def test_auth_token_plugin():

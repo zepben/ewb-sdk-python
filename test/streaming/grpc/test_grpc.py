@@ -4,7 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 from pytest import raises
 
-from zepben.evolve import GrpcResult
+from zepben.ewb import GrpcResult
 
 
 def test_value_works_if_valid():

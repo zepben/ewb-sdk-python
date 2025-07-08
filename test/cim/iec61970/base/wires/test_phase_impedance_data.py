@@ -5,10 +5,10 @@
 from hypothesis import given
 from hypothesis.strategies import floats, sampled_from
 from pytest import raises
-from zepben.evolve import SinglePhaseKind
+from zepben.ewb import SinglePhaseKind
 
 from cim.cim_creators import FLOAT_MIN, FLOAT_MAX
-from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
+from zepben.ewb.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
 
 phase_impedance_data_kwargs = {
     "from_phase": sampled_from(SinglePhaseKind),

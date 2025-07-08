@@ -5,9 +5,9 @@
 from traceback import print_tb, format_tb
 from typing import TypeVar, Type, Set
 
-from zepben.evolve import IdentifiedObject, BaseService, BaseServiceComparator, EquipmentContainer, OperationalRestriction, ConnectivityNode, TableVersion, \
+from zepben.ewb import IdentifiedObject, BaseService, BaseServiceComparator, EquipmentContainer, OperationalRestriction, ConnectivityNode, TableVersion, \
     TableMetadataDataSources, TableNameTypes, TableNames, SqliteTable
-from zepben.evolve.database.sqlite.common.base_database_tables import BaseDatabaseTables
+from zepben.ewb.database.sqlite.common.base_database_tables import BaseDatabaseTables
 from zepben.protobuf.cim.iec61970.base.core.IdentifiedObject_pb2 import IdentifiedObject as PBIdentifiedObject
 
 T = TypeVar("T", bound=IdentifiedObject)

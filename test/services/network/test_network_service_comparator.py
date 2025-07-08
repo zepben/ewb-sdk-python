@@ -9,7 +9,7 @@ import pytest
 
 from services.common.service_comparator_validator import ServiceComparatorValidator
 from services.common.test_base_service_comparator import TestBaseServiceComparator
-from zepben.evolve import NoLoadTest, OpenCircuitTest, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
+from zepben.ewb import NoLoadTest, OpenCircuitTest, PowerTransformerInfo, TransformerTankInfo, ShortCircuitTest, \
     TransformerEndInfo, TransformerStarImpedance, TransformerTest, WireInfo, WireMaterialKind, Asset, Location, AssetInfo, \
     AssetOrganisationRole, Pole, Streetlight, WindingConnection, Structure, Junction, OperationalRestriction, AuxiliaryEquipment, Terminal, BaseVoltage, \
     ConductingEquipment, \
@@ -28,40 +28,40 @@ from zepben.evolve import NoLoadTest, OpenCircuitTest, PowerTransformerInfo, Tra
     ProtectionRelaySystem, Ground, GroundDisconnector, SeriesCompensator, BatteryControl, BatteryControlMode, AssetFunction, PanDemandResponseFunction, \
     StaticVarCompensator, SVCControlMode, PerLengthPhaseImpedance, ReactiveCapabilityCurve, Curve, CurveData, \
     PhaseImpedanceData, EarthFaultCompensator, GroundingImpedance, PetersenCoil, RotatingMachine, SynchronousMachine, SynchronousMachineKind
-from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
-from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
-from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
-from zepben.evolve.model.cim.iec61968.assets.asset_container import AssetContainer
-from zepben.evolve.model.cim.iec61968.assets.asset_owner import AssetOwner
-from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
-from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
-from zepben.evolve.model.cim.iec61968.common.town_detail import TownDetail
-from zepben.evolve.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
-from zepben.evolve.model.cim.iec61968.metering.end_device import EndDevice
-from zepben.evolve.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
-from zepben.evolve.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
-from zepben.evolve.model.cim.iec61968.metering.meter import Meter
-from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
-from zepben.evolve.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
-from zepben.evolve.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
-from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.meas.accumulator import Accumulator
-from zepben.evolve.model.cim.iec61970.base.meas.analog import Analog
-from zepben.evolve.model.cim.iec61970.base.meas.discrete import Discrete
-from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
-from zepben.evolve.model.cim.iec61970.base.wires.conductor import Conductor
-from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
-from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_line_parameter import PerLengthLineParameter
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
-from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
-from zepben.evolve.model.cim.iec61970.base.wires.tap_changer import TapChanger
-from zepben.evolve.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
-from zepben.evolve.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
+from zepben.ewb.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
+from zepben.ewb.model.cim.iec61968.assetinfo.cable_info import CableInfo
+from zepben.ewb.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
+from zepben.ewb.model.cim.iec61968.assets.asset_container import AssetContainer
+from zepben.ewb.model.cim.iec61968.assets.asset_owner import AssetOwner
+from zepben.ewb.model.cim.iec61968.common.position_point import PositionPoint
+from zepben.ewb.model.cim.iec61968.common.street_address import StreetAddress
+from zepben.ewb.model.cim.iec61968.common.town_detail import TownDetail
+from zepben.ewb.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
+from zepben.ewb.model.cim.iec61968.metering.end_device import EndDevice
+from zepben.ewb.model.cim.iec61968.metering.end_device_function import EndDeviceFunction
+from zepben.ewb.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
+from zepben.ewb.model.cim.iec61968.metering.meter import Meter
+from zepben.ewb.model.cim.iec61968.metering.usage_point import UsagePoint
+from zepben.ewb.model.cim.iec61970.base.auxiliaryequipment.fault_indicator import FaultIndicator
+from zepben.ewb.model.cim.iec61970.base.core.ac_dc_terminal import AcDcTerminal
+from zepben.ewb.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
+from zepben.ewb.model.cim.iec61970.base.meas.accumulator import Accumulator
+from zepben.ewb.model.cim.iec61970.base.meas.analog import Analog
+from zepben.ewb.model.cim.iec61970.base.meas.discrete import Discrete
+from zepben.ewb.model.cim.iec61970.base.wires.clamp import Clamp
+from zepben.ewb.model.cim.iec61970.base.wires.conductor import Conductor
+from zepben.ewb.model.cim.iec61970.base.wires.cut import Cut
+from zepben.ewb.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
+from zepben.ewb.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_impedance import PerLengthImpedance
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_line_parameter import PerLengthLineParameter
+from zepben.ewb.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
+from zepben.ewb.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
+from zepben.ewb.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
+from zepben.ewb.model.cim.iec61970.base.wires.tap_changer import TapChanger
+from zepben.ewb.model.cim.iec61970.base.wires.transformer_end import TransformerEnd
+from zepben.ewb.services.network.network_service_comparator import NetworkServiceComparatorOptions, NetworkServiceComparator
 
 
 class TestNetworkServiceComparator(TestBaseServiceComparator):

@@ -5,7 +5,7 @@
 from zepben.protobuf.cim.iec61970.base.wires.PhaseShuntConnectionKind_pb2 import PhaseShuntConnectionKind as PBPhaseShuntConnectionKind
 
 from cim.enum_validator import validate_enum
-from zepben.evolve import PhaseShuntConnectionKind
+from zepben.ewb import PhaseShuntConnectionKind
 
 
 def test_phase_shunt_connection_kind_enum():

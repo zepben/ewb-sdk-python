@@ -7,8 +7,8 @@ from typing import Tuple
 
 import pytest
 from hypothesis.strategies import uuids, text, lists, builds
-from zepben.evolve import IdentifiedObject
-from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
+from zepben.ewb import IdentifiedObject
+from zepben.ewb.model.cim.iec61970.base.wires.junction import Junction
 #
 # NOTE: The following should be called in a chain through the inheritance hierarchy:
 #       1. verify...default verifies the constructor with no args.
@@ -17,7 +17,7 @@ from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
 # There is a lot of overlap here, but calling both maximises the constructor combinations we check and should catch any breaking changes to
 # constructors.
 #
-from zepben.evolve.model.cim.iec61970.base.core.name_type import Name, NameType
+from zepben.ewb.model.cim.iec61970.base.core.name_type import Name, NameType
 
 from cim.cim_creators import ALPHANUM, TEXT_MAX_SIZE, create_name_type
 

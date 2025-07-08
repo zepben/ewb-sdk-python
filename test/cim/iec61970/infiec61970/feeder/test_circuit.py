@@ -5,7 +5,7 @@
 
 from hypothesis import given
 from hypothesis.strategies import builds, lists
-from zepben.evolve import Circuit, Loop, Terminal, Substation
+from zepben.ewb import Circuit, Loop, Terminal, Substation
 
 from cim.iec61970.base.wires.test_line import verify_line_constructor_default, verify_line_constructor_kwargs, verify_line_constructor_args, line_kwargs, \
     line_args

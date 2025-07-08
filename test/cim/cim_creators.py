@@ -2,6 +2,7 @@
 #  This Source Code Form is subject to the terms of the Mozilla Public
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 __all__ = ['create_cable_info', 'create_no_load_test', 'create_open_circuit_test', 'create_overhead_wire_info', 'create_power_transformer_info',
            'create_short_circuit_test', 'create_series_compensator', 'create_shunt_compensator_info', 'create_switch_info', 'create_transformer_end_info',
            'create_transformer_tank_info', 'create_transformer_test', 'create_wire_info', 'sampled_wire_material_kind', 'create_asset', 'create_asset_info',
@@ -46,50 +47,12 @@ from random import choice
 
 # @formatter:off
 
-# This must be above hypothesis.strategies to avoid conflicting import with zepben.evolve.util.none
-from zepben.evolve import *
+# This must be above hypothesis.strategies to avoid conflicting import with zepben.ewb.util.none
+from zepben.ewb import *
 
 from hypothesis.strategies import builds, text, integers, sampled_from, lists, floats, booleans, uuids, datetimes, one_of, none
 
 # @formatter:on
-
-from zepben.evolve.model.cim.extensions.iec61970.base.core.site import Site
-from zepben.evolve.model.cim.extensions.iec61970.base.wires.transformer_end_rated_s import TransformerEndRatedS
-from zepben.evolve.model.cim.iec61968.assetinfo.cable_info import CableInfo
-from zepben.evolve.model.cim.iec61968.assetinfo.overhead_wire_info import OverheadWireInfo
-from zepben.evolve.model.cim.iec61968.common.position_point import PositionPoint
-from zepben.evolve.model.cim.iec61968.common.street_address import StreetAddress
-from zepben.evolve.model.cim.iec61968.common.street_detail import StreetDetail
-from zepben.evolve.model.cim.iec61968.common.town_detail import TownDetail
-from zepben.evolve.model.cim.iec61968.infiec61968.infassets.streetlight_lamp_kind import StreetlightLampKind
-from zepben.evolve.model.cim.iec61968.metering.end_device_function_kind import EndDeviceFunctionKind
-from zepben.evolve.model.cim.iec61968.metering.meter import Meter
-from zepben.evolve.model.cim.iec61968.metering.usage_point import UsagePoint
-from zepben.evolve.model.cim.iec61970.base.core.feeder import Feeder
-from zepben.evolve.model.cim.iec61970.base.core.geographical_region import GeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.core.sub_geographical_region import SubGeographicalRegion
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram import Diagram
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object import DiagramObject
-from zepben.evolve.model.cim.iec61970.base.diagramlayout.diagram_object_point import DiagramObjectPoint
-from zepben.evolve.model.cim.iec61970.base.meas.accumulator import Accumulator
-from zepben.evolve.model.cim.iec61970.base.meas.accumulator_value import AccumulatorValue
-from zepben.evolve.model.cim.iec61970.base.meas.analog import Analog
-from zepben.evolve.model.cim.iec61970.base.meas.analog_value import AnalogValue
-from zepben.evolve.model.cim.iec61970.base.meas.discrete import Discrete
-from zepben.evolve.model.cim.iec61970.base.meas.discrete_value import DiscreteValue
-from zepben.evolve.model.cim.iec61970.base.wires.busbar_section import BusbarSection
-from zepben.evolve.model.cim.iec61970.base.wires.clamp import Clamp
-from zepben.evolve.model.cim.iec61970.base.wires.cut import Cut
-from zepben.evolve.model.cim.iec61970.base.wires.energy_consumer_phase import EnergyConsumerPhase
-from zepben.evolve.model.cim.iec61970.base.wires.junction import Junction
-from zepben.evolve.model.cim.iec61970.base.wires.linear_shunt_compensator import LinearShuntCompensator
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_phase_impedance import PerLengthPhaseImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.per_length_sequence_impedance import PerLengthSequenceImpedance
-from zepben.evolve.model.cim.iec61970.base.wires.phase_impedance_data import PhaseImpedanceData
-from zepben.evolve.model.cim.iec61970.base.wires.power_electronics_connection_phase import PowerElectronicsConnectionPhase
-from zepben.evolve.model.cim.iec61970.base.wires.power_transformer_end import PowerTransformerEnd
-from zepben.evolve.model.cim.iec61970.base.wires.ratio_tap_changer import RatioTapChanger
-
 
 # WARNING!! # THIS IS A WORK IN PROGRESS AND MANY FUNCTIONS ARE LIKELY BROKEN
 

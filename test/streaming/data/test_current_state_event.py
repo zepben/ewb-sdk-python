@@ -11,7 +11,7 @@ from zepben.protobuf.ns.data.change_events_pb2 import CurrentStateEvent as PBCur
     AddCutEvent as PBAddCutEvent, RemoveCutEvent as PBRemoveCutEvent, AddJumperEvent as PBAddJumperEvent, RemoveJumperEvent as PBRemoveJumperEvent, \
     SwitchAction as PBSwitchAction, JumperConnection as PBJumperConnection
 
-from zepben.evolve import PhaseCode, datetime_to_timestamp, CurrentStateEvent, SwitchStateEvent, SwitchAction, AddCutEvent, RemoveCutEvent, AddJumperEvent, \
+from zepben.ewb import PhaseCode, datetime_to_timestamp, CurrentStateEvent, SwitchStateEvent, SwitchAction, AddCutEvent, RemoveCutEvent, AddJumperEvent, \
     RemoveJumperEvent
 
 
