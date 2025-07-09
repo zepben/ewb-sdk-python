@@ -70,6 +70,8 @@ class BaseFeedersInternal:
     def _associate_equipment_with_containers(self, equipment_containers: Iterable[EquipmentContainer], equipment: Iterable[Equipment]):
         for feeder in equipment_containers:
             for it in equipment:
+                #todo remove this and fix the test that is using PatchedNetworkTraceStepPath (removing it). Error is that the feeder test doesn't have a head
+                # equipment, and the trace validation throws an error.
                 if it is not None:
                     self.network_state_operators.associate_equipment_and_container(it, feeder)
 
