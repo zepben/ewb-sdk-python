@@ -1,0 +1,60 @@
+---
+id: query-network-state-client
+title: Query Network State Client
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+The `QueryNetworkStateClient` will allow you to interact with a server running the `QueryNetworkStateService`. It provides an object-oriented
+wrapper for the gRPC library, with the ability to retrieve information about the state of the network. This is done with the following 3 steps:
+
+1. Create a gRPC connection to the server.
+2. Create an instance of the `QueryNetworkStateClient` using your gRPC connection.
+3. Use your `QueryNetworkStateClient` to retrieve the state of the network.
+4. Use your `QueryNetworkStateClient` to report the status of applying the state of the network.
+
+## Creating a gRPC channel
+
+The channel gRPC channel can be directly from the gRPC library, or using our `GrpcChannelBuilder` helper. At its most basic, this can be achieved with:
+
+```python
+from zepben.evolve import GrpcChannelBuilder
+
+channel = GrpcChannelBuilder().for_address(host, port).build()
+```
+
+For more in depth options for using a gRPC channel, see the [gRPC documentation](https://grpc.io/docs/languages/), or look up a tutorial.
+
+## Using a gRPC channel with your client
+
+Using your gRPC channel with the `QueryNetworkStateClient` is as simple as passing it to the constructor.
+
+```python
+from zepben.evolve import QueryNetworkStateClient
+
+client = QueryNetworkStateClient(channel)
+```
+
+## Using your client to query the network state
+
+Now that you have a client, you can use it to query the state of the network on the connected server.
+
+### Querying current network state
+
+The current state of the network between two date/times can be retrieved using the `get_current_states` function on the `QueryNetworkStateClient`.
+
+```python
+from datetime import datetime, timedelta
+
+async for events in client.get_current_states(1, datetime.now() - timedelta(days=1), datetime.now()):
+    # process the list of events here.
+```
+
+### Sending current network state statuses
+
+When applying the current state of the network, you should send a status response to report how the update went.
+
+```python
+client.report_batch_status(BatchSuccessful(1))
+```

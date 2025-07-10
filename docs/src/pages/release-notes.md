@@ -2,6 +2,7 @@
 
 | Version          | Released            |
 |------------------|---------------------|
+|[0.48.0](#v0480)| `10 July 2025` |
 |[0.47.1](#v0471)| `13 May 2025` |
 |[0.47.0](#v0470)| `08 May 2025` |
 |[0.46.0](#v0460)| `24 April 2025` |
@@ -56,6 +57,71 @@
 
 NOTE: This library is not yet stable, and breaking changes should be expected until
 a 1.0.0 release.
+
+---
+
+## [0.48.0]
+
+### Breaking Changes
+* Updated to new Tracing API. All old traces will need to be re-written with the new API.
+* `AcLineSegment` supports adding a maximum of 2 terminals. Mid-span terminals are no longer supported and models should migrate to using `Clamp`.
+* `Clamp` supports only adding a single terminal.
+* `FeederDirectionStateOperations` have been reworked to take `NetworkStateOperators` as a parameter.
+* `RemoveDirection` has been removed. It did not work reliably with dual fed networks with loops. You now need to clear direction using the new `ClearDirection`
+  and reapply directions where appropriate using `SetDirection`.
+* `Cut` supports adding a maximum of 2 terminals.
+* `NetworkTraceTracker` now uses a `set` to track visited objects, if you were using unhashable objects this will need to be addressed.
+* Added a new `debug_logging` and `name` parameters to the constructor of the following traces. The helper functions in `Tracing` also have these parameters,
+  which defaults to `None` and `network_trace`, meaning anyone using these wrappers will be unaffected by the change:
+  * `AssignToFeeders`
+  * `AssignToLvFeeders`
+  * `ClearDirection`
+  * `FindSwerEquipment`
+  * `PhaseInferrer`
+  * `RemovePhases`
+  * `SetDirection`
+  * `SetPhases`
+* `NetworkStateOperators` has a new abstract `description`. If you are creating custom operators you will need to add it.
+* `StepAction` will now raise an exception if `apply` is overridden. override `_apply` instead, or pass the function to `__init__`
+
+### New Features
+* Added `ClearDirection` that clears feeder directions.
+* You can now pass a logger to all `Tracing` methods and `TestNetworkBuilder.build` to enable debug logging for the traces it runs. The debug logging will
+  include the results of all queue and stop condition checks, and each item that is stepped on.
+
+### Enhancements
+* Tracing models with `Cut` and `Clamp` are now supported via the new tracing API.
+* Added support to `TestNetworkBuilder` for:
+  * `with_clamp` - Adds a clamp to the previously added `AcLineSegment`
+  * `with_cut` - Adds a cut to the previously added `AcLineSegment`
+  * `connect_to` - Connects the previously added item, rather than having to specify it again in `connect`.
+  * You can now add sites to the `TestNetworkBuilder` via `addSite`.
+  * You can now add busbar sections natively with `from_busbar_section` and `to_busbar_section`
+  * The prefix for generated mRIDs for "other" equipment can be specified with the `default_mrid_prefix` argument in `from_other` and `to_other`.
+* When processing feeder assignments, all LV feeders belonging to a dist substation site will now be considered energized when the site is energized by a
+  feeder.
+* `NetworkTrace` now supports starting from a known `NetworkTraceStep.Path`. This allows you to force a trace to start in a particular direction, or to continue
+  a follow-up trace from a detected stop point.
+* `Traversal.is_stopping`/`Traversal.is_not_stopping` now accept `StepAction` and any child classes, including those subclassing `StepActionWithContextValue`
+
+### Fixes
+* When finding `LvFeeders` in the `Site` we will now exclude `LvFeeders` that start with an open `Switch`
+* `AssignToFeeder` and `AssignToLvFeeder` will no longer trace from start terminals that belong to open switches
+* The follow fixes were added to Traversal and NetworkTrace:
+  * `can_stop_on_start_item` now works for branching traversals.
+  * Traversal start items are added to the queue before traversal starts, so that the start items honour the queue type order.
+  * Stop conditions on the `NetworkTrace` now are checked based on a step type, like `QueueCondition` does, rather than by checking `can_action_item`.
+  * `Cut` and `Clamp` are now correctly supported in `SetDirection` and `DirectionCondition`.
+  * `NetworkTrace` now handles starting on `Cut` , `Clamp`, and `AcLineSegment` and their terminals in a explicit / sensible way.
+  * `NetworkTracePathProvider` now correctly handles next paths when starting on a `Clamp` terminal.
+* `NetworkTrace`/`Traversal` now correctly respects `can_stop_on_start_item` when providing multiple start items.
+* `AssignToFeeders`/`AssignToLvFeeders` now finds back-fed equipment correctly
+* `AssignToFeeders` and `AssignToLvFeeders` will now associate `PowerElectronicUnits` with their `powerElectronicsConnection` `Feeder`/`LvFeeder`.
+* Phases are now correctly assigned to the LV side of an LV2 transformer that is in parallel with a previously energised LV1 transformer.
+* Added missing default network state operators (NORMAL) if you are calling `SetDirection.run` directly.
+
+### Notes
+* None.
 
 ---
 
