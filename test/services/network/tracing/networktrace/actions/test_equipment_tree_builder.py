@@ -54,9 +54,9 @@ async def test_downstream_tree():
     root = list(tree_builder.roots)[0]
 
     assert root is not None
-    _verify_tree_asset(root, n["j1"], None, [n["ac1"], n["ac3"]])
+    _verify_tree_asset(root, n["j1"], None, [n["ac3"], n["ac1"]])
 
-    test_node = root.children[0]
+    test_node = root.children[1]
     _verify_tree_asset(test_node, n["ac1"], n["j1"], [n["j2"]])
 
     test_node = test_node.children[0]
@@ -74,7 +74,7 @@ async def test_downstream_tree():
     test_node = next(iter(test_node.children))
     _verify_tree_asset(test_node, n["j6"], n["ac4"], [])
 
-    test_node = list(root.children)[1]
+    test_node = list(root.children)[0]
     _verify_tree_asset(test_node, n["ac3"], n["j1"], [n["j4"]])
 
     test_node = next(iter(test_node.children))

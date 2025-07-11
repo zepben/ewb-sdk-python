@@ -3,7 +3,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-from typing import List, TypeVar, Generic
+from typing import List, TypeVar, Generic, Set
 
 from zepben.evolve import IdentifiedObject
 
@@ -19,7 +19,7 @@ class TreeNode(Generic[T]):
     def __init__(self, identified_object: IdentifiedObject, parent=None):
         self.identified_object = identified_object
         self._parent: TreeNode = parent
-        self._children: List[TreeNode] = []
+        self._children: Set[TreeNode] = set()
 
     @property
     def parent(self) -> 'TreeNode[T]':
@@ -30,7 +30,7 @@ class TreeNode(Generic[T]):
         return list(self._children)
 
     def add_child(self, child: 'TreeNode'):
-        self._children.append(child)
+        self._children.add(child)
 
     def __str__(self):
         return f"{{object: {self.identified_object}, parent: {self.parent or ''}, num children: {len(self.children)}}}"
