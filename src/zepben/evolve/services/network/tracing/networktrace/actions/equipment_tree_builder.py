@@ -35,6 +35,7 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
     """
 
     _roots: dict[ConductingEquipment, EquipmentTreeNode] = {}
+    leaves: dict[str, EquipmentTreeNode] = {}
 
     def __init__(self):
         super().__init__(key=str(uuid.uuid4()))
@@ -66,6 +67,7 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
         current_node: TreeNode = self.get_context_value(context)
         if current_node.parent:
             current_node.parent.add_child(current_node)
+        self.leaves[current_node.identified_object.mrid] = current_node
 
     def clear(self):
         self._roots.clear()
