@@ -31,7 +31,7 @@ test_deps = [
 
 setup(
     name="zepben.ewb",
-    version="1.0.0b1",
+    version="1.0.0b2",
     description="Python SDK for interacting with the Energy Workbench platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
