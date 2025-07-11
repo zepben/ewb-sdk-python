@@ -17,6 +17,8 @@
 
 ## [0.48.0] - 2025-07-10
 ### Breaking Changes
+* Renamed the package to `zepben.ewb`. You will need to update all your imports `zepben.evolve.*` -> `zepben.ewb.*`. This also updates the pypi artifact to
+  `zepben.ewb`.
 * Updated to new Tracing API. All old traces will need to be re-written with the new API.
 * `AcLineSegment` supports adding a maximum of 2 terminals. Mid-span terminals are no longer supported and models should migrate to using `Clamp`.
 * `Clamp` supports only adding a single terminal.
