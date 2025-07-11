@@ -26,7 +26,7 @@ current state events that occurred between those date/times (inclusive)
 from datetime import datetime
 from typing import AsyncGenerator, Iterable
 
-from zepben.evolve import CurrentStateEventBatch
+from zepben.ewb import CurrentStateEventBatch
 
 
 async def on_get_current_states(from_datetime: datetime, to_datetime: datetime) -> AsyncGenerator[CurrentStateEventBatch, None]:
@@ -41,7 +41,7 @@ The `onCurrentStatesStatus` callback is triggered for each status response sent 
 returned from `onGetCurrentStates`.
 
 ```python
-from zepben.evolve import SetCurrentStatesStatus
+from zepben.ewb import SetCurrentStatesStatus
 
 
 def on_current_states_status(event_status: SetCurrentStatesStatus):
@@ -96,7 +96,7 @@ from typing import AsyncGenerator, Iterable
 import grpc
 from zepben.protobuf.ns.network_state_pb2_grpc import add_QueryNetworkStateServiceServicer_to_server
 
-from zepben.evolve import CurrentStateEventBatch, QueryNetworkStateService, SetCurrentStatesStatus
+from zepben.ewb import CurrentStateEventBatch, QueryNetworkStateService, SetCurrentStatesStatus
 
 class QueryNetworkStateServiceImpl:
 

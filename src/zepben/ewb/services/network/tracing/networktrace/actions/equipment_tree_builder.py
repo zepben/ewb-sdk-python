@@ -25,7 +25,7 @@ class EquipmentTreeBuilder(StepActionWithContextValue):
     
     eg:
 
-    >>> from zepben.evolve import Tracing, NetworkStateOperators
+    >>> from zepben.ewb import Tracing, NetworkStateOperators
     >>>
     >>> tree_builder = EquipmentTreeBuilder()
     >>> state_operators = NetworkStateOperators.NORMAL

@@ -11,7 +11,7 @@ The Python Evolve SDK contains everything necessary to communicate with a [Zepbe
 # Installation #
 
 ```
-pip install zepben.evolve
+pip install zepben.ewb
 ```
 
 # Building #

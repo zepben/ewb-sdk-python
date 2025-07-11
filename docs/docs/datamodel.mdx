@@ -40,7 +40,7 @@ In CIM all these things are a subtype of
 Let's see how we create them:
 
 ```python
-from zepben.evolve import EnergySource, AcLineSegment, Breaker
+from zepben.ewb import EnergySource, AcLineSegment, Breaker
 
 # Create the energy source. Providing no ID will generate a UUID.
 source = EnergySource()
@@ -66,7 +66,7 @@ Where the back dots represent the terminals and the black diamonds represent con
 Now, lets redo the above code sample this time also creating connectivity between the objects.
 
 ```python
-from zepben.evolve import EnergySource, AcLineSegment, Terminal, Breaker, ConnectivityNode
+from zepben.ewb import EnergySource, AcLineSegment, Terminal, Breaker, ConnectivityNode
 
 # Create the energy source
 source = EnergySource()
@@ -121,7 +121,7 @@ to tell if the network is currently in the normal state or not. This can be impo
 analytics you may be running when using the model.
 
 ```python
-from zepben.evolve import Breaker
+from zepben.ewb import Breaker
 
 # Example of setting normal and current switch states
 switch = Breaker()
@@ -142,7 +142,7 @@ There are a number of helpful functions for tracing phases based on connectivity
 :::
 
 ```python
-from zepben.evolve import Terminal, PhaseCode
+from zepben.ewb import Terminal, PhaseCode
 # Example of setting nominal phases on a terminal
 Terminal terminal = Terminal(phases=PhaseCode.ABC)
 ```
@@ -215,7 +215,7 @@ The following example shows how you can build a network hierarchy and assign equ
 containers.
 
 ```python
-from zepben.evolve import GeographicalRegion, SubGeographicalRegion, PowerTransformer, Feeder, Breaker
+from zepben.ewb import GeographicalRegion, SubGeographicalRegion, PowerTransformer, Feeder, Breaker
 
 region = GeographicalRegion()
 sub_region = SubGeographicalRegion(geographical_region=region)

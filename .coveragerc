@@ -1,5 +1,5 @@
 [run]
-source = zepben.evolve
+source = zepben.ewb
 
 [paths]
 source = src/

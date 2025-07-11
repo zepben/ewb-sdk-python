@@ -15,7 +15,7 @@ failsafe.
 Here is a contrived example of such a system modelled using the Evolve SDK:
 
 ```python
-from zepben.evolve import Breaker, CurrentTransformer, CurrentRelay, RelaySetting, UnitSymbol, ProtectionRelayScheme, ProtectionRelaySystem
+from zepben.ewb import Breaker, CurrentTransformer, CurrentRelay, RelaySetting, UnitSymbol, ProtectionRelayScheme, ProtectionRelaySystem
 
 
 def main():
@@ -90,7 +90,7 @@ For brevity, this example excludes modelling of connectivity between the sensors
 To aid in modelling protection systems, our network data model also supports explicit modelling of grounds and ground disconnectors:
 
 ```python
-from zepben.evolve import NetworkService, Terminal, Ground, GroundDisconnector, Junction
+from zepben.ewb import NetworkService, Terminal, Ground, GroundDisconnector, Junction
 
 
 def main():
@@ -121,7 +121,7 @@ def main():
 The Evolve SDK also supports modelling series compensators, which are series capacitors and reactors or an AC transmission line without charging susceptance.
 
 ```python
-from zepben.evolve import NetworkService, Terminal, AcLineSegment, SeriesCompensator
+from zepben.ewb import NetworkService, Terminal, AcLineSegment, SeriesCompensator
 
 
 def main():

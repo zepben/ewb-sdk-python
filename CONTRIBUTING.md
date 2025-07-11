@@ -32,7 +32,7 @@ python -m pytest
 You can generate the [coverage report](htmlcov/index.html) using the following options:
 
 ```
- pytest --cov=zepben.evolve --cov-report=html --cov-branch
+ pytest --cov=zepben.ewb --cov-report=html --cov-branch
  ```
 
 If you need to debug a test, you will need to annotate the test with the following
@@ -96,13 +96,13 @@ to prevent the test from timing out while you step through the code:
 1. Update [```__init__.py```](src/zepben/ewb/__init__.py) to import every new public name (classes, functions, constants, extension methods):
 
 
-* ```from zepben.evolve...<new_module_name> import *```
+* ```from zepben.ewb...<new_module_name> import *```
 
 
 1. Testing:
 
 
-* Import public names via ```from zepben.evolve import <name>``` when writing/updating tests. This ensures that
+* Import public names via ```from zepben.ewb import <name>``` when writing/updating tests. This ensures that
   [```__init__.py```](src/zepben/ewb/__init__.py) was updated correctly.
 * Test for model classes.
 * Add new classes to corresponding service translator test. [```test/services/.../translator```](test/services)

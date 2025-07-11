@@ -324,7 +324,7 @@ class NetworkTrace(Traversal[NetworkTraceStep[T], 'NetworkTrace[T]'], Generic[T]
 
         .. code-block::
 
-            from zepben.evolve import stop_at_open
+            from zepben.ewb import stop_at_open
             NetworkTrace().add_condition(stop_at_open())
         """
 

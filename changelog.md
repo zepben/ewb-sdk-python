@@ -73,15 +73,15 @@
 * `NetworkConsumerClient` and `SyncNetworkConsumerClient` no longer use the protobuf `IncludedEnergizedContainers`, `IncludedEnergizingContainers` and
   `NetworkState` enums directly, it now uses SDK versions of these enums. To use these enums you will need to update your imports, and use the simplified
   versions of the enum values:
-  * `IncludedEnergizedContainers` from package `com.zepben.evolve.streaming.get`.
+  * `IncludedEnergizedContainers` from package `zepben.ewb.streaming.get`.
     * `EXCLUDE_ENERGIZED_CONTAINERS` -> `NONE`.
     * `INCLUDE_ENERGIZED_FEEDERS` -> `FEEDERS`.
     * `INCLUDE_ENERGIZED_LV_FEEDERS` -> `LV_FEEDERS`.
-  * `IncludedEnergizingContainers` from package `com.zepben.evolve.streaming.get`.
+  * `IncludedEnergizingContainers` from package `zepben.ewb.streaming.get`.
     * `EXCLUDE_ENERGIZING_CONTAINERS` -> `NONE`.
     * `INCLUDE_ENERGIZING_FEEDERS` -> `FEEDERS`.
     * `INCLUDE_ENERGIZING_SUBSTATIONS` -> `SUBSTATIONS`.
-  * `NetworkState` from package `com.zepben.evolve.services.network`.
+  * `NetworkState` from package `zepben.ewb.services.network`.
     * `ALL_NETWORK_STATE` -> `ALL`.
     * `NORMAL_NETWORK_STATE` -> `NORMAL`.
     * `CURRENT_NETWORK_STATE` -> `CURRENT`.
