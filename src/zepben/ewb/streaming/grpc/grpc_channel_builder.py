@@ -10,7 +10,7 @@ from typing import Optional, List, Tuple, Any, Dict
 
 import grpc
 from grpc._channel import _InactiveRpcError
-from zepben.auth import ZepbenTokenFetcher
+from zepben.ewb.auth import ZepbenTokenFetcher
 from zepben.protobuf.cc.cc_pb2_grpc import CustomerConsumerStub
 from zepben.protobuf.connection.connection_requests_pb2 import CheckConnectionRequest
 from zepben.protobuf.dc.dc_pb2_grpc import DiagramConsumerStub

@@ -6,7 +6,7 @@
 __all__ = ["AuthTokenPlugin"]
 
 import grpc
-from zepben.auth import ZepbenTokenFetcher
+from zepben.ewb.auth import ZepbenTokenFetcher
 
 _AUTH_HEADER_KEY = 'authorization'
 

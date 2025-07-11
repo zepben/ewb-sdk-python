@@ -14,7 +14,7 @@ from zepben.ewb.dataclassy import dataclass
 from grpc import StatusCode, insecure_channel
 from grpc._channel import _InactiveRpcError, _RPCState
 from grpc._cython.cygrpc import OperationType
-from zepben.auth import ZepbenTokenFetcher
+from zepben.ewb.auth import ZepbenTokenFetcher
 
 from zepben.ewb import GrpcChannelBuilder, GrpcConnectionException, GrpcClient
 

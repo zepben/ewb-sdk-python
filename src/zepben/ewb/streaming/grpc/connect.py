@@ -8,7 +8,7 @@ __all__ = ["connect_tls", "connect_insecure", "connect_with_password", "connect_
 from typing import Optional, Union
 
 import grpc
-from zepben.auth import ZepbenTokenFetcher, create_token_fetcher, create_token_fetcher_managed_identity
+from zepben.ewb.auth import ZepbenTokenFetcher, create_token_fetcher, create_token_fetcher_managed_identity
 
 from zepben.ewb import GrpcChannelBuilder
 

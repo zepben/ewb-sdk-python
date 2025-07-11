@@ -129,7 +129,8 @@
     * `ALL_NETWORK_STATE` -> `ALL`.
     * `NORMAL_NETWORK_STATE` -> `NORMAL`.
     * `CURRENT_NETWORK_STATE` -> `CURRENT`.
-* The `zepben.auth` dependency has been incorporated into the SDK with the following package changes:
+* The `zepben.auth` dependency has been incorporated into the SDK with the following package change:
+  * `zepben.auth` -> `zepben.ewb.auth`. You can also import these directly from `zepben.ewb`.
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.
