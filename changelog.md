@@ -1,5 +1,5 @@
 # Zepben Python SDK
-## [0.49.0] - UNRELEASED
+## [1.0.0] - UNRELEASED
 ### Breaking Changes
 * None.
 
@@ -129,6 +129,7 @@
     * `ALL_NETWORK_STATE` -> `ALL`.
     * `NORMAL_NETWORK_STATE` -> `NORMAL`.
     * `CURRENT_NETWORK_STATE` -> `CURRENT`.
+* The `zepben.auth` dependency has been incorporated into the SDK with the following package changes:
 
 ### New Features
 * Added `ClearDirection` that clears feeder directions.
