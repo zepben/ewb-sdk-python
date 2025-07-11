@@ -1,44 +1,8 @@
 # Zepben Python SDK
 ## [1.0.0] - UNRELEASED
 ### Breaking Changes
-* None.
-
-### New Features
-* None.
-
-### Enhancements
-* None.
-
-### Fixes
-* None.
-
-### Notes
-* None.
-
-## [0.48.0] - 2025-07-10
-### Breaking Changes
 * Renamed the package to `zepben.ewb`. You will need to update all your imports `zepben.evolve.*` -> `zepben.ewb.*`. This also updates the pypi artifact to
   `zepben.ewb`.
-* Updated to new Tracing API. All old traces will need to be re-written with the new API.
-* `AcLineSegment` supports adding a maximum of 2 terminals. Mid-span terminals are no longer supported and models should migrate to using `Clamp`.
-* `Clamp` supports only adding a single terminal.
-* `FeederDirectionStateOperations` have been reworked to take `NetworkStateOperators` as a parameter.
-* `RemoveDirection` has been removed. It did not work reliably with dual fed networks with loops. You now need to clear direction using the new `ClearDirection`
-  and reapply directions where appropriate using `SetDirection`.
-* `Cut` supports adding a maximum of 2 terminals.
-* `NetworkTraceTracker` now uses a `set` to track visited objects, if you were using unhashable objects this will need to be addressed.
-* Added a new `debug_logging` and `name` parameters to the constructor of the following traces. The helper functions in `Tracing` also have these parameters,
-  which defaults to `None` and `network_trace`, meaning anyone using these wrappers will be unaffected by the change:
-  * `AssignToFeeders`
-  * `AssignToLvFeeders`
-  * `ClearDirection`
-  * `FindSwerEquipment`
-  * `PhaseInferrer`
-  * `RemovePhases`
-  * `SetDirection`
-  * `SetPhases`
-* `NetworkStateOperators` has a new abstract `description`. If you are creating custom operators you will need to add it.
-* `StepAction` will now raise an exception if `apply` is overridden. override `_apply` instead, or pass the function to `__init__`
 * Renamed `length_from_t1_or_0` to `length_from_t1_or_0`.
 * Relocated the following classes into the Zepben extensions area, marking them as [ZBEX]:
   * `DistanceRelay`: `cim.iec61970.base.protection` -> `cim.extensions.iec61970.base.protection`.
@@ -125,6 +89,72 @@
   * `zepben.auth` -> `zepben.ewb.auth`. You can also import these directly from `zepben.ewb`.
 
 ### New Features
+* None.
+
+### Enhancements
+* None.
+
+### Fixes
+* Marked some extensions properties and classes with [ZBEX] that were missing them (might still be more). In addition to the ones moved into the extensions
+  package:
+  * `PhaseCode.Y`
+  * `PhaseCode.YN`
+  * `PowerElectronicsConnection.inverterStandard`
+  * `PowerElectronicsConnection.sustainOpOvervoltLimit`
+  * `PowerElectronicsConnection.stopAtOverFreq`
+  * `PowerElectronicsConnection.stopAtUnderFreq`
+  * `PowerElectronicsConnection.invVoltWattRespMode`
+  * `PowerElectronicsConnection.invWattRespV1`
+  * `PowerElectronicsConnection.invWattRespV2`
+  * `PowerElectronicsConnection.invWattRespV3`
+  * `PowerElectronicsConnection.invWattRespV4`
+  * `PowerElectronicsConnection.invWattRespPAtV1`
+  * `PowerElectronicsConnection.invWattRespPAtV2`
+  * `PowerElectronicsConnection.invWattRespPAtV3`
+  * `PowerElectronicsConnection.invWattRespPAtV4`
+  * `PowerElectronicsConnection.invVoltVarRespMode`
+  * `PowerElectronicsConnection.invVarRespV1`
+  * `PowerElectronicsConnection.invVarRespV2`
+  * `PowerElectronicsConnection.invVarRespV3`
+  * `PowerElectronicsConnection.invVarRespV4`
+  * `PowerElectronicsConnection.invVarRespQAtV1`
+  * `PowerElectronicsConnection.invVarRespQAtV2`
+  * `PowerElectronicsConnection.invVarRespQAtV3`
+  * `PowerElectronicsConnection.invVarRespQAtV4`
+  * `PowerElectronicsConnection.invReactivePowerMode`
+  * `PowerElectronicsConnection.invFixReactivePower`
+  * `PowerTransformerEnd.ratings`
+  * `RegulatingControl.ratedCurrent`
+  * `Sensor.relayFunctions`
+  * `UsagePoint.approvedInverterCapacity`
+
+### Notes
+* None.
+
+## [0.48.0] - 2025-07-10
+### Breaking Changes
+* Updated to new Tracing API. All old traces will need to be re-written with the new API.
+* `AcLineSegment` supports adding a maximum of 2 terminals. Mid-span terminals are no longer supported and models should migrate to using `Clamp`.
+* `Clamp` supports only adding a single terminal.
+* `FeederDirectionStateOperations` have been reworked to take `NetworkStateOperators` as a parameter.
+* `RemoveDirection` has been removed. It did not work reliably with dual fed networks with loops. You now need to clear direction using the new `ClearDirection`
+  and reapply directions where appropriate using `SetDirection`.
+* `Cut` supports adding a maximum of 2 terminals.
+* `NetworkTraceTracker` now uses a `set` to track visited objects, if you were using unhashable objects this will need to be addressed.
+* Added a new `debug_logging` and `name` parameters to the constructor of the following traces. The helper functions in `Tracing` also have these parameters,
+  which defaults to `None` and `network_trace`, meaning anyone using these wrappers will be unaffected by the change:
+  * `AssignToFeeders`
+  * `AssignToLvFeeders`
+  * `ClearDirection`
+  * `FindSwerEquipment`
+  * `PhaseInferrer`
+  * `RemovePhases`
+  * `SetDirection`
+  * `SetPhases`
+* `NetworkStateOperators` has a new abstract `description`. If you are creating custom operators you will need to add it.
+* `StepAction` will now raise an exception if `apply` is overridden. override `_apply` instead, or pass the function to `__init__`
+
+### New Features
 * Added `ClearDirection` that clears feeder directions.
 * You can now pass a logger to all `Tracing` methods and `TestNetworkBuilder.build` to enable debug logging for the traces it runs. The debug logging will
   include the results of all queue and stop condition checks, and each item that is stepped on.
@@ -159,38 +189,6 @@
 * `AssignToFeeders` and `AssignToLvFeeders` will now associate `PowerElectronicUnits` with their `powerElectronicsConnection` `Feeder`/`LvFeeder`.
 * Phases are now correctly assigned to the LV side of an LV2 transformer that is in parallel with a previously energised LV1 transformer.
 * Added missing default network state operators (NORMAL) if you are calling `SetDirection.run` directly.
-* Marked some extensions properties and classes with [ZBEX] that were missing them (might still be more). In addition to the ones moved into the extensions
-  package:
-  * `PhaseCode.Y`
-  * `PhaseCode.YN`
-  * `PowerElectronicsConnection.inverterStandard`
-  * `PowerElectronicsConnection.sustainOpOvervoltLimit`
-  * `PowerElectronicsConnection.stopAtOverFreq`
-  * `PowerElectronicsConnection.stopAtUnderFreq`
-  * `PowerElectronicsConnection.invVoltWattRespMode`
-  * `PowerElectronicsConnection.invWattRespV1`
-  * `PowerElectronicsConnection.invWattRespV2`
-  * `PowerElectronicsConnection.invWattRespV3`
-  * `PowerElectronicsConnection.invWattRespV4`
-  * `PowerElectronicsConnection.invWattRespPAtV1`
-  * `PowerElectronicsConnection.invWattRespPAtV2`
-  * `PowerElectronicsConnection.invWattRespPAtV3`
-  * `PowerElectronicsConnection.invWattRespPAtV4`
-  * `PowerElectronicsConnection.invVoltVarRespMode`
-  * `PowerElectronicsConnection.invVarRespV1`
-  * `PowerElectronicsConnection.invVarRespV2`
-  * `PowerElectronicsConnection.invVarRespV3`
-  * `PowerElectronicsConnection.invVarRespV4`
-  * `PowerElectronicsConnection.invVarRespQAtV1`
-  * `PowerElectronicsConnection.invVarRespQAtV2`
-  * `PowerElectronicsConnection.invVarRespQAtV3`
-  * `PowerElectronicsConnection.invVarRespQAtV4`
-  * `PowerElectronicsConnection.invReactivePowerMode`
-  * `PowerElectronicsConnection.invFixReactivePower`
-  * `PowerTransformerEnd.ratings`
-  * `RegulatingControl.ratedCurrent`
-  * `Sensor.relayFunctions`
-  * `UsagePoint.approvedInverterCapacity`
 
 ### Notes
 * None.
