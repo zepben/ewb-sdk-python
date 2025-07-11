@@ -10,6 +10,10 @@ with open("README.md", "r") as fh:
 deps = [
     "zepben-protobuf==1.0.0b1",
     "typing_extensions==4.12.2",
+    "requests>=2.26.0, <3.0.0",
+    "urllib3>=1.26.6, <1.27.0",
+    "PyJWT>=2.1.0, <2.2.0",
+    "dataclassy==0.6.2",
 ]
 
 test_deps = [
