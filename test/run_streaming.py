@@ -4,6 +4,7 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 import cProfile
 import platform
+import traceback
 from time import perf_counter, process_time
 from typing import Callable
 
@@ -11,7 +12,7 @@ from zepben.ewb import connect_insecure
 from zepben.ewb.model.cim.iec61970.base.core.feeder import Feeder
 from zepben.ewb.streaming.get.network_consumer import SyncNetworkConsumerClient
 
-rpc_port = 9001
+rpc_port = 9100
 indent_level = 0
 indent = 3
 profile = False
@@ -19,56 +20,54 @@ profile = False
 
 def run_streaming():
     print(platform.architecture())
-    _time("get object", run_get_object)
-    _time("get feeder", run_feeder)
+
+    print("connecting...")
+    channel = connect_insecure(rpc_port=rpc_port)
+    client = SyncNetworkConsumerClient(channel=channel)
+    print("connected.")
+
+    _time_client(client, "get object", run_get_object)
+    _time_client(client, "get feeder", run_feeder)
     # Depending on the database you have loaded this can take substantial time (minutes), so it is disabled by default.
-    # _time("retrieve network", run_retrieve)
-    _time("retrieve network hierarchy", run_network_hierarchy)
+    # _time_client(client, "retrieve network", run_retrieve)
+    _time_client(client, "retrieve network hierarchy", run_network_hierarchy)
 
 
-def run_retrieve():
-    with connect_insecure(rpc_port=rpc_port) as channel:
-        client = SyncNetworkConsumerClient(channel=channel)
+def run_retrieve(client: SyncNetworkConsumerClient):
+    client.retrieve_network().throw_on_error()
 
-        client.retrieve_network().throw_on_error()
-
-        _log(f"Num unresolved: {client.service.num_unresolved_references()}")
-        _log(f"Num objects: {client.service.len_of()}")
+    _log(f"Num unresolved: {client.service.num_unresolved_references()}")
+    _log(f"Num objects: {client.service.len_of()}")
 
 
-def run_get_object():
-    with connect_insecure(rpc_port=rpc_port) as channel:
-        client = SyncNetworkConsumerClient(channel=channel)
+def run_get_object(client: SyncNetworkConsumerClient):
+    client.get_identified_object("95335924").throw_on_error()
+    client.get_identified_object("pluto-plsi").throw_on_error()
 
-        client.get_identified_object("21527151-6fce-423d-84e5-8254a00b05b1").throw_on_error()
-
-        _log(f"Num unresolved: {client.service.num_unresolved_references()}")
-        _log(f"Num objects: {client.service.len_of()}")
+    _log(f"Num unresolved: {client.service.num_unresolved_references()}")
+    _log(f"Num objects: {client.service.len_of()}")
 
 
-def run_feeder():
-    with connect_insecure(rpc_port=rpc_port) as channel:
-        client = SyncNetworkConsumerClient(channel=channel)
+def run_feeder(client: SyncNetworkConsumerClient):
+    client.get_equipment_container("FNS022", Feeder).throw_on_error()
 
-        client.get_equipment_container("CTN005", Feeder).throw_on_error()
-
-        _log(f"Num unresolved: {client.service.num_unresolved_references()}")
-        _log(f"Num objects: {client.service.len_of()}")
+    _log(f"Num unresolved: {client.service.num_unresolved_references()}")
+    _log(f"Num objects: {client.service.len_of()}")
 
 
-def run_network_hierarchy():
-    with connect_insecure(rpc_port=rpc_port) as channel:
-        client = SyncNetworkConsumerClient(channel=channel)
+def run_network_hierarchy(client: SyncNetworkConsumerClient):
+    network_hierarchy = client.get_network_hierarchy().throw_on_error().value
 
-        network_hierarchy = client.get_network_hierarchy().throw_on_error().value
+    _log(f"Num geographical regions: {len(network_hierarchy.geographical_regions)}")
+    _log(f"Num sub geographical regions: {len(network_hierarchy.sub_geographical_regions)}")
+    _log(f"Num substations: {len(network_hierarchy.substations)}")
+    _log(f"Num feeders: {len(network_hierarchy.feeders)}")
+    _log(f"Num circuits: {len(network_hierarchy.circuits)}")
+    _log(f"Num loops: {len(network_hierarchy.loops)}")
 
-        _log(f"Num geographical regions: {len(network_hierarchy.geographical_regions)}")
-        _log(f"Num sub geographical regions: {len(network_hierarchy.sub_geographical_regions)}")
-        _log(f"Num substations: {len(network_hierarchy.substations)}")
-        _log(f"Num feeders: {len(network_hierarchy.feeders)}")
-        _log(f"Num circuits: {len(network_hierarchy.circuits)}")
-        _log(f"Num loops: {len(network_hierarchy.loops)}")
 
+def _time_client(client: SyncNetworkConsumerClient, desc: str, run: Callable[[SyncNetworkConsumerClient], None]):
+    _time(desc, lambda: run(client))
 
 def _time(desc: str, run: Callable[[], None]):
     start_perf = perf_counter()
@@ -81,6 +80,7 @@ def _time(desc: str, run: Callable[[], None]):
         run()
     except Exception as e:
         _log(f"Exception caught: {type(e).__name__} - {str(e)}")
+        traceback.print_exc()
 
     indent_level -= 1
 
